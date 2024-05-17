@@ -2,3 +2,4 @@
 /src/ui/.idea
 
 *.buildinfo.json
+/src/services/.vs
