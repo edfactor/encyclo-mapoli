@@ -2,6 +2,6 @@ using Projects;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-builder.AddProject<Demoulas_ProfitSharing_Api>("DemoulasProfitSharingApi");
+builder.AddProject<Projects.Demoulas_ProfitSharing_Api>("demoulas-profitsharing-api");
 
 builder.Build().Run();

@@ -3,6 +3,7 @@ using Demoulas.ProfitSharing.Api.Extensions;
 using Demoulas.ProfitSharing.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder();
+
 builder.Configuration.AddUserSecrets<Program>();
 
 #if !DEBUG
