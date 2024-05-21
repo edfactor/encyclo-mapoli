@@ -18,6 +18,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.Endp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.Common.Data.Contexts", "..\..\..\demoulas.common\src\Demoulas.Common.Data.Contexts\Demoulas.Common.Data.Contexts.csproj", "{9F3E58E7-1EBF-44F3-A8E0-72405CC61DBF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demoulas.ProfitSharing.Data", "Demoulas.ProfitSharing.Data\Demoulas.ProfitSharing.Data.csproj", "{F9FECC1D-427B-44D7-BA11-1ED0E752F2CB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,10 @@ Global
 		{9F3E58E7-1EBF-44F3-A8E0-72405CC61DBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9F3E58E7-1EBF-44F3-A8E0-72405CC61DBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9F3E58E7-1EBF-44F3-A8E0-72405CC61DBF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9FECC1D-427B-44D7-BA11-1ED0E752F2CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9FECC1D-427B-44D7-BA11-1ED0E752F2CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9FECC1D-427B-44D7-BA11-1ED0E752F2CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9FECC1D-427B-44D7-BA11-1ED0E752F2CB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
