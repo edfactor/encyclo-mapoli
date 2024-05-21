@@ -1,5 +1,10 @@
 using System.Diagnostics;
+using Demoulas.Common.Data.Contexts.DTOs.Context;
+using Demoulas.Common.Data.Contexts;
+using Demoulas.Common.Data.Contexts.Contexts;
+using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Api.Extensions;
+using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder();
@@ -22,12 +27,18 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(pol =>
     {
         _ = pol.AllowAnyMethod() // Specify the allowed methods, e.g., GET, POST, etc.
-            .AllowAnyHeader()
-            .AllowAnyOrigin();
+        .AllowAnyHeader()
+        .AllowAnyOrigin();
     });
 });
 
-//builder.AddDatabaseServices("AccountsReceivable");
+var list = new List<ContextFactoryRequest>
+{
+    ContextFactoryRequest.Initialize<ProfitSharingDbContext>(nameof(OracleDbContext), "ProfitSharing"),
+    ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>(nameof(ReadOnlyOracleDbContext), "ProfitSharing")
+};
+
+builder.AddDatabaseServices(list);
 builder.AddCachingServices();
 
 builder.ConfigureDefaultEndpoints();
