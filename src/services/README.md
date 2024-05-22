@@ -1,4 +1,4 @@
-# Demoulas Accounts Receivable API project #
+# Demoulas Profit Sharing API project #
 
 <hr/>
 
@@ -7,7 +7,7 @@
 ### Getting Started
 Install 3rd Party Libraries:
 
-1. Visual Studio Professional 2022 (17.9.4) or higher installed - https://visualstudio.microsoft.com/downloads/
+1. Visual Studio Professional 2022 (17.10.0) or higher installed - https://visualstudio.microsoft.com/downloads/
 
     ![Workload](./setup_images/workload.PNG)
     - Install the "ASP.net and web development", "Azure" workload, and ".NET desktop development" workloads
@@ -17,11 +17,11 @@ Install 3rd Party Libraries:
 
 
 ### Build and Test
-1. Clone the git repository https://stash.demoulasmarketbasket.net/projects/NGA/repos/smart-accounts-receivable 
-2. Open the Demoulas.AccountsReceivable solution
+1. Clone the git repository https://bitbucket.org/demoulas/smart-profit-sharing 
+2. Open the Demoulas.ProfitSharing solution
     - API Navigate to the \src\Services folder
-    - Locate Demoulas.AccountsReceivable.sln and open with Visual Studio.
-2. Set the 'Demoulas.AccountsReceivable.Api' project as your startup project
+    - Locate Demoulas.ProfitSharing.sln and open with Visual Studio.
+2. Set the 'Demoulas.ProfitSharing.Api' project as your startup project
     - Find the project, right click and choose "set as startup project"
 3. Get secrets.json from one of the team members
     - [Safe storage of app secrets in development](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-8.0&tabs=windows#manage-user-secrets-with-visual-studio)
@@ -75,7 +75,7 @@ dotnet tool update --global dotnet-ef
 
 
 ### EntityFramework Migrations
-dotnet ef migrations add {migrationName} --context OracleDbContext
+dotnet ef migrations add {migrationName} --context ProfitSharingDbContext
 
 
 ### EntityFramework scaffold
@@ -89,16 +89,16 @@ dotnet ef dbcontext scaffold "{Data Source}" Oracle.EntityFrameworkCore -o Model
 dotnet publish -c Release -p:PublishProfile=FolderProfile -o ./publishOutput
 PowerShell -ExecutionPolicy Bypass -File .\utilities\generateBuildInfo.ps1
 
-Compress-Archive -Path ./publishOutput/* -DestinationPath ./Demoulas.AccountsReceivable.Api.zip -Force
+Compress-Archive -Path ./publishOutput/* -DestinationPath ./Demoulas.ProfitSharing.Api.zip -Force
 
 
 
 # Build command line
 [dotnet build](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-build)
 [.NET Runtime Identifier Catalog](https://learn.microsoft.com/en-us/dotnet/core/rid-catalog)
-using Powershell: dotnet build Demoulas.AccountsReceivable.Api.csproj --configuration Release --runtime win-x64 /p:SourceRevisionId=$(git rev-parse --short HEAD)
+using Powershell: dotnet build Demoulas.ProfitSharing.Api.csproj --configuration Release --runtime win-x64 /p:SourceRevisionId=$(git rev-parse --short HEAD)
 
 
 
 # Run tests
-dotnet test Demoulas.AccountsReceivable.Tests.csproj --configuration debug
+dotnet test Demoulas.ProfitSharing.Tests.csproj --configuration debug
