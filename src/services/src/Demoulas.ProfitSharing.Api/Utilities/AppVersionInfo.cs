@@ -49,7 +49,7 @@ public class AppVersionInfo
         {
             if (string.IsNullOrWhiteSpace(_gitHash))
             {
-                var version = "1.0.0+LOCALBUILD"; // Dummy version for local dev
+                string? version = "1.0.0+LOCALBUILD"; // Dummy version for local dev
                 var appAssembly = typeof(AppVersionInfo).Assembly;
                 var infoVerAttr = (AssemblyInformationalVersionAttribute)appAssembly
                     .GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute)).FirstOrDefault()!;
