@@ -1,4 +1,8 @@
+using Demoulas.Common.Data.Contexts.DTOs.Request;
 using Demoulas.ProfitSharing.IntegrationTests.Fixtures;
+using Demoulas.ProfitSharing.Services;
+using Microsoft.Extensions.DependencyInjection;
+using MockDataContextFactory = Demoulas.ProfitSharing.IntegrationTests.Mocks.MockDataContextFactory;
 
 namespace Demoulas.ProfitSharing.IntegrationTests
 {
@@ -14,7 +18,12 @@ namespace Demoulas.ProfitSharing.IntegrationTests
         [Fact]
         public async Task TestInsertAndRetrieveEntity()
         {
-            _fixture.OracleContainer.GetConnectionString();
+            var connectionString = _fixture.OracleContainer.GetConnectionString();
+            var factory = MockDataContextFactory.InitializeForTesting(new ServiceCollection(), connectionString);
+            var ds = new DemographicsService(factory);
+
+            var response = await ds.GetAllDemographics(new PaginationRequestDto(), CancellationToken.None);
+
             await Task.CompletedTask;
         }
     }

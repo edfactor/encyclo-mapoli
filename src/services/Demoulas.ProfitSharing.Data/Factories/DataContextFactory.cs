@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics;
 using Demoulas.Common.Data.Contexts.Contexts;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
-using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.ProfitSharing.Data.Contexts;
+using Demoulas.ProfitSharing.Data.Interfaces;
 using EntityFramework.Exceptions.Oracle;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,7 +10,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace Demoulas.ProfitSharing.Data.Factories;
 
-public sealed class DataContextFactory : IDataContextFactory<ProfitSharingDbContext, ProfitSharingReadOnlyDbContext>
+public sealed class DataContextFactory : IProfitSharingDataContextFactory
 {
     private readonly IServiceProvider _serviceProvider;
 
@@ -48,11 +48,11 @@ public sealed class DataContextFactory : IDataContextFactory<ProfitSharingDbCont
 
         foreach (ContextFactoryRequest contextFactoryRequest in factoryRequests)
         {
-            if (contextFactoryRequest.ContextType.BaseType?.Name == nameof(OracleDbContext))
+            if (contextFactoryRequest.ContextType.BaseType?.Name == "OracleDbContext`1")
             {
                 contextFactoryRequest.ConfigureDbContextOptions ??= CommonDbBuilderSettings;
             }
-            else if (contextFactoryRequest.ContextType.BaseType?.Name == nameof(ReadOnlyOracleDbContext))
+            else if (contextFactoryRequest.ContextType.BaseType?.Name == "ReadOnlyOracleDbContext`1")
             {
                 contextFactoryRequest.ConfigureDbContextOptions ??= dbBuilder =>
                 {
@@ -70,7 +70,6 @@ public sealed class DataContextFactory : IDataContextFactory<ProfitSharingDbCont
             [
                builder, contextFactoryRequest.ConnectionName, contextFactoryRequest.ConfigureSettings, contextFactoryRequest.ConfigureDbContextOptions
             ]);
-            enrichOracleDatabaseDbContext.MakeGenericMethod(contextFactoryRequest.ContextType).Invoke(null, [builder]);
         }
 
         return new DataContextFactory(builder.Services.BuildServiceProvider());

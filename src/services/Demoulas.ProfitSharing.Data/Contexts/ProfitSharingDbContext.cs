@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Data.Contexts
 {
-    public class ProfitSharingDbContext : OracleDbContext
+    public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>
     {
-        public ProfitSharingDbContext(DbContextOptions<OracleDbContext> options)
+        public ProfitSharingDbContext(DbContextOptions<ProfitSharingDbContext> options)
             : base(options)
         {
 

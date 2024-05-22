@@ -1,18 +1,17 @@
 ﻿using Demoulas.Common.Data.Contexts.DTOs.Request;
 using Demoulas.Common.Data.Contexts.DTOs.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
-using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.ProfitSharing.Data.Factories;
+using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Contracts.Contracts.Response;
-using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services
 {
     public class DemographicsService
     {
-        private readonly DataContextFactory _dataContextFactory;
+        private readonly IProfitSharingDataContextFactory _dataContextFactory;
 
-        public DemographicsService(DataContextFactory dataContextFactory)
+        public DemographicsService(IProfitSharingDataContextFactory dataContextFactory)
         {
             _dataContextFactory = dataContextFactory;
         }

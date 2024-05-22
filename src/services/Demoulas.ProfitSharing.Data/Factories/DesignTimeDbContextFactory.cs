@@ -6,11 +6,11 @@ using Microsoft.EntityFrameworkCore.Design;
 //When running migrations or using design-time tools, Entity Framework will need to be able to create an instance of this DbContext without going through the normal startup process
 namespace Demoulas.ProfitSharing.Data.Factories;
 
-public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<OracleDbContext>
+public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<ProfitSharingDbContext>
 {
-    public OracleDbContext CreateDbContext(string[] args)
+    public ProfitSharingDbContext CreateDbContext(string[] args)
     {
-        var optionsBuilder = new DbContextOptionsBuilder<OracleDbContext>();
+        var optionsBuilder = new DbContextOptionsBuilder<ProfitSharingDbContext>();
         optionsBuilder.UseOracle();
 
         return new ProfitSharingDbContext(optionsBuilder.Options);
