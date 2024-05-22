@@ -1,7 +1,7 @@
 ﻿using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 
-namespace Demoulas.AccountsReceivable.Endpoints.Groups;
+namespace Demoulas.ProfitSharing.Endpoints.Groups;
 
 public sealed class AccountsGroup : Group
 {
