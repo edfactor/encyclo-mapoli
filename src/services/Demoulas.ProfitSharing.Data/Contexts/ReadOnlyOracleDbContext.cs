@@ -1,5 +1,6 @@
 ﻿using Demoulas.Common.Data.Contexts.Contexts;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
+using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Data.Contexts
@@ -11,6 +12,8 @@ namespace Demoulas.ProfitSharing.Data.Contexts
         {
 
         }
+
+        public DbSet<Demographics> Demographics { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Demoulas.ProfitSharing.Data.Entities
+namespace Demoulas.ProfitSharing.Endpoints.Contracts.Contracts.Response
 {
-    public class Demographics
+    public record DemographicsResponseDto
     {
         public int BadgeNumber { get; set; }
     }
