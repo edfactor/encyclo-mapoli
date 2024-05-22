@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\demoulas.common\src\Demoulas.Common.Data.Contexts\Demoulas.Common.Data.Contexts.csproj" />
+    <ProjectReference Include="..\Demoulas.ProfitSharing.Data\Demoulas.ProfitSharing.Data.csproj" />
+    <ProjectReference Include="..\Demoulas.ProfitSharing.Endpoints.Contracts\Demoulas.ProfitSharing.Endpoints.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>

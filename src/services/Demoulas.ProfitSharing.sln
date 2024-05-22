@@ -8,25 +8,27 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.Serv
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D1297442-67BE-4098-A95F-727F04A68FA3}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		Directory.Build.props = Directory.Build.props
 		Directory.Packages.props = Directory.Packages.props
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.Api", "src\Demoulas.ProfitSharing.Api\Demoulas.ProfitSharing.Api.csproj", "{D441104E-515B-43CB-A851-AF47008C6E77}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.Endpoints", "Demoulas.ProfitSharing.Endpoints\Demoulas.ProfitSharing.Endpoints.csproj", "{376A7BC4-D5E7-4353-ACDE-E245897095C4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.Endpoints", "src\Demoulas.ProfitSharing.Endpoints\Demoulas.ProfitSharing.Endpoints.csproj", "{376A7BC4-D5E7-4353-ACDE-E245897095C4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.Common.Data.Contexts", "..\..\..\demoulas.common\src\Demoulas.Common.Data.Contexts\Demoulas.Common.Data.Contexts.csproj", "{9F3E58E7-1EBF-44F3-A8E0-72405CC61DBF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.Data", "Demoulas.ProfitSharing.Data\Demoulas.ProfitSharing.Data.csproj", "{F9FECC1D-427B-44D7-BA11-1ED0E752F2CB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.Data", "src\Demoulas.ProfitSharing.Data\Demoulas.ProfitSharing.Data.csproj", "{F9FECC1D-427B-44D7-BA11-1ED0E752F2CB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{80B088DC-C84B-46AA-BFF3-DC309C5B4325}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.IntegrationTests", "tests\Demoulas.ProfitSharing.UnitTests\Demoulas.ProfitSharing.IntegrationTests.csproj", "{D0216F81-E01D-4620-BE4F-D1FF0D28CA01}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demoulas.ProfitSharing.Services", "Demoulas.ProfitSharing.Services\Demoulas.ProfitSharing.Services.csproj", "{24F51728-CF8F-44E2-AE66-E932A6C3A1A0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demoulas.ProfitSharing.Services", "src\Demoulas.ProfitSharing.Services\Demoulas.ProfitSharing.Services.csproj", "{24F51728-CF8F-44E2-AE66-E932A6C3A1A0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demoulas.ProfitSharing.Endpoints.Contracts", "Demoulas.ProfitSharing.Endpoints.Contracts\Demoulas.ProfitSharing.Endpoints.Contracts.csproj", "{F612AD2C-8DDE-41CA-A820-1C7E81B617FD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demoulas.ProfitSharing.Endpoints.Contracts", "src\Demoulas.ProfitSharing.Endpoints.Contracts\Demoulas.ProfitSharing.Endpoints.Contracts.csproj", "{F612AD2C-8DDE-41CA-A820-1C7E81B617FD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
