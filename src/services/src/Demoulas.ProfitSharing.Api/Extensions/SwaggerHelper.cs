@@ -35,6 +35,7 @@ internal static class SwaggerHelper
              o.EnableJWTBearerAuth = false;
              o.DocumentSettings = s =>
              {
+                 s.EnableJWTBearerAuth();
                  s.DocumentName = $"Release {version}.0";
                  s.Title = title;
                  s.Version = $"v{version}.0";
