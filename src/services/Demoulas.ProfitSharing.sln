@@ -26,9 +26,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{80B088DC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.IntegrationTests", "tests\Demoulas.ProfitSharing.UnitTests\Demoulas.ProfitSharing.IntegrationTests.csproj", "{D0216F81-E01D-4620-BE4F-D1FF0D28CA01}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demoulas.ProfitSharing.Services", "src\Demoulas.ProfitSharing.Services\Demoulas.ProfitSharing.Services.csproj", "{24F51728-CF8F-44E2-AE66-E932A6C3A1A0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.Services", "src\Demoulas.ProfitSharing.Services\Demoulas.ProfitSharing.Services.csproj", "{24F51728-CF8F-44E2-AE66-E932A6C3A1A0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demoulas.ProfitSharing.Endpoints.Contracts", "src\Demoulas.ProfitSharing.Endpoints.Contracts\Demoulas.ProfitSharing.Endpoints.Contracts.csproj", "{F612AD2C-8DDE-41CA-A820-1C7E81B617FD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.Endpoints.Contracts", "src\Demoulas.ProfitSharing.Endpoints.Contracts\Demoulas.ProfitSharing.Endpoints.Contracts.csproj", "{F612AD2C-8DDE-41CA-A820-1C7E81B617FD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pipelines", "Pipelines", "{E8B4A68D-9AFA-479D-BB49-BD8843E0800C}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\bitbucket-pipelines.yml = ..\..\bitbucket-pipelines.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

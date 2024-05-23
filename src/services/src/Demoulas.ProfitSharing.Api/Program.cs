@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.Common.Data.Contexts.Contexts;
 using Demoulas.ProfitSharing.Api.Extensions;
@@ -33,8 +33,8 @@ builder.Services.AddCors(options =>
 
 var list = new List<ContextFactoryRequest>
 {
-    ContextFactoryRequest.Initialize<ProfitSharingDbContext>(nameof(ProfitSharingDbContext), "ProfitSharing"),
-    ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>(nameof(ProfitSharingReadOnlyDbContext), "ProfitSharing")
+    ContextFactoryRequest.Initialize<ProfitSharingDbContext>("ProfitSharing"),
+    ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing")
 };
 
 builder.AddDatabaseServices(list);

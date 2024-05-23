@@ -1,0 +1,28 @@
+image: mcr.microsoft.com/dotnet/sdk:8.0 # Use the appropriate .NET SDK version
+
+pipelines:
+  default:
+    - step:
+        name: Restore and Build
+        caches:
+          - dotnetcore
+        script:
+          - dotnet restore
+          - dotnet build --no-restore
+
+    - step:
+        name: Run Tests
+        services:
+          - docker
+        caches:
+          - dotnetcore
+        script:
+          - dotnet test --no-build --logger "trx;LogFileName=test_results.trx"
+          - pipe: atlassian/test-reporting:0.3.5
+            variables:
+              TEST_REPORT_FILE: "test_results.trx"
+
+definitions:
+  services:
+    docker:
+      memory: 1024
