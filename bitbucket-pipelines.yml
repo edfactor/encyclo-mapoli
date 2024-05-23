@@ -17,7 +17,7 @@ pipelines:
         caches:
           - dotnetcore
         script:
-          - dotnet test --no-build --logger "trx;LogFileName=test_results.trx"
+          - dotnet test ./src/services/tests/Demoulas.ProfitSharing.UnitTests/Demoulas.ProfitSharing.IntegrationTests.csproj --logger "trx;LogFileName=test_results.trx" --configuration debug
         artifacts:
           - test_results.trx
 
