@@ -18,9 +18,8 @@ pipelines:
           - dotnetcore
         script:
           - dotnet test --no-build --logger "trx;LogFileName=test_results.trx"
-          - pipe: atlassian/test-reporting:0.3.5
-            variables:
-              TEST_REPORT_FILE: "test_results.trx"
+        artifacts:
+          - test_results.trx
 
 definitions:
   services:
