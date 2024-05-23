@@ -3,14 +3,6 @@ image: mcr.microsoft.com/dotnet/sdk:8.0 # Use the appropriate .NET SDK version
 pipelines:
   default:
     - step:
-        name: Restore and Build
-        caches:
-          - dotnetcore
-        script:
-          - dotnet restore
-          - dotnet build --no-restore
-
-    - step:
         name: Run Tests
         services:
           - docker
