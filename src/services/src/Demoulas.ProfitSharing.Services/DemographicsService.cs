@@ -1,7 +1,6 @@
 ﻿using Demoulas.Common.Data.Contexts.DTOs.Request;
 using Demoulas.Common.Data.Contexts.DTOs.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
-using Demoulas.ProfitSharing.Data.Factories;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Contracts.Contracts.Response;
 

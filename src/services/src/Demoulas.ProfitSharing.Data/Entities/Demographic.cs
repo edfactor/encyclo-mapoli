@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Data.Enums;
+﻿using Demoulas.ProfitSharing.Data.Enums;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
 
+/// <summary>
+/// https://demoulas.atlassian.net/wiki/spaces/~bherrmann/pages/39944312/Quick+Guide+to+Profit+Sharing+Tables
+/// </summary>
 public sealed class Demographic
 {
-    //https://demoulas.atlassian.net/wiki/spaces/~bherrmann/pages/39944312/Quick+Guide+to+Profit+Sharing+Tables
-
     public required int BadgeNumber { get; set; }
     public required string FullName { get; set; }
     public required string LastName { get; set; }
