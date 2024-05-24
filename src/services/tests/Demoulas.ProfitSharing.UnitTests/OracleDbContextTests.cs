@@ -34,7 +34,10 @@ public class OracleDbContextTests : IClassFixture<OracleContainerFixture>
             bool haveDefinitions = await c.Definitions.AnyAsync();
             haveDefinitions.Should().BeTrue();
 
-            return haveDefinitions;
+            bool haveCountries = await c.Countries.AnyAsync();
+            haveCountries.Should().BeTrue();
+
+            return haveDefinitions && haveCountries;
         });
 
         _ = await ds.GetAllDemographics(new PaginationRequestDto(), CancellationToken.None);

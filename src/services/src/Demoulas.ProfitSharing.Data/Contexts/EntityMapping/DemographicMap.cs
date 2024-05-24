@@ -20,6 +20,11 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             .ValueGeneratedNever()
             .HasColumnName("DEM_BADGE");
 
+        _ = builder.Property(e => e.OracleHcmId)
+            .HasPrecision(15)
+            .ValueGeneratedNever()
+            .HasColumnName("PY_ASSIGN_ID");
+        
         _ = builder.Property(e => e.FullName)
             .HasMaxLength(60)
             .HasColumnName("PY_NAM")
@@ -95,11 +100,9 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
         //"PY_SCOD" CHAR(1),
 
         //"PY_TERM" CHAR(1),
-        //"PY_ASSIGN_ID" NUMBER(15, 0),
         //"PY_ASSIGN_DESC" CHAR(15),
         //"PY_NEW_EMP" CHAR(1),
         //"PY_GENDER" CHAR(1),
-        //"PY_EMP_TELNO" NUMBER(10, 0),
         //"PY_SHOUR" NUMBER(5, 2),
         //"PY_SET_PWD" CHAR(1),
         //"PY_SET_PWD_DT" DATE,
@@ -113,6 +116,18 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             address.Property(a => a.City).HasMaxLength(25).HasColumnName("PY_CITY").IsRequired();
             address.Property(a => a.State).HasMaxLength(3).HasColumnName("PY_STATE").IsRequired();
             address.Property(a => a.PostalCode).HasPrecision(9).HasColumnName("PY_ZIP").IsRequired().HasConversion<PostalCodeConverter>();
+            address.Property(a => a.CountryISO).HasMaxLength(2).HasColumnName("CountryISO").HasDefaultValue(Country.US);
+
+            address.HasOne<Country>()
+                .WithMany()
+                .HasForeignKey(o => o.CountryISO);
+        });
+
+        builder.OwnsOne(e => e.ContactInfo, contact =>
+        {
+            contact.Property(a => a.PhoneNumber).HasMaxLength(10).HasColumnName("PY_EMP_TELNO").IsRequired();
+            contact.Property(a => a.MobileNumber).HasMaxLength(10).HasColumnName("MobileNumber");
+            contact.Property(a => a.EmailAddress).HasMaxLength(50).HasColumnName("EmailAddress");
         });
     }
 }

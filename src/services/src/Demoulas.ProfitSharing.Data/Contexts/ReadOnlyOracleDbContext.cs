@@ -15,6 +15,7 @@ public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitShar
 
     public DbSet<Demographic> Demographics { get; set; }
     public DbSet<Definition> Definitions { get; set; }
+    public DbSet<Country> Countries { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

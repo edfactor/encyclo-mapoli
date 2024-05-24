@@ -8,6 +8,7 @@ namespace Demoulas.ProfitSharing.Data.Entities;
 public sealed class Demographic
 {
     public required int BadgeNumber { get; set; }
+    public required long OracleHcmId { get; set; }
     public required string FullName { get; set; }
     public required string LastName { get; set; }
     public required string FirstName { get; set; }
@@ -15,6 +16,8 @@ public sealed class Demographic
     public required short StoreNumber { get; set; }
     public required byte Department { get; set; }
     public required short PayClass { get; set; }
+
+    public required ContactInfo ContactInfo { get; set; }
     public required Address Address { get; set; }
     public required DateOnly DateOfBirth { get; set; }
 
@@ -28,4 +31,5 @@ public sealed class Demographic
     public required DateOnly TerminationDate { get; set; }
     public required EmploymentTypeEnum EmploymentType { get; set; }
     public required PayFrequencyEnum PayFrequency { get; set; }
+    
 }

@@ -6,6 +6,7 @@ internal static class ContextExtensions
 {
     public static ModelBuilder ApplyModelConfiguration(this ModelBuilder modelBuilder)
     {
+        modelBuilder.ApplyConfiguration(new CountryMap());
         modelBuilder.ApplyConfiguration(new DefinitionMap());
         modelBuilder.ApplyConfiguration(new DemographicMap());
 
