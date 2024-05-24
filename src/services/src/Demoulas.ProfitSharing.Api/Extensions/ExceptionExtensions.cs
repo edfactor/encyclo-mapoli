@@ -11,7 +11,7 @@ namespace Demoulas.ProfitSharing.Api.Extensions;
 /// </summary>
 internal static class ExceptionExtensions
 {
-    private const string _typeString = "https://www.shopmarketbasket.com/about-us/contact-us";
+    private const string TypeString = "https://www.shopmarketbasket.com/about-us/contact-us";
     public static ProblemDetails ToProblemDetails(this Exception ex, string? title = null, string? details = null, string? instance = null,
         string? type = null)
     {
@@ -21,7 +21,7 @@ internal static class ExceptionExtensions
             Status = (int)HttpStatusCode.InternalServerError,
             Detail = details ?? (!Debugger.IsAttached ? ex.Message : ex.ToString()),
             Instance = instance,
-            Type = type ?? _typeString,
+            Type = type ?? TypeString,
             Extensions =
                 {
                     {
@@ -39,7 +39,7 @@ internal static class ExceptionExtensions
             Status = ex.StatusCode,
             Detail = details ?? (!Debugger.IsAttached ? ex.Message : ex.ToString()),
             Instance = instance,
-            Type = type ?? _typeString,
+            Type = type ?? TypeString,
             Extensions =
                 {
                     {
@@ -63,7 +63,7 @@ internal static class ExceptionExtensions
             Status = (int)HttpStatusCode.BadRequest,
             Detail = details ?? (!Debugger.IsAttached ? ex.Message : ex.ToString()),
             Instance = instance,
-            Type = type ?? _typeString,
+            Type = type ?? TypeString,
             Extensions =
                 {
                     {

@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using FastEndpoints.Swagger;
 using NSwag;
+using NSwag.Generation.AspNetCore;
 using NSwag.Generation.Processors.Security;
 
 namespace Demoulas.ProfitSharing.Api.Extensions;
@@ -16,8 +17,10 @@ internal static class SwaggerHelper
     internal static WebApplicationBuilder AddSwaggerOpenApi(this WebApplicationBuilder builder, byte version = 1,
         string title = "DeMoulas Super Markets, Inc",
         string? description = null,
+        bool enableJwtBearerAuth = true,
         OpenApiContact? contactDetails = null,
-        Action<Dictionary<string, string>>? tagDescriptions = null)
+        Action<Dictionary<string, string>>? tagDescriptions = null,
+        Action<AspNetCoreOpenApiDocumentGeneratorSettings>? documentSettings = null )
     {
         _ = builder.Services.SwaggerDocument(o =>
          {
@@ -32,31 +35,23 @@ internal static class SwaggerHelper
              o.ShortSchemaNames = true;
              o.AutoTagPathSegmentIndex = 0;
              o.TagDescriptions = tagDescriptions;
-             o.EnableJWTBearerAuth = false;
-             o.DocumentSettings = s =>
+             o.EnableJWTBearerAuth = enableJwtBearerAuth;
+             o.DocumentSettings = documentSettings ?? (s =>
              {
-                 s.EnableJWTBearerAuth();
                  s.DocumentName = $"Release {version}.0";
                  s.Title = title;
                  s.Version = $"v{version}.0";
                  s.Description = description;
                  s.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("bearer"));
-                 s.PostProcess = doc =>
-                 {
-                     doc.Produces = new List<string>
-                     {
-                        "application/json"
-                     };
-                 };
+                 s.PostProcess = doc => { doc.Produces = new List<string> { "application/json" }; };
                  s.PostProcess = document =>
                  {
                      document.Info.Contact = contactDetails ?? new OpenApiContact
                      {
-                         Name = "NGDS Core Team",
-                         Email = "rharding@demoulasmarketbasket.com"
+                         Name = "NGDS Core Team", Email = "rharding@demoulasmarketbasket.com"
                      };
                  };
-             };
+             });
          });
 
         return builder;

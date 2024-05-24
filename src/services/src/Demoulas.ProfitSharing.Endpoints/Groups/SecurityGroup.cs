@@ -5,17 +5,17 @@ namespace Demoulas.ProfitSharing.Endpoints.Groups;
 
 public sealed class SecurityGroup : Group
 {
-    private const string ROUTE = "security";
-    private const string ROUTE_NAME = "Security";
+    private const string Route = "security";
+    private const string RouteName = "Security";
     public SecurityGroup()
     {
         //security is the route prefix for the top level group
-        Configure(ROUTE.ToLowerInvariant(), ep =>
+        Configure(Route.ToLowerInvariant(), ep =>
         {
             ep.Description(x => x
                 .ProducesProblemFE<Microsoft.AspNetCore.Mvc.ProblemDetails>()
                 .ProducesProblemFE<Microsoft.AspNetCore.Mvc.ProblemDetails>(500)
-                .WithTags(ROUTE_NAME));
+                .WithTags(RouteName));
         });
     }
 }

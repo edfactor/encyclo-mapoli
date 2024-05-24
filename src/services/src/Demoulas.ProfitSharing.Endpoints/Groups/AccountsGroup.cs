@@ -5,16 +5,16 @@ namespace Demoulas.ProfitSharing.Endpoints.Groups;
 
 public sealed class AccountsGroup : Group
 {
-    private const string ROUTE = "accounts";
-    private const string ROUTE_NAME = "Accounts";
+    private const string Route = "accounts";
+    private const string RouteName = "Accounts";
     public AccountsGroup()
     {
-        Configure(ROUTE.ToLowerInvariant(), ep => //admin is the route prefix for the top level group
+        Configure(Route.ToLowerInvariant(), ep => //admin is the route prefix for the top level group
         {
             ep.Description(x => x
                 .ProducesProblemFE<Microsoft.AspNetCore.Mvc.ProblemDetails>()
                 .ProducesProblemFE<Microsoft.AspNetCore.Mvc.ProblemDetails>(500)
-                .WithTags(ROUTE_NAME));
+                .WithTags(RouteName));
         });
     }
 }
