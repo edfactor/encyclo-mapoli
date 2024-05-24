@@ -19,16 +19,24 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
     {
         ArgumentNullException.ThrowIfNull(connectionString);
 
-        _ = serviceCollection.AddDbContextPool<ProfitSharingDbContext>(builder =>
+        _ = serviceCollection.AddDbContextPool<ProfitSharingDbContext>(dbBuilder =>
         {
-            _ = builder.UseOracle(connectionString);
-            _ = builder.EnableSensitiveDataLogging(Debugger.IsAttached);
+            if (Debugger.IsAttached)
+            {
+                _ = dbBuilder.LogTo(s => Debug.WriteLine(s));
+            }
+            _ = dbBuilder.UseOracle(connectionString);
+            _ = dbBuilder.EnableSensitiveDataLogging(Debugger.IsAttached);
         });
-        _ = serviceCollection.AddDbContextPool<ProfitSharingReadOnlyDbContext>(builder =>
+        _ = serviceCollection.AddDbContextPool<ProfitSharingReadOnlyDbContext>(dbBuilder =>
         {
-            _ = builder.EnableSensitiveDataLogging(Debugger.IsAttached);
-            _ = builder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-            _ = builder.UseOracle(connectionString, optionsBuilder =>
+            if (Debugger.IsAttached)
+            {
+                _ = dbBuilder.LogTo(s => Debug.WriteLine(s));
+            }
+            _ = dbBuilder.EnableSensitiveDataLogging(Debugger.IsAttached);
+            _ = dbBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            _ = dbBuilder.UseOracle(connectionString, optionsBuilder =>
             {
                 _ = optionsBuilder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
             });

@@ -32,6 +32,10 @@ public sealed class DataContextFactory : IProfitSharingDataContextFactory
 
         void CommonDbBuilderSettings(DbContextOptionsBuilder dbBuilder)
         {
+            if (Debugger.IsAttached)
+            {
+                _ = dbBuilder.LogTo(s => Debug.WriteLine(s));
+            }
             _ = dbBuilder.UseExceptionProcessor();
             _ = dbBuilder.EnableSensitiveDataLogging(Debugger.IsAttached);
             _ = dbBuilder.EnableDetailedErrors(Debugger.IsAttached);
