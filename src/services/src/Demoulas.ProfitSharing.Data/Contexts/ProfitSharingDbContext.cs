@@ -1,5 +1,6 @@
 ﻿using Demoulas.Common.Data.Contexts.Contexts;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
+using Demoulas.ProfitSharing.Data.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Data.Contexts;
@@ -16,6 +17,6 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.ApplyConfiguration(new DemographicsMap());
+        modelBuilder.ApplyModelConfiguration();
     }
 }

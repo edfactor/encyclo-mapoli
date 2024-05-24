@@ -44,7 +44,7 @@ public sealed class DataContextFactory : IProfitSharingDataContextFactory
         //TODO: Figure this call out
         //var enrichOracleDatabaseDbContext = typeof(AspireOracleEFCoreExtensions)
         //   .GetMethods()
-        //   .First(m => m.Name == nameof(AspireOracleEFCoreExtensions.EnrichOracleDatabaseDbContext));
+        //   .First(m => m.Key == nameof(AspireOracleEFCoreExtensions.EnrichOracleDatabaseDbContext));
 
 
         foreach (ContextFactoryRequest contextFactoryRequest in factoryRequests)

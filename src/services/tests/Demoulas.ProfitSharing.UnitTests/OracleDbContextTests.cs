@@ -1,6 +1,7 @@
 ﻿using Demoulas.Common.Data.Contexts.DTOs.Request;
 using Demoulas.ProfitSharing.IntegrationTests.Fixtures;
 using Demoulas.ProfitSharing.Services;
+using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MockDataContextFactory = Demoulas.ProfitSharing.IntegrationTests.Mocks.MockDataContextFactory;
@@ -26,7 +27,14 @@ public class OracleDbContextTests : IClassFixture<OracleContainerFixture>
         await factory.UseWritableContext(async c =>
         {
             await c.Database.MigrateAsync();
-            return string.Empty;
+        });
+
+        await factory.UseReadOnlyContext(async c =>
+        {
+            bool haveDefinitions = await c.Definitions.AnyAsync();
+            haveDefinitions.Should().BeTrue();
+
+            return haveDefinitions;
         });
 
         _ = await ds.GetAllDemographics(new PaginationRequestDto(), CancellationToken.None);

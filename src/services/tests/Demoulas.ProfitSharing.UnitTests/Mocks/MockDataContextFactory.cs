@@ -41,6 +41,29 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
     /// <summary>
     /// For Read/Write workloads where all operations will execute inside a single transaction
     /// </summary>
+    public async Task UseWritableContext(Func<ProfitSharingDbContext, Task> func, CancellationToken cancellationToken = default)
+    {
+        await using var scope = _serviceProvider.CreateAsyncScope();
+        var context = scope.ServiceProvider.GetRequiredService<ProfitSharingDbContext>();
+        await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
+        try
+        {
+            await func(context);
+
+            // Commit the transaction when all operations are done
+            await transaction.CommitAsync(cancellationToken);
+        }
+        catch (Exception)
+        {
+            // Roll back the transaction if any operation fails
+            await transaction.RollbackAsync(cancellationToken);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// For Read/Write workloads where all operations will execute inside a single transaction
+    /// </summary>
     public async Task<T> UseWritableContext<T>(Func<ProfitSharingDbContext, Task<T>> func, CancellationToken cancellationToken = default)
     {
         await using var scope = _serviceProvider.CreateAsyncScope();

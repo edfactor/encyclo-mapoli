@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Demoulas.ProfitSharing.Data.Entities;
-
-public class Demographics
+namespace Demoulas.ProfitSharing.Data.Enums;
+public enum PayFrequencyEnum : byte
 {
-    public int BadgeNumber { get; set; }
+    Weekly = 1,
+    Monthly = 2
 }

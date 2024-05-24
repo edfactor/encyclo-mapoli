@@ -7,6 +7,7 @@
   <ItemGroup>
     <PackageVersion Include="Aspire.Hosting.AppHost" Version="$(AspireVersion)" />
     <PackageVersion Include="Aspire.Oracle.EntityFrameworkCore" Version="$(AspireVersion)" />
+    <PackageVersion Include="FluentAssertions.Analyzers" Version="0.32.0" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="$(AspireVersion)" />
     <PackageVersion Include="FastEndpoints" Version="$(FastEndpointsVersion)" />
     <PackageVersion Include="FastEndpoints.AspVersioning" Version="$(FastEndpointsVersion)" />
