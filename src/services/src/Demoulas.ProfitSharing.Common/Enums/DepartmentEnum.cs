@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Data.Enums;
+﻿namespace Demoulas.ProfitSharing.Common.Enums;
 
 /*
  *The PY_DP column indicates department to which employee is assigned.

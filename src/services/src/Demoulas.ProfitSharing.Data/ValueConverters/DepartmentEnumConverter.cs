@@ -1,5 +1,7 @@
-﻿using Demoulas.ProfitSharing.Data.Enums;
+﻿using Demoulas.ProfitSharing.Common.Enums;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+
+namespace Demoulas.ProfitSharing.Data.ValueConverters;
 
 public class DepartmentEnumConverter : ValueConverter<DepartmentEnum, byte>
 {
@@ -11,7 +13,7 @@ public class DepartmentEnumConverter : ValueConverter<DepartmentEnum, byte>
 
     private static byte ConvertToDatabase(DepartmentEnum department)
     {
-        return ((byte)department);
+        return (byte)department;
     }
 
     private static DepartmentEnum ConvertToEntity(byte department)

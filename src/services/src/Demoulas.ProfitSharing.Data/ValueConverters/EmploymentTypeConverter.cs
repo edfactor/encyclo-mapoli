@@ -1,5 +1,7 @@
-﻿using Demoulas.ProfitSharing.Data.Enums;
+﻿using Demoulas.ProfitSharing.Common.Enums;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+
+namespace Demoulas.ProfitSharing.Data.ValueConverters;
 
 public class EmploymentTypeConverter : ValueConverter<EmploymentTypeEnum, string>
 {

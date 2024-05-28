@@ -1,5 +1,7 @@
-﻿using Demoulas.ProfitSharing.Data.Enums;
+﻿using Demoulas.ProfitSharing.Common.Enums;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+
+namespace Demoulas.ProfitSharing.Data.ValueConverters;
 
 public class PayFrequencyConverter : ValueConverter<PayFrequencyEnum, char>
 {
@@ -11,7 +13,7 @@ public class PayFrequencyConverter : ValueConverter<PayFrequencyEnum, char>
 
     private static char ConvertToDatabase(PayFrequencyEnum payFrequency)
     {
-        return ((char)payFrequency);
+        return (char)payFrequency;
     }
 
     private static PayFrequencyEnum ConvertToEntity(char payFrequency)

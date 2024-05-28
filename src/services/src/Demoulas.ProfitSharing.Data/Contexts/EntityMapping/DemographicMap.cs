@@ -1,5 +1,6 @@
 ﻿using Demoulas.Common.Data.Contexts.ValueConverters;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.ValueConverters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -92,13 +93,18 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             .HasColumnName("PY_FREQ")
             .HasConversion<PayFrequencyConverter>();
 
+        _ = builder.Property(e => e.Gender)
+            .HasMaxLength(1)
+            .HasColumnName("PY_GENDER")
+            .HasConversion<GenderEnumConverter>();
+
+
         //"PY_TYPE" CHAR(1),
         //"PY_SCOD" CHAR(1),
 
         //"PY_TERM" CHAR(1),
         //"PY_ASSIGN_DESC" CHAR(15),
         //"PY_NEW_EMP" CHAR(1),
-        //"PY_GENDER" CHAR(1),
         //"PY_SHOUR" NUMBER(5, 2),
         //"PY_SET_PWD" CHAR(1),
         //"PY_SET_PWD_DT" DATE,

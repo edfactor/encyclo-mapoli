@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Data.Enums;
+﻿namespace Demoulas.ProfitSharing.Common.Enums;
 public enum EmploymentTypeEnum
 {
     PartTime = 'P',
