@@ -78,6 +78,7 @@ dotnet tool update --global dotnet-ef
 dotnet ef migrations add {migrationName} --context ProfitSharingDbContext
 
 
+
 ### EntityFramework scaffold
 dotnet ef dbcontext scaffold "{Data Source}" Oracle.EntityFrameworkCore -o Models -t AR_ACTIVE -t AR_ADJUSTMENT -t AR_DEPOSIT -t AR_DEPOSIT_DETAIL -t AR_TEMP
 

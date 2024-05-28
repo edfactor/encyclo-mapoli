@@ -11,7 +11,7 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    [Migration("20240524194358_initialMigration")]
+    [Migration("20240528181525_initialMigration")]
     partial class initialMigration
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .UseCollation("USING_NLS_COMP")
-                .HasAnnotation("ProductVersion", "8.0.4")
+                .HasAnnotation("ProductVersion", "8.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             OracleModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -1493,6 +1493,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(8)")
                         .HasColumnName("PY_FULL_DT");
 
+                    b.Property<char>("Gender")
+                        .HasMaxLength(1)
+                        .HasColumnType("NVARCHAR2(1)")
+                        .HasColumnName("PY_GENDER");
+
                     b.Property<int>("HireDate")
                         .HasPrecision(8)
                         .HasColumnType("NUMBER(8)")
@@ -1514,7 +1519,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(15)")
                         .HasColumnName("PY_ASSIGN_ID");
 
-                    b.Property<short>("PayClass")
+                    b.Property<short>("PayClassification")
                         .HasPrecision(3)
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("PY_CLA");
@@ -1534,7 +1539,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("PY_STOR");
 
-                    b.Property<int>("TerminationDate")
+                    b.Property<char>("TerminationCode")
+                        .HasMaxLength(1)
+                        .HasColumnType("NVARCHAR2(1)")
+                        .HasColumnName("PY_TERM");
+
+                    b.Property<int?>("TerminationDate")
                         .HasPrecision(8)
                         .HasColumnType("NUMBER(8)")
                         .HasColumnName("PY_TERM_DT");

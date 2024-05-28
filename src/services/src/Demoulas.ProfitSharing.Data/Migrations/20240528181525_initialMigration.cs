@@ -64,9 +64,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     PY_FULL_DT = table.Column<int>(type: "NUMBER(8)", precision: 8, nullable: false),
                     PY_HIRE_DT = table.Column<int>(type: "NUMBER(8)", precision: 8, nullable: false),
                     PY_REHIRE_DT = table.Column<int>(type: "NUMBER(8)", precision: 8, nullable: false),
-                    PY_TERM_DT = table.Column<int>(type: "NUMBER(8)", precision: 8, nullable: false),
+                    PY_TERM = table.Column<string>(type: "NVARCHAR2(1)", maxLength: 1, nullable: false),
+                    PY_TERM_DT = table.Column<int>(type: "NUMBER(8)", precision: 8, nullable: true),
                     PY_FUL = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: false),
-                    PY_FREQ = table.Column<string>(type: "NVARCHAR2(1)", maxLength: 1, nullable: false)
+                    PY_FREQ = table.Column<string>(type: "NVARCHAR2(1)", maxLength: 1, nullable: false),
+                    PY_GENDER = table.Column<string>(type: "NVARCHAR2(1)", maxLength: 1, nullable: false)
                 },
                 constraints: table =>
                 {
