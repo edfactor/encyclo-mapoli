@@ -6,10 +6,10 @@ namespace Demoulas.ProfitSharing.Data.Extensions;
 
 public static class DatabaseServicesExtension
 {
-   public static IHostApplicationBuilder AddDatabaseServices(this IHostApplicationBuilder builder,
-      IEnumerable<ContextFactoryRequest> contextFactoryRequests)
-   {
-       return Common.Data.Contexts.Extensions.DatabaseServicesExtension.AddDatabaseServices(builder,
-           DataContextFactory.Initialize(builder, contextFactoryRequests: contextFactoryRequests));
-   }
+    public static IHostApplicationBuilder AddDatabaseServices(this IHostApplicationBuilder builder,
+       IEnumerable<ContextFactoryRequest> contextFactoryRequests)
+    {
+        return Demoulas.Common.Data.Contexts.Extensions.DatabaseServicesExtension.AddDatabaseServices(builder,
+            DataContextFactory.Initialize(builder, contextFactoryRequests: contextFactoryRequests));
+    }
 }

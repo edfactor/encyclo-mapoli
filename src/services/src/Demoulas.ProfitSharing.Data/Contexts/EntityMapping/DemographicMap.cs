@@ -1,4 +1,5 @@
 ﻿using Demoulas.Common.Data.Contexts.ValueConverters;
+using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.ValueConverters;
 using Microsoft.EntityFrameworkCore;
@@ -118,7 +119,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             address.Property(a => a.City).HasMaxLength(25).HasColumnName("PY_CITY").IsRequired();
             address.Property(a => a.State).HasMaxLength(3).HasColumnName("PY_STATE").IsRequired();
             address.Property(a => a.PostalCode).HasPrecision(9).HasColumnName("PY_ZIP").IsRequired().HasConversion<PostalCodeConverter>();
-            address.Property(a => a.CountryISO).HasMaxLength(2).HasColumnName("CountryISO").HasDefaultValue(Country.US);
+            address.Property(a => a.CountryISO).HasMaxLength(2).HasColumnName("CountryISO").HasDefaultValue(Constants.US);
 
             address.HasOne<Country>()
                 .WithMany()

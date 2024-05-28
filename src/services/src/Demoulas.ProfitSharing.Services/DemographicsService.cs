@@ -21,7 +21,16 @@ public class DemographicsService
         {
             return await c.Demographics.Select(d => new DemographicsResponseDto
             {
-                BadgeNumber = d.BadgeNumber
+                BadgeNumber = d.BadgeNumber,
+                Address = new AddressResponseDto
+                {
+                    Street = d.Address.Street,
+                    Street2 = d.Address.Street2,
+                    City = d.Address.City,
+                    State = d.Address.State,
+                    PostalCode = d.Address.PostalCode,
+                    CountryISO = d.Address.CountryISO,
+                }
             }).ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
         });
 
