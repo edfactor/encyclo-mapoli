@@ -1,7 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore;
+﻿using Demoulas.Common.Data.Contexts.ValueConverters;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.Common.Data.Contexts.ValueConverters;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
 
@@ -13,7 +13,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
         //https://demoulas.atlassian.net/wiki/spaces/~bherrmann/pages/39944312/Quick+Guide+to+Profit+Sharing+Tables
 
         _ = builder.HasKey(e => e.BadgeNumber);
-        _ = builder.ToTable("Demographic");
+        _ = builder.ToTable("DEMOGRAPHICS");
 
         _ = builder.Property(e => e.BadgeNumber)
             .HasPrecision(7)
@@ -24,7 +24,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             .HasPrecision(15)
             .ValueGeneratedNever()
             .HasColumnName("PY_ASSIGN_ID");
-        
+
         _ = builder.Property(e => e.FullName)
             .HasMaxLength(60)
             .HasColumnName("PY_NAM")

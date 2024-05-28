@@ -25,7 +25,10 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
             {
                 _ = dbBuilder.LogTo(s => Debug.WriteLine(s));
             }
-            _ = dbBuilder.UseOracle(connectionString);
+
+            _ = dbBuilder.UseOracle(connectionString, optionsBuilder =>
+                _ = optionsBuilder.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19));
+
             _ = dbBuilder.EnableSensitiveDataLogging(Debugger.IsAttached);
         });
         _ = serviceCollection.AddDbContextPool<ProfitSharingReadOnlyDbContext>(dbBuilder =>
@@ -38,6 +41,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
             _ = dbBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             _ = dbBuilder.UseOracle(connectionString, optionsBuilder =>
             {
+                _ = optionsBuilder.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19);
                 _ = optionsBuilder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
             });
         });

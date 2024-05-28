@@ -39,6 +39,7 @@ public sealed class DataContextFactory : IProfitSharingDataContextFactory
             _ = dbBuilder.UseExceptionProcessor();
             _ = dbBuilder.EnableSensitiveDataLogging(Debugger.IsAttached);
             _ = dbBuilder.EnableDetailedErrors(Debugger.IsAttached);
+            _ = dbBuilder.UseOracle(optionsBuilder => _ = optionsBuilder.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19));
         }
 
         var addOracleDatabaseDbContext = typeof(AspireOracleEFCoreExtensions)
@@ -64,9 +65,10 @@ public sealed class DataContextFactory : IProfitSharingDataContextFactory
                     CommonDbBuilderSettings(dbBuilder);
                     _ = dbBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
                     _ = dbBuilder.UseOracle(optionsBuilder =>
-                 {
-                       _ = optionsBuilder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-                   });
+                    {
+                        _ = optionsBuilder.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19);
+                        _ = optionsBuilder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                    });
                 };
             }
 
