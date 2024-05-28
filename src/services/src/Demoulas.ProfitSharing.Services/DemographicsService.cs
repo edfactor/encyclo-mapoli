@@ -22,6 +22,28 @@ public class DemographicsService
             return await c.Demographics.Select(d => new DemographicsResponseDto
             {
                 BadgeNumber = d.BadgeNumber,
+                OracleHcmId = d.OracleHcmId,
+                StoreNumber = d.StoreNumber,
+                Gender = d.Gender,
+                DateOfBirth = d.DateOfBirth,
+                Department = d.Department,
+                EmploymentType = d.EmploymentType,
+                FirstName = d.FirstName,
+                LastName = d.LastName,
+                FullName = d.FullName,
+                MiddleName = d.MiddleName,
+                HireDate = d.HireDate,
+                PayClass = d.PayClass,
+                PayFrequency = d.PayFrequency,
+                ReHireDate = d.ReHireDate,
+                TerminationDate = d.TerminationDate,
+                FullTimeDate = d.FullTimeDate,
+                ContactInfo = new ContactInfoResponseDto
+                {
+                    EmailAddress = d.ContactInfo.EmailAddress,
+                    MobileNumber = d.ContactInfo.MobileNumber,
+                    PhoneNumber = d.ContactInfo.PhoneNumber
+                },
                 Address = new AddressResponseDto
                 {
                     Street = d.Address.Street,
