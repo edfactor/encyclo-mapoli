@@ -1,7 +1,7 @@
 ﻿using Demoulas.Common.Data.Contexts.ValueConverters;
 using Demoulas.ProfitSharing.Common;
+using Demoulas.ProfitSharing.Data.Contexts.ValueConverters;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Data.ValueConverters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -11,6 +11,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
 {
     public void Configure(EntityTypeBuilder<Demographic> builder)
     {
+        //https://demoulas.atlassian.net/wiki/spaces/MAIN/pages/31887785/DEMOGRAPHICS
         //https://demoulas.atlassian.net/wiki/spaces/MAIN/pages/31909725/Employee+Hiring+data+fields
         //https://demoulas.atlassian.net/wiki/spaces/~bherrmann/pages/39944312/Quick+Guide+to+Profit+Sharing+Tables
 
@@ -55,9 +56,10 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             .HasColumnName("PY_DP")
             .HasConversion<DepartmentEnumConverter>();
 
-        _ = builder.Property(e => e.PayClass)
+        _ = builder.Property(e => e.PayClassification)
             .HasPrecision(3)
-            .HasColumnName("PY_CLA");
+            .HasColumnName("PY_CLA")
+            .HasConversion<PayClassificationEnumConverter>();
 
         _ = builder.Property(e => e.DateOfBirth)
             .HasPrecision(8)
@@ -106,6 +108,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
         //"PY_TERM" CHAR(1),
         //"PY_ASSIGN_DESC" CHAR(15),
         //"PY_NEW_EMP" CHAR(1),
+
         //"PY_SHOUR" NUMBER(5, 2),
         //"PY_SET_PWD" CHAR(1),
         //"PY_SET_PWD_DT" DATE,

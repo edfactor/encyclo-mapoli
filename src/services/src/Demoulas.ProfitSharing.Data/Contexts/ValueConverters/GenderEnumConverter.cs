@@ -1,13 +1,13 @@
 ﻿using Demoulas.ProfitSharing.Common.Enums;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace Demoulas.ProfitSharing.Data.ValueConverters;
+namespace Demoulas.ProfitSharing.Data.Contexts.ValueConverters;
 
 public class GenderEnumConverter : ValueConverter<GenderEnum, char>
 {
     public GenderEnumConverter() : base(
         v => ConvertToDatabase(v),
-        v => (GenderEnum)ConvertToEntity(v))
+        v => ConvertToEntity(v))
     {
     }
 

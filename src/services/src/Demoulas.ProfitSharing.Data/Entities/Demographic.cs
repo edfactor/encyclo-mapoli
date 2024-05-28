@@ -16,7 +16,7 @@ public sealed class Demographic
     public required short StoreNumber { get; set; }
 
     public required DepartmentEnum Department { get; set; }
-    public required short PayClass { get; set; }
+    public required PayClassification PayClassification { get; set; }
 
     public required ContactInfo ContactInfo { get; set; }
     public required Address Address { get; set; }

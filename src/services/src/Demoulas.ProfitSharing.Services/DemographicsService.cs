@@ -33,7 +33,7 @@ public class DemographicsService
                 FullName = d.FullName,
                 MiddleName = d.MiddleName,
                 HireDate = d.HireDate,
-                PayClass = d.PayClass,
+                PayClassification = d.PayClassification,
                 PayFrequency = d.PayFrequency,
                 ReHireDate = d.ReHireDate,
                 TerminationDate = d.TerminationDate,

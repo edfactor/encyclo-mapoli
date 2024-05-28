@@ -14,7 +14,7 @@ public record DemographicsResponseDto
     public required short StoreNumber { get; set; }
 
     public required DepartmentEnum Department { get; set; }
-    public required short PayClass { get; set; }
+    public required PayClassification PayClassification { get; set; }
 
     public required ContactInfoResponseDto ContactInfo { get; set; }
     public AddressResponseDto? Address { get; set; }
