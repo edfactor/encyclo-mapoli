@@ -2,6 +2,7 @@
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.StoreInfo.Entities.Contexts;
 using EntityFramework.Exceptions.Oracle;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -112,6 +113,13 @@ public sealed class DataContextFactory : IProfitSharingDataContextFactory
     {
         await using var scope = _serviceProvider.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ProfitSharingReadOnlyDbContext>();
+        return await func(dbContext);
+    }
+
+    public async Task<T> UseStoreInfoContext<T>(Func<StoreInfoDbContext, Task<T>> func)
+    {
+        await using var scope = _serviceProvider.CreateAsyncScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<StoreInfoDbContext>();
         return await func(dbContext);
     }
 }

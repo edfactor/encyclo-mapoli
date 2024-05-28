@@ -35,6 +35,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pipelines", "Pipelines", "{
 		..\..\bitbucket-pipelines.yml = ..\..\bitbucket-pipelines.yml
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.StoreInfo", "..\..\..\demoulas.common\src\Demoulas.StoreInfo\Demoulas.StoreInfo.csproj", "{5422A85F-D984-4A31-B001-D4068E44BBBE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +79,10 @@ Global
 		{F612AD2C-8DDE-41CA-A820-1C7E81B617FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F612AD2C-8DDE-41CA-A820-1C7E81B617FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F612AD2C-8DDE-41CA-A820-1C7E81B617FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5422A85F-D984-4A31-B001-D4068E44BBBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5422A85F-D984-4A31-B001-D4068E44BBBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5422A85F-D984-4A31-B001-D4068E44BBBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5422A85F-D984-4A31-B001-D4068E44BBBE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\..\demoulas.common\src\Demoulas.Common.Data.Contexts\Demoulas.Common.Data.Contexts.csproj" />
+    <ProjectReference Include="..\..\..\..\..\demoulas.common\src\Demoulas.StoreInfo\Demoulas.StoreInfo.csproj" />
   </ItemGroup>
 
 </Project>

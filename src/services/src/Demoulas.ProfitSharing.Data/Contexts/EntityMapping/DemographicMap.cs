@@ -13,7 +13,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
         //https://demoulas.atlassian.net/wiki/spaces/~bherrmann/pages/39944312/Quick+Guide+to+Profit+Sharing+Tables
 
         _ = builder.HasKey(e => e.BadgeNumber);
-        _ = builder.ToTable("DEMOGRAPHICS");
+        _ = builder.ToTable("Demographic");
 
         _ = builder.Property(e => e.BadgeNumber)
             .HasPrecision(7)
@@ -85,11 +85,6 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             .HasMaxLength(2)
             .HasColumnName("PY_FUL")
             .HasConversion<EmploymentTypeConverter>();
-
-        //builder.HasOne<Definition>()
-        //    .WithMany()
-        //    .HasForeignKey(o => o.EmploymentType);
-
 
         _ = builder.Property(e => e.PayFrequency)
             .HasMaxLength(1)
