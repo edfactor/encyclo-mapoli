@@ -14,7 +14,8 @@ public sealed class Demographic
     public required string FirstName { get; set; }
     public string? MiddleName { get; set; }
     public required short StoreNumber { get; set; }
-    public required byte Department { get; set; }
+    
+    public required DepartmentEnum Department { get; set; }
     public required short PayClass { get; set; }
 
     public required ContactInfo ContactInfo { get; set; }

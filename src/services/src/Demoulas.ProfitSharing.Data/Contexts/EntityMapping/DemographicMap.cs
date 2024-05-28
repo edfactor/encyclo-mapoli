@@ -50,7 +50,8 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
 
         _ = builder.Property(e => e.Department)
             .HasPrecision(1)
-            .HasColumnName("PY_DP");
+            .HasColumnName("PY_DP")
+            .HasConversion<DepartmentEnumConverter>();
 
         _ = builder.Property(e => e.PayClass)
             .HasPrecision(3)
