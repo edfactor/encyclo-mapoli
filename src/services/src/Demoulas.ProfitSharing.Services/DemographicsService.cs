@@ -36,6 +36,7 @@ public class DemographicsService
                 PayClassification = d.PayClassification,
                 PayFrequency = d.PayFrequency,
                 ReHireDate = d.ReHireDate,
+                TerminationCode = d.TerminationCode,
                 TerminationDate = d.TerminationDate,
                 FullTimeDate = d.FullTimeDate,
                 ContactInfo = new ContactInfoResponseDto

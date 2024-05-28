@@ -29,10 +29,10 @@ public sealed class Demographic
 
     public required DateOnly HireDate { get; set; }
     public required DateOnly ReHireDate { get; set; }
-    public required DateOnly TerminationDate { get; set; }
+
+    public TerminationCode TerminationCode { get; set; }
+    public DateOnly? TerminationDate { get; set; }
     public required EmploymentTypeEnum EmploymentType { get; set; }
     public required PayFrequencyEnum PayFrequency { get; set; }
-
     public required GenderEnum Gender { get; set; }
-
 }

@@ -76,6 +76,12 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             .HasColumnName("PY_REHIRE_DT")
             .HasConversion<IntegerToDateOnlyConverterYyyyMMdd>();
 
+        _ = builder.Property(e => e.TerminationCode)
+            .HasMaxLength(1)
+            .HasColumnName("PY_TERM")
+            .HasConversion<TerminationCodeEnumConverter>();
+        
+
         _ = builder.Property(e => e.TerminationDate)
             .HasPrecision(8)
             .HasColumnName("PY_TERM_DT")
@@ -105,7 +111,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
         //"PY_TYPE" CHAR(1),
         //"PY_SCOD" CHAR(1),
 
-        //"PY_TERM" CHAR(1),
+        
         //"PY_ASSIGN_DESC" CHAR(15),
         //"PY_NEW_EMP" CHAR(1),
 

@@ -15,7 +15,7 @@ namespace Demoulas.ProfitSharing.Api.Extensions;
 internal static class SwaggerHelper
 {
     internal static WebApplicationBuilder AddSwaggerOpenApi(this WebApplicationBuilder builder, byte version = 1,
-        string title = "DeMoulas Super Markets, Inc",
+        string title = "Demoulas Super Markets, Inc",
         string? description = null,
         bool enableJwtBearerAuth = true,
         OpenApiContact? contactDetails = null,
