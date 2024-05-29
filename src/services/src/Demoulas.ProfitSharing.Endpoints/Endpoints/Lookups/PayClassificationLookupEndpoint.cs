@@ -1,5 +1,4 @@
-﻿using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Endpoints.Contracts.Contracts.Response;
+﻿using Demoulas.ProfitSharing.Endpoints.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Services;
 using FastEndpoints;
@@ -17,10 +16,11 @@ public class PayClassificationLookupEndpoint : EndpointWithoutRequest<ISet<PayCl
 
     public override void Configure()
     {
-        Get("search");
+        AllowAnonymous();
+        Get("payclassification/all");
         Summary(s =>
         {
-            s.Summary = "Search for customers by either account number or customer name";
+            s.Summary = "Get all pay classifications";
             s.ResponseExamples = new Dictionary<int, object> {
             {
                 200, new List<PayClassificationResponseDto>
