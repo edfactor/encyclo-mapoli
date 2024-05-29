@@ -43,7 +43,10 @@ public class OracleDbContextTests
             bool haveCountries = await c.Countries.AnyAsync();
             haveCountries.Should().BeTrue();
 
-            return haveDefinitions && haveCountries;
+            bool payClassifications = await c.PayClassifications.AnyAsync();
+            payClassifications.Should().BeTrue();
+
+            return haveDefinitions && haveCountries && payClassifications;
         });
 
         _ = await ds.GetAllDemographics(new PaginationRequestDto(), CancellationToken.None);
