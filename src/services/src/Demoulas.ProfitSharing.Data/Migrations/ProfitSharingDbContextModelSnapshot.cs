@@ -17,7 +17,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .UseCollation("USING_NLS_COMP")
-                .HasAnnotation("ProductVersion", "8.0.4")
+                .HasAnnotation("ProductVersion", "8.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             OracleModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -1460,81 +1460,107 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<int>("DateOfBirth")
                         .HasPrecision(8)
                         .HasColumnType("NUMBER(8)")
-                        .HasColumnName("PY_DOB");
+                        .HasColumnName("PY_DOB")
+                        .HasComment("DateOfBirth");
 
                     b.Property<byte>("Department")
                         .HasPrecision(1)
                         .HasColumnType("NUMBER(1)")
-                        .HasColumnName("PY_DP");
+                        .HasColumnName("PY_DP")
+                        .HasComment("Department");
 
                     b.Property<string>("EmploymentType")
                         .IsRequired()
                         .HasMaxLength(2)
                         .HasColumnType("NVARCHAR2(2)")
-                        .HasColumnName("PY_FUL");
+                        .HasColumnName("PY_FUL")
+                        .HasComment("EmploymentType");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("NVARCHAR2(30)")
-                        .HasColumnName("PY_FNAME");
+                        .HasColumnName("PY_FNAME")
+                        .HasComment("FirstName");
 
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasMaxLength(60)
                         .HasColumnType("NVARCHAR2(60)")
-                        .HasColumnName("PY_NAM");
+                        .HasColumnName("PY_NAM")
+                        .HasComment("FullName");
 
                     b.Property<int>("FullTimeDate")
                         .HasPrecision(8)
                         .HasColumnType("NUMBER(8)")
-                        .HasColumnName("PY_FULL_DT");
+                        .HasColumnName("PY_FULL_DT")
+                        .HasComment("FullTimeDate");
+
+                    b.Property<char>("Gender")
+                        .HasMaxLength(1)
+                        .HasColumnType("NVARCHAR2(1)")
+                        .HasColumnName("PY_GENDER")
+                        .HasComment("Gender");
 
                     b.Property<int>("HireDate")
                         .HasPrecision(8)
                         .HasColumnType("NUMBER(8)")
-                        .HasColumnName("PY_HIRE_DT");
+                        .HasColumnName("PY_HIRE_DT")
+                        .HasComment("HireDate");
 
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("NVARCHAR2(30)")
-                        .HasColumnName("PY_LNAME");
+                        .HasColumnName("PY_LNAME")
+                        .HasComment("LastName");
 
                     b.Property<string>("MiddleName")
                         .HasMaxLength(25)
                         .HasColumnType("NVARCHAR2(25)")
-                        .HasColumnName("PY_MNAME");
+                        .HasColumnName("PY_MNAME")
+                        .HasComment("MiddleName");
 
                     b.Property<long>("OracleHcmId")
                         .HasPrecision(15)
                         .HasColumnType("NUMBER(15)")
                         .HasColumnName("PY_ASSIGN_ID");
 
-                    b.Property<short>("PayClass")
+                    b.Property<short>("PayClassification")
                         .HasPrecision(3)
                         .HasColumnType("NUMBER(3)")
-                        .HasColumnName("PY_CLA");
+                        .HasColumnName("PY_CLA")
+                        .HasComment("PayClassification");
 
                     b.Property<char>("PayFrequency")
                         .HasMaxLength(1)
                         .HasColumnType("NVARCHAR2(1)")
-                        .HasColumnName("PY_FREQ");
+                        .HasColumnName("PY_FREQ")
+                        .HasComment("PayFrequency");
 
                     b.Property<int>("ReHireDate")
                         .HasPrecision(8)
                         .HasColumnType("NUMBER(8)")
-                        .HasColumnName("PY_REHIRE_DT");
+                        .HasColumnName("PY_REHIRE_DT")
+                        .HasComment("ReHireDate");
 
                     b.Property<short>("StoreNumber")
                         .HasPrecision(3)
                         .HasColumnType("NUMBER(3)")
-                        .HasColumnName("PY_STOR");
+                        .HasColumnName("PY_STOR")
+                        .HasComment("StoreNumber");
 
-                    b.Property<int>("TerminationDate")
+                    b.Property<char>("TerminationCode")
+                        .HasMaxLength(1)
+                        .HasColumnType("NVARCHAR2(1)")
+                        .HasColumnName("PY_TERM")
+                        .HasComment("TerminationCode");
+
+                    b.Property<int?>("TerminationDate")
                         .HasPrecision(8)
                         .HasColumnType("NUMBER(8)")
-                        .HasColumnName("PY_TERM_DT");
+                        .HasColumnName("PY_TERM_DT")
+                        .HasComment("TerminationDate");
 
                     b.HasKey("BadgeNumber");
 
@@ -1552,7 +1578,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                                 .IsRequired()
                                 .HasMaxLength(25)
                                 .HasColumnType("NVARCHAR2(25)")
-                                .HasColumnName("PY_CITY");
+                                .HasColumnName("PY_CITY")
+                                .HasComment("City");
 
                             b1.Property<string>("CountryISO")
                                 .IsRequired()
@@ -1565,25 +1592,29 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             b1.Property<int>("PostalCode")
                                 .HasPrecision(9)
                                 .HasColumnType("NUMBER(9)")
-                                .HasColumnName("PY_ZIP");
+                                .HasColumnName("PY_ZIP")
+                                .HasComment("Postal Code");
 
                             b1.Property<string>("State")
                                 .IsRequired()
                                 .HasMaxLength(3)
                                 .HasColumnType("NVARCHAR2(3)")
-                                .HasColumnName("PY_STATE");
+                                .HasColumnName("PY_STATE")
+                                .HasComment("State");
 
                             b1.Property<string>("Street")
                                 .IsRequired()
                                 .HasMaxLength(30)
                                 .HasColumnType("NVARCHAR2(30)")
-                                .HasColumnName("PY_ADD");
+                                .HasColumnName("PY_ADD")
+                                .HasComment("Street");
 
                             b1.Property<string>("Street2")
                                 .IsRequired()
                                 .HasMaxLength(30)
                                 .HasColumnType("NVARCHAR2(30)")
-                                .HasColumnName("PY_ADD2");
+                                .HasColumnName("PY_ADD2")
+                                .HasComment("Street2");
 
                             b1.HasKey("DemographicBadgeNumber");
 
@@ -1620,7 +1651,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                                 .IsRequired()
                                 .HasMaxLength(10)
                                 .HasColumnType("NVARCHAR2(10)")
-                                .HasColumnName("PY_EMP_TELNO");
+                                .HasColumnName("PY_EMP_TELNO")
+                                .HasComment("PhoneNumber");
 
                             b1.HasKey("DemographicBadgeNumber");
 

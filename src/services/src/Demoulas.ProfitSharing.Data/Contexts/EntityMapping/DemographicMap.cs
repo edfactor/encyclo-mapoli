@@ -30,80 +30,96 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
 
         _ = builder.Property(e => e.FullName)
             .HasMaxLength(60)
+            .HasComment("FullName")
             .HasColumnName("PY_NAM")
             .IsRequired();
 
         _ = builder.Property(e => e.LastName)
             .HasMaxLength(30)
+            .HasComment("LastName")
             .HasColumnName("PY_LNAME")
             .IsRequired();
 
         _ = builder.Property(e => e.FirstName)
             .HasMaxLength(30)
+            .HasComment("FirstName")
             .HasColumnName("PY_FNAME")
             .IsRequired();
 
         _ = builder.Property(e => e.MiddleName)
             .HasMaxLength(25)
+            .HasComment("MiddleName")
             .HasColumnName("PY_MNAME");
 
         _ = builder.Property(e => e.StoreNumber)
             .HasPrecision(3)
+            .HasComment("StoreNumber")
             .HasColumnName("PY_STOR");
 
         _ = builder.Property(e => e.Department)
             .HasPrecision(1)
+            .HasComment("Department")
             .HasColumnName("PY_DP")
             .HasConversion<DepartmentEnumConverter>();
 
         _ = builder.Property(e => e.PayClassification)
             .HasPrecision(3)
+            .HasComment("PayClassification")
             .HasColumnName("PY_CLA")
             .HasConversion<PayClassificationEnumConverter>();
 
         _ = builder.Property(e => e.DateOfBirth)
             .HasPrecision(8)
+            .HasComment("DateOfBirth")
             .HasColumnName("PY_DOB")
             .HasConversion<IntegerToDateOnlyConverterYyyyMMdd>();
 
         _ = builder.Property(e => e.HireDate)
             .HasPrecision(8)
+            .HasComment("HireDate")
             .HasColumnName("PY_HIRE_DT")
             .HasConversion<IntegerToDateOnlyConverterYyyyMMdd>();
 
         _ = builder.Property(e => e.ReHireDate)
             .HasPrecision(8)
+            .HasComment("ReHireDate")
             .HasColumnName("PY_REHIRE_DT")
             .HasConversion<IntegerToDateOnlyConverterYyyyMMdd>();
 
         _ = builder.Property(e => e.TerminationCode)
             .HasMaxLength(1)
+            .HasComment("TerminationCode")
             .HasColumnName("PY_TERM")
             .HasConversion<TerminationCodeEnumConverter>();
         
 
         _ = builder.Property(e => e.TerminationDate)
             .HasPrecision(8)
+            .HasComment("TerminationDate")
             .HasColumnName("PY_TERM_DT")
             .HasConversion<IntegerToDateOnlyConverterYyyyMMdd>();
 
         _ = builder.Property(e => e.FullTimeDate)
             .HasPrecision(8)
+            .HasComment("FullTimeDate")
             .HasColumnName("PY_FULL_DT")
             .HasConversion<IntegerToDateOnlyConverterYyyyMMdd>();
 
         _ = builder.Property(e => e.EmploymentType)
             .HasMaxLength(2)
+            .HasComment("EmploymentType")
             .HasColumnName("PY_FUL")
             .HasConversion<EmploymentTypeConverter>();
 
         _ = builder.Property(e => e.PayFrequency)
             .HasMaxLength(1)
+            .HasComment("PayFrequency")
             .HasColumnName("PY_FREQ")
             .HasConversion<PayFrequencyConverter>();
 
         _ = builder.Property(e => e.Gender)
             .HasMaxLength(1)
+            .HasComment("Gender")
             .HasColumnName("PY_GENDER")
             .HasConversion<GenderEnumConverter>();
 
@@ -123,11 +139,11 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
 
         builder.OwnsOne(e => e.Address, address =>
         {
-            address.Property(a => a.Street).HasMaxLength(30).HasColumnName("PY_ADD").IsRequired();
-            address.Property(a => a.Street2).HasMaxLength(30).HasColumnName("PY_ADD2");
-            address.Property(a => a.City).HasMaxLength(25).HasColumnName("PY_CITY").IsRequired();
-            address.Property(a => a.State).HasMaxLength(3).HasColumnName("PY_STATE").IsRequired();
-            address.Property(a => a.PostalCode).HasPrecision(9).HasColumnName("PY_ZIP").IsRequired().HasConversion<PostalCodeConverter>();
+            address.Property(a => a.Street).HasMaxLength(30).HasColumnName("PY_ADD").HasComment("Street").IsRequired();
+            address.Property(a => a.Street2).HasMaxLength(30).HasColumnName("PY_ADD2").HasComment("Street2");
+            address.Property(a => a.City).HasMaxLength(25).HasColumnName("PY_CITY").HasComment("City").IsRequired();
+            address.Property(a => a.State).HasMaxLength(3).HasColumnName("PY_STATE").HasComment("State").IsRequired();
+            address.Property(a => a.PostalCode).HasPrecision(9).HasColumnName("PY_ZIP").HasComment("Postal Code").IsRequired().HasConversion<PostalCodeConverter>();
             address.Property(a => a.CountryISO).HasMaxLength(2).HasColumnName("CountryISO").HasDefaultValue(Constants.US);
 
             address.HasOne<Country>()
@@ -137,7 +153,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
 
         builder.OwnsOne(e => e.ContactInfo, contact =>
         {
-            contact.Property(a => a.PhoneNumber).HasMaxLength(10).HasColumnName("PY_EMP_TELNO").IsRequired();
+            contact.Property(a => a.PhoneNumber).HasMaxLength(10).HasColumnName("PY_EMP_TELNO").HasComment("PhoneNumber").IsRequired();
             contact.Property(a => a.MobileNumber).HasMaxLength(10).HasColumnName("MobileNumber");
             contact.Property(a => a.EmailAddress).HasMaxLength(50).HasColumnName("EmailAddress");
         });
