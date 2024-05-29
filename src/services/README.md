@@ -76,6 +76,9 @@ dotnet tool update --global dotnet-ef
 
 ### EntityFramework Migrations
 dotnet ef migrations add {migrationName} --context ProfitSharingDbContext
+dotnet ef migrations script --context ProfitSharingDbContext
+
+
 
 
 ### EntityFramework scaffold
