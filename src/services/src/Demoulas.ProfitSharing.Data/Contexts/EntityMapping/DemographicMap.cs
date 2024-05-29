@@ -1,5 +1,6 @@
 ﻿using Demoulas.Common.Data.Contexts.ValueConverters;
 using Demoulas.ProfitSharing.Common;
+using Demoulas.ProfitSharing.Common.Enums;
 using Demoulas.ProfitSharing.Data.Contexts.ValueConverters;
 using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -62,11 +63,14 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             .HasColumnName("PY_DP")
             .HasConversion<DepartmentEnumConverter>();
 
-        _ = builder.Property(e => e.PayClassification)
-            .HasPrecision(3)
-            .HasComment("PayClassification")
+        builder.Property(e => e.PayClassificationId)
             .HasColumnName("PY_CLA")
-            .HasConversion<PayClassificationEnumConverter>();
+            .HasComment("PayClassification")
+            .HasPrecision(2);
+
+        builder.HasOne(e => e.PayClassification)
+            .WithMany()
+            .HasForeignKey(e => e.PayClassificationId);
 
         _ = builder.Property(e => e.DateOfBirth)
             .HasPrecision(8)

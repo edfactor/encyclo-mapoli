@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.ValueConverters;
 
-public class PayFrequencyConverter : ValueConverter<PayFrequencyEnum, char>
+public class PayFrequencyConverter : ValueConverter<PayFrequency, char>
 {
     public PayFrequencyConverter() : base(
         v => ConvertToDatabase(v),
@@ -11,13 +11,13 @@ public class PayFrequencyConverter : ValueConverter<PayFrequencyEnum, char>
     {
     }
 
-    private static char ConvertToDatabase(PayFrequencyEnum payFrequency)
+    private static char ConvertToDatabase(PayFrequency payFrequency)
     {
         return (char)payFrequency;
     }
 
-    private static PayFrequencyEnum ConvertToEntity(char payFrequency)
+    private static PayFrequency ConvertToEntity(char payFrequency)
     {
-        return (PayFrequencyEnum)payFrequency;
+        return (PayFrequency)payFrequency;
     }
 }

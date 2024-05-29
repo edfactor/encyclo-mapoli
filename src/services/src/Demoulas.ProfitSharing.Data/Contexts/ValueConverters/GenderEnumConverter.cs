@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.ValueConverters;
 
-public class GenderEnumConverter : ValueConverter<GenderEnum, char>
+public class GenderEnumConverter : ValueConverter<Gender, char>
 {
     public GenderEnumConverter() : base(
         v => ConvertToDatabase(v),
@@ -11,13 +11,13 @@ public class GenderEnumConverter : ValueConverter<GenderEnum, char>
     {
     }
 
-    private static char ConvertToDatabase(GenderEnum gender)
+    private static char ConvertToDatabase(Gender gender)
     {
         return (char)gender;
     }
 
-    private static GenderEnum ConvertToEntity(char gender)
+    private static Gender ConvertToEntity(char gender)
     {
-        return (GenderEnum)gender;
+        return (Gender)gender;
     }
 }

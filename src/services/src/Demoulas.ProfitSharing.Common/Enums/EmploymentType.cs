@@ -1,5 +1,5 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Enums;
-public enum EmploymentTypeEnum
+public enum EmploymentType
 {
     PartTime = 'P',
     FullTimeStraightSalary = 'H',

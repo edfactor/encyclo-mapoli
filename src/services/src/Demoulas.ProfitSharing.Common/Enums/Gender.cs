@@ -5,7 +5,7 @@
 /// https://transequality.org/documents/state/new-hampshire#:~:text=New%20Hampshire%20Drivers%20License%20Policy,documentation%20of%20the%20name%20change.
 /// </summary>
 
-public enum GenderEnum
+public enum Gender
 {
     Male = 'M',
     Female = 'F',

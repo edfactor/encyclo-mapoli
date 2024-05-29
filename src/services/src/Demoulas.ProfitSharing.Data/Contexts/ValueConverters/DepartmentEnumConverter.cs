@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.ValueConverters;
 
-public class DepartmentEnumConverter : ValueConverter<DepartmentEnum, byte>
+public class DepartmentEnumConverter : ValueConverter<Department, byte>
 {
     public DepartmentEnumConverter() : base(
         v => ConvertToDatabase(v),
@@ -11,13 +11,13 @@ public class DepartmentEnumConverter : ValueConverter<DepartmentEnum, byte>
     {
     }
 
-    private static byte ConvertToDatabase(DepartmentEnum department)
+    private static byte ConvertToDatabase(Department department)
     {
         return (byte)department;
     }
 
-    private static DepartmentEnum ConvertToEntity(byte department)
+    private static Department ConvertToEntity(byte department)
     {
-        return (DepartmentEnum)department;
+        return (Department)department;
     }
 }

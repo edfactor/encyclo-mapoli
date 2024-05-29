@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.ValueConverters;
 
-public class EmploymentTypeConverter : ValueConverter<EmploymentTypeEnum, string>
+public class EmploymentTypeConverter : ValueConverter<EmploymentType, string>
 {
     public EmploymentTypeConverter() : base(
         v => ConvertToDatabase(v),
@@ -11,13 +11,13 @@ public class EmploymentTypeConverter : ValueConverter<EmploymentTypeEnum, string
     {
     }
 
-    private static string ConvertToDatabase(EmploymentTypeEnum employmentType)
+    private static string ConvertToDatabase(EmploymentType employmentType)
     {
         return ((char)employmentType).ToString();
     }
 
-    private static EmploymentTypeEnum ConvertToEntity(string employmentType)
+    private static EmploymentType ConvertToEntity(string employmentType)
     {
-        return (EmploymentTypeEnum)employmentType[0];
+        return (EmploymentType)employmentType[0];
     }
 }

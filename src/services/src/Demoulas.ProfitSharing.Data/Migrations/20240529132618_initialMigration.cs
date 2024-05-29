@@ -39,6 +39,18 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "PayClassification",
+                columns: table => new
+                {
+                    Id = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false),
+                    Name = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: false, comment: "Pay Classification")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PayClassification", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "DEMOGRAPHICS",
                 columns: table => new
                 {
@@ -50,7 +62,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     PY_MNAME = table.Column<string>(type: "NVARCHAR2(25)", maxLength: 25, nullable: true, comment: "MiddleName"),
                     PY_STOR = table.Column<short>(type: "NUMBER(3)", precision: 3, nullable: false, comment: "StoreNumber"),
                     PY_DP = table.Column<byte>(type: "NUMBER(1)", precision: 1, nullable: false, comment: "Department"),
-                    PY_CLA = table.Column<short>(type: "NUMBER(3)", precision: 3, nullable: false, comment: "PayClassification"),
+                    PY_CLA = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false, comment: "PayClassification"),
                     PY_EMP_TELNO = table.Column<string>(type: "NVARCHAR2(10)", maxLength: 10, nullable: false, comment: "PhoneNumber"),
                     MobileNumber = table.Column<string>(type: "NVARCHAR2(10)", maxLength: 10, nullable: true),
                     EmailAddress = table.Column<string>(type: "NVARCHAR2(50)", maxLength: 50, nullable: true),
@@ -78,6 +90,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         column: x => x.CountryISO,
                         principalTable: "Country",
                         principalColumn: "ISO",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_DEMOGRAPHICS_PayClassification_PY_CLA",
+                        column: x => x.PY_CLA,
+                        principalTable: "PayClassification",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -294,10 +312,107 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     { "PF", "Pay frequency (1=weekly, 2=monthly)" }
                 });
 
+            migrationBuilder.InsertData(
+                table: "PayClassification",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { (byte)1, "MANAGER" },
+                    { (byte)2, "ASSISTANT MANAGER" },
+                    { (byte)10, "FRONT END MANAGER" },
+                    { (byte)11, "ASSISTANT HEAD CASHIER" },
+                    { (byte)13, "CASHIERS - AM" },
+                    { (byte)14, "CASHIERS - PM" },
+                    { (byte)15, "CASHIERS 14-15" },
+                    { (byte)16, "SACKERS - AM" },
+                    { (byte)17, "SACKERS - PM" },
+                    { (byte)18, "SACKERS 14-15" },
+                    { (byte)19, "STORE MAINTENANCE" },
+                    { (byte)20, "OFFICE MANAGER" },
+                    { (byte)22, "COURTESY BOOTH - AM" },
+                    { (byte)23, "COURTESY BOOTH - PM" },
+                    { (byte)24, "POS - FULL TIME" },
+                    { (byte)25, "CLERK -FULL TIME AP" },
+                    { (byte)26, "CLERKS - FULL TIME AR" },
+                    { (byte)27, "CLERKS - FULL TIME GROC" },
+                    { (byte)28, "CLERKS - FULL TIME PERISHABLES" },
+                    { (byte)29, "CLERKS - FULL TIME WAREHOUSE" },
+                    { (byte)30, "MERCHANDISER" },
+                    { (byte)31, "GROCERY MANAGER" },
+                    { (byte)32, "ENDS - PART TIME" },
+                    { (byte)33, "FIRST MEAT CUTTER" },
+                    { (byte)35, "NOT USED" },
+                    { (byte)37, "CAFE PART TIME" },
+                    { (byte)38, "RECEIVER" },
+                    { (byte)39, "NOT USED" },
+                    { (byte)40, "MEAT CUTTERS" },
+                    { (byte)41, "APPR MEAT CUTTERS" },
+                    { (byte)42, "MEAT CUTTER PART TIME" },
+                    { (byte)43, "TRAINEE MEAT CUTTER" },
+                    { (byte)44, "PART TIME SUBSHOP" },
+                    { (byte)45, "ASST SUB SHOP MANAGER" },
+                    { (byte)46, "SERVICE CASE - FULL TIME" },
+                    { (byte)47, "WRAPPERS - FULL TIME" },
+                    { (byte)48, "WRAPPERS - PART TIME AM" },
+                    { (byte)49, "WRAPPERS - PART TIME PM" },
+                    { (byte)50, "HEAD CLERK" },
+                    { (byte)51, "SUB SHOP MANAGER" },
+                    { (byte)52, "CLERKS - FULL TIME AM" },
+                    { (byte)53, "CLERKS - PART TIME AM" },
+                    { (byte)54, "CLERKS - PART TIME PM" },
+                    { (byte)55, "POS - PART TIME" },
+                    { (byte)56, "MARKETS KITCHEN - ASST MGR" },
+                    { (byte)57, "MARKETS KITCHEN FT" },
+                    { (byte)58, "MARKETS KITCHEN PT" },
+                    { (byte)59, "KITCHEN MANAGER" },
+                    { (byte)60, "NOT USED" },
+                    { (byte)61, "PT BAKERY MERCHANDISER" },
+                    { (byte)62, "FT CAKE & CREAMS" },
+                    { (byte)63, "CAKE & CREAM PT" },
+                    { (byte)64, "OVER WORKER PT" },
+                    { (byte)65, "BENCH WORKER PT" },
+                    { (byte)66, "FORK LIFT OPR (REC) AM" },
+                    { (byte)67, "FORK LIFT OPR (REC) PM" },
+                    { (byte)68, "FORK LIFT OPR (SHIP) AM" },
+                    { (byte)69, "FORK LIFT OPR (SHIP) PM" },
+                    { (byte)70, "FORK LIFT OPR (MISC.) AM" },
+                    { (byte)71, "FORK LIFT OPR (MISC.) PM" },
+                    { (byte)72, "LOADER - AM" },
+                    { (byte)73, "LOADER - PM" },
+                    { (byte)74, "WHSE MAINTENANCE - AM" },
+                    { (byte)75, "WHSE MAINTENANCE - PM" },
+                    { (byte)77, "SELECTOR PART TIME - AM" },
+                    { (byte)78, "SELECTOR PART TIME - PM" },
+                    { (byte)79, "SELECTOR FULL TIME - AM" },
+                    { (byte)80, "TEMP FULLTIME" },
+                    { (byte)81, "SELECTOR FULL TIME - PM" },
+                    { (byte)82, "INSPECTOR" },
+                    { (byte)83, "GENERAL WAREHOUSE - AM" },
+                    { (byte)84, "GENERAL WAREHOUSE - PM" },
+                    { (byte)85, "DRIVER - TRAILER" },
+                    { (byte)86, "DRIVER - STRAIGHT" },
+                    { (byte)87, "MECHANIC" },
+                    { (byte)88, "GARAGE - PM" },
+                    { (byte)89, "FACILITY OPERATIONS" },
+                    { (byte)90, "COMPUTER OPERATIONS" },
+                    { (byte)91, "SIGN SHOP" },
+                    { (byte)92, "INVENTORY" },
+                    { (byte)93, "PROGRAMMING" },
+                    { (byte)94, "HELP DESK" },
+                    { (byte)95, "DEFUNCT" },
+                    { (byte)96, "TECHNICAL SUPPORT" },
+                    { (byte)98, "TRAINING" }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_DEMOGRAPHICS_CountryISO",
                 table: "DEMOGRAPHICS",
                 column: "CountryISO");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DEMOGRAPHICS_PY_CLA",
+                table: "DEMOGRAPHICS",
+                column: "PY_CLA");
         }
 
         /// <inheritdoc />
@@ -311,6 +426,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Country");
+
+            migrationBuilder.DropTable(
+                name: "PayClassification");
         }
     }
 }

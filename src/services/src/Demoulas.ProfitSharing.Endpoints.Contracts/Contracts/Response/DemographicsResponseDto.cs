@@ -13,8 +13,8 @@ public record DemographicsResponseDto
     public string? MiddleName { get; set; }
     public required short StoreNumber { get; set; }
 
-    public required DepartmentEnum Department { get; set; }
-    public required PayClassification PayClassification { get; set; }
+    public required Department Department { get; set; }
+    public required byte PayClassification { get; set; }
 
     public required ContactInfoResponseDto ContactInfo { get; set; }
     public AddressResponseDto? Address { get; set; }
@@ -29,9 +29,9 @@ public record DemographicsResponseDto
     public required DateOnly ReHireDate { get; set; }
     public TerminationCode TerminationCode { get; set; }
     public DateOnly? TerminationDate { get; set; }
-    public required EmploymentTypeEnum EmploymentType { get; set; }
-    public required PayFrequencyEnum PayFrequency { get; set; }
+    public required EmploymentType EmploymentType { get; set; }
+    public required PayFrequency PayFrequency { get; set; }
 
-    public required GenderEnum Gender { get; set; }
+    public required Gender Gender { get; set; }
 
 }
