@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\demoulas.common\src\Demoulas.Common.Caching\Demoulas.Common.Caching.csproj" />
     <ProjectReference Include="..\Demoulas.ProfitSharing.Common\Demoulas.ProfitSharing.Common.csproj" />
   </ItemGroup>
 

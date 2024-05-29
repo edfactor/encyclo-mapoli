@@ -3,11 +3,11 @@ using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.Endpoints.Groups;
 
-public sealed class AccountsGroup : Group
+public sealed class LookupGroup : Group
 {
-    private const string Route = "accounts";
-    private const string RouteName = "Accounts";
-    public AccountsGroup()
+    private const string Route = "lookup";
+    private const string RouteName = "Lookup";
+    public LookupGroup()
     {
         Configure(Route.ToLowerInvariant(), ep => //admin is the route prefix for the top level group
         {

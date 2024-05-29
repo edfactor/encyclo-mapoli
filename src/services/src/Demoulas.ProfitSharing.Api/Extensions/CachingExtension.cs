@@ -1,5 +1,7 @@
 ﻿
 
+using Demoulas.ProfitSharing.Services.HostedServices;
+
 namespace Demoulas.ProfitSharing.Api.Extensions;
 
 /// <summary>
@@ -13,7 +15,7 @@ public static class CachingExtension
 
         if (builder.Environment.EnvironmentName != "Testing")
         {
-            //_ = builder.Services.AddHostedService<AccountCacheHostedService>();
+            _ = builder.Services.AddHostedService<PayClassificationHostedService>();
         }
 
         return builder;
