@@ -11,7 +11,11 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
+<<<<<<<< HEAD:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240529132618_initialMigration.Designer.cs
     [Migration("20240529132618_initialMigration")]
+========
+    [Migration("20240528181525_initialMigration")]
+>>>>>>>> 0c25c4c486e9a587025a740f35a94f084030af6e:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240528181525_initialMigration.Designer.cs
     partial class initialMigration
     {
         /// <inheritdoc />
@@ -1505,6 +1509,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("PY_GENDER")
                         .HasComment("Gender");
 
+                    b.Property<char>("Gender")
+                        .HasMaxLength(1)
+                        .HasColumnType("NVARCHAR2(1)")
+                        .HasColumnName("PY_GENDER");
+
                     b.Property<int>("HireDate")
                         .HasPrecision(8)
                         .HasColumnType("NUMBER(8)")
@@ -1529,11 +1538,18 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(15)")
                         .HasColumnName("PY_ASSIGN_ID");
 
+<<<<<<<< HEAD:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240529132618_initialMigration.Designer.cs
                     b.Property<byte>("PayClassificationId")
                         .HasPrecision(2)
                         .HasColumnType("NUMBER(2)")
                         .HasColumnName("PY_CLA")
                         .HasComment("PayClassification");
+========
+                    b.Property<short>("PayClassification")
+                        .HasPrecision(3)
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("PY_CLA");
+>>>>>>>> 0c25c4c486e9a587025a740f35a94f084030af6e:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240528181525_initialMigration.Designer.cs
 
                     b.Property<char>("PayFrequency")
                         .HasMaxLength(1)
@@ -1556,8 +1572,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<char>("TerminationCode")
                         .HasMaxLength(1)
                         .HasColumnType("NVARCHAR2(1)")
+<<<<<<<< HEAD:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240529132618_initialMigration.Designer.cs
                         .HasColumnName("PY_TERM")
                         .HasComment("TerminationCode");
+========
+                        .HasColumnName("PY_TERM");
+>>>>>>>> 0c25c4c486e9a587025a740f35a94f084030af6e:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240528181525_initialMigration.Designer.cs
 
                     b.Property<int?>("TerminationDate")
                         .HasPrecision(8)
