@@ -1,8 +1,8 @@
 ﻿using Demoulas.Common.Data.Contexts.DTOs.Request;
 using Demoulas.Common.Data.Contexts.DTOs.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Endpoints.Contracts.Contracts.Response;
 
 namespace Demoulas.ProfitSharing.Services;
 

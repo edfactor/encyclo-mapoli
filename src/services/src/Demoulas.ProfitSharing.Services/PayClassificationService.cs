@@ -1,23 +1,27 @@
-﻿using Demoulas.Common.Caching.Interfaces;
-using Demoulas.Common.Data.Contexts.DTOs.Request;
-using Demoulas.Common.Data.Contexts.DTOs.Response;
-using Demoulas.Common.Data.Contexts.Extensions;
-using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Endpoints.Contracts.Contracts.Response;
+﻿using System.Collections.Frozen;
+using Demoulas.Common.Caching.Interfaces;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Services.InternalEntities;
 
 namespace Demoulas.ProfitSharing.Services;
 
-public class PayClassificationService
+public sealed class PayClassificationService : IPayClassificationService
 {
-    private readonly IBaseCacheService<PayClassificationResponseDto> _accountCache;
+    private readonly IBaseCacheService<PayClassificationResponseCache> _accountCache;
 
-    public PayClassificationService(IBaseCacheService<PayClassificationResponseDto> accountCache)
+    public PayClassificationService(IBaseCacheService<PayClassificationResponseCache> accountCache)
     {
         _accountCache = accountCache;
     }
 
-    public Task<ISet<PayClassificationResponseDto>> GetAllPayClassifications(CancellationToken cancellationToken = default)
+    public async Task<ISet<PayClassificationResponseDto>> GetAllPayClassifications(CancellationToken cancellationToken = default)
     {
-        return _accountCache.GetAllAsync(cancellationToken);
+        var arcobjects =await  _accountCache.GetAllAsync(cancellationToken);
+        return arcobjects.Select(o=> new PayClassificationResponseDto
+        {
+            Id = o.Id,
+            Name = o.Name
+        }).ToFrozenSet();
     }
 }

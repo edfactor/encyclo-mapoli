@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Endpoints.Contracts.Contracts.Response;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Services;
 using FastEndpoints;

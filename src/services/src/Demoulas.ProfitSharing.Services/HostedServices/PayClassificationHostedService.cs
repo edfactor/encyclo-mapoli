@@ -1,14 +1,15 @@
 ﻿using Demoulas.Common.Caching;
 using Demoulas.Common.Caching.Helpers;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Data.Factories;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Endpoints.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Services.InternalEntities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Hosting;
 
 namespace Demoulas.ProfitSharing.Services.HostedServices;
-public sealed class PayClassificationHostedService : BaseCacheHostedService<PayClassificationResponseDto>
+public sealed class PayClassificationHostedService : BaseCacheHostedService<PayClassificationResponseCache>
 {
     private readonly IProfitSharingDataContextFactory _contextFactory;
     protected override string BaseKeyName => "ACS";
@@ -23,22 +24,22 @@ public sealed class PayClassificationHostedService : BaseCacheHostedService<PayC
     }
 
 
-    public override Task<IEnumerable<PayClassificationResponseDto>> GetDataToUpdateCacheAsync(CacheDataDictionary cdd, CancellationToken cancellation = default)
+    public override Task<IEnumerable<PayClassificationResponseCache>> GetDataToUpdateCacheAsync(CacheDataDictionary cdd, CancellationToken cancellation = default)
     {
         return GetAllPayClassifications(cancellation);
     }
 
-    public override Task<IEnumerable<PayClassificationResponseDto>> GetInitialDataToCacheAsync(CancellationToken cancellation = default)
+    public override Task<IEnumerable<PayClassificationResponseCache>> GetInitialDataToCacheAsync(CancellationToken cancellation = default)
     {
         return GetAllPayClassifications(cancellation);
     }
 
-    private async Task<IEnumerable<PayClassificationResponseDto>> GetAllPayClassifications(CancellationToken cancellationToken)
+    private async Task<IEnumerable<PayClassificationResponseCache>> GetAllPayClassifications(CancellationToken cancellationToken)
     {
         return await _contextFactory.UseReadOnlyContext(context =>
         {
             return context.PayClassifications
-                .Select(c => new PayClassificationResponseDto
+                .Select(c => new PayClassificationResponseCache
                 {
                     Id = c.Id,
                     Name = c.Name

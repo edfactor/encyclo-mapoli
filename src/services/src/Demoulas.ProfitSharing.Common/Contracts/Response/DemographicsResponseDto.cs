@@ -1,6 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Common.Enums;
 
-namespace Demoulas.ProfitSharing.Endpoints.Contracts.Contracts.Response;
+namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 
 public record DemographicsResponseDto
 {

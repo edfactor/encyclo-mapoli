@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Endpoints.Contracts.Contracts.Response;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 public record ContactInfoResponseDto
 {
     public string? PhoneNumber { get; init; }
