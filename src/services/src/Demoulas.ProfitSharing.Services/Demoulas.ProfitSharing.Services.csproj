@@ -16,4 +16,8 @@
     <Folder Include="Interfaces\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Riok.Mapperly" />
+  </ItemGroup>
+
 </Project>

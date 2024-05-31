@@ -1,8 +1,8 @@
 ﻿using Demoulas.ProfitSharing.Common.Enums;
 
-namespace Demoulas.ProfitSharing.Common.Contracts.Response;
+namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 
-public record DemographicsResponseDto
+public record DemographicsRequestDto
 {
     public int BadgeNumber { get; set; }
 
@@ -16,8 +16,8 @@ public record DemographicsResponseDto
     public required Department Department { get; set; }
     public required byte PayClassificationId { get; set; }
 
-    public required ContactInfoResponseDto ContactInfo { get; set; }
-    public AddressResponseDto? Address { get; set; }
+    public required ContactInfoRequestDto ContactInfo { get; set; }
+    public required AddressRequestDto Address { get; set; }
     public required DateOnly DateOfBirth { get; set; }
 
     /// <summary>

@@ -82,10 +82,23 @@ public sealed class DataContextFactory : IProfitSharingDataContextFactory
         return new DataContextFactory(builder.Services.BuildServiceProvider());
     }
 
-    /// <summary>
-    /// For Read/Write workloads where all operations will execute inside a single transaction
-    /// </summary>
-    public async Task<T> UseWritableContext<T>(Func<ProfitSharingDbContext, Task<T>> func, CancellationToken cancellationToken = default)
+    #region Use Writable Context
+
+    public Task UseWritableContext(Func<ProfitSharingDbContext, Task> func, CancellationToken cancellationToken = default)
+    {
+        return UseWritableContextInternal(async context =>
+        {
+            await func(context);
+            return Task.CompletedTask;
+        }, cancellationToken);
+    }
+
+    public Task<T> UseWritableContext<T>(Func<ProfitSharingDbContext, Task<T>> func, CancellationToken cancellationToken = default)
+    {
+        return UseWritableContextInternal(func, cancellationToken);
+    }
+
+    private async Task<T> UseWritableContextInternal<T>(Func<ProfitSharingDbContext, Task<T>> func, CancellationToken cancellationToken)
     {
         await using var scope = _serviceProvider.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<ProfitSharingDbContext>();
@@ -105,6 +118,9 @@ public sealed class DataContextFactory : IProfitSharingDataContextFactory
             throw;
         }
     }
+
+    #endregion
+
 
     /// <summary>
     /// For read only workloads. This should not be mixed with Read/Write workloads in the same method as a matter of best

@@ -1,11 +1,12 @@
 ﻿using Demoulas.Common.Data.Contexts.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Extensions;
+using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Data.Contexts;
 
-public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitSharingReadOnlyDbContext>
+public sealed class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitSharingReadOnlyDbContext>, IProfitSharingDbContext
 {
     public ProfitSharingReadOnlyDbContext(DbContextOptions<ProfitSharingReadOnlyDbContext> options)
         : base(options)

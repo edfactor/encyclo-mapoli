@@ -10,10 +10,10 @@ public static class RegistrationExtension
         _ = services.AddScoped<IPayClassificationService, PayClassificationClient>();
 
 
-        services.AddHttpClient(Constants.HttpClient, (client =>
+        services.AddHttpClient(Constants.HttpClient, client =>
         {
             client.BaseAddress = baseAddress;
-        })) .AddStandardResilienceHandler();
+        }) .AddStandardResilienceHandler();
 
         return services;
     }

@@ -1,5 +1,7 @@
 ﻿using Demoulas.Common.Data.Contexts.DTOs.Request;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Services;
+using Demoulas.ProfitSharing.Services.Mappers;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -27,7 +29,8 @@ public class OracleDbContextTests
     {
         string? connectionString = GetConnectionString();
         var factory = MockDataContextFactory.InitializeForTesting(new ServiceCollection(), connectionString);
-        var ds = new DemographicsService(factory);
+        var mapper = new DemographicMapper(new AddressMapper(), new ContactInfoMapper());
+        var ds = new DemographicsService(factory, mapper);
 
         await factory.UseWritableContext(async c =>
         {
