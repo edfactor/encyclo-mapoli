@@ -2,10 +2,9 @@
 
 ## Project Links ##
 - [Blue QA](http://appa84d:8080/home.seam?cid=4413)
-- [Confluence](https://docs.demoulasmarketbasket.net/pages/viewpage.action?spaceKey=NGDS&title=SMART+Accounts+Receivable)
-- [Jira](https://jira.demoulasmarketbasket.net/projects/SAR/issues/SAR-35?filter=allopenissues)
-- [Bamboo](https://bamboo.demoulasmarketbasket.net/browse/NGA-SAR0)
-- [Stash](https://stash.demoulasmarketbasket.net/projects/NGA/repos/smart-accounts-receivable/browse)
+- [Confluence](https://demoulas.atlassian.net/wiki/spaces/NGDS/pages/29853053/NGDS+Profit+Sharing+Documentation)
+- [Jira](https://demoulas.atlassian.net/jira/software/c/projects/PS/boards/24)
+- [Stash](https://bitbucket.org/demoulas/smart-profit-sharing)
 
 
 ## Definition of Ready ##
@@ -24,7 +23,7 @@ Criteria
 3. Dependencies Identified
    - Internal Dependencies: Documentation of dependencies within the project     
    - External Dependencies: Documentation of third-party service dependencies
-     - External dependencies should be defined in user tickets and documented in [Confluence](https://docs.demoulasmarketbasket.net/pages/viewpage.action?spaceKey=NGDS&title=SMART+Accounts+Receivable)
+     - External dependencies should be defined in user tickets and documented in [Confluence](https://demoulas.atlassian.net/wiki/spaces/NGDS/pages/29853053/NGDS+Profit+Sharing+Documentation)
 4. Data Readiness
    - Test Data: Availability or generation of test data for feature validation
 6. Estimation
