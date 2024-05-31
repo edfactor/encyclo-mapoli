@@ -15,8 +15,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.Api"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.Endpoints", "src\Demoulas.ProfitSharing.Endpoints\Demoulas.ProfitSharing.Endpoints.csproj", "{376A7BC4-D5E7-4353-ACDE-E245897095C4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.Common.Data.Contexts", "..\..\..\demoulas.common\src\Demoulas.Common.Data.Contexts\Demoulas.Common.Data.Contexts.csproj", "{9F3E58E7-1EBF-44F3-A8E0-72405CC61DBF}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.Data", "src\Demoulas.ProfitSharing.Data\Demoulas.ProfitSharing.Data.csproj", "{F9FECC1D-427B-44D7-BA11-1ED0E752F2CB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{80B088DC-C84B-46AA-BFF3-DC309C5B4325}"
@@ -30,17 +28,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pipelines", "Pipelines", "{
 		..\..\bitbucket-pipelines.yml = ..\..\bitbucket-pipelines.yml
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.StoreInfo", "..\..\..\demoulas.common\src\Demoulas.StoreInfo\Demoulas.StoreInfo.csproj", "{5422A85F-D984-4A31-B001-D4068E44BBBE}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.Common.Caching", "..\..\..\demoulas.common\src\Demoulas.Common.Caching\Demoulas.Common.Caching.csproj", "{28A475AC-9D4E-4DC7-A330-F3777E83F27D}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Demoulas.Common", "Demoulas.Common", "{064472CC-4FB9-44E9-9125-32E139A21BBD}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.Common", "src\Demoulas.ProfitSharing.Common\Demoulas.ProfitSharing.Common.csproj", "{B6B0D1E4-9EAC-4656-BC8A-FE517F1D8FEA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.Client", "src\Demoulas.ProfitSharing.Client\Demoulas.ProfitSharing.Client.csproj", "{85083A70-BCEF-4479-866C-85E6A64D438F}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demoulas.Common.Contracts", "..\..\..\demoulas.common\src\Demoulas.Common.Contracts\Demoulas.Common.Contracts.csproj", "{F272A74D-EBB4-4B14-A1F3-CEE80C523D19}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Backend", "Backend", "{66B0DDDA-624B-4BF3-A4C7-CAEBC3E3DA62}"
 	ProjectSection(SolutionItems) = preProject
@@ -72,10 +62,6 @@ Global
 		{376A7BC4-D5E7-4353-ACDE-E245897095C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{376A7BC4-D5E7-4353-ACDE-E245897095C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{376A7BC4-D5E7-4353-ACDE-E245897095C4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9F3E58E7-1EBF-44F3-A8E0-72405CC61DBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9F3E58E7-1EBF-44F3-A8E0-72405CC61DBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9F3E58E7-1EBF-44F3-A8E0-72405CC61DBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9F3E58E7-1EBF-44F3-A8E0-72405CC61DBF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F9FECC1D-427B-44D7-BA11-1ED0E752F2CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F9FECC1D-427B-44D7-BA11-1ED0E752F2CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F9FECC1D-427B-44D7-BA11-1ED0E752F2CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -88,14 +74,6 @@ Global
 		{24F51728-CF8F-44E2-AE66-E932A6C3A1A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{24F51728-CF8F-44E2-AE66-E932A6C3A1A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{24F51728-CF8F-44E2-AE66-E932A6C3A1A0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5422A85F-D984-4A31-B001-D4068E44BBBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5422A85F-D984-4A31-B001-D4068E44BBBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5422A85F-D984-4A31-B001-D4068E44BBBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5422A85F-D984-4A31-B001-D4068E44BBBE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{28A475AC-9D4E-4DC7-A330-F3777E83F27D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{28A475AC-9D4E-4DC7-A330-F3777E83F27D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{28A475AC-9D4E-4DC7-A330-F3777E83F27D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{28A475AC-9D4E-4DC7-A330-F3777E83F27D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B6B0D1E4-9EAC-4656-BC8A-FE517F1D8FEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B6B0D1E4-9EAC-4656-BC8A-FE517F1D8FEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B6B0D1E4-9EAC-4656-BC8A-FE517F1D8FEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -104,20 +82,12 @@ Global
 		{85083A70-BCEF-4479-866C-85E6A64D438F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{85083A70-BCEF-4479-866C-85E6A64D438F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{85083A70-BCEF-4479-866C-85E6A64D438F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F272A74D-EBB4-4B14-A1F3-CEE80C523D19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F272A74D-EBB4-4B14-A1F3-CEE80C523D19}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F272A74D-EBB4-4B14-A1F3-CEE80C523D19}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F272A74D-EBB4-4B14-A1F3-CEE80C523D19}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{9F3E58E7-1EBF-44F3-A8E0-72405CC61DBF} = {064472CC-4FB9-44E9-9125-32E139A21BBD}
 		{D0216F81-E01D-4620-BE4F-D1FF0D28CA01} = {80B088DC-C84B-46AA-BFF3-DC309C5B4325}
-		{5422A85F-D984-4A31-B001-D4068E44BBBE} = {064472CC-4FB9-44E9-9125-32E139A21BBD}
-		{28A475AC-9D4E-4DC7-A330-F3777E83F27D} = {064472CC-4FB9-44E9-9125-32E139A21BBD}
-		{F272A74D-EBB4-4B14-A1F3-CEE80C523D19} = {064472CC-4FB9-44E9-9125-32E139A21BBD}
 		{66B0DDDA-624B-4BF3-A4C7-CAEBC3E3DA62} = {D1297442-67BE-4098-A95F-727F04A68FA3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
