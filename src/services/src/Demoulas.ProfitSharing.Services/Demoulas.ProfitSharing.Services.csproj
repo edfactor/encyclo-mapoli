@@ -7,13 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\demoulas.common\src\Demoulas.Common.Caching\Demoulas.Common.Caching.csproj" />
-    <ProjectReference Include="..\..\..\..\..\demoulas.common\src\Demoulas.Common.Data.Contexts\Demoulas.Common.Data.Contexts.csproj" />
-    <ProjectReference Include="..\Demoulas.ProfitSharing.Data\Demoulas.ProfitSharing.Data.csproj" />
+    <Compile Remove="Interfaces\**" />
+    <EmbeddedResource Remove="Interfaces\**" />
+    <None Remove="Interfaces\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Interfaces\" />
+    <ProjectReference Include="..\..\..\..\..\demoulas.common\src\Demoulas.Common.Caching\Demoulas.Common.Caching.csproj" />
+    <ProjectReference Include="..\..\..\..\..\demoulas.common\src\Demoulas.Common.Data.Contexts\Demoulas.Common.Data.Contexts.csproj" />
+    <ProjectReference Include="..\Demoulas.ProfitSharing.Data\Demoulas.ProfitSharing.Data.csproj" />
   </ItemGroup>
 
   <ItemGroup>

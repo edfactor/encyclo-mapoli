@@ -9,7 +9,7 @@ using Demoulas.ProfitSharing.Services.Mappers;
 
 namespace Demoulas.ProfitSharing.Services;
 
-public class DemographicsService
+public class DemographicsService : IDemographicsService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly DemographicMapper _mapper;
@@ -24,7 +24,7 @@ public class DemographicsService
     {
         return _dataContextFactory.UseReadOnlyContext(async c =>
         {
-            return await c.Demographics.Select(d => _mapper.Map(d) ).ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
+            return await c.Demographics.Select(d => _mapper.Map(d)).ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
         });
 
     }

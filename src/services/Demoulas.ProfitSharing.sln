@@ -43,6 +43,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.Comm
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demoulas.ProfitSharing.Client", "src\Demoulas.ProfitSharing.Client\Demoulas.ProfitSharing.Client.csproj", "{85083A70-BCEF-4479-866C-85E6A64D438F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demoulas.Common.Contracts", "..\..\..\demoulas.common\src\Demoulas.Common.Contracts\Demoulas.Common.Contracts.csproj", "{F272A74D-EBB4-4B14-A1F3-CEE80C523D19}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -97,6 +99,10 @@ Global
 		{85083A70-BCEF-4479-866C-85E6A64D438F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{85083A70-BCEF-4479-866C-85E6A64D438F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{85083A70-BCEF-4479-866C-85E6A64D438F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F272A74D-EBB4-4B14-A1F3-CEE80C523D19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F272A74D-EBB4-4B14-A1F3-CEE80C523D19}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F272A74D-EBB4-4B14-A1F3-CEE80C523D19}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F272A74D-EBB4-4B14-A1F3-CEE80C523D19}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -106,6 +112,7 @@ Global
 		{D0216F81-E01D-4620-BE4F-D1FF0D28CA01} = {80B088DC-C84B-46AA-BFF3-DC309C5B4325}
 		{5422A85F-D984-4A31-B001-D4068E44BBBE} = {064472CC-4FB9-44E9-9125-32E139A21BBD}
 		{28A475AC-9D4E-4DC7-A330-F3777E83F27D} = {064472CC-4FB9-44E9-9125-32E139A21BBD}
+		{F272A74D-EBB4-4B14-A1F3-CEE80C523D19} = {064472CC-4FB9-44E9-9125-32E139A21BBD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FB1CB19A-BE8B-4F91-9186-FE7C9F3CE4D7}
