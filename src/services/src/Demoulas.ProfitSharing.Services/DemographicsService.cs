@@ -1,9 +1,10 @@
 ﻿using System.Collections.Frozen;
-using Demoulas.Common.Data.Contexts.DTOs.Request;
-using Demoulas.Common.Data.Contexts.DTOs.Response;
+using Demoulas.Common.Contracts.Request;
+using Demoulas.Common.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Mappers;
 

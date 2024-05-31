@@ -1,5 +1,4 @@
-﻿using Demoulas.Common.Data.Contexts.DTOs.Request;
-using Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Mappers;
 using FluentAssertions;

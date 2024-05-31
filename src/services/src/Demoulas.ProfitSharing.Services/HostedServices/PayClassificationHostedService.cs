@@ -1,7 +1,5 @@
 ﻿using Demoulas.Common.Caching;
-using Demoulas.Common.Caching.Helpers;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
-using Demoulas.ProfitSharing.Data.Factories;
+using Demoulas.Common.Contracts.Caching;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.InternalEntities;
 using Microsoft.EntityFrameworkCore;

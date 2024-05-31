@@ -1,9 +1,9 @@
-﻿using Demoulas.Common.Data.Contexts.DTOs.Request;
-using Demoulas.Common.Data.Contexts.DTOs.Response;
+﻿using Demoulas.Common.Contracts.Request;
+using Demoulas.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 
-namespace Demoulas.ProfitSharing.Services;
+namespace Demoulas.ProfitSharing.Common.Interfaces;
 
 public interface IDemographicsService
 {
