@@ -6,18 +6,23 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Data.Contexts;
 
-public sealed class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, IProfitSharingDbContext
+public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, IProfitSharingDbContext
 {
+    public ProfitSharingDbContext()
+    {
+        // Used for Unit testing/Mocking only
+    }
+
     public ProfitSharingDbContext(DbContextOptions<ProfitSharingDbContext> options)
         : base(options)
     {
 
     }
 
-    public DbSet<Demographic> Demographics { get; set; }
+    public virtual DbSet<Demographic> Demographics { get; set; }
     public DbSet<Definition> Definitions { get; set; }
-    public DbSet<Country> Countries { get; set; }
-    public DbSet<PayClassification> PayClassifications { get; set; }
+    public virtual DbSet<Country> Countries { get; set; }
+    public virtual DbSet<PayClassification> PayClassifications { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

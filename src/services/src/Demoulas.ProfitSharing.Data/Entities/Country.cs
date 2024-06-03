@@ -1,5 +1,5 @@
 ﻿namespace Demoulas.ProfitSharing.Data.Entities;
-public class Country
+public sealed class Country
 {
     public required short Id { get; init; }
     public required string Name { get; init; }
