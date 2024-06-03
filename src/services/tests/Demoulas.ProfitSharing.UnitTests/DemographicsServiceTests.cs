@@ -19,8 +19,8 @@ public class DemographicsServiceTests : IClassFixture<ApiTestBase<Program>>
         _fixture = fixture;
     }
 
-    [Fact]
-    public async Task TestInsertAndRetrieveEntity()
+    [Fact(DisplayName = "Get all demographicsS")]
+    public async Task GetAllDemographicsTest()
     {
         var ds = new DemographicsClient(_fixture.ApiClient);
 
