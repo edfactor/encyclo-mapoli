@@ -7,7 +7,7 @@ public record DemographicsRequestDto
     public int BadgeNumber { get; set; }
 
     public required long OracleHcmId { get; set; }
-    public required string FullName { get; set; }
+    public string? FullName { get; set; }
     public required string LastName { get; set; }
     public required string FirstName { get; set; }
     public string? MiddleName { get; set; }

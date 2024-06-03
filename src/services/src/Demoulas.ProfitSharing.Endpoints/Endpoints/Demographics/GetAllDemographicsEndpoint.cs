@@ -20,35 +20,35 @@ public class GetAllDemographicsEndpoint : Endpoint<PaginationRequestDto, Paginat
     public override void Configure()
     {
         AllowAnonymous();
-        Get("all");
+        Post("all");
         Summary(s =>
         {
             s.Summary = "Get all Demographics";
-            s.ResponseExamples = new Dictionary<int, object> {
-            {
-                200, new List<DemographicsResponseDto>
-                {
-                    new DemographicsResponseDto
-                    {
-                        OracleHcmId = 0,
-                        FullName = "John Doe",
-                        LastName = "John",
-                        FirstName = "Doe",
-                        StoreNumber = 0,
-                        Department = (Department)0,
-                        PayClassificationId = 0,
-                        ContactInfo = new ContactInfoResponseDto(),
-                        DateOfBirth = default,
-                        HireDate = default,
-                        ReHireDate = default,
-                        EmploymentType = (EmploymentType)0,
-                        PayFrequency = (PayFrequency)0,
-                        Gender = (Gender)0
-                    }
-                }
-            } };
+            //s.ResponseExamples = new Dictionary<int, object> {
+            //{
+            //    200, new List<DemographicsResponseDto>
+            //    {
+            //        new DemographicsResponseDto
+            //        {
+            //            OracleHcmId = 0,
+            //            FullName = "John Doe",
+            //            LastName = "John",
+            //            FirstName = "Doe",
+            //            StoreNumber = 0,
+            //            Department = (Department)0,
+            //            PayClassificationId = 0,
+            //            ContactInfo = new ContactInfoResponseDto(),
+            //            DateOfBirth = default,
+            //            HireDate = default,
+            //            ReHireDate = default,
+            //            EmploymentType = (EmploymentType)0,
+            //            PayFrequency = (PayFrequency)0,
+            //            Gender = (Gender)0
+            //        }
+            //    }
+            //} };
         });
-        Group<LookupGroup>();
+        Group<DemographicsGroup>();
     }
 
     public override Task<PaginatedResponseDto<DemographicsResponseDto>?> ExecuteAsync(PaginationRequestDto req, CancellationToken ct)

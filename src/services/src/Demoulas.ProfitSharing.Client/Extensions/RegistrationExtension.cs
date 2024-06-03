@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Common.Interfaces;
+﻿using Demoulas.ProfitSharing.Client.Common;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Client.Extensions;

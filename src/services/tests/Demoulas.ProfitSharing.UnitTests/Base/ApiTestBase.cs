@@ -46,12 +46,13 @@ public class ApiTestBase<TStartup> where TStartup : class
 
 
         var builder = webApplicationFactory.WithWebHostBuilder(
-            builder =>
+            hostBuilder =>
             {
-                builder.ConfigureServices(services =>
+                hostBuilder.UseEnvironment("Testing");
+
+                hostBuilder.ConfigureServices(services =>
                 {
                     services.AddSingleton(MockDbContextFactory);
-                    services.AddProfitSharingClientServices();
 
                     ServiceProvider = services.BuildServiceProvider();
                 });

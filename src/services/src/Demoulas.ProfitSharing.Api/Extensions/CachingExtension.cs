@@ -15,7 +15,7 @@ public static class CachingExtension
 
         if (builder.Environment.EnvironmentName != "Testing")
         {
-            _ = builder.Services.AddHostedService<PayClassificationHostedService>();
+           // _ = builder.Services.AddHostedService<PayClassificationHostedService>();
         }
 
         return builder;

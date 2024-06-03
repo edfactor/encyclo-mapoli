@@ -1,6 +1,7 @@
 ﻿using Demoulas.Common.Contracts.Request;
 using Demoulas.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Api;
+using Demoulas.ProfitSharing.Client;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.IntegrationTests.Base;
@@ -21,10 +22,11 @@ public class DemographicsServiceTests : IClassFixture<ApiTestBase<Program>>
     [Fact]
     public async Task TestInsertAndRetrieveEntity()
     {
-        var ds = _fixture.ServiceProvider!.GetRequiredService<IDemographicsService>();
+        var ds = new DemographicsClient(_fixture.ApiClient);
 
         var response = await ds.GetAllDemographics(new PaginationRequestDto(), cancellationToken: CancellationToken.None);
 
         response.Should().NotBeNull();
+        response!.Results.Should().HaveCountGreaterOrEqualTo(100);
     }
 }

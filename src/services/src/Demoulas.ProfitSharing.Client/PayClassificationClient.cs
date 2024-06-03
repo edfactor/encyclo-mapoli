@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using Demoulas.ProfitSharing.Client.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 
