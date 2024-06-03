@@ -21,9 +21,9 @@ public class DemographicsService : IDemographicsService
         _mapper = mapper;
     }
 
-    public Task<PaginatedResponseDto<DemographicsResponseDto>> GetAllDemographics(PaginationRequestDto req, CancellationToken cancellationToken = default)
+    public async Task<PaginatedResponseDto<DemographicsResponseDto>?> GetAllDemographics(PaginationRequestDto req, CancellationToken cancellationToken = default)
     {
-        return _dataContextFactory.UseReadOnlyContext(async c =>
+        return await _dataContextFactory.UseReadOnlyContext(async c =>
         {
             return await c.Demographics.Select(d => _mapper.Map(d)).ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
         });

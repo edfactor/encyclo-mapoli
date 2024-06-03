@@ -6,18 +6,23 @@ using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Client;
-public class DemographicsClient : IDemographicsService
+public sealed class DemographicsClient : IDemographicsService
 {
+    private const string BaseApiPath = "api/demographics/";
+
     private readonly HttpClient _httpClient;
 
-    public DemographicsClient(IHttpClientFactory httpClientFactory)
+    public DemographicsClient(HttpClient client)
     {
-        _httpClient = httpClientFactory.CreateClient(Constants.HttpClient);
+        _httpClient = client;
     }
 
-    public Task<PaginatedResponseDto<DemographicsResponseDto>> GetAllDemographics(PaginationRequestDto req, CancellationToken cancellationToken = default)
+    public async Task<PaginatedResponseDto<DemographicsResponseDto>?> GetAllDemographics(PaginationRequestDto req, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var response = await _httpClient.PutAsJsonAsync($"{BaseApiPath}/all", req, cancellationToken);
+
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<PaginatedResponseDto<DemographicsResponseDto>>(cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<ISet<DemographicsResponseDto>> AddDemographics(IEnumerable<DemographicsRequestDto> demographics, CancellationToken cancellationToken)

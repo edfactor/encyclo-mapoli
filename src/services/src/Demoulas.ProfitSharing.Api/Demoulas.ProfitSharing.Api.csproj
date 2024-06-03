@@ -34,4 +34,15 @@
 	  <ProjectReference Include="..\Demoulas.ProfitSharing.Services\Demoulas.ProfitSharing.Services.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <PackageReference Update="Roslynator.Analyzers">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
+	  <PackageReference Update="Roslynator.Formatting.Analyzers">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
+	</ItemGroup>
+
 </Project>

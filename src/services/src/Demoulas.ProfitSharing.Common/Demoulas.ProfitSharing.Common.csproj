@@ -14,4 +14,15 @@
     <ProjectReference Include="..\..\..\..\..\demoulas.common\src\Demoulas.Common.Contracts\Demoulas.Common.Contracts.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Update="Roslynator.Analyzers">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Update="Roslynator.Formatting.Analyzers">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
 </Project>

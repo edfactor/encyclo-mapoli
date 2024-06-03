@@ -19,7 +19,7 @@ public sealed class DataContextFactory : IProfitSharingDataContextFactory
         _serviceProvider = serviceProvider;
     }
 
-    public static DataContextFactory Initialize(IHostApplicationBuilder builder, IEnumerable<ContextFactoryRequest> contextFactoryRequests)
+    public static IProfitSharingDataContextFactory Initialize(IHostApplicationBuilder builder, IEnumerable<ContextFactoryRequest> contextFactoryRequests)
     {
         ArgumentNullException.ThrowIfNull(builder);
         ArgumentNullException.ThrowIfNull(contextFactoryRequests);

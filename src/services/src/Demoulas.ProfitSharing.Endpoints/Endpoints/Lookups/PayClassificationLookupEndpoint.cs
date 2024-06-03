@@ -1,15 +1,15 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using Demoulas.ProfitSharing.Services;
 using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 
 public class PayClassificationLookupEndpoint : EndpointWithoutRequest<ISet<PayClassificationResponseDto>>
 {
-    private readonly PayClassificationService _payClassificationService;
+    private readonly IPayClassificationService _payClassificationService;
 
-    public PayClassificationLookupEndpoint(PayClassificationService payClassificationService)
+    public PayClassificationLookupEndpoint(IPayClassificationService payClassificationService)
     {
         _payClassificationService = payClassificationService;
     }
