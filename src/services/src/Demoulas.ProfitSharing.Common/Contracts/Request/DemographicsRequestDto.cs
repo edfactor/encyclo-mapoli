@@ -2,7 +2,7 @@
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 
-public record DemographicsRequestDto
+public record DemographicsRequestDto : MemberRequestDto
 {
     public int BadgeNumber { get; set; }
 

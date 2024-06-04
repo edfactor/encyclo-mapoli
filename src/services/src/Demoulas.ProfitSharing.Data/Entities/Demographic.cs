@@ -1,11 +1,12 @@
 ﻿using Demoulas.ProfitSharing.Common.Enums;
+using Demoulas.ProfitSharing.Data.Entities.Base;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
 
 /// <summary>
 /// https://demoulas.atlassian.net/wiki/spaces/~bherrmann/pages/39944312/Quick+Guide+to+Profit+Sharing+Tables
 /// </summary>
-public sealed class Demographic
+public sealed class Demographic : Member
 {
     public required int BadgeNumber { get; set; }
     public required long OracleHcmId { get; set; }
