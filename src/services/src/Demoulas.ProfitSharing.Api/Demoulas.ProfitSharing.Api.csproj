@@ -25,7 +25,7 @@
 		<PackageReference Include="Serilog.Expressions" />
 		<PackageReference Include="Serilog.Sinks.Console" />
 		<PackageReference Include="Serilog.Sinks.Debug" />
-		<PackageReference Include="Serilog.Sinks.Elasticsearch" />
+		<PackageReference Include="Elastic.Serilog.Sinks" />
 	</ItemGroup>
 
 	<ItemGroup>
