@@ -21,4 +21,4 @@ pipelines:
 
           - dotnet test Demoulas.ProfitSharing.UnitTests.csproj --configuration debug --logger:junit -p:RestoreAdditionalProjectSources=https://api.nuget.org/v3/index.json
         artifacts:
-          - ./**/TestResults/**/*.xml
+          - ./TestResults/**/*.xml
