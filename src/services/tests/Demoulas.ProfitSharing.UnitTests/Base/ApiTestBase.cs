@@ -1,16 +1,10 @@
-﻿using Demoulas.Common.Data.Contexts.DTOs.Context;
-using Demoulas.ProfitSharing.Client.Extensions;
-using Demoulas.ProfitSharing.Data.Factories;
-using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.IntegrationTests.Mocks;
+﻿using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.UnitTests.Mocks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Moq;
 
-namespace Demoulas.ProfitSharing.IntegrationTests.Base;
+namespace Demoulas.ProfitSharing.UnitTests.Base;
 
 /// <summary>
 ///   Abstraction for testing api endpoints that use a <c>DbContext</c>.

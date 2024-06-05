@@ -31,6 +31,7 @@ public class GetAllDemographicsEndpoint : Endpoint<PaginationRequestDto, Paginat
                 {
                     new DemographicsResponseDto
                     {
+                        SSN = "XXX-XX-6789",
                         OracleHcmId = 0,
                         FullName = "John Doe",
                         LastName = "John",

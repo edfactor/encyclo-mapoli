@@ -32,6 +32,7 @@ public class AddDemographicsEndpoint : Endpoint<IEnumerable<DemographicsRequestD
                 {
                     new DemographicsRequestDto
                     {
+                        SSN = 123_45_6789,
                         OracleHcmId = 0,
                         FullName = "John Doe",
                         LastName = "John",

@@ -4,6 +4,7 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 
 public record DemographicsResponseDto : MemberResponseDto
 {
+    public required string SSN { get; set; }
     public int BadgeNumber { get; set; }
 
     public required long OracleHcmId { get; set; }

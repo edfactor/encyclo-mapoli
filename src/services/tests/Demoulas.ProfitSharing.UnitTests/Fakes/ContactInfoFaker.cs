@@ -1,7 +1,7 @@
 ﻿using Bogus;
 using Demoulas.ProfitSharing.Data.Entities;
 
-namespace Demoulas.ProfitSharing.IntegrationTests.Fakes;
+namespace Demoulas.ProfitSharing.UnitTests.Fakes;
 
 internal sealed class ContactInfoFaker : Faker<ContactInfo>
 {

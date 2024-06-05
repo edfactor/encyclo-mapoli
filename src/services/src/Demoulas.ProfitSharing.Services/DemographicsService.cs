@@ -33,6 +33,14 @@ public class DemographicsService : IDemographicsService
 
     public async Task<ISet<DemographicsResponseDto>?> AddDemographics(IEnumerable<DemographicsRequestDto> demographics, CancellationToken cancellationToken)
     {
+        /*
+         *
+         * TODO: This needs to be an upsert. People who have retired will stay in Profit sharing, but would be removed from 
+         *
+         *
+         */
+
+
         List<Demographic> entities = await _dataContextFactory.UseWritableContext(async context =>
         {
             List<Demographic> entities = _mapper.Map(demographics).ToList();

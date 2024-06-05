@@ -4,6 +4,7 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 
 public record DemographicsRequestDto : MemberRequestDto
 {
+    public required long SSN { get; set; }
     public int BadgeNumber { get; set; }
 
     public required long OracleHcmId { get; set; }

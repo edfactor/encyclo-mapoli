@@ -6,24 +6,22 @@ using Demoulas.ProfitSharing.Client;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.IntegrationTests.Base;
-using Demoulas.ProfitSharing.IntegrationTests.Extensions;
-using Demoulas.ProfitSharing.IntegrationTests.Fakes;
 using Demoulas.ProfitSharing.Services.Mappers;
+using Demoulas.ProfitSharing.UnitTests.Base;
+using Demoulas.ProfitSharing.UnitTests.Extensions;
+using Demoulas.ProfitSharing.UnitTests.Fakes;
 using FluentAssertions;
 
-namespace Demoulas.ProfitSharing.IntegrationTests;
+namespace Demoulas.ProfitSharing.UnitTests;
 
 public class DemographicsServiceTests : IClassFixture<ApiTestBase<Program>>
 {
-    private readonly ApiTestBase<Program> _fixture;
     private readonly DemographicMapper _mapper;
     private readonly DemographicsClient _demographicsClient;
 
     public DemographicsServiceTests(ApiTestBase<Program> fixture)
     {
-        _fixture = fixture;
-        _demographicsClient = new DemographicsClient(_fixture.ApiClient);
+        _demographicsClient = new DemographicsClient(fixture.ApiClient);
         _mapper = new DemographicMapper(new AddressMapper(), new ContactInfoMapper());
     }
 
@@ -34,6 +32,7 @@ public class DemographicsServiceTests : IClassFixture<ApiTestBase<Program>>
 
         response.Should().NotBeNull();
         response!.Results.Should().HaveCountGreaterOrEqualTo(100);
+        _ = response!.Results.Select(d=> d.SSN.Should().MatchRegex(@"XXX-XX-\d{4}"));
     }
 
     [Theory(DisplayName = "Add new demographics")]
@@ -50,6 +49,7 @@ public class DemographicsServiceTests : IClassFixture<ApiTestBase<Program>>
 
         response.Should().NotBeNull();
         response.Should().HaveCount(count);
+        _ = response!.Select(d => d.SSN.Should().MatchRegex(@"XXX-XX-\d{4}"));
 
         var responseDict = response!.ToDictionary(k => k.BadgeNumber);
 

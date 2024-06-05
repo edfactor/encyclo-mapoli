@@ -16,17 +16,21 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
         //https://demoulas.atlassian.net/wiki/spaces/MAIN/pages/31909725/Employee+Hiring+data+fields
         //https://demoulas.atlassian.net/wiki/spaces/~bherrmann/pages/39944312/Quick+Guide+to+Profit+Sharing+Tables
 
-        _ = builder.HasKey(e => e.BadgeNumber);
+        _ = builder.HasKey(e => e.SSN);
         _ = builder.ToTable("DEMOGRAPHICS");
+
+        _ = builder.Property(e => e.SSN)
+            .HasPrecision(9)
+            .IsRequired()
+            .ValueGeneratedNever()
+            .HasColumnName("DEM_SSN");
 
         _ = builder.Property(e => e.BadgeNumber)
             .HasPrecision(7)
-            .ValueGeneratedNever()
             .HasColumnName("DEM_BADGE");
 
         _ = builder.Property(e => e.OracleHcmId)
             .HasPrecision(15)
-            .ValueGeneratedNever()
             .HasColumnName("PY_ASSIGN_ID");
 
         _ = builder.Property(e => e.FullName)

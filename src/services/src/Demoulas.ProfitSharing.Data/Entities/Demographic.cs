@@ -8,6 +8,7 @@ namespace Demoulas.ProfitSharing.Data.Entities;
 /// </summary>
 public sealed class Demographic : Member
 {
+    public required long SSN { get; set; }
     public required int BadgeNumber { get; set; }
     public required long OracleHcmId { get; set; }
     public string? FullName { get; set; }
@@ -25,7 +26,7 @@ public sealed class Demographic : Member
     public required DateOnly DateOfBirth { get; set; }
 
     /// <summary>
-    /// Date of full-time status 
+    /// Date of full-time status
     /// </summary>
     public DateOnly FullTimeDate { get; set; }
 

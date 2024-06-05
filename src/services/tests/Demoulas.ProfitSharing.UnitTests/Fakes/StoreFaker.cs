@@ -1,7 +1,7 @@
 ﻿using Bogus;
 using Demoulas.StoreInfo.DTOs;
 
-namespace Demoulas.ProfitSharing.IntegrationTests.Fakes;
+namespace Demoulas.ProfitSharing.UnitTests.Fakes;
 
 /// <summary>
 ///   Faker for <c>PayrollCheckStatus</c>

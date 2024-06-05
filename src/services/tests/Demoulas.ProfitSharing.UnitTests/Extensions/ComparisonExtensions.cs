@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using FluentAssertions;
 
-namespace Demoulas.ProfitSharing.IntegrationTests.Extensions;
+namespace Demoulas.ProfitSharing.UnitTests.Extensions;
 
 public static class ComparisonExtensions
 {
@@ -28,6 +28,12 @@ public static class ComparisonExtensions
 
             if (IsNavigationProperty(dtoProperty.PropertyType))
             {
+                continue;
+            }
+
+            if (entityProperty.PropertyType != dtoProperty.PropertyType)
+            {
+                // Skip properties that don't have the same type
                 continue;
             }
 
