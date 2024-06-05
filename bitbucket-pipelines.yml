@@ -19,7 +19,7 @@ pipelines:
           - echo "Running Profit Sharing Backend Automated Tests"
           - cd .\src\services\tests\Demoulas.ProfitSharing.UnitTests\
 
-          - dotnet add package JUnitTestLogger --version 1.1.0
+          - dotnet add Demoulas.ProfitSharing.UnitTests.csproj package JUnitTestLogger --version 1.1.0
           - dotnet test Demoulas.ProfitSharing.UnitTests.csproj --configuration debug --logger "junit" -p:RestoreAdditionalProjectSources=https://api.nuget.org/v3/index.json
         artifacts:
           - tests/**/TestResults/*.* 
