@@ -19,7 +19,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.Data
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{80B088DC-C84B-46AA-BFF3-DC309C5B4325}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.IntegrationTests", "tests\Demoulas.ProfitSharing.UnitTests\Demoulas.ProfitSharing.IntegrationTests.csproj", "{D0216F81-E01D-4620-BE4F-D1FF0D28CA01}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.UnitTests", "tests\Demoulas.ProfitSharing.UnitTests\Demoulas.ProfitSharing.UnitTests.csproj", "{D0216F81-E01D-4620-BE4F-D1FF0D28CA01}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.Services", "src\Demoulas.ProfitSharing.Services\Demoulas.ProfitSharing.Services.csproj", "{24F51728-CF8F-44E2-AE66-E932A6C3A1A0}"
 EndProject
@@ -30,7 +30,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pipelines", "Pipelines", "{
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.Common", "src\Demoulas.ProfitSharing.Common\Demoulas.ProfitSharing.Common.csproj", "{B6B0D1E4-9EAC-4656-BC8A-FE517F1D8FEA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demoulas.ProfitSharing.Client", "src\Demoulas.ProfitSharing.Client\Demoulas.ProfitSharing.Client.csproj", "{85083A70-BCEF-4479-866C-85E6A64D438F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.Client", "src\Demoulas.ProfitSharing.Client\Demoulas.ProfitSharing.Client.csproj", "{85083A70-BCEF-4479-866C-85E6A64D438F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Backend", "Backend", "{66B0DDDA-624B-4BF3-A4C7-CAEBC3E3DA62}"
 	ProjectSection(SolutionItems) = preProject

@@ -1,19 +1,22 @@
-image: mcr.microsoft.com/dotnet/sdk:8.0 # Use the appropriate .NET SDK version
+# ------------------------------------------------------------------------
+# BitBucket Pipeline
+# ------------------------------------------------------------------------
+# Application Name:
+#   - Profit Sharing
+#
+# ------------------------------------------------------------------------
 
 pipelines:
   default:
+    # Build Stage
     - step:
-        name: Run Tests
-        services:
-          - docker
-        caches:
-          - dotnetcore
+        name: "Run Profit Sharing Backend Automated Tests"
+        runs-on:
+          - windows
+          - self.hosted
+          - appt125
         script:
-          - dotnet test ./src/services/tests/Demoulas.ProfitSharing.UnitTests/Demoulas.ProfitSharing.IntegrationTests.csproj --logger "trx;LogFileName=test_results.trx" --configuration debug
+          - echo "Running Profit Sharing Backend Automated Tests"
+          - dotnet test .\src\services\tests\Demoulas.ProfitSharing.UnitTests\Demoulas.ProfitSharing.UnitTests.csproj --configuration debug --logger:junit   
         artifacts:
-          - test_results.trx
-
-definitions:
-  services:
-    docker:
-      memory: 1024
+          - tests/**/TestResults/*.* 
