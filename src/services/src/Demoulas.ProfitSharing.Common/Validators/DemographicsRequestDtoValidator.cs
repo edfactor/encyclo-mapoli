@@ -10,7 +10,7 @@ public class DemographicsRequestDtoValidator : Validator<DemographicsRequestDto>
     {
         RuleFor(x => x.SSN)
             .NotEmpty()
-            .InclusiveBetween(100000000, 999999999).WithMessage("SSN must be a 9-digit number.");
+            .InclusiveBetween(1000000, 999999999).WithMessage("Must be a valid SSN number.");
 
         RuleFor(x => x.BadgeNumber)
             .InclusiveBetween(1, 9999999).WithMessage("BadgeNumber must be a 7-digit number.");
