@@ -8,6 +8,8 @@ namespace Demoulas.ProfitSharing.IntegrationTests.Fakes;
 
 internal sealed class DemographicFaker : Faker<Demographic>
 {
+    private static int _badgeNumberCounter = 1000;
+
     internal DemographicFaker()
     {
         ContactInfoFaker contactInfoFaker = new ContactInfoFaker();
@@ -15,8 +17,8 @@ internal sealed class DemographicFaker : Faker<Demographic>
         PayClassificationFaker payClassificationFaker = new PayClassificationFaker();
 
 
-        RuleFor(d => d.BadgeNumber, f => f.Random.Int(1000, 9999))
-            .RuleFor(d => d.OracleHcmId, f => f.Random.Long(100000, 999999))
+        RuleFor(d => d.BadgeNumber, f => _badgeNumberCounter++)
+           .RuleFor(d => d.OracleHcmId, f => f.Random.Long(100000, 999999))
             .RuleFor(d => d.LastName, f => f.Name.LastName())
             .RuleFor(d => d.FirstName, f => f.Name.FirstName())
             .RuleFor(d => d.MiddleName, f => f.Name.FirstName())

@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.IntegrationTests.Base;
+using Demoulas.ProfitSharing.IntegrationTests.Extensions;
 using Demoulas.ProfitSharing.IntegrationTests.Fakes;
 using Demoulas.ProfitSharing.Services.Mappers;
 using FluentAssertions;
@@ -49,5 +50,16 @@ public class DemographicsServiceTests : IClassFixture<ApiTestBase<Program>>
 
         response.Should().NotBeNull();
         response.Should().HaveCount(count);
+
+        var responseDict = response!.ToDictionary(k => k.BadgeNumber);
+
+        demographics.ForEach(d =>
+        {
+            if (!responseDict.TryGetValue(d.BadgeNumber, out var responseDto))
+            {
+                Assert.Fail($"Unable to find the matching BadgeNumber: {d.BadgeNumber}");
+            }
+            d.ShouldBeEquivalentTo(responseDto);
+        });
     }
 }
