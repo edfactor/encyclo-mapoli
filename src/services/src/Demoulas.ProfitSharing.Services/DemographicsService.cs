@@ -30,7 +30,7 @@ public class DemographicsService : IDemographicsService
 
     }
 
-    public async Task<ISet<DemographicsResponseDto>> AddDemographics(IEnumerable<DemographicsRequestDto> demographics, CancellationToken cancellationToken)
+    public async Task<ISet<DemographicsResponseDto>?> AddDemographics(IEnumerable<DemographicsRequestDto> demographics, CancellationToken cancellationToken)
     {
         var entities = await _dataContextFactory.UseWritableContext(async context =>
         {

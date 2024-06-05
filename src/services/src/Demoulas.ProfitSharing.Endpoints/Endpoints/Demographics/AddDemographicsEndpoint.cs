@@ -1,6 +1,7 @@
 ﻿using Demoulas.Common.Contracts.Request;
 using Demoulas.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Enums;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -9,11 +10,11 @@ using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Demographics;
 
-public class GetAllDemographicsEndpoint : Endpoint<PaginationRequestDto, PaginatedResponseDto<DemographicsResponseDto>?>
+public class AddDemographicsEndpoint : Endpoint<IEnumerable<DemographicsRequestDto>, ISet<DemographicsResponseDto>?>
 {
     private readonly IDemographicsService _demographicsService;
 
-    public GetAllDemographicsEndpoint(IDemographicsService demographicsService)
+    public AddDemographicsEndpoint(IDemographicsService demographicsService)
     {
         _demographicsService = demographicsService;
     }
@@ -21,15 +22,15 @@ public class GetAllDemographicsEndpoint : Endpoint<PaginationRequestDto, Paginat
     public override void Configure()
     {
         AllowAnonymous();
-        Post("all");
+        Post("");
         Summary(s =>
         {
-            s.Summary = "Get all Demographics";
+            s.Summary = "Add Demographics";
             s.ResponseExamples = new Dictionary<int, object> {
             {
-                200, new List<DemographicsResponseDto>
+                200, new List<DemographicsRequestDto>
                 {
-                    new DemographicsResponseDto
+                    new DemographicsRequestDto
                     {
                         OracleHcmId = 0,
                         FullName = "John Doe",
@@ -38,8 +39,8 @@ public class GetAllDemographicsEndpoint : Endpoint<PaginationRequestDto, Paginat
                         StoreNumber = 0,
                         Department = (Department)0,
                         PayClassificationId = 0,
-                        ContactInfo = new ContactInfoResponseDto(),
-                        Address = new AddressResponseDto
+                        ContactInfo = new ContactInfoRequestDto(),
+                        Address = new AddressRequestDto
                         {
                             Street = "123 Street",
                             State = "MA",
@@ -60,8 +61,8 @@ public class GetAllDemographicsEndpoint : Endpoint<PaginationRequestDto, Paginat
         Group<DemographicsGroup>();
     }
 
-    public override Task<PaginatedResponseDto<DemographicsResponseDto>?> ExecuteAsync(PaginationRequestDto req, CancellationToken ct)
+    public override Task<ISet<DemographicsResponseDto>?> ExecuteAsync(IEnumerable<DemographicsRequestDto> req, CancellationToken ct)
     {
-        return _demographicsService.GetAllDemographics(req, ct);
+        return _demographicsService.AddDemographics(req, ct);
     }
 }

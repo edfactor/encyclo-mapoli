@@ -19,6 +19,8 @@ public partial class DemographicMapper
         _contactInfoMapper = contactInfoMapper;
     }
 
+    public partial IEnumerable<DemographicsRequestDto> MapToRequest(IEnumerable<Demographic> sources);
+
     public partial IEnumerable<DemographicsResponseDto> Map(IEnumerable<Demographic> sources);
 
     public partial DemographicsResponseDto Map(Demographic source);

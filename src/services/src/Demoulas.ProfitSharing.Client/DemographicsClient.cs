@@ -18,47 +18,34 @@ public sealed class DemographicsClient : IDemographicsService
     public DemographicsClient(HttpClient? client)
     {
         ArgumentNullException.ThrowIfNull(client);
-
+        
         _httpClient = client;
         _options = Constants.GetJsonSerializerOptions();
     }
 
     public async Task<PaginatedResponseDto<DemographicsResponseDto>?> GetAllDemographics(PaginationRequestDto req, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(req);
+
         var response = await _httpClient.PostAsJsonAsync($"{BaseApiPath}/all", req, cancellationToken);
-
         response.EnsureSuccessStatusCode();
-        try
-        {
-            var json = await response.Content.ReadAsStringAsync(cancellationToken);
-            var obj = JsonSerializer.Deserialize<PaginatedResponseDto<DemographicsResponseDto>>(json, _options);
-            return obj;
-        }
-        catch (JsonException jsonEx)
-        {
-            // Log or handle the JSON exception
-            Console.WriteLine($"JSON Deserialization Error: {jsonEx.Message}");
-            Console.WriteLine($"Path: {jsonEx.Path}");
-            Console.WriteLine($"Line Number: {jsonEx.LineNumber}");
-            Console.WriteLine($"Byte Position in Line: {jsonEx.BytePositionInLine}");
-            throw;
-        }
-        catch (Exception ex)
-        {
-            // Log or handle the general exception
-            Console.WriteLine($"General Error: {ex.Message}");
-            throw;
-        }
-
-        //return await response.Content.ReadFromJsonAsync<PaginatedResponseDto<DemographicsResponseDto>>(options: _options, cancellationToken: cancellationToken).ConfigureAwait(false);
+        return await response.Content.ReadFromJsonAsync<PaginatedResponseDto<DemographicsResponseDto>>(_options, cancellationToken).ConfigureAwait(false);
     }
 
-    public async Task<ISet<DemographicsResponseDto>> AddDemographics(IEnumerable<DemographicsRequestDto> demographics, CancellationToken cancellationToken)
+    public async Task<ISet<DemographicsResponseDto>?> AddDemographics(IEnumerable<DemographicsRequestDto> demographics, CancellationToken cancellationToken)
     {
-        var response = await _httpClient.PutAsJsonAsync("lookup/payclassification/all", demographics, cancellationToken);
+        ArgumentNullException.ThrowIfNull(demographics);
 
+        IEnumerable<DemographicsRequestDto> demographicsRequestDtos = demographics.ToList();
+        if (!demographicsRequestDtos.Any())
+        {
+            return new HashSet<DemographicsResponseDto>(0);
+
+        }
+
+        var response = await _httpClient.PostAsJsonAsync(BaseApiPath, demographicsRequestDtos, cancellationToken);
         response.EnsureSuccessStatusCode();
 
-        return new HashSet<DemographicsResponseDto>(0);
+        return await response.Content.ReadFromJsonAsync<ISet<DemographicsResponseDto>>(_options, cancellationToken).ConfigureAwait(false) ?? new HashSet<DemographicsResponseDto>(0);
     }
 }
