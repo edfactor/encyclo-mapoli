@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Json;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Net.Http.Json;
 using System.Text.Json;
 using Demoulas.Common.Contracts.Request;
 using Demoulas.Common.Contracts.Response;
@@ -6,6 +7,8 @@ using Demoulas.ProfitSharing.Client.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Validators;
+using FluentValidation;
 
 namespace Demoulas.ProfitSharing.Client;
 public sealed class DemographicsClient : IDemographicsService
@@ -14,12 +17,14 @@ public sealed class DemographicsClient : IDemographicsService
 
     private readonly HttpClient _httpClient;
     private readonly JsonSerializerOptions _options;
+    private readonly DemographicsRequestDtoValidator _validator;
 
     public DemographicsClient(HttpClient? client)
     {
         ArgumentNullException.ThrowIfNull(client);
         
         _httpClient = client;
+        _validator = new DemographicsRequestDtoValidator();
         _options = Constants.GetJsonSerializerOptions();
     }
 
@@ -40,7 +45,11 @@ public sealed class DemographicsClient : IDemographicsService
         if (!demographicsRequestDtos.Any())
         {
             return new HashSet<DemographicsResponseDto>(0);
+        }
 
+        foreach (var demo in demographicsRequestDtos)
+        {
+            await _validator.ValidateAndThrowAsync(demo, cancellationToken);
         }
 
         HttpResponseMessage response = await _httpClient.PostAsJsonAsync(BaseApiPath, demographicsRequestDtos, cancellationToken);

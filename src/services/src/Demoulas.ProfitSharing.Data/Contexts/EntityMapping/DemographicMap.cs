@@ -161,8 +161,8 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
 
         builder.OwnsOne(e => e.ContactInfo, contact =>
         {
-            contact.Property(a => a.PhoneNumber).HasMaxLength(10).HasColumnName("PY_EMP_TELNO").HasComment("PhoneNumber").IsRequired();
-            contact.Property(a => a.MobileNumber).HasMaxLength(10).HasColumnName("MobileNumber");
+            contact.Property(a => a.PhoneNumber).HasMaxLength(15).HasColumnName("PY_EMP_TELNO").HasComment("PhoneNumber").IsRequired();
+            contact.Property(a => a.MobileNumber).HasMaxLength(15).HasColumnName("MobileNumber");
             contact.Property(a => a.EmailAddress).HasMaxLength(50).HasColumnName("EmailAddress");
         });
     }
