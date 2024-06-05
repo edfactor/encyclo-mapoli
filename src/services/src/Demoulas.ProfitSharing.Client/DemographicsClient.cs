@@ -27,7 +27,7 @@ public sealed class DemographicsClient : IDemographicsService
     {
         ArgumentNullException.ThrowIfNull(req);
 
-        var response = await _httpClient.PostAsJsonAsync($"{BaseApiPath}/all", req, cancellationToken);
+        HttpResponseMessage response = await _httpClient.PostAsJsonAsync($"{BaseApiPath}/all", req, cancellationToken);
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<PaginatedResponseDto<DemographicsResponseDto>>(_options, cancellationToken).ConfigureAwait(false);
     }
@@ -43,7 +43,7 @@ public sealed class DemographicsClient : IDemographicsService
 
         }
 
-        var response = await _httpClient.PostAsJsonAsync(BaseApiPath, demographicsRequestDtos, cancellationToken);
+        HttpResponseMessage response = await _httpClient.PostAsJsonAsync(BaseApiPath, demographicsRequestDtos, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         return await response.Content.ReadFromJsonAsync<ISet<DemographicsResponseDto>>(_options, cancellationToken).ConfigureAwait(false) ?? new HashSet<DemographicsResponseDto>(0);

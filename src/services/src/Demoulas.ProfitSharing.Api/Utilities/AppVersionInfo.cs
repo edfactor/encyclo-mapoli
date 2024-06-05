@@ -29,7 +29,7 @@ public class AppVersionInfo
                     string fileContents = File.ReadAllText(_buildFilePath);
                     if (!string.IsNullOrWhiteSpace(fileContents))
                     {
-                        var buildInfo = JsonSerializer.Deserialize<BuildInfo>(fileContents);
+                        BuildInfo? buildInfo = JsonSerializer.Deserialize<BuildInfo>(fileContents);
                         _buildNumber = buildInfo?.BuildNumber;
                         _buildId = buildInfo?.BuildId;
                         _gitHash = buildInfo?.RevisionNumber;
@@ -50,8 +50,8 @@ public class AppVersionInfo
             if (string.IsNullOrWhiteSpace(_gitHash))
             {
                 string? version = "1.0.0+LOCALBUILD"; // Dummy version for local dev
-                var appAssembly = typeof(AppVersionInfo).Assembly;
-                var infoVerAttr = (AssemblyInformationalVersionAttribute)appAssembly
+                Assembly appAssembly = typeof(AppVersionInfo).Assembly;
+                AssemblyInformationalVersionAttribute infoVerAttr = (AssemblyInformationalVersionAttribute)appAssembly
                     .GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute)).FirstOrDefault()!;
 
                 if (infoVerAttr is { InformationalVersion.Length: > 6 })

@@ -17,7 +17,7 @@ public sealed class PayClassificationService : IPayClassificationService
 
     public async Task<ISet<PayClassificationResponseDto>> GetAllPayClassifications(CancellationToken cancellationToken = default)
     {
-        var arcobjects =await  _accountCache.GetAllAsync(cancellationToken);
+        ISet<PayClassificationResponseCache> arcobjects =await  _accountCache.GetAllAsync(cancellationToken);
         return arcobjects.Select(o=> new PayClassificationResponseDto
         {
             Id = o.Id,

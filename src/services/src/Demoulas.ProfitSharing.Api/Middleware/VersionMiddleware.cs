@@ -29,7 +29,7 @@ public class VersionMiddleware
 
     private void CompileVersion()
     {
-        var attribute = Attribute.GetCustomAttribute(Assembly.GetExecutingAssembly(), typeof(AssemblyInformationalVersionAttribute)) as AssemblyInformationalVersionAttribute;
+        AssemblyInformationalVersionAttribute? attribute = Attribute.GetCustomAttribute(Assembly.GetExecutingAssembly(), typeof(AssemblyInformationalVersionAttribute)) as AssemblyInformationalVersionAttribute;
         _version ??= attribute?.InformationalVersion;
     }
 }

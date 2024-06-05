@@ -9,7 +9,7 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<ProfitShar
 {
     public ProfitSharingDbContext CreateDbContext(string[] args)
     {
-        var optionsBuilder = new DbContextOptionsBuilder<ProfitSharingDbContext>();
+        DbContextOptionsBuilder<ProfitSharingDbContext> optionsBuilder = new DbContextOptionsBuilder<ProfitSharingDbContext>();
         optionsBuilder.UseOracle();
 
         return new ProfitSharingDbContext(optionsBuilder.Options);

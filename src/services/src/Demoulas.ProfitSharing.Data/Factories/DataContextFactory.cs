@@ -1,10 +1,12 @@
 ﻿using System.Diagnostics;
+using System.Reflection;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.StoreInfo.Entities.Contexts;
 using EntityFramework.Exceptions.Oracle;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -42,7 +44,7 @@ public sealed class DataContextFactory : IProfitSharingDataContextFactory
             _ = dbBuilder.UseOracle(optionsBuilder => _ = optionsBuilder.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19));
         }
 
-        var addOracleDatabaseDbContext = typeof(AspireOracleEFCoreExtensions)
+        MethodInfo addOracleDatabaseDbContext = typeof(AspireOracleEFCoreExtensions)
            .GetMethods()
            .First(m => m.Name == nameof(AspireOracleEFCoreExtensions.AddOracleDatabaseDbContext));
 
@@ -72,7 +74,7 @@ public sealed class DataContextFactory : IProfitSharingDataContextFactory
                 };
             }
 
-            var addContext = addOracleDatabaseDbContext.MakeGenericMethod(contextFactoryRequest.ContextType);
+            MethodInfo addContext = addOracleDatabaseDbContext.MakeGenericMethod(contextFactoryRequest.ContextType);
             addContext.Invoke(null,
             [
                builder, contextFactoryRequest.ConnectionName, contextFactoryRequest.ConfigureSettings, contextFactoryRequest.ConfigureDbContextOptions
@@ -100,12 +102,12 @@ public sealed class DataContextFactory : IProfitSharingDataContextFactory
 
     private async Task<T> UseWritableContextInternal<T>(Func<ProfitSharingDbContext, Task<T>> func, CancellationToken cancellationToken)
     {
-        await using var scope = _serviceProvider.CreateAsyncScope();
-        var context = scope.ServiceProvider.GetRequiredService<ProfitSharingDbContext>();
-        await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
+        await using AsyncServiceScope scope = _serviceProvider.CreateAsyncScope();
+        ProfitSharingDbContext context = scope.ServiceProvider.GetRequiredService<ProfitSharingDbContext>();
+        await using IDbContextTransaction transaction = await context.Database.BeginTransactionAsync(cancellationToken);
         try
         {
-            var result = await func(context);
+            T result = await func(context);
 
             // Commit the transaction when all operations are done
             await transaction.CommitAsync(cancellationToken);
@@ -129,15 +131,15 @@ public sealed class DataContextFactory : IProfitSharingDataContextFactory
     /// </summary>
     public async Task<T> UseReadOnlyContext<T>(Func<ProfitSharingReadOnlyDbContext, Task<T>> func)
     {
-        await using var scope = _serviceProvider.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ProfitSharingReadOnlyDbContext>();
+        await using AsyncServiceScope scope = _serviceProvider.CreateAsyncScope();
+        ProfitSharingReadOnlyDbContext dbContext = scope.ServiceProvider.GetRequiredService<ProfitSharingReadOnlyDbContext>();
         return await func(dbContext);
     }
 
     public async Task<T> UseStoreInfoContext<T>(Func<StoreInfoDbContext, Task<T>> func)
     {
-        await using var scope = _serviceProvider.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<StoreInfoDbContext>();
+        await using AsyncServiceScope scope = _serviceProvider.CreateAsyncScope();
+        StoreInfoDbContext dbContext = scope.ServiceProvider.GetRequiredService<StoreInfoDbContext>();
         return await func(dbContext);
     }
 }

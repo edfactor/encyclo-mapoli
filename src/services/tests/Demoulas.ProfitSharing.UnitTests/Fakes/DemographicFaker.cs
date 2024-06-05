@@ -10,9 +10,9 @@ internal sealed class DemographicFaker : Faker<Demographic>
 {
     internal DemographicFaker()
     {
-        var contactInfoFaker = new ContactInfoFaker();
-        var addressFaker = new AddressFaker();
-        var payClassificationFaker = new PayClassificationFaker();
+        ContactInfoFaker contactInfoFaker = new ContactInfoFaker();
+        AddressFaker addressFaker = new AddressFaker();
+        PayClassificationFaker payClassificationFaker = new PayClassificationFaker();
 
 
         RuleFor(d => d.BadgeNumber, f => f.Random.Int(1000, 9999))

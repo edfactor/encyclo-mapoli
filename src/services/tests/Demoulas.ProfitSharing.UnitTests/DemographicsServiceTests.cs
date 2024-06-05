@@ -1,7 +1,11 @@
 ﻿using System.ComponentModel;
 using Demoulas.Common.Contracts.Request;
+using Demoulas.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Client;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.IntegrationTests.Base;
 using Demoulas.ProfitSharing.IntegrationTests.Fakes;
 using Demoulas.ProfitSharing.Services.Mappers;
@@ -25,7 +29,7 @@ public class DemographicsServiceTests : IClassFixture<ApiTestBase<Program>>
     [Fact(DisplayName = "Get all demographics")]
     public async Task GetAllDemographicsTest()
     {
-        var response = await _demographicsClient.GetAllDemographics(new PaginationRequestDto(), cancellationToken: CancellationToken.None);
+        PaginatedResponseDto<DemographicsResponseDto>? response = await _demographicsClient.GetAllDemographics(new PaginationRequestDto(), cancellationToken: CancellationToken.None);
 
         response.Should().NotBeNull();
         response!.Results.Should().HaveCountGreaterOrEqualTo(100);
@@ -38,10 +42,10 @@ public class DemographicsServiceTests : IClassFixture<ApiTestBase<Program>>
     [Description("https://demoulas.atlassian.net/browse/PS-82")]
     public async Task AddNewDemographicsTest(int count)
     {
-        var demographics = new DemographicFaker().Generate(count);
-        var demographicsRequest = _mapper.MapToRequest(demographics);
+        List<Demographic>? demographics = new DemographicFaker().Generate(count);
+        IEnumerable<DemographicsRequestDto> demographicsRequest = _mapper.MapToRequest(demographics);
 
-        var response = await _demographicsClient.AddDemographics(demographicsRequest, cancellationToken: CancellationToken.None);
+        ISet<DemographicsResponseDto>? response = await _demographicsClient.AddDemographics(demographicsRequest, cancellationToken: CancellationToken.None);
 
         response.Should().NotBeNull();
         response.Should().HaveCount(count);

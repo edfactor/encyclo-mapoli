@@ -6,7 +6,7 @@ using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.ServiceDefaults;
 using Demoulas.StoreInfo.Entities.Contexts;
 
-var builder = WebApplication.CreateBuilder();
+WebApplicationBuilder builder = WebApplication.CreateBuilder();
 
 builder.Configuration.AddUserSecrets<Program>();
 
@@ -31,7 +31,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-var list = new List<ContextFactoryRequest>
+List<ContextFactoryRequest> list = new List<ContextFactoryRequest>
 {
     ContextFactoryRequest.Initialize<ProfitSharingDbContext>("ProfitSharing"),
     ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"),
@@ -44,7 +44,7 @@ builder.AddCachingServices();
 builder.ConfigureDefaultEndpoints();
 
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 app.MapDefaultEndpoints();
 

@@ -73,7 +73,7 @@ internal static class EndpointExtension
                  * https://github.com/FastEndpoints/FastEndpoints/issues/653
                  */
                 options.DisableAutoDiscovery = true;
-                var assemblies = DependencyContext.Default?
+                List<Assembly>? assemblies = DependencyContext.Default?
                     .RuntimeLibraries
                     .Where(a => a.Name.Contains("Demoulas", StringComparison.InvariantCultureIgnoreCase))
                     .Select(a => Assembly.Load(a.Name))

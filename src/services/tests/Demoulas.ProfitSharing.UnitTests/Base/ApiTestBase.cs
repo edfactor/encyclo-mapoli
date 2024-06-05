@@ -42,10 +42,10 @@ public class ApiTestBase<TStartup> where TStartup : class
     public ApiTestBase()
     {
         MockDbContextFactory = MockDataContextFactory.InitializeForTesting();
-        var webApplicationFactory = new WebApplicationFactory<TStartup>();
+        WebApplicationFactory<TStartup> webApplicationFactory = new WebApplicationFactory<TStartup>();
 
 
-        var builder = webApplicationFactory.WithWebHostBuilder(
+        WebApplicationFactory<TStartup> builder = webApplicationFactory.WithWebHostBuilder(
             hostBuilder =>
             {
                 hostBuilder.UseEnvironment("Testing");
