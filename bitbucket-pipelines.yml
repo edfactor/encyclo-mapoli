@@ -18,6 +18,6 @@ pipelines:
         script:
           - echo "Running Profit Sharing Backend Automated Tests"          
 
-          - dotnet test .\src\services\tests\Demoulas.ProfitSharing.UnitTests\Demoulas.ProfitSharing.UnitTests.csproj --configuration debug --logger "junit;LogFilePath=..\..\..\..\TestResults" -p:RestoreAdditionalProjectSources=https://api.nuget.org/v3/index.json
+          - dotnet test .\src\services\tests\Demoulas.ProfitSharing.UnitTests\Demoulas.ProfitSharing.UnitTests.csproj --configuration debug --logger "junit;LogFilePath=..\..\..\..\TestResults\results.xml" -p:RestoreAdditionalProjectSources=https://api.nuget.org/v3/index.json
         artifacts:
           - ./**/TestResults/**/*.xml
