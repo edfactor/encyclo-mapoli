@@ -4,12 +4,14 @@ using System.Reflection;
 using Asp.Versioning;
 using Demoulas.ProfitSharing.Api.Converters;
 using Demoulas.ProfitSharing.Api.Middleware;
+using Demoulas.ProfitSharing.Common.Contracts.Configuration;
 using Demoulas.ProfitSharing.ServiceDefaults;
 using FastEndpoints;
 using FastEndpoints.AspVersioning;
 using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.DependencyModel;
+using NSwag.AspNetCore;
 using Serilog;
 
 namespace Demoulas.ProfitSharing.Api.Extensions;
@@ -37,8 +39,8 @@ internal static class EndpointExtension
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         _ = builder.Services.AddEndpointsApiExplorer();
 
-        _ = builder.AddSwaggerOpenApi()
-            .AddSwaggerOpenApi(version: 2);
+        _ = builder.AddSwaggerOpenApi(enableJwtBearerAuth: false)
+            .AddSwaggerOpenApi(enableJwtBearerAuth: false, version: 2);
 
         // Compression
         _ = builder.Services.AddResponseCompression(options =>

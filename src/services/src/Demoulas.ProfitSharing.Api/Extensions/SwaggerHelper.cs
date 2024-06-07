@@ -1,4 +1,7 @@
-﻿using System.Diagnostics;
+﻿using System.Configuration;
+using System.Diagnostics;
+using Demoulas.ProfitSharing.Common.Contracts.Configuration;
+using Elastic.CommonSchema;
 using FastEndpoints.Swagger;
 using NSwag;
 using NSwag.Generation.AspNetCore;
@@ -20,8 +23,21 @@ internal static class SwaggerHelper
         bool enableJwtBearerAuth = true,
         OpenApiContact? contactDetails = null,
         Action<Dictionary<string, string>>? tagDescriptions = null,
-        Action<AspNetCoreOpenApiDocumentGeneratorSettings>? documentSettings = null )
+    Action<AspNetCoreOpenApiDocumentGeneratorSettings>? documentSettings = null )
     {
+        // Load Okta settings
+        const string notSet = "Not Set";
+        OktaSettings oktaSettings = builder.Configuration.GetSection("Okta").Get<OktaSettings>() ?? new OktaSettings
+        {
+            AuthorizationEndpoint = notSet,
+            ClientId = notSet,
+            Issuer = notSet,
+            TokenEndpoint = notSet
+        };
+
+        // Add Okta settings to the DI container
+       _ = builder.Services.AddSingleton(oktaSettings);
+
         _ = builder.Services.SwaggerDocument(o =>
          {
              if (version > 1)
@@ -43,6 +59,24 @@ internal static class SwaggerHelper
                  s.Version = $"v{version}.0";
                  s.Description = description;
                  s.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("bearer"));
+                 s.AddSecurity("oauth2", new OpenApiSecurityScheme
+                 {
+                     Type = OpenApiSecuritySchemeType.OAuth2,
+                     Flows = new OpenApiOAuthFlows
+                     {
+                         AuthorizationCode = new OpenApiOAuthFlow
+                         {
+                             AuthorizationUrl = $"{oktaSettings.AuthorizationEndpoint}",
+                             TokenUrl = $"{oktaSettings.TokenEndpoint}",
+                             Scopes = new Dictionary<string, string>
+                             {
+                                 { "openid", "OpenID Connect scope" },
+                                 { "profile", "Profile scope" },
+                                 { "email", "Email scope" }
+                             }
+                         }
+                     }
+                 });
                  s.PostProcess = doc => { doc.Produces = new List<string> { "application/json" }; };
                  s.PostProcess = document =>
                  {
