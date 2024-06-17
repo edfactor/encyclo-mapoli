@@ -30,7 +30,7 @@ Install 3rd Party Libraries:
 # Note-worthy technology #
 
 1. [Safe storage of app secrets in development](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-8.0&tabs=windows#enable-secret-storage)
-2. [Fast-Endpoints](https://fast-endpoints.com/)
+2. [Fast-Endpoints](https://fast-endpoints.com/) | [REPR Design Pattern](https://deviq.com/design-patterns/repr-design-pattern)
 3. [EntityFramework.Core 8 w/Oracle](https://www.nuget.org/packages/Oracle.EntityFrameworkCore)
 4. [.editorconfig](https://learn.microsoft.com/en-us/visualstudio/ide/create-portable-custom-editor-options?view=vs-2022)
 5. [Directory.Build.Props](https://learn.microsoft.com/en-us/visualstudio/msbuild/customize-by-directory?view=vs-2022)
