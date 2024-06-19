@@ -35,7 +35,7 @@ internal static class LoggerConfigurationExtension
                     new CreditCardMaskingOperator()
                 ];
             })
-            .WriteTo.Debug()
+            .WriteTo.Debug(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
             .WriteTo.Console(theme: AnsiConsoleTheme.Code, outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
             //.WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri("http://products.elasticsearch:9200"))
             //{

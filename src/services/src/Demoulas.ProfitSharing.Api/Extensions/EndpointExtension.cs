@@ -109,7 +109,7 @@ internal static class EndpointExtension
         return builder;
     }
 
-    public static IApplicationBuilder UseDefaultEndpoints(this IApplicationBuilder app)
+    public static IApplicationBuilder UseDefaultEndpoints(this WebApplication app)
     {
         _ = app.UseSerilogRequestLogging();
         _ = app.UseMiddleware<BadRequestExceptionMiddleware>();
@@ -134,8 +134,12 @@ internal static class EndpointExtension
                 };
             })
             .UseOutputCache()
-            .UseAntiforgery()
-            .UseSwaggerGen();
+            .UseAntiforgery();
+
+        if (!app.Environment.IsProduction())
+        {
+            app.UseSwaggerGen();
+        }
 
         return app;
     }
