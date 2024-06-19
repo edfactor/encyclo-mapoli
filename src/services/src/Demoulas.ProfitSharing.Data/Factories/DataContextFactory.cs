@@ -1,0 +1,145 @@
+﻿using System.Diagnostics;
+using System.Reflection;
+using Demoulas.Common.Data.Contexts.DTOs.Context;
+using Demoulas.ProfitSharing.Data.Contexts;
+using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.StoreInfo.Entities.Contexts;
+using EntityFramework.Exceptions.Oracle;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+
+namespace Demoulas.ProfitSharing.Data.Factories;
+
+public sealed class DataContextFactory : IProfitSharingDataContextFactory
+{
+    private readonly IServiceProvider _serviceProvider;
+
+    private DataContextFactory(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+    }
+
+    public static IProfitSharingDataContextFactory Initialize(IHostApplicationBuilder builder, IEnumerable<ContextFactoryRequest> contextFactoryRequests)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+        ArgumentNullException.ThrowIfNull(contextFactoryRequests);
+
+        List<ContextFactoryRequest> factoryRequests = contextFactoryRequests.ToList();
+        if (factoryRequests.Count == 0)
+        {
+            throw new ArgumentException($"{nameof(contextFactoryRequests)} has no database contexts to configure");
+        }
+
+        void CommonDbBuilderSettings(DbContextOptionsBuilder dbBuilder)
+        {
+            if (Debugger.IsAttached)
+            {
+                _ = dbBuilder.LogTo(s => Debug.WriteLine(s));
+            }
+            _ = dbBuilder.UseExceptionProcessor();
+            _ = dbBuilder.EnableSensitiveDataLogging(Debugger.IsAttached);
+            _ = dbBuilder.EnableDetailedErrors(Debugger.IsAttached);
+            _ = dbBuilder.UseOracle(optionsBuilder => _ = optionsBuilder.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19));
+        }
+
+        MethodInfo addOracleDatabaseDbContext = typeof(AspireOracleEFCoreExtensions)
+           .GetMethods()
+           .First(m => m.Name == nameof(AspireOracleEFCoreExtensions.AddOracleDatabaseDbContext));
+
+        //TODO: Figure this call out
+        //var enrichOracleDatabaseDbContext = typeof(AspireOracleEFCoreExtensions)
+        //   .GetMethods()
+        //   .First(m => m.Key == nameof(AspireOracleEFCoreExtensions.EnrichOracleDatabaseDbContext));
+
+
+        foreach (ContextFactoryRequest contextFactoryRequest in factoryRequests)
+        {
+            if (contextFactoryRequest.ContextType.BaseType?.Name == "OracleDbContext`1")
+            {
+                contextFactoryRequest.ConfigureDbContextOptions ??= CommonDbBuilderSettings;
+            }
+            else if (contextFactoryRequest.ContextType.BaseType?.Name == "ReadOnlyOracleDbContext`1")
+            {
+                contextFactoryRequest.ConfigureDbContextOptions ??= dbBuilder =>
+                {
+                    CommonDbBuilderSettings(dbBuilder);
+                    _ = dbBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+                    _ = dbBuilder.UseOracle(optionsBuilder =>
+                    {
+                        _ = optionsBuilder.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19);
+                        _ = optionsBuilder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                    });
+                };
+            }
+
+            MethodInfo addContext = addOracleDatabaseDbContext.MakeGenericMethod(contextFactoryRequest.ContextType);
+            addContext.Invoke(null,
+            [
+               builder, contextFactoryRequest.ConnectionName, contextFactoryRequest.ConfigureSettings, contextFactoryRequest.ConfigureDbContextOptions
+            ]);
+        }
+
+        return new DataContextFactory(builder.Services.BuildServiceProvider());
+    }
+
+    #region Use Writable Context
+
+    public Task UseWritableContext(Func<ProfitSharingDbContext, Task> func, CancellationToken cancellationToken = default)
+    {
+        return UseWritableContextInternal(async context =>
+        {
+            await func(context);
+            return Task.CompletedTask;
+        }, cancellationToken);
+    }
+
+    public Task<T> UseWritableContext<T>(Func<ProfitSharingDbContext, Task<T>> func, CancellationToken cancellationToken = default)
+    {
+        return UseWritableContextInternal(func, cancellationToken);
+    }
+
+    private async Task<T> UseWritableContextInternal<T>(Func<ProfitSharingDbContext, Task<T>> func, CancellationToken cancellationToken)
+    {
+        await using AsyncServiceScope scope = _serviceProvider.CreateAsyncScope();
+        ProfitSharingDbContext context = scope.ServiceProvider.GetRequiredService<ProfitSharingDbContext>();
+        await using IDbContextTransaction transaction = await context.Database.BeginTransactionAsync(cancellationToken);
+        try
+        {
+            T result = await func(context);
+
+            // Commit the transaction when all operations are done
+            await transaction.CommitAsync(cancellationToken);
+            return result;
+        }
+        catch (Exception)
+        {
+            // Roll back the transaction if any operation fails
+            await transaction.RollbackAsync(cancellationToken);
+            throw;
+        }
+    }
+
+    #endregion
+
+
+    /// <summary>
+    /// For read only workloads. This should not be mixed with Read/Write workloads in the same method as a matter of best
+    /// practice.
+    /// More information can be found here: https://docs.microsoft.com/en-us/azure/azure-sql/database/read-scale-out
+    /// </summary>
+    public async Task<T> UseReadOnlyContext<T>(Func<ProfitSharingReadOnlyDbContext, Task<T>> func)
+    {
+        await using AsyncServiceScope scope = _serviceProvider.CreateAsyncScope();
+        ProfitSharingReadOnlyDbContext dbContext = scope.ServiceProvider.GetRequiredService<ProfitSharingReadOnlyDbContext>();
+        return await func(dbContext);
+    }
+
+    public async Task<T> UseStoreInfoContext<T>(Func<StoreInfoDbContext, Task<T>> func)
+    {
+        await using AsyncServiceScope scope = _serviceProvider.CreateAsyncScope();
+        StoreInfoDbContext dbContext = scope.ServiceProvider.GetRequiredService<StoreInfoDbContext>();
+        return await func(dbContext);
+    }
+}

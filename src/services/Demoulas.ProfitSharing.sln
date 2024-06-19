@@ -1,0 +1,96 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.0.0
+MinimumVisualStudioVersion = 17.8.0.0
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.AppHost", "src\Demoulas.ProfitSharing.AppHost\Demoulas.ProfitSharing.AppHost.csproj", "{92A3B192-25F3-40C4-94BD-A13779CF0B81}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.ServiceDefaults", "src\Demoulas.ProfitSharing.ServiceDefaults\Demoulas.ProfitSharing.ServiceDefaults.csproj", "{7F0906C7-ED3E-4A74-AC9C-EE2B6F17F1DD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D1297442-67BE-4098-A95F-727F04A68FA3}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\README.md = ..\..\README.md
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.Api", "src\Demoulas.ProfitSharing.Api\Demoulas.ProfitSharing.Api.csproj", "{D441104E-515B-43CB-A851-AF47008C6E77}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.Endpoints", "src\Demoulas.ProfitSharing.Endpoints\Demoulas.ProfitSharing.Endpoints.csproj", "{376A7BC4-D5E7-4353-ACDE-E245897095C4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.Data", "src\Demoulas.ProfitSharing.Data\Demoulas.ProfitSharing.Data.csproj", "{F9FECC1D-427B-44D7-BA11-1ED0E752F2CB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{80B088DC-C84B-46AA-BFF3-DC309C5B4325}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.UnitTests", "tests\Demoulas.ProfitSharing.UnitTests\Demoulas.ProfitSharing.UnitTests.csproj", "{D0216F81-E01D-4620-BE4F-D1FF0D28CA01}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.Services", "src\Demoulas.ProfitSharing.Services\Demoulas.ProfitSharing.Services.csproj", "{24F51728-CF8F-44E2-AE66-E932A6C3A1A0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pipelines", "Pipelines", "{E8B4A68D-9AFA-479D-BB49-BD8843E0800C}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\bitbucket-pipelines.yml = ..\..\bitbucket-pipelines.yml
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.Common", "src\Demoulas.ProfitSharing.Common\Demoulas.ProfitSharing.Common.csproj", "{B6B0D1E4-9EAC-4656-BC8A-FE517F1D8FEA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.Client", "src\Demoulas.ProfitSharing.Client\Demoulas.ProfitSharing.Client.csproj", "{85083A70-BCEF-4479-866C-85E6A64D438F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Backend", "Backend", "{66B0DDDA-624B-4BF3-A4C7-CAEBC3E3DA62}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		Directory.Build.props = Directory.Build.props
+		Directory.Packages.props = Directory.Packages.props
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{92A3B192-25F3-40C4-94BD-A13779CF0B81}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92A3B192-25F3-40C4-94BD-A13779CF0B81}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92A3B192-25F3-40C4-94BD-A13779CF0B81}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92A3B192-25F3-40C4-94BD-A13779CF0B81}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F0906C7-ED3E-4A74-AC9C-EE2B6F17F1DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F0906C7-ED3E-4A74-AC9C-EE2B6F17F1DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F0906C7-ED3E-4A74-AC9C-EE2B6F17F1DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F0906C7-ED3E-4A74-AC9C-EE2B6F17F1DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D441104E-515B-43CB-A851-AF47008C6E77}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D441104E-515B-43CB-A851-AF47008C6E77}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D441104E-515B-43CB-A851-AF47008C6E77}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D441104E-515B-43CB-A851-AF47008C6E77}.Release|Any CPU.Build.0 = Release|Any CPU
+		{376A7BC4-D5E7-4353-ACDE-E245897095C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{376A7BC4-D5E7-4353-ACDE-E245897095C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{376A7BC4-D5E7-4353-ACDE-E245897095C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{376A7BC4-D5E7-4353-ACDE-E245897095C4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9FECC1D-427B-44D7-BA11-1ED0E752F2CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9FECC1D-427B-44D7-BA11-1ED0E752F2CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9FECC1D-427B-44D7-BA11-1ED0E752F2CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9FECC1D-427B-44D7-BA11-1ED0E752F2CB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0216F81-E01D-4620-BE4F-D1FF0D28CA01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0216F81-E01D-4620-BE4F-D1FF0D28CA01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0216F81-E01D-4620-BE4F-D1FF0D28CA01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0216F81-E01D-4620-BE4F-D1FF0D28CA01}.Release|Any CPU.Build.0 = Release|Any CPU
+		{24F51728-CF8F-44E2-AE66-E932A6C3A1A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24F51728-CF8F-44E2-AE66-E932A6C3A1A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24F51728-CF8F-44E2-AE66-E932A6C3A1A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24F51728-CF8F-44E2-AE66-E932A6C3A1A0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6B0D1E4-9EAC-4656-BC8A-FE517F1D8FEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6B0D1E4-9EAC-4656-BC8A-FE517F1D8FEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6B0D1E4-9EAC-4656-BC8A-FE517F1D8FEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6B0D1E4-9EAC-4656-BC8A-FE517F1D8FEA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{85083A70-BCEF-4479-866C-85E6A64D438F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85083A70-BCEF-4479-866C-85E6A64D438F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85083A70-BCEF-4479-866C-85E6A64D438F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85083A70-BCEF-4479-866C-85E6A64D438F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D0216F81-E01D-4620-BE4F-D1FF0D28CA01} = {80B088DC-C84B-46AA-BFF3-DC309C5B4325}
+		{66B0DDDA-624B-4BF3-A4C7-CAEBC3E3DA62} = {D1297442-67BE-4098-A95F-727F04A68FA3}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FB1CB19A-BE8B-4F91-9186-FE7C9F3CE4D7}
+	EndGlobalSection
+EndGlobal
