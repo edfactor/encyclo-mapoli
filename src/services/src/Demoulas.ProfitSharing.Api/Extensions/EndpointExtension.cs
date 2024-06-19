@@ -134,12 +134,6 @@ internal static class EndpointExtension
                 };
             })
             .UseOutputCache()
-            .UseAntiforgery();
-
-        if (!app.Environment.IsProduction())
-        {
-            app.UseSwaggerGen();
-        }
 
         return app;
     }
