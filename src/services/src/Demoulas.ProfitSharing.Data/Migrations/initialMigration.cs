@@ -17,7 +17,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 columns: table => new
                 {
                     ISO = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: false),
-                    Id = table.Column<short>(type: "NUMBER(3)", precision: 3, nullable: false),
+                    Id = table.Column<short>(type: "NUMBER(3)", nullable: false, precision: 3),
                     Name = table.Column<string>(type: "NVARCHAR2(100)", maxLength: 100, nullable: false),
                     TelephoneCode = table.Column<string>(type: "NVARCHAR2(10)", maxLength: 10, nullable: false)
                 },
@@ -42,7 +42,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "PayClassification",
                 columns: table => new
                 {
-                    Id = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false),
+                    Id = table.Column<byte>(type: "NUMBER(2)", nullable: false, precision: 2),
                     Name = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: false, comment: "Pay Classification")
                 },
                 constraints: table =>
@@ -54,15 +54,15 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "DEMOGRAPHICS",
                 columns: table => new
                 {
-                    DEM_BADGE = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false),
-                    PY_ASSIGN_ID = table.Column<long>(type: "NUMBER(15)", precision: 15, nullable: false),
+                    DEM_BADGE = table.Column<int>(type: "NUMBER(7)", nullable: false, precision: 7),
+                    PY_ASSIGN_ID = table.Column<long>(type: "NUMBER(15)", nullable: false, precision: 15),
                     PY_NAM = table.Column<string>(type: "NVARCHAR2(60)", maxLength: 60, nullable: false, comment: "FullName"),
                     PY_LNAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "LastName"),
                     PY_FNAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "FirstName"),
                     PY_MNAME = table.Column<string>(type: "NVARCHAR2(25)", maxLength: 25, nullable: true, comment: "MiddleName"),
-                    PY_STOR = table.Column<short>(type: "NUMBER(3)", precision: 3, nullable: false, comment: "StoreNumber"),
-                    PY_DP = table.Column<byte>(type: "NUMBER(1)", precision: 1, nullable: false, comment: "Department"),
-                    PY_CLA = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false, comment: "PayClassification"),
+                    PY_STOR = table.Column<short>(type: "NUMBER(3)", nullable: false, comment: "StoreNumber", precision: 3),
+                    PY_DP = table.Column<byte>(type: "NUMBER(1)", nullable: false, comment: "Department", precision: 1),
+                    PY_CLA = table.Column<byte>(type: "NUMBER(2)", nullable: false, comment: "PayClassification", precision: 2),
                     PY_EMP_TELNO = table.Column<string>(type: "NVARCHAR2(10)", maxLength: 10, nullable: false, comment: "PhoneNumber"),
                     MobileNumber = table.Column<string>(type: "NVARCHAR2(10)", maxLength: 10, nullable: true),
                     EmailAddress = table.Column<string>(type: "NVARCHAR2(50)", maxLength: 50, nullable: true),
@@ -70,14 +70,14 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     PY_ADD2 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "Street2"),
                     PY_CITY = table.Column<string>(type: "NVARCHAR2(25)", maxLength: 25, nullable: false, comment: "City"),
                     PY_STATE = table.Column<string>(type: "NVARCHAR2(3)", maxLength: 3, nullable: false, comment: "State"),
-                    PY_ZIP = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false, comment: "Postal Code"),
+                    PY_ZIP = table.Column<int>(type: "NUMBER(9)", nullable: false, comment: "Postal Code", precision: 9),
                     CountryISO = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: false, defaultValue: "US"),
-                    PY_DOB = table.Column<int>(type: "NUMBER(8)", precision: 8, nullable: false, comment: "DateOfBirth"),
-                    PY_FULL_DT = table.Column<int>(type: "NUMBER(8)", precision: 8, nullable: false, comment: "FullTimeDate"),
-                    PY_HIRE_DT = table.Column<int>(type: "NUMBER(8)", precision: 8, nullable: false, comment: "HireDate"),
-                    PY_REHIRE_DT = table.Column<int>(type: "NUMBER(8)", precision: 8, nullable: false, comment: "ReHireDate"),
+                    PY_DOB = table.Column<int>(type: "NUMBER(8)", nullable: false, comment: "DateOfBirth", precision: 8),
+                    PY_FULL_DT = table.Column<int>(type: "NUMBER(8)", nullable: false, comment: "FullTimeDate", precision: 8),
+                    PY_HIRE_DT = table.Column<int>(type: "NUMBER(8)", nullable: false, comment: "HireDate", precision: 8),
+                    PY_REHIRE_DT = table.Column<int>(type: "NUMBER(8)", nullable: false, comment: "ReHireDate", precision: 8),
                     PY_TERM = table.Column<string>(type: "NVARCHAR2(1)", maxLength: 1, nullable: false, comment: "TerminationCode"),
-                    PY_TERM_DT = table.Column<int>(type: "NUMBER(8)", precision: 8, nullable: true, comment: "TerminationDate"),
+                    PY_TERM_DT = table.Column<int>(type: "NUMBER(8)", nullable: true, comment: "TerminationDate", precision: 8),
                     PY_FUL = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: false, comment: "EmploymentType"),
                     PY_FREQ = table.Column<string>(type: "NVARCHAR2(1)", maxLength: 1, nullable: false, comment: "PayFrequency"),
                     PY_GENDER = table.Column<string>(type: "NVARCHAR2(1)", maxLength: 1, nullable: false, comment: "Gender")

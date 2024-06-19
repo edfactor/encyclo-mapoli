@@ -34,13 +34,12 @@ internal static class EndpointExtension
 
         _ = builder.Services.AddProjectServices();
 
-
         // Add services to the container.
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         _ = builder.Services.AddEndpointsApiExplorer();
 
         _ = builder.AddSwaggerOpenApi(enableJwtBearerAuth: false)
-            .AddSwaggerOpenApi(enableJwtBearerAuth: false, version: 2);
+            .AddSwaggerOpenApi(version: 2, enableJwtBearerAuth: false);
 
         // Compression
         _ = builder.Services.AddResponseCompression(options =>
@@ -82,7 +81,6 @@ internal static class EndpointExtension
                     .ToList();
 
                 options.Assemblies = assemblies;
-
             })
             .AddVersioning(o =>
             {
@@ -92,10 +90,7 @@ internal static class EndpointExtension
                 o.ReportApiVersions = true;
                 o.UnsupportedApiVersionStatusCode = (int)HttpStatusCode.NotImplemented;
             })
-            .AddOutputCache(options =>
-            {
-                options.UseCaseSensitivePaths = false;
-            })
+            .AddOutputCache(options => options.UseCaseSensitivePaths = false)
             .ConfigureHttpJsonOptions(options =>
             {
                 options.SerializerOptions.WriteIndented = Debugger.IsAttached;
@@ -109,7 +104,7 @@ internal static class EndpointExtension
         return builder;
     }
 
-    public static IApplicationBuilder UseDefaultEndpoints(this IApplicationBuilder app)
+    public static IApplicationBuilder UseDefaultEndpoints(this WebApplication app)
     {
         _ = app.UseSerilogRequestLogging();
         _ = app.UseMiddleware<BadRequestExceptionMiddleware>();
@@ -134,8 +129,12 @@ internal static class EndpointExtension
                 };
             })
             .UseOutputCache()
-            .UseAntiforgery()
-            .UseSwaggerGen();
+            .UseAntiforgery();
+
+        if (!app.Environment.IsProduction())
+        {
+            _ = app.UseSwaggerGen();
+        }
 
         return app;
     }

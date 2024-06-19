@@ -20,10 +20,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 type: "NVARCHAR2(15)",
                 maxLength: 15,
                 nullable: false,
-                comment: "PhoneNumber",
                 oldClrType: typeof(string),
                 oldType: "NVARCHAR2(10)",
                 oldMaxLength: 10,
+                comment: "PhoneNumber",
                 oldComment: "PhoneNumber");
 
             migrationBuilder.AlterColumn<string>(
@@ -41,9 +41,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "DEM_SSN",
                 table: "DEMOGRAPHICS",
                 type: "NUMBER(9)",
-                precision: 9,
                 nullable: false,
-                defaultValue: 0L);
+                defaultValue: 0L,
+                precision: 9);
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_DEMOGRAPHICS",
@@ -1433,10 +1433,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 type: "NVARCHAR2(10)",
                 maxLength: 10,
                 nullable: false,
-                comment: "PhoneNumber",
                 oldClrType: typeof(string),
                 oldType: "NVARCHAR2(15)",
                 oldMaxLength: 15,
+                comment: "PhoneNumber",
                 oldComment: "PhoneNumber");
 
             migrationBuilder.AlterColumn<string>(

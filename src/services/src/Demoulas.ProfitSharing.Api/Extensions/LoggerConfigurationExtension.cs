@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using System.Drawing.Text;
+using Serilog;
 using Serilog.Enrichers.OpenTelemetry;
 using Serilog.Enrichers.Sensitive;
 using Serilog.Exceptions;
@@ -14,6 +15,8 @@ internal static class LoggerConfigurationExtension
 {
     internal static WebApplicationBuilder SetDefaultLoggerConfiguration(this WebApplicationBuilder builder, string indexPrefix)
     {
+        const string outputTemplate = "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}";
+
         Log.Logger = new LoggerConfiguration()
             .Enrich.WithOpenTelemetryTraceId()
             .Enrich.WithOpenTelemetrySpanId()
@@ -35,8 +38,8 @@ internal static class LoggerConfigurationExtension
                     new CreditCardMaskingOperator()
                 ];
             })
-            .WriteTo.Debug()
-            .WriteTo.Console(theme: AnsiConsoleTheme.Code, outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
+            .WriteTo.Debug(outputTemplate: outputTemplate)
+            .WriteTo.Console(outputTemplate: outputTemplate, theme: AnsiConsoleTheme.Code)
             //.WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri("http://products.elasticsearch:9200"))
             //{
             //    FailureCallback = e => Console.WriteLine($"Unable to submit event {e.MessageTemplate}"),
