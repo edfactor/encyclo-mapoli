@@ -35,8 +35,12 @@ internal static class LoggerConfigurationExtension
                     new CreditCardMaskingOperator()
                 ];
             })
+<<<<<<< HEAD
             .WriteTo.Debug(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
-            .WriteTo.Console(theme: AnsiConsoleTheme.Code, outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
+=======
+            .WriteTo.Debug()
+>>>>>>> origin/develop
+            .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}", theme: AnsiConsoleTheme.Code)
             //.WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri("http://products.elasticsearch:9200"))
             //{
             //    FailureCallback = e => Console.WriteLine($"Unable to submit event {e.MessageTemplate}"),
