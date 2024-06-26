@@ -25,6 +25,11 @@ internal static class SwaggerHelper
         Action<Dictionary<string, string>>? tagDescriptions = null,
     Action<AspNetCoreOpenApiDocumentGeneratorSettings>? documentSettings = null )
     {
+        if (string.IsNullOrWhiteSpace(description))
+        {
+            description = $"Environment Name : {builder.Environment.EnvironmentName}";
+        }
+
         // Load Okta settings
         const string notSet = "Not Set";
         OktaSettings oktaSettings = builder.Configuration.GetSection("Okta").Get<OktaSettings>() ?? new OktaSettings
@@ -52,7 +57,7 @@ internal static class SwaggerHelper
              o.AutoTagPathSegmentIndex = 0;
              o.TagDescriptions = tagDescriptions;
              o.EnableJWTBearerAuth = enableJwtBearerAuth;
-             o.DocumentSettings = documentSettings ?? (s =>
+             o.DocumentSettings = (s =>
              {
                  s.DocumentName = $"Release {version}.0";
                  s.Title = title;
@@ -82,10 +87,10 @@ internal static class SwaggerHelper
                  {
                      document.Info.Contact = contactDetails ?? new OpenApiContact
                      {
-                         Name = "NGDS Core Team", Email = "rharding@demoulasmarketbasket.com"
+                         Name = "NGDS Development Team", Email = "rfbreakey@demoulasmarketbasket.com"
                      };
                  };
-             });
+             }) + documentSettings;
          });
 
         return builder;

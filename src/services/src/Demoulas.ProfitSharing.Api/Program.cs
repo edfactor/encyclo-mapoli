@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.ProfitSharing.Api.Extensions;
+using Demoulas.ProfitSharing.Common.Configuration;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.ServiceDefaults;
@@ -18,8 +19,10 @@ if (!Debugger.IsAttached)
     builder.Configuration.AddJsonFile(configFile);
 }
 #endif
+ElasticSearchConfig smartConfig = new ElasticSearchConfig();
+builder.Configuration.Bind("Logging:Smart", smartConfig);
 
-builder.SetDefaultLoggerConfiguration("Demoulas.ProfitSharing");
+builder.SetDefaultLoggerConfiguration(smartConfig);
 
 builder.Services.AddCors(options =>
 {

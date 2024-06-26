@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Data.Factories;
 
@@ -38,10 +39,11 @@ public sealed class DataContextFactory : IProfitSharingDataContextFactory
             {
                 _ = dbBuilder.LogTo(s => Debug.WriteLine(s));
             }
+
             _ = dbBuilder.UseExceptionProcessor();
             _ = dbBuilder.EnableSensitiveDataLogging(Debugger.IsAttached);
             _ = dbBuilder.EnableDetailedErrors(Debugger.IsAttached);
-            _ = dbBuilder.UseOracle(optionsBuilder => _ = optionsBuilder.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19));
+            _ = dbBuilder.UseOracle(optionsBuilder => _ = optionsBuilder.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion21));
         }
 
         MethodInfo addOracleDatabaseDbContext = typeof(AspireOracleEFCoreExtensions)

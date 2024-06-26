@@ -1,4 +1,9 @@
 ﻿using System.Drawing.Text;
+using Demoulas.ProfitSharing.Common.Configuration;
+using Elastic.Channels;
+using Elastic.Ingest.Elasticsearch;
+using Elastic.Ingest.Elasticsearch.DataStreams;
+using Elastic.Serilog.Sinks;
 using Serilog;
 using Serilog.Enrichers.OpenTelemetry;
 using Serilog.Enrichers.Sensitive;
@@ -13,11 +18,28 @@ namespace Demoulas.ProfitSharing.Api.Extensions;
 /// </summary>
 internal static class LoggerConfigurationExtension
 {
-    internal static WebApplicationBuilder SetDefaultLoggerConfiguration(this WebApplicationBuilder builder, string indexPrefix)
+    internal static WebApplicationBuilder SetDefaultLoggerConfiguration(this WebApplicationBuilder builder, ElasticSearchConfig smartConfig)
     {
+        return SetDefaultLoggerConfiguration(builder, config =>
+        {
+            config.EnableElasticSearchLogging = smartConfig.EnableElasticSearchLogging;
+            config.ProjectName = smartConfig.ProjectName;
+            config.Namespace = smartConfig.Namespace;
+            config.ElasticSearchNodes = smartConfig.ElasticSearchNodes;
+        });
+    }
+
+    internal static WebApplicationBuilder SetDefaultLoggerConfiguration(this WebApplicationBuilder builder, Action<ElasticSearchConfig> config)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+
+        ElasticSearchConfig esConfig = new ElasticSearchConfig();
+        config.Invoke(esConfig);
+
+
         const string outputTemplate = "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}";
 
-        Log.Logger = new LoggerConfiguration()
+        var sinks = new LoggerConfiguration()
             .Enrich.WithOpenTelemetryTraceId()
             .Enrich.WithOpenTelemetrySpanId()
             .Enrich.FromLogContext()
@@ -38,31 +60,27 @@ internal static class LoggerConfigurationExtension
                     new CreditCardMaskingOperator()
                 ];
             })
-            .WriteTo.Debug(outputTemplate: outputTemplate)
-            .WriteTo.Console(outputTemplate: outputTemplate, theme: AnsiConsoleTheme.Code)
-            //.WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri("http://products.elasticsearch:9200"))
-            //{
-            //    FailureCallback = e => Console.WriteLine($"Unable to submit event {e.MessageTemplate}"),
-            //    EmitEventFailure = EmitEventFailureHandling.WriteToSelfLog |
-            //                       EmitEventFailureHandling.WriteToFailureSink |
-            //                       EmitEventFailureHandling.RaiseCallback,
-            //    AutoRegisterTemplate = true,
-            //    OverwriteTemplate = true,
-            //    AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv7,
-            //    IndexFormat = $"{indexPrefix}-{0:yyyy.MM}",
-            //    BatchPostingLimit = byte.MaxValue,
-            //    BatchAction = ElasticOpType.Create,
-            //    InlineFields = true,
-            //    NumberOfShards = 20,
-            //    NumberOfReplicas = 10,
-            //})
             .ReadFrom.Configuration(builder.Configuration)
             .Filter.ByExcluding(
                 Matching.WithProperty<string>("RequestPath", v =>
                     "/metrics".Equals(v, StringComparison.OrdinalIgnoreCase) ||
                     "/ready".Equals(v, StringComparison.OrdinalIgnoreCase) ||
                     "/live".Equals(v, StringComparison.OrdinalIgnoreCase)))
-            .CreateLogger();
+            .WriteTo.Debug(outputTemplate: outputTemplate)
+            .WriteTo.Console(theme: AnsiConsoleTheme.Code, outputTemplate: outputTemplate);
+
+        if (esConfig.EnableElasticSearchLogging)
+        {
+            sinks.WriteTo.Elasticsearch(esConfig.ElasticSearchNodes ?? new List<Uri>(0), opts =>
+            {
+                opts.DataStream = new DataStreamName(type: "logs", esConfig.ProjectName ?? builder.Environment.ApplicationName,
+                    esConfig.Namespace ?? builder.Environment.EnvironmentName);
+                opts.BootstrapMethod = BootstrapMethod.Failure;
+                opts.ConfigureChannel = channelOpts => { channelOpts.BufferOptions = new BufferOptions { ExportMaxConcurrency = 10 }; };
+            });
+        }
+
+        Log.Logger = sinks.CreateLogger();
 
         Serilog.Debugging.SelfLog.Enable(Console.Error);
         builder.Host.UseSerilog();
