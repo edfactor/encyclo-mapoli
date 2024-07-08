@@ -15,6 +15,8 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new TerminationCodeMap());
         modelBuilder.ApplyConfiguration(new EmploymentTypeMap());
         modelBuilder.ApplyConfiguration(new DepartmentMap());
+        modelBuilder.ApplyConfiguration(new EnrollmentMap());
+        modelBuilder.ApplyConfiguration(new PayProfitMap());
 
         return modelBuilder;
     }
