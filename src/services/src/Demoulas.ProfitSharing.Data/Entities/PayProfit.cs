@@ -15,12 +15,12 @@ public class PayProfit
     public required string EmployeeSSN { get; set; }
 
     /// <summary>
-    /// Hours towards Profit Sharing in the current year (updated weekly) 
+    /// Hours towards Profit Sharing in the current year (updated weekly)
     /// </summary>
     public required decimal HoursPSYear { get; set; }
 
     /// <summary>
-    /// Dollars earned by the employee in the current year (updated weekly) 
+    /// Dollars earned by the employee in the current year (updated weekly)
     /// </summary>
     public required decimal EarningsPSYear { get; set; }
 
@@ -29,7 +29,15 @@ public class PayProfit
     /// </summary>
     public required byte WeeksWorkedYear { get; set; }
 
-    public required DateOnly PSCertificateIssuedDate { get; set; }
+    /// <summary>
+    /// Years the company has contributed to the employee 
+    /// </summary>
+    public required byte CompanyContributionYears { get; set; }
+
+    /// <summary>
+    /// Date the last PS Certificate was issued
+    /// </summary>
+    public DateOnly? PSCertificateIssuedDate { get; set; }
 
     public required Enrollment Enrollment { get; set; }
 }
