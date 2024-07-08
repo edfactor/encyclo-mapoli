@@ -1,8 +1,6 @@
-﻿using Demoulas.ProfitSharing.Common.Enums;
-using Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection.Emit;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
 

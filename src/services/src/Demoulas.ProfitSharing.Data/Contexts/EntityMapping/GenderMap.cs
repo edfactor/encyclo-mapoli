@@ -1,0 +1,26 @@
+﻿using Demoulas.ProfitSharing.Data.Entities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+internal sealed class GenderMap : IEntityTypeConfiguration<Gender>
+{
+    public void Configure(EntityTypeBuilder<Gender> builder)
+    {
+        builder.ToTable("Gender");
+        builder.HasKey(e => e.Id);
+
+        builder.Property(e => e.Id)
+            .ValueGeneratedNever()
+            .IsRequired();
+
+        builder.Property(e => e.Name)
+            .HasMaxLength(64)
+            .IsRequired();
+
+        builder.HasData(
+            new Gender { Id = Gender.Constants.Male, Name = "Male" },
+            new Gender { Id = Gender.Constants.Female, Name = "Female" },
+            new Gender { Id = Gender.Constants.Other, Name = "Other" }
+        );
+    }
+}

@@ -1,9 +1,10 @@
 ﻿using Demoulas.Common.Contracts.Request;
 using Demoulas.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Enums;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 
@@ -37,7 +38,7 @@ public class GetAllDemographicsEndpoint : Endpoint<PaginationRequestDto, Paginat
                         LastName = "John",
                         FirstName = "Doe",
                         StoreNumber = 0,
-                        Department = (Department)0,
+                        Department = new DepartmentResponseDto { Id = Department.Constants.Produce, Name = "Produce"},
                         PayClassificationId = 0,
                         ContactInfo = new ContactInfoResponseDto(),
                         Address = new AddressResponseDto
@@ -51,9 +52,9 @@ public class GetAllDemographicsEndpoint : Endpoint<PaginationRequestDto, Paginat
                         DateOfBirth = default,
                         HireDate = default,
                         ReHireDate = default,
-                        EmploymentType = (EmploymentType)0,
-                        PayFrequency = (PayFrequency)0,
-                        Gender = (Gender)0
+                        EmploymentType = new EmploymentTypeResponseDto { Name = "Supreme Leader"},
+                        PayFrequency = new PayFrequencyResponseDto { Name = "Hourly"},
+                        Gender = new GenderResponseDto { Name = "Yes"}
                     }
                 }
             } };

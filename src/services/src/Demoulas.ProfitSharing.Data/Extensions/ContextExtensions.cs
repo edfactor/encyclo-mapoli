@@ -7,9 +7,14 @@ internal static class ContextExtensions
     public static ModelBuilder ApplyModelConfiguration(this ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new CountryMap());
-        modelBuilder.ApplyConfiguration(new DefinitionMap());
         modelBuilder.ApplyConfiguration(new DemographicMap());
         modelBuilder.ApplyConfiguration(new PayClassificationMap());
+
+        modelBuilder.ApplyConfiguration(new GenderMap());
+        modelBuilder.ApplyConfiguration(new PayFrequencyMap());
+        modelBuilder.ApplyConfiguration(new TerminationCodeMap());
+        modelBuilder.ApplyConfiguration(new EmploymentTypeMap());
+        modelBuilder.ApplyConfiguration(new DepartmentMap());
 
         return modelBuilder;
     }

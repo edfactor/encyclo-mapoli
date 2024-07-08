@@ -22,13 +22,16 @@ public static class ServicesExtension
         _ = services.AddScoped<IDemographicsService, DemographicsService>();
 
 
-
-
         #region Mappers
 
         services.AddSingleton<AddressMapper>();
         services.AddSingleton<ContactInfoMapper>();
         services.AddSingleton<DemographicMapper>();
+        services.AddSingleton<TerminationCodeMapper>();
+        services.AddSingleton<PayFrequencyMapper>();
+        services.AddSingleton<GenderMapper>();
+        services.AddSingleton<EmploymentTypeMapper>();
+        services.AddSingleton<DepartmentMapper>();
 
         #endregion
 

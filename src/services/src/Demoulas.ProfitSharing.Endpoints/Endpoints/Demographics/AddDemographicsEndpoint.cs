@@ -1,11 +1,8 @@
-﻿using Demoulas.Common.Contracts.Request;
-using Demoulas.Common.Contracts.Response;
-using Demoulas.ProfitSharing.Common;
+﻿using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Enums;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Common.Validators;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 
@@ -29,20 +26,20 @@ public class AddDemographicsEndpoint : Endpoint<IEnumerable<DemographicsRequestD
             s.Summary = "Add Demographics";
             s.ResponseExamples = new Dictionary<int, object> {
             {
-                200, new List<DemographicsRequestDto>
+                200, new List<DemographicsResponseDto>
                 {
-                    new DemographicsRequestDto
+                    new DemographicsResponseDto
                     {
-                        SSN = 123_45_6789,
+                        SSN = "123-45-6789",
                         OracleHcmId = 0,
                         FullName = "John Doe",
                         LastName = "John",
                         FirstName = "Doe",
                         StoreNumber = 0,
-                        Department = (Department)0,
+                        Department = new DepartmentResponseDto { Id = Department.Constants.Produce, Name = "Produce"},
                         PayClassificationId = 0,
-                        ContactInfo = new ContactInfoRequestDto(),
-                        Address = new AddressRequestDto
+                        ContactInfo = new ContactInfoResponseDto(),
+                        Address = new AddressResponseDto
                         {
                             Street = "123 Street",
                             State = "MA",
@@ -53,9 +50,9 @@ public class AddDemographicsEndpoint : Endpoint<IEnumerable<DemographicsRequestD
                         DateOfBirth = default,
                         HireDate = default,
                         ReHireDate = default,
-                        EmploymentType = (EmploymentType)0,
-                        PayFrequency = (PayFrequency)0,
-                        Gender = (Gender)0
+                        EmploymentType = new EmploymentTypeResponseDto { Name = "Supreme Leader"},
+                        PayFrequency = new PayFrequencyResponseDto { Name = "Hourly"},
+                        Gender = new GenderResponseDto { Name = "Yes"}
                     }
                 }
             } };

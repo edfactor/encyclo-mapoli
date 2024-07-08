@@ -1,5 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Enums;
-using Demoulas.ProfitSharing.Data.Entities.Base;
+﻿using Demoulas.ProfitSharing.Data.Entities.Base;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
 
@@ -17,7 +16,6 @@ public sealed class Demographic : Member
     public string? MiddleName { get; set; }
     public required short StoreNumber { get; set; }
 
-    public required Department Department { get; set; }
     public PayClassification? PayClassification { get; set; }
     public required byte PayClassificationId { get; set; }
 
@@ -33,9 +31,21 @@ public sealed class Demographic : Member
     public required DateOnly HireDate { get; set; }
     public required DateOnly ReHireDate { get; set; }
 
-    public TerminationCode TerminationCode { get; set; }
     public DateOnly? TerminationDate { get; set; }
-    public required EmploymentType EmploymentType { get; set; }
-    public required PayFrequency PayFrequency { get; set; }
-    public required Gender Gender { get; set; }
+
+
+    public byte DepartmentId { get; set; }
+    public Department? Department { get; set; }
+
+    public char EmploymentTypeId { get; set; }
+    public EmploymentType? EmploymentType { get; set; }
+
+    public char GenderId { get; set; }
+    public Gender? Gender { get; set; }
+
+    public byte PayFrequencyId { get; set; }
+    public PayFrequency? PayFrequency { get; set; }
+
+    public char TerminationCodeId { get; set; }
+    public TerminationCode? TerminationCode { get; set; }
 }

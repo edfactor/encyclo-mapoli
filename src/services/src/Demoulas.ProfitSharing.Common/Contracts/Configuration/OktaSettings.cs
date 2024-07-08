@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Demoulas.ProfitSharing.Common.Contracts.Configuration;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Configuration;
 public record OktaSettings
 {
     public required string ClientId { get; init; }

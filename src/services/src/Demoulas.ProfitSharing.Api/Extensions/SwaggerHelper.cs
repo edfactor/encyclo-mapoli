@@ -1,7 +1,5 @@
-﻿using System.Configuration;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Demoulas.ProfitSharing.Common.Contracts.Configuration;
-using Elastic.CommonSchema;
 using FastEndpoints.Swagger;
 using NSwag;
 using NSwag.Generation.AspNetCore;

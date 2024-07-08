@@ -1,5 +1,4 @@
-﻿using System.Drawing.Text;
-using Demoulas.ProfitSharing.Common.Configuration;
+﻿using Demoulas.ProfitSharing.Common.Configuration;
 using Elastic.Channels;
 using Elastic.Ingest.Elasticsearch;
 using Elastic.Ingest.Elasticsearch.DataStreams;

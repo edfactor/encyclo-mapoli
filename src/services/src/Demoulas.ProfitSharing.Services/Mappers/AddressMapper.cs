@@ -13,4 +13,5 @@ public partial class AddressMapper
     public partial AddressResponseDto Map(Address source);
     public partial Address Map(AddressRequestDto source);
 
+    public partial AddressRequestDto MapToAddressRequestDto(Address source);
 }

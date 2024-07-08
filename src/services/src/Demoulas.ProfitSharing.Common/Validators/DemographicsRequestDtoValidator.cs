@@ -37,7 +37,7 @@ public class DemographicsRequestDtoValidator : Validator<DemographicsRequestDto>
             .InclusiveBetween((short)1, (short)999)
             .WithMessage("StoreNumber must be a 3-digit number.");
 
-        RuleFor(x => x.Department)
+        RuleFor(x => x.DepartmentId)
             .NotEmpty().WithMessage("Department is required.");
 
         RuleFor(x => x.PayClassificationId)
@@ -58,17 +58,5 @@ public class DemographicsRequestDtoValidator : Validator<DemographicsRequestDto>
 
         RuleFor(x => x.ReHireDate)
             .NotEmpty().WithMessage("ReHireDate is required.");
-
-        RuleFor(x => x.TerminationCode)
-            .IsInEnum().WithMessage("TerminationCode must be a valid enum value.");
-
-        RuleFor(x => x.EmploymentType)
-            .IsInEnum().WithMessage("EmploymentType must be a valid enum value.");
-
-        RuleFor(x => x.PayFrequency)
-            .IsInEnum().WithMessage("PayFrequency must be a valid enum value.");
-
-        RuleFor(x => x.Gender)
-            .IsInEnum().WithMessage("Gender must be a valid enum value.");
     }
 }

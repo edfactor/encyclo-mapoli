@@ -17,7 +17,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 columns: table => new
                 {
                     ISO = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: false),
-                    Id = table.Column<short>(type: "NUMBER(3)", nullable: false, precision: 3),
+                    Id = table.Column<short>(type: "NUMBER(3)", precision: 3, nullable: false),
                     Name = table.Column<string>(type: "NVARCHAR2(100)", maxLength: 100, nullable: false),
                     TelephoneCode = table.Column<string>(type: "NVARCHAR2(10)", maxLength: 10, nullable: false)
                 },
@@ -27,22 +27,46 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Definition",
+                name: "Department",
                 columns: table => new
                 {
-                    Key = table.Column<string>(type: "NVARCHAR2(24)", maxLength: 24, nullable: false),
-                    Description = table.Column<string>(type: "NVARCHAR2(255)", maxLength: 255, nullable: false)
+                    Id = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    Name = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Definition", x => x.Key);
+                    table.PrimaryKey("PK_Department", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "EmploymentType",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
+                    Name = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EmploymentType", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Gender",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
+                    Name = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Gender", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
                 name: "PayClassification",
                 columns: table => new
                 {
-                    Id = table.Column<byte>(type: "NUMBER(2)", nullable: false, precision: 2),
+                    Id = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false),
                     Name = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: false, comment: "Pay Classification")
                 },
                 constraints: table =>
@@ -51,40 +75,65 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "PayFrequency",
+                columns: table => new
+                {
+                    Id = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    Name = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PayFrequency", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TerminationCode",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
+                    Description = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TerminationCode", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "DEMOGRAPHICS",
                 columns: table => new
                 {
-                    DEM_BADGE = table.Column<int>(type: "NUMBER(7)", nullable: false, precision: 7),
-                    PY_ASSIGN_ID = table.Column<long>(type: "NUMBER(15)", nullable: false, precision: 15),
+                    DEM_SSN = table.Column<long>(type: "NUMBER(9)", precision: 9, nullable: false),
+                    DEM_BADGE = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false),
+                    PY_ASSIGN_ID = table.Column<long>(type: "NUMBER(15)", precision: 15, nullable: false),
                     PY_NAM = table.Column<string>(type: "NVARCHAR2(60)", maxLength: 60, nullable: false, comment: "FullName"),
                     PY_LNAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "LastName"),
                     PY_FNAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "FirstName"),
                     PY_MNAME = table.Column<string>(type: "NVARCHAR2(25)", maxLength: 25, nullable: true, comment: "MiddleName"),
-                    PY_STOR = table.Column<short>(type: "NUMBER(3)", nullable: false, comment: "StoreNumber", precision: 3),
-                    PY_DP = table.Column<byte>(type: "NUMBER(1)", nullable: false, comment: "Department", precision: 1),
-                    PY_CLA = table.Column<byte>(type: "NUMBER(2)", nullable: false, comment: "PayClassification", precision: 2),
-                    PY_EMP_TELNO = table.Column<string>(type: "NVARCHAR2(10)", maxLength: 10, nullable: false, comment: "PhoneNumber"),
-                    MobileNumber = table.Column<string>(type: "NVARCHAR2(10)", maxLength: 10, nullable: true),
+                    PY_STOR = table.Column<short>(type: "NUMBER(3)", precision: 3, nullable: false, comment: "StoreNumber"),
+                    PY_CLA = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false, comment: "PayClassification"),
+                    PY_EMP_TELNO = table.Column<string>(type: "NVARCHAR2(15)", maxLength: 15, nullable: false, comment: "PhoneNumber"),
+                    MobileNumber = table.Column<string>(type: "NVARCHAR2(15)", maxLength: 15, nullable: true),
                     EmailAddress = table.Column<string>(type: "NVARCHAR2(50)", maxLength: 50, nullable: true),
                     PY_ADD = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "Street"),
                     PY_ADD2 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "Street2"),
                     PY_CITY = table.Column<string>(type: "NVARCHAR2(25)", maxLength: 25, nullable: false, comment: "City"),
                     PY_STATE = table.Column<string>(type: "NVARCHAR2(3)", maxLength: 3, nullable: false, comment: "State"),
-                    PY_ZIP = table.Column<int>(type: "NUMBER(9)", nullable: false, comment: "Postal Code", precision: 9),
+                    PY_ZIP = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false, comment: "Postal Code"),
                     CountryISO = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: false, defaultValue: "US"),
-                    PY_DOB = table.Column<int>(type: "NUMBER(8)", nullable: false, comment: "DateOfBirth", precision: 8),
-                    PY_FULL_DT = table.Column<int>(type: "NUMBER(8)", nullable: false, comment: "FullTimeDate", precision: 8),
-                    PY_HIRE_DT = table.Column<int>(type: "NUMBER(8)", nullable: false, comment: "HireDate", precision: 8),
-                    PY_REHIRE_DT = table.Column<int>(type: "NUMBER(8)", nullable: false, comment: "ReHireDate", precision: 8),
-                    PY_TERM = table.Column<string>(type: "NVARCHAR2(1)", maxLength: 1, nullable: false, comment: "TerminationCode"),
-                    PY_TERM_DT = table.Column<int>(type: "NUMBER(8)", nullable: true, comment: "TerminationDate", precision: 8),
+                    PY_DOB = table.Column<int>(type: "NUMBER(8)", precision: 8, nullable: false, comment: "DateOfBirth"),
+                    PY_FULL_DT = table.Column<int>(type: "NUMBER(8)", precision: 8, nullable: false, comment: "FullTimeDate"),
+                    PY_HIRE_DT = table.Column<int>(type: "NUMBER(8)", precision: 8, nullable: false, comment: "HireDate"),
+                    PY_REHIRE_DT = table.Column<int>(type: "NUMBER(8)", precision: 8, nullable: false, comment: "ReHireDate"),
+                    PY_TERM_DT = table.Column<int>(type: "NUMBER(8)", precision: 8, nullable: true, comment: "TerminationDate"),
+                    PY_DP = table.Column<byte>(type: "NUMBER(1)", precision: 1, nullable: false, comment: "Department"),
                     PY_FUL = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: false, comment: "EmploymentType"),
-                    PY_FREQ = table.Column<string>(type: "NVARCHAR2(1)", maxLength: 1, nullable: false, comment: "PayFrequency"),
-                    PY_GENDER = table.Column<string>(type: "NVARCHAR2(1)", maxLength: 1, nullable: false, comment: "Gender")
+                    PY_GENDER = table.Column<string>(type: "NVARCHAR2(1)", maxLength: 1, nullable: false, comment: "Gender"),
+                    PY_FREQ = table.Column<byte>(type: "NUMBER(3)", maxLength: 1, nullable: false, comment: "PayFrequency"),
+                    PY_TERM = table.Column<string>(type: "NVARCHAR2(1)", maxLength: 1, nullable: false, comment: "TerminationCode")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DEMOGRAPHICS", x => x.DEM_BADGE);
+                    table.PrimaryKey("PK_DEMOGRAPHICS", x => x.DEM_SSN);
                     table.ForeignKey(
                         name: "FK_DEMOGRAPHICS_Country_CountryISO",
                         column: x => x.CountryISO,
@@ -92,9 +141,39 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         principalColumn: "ISO",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
+                        name: "FK_DEMOGRAPHICS_Department_PY_DP",
+                        column: x => x.PY_DP,
+                        principalTable: "Department",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_DEMOGRAPHICS_EmploymentType_PY_FUL",
+                        column: x => x.PY_FUL,
+                        principalTable: "EmploymentType",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_DEMOGRAPHICS_Gender_PY_GENDER",
+                        column: x => x.PY_GENDER,
+                        principalTable: "Gender",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
                         name: "FK_DEMOGRAPHICS_PayClassification_PY_CLA",
                         column: x => x.PY_CLA,
                         principalTable: "PayClassification",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_DEMOGRAPHICS_PayFrequency_PY_FREQ",
+                        column: x => x.PY_FREQ,
+                        principalTable: "PayFrequency",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_DEMOGRAPHICS_TerminationCode_PY_TERM",
+                        column: x => x.PY_TERM,
+                        principalTable: "TerminationCode",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -301,15 +380,38 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Definition",
-                columns: new[] { "Key", "Description" },
+                table: "Department",
+                columns: new[] { "Id", "Name" },
                 values: new object[,]
                 {
-                    { "F", "Full time 8 paid holidays " },
-                    { "G", "Full time accrued paid holidays" },
-                    { "H", "Full time(straight salary)" },
-                    { "P", "Part Time" },
-                    { "PF", "Pay frequency (1=weekly, 2=monthly)" }
+                    { (byte)1, "Grocery" },
+                    { (byte)2, "Meat" },
+                    { (byte)3, "Produce" },
+                    { (byte)4, "Deli" },
+                    { (byte)5, "Dairy" },
+                    { (byte)6, "Beer and Wine" },
+                    { (byte)7, "Bakery" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "EmploymentType",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { "F", "FullTimeEightPaidHolidays" },
+                    { "G", "FullTimeAccruedPaidHolidays" },
+                    { "H", "FullTimeStraightSalary" },
+                    { "P", "PartTime" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Gender",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { "F", "Female" },
+                    { "M", "Male" },
+                    { "X", "Other" }
                 });
 
             migrationBuilder.InsertData(
@@ -404,6 +506,32 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     { (byte)98, "TRAINING" }
                 });
 
+            migrationBuilder.InsertData(
+                table: "PayFrequency",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { (byte)1, "Weekly" },
+                    { (byte)2, "Monthly" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "TerminationCode",
+                columns: new[] { "Id", "Description" },
+                values: new object[,]
+                {
+                    { "A", "Left On Own" },
+                    { "B", "Personal Or Family Reason" },
+                    { "C", "Could Not Work Available Hours" },
+                    { "D", "Stealing" },
+                    { "E", "Not Following Company Policy" },
+                    { "F", "FMLA Expired" },
+                    { "G", "Terminated Private" },
+                    { "H", "Job Abandonment" },
+                    { "I", "Health Reasons Non-FMLA" },
+                    { "J", "Layoff No Work" }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_DEMOGRAPHICS_CountryISO",
                 table: "DEMOGRAPHICS",
@@ -413,14 +541,36 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "IX_DEMOGRAPHICS_PY_CLA",
                 table: "DEMOGRAPHICS",
                 column: "PY_CLA");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DEMOGRAPHICS_PY_DP",
+                table: "DEMOGRAPHICS",
+                column: "PY_DP");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DEMOGRAPHICS_PY_FREQ",
+                table: "DEMOGRAPHICS",
+                column: "PY_FREQ");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DEMOGRAPHICS_PY_FUL",
+                table: "DEMOGRAPHICS",
+                column: "PY_FUL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DEMOGRAPHICS_PY_GENDER",
+                table: "DEMOGRAPHICS",
+                column: "PY_GENDER");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DEMOGRAPHICS_PY_TERM",
+                table: "DEMOGRAPHICS",
+                column: "PY_TERM");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "Definition");
-
             migrationBuilder.DropTable(
                 name: "DEMOGRAPHICS");
 
@@ -428,7 +578,22 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "Country");
 
             migrationBuilder.DropTable(
+                name: "Department");
+
+            migrationBuilder.DropTable(
+                name: "EmploymentType");
+
+            migrationBuilder.DropTable(
+                name: "Gender");
+
+            migrationBuilder.DropTable(
                 name: "PayClassification");
+
+            migrationBuilder.DropTable(
+                name: "PayFrequency");
+
+            migrationBuilder.DropTable(
+                name: "TerminationCode");
         }
     }
 }

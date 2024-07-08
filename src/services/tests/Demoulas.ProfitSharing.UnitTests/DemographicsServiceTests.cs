@@ -22,7 +22,13 @@ public class DemographicsServiceTests : IClassFixture<ApiTestBase<Program>>
     public DemographicsServiceTests(ApiTestBase<Program> fixture)
     {
         _demographicsClient = new DemographicsClient(fixture.ApiClient);
-        _mapper = new DemographicMapper(new AddressMapper(), new ContactInfoMapper());
+        _mapper = new DemographicMapper(new AddressMapper(), 
+            new ContactInfoMapper(), 
+            new DepartmentMapper(), 
+            new EmploymentTypeMapper(),
+            new PayFrequencyMapper(), 
+            new GenderMapper(), 
+            new TerminationCodeMapper());
     }
 
     [Fact(DisplayName = "Get all demographics")]

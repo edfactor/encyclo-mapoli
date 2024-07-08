@@ -1,9 +1,7 @@
-﻿// DemographicMapper.cs
-
-using System.Data.SqlTypes;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Data.Entities;
+using OpenTelemetry.Resources;
 using Riok.Mapperly.Abstractions;
 
 namespace Demoulas.ProfitSharing.Services.Mappers;
@@ -13,20 +11,65 @@ public partial class DemographicMapper
 {
     private readonly AddressMapper _addressMapper;
     private readonly ContactInfoMapper _contactInfoMapper;
+    private readonly DepartmentMapper _departmentMapper;
+    private readonly EmploymentTypeMapper _employmentTypeMapper;
+    private readonly PayFrequencyMapper _payFrequencyMapper;
+    private readonly GenderMapper _genderMapper;
+    private readonly TerminationCodeMapper _terminationCodeMapper;
 
-    public DemographicMapper(AddressMapper addressMapper, ContactInfoMapper contactInfoMapper)
+    public DemographicMapper(AddressMapper addressMapper, 
+        ContactInfoMapper contactInfoMapper, 
+        DepartmentMapper departmentMapper, 
+        EmploymentTypeMapper employmentTypeMapper,
+        PayFrequencyMapper payFrequencyMapper,
+        GenderMapper genderMapper,
+        TerminationCodeMapper terminationCodeMapper)
     {
         _addressMapper = addressMapper;
         _contactInfoMapper = contactInfoMapper;
+        _departmentMapper = departmentMapper;
+        _employmentTypeMapper = employmentTypeMapper;
+        _payFrequencyMapper = payFrequencyMapper;
+        _genderMapper = genderMapper;
+        _terminationCodeMapper = terminationCodeMapper;
     }
 
     public partial IEnumerable<DemographicsRequestDto> MapToRequest(IEnumerable<Demographic> sources);
+
+    public DemographicsRequestDto MapToRequest(Demographic source)
+    {
+        var target = new DemographicsRequestDto
+        {
+            SSN = source.SSN,
+            OracleHcmId = source.OracleHcmId,
+            LastName = source.LastName,
+            FirstName = source.FirstName,
+            StoreNumber = source.StoreNumber,
+            DepartmentId = source.DepartmentId,
+            PayClassificationId = source.PayClassificationId,
+            ContactInfo = _contactInfoMapper.MapToContactInfoRequestDto(source.ContactInfo),
+            Address = _addressMapper.MapToAddressRequestDto(source.Address),
+            DateOfBirth = source.DateOfBirth,
+            HireDate = source.HireDate,
+            ReHireDate = source.ReHireDate,
+            PayFrequencyId = source.PayFrequencyId,
+            EmploymentTypeCode = source.EmploymentTypeId,
+            GenderCode = source.GenderId,
+            TerminationCodeId = source.TerminationCodeId,
+            BadgeNumber = source.BadgeNumber,
+            FullName = source.FullName,
+            MiddleName = source.MiddleName,
+            FullTimeDate = source.FullTimeDate,
+            TerminationDate = source.TerminationDate
+        };
+        return target;
+    }
 
     public partial IEnumerable<DemographicsResponseDto> Map(IEnumerable<Demographic> sources);
 
     public DemographicsResponseDto Map(Demographic source)
     {
-        var target = new DemographicsResponseDto()
+        var target = new DemographicsResponseDto
         {
             SSN = MaskSsn(source.SSN),
             OracleHcmId = source.OracleHcmId,
@@ -34,21 +77,21 @@ public partial class DemographicMapper
             LastName = source.LastName,
             FirstName = source.FirstName,
             StoreNumber = source.StoreNumber,
-            Department = source.Department,
+            Department = _departmentMapper.Map(source.Department),
             PayClassificationId = source.PayClassificationId,
             ContactInfo = _contactInfoMapper.Map(source.ContactInfo),
             DateOfBirth = source.DateOfBirth,
             HireDate = source.HireDate,
             ReHireDate = source.ReHireDate,
-            EmploymentType = source.EmploymentType,
-            PayFrequency = source.PayFrequency,
-            Gender = source.Gender,
+            EmploymentType = _employmentTypeMapper.Map(source.EmploymentType),
+            PayFrequency = _payFrequencyMapper.Map(source.PayFrequency),
+            Gender = _genderMapper.Map(source.Gender),
         };
         target.BadgeNumber = source.BadgeNumber;
         target.MiddleName = source.MiddleName;
         target.Address = _addressMapper.Map(source.Address);
         target.FullTimeDate = source.FullTimeDate;
-        target.TerminationCode = source.TerminationCode;
+        target.TerminationCode = _terminationCodeMapper.Map(source.TerminationCode);
         target.TerminationDate = source.TerminationDate;
         return target;
     }
@@ -67,7 +110,7 @@ public partial class DemographicMapper
             FirstName = source.FirstName,
             MiddleName = source.MiddleName,
             StoreNumber = source.StoreNumber,
-            Department = source.Department,
+            DepartmentId = source.DepartmentId,
             PayClassificationId = source.PayClassificationId,
             ContactInfo = _contactInfoMapper.Map(source.ContactInfo),
             Address = _addressMapper.Map(source.Address),
@@ -75,11 +118,11 @@ public partial class DemographicMapper
             FullTimeDate = source.FullTimeDate,
             HireDate = source.HireDate,
             ReHireDate = source.ReHireDate,
-            TerminationCode = source.TerminationCode,
+            TerminationCodeId = source.TerminationCodeId,
             TerminationDate = source.TerminationDate,
-            EmploymentType = source.EmploymentType,
-            PayFrequency = source.PayFrequency,
-            Gender = source.Gender
+            EmploymentTypeId = source.EmploymentTypeCode,
+            PayFrequencyId = source.PayFrequencyId,
+            GenderId = source.GenderCode,
         };
     }
 

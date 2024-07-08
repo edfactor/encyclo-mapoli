@@ -1,5 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Enums;
-
+﻿
 namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 
 public record DemographicsRequestDto : MemberRequestDto
@@ -14,7 +13,7 @@ public record DemographicsRequestDto : MemberRequestDto
     public string? MiddleName { get; set; }
     public required short StoreNumber { get; set; }
 
-    public required Department Department { get; set; }
+    public required byte DepartmentId { get; set; }
     public required byte PayClassificationId { get; set; }
 
     public required ContactInfoRequestDto ContactInfo { get; set; }
@@ -28,11 +27,11 @@ public record DemographicsRequestDto : MemberRequestDto
 
     public required DateOnly HireDate { get; set; }
     public required DateOnly ReHireDate { get; set; }
-    public TerminationCode TerminationCode { get; set; }
+    public char TerminationCodeId { get; set; }
     public DateOnly? TerminationDate { get; set; }
-    public required EmploymentType EmploymentType { get; set; }
-    public required PayFrequency PayFrequency { get; set; }
+    public required char EmploymentTypeCode { get; set; }
+    public required byte PayFrequencyId { get; set; }
 
-    public required Gender Gender { get; set; }
+    public required char GenderCode { get; set; }
 
 }

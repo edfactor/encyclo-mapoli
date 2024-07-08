@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using System.Text.Json;
 using Demoulas.Common.Contracts.Request;
 using Demoulas.Common.Contracts.Response;

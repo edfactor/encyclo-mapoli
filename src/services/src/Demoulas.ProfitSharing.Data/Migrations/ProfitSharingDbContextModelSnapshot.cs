@@ -1407,49 +1407,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Definition", b =>
-                {
-                    b.Property<string>("Key")
-                        .HasMaxLength(24)
-                        .HasColumnType("NVARCHAR2(24)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("NVARCHAR2(255)");
-
-                    b.HasKey("Key");
-
-                    b.ToTable("Definition", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Key = "P",
-                            Description = "Part Time"
-                        },
-                        new
-                        {
-                            Key = "H",
-                            Description = "Full time(straight salary)"
-                        },
-                        new
-                        {
-                            Key = "G",
-                            Description = "Full time accrued paid holidays"
-                        },
-                        new
-                        {
-                            Key = "F",
-                            Description = "Full time 8 paid holidays"
-                        },
-                        new
-                        {
-                            Key = "PF",
-                            Description = "Pay frequency (1=weekly, 2=monthly)"
-                        });
-                });
-
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Demographic", b =>
                 {
                     b.Property<long>("SSN")
@@ -1468,13 +1425,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("PY_DOB")
                         .HasComment("DateOfBirth");
 
-                    b.Property<byte>("Department")
+                    b.Property<byte>("DepartmentId")
                         .HasPrecision(1)
                         .HasColumnType("NUMBER(1)")
                         .HasColumnName("PY_DP")
                         .HasComment("Department");
 
-                    b.Property<string>("EmploymentType")
+                    b.Property<string>("EmploymentTypeId")
                         .IsRequired()
                         .HasMaxLength(2)
                         .HasColumnType("NVARCHAR2(2)")
@@ -1501,7 +1458,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("PY_FULL_DT")
                         .HasComment("FullTimeDate");
 
-                    b.Property<char>("Gender")
+                    b.Property<string>("GenderId")
+                        .IsRequired()
                         .HasMaxLength(1)
                         .HasColumnType("NVARCHAR2(1)")
                         .HasColumnName("PY_GENDER")
@@ -1537,9 +1495,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("PY_CLA")
                         .HasComment("PayClassification");
 
-                    b.Property<char>("PayFrequency")
+                    b.Property<byte>("PayFrequencyId")
                         .HasMaxLength(1)
-                        .HasColumnType("NVARCHAR2(1)")
+                        .HasColumnType("NUMBER(3)")
                         .HasColumnName("PY_FREQ")
                         .HasComment("PayFrequency");
 
@@ -1555,7 +1513,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("PY_STOR")
                         .HasComment("StoreNumber");
 
-                    b.Property<char>("TerminationCode")
+                    b.Property<string>("TerminationCodeId")
+                        .IsRequired()
                         .HasMaxLength(1)
                         .HasColumnType("NVARCHAR2(1)")
                         .HasColumnName("PY_TERM")
@@ -1569,9 +1528,140 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasKey("SSN");
 
+                    b.HasIndex("DepartmentId");
+
+                    b.HasIndex("EmploymentTypeId");
+
+                    b.HasIndex("GenderId");
+
                     b.HasIndex("PayClassificationId");
 
+                    b.HasIndex("PayFrequencyId");
+
+                    b.HasIndex("TerminationCodeId");
+
                     b.ToTable("DEMOGRAPHICS", (string)null);
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Department", b =>
+                {
+                    b.Property<byte>("Id")
+                        .HasColumnType("NUMBER(3)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("NVARCHAR2(64)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Department", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = (byte)1,
+                            Name = "Grocery"
+                        },
+                        new
+                        {
+                            Id = (byte)2,
+                            Name = "Meat"
+                        },
+                        new
+                        {
+                            Id = (byte)3,
+                            Name = "Produce"
+                        },
+                        new
+                        {
+                            Id = (byte)4,
+                            Name = "Deli"
+                        },
+                        new
+                        {
+                            Id = (byte)5,
+                            Name = "Dairy"
+                        },
+                        new
+                        {
+                            Id = (byte)6,
+                            Name = "Beer and Wine"
+                        },
+                        new
+                        {
+                            Id = (byte)7,
+                            Name = "Bakery"
+                        });
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.EmploymentType", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("NVARCHAR2(1)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("NVARCHAR2(64)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("EmploymentType", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "P",
+                            Name = "PartTime"
+                        },
+                        new
+                        {
+                            Id = "H",
+                            Name = "FullTimeStraightSalary"
+                        },
+                        new
+                        {
+                            Id = "G",
+                            Name = "FullTimeAccruedPaidHolidays"
+                        },
+                        new
+                        {
+                            Id = "F",
+                            Name = "FullTimeEightPaidHolidays"
+                        });
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Gender", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("NVARCHAR2(1)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("NVARCHAR2(64)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Gender", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "M",
+                            Name = "Male"
+                        },
+                        new
+                        {
+                            Id = "F",
+                            Name = "Female"
+                        },
+                        new
+                        {
+                            Id = "X",
+                            Name = "Other"
+                        });
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.PayClassification", b =>
@@ -2018,11 +2108,135 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.PayFrequency", b =>
+                {
+                    b.Property<byte>("Id")
+                        .HasColumnType("NUMBER(3)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("NVARCHAR2(64)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PayFrequency", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = (byte)1,
+                            Name = "Weekly"
+                        },
+                        new
+                        {
+                            Id = (byte)2,
+                            Name = "Monthly"
+                        });
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.TerminationCode", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("NVARCHAR2(1)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("NVARCHAR2(64)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TerminationCode", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "A",
+                            Description = "Left On Own"
+                        },
+                        new
+                        {
+                            Id = "B",
+                            Description = "Personal Or Family Reason"
+                        },
+                        new
+                        {
+                            Id = "C",
+                            Description = "Could Not Work Available Hours"
+                        },
+                        new
+                        {
+                            Id = "D",
+                            Description = "Stealing"
+                        },
+                        new
+                        {
+                            Id = "E",
+                            Description = "Not Following Company Policy"
+                        },
+                        new
+                        {
+                            Id = "F",
+                            Description = "FMLA Expired"
+                        },
+                        new
+                        {
+                            Id = "G",
+                            Description = "Terminated Private"
+                        },
+                        new
+                        {
+                            Id = "H",
+                            Description = "Job Abandonment"
+                        },
+                        new
+                        {
+                            Id = "I",
+                            Description = "Health Reasons Non-FMLA"
+                        },
+                        new
+                        {
+                            Id = "J",
+                            Description = "Layoff No Work"
+                        });
+                });
+
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Demographic", b =>
                 {
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Department", "Department")
+                        .WithMany("Demographics")
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.EmploymentType", "EmploymentType")
+                        .WithMany("Demographics")
+                        .HasForeignKey("EmploymentTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Gender", "Gender")
+                        .WithMany("Demographics")
+                        .HasForeignKey("GenderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.PayClassification", "PayClassification")
-                        .WithMany()
+                        .WithMany("Employees")
                         .HasForeignKey("PayClassificationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.PayFrequency", "PayFrequency")
+                        .WithMany("Demographics")
+                        .HasForeignKey("PayFrequencyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.TerminationCode", "TerminationCode")
+                        .WithMany("Demographics")
+                        .HasForeignKey("TerminationCodeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -2125,7 +2339,47 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Navigation("ContactInfo")
                         .IsRequired();
 
+                    b.Navigation("Department");
+
+                    b.Navigation("EmploymentType");
+
+                    b.Navigation("Gender");
+
                     b.Navigation("PayClassification");
+
+                    b.Navigation("PayFrequency");
+
+                    b.Navigation("TerminationCode");
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Department", b =>
+                {
+                    b.Navigation("Demographics");
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.EmploymentType", b =>
+                {
+                    b.Navigation("Demographics");
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Gender", b =>
+                {
+                    b.Navigation("Demographics");
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.PayClassification", b =>
+                {
+                    b.Navigation("Employees");
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.PayFrequency", b =>
+                {
+                    b.Navigation("Demographics");
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.TerminationCode", b =>
+                {
+                    b.Navigation("Demographics");
                 });
 #pragma warning restore 612, 618
         }

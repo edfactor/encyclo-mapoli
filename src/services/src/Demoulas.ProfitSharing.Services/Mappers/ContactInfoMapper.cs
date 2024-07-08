@@ -13,4 +13,6 @@ public partial class ContactInfoMapper
     public partial ContactInfoResponseDto Map(ContactInfo source);
     public partial ContactInfo Map(ContactInfoRequestDto source);
 
+    public partial ContactInfoRequestDto MapToContactInfoRequestDto(ContactInfo source);
+
 }

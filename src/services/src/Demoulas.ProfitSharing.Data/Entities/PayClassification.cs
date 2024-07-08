@@ -95,4 +95,6 @@ public sealed class PayClassification
 
     public byte Id { get; set; }
     public required string Name { get; set; }
+
+    public IEnumerable<Demographic>? Employees { get; set; }
 }

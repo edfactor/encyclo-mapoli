@@ -1,7 +1,5 @@
 ﻿using Demoulas.Common.Data.Contexts.ValueConverters;
 using Demoulas.ProfitSharing.Common;
-using Demoulas.ProfitSharing.Common.Enums;
-using Demoulas.ProfitSharing.Data.Contexts.ValueConverters;
 using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -61,20 +59,15 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             .HasComment("StoreNumber")
             .HasColumnName("PY_STOR");
 
-        _ = builder.Property(e => e.Department)
+        _ = builder.Property(e => e.DepartmentId)
             .HasPrecision(1)
             .HasComment("Department")
-            .HasColumnName("PY_DP")
-            .HasConversion<DepartmentEnumConverter>();
+            .HasColumnName("PY_DP");
 
         builder.Property(e => e.PayClassificationId)
             .HasColumnName("PY_CLA")
             .HasComment("PayClassification")
             .HasPrecision(2);
-
-        builder.HasOne(e => e.PayClassification)
-            .WithMany()
-            .HasForeignKey(e => e.PayClassificationId);
 
         _ = builder.Property(e => e.DateOfBirth)
             .HasPrecision(8)
@@ -94,11 +87,10 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             .HasColumnName("PY_REHIRE_DT")
             .HasConversion<IntegerToDateOnlyConverterYyyyMMdd>();
 
-        _ = builder.Property(e => e.TerminationCode)
+        _ = builder.Property(e => e.TerminationCodeId)
             .HasMaxLength(1)
             .HasComment("TerminationCode")
-            .HasColumnName("PY_TERM")
-            .HasConversion<TerminationCodeEnumConverter>();
+            .HasColumnName("PY_TERM");
         
 
         _ = builder.Property(e => e.TerminationDate)
@@ -113,37 +105,21 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             .HasColumnName("PY_FULL_DT")
             .HasConversion<IntegerToDateOnlyConverterYyyyMMdd>();
 
-        _ = builder.Property(e => e.EmploymentType)
+        _ = builder.Property(e => e.EmploymentTypeId)
             .HasMaxLength(2)
             .HasComment("EmploymentType")
-            .HasColumnName("PY_FUL")
-            .HasConversion<EmploymentTypeConverter>();
+            .HasColumnName("PY_FUL");
 
-        _ = builder.Property(e => e.PayFrequency)
+        _ = builder.Property(e => e.PayFrequencyId)
             .HasMaxLength(1)
             .HasComment("PayFrequency")
-            .HasColumnName("PY_FREQ")
-            .HasConversion<PayFrequencyConverter>();
+            .HasColumnName("PY_FREQ");
 
-        _ = builder.Property(e => e.Gender)
+        _ = builder.Property(e => e.GenderId)
             .HasMaxLength(1)
             .HasComment("Gender")
-            .HasColumnName("PY_GENDER")
-            .HasConversion<GenderEnumConverter>();
+            .HasColumnName("PY_GENDER");
 
-
-        //"PY_TYPE" CHAR(1),
-        //"PY_SCOD" CHAR(1),
-
-        
-        //"PY_ASSIGN_DESC" CHAR(15),
-        //"PY_NEW_EMP" CHAR(1),
-
-        //"PY_SHOUR" NUMBER(5, 2),
-        //"PY_SET_PWD" CHAR(1),
-        //"PY_SET_PWD_DT" DATE,
-        //"PY_CLASS_DT" NUMBER(8, 0),
-        //"PY_GUID" VARCHAR2(256),
 
         builder.OwnsOne(e => e.Address, address =>
         {
@@ -165,5 +141,30 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             contact.Property(a => a.MobileNumber).HasMaxLength(15).HasColumnName("MobileNumber");
             contact.Property(a => a.EmailAddress).HasMaxLength(50).HasColumnName("EmailAddress");
         });
+
+
+        builder.HasOne(e => e.PayClassification)
+            .WithMany(e=> e.Employees)
+            .HasForeignKey(e => e.PayClassificationId);
+
+        builder.HasOne(d => d.Department)
+            .WithMany(p => p.Demographics)
+            .HasForeignKey(d => d.DepartmentId);
+
+        builder.HasOne(d => d.EmploymentType)
+            .WithMany(p => p.Demographics)
+            .HasForeignKey(d => d.EmploymentTypeId);
+
+        builder.HasOne(d => d.Gender)
+            .WithMany(p => p.Demographics)
+            .HasForeignKey(d => d.GenderId);
+
+        builder.HasOne(d => d.PayFrequency)
+            .WithMany(p => p.Demographics)
+            .HasForeignKey(d => d.PayFrequencyId);
+
+        builder.HasOne(d => d.TerminationCode)
+            .WithMany(p => p.Demographics)
+            .HasForeignKey(d => d.TerminationCodeId);
     }
 }

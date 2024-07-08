@@ -1,7 +1,5 @@
 ﻿
 
-using Demoulas.ProfitSharing.Services.HostedServices;
-
 namespace Demoulas.ProfitSharing.Api.Extensions;
 
 /// <summary>

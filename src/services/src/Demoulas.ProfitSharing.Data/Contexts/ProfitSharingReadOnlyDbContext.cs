@@ -20,7 +20,6 @@ public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitShar
     }
 
     public virtual DbSet<Demographic> Demographics { get; set; }
-    public DbSet<Definition> Definitions { get; set; }
     public virtual DbSet<Country> Countries { get; set; }
     public virtual DbSet<PayClassification> PayClassifications { get; set; }
 

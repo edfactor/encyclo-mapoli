@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="C:\Users\russh\.nuget\packages\demoulas.storeinfo\1.7.2\contentFiles\any\net8.0\readme.md" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Demoulas.StoreInfo" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
       <PrivateAssets>all</PrivateAssets>

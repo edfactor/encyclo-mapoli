@@ -1,9 +1,7 @@
 ﻿using Bogus;
 using Bogus.Extensions.UnitedStates;
-using Demoulas.ProfitSharing.Common.Enums;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Data.Entities;
-using Department = Demoulas.ProfitSharing.Common.Enums.Department;
 
 namespace Demoulas.ProfitSharing.UnitTests.Fakes;
 
@@ -26,7 +24,7 @@ internal sealed class DemographicFaker : Faker<Demographic>
             .RuleFor(d => d.MiddleName, f => f.Name.FirstName())
             .RuleFor(d => d.FullName, (f, d) => $"{d.FirstName} {d.LastName}")
             .RuleFor(d => d.StoreNumber, f => f.Random.Short(1, 100))
-            .RuleFor(d => d.Department, f => f.PickRandom<Department>())
+            .RuleFor(d => d.DepartmentId, f => f.PickRandom<byte>(1, 2, 3, 4, 5, 6, 7))
             .RuleFor(d => d.PayClassification, f => payClassificationFaker.Generate())
             .RuleFor(d => d.PayClassificationId, f => f.PickRandom<byte>(1, 2, 10, 11, 13, 14, 15, 16, 17, 18, 19, 20))
             .RuleFor(d => d.ContactInfo, f => contactInfoFaker.Generate())
@@ -35,11 +33,11 @@ internal sealed class DemographicFaker : Faker<Demographic>
             .RuleFor(d => d.FullTimeDate, f => f.Date.Past(10).ToDateOnly())
             .RuleFor(d => d.HireDate, f => f.Date.Past(15).ToDateOnly())
             .RuleFor(d => d.ReHireDate, f => f.Date.Past(5).ToDateOnly())
-            .RuleFor(d => d.TerminationCode, f => f.PickRandom<TerminationCode>())
+            .RuleFor(d => d.TerminationCodeId, f => f.PickRandom('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'))
             .RuleFor(d => d.TerminationDate, f => f.Date.Past(5).ToDateOnly())
-            .RuleFor(d => d.EmploymentType, f => f.PickRandom<EmploymentType>())
-            .RuleFor(d => d.PayFrequency, f => f.PickRandom<PayFrequency>())
-            .RuleFor(d => d.Gender, f => f.PickRandom<Gender>());
+            .RuleFor(d => d.EmploymentTypeId, f => f.PickRandom<char>('P', 'H', 'G', 'F'))
+            .RuleFor(d => d.PayFrequencyId, f => f.PickRandom<byte>(1,2))
+            .RuleFor(d => d.GenderId, f => f.PickRandom<char>('M', 'F', 'X'));
     }
 
     internal static long ConvertSsnToLong(string ssn)

@@ -4,14 +4,12 @@ using System.Reflection;
 using Asp.Versioning;
 using Demoulas.ProfitSharing.Api.Converters;
 using Demoulas.ProfitSharing.Api.Middleware;
-using Demoulas.ProfitSharing.Common.Contracts.Configuration;
 using Demoulas.ProfitSharing.ServiceDefaults;
 using FastEndpoints;
 using FastEndpoints.AspVersioning;
 using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.DependencyModel;
-using NSwag.AspNetCore;
 using Serilog;
 
 namespace Demoulas.ProfitSharing.Api.Extensions;
