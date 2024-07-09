@@ -15,7 +15,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
         //https://demoulas.atlassian.net/wiki/spaces/~bherrmann/pages/39944312/Quick+Guide+to+Profit+Sharing+Tables
 
         _ = builder.HasKey(e => e.SSN);
-        _ = builder.ToTable("DEMOGRAPHICS");
+        _ = builder.ToTable("Demographics");
 
         _ = builder.Property(e => e.SSN)
             .HasPrecision(9)
