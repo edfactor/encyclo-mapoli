@@ -1,6 +1,4 @@
-﻿using static System.Runtime.InteropServices.JavaScript.JSType;
-
-namespace Demoulas.ProfitSharing.Data.Entities;
+﻿namespace Demoulas.ProfitSharing.Data.Entities;
 
 public class PayProfit
 {
@@ -39,5 +37,61 @@ public class PayProfit
     /// </summary>
     public DateOnly? PSCertificateIssuedDate { get; set; }
 
+    /// <summary>
+    /// Year of initial contribution
+    /// </summary>
+    public short InitialContributionYear { get; set; }
+
+    /// <summary>
+    /// Employee net balance as of last year
+    /// </summary>
+    public decimal NetBalanceLastYear { get; set; }
+
+    /// <summary>
+    /// hours towards PS last year 
+    /// </summary>
+    public decimal HoursTowardsPSLastYear { get; set; }
+
+    /// <summary>
+    /// number of dollars earning in PS last year
+    /// </summary>
+    public decimal NumberOfDollarsEarningLastYear { get; set; }
+
+
+    /// <summary>
+    /// points earned last year
+    /// </summary>
+    public ushort PointsEarnedLastYear  { get; set; }
+
+    /// <summary>
+    /// Employee vested balance as of last year
+    /// </summary>
+    public decimal VestedBalanceLastYear { get; set; }
+
+    /// <summary>
+    /// employees dollar contribution PS last year 
+    /// </summary>
+    public decimal ContributionAmountLastYear { get; set; }
+
+    /// <summary>
+    /// Employee amount forfeiture to plan last year 
+    /// </summary>
+    public decimal ForfeitureAmountLastYear { get; set; }
+
+    /// <summary>
+    /// Employee enrollment status
+    /// </summary>
     public required Enrollment Enrollment { get; set; }
+
+    /// <summary>
+    /// 0=Employee, 1=Beneficiary
+    /// </summary>
+    public required  BeneficiaryType BeneficiaryType { get; set; }
+
+    /// <summary>
+    /// 0=NOT New in plan last year, 1=New last year    
+    /// </summary>
+    public required EmployeeType EmployeeType { get; set; }
+
+    public ZeroContributionReason? ZeroContributionReason { get; set; }
 }
