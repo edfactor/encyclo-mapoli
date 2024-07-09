@@ -3,6 +3,7 @@ using System;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 
@@ -11,9 +12,11 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    partial class ProfitSharingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240709182833_initialPayProfitMigration")]
+    partial class initialPayProfitMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2245,28 +2248,22 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(3)");
 
                     b.Property<decimal>("ContributionAmountLastYear")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)");
+                        .HasColumnType("DECIMAL(18, 2)");
 
                     b.Property<decimal>("EarningsAfterApplyingVestingRules")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)");
+                        .HasColumnType("DECIMAL(18, 2)");
 
                     b.Property<decimal>("EarningsCurrentYear")
-                        .HasPrecision(8, 2)
-                        .HasColumnType("DECIMAL(8,2)");
+                        .HasColumnType("DECIMAL(18, 2)");
 
                     b.Property<decimal>("EarningsEtvaValue")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)");
+                        .HasColumnType("DECIMAL(18, 2)");
 
                     b.Property<decimal>("EarningsLastYear")
-                        .HasPrecision(8, 2)
-                        .HasColumnType("DECIMAL(8,2)");
+                        .HasColumnType("DECIMAL(18, 2)");
 
                     b.Property<decimal?>("EarningsPriorEtvaValue")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)");
+                        .HasColumnType("DECIMAL(18, 2)");
 
                     b.Property<string>("EmployeeSSN")
                         .IsRequired()
@@ -2280,55 +2277,43 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(3)");
 
                     b.Property<decimal>("ForfeitureAmountLastYear")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)");
+                        .HasColumnType("DECIMAL(18, 2)");
 
                     b.Property<decimal>("HoursCurrentYear")
-                        .HasPrecision(4, 2)
-                        .HasColumnType("DECIMAL(4,2)");
+                        .HasColumnType("DECIMAL(18, 2)");
 
                     b.Property<decimal>("HoursTowardsPSLastYear")
-                        .HasPrecision(4, 2)
-                        .HasColumnType("DECIMAL(4,2)");
+                        .HasColumnType("DECIMAL(18, 2)");
 
                     b.Property<short>("InitialContributionYear")
-                        .HasPrecision(4)
-                        .HasColumnType("NUMBER(4)");
+                        .HasColumnType("NUMBER(5)");
 
                     b.Property<decimal>("NetBalanceLastYear")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)");
+                        .HasColumnType("DECIMAL(18, 2)");
 
                     b.Property<decimal>("NumberOfDollarsEarningLastYear")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)");
+                        .HasColumnType("DECIMAL(18, 2)");
 
                     b.Property<string>("PSCertificateIssuedDate")
                         .HasColumnType("NVARCHAR2(10)");
 
                     b.Property<int>("PointsEarnedLastYear")
-                        .HasPrecision(5)
                         .HasColumnType("NUMBER(5)");
 
                     b.Property<decimal?>("SecondaryEarnings")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)");
+                        .HasColumnType("DECIMAL(18, 2)");
 
                     b.Property<decimal?>("SecondaryEtvaEarnings")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)");
+                        .HasColumnType("DECIMAL(18, 2)");
 
                     b.Property<decimal>("VestedBalanceLastYear")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)");
+                        .HasColumnType("DECIMAL(18, 2)");
 
                     b.Property<byte>("WeeksWorkedLastYear")
-                        .HasPrecision(2)
-                        .HasColumnType("NUMBER(2)");
+                        .HasColumnType("NUMBER(3)");
 
                     b.Property<byte>("WeeksWorkedYear")
-                        .HasPrecision(2)
-                        .HasColumnType("NUMBER(2)");
+                        .HasColumnType("NUMBER(3)");
 
                     b.Property<byte?>("ZeroContributionReasonId")
                         .HasColumnType("NUMBER(3)");

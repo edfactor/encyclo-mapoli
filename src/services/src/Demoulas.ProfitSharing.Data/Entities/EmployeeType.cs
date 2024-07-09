@@ -7,7 +7,7 @@ public sealed class EmployeeType
         public const byte New_LastYear = 1;
     }
 
-    public char Id { get; set; }
+    public byte Id { get; set; }
     public required string Name { get; set; }
 
     public ICollection<PayProfit>? Profits { get; set; }

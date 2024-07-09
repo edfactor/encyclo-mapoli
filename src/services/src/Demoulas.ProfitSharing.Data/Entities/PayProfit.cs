@@ -15,17 +15,57 @@ public class PayProfit
     /// <summary>
     /// Hours towards Profit Sharing in the current year (updated weekly)
     /// </summary>
-    public required decimal HoursPSYear { get; set; }
+    public required decimal HoursCurrentYear { get; set; }
+
+    /// <summary>
+    /// hours towards PS last year 
+    /// </summary>
+    public decimal HoursTowardsPSLastYear { get; set; }
 
     /// <summary>
     /// Dollars earned by the employee in the current year (updated weekly)
     /// </summary>
-    public required decimal EarningsPSYear { get; set; }
+    public required decimal EarningsCurrentYear { get; set; }
+
+    /// <summary>
+    /// Dollars earned by the employee last year
+    /// </summary>
+    public required decimal EarningsLastYear { get; set; }
+
+    /// <summary>
+    /// amount after applying vesting rules.This can be updated when new transactions occur.For example, QDRO.
+    /// </summary>
+    public required decimal EarningsAfterApplyingVestingRules { get; set; }
+
+    /// <summary>
+    /// earnings on the ETVA value 
+    /// </summary>
+    public required decimal EarningsEtvaValue { get; set; }
+
+    /// <summary>
+    /// secondary earnings 
+    /// </summary>
+    public decimal? SecondaryEarnings  { get; set; }
+
+    /// <summary>
+    /// secondary ETVA earnings 
+    /// </summary>
+    public decimal? SecondaryEtvaEarnings { get; set; }
+
+    /// <summary>
+    /// populated when forfeiture happens 
+    /// </summary>
+    public decimal? EarningsPriorEtvaValue { get; set; }
 
     /// <summary>
     /// Number of weeks worked in the current year
     /// </summary>
     public required byte WeeksWorkedYear { get; set; }
+
+    /// <summary>
+    /// Number of weeks worked last year
+    /// </summary>
+    public required byte WeeksWorkedLastYear { get; set; }
 
     /// <summary>
     /// Years the company has contributed to the employee 
@@ -46,11 +86,6 @@ public class PayProfit
     /// Employee net balance as of last year
     /// </summary>
     public decimal NetBalanceLastYear { get; set; }
-
-    /// <summary>
-    /// hours towards PS last year 
-    /// </summary>
-    public decimal HoursTowardsPSLastYear { get; set; }
 
     /// <summary>
     /// number of dollars earning in PS last year
