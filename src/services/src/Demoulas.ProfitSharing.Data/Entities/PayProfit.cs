@@ -116,17 +116,17 @@ public sealed class PayProfit
     /// <summary>
     /// Employee enrollment status
     /// </summary>
-    public required Enrollment Enrollment { get; set; }
+    public required Enrollment? Enrollment { get; set; }
 
     /// <summary>
     /// 0=Employee, 1=Beneficiary
     /// </summary>
-    public required BeneficiaryType BeneficiaryType { get; set; }
+    public required BeneficiaryType? BeneficiaryType { get; set; }
 
     /// <summary>
     /// 0=NOT New in plan last year, 1=New last year    
     /// </summary>
-    public required EmployeeType EmployeeType { get; set; }
+    public required EmployeeType? EmployeeType { get; set; }
 
     public ZeroContributionReason? ZeroContributionReason { get; set; }
 
