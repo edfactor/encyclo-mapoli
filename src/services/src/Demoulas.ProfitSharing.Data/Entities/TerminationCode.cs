@@ -2,7 +2,7 @@
 
 namespace Demoulas.ProfitSharing.Data.Entities;
 
-public class TerminationCode : LookupTable<char>
+public sealed class TerminationCode : LookupTable<char>
 {
     public static class Constants
     {

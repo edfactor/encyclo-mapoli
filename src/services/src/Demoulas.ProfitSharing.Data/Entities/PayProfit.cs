@@ -1,6 +1,6 @@
 ﻿namespace Demoulas.ProfitSharing.Data.Entities;
 
-public class PayProfit
+public sealed class PayProfit
 {
     /// <summary>
     /// Employee badge number

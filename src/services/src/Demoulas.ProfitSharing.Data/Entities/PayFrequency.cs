@@ -2,7 +2,7 @@
 
 namespace Demoulas.ProfitSharing.Data.Entities;
 
-public class PayFrequency : LookupTable<byte>
+public sealed class PayFrequency : LookupTable<byte>
 {
     public static class Constants
     {
