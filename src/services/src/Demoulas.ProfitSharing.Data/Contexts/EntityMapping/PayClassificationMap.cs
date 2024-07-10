@@ -23,7 +23,7 @@ internal sealed class PayClassificationMap : IEntityTypeConfiguration<PayClassif
             .HasComment("Pay Classification");
 
         builder.HasData(
-            new PayClassification { Id = 1, Name = "MANAGER" },
+            new PayClassification { Id = PayClassification.Constants.Manager, Name = "MANAGER" },
             new PayClassification { Id = 2, Name = "ASSISTANT MANAGER" },
             new PayClassification { Id = 10, Name = "FRONT END MANAGER" },
             new PayClassification { Id = 11, Name = "ASSISTANT HEAD CASHIER" },

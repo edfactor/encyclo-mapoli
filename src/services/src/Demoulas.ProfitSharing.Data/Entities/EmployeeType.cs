@@ -8,7 +8,6 @@ public sealed class EmployeeType : LookupTable<byte>
         public const byte Not_New_LastYear = 0;
         public const byte New_LastYear = 1;
     }
-
    
     public ICollection<PayProfit>? Profits { get; set; }
 }
