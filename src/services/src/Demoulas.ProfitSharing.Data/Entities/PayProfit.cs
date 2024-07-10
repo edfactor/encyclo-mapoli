@@ -10,7 +10,7 @@ public class PayProfit
     /// <summary>
     /// Employee social security number
     /// </summary>
-    public required string EmployeeSSN { get; set; }
+    public required long EmployeeSSN { get; set; }
 
     /// <summary>
     /// Hours towards Profit Sharing in the current year (updated weekly)

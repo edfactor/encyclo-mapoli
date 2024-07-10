@@ -1,4 +1,5 @@
 ﻿using Bogus;
+using Bogus.Extensions.UnitedStates;
 using Demoulas.ProfitSharing.Data.Entities;
 
 namespace Demoulas.ProfitSharing.UnitTests.Fakes;
@@ -7,7 +8,7 @@ internal sealed class PayProfitFaker : Faker<PayProfit>
     internal PayProfitFaker()
     {
         RuleFor(pc => pc.EmployeeBadge, f => f.PickRandom<long>(int.MaxValue, uint.MaxValue))
-            .RuleFor(pc => pc.EmployeeSSN, f => f.Random.ReplaceNumbers("###-##-####"))
+            .RuleFor(d => d.EmployeeSSN, f => ConvertSsnToLong(f.Person.Ssn()))
             .RuleFor(pc => pc.HoursCurrentYear, f => f.Random.Int(min: 0, max: 3000))
             .RuleFor(pc => pc.HoursLastYear, f => f.Random.Int(min: 0, max: 3000))
             .RuleFor(pc => pc.WeeksWorkedYear, f => f.Random.Byte(min: 0, max: 53))
@@ -20,5 +21,14 @@ internal sealed class PayProfitFaker : Faker<PayProfit>
             .RuleFor(pc => pc.EarningsPriorEtvaValue, f => f.Finance.Amount(min: 100, max: 1_200_000, decimals: 2))
             .RuleFor(pc => pc.SecondaryEarnings, f => f.Finance.Amount(min: 100, max: 1_200_000, decimals: 2))
             .RuleFor(pc => pc.SecondaryEtvaEarnings, f => f.Finance.Amount(min: 100, max: 1_200_000, decimals: 2));
+    }
+
+    internal static long ConvertSsnToLong(string ssn)
+    {
+        // Remove non-numeric characters if any (e.g., dashes)
+        string numericSsn = new string(ssn.Where(char.IsDigit).ToArray());
+
+        // Convert to long
+        return long.Parse(numericSsn);
     }
 }
