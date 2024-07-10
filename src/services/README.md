@@ -7,7 +7,7 @@
 ### Getting Started
 Install 3rd Party Libraries:
 
-1. Visual Studio Professional 2022 (17.10.1) or higher installed - https://visualstudio.microsoft.com/downloads/
+1. Visual Studio Professional 2022 (17.10.4) or higher installed - https://visualstudio.microsoft.com/downloads/
 
     ![Workload](./setup_images/workload.PNG)
     - Install the "ASP.net and web development", "Azure" workload, and ".NET desktop development" workloads
@@ -21,7 +21,7 @@ Install 3rd Party Libraries:
 2. Open the Demoulas.ProfitSharing solution
     - API Navigate to the \src\Services folder
     - Locate Demoulas.ProfitSharing.sln and open with Visual Studio.
-2. Set the 'Demoulas.ProfitSharing.Api' project as your startup project
+2. Set the 'Demoulas.ProfitSharing.AppHost' project as your startup project
     - Find the project, right click and choose "set as startup project"
 3. Get secrets.json from one of the team members
     - [Safe storage of app secrets in development](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-8.0&tabs=windows#manage-user-secrets-with-visual-studio)
