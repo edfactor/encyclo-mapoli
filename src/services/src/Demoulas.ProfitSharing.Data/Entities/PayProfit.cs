@@ -45,7 +45,7 @@ public class PayProfit
     /// <summary>
     /// secondary earnings 
     /// </summary>
-    public decimal? SecondaryEarnings  { get; set; }
+    public decimal? SecondaryEarnings { get; set; }
 
     /// <summary>
     /// secondary ETVA earnings 
@@ -96,7 +96,7 @@ public class PayProfit
     /// <summary>
     /// points earned last year
     /// </summary>
-    public ushort PointsEarnedLastYear  { get; set; }
+    public ushort PointsEarnedLastYear { get; set; }
 
     /// <summary>
     /// Employee vested balance as of last year
@@ -121,7 +121,7 @@ public class PayProfit
     /// <summary>
     /// 0=Employee, 1=Beneficiary
     /// </summary>
-    public required  BeneficiaryType BeneficiaryType { get; set; }
+    public required BeneficiaryType BeneficiaryType { get; set; }
 
     /// <summary>
     /// 0=NOT New in plan last year, 1=New last year    
@@ -129,4 +129,6 @@ public class PayProfit
     public required EmployeeType EmployeeType { get; set; }
 
     public ZeroContributionReason? ZeroContributionReason { get; set; }
+
+    public Demographic? Demographic { get; set; }
 }

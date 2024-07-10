@@ -1,6 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Data.Entities;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
 internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
@@ -97,5 +97,9 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
 
         builder.HasOne(e => e.ZeroContributionReason)
             .WithMany(p => p.Profits);
+
+        builder.HasOne(d => d.Demographic)
+            .WithMany(p => p.PayProfit)
+            .HasForeignKey(p => p.EmployeeSSN);
     }
 }
