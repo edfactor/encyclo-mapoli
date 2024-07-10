@@ -5,8 +5,8 @@ using Riok.Mapperly.Abstractions;
 namespace Demoulas.ProfitSharing.Services.Mappers;
 
 [Mapper]
-public partial class TerminationCodeMapper
+public partial class ZeroContributionReasonMapper
 {
-    public partial TerminationCodeResponseDto? Map(TerminationCode? source);
+    public partial ZeroContributionReasonResponseDto Map(ZeroContributionReason source);
 
 }

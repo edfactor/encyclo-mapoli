@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Demoulas.ProfitSharing.Common.Contracts.Response;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 public sealed record ZeroContributionReasonResponseDto
 {
+    public required byte Id { get; set; }
+    public required string Name { get; set; }
 }

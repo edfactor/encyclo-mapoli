@@ -16,44 +16,44 @@ public sealed class PayProfitClient : IPayProfitService
 
     private readonly HttpClient _httpClient;
     private readonly JsonSerializerOptions _options;
-    private readonly DemographicsRequestDtoValidator _validator;
+    private readonly PayProfitRequestDtoValidator _validator;
 
     public PayProfitClient(HttpClient? client)
     {
         ArgumentNullException.ThrowIfNull(client);
         
         _httpClient = client;
-        _validator = new DemographicsRequestDtoValidator();
+        _validator = new PayProfitRequestDtoValidator();
         _options = Constants.GetJsonSerializerOptions();
     }
 
-    public async Task<PaginatedResponseDto<DemographicsResponseDto>?> GetAllProfits(PaginationRequestDto req, CancellationToken cancellationToken = default)
+    public async Task<PaginatedResponseDto<PayProfitResponseDto>?> GetAllProfits(PaginationRequestDto req, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(req);
 
         HttpResponseMessage response = await _httpClient.PostAsJsonAsync($"{BaseApiPath}/all", req, cancellationToken);
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<PaginatedResponseDto<DemographicsResponseDto>>(_options, cancellationToken).ConfigureAwait(false);
+        return await response.Content.ReadFromJsonAsync<PaginatedResponseDto<PayProfitResponseDto>>(_options, cancellationToken).ConfigureAwait(false);
     }
 
-    public async Task<ISet<DemographicsResponseDto>?> AddProfit(IEnumerable<DemographicsRequestDto> demographics, CancellationToken cancellationToken)
+    public async Task<ISet<PayProfitResponseDto>?> AddProfit(IEnumerable<PayProfitRequestDto> profitRequest, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(demographics);
+        ArgumentNullException.ThrowIfNull(profitRequest);
 
-        IEnumerable<DemographicsRequestDto> demographicsRequestDtos = demographics.ToList();
-        if (!demographicsRequestDtos.Any())
+        IEnumerable<PayProfitRequestDto> payProfitRequestDtos = profitRequest.ToList();
+        if (!payProfitRequestDtos.Any())
         {
-            return new HashSet<DemographicsResponseDto>(0);
+            return new HashSet<PayProfitResponseDto>(0);
         }
 
-        foreach (var demo in demographicsRequestDtos)
+        foreach (var demo in payProfitRequestDtos)
         {
             await _validator.ValidateAndThrowAsync(demo, cancellationToken);
         }
 
-        HttpResponseMessage response = await _httpClient.PostAsJsonAsync(BaseApiPath, demographicsRequestDtos, cancellationToken);
+        HttpResponseMessage response = await _httpClient.PostAsJsonAsync(BaseApiPath, payProfitRequestDtos, cancellationToken);
         response.EnsureSuccessStatusCode();
 
-        return await response.Content.ReadFromJsonAsync<ISet<DemographicsResponseDto>>(_options, cancellationToken).ConfigureAwait(false) ?? new HashSet<DemographicsResponseDto>(0);
+        return await response.Content.ReadFromJsonAsync<ISet<PayProfitResponseDto>>(_options, cancellationToken).ConfigureAwait(false) ?? new HashSet<PayProfitResponseDto>(0);
     }
 }

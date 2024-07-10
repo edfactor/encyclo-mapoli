@@ -1,5 +1,5 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response;
-public sealed record PayProfitResponseDto
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request;
+public sealed record PayProfitRequestDto
 {
     /// <summary>
     /// Employee badge number
@@ -115,17 +115,17 @@ public sealed record PayProfitResponseDto
     /// <summary>
     /// Employee enrollment status
     /// </summary>
-    public required EnrollmentResponseDto Enrollment { get; set; }
+    public required EnrollmentRequestDto Enrollment { get; set; }
 
     /// <summary>
     /// 0=Employee, 1=Beneficiary
     /// </summary>
-    public required BeneficiaryTypeResponseDto BeneficiaryType { get; set; }
+    public required BeneficiaryTypeRequestDto BeneficiaryType { get; set; }
 
     /// <summary>
     /// 0=NOT New in plan last year, 1=New last year    
     /// </summary>
-    public required EmployeeTypeResponseDto EmployeeType { get; set; }
+    public required EmployeeTypeRequestDto EmployeeType { get; set; }
 
-    public ZeroContributionReasonResponseDto? ZeroContributionReason { get; set; }
+    public ZeroContributionReasonRequestDto? ZeroContributionReason { get; set; }
 }

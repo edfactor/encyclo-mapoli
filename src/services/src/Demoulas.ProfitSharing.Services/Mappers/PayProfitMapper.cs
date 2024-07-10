@@ -7,10 +7,15 @@ namespace Demoulas.ProfitSharing.Services.Mappers;
 
 [Mapper]
 [UseStaticMapper<EnrollmentMapper>]
+[UseStaticMapper<EmployeeTypeMapper>]
+[UseStaticMapper<BeneficiaryTypeMapper>]
+[UseStaticMapper<ZeroContributionReasonMapper>]
 public partial class PayProfitMapper
 {
-    public partial EnrollmentResponseDto Map(PayProfit source);
-    public partial PayProfit Map(EnrollmentRequestDto source);
+    public partial PayProfitResponseDto Map(PayProfit source);
 
-    public partial EnrollmentRequestDto MapToAddressRequestDto(PayProfit source);
+    public partial IEnumerable<PayProfit> Map(IEnumerable<PayProfitRequestDto> source);
+
+    public partial IEnumerable<PayProfitResponseDto> Map(IEnumerable<PayProfit> source);
+    public partial PayProfit Map(PayProfitRequestDto source);
 }

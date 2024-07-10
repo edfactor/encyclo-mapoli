@@ -2,7 +2,7 @@
 
 namespace Demoulas.ProfitSharing.Data.Entities;
 
-public class EmploymentType : LookupTable<byte>
+public class EmploymentType : LookupTable<char>
 {
     public static class Constants
     {
