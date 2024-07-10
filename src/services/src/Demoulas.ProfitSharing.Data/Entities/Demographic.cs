@@ -48,4 +48,6 @@ public sealed class Demographic : Member
 
     public char TerminationCodeId { get; set; }
     public TerminationCode? TerminationCode { get; set; }
+
+    public IEnumerable<PayProfit>? PayProfit { get; set; }
 }
