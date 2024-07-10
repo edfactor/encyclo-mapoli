@@ -24,7 +24,7 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
             .HasPrecision(4, 2)
             .IsRequired();
 
-        builder.Property(e => e.HoursTowardsPSLastYear)
+        builder.Property(e => e.HoursLastYear)
             .HasPrecision(4, 2);
 
         builder.Property(e => e.WeeksWorkedYear)

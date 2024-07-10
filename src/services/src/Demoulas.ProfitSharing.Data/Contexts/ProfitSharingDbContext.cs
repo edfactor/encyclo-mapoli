@@ -23,6 +23,8 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
     public virtual DbSet<Country> Countries { get; set; }
     public virtual DbSet<PayClassification> PayClassifications { get; set; }
 
+    public virtual DbSet<PayProfit> PayProfits { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

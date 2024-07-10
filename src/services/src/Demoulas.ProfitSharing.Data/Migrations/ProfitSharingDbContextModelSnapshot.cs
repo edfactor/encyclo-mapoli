@@ -2287,7 +2287,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasPrecision(4, 2)
                         .HasColumnType("DECIMAL(4,2)");
 
-                    b.Property<decimal>("HoursTowardsPSLastYear")
+                    b.Property<decimal>("HoursLastYear")
                         .HasPrecision(4, 2)
                         .HasColumnType("DECIMAL(4,2)");
 

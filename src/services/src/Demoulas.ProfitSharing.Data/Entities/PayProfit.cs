@@ -20,7 +20,7 @@ public class PayProfit
     /// <summary>
     /// hours towards PS last year 
     /// </summary>
-    public decimal HoursTowardsPSLastYear { get; set; }
+    public decimal HoursLastYear { get; set; }
 
     /// <summary>
     /// Dollars earned by the employee in the current year (updated weekly)
