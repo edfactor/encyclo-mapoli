@@ -1,6 +1,8 @@
-﻿namespace Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.ProfitSharing.Data.Entities.Base;
 
-public class Department
+namespace Demoulas.ProfitSharing.Data.Entities;
+
+public class Department : LookupTable<byte>
 {
     public static class Constants
     {
@@ -12,9 +14,6 @@ public class Department
         public const byte Beer_And_Wine = 6;
         public const byte Bakery = 7;
     }
-
-    public byte Id { get; set; }
-    public required string Name { get; set; }
 
     public ICollection<Demographic>? Demographics { get; set; }
    

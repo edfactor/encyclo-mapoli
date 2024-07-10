@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
+namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
+
 internal sealed class EmploymentTypeMap : IEntityTypeConfiguration<EmploymentType>
 {
     public void Configure(EntityTypeBuilder<EmploymentType> builder)

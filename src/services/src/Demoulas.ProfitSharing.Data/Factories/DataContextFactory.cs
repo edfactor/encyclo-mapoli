@@ -9,16 +9,20 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Data.Factories;
 
 public sealed class DataContextFactory : IProfitSharingDataContextFactory
 {
+    private readonly ILogger _logger;
     private readonly IServiceProvider _serviceProvider;
 
     private DataContextFactory(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
+        var factory = serviceProvider.GetRequiredService<ILoggerFactory>();
+        _logger = factory.CreateLogger<DataContextFactory>();
     }
 
     public static IProfitSharingDataContextFactory Initialize(IHostApplicationBuilder builder, IEnumerable<ContextFactoryRequest> contextFactoryRequests)
@@ -46,8 +50,8 @@ public sealed class DataContextFactory : IProfitSharingDataContextFactory
         }
 
         MethodInfo addOracleDatabaseDbContext = typeof(AspireOracleEFCoreExtensions)
-           .GetMethods()
-           .First(m => m.Name == nameof(AspireOracleEFCoreExtensions.AddOracleDatabaseDbContext));
+            .GetMethods()
+            .First(m => m.Name == nameof(AspireOracleEFCoreExtensions.AddOracleDatabaseDbContext));
 
         //TODO: Figure this call out
         //var enrichOracleDatabaseDbContext = typeof(AspireOracleEFCoreExtensions)
@@ -78,7 +82,7 @@ public sealed class DataContextFactory : IProfitSharingDataContextFactory
             MethodInfo addContext = addOracleDatabaseDbContext.MakeGenericMethod(contextFactoryRequest.ContextType);
             addContext.Invoke(null,
             [
-               builder, contextFactoryRequest.ConnectionName, contextFactoryRequest.ConfigureSettings, contextFactoryRequest.ConfigureDbContextOptions
+                builder, contextFactoryRequest.ConnectionName, contextFactoryRequest.ConfigureSettings, contextFactoryRequest.ConfigureDbContextOptions
             ]);
         }
 
@@ -103,22 +107,26 @@ public sealed class DataContextFactory : IProfitSharingDataContextFactory
 
     private async Task<T> UseWritableContextInternal<T>(Func<ProfitSharingDbContext, Task<T>> func, CancellationToken cancellationToken)
     {
-        await using AsyncServiceScope scope = _serviceProvider.CreateAsyncScope();
-        ProfitSharingDbContext context = scope.ServiceProvider.GetRequiredService<ProfitSharingDbContext>();
-        await using IDbContextTransaction transaction = await context.Database.BeginTransactionAsync(cancellationToken);
-        try
+        using (_logger.BeginScope("Writable DB Operation"))
         {
-            T result = await func(context);
+            await using AsyncServiceScope scope = _serviceProvider.CreateAsyncScope();
+            ProfitSharingDbContext context = scope.ServiceProvider.GetRequiredService<ProfitSharingDbContext>();
+            await using IDbContextTransaction transaction = await context.Database.BeginTransactionAsync(cancellationToken);
+            try
+            {
+                T result = await func(context);
 
-            // Commit the transaction when all operations are done
-            await transaction.CommitAsync(cancellationToken);
-            return result;
-        }
-        catch (Exception)
-        {
-            // Roll back the transaction if any operation fails
-            await transaction.RollbackAsync(cancellationToken);
-            throw;
+                // Commit the transaction when all operations are done
+                await transaction.CommitAsync(cancellationToken);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // Roll back the transaction if any operation fails
+                await transaction.RollbackAsync(cancellationToken);
+                _logger.LogError(ex, "Failed to execute operation, rolling back");
+                throw;
+            }
         }
     }
 
@@ -132,15 +140,44 @@ public sealed class DataContextFactory : IProfitSharingDataContextFactory
     /// </summary>
     public async Task<T> UseReadOnlyContext<T>(Func<ProfitSharingReadOnlyDbContext, Task<T>> func)
     {
-        await using AsyncServiceScope scope = _serviceProvider.CreateAsyncScope();
-        ProfitSharingReadOnlyDbContext dbContext = scope.ServiceProvider.GetRequiredService<ProfitSharingReadOnlyDbContext>();
-        return await func(dbContext);
+        using (_logger.BeginScope("ReadOnly DB Operation"))
+        {
+            try
+            {
+                await using AsyncServiceScope scope = _serviceProvider.CreateAsyncScope();
+                ProfitSharingReadOnlyDbContext dbContext = scope.ServiceProvider.GetRequiredService<ProfitSharingReadOnlyDbContext>();
+                return await func(dbContext);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to execute readonly query");
+                throw;
+            }
+
+        }
     }
 
+    /// <summary>
+    /// Context to access Store related data
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="func"></param>
+    /// <returns></returns>
     public async Task<T> UseStoreInfoContext<T>(Func<StoreInfoDbContext, Task<T>> func)
     {
-        await using AsyncServiceScope scope = _serviceProvider.CreateAsyncScope();
-        StoreInfoDbContext dbContext = scope.ServiceProvider.GetRequiredService<StoreInfoDbContext>();
-        return await func(dbContext);
+        using (_logger.BeginScope("Store Info DB Operation"))
+        {
+            try
+            {
+                await using AsyncServiceScope scope = _serviceProvider.CreateAsyncScope();
+                StoreInfoDbContext dbContext = scope.ServiceProvider.GetRequiredService<StoreInfoDbContext>();
+                return await func(dbContext);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to execute readonly Store Info query");
+                throw;
+            }
+        }
     }
 }

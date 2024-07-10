@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 public class DepartmentResponseDto
 {
     public byte Id { get; set; }

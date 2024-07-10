@@ -41,7 +41,7 @@ List<ContextFactoryRequest> list = new List<ContextFactoryRequest>
     ContextFactoryRequest.Initialize<StoreInfoDbContext>("StoreInfo")
 };
 
-builder.AddDatabaseServices(list);
+builder.AddDatabaseServices(list, true, true);
 builder.AddCachingServices();
 
 builder.ConfigureDefaultEndpoints();

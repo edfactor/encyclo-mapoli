@@ -15,7 +15,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
         //https://demoulas.atlassian.net/wiki/spaces/~bherrmann/pages/39944312/Quick+Guide+to+Profit+Sharing+Tables
 
         _ = builder.HasKey(e => e.SSN);
-        _ = builder.ToTable("DEMOGRAPHICS");
+        _ = builder.ToTable("Demographics");
 
         _ = builder.Property(e => e.SSN)
             .HasPrecision(9)
@@ -91,7 +91,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             .HasMaxLength(1)
             .HasComment("TerminationCode")
             .HasColumnName("PY_TERM");
-        
+
 
         _ = builder.Property(e => e.TerminationDate)
             .HasPrecision(8)
@@ -144,7 +144,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
 
 
         builder.HasOne(e => e.PayClassification)
-            .WithMany(e=> e.Employees)
+            .WithMany(e => e.Employees)
             .HasForeignKey(e => e.PayClassificationId);
 
         builder.HasOne(d => d.Department)
@@ -166,5 +166,8 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
         builder.HasOne(d => d.TerminationCode)
             .WithMany(p => p.Demographics)
             .HasForeignKey(d => d.TerminationCodeId);
+
+        builder.HasMany(d => d.PayProfit)
+            .WithOne(p => p.Demographic);
     }
 }

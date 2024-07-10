@@ -20,6 +20,7 @@ public static class ServicesExtension
 
         _ = services.AddScoped<IPayClassificationService, PayClassificationService>();
         _ = services.AddScoped<IDemographicsService, DemographicsService>();
+        _ = services.AddScoped<IPayProfitService, PayProfitService>();
 
 
         #region Mappers
@@ -32,6 +33,10 @@ public static class ServicesExtension
         services.AddSingleton<GenderMapper>();
         services.AddSingleton<EmploymentTypeMapper>();
         services.AddSingleton<DepartmentMapper>();
+        services.AddSingleton<PayProfitMapper>();
+        services.AddSingleton<ZeroContributionReasonMapper>();
+        services.AddSingleton<BeneficiaryTypeMapper>();
+        services.AddSingleton<EmployeeTypeMapper>();
 
         #endregion
 

@@ -13,6 +13,18 @@ namespace Demoulas.ProfitSharing.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "BeneficiaryType",
+                columns: table => new
+                {
+                    Id = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    Name = table.Column<string>(type: "NVARCHAR2(20)", maxLength: 20, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BeneficiaryType", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Country",
                 columns: table => new
                 {
@@ -39,6 +51,18 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "EmployeeType",
+                columns: table => new
+                {
+                    Id = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    Name = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EmployeeType", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "EmploymentType",
                 columns: table => new
                 {
@@ -48,6 +72,18 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_EmploymentType", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Enrollment",
+                columns: table => new
+                {
+                    Id = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    Description = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Enrollment", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -99,7 +135,19 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "DEMOGRAPHICS",
+                name: "ZeroContributionReason",
+                columns: table => new
+                {
+                    Id = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    Name = table.Column<string>(type: "NVARCHAR2(100)", maxLength: 100, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ZeroContributionReason", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Demographics",
                 columns: table => new
                 {
                     DEM_SSN = table.Column<long>(type: "NUMBER(9)", precision: 9, nullable: false),
@@ -133,49 +181,117 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DEMOGRAPHICS", x => x.DEM_SSN);
+                    table.PrimaryKey("PK_Demographics", x => x.DEM_SSN);
                     table.ForeignKey(
-                        name: "FK_DEMOGRAPHICS_Country_CountryISO",
+                        name: "FK_Demographics_Country_CountryISO",
                         column: x => x.CountryISO,
                         principalTable: "Country",
                         principalColumn: "ISO",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_DEMOGRAPHICS_Department_PY_DP",
+                        name: "FK_Demographics_Department_PY_DP",
                         column: x => x.PY_DP,
                         principalTable: "Department",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_DEMOGRAPHICS_EmploymentType_PY_FUL",
+                        name: "FK_Demographics_EmploymentType_PY_FUL",
                         column: x => x.PY_FUL,
                         principalTable: "EmploymentType",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_DEMOGRAPHICS_Gender_PY_GENDER",
+                        name: "FK_Demographics_Gender_PY_GENDER",
                         column: x => x.PY_GENDER,
                         principalTable: "Gender",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_DEMOGRAPHICS_PayClassification_PY_CLA",
+                        name: "FK_Demographics_PayClassification_PY_CLA",
                         column: x => x.PY_CLA,
                         principalTable: "PayClassification",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_DEMOGRAPHICS_PayFrequency_PY_FREQ",
+                        name: "FK_Demographics_PayFrequency_PY_FREQ",
                         column: x => x.PY_FREQ,
                         principalTable: "PayFrequency",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_DEMOGRAPHICS_TerminationCode_PY_TERM",
+                        name: "FK_Demographics_TerminationCode_PY_TERM",
                         column: x => x.PY_TERM,
                         principalTable: "TerminationCode",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PayProfit",
+                columns: table => new
+                {
+                    EmployeeBadge = table.Column<long>(type: "NUMBER(7)", precision: 7, nullable: false),
+                    EmployeeSSN = table.Column<string>(type: "NVARCHAR2(9)", maxLength: 9, nullable: false),
+                    HoursCurrentYear = table.Column<decimal>(type: "DECIMAL(4,2)", precision: 4, scale: 2, nullable: false),
+                    HoursTowardsPSLastYear = table.Column<decimal>(type: "DECIMAL(4,2)", precision: 4, scale: 2, nullable: false),
+                    EarningsCurrentYear = table.Column<decimal>(type: "DECIMAL(8,2)", precision: 8, scale: 2, nullable: false),
+                    EarningsLastYear = table.Column<decimal>(type: "DECIMAL(8,2)", precision: 8, scale: 2, nullable: false),
+                    EarningsAfterApplyingVestingRules = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    EarningsEtvaValue = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    SecondaryEarnings = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: true),
+                    SecondaryEtvaEarnings = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: true),
+                    EarningsPriorEtvaValue = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: true),
+                    WeeksWorkedYear = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false),
+                    WeeksWorkedLastYear = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false),
+                    CompanyContributionYears = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    PSCertificateIssuedDate = table.Column<string>(type: "NVARCHAR2(10)", nullable: true),
+                    InitialContributionYear = table.Column<short>(type: "NUMBER(4)", precision: 4, nullable: false),
+                    NetBalanceLastYear = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    NumberOfDollarsEarningLastYear = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    PointsEarnedLastYear = table.Column<int>(type: "NUMBER(5)", precision: 5, nullable: false),
+                    VestedBalanceLastYear = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    ContributionAmountLastYear = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    ForfeitureAmountLastYear = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    EnrollmentId = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    BeneficiaryTypeId = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    EmployeeTypeId = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    ZeroContributionReasonId = table.Column<byte>(type: "NUMBER(3)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PayProfit", x => x.EmployeeBadge);
+                    table.ForeignKey(
+                        name: "FK_PayProfit_BeneficiaryType_BeneficiaryTypeId",
+                        column: x => x.BeneficiaryTypeId,
+                        principalTable: "BeneficiaryType",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PayProfit_EmployeeType_EmployeeTypeId",
+                        column: x => x.EmployeeTypeId,
+                        principalTable: "EmployeeType",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PayProfit_Enrollment_EnrollmentId",
+                        column: x => x.EnrollmentId,
+                        principalTable: "Enrollment",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PayProfit_ZeroContributionReason_ZeroContributionReasonId",
+                        column: x => x.ZeroContributionReasonId,
+                        principalTable: "ZeroContributionReason",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.InsertData(
+                table: "BeneficiaryType",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { (byte)0, "Employee" },
+                    { (byte)1, "Beneficiary" }
                 });
 
             migrationBuilder.InsertData(
@@ -394,6 +510,15 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "EmployeeType",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { (byte)0, "NOT New in plan last year" },
+                    { (byte)1, "New last year" }
+                });
+
+            migrationBuilder.InsertData(
                 table: "EmploymentType",
                 columns: new[] { "Id", "Name" },
                 values: new object[,]
@@ -402,6 +527,18 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     { "G", "FullTimeAccruedPaidHolidays" },
                     { "H", "FullTimeStraightSalary" },
                     { "P", "PartTime" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Enrollment",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { (byte)0, "Not Enrolled" },
+                    { (byte)1, "Old vesting plan has Contributions (7 years to full vesting)" },
+                    { (byte)2, "New vesting plan has Contributions (6 years to full vesting)" },
+                    { (byte)3, "Old vesting plan has Forfeiture records" },
+                    { (byte)4, "New vesting plan has Forfeiture records" }
                 });
 
             migrationBuilder.InsertData(
@@ -517,7 +654,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "TerminationCode",
-                columns: new[] { "Id", "Description" },
+                columns: new[] { "Id", "Name" },
                 values: new object[,]
                 {
                     { "A", "Left On Own" },
@@ -532,47 +669,85 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     { "J", "Layoff No Work" }
                 });
 
+            migrationBuilder.InsertData(
+                table: "ZeroContributionReason",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { (byte)0, "Normal" },
+                    { (byte)1, "18, 19, OR 20 WITH > 1000 HOURS" },
+                    { (byte)2, "TERMINATED EMPLOYEE > 1000 HOURS WORKED GETS YEAR VESTED" },
+                    { (byte)3, "OVER 64 AND < 1000 HOURS GETS 1 YEAR VESTING (obsolete 11/20)" },
+                    { (byte)4, "OVER 64 AND < 1000 HOURS GETS 2 YEARS VESTING (obsolete 11/20)" },
+                    { (byte)5, "OVER 64 AND > 1000 HOURS GETS 3 YEARS VESTING (obsolete 11/20)" },
+                    { (byte)6, ">=65 AND 1st CONTRIBUTION >= 5 YEARS AGO GETS 100% VESTED" },
+                    { (byte)7, "=64 AND 1ST CONTRIBUTION >=5 YEARS AGO GETS 100% VESTED ON THEIR BIRTHDAY" }
+                });
+
             migrationBuilder.CreateIndex(
-                name: "IX_DEMOGRAPHICS_CountryISO",
-                table: "DEMOGRAPHICS",
+                name: "IX_Demographics_CountryISO",
+                table: "Demographics",
                 column: "CountryISO");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DEMOGRAPHICS_PY_CLA",
-                table: "DEMOGRAPHICS",
+                name: "IX_Demographics_PY_CLA",
+                table: "Demographics",
                 column: "PY_CLA");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DEMOGRAPHICS_PY_DP",
-                table: "DEMOGRAPHICS",
+                name: "IX_Demographics_PY_DP",
+                table: "Demographics",
                 column: "PY_DP");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DEMOGRAPHICS_PY_FREQ",
-                table: "DEMOGRAPHICS",
+                name: "IX_Demographics_PY_FREQ",
+                table: "Demographics",
                 column: "PY_FREQ");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DEMOGRAPHICS_PY_FUL",
-                table: "DEMOGRAPHICS",
+                name: "IX_Demographics_PY_FUL",
+                table: "Demographics",
                 column: "PY_FUL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DEMOGRAPHICS_PY_GENDER",
-                table: "DEMOGRAPHICS",
+                name: "IX_Demographics_PY_GENDER",
+                table: "Demographics",
                 column: "PY_GENDER");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DEMOGRAPHICS_PY_TERM",
-                table: "DEMOGRAPHICS",
+                name: "IX_Demographics_PY_TERM",
+                table: "Demographics",
                 column: "PY_TERM");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PayProfit_BeneficiaryTypeId",
+                table: "PayProfit",
+                column: "BeneficiaryTypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PayProfit_EmployeeTypeId",
+                table: "PayProfit",
+                column: "EmployeeTypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PayProfit_EnrollmentId",
+                table: "PayProfit",
+                column: "EnrollmentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PayProfit_ZeroContributionReasonId",
+                table: "PayProfit",
+                column: "ZeroContributionReasonId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "DEMOGRAPHICS");
+                name: "Demographics");
+
+            migrationBuilder.DropTable(
+                name: "PayProfit");
 
             migrationBuilder.DropTable(
                 name: "Country");
@@ -594,6 +769,18 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "TerminationCode");
+
+            migrationBuilder.DropTable(
+                name: "BeneficiaryType");
+
+            migrationBuilder.DropTable(
+                name: "EmployeeType");
+
+            migrationBuilder.DropTable(
+                name: "Enrollment");
+
+            migrationBuilder.DropTable(
+                name: "ZeroContributionReason");
         }
     }
 }
