@@ -11,7 +11,7 @@ namespace Demoulas.ProfitSharing.Data.Extensions;
 public static class DatabaseServicesExtension
 {
     public static IHostApplicationBuilder AddDatabaseServices(this IHostApplicationBuilder builder,
-       IEnumerable<ContextFactoryRequest> contextFactoryRequests, bool runMigration = false)
+       IEnumerable<ContextFactoryRequest> contextFactoryRequests, bool runMigration = false, bool dropAndRecreate = false)
     {
         if (builder.Services.Any(s => s.ServiceType == typeof(IProfitSharingDataContextFactory)))
         {
@@ -25,8 +25,26 @@ public static class DatabaseServicesExtension
         {
             factory.UseWritableContext(context =>
             {
-                context.Database.Migrate();
-                return Task.CompletedTask;
+                try
+                {
+                    if (dropAndRecreate)
+                    {
+                        context.Database.EnsureDeleted();
+                    }
+
+                    var pendingMigrations = context.Database.GetPendingMigrations();
+                    if (pendingMigrations.Any())
+                    {
+                        context.Database.Migrate();
+                    }
+
+                    return Task.CompletedTask;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    throw;
+                }
             });
         }
 

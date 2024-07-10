@@ -1568,7 +1568,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasIndex("TerminationCodeId");
 
-                    b.ToTable("DEMOGRAPHICS", (string)null);
+                    b.ToTable("Demographics", (string)null);
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Department", b =>
@@ -2420,8 +2420,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("NVARCHAR2(20)");
+                        .HasMaxLength(100)
+                        .HasColumnType("NVARCHAR2(100)");
 
                     b.HasKey("Id");
 
@@ -2559,7 +2559,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                             b1.HasIndex("CountryISO");
 
-                            b1.ToTable("DEMOGRAPHICS");
+                            b1.ToTable("Demographics");
 
                             b1.HasOne("Demoulas.ProfitSharing.Data.Entities.Country", null)
                                 .WithMany()
@@ -2595,7 +2595,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                             b1.HasKey("DemographicSSN");
 
-                            b1.ToTable("DEMOGRAPHICS");
+                            b1.ToTable("Demographics");
 
                             b1.WithOwner()
                                 .HasForeignKey("DemographicSSN");

@@ -12,8 +12,8 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    [Migration("20240709185406_PayProfitMigrationWithPrecisions2")]
-    partial class PayProfitMigrationWithPrecisions2
+    [Migration("20240710133047_initialMigration")]
+    partial class initialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1571,7 +1571,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasIndex("TerminationCodeId");
 
-                    b.ToTable("DEMOGRAPHICS", (string)null);
+                    b.ToTable("Demographics", (string)null);
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Department", b =>
@@ -2423,8 +2423,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("NVARCHAR2(20)");
+                        .HasMaxLength(100)
+                        .HasColumnType("NVARCHAR2(100)");
 
                     b.HasKey("Id");
 
@@ -2562,7 +2562,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                             b1.HasIndex("CountryISO");
 
-                            b1.ToTable("DEMOGRAPHICS");
+                            b1.ToTable("Demographics");
 
                             b1.HasOne("Demoulas.ProfitSharing.Data.Entities.Country", null)
                                 .WithMany()
@@ -2598,7 +2598,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                             b1.HasKey("DemographicSSN");
 
-                            b1.ToTable("DEMOGRAPHICS");
+                            b1.ToTable("Demographics");
 
                             b1.WithOwner()
                                 .HasForeignKey("DemographicSSN");
