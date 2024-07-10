@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Demoulas.ProfitSharing.Data.Entities.Base;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
-public sealed class ZeroContributionReason
+public sealed class ZeroContributionReason : LookupTable<byte>
 {
     public static class Constants
     {
@@ -48,9 +49,6 @@ public sealed class ZeroContributionReason
         /// </summary>
         public const byte SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay = 7;
     }
-
-    public required byte Id { get; set; }
-    public required string Name { get; set; }
 
     public ICollection<PayProfit>? Profits { get; set; }
 }

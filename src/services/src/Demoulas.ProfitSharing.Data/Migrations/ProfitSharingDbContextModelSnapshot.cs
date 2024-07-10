@@ -1692,7 +1692,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<byte>("Id")
                         .HasColumnType("NUMBER(3)");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("NVARCHAR2(64)");
@@ -2351,7 +2351,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("NVARCHAR2(1)");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("NVARCHAR2(64)");

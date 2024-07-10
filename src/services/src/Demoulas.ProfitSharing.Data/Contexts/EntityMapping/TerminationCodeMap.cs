@@ -13,21 +13,21 @@ internal sealed class TerminationCodeMap : IEntityTypeConfiguration<TerminationC
             .ValueGeneratedNever()
             .IsRequired();
 
-        builder.Property(e => e.Description)
+        builder.Property(e => e.Name)
             .HasMaxLength(64)
             .IsRequired();
 
         builder.HasData(
-            new TerminationCode { Id = TerminationCode.Constants.LeftOnOwn, Description = "Left On Own" },
-            new TerminationCode { Id = TerminationCode.Constants.PersonalOrFamilyReason, Description = "Personal Or Family Reason" },
-            new TerminationCode { Id = TerminationCode.Constants.CouldNotWorkAvailableHours, Description = "Could Not Work Available Hours" },
-            new TerminationCode { Id = TerminationCode.Constants.Stealing, Description = "Stealing" },
-            new TerminationCode { Id = TerminationCode.Constants.NotFollowingCompanyPolicy, Description = "Not Following Company Policy" },
-            new TerminationCode { Id = TerminationCode.Constants.FMLAExpired, Description = "FMLA Expired" },
-            new TerminationCode { Id = TerminationCode.Constants.TerminatedPrivate, Description = "Terminated Private" },
-            new TerminationCode { Id = TerminationCode.Constants.JobAbandonment, Description = "Job Abandonment" },
-            new TerminationCode { Id = TerminationCode.Constants.HealthReasonsNonFMLA, Description = "Health Reasons Non-FMLA" },
-            new TerminationCode { Id = TerminationCode.Constants.LayoffNoWork, Description = "Layoff No Work" }
+            new TerminationCode { Id = TerminationCode.Constants.LeftOnOwn, Name = "Left On Own" },
+            new TerminationCode { Id = TerminationCode.Constants.PersonalOrFamilyReason, Name = "Personal Or Family Reason" },
+            new TerminationCode { Id = TerminationCode.Constants.CouldNotWorkAvailableHours, Name = "Could Not Work Available Hours" },
+            new TerminationCode { Id = TerminationCode.Constants.Stealing, Name = "Stealing" },
+            new TerminationCode { Id = TerminationCode.Constants.NotFollowingCompanyPolicy, Name = "Not Following Company Policy" },
+            new TerminationCode { Id = TerminationCode.Constants.FMLAExpired, Name = "FMLA Expired" },
+            new TerminationCode { Id = TerminationCode.Constants.TerminatedPrivate, Name = "Terminated Private" },
+            new TerminationCode { Id = TerminationCode.Constants.JobAbandonment, Name = "Job Abandonment" },
+            new TerminationCode { Id = TerminationCode.Constants.HealthReasonsNonFMLA, Name = "Health Reasons Non-FMLA" },
+            new TerminationCode { Id = TerminationCode.Constants.LayoffNoWork, Name = "Layoff No Work" }
             );
     }
 }

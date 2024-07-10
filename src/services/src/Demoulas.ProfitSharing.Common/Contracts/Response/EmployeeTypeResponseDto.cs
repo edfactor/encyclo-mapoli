@@ -1,6 +1,6 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response;
-public class EmploymentTypeResponseDto
+public sealed record EmployeeTypeResponseDto
 {
-    public char Id { get; set; }
+    public byte Id { get; set; }
     public required string Name { get; set; }
 }

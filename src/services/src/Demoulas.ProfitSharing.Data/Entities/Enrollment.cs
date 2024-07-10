@@ -1,6 +1,8 @@
-﻿namespace Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.ProfitSharing.Data.Entities.Base;
 
-public sealed class Enrollment
+namespace Demoulas.ProfitSharing.Data.Entities;
+
+public sealed class Enrollment : LookupTable<byte>
 {
     public static class Constants
     {
@@ -10,10 +12,6 @@ public sealed class Enrollment
         public const byte Old_Vesting_Plan_Has_Forfeiture_Records = 3;
         public const byte New_Vesting_Plan_Has_Forfeiture_Records = 4;
     }
-   
-
-    public required byte Id { get; set; }
-    public required string Description { get; set; }
 
     public ICollection<PayProfit>? Profits { get; set; }
 }

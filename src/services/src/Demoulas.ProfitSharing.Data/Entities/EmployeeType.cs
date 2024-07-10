@@ -1,5 +1,7 @@
-﻿namespace Demoulas.ProfitSharing.Data.Entities;
-public sealed class EmployeeType
+﻿using Demoulas.ProfitSharing.Data.Entities.Base;
+
+namespace Demoulas.ProfitSharing.Data.Entities;
+public sealed class EmployeeType : LookupTable<byte>
 {
     public static class Constants
     {
@@ -7,8 +9,6 @@ public sealed class EmployeeType
         public const byte New_LastYear = 1;
     }
 
-    public byte Id { get; set; }
-    public required string Name { get; set; }
-
+   
     public ICollection<PayProfit>? Profits { get; set; }
 }

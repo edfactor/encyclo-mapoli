@@ -531,7 +531,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "Enrollment",
-                columns: new[] { "Id", "Description" },
+                columns: new[] { "Id", "Name" },
                 values: new object[,]
                 {
                     { (byte)0, "Not Enrolled" },
@@ -654,7 +654,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "TerminationCode",
-                columns: new[] { "Id", "Description" },
+                columns: new[] { "Id", "Name" },
                 values: new object[,]
                 {
                     { "A", "Left On Own" },
