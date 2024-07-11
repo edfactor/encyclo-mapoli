@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Data.Entities.Base;
+﻿using Demoulas.ProfitSharing.Data.Interfaces;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
 
@@ -6,7 +6,7 @@ namespace Demoulas.ProfitSharing.Data.Entities;
 /// https://demoulas.atlassian.net/wiki/spaces/MAIN/pages/31887785/DEMOGRAPHICS
 /// </summary>
 
-public sealed class PayClassification : LookupTable<byte>
+public sealed class PayClassification : ILookupTable<byte>
 {
     public static class Constants
     {
@@ -97,5 +97,7 @@ public sealed class PayClassification : LookupTable<byte>
         public const byte Training = 98;
     }
 
+    public byte Id { get; set; }
+    public required string Name { get; set; }
     public IEnumerable<Demographic>? Employees { get; set; }
 }

@@ -1,8 +1,8 @@
-﻿using Demoulas.ProfitSharing.Data.Entities.Base;
+﻿using Demoulas.ProfitSharing.Data.Interfaces;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
 
-public sealed class TerminationCode : LookupTable<char>
+public sealed class TerminationCode : ILookupTable<char>
 {
     public static class Constants
     {
@@ -34,7 +34,7 @@ public sealed class TerminationCode : LookupTable<char>
         public const char Deceased = 'Z';
     }
 
+    public char Id { get; set; }
+    public required string Name { get; set; }
     public ICollection<Demographic>? Demographics { get; set; }
-
-   
 }

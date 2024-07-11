@@ -1,8 +1,8 @@
-﻿using Demoulas.ProfitSharing.Data.Entities.Base;
+﻿using Demoulas.ProfitSharing.Data.Interfaces;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
 
-public sealed class EmploymentType : LookupTable<char>
+public sealed class EmploymentType : ILookupTable<char>
 {
     public static class Constants
     {
@@ -11,5 +11,9 @@ public sealed class EmploymentType : LookupTable<char>
         public const char FullTimeAccruedPaidHolidays = 'G';
         public const char FullTimeEightPaidHolidays = 'F';
     }
+
+    public char Id { get; set; }
+    public required string Name { get; set; }
+
     public ICollection<Demographic>? Demographics { get; set; }
 }

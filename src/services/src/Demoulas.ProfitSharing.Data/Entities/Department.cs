@@ -1,8 +1,8 @@
-﻿using Demoulas.ProfitSharing.Data.Entities.Base;
+﻿using Demoulas.ProfitSharing.Data.Interfaces;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
 
-public sealed class Department : LookupTable<byte>
+public sealed class Department : ILookupTable<byte>
 {
     public static class Constants
     {
@@ -14,6 +14,9 @@ public sealed class Department : LookupTable<byte>
         public const byte Beer_And_Wine = 6;
         public const byte Bakery = 7;
     }
+
+    public byte Id { get; set; }
+    public required string Name { get; set; }
 
     public ICollection<Demographic>? Demographics { get; set; }
    

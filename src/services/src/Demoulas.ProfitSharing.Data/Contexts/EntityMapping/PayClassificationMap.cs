@@ -24,9 +24,9 @@ internal sealed class PayClassificationMap : IEntityTypeConfiguration<PayClassif
 
         builder.HasData(
             new PayClassification { Id = PayClassification.Constants.Manager, Name = "MANAGER" },
-            new PayClassification { Id = 2, Name = "ASSISTANT MANAGER" },
-            new PayClassification { Id = 10, Name = "FRONT END MANAGER" },
-            new PayClassification { Id = 11, Name = "ASSISTANT HEAD CASHIER" },
+            new PayClassification { Id = PayClassification.Constants.AssistantManager, Name = "ASSISTANT MANAGER" },
+            new PayClassification { Id = PayClassification.Constants.FrontEndManager, Name = "FRONT END MANAGER" },
+            new PayClassification { Id = PayClassification.Constants.AssistantHeadCashier, Name = "ASSISTANT HEAD CASHIER" },
             new PayClassification { Id = 13, Name = "CASHIERS - AM" },
             new PayClassification { Id = 14, Name = "CASHIERS - PM" },
             new PayClassification { Id = 15, Name = "CASHIERS 14-15" },
