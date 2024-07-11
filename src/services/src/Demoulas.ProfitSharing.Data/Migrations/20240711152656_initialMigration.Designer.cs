@@ -12,7 +12,11 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
+<<<<<<<< HEAD:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240711152656_initialMigration.Designer.cs
     [Migration("20240711152656_initialMigration")]
+========
+    [Migration("20240710133047_initialMigration")]
+>>>>>>>> origin/develop:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240710133047_initialMigration.Designer.cs
     partial class initialMigration
     {
         /// <inheritdoc />
@@ -1695,7 +1699,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<byte>("Id")
                         .HasColumnType("NUMBER(3)");
 
+<<<<<<<< HEAD:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240711152656_initialMigration.Designer.cs
                     b.Property<string>("Name")
+========
+                    b.Property<string>("Description")
+>>>>>>>> origin/develop:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240710133047_initialMigration.Designer.cs
                         .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("NVARCHAR2(64)");
@@ -1708,27 +1716,47 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         new
                         {
                             Id = (byte)0,
+<<<<<<<< HEAD:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240711152656_initialMigration.Designer.cs
                             Name = "Not Enrolled"
+========
+                            Description = "Not Enrolled"
+>>>>>>>> origin/develop:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240710133047_initialMigration.Designer.cs
                         },
                         new
                         {
                             Id = (byte)1,
+<<<<<<<< HEAD:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240711152656_initialMigration.Designer.cs
                             Name = "Old vesting plan has Contributions (7 years to full vesting)"
+========
+                            Description = "Old vesting plan has Contributions (7 years to full vesting)"
+>>>>>>>> origin/develop:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240710133047_initialMigration.Designer.cs
                         },
                         new
                         {
                             Id = (byte)2,
+<<<<<<<< HEAD:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240711152656_initialMigration.Designer.cs
                             Name = "New vesting plan has Contributions (6 years to full vesting)"
+========
+                            Description = "New vesting plan has Contributions (6 years to full vesting)"
+>>>>>>>> origin/develop:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240710133047_initialMigration.Designer.cs
                         },
                         new
                         {
                             Id = (byte)3,
+<<<<<<<< HEAD:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240711152656_initialMigration.Designer.cs
                             Name = "Old vesting plan has Forfeiture records"
+========
+                            Description = "Old vesting plan has Forfeiture records"
+>>>>>>>> origin/develop:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240710133047_initialMigration.Designer.cs
                         },
                         new
                         {
                             Id = (byte)4,
+<<<<<<<< HEAD:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240711152656_initialMigration.Designer.cs
                             Name = "New vesting plan has Forfeiture records"
+========
+                            Description = "New vesting plan has Forfeiture records"
+>>>>>>>> origin/develop:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240710133047_initialMigration.Designer.cs
                         });
                 });
 
@@ -2241,7 +2269,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasPrecision(7)
                         .HasColumnType("NUMBER(7)");
 
+<<<<<<<< HEAD:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240711152656_initialMigration.Designer.cs
                     b.Property<byte?>("BeneficiaryTypeId")
+========
+                    b.Property<byte>("BeneficiaryTypeId")
+>>>>>>>> origin/develop:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240710133047_initialMigration.Designer.cs
                         .HasColumnType("NUMBER(3)");
 
                     b.Property<byte>("CompanyContributionYears")
@@ -2271,6 +2303,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasPrecision(9, 2)
                         .HasColumnType("DECIMAL(9,2)");
 
+<<<<<<<< HEAD:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240711152656_initialMigration.Designer.cs
                     b.Property<long>("EmployeeSSN")
                         .HasMaxLength(9)
                         .HasColumnType("NUMBER(9)");
@@ -2279,6 +2312,17 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(3)");
 
                     b.Property<byte?>("EnrollmentId")
+========
+                    b.Property<string>("EmployeeSSN")
+                        .IsRequired()
+                        .HasMaxLength(9)
+                        .HasColumnType("NVARCHAR2(9)");
+
+                    b.Property<byte>("EmployeeTypeId")
+                        .HasColumnType("NUMBER(3)");
+
+                    b.Property<byte>("EnrollmentId")
+>>>>>>>> origin/develop:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240710133047_initialMigration.Designer.cs
                         .HasColumnType("NUMBER(3)");
 
                     b.Property<decimal>("ForfeitureAmountLastYear")
@@ -2289,7 +2333,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasPrecision(4, 2)
                         .HasColumnType("DECIMAL(4,2)");
 
+<<<<<<<< HEAD:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240711152656_initialMigration.Designer.cs
                     b.Property<decimal>("HoursLastYear")
+========
+                    b.Property<decimal>("HoursTowardsPSLastYear")
+>>>>>>>> origin/develop:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240710133047_initialMigration.Designer.cs
                         .HasPrecision(4, 2)
                         .HasColumnType("DECIMAL(4,2)");
 
@@ -2339,8 +2387,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasIndex("BeneficiaryTypeId");
 
+<<<<<<<< HEAD:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240711152656_initialMigration.Designer.cs
                     b.HasIndex("EmployeeSSN");
 
+========
+>>>>>>>> origin/develop:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240710133047_initialMigration.Designer.cs
                     b.HasIndex("EmployeeTypeId");
 
                     b.HasIndex("EnrollmentId");
@@ -2424,6 +2475,63 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         {
                             Id = "K",
                             Name = "School Or Sports"
+                        });
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.ZeroContributionReason", b =>
+                {
+                    b.Property<byte>("Id")
+                        .HasColumnType("NUMBER(3)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("NVARCHAR2(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ZeroContributionReason", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = (byte)0,
+                            Name = "Normal"
+                        },
+                        new
+                        {
+                            Id = (byte)1,
+                            Name = "18, 19, OR 20 WITH > 1000 HOURS"
+                        },
+                        new
+                        {
+                            Id = (byte)2,
+                            Name = "TERMINATED EMPLOYEE > 1000 HOURS WORKED GETS YEAR VESTED"
+                        },
+                        new
+                        {
+                            Id = (byte)3,
+                            Name = "OVER 64 AND < 1000 HOURS GETS 1 YEAR VESTING (obsolete 11/20)"
+                        },
+                        new
+                        {
+                            Id = (byte)4,
+                            Name = "OVER 64 AND < 1000 HOURS GETS 2 YEARS VESTING (obsolete 11/20)"
+                        },
+                        new
+                        {
+                            Id = (byte)5,
+                            Name = "OVER 64 AND > 1000 HOURS GETS 3 YEARS VESTING (obsolete 11/20)"
+                        },
+                        new
+                        {
+                            Id = (byte)6,
+                            Name = ">=65 AND 1st CONTRIBUTION >= 5 YEARS AGO GETS 100% VESTED"
+                        },
+                        new
+                        {
+                            Id = (byte)7,
+                            Name = "=64 AND 1ST CONTRIBUTION >=5 YEARS AGO GETS 100% VESTED ON THEIR BIRTHDAY"
                         });
                 });
 
@@ -2638,21 +2746,37 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 {
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.BeneficiaryType", "BeneficiaryType")
                         .WithMany("Profits")
+<<<<<<<< HEAD:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240711152656_initialMigration.Designer.cs
                         .HasForeignKey("BeneficiaryTypeId");
 
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.Demographic", "Demographic")
                         .WithMany("PayProfit")
                         .HasForeignKey("EmployeeSSN")
+========
+                        .HasForeignKey("BeneficiaryTypeId")
+>>>>>>>> origin/develop:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240710133047_initialMigration.Designer.cs
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.EmployeeType", "EmployeeType")
                         .WithMany("Profits")
+<<<<<<<< HEAD:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240711152656_initialMigration.Designer.cs
                         .HasForeignKey("EmployeeTypeId");
 
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.Enrollment", "Enrollment")
                         .WithMany("Profits")
                         .HasForeignKey("EnrollmentId");
+========
+                        .HasForeignKey("EmployeeTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Enrollment", "Enrollment")
+                        .WithMany("Profits")
+                        .HasForeignKey("EnrollmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+>>>>>>>> origin/develop:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240710133047_initialMigration.Designer.cs
 
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.ZeroContributionReason", "ZeroContributionReason")
                         .WithMany("Profits")
@@ -2660,8 +2784,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.Navigation("BeneficiaryType");
 
+<<<<<<<< HEAD:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240711152656_initialMigration.Designer.cs
                     b.Navigation("Demographic");
 
+========
+>>>>>>>> origin/develop:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240710133047_initialMigration.Designer.cs
                     b.Navigation("EmployeeType");
 
                     b.Navigation("Enrollment");
@@ -2674,11 +2801,14 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Navigation("Profits");
                 });
 
+<<<<<<<< HEAD:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240711152656_initialMigration.Designer.cs
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Demographic", b =>
                 {
                     b.Navigation("PayProfit");
                 });
 
+========
+>>>>>>>> origin/develop:src/services/src/Demoulas.ProfitSharing.Data/Migrations/20240710133047_initialMigration.Designer.cs
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Department", b =>
                 {
                     b.Navigation("Demographics");
