@@ -79,7 +79,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<byte>(type: "NUMBER(3)", nullable: false),
-                    Description = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: false)
+                    Name = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -127,7 +127,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
-                    Description = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: false)
+                    Name = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -231,9 +231,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 columns: table => new
                 {
                     EmployeeBadge = table.Column<long>(type: "NUMBER(7)", precision: 7, nullable: false),
-                    EmployeeSSN = table.Column<string>(type: "NVARCHAR2(9)", maxLength: 9, nullable: false),
+                    EmployeeSSN = table.Column<long>(type: "NUMBER(9)", maxLength: 9, nullable: false),
                     HoursCurrentYear = table.Column<decimal>(type: "DECIMAL(4,2)", precision: 4, scale: 2, nullable: false),
-                    HoursTowardsPSLastYear = table.Column<decimal>(type: "DECIMAL(4,2)", precision: 4, scale: 2, nullable: false),
+                    HoursLastYear = table.Column<decimal>(type: "DECIMAL(4,2)", precision: 4, scale: 2, nullable: false),
                     EarningsCurrentYear = table.Column<decimal>(type: "DECIMAL(8,2)", precision: 8, scale: 2, nullable: false),
                     EarningsLastYear = table.Column<decimal>(type: "DECIMAL(8,2)", precision: 8, scale: 2, nullable: false),
                     EarningsAfterApplyingVestingRules = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
@@ -252,9 +252,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     VestedBalanceLastYear = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
                     ContributionAmountLastYear = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
                     ForfeitureAmountLastYear = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
-                    EnrollmentId = table.Column<byte>(type: "NUMBER(3)", nullable: false),
-                    BeneficiaryTypeId = table.Column<byte>(type: "NUMBER(3)", nullable: false),
-                    EmployeeTypeId = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    EnrollmentId = table.Column<byte>(type: "NUMBER(3)", nullable: true),
+                    BeneficiaryTypeId = table.Column<byte>(type: "NUMBER(3)", nullable: true),
+                    EmployeeTypeId = table.Column<byte>(type: "NUMBER(3)", nullable: true),
                     ZeroContributionReasonId = table.Column<byte>(type: "NUMBER(3)", nullable: true)
                 },
                 constraints: table =>
@@ -264,20 +264,23 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         name: "FK_PayProfit_BeneficiaryType_BeneficiaryTypeId",
                         column: x => x.BeneficiaryTypeId,
                         principalTable: "BeneficiaryType",
-                        principalColumn: "Id",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_PayProfit_Demographics_EmployeeSSN",
+                        column: x => x.EmployeeSSN,
+                        principalTable: "Demographics",
+                        principalColumn: "DEM_SSN",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_PayProfit_EmployeeType_EmployeeTypeId",
                         column: x => x.EmployeeTypeId,
                         principalTable: "EmployeeType",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_PayProfit_Enrollment_EnrollmentId",
                         column: x => x.EnrollmentId,
                         principalTable: "Enrollment",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_PayProfit_ZeroContributionReason_ZeroContributionReasonId",
                         column: x => x.ZeroContributionReasonId,
@@ -666,7 +669,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     { "G", "Terminated Private" },
                     { "H", "Job Abandonment" },
                     { "I", "Health Reasons Non-FMLA" },
-                    { "J", "Layoff No Work" }
+                    { "J", "Layoff No Work" },
+                    { "K", "School Or Sports" },
+                    { "X", "Military" }
                 });
 
             migrationBuilder.InsertData(
@@ -725,6 +730,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 column: "BeneficiaryTypeId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_PayProfit_EmployeeSSN",
+                table: "PayProfit",
+                column: "EmployeeSSN");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PayProfit_EmployeeTypeId",
                 table: "PayProfit",
                 column: "EmployeeTypeId");
@@ -744,10 +754,22 @@ namespace Demoulas.ProfitSharing.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "PayProfit");
+
+            migrationBuilder.DropTable(
+                name: "BeneficiaryType");
+
+            migrationBuilder.DropTable(
                 name: "Demographics");
 
             migrationBuilder.DropTable(
-                name: "PayProfit");
+                name: "EmployeeType");
+
+            migrationBuilder.DropTable(
+                name: "Enrollment");
+
+            migrationBuilder.DropTable(
+                name: "ZeroContributionReason");
 
             migrationBuilder.DropTable(
                 name: "Country");
@@ -769,18 +791,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "TerminationCode");
-
-            migrationBuilder.DropTable(
-                name: "BeneficiaryType");
-
-            migrationBuilder.DropTable(
-                name: "EmployeeType");
-
-            migrationBuilder.DropTable(
-                name: "Enrollment");
-
-            migrationBuilder.DropTable(
-                name: "ZeroContributionReason");
         }
     }
 }

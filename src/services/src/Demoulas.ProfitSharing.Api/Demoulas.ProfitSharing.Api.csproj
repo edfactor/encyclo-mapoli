@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>a3be1bce-4a9e-4da4-a908-5f315c147298</UserSecretsId>
+    <Configurations>Debug;Release;Russ</Configurations>
   </PropertyGroup>
 
 	<ItemGroup>
