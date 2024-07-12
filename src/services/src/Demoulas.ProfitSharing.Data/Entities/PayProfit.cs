@@ -1,6 +1,6 @@
 ﻿namespace Demoulas.ProfitSharing.Data.Entities;
 
-public class PayProfit
+public sealed class PayProfit
 {
     /// <summary>
     /// Employee badge number
@@ -10,7 +10,7 @@ public class PayProfit
     /// <summary>
     /// Employee social security number
     /// </summary>
-    public required string EmployeeSSN { get; set; }
+    public required long EmployeeSSN { get; set; }
 
     /// <summary>
     /// Hours towards Profit Sharing in the current year (updated weekly)
@@ -116,17 +116,17 @@ public class PayProfit
     /// <summary>
     /// Employee enrollment status
     /// </summary>
-    public required Enrollment Enrollment { get; set; }
+    public required Enrollment? Enrollment { get; set; }
 
     /// <summary>
     /// 0=Employee, 1=Beneficiary
     /// </summary>
-    public required BeneficiaryType BeneficiaryType { get; set; }
+    public required BeneficiaryType? BeneficiaryType { get; set; }
 
     /// <summary>
     /// 0=NOT New in plan last year, 1=New last year    
     /// </summary>
-    public required EmployeeType EmployeeType { get; set; }
+    public required EmployeeType? EmployeeType { get; set; }
 
     public ZeroContributionReason? ZeroContributionReason { get; set; }
 

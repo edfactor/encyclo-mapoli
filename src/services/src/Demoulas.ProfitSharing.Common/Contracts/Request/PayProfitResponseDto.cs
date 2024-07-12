@@ -115,17 +115,17 @@ public sealed record PayProfitRequestDto
     /// <summary>
     /// Employee enrollment status
     /// </summary>
-    public required EnrollmentRequestDto Enrollment { get; set; }
+    public required EnrollmentRequestDto? Enrollment { get; set; }
 
     /// <summary>
     /// 0=Employee, 1=Beneficiary
     /// </summary>
-    public required BeneficiaryTypeRequestDto BeneficiaryType { get; set; }
+    public required BeneficiaryTypeRequestDto? BeneficiaryType { get; set; }
 
     /// <summary>
     /// 0=NOT New in plan last year, 1=New last year    
     /// </summary>
-    public required EmployeeTypeRequestDto EmployeeType { get; set; }
+    public required EmployeeTypeRequestDto? EmployeeType { get; set; }
 
     public ZeroContributionReasonRequestDto? ZeroContributionReason { get; set; }
 }

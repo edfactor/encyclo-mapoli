@@ -1,7 +1,7 @@
-﻿using Demoulas.ProfitSharing.Data.Entities.Base;
+﻿using Demoulas.ProfitSharing.Data.Interfaces;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
-public sealed class ZeroContributionReason : LookupTable<byte>
+public sealed class ZeroContributionReason : ILookupTable<byte>
 {
     public static class Constants
     {
@@ -44,6 +44,9 @@ public sealed class ZeroContributionReason : LookupTable<byte>
         /// </summary>
         public const byte SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay = 7;
     }
+
+    public byte Id { get; set; }
+    public required string Name { get; set; }
 
     public ICollection<PayProfit>? Profits { get; set; }
 }

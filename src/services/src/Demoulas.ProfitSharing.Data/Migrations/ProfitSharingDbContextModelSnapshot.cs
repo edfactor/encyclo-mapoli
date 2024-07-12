@@ -18,7 +18,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .UseCollation("USING_NLS_COMP")
-                .HasAnnotation("ProductVersion", "8.0.4")
+                .HasAnnotation("ProductVersion", "8.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             OracleModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -1705,27 +1705,27 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         new
                         {
                             Id = (byte)0,
-                            Description = "Not Enrolled"
+                            Name = "Not Enrolled"
                         },
                         new
                         {
                             Id = (byte)1,
-                            Description = "Old vesting plan has Contributions (7 years to full vesting)"
+                            Name = "Old vesting plan has Contributions (7 years to full vesting)"
                         },
                         new
                         {
                             Id = (byte)2,
-                            Description = "New vesting plan has Contributions (6 years to full vesting)"
+                            Name = "New vesting plan has Contributions (6 years to full vesting)"
                         },
                         new
                         {
                             Id = (byte)3,
-                            Description = "Old vesting plan has Forfeiture records"
+                            Name = "Old vesting plan has Forfeiture records"
                         },
                         new
                         {
                             Id = (byte)4,
-                            Description = "New vesting plan has Forfeiture records"
+                            Name = "New vesting plan has Forfeiture records"
                         });
                 });
 
@@ -2238,7 +2238,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasPrecision(7)
                         .HasColumnType("NUMBER(7)");
 
-                    b.Property<byte>("BeneficiaryTypeId")
+                    b.Property<byte?>("BeneficiaryTypeId")
                         .HasColumnType("NUMBER(3)");
 
                     b.Property<byte>("CompanyContributionYears")
@@ -2268,15 +2268,14 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasPrecision(9, 2)
                         .HasColumnType("DECIMAL(9,2)");
 
-                    b.Property<string>("EmployeeSSN")
-                        .IsRequired()
+                    b.Property<long>("EmployeeSSN")
                         .HasMaxLength(9)
-                        .HasColumnType("NVARCHAR2(9)");
+                        .HasColumnType("NUMBER(9)");
 
-                    b.Property<byte>("EmployeeTypeId")
+                    b.Property<byte?>("EmployeeTypeId")
                         .HasColumnType("NUMBER(3)");
 
-                    b.Property<byte>("EnrollmentId")
+                    b.Property<byte?>("EnrollmentId")
                         .HasColumnType("NUMBER(3)");
 
                     b.Property<decimal>("ForfeitureAmountLastYear")
@@ -2337,6 +2336,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasIndex("BeneficiaryTypeId");
 
+                    b.HasIndex("EmployeeSSN");
+
                     b.HasIndex("EmployeeTypeId");
 
                     b.HasIndex("EnrollmentId");
@@ -2364,52 +2365,62 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         new
                         {
                             Id = "A",
-                            Description = "Left On Own"
+                            Name = "Left On Own"
                         },
                         new
                         {
                             Id = "B",
-                            Description = "Personal Or Family Reason"
+                            Name = "Personal Or Family Reason"
                         },
                         new
                         {
                             Id = "C",
-                            Description = "Could Not Work Available Hours"
+                            Name = "Could Not Work Available Hours"
                         },
                         new
                         {
                             Id = "D",
-                            Description = "Stealing"
+                            Name = "Stealing"
                         },
                         new
                         {
                             Id = "E",
-                            Description = "Not Following Company Policy"
+                            Name = "Not Following Company Policy"
                         },
                         new
                         {
                             Id = "F",
-                            Description = "FMLA Expired"
+                            Name = "FMLA Expired"
                         },
                         new
                         {
                             Id = "G",
-                            Description = "Terminated Private"
+                            Name = "Terminated Private"
                         },
                         new
                         {
                             Id = "H",
-                            Description = "Job Abandonment"
+                            Name = "Job Abandonment"
                         },
                         new
                         {
                             Id = "I",
-                            Description = "Health Reasons Non-FMLA"
+                            Name = "Health Reasons Non-FMLA"
                         },
                         new
                         {
                             Id = "J",
-                            Description = "Layoff No Work"
+                            Name = "Layoff No Work"
+                        },
+                        new
+                        {
+                            Id = "X",
+                            Name = "Military"
+                        },
+                        new
+                        {
+                            Id = "K",
+                            Name = "School Or Sports"
                         });
                 });
 
@@ -2624,27 +2635,29 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 {
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.BeneficiaryType", "BeneficiaryType")
                         .WithMany("Profits")
-                        .HasForeignKey("BeneficiaryTypeId")
+                        .HasForeignKey("BeneficiaryTypeId");
+
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Demographic", "Demographic")
+                        .WithMany("PayProfit")
+                        .HasForeignKey("EmployeeSSN")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.EmployeeType", "EmployeeType")
                         .WithMany("Profits")
-                        .HasForeignKey("EmployeeTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("EmployeeTypeId");
 
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.Enrollment", "Enrollment")
                         .WithMany("Profits")
-                        .HasForeignKey("EnrollmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("EnrollmentId");
 
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.ZeroContributionReason", "ZeroContributionReason")
                         .WithMany("Profits")
                         .HasForeignKey("ZeroContributionReasonId");
 
                     b.Navigation("BeneficiaryType");
+
+                    b.Navigation("Demographic");
 
                     b.Navigation("EmployeeType");
 
@@ -2656,6 +2669,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BeneficiaryType", b =>
                 {
                     b.Navigation("Profits");
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Demographic", b =>
+                {
+                    b.Navigation("PayProfit");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Department", b =>

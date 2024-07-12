@@ -11,7 +11,7 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder();
 
 builder.Configuration.AddUserSecrets<Program>();
 
-#if !DEBUG
+#if !DEBUG && !RUSS
 if (!Debugger.IsAttached)
 {
     // This is ONLY used when deployed.
@@ -41,7 +41,12 @@ List<ContextFactoryRequest> list = new List<ContextFactoryRequest>
     ContextFactoryRequest.Initialize<StoreInfoDbContext>("StoreInfo")
 };
 
+#if RUSS
 builder.AddDatabaseServices(list, true, true);
+#else
+builder.AddDatabaseServices(list);
+#endif
+
 builder.AddCachingServices();
 
 builder.ConfigureDefaultEndpoints();
