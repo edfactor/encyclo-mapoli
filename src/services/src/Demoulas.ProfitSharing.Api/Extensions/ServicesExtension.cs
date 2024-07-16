@@ -20,6 +20,7 @@ public static class ServicesExtension
 
         _ = services.AddScoped<IPayClassificationService, PayClassificationService>();
         _ = services.AddScoped<IDemographicsService, DemographicsService>();
+        _ = services.AddScoped<IYearEndService, YearEndService>();
         _ = services.AddScoped<IPayProfitService, PayProfitService>();
 
 

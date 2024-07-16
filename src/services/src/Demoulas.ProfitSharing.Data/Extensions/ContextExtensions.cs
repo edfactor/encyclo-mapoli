@@ -9,7 +9,9 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new CountryMap());
         modelBuilder.ApplyConfiguration(new DemographicMap());
         modelBuilder.ApplyConfiguration(new PayClassificationMap());
-
+        modelBuilder.ApplyConfiguration(new ProfitDetailMap());
+        modelBuilder.ApplyConfiguration(new ProfitCodeMap());
+        modelBuilder.ApplyConfiguration(new TaxCodeMap());
         modelBuilder.ApplyConfiguration(new GenderMap());
         modelBuilder.ApplyConfiguration(new PayFrequencyMap());
         modelBuilder.ApplyConfiguration(new TerminationCodeMap());

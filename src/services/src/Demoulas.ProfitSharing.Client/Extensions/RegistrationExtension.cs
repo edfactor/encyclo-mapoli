@@ -10,7 +10,7 @@ public static class RegistrationExtension
     {
         _ = services.AddScoped<IPayClassificationService, PayClassificationClient>();
         _ = services.AddScoped<IDemographicsService, DemographicsClient>();
-
+        _ = services.AddScoped<IYearEndService, YearEndClient>();
 
         services.AddHttpClient(Constants.HttpClient) .AddStandardResilienceHandler();
 

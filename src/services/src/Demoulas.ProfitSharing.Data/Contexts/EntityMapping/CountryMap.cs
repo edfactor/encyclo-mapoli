@@ -7,21 +7,21 @@ public sealed class CountryMap : IEntityTypeConfiguration<Country>
 {
     public void Configure(EntityTypeBuilder<Country> builder)
     {
-        builder.HasKey(c => c.ISO);
-        builder.ToTable("Country");
+        _ = builder.HasKey(c => c.ISO);
+        _ = builder.ToTable("Country");
 
-        builder.Property(c => c.ISO).IsRequired().HasMaxLength(2);
-        builder.Property(c => c.Id).IsRequired().HasPrecision(3);
-        builder.Property(c => c.Name).IsRequired().HasMaxLength(100);
-        builder.Property(c => c.TelephoneCode).IsRequired().HasMaxLength(10);
+        _ = builder.Property(c => c.ISO).IsRequired().HasMaxLength(2);
+        _ = builder.Property(c => c.Id).IsRequired().HasPrecision(3);
+        _ = builder.Property(c => c.Name).IsRequired().HasMaxLength(100);
+        _ = builder.Property(c => c.TelephoneCode).IsRequired().HasMaxLength(10);
 
-        builder.HasData(GetPredefinedCountries());
+        _ = builder.HasData(GetPredefinedCountries());
     }
 
     private List<Country> GetPredefinedCountries()
     {
-        return new List<Country>
-        {
+        return
+        [
             new Country { Id = 1, Name = "Afghanistan", ISO = "AF", TelephoneCode = "+93" },
             new Country { Id = 2, Name = "Albania", ISO = "AL", TelephoneCode = "+355" },
             new Country { Id = 3, Name = "Algeria", ISO = "DZ", TelephoneCode = "+213" },
@@ -216,6 +216,6 @@ public sealed class CountryMap : IEntityTypeConfiguration<Country>
             new Country { Id = 192, Name = "Yemen", ISO = "YE", TelephoneCode = "+967" },
             new Country { Id = 193, Name = "Zambia", ISO = "ZM", TelephoneCode = "+260" },
             new Country { Id = 194, Name = "Zimbabwe", ISO = "ZW", TelephoneCode = "+263" }
-        };
+        ];
     }
 }

@@ -43,6 +43,21 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         Mock<DbSet<PayProfit>> mockProfits = profits.AsQueryable().BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.PayProfits).Returns(mockProfits.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.PayProfits).Returns(mockProfits.Object);
+
+        var profitCodes = new ProfitCodeFaker().Generate(10);
+        var mockProfitCodes = profitCodes.AsQueryable().BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.ProfitCodes).Returns(mockProfitCodes.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.ProfitCodes).Returns(mockProfitCodes.Object);
+
+        var taxCodes = new TaxCodeFaker().Generate(10);
+        var mockTaxCodes = taxCodes.AsQueryable().BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.TaxCodes).Returns(mockTaxCodes.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.TaxCodes).Returns(mockTaxCodes.Object);
+
+        var profitDetails = new ProfitDetailFaker().Generate(100);
+        var mockProfitDetails = profitDetails.AsQueryable().BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
     }
 
     public static IProfitSharingDataContextFactory InitializeForTesting()
