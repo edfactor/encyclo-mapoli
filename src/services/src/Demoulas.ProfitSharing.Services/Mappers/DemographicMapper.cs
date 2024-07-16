@@ -37,7 +37,7 @@ public partial class DemographicMapper
 
     public DemographicsRequestDto MapToRequest(Demographic source)
     {
-        var target = new DemographicsRequestDto
+        DemographicsRequestDto target = new DemographicsRequestDto
         {
             SSN = source.SSN,
             OracleHcmId = source.OracleHcmId,
@@ -68,7 +68,7 @@ public partial class DemographicMapper
 
     public DemographicsResponseDto Map(Demographic source)
     {
-        var target = new DemographicsResponseDto
+        DemographicsResponseDto target = new DemographicsResponseDto
         {
             SSN = MaskSsn(source.SSN),
             OracleHcmId = source.OracleHcmId,

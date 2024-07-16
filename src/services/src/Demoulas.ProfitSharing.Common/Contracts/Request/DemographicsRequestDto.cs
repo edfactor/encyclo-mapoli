@@ -27,7 +27,7 @@ public record DemographicsRequestDto : MemberRequestDto
 
     public required DateOnly HireDate { get; set; }
     public required DateOnly ReHireDate { get; set; }
-    public char TerminationCodeId { get; set; }
+    public char? TerminationCodeId { get; set; }
     public DateOnly? TerminationDate { get; set; }
     public required char EmploymentTypeCode { get; set; }
     public required byte PayFrequencyId { get; set; }

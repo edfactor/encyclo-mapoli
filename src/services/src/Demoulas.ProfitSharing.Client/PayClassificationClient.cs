@@ -10,7 +10,7 @@ public sealed  class PayClassificationClient : IPayClassificationService
 
     public PayClassificationClient(IHttpClientFactory httpClientFactory)
     {
-       _httpClient =  httpClientFactory.CreateClient(Constants.HttpClient);
+       _httpClient =  httpClientFactory.CreateClient(Constants.Http.HttpClient);
     }
     public async Task<ISet<PayClassificationResponseDto>> GetAllPayClassifications(CancellationToken cancellationToken = default)
     {

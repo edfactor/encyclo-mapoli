@@ -1,21 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Api;
-using Demoulas.ProfitSharing.Client;
+﻿using Demoulas.ProfitSharing.Api;
+using Demoulas.ProfitSharing.Client.Reports.YearEnd;
 using Demoulas.ProfitSharing.UnitTests.Base;
 using FluentAssertions;
 
-namespace Demoulas.ProfitSharing.UnitTests;
+namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 public class YearEndServiceTests:IClassFixture<ApiTestBase<Program>>
 {
     private readonly YearEndClient _yearEndClient;
 
     public YearEndServiceTests(ApiTestBase<Program> fixture)
     {
-        _yearEndClient = new YearEndClient(fixture.ApiClient);
+        _yearEndClient = new YearEndClient(fixture.ApiClient, fixture.DownloadClient);
     }
 
     [Fact(DisplayName ="Check Duplicate SSNs")]

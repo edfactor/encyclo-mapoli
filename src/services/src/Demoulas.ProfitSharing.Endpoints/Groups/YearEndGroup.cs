@@ -1,25 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FastEndpoints;
+﻿using FastEndpoints;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
 
-namespace Demoulas.ProfitSharing.Endpoints;
+namespace Demoulas.ProfitSharing.Endpoints.Groups;
+
 public sealed class YearEndGroup : Group
 {
     private const string Route = "yearend";
-    private const string RouteName = "YearEnd";
-
+    private const string RouteName = "Year End";
     public YearEndGroup()
     {
-        Configure(Route.ToLowerInvariant(), ep => 
+        Configure(Route.ToLowerInvariant(), ep => //admin is the route prefix for the top level group
         {
             ep.Description(x => x
                 .ProducesProblemFE<Microsoft.AspNetCore.Mvc.ProblemDetails>()
                 .ProducesProblemFE<Microsoft.AspNetCore.Mvc.ProblemDetails>(500)
+                .WithRequestTimeout(TimeSpan.FromMinutes(1))
                 .WithTags(RouteName));
         });
     }

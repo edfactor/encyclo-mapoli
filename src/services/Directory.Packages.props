@@ -5,6 +5,7 @@
   <ItemGroup>
     <PackageVersion Include="Aspire.Hosting.AppHost" Version="8.0.2" />
     <PackageVersion Include="Aspire.Oracle.EntityFrameworkCore" Version="8.0.2" />
+    <PackageVersion Include="CsvHelper" Version="33.0.1" />
     <PackageVersion Include="FluentValidation" Version="11.9.1" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="8.0.7" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="8.0.2" />

@@ -38,7 +38,7 @@ internal static class LoggerConfigurationExtension
 
         const string outputTemplate = "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}";
 
-        var sinks = new LoggerConfiguration()
+        LoggerConfiguration sinks = new LoggerConfiguration()
             .Enrich.WithOpenTelemetryTraceId()
             .Enrich.WithOpenTelemetrySpanId()
             .Enrich.FromLogContext()

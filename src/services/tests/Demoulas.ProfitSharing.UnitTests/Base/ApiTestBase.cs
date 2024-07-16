@@ -24,6 +24,8 @@ public class ApiTestBase<TStartup> where TStartup : class
     /// </summary>
     public HttpClient ApiClient { get; }
 
+    public HttpClient DownloadClient { get; }
+
 
     public ServiceProvider? ServiceProvider { get; private set; }
 
@@ -53,5 +55,8 @@ public class ApiTestBase<TStartup> where TStartup : class
             });
 
         ApiClient = builder.CreateClient();
+        DownloadClient = builder.CreateClient();
+
+        DownloadClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("text/csv"));
     }
 }

@@ -21,7 +21,7 @@ public sealed class DataContextFactory : IProfitSharingDataContextFactory
     private DataContextFactory(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
-        var factory = serviceProvider.GetRequiredService<ILoggerFactory>();
+        ILoggerFactory factory = serviceProvider.GetRequiredService<ILoggerFactory>();
         _logger = factory.CreateLogger<DataContextFactory>();
     }
 

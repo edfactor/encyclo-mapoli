@@ -1,7 +1,8 @@
 ﻿using Demoulas.Common.Contracts.Request;
+using Demoulas.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Client;
-using Demoulas.ProfitSharing.Services.Mappers;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.UnitTests.Base;
 using FluentAssertions;
 
@@ -21,7 +22,7 @@ public class PayProfitServiceTests : IClassFixture<ApiTestBase<Program>>
     [Fact(DisplayName = "Get all the profit!")]
     public async Task GetAllDemographicsTest()
     {
-        var response = await _payProfitClient.GetAllProfits(new PaginationRequestDto(), cancellationToken: CancellationToken.None);
+        PaginatedResponseDto<PayProfitResponseDto>? response = await _payProfitClient.GetAllProfits(new PaginationRequestDto(), cancellationToken: CancellationToken.None);
 
         response.Should().NotBeNull();
         response!.Results.Should().HaveCountGreaterOrEqualTo(100);

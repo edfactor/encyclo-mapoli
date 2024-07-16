@@ -80,7 +80,7 @@ internal static class SwaggerHelper
                          }
                      }
                  });
-                 s.PostProcess = doc => { doc.Produces = new List<string> { "application/json" }; };
+                 s.PostProcess = doc => { doc.Produces = new List<string> { "application/json", "text/csv" }; };
                  s.PostProcess = document =>
                  {
                      document.Info.Contact = contactDetails ?? new OpenApiContact

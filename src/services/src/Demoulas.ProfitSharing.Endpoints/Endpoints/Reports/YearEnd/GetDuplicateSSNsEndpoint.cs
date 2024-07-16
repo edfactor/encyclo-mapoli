@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.YearEnd;
+namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 public class GetDuplicateSSNsEndpoint : EndpointWithoutRequest<IList<PayrollDuplicateSSNResponseDto>>
 {
     private readonly IYearEndService _yearEndService;

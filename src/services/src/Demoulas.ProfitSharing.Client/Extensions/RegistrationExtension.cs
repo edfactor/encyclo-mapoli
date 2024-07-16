@@ -1,4 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Client.Common;
+using Demoulas.ProfitSharing.Client.Reports.YearEnd;
+using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,7 +14,13 @@ public static class RegistrationExtension
         _ = services.AddScoped<IDemographicsService, DemographicsClient>();
         _ = services.AddScoped<IYearEndService, YearEndClient>();
 
-        services.AddHttpClient(Constants.HttpClient) .AddStandardResilienceHandler();
+        _ = services.AddHttpClient(Constants.Http.HttpClient).AddStandardResilienceHandler();
+        _ = services.AddHttpClient(Constants.Http.ReportsHttpClient).AddStandardResilienceHandler();
+        _ = services.AddHttpClient(Constants.Http.ReportsDownloadClient, client =>
+        {
+            client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("text/csv"));
+        }).AddStandardResilienceHandler();
+
 
         return services;
     }

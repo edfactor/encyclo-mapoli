@@ -46,7 +46,7 @@ public sealed class PayProfitClient : IPayProfitService
             return new HashSet<PayProfitResponseDto>(0);
         }
 
-        foreach (var demo in payProfitRequestDtos)
+        foreach (PayProfitRequestDto demo in payProfitRequestDtos)
         {
             await _validator.ValidateAndThrowAsync(demo, cancellationToken);
         }

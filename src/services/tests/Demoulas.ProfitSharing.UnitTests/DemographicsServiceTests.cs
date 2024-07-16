@@ -57,11 +57,11 @@ public class DemographicsServiceTests : IClassFixture<ApiTestBase<Program>>
         response.Should().HaveCount(count);
         _ = response!.Select(d => d.SSN.Should().MatchRegex(@"XXX-XX-\d{4}"));
 
-        var responseDict = response!.ToDictionary(k => k.BadgeNumber);
+        Dictionary<int, DemographicsResponseDto> responseDict = response!.ToDictionary(k => k.BadgeNumber);
 
         demographics.ForEach(d =>
         {
-            if (!responseDict.TryGetValue(d.BadgeNumber, out var responseDto))
+            if (!responseDict.TryGetValue(d.BadgeNumber, out DemographicsResponseDto? responseDto))
             {
                 Assert.Fail($"Unable to find the matching BadgeNumber: {d.BadgeNumber}");
             }

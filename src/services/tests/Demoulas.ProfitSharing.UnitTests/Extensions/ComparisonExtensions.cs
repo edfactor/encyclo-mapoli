@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Reflection;
 using FluentAssertions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Extensions;
@@ -7,10 +8,10 @@ public static class ComparisonExtensions
 {
     public static void ShouldBeEquivalentTo<T, TU>(this T entity, TU dto)
     {
-        var entityProperties = typeof(T).GetProperties();
-        var dtoProperties = typeof(TU).GetProperties();
+        PropertyInfo[] entityProperties = typeof(T).GetProperties();
+        PropertyInfo[] dtoProperties = typeof(TU).GetProperties();
 
-        foreach (var entityProperty in entityProperties)
+        foreach (PropertyInfo entityProperty in entityProperties)
         {
             // Skip navigation properties
             if (IsNavigationProperty(entityProperty.PropertyType))
@@ -18,7 +19,7 @@ public static class ComparisonExtensions
                 continue;
             }
 
-            var dtoProperty = dtoProperties.FirstOrDefault(p => p.Name == entityProperty.Name);
+            PropertyInfo? dtoProperty = dtoProperties.FirstOrDefault(p => p.Name == entityProperty.Name);
 
             if (dtoProperty == null)
             {
@@ -37,8 +38,8 @@ public static class ComparisonExtensions
                 continue;
             }
 
-            var entityValue = entityProperty.GetValue(entity);
-            var dtoValue = dtoProperty.GetValue(dto);
+            object? entityValue = entityProperty.GetValue(entity);
+            object? dtoValue = dtoProperty.GetValue(dto);
 
             dtoValue.Should().Be(entityValue, because: $"{dtoProperty.Name} property should be equivalent.");
         }

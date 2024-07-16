@@ -18,7 +18,7 @@ public static class DatabaseServicesExtension
             throw new InvalidOperationException($"Service type {typeof(IProfitSharingDataContextFactory).FullName} is already registered.");
         }
 
-        var factory = DataContextFactory.Initialize(builder, contextFactoryRequests: contextFactoryRequests);
+        IProfitSharingDataContextFactory factory = DataContextFactory.Initialize(builder, contextFactoryRequests: contextFactoryRequests);
         builder.Services.AddSingleton(factory);
 
         if (runMigration && Debugger.IsAttached)
@@ -32,7 +32,7 @@ public static class DatabaseServicesExtension
                         context.Database.EnsureDeleted();
                     }
 
-                    var pendingMigrations = context.Database.GetPendingMigrations();
+                    IEnumerable<string> pendingMigrations = context.Database.GetPendingMigrations();
                     if (pendingMigrations.Any())
                     {
                         context.Database.Migrate();

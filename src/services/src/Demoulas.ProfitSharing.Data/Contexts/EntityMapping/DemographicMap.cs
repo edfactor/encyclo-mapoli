@@ -70,22 +70,19 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             .HasPrecision(2);
 
         _ = builder.Property(e => e.DateOfBirth)
-            .HasPrecision(8)
             .HasComment("DateOfBirth")
-            .HasColumnName("PY_DOB")
-            .HasConversion<IntegerToDateOnlyConverterYyyyMMdd>();
+            .HasColumnType("DATE")
+            .HasConversion<DateOnlyConverter>();
 
         _ = builder.Property(e => e.HireDate)
-            .HasPrecision(8)
             .HasComment("HireDate")
-            .HasColumnName("PY_HIRE_DT")
-            .HasConversion<IntegerToDateOnlyConverterYyyyMMdd>();
+            .HasColumnType("DATE")
+            .HasConversion<DateOnlyConverter>();
 
         _ = builder.Property(e => e.ReHireDate)
-            .HasPrecision(8)
             .HasComment("ReHireDate")
-            .HasColumnName("PY_REHIRE_DT")
-            .HasConversion<IntegerToDateOnlyConverterYyyyMMdd>();
+            .HasColumnType("DATE")
+            .HasConversion<DateOnlyConverter>();
 
         _ = builder.Property(e => e.TerminationCodeId)
             .HasMaxLength(1)
@@ -94,16 +91,14 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
 
 
         _ = builder.Property(e => e.TerminationDate)
-            .HasPrecision(8)
             .HasComment("TerminationDate")
-            .HasColumnName("PY_TERM_DT")
-            .HasConversion<IntegerToDateOnlyConverterYyyyMMdd>();
+            .HasColumnType("DATE")
+            .HasConversion<DateOnlyConverter>();
 
         _ = builder.Property(e => e.FullTimeDate)
-            .HasPrecision(8)
             .HasComment("FullTimeDate")
-            .HasColumnName("PY_FULL_DT")
-            .HasConversion<IntegerToDateOnlyConverterYyyyMMdd>();
+            .HasColumnType("DATE")
+            .HasConversion<DateOnlyConverter>();
 
         _ = builder.Property(e => e.EmploymentTypeId)
             .HasMaxLength(2)

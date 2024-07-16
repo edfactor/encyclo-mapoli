@@ -1,4 +1,5 @@
 ﻿using Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
+using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Data.Extensions;
@@ -22,6 +23,7 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new BeneficiaryTypeMap());
         modelBuilder.ApplyConfiguration(new EmployeeTypeMap());
         modelBuilder.ApplyConfiguration(new ZeroContributionReasonMap());
+        modelBuilder.ApplyConfiguration(new BeneficiaryMap());
 
         return modelBuilder;
     }

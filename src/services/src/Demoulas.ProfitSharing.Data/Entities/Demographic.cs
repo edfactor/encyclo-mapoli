@@ -46,7 +46,7 @@ public sealed class Demographic : Member
     public byte PayFrequencyId { get; set; }
     public PayFrequency? PayFrequency { get; set; }
 
-    public char TerminationCodeId { get; set; }
+    public char? TerminationCodeId { get; set; }
     public TerminationCode? TerminationCode { get; set; }
 
     public IEnumerable<PayProfit>? PayProfit { get; set; }

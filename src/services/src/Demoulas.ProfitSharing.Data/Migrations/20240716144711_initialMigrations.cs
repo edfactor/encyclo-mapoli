@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -7,7 +8,7 @@
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class initialMigration : Migration
+    public partial class initialMigrations : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -123,6 +124,31 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ProfitCode",
+                columns: table => new
+                {
+                    Code = table.Column<short>(type: "NUMBER(5)", nullable: false),
+                    Definition = table.Column<string>(type: "NVARCHAR2(128)", maxLength: 128, nullable: false),
+                    Frequency = table.Column<string>(type: "NVARCHAR2(128)", maxLength: 128, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProfitCode", x => x.Code);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TaxCode",
+                columns: table => new
+                {
+                    Code = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
+                    Description = table.Column<string>(type: "NVARCHAR2(128)", maxLength: 128, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TaxCode", x => x.Code);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TerminationCode",
                 columns: table => new
                 {
@@ -147,6 +173,83 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Beneficiary",
+                columns: table => new
+                {
+                    PSN = table.Column<long>(type: "NUMBER(9)", precision: 9, nullable: false)
+                        .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
+                    SSN = table.Column<long>(type: "NUMBER(9)", precision: 9, nullable: false),
+                    FirstName = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false),
+                    MiddleName = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true),
+                    LastName = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false),
+                    DateOfBirth = table.Column<DateTime>(type: "DATE", nullable: false),
+                    Address_Street = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "Street"),
+                    Address_Street2 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "Street2"),
+                    Address_City = table.Column<string>(type: "NVARCHAR2(25)", maxLength: 25, nullable: false, comment: "City"),
+                    Address_State = table.Column<string>(type: "NVARCHAR2(3)", maxLength: 3, nullable: false, comment: "State"),
+                    Address_PostalCode = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false, comment: "Postal Code"),
+                    CountryISO = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: false, defaultValue: "US"),
+                    ContactInfo_PhoneNumber = table.Column<string>(type: "NVARCHAR2(15)", maxLength: 15, nullable: false, comment: "PhoneNumber"),
+                    MobileNumber = table.Column<string>(type: "NVARCHAR2(15)", maxLength: 15, nullable: true),
+                    EmailAddress = table.Column<string>(type: "NVARCHAR2(50)", maxLength: 50, nullable: true),
+                    TypeId = table.Column<byte>(type: "NUMBER(3)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Beneficiary", x => x.PSN);
+                    table.ForeignKey(
+                        name: "FK_Beneficiary_BeneficiaryType_TypeId",
+                        column: x => x.TypeId,
+                        principalTable: "BeneficiaryType",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Beneficiary_Country_CountryISO",
+                        column: x => x.CountryISO,
+                        principalTable: "Country",
+                        principalColumn: "ISO",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProfitDetail",
+                columns: table => new
+                {
+                    ProfitYear = table.Column<short>(type: "NUMBER(5)", nullable: false),
+                    ProfitYearIteration = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    ProfitClient = table.Column<short>(type: "NUMBER(5)", nullable: false),
+                    ProfitCodeId = table.Column<short>(type: "NUMBER(5)", nullable: false),
+                    Contribution = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    Earnings = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    Forfeiture = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    Month = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    Year = table.Column<short>(type: "NUMBER(5)", nullable: false),
+                    Comment = table.Column<string>(type: "NVARCHAR2(16)", maxLength: 16, nullable: false),
+                    ZeroCont = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
+                    FederalTaxes = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    StateTaxes = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    TaxCodeId = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
+                    SSN = table.Column<long>(type: "NUMBER(19)", nullable: false),
+                    ProfDistId = table.Column<int>(type: "NUMBER(10)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProfitDetail", x => new { x.ProfitYear, x.ProfitYearIteration });
+                    table.ForeignKey(
+                        name: "FK_ProfitDetail_ProfitCode_ProfitCodeId",
+                        column: x => x.ProfitCodeId,
+                        principalTable: "ProfitCode",
+                        principalColumn: "Code",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProfitDetail_TaxCode_TaxCodeId",
+                        column: x => x.TaxCodeId,
+                        principalTable: "TaxCode",
+                        principalColumn: "Code",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Demographics",
                 columns: table => new
                 {
@@ -168,16 +271,16 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     PY_STATE = table.Column<string>(type: "NVARCHAR2(3)", maxLength: 3, nullable: false, comment: "State"),
                     PY_ZIP = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false, comment: "Postal Code"),
                     CountryISO = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: false, defaultValue: "US"),
-                    PY_DOB = table.Column<int>(type: "NUMBER(8)", precision: 8, nullable: false, comment: "DateOfBirth"),
-                    PY_FULL_DT = table.Column<int>(type: "NUMBER(8)", precision: 8, nullable: false, comment: "FullTimeDate"),
-                    PY_HIRE_DT = table.Column<int>(type: "NUMBER(8)", precision: 8, nullable: false, comment: "HireDate"),
-                    PY_REHIRE_DT = table.Column<int>(type: "NUMBER(8)", precision: 8, nullable: false, comment: "ReHireDate"),
-                    PY_TERM_DT = table.Column<int>(type: "NUMBER(8)", precision: 8, nullable: true, comment: "TerminationDate"),
+                    DateOfBirth = table.Column<DateTime>(type: "DATE", nullable: false, comment: "DateOfBirth"),
+                    FullTimeDate = table.Column<DateTime>(type: "DATE", nullable: false, comment: "FullTimeDate"),
+                    HireDate = table.Column<DateTime>(type: "DATE", nullable: false, comment: "HireDate"),
+                    ReHireDate = table.Column<DateTime>(type: "DATE", nullable: false, comment: "ReHireDate"),
+                    TerminationDate = table.Column<DateTime>(type: "DATE", nullable: true, comment: "TerminationDate"),
                     PY_DP = table.Column<byte>(type: "NUMBER(1)", precision: 1, nullable: false, comment: "Department"),
                     PY_FUL = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: false, comment: "EmploymentType"),
                     PY_GENDER = table.Column<string>(type: "NVARCHAR2(1)", maxLength: 1, nullable: false, comment: "Gender"),
                     PY_FREQ = table.Column<byte>(type: "NUMBER(3)", maxLength: 1, nullable: false, comment: "PayFrequency"),
-                    PY_TERM = table.Column<string>(type: "NVARCHAR2(1)", maxLength: 1, nullable: false, comment: "TerminationCode")
+                    PY_TERM = table.Column<string>(type: "NVARCHAR2(1)", maxLength: 1, nullable: true, comment: "TerminationCode")
                 },
                 constraints: table =>
                 {
@@ -222,8 +325,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         name: "FK_Demographics_TerminationCode_PY_TERM",
                         column: x => x.PY_TERM,
                         principalTable: "TerminationCode",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -656,6 +758,21 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "ProfitCode",
+                columns: new[] { "Code", "Definition", "Frequency" },
+                values: new object[,]
+                {
+                    { (short)0, "Incoming contributions, forfeitures, earnings", "Year-end only" },
+                    { (short)1, "Outgoing payments (not rollovers or direct payments) - Partial withdrawal", "Multiple Times" },
+                    { (short)2, "Outgoing forfeitures", "Multiple Times" },
+                    { (short)3, "Outgoing direct payments / rollover payments", "Multiple Times" },
+                    { (short)5, "Outgoing XFER beneficiary / QDRO allocation (beneficiary payment)", "Once" },
+                    { (short)6, "Incoming QDRO beneficiary allocation  (beneficiary receipt)", "Once" },
+                    { (short)8, "Incoming \"100% vested\" earnings", "Usually year-end, unless there is special processing – i.e. Class Action settlement.  Earnings are 100% vested." },
+                    { (short)9, "Outgoing payment from 100% vesting amount (payment of ETVA funds)", "Multiple Times" }
+                });
+
+            migrationBuilder.InsertData(
                 table: "TerminationCode",
                 columns: new[] { "Id", "Name" },
                 values: new object[,]
@@ -688,6 +805,21 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     { (byte)6, ">=65 AND 1st CONTRIBUTION >= 5 YEARS AGO GETS 100% VESTED" },
                     { (byte)7, "=64 AND 1ST CONTRIBUTION >=5 YEARS AGO GETS 100% VESTED ON THEIR BIRTHDAY" }
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Beneficiary_CountryISO",
+                table: "Beneficiary",
+                column: "CountryISO");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Beneficiary_TypeId",
+                table: "Beneficiary",
+                column: "TypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SSN",
+                table: "Beneficiary",
+                column: "SSN");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Demographics_CountryISO",
@@ -748,13 +880,29 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "IX_PayProfit_ZeroContributionReasonId",
                 table: "PayProfit",
                 column: "ZeroContributionReasonId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProfitDetail_ProfitCodeId",
+                table: "ProfitDetail",
+                column: "ProfitCodeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProfitDetail_TaxCodeId",
+                table: "ProfitDetail",
+                column: "TaxCodeId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "Beneficiary");
+
+            migrationBuilder.DropTable(
                 name: "PayProfit");
+
+            migrationBuilder.DropTable(
+                name: "ProfitDetail");
 
             migrationBuilder.DropTable(
                 name: "BeneficiaryType");
@@ -770,6 +918,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "ZeroContributionReason");
+
+            migrationBuilder.DropTable(
+                name: "ProfitCode");
+
+            migrationBuilder.DropTable(
+                name: "TaxCode");
 
             migrationBuilder.DropTable(
                 name: "Country");

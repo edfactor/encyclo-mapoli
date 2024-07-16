@@ -46,7 +46,7 @@ public sealed class DemographicsClient : IDemographicsService
             return new HashSet<DemographicsResponseDto>(0);
         }
 
-        foreach (var demo in demographicsRequestDtos)
+        foreach (DemographicsRequestDto demo in demographicsRequestDtos)
         {
             await _validator.ValidateAndThrowAsync(demo, cancellationToken);
         }

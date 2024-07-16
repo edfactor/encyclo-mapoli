@@ -1,7 +1,9 @@
 ﻿using Bogus;
 using Bogus.Extensions.UnitedStates;
+using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.UnitTests.Extensions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Fakes;
 
@@ -17,7 +19,7 @@ internal sealed class DemographicFaker : Faker<Demographic>
 
 
         RuleFor(d => d.BadgeNumber, f => _badgeNumberCounter++)
-            .RuleFor(d => d.SSN, f => ConvertSsnToLong(f.Person.Ssn()))
+            .RuleFor(d => d.SSN, f => f.Person.Ssn().ConvertSsnToLong())
             .RuleFor(d => d.OracleHcmId, f => f.Random.Long(100000, 999999))
             .RuleFor(d => d.LastName, f => f.Name.LastName())
             .RuleFor(d => d.FirstName, f => f.Name.FirstName())
@@ -36,16 +38,19 @@ internal sealed class DemographicFaker : Faker<Demographic>
             .RuleFor(d => d.TerminationCodeId, f => f.PickRandom('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'))
             .RuleFor(d => d.TerminationDate, f => f.Date.Past(5).ToDateOnly())
             .RuleFor(d => d.EmploymentTypeId, f => f.PickRandom<char>('P', 'H', 'G', 'F'))
-            .RuleFor(d => d.PayFrequencyId, f => f.PickRandom<byte>(1,2))
-            .RuleFor(d => d.GenderId, f => f.PickRandom<char>('M', 'F', 'X'));
-    }
-
-    internal static long ConvertSsnToLong(string ssn)
-    {
-        // Remove non-numeric characters if any (e.g., dashes)
-        string numericSsn = new string(ssn.Where(char.IsDigit).ToArray());
-
-        // Convert to long
-        return long.Parse(numericSsn);
+            .RuleFor(d => d.PayFrequencyId, f => f.PickRandom<byte>(1, 2))
+            .RuleFor(d => d.GenderId, f => f.PickRandom<char>('M', 'F', 'X'))
+            .RuleFor(b => b.Address,
+                f => new Address
+                {
+                    Street = f.Address.StreetAddress(),
+                    Street2 = f.Address.SecondaryAddress(),
+                    City = f.Address.City(),
+                    State = f.Address.StateAbbr(),
+                    PostalCode = f.Address.ZipCode(),
+                    CountryISO = Constants.US
+                })
+            .RuleFor(b => b.ContactInfo,
+                f => new ContactInfo { PhoneNumber = f.Phone.PhoneNumber("###-###-####"), MobileNumber = f.Phone.PhoneNumber("###-###-####"), EmailAddress = f.Internet.Email() });
     }
 }
