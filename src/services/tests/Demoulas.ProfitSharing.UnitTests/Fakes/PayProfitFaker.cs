@@ -1,7 +1,5 @@
 ﻿using Bogus;
-using Bogus.Extensions.UnitedStates;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.UnitTests.Extensions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Fakes;
 internal sealed class PayProfitFaker : Faker<PayProfit>

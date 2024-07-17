@@ -73,7 +73,7 @@ public class YearEndService : IYearEndService
     {
         List<NegativeETVAForSSNsOnPayProfitResponse> results = await _dataContextFactory.UseReadOnlyContext(async c =>
         {
-            var ssnUnion = await c.Demographics.Select(d => d.SSN).Union(c.Beneficiaries.Select(b => b.SSN)).ToListAsync(cancellationToken);
+            var ssnUnion = c.Demographics.Select(d => d.SSN).Union(c.Beneficiaries.Select(b => b.SSN));
 
             return await c.PayProfits
                 .Where(p => ssnUnion.Contains(p.EmployeeSSN) && p.EarningsEtvaValue < 0)

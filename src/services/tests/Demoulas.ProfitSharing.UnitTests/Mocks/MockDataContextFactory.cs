@@ -4,6 +4,7 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.UnitTests.Fakes;
 using Demoulas.StoreInfo.Entities.Contexts;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using MockQueryable.Moq;
 using Moq;
@@ -71,7 +72,11 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         var mockProfitDetails = profitDetails.AsQueryable().BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
-      
+
+
+
+        _profitSharingReadOnlyDbContext.Setup(s => s.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
+
     }
 
     public static IProfitSharingDataContextFactory InitializeForTesting()

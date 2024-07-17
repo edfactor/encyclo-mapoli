@@ -59,7 +59,6 @@ public class NegativeETVAForSSNsOnPayProfitEndPoint : EndpointWithoutRequest<Rep
         {
             streamWriter.WriteLine($"{report.ReportDate:MMM dd yyyy HH:mm}");
             streamWriter.WriteLine(report.ReportName);
-            streamWriter.WriteLine(",,BADGE,SSN,ETVA");
 
             csvWriter.Context.RegisterClassMap<NegativeETVAForSSNsOnPayProfitResponseMap>();
             csvWriter.WriteRecords(report.Results);
@@ -73,9 +72,11 @@ public class NegativeETVAForSSNsOnPayProfitEndPoint : EndpointWithoutRequest<Rep
     {
         public NegativeETVAForSSNsOnPayProfitResponseMap()
         {
-            Map(m => m.EmployeeBadge).Index(1).Name("BADGE");
-            Map(m => m.EmployeeSSN).Index(2).Name("SSN");
-            Map(m => m.EtvaValue).Index(3).Name("ETVA");
+            Map().Index(0).Convert(_ => string.Empty);
+            Map().Index(1).Convert(_ => string.Empty);
+            Map(m => m.EmployeeBadge).Index(2).Name("BADGE");
+            Map(m => m.EmployeeSSN).Index(3).Name("SSN");
+            Map(m => m.EtvaValue).Index(4).Name("ETVA");
         }
     }
 }
