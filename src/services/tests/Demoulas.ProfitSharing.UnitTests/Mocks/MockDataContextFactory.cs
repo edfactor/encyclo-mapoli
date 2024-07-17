@@ -1,8 +1,10 @@
-﻿using Demoulas.ProfitSharing.Data.Contexts;
+﻿using System.Threading;
+using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.UnitTests.Fakes;
 using Demoulas.StoreInfo.Entities.Contexts;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using MockQueryable.Moq;
 using Moq;
@@ -28,6 +30,12 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(m => m.Demographics).Returns(mockDemographic.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Demographics).Returns(mockDemographic.Object);
 
+        List<Beneficiary>? beneficiaries = new BeneficiaryFaker().Generate(10_000);
+        Mock<DbSet<Beneficiary>> mockBeneficiaries = beneficiaries.AsQueryable().BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaries.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaries.Object);
+
+        
         List<Country>? countries = new CountryFaker().Generate(10);
         Mock<DbSet<Country>> mockCountry = countries.AsQueryable().BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.Countries).Returns(mockCountry.Object);
@@ -39,10 +47,16 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingReadOnlyDbContext.Setup(m => m.PayClassifications).Returns(mockPayClassifications.Object);
 
 
-        List<PayProfit>? profits = new PayProfitFaker().Generate(10_000);
+        HashSet<long> ssnUnion = mockDemographic.Object.Select(d => d.SSN)
+            .Union(mockBeneficiaries.Object.Select(b => b.SSN)).ToHashSet();
+
+        List<PayProfit>? profits = new PayProfitFaker(ssnUnion).Generate(ssnUnion.Count);
         Mock<DbSet<PayProfit>> mockProfits = profits.AsQueryable().BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.PayProfits).Returns(mockProfits.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.PayProfits).Returns(mockProfits.Object);
+
+
+
 
         var profitCodes = new ProfitCodeFaker().Generate(10);
         var mockProfitCodes = profitCodes.AsQueryable().BuildMockDbSet();
@@ -60,10 +74,9 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingReadOnlyDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
 
 
-        List<Beneficiary>? beneficiaries = new BeneficiaryFaker().Generate(10_000);
-        Mock<DbSet<Beneficiary>> mockBeneficiaries = beneficiaries.AsQueryable().BuildMockDbSet();
-        _profitSharingDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaries.Object);
-        _profitSharingReadOnlyDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaries.Object);
+
+        _profitSharingReadOnlyDbContext.Setup(s => s.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
+
     }
 
     public static IProfitSharingDataContextFactory InitializeForTesting()

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Frozen;
+using System.Threading;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -75,7 +76,7 @@ public class YearEndService : IYearEndService
             var ssnUnion = c.Demographics.Select(d => d.SSN).Union(c.Beneficiaries.Select(b => b.SSN));
 
             return await c.PayProfits
-                .Where(p => ssnUnion.Contains(p.EmployeeSSN) && p.EarningsEtvaValue > 0)
+                .Where(p => ssnUnion.Contains(p.EmployeeSSN) && p.EarningsEtvaValue < 0)
                 .Select(p => new NegativeETVAForSSNsOnPayProfitResponse
                 {
                     EmployeeBadge = p.EmployeeBadge,

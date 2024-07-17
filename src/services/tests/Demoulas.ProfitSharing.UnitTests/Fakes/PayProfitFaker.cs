@@ -1,15 +1,13 @@
 ﻿using Bogus;
-using Bogus.Extensions.UnitedStates;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.UnitTests.Extensions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Fakes;
 internal sealed class PayProfitFaker : Faker<PayProfit>
 {
-    internal PayProfitFaker()
+    internal PayProfitFaker(ISet<long> ssnCollection)
     {
         RuleFor(pc => pc.EmployeeBadge, f => f.PickRandom<long>(int.MaxValue, uint.MaxValue))
-            .RuleFor(d => d.EmployeeSSN, f => f.Person.Ssn().ConvertSsnToLong())
+            .RuleFor(d => d.EmployeeSSN, f => f.PickRandom<long>(ssnCollection))
             .RuleFor(pc => pc.HoursCurrentYear, f => f.Random.Int(min: 0, max: 3000))
             .RuleFor(pc => pc.HoursLastYear, f => f.Random.Int(min: 0, max: 3000))
             .RuleFor(pc => pc.WeeksWorkedYear, f => f.Random.Byte(min: 0, max: 53))
