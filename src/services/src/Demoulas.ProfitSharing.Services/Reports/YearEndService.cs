@@ -1,4 +1,5 @@
 ﻿using System.Collections.Frozen;
+using System.Threading;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -72,10 +73,10 @@ public class YearEndService : IYearEndService
     {
         List<NegativeETVAForSSNsOnPayProfitResponse> results = await _dataContextFactory.UseReadOnlyContext(async c =>
         {
-            var ssnUnion = c.Demographics.Select(d => d.SSN).Union(c.Beneficiaries.Select(b => b.SSN));
+            var ssnUnion = await c.Demographics.Select(d => d.SSN).Union(c.Beneficiaries.Select(b => b.SSN)).ToListAsync(cancellationToken);
 
             return await c.PayProfits
-                .Where(p => ssnUnion.Contains(p.EmployeeSSN) && p.EarningsEtvaValue > 0)
+                .Where(p => ssnUnion.Contains(p.EmployeeSSN) && p.EarningsEtvaValue < 0)
                 .Select(p => new NegativeETVAForSSNsOnPayProfitResponse
                 {
                     EmployeeBadge = p.EmployeeBadge,
