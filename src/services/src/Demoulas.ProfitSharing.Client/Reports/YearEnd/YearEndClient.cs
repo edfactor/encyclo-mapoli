@@ -52,6 +52,11 @@ public sealed class YearEndClient : IYearEndService
         };
     }
 
+    public Task<ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>> GetMismatchedSsnsPayprofitAndDemographicsOnSameBadge(CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
     public Task<Stream> DownloadNegativeETVAForSSNsOnPayProfitResponse(CancellationToken cancellationToken = default)
     {
         return _httpDownloadClient.GetStreamAsync($"{BaseApiPath}/negative-evta-ssn", cancellationToken);

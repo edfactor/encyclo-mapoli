@@ -112,6 +112,7 @@ internal static class EndpointExtension
             //.UseAuthentication()
             //.UseAuthorization()
             .UseResponseCompression()
+            .UseOutputCache()
             .UseFastEndpoints(c =>
             {
                 c.Versioning.Prefix = "v";
@@ -126,7 +127,6 @@ internal static class EndpointExtension
                     return true;
                 };
             })
-            .UseOutputCache()
             .UseAntiforgery();
 
         if (!app.Environment.IsProduction())

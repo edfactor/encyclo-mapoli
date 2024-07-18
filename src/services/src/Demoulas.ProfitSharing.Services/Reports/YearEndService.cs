@@ -97,4 +97,9 @@ public class YearEndService : IYearEndService
             };
         }
     }
+
+    public Task<ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>> GetMismatchedSsnsPayprofitAndDemographicsOnSameBadge(CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
 }

@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Demoulas.ProfitSharing.Common.Contracts.Response;
-public class PayrollDuplicateSSNResponseDto
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+public sealed record PayrollDuplicateSSNResponseDto
 {
     public long BadgeNumber { get; set; }
     public long SSN { get; set; }
