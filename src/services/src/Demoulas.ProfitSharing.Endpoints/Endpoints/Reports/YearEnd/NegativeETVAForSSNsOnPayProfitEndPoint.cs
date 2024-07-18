@@ -43,7 +43,7 @@ public class NegativeETVAForSSNsOnPayProfitEndPoint : EndpointWithoutRequest<Rep
         if (acceptHeader.Contains("text/csv"))
         {
             await using MemoryStream csvData = GenerateCsvStream(response);
-            await SendStreamAsync(csvData, "ETVA-LESS-THAN-ZERO.csv", contentType: "text/csv", cancellation: ct);
+            await SendStreamAsync(csvData, "ETVA-LESS-THAN-ZERO.csv", cancellation: ct);
             return;
         }
 
