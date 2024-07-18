@@ -5,7 +5,7 @@ public sealed record MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDt
     public long PayProfitSSN { get; set; }
     public long EmployeeSSN { get; set; }
     public required string Name { get; set; }
-    public byte Store { get; set; }
-    public byte Status { get; set; }
+    public short Store { get; set; }
+    public char Status { get; set; }
 
 }

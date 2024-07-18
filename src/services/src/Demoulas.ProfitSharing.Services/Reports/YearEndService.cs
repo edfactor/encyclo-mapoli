@@ -98,8 +98,38 @@ public class YearEndService : IYearEndService
         }
     }
 
-    public Task<ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>> GetMismatchedSsnsPayprofitAndDemographicsOnSameBadge(CancellationToken cancellationToken = default)
+    public async Task<ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>> GetMismatchedSsnsPayprofitAndDemographicsOnSameBadge(CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        using (_logger.BeginScope("Request MISMATCHED SSNs PAYPROFIT AND DEMO ON SAME BADGE"))
+        {
+            List<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto> results = await _dataContextFactory.UseReadOnlyContext(c =>
+            {
+                var query = from demographic in c.Demographics
+                    join payProfit in c.PayProfits
+                        on demographic.BadgeNumber equals payProfit.EmployeeBadge
+                    where payProfit.EmployeeSSN != demographic.SSN
+                    orderby demographic.BadgeNumber, demographic.SSN, payProfit.EmployeeSSN
+                    select new MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto
+                    {
+                        Name = demographic.FullName ?? $"{demographic.FirstName} {demographic.LastName}",
+                        EmployeeBadge = demographic.BadgeNumber,
+                        EmployeeSSN = demographic.SSN,
+                        PayProfitSSN = payProfit.EmployeeSSN,
+                       Store = demographic.StoreNumber,
+                       Status = 'x'// TODO: Get Status
+                    };
+
+                return query.ToListAsync(cancellationToken);
+            });
+
+            _logger.LogWarning("Returned {results} records", results.Count);
+
+            return new ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>
+            {
+                ReportName = "MISMATCHED SSNs PAYPROFIT AND DEMO ON SAME BADGE",
+                ReportDate = DateTimeOffset.Now,
+                Results = results.ToFrozenSet()
+            };
+        }
     }
 }
