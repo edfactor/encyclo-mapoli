@@ -46,20 +46,6 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(m => m.PayClassifications).Returns(mockPayClassifications.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.PayClassifications).Returns(mockPayClassifications.Object);
 
-
-        HashSet<int> badgeNumbers = mockDemographic.Object.Select(d => d.BadgeNumber).ToHashSet();
-
-        HashSet<long> ssnUnion = mockDemographic.Object.Select(d => d.SSN)
-            .Union(mockBeneficiaries.Object.Select(b => b.SSN)).ToHashSet();
-
-        List<PayProfit>? profits = new PayProfitFaker(badgeNumbers, ssnUnion).Generate(ssnUnion.Count);
-        Mock<DbSet<PayProfit>> mockProfits = profits.AsQueryable().BuildMockDbSet();
-        _profitSharingDbContext.Setup(m => m.PayProfits).Returns(mockProfits.Object);
-        _profitSharingReadOnlyDbContext.Setup(m => m.PayProfits).Returns(mockProfits.Object);
-
-
-
-
         var profitCodes = new ProfitCodeFaker().Generate(10);
         var mockProfitCodes = profitCodes.AsQueryable().BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.ProfitCodes).Returns(mockProfitCodes.Object);
@@ -74,6 +60,19 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         var mockProfitDetails = profitDetails.AsQueryable().BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
+
+
+
+
+        HashSet<int> badgeNumbers = mockDemographic.Object.Select(d => d.BadgeNumber).ToHashSet();
+        HashSet<long> ssnUnion = mockDemographic.Object.Select(d => d.SSN)
+            .Union(mockBeneficiaries.Object.Select(b => b.SSN)).ToHashSet();
+
+        List<PayProfit>? profits = new PayProfitFaker(badgeNumbers, ssnUnion).Generate(ssnUnion.Count);
+        Mock<DbSet<PayProfit>> mockProfits = profits.AsQueryable().BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.PayProfits).Returns(mockProfits.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.PayProfits).Returns(mockProfits.Object);
+
 
 
 
