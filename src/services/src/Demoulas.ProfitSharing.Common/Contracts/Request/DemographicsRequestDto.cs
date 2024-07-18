@@ -33,5 +33,6 @@ public record DemographicsRequestDto : MemberRequestDto
     public required byte PayFrequencyId { get; set; }
 
     public required char GenderCode { get; set; }
+    public required char EmploymentStatusId { get; set; }
 
 }

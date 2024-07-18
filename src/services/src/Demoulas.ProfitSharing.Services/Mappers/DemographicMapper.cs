@@ -59,7 +59,8 @@ public partial class DemographicMapper
             FullName = source.FullName,
             MiddleName = source.MiddleName,
             FullTimeDate = source.FullTimeDate,
-            TerminationDate = source.TerminationDate
+            TerminationDate = source.TerminationDate,
+            EmploymentStatusId = source.EmploymentStatusId
         };
         return target;
     }
@@ -72,7 +73,7 @@ public partial class DemographicMapper
         {
             SSN = MaskSsn(source.SSN),
             OracleHcmId = source.OracleHcmId,
-            FullName = source.FullName ?? throw new System.ArgumentNullException(nameof(source.FullName)),
+            FullName = source.FullName ?? throw new ArgumentNullException(nameof(source.FullName)),
             LastName = source.LastName,
             FirstName = source.FirstName,
             StoreNumber = source.StoreNumber,
@@ -122,6 +123,7 @@ public partial class DemographicMapper
             EmploymentTypeId = source.EmploymentTypeCode,
             PayFrequencyId = source.PayFrequencyId,
             GenderId = source.GenderCode,
+            EmploymentStatus = new EmploymentStatus { Id = source.EmploymentStatusId }
         };
     }
 

@@ -16,6 +16,7 @@ internal sealed class DemographicFaker : Faker<Demographic>
         ContactInfoFaker contactInfoFaker = new ContactInfoFaker();
         AddressFaker addressFaker = new AddressFaker();
         PayClassificationFaker payClassificationFaker = new PayClassificationFaker();
+        EmploymentStatusFaker employmentStatusFaker = new EmploymentStatusFaker();
 
 
         RuleFor(d => d.BadgeNumber, f => _badgeNumberCounter++)
@@ -40,6 +41,7 @@ internal sealed class DemographicFaker : Faker<Demographic>
             .RuleFor(d => d.EmploymentTypeId, f => f.PickRandom<char>('P', 'H', 'G', 'F'))
             .RuleFor(d => d.PayFrequencyId, f => f.PickRandom<byte>(1, 2))
             .RuleFor(d => d.GenderId, f => f.PickRandom<char>('M', 'F', 'X'))
+            .RuleFor(tc => tc.EmploymentStatus, f => employmentStatusFaker.Generate())
             .RuleFor(b => b.Address,
                 f => new Address
                 {

@@ -43,7 +43,7 @@ public class YearEndService : IYearEndService
                             dem.HireDate,
                             dem.TerminationDate,
                             dem.ReHireDate,
-                            //Status,
+                            dem.EmploymentStatusId,
                             dem.StoreNumber,
                             DemPdPp.HoursCurrentYear,
                             DemPdPp.EarningsCurrentYear
@@ -61,7 +61,7 @@ public class YearEndService : IYearEndService
                         HireDate = grp.Key.HireDate,
                         TerminationDate = grp.Key.TerminationDate,
                         RehireDate = grp.Key.ReHireDate,
-                        Status = 'a', //TODO: Where is this in demographics?
+                        Status = grp.Key.EmploymentStatusId,
                         StoreNumber = grp.Key.StoreNumber,
                         ProfitSharingRecords = grp.Count(),
                         HoursCurrentYear = grp.Key.HoursCurrentYear,
@@ -116,7 +116,7 @@ public class YearEndService : IYearEndService
                         EmployeeSSN = demographic.SSN,
                         PayProfitSSN = payProfit.EmployeeSSN,
                        Store = demographic.StoreNumber,
-                       Status = 'x'// TODO: Get Status
+                       Status = demographic.EmploymentStatusId
                     };
 
                 return query.ToListAsync(cancellationToken);

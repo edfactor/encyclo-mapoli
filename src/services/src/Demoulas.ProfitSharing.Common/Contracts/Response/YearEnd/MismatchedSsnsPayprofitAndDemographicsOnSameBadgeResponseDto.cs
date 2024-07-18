@@ -7,5 +7,4 @@ public sealed record MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDt
     public required string Name { get; set; }
     public short Store { get; set; }
     public char Status { get; set; }
-
 }
