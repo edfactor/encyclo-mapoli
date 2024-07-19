@@ -35,7 +35,7 @@ pipelines:
             caches:
               - dotnetcore
             script:
-              - $env:SOLUTION_NAME="Demoulas.ProfitSharing""
+              - $env:SOLUTION_NAME="Demoulas.ProfitSharing"
               - $env:REPORTS_PATH="linter-reports"
               - dotnet workload install aspire
               - dotnet workload update
