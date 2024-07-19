@@ -11,14 +11,6 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder();
 
 builder.Configuration.AddUserSecrets<Program>();
 
-#if !DEBUG && !RUSS
-if (!Debugger.IsAttached)
-{
-    // This is ONLY used when deployed.
-    string configFile = $"credSettings.{builder.Environment.EnvironmentName}.json";
-    builder.Configuration.AddJsonFile(configFile);
-}
-#endif
 ElasticSearchConfig smartConfig = new ElasticSearchConfig();
 builder.Configuration.Bind("Logging:Smart", smartConfig);
 
