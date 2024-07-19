@@ -16,10 +16,12 @@ pipelines:
              caches:
                - dotnetcore
              script:
+               - export SOLUTION_NAME=Demoulas.ProfitSharing
                - REPORTS_PATH=./test-reports/build_${BITBUCKET_BUILD_NUMBER}
-               - dotnet restore src/services
-               - dotnet build src/services --no-restore --configuration Release
-               - dotnet test src/services --no-build --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath=$REPORTS_PATH/junit.xml"
+               - dotnet workload restore --SOLUTION src/services/${SOLUTION_NAME}.sln
+               - dotnet restore src/services/${SOLUTION_NAME}.sln
+               - dotnet build src/services/${SOLUTION_NAME}.sln --no-restore --configuration Release
+               - dotnet test src/services/${SOLUTION_NAME}.sln --no-build --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath=$REPORTS_PATH/junit.xml"
              artifacts:
                - test-reports/**
         - step:
