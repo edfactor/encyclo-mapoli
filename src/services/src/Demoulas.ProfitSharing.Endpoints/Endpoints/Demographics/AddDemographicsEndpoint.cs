@@ -24,6 +24,39 @@ public class AddDemographicsEndpoint : Endpoint<IEnumerable<DemographicsRequestD
         Summary(s =>
         {
             s.Summary = "Add Demographics";
+            s.Description = "API to add a collection of employee's into the Demographics table";
+            s.ExampleRequest = new List<DemographicsRequestDto>
+            {
+                new DemographicsRequestDto
+                {
+                    BadgeNumber = 123456789,
+                    SSN = 123456789,
+                    OracleHcmId = 0,
+                    FullName = "John Doe",
+                    FirstName = "John",
+                    MiddleName = "Vikramaditya",
+                    LastName = "Doe",
+                    StoreNumber = 0,
+                    DepartmentId = Department.Constants.Produce,
+                    PayClassificationId = 0,
+                    ContactInfo = new ContactInfoRequestDto(),
+                    Address = new AddressRequestDto
+                    {
+                        Street = "123 Street",
+                        State = "MA",
+                        City = "Andover",
+                        PostalCode = "02589",
+                        CountryISO = Constants.US
+                    },
+                    DateOfBirth = default,
+                    HireDate = default,
+                    ReHireDate = default,
+                    EmploymentTypeCode = EmploymentType.Constants.PartTime,
+                    PayFrequencyId = PayFrequency.Constants.Weekly,
+                    GenderCode = Gender.Constants.Female,
+                    EmploymentStatusId = EmploymentStatus.Constants.Active
+                }
+            };
             s.ResponseExamples = new Dictionary<int, object> {
             {
                 200, new List<DemographicsResponseDto>

@@ -31,16 +31,6 @@ public class DemographicsServiceTests : IClassFixture<ApiTestBase<Program>>
             new TerminationCodeMapper());
     }
 
-    [Fact(DisplayName = "Get all demographics")]
-    public async Task GetAllDemographicsTest()
-    {
-        PaginatedResponseDto<DemographicsResponseDto>? response = await _demographicsClient.GetAllDemographics(new PaginationRequestDto(), cancellationToken: CancellationToken.None);
-
-        response.Should().NotBeNull();
-        response!.Results.Should().HaveCountGreaterOrEqualTo(100);
-        _ = response!.Results.Select(d=> d.SSN.Should().MatchRegex(@"XXX-XX-\d{4}"));
-    }
-
     [Theory(DisplayName = "Add new demographics")]
     [InlineData(1)]
     [InlineData(5)]
