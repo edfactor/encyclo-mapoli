@@ -33,7 +33,7 @@ pipelines:
             script:
               - export SOLUTION_NAME=Demoulas.ProfitSharing
               - export REPORTS_PATH=linter-reports
-              - sudo dotnet workload install aspire
+              - dotnet workload install aspire
               - dotnet new tool-manifest
               - dotnet tool install JetBrains.ReSharper.GlobalTools
               - dotnet tool restore
