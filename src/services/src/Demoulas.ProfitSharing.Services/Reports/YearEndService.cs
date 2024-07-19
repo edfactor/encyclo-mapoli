@@ -11,18 +11,12 @@ namespace Demoulas.ProfitSharing.Services.Reports;
 public class YearEndService : IYearEndService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
-    //private readonly AddressMapper _addressMapper;
-    //private readonly ContactInfoMapper _contactInfoMapper;
     private readonly ILogger<YearEndService> _logger;
 
     public YearEndService(IProfitSharingDataContextFactory dataContextFactory, 
         ILoggerFactory factory)
-        //AddressMapper addressMapper,
-        //ContactInfoMapper contactInfoMapper)
     {
         _dataContextFactory = dataContextFactory;
-        //_addressMapper = addressMapper;
-        //_contactInfoMapper = contactInfoMapper;
         _logger = factory.CreateLogger<YearEndService>();
     }
 
@@ -164,13 +158,20 @@ public class YearEndService : IYearEndService
                                 payProfit.EmployeeBadge,
                                 payProfit.EmployeeSSN,
                                 demographics.FullName,
-                                //demographics.Address,
                                 demographics.HireDate,
                                 demographics.TerminationDate,
                                 demographics.ReHireDate,
                                 demographics.EmploymentStatusId,
                                 demographics.StoreNumber,
-                                //demographics.ContactInfo,
+                                demographics.Address.Street,
+                                demographics.Address.Street2,
+                                demographics.Address.City,
+                                demographics.Address.State,
+                                demographics.Address.PostalCode,
+                                demographics.Address.CountryISO,
+                                demographics.ContactInfo.EmailAddress,
+                                demographics.ContactInfo.PhoneNumber,
+                                demographics.ContactInfo.MobileNumber,
                                 payProfit.EarningsCurrentYear
                             } into g
                             orderby g.Key.EmployeeSSN, g.Key.EmployeeBadge
@@ -186,8 +187,21 @@ public class YearEndService : IYearEndService
                                 Status = g.Key.EmploymentStatusId,
                                 Store = g.Key.StoreNumber,
                                 EarningsCurrentYear = g.Key.EarningsCurrentYear,
-                                //ContactInfo = _contactInfoMapper.Map(g.Key.ContactInfo),
-                                //Address = _addressMapper.Map(g.Key.Address)
+                                ContactInfo = new ContactInfoResponseDto
+                                {
+                                    EmailAddress = g.Key.EmailAddress,
+                                    MobileNumber = g.Key.MobileNumber,
+                                    PhoneNumber = g.Key.PhoneNumber
+                                },
+                                Address = new AddressResponseDto
+                                {
+                                    Street = g.Key.Street,
+                                    Street2 = g.Key.Street2,
+                                    City = g.Key.City,
+                                    State = g.Key.State,
+                                    PostalCode = g.Key.PostalCode,
+                                    CountryISO = g.Key.CountryISO
+                                }
                             };
 
                 return query.ToListAsync(cancellationToken: cancellationToken);

@@ -13,6 +13,6 @@ public sealed record PayrollDuplicateSsnsOnPayprofitResponseDto
     public DateOnly RehireDate { get; set; }
     public DateOnly? TermDate { get; set; }
 
-    //public AddressResponseDto? Address { get; set; }
-    //public ContactInfoResponseDto? ContactInfo { get; set; }
+    public AddressResponseDto? Address { get; set; }
+    public ContactInfoResponseDto? ContactInfo { get; set; }
 }
