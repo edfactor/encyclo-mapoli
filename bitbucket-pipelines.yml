@@ -33,14 +33,14 @@ pipelines:
               - appt125
             script:
               - $env:SOLUTION_NAME="Demoulas.ProfitSharing"
-              - $env:REPORTS_PATH="linter-reports"
+              - $env:REPORTS_PATH="../../../../linter-reports"
               - $env:NUGET_ORG="https://api.nuget.org/v3/index.json"
               - dotnet workload install aspire --source $env:NUGET_ORG
               - dotnet workload update --source $env:NUGET_ORG
               - dotnet new tool-manifest
               - dotnet tool install JetBrains.ReSharper.GlobalTools --add-source $env:NUGET_ORG
               - dotnet tool restore
-              - dotnet jb inspectcode src/services/{$env:SOLUTION_NAME}.sln --output="{$env:REPORTS_PATH}/jb-${BITBUCKET_BUILD_NUMBER}.xml"
+              - dotnet jb inspectcode src/services/$env:SOLUTION_NAME.sln --output="$env:REPORTS_PATH/jb-${BITBUCKET_BUILD_NUMBER}.xml"
             artifacts:
               - linter-reports/**
 
