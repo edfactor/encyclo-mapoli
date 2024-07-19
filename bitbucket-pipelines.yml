@@ -40,7 +40,7 @@ pipelines:
               - dotnet new tool-manifest
               - dotnet tool install JetBrains.ReSharper.GlobalTools --add-source $env:NUGET_ORG
               - dotnet tool restore
-              - dotnet jb inspectcode src/services/$env:SOLUTION_NAME.sln --output="$env:REPORTS_PATH/jb-${BITBUCKET_BUILD_NUMBER}.xml" --add-source $env:NUGET_ORG
+              - dotnet jb inspectcode src/services/$env:SOLUTION_NAME.sln --output="$env:REPORTS_PATH/jb-${BITBUCKET_BUILD_NUMBER}.xml" -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
             artifacts:
               - linter-reports/**
 
