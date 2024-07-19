@@ -21,7 +21,7 @@ pipelines:
                - dotnetcore
              script:
                - $env:SOLUTION_NAME = "Demoulas.ProfitSharing"
-               - $env:REPORTS_PATH=./test-reports/build_${BITBUCKET_BUILD_NUMBER}
+               - $env:REPORTS_PATH="./test-reports/build_${BITBUCKET_BUILD_NUMBER}"
                - dotnet workload restore --SOLUTION src/services/${SOLUTION_NAME}.sln
                - dotnet restore src/services/${SOLUTION_NAME}.sln
                - dotnet build src/services/${SOLUTION_NAME}.sln --no-restore --configuration Release
