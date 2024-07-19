@@ -20,7 +20,7 @@ pipelines:
              caches:
                - dotnetcore
              script:
-               - export SOLUTION_NAME=Demoulas.ProfitSharing
+               - $env:SOLUTION_NAME = "Demoulas.ProfitSharing"
                - REPORTS_PATH=./test-reports/build_${BITBUCKET_BUILD_NUMBER}
                - dotnet workload restore --SOLUTION src/services/${SOLUTION_NAME}.sln
                - dotnet restore src/services/${SOLUTION_NAME}.sln
