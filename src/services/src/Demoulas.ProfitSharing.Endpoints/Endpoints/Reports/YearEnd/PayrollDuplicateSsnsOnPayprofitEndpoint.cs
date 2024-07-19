@@ -12,11 +12,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 
-public class MismatchedSsnsPayprofitAndDemographicsOnSameBadge : EndpointWithoutRequest<ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>>
+public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithoutRequest<ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto>>
 {
     private readonly IYearEndService _reportService;
 
-    public MismatchedSsnsPayprofitAndDemographicsOnSameBadge(IYearEndService reportService)
+    public PayrollDuplicateSsnsOnPayprofitEndpoint(IYearEndService reportService)
     {
         _reportService = reportService;
     }
@@ -24,25 +24,25 @@ public class MismatchedSsnsPayprofitAndDemographicsOnSameBadge : EndpointWithout
     public override void Configure()
     {
         AllowAnonymous();
-        Get("mismatched-ssns-payprofit-and-demo-on-same-badge");
+        Get("payroll-duplicate-ssns-on-payprofit");
         Summary(s =>
         {
-            s.Summary = "Mismatched SSN's On Pay Profit And Demographics with the same badge number";
+            s.Summary = "Payroll duplicate ssns on payprofit";
             s.Description = @"SSN and ""clean up"" reports to highlight possible problems which should be corrected before profit sharing is run. This job can be run multiple times.";
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
                     200,
-                    new ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>
+                    new ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto>
                     {
-                        ReportName = "MISMATCHED SSNs PAYPROFIT AND DEMO ON SAME BADGE", 
+                        ReportName = "PAYROLL DUPLICATE SSNs ON PAYPROFIT", 
                         ReportDate = DateTimeOffset.Now,
-                        Results = new HashSet<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>
+                        Results = new HashSet<PayrollDuplicateSsnsOnPayprofitResponseDto>
                         {
-                            new MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto { EmployeeBadge = 47425, EmployeeSSN = 900047425, Name = "John", Status = EmploymentStatus.Constants.Active},
-                            new MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto { EmployeeBadge = 82424, EmployeeSSN = 900082424, Name = "Jane", Status = EmploymentStatus.Constants.Delete},
-                            new MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto { EmployeeBadge = 85744, EmployeeSSN = 900085744, Name = "Tim", Status = EmploymentStatus.Constants.Inactive},
-                            new MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto { EmployeeBadge = 94861, EmployeeSSN = 900094861, Name = "Sally", Status = EmploymentStatus.Constants.Terminated}
+                            new PayrollDuplicateSsnsOnPayprofitResponseDto { EmployeeBadge = 47425, EmployeeSSN = 900047425, Name = "John", Status = EmploymentStatus.Constants.Active},
+                            new PayrollDuplicateSsnsOnPayprofitResponseDto { EmployeeBadge = 82424, EmployeeSSN = 900082424, Name = "Jane", Status = EmploymentStatus.Constants.Delete},
+                            new PayrollDuplicateSsnsOnPayprofitResponseDto { EmployeeBadge = 85744, EmployeeSSN = 900085744, Name = "Tim", Status = EmploymentStatus.Constants.Inactive},
+                            new PayrollDuplicateSsnsOnPayprofitResponseDto { EmployeeBadge = 94861, EmployeeSSN = 900094861, Name = "Sally", Status = EmploymentStatus.Constants.Terminated}
                         }
                     }
                 }
@@ -56,12 +56,12 @@ public class MismatchedSsnsPayprofitAndDemographicsOnSameBadge : EndpointWithout
     {
         string acceptHeader = HttpContext.Request.Headers["Accept"].ToString().ToLower(CultureInfo.InvariantCulture);
 
-        ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto> response = await _reportService.GetMismatchedSsnsPayprofitAndDemographicsOnSameBadge(ct);
+        ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto> response = await _reportService.GetPayrollDuplicateSsnsOnPayprofit(ct);
 
         if (acceptHeader.Contains("text/csv"))
         {
             await using MemoryStream csvData = GenerateCsvStream(response);
-            await SendStreamAsync(csvData, "MISMATCHED-PAYPROF-DEM-SSNS.csv", cancellation: ct);
+            await SendStreamAsync(csvData, "PAYROLL DUPLICATE SSNs ON PAYPROFIT.csv", cancellation: ct);
             return;
         }
 
@@ -69,7 +69,7 @@ public class MismatchedSsnsPayprofitAndDemographicsOnSameBadge : EndpointWithout
     }
 
 
-    private MemoryStream GenerateCsvStream(ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto> report)
+    private MemoryStream GenerateCsvStream(ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto> report)
     {
         MemoryStream memoryStream = new MemoryStream();
         using (StreamWriter streamWriter = new StreamWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
@@ -78,7 +78,7 @@ public class MismatchedSsnsPayprofitAndDemographicsOnSameBadge : EndpointWithout
             streamWriter.WriteLine($"{report.ReportDate:MMM dd yyyy HH:mm}");
             streamWriter.WriteLine(report.ReportName);
 
-            csvWriter.Context.RegisterClassMap<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseMap>();
+            csvWriter.Context.RegisterClassMap<PayrollDuplicateSsnsOnPayprofitResponseMap>();
             csvWriter.WriteRecords(report.Results);
             streamWriter.Flush();
         }
@@ -86,9 +86,9 @@ public class MismatchedSsnsPayprofitAndDemographicsOnSameBadge : EndpointWithout
         return memoryStream;
     }
 
-    private sealed class MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseMap : ClassMap<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>
+    private sealed class PayrollDuplicateSsnsOnPayprofitResponseMap : ClassMap<PayrollDuplicateSsnsOnPayprofitResponseDto>
     {
-        public MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseMap()
+        public PayrollDuplicateSsnsOnPayprofitResponseMap()
         {
             Map().Index(0).Convert(_ => string.Empty);
             Map().Index(1).Convert(_ => string.Empty);
