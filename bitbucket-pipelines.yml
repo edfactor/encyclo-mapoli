@@ -20,13 +20,10 @@ pipelines:
              caches:
                - dotnetcore
              script:
-               - $env:SOLUTION_NAME = "Demoulas.ProfitSharing"
+               - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
                - $env:REPORTS_PATH="./test-reports/build_${BITBUCKET_BUILD_NUMBER}"
                - dotnet workload update
-               - dotnet workload restore --SOLUTION src/services/$env:SOLUTION_NAME.sln
-               - dotnet restore src/services/$env:SOLUTION_NAME.sln
-               - dotnet build src/services/$env:SOLUTION_NAME.sln --no-restore --configuration Release
-               - dotnet test src/services/$env:SOLUTION_NAME.sln --no-build --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath=$env:REPORTS_PATH/junit.xml"
+               - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml"
              artifacts:
                - test-reports/**
         - step:
