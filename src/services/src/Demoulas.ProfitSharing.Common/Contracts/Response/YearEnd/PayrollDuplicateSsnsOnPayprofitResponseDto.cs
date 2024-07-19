@@ -10,9 +10,9 @@ public sealed record PayrollDuplicateSsnsOnPayprofitResponseDto
     public char Status { get; set; }
     public DateOnly HireDate { get; set; }
     public decimal EarningsCurrentYear { get; set; }
-    public DateOnly RehireDate { get; set; }
+    public DateOnly? RehireDate { get; set; }
     public DateOnly? TermDate { get; set; }
 
-    public AddressResponseDto? Address { get; set; }
-    public ContactInfoResponseDto? ContactInfo { get; set; }
+    public required AddressResponseDto Address { get; set; }
+    public required ContactInfoResponseDto ContactInfo { get; set; }
 }

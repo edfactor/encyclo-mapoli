@@ -39,10 +39,18 @@ public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithoutRequest<Re
                         ReportDate = DateTimeOffset.Now,
                         Results = new HashSet<PayrollDuplicateSsnsOnPayprofitResponseDto>
                         {
-                            new PayrollDuplicateSsnsOnPayprofitResponseDto { EmployeeBadge = 47425, EmployeeSSN = 900047425, Name = "John", Status = EmploymentStatus.Constants.Active},
-                            new PayrollDuplicateSsnsOnPayprofitResponseDto { EmployeeBadge = 82424, EmployeeSSN = 900082424, Name = "Jane", Status = EmploymentStatus.Constants.Delete},
-                            new PayrollDuplicateSsnsOnPayprofitResponseDto { EmployeeBadge = 85744, EmployeeSSN = 900085744, Name = "Tim", Status = EmploymentStatus.Constants.Inactive},
-                            new PayrollDuplicateSsnsOnPayprofitResponseDto { EmployeeBadge = 94861, EmployeeSSN = 900094861, Name = "Sally", Status = EmploymentStatus.Constants.Terminated}
+                            new PayrollDuplicateSsnsOnPayprofitResponseDto
+                            {
+                                EmployeeBadge = 47425, EmployeeSSN = 900047425, Name = "John", Status = EmploymentStatus.Constants.Active, Address = new AddressResponseDto
+                                {
+                                    Street = "",
+                                    City = "",
+                                    State = "",
+                                    CountryISO = "",
+                                    PostalCode = "01234"
+                                },
+                                ContactInfo = new ContactInfoResponseDto()
+                            }
                         }
                     }
                 }
@@ -93,11 +101,20 @@ public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithoutRequest<Re
             Map().Index(0).Convert(_ => string.Empty);
             Map().Index(1).Convert(_ => string.Empty);
             Map(m => m.EmployeeBadge).Index(2).Name("BADGE");
-            Map(m => m.PayProfitSSN).Index(3).Name("PAYPROFIT SSN");
-            Map(m => m.EmployeeSSN).Index(4).Name("DEMOGRAPHICS SSN");
-            Map(m => m.Name).Index(5).Name("NAME");
-            Map(m => m.Store).Index(6).Name("STORE");
-            Map(m => m.Status).Index(7).Name("STATUS");
+            Map(m => m.PayProfitSSN).Index(3).Name("SSN");
+            Map(m => m.Name).Index(4).Name("NAME");
+            Map(m => m.Address.Street).Index(5).Name("ADDR");
+            Map(m => m.Address.City).Index(6).Name("CITY");
+            Map(m => m.Address.State).Index(7).Name("ST");
+            Map(m => m.Address.PostalCode).Index(8).Name("ZIP");
+            Map(m => m.HireDate.ToString("YYYYMMDD")).Index(9).Name("HIRE");
+            Map(m => m.TermDate!.Value.ToString("YYYYMMDD")).Index(10).Name("TERM");
+            Map(m => m.RehireDate!.Value.ToString("YYYYMMDD")).Index(11).Name("REHIRE");
+            Map(m => m.Status).Index(12).Name("ST");
+            Map(m => m.Store).Index(13).Name("STR");
+            Map(m => m.PayProfitSSN).Index(13).Name("PS RECS");
+
+            Map(m => m.EarningsCurrentYear).Index(15).Name("CUR WAGE");
         }
     }
 }
