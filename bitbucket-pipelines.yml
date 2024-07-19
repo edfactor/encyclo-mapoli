@@ -13,6 +13,10 @@ pipelines:
     - parallel:
         - step:
              name: Build and Test
+             runs-on:
+                - windows
+                - self.hosted
+                - appt125
              caches:
                - dotnetcore
              script:
@@ -40,6 +44,10 @@ pipelines:
       - parallel:
          - step:
              name: Build and Test
+             runs-on:
+                - windows
+                - self.hosted
+                - appt125
              caches:
                - dotnetcore
              script:
