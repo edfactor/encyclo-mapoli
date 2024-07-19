@@ -41,12 +41,19 @@ public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithoutRequest<Re
                         {
                             new PayrollDuplicateSsnsOnPayprofitResponseDto
                             {
-                                EmployeeBadge = 47425, EmployeeSSN = 900047425, Name = "John", Status = EmploymentStatus.Constants.Active, Address = new AddressResponseDto
+                                EmployeeBadge = 47425, 
+                                EmployeeSSN = 900047425, 
+                                Name = "John", 
+                                Status = EmploymentStatus.Constants.Active, 
+                                Store = 14,
+                                EarningsCurrentYear = 32_100,
+                                PayProfitSSN = 900047425,
+                                Address = new AddressResponseDto
                                 {
-                                    Street = "",
-                                    City = "",
-                                    State = "",
-                                    CountryISO = "",
+                                    Street = "123 Main",
+                                    City = "Sydney",
+                                    State = "HI",
+                                    CountryISO = Common.Constants.US,
                                     PostalCode = "01234"
                                 },
                                 ContactInfo = new ContactInfoResponseDto()
