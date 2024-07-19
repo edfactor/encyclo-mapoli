@@ -29,7 +29,24 @@ public class NegativeETVAForSSNsOnPayProfitEndPoint : EndpointWithoutRequest<Rep
         Summary(s =>
         {
             s.Summary = "Negative ETVA for SSNs on PayProfit";
-            s.ResponseExamples = new Dictionary<int, object> { { 200, new List<ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>>() } };
+            s.ResponseExamples = new Dictionary<int, object>
+            {
+                {
+                    200,
+                    new ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>
+                    {
+                        ReportName = "NEGATIVE ETVA FOR SSNs ON PAYPROFIT",
+                        ReportDate = DateTimeOffset.Now,
+                        Results = new HashSet<NegativeETVAForSSNsOnPayProfitResponse>
+                        {
+                            new NegativeETVAForSSNsOnPayProfitResponse { EmployeeBadge = 47425, EmployeeSSN = 900047425, EtvaValue = -1293.43m },
+                            new NegativeETVAForSSNsOnPayProfitResponse { EmployeeBadge = 82424, EmployeeSSN = 900082424, EtvaValue = -1152.33m },
+                            new NegativeETVAForSSNsOnPayProfitResponse { EmployeeBadge = 85744, EmployeeSSN = 900085744, EtvaValue = -2899.78m },
+                            new NegativeETVAForSSNsOnPayProfitResponse { EmployeeBadge = 94861, EmployeeSSN = 900094861, EtvaValue = -1200.00m }
+                        }
+                    }
+                }
+            };
         });
         Group<YearEndGroup>();
     }
@@ -43,7 +60,7 @@ public class NegativeETVAForSSNsOnPayProfitEndPoint : EndpointWithoutRequest<Rep
         if (acceptHeader.Contains("text/csv"))
         {
             await using MemoryStream csvData = GenerateCsvStream(response);
-            await SendStreamAsync(csvData, "ETVA-LESS-THAN-ZERO.csv", contentType: "text/csv", cancellation: ct);
+            await SendStreamAsync(csvData, "ETVA-LESS-THAN-ZERO.csv", cancellation: ct);
             return;
         }
 

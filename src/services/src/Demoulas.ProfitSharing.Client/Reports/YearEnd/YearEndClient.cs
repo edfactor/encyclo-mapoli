@@ -40,11 +40,16 @@ public sealed class YearEndClient : IYearEndService
         return rslt ?? ([]);
     }
 
+    #region Negative ETVA For SSNs On PayProfit
+
     public async Task<ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>> GetNegativeETVAForSSNsOnPayProfitResponse(CancellationToken cancellationToken = default)
     {
-        ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>? response = await _httpClient.GetFromJsonAsync<ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>>($"{BaseApiPath}/negative-evta-ssn", _options, cancellationToken);
+        var response = await _httpClient.GetAsync($"{BaseApiPath}/negative-evta-ssn", cancellationToken);
+        _ = response.EnsureSuccessStatusCode();
 
-        return response ?? new ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>
+        var rslt = await response.Content.ReadFromJsonAsync<ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>>(_options, cancellationToken);
+
+        return rslt ?? new ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>
         {
             ReportName = Constants.ErrorMessages.ReportNotFound,
             ReportDate = SqlDateTime.MinValue.Value,
@@ -56,4 +61,28 @@ public sealed class YearEndClient : IYearEndService
     {
         return _httpDownloadClient.GetStreamAsync($"{BaseApiPath}/negative-evta-ssn", cancellationToken);
     }
+
+    #endregion
+
+    #region Mismatched Ssns Payprofit And Demographics On Same Badge
+    public async Task<ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>> GetMismatchedSsnsPayprofitAndDemographicsOnSameBadge(CancellationToken cancellationToken = default)
+    {
+        var response = await _httpClient.GetAsync($"{BaseApiPath}/mismatched-ssns-payprofit-and-demo-on-same-badge", cancellationToken);
+        _ = response.EnsureSuccessStatusCode();
+
+        var rslt = await response.Content.ReadFromJsonAsync<ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>>(_options, cancellationToken);
+        return rslt ?? new ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>
+        {
+            ReportName = Constants.ErrorMessages.ReportNotFound,
+            ReportDate = SqlDateTime.MinValue.Value,
+            Results = new HashSet<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>(0)
+        };
+    }
+
+    public Task<Stream> DownloadMismatchedSsnsPayprofitAndDemographicsOnSameBadge(CancellationToken cancellationToken = default)
+    {
+        return _httpDownloadClient.GetStreamAsync($"{BaseApiPath}/mismatched-ssns-payprofit-and-demo-on-same-badge", cancellationToken);
+    }
+
+    #endregion
 }

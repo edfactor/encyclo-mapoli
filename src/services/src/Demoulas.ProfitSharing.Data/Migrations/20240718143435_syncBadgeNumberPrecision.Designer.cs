@@ -3,6 +3,7 @@ using System;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 
@@ -11,9 +12,11 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    partial class ProfitSharingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240718143435_syncBadgeNumberPrecision")]
+    partial class syncBadgeNumberPrecision
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1499,10 +1502,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("PY_DP")
                         .HasComment("Department");
 
-                    b.Property<string>("EmploymentStatusId")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR2(1)");
-
                     b.Property<string>("EmploymentTypeId")
                         .IsRequired()
                         .HasMaxLength(2)
@@ -1592,8 +1591,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasKey("SSN");
 
                     b.HasIndex("DepartmentId");
-
-                    b.HasIndex("EmploymentStatusId");
 
                     b.HasIndex("EmploymentTypeId");
 
@@ -1685,21 +1682,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             Id = (byte)1,
                             Name = "New last year"
                         });
-                });
-
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.EmploymentStatus", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("NVARCHAR2(1)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("EmploymentStatus");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.EmploymentType", b =>
@@ -2798,12 +2780,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.EmploymentStatus", "EmploymentStatus")
-                        .WithMany("Demographics")
-                        .HasForeignKey("EmploymentStatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.EmploymentType", "EmploymentType")
                         .WithMany("Demographics")
                         .HasForeignKey("EmploymentTypeId")
@@ -2933,8 +2909,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.Navigation("Department");
 
-                    b.Navigation("EmploymentStatus");
-
                     b.Navigation("EmploymentType");
 
                     b.Navigation("Gender");
@@ -3018,11 +2992,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.EmployeeType", b =>
                 {
                     b.Navigation("Profits");
-                });
-
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.EmploymentStatus", b =>
-                {
-                    b.Navigation("Demographics");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.EmploymentType", b =>

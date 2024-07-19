@@ -70,4 +70,29 @@ public class YearEndServiceTests:IClassFixture<ApiTestBase<Program>>
 
         _testOutputHelper.WriteLine(result);
     }
+
+
+    [Fact(DisplayName = "PS-149 : Mismatched Ssns Payprofit and Demographics On Same Badge (JSON)")]
+    public async Task GetMismatchedSsnsPayprofitAndDemographicsOnSameBadgeJson()
+    {
+        var response = await _yearEndClient.GetMismatchedSsnsPayprofitAndDemographicsOnSameBadge(CancellationToken.None);
+
+        response.Should().NotBeNull();
+        response.ReportName.Should().BeEquivalentTo("MISMATCHED SSNs PAYPROFIT AND DEMO ON SAME BADGE");
+
+        _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+    }
+
+    [Fact(DisplayName = "PS-149 : Mismatched Ssns Payprofit and Demographics On Same Badge (CSV)")]
+    public async Task GetMismatchedSsnsPayprofitAndDemographicsOnSameBadgeCsv()
+    {
+        var stream = await _yearEndClient.DownloadMismatchedSsnsPayprofitAndDemographicsOnSameBadge(CancellationToken.None);
+        stream.Should().NotBeNull();
+
+        using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
+        string result = await reader.ReadToEndAsync();
+        result.Should().NotBeNullOrEmpty();
+
+        _testOutputHelper.WriteLine(result);
+    }
 }

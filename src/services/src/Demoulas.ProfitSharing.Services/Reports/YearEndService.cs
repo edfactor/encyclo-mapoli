@@ -1,19 +1,21 @@
 ﻿using System.Collections.Frozen;
-using System.Threading;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 public class YearEndService : IYearEndService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
+    private readonly ILogger<YearEndService> _logger;
 
-    public YearEndService(IProfitSharingDataContextFactory dataContextFactory)
+    public YearEndService(IProfitSharingDataContextFactory dataContextFactory, ILoggerFactory factory)
     {
         _dataContextFactory = dataContextFactory;
+        _logger = factory.CreateLogger<YearEndService>();
     }
 
     public async Task<IList<PayrollDuplicateSSNResponseDto>> GetDuplicateSSNs(CancellationToken ct)
@@ -41,7 +43,7 @@ public class YearEndService : IYearEndService
                             dem.HireDate,
                             dem.TerminationDate,
                             dem.ReHireDate,
-                            //Status,
+                            dem.EmploymentStatusId,
                             dem.StoreNumber,
                             DemPdPp.HoursCurrentYear,
                             DemPdPp.EarningsCurrentYear
@@ -59,7 +61,7 @@ public class YearEndService : IYearEndService
                         HireDate = grp.Key.HireDate,
                         TerminationDate = grp.Key.TerminationDate,
                         RehireDate = grp.Key.ReHireDate,
-                        Status = 'a', //TODO: Where is this in demographics?
+                        Status = grp.Key.EmploymentStatusId,
                         StoreNumber = grp.Key.StoreNumber,
                         ProfitSharingRecords = grp.Count(),
                         HoursCurrentYear = grp.Key.HoursCurrentYear,
@@ -71,25 +73,63 @@ public class YearEndService : IYearEndService
 
     public async Task<ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>> GetNegativeETVAForSSNsOnPayProfitResponse(CancellationToken cancellationToken = default)
     {
-        List<NegativeETVAForSSNsOnPayProfitResponse> results = await _dataContextFactory.UseReadOnlyContext(async c =>
+        using (_logger.BeginScope("Request NEGATIVE ETVA FOR SSNs ON PAYPROFIT"))
         {
-            var ssnUnion = c.Demographics.Select(d => d.SSN).Union(c.Beneficiaries.Select(b => b.SSN));
+            List<NegativeETVAForSSNsOnPayProfitResponse> results = await _dataContextFactory.UseReadOnlyContext(async c =>
+            {
+                var ssnUnion = c.Demographics.Select(d => d.SSN).Union(c.Beneficiaries.Select(b => b.SSN));
 
-            return await c.PayProfits
-                .Where(p => ssnUnion.Contains(p.EmployeeSSN) && p.EarningsEtvaValue < 0)
-                .Select(p => new NegativeETVAForSSNsOnPayProfitResponse
-                {
-                    EmployeeBadge = p.EmployeeBadge,
-                    EmployeeSSN = p.EmployeeSSN,
-                    EtvaValue = p.EarningsEtvaValue
-                }).ToListAsync(cancellationToken);
-        });
+                return await c.PayProfits
+                    .Where(p => ssnUnion.Contains(p.EmployeeSSN) && p.EarningsEtvaValue < 0)
+                    .Select(p => new NegativeETVAForSSNsOnPayProfitResponse
+                    {
+                        EmployeeBadge = p.EmployeeBadge, EmployeeSSN = p.EmployeeSSN, EtvaValue = p.EarningsEtvaValue
+                    })
+                    .OrderBy(p => p.EmployeeBadge)
+                    .ToListAsync(cancellationToken);
+            });
 
-        return new ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>
+            _logger.LogWarning("Returned {results} records", results.Count);
+
+            return new ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>
+            {
+                ReportName = "NEGATIVE ETVA FOR SSNs ON PAYPROFIT", ReportDate = DateTimeOffset.Now, Results = results.ToFrozenSet()
+            };
+        }
+    }
+
+    public async Task<ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>> GetMismatchedSsnsPayprofitAndDemographicsOnSameBadge(CancellationToken cancellationToken = default)
+    {
+        using (_logger.BeginScope("Request MISMATCHED SSNs PAYPROFIT AND DEMO ON SAME BADGE"))
         {
-            ReportName = "NEGATIVE ETVA FOR SSNs ON PAYPROFIT",
-            ReportDate = DateTimeOffset.Now,
-            Results = results.ToFrozenSet()
-        };
+            List<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto> results = await _dataContextFactory.UseReadOnlyContext(c =>
+            {
+                var query = from demographic in c.Demographics
+                    join payProfit in c.PayProfits
+                        on demographic.BadgeNumber equals payProfit.EmployeeBadge
+                    where payProfit.EmployeeSSN != demographic.SSN
+                    orderby demographic.BadgeNumber, demographic.SSN, payProfit.EmployeeSSN
+                    select new MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto
+                    {
+                        Name = demographic.FullName ?? $"{demographic.FirstName} {demographic.LastName}",
+                        EmployeeBadge = demographic.BadgeNumber,
+                        EmployeeSSN = demographic.SSN,
+                        PayProfitSSN = payProfit.EmployeeSSN,
+                       Store = demographic.StoreNumber,
+                       Status = demographic.EmploymentStatusId
+                    };
+
+                return query.ToListAsync(cancellationToken);
+            });
+
+            _logger.LogWarning("Returned {results} records", results.Count);
+
+            return new ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>
+            {
+                ReportName = "MISMATCHED SSNs PAYPROFIT AND DEMO ON SAME BADGE",
+                ReportDate = DateTimeOffset.Now,
+                Results = results.ToFrozenSet()
+            };
+        }
     }
 }
