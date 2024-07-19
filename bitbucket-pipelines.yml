@@ -17,8 +17,6 @@ pipelines:
                 - windows
                 - self.hosted
                 - appt125
-             caches:
-               - dotnetcore
              script:
                - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
                - $env:REPORTS_PATH="./test-reports/build_${BITBUCKET_BUILD_NUMBER}"
@@ -32,13 +30,11 @@ pipelines:
               - windows
               - self.hosted
               - appt125
-            caches:
-              - dotnetcore
             script:
               - $env:SOLUTION_NAME="Demoulas.ProfitSharing"
               - $env:REPORTS_PATH="linter-reports"
-              - dotnet workload install aspire
               - dotnet workload update
+              - dotnet workload install aspire
               - dotnet new tool-manifest
               - dotnet tool install JetBrains.ReSharper.GlobalTools
               - dotnet tool restore
