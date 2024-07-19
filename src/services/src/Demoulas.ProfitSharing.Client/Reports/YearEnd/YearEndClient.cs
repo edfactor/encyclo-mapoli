@@ -42,19 +42,9 @@ public sealed class YearEndClient : IYearEndService
 
     #region Negative ETVA For SSNs On PayProfit
 
-    public async Task<ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>> GetNegativeETVAForSSNsOnPayProfitResponse(CancellationToken cancellationToken = default)
+    public Task<ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>> GetNegativeETVAForSSNsOnPayProfitResponse(CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.GetAsync($"{BaseApiPath}/negative-evta-ssn", cancellationToken);
-        _ = response.EnsureSuccessStatusCode();
-
-        var rslt = await response.Content.ReadFromJsonAsync<ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>>(_options, cancellationToken);
-
-        return rslt ?? new ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>
-        {
-            ReportName = Constants.ErrorMessages.ReportNotFound,
-            ReportDate = SqlDateTime.MinValue.Value,
-            Results = new HashSet<NegativeETVAForSSNsOnPayProfitResponse>(0)
-        };
+        return CallReportEndpoint<NegativeETVAForSSNsOnPayProfitResponse>("negative-evta-ssn", cancellationToken);
     }
 
     public Task<Stream> DownloadNegativeETVAForSSNsOnPayProfitResponse(CancellationToken cancellationToken = default)
@@ -65,23 +55,9 @@ public sealed class YearEndClient : IYearEndService
     #endregion
 
     #region Mismatched Ssns Payprofit And Demographics On Same Badge
-    public async Task<ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>> GetMismatchedSsnsPayprofitAndDemographicsOnSameBadge(CancellationToken cancellationToken = default)
+    public Task<ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>> GetMismatchedSsnsPayprofitAndDemographicsOnSameBadge(CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.GetAsync($"{BaseApiPath}/mismatched-ssns-payprofit-and-demo-on-same-badge", cancellationToken);
-        _ = response.EnsureSuccessStatusCode();
-
-        var rslt = await response.Content.ReadFromJsonAsync<ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>>(_options, cancellationToken);
-        return rslt ?? new ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>
-        {
-            ReportName = Constants.ErrorMessages.ReportNotFound,
-            ReportDate = SqlDateTime.MinValue.Value,
-            Results = new HashSet<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>(0)
-        };
-    }
-
-    public Task<ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto>> GetPayrollDuplicateSsnsOnPayprofit(CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
+        return CallReportEndpoint<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>("mismatched-ssns-payprofit-and-demo-on-same-badge", cancellationToken);
     }
 
     public Task<Stream> DownloadMismatchedSsnsPayprofitAndDemographicsOnSameBadge(CancellationToken cancellationToken = default)
@@ -90,4 +66,32 @@ public sealed class YearEndClient : IYearEndService
     }
 
     #endregion
+
+    #region Get Payroll Duplicate Ssns On Payprofit
+    public Task<ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto>> GetPayrollDuplicateSsnsOnPayprofit(CancellationToken cancellationToken = default)
+    {
+        return CallReportEndpoint<PayrollDuplicateSsnsOnPayprofitResponseDto>("payroll-duplicate-ssns-on-payprofit", cancellationToken);
+    }
+
+    public Task<Stream> DownloadPayrollDuplicateSsnsOnPayprofit(CancellationToken cancellationToken = default)
+    {
+        return _httpDownloadClient.GetStreamAsync($"{BaseApiPath}/payroll-duplicate-ssns-on-payprofit", cancellationToken);
+    }
+
+    #endregion
+
+
+    private async Task<ReportResponseBase<TResponseDto>> CallReportEndpoint<TResponseDto>(string endpointRoute, CancellationToken cancellationToken) where TResponseDto : class
+    {
+        var response = await _httpClient.GetAsync($"{BaseApiPath}/{endpointRoute}", cancellationToken);
+        _ = response.EnsureSuccessStatusCode();
+
+        var rslt = await response.Content.ReadFromJsonAsync<ReportResponseBase<TResponseDto>>(_options, cancellationToken);
+        return rslt ?? new ReportResponseBase<TResponseDto>
+        {
+            ReportName = Constants.ErrorMessages.ReportNotFound,
+            ReportDate = SqlDateTime.MinValue.Value,
+            Results = new HashSet<TResponseDto>(0)
+        };
+    }
 }
