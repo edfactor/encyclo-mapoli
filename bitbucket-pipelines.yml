@@ -19,7 +19,7 @@ pipelines:
                 - appt125
              script:
                - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
-               - $env:REPORTS_PATH="./test-reports/build_${BITBUCKET_BUILD_NUMBER}"
+               - $env:REPORTS_PATH="../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}"
                - dotnet workload update
                - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml"
              artifacts:
@@ -34,7 +34,7 @@ pipelines:
               - $env:SOLUTION_NAME="Demoulas.ProfitSharing"
               - $env:REPORTS_PATH="linter-reports"
               - dotnet workload update
-              - dotnet workload install aspire
+              - dotnet workload install aspire --source https://api.nuget.org/v3/index.json
               - dotnet new tool-manifest
               - dotnet tool install JetBrains.ReSharper.GlobalTools
               - dotnet tool restore
