@@ -4,10 +4,13 @@ using Demoulas.ProfitSharing.Data.Entities;
 namespace Demoulas.ProfitSharing.UnitTests.Fakes;
 internal sealed class PayProfitFaker : Faker<PayProfit>
 {
-    internal PayProfitFaker(ISet<int> badgeNumbers, ISet<long> ssnCollection)
+    internal PayProfitFaker(IList<Demographic> demographicFakes)
     {
-        RuleFor(pc => pc.EmployeeBadge, f => f.PickRandom<int>(badgeNumbers))
-            .RuleFor(d => d.EmployeeSSN, f => f.PickRandom<long>(ssnCollection))
+        var demographicQueue = new Queue<Demographic>(demographicFakes);
+
+        RuleFor(pc => pc.Demographic, f => demographicQueue.Dequeue())
+            .RuleFor(pc => pc.EmployeeBadge, (f,o) => (o.Demographic?.BadgeNumber ?? 0))
+            .RuleFor(d => d.EmployeeSSN, (f,o) => (o.Demographic?.SSN ??  0))
             .RuleFor(pc => pc.HoursCurrentYear, f => f.Random.Int(min: 0, max: 3000))
             .RuleFor(pc => pc.HoursLastYear, f => f.Random.Int(min: 0, max: 3000))
             .RuleFor(pc => pc.WeeksWorkedYear, f => f.Random.Byte(min: 0, max: 53))

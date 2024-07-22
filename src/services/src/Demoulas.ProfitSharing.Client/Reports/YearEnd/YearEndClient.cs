@@ -2,6 +2,7 @@
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Threading;
 using Demoulas.ProfitSharing.Client.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -31,13 +32,18 @@ public sealed class YearEndClient : IYearEndService
         _options = Constants.GetJsonSerializerOptions();
     }
 
-    public async Task<IList<PayrollDuplicateSSNResponseDto>> GetDuplicateSSNs(CancellationToken ct)
+    public async Task<ReportResponseBase<PayrollDuplicateSSNResponseDto>> GetDuplicateSSNs(CancellationToken ct)
     {
         var response = await _httpClient.GetAsync($"{BaseApiPath}/duplicatessns", ct);
         _ = response.EnsureSuccessStatusCode();
 
-        var rslt = await response.Content.ReadFromJsonAsync<IList<PayrollDuplicateSSNResponseDto>>(_options, ct);
-        return rslt ?? ([]);
+        var rslt = await response.Content.ReadFromJsonAsync<ReportResponseBase<PayrollDuplicateSSNResponseDto>>(_options, ct);
+        return rslt ?? new ReportResponseBase<PayrollDuplicateSSNResponseDto> 
+        {
+            ReportName = Constants.ErrorMessages.ReportNotFound,
+            ReportDate = SqlDateTime.MinValue.Value,
+            Results = new HashSet<PayrollDuplicateSSNResponseDto>(0)
+        };
     }
 
     #region Negative ETVA For SSNs On PayProfit
@@ -63,6 +69,20 @@ public sealed class YearEndClient : IYearEndService
     public Task<Stream> DownloadMismatchedSsnsPayprofitAndDemographicsOnSameBadge(CancellationToken cancellationToken = default)
     {
         return _httpDownloadClient.GetStreamAsync($"{BaseApiPath}/mismatched-ssns-payprofit-and-demo-on-same-badge", cancellationToken);
+    }
+
+    public async Task<ReportResponseBase<PayProfitBadgesNotInDemographicsResponse>> GetPayProfitBadgesNotInDemographics(CancellationToken cancellationToken = default)
+    {
+        var response = await _httpClient.GetAsync($"{BaseApiPath}/payprofit-badges-without-demographics", cancellationToken);
+        _ = response.EnsureSuccessStatusCode();
+
+        var rslt = await response.Content.ReadFromJsonAsync<ReportResponseBase<PayProfitBadgesNotInDemographicsResponse>>(_options, cancellationToken);
+        return rslt ?? new ReportResponseBase<PayProfitBadgesNotInDemographicsResponse>
+        {
+            ReportName = Constants.ErrorMessages.ReportNotFound,
+            ReportDate = SqlDateTime.MinValue.Value,
+            Results = new HashSet<PayProfitBadgesNotInDemographicsResponse>(0)
+        };
     }
 
     #endregion

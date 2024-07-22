@@ -4,6 +4,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Mappers;
+using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -20,13 +21,13 @@ public class YearEndService : IYearEndService
         _logger = factory.CreateLogger<YearEndService>();
     }
 
-    public async Task<IList<PayrollDuplicateSSNResponseDto>> GetDuplicateSSNs(CancellationToken ct)
+    public async Task<ReportResponseBase<PayrollDuplicateSSNResponseDto>> GetDuplicateSSNs(CancellationToken ct)
     {
         return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var dupSsns = await ctx.Demographics.GroupBy(x => x.SSN).Where(x => x.Count() > 1).Select(x => x.Key).ToListAsync();
 
-            return await (from dem in ctx.Demographics
+            var rslts = await (from dem in ctx.Demographics
                     join pdJoin in ctx.ProfitDetails on dem.SSN equals pdJoin.SSN into demPdJoin
                     from pd in demPdJoin.DefaultIfEmpty()
                     join pp in ctx.PayProfits on dem.SSN equals pp.EmployeeSSN into DemPdPpJoin
@@ -70,7 +71,35 @@ public class YearEndService : IYearEndService
                         EarningsCurrentYear = grp.Key.EarningsCurrentYear,
                     }
                 ).ToListAsync(ct);
+
+            return new ReportResponseBase<PayrollDuplicateSSNResponseDto>()
+            {
+                ReportDate = DateTimeOffset.Now,
+                ReportName = "Duplicate SSNs",
+                Results = rslts.ToFrozenSet()
+            };
         });
+    }
+
+    public async Task<ReportResponseBase<PayProfitBadgesNotInDemographicsResponse>> GetPayProfitBadgesNotInDemographics(CancellationToken ct = default)
+    {
+        var results = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            return await (from pp in ctx.PayProfits
+             join dem in ctx.Demographics on pp.EmployeeBadge equals dem.BadgeNumber into demTmp
+             from dem in demTmp.DefaultIfEmpty()
+             where dem == null
+             orderby pp.EmployeeBadge, pp.EmployeeSSN
+             select new PayProfitBadgesNotInDemographicsResponse { EmployeeBadge = pp.EmployeeBadge, EmployeeSSN = pp.EmployeeSSN }
+            ).ToListAsync(ct);
+        });
+
+        return new ReportResponseBase<PayProfitBadgesNotInDemographicsResponse>
+        {
+            ReportName = "Payprofit Badges not in Demographics",
+            ReportDate = DateTimeOffset.Now,
+            Results = results.ToFrozenSet()
+        };
     }
 
     public async Task<ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>> GetNegativeETVAForSSNsOnPayProfitResponse(CancellationToken cancellationToken = default)

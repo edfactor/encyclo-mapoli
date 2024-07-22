@@ -14,7 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 
-public class NegativeETVAForSSNsOnPayProfitEndPoint : EndpointWithoutRequest<ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>>
+public class NegativeETVAForSSNsOnPayProfitEndPoint : EndpointWithCSVBase<EmptyRequest, NegativeETVAForSSNsOnPayProfitResponse, NegativeETVAForSSNsOnPayProfitEndPoint.NegativeETVAForSSNsOnPayProfitResponseMap>
 {
     private readonly IYearEndService _reportService;
 
@@ -53,41 +53,14 @@ public class NegativeETVAForSSNsOnPayProfitEndPoint : EndpointWithoutRequest<Rep
         Options(x => x.CacheOutput(p => p.Expire(TimeSpan.FromMinutes(5))));
     }
 
-    public override async Task HandleAsync(CancellationToken ct)
+    public override async Task<ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>> GetResponse(CancellationToken ct)
     {
-        string acceptHeader = HttpContext.Request.Headers["Accept"].ToString().ToLower(CultureInfo.InvariantCulture);
-
-        ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse> response = await _reportService.GetNegativeETVAForSSNsOnPayProfitResponse(ct);
-
-        if (acceptHeader.Contains("text/csv"))
-        {
-            await using MemoryStream csvData = GenerateCsvStream(response);
-            await SendStreamAsync(csvData, "ETVA-LESS-THAN-ZERO.csv", cancellation: ct);
-            return;
-        }
-
-        await SendOkAsync(response, ct);
+        return await _reportService.GetNegativeETVAForSSNsOnPayProfitResponse(ct);
     }
 
+    public override string ReportFileName => "ETVA-LESS-THAN-ZERO";
 
-    private MemoryStream GenerateCsvStream(ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse> report)
-    {
-        MemoryStream memoryStream = new MemoryStream();
-        using (StreamWriter streamWriter = new StreamWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
-        using (CsvWriter csvWriter = new CsvWriter(streamWriter, new CsvConfiguration(CultureInfo.InvariantCulture) { Delimiter = "," }))
-        {
-            streamWriter.WriteLine($"{report.ReportDate:MMM dd yyyy HH:mm}");
-            streamWriter.WriteLine(report.ReportName);
-
-            csvWriter.Context.RegisterClassMap<NegativeETVAForSSNsOnPayProfitResponseMap>();
-            csvWriter.WriteRecords(report.Results);
-            streamWriter.Flush();
-        }
-        memoryStream.Position = 0; // Reset the stream position to the beginning
-        return memoryStream;
-    }
-
-    private sealed class NegativeETVAForSSNsOnPayProfitResponseMap : ClassMap<NegativeETVAForSSNsOnPayProfitResponse>
+    public sealed class NegativeETVAForSSNsOnPayProfitResponseMap : ClassMap<NegativeETVAForSSNsOnPayProfitResponse>
     {
         public NegativeETVAForSSNsOnPayProfitResponseMap()
         {

@@ -24,14 +24,44 @@ public class YearEndServiceTests:IClassFixture<ApiTestBase<Program>>
         _yearEndClient = new YearEndClient(fixture.ApiClient, fixture.DownloadClient);
     }
 
-    [Fact(DisplayName ="Check Duplicate SSNs")]
+    [Fact(DisplayName ="PS-147: Check Duplicate SSNs")]
     public async Task GetDuplicateSSNsTest()
     {
         var response = await _yearEndClient.GetDuplicateSSNs(CancellationToken.None);
         response.Should().NotBeNull();
-        response.Count.Should().Be(0); //Duplicate SSNs aren't allowed in our data model, prohibited by primary key on SSN in the demographics table.
+        response.Results.Count.Should().Be(0); //Duplicate SSNs aren't allowed in our data model, prohibited by primary key on SSN in the demographics table.
     }
 
+    [Fact(DisplayName ="PS-150: Payprofit badges w/o Demographics")]
+    public async Task GetPayProfitBadgesNotInDemographics()
+    {
+        await _dataContextFactory.UseWritableContext(async c =>
+        {
+            var response = await _yearEndClient.GetPayProfitBadgesNotInDemographics(CancellationToken.None);
+            response.Should().NotBeNull();
+            response.Results.Should().HaveCount(0);
+
+            _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+
+            byte mismatchedValues = 5;
+
+            await c.PayProfits.Take(mismatchedValues).ForEachAsync(pp =>
+            {
+                if (pp.Demographic != null)
+                {
+                    pp.Demographic.BadgeNumber = pp.EmployeeBadge * 31;
+                }
+            });
+
+            await c.SaveChangesAsync();
+
+            response = await _yearEndClient.GetPayProfitBadgesNotInDemographics(CancellationToken.None);
+            response.Should().NotBeNull();
+            response.Results.Should().HaveCount(mismatchedValues);
+
+            _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+        });
+    }
 
     [Fact(DisplayName = "PS-145 : Negative ETVA for SSNs on PayProfit (JSON)")]
     public async Task GetNegativeETVAReportJson()
