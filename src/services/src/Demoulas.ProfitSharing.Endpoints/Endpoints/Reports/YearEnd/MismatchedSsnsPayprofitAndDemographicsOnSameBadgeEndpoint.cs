@@ -1,18 +1,17 @@
-﻿using System.Globalization;
-using System.Text;
-using CsvHelper;
-using CsvHelper.Configuration;
+﻿using CsvHelper.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 using Microsoft.Extensions.DependencyInjection;
+using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.MismatchedSsnsPayprofitAndDemographicsOnSameBadgeEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 
-public class MismatchedSsnsPayprofitAndDemographicsOnSameBadgeEndpoint : EndpointWithoutRequest<ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>>
+public class MismatchedSsnsPayprofitAndDemographicsOnSameBadgeEndpoint : EndpointWithCSVBase<EmptyRequest, MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto, MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseMap>
 {
     private readonly IYearEndService _reportService;
 
@@ -52,41 +51,15 @@ public class MismatchedSsnsPayprofitAndDemographicsOnSameBadgeEndpoint : Endpoin
         Options(x => x.CacheOutput(p => p.Expire(TimeSpan.FromMinutes(5))));
     }
 
-    public override async Task HandleAsync(CancellationToken ct)
+    public override string ReportFileName => "MISMATCHED-PAYPROF-DEM-SSNS";
+
+    public override Task<ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>> GetResponse(CancellationToken ct)
     {
-        string acceptHeader = HttpContext.Request.Headers["Accept"].ToString().ToLower(CultureInfo.InvariantCulture);
-
-        ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto> response = await _reportService.GetMismatchedSsnsPayprofitAndDemographicsOnSameBadge(ct);
-
-        if (acceptHeader.Contains("text/csv"))
-        {
-            await using MemoryStream csvData = GenerateCsvStream(response);
-            await SendStreamAsync(csvData, "MISMATCHED-PAYPROF-DEM-SSNS.csv", cancellation: ct);
-            return;
-        }
-
-        await SendOkAsync(response, ct);
+        return _reportService.GetMismatchedSsnsPayprofitAndDemographicsOnSameBadge(ct);
     }
 
 
-    private MemoryStream GenerateCsvStream(ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto> report)
-    {
-        MemoryStream memoryStream = new MemoryStream();
-        using (StreamWriter streamWriter = new StreamWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
-        using (CsvWriter csvWriter = new CsvWriter(streamWriter, new CsvConfiguration(CultureInfo.InvariantCulture) { Delimiter = "," }))
-        {
-            streamWriter.WriteLine($"{report.ReportDate:MMM dd yyyy HH:mm}");
-            streamWriter.WriteLine(report.ReportName);
-
-            csvWriter.Context.RegisterClassMap<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseMap>();
-            csvWriter.WriteRecords(report.Results);
-            streamWriter.Flush();
-        }
-        memoryStream.Position = 0; // Reset the stream position to the beginning
-        return memoryStream;
-    }
-
-    private sealed class MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseMap : ClassMap<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>
+    public sealed class MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseMap : ClassMap<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>
     {
         public MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseMap()
         {

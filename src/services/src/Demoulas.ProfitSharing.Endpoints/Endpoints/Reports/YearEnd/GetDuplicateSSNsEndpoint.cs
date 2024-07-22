@@ -5,6 +5,7 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 using CsvHelper;
 using CsvHelper.Configuration;
+using Demoulas.ProfitSharing.Endpoints.Base;
 
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
@@ -20,7 +21,7 @@ public class GetDuplicateSSNsEndpoint : EndpointWithCSVBase<EmptyRequest, Payrol
     public override void Configure()
     {
         AllowAnonymous();
-        Get("duplicatessns");
+        Get("duplicate-ssns");
         Summary(s =>
         {
             s.Summary = "Get SSNs that are duplicated in the demographics area";

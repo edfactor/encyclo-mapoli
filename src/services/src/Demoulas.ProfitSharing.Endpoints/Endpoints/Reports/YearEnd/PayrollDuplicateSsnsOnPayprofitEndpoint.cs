@@ -6,13 +6,15 @@ using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Services.Reports;
 using FastEndpoints;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 
-public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithoutRequest<ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto>>
+public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithCSVBase<EmptyRequest, PayrollDuplicateSsnsOnPayprofitResponseDto, PayrollDuplicateSsnsOnPayprofitEndpoint.PayrollDuplicateSsnsOnPayprofitResponseMap>
 {
     private readonly IYearEndService _reportService;
 
@@ -67,41 +69,14 @@ public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithoutRequest<Re
         Options(x => x.CacheOutput(p => p.Expire(TimeSpan.FromMinutes(5))));
     }
 
-    public override async Task HandleAsync(CancellationToken ct)
+    public override string ReportFileName => "PAYROLL DUPLICATE SSNs ON PAYPROFIT";
+
+    public override async Task<ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto>> GetResponse(CancellationToken ct)
     {
-        string acceptHeader = HttpContext.Request.Headers["Accept"].ToString().ToLower(CultureInfo.InvariantCulture);
-
-        ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto> response = await _reportService.GetPayrollDuplicateSsnsOnPayprofit(ct);
-
-        if (acceptHeader.Contains("text/csv"))
-        {
-            await using MemoryStream csvData = GenerateCsvStream(response);
-            await SendStreamAsync(csvData, "PAYROLL DUPLICATE SSNs ON PAYPROFIT.csv", cancellation: ct);
-            return;
-        }
-
-        await SendOkAsync(response, ct);
+        return await _reportService.GetPayrollDuplicateSsnsOnPayprofit(ct);
     }
 
-
-    private MemoryStream GenerateCsvStream(ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto> report)
-    {
-        MemoryStream memoryStream = new MemoryStream();
-        using (StreamWriter streamWriter = new StreamWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
-        using (CsvWriter csvWriter = new CsvWriter(streamWriter, new CsvConfiguration(CultureInfo.InvariantCulture) { Delimiter = "," }))
-        {
-            streamWriter.WriteLine($"{report.ReportDate:MMM dd yyyy HH:mm}");
-            streamWriter.WriteLine(report.ReportName);
-
-            csvWriter.Context.RegisterClassMap<PayrollDuplicateSsnsOnPayprofitResponseMap>();
-            csvWriter.WriteRecords(report.Results);
-            streamWriter.Flush();
-        }
-        memoryStream.Position = 0; // Reset the stream position to the beginning
-        return memoryStream;
-    }
-
-    private sealed class PayrollDuplicateSsnsOnPayprofitResponseMap : ClassMap<PayrollDuplicateSsnsOnPayprofitResponseDto>
+    public sealed class PayrollDuplicateSsnsOnPayprofitResponseMap : ClassMap<PayrollDuplicateSsnsOnPayprofitResponseDto>
     {
         public PayrollDuplicateSsnsOnPayprofitResponseMap()
         {

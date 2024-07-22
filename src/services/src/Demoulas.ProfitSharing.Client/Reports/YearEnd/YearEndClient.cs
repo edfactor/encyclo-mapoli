@@ -32,18 +32,14 @@ public sealed class YearEndClient : IYearEndService
         _options = Constants.GetJsonSerializerOptions();
     }
 
-    public async Task<ReportResponseBase<PayrollDuplicateSSNResponseDto>> GetDuplicateSSNs(CancellationToken ct)
+    public Task<ReportResponseBase<PayrollDuplicateSSNResponseDto>> GetDuplicateSSNs(CancellationToken ct)
     {
-        var response = await _httpClient.GetAsync($"{BaseApiPath}/duplicatessns", ct);
-        _ = response.EnsureSuccessStatusCode();
+        return CallReportEndpoint<PayrollDuplicateSSNResponseDto>("duplicate-ssns", ct);
+    }
 
-        var rslt = await response.Content.ReadFromJsonAsync<ReportResponseBase<PayrollDuplicateSSNResponseDto>>(_options, ct);
-        return rslt ?? new ReportResponseBase<PayrollDuplicateSSNResponseDto> 
-        {
-            ReportName = Constants.ErrorMessages.ReportNotFound,
-            ReportDate = SqlDateTime.MinValue.Value,
-            Results = new HashSet<PayrollDuplicateSSNResponseDto>(0)
-        };
+    public Task<Stream> DownloadDuplicateSSNs(CancellationToken ct)
+    {
+        return _httpDownloadClient.GetStreamAsync($"{BaseApiPath}/duplicate-ssns", ct);
     }
 
     #region Negative ETVA For SSNs On PayProfit

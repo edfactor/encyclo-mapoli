@@ -24,12 +24,25 @@ public class YearEndServiceTests:IClassFixture<ApiTestBase<Program>>
         _yearEndClient = new YearEndClient(fixture.ApiClient, fixture.DownloadClient);
     }
 
-    [Fact(DisplayName ="PS-147: Check Duplicate SSNs")]
-    public async Task GetDuplicateSSNsTest()
+    [Fact(DisplayName ="PS-147: Check Duplicate SSNs (JSON)")]
+    public async Task GetDuplicateSSNsTestJson()
     {
         var response = await _yearEndClient.GetDuplicateSSNs(CancellationToken.None);
         response.Should().NotBeNull();
         response.Results.Count.Should().Be(0); //Duplicate SSNs aren't allowed in our data model, prohibited by primary key on SSN in the demographics table.
+    }
+
+    [Fact(DisplayName = "PS-147: Check Duplicate SSNs (CSV)")]
+    public async Task GetDuplicateSSNsTestCsv()
+    {
+        var stream = await _yearEndClient.DownloadDuplicateSSNs(CancellationToken.None);
+        stream.Should().NotBeNull();
+
+        using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
+        string result = await reader.ReadToEndAsync();
+        result.Should().NotBeNullOrEmpty();
+
+        _testOutputHelper.WriteLine(result);
     }
 
     [Fact(DisplayName ="PS-150: Payprofit badges w/o Demographics")]
