@@ -17,7 +17,7 @@ public class Program
         var config = configurationBuilder.Build();
 
         // Load Okta settings
-        OracleHcmConfig oktaSettings = config.GetSection("OracleHcm").Get<OracleHcmConfig>() ?? new OracleHcmConfig();
+        OracleHcmConfig oktaSettings = config.GetSection("OracleHcm").Get<OracleHcmConfig>() ?? new OracleHcmConfig {Url = string.Empty};
 
         var provider = services.BuildServiceProvider();
 

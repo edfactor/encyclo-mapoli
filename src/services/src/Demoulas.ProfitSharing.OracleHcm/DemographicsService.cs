@@ -21,7 +21,19 @@ public sealed class DemographicsService
         var bytes = Encoding.UTF8.GetBytes($"{oracleHcmConfig.Username}:{oracleHcmConfig.Password}");
         string base64String = Convert.ToBase64String(bytes);
 
-        var request = new HttpRequestMessage(HttpMethod.Get, oracleHcmConfig.Url);
+        var query = new Dictionary<string, string>
+        {
+            { "limit", "500" },
+            { "offset", "0" },
+            { "totalResults", "false" },
+        };
+
+        var uriBuilder = new UriBuilder(oracleHcmConfig.Url);
+        string queryString = await new FormUrlEncodedContent(query).ReadAsStringAsync(cancellationToken);
+        uriBuilder.Query = queryString;
+
+
+        var request = new HttpRequestMessage(HttpMethod.Get, uriBuilder.Uri);
         request.Headers.Add("REST-Framework-Version", oracleHcmConfig.RestFrameworkVersion);
         request.Headers.Add("Authorization", $"Basic {base64String}");
         var response = await _httpClient.SendAsync(request, cancellationToken);
