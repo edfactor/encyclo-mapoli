@@ -3,6 +3,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Mappers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -12,7 +13,8 @@ public class YearEndService : IYearEndService
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ILogger<YearEndService> _logger;
 
-    public YearEndService(IProfitSharingDataContextFactory dataContextFactory, ILoggerFactory factory)
+    public YearEndService(IProfitSharingDataContextFactory dataContextFactory, 
+        ILoggerFactory factory)
     {
         _dataContextFactory = dataContextFactory;
         _logger = factory.CreateLogger<YearEndService>();
@@ -127,6 +129,89 @@ public class YearEndService : IYearEndService
             return new ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>
             {
                 ReportName = "MISMATCHED SSNs PAYPROFIT AND DEMO ON SAME BADGE",
+                ReportDate = DateTimeOffset.Now,
+                Results = results.ToFrozenSet()
+            };
+        }
+    }
+
+    public async Task<ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto>> GetPayrollDuplicateSsnsOnPayprofit(CancellationToken cancellationToken = default)
+    {
+        using (_logger.BeginScope("Request PAYROLL DUPLICATE SSNs ON PAYPROFIT"))
+        {
+            List<PayrollDuplicateSsnsOnPayprofitResponseDto> results = await _dataContextFactory.UseReadOnlyContext(context =>
+            {
+                var query = from payProfit in context.PayProfits
+                            join demographics in context.Demographics
+                                on payProfit.EmployeeBadge equals demographics.BadgeNumber into demGroup
+                            from demographics in demGroup.DefaultIfEmpty()
+                            join profitDetail in context.ProfitDetails
+                                on payProfit.EmployeeSSN equals profitDetail.SSN into detGroup
+                            from profitDetail in detGroup.DefaultIfEmpty()
+                            where context.PayProfits
+                                .GroupBy(p => p.EmployeeSSN)
+                                .Where(g => g.Count() > 1)
+                                .Select(g => g.Key)
+                                .Contains(payProfit.EmployeeSSN)
+                            group new { payProfit, demographics, profitDetail } by new
+                            {
+                                payProfit.EmployeeBadge,
+                                payProfit.EmployeeSSN,
+                                demographics.FullName,
+                                demographics.HireDate,
+                                demographics.TerminationDate,
+                                demographics.ReHireDate,
+                                demographics.EmploymentStatusId,
+                                demographics.StoreNumber,
+                                demographics.Address.Street,
+                                demographics.Address.Street2,
+                                demographics.Address.City,
+                                demographics.Address.State,
+                                demographics.Address.PostalCode,
+                                demographics.Address.CountryISO,
+                                demographics.ContactInfo.EmailAddress,
+                                demographics.ContactInfo.PhoneNumber,
+                                demographics.ContactInfo.MobileNumber,
+                                payProfit.EarningsCurrentYear
+                            } into g
+                            orderby g.Key.EmployeeSSN, g.Key.EmployeeBadge
+                            select new PayrollDuplicateSsnsOnPayprofitResponseDto
+                            {
+                                Count = g.Count(),
+                                EmployeeBadge = g.Key.EmployeeBadge,
+                                EmployeeSSN = g.Key.EmployeeSSN,
+                                Name = g.Key.FullName,
+                                HireDate = g.Key.HireDate,
+                                TermDate = g.Key.TerminationDate,
+                                RehireDate = g.Key.ReHireDate,
+                                Status = g.Key.EmploymentStatusId,
+                                Store = g.Key.StoreNumber,
+                                EarningsCurrentYear = g.Key.EarningsCurrentYear,
+                                ContactInfo = new ContactInfoResponseDto
+                                {
+                                    EmailAddress = g.Key.EmailAddress,
+                                    MobileNumber = g.Key.MobileNumber,
+                                    PhoneNumber = g.Key.PhoneNumber
+                                },
+                                Address = new AddressResponseDto
+                                {
+                                    Street = g.Key.Street,
+                                    Street2 = g.Key.Street2,
+                                    City = g.Key.City,
+                                    State = g.Key.State,
+                                    PostalCode = g.Key.PostalCode,
+                                    CountryISO = g.Key.CountryISO
+                                }
+                            };
+
+                return query.ToListAsync(cancellationToken: cancellationToken);
+            });
+
+            _logger.LogWarning("Returned {results} records", results.Count);
+
+            return new ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto>
+            {
+                ReportName = "PAYROLL DUPLICATE SSNs ON PAYPROFIT",
                 ReportDate = DateTimeOffset.Now,
                 Results = results.ToFrozenSet()
             };

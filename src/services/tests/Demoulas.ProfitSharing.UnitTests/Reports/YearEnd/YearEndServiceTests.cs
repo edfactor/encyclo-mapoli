@@ -95,4 +95,33 @@ public class YearEndServiceTests:IClassFixture<ApiTestBase<Program>>
 
         _testOutputHelper.WriteLine(result);
     }
+
+
+
+
+
+
+    [Fact(DisplayName = "PS-148 : Payroll Duplicate Ssns On Payprofit (JSON)")]
+    public async Task GetPayrollDuplicateSsnsOnPayprofitJson()
+    {
+        var response = await _yearEndClient.GetPayrollDuplicateSsnsOnPayprofit(CancellationToken.None);
+
+        response.Should().NotBeNull();
+        response.ReportName.Should().BeEquivalentTo("PAYROLL DUPLICATE SSNs ON PAYPROFIT");
+
+        _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+    }
+
+    [Fact(DisplayName = "PS-148 : Payroll Duplicate Ssns On Payprofit (CSV)")]
+    public async Task GetPayrollDuplicateSsnsOnPayprofitCsv()
+    {
+        var stream = await _yearEndClient.DownloadPayrollDuplicateSsnsOnPayprofit(CancellationToken.None);
+        stream.Should().NotBeNull();
+
+        using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
+        string result = await reader.ReadToEndAsync();
+        result.Should().NotBeNullOrEmpty();
+
+        _testOutputHelper.WriteLine(result);
+    }
 }

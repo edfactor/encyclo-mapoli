@@ -12,11 +12,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 
-public class MismatchedSsnsPayprofitAndDemographicsOnSameBadge : EndpointWithoutRequest<ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>>
+public class MismatchedSsnsPayprofitAndDemographicsOnSameBadgeEndpoint : EndpointWithoutRequest<ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>>
 {
     private readonly IYearEndService _reportService;
 
-    public MismatchedSsnsPayprofitAndDemographicsOnSameBadge(IYearEndService reportService)
+    public MismatchedSsnsPayprofitAndDemographicsOnSameBadgeEndpoint(IYearEndService reportService)
     {
         _reportService = reportService;
     }

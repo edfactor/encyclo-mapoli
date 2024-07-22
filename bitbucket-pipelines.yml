@@ -8,31 +8,36 @@
 
 pipelines:
   default:
-    # Build Stage
-    - step:
-        name: "Run Profit Sharing Backend Automated Tests"
-        runs-on:
-          - windows
-          - self.hosted
-          - appt125
-        script:
-          - echo "Running Profit Sharing Backend Automated Tests"          
-
-          - dotnet test .\src\services\tests\Demoulas.ProfitSharing.UnitTests\Demoulas.ProfitSharing.UnitTests.csproj --configuration debug --logger "junit;LogFilePath=..\..\..\..\TestResults\results.xml" -p:RestoreAdditionalProjectSources=https://api.nuget.org/v3/index.json
-        artifacts:
-          - ./**/TestResults/**/*.xml
+    - parallel:
+        - step:
+             name: Build and Test
+             runs-on:
+                - windows
+                - self.hosted
+                - appt125
+             script:
+               - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
+               - $env:REPORTS_PATH="../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}"
+               - $env:NUGET_ORG="https://api.nuget.org/v3/index.json"
+               - dotnet workload update --source $env:NUGET_ORG
+               - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml" -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
+             artifacts:
+               - test-reports/**        
 
   pull-requests:   
     '**':
-      - step:
-          name: "Run Profit Sharing Backend Automated Tests"
-          runs-on:
-            - windows
-            - self.hosted
-            - appt125
-          script:
-            - echo "Running Profit Sharing Backend Automated Tests"          
-
-            - dotnet test .\src\services\tests\Demoulas.ProfitSharing.UnitTests\Demoulas.ProfitSharing.UnitTests.csproj --configuration debug --logger "junit;LogFilePath=..\..\..\..\TestResults\results.xml" -p:RestoreAdditionalProjectSources=https://api.nuget.org/v3/index.json
-          artifacts:
-            - ./**/TestResults/**/*.xml
+      - parallel:
+         - step:
+             name: Build and Test
+             runs-on:
+                - windows
+                - self.hosted
+                - appt125
+             script:
+               - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
+               - $env:REPORTS_PATH="../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}"
+               - $env:NUGET_ORG="https://api.nuget.org/v3/index.json"
+               - dotnet workload update --source $env:NUGET_ORG
+               - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml" -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
+             artifacts:
+               - test-reports/**   

@@ -25,12 +25,12 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingReadOnlyDbContext = new Mock<ProfitSharingReadOnlyDbContext>();
         _storeInfoDbContext = new Mock<StoreInfoDbContext>();
 
-        List<Demographic>? demographics = new DemographicFaker().Generate(1_000);
+        List<Demographic>? demographics = new DemographicFaker().Generate(500);
         Mock<DbSet<Demographic>> mockDemographic = demographics.AsQueryable().BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.Demographics).Returns(mockDemographic.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Demographics).Returns(mockDemographic.Object);
 
-        List<Beneficiary>? beneficiaries = new BeneficiaryFaker().Generate(10_000);
+        List<Beneficiary>? beneficiaries = new BeneficiaryFaker().Generate(5_000);
         Mock<DbSet<Beneficiary>> mockBeneficiaries = beneficiaries.AsQueryable().BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaries.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaries.Object);
@@ -41,7 +41,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(m => m.Countries).Returns(mockCountry.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Countries).Returns(mockCountry.Object);
 
-        List<PayClassification>? payClassifications = new PayClassificationFaker().Generate(1_000);
+        List<PayClassification>? payClassifications = new PayClassificationFaker().Generate(500);
         Mock<DbSet<PayClassification>> mockPayClassifications = payClassifications.AsQueryable().BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.PayClassifications).Returns(mockPayClassifications.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.PayClassifications).Returns(mockPayClassifications.Object);

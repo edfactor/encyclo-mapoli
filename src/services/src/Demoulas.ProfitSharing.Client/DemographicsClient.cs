@@ -26,16 +26,7 @@ public sealed class DemographicsClient : IDemographicsService
         _validator = new DemographicsRequestDtoValidator();
         _options = Constants.GetJsonSerializerOptions();
     }
-
-    public async Task<PaginatedResponseDto<DemographicsResponseDto>?> GetAllDemographics(PaginationRequestDto req, CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(req);
-
-        HttpResponseMessage response = await _httpClient.PostAsJsonAsync($"{BaseApiPath}/all", req, cancellationToken);
-        response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<PaginatedResponseDto<DemographicsResponseDto>>(_options, cancellationToken).ConfigureAwait(false);
-    }
-
+   
     public async Task<ISet<DemographicsResponseDto>?> AddDemographics(IEnumerable<DemographicsRequestDto> demographics, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(demographics);

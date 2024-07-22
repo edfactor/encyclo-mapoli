@@ -10,6 +10,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 
@@ -49,6 +50,7 @@ public class NegativeETVAForSSNsOnPayProfitEndPoint : EndpointWithoutRequest<Rep
             };
         });
         Group<YearEndGroup>();
+        Options(x => x.CacheOutput(p => p.Expire(TimeSpan.FromMinutes(5))));
     }
 
     public override async Task HandleAsync(CancellationToken ct)
