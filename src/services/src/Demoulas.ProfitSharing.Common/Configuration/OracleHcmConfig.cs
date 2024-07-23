@@ -5,5 +5,5 @@ public sealed record OracleHcmConfig
     public string? Username { get; set; }
     public string? Password { get; set; }
     public string RestFrameworkVersion { get; set; } = "9";
-    public ushort Limit { get; set; } = 500;
+    public ushort Limit { get; set; } = byte.MaxValue;
 }

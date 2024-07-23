@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Concurrent;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Text.Json;
 using Demoulas.ProfitSharing.Common.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Contracts.Request;
 
@@ -17,14 +11,18 @@ public sealed class OracleDemographicsService
 {
     private readonly HttpClient _httpClient;
     private readonly OracleHcmConfig _oracleHcmConfig;
-    private readonly string _encodedAuth;
+    private readonly JsonSerializerOptions _jsonSerializerOptions;
 
     public OracleDemographicsService(HttpClient httpClient, OracleHcmConfig oracleHcmConfig)
     {
         _httpClient = httpClient;
         _oracleHcmConfig = oracleHcmConfig;
-        byte[] bytes = Encoding.UTF8.GetBytes($"{_oracleHcmConfig.Username}:{_oracleHcmConfig.Password}");
-        _encodedAuth = Convert.ToBase64String(bytes);
+        _jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+
+        _jsonSerializerOptions.Converters.Add(new SingleItemConverter<EmailItem>());
+        _jsonSerializerOptions.Converters.Add(new SingleItemConverter<AddressItem>());
+        _jsonSerializerOptions.Converters.Add(new SingleItemConverter<NameItem>());
+        _jsonSerializerOptions.Converters.Add(new SingleItemConverter<PhoneItem>());
     }
 
     public async IAsyncEnumerable<OracleEmployee?> GetAllEmployees([EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -46,19 +44,17 @@ public sealed class OracleDemographicsService
         await fetchTask; // Ensure fetch task completes
     }
 
-    public async Task<string> GetEmployeeAddress(long workersUniqID, CancellationToken cancellationToken = default)
-    {
-        string url = $"{_oracleHcmConfig.Url}/{workersUniqID}/child/addresses";
-        var addressUrl = await BuildUrl(url, cancellationToken: cancellationToken);
-        HttpResponseMessage response = await GetOracleHcmValue(addressUrl, cancellationToken);
-        return await response.Content.ReadAsStringAsync(cancellationToken);
-    }
-
     private async Task<string> BuildUrl(string url, int offset = 0, CancellationToken cancellationToken = default)
     {
         // Oracle will limit us to 500.
-        ushort limit = ushort.Min(500, _oracleHcmConfig.Limit);
-        Dictionary<string, string> initialQuery = new Dictionary<string, string> { { "limit", $"{limit}" }, { "offset", $"{offset}" }, { "totalResults", "false" } };
+        ushort limit = ushort.Min(1, _oracleHcmConfig.Limit);
+        Dictionary<string, string> initialQuery = new Dictionary<string, string>
+        {
+            { "limit", $"{limit}" },
+            { "offset", $"{offset}" },
+            { "totalResults", "false" },
+            { "fields", "PersonId,PersonNumber,DateOfBirth,LastUpdateDate,addresses,emails,names,phones" }
+        };
         UriBuilder initialUriBuilder = new UriBuilder(url);
         string initialQueryString = await new FormUrlEncodedContent(initialQuery).ReadAsStringAsync(cancellationToken);
         initialUriBuilder.Query = initialQueryString;
@@ -76,18 +72,15 @@ public sealed class OracleDemographicsService
             while (true)
             {
                 HttpResponseMessage response = await GetOracleHcmValue(url, cancellationToken);
-                OracleDemographics? demographics = await response.Content.ReadFromJsonAsync<OracleDemographics>(cancellationToken);
+                OracleDemographics? demographics = await response.Content.ReadFromJsonAsync<OracleDemographics>(_jsonSerializerOptions, cancellationToken);
 
-                if (demographics?.Items == null)
+                if (demographics?.Employees == null)
                 {
                     break;
                 }
 
-                foreach (OracleEmployee emp in demographics.Items)
+                foreach (OracleEmployee emp in demographics.Employees)
                 {
-                    var address = await GetEmployeeAddress(emp.PersonId, cancellationToken);
-                    Console.WriteLine(address);
-
                     queue.Enqueue(emp);
                 }
 
@@ -111,9 +104,6 @@ public sealed class OracleDemographicsService
     private async Task<HttpResponseMessage> GetOracleHcmValue(string url, CancellationToken cancellationToken)
     {
         HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("REST-Framework-Version", _oracleHcmConfig.RestFrameworkVersion);
-        request.Headers.Add("Authorization", $"Basic {_encodedAuth}");
-
         HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken);
         response.EnsureSuccessStatusCode();
         return response;

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Data.SqlTypes;
 using System.Diagnostics;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Text.Json;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.ProfitSharing.Common.Configuration;
@@ -16,6 +18,7 @@ using Demoulas.StoreInfo.Entities.Contexts;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Http.Resilience;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Cli;
 
@@ -39,7 +42,7 @@ public class Program
                     SSN = employee.PersonId,
                     DateOfBirth = employee.DateOfBirth,
 
-                    FirstName = "",
+                    FirstName = "employee.Name.FirstName",
                     LastName = "",
                     StoreNumber = 0,
                     DepartmentId = 0,
@@ -68,7 +71,22 @@ public class Program
 
         IHostApplicationBuilder builder = new HostApplicationBuilder();
 
-        builder.Services.AddHttpClient<OracleDemographicsService>().AddStandardResilienceHandler();
+        builder.Services.AddHttpClient<OracleDemographicsService>((services, client) =>
+        {
+            var config = services.GetRequiredService<OracleHcmConfig>();
+
+            byte[] bytes = Encoding.UTF8.GetBytes($"{config.Username}:{config.Password}");
+            var encodedAuth = Convert.ToBase64String(bytes);
+
+            client.BaseAddress = new Uri(config.Url, UriKind.Absolute);
+            client.DefaultRequestHeaders.Add("REST-Framework-Version", config.RestFrameworkVersion);
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", encodedAuth);
+        }).AddStandardResilienceHandler(options =>
+        {
+            options.CircuitBreaker = new HttpCircuitBreakerStrategyOptions { SamplingDuration = TimeSpan.FromMinutes(2) };
+            options.AttemptTimeout = new HttpTimeoutStrategyOptions { Timeout = TimeSpan.FromMinutes(1) };
+            options.TotalRequestTimeout = new HttpTimeoutStrategyOptions { Timeout = TimeSpan.FromMinutes(2) };
+        });
         builder.Configuration.AddUserSecrets<Program>();
 
         List<ContextFactoryRequest> list = new List<ContextFactoryRequest>

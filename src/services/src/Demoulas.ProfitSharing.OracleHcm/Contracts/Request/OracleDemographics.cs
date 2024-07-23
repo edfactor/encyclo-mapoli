@@ -3,7 +3,7 @@
 namespace Demoulas.ProfitSharing.OracleHcm.Contracts.Request;
 
 public record OracleDemographics(
-    [property: JsonPropertyName("items")] IReadOnlyList<OracleEmployee> Items,
+    [property: JsonPropertyName("items")] IReadOnlyList<OracleEmployee> Employees,
     [property: JsonPropertyName("count")] int Count,
     [property: JsonPropertyName("hasMore")] bool HasMore,
     [property: JsonPropertyName("limit")] int Limit,
