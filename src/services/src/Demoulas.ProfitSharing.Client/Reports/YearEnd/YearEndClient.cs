@@ -46,6 +46,20 @@ public sealed class YearEndClient : IYearEndService
         };
     }
 
+    public async Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfit(CancellationToken ct = default)
+    {
+        var response = await _httpClient.GetAsync($"{BaseApiPath}/demographic-badges-not-in-payprofit", ct);
+        _ = response.EnsureSuccessStatusCode();
+
+        var rslt = await response.Content.ReadFromJsonAsync<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>>(_options, ct);
+        return rslt ?? new ReportResponseBase<DemographicBadgesNotInPayProfitResponse>
+        {
+            ReportName = Constants.ErrorMessages.ReportNotFound,
+            ReportDate = SqlDateTime.MinValue.Value,
+            Results = new HashSet<DemographicBadgesNotInPayProfitResponse>(0)
+        };
+    }
+
     #region Negative ETVA For SSNs On PayProfit
 
     public Task<ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>> GetNegativeETVAForSSNsOnPayProfitResponse(CancellationToken cancellationToken = default)

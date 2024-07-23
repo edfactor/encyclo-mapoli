@@ -63,6 +63,34 @@ public class YearEndServiceTests:IClassFixture<ApiTestBase<Program>>
         });
     }
 
+    [Fact(DisplayName = "PS-151: Demographic badges without payprofit")]
+    public async Task GetDemogrpahicBadgesWithoutPayProfitTests()
+    {
+        await _dataContextFactory.UseWritableContext(async c =>
+        {
+            var response = await _yearEndClient.GetDemographicBadgesNotInPayProfit(CancellationToken.None);
+            response.Should().NotBeNull();
+            response.Results.Should().HaveCount(0);
+
+            _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+
+            byte mismatchedValues = 5;
+
+            await c.Demographics.Take(mismatchedValues).ForEachAsync(dem =>
+            {
+                dem.BadgeNumber = dem.BadgeNumber * 1024;
+            });
+
+            await c.SaveChangesAsync();
+
+            response = await _yearEndClient.GetDemographicBadgesNotInPayProfit(CancellationToken.None);
+            response.Should().NotBeNull();
+            response.Results.Should().HaveCount(mismatchedValues);
+
+            _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+        });
+    }
+
     [Fact(DisplayName = "PS-145 : Negative ETVA for SSNs on PayProfit (JSON)")]
     public async Task GetNegativeETVAReportJson()
     {
