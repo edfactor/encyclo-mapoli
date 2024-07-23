@@ -40,11 +40,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Backend", "Backend", "{66B0
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demoulas.ProfitSharing.OracleHcm", "src\Demoulas.ProfitSharing.OracleHcm\Demoulas.ProfitSharing.OracleHcm.csproj", "{93F3EDAE-4D3C-4358-97F6-869C4EDA549F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.OracleHcm", "src\Demoulas.ProfitSharing.OracleHcm\Demoulas.ProfitSharing.OracleHcm.csproj", "{93F3EDAE-4D3C-4358-97F6-869C4EDA549F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CLI", "CLI", "{DD132942-9EAB-4F5C-97B4-439082FB1231}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demoulas.ProfitSharing.OracleHcm.Cli", "src\Demoulas.ProfitSharing.OracleHcm.Cli\Demoulas.ProfitSharing.OracleHcm.Cli.csproj", "{44938E54-C197-4A07-A022-B032F44712A6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.OracleHcm.Cli", "src\Demoulas.ProfitSharing.OracleHcm.Cli\Demoulas.ProfitSharing.OracleHcm.Cli.csproj", "{44938E54-C197-4A07-A022-B032F44712A6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "OracleHcm Services", "OracleHcm Services", "{BFAE45AB-7719-445C-99A2-F9597D24E570}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -126,6 +128,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{D0216F81-E01D-4620-BE4F-D1FF0D28CA01} = {80B088DC-C84B-46AA-BFF3-DC309C5B4325}
 		{66B0DDDA-624B-4BF3-A4C7-CAEBC3E3DA62} = {D1297442-67BE-4098-A95F-727F04A68FA3}
+		{93F3EDAE-4D3C-4358-97F6-869C4EDA549F} = {BFAE45AB-7719-445C-99A2-F9597D24E570}
 		{44938E54-C197-4A07-A022-B032F44712A6} = {DD132942-9EAB-4F5C-97B4-439082FB1231}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

@@ -26,23 +26,39 @@ public sealed class OracleDemographicsService
         OracleHcmConfig oracleHcmConfig,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-
-        async Task<string> BuildUrl(ushort limit, int offset = 0)
-        {
-            // Oracle will limit us to 500.
-            var initialQuery = new Dictionary<string, string> { { "limit", $"{limit}" }, { "offset", $"{offset}" }, { "totalResults", "false" } };
-            var initialUriBuilder = new UriBuilder(oracleHcmConfig.Url);
-            string initialQueryString = await new FormUrlEncodedContent(initialQuery).ReadAsStringAsync(cancellationToken);
-            initialUriBuilder.Query = initialQueryString;
-            return initialUriBuilder.Uri.ToString();
-        }
-
-        ushort limit = ushort.Min(500, oracleHcmConfig.Limit);
-        string initialUrl = await BuildUrl(limit);
+        string initialUrl = await BuildUrl(oracleHcmConfig, cancellationToken: cancellationToken);
         var queue = new ConcurrentQueue<OracleEmployee>();
 
+        Task fetchTask = FetchOracleDemographic(oracleHcmConfig, initialUrl, queue, cancellationToken);
+
+        // Yield results from the queue
+        while (!fetchTask.IsCompleted || !queue.IsEmpty)
+        {
+            while (queue.TryDequeue(out var emp))
+            {
+                yield return emp;
+            }
+        }
+
+        await fetchTask; // Ensure fetch task completes
+    }
+
+    private async Task<string> BuildUrl(OracleHcmConfig oracleHcmConfig, int offset = 0, CancellationToken cancellationToken = default)
+    {
+        // Oracle will limit us to 500.
+        ushort limit = ushort.Min(500, oracleHcmConfig.Limit);
+        var initialQuery = new Dictionary<string, string> { { "limit", $"{limit}" }, { "offset", $"{offset}" }, { "totalResults", "false" } };
+        var initialUriBuilder = new UriBuilder(oracleHcmConfig.Url);
+        string initialQueryString = await new FormUrlEncodedContent(initialQuery).ReadAsStringAsync(cancellationToken);
+        initialUriBuilder.Query = initialQueryString;
+        return initialUriBuilder.Uri.ToString();
+    }
+
+    private Task FetchOracleDemographic(OracleHcmConfig oracleHcmConfig, string initialUrl, ConcurrentQueue<OracleEmployee> queue,
+        CancellationToken cancellationToken)
+    {
         // Task to fetch data and enqueue it
-        var fetchTask = Task.Run(async () =>
+        var fetchTask = Task.Run((Func<Task?>)(async () =>
         {
             var bytes = Encoding.UTF8.GetBytes($"{oracleHcmConfig.Username}:{oracleHcmConfig.Password}");
             string encodedAuth = Convert.ToBase64String(bytes);
@@ -74,7 +90,7 @@ public sealed class OracleDemographicsService
                 }
 
                 // Construct the next URL for pagination
-                var nextUrl = await BuildUrl(limit, demographics.Offset + 1);
+                var nextUrl = await BuildUrl(oracleHcmConfig, demographics.Offset + 1, cancellationToken);
                 if (string.IsNullOrEmpty(nextUrl))
                 {
                     break;
@@ -82,17 +98,7 @@ public sealed class OracleDemographicsService
 
                 url = nextUrl;
             }
-        }, cancellationToken);
-
-        // Yield results from the queue
-        while (!fetchTask.IsCompleted || !queue.IsEmpty)
-        {
-            while (queue.TryDequeue(out var emp))
-            {
-                yield return emp;
-            }
-        }
-
-        await fetchTask; // Ensure fetch task completes
+        }), cancellationToken);
+        return fetchTask;
     }
 }
