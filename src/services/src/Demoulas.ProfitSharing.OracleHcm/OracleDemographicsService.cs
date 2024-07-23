@@ -27,14 +27,14 @@ public sealed class OracleDemographicsService
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         string initialUrl = await BuildUrl(oracleHcmConfig, cancellationToken: cancellationToken);
-        var queue = new ConcurrentQueue<OracleEmployee>();
+        ConcurrentQueue<OracleEmployee> queue = new ConcurrentQueue<OracleEmployee>();
 
         Task fetchTask = FetchOracleDemographic(oracleHcmConfig, initialUrl, queue, cancellationToken);
 
         // Yield results from the queue
         while (!fetchTask.IsCompleted || !queue.IsEmpty)
         {
-            while (queue.TryDequeue(out var emp))
+            while (queue.TryDequeue(out OracleEmployee? emp))
             {
                 yield return emp;
             }
@@ -47,8 +47,8 @@ public sealed class OracleDemographicsService
     {
         // Oracle will limit us to 500.
         ushort limit = ushort.Min(500, oracleHcmConfig.Limit);
-        var initialQuery = new Dictionary<string, string> { { "limit", $"{limit}" }, { "offset", $"{offset}" }, { "totalResults", "false" } };
-        var initialUriBuilder = new UriBuilder(oracleHcmConfig.Url);
+        Dictionary<string, string> initialQuery = new Dictionary<string, string> { { "limit", $"{limit}" }, { "offset", $"{offset}" }, { "totalResults", "false" } };
+        UriBuilder initialUriBuilder = new UriBuilder(oracleHcmConfig.Url);
         string initialQueryString = await new FormUrlEncodedContent(initialQuery).ReadAsStringAsync(cancellationToken);
         initialUriBuilder.Query = initialQueryString;
         return initialUriBuilder.Uri.ToString();
@@ -58,28 +58,28 @@ public sealed class OracleDemographicsService
         CancellationToken cancellationToken)
     {
         // Task to fetch data and enqueue it
-        var fetchTask = Task.Run((Func<Task?>)(async () =>
+        return Task.Run(async () =>
         {
-            var bytes = Encoding.UTF8.GetBytes($"{oracleHcmConfig.Username}:{oracleHcmConfig.Password}");
+            byte[] bytes = Encoding.UTF8.GetBytes($"{oracleHcmConfig.Username}:{oracleHcmConfig.Password}");
             string encodedAuth = Convert.ToBase64String(bytes);
             string url = initialUrl;
 
             while (true)
             {
-                var request = new HttpRequestMessage(HttpMethod.Get, url);
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
                 request.Headers.Add("REST-Framework-Version", oracleHcmConfig.RestFrameworkVersion);
                 request.Headers.Add("Authorization", $"Basic {encodedAuth}");
 
-                var response = await _httpClient.SendAsync(request, cancellationToken);
+                HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken);
                 response.EnsureSuccessStatusCode();
-                var demographics = await response.Content.ReadFromJsonAsync<OracleDemographics>(cancellationToken);
+                OracleDemographics? demographics = await response.Content.ReadFromJsonAsync<OracleDemographics>(cancellationToken);
 
                 if (demographics?.Items == null)
                 {
                     break;
                 }
 
-                foreach (var emp in demographics.Items)
+                foreach (OracleEmployee emp in demographics.Items)
                 {
                     queue.Enqueue(emp);
                 }
@@ -90,7 +90,7 @@ public sealed class OracleDemographicsService
                 }
 
                 // Construct the next URL for pagination
-                var nextUrl = await BuildUrl(oracleHcmConfig, demographics.Offset + 1, cancellationToken);
+                string nextUrl = await BuildUrl(oracleHcmConfig, demographics.Offset + 1, cancellationToken);
                 if (string.IsNullOrEmpty(nextUrl))
                 {
                     break;
@@ -98,7 +98,6 @@ public sealed class OracleDemographicsService
 
                 url = nextUrl;
             }
-        }), cancellationToken);
-        return fetchTask;
+        }, cancellationToken);
     }
 }
