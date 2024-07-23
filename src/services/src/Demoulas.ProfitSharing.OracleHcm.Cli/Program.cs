@@ -1,5 +1,8 @@
 ﻿
+using System.Diagnostics;
+using System.Text.Json;
 using Demoulas.ProfitSharing.Common.Configuration;
+using Demoulas.ProfitSharing.OracleHcm.Contracts.Request;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -23,9 +26,17 @@ public class Program
 
         var service = provider.GetRequiredService<DemographicsService>();
 
-        var result = await service.GetAllEmployees(oktaSettings);
+        var employees = service.GetAllEmployees(oktaSettings);
 
-        Console.WriteLine(result);
+        await foreach (OracleEmployee? employee in employees)
+        {
+            //var json = JsonSerializer.Serialize(employee, new JsonSerializerOptions { WriteIndented = Debugger.IsAttached });
+            //Console.WriteLine(json);
+        }
+
+        
         Console.ReadLine();
     }
+
+   
 }

@@ -2,7 +2,7 @@
 
 namespace Demoulas.ProfitSharing.OracleHcm.Contracts.Request;
 
-public record Employee(
+public record OracleEmployee(
     [property: JsonPropertyName("PersonId")] long PersonId,
     [property: JsonPropertyName("PersonNumber")] int BadgeNumber,
     [property: JsonPropertyName("DateOfBirth")] DateOnly DateOfBirth,

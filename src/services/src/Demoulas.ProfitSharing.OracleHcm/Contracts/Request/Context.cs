@@ -1,4 +1,4 @@
-﻿// Demographics myDeserializedClass = JsonSerializer.Deserialize<Demographics>(myJsonResponse);
+﻿// OracleDemographics myDeserializedClass = JsonSerializer.Deserialize<OracleDemographics>(myJsonResponse);
 
 using System.Text.Json.Serialization;
 

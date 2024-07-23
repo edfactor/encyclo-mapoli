@@ -22,6 +22,28 @@ public class DemographicsService : IDemographicsService
         _mapper = mapper;
     }
 
+    public async Task AddDemographicsAsync(IAsyncEnumerable<DemographicsRequestDto> employees, byte batchSize = byte.MaxValue, CancellationToken cancellationToken = default)
+    {
+        var batch = new List<DemographicsRequestDto>();
+
+        await foreach (var employee in employees.WithCancellation(cancellationToken))
+        {
+
+            batch.Add(employee);
+
+            if (batch.Count >= batchSize)
+            {
+                _ = await AddDemographics(batch, cancellationToken);
+                batch.Clear();
+            }
+        }
+
+        if (batch.Count > 0)
+        {
+            _ = await AddDemographics(batch, cancellationToken);
+        }
+    }
+
     public async Task<ISet<DemographicsResponseDto>?> AddDemographics(IEnumerable<DemographicsRequestDto> demographics, CancellationToken cancellationToken)
     {
         /*

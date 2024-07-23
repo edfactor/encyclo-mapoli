@@ -1,43 +1,98 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Json;
+using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Demoulas.ProfitSharing.Common.Configuration;
+using Demoulas.ProfitSharing.OracleHcm.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.OracleHcm;
+
 public sealed class DemographicsService
 {
     private readonly HttpClient _httpClient;
 
     public DemographicsService(HttpClient httpClient)
     {
-        _httpClient = httpClient;        
+        _httpClient = httpClient;
     }
 
-    public async Task<string> GetAllEmployees(OracleHcmConfig oracleHcmConfig, CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<OracleEmployee?> GetAllEmployees(
+        OracleHcmConfig oracleHcmConfig,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
 
-        var bytes = Encoding.UTF8.GetBytes($"{oracleHcmConfig.Username}:{oracleHcmConfig.Password}");
-        string base64String = Convert.ToBase64String(bytes);
-
-        var query = new Dictionary<string, string>
+        async Task<string> BuildUrl(ushort limit, int offset = 0)
         {
-            { "limit", "500" },
-            { "offset", "0" },
-            { "totalResults", "false" },
-        };
+            // Oracle will limit us to 500.
+            var initialQuery = new Dictionary<string, string> { { "limit", $"{limit}" }, { "offset", $"{offset}" }, { "totalResults", "false" } };
+            var initialUriBuilder = new UriBuilder(oracleHcmConfig.Url);
+            string initialQueryString = await new FormUrlEncodedContent(initialQuery).ReadAsStringAsync(cancellationToken);
+            initialUriBuilder.Query = initialQueryString;
+            return initialUriBuilder.Uri.ToString();
+        }
 
-        var uriBuilder = new UriBuilder(oracleHcmConfig.Url);
-        string queryString = await new FormUrlEncodedContent(query).ReadAsStringAsync(cancellationToken);
-        uriBuilder.Query = queryString;
+        ushort limit = ushort.Min(500, oracleHcmConfig.Limit);
+        string initialUrl = await BuildUrl(limit);
+        var queue = new ConcurrentQueue<OracleEmployee>();
 
+        // Task to fetch data and enqueue it
+        var fetchTask = Task.Run(async () =>
+        {
+            var bytes = Encoding.UTF8.GetBytes($"{oracleHcmConfig.Username}:{oracleHcmConfig.Password}");
+            string encodedAuth = Convert.ToBase64String(bytes);
+            string url = initialUrl;
 
-        var request = new HttpRequestMessage(HttpMethod.Get, uriBuilder.Uri);
-        request.Headers.Add("REST-Framework-Version", oracleHcmConfig.RestFrameworkVersion);
-        request.Headers.Add("Authorization", $"Basic {base64String}");
-        var response = await _httpClient.SendAsync(request, cancellationToken);
-        response.EnsureSuccessStatusCode();
-        return await response.Content.ReadAsStringAsync(cancellationToken);
+            while (true)
+            {
+                var request = new HttpRequestMessage(HttpMethod.Get, url);
+                request.Headers.Add("REST-Framework-Version", oracleHcmConfig.RestFrameworkVersion);
+                request.Headers.Add("Authorization", $"Basic {encodedAuth}");
+
+                var response = await _httpClient.SendAsync(request, cancellationToken);
+                response.EnsureSuccessStatusCode();
+                var demographics = await response.Content.ReadFromJsonAsync<OracleDemographics>(cancellationToken);
+
+                if (demographics?.Items == null)
+                {
+                    break;
+                }
+
+                foreach (var emp in demographics.Items)
+                {
+                    queue.Enqueue(emp);
+                }
+
+                if (!demographics.HasMore)
+                {
+                    break;
+                }
+
+                // Construct the next URL for pagination
+                var nextUrl = await BuildUrl(limit, demographics.Offset + 1);
+                if (string.IsNullOrEmpty(nextUrl))
+                {
+                    break;
+                }
+
+                url = nextUrl;
+            }
+        }, cancellationToken);
+
+        // Yield results from the queue
+        while (!fetchTask.IsCompleted || !queue.IsEmpty)
+        {
+            while (queue.TryDequeue(out var emp))
+            {
+                yield return emp;
+            }
+        }
+
+        await fetchTask; // Ensure fetch task completes
     }
 }
