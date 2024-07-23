@@ -1,45 +1,51 @@
 ﻿using Demoulas.Common.Caching.Interfaces;
+using Demoulas.ProfitSharing.Common.Configuration;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Services.HostedServices;
 using Demoulas.ProfitSharing.Services.InternalEntities;
 using Demoulas.ProfitSharing.Services.Mappers;
 using Demoulas.ProfitSharing.Services.Reports;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Demoulas.ProfitSharing.Services.Extensions;
 
 /// <summary>
-/// Provides helper methods for configuring project services.
+/// Provides helper methods for configuring project builder.Services.
 /// </summary>
 public static class ServicesExtension
 {
-    public static IServiceCollection AddProjectServices(this IServiceCollection services)
+    public static IHostApplicationBuilder AddProjectServices(this IHostApplicationBuilder builder)
     {
-        _ = services.AddSingleton<IBaseCacheService<PayClassificationResponseCache>, PayClassificationHostedService>();
+        _ = builder.Services.AddSingleton<IBaseCacheService<PayClassificationResponseCache>, PayClassificationHostedService>();
 
-        _ = services.AddScoped<IPayClassificationService, PayClassificationService>();
-        _ = services.AddScoped<IDemographicsService, DemographicsService>();
-        _ = services.AddScoped<IYearEndService, YearEndService>();
-        _ = services.AddScoped<IPayProfitService, PayProfitService>();
+        _ = builder.Services.AddScoped<IPayClassificationService, PayClassificationService>();
+        _ = builder.Services.AddScoped<IDemographicsService, DemographicsService>();
+        _ = builder.Services.AddScoped<IYearEndService, YearEndService>();
+        _ = builder.Services.AddScoped<IPayProfitService, PayProfitService>();
 
+
+        OracleHcmConfig oktaSettings = builder.Configuration.GetSection("OracleHcm").Get<OracleHcmConfig>() ?? new OracleHcmConfig { Url = string.Empty };
+        _ = builder.Services.AddSingleton(oktaSettings);
 
         #region Mappers
 
-        services.AddSingleton<AddressMapper>();
-        services.AddSingleton<ContactInfoMapper>();
-        services.AddSingleton<DemographicMapper>();
-        services.AddSingleton<TerminationCodeMapper>();
-        services.AddSingleton<PayFrequencyMapper>();
-        services.AddSingleton<GenderMapper>();
-        services.AddSingleton<EmploymentTypeMapper>();
-        services.AddSingleton<DepartmentMapper>();
-        services.AddSingleton<PayProfitMapper>();
-        services.AddSingleton<ZeroContributionReasonMapper>();
-        services.AddSingleton<BeneficiaryTypeMapper>();
-        services.AddSingleton<EmployeeTypeMapper>();
+        builder.Services.AddSingleton<AddressMapper>();
+        builder.Services.AddSingleton<ContactInfoMapper>();
+        builder.Services.AddSingleton<DemographicMapper>();
+        builder.Services.AddSingleton<TerminationCodeMapper>();
+        builder.Services.AddSingleton<PayFrequencyMapper>();
+        builder.Services.AddSingleton<GenderMapper>();
+        builder.Services.AddSingleton<EmploymentTypeMapper>();
+        builder.Services.AddSingleton<DepartmentMapper>();
+        builder.Services.AddSingleton<PayProfitMapper>();
+        builder.Services.AddSingleton<ZeroContributionReasonMapper>();
+        builder.Services.AddSingleton<BeneficiaryTypeMapper>();
+        builder.Services.AddSingleton<EmployeeTypeMapper>();
 
         #endregion
 
-        return services;
+        return builder;
     }
 }

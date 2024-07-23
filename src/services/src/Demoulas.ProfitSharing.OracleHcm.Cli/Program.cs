@@ -71,10 +71,6 @@ public class Program
         builder.Services.AddHttpClient<OracleDemographicsService>().AddStandardResilienceHandler();
         builder.Configuration.AddUserSecrets<Program>();
 
-        // Load Okta settings
-        OracleHcmConfig oktaSettings = builder.Configuration.GetSection("OracleHcm").Get<OracleHcmConfig>() ?? new OracleHcmConfig {Url = string.Empty};
-
-
         List<ContextFactoryRequest> list = new List<ContextFactoryRequest>
         {
             ContextFactoryRequest.Initialize<ProfitSharingDbContext>("ProfitSharing"),
@@ -82,13 +78,13 @@ public class Program
             ContextFactoryRequest.Initialize<StoreInfoDbContext>("StoreInfo")
         };
         builder.AddDatabaseServices(list, true, true);
-        Services.Extensions.ServicesExtension.AddProjectServices(builder.Services);
+        Services.Extensions.ServicesExtension.AddProjectServices(builder);
         builder.Services.AddSingleton<DemographicsService>();
         var provider = builder.Services.BuildServiceProvider();
 
         var service = provider.GetRequiredService<OracleDemographicsService>();
 
-        var employees = service.GetAllEmployees(oktaSettings);
+        var employees = service.GetAllEmployees();
 
         var dto = ConvertToDto(employees);
 

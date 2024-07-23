@@ -30,7 +30,7 @@ internal static class EndpointExtension
 
         _ = builder.AddServiceDefaults();
 
-        _ = builder.Services.AddProjectServices();
+        _ = builder.AddProjectServices();
 
         // Add services to the container.
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

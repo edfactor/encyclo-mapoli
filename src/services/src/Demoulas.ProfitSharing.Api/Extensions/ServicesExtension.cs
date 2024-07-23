@@ -1,12 +1,4 @@
-﻿using Demoulas.Common.Caching.Interfaces;
-using Demoulas.ProfitSharing.Api.Utilities;
-using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Services;
-using Demoulas.ProfitSharing.Services.HostedServices;
-using Demoulas.ProfitSharing.Services.InternalEntities;
-using Demoulas.ProfitSharing.Services.Mappers;
-using Demoulas.ProfitSharing.Services.Reports;
+﻿using Demoulas.ProfitSharing.Api.Utilities;
 
 namespace Demoulas.ProfitSharing.Api.Extensions;
 
@@ -15,12 +7,12 @@ namespace Demoulas.ProfitSharing.Api.Extensions;
 /// </summary>
 public static class ServicesExtension
 {
-    public static IServiceCollection AddProjectServices(this IServiceCollection services)
+    public static IHostApplicationBuilder AddProjectServices(this IHostApplicationBuilder builder)
     {
-        _ = services.AddSingleton<AppVersionInfo>();
+        _ = builder.Services.AddSingleton<AppVersionInfo>();
 
-        _ = Services.Extensions.ServicesExtension.AddProjectServices(services);
+        _ = Services.Extensions.ServicesExtension.AddProjectServices(builder);
 
-        return services;
+        return builder;
     }
 }
