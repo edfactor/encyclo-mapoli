@@ -8,6 +8,7 @@ using System.Text.Json;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.ProfitSharing.Common.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -39,31 +40,35 @@ public class Program
                 {
                     OracleHcmId = employee.PersonId,
                     BadgeNumber = employee.BadgeNumber,
-                    SSN = employee.PersonId,
+                    SSN = 0,
                     DateOfBirth = employee.DateOfBirth,
 
-                    FirstName = "employee.Name.FirstName",
-                    LastName = "",
+                    FirstName = employee.Name.FirstName,
+                    LastName = employee.Name.LastName,
+                    FullName = employee.Name.DisplayName,
                     StoreNumber = 0,
                     DepartmentId = 0,
                     PayClassificationId = 0,
-                    HireDate = DateOnly.FromDateTime(employee.CreationDate.DateTime),
+                    HireDate = employee.Name.EffectiveStartDate.ToDateOnly(),
                     EmploymentTypeCode = EmploymentType.Constants.PartTime,
                     PayFrequencyId = PayFrequency.Constants.Weekly,
                     EmploymentStatusId = EmploymentStatus.Constants.Active,
                     GenderCode = Gender.Constants.Other,
 
-                    ContactInfo = new ContactInfoRequestDto()
+                    ContactInfo = new ContactInfoRequestDto
                     {
-                        EmailAddress = ""
+                        PhoneNumber = employee.Phone?.PhoneNumber
                     },
                     Address = new AddressRequestDto
                     {
-                        Street = "",
-                        City = "",
-                        State = "",
-                        PostalCode = "",
-                        CountryISO = ""
+                        Street = employee.Address.AddressLine1,
+                        Street2 = employee.Address.AddressLine2,
+                        Street3 = employee.Address.AddressLine3,
+                        Street4 = employee.Address.AddressLine4,
+                        City = employee.Address.TownOrCity,
+                        State = employee.Address.State,
+                        PostalCode = employee.Address.PostalCode,
+                        CountryISO = employee.Address.Country
                     }
                 };
             }
@@ -107,7 +112,9 @@ public class Program
         var dto = ConvertToDto(employees);
 
         var demographicsService = provider.GetRequiredService<DemographicsService>();
-        await demographicsService.AddDemographicsStream(dto, byte.MaxValue, CancellationToken.None);
+        await demographicsService.AddDemographicsStream(dto, 5, CancellationToken.None);
+
+        await Task.CompletedTask;
 
         Console.ReadLine();
     }

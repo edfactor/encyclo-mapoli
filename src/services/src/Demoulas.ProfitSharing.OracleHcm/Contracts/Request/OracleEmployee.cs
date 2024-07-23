@@ -12,8 +12,8 @@ public record OracleEmployee(
     [property: JsonPropertyName("LastUpdatedBy")] string LastUpdatedBy,
     [property: JsonPropertyName("LastUpdateDate")] DateTimeOffset? LastUpdateDate,
     [property: JsonPropertyName("addresses")] AddressItem Address,
-    [property: JsonPropertyName("emails")] EmailItem Email,
+    [property: JsonPropertyName("emails")] EmailItem? Email,
     [property: JsonPropertyName("names")] NameItem Name,
-    [property: JsonPropertyName("phones")] PhoneItem Phone,
+    [property: JsonPropertyName("phones")] PhoneItem? Phone,
     [property: JsonPropertyName("@context")] Context Context
 );

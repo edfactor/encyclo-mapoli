@@ -111,22 +111,26 @@ public sealed class DataContextFactory : IProfitSharingDataContextFactory
         {
             await using AsyncServiceScope scope = _serviceProvider.CreateAsyncScope();
             ProfitSharingDbContext context = scope.ServiceProvider.GetRequiredService<ProfitSharingDbContext>();
-            await using IDbContextTransaction transaction = await context.Database.BeginTransactionAsync(cancellationToken);
-            try
+            var executionStrategy = context.Database.CreateExecutionStrategy();
+            return await executionStrategy.ExecuteAsync(async () =>
             {
-                T result = await func(context);
+                await using IDbContextTransaction transaction = await context.Database.BeginTransactionAsync(cancellationToken);
+                try
+                {
+                    T result = await func(context);
 
-                // Commit the transaction when all operations are done
-                await transaction.CommitAsync(cancellationToken);
-                return result;
-            }
-            catch (Exception ex)
-            {
-                // Roll back the transaction if any operation fails
-                await transaction.RollbackAsync(cancellationToken);
-                _logger.LogError(ex, "Failed to execute operation, rolling back");
-                throw;
-            }
+                    // Commit the transaction when all operations are done
+                    await transaction.CommitAsync(cancellationToken);
+                    return result;
+                }
+                catch (Exception ex)
+                {
+                    // Roll back the transaction if any operation fails
+                    await transaction.RollbackAsync(cancellationToken);
+                    _logger.LogError(ex, "Failed to execute operation, rolling back");
+                    throw;
+                }
+            });
         }
     }
 

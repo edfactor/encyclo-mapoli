@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Demoulas.ProfitSharing.Common.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Contracts.Request;
+using Demoulas.ProfitSharing.OracleHcm.Converter;
 
 namespace Demoulas.ProfitSharing.OracleHcm;
 
@@ -47,7 +48,7 @@ public sealed class OracleDemographicsService
     private async Task<string> BuildUrl(string url, int offset = 0, CancellationToken cancellationToken = default)
     {
         // Oracle will limit us to 500.
-        ushort limit = ushort.Min(1, _oracleHcmConfig.Limit);
+        ushort limit = ushort.Min(10, _oracleHcmConfig.Limit);
         Dictionary<string, string> initialQuery = new Dictionary<string, string>
         {
             { "limit", $"{limit}" },

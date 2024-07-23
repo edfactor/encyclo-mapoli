@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+
+namespace Demoulas.ProfitSharing.OracleHcm.Converter;
 
 public sealed class SingleItemConverter<T> : JsonConverter<T>
 {
@@ -19,7 +19,7 @@ public sealed class SingleItemConverter<T> : JsonConverter<T>
             {
                 foreach (var item in itemsElement.EnumerateArray())
                 {
-                    return JsonSerializer.Deserialize<T>(item.GetRawText(), options);
+                    return JsonSerializer.Deserialize<T>(item.GetRawText());
                 }
             }
         }
