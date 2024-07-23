@@ -13,11 +13,11 @@ using Demoulas.ProfitSharing.OracleHcm.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.OracleHcm;
 
-public sealed class DemographicsService
+public sealed class OracleDemographicsService
 {
     private readonly HttpClient _httpClient;
 
-    public DemographicsService(HttpClient httpClient)
+    public OracleDemographicsService(HttpClient httpClient)
     {
         _httpClient = httpClient;
     }

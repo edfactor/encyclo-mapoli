@@ -29,7 +29,7 @@ public sealed class Demographic : Member
     public DateOnly FullTimeDate { get; set; }
 
     public required DateOnly HireDate { get; set; }
-    public required DateOnly ReHireDate { get; set; }
+    public DateOnly? ReHireDate { get; set; }
 
     public DateOnly? TerminationDate { get; set; }
 

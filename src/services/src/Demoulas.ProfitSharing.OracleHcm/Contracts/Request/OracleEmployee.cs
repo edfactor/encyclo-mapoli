@@ -8,7 +8,7 @@ public record OracleEmployee(
     [property: JsonPropertyName("DateOfBirth")] DateOnly DateOfBirth,
     [property: JsonPropertyName("DateOfDeath")] DateOnly? DateOfDeath,
     [property: JsonPropertyName("CreatedBy")] string CreatedBy,
-    [property: JsonPropertyName("CreationDate")] DateTimeOffset? CreationDate,
+    [property: JsonPropertyName("CreationDate")] DateTimeOffset CreationDate,
     [property: JsonPropertyName("LastUpdatedBy")] string LastUpdatedBy,
     [property: JsonPropertyName("LastUpdateDate")] DateTimeOffset? LastUpdateDate,
     [property: JsonPropertyName("@context")] Context Context

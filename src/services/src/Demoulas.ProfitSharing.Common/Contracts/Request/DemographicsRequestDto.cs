@@ -26,7 +26,7 @@ public record DemographicsRequestDto : MemberRequestDto
     public DateOnly FullTimeDate { get; set; }
 
     public required DateOnly HireDate { get; set; }
-    public required DateOnly ReHireDate { get; set; }
+    public DateOnly? ReHireDate { get; set; }
     public char? TerminationCodeId { get; set; }
     public DateOnly? TerminationDate { get; set; }
     public required char EmploymentTypeCode { get; set; }

@@ -18,30 +18,8 @@ public static class ServicesExtension
     public static IServiceCollection AddProjectServices(this IServiceCollection services)
     {
         _ = services.AddSingleton<AppVersionInfo>();
-        _ = services.AddSingleton<IBaseCacheService<PayClassificationResponseCache>, PayClassificationHostedService>();
 
-        _ = services.AddScoped<IPayClassificationService, PayClassificationService>();
-        _ = services.AddScoped<IDemographicsService, DemographicsService>();
-        _ = services.AddScoped<IYearEndService, YearEndService>();
-        _ = services.AddScoped<IPayProfitService, PayProfitService>();
-
-
-        #region Mappers
-
-        services.AddSingleton<AddressMapper>();
-        services.AddSingleton<ContactInfoMapper>();
-        services.AddSingleton<DemographicMapper>();
-        services.AddSingleton<TerminationCodeMapper>();
-        services.AddSingleton<PayFrequencyMapper>();
-        services.AddSingleton<GenderMapper>();
-        services.AddSingleton<EmploymentTypeMapper>();
-        services.AddSingleton<DepartmentMapper>();
-        services.AddSingleton<PayProfitMapper>();
-        services.AddSingleton<ZeroContributionReasonMapper>();
-        services.AddSingleton<BeneficiaryTypeMapper>();
-        services.AddSingleton<EmployeeTypeMapper>();
-
-        #endregion
+        _ = Services.Extensions.ServicesExtension.AddProjectServices(services);
 
         return services;
     }

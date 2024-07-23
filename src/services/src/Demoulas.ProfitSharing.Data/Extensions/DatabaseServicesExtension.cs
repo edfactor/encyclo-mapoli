@@ -19,7 +19,7 @@ public static class DatabaseServicesExtension
         }
 
         IProfitSharingDataContextFactory factory = DataContextFactory.Initialize(builder, contextFactoryRequests: contextFactoryRequests);
-        builder.Services.AddSingleton(factory);
+        _ = builder.Services.AddSingleton(factory);
 
         if (runMigration && Debugger.IsAttached)
         {

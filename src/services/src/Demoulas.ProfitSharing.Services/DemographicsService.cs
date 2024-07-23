@@ -1,7 +1,4 @@
 ﻿using System.Collections.Frozen;
-using Demoulas.Common.Contracts.Request;
-using Demoulas.Common.Contracts.Response;
-using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -22,7 +19,7 @@ public class DemographicsService : IDemographicsService
         _mapper = mapper;
     }
 
-    public async Task AddDemographicsAsync(IAsyncEnumerable<DemographicsRequestDto> employees, byte batchSize = byte.MaxValue, CancellationToken cancellationToken = default)
+    public async Task AddDemographicsStream(IAsyncEnumerable<DemographicsRequestDto> employees, byte batchSize = byte.MaxValue, CancellationToken cancellationToken = default)
     {
         var batch = new List<DemographicsRequestDto>();
 
