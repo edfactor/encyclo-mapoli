@@ -244,4 +244,34 @@ public class YearEndService : IYearEndService
             };
         }
     }
+
+    public async Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfit(CancellationToken cancellationToken = default)
+    {
+        using (_logger.BeginScope("Request BEGIN DEMOGRAPHIC BADGES NOT IN PAY PROFIT"))
+        {
+            List<DemographicBadgesNotInPayProfitResponse> results = await _dataContextFactory.UseReadOnlyContext(ctx =>
+            {
+                var query = from dem in ctx.Demographics
+                            where !(from pp in ctx.PayProfits select pp.EmployeeBadge).Contains(dem.BadgeNumber)
+                            select new DemographicBadgesNotInPayProfitResponse
+                            {
+                                EmployeeBadge = dem.BadgeNumber,
+                                EmployeeSSN = dem.SSN,
+                                EmployeeName = dem.FullName ?? "",
+                                Status = dem.EmploymentStatusId,
+                                Store = dem.StoreNumber,
+                            };
+                return query.ToListAsync(cancellationToken: cancellationToken);
+            });
+
+            _logger.LogInformation("Returned {results} records", results.Count);
+
+            return new ReportResponseBase<DemographicBadgesNotInPayProfitResponse>
+            {
+                ReportDate = DateTimeOffset.Now,
+                ReportName = "DEMOGRAPHICS BADGES NOT ON PAYPROFIT",
+                Results = results.ToFrozenSet()
+            };
+        }
+    }
 }
