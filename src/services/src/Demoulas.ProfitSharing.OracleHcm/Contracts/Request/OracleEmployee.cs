@@ -11,18 +11,25 @@ public record OracleEmployee(
     [property: JsonPropertyName("CreationDate")] DateTimeOffset CreationDate,
     [property: JsonPropertyName("LastUpdatedBy")] string LastUpdatedBy,
     [property: JsonPropertyName("LastUpdateDate")] DateTimeOffset? LastUpdateDate,
-    [property: JsonPropertyName("addresses")] List<AddressItem> Addresses,
-    [property: JsonPropertyName("emails")] List<EmailItem> Emails,
-    [property: JsonPropertyName("names")] List<NameItem> Names,
-    [property: JsonPropertyName("phones")] List<PhoneItem> Phones,
+    [property: JsonPropertyName("addresses")] Addresses Addresses,
+    [property: JsonPropertyName("emails")] Emails Emails,
+    [property: JsonPropertyName("names")] Names Names,
+    [property: JsonPropertyName("phones")] Phones? Phones,
     [property: JsonPropertyName("@context")]
     Context Context
 )
 {
-    public AddressItem? Address => Addresses.FirstOrDefault(a => a.PrimaryFlag ?? false);
-    public EmailItem? Email => Emails.FirstOrDefault(a => a.PrimaryFlag ?? false);
-    public NameItem Name => Names.First();
-    public PhoneItem? Phone => Phones.FirstOrDefault(a => a.PrimaryFlag ?? false);
+    [JsonIgnore]
+    public AddressItem? Address => Addresses.Items.FirstOrDefault(a => a.PrimaryFlag ?? false);
+
+    [JsonIgnore]
+    public EmailItem? Email => Emails.Items.FirstOrDefault(a => a.PrimaryFlag ?? false);
+
+    [JsonIgnore]
+    public NameItem Name => Names.Items.First();
+    
+    [JsonIgnore] 
+    public PhoneItem? Phone => Phones?.Items.FirstOrDefault(a => a.PrimaryFlag ?? false);
 
 }
 
