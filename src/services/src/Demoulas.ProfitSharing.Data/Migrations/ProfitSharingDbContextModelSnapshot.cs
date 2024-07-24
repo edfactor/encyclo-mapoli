@@ -1692,11 +1692,34 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)");
+                        .HasMaxLength(20)
+                        .HasColumnType("NVARCHAR2(20)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("EmploymentStatus");
+                    b.ToTable("EmploymentStatus", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "a",
+                            Name = "Active"
+                        },
+                        new
+                        {
+                            Id = "d",
+                            Name = "Delete"
+                        },
+                        new
+                        {
+                            Id = "i",
+                            Name = "Inactive"
+                        },
+                        new
+                        {
+                            Id = "t",
+                            Name = "Terminated"
+                        });
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.EmploymentType", b =>

@@ -24,6 +24,7 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new EmployeeTypeMap());
         modelBuilder.ApplyConfiguration(new ZeroContributionReasonMap());
         modelBuilder.ApplyConfiguration(new BeneficiaryMap());
+        modelBuilder.ApplyConfiguration(new EmploymentStatusMap());
 
         return modelBuilder;
     }

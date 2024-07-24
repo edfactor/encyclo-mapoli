@@ -34,9 +34,9 @@ List<ContextFactoryRequest> list = new List<ContextFactoryRequest>
 };
 
 #if RUSS
-builder.AddDatabaseServices(list, true, true);
+await builder.AddDatabaseServices(list, true, true);
 #else
-builder.AddDatabaseServices(list);
+await builder.AddDatabaseServices(list);
 #endif
 
 builder.AddCachingServices();

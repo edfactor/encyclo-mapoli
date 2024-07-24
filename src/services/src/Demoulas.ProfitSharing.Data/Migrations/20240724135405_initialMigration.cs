@@ -68,7 +68,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
-                    Name = table.Column<string>(type: "NVARCHAR2(2000)", nullable: false)
+                    Name = table.Column<string>(type: "NVARCHAR2(20)", maxLength: 20, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -644,6 +644,17 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 {
                     { (byte)0, "NOT New in plan last year" },
                     { (byte)1, "New last year" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "EmploymentStatus",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { "a", "Active" },
+                    { "d", "Delete" },
+                    { "i", "Inactive" },
+                    { "t", "Terminated" }
                 });
 
             migrationBuilder.InsertData(

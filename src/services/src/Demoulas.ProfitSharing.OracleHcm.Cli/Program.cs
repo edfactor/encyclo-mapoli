@@ -47,13 +47,14 @@ public class Program
                     LastName = employee.Name.LastName,
                     FullName = employee.Name.DisplayName,
                     StoreNumber = 0,
-                    DepartmentId = 0,
-                    PayClassificationId = 0,
+                    DepartmentId = Department.Constants.Beer_And_Wine,
+                    PayClassificationId = PayClassification.Constants.ApprMeatCutters,
                     HireDate = employee.Name.EffectiveStartDate.ToDateOnly(),
                     EmploymentTypeCode = EmploymentType.Constants.PartTime,
                     PayFrequencyId = PayFrequency.Constants.Weekly,
                     EmploymentStatusId = EmploymentStatus.Constants.Active,
                     GenderCode = Gender.Constants.Other,
+
 
                     ContactInfo = new ContactInfoRequestDto
                     {
@@ -100,7 +101,7 @@ public class Program
             ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"),
             ContextFactoryRequest.Initialize<StoreInfoDbContext>("StoreInfo")
         };
-        builder.AddDatabaseServices(list, true, true);
+        await builder.AddDatabaseServices(list, true, true);
         Services.Extensions.ServicesExtension.AddProjectServices(builder);
         builder.Services.AddSingleton<DemographicsService>();
         var provider = builder.Services.BuildServiceProvider();
