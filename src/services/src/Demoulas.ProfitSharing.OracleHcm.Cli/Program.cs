@@ -78,23 +78,6 @@ public class Program
         }
 
         IHostApplicationBuilder builder = new HostApplicationBuilder();
-
-        builder.Services.AddHttpClient<OracleDemographicsService>((services, client) =>
-        {
-            var config = services.GetRequiredService<OracleHcmConfig>();
-
-            byte[] bytes = Encoding.UTF8.GetBytes($"{config.Username}:{config.Password}");
-            var encodedAuth = Convert.ToBase64String(bytes);
-
-            client.BaseAddress = new Uri(config.Url, UriKind.Absolute);
-            client.DefaultRequestHeaders.Add("REST-Framework-Version", config.RestFrameworkVersion);
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", encodedAuth);
-        }).AddStandardResilienceHandler(options =>
-        {
-            options.CircuitBreaker = new HttpCircuitBreakerStrategyOptions { SamplingDuration = TimeSpan.FromMinutes(2) };
-            options.AttemptTimeout = new HttpTimeoutStrategyOptions { Timeout = TimeSpan.FromMinutes(1) };
-            options.TotalRequestTimeout = new HttpTimeoutStrategyOptions { Timeout = TimeSpan.FromMinutes(2) };
-        });
         builder.Configuration.AddUserSecrets<Program>();
 
         List<ContextFactoryRequest> list = new List<ContextFactoryRequest>
@@ -105,16 +88,13 @@ public class Program
         };
         await builder.AddDatabaseServices(list, true, true);
         Services.Extensions.ServicesExtension.AddProjectServices(builder);
-        builder.Services.AddSingleton<DemographicsService>();
         var provider = builder.Services.BuildServiceProvider();
 
         var service = provider.GetRequiredService<OracleDemographicsService>();
+        var demographicsService = provider.GetRequiredService<IDemographicsServiceInternal>();
 
         var employees = service.GetAllEmployees();
-
         var dto = ConvertToDto(employees);
-
-        var demographicsService = provider.GetRequiredService<DemographicsService>();
         await demographicsService.AddDemographicsStream(dto, byte.MaxValue, CancellationToken.None);
 
         await Task.CompletedTask;

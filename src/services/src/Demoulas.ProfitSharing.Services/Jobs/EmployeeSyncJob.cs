@@ -1,6 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Extensions;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.OracleHcm;
 using Demoulas.ProfitSharing.OracleHcm.Contracts.Request;
@@ -10,11 +11,11 @@ namespace Demoulas.ProfitSharing.Services.Jobs;
 internal sealed class EmployeeSyncJob : IJob
 {
     private readonly OracleDemographicsService _oracleDemographicsService;
-    private readonly DemographicsService _demographicsService;
+    private readonly IDemographicsServiceInternal _demographicsService;
     private readonly OracleHcmConfig _oracleHcmConfig;
 
-    public EmployeeSyncJob(OracleDemographicsService oracleDemographicsService, 
-        DemographicsService demographicsService,
+    public EmployeeSyncJob(OracleDemographicsService oracleDemographicsService,
+        IDemographicsServiceInternal demographicsService,
         OracleHcmConfig oracleHcmConfig)
     {
         _oracleDemographicsService = oracleDemographicsService;

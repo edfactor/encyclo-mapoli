@@ -29,6 +29,7 @@ public static class ServicesExtension
     {
         _ = builder.Services.AddScoped<IPayClassificationService, PayClassificationService>();
         _ = builder.Services.AddScoped<IDemographicsService, DemographicsService>();
+        _ = builder.Services.AddScoped<IDemographicsServiceInternal, DemographicsService>(); // Need a non-interface registration to call "internal" methods that should not be exposed.
         _ = builder.Services.AddScoped<IYearEndService, YearEndService>();
         _ = builder.Services.AddScoped<IPayProfitService, PayProfitService>();
 

@@ -8,7 +8,7 @@ using Demoulas.ProfitSharing.Services.Mappers;
 
 namespace Demoulas.ProfitSharing.Services;
 
-public class DemographicsService : IDemographicsService
+public class DemographicsService : IDemographicsServiceInternal
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly DemographicMapper _mapper;
