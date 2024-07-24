@@ -24,6 +24,8 @@ public class YearEndServiceTests:IClassFixture<ApiTestBase<Program>>
         _yearEndClient = new YearEndClient(fixture.ApiClient, fixture.DownloadClient);
     }
 
+    
+
     [Fact(DisplayName ="PS-147: Check Duplicate SSNs (JSON)")]
     public async Task GetDuplicateSSNsTestJson()
     {

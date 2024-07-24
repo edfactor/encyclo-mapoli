@@ -48,7 +48,7 @@ public class ApiTestBase<TStartup> where TStartup : class
 
                 hostBuilder.ConfigureServices(services =>
                 {
-                    services.AddSingleton(MockDbContextFactory);
+                    services.AddTransient((c)=> MockDbContextFactory);
 
                     ServiceProvider = services.BuildServiceProvider();
                 });
