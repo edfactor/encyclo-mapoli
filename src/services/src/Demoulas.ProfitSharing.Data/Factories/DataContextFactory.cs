@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
+using Aspire.Oracle.EntityFrameworkCore;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -53,10 +54,9 @@ public sealed class DataContextFactory : IProfitSharingDataContextFactory
             .GetMethods()
             .First(m => m.Name == nameof(AspireOracleEFCoreExtensions.AddOracleDatabaseDbContext));
 
-        //TODO: Figure this call out
-        //var enrichOracleDatabaseDbContext = typeof(AspireOracleEFCoreExtensions)
-        //   .GetMethods()
-        //   .First(m => m.Key == nameof(AspireOracleEFCoreExtensions.EnrichOracleDatabaseDbContext));
+        var enrichOracleDatabaseDbContext = typeof(AspireOracleEFCoreExtensions)
+           .GetMethods()
+           .First(m => m.Name == nameof(AspireOracleEFCoreExtensions.EnrichOracleDatabaseDbContext));
 
 
         foreach (ContextFactoryRequest contextFactoryRequest in factoryRequests)
@@ -73,7 +73,7 @@ public sealed class DataContextFactory : IProfitSharingDataContextFactory
                     _ = dbBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
                     _ = dbBuilder.UseOracle(optionsBuilder =>
                     {
-                        _ = optionsBuilder.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19);
+                        _ = optionsBuilder.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion21);
                         _ = optionsBuilder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
                     });
                 };
@@ -84,7 +84,11 @@ public sealed class DataContextFactory : IProfitSharingDataContextFactory
             [
                 builder, contextFactoryRequest.ConnectionName, contextFactoryRequest.ConfigureSettings, contextFactoryRequest.ConfigureDbContextOptions
             ]);
+
+            MethodInfo genericMethodInfo = enrichOracleDatabaseDbContext.MakeGenericMethod(contextFactoryRequest.ContextType);
+            genericMethodInfo.Invoke(null, new object[] { builder, null! });
         }
+
 
         return new DataContextFactory(builder.Services.BuildServiceProvider());
     }

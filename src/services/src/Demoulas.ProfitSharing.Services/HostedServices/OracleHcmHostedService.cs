@@ -26,8 +26,8 @@ public class OracleHcmHostedService : IHostedService
         _scheduler = await _schedulerFactory.GetScheduler(cancellationToken);
         _scheduler.JobFactory = _jobFactory;
 
-        // Run the initial task
-        Task initialize = RunStartupTask(cancellationToken);
+        // Run the initial task ( Fire and forget )
+        _ = RunStartupTask(cancellationToken);
 
         // Schedule the recurring job
         var job = JobBuilder.Create<EmployeeSyncJob>()
@@ -42,8 +42,6 @@ public class OracleHcmHostedService : IHostedService
         await _scheduler.ScheduleJob(job, trigger, cancellationToken);
 
         await _scheduler.Start(cancellationToken);
-
-        await initialize;
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
