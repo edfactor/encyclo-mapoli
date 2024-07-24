@@ -10,11 +10,8 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using FastEndpoints;
 
-<<<<<<<< HEAD:src/services/src/Demoulas.ProfitSharing.Endpoints/Base/EndpointWithCSVBase.cs
+
 namespace Demoulas.ProfitSharing.Endpoints.Base;
-========
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Csv;
->>>>>>>> origin/develop:src/services/src/Demoulas.ProfitSharing.Endpoints/Endpoints/Reports/YearEnd/Csv/EndpointWithCSVBase.cs
 /// <summary>
 /// Endpoints deriving from this class will automatically be able to return a CSV when the accept headers contain text/csv.
 /// The developer needs to override the GetResponse member to provide a response via a DTO.  The developer also needs to override the report filename property.
