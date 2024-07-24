@@ -12,7 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 
-public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithoutRequest<ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto>>
+public partial class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithoutRequest<ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto>>
 {
     private readonly IYearEndService _reportService;
 
@@ -114,9 +114,9 @@ public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithoutRequest<Re
             Map(m => m.Address.City).Index(6).Name("CITY");
             Map(m => m.Address.State).Index(7).Name("ST");
             Map(m => m.Address.PostalCode).Index(8).Name("ZIP");
-            Map(m => m.HireDate.ToString("YYYYMMDD")).Index(9).Name("HIRE");
-            Map(m => m.TermDate!.Value.ToString("YYYYMMDD")).Index(10).Name("TERM");
-            Map(m => m.RehireDate!.Value.ToString("YYYYMMDD")).Index(11).Name("REHIRE");
+            Map(m => m.HireDate).Index(9).Name("HIRE").TypeConverter<YearMonthDayTypeConverter>();
+            Map(m => m.TermDate).Index(10).Name("TERM").TypeConverter<YearMonthDayTypeConverter>(); ;
+            Map(m => m.RehireDate).Index(11).Name("REHIRE").TypeConverter<YearMonthDayTypeConverter>(); 
             Map(m => m.Status).Index(12).Name("ST");
             Map(m => m.Store).Index(13).Name("STR");
             Map(m => m.PayProfitSSN).Index(13).Name("PS RECS");

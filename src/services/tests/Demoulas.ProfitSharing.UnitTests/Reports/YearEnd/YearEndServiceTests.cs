@@ -10,18 +10,15 @@ using Microsoft.EntityFrameworkCore;
 using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
-public class YearEndServiceTests:IClassFixture<ApiTestBase<Program>>
+public class YearEndServiceTests:ApiTestBase<Program>
 {
     private readonly YearEndClient _yearEndClient;
     private readonly ITestOutputHelper _testOutputHelper;
-    private readonly IProfitSharingDataContextFactory _dataContextFactory;
-
-
-    public YearEndServiceTests(ApiTestBase<Program> fixture, ITestOutputHelper testOutputHelper)
+    
+    public YearEndServiceTests( ITestOutputHelper testOutputHelper)
     {
         _testOutputHelper = testOutputHelper;
-        _dataContextFactory = fixture.MockDbContextFactory;
-        _yearEndClient = new YearEndClient(fixture.ApiClient, fixture.DownloadClient);
+        _yearEndClient = new YearEndClient(ApiClient, DownloadClient);
     }
 
     [Fact(DisplayName ="PS-147: Check Duplicate SSNs")]
@@ -35,7 +32,8 @@ public class YearEndServiceTests:IClassFixture<ApiTestBase<Program>>
     [Fact(DisplayName ="PS-150: Payprofit badges w/o Demographics")]
     public async Task GetPayProfitBadgesNotInDemographics()
     {
-        await _dataContextFactory.UseWritableContext(async c =>
+        
+        await MockDbContextFactory.UseWritableContext(async c =>
         {
             var response = await _yearEndClient.GetPayProfitBadgesNotInDemographics(CancellationToken.None);
             response.Should().NotBeNull();
@@ -49,7 +47,7 @@ public class YearEndServiceTests:IClassFixture<ApiTestBase<Program>>
             {
                 if (pp.Demographic != null)
                 {
-                    pp.Demographic.BadgeNumber = pp.EmployeeBadge * 31;
+                    pp.Demographic.BadgeNumber = pp.EmployeeBadge + c.Demographics.Count() + 1;
                 }
             });
 
@@ -63,11 +61,39 @@ public class YearEndServiceTests:IClassFixture<ApiTestBase<Program>>
         });
     }
 
+    [Fact(DisplayName = "PS-151: Demographic badges without payprofit")]
+    public async Task GetDemogrpahicBadgesWithoutPayProfitTests()
+    {
+        await MockDbContextFactory.UseWritableContext(async c =>
+        {
+            var response = await _yearEndClient.GetDemographicBadgesNotInPayProfit(CancellationToken.None);
+            response.Should().NotBeNull();
+            response.Results.Should().HaveCount(0);
+
+            _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+
+            byte mismatchedValues = 5;
+
+            await c.Demographics.Take(mismatchedValues).ForEachAsync(dem =>
+            {
+                dem.BadgeNumber = dem.BadgeNumber + c.PayProfits.Count() + 1;
+            });
+
+            await c.SaveChangesAsync();
+
+            response = await _yearEndClient.GetDemographicBadgesNotInPayProfit(CancellationToken.None);
+            response.Should().NotBeNull();
+            response.Results.Should().HaveCount(mismatchedValues);
+
+            _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+        });
+    }
+
     [Fact(DisplayName = "PS-145 : Negative ETVA for SSNs on PayProfit (JSON)")]
     public async Task GetNegativeETVAReportJson()
     {
         byte negativeValues = 5;
-        await _dataContextFactory.UseWritableContext(async c =>
+        await MockDbContextFactory.UseWritableContext(async c =>
         {
             await c.PayProfits.Take(negativeValues).ForEachAsync(pp =>
             {
@@ -125,11 +151,6 @@ public class YearEndServiceTests:IClassFixture<ApiTestBase<Program>>
 
         _testOutputHelper.WriteLine(result);
     }
-
-
-
-
-
 
     [Fact(DisplayName = "PS-148 : Payroll Duplicate Ssns On Payprofit (JSON)")]
     public async Task GetPayrollDuplicateSsnsOnPayprofitJson()

@@ -46,6 +46,11 @@ public sealed class YearEndClient : IYearEndService
         };
     }
 
+    public Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfit(CancellationToken ct = default)
+    {
+        return CallReportEndpoint<DemographicBadgesNotInPayProfitResponse>("demographic-badges-not-in-payprofit", ct);
+    }
+
     #region Negative ETVA For SSNs On PayProfit
 
     public Task<ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>> GetNegativeETVAForSSNsOnPayProfitResponse(CancellationToken cancellationToken = default)

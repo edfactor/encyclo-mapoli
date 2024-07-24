@@ -5,6 +5,7 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 using CsvHelper;
 using CsvHelper.Configuration;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Csv;
 
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;

@@ -10,7 +10,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using FastEndpoints;
 
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
+namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Csv;
 /// <summary>
 /// Endpoints deriving from this class will automatically be able to return a CSV when the accept headers contain text/csv.
 /// The developer needs to override the GetResponse member to provide a response via a DTO.  The developer also needs to override the report filename property.
@@ -19,10 +19,10 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 /// <typeparam name="ReqType">Request type of the endpoint.  Can be EmptyRequest</typeparam>
 /// <typeparam name="RespType">Response type of the endpoint.</typeparam>
 /// <typeparam name="MapType">A mapping class that converts from a dto to a CSV format</typeparam>
-public abstract class EndpointWithCSVBase<ReqType, RespType, MapType> : Endpoint<ReqType, ReportResponseBase<RespType>> 
-    where ReqType:notnull
-    where RespType:class
-    where MapType:ClassMap<RespType>
+public abstract class EndpointWithCSVBase<ReqType, RespType, MapType> : Endpoint<ReqType, ReportResponseBase<RespType>>
+    where ReqType : notnull
+    where RespType : class
+    where MapType : ClassMap<RespType>
 {
 
     /// <summary>
