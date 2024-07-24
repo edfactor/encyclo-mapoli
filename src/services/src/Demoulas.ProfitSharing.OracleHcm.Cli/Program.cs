@@ -59,7 +59,8 @@ public class Program
 
                     ContactInfo = new ContactInfoRequestDto
                     {
-                        PhoneNumber = employee.Phone?.PhoneNumber
+                        PhoneNumber = employee.Phone?.PhoneNumber,
+                        EmailAddress = employee.Email?.EmailAddress
                     },
                     Address = new AddressRequestDto
                     {

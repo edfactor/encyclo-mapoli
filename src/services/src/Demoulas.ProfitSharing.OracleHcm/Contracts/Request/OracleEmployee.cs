@@ -20,7 +20,7 @@ public record OracleEmployee(
 )
 {
     public AddressItem? Address => Addresses.FirstOrDefault(a => a.PrimaryFlag ?? false);
-    public EmailItem? Email => Emails.FirstOrDefault();
+    public EmailItem? Email => Emails.FirstOrDefault(a => a.PrimaryFlag ?? false);
     public NameItem Name => Names.First();
     public PhoneItem? Phone => Phones.FirstOrDefault(a => a.PrimaryFlag ?? false);
 
