@@ -29,7 +29,6 @@ public static class ServicesExtension
     {
         _ = builder.Services.AddScoped<IPayClassificationService, PayClassificationService>();
         _ = builder.Services.AddScoped<IDemographicsService, DemographicsService>();
-        _ = builder.Services.AddScoped<IDemographicsServiceInternal, DemographicsService>(); // Need a non-interface registration to call "internal" methods that should not be exposed.
         _ = builder.Services.AddScoped<IYearEndService, YearEndService>();
         _ = builder.Services.AddScoped<IPayProfitService, PayProfitService>();
 
@@ -37,12 +36,13 @@ public static class ServicesExtension
         OracleHcmConfig oktaSettings = builder.Configuration.GetSection("OracleHcm").Get<OracleHcmConfig>() ?? new OracleHcmConfig { Url = string.Empty };
         _ = builder.Services.AddSingleton(oktaSettings);
 
+        _ = builder.Services.AddSingleton<IBaseCacheService<PayClassificationResponseCache>, PayClassificationHostedService>();
         _ = builder.Services.AddSingleton<IJobFactory, SimpleJobFactory>();
         _ = builder.Services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
         _ = builder.Services.AddSingleton<EmployeeSyncJob>();
+        _ = builder.Services.AddSingleton<IDemographicsServiceInternal, DemographicsService>();
 
         _ = builder.Services.AddHostedService<OracleHcmHostedService>();
-        _ = builder.Services.AddHostedService<PayClassificationHostedService>();
 
 
         _ = builder.Services.AddHttpClient<OracleDemographicsService>((services, client) =>

@@ -24,20 +24,12 @@ public sealed class OracleDemographicsService
     public async IAsyncEnumerable<OracleEmployee?> GetAllEmployees([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         string initialUrl = await BuildUrl(_oracleHcmConfig.Url, cancellationToken: cancellationToken);
-        ConcurrentQueue<OracleEmployee> queue = new ConcurrentQueue<OracleEmployee>();
 
-        Task fetchTask = FetchOracleDemographic(initialUrl, queue, cancellationToken);
-
-        // Yield results from the queue
-        while (!fetchTask.IsCompleted || !queue.IsEmpty)
+        var returnValues = FetchOracleDemographic(initialUrl, cancellationToken);
+        await foreach (var emp in returnValues)
         {
-            while (queue.TryDequeue(out OracleEmployee? emp))
-            {
-                yield return emp;
-            }
+            yield return emp;
         }
-
-        await fetchTask; // Ensure fetch task completes
     }
 
     private async Task<string> BuildUrl(string url, int offset = 0, CancellationToken cancellationToken = default)
@@ -59,44 +51,40 @@ public sealed class OracleDemographicsService
         return initialUriBuilder.Uri.ToString();
     }
 
-    private Task FetchOracleDemographic(string initialUrl, ConcurrentQueue<OracleEmployee> queue,
-        CancellationToken cancellationToken)
+    private async IAsyncEnumerable<OracleEmployee?> FetchOracleDemographic(string initialUrl, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         // Task to fetch data and enqueue it
-        return Task.Run(async () =>
+        string url = initialUrl;
+
+        while (true)
         {
-            string url = initialUrl;
+            HttpResponseMessage response = await GetOracleHcmValue(url, cancellationToken);
+            OracleDemographics? demographics = await response.Content.ReadFromJsonAsync<OracleDemographics>(_jsonSerializerOptions, cancellationToken);
 
-            while (true)
+            if (demographics?.Employees == null)
             {
-                HttpResponseMessage response = await GetOracleHcmValue(url, cancellationToken);
-                OracleDemographics? demographics = await response.Content.ReadFromJsonAsync<OracleDemographics>(_jsonSerializerOptions, cancellationToken);
-
-                if (demographics?.Employees == null)
-                {
-                    break;
-                }
-
-                foreach (OracleEmployee emp in demographics.Employees)
-                {
-                    queue.Enqueue(emp);
-                }
-
-                if (!demographics.HasMore)
-                {
-                    break;
-                }
-
-                // Construct the next URL for pagination
-                string nextUrl = await BuildUrl(_oracleHcmConfig.Url, demographics.Count + demographics.Offset, cancellationToken);
-                if (string.IsNullOrEmpty(nextUrl))
-                {
-                    break;
-                }
-
-                url = nextUrl;
+                break;
             }
-        }, cancellationToken);
+
+            foreach (OracleEmployee emp in demographics.Employees)
+            {
+                yield return emp;
+            }
+
+            if (!demographics.HasMore)
+            {
+                break;
+            }
+
+            // Construct the next URL for pagination
+            string nextUrl = await BuildUrl(_oracleHcmConfig.Url, demographics.Count + demographics.Offset, cancellationToken);
+            if (string.IsNullOrEmpty(nextUrl))
+            {
+                break;
+            }
+
+            url = nextUrl;
+        }
     }
 
     private async Task<HttpResponseMessage> GetOracleHcmValue(string url, CancellationToken cancellationToken)

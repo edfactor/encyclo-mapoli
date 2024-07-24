@@ -88,7 +88,7 @@ public class Program
         };
         await builder.AddDatabaseServices(list, true, true);
         Services.Extensions.ServicesExtension.AddProjectServices(builder);
-        var provider = builder.Services.BuildServiceProvider();
+        ServiceProvider provider = builder.Services.BuildServiceProvider();
 
         var service = provider.GetRequiredService<OracleDemographicsService>();
         var demographicsService = provider.GetRequiredService<IDemographicsServiceInternal>();

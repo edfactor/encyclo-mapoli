@@ -8,7 +8,7 @@ using Demoulas.ProfitSharing.OracleHcm.Contracts.Request;
 using Quartz;
 
 namespace Demoulas.ProfitSharing.Services.Jobs;
-internal sealed class EmployeeSyncJob : IJob
+public sealed class EmployeeSyncJob : IJob
 {
     private readonly OracleDemographicsService _oracleDemographicsService;
     private readonly IDemographicsServiceInternal _demographicsService;
@@ -25,9 +25,14 @@ internal sealed class EmployeeSyncJob : IJob
 
     public Task Execute(IJobExecutionContext context)
     {
-        var oracleHcmEmployees = _oracleDemographicsService.GetAllEmployees(context.CancellationToken);
+        return SynchronizeEmployees(context.CancellationToken);
+    }
+
+    internal Task SynchronizeEmployees(CancellationToken cancellationToken)
+    {
+        var oracleHcmEmployees = _oracleDemographicsService.GetAllEmployees(cancellationToken);
         var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees);
-        return _demographicsService.AddDemographicsStream(requestDtoEnumerable, _oracleHcmConfig.Limit, context.CancellationToken);
+        return _demographicsService.AddDemographicsStream(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
     }
 
     private async IAsyncEnumerable<DemographicsRequestDto> ConvertToRequestDto(IAsyncEnumerable<OracleEmployee?> asyncEnumerable)

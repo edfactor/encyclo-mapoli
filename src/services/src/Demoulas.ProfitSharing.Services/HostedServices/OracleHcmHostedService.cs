@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Services.Jobs;
+﻿using Demoulas.ProfitSharing.Services.Jobs;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Quartz;
+using Quartz.Impl;
 using Quartz.Spi;
 
 namespace Demoulas.ProfitSharing.Services.HostedServices;
@@ -14,12 +10,15 @@ public class OracleHcmHostedService : IHostedService
 {
     private readonly ISchedulerFactory _schedulerFactory;
     private readonly IJobFactory _jobFactory;
+    private readonly IServiceProvider _serviceProvider;
     private IScheduler? _scheduler;
 
-    public OracleHcmHostedService(ISchedulerFactory schedulerFactory, IJobFactory jobFactory)
+    public OracleHcmHostedService(ISchedulerFactory schedulerFactory, IJobFactory jobFactory,
+        IServiceProvider serviceProvider)
     {
         _schedulerFactory = schedulerFactory;
         _jobFactory = jobFactory;
+        _serviceProvider = serviceProvider;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -28,7 +27,7 @@ public class OracleHcmHostedService : IHostedService
         _scheduler.JobFactory = _jobFactory;
 
         // Run the initial task
-        await RunStartupTask();
+        Task initialize = RunStartupTask(cancellationToken);
 
         // Schedule the recurring job
         var job = JobBuilder.Create<EmployeeSyncJob>()
@@ -43,6 +42,8 @@ public class OracleHcmHostedService : IHostedService
         await _scheduler.ScheduleJob(job, trigger, cancellationToken);
 
         await _scheduler.Start(cancellationToken);
+
+        await initialize;
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
@@ -53,10 +54,9 @@ public class OracleHcmHostedService : IHostedService
         }
     }
 
-    private Task RunStartupTask()
+    private Task RunStartupTask(CancellationToken cancellationToken)
     {
-        // Your startup task logic here
-        Console.WriteLine("Running startup task");
-        return Task.CompletedTask;
+        var employeeSyncJob = _serviceProvider.GetRequiredService<EmployeeSyncJob>();
+        return employeeSyncJob.SynchronizeEmployees(cancellationToken);
     }
 }
