@@ -42,13 +42,15 @@ public sealed class OracleDemographicsService
 
     private async Task<string> BuildUrl(string url, int offset = 0, CancellationToken cancellationToken = default)
     {
-        // Oracle will limit us to 500, but we run the risk of timeout, so we want to be conservative.
-        ushort limit = ushort.Min(150, _oracleHcmConfig.Limit);
+        // Oracle will limit us to 500, but we run the risk of timeout well below that, so we need to be conservative.
+        ushort limit = ushort.Min(125, _oracleHcmConfig.Limit);
         Dictionary<string, string> initialQuery = new Dictionary<string, string>
         {
             { "limit", $"{limit}" },
             { "offset", $"{offset}" },
             { "totalResults", "false" },
+            { "onlyData", "true" },
+            { "expand", "addresses,emails,names" },
             { "fields", "addresses:AddressId,AddressLine1,AddressLine2,AddressLine3,AddressLine4,TownOrCity,Region1,Region2,Country,CountryName,PostalCode,LongPostalCode,Building,FloorNumber,CreatedBy,CreationDate,LastUpdatedBy,PersonAddrUsageId,AddressType,AddressTypeMeaning,PrimaryFlag;emails:EmailAddressId,EmailType,EmailAddress,PrimaryFlag;names:PersonNameId,EffectiveStartDate,EffectiveEndDate,LegislationCode,LastName,FirstName,Title,PreNameAdjunct,Suffix,MiddleNames,KnownAs,PreviousLastName,DisplayName,FullName,MilitaryRank,NameLanguage,LastUpdateDate;PersonNumber,PersonId,DateOfBirth,LastUpdateDate" }
         };
         UriBuilder initialUriBuilder = new UriBuilder(url);
@@ -101,6 +103,15 @@ public sealed class OracleDemographicsService
     {
         HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
         HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken);
+        if (!response.IsSuccessStatusCode)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine();
+            Console.WriteLine(await response.Content.ReadAsStringAsync(cancellationToken));
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+
         response.EnsureSuccessStatusCode();
         return response;
     }
