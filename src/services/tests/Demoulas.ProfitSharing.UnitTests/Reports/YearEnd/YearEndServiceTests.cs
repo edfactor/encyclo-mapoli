@@ -35,6 +35,7 @@ public class YearEndServiceTests:IClassFixture<ApiTestBase<Program>>
     [Fact(DisplayName ="PS-150: Payprofit badges w/o Demographics")]
     public async Task GetPayProfitBadgesNotInDemographics()
     {
+        
         await _dataContextFactory.UseWritableContext(async c =>
         {
             var response = await _yearEndClient.GetPayProfitBadgesNotInDemographics(CancellationToken.None);
@@ -49,7 +50,7 @@ public class YearEndServiceTests:IClassFixture<ApiTestBase<Program>>
             {
                 if (pp.Demographic != null)
                 {
-                    pp.Demographic.BadgeNumber = pp.EmployeeBadge * 31;
+                    pp.Demographic.BadgeNumber = pp.EmployeeBadge + c.Demographics.Count() + 1;
                 }
             });
 
@@ -60,6 +61,17 @@ public class YearEndServiceTests:IClassFixture<ApiTestBase<Program>>
             response.Results.Should().HaveCount(mismatchedValues);
 
             _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+
+            //Revert changes back
+            await c.PayProfits.Take(mismatchedValues).ForEachAsync(pp =>
+            {
+                if (pp.Demographic != null)
+                {
+                    pp.Demographic.BadgeNumber = pp.EmployeeBadge;
+                }
+            });
+
+            await c.SaveChangesAsync();
         });
     }
 
@@ -78,7 +90,7 @@ public class YearEndServiceTests:IClassFixture<ApiTestBase<Program>>
 
             await c.Demographics.Take(mismatchedValues).ForEachAsync(dem =>
             {
-                dem.BadgeNumber = dem.BadgeNumber * 1024;
+                dem.BadgeNumber = dem.BadgeNumber + c.PayProfits.Count() + 1;
             });
 
             await c.SaveChangesAsync();
@@ -88,6 +100,13 @@ public class YearEndServiceTests:IClassFixture<ApiTestBase<Program>>
             response.Results.Should().HaveCount(mismatchedValues);
 
             _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+
+            await c.Demographics.Take(mismatchedValues).ForEachAsync(dem =>
+            {
+                dem.BadgeNumber = dem.BadgeNumber - c.PayProfits.Count() - 1;
+            });
+
+            await c.SaveChangesAsync();
         });
     }
 
