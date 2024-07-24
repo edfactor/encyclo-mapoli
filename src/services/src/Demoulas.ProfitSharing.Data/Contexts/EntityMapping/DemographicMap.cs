@@ -82,8 +82,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
 
         _ = builder.Property(e => e.TerminationCodeId)
             .HasMaxLength(1)
-            .HasComment("TerminationCode")
-            .HasColumnName("PY_TERM");
+            .HasComment("TerminationCode");
 
 
         _ = builder.Property(e => e.TerminationDate)
@@ -98,18 +97,15 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
 
         _ = builder.Property(e => e.EmploymentTypeId)
             .HasMaxLength(2)
-            .HasComment("EmploymentType")
-            .HasColumnName("PY_FUL");
+            .HasComment("EmploymentType");
 
         _ = builder.Property(e => e.PayFrequencyId)
             .HasMaxLength(1)
-            .HasComment("PayFrequency")
-            .HasColumnName("PY_FREQ");
+            .HasComment("PayFrequency");
 
         _ = builder.Property(e => e.GenderId)
             .HasMaxLength(1)
-            .HasComment("Gender")
-            .HasColumnName("PY_GENDER");
+            .HasComment("Gender");
 
 
         builder.OwnsOne(e => e.Address, address =>
@@ -120,7 +116,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             address.Property(a => a.Street4).HasMaxLength(30).HasColumnName("Street4").HasComment("Street4");
             address.Property(a => a.City).HasMaxLength(25).HasColumnName("City").HasComment("City").IsRequired();
             address.Property(a => a.State).HasMaxLength(3).HasColumnName("State").HasComment("State").IsRequired();
-            address.Property(a => a.PostalCode).HasPrecision(9).HasColumnName("PostalCode").HasComment("Postal Code").IsRequired().HasConversion<PostalCodeConverter>();
+            address.Property(a => a.PostalCode).HasMaxLength(9).HasColumnName("PostalCode").HasComment("Postal Code").IsRequired();
             address.Property(a => a.CountryISO).HasMaxLength(2).HasColumnName("CountryISO").HasDefaultValue(Constants.US);
 
             address.HasOne<Country>()
@@ -130,7 +126,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
 
         builder.OwnsOne(e => e.ContactInfo, contact =>
         {
-            contact.Property(a => a.PhoneNumber).HasMaxLength(15).HasColumnName("PY_EMP_TELNO").HasComment("PhoneNumber").IsRequired();
+            contact.Property(a => a.PhoneNumber).HasMaxLength(15).HasColumnName("PhoneNumber");
             contact.Property(a => a.MobileNumber).HasMaxLength(15).HasColumnName("MobileNumber");
             contact.Property(a => a.EmailAddress).HasMaxLength(50).HasColumnName("EmailAddress");
         });

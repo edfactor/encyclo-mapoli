@@ -1,15 +1,18 @@
-﻿using Demoulas.ProfitSharing.Data.Entities.Base;
+﻿using System.Diagnostics;
+using Demoulas.ProfitSharing.Data.Entities.Base;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
 
 /// <summary>
 /// https://demoulas.atlassian.net/wiki/spaces/~bherrmann/pages/39944312/Quick+Guide+to+Profit+Sharing+Tables
 /// </summary>
+[DebuggerDisplay("OracleHcmId={OracleHcmId} BadgeNumber={BadgeNumber} FullName={FullName} StoreNumber={StoreNumber}")]
 public sealed class Demographic : Member
 {
+    public required long OracleHcmId { get; set; }
     public required long SSN { get; set; }
     public required int BadgeNumber { get; set; }
-    public required long OracleHcmId { get; set; }
+
     public string? FullName { get; set; }
     public required string LastName { get; set; }
     public required string FirstName { get; set; }
@@ -26,7 +29,7 @@ public sealed class Demographic : Member
     /// <summary>
     /// Date of full-time status
     /// </summary>
-    public DateOnly FullTimeDate { get; set; }
+    public DateOnly? FullTimeDate { get; set; }
 
     public required DateOnly HireDate { get; set; }
     public DateOnly? ReHireDate { get; set; }

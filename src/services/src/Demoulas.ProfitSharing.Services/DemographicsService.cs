@@ -25,7 +25,6 @@ public class DemographicsService : IDemographicsService
 
         await foreach (var employee in employees.WithCancellation(cancellationToken))
         {
-
             batch.Add(employee);
 
             if (batch.Count >= batchSize)

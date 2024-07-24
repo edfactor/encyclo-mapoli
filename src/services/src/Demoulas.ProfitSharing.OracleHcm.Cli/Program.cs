@@ -31,7 +31,7 @@ public class Program
         {
             await foreach (OracleEmployee? employee in asyncEnumerable)
             {
-                if (employee == null)
+                if (employee?.Address == null)
                 {
                     continue;
                 }
@@ -40,12 +40,13 @@ public class Program
                 {
                     OracleHcmId = employee.PersonId,
                     BadgeNumber = employee.BadgeNumber,
-                    SSN = 0,
                     DateOfBirth = employee.DateOfBirth,
-
                     FirstName = employee.Name.FirstName,
                     LastName = employee.Name.LastName,
                     FullName = employee.Name.DisplayName,
+
+
+                    SSN = 0,
                     StoreNumber = 0,
                     DepartmentId = Department.Constants.Beer_And_Wine,
                     PayClassificationId = PayClassification.Constants.ApprMeatCutters,
@@ -113,7 +114,7 @@ public class Program
         var dto = ConvertToDto(employees);
 
         var demographicsService = provider.GetRequiredService<DemographicsService>();
-        await demographicsService.AddDemographicsStream(dto, 5, CancellationToken.None);
+        await demographicsService.AddDemographicsStream(dto, byte.MaxValue, CancellationToken.None);
 
         await Task.CompletedTask;
 

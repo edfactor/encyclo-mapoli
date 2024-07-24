@@ -22,7 +22,7 @@ public record DemographicsResponseDto : MemberResponseDto
     /// <summary>
     /// Date of full-time status 
     /// </summary>
-    public DateOnly FullTimeDate { get; set; }
+    public DateOnly? FullTimeDate { get; set; }
 
     public required DateOnly HireDate { get; set; }
     public DateOnly? ReHireDate { get; set; }

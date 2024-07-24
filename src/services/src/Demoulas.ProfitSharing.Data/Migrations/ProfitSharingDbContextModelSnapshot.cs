@@ -1505,7 +1505,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(2)
                         .HasColumnType("NVARCHAR2(2)")
-                        .HasColumnName("PY_FUL")
                         .HasComment("EmploymentType");
 
                     b.Property<string>("FirstName")
@@ -1520,7 +1519,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NVARCHAR2(60)")
                         .HasComment("FullName");
 
-                    b.Property<DateTime>("FullTimeDate")
+                    b.Property<DateTime?>("FullTimeDate")
                         .HasColumnType("DATE")
                         .HasComment("FullTimeDate");
 
@@ -1528,7 +1527,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(1)
                         .HasColumnType("NVARCHAR2(1)")
-                        .HasColumnName("PY_GENDER")
                         .HasComment("Gender");
 
                     b.Property<DateTime>("HireDate")
@@ -1556,7 +1554,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<byte>("PayFrequencyId")
                         .HasMaxLength(1)
                         .HasColumnType("NUMBER(3)")
-                        .HasColumnName("PY_FREQ")
                         .HasComment("PayFrequency");
 
                     b.Property<DateTime?>("ReHireDate")
@@ -1576,7 +1573,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<string>("TerminationCodeId")
                         .HasMaxLength(1)
                         .HasColumnType("NVARCHAR2(1)")
-                        .HasColumnName("PY_TERM")
                         .HasComment("TerminationCode");
 
                     b.Property<DateTime?>("TerminationDate")
@@ -2888,9 +2884,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                                 .HasDefaultValue("US")
                                 .HasColumnName("CountryISO");
 
-                            b1.Property<int>("PostalCode")
-                                .HasPrecision(9)
-                                .HasColumnType("NUMBER(9)")
+                            b1.Property<string>("PostalCode")
+                                .IsRequired()
+                                .HasMaxLength(9)
+                                .HasColumnType("NVARCHAR2(9)")
                                 .HasColumnName("PostalCode")
                                 .HasComment("Postal Code");
 
@@ -2958,11 +2955,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                                 .HasColumnName("MobileNumber");
 
                             b1.Property<string>("PhoneNumber")
-                                .IsRequired()
                                 .HasMaxLength(15)
                                 .HasColumnType("NVARCHAR2(15)")
-                                .HasColumnName("PY_EMP_TELNO")
-                                .HasComment("PhoneNumber");
+                                .HasColumnName("PhoneNumber");
 
                             b1.HasKey("DemographicOracleHcmId");
 

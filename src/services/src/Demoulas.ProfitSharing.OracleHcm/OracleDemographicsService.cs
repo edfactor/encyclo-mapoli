@@ -48,7 +48,7 @@ public sealed class OracleDemographicsService
     private async Task<string> BuildUrl(string url, int offset = 0, CancellationToken cancellationToken = default)
     {
         // Oracle will limit us to 500.
-        ushort limit = ushort.Min(10, _oracleHcmConfig.Limit);
+        ushort limit = ushort.Min(100, _oracleHcmConfig.Limit);
         Dictionary<string, string> initialQuery = new Dictionary<string, string>
         {
             { "limit", $"{limit}" },
@@ -91,7 +91,7 @@ public sealed class OracleDemographicsService
                 }
 
                 // Construct the next URL for pagination
-                string nextUrl = await BuildUrl(_oracleHcmConfig.Url, demographics.Offset + 1, cancellationToken);
+                string nextUrl = await BuildUrl(_oracleHcmConfig.Url, demographics.Count + demographics.Offset, cancellationToken);
                 if (string.IsNullOrEmpty(nextUrl))
                 {
                     break;
