@@ -11,9 +11,20 @@ public record OracleEmployee(
     [property: JsonPropertyName("CreationDate")] DateTimeOffset CreationDate,
     [property: JsonPropertyName("LastUpdatedBy")] string LastUpdatedBy,
     [property: JsonPropertyName("LastUpdateDate")] DateTimeOffset? LastUpdateDate,
-    [property: JsonPropertyName("addresses")] AddressItem Address,
-    [property: JsonPropertyName("emails")] EmailItem? Email,
-    [property: JsonPropertyName("names")] NameItem Name,
-    [property: JsonPropertyName("phones")] PhoneItem? Phone,
-    [property: JsonPropertyName("@context")] Context Context
-);
+    [property: JsonPropertyName("addresses")] List<AddressItem> Addresses,
+    [property: JsonPropertyName("emails")] List<EmailItem> Emails,
+    [property: JsonPropertyName("names")] List<NameItem> Names,
+    [property: JsonPropertyName("phones")] List<PhoneItem> Phones,
+    [property: JsonPropertyName("@context")]
+    Context Context
+)
+{
+    public AddressItem? Address => Addresses.FirstOrDefault(a => a.PrimaryFlag ?? false);
+    public EmailItem? Email => Emails.FirstOrDefault();
+    public NameItem Name => Names.First();
+    public PhoneItem? Phone => Phones.FirstOrDefault(a => a.PrimaryFlag ?? false);
+
+}
+
+
+

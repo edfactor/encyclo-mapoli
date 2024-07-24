@@ -14,6 +14,6 @@ public record PhoneItem(
     DateTime CreationDate,
     string LastUpdatedBy,
     DateTime LastUpdateDate,
-    bool PrimaryFlag,
+    bool? PrimaryFlag,
     Context Context
 );
