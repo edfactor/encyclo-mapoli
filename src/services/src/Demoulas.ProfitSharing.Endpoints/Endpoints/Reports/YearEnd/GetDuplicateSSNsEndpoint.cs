@@ -3,7 +3,6 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
-using CsvHelper;
 using CsvHelper.Configuration;
 using Demoulas.ProfitSharing.Endpoints.Base;
 

@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CsvHelper.Configuration;
+﻿using CsvHelper.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Csv;
+using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
-public class DemographicBadgesNotInPayProfitEndpoint:EndpointWithCSVBase<EmptyRequest, DemographicBadgesNotInPayProfitResponse, DemographicBadgesNotInPayProfitEndpoint.DemographicBadgesNotInPayProfitResponseMap>
+
+public class DemographicBadgesNotInPayProfitEndpoint : EndpointWithCSVBase<EmptyRequest, DemographicBadgesNotInPayProfitResponse,
+    DemographicBadgesNotInPayProfitEndpoint.DemographicBadgesNotInPayProfitResponseMap>
 {
     private readonly IYearEndService _yearEndService;
 
@@ -25,10 +22,7 @@ public class DemographicBadgesNotInPayProfitEndpoint:EndpointWithCSVBase<EmptyRe
     {
         AllowAnonymous();
         Get("demographic-badges-not-in-payprofit");
-        Summary(s =>
-        {
-            s.Summary = "Demographic badges not in Payprofit";
-        });
+        Summary(s => { s.Summary = "Demographic badges not in Payprofit"; });
         Group<YearEndGroup>();
     }
 
@@ -39,7 +33,7 @@ public class DemographicBadgesNotInPayProfitEndpoint:EndpointWithCSVBase<EmptyRe
         return await _yearEndService.GetDemographicBadgesNotInPayProfit(ct);
     }
 
-    public sealed class DemographicBadgesNotInPayProfitResponseMap: ClassMap<DemographicBadgesNotInPayProfitResponse>
+    public sealed class DemographicBadgesNotInPayProfitResponseMap : ClassMap<DemographicBadgesNotInPayProfitResponse>
     {
         public DemographicBadgesNotInPayProfitResponseMap()
         {
