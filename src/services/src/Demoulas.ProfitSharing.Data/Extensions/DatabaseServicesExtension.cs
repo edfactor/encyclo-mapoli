@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Data.Factories;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +21,11 @@ public static class DatabaseServicesExtension
 
         IProfitSharingDataContextFactory factory = DataContextFactory.Initialize(builder, contextFactoryRequests: contextFactoryRequests);
         _ = builder.Services.AddSingleton(factory);
+
+        if (builder.Environment.IsTestEnvironment())
+        {
+            return builder;
+        }
 
         if (runMigration && Debugger.IsAttached)
         {

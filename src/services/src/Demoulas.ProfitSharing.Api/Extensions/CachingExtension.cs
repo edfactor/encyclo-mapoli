@@ -1,5 +1,6 @@
 ﻿
 
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Services.HostedServices;
 
 namespace Demoulas.ProfitSharing.Api.Extensions;
@@ -13,7 +14,7 @@ public static class CachingExtension
     {
         _ = builder.Services.AddDistributedMemoryCache();
 
-        if (builder.Environment.EnvironmentName != "Testing")
+        if (!builder.Environment.IsTestEnvironment())
         {
             _ = builder.Services.AddHostedService<PayClassificationHostedService>();
         }

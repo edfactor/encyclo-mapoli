@@ -16,6 +16,7 @@ using Quartz.Spi;
 using Quartz;
 using System.Net.Http.Headers;
 using System.Text;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Microsoft.Extensions.Http.Resilience;
 
 namespace Demoulas.ProfitSharing.Services.Extensions;
@@ -42,8 +43,10 @@ public static class ServicesExtension
         _ = builder.Services.AddSingleton<EmployeeSyncJob>();
         _ = builder.Services.AddSingleton<IDemographicsServiceInternal, DemographicsService>();
 
-        _ = builder.Services.AddHostedService<OracleHcmHostedService>();
-
+        if (!builder.Environment.IsTestEnvironment())
+        {
+            _ = builder.Services.AddHostedService<OracleHcmHostedService>();
+        }
 
         _ = builder.Services.AddHttpClient<OracleDemographicsService>((services, client) =>
         {
