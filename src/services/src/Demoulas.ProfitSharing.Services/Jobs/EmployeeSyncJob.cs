@@ -28,7 +28,7 @@ public sealed class EmployeeSyncJob : IJob
         return SynchronizeEmployees(context.CancellationToken);
     }
 
-    internal Task SynchronizeEmployees(CancellationToken cancellationToken)
+    public Task SynchronizeEmployees(CancellationToken cancellationToken)
     {
         var oracleHcmEmployees = _oracleDemographicsService.GetAllEmployees(cancellationToken);
         var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees);
@@ -54,7 +54,7 @@ public sealed class EmployeeSyncJob : IJob
                 FullName = employee.Name.DisplayName,
 
 
-                SSN = 0,
+                SSN = employee.NationalIdentifier?.NationalIdentifierNumber.ConvertSsnToLong() ?? 0,
                 StoreNumber = 0,
                 DepartmentId = Department.Constants.Beer_And_Wine,
                 PayClassificationId = PayClassification.Constants.ApprMeatCutters,

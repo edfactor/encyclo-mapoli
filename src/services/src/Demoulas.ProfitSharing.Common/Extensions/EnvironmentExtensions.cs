@@ -14,6 +14,8 @@ public static class EnvironmentExtensions
             environment.ApplicationName == "ReSharperTestRunner" ||
             environment.ApplicationName == "testhost")
         {
+            environment.EnvironmentName = "Testing";
+
             return true;
         }
 

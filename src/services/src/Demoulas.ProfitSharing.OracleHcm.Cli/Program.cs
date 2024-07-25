@@ -15,6 +15,7 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.OracleHcm.Contracts.Request;
 using Demoulas.ProfitSharing.Services;
+using Demoulas.ProfitSharing.Services.Jobs;
 using Demoulas.StoreInfo.Entities.Contexts;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,56 +28,6 @@ public class Program
 {
     public static async Task Main()
     {
-        async IAsyncEnumerable< DemographicsRequestDto> ConvertToDto(IAsyncEnumerable<OracleEmployee?> asyncEnumerable)
-        {
-            await foreach (OracleEmployee? employee in asyncEnumerable)
-            {
-                if (employee?.Address == null)
-                {
-                    continue;
-                }
-
-                yield return new DemographicsRequestDto
-                {
-                    OracleHcmId = employee.PersonId,
-                    BadgeNumber = employee.BadgeNumber,
-                    DateOfBirth = employee.DateOfBirth,
-                    FirstName = employee.Name.FirstName,
-                    LastName = employee.Name.LastName,
-                    FullName = employee.Name.DisplayName,
-
-
-                    SSN = 0,
-                    StoreNumber = 0,
-                    DepartmentId = Department.Constants.Beer_And_Wine,
-                    PayClassificationId = PayClassification.Constants.ApprMeatCutters,
-                    HireDate = employee.Name.EffectiveStartDate.ToDateOnly(),
-                    EmploymentTypeCode = EmploymentType.Constants.PartTime,
-                    PayFrequencyId = PayFrequency.Constants.Weekly,
-                    EmploymentStatusId = EmploymentStatus.Constants.Active,
-                    GenderCode = Gender.Constants.Other,
-
-
-                    ContactInfo = new ContactInfoRequestDto
-                    {
-                        PhoneNumber = employee.Phone?.PhoneNumber,
-                        EmailAddress = employee.Email?.EmailAddress
-                    },
-                    Address = new AddressRequestDto
-                    {
-                        Street = employee.Address.AddressLine1,
-                        Street2 = employee.Address.AddressLine2,
-                        Street3 = employee.Address.AddressLine3,
-                        Street4 = employee.Address.AddressLine4,
-                        City = employee.Address.TownOrCity,
-                        State = employee.Address.State,
-                        PostalCode = employee.Address.PostalCode,
-                        CountryISO = employee.Address.Country
-                    }
-                };
-            }
-        }
-
         IHostApplicationBuilder builder = new HostApplicationBuilder();
         builder.Configuration.AddUserSecrets<Program>();
 
@@ -90,12 +41,9 @@ public class Program
         Services.Extensions.ServicesExtension.AddProjectServices(builder);
         ServiceProvider provider = builder.Services.BuildServiceProvider();
 
-        var service = provider.GetRequiredService<OracleDemographicsService>();
-        var demographicsService = provider.GetRequiredService<IDemographicsServiceInternal>();
+        var syncJob = provider.GetRequiredService<EmployeeSyncJob>();
 
-        var employees = service.GetAllEmployees();
-        var dto = ConvertToDto(employees);
-        await demographicsService.AddDemographicsStream(dto, byte.MaxValue, CancellationToken.None);
+        await syncJob.SynchronizeEmployees(CancellationToken.None);
 
         await Task.CompletedTask;
 
