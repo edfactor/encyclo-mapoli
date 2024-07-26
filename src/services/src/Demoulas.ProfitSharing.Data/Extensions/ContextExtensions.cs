@@ -26,6 +26,14 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new BeneficiaryMap());
         modelBuilder.ApplyConfiguration(new EmploymentStatusMap());
 
+
+        // Force table names to be upper case for consistency with all existing DSM projects
+        foreach (var entity in modelBuilder.Model.GetEntityTypes())
+        {
+            // Set table name to upper case
+            entity.SetTableName(entity.GetTableName()?.ToUpper());
+        }
+
         return modelBuilder;
     }
 }

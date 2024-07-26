@@ -12,7 +12,7 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    [Migration("20240724144509_initialMigration")]
+    [Migration("20240726153923_initialMigration")]
     partial class initialMigration
     {
         /// <inheritdoc />
@@ -21,7 +21,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .UseCollation("USING_NLS_COMP")
-                .HasAnnotation("ProductVersion", "8.0.6")
+                .HasAnnotation("ProductVersion", "8.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             OracleModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -65,7 +65,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasIndex(new[] { "SSN" }, "IX_SSN");
 
-                    b.ToTable("Beneficiary", (string)null);
+                    b.ToTable("BENEFICIARY", (string)null);
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BeneficiaryType", b =>
@@ -80,7 +80,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("BeneficiaryType", (string)null);
+                    b.ToTable("BENEFICIARYTYPE", (string)null);
 
                     b.HasData(
                         new
@@ -117,7 +117,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasKey("ISO");
 
-                    b.ToTable("Country", (string)null);
+                    b.ToTable("COUNTRY", (string)null);
 
                     b.HasData(
                         new
@@ -1601,7 +1601,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasIndex(new[] { "SSN" }, "IX_SSN")
                         .HasDatabaseName("IX_SSN1");
 
-                    b.ToTable("Demographics", (string)null);
+                    b.ToTable("DEMOGRAPHICS", (string)null);
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Department", b =>
@@ -1616,7 +1616,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Department", (string)null);
+                    b.ToTable("DEPARTMENT", (string)null);
 
                     b.HasData(
                         new
@@ -1668,7 +1668,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("EmployeeType", (string)null);
+                    b.ToTable("EMPLOYEETYPE", (string)null);
 
                     b.HasData(
                         new
@@ -1696,7 +1696,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("EmploymentStatus", (string)null);
+                    b.ToTable("EMPLOYMENTSTATUS", (string)null);
 
                     b.HasData(
                         new
@@ -1733,7 +1733,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("EmploymentType", (string)null);
+                    b.ToTable("EMPLOYMENTTYPE", (string)null);
 
                     b.HasData(
                         new
@@ -1770,7 +1770,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Enrollment", (string)null);
+                    b.ToTable("ENROLLMENT", (string)null);
 
                     b.HasData(
                         new
@@ -1812,7 +1812,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Gender", (string)null);
+                    b.ToTable("GENDER", (string)null);
 
                     b.HasData(
                         new
@@ -1846,7 +1846,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PayClassification", (string)null);
+                    b.ToTable("PAYCLASSIFICATION", (string)null);
 
                     b.HasData(
                         new
@@ -2288,7 +2288,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PayFrequency", (string)null);
+                    b.ToTable("PAYFREQUENCY", (string)null);
 
                     b.HasData(
                         new
@@ -2323,7 +2323,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasPrecision(9, 2)
                         .HasColumnType("DECIMAL(9,2)");
 
-                    b.Property<decimal>("EarningsCurrentYear")
+                    b.Property<decimal?>("EarningsCurrentYear")
+                        .IsRequired()
                         .HasPrecision(8, 2)
                         .HasColumnType("DECIMAL(8,2)");
 
@@ -2353,7 +2354,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasPrecision(9, 2)
                         .HasColumnType("DECIMAL(9,2)");
 
-                    b.Property<decimal>("HoursCurrentYear")
+                    b.Property<decimal?>("HoursCurrentYear")
+                        .IsRequired()
                         .HasPrecision(4, 2)
                         .HasColumnType("DECIMAL(4,2)");
 
@@ -2415,7 +2417,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasIndex("ZeroContributionReasonId");
 
-                    b.ToTable("PayProfit", (string)null);
+                    b.ToTable("PAYPROFIT", (string)null);
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.ProfitCode", b =>
@@ -2435,7 +2437,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasKey("Code");
 
-                    b.ToTable("ProfitCode", (string)null);
+                    b.ToTable("PROFITCODE", (string)null);
 
                     b.HasData(
                         new
@@ -2553,7 +2555,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasIndex("TaxCodeId");
 
-                    b.ToTable("ProfitDetail", (string)null);
+                    b.ToTable("PROFITDETAIL", (string)null);
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.TaxCode", b =>
@@ -2568,7 +2570,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasKey("Code");
 
-                    b.ToTable("TaxCode", (string)null);
+                    b.ToTable("TAXCODE", (string)null);
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.TerminationCode", b =>
@@ -2583,7 +2585,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TerminationCode", (string)null);
+                    b.ToTable("TERMINATIONCODE", (string)null);
 
                     b.HasData(
                         new
@@ -2660,7 +2662,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ZeroContributionReason", (string)null);
+                    b.ToTable("ZEROCONTRIBUTIONREASON", (string)null);
 
                     b.HasData(
                         new
@@ -2775,7 +2777,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                             b1.HasIndex("CountryISO");
 
-                            b1.ToTable("Beneficiary");
+                            b1.ToTable("BENEFICIARY");
 
                             b1.WithOwner()
                                 .HasForeignKey("BeneficiaryPSN");
@@ -2810,7 +2812,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                             b1.HasKey("BeneficiaryPSN");
 
-                            b1.ToTable("Beneficiary");
+                            b1.ToTable("BENEFICIARY");
 
                             b1.WithOwner()
                                 .HasForeignKey("BeneficiaryPSN");
@@ -2930,7 +2932,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                             b1.HasIndex("CountryISO");
 
-                            b1.ToTable("Demographics");
+                            b1.ToTable("DEMOGRAPHICS");
 
                             b1.HasOne("Demoulas.ProfitSharing.Data.Entities.Country", null)
                                 .WithMany()
@@ -2964,7 +2966,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                             b1.HasKey("DemographicOracleHcmId");
 
-                            b1.ToTable("Demographics");
+                            b1.ToTable("DEMOGRAPHICS");
 
                             b1.WithOwner()
                                 .HasForeignKey("DemographicOracleHcmId");
