@@ -31,7 +31,7 @@ public class YearEndService : IYearEndService
             var rslts = await (from dem in ctx.Demographics
                     join pdJoin in ctx.ProfitDetails on dem.SSN equals pdJoin.SSN into demPdJoin
                     from pd in demPdJoin.DefaultIfEmpty()
-                    join pp in ctx.PayProfits on dem.SSN equals pp.EmployeeSSN into DemPdPpJoin
+                    join pp in ctx.PayProfits on dem.SSN equals pp.EmployeeSSN  into DemPdPpJoin
                     from DemPdPp in DemPdPpJoin.DefaultIfEmpty()
                     where dupSsns.Contains(dem.SSN)
                     group new { dem, DemPdPp }
@@ -64,7 +64,7 @@ public class YearEndService : IYearEndService
                             City = grp.Key.City,
                             State = grp.Key.State,
                             PostalCode = grp.Key.PostalCode,
-                            CountryISO = Constants.US,
+                            CountryISO = Constants.US
                         },
                         HireDate = grp.Key.HireDate,
                         TerminationDate = grp.Key.TerminationDate,
@@ -72,12 +72,12 @@ public class YearEndService : IYearEndService
                         Status = grp.Key.EmploymentStatusId,
                         StoreNumber = grp.Key.StoreNumber,
                         ProfitSharingRecords = grp.Count(),
-                        HoursCurrentYear = grp.Key.HoursCurrentYear,
-                        EarningsCurrentYear = grp.Key.EarningsCurrentYear,
+                        HoursCurrentYear = grp.Key.HoursCurrentYear ?? 0,
+                        EarningsCurrentYear = grp.Key.EarningsCurrentYear ?? 0,
                     }
-                ).ToPaginationResultsAsync(req, ct);
+                ).ToPaginationResultsAsync(req, forceSingleQuery: true, ct);
 
-            return new ReportResponseBase<PayrollDuplicateSSNResponseDto>()
+            return new ReportResponseBase<PayrollDuplicateSSNResponseDto>
             {
                 ReportDate = DateTimeOffset.Now, ReportName = "Duplicate SSNs", Response = rslts
             };
@@ -94,7 +94,7 @@ public class YearEndService : IYearEndService
              where dem == null
              orderby pp.EmployeeBadge, pp.EmployeeSSN
              select new PayProfitBadgesNotInDemographicsResponse { EmployeeBadge = pp.EmployeeBadge, EmployeeSSN = pp.EmployeeSSN }
-            ).ToPaginationResultsAsync(req, ct);
+            ).ToPaginationResultsAsync(req, forceSingleQuery: true, ct);
         });
 
         return new ReportResponseBase<PayProfitBadgesNotInDemographicsResponse>
@@ -120,7 +120,7 @@ public class YearEndService : IYearEndService
                         EmployeeBadge = p.EmployeeBadge, EmployeeSSN = p.EmployeeSSN, EtvaValue = p.EarningsEtvaValue
                     })
                     .OrderBy(p => p.EmployeeBadge)
-                    .ToPaginationResultsAsync(req, cancellationToken);
+                    .ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken);
             });
 
             _logger.LogWarning("Returned {results} records", results.PageSize);
@@ -153,7 +153,7 @@ public class YearEndService : IYearEndService
                        Status = demographic.EmploymentStatusId
                     };
 
-                return query.ToPaginationResultsAsync(req, cancellationToken);
+                return query.ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken);
             });
 
             _logger.LogWarning("Returned {results} records", results.PageSize);
@@ -218,7 +218,7 @@ public class YearEndService : IYearEndService
                                 RehireDate = g.Key.ReHireDate,
                                 Status = g.Key.EmploymentStatusId,
                                 Store = g.Key.StoreNumber,
-                                EarningsCurrentYear = g.Key.EarningsCurrentYear,
+                                EarningsCurrentYear = g.Key.EarningsCurrentYear ?? 0,
                                 ContactInfo = new ContactInfoResponseDto
                                 {
                                     EmailAddress = g.Key.EmailAddress,
@@ -236,7 +236,7 @@ public class YearEndService : IYearEndService
                                 }
                             };
 
-                return query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
+                return query.ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken: cancellationToken);
             });
 
             _logger.LogWarning("Returned {results} records", results.PageSize);
@@ -266,7 +266,7 @@ public class YearEndService : IYearEndService
                                 Status = dem.EmploymentStatusId,
                                 Store = dem.StoreNumber,
                             };
-                return query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
+                return query.ToPaginationResultsAsync(req, forceSingleQuery:true, cancellationToken: cancellationToken);
             });
 
             _logger.LogInformation("Returned {results} records", results.PageSize);
