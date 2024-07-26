@@ -112,7 +112,7 @@ public sealed class YearEndClient : IYearEndService
             query["take"] = req.Take.Value.ToString();
         }
 
-        var uriBuilder = new UriBuilder($"{BaseApiPath}/{endpointRoute}/")
+        var uriBuilder = new UriBuilder($"{_httpClient.BaseAddress}{BaseApiPath}/{endpointRoute}/")
         {
             Query = query.ToString()
         };
