@@ -1,4 +1,7 @@
 ﻿using System.Collections.Frozen;
+using Demoulas.Common.Contracts.Request;
+using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -19,11 +22,11 @@ public class YearEndService : IYearEndService
         _logger = factory.CreateLogger<YearEndService>();
     }
 
-    public async Task<ReportResponseBase<PayrollDuplicateSSNResponseDto>> GetDuplicateSSNs(CancellationToken ct)
+    public async Task<ReportResponseBase<PayrollDuplicateSSNResponseDto>> GetDuplicateSSNs(PaginationRequestDto req, CancellationToken ct)
     {
         return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var dupSsns = await ctx.Demographics.GroupBy(x => x.SSN).Where(x => x.Count() > 1).Select(x => x.Key).ToListAsync();
+            var dupSsns = await ctx.Demographics.GroupBy(x => x.SSN).Where(x => x.Count() > 1).Select(x => x.Key).ToListAsync(cancellationToken: ct);
 
             var rslts = await (from dem in ctx.Demographics
                     join pdJoin in ctx.ProfitDetails on dem.SSN equals pdJoin.SSN into demPdJoin
@@ -55,10 +58,14 @@ public class YearEndService : IYearEndService
                         BadgeNumber = grp.Key.BadgeNumber,
                         SSN = grp.Key.SSN,
                         Name = grp.Key.FullName,
-                        Address = grp.Key.Street,
-                        City = grp.Key.City,
-                        State = grp.Key.State,
-                        PostalCode = grp.Key.PostalCode,
+                        Address = new AddressResponseDto
+                        {
+                            Street = grp.Key.Street,
+                            City = grp.Key.City,
+                            State = grp.Key.State,
+                            PostalCode = grp.Key.PostalCode,
+                            CountryISO = Constants.US,
+                        },
                         HireDate = grp.Key.HireDate,
                         TerminationDate = grp.Key.TerminationDate,
                         RehireDate = grp.Key.ReHireDate,
@@ -68,70 +75,68 @@ public class YearEndService : IYearEndService
                         HoursCurrentYear = grp.Key.HoursCurrentYear,
                         EarningsCurrentYear = grp.Key.EarningsCurrentYear,
                     }
-                ).ToListAsync(ct);
+                ).ToPaginationResultsAsync(req, ct);
 
             return new ReportResponseBase<PayrollDuplicateSSNResponseDto>()
             {
-                ReportDate = DateTimeOffset.Now,
-                ReportName = "Duplicate SSNs",
-                Results = rslts.ToFrozenSet()
+                ReportDate = DateTimeOffset.Now, ReportName = "Duplicate SSNs", Response = rslts
             };
         });
     }
 
-    public async Task<ReportResponseBase<PayProfitBadgesNotInDemographicsResponse>> GetPayProfitBadgesNotInDemographics(CancellationToken ct = default)
+    public async Task<ReportResponseBase<PayProfitBadgesNotInDemographicsResponse>> GetPayProfitBadgesNotInDemographics(PaginationRequestDto req, CancellationToken ct = default)
     {
-        var results = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        var results = await _dataContextFactory.UseReadOnlyContext(ctx =>
         {
-            return await (from pp in ctx.PayProfits
+            return (from pp in ctx.PayProfits
              join dem in ctx.Demographics on pp.EmployeeBadge equals dem.BadgeNumber into demTmp
              from dem in demTmp.DefaultIfEmpty()
              where dem == null
              orderby pp.EmployeeBadge, pp.EmployeeSSN
              select new PayProfitBadgesNotInDemographicsResponse { EmployeeBadge = pp.EmployeeBadge, EmployeeSSN = pp.EmployeeSSN }
-            ).ToListAsync(ct);
+            ).ToPaginationResultsAsync(req, ct);
         });
 
         return new ReportResponseBase<PayProfitBadgesNotInDemographicsResponse>
         {
             ReportName = "Payprofit Badges not in Demographics",
             ReportDate = DateTimeOffset.Now,
-            Results = results.ToFrozenSet()
+            Response = results
         };
     }
 
-    public async Task<ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>> GetNegativeETVAForSSNsOnPayProfitResponse(CancellationToken cancellationToken = default)
+    public async Task<ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>> GetNegativeETVAForSSNsOnPayProfitResponse(PaginationRequestDto req, CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("Request NEGATIVE ETVA FOR SSNs ON PAYPROFIT"))
         {
-            List<NegativeETVAForSSNsOnPayProfitResponse> results = await _dataContextFactory.UseReadOnlyContext(async c =>
+            var results = await _dataContextFactory.UseReadOnlyContext(c =>
             {
                 var ssnUnion = c.Demographics.Select(d => d.SSN).Union(c.Beneficiaries.Select(b => b.SSN));
 
-                return await c.PayProfits
+                return c.PayProfits
                     .Where(p => ssnUnion.Contains(p.EmployeeSSN) && p.EarningsEtvaValue < 0)
                     .Select(p => new NegativeETVAForSSNsOnPayProfitResponse
                     {
                         EmployeeBadge = p.EmployeeBadge, EmployeeSSN = p.EmployeeSSN, EtvaValue = p.EarningsEtvaValue
                     })
                     .OrderBy(p => p.EmployeeBadge)
-                    .ToListAsync(cancellationToken);
+                    .ToPaginationResultsAsync(req, cancellationToken);
             });
 
-            _logger.LogWarning("Returned {results} records", results.Count);
+            _logger.LogWarning("Returned {results} records", results.PageSize);
 
             return new ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>
             {
-                ReportName = "NEGATIVE ETVA FOR SSNs ON PAYPROFIT", ReportDate = DateTimeOffset.Now, Results = results.ToFrozenSet()
+                ReportName = "NEGATIVE ETVA FOR SSNs ON PAYPROFIT", ReportDate = DateTimeOffset.Now, Response = results
             };
         }
     }
 
-    public async Task<ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>> GetMismatchedSsnsPayprofitAndDemographicsOnSameBadge(CancellationToken cancellationToken = default)
+    public async Task<ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>> GetMismatchedSsnsPayprofitAndDemographicsOnSameBadge(PaginationRequestDto req, CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("Request MISMATCHED SSNs PAYPROFIT AND DEMO ON SAME BADGE"))
         {
-            List<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto> results = await _dataContextFactory.UseReadOnlyContext(c =>
+            var results = await _dataContextFactory.UseReadOnlyContext(c =>
             {
                 var query = from demographic in c.Demographics
                     join payProfit in c.PayProfits
@@ -148,25 +153,25 @@ public class YearEndService : IYearEndService
                        Status = demographic.EmploymentStatusId
                     };
 
-                return query.ToListAsync(cancellationToken);
+                return query.ToPaginationResultsAsync(req, cancellationToken);
             });
 
-            _logger.LogWarning("Returned {results} records", results.Count);
+            _logger.LogWarning("Returned {results} records", results.PageSize);
 
             return new ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>
             {
                 ReportName = "MISMATCHED SSNs PAYPROFIT AND DEMO ON SAME BADGE",
                 ReportDate = DateTimeOffset.Now,
-                Results = results.ToFrozenSet()
+                Response = results
             };
         }
     }
 
-    public async Task<ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto>> GetPayrollDuplicateSsnsOnPayprofit(CancellationToken cancellationToken = default)
+    public async Task<ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto>> GetPayrollDuplicateSsnsOnPayprofit(PaginationRequestDto req, CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("Request PAYROLL DUPLICATE SSNs ON PAYPROFIT"))
         {
-            List<PayrollDuplicateSsnsOnPayprofitResponseDto> results = await _dataContextFactory.UseReadOnlyContext(context =>
+            var results = await _dataContextFactory.UseReadOnlyContext(context =>
             {
                 var query = from payProfit in context.PayProfits
                             join demographics in context.Demographics
@@ -231,25 +236,25 @@ public class YearEndService : IYearEndService
                                 }
                             };
 
-                return query.ToListAsync(cancellationToken: cancellationToken);
+                return query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
             });
 
-            _logger.LogWarning("Returned {results} records", results.Count);
+            _logger.LogWarning("Returned {results} records", results.PageSize);
 
             return new ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto>
             {
                 ReportName = "PAYROLL DUPLICATE SSNs ON PAYPROFIT",
                 ReportDate = DateTimeOffset.Now,
-                Results = results.ToFrozenSet()
+                Response = results
             };
         }
     }
 
-    public async Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfit(CancellationToken cancellationToken = default)
+    public async Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfit(PaginationRequestDto req, CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("Request BEGIN DEMOGRAPHIC BADGES NOT IN PAY PROFIT"))
         {
-            List<DemographicBadgesNotInPayProfitResponse> results = await _dataContextFactory.UseReadOnlyContext(ctx =>
+            var results = await _dataContextFactory.UseReadOnlyContext(ctx =>
             {
                 var query = from dem in ctx.Demographics
                             where !(from pp in ctx.PayProfits select pp.EmployeeBadge).Contains(dem.BadgeNumber)
@@ -261,16 +266,16 @@ public class YearEndService : IYearEndService
                                 Status = dem.EmploymentStatusId,
                                 Store = dem.StoreNumber,
                             };
-                return query.ToListAsync(cancellationToken: cancellationToken);
+                return query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
             });
 
-            _logger.LogInformation("Returned {results} records", results.Count);
+            _logger.LogInformation("Returned {results} records", results.PageSize);
 
             return new ReportResponseBase<DemographicBadgesNotInPayProfitResponse>
             {
                 ReportDate = DateTimeOffset.Now,
                 ReportName = "DEMOGRAPHICS BADGES NOT ON PAYPROFIT",
-                Results = results.ToFrozenSet()
+                Response = results
             };
         }
     }

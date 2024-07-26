@@ -4,6 +4,7 @@ using CsvHelper.Configuration;
 using CsvHelper;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using FastEndpoints;
+using Demoulas.Common.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.Endpoints.Base;
 /// <summary>
@@ -15,17 +16,21 @@ namespace Demoulas.ProfitSharing.Endpoints.Base;
 /// <typeparam name="RespType">Response type of the endpoint.</typeparam>
 /// <typeparam name="MapType">A mapping class that converts from a dto to a CSV format</typeparam>
 public abstract class EndpointWithCSVBase<ReqType, RespType, MapType> : Endpoint<ReqType, ReportResponseBase<RespType>>
-    where ReqType : notnull
+    where ReqType : PaginationRequestDto
     where RespType : class
     where MapType : ClassMap<RespType>
 {
+    /// <summary>
+    /// Use to provide a simple example request when no more complex than a simple Pagination Request is needed
+    /// </summary>
+    protected PaginationRequestDto SimpleExampleRequest => new PaginationRequestDto { Skip = 0, Take = byte.MaxValue };
 
     /// <summary>
     /// Called when the service is requested.  Developer should return a dto
     /// </summary>
     /// <param name="ct"></param>
     /// <returns></returns>
-    public abstract Task<ReportResponseBase<RespType>> GetResponse(CancellationToken ct);
+    public abstract Task<ReportResponseBase<RespType>> GetResponse(ReqType req, CancellationToken ct);
 
     /// <summary>
     /// Returns the base portion of the filename downloaded to the browser.
@@ -35,8 +40,7 @@ public abstract class EndpointWithCSVBase<ReqType, RespType, MapType> : Endpoint
     public sealed override async Task HandleAsync(ReqType req, CancellationToken ct)
     {
         string acceptHeader = HttpContext.Request.Headers["Accept"].ToString().ToLower(CultureInfo.InvariantCulture);
-
-        var response = await GetResponse(ct);
+        var response = await GetResponse(req, ct);
 
         if (acceptHeader.Contains("text/csv"))
         {
@@ -51,14 +55,14 @@ public abstract class EndpointWithCSVBase<ReqType, RespType, MapType> : Endpoint
     private MemoryStream GenerateCsvStream(ReportResponseBase<RespType> report)
     {
         MemoryStream memoryStream = new MemoryStream();
-        using (StreamWriter streamWriter = new StreamWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
+        using (StreamWriter streamWriter = new StreamWriter(memoryStream, Encoding.UTF8))
         using (CsvWriter csvWriter = new CsvWriter(streamWriter, new CsvConfiguration(CultureInfo.InvariantCulture) { Delimiter = "," }))
         {
             streamWriter.WriteLine($"{report.ReportDate:MMM dd yyyy HH:mm}");
             streamWriter.WriteLine(report.ReportName);
 
             csvWriter.Context.RegisterClassMap<MapType>();
-            csvWriter.WriteRecords(report.Results);
+            csvWriter.WriteRecords(report.Response.Results);
             streamWriter.Flush();
         }
         memoryStream.Position = 0; // Reset the stream position to the beginning

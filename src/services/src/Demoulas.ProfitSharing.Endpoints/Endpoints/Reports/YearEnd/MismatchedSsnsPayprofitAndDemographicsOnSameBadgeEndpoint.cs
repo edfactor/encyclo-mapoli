@@ -1,4 +1,6 @@
 ﻿using CsvHelper.Configuration;
+using Demoulas.Common.Contracts.Request;
+using Demoulas.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -11,7 +13,7 @@ using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Mismatch
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 
-public class MismatchedSsnsPayprofitAndDemographicsOnSameBadgeEndpoint : EndpointWithCSVBase<EmptyRequest, MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto, MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseMap>
+public class MismatchedSsnsPayprofitAndDemographicsOnSameBadgeEndpoint : EndpointWithCSVBase<PaginationRequestDto, MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto, MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseMap>
 {
     private readonly IYearEndService _reportService;
 
@@ -27,21 +29,43 @@ public class MismatchedSsnsPayprofitAndDemographicsOnSameBadgeEndpoint : Endpoin
         Summary(s =>
         {
             s.Summary = "Mismatched SSN's On Pay Profit And Demographics with the same badge number";
-            s.Description = @"SSN and ""clean up"" reports to highlight possible problems which should be corrected before profit sharing is run. This job can be run multiple times.";
+            s.Description =
+                @"SSN and ""clean up"" reports to highlight possible problems which should be corrected before profit sharing is run. This job can be run multiple times.";
+            s.ExampleRequest = SimpleExampleRequest;
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
                     200,
                     new ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>
                     {
-                        ReportName = "MISMATCHED SSNs PAYPROFIT AND DEMO ON SAME BADGE", 
+                        ReportName = ReportFileName,
                         ReportDate = DateTimeOffset.Now,
-                        Results = new HashSet<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>
+                        Response = new PaginatedResponseDto<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>()
                         {
-                            new MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto { EmployeeBadge = 47425, EmployeeSSN = 900047425, Name = "John", Status = EmploymentStatus.Constants.Active},
-                            new MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto { EmployeeBadge = 82424, EmployeeSSN = 900082424, Name = "Jane", Status = EmploymentStatus.Constants.Delete},
-                            new MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto { EmployeeBadge = 85744, EmployeeSSN = 900085744, Name = "Tim", Status = EmploymentStatus.Constants.Inactive},
-                            new MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto { EmployeeBadge = 94861, EmployeeSSN = 900094861, Name = "Sally", Status = EmploymentStatus.Constants.Terminated}
+                            Results = new List<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>
+                            {
+                                new MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto
+                                {
+                                    EmployeeBadge = 47425, EmployeeSSN = 900047425, Name = "John", Status = EmploymentStatus.Constants.Active
+                                },
+                                new MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto
+                                {
+                                    EmployeeBadge = 82424, EmployeeSSN = 900082424, Name = "Jane", Status = EmploymentStatus.Constants.Delete
+                                },
+                                new MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto
+                                {
+                                    EmployeeBadge = 85744, EmployeeSSN = 900085744, Name = "Tim", Status = EmploymentStatus.Constants.Inactive
+                                },
+                                new MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto
+                                {
+                                    EmployeeBadge = 94861,
+                                    EmployeeSSN = 900094861,
+                                    Name = "Sally",
+                                    Status = EmploymentStatus.Constants.Terminated,
+                                    Store = 4,
+                                    PayProfitSSN = 123_45_6789
+                                }
+                            }
                         }
                     }
                 }
@@ -53,9 +77,9 @@ public class MismatchedSsnsPayprofitAndDemographicsOnSameBadgeEndpoint : Endpoin
 
     public override string ReportFileName => "MISMATCHED-PAYPROF-DEM-SSNS";
 
-    public override Task<ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>> GetResponse(CancellationToken ct)
+    public override Task<ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>> GetResponse(PaginationRequestDto req, CancellationToken ct)
     {
-        return _reportService.GetMismatchedSsnsPayprofitAndDemographicsOnSameBadge(ct);
+        return _reportService.GetMismatchedSsnsPayprofitAndDemographicsOnSameBadge(req, ct);
     }
 
 

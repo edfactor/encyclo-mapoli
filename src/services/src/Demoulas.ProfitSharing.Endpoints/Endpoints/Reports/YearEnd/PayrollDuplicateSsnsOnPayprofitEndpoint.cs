@@ -1,6 +1,8 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
 using CsvHelper.TypeConversion;
+using Demoulas.Common.Contracts.Request;
+using Demoulas.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -12,7 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 
-public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithCSVBase<EmptyRequest, PayrollDuplicateSsnsOnPayprofitResponseDto, PayrollDuplicateSsnsOnPayprofitEndpoint.PayrollDuplicateSsnsOnPayprofitResponseMap>
+public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithCSVBase<PaginationRequestDto, PayrollDuplicateSsnsOnPayprofitResponseDto, PayrollDuplicateSsnsOnPayprofitEndpoint.PayrollDuplicateSsnsOnPayprofitResponseMap>
 {
     private readonly IYearEndService _reportService;
 
@@ -28,35 +30,40 @@ public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithCSVBase<Empty
         Summary(s =>
         {
             s.Summary = "Payroll duplicate ssns on payprofit";
-            s.Description = @"SSN and ""clean up"" reports to highlight possible problems which should be corrected before profit sharing is run. This job can be run multiple times.";
+            s.Description =
+                @"SSN and ""clean up"" reports to highlight possible problems which should be corrected before profit sharing is run. This job can be run multiple times.";
+            s.ExampleRequest = SimpleExampleRequest;
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
                     200,
                     new ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto>
                     {
-                        ReportName = "PAYROLL DUPLICATE SSNs ON PAYPROFIT", 
+                        ReportName = ReportFileName,
                         ReportDate = DateTimeOffset.Now,
-                        Results = new HashSet<PayrollDuplicateSsnsOnPayprofitResponseDto>
+                        Response = new PaginatedResponseDto<PayrollDuplicateSsnsOnPayprofitResponseDto>
                         {
-                            new PayrollDuplicateSsnsOnPayprofitResponseDto
+                            Results = new List<PayrollDuplicateSsnsOnPayprofitResponseDto>
                             {
-                                EmployeeBadge = 47425, 
-                                EmployeeSSN = 900047425, 
-                                Name = "John", 
-                                Status = EmploymentStatus.Constants.Active, 
-                                Store = 14,
-                                EarningsCurrentYear = 32_100,
-                                PayProfitSSN = 900047425,
-                                Address = new AddressResponseDto
+                                new PayrollDuplicateSsnsOnPayprofitResponseDto
                                 {
-                                    Street = "123 Main",
-                                    City = "Sydney",
-                                    State = "HI",
-                                    CountryISO = Common.Constants.US,
-                                    PostalCode = "01234"
-                                },
-                                ContactInfo = new ContactInfoResponseDto()
+                                    EmployeeBadge = 47425,
+                                    EmployeeSSN = 900047425,
+                                    Name = "John",
+                                    Status = EmploymentStatus.Constants.Active,
+                                    Store = 14,
+                                    EarningsCurrentYear = 32_100,
+                                    PayProfitSSN = 900047425,
+                                    Address = new AddressResponseDto
+                                    {
+                                        Street = "123 Main",
+                                        City = "Sydney",
+                                        State = "HI",
+                                        CountryISO = Common.Constants.US,
+                                        PostalCode = "01234"
+                                    },
+                                    ContactInfo = new ContactInfoResponseDto()
+                                }
                             }
                         }
                     }
@@ -69,9 +76,9 @@ public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithCSVBase<Empty
 
     public override string ReportFileName => "PAYROLL DUPLICATE SSNs ON PAYPROFIT";
 
-    public override async Task<ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto>> GetResponse(CancellationToken ct)
+    public override async Task<ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto>> GetResponse(PaginationRequestDto req, CancellationToken ct)
     {
-        return await _reportService.GetPayrollDuplicateSsnsOnPayprofit(ct);
+        return await _reportService.GetPayrollDuplicateSsnsOnPayprofit(req, ct);
     }
 
     public sealed class YearMonthDayTypeConverter : DefaultTypeConverter
