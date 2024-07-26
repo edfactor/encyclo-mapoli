@@ -9,8 +9,6 @@ public static class ServicesExtension
 {
     public static IHostApplicationBuilder AddProjectServices(this IHostApplicationBuilder builder)
     {
-        _ = builder.Services.AddSingleton<AppVersionInfo>();
-
         _ = Services.Extensions.ServicesExtension.AddProjectServices(builder);
 
         return builder;
