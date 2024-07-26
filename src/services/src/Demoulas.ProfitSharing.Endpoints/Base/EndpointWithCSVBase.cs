@@ -7,6 +7,7 @@ using FastEndpoints;
 using Demoulas.Common.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.Endpoints.Base;
+
 /// <summary>
 /// Endpoints deriving from this class will automatically be able to return a CSV when the accept headers contain text/csv.
 /// The developer needs to override the GetResponse member to provide a response via a DTO.  The developer also needs to override the report filename property.
@@ -55,7 +56,7 @@ public abstract class EndpointWithCSVBase<ReqType, RespType, MapType> : Endpoint
     private MemoryStream GenerateCsvStream(ReportResponseBase<RespType> report)
     {
         MemoryStream memoryStream = new MemoryStream();
-        using (StreamWriter streamWriter = new StreamWriter(memoryStream, Encoding.UTF8))
+        using (StreamWriter streamWriter = new StreamWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
         using (CsvWriter csvWriter = new CsvWriter(streamWriter, new CsvConfiguration(CultureInfo.InvariantCulture) { Delimiter = "," }))
         {
             streamWriter.WriteLine($"{report.ReportDate:MMM dd yyyy HH:mm}");
@@ -65,6 +66,7 @@ public abstract class EndpointWithCSVBase<ReqType, RespType, MapType> : Endpoint
             csvWriter.WriteRecords(report.Response.Results);
             streamWriter.Flush();
         }
+
         memoryStream.Position = 0; // Reset the stream position to the beginning
         return memoryStream;
     }

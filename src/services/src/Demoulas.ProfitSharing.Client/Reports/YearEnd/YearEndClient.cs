@@ -42,9 +42,9 @@ public sealed class YearEndClient : IYearEndService
         return CallReportEndpoint<PayrollDuplicateSSNResponseDto>(req, "duplicate-ssns", ct);
     }
 
-    public Task<Stream> DownloadDuplicateSsNs(CancellationToken ct)
+    public Task<Stream> DownloadDuplicateSsNs(CancellationToken cancellationToken)
     {
-        return _httpDownloadClient.GetStreamAsync($"{BaseApiPath}/duplicate-ssns", ct);
+        return DownloadCsvReport("duplicate-ssns", cancellationToken);
     }
 
     public Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfit(PaginationRequestDto req, CancellationToken ct = default)
@@ -61,7 +61,7 @@ public sealed class YearEndClient : IYearEndService
 
     public Task<Stream> DownloadNegativeETVAForSSNsOnPayProfitResponse(CancellationToken cancellationToken = default)
     {
-        return _httpDownloadClient.GetStreamAsync($"{BaseApiPath}/negative-evta-ssn", cancellationToken);
+        return DownloadCsvReport("negative-evta-ssn", cancellationToken);
     }
 
     #endregion
@@ -74,7 +74,7 @@ public sealed class YearEndClient : IYearEndService
 
     public Task<Stream> DownloadMismatchedSsnsPayprofitAndDemographicsOnSameBadge(CancellationToken cancellationToken = default)
     {
-        return _httpDownloadClient.GetStreamAsync($"{BaseApiPath}/mismatched-ssns-payprofit-and-demo-on-same-badge", cancellationToken);
+        return DownloadCsvReport("mismatched-ssns-payprofit-and-demo-on-same-badge", cancellationToken);
     }
 
     public Task<ReportResponseBase<PayProfitBadgesNotInDemographicsResponse>> GetPayProfitBadgesNotInDemographics(PaginationRequestDto req, CancellationToken cancellationToken = default)
@@ -92,13 +92,33 @@ public sealed class YearEndClient : IYearEndService
 
     public Task<Stream> DownloadPayrollDuplicateSsnsOnPayprofit(CancellationToken cancellationToken = default)
     {
-        return _httpDownloadClient.GetStreamAsync($"{BaseApiPath}/payroll-duplicate-ssns-on-payprofit", cancellationToken);
+        return DownloadCsvReport("payroll-duplicate-ssns-on-payprofit", cancellationToken);
     }
 
     #endregion
 
+    private Task<Stream> DownloadCsvReport(string endpointRoute, CancellationToken cancellationToken)
+    {
+        UriBuilder uriBuilder = BuildPaginatedUrl(new PaginationRequestDto { Skip = 0, Take = int.MaxValue }, endpointRoute);
+        return _httpDownloadClient.GetStreamAsync(uriBuilder.Uri, cancellationToken);
+    }
 
     private async Task<ReportResponseBase<TResponseDto>> CallReportEndpoint<TResponseDto>(PaginationRequestDto req, string endpointRoute, CancellationToken cancellationToken) where TResponseDto : class
+    {
+        UriBuilder uriBuilder = BuildPaginatedUrl(req, endpointRoute);
+        var response = await _httpClient.GetAsync(uriBuilder.Uri, cancellationToken);
+        _ = response.EnsureSuccessStatusCode();
+
+        var rslt = await response.Content.ReadFromJsonAsync<ReportResponseBase<TResponseDto>>(_options, cancellationToken);
+        return rslt ?? new ReportResponseBase<TResponseDto>
+        {
+            ReportName = Constants.ErrorMessages.ReportNotFound,
+            ReportDate = SqlDateTime.MinValue.Value,
+            Response = new PaginatedResponseDto<TResponseDto>()
+        };
+    }
+
+    private UriBuilder BuildPaginatedUrl(PaginationRequestDto req, string endpointRoute)
     {
         var query = HttpUtility.ParseQueryString(string.Empty);
 
@@ -116,16 +136,6 @@ public sealed class YearEndClient : IYearEndService
         {
             Query = query.ToString()
         };
-
-        var response = await _httpClient.GetAsync(uriBuilder.ToString(), cancellationToken);
-        _ = response.EnsureSuccessStatusCode();
-
-        var rslt = await response.Content.ReadFromJsonAsync<ReportResponseBase<TResponseDto>>(_options, cancellationToken);
-        return rslt ?? new ReportResponseBase<TResponseDto>
-        {
-            ReportName = Constants.ErrorMessages.ReportNotFound,
-            ReportDate = SqlDateTime.MinValue.Value,
-            Response = new PaginatedResponseDto<TResponseDto>()
-        };
+        return uriBuilder;
     }
 }
