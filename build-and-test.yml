@@ -1,0 +1,15 @@
+steps:
+  - step:
+      name: Build and Test
+      runs-on:
+        - windows
+        - self.hosted
+        - appt125
+      script:
+        - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
+        - $env:REPORTS_PATH="../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}"
+        - $env:NUGET_ORG="https://api.nuget.org/v3/index.json"
+        - dotnet workload update --source $env:NUGET_ORG
+        - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml" -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
+      artifacts:
+        - test-reports/**

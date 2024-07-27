@@ -2,7 +2,6 @@
 using Demoulas.ProfitSharing.Api.Extensions;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 
 namespace Demoulas.ProfitSharing.Api.Middleware;
 
@@ -47,7 +46,7 @@ public class BadRequestExceptionMiddleware
         ProblemDetails problemDetails = exception.ToProblemDetails(instance: context.Request.Path);
         context.Response.ContentType = "application/problem+json";
         context.Response.StatusCode = exception.StatusCode;
-        return context.Response.WriteAsync(JsonConvert.SerializeObject(problemDetails));
+        return context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(problemDetails));
     }
 
     private static Task HandleUnauthorizedAccessExceptionAsync(HttpContext context, UnauthorizedAccessException exception)
@@ -62,7 +61,7 @@ public class BadRequestExceptionMiddleware
         ValidationProblemDetails problemDetails = exception.ToProblemDetails(instance: context.Request.Path);
         context.Response.ContentType = "application/problem+json";
         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-        return context.Response.WriteAsync(JsonConvert.SerializeObject(problemDetails));
+        return context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(problemDetails));
     }
 
     private static Task HandleExceptionAsync(HttpContext context, Exception exception)
@@ -70,6 +69,6 @@ public class BadRequestExceptionMiddleware
         ProblemDetails problemDetails = exception.ToProblemDetails(instance: context.Request.Path);
         context.Response.ContentType = "application/problem+json";
         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-        return context.Response.WriteAsync(JsonConvert.SerializeObject(problemDetails));
+        return context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(problemDetails));
     }
 }

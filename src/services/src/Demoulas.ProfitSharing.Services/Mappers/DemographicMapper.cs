@@ -123,7 +123,7 @@ public partial class DemographicMapper
             EmploymentTypeId = source.EmploymentTypeCode,
             PayFrequencyId = source.PayFrequencyId,
             GenderId = source.GenderCode,
-            EmploymentStatus = new EmploymentStatus { Id = source.EmploymentStatusId }
+            EmploymentStatusId = source.EmploymentStatusId
         };
     }
 
