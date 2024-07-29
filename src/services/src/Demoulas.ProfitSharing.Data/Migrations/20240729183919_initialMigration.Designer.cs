@@ -12,7 +12,7 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    [Migration("20240729170305_initialMigration")]
+    [Migration("20240729183919_initialMigration")]
     partial class initialMigration
     {
         /// <inheritdoc />
@@ -1563,6 +1563,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DATE")
                         .HasColumnName("HIREDATE")
                         .HasComment("HireDate");
+
+                    b.Property<DateTime>("LastModifiedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("DATE")
+                        .HasDefaultValue(new DateTime(2024, 7, 29, 14, 39, 19, 207, DateTimeKind.Local).AddTicks(4633))
+                        .HasColumnName("LASTMODIFIEDDATE");
 
                     b.Property<string>("LastName")
                         .IsRequired()

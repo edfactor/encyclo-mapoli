@@ -1561,6 +1561,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("HIREDATE")
                         .HasComment("HireDate");
 
+                    b.Property<DateTime>("LastModifiedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("DATE")
+                        .HasDefaultValue(new DateTime(2024, 7, 29, 14, 39, 19, 207, DateTimeKind.Local).AddTicks(4633))
+                        .HasColumnName("LASTMODIFIEDDATE");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(30)

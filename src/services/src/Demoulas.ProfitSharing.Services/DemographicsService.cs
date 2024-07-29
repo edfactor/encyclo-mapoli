@@ -54,11 +54,11 @@ public class DemographicsService : IDemographicsServiceInternal
         using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(AddDemographics), ActivityKind.Internal);
         try
         {
-
-
+            DateTime lastModificationDate = DateTime.Now;
             List<Demographic> entities = await _dataContextFactory.UseWritableContext(async context =>
             {
                 List<Demographic> entities = _mapper.Map(demographics).ToList();
+                entities.ForEach(e=> e.LastModifiedDate = lastModificationDate);
                 context.Demographics.AddRange(entities);
                 await context.SaveChangesAsync(cancellationToken);
                 return entities;

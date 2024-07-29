@@ -270,6 +270,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     ORACLEHCMID = table.Column<long>(type: "NUMBER(15)", precision: 15, nullable: false),
                     SSN = table.Column<long>(type: "NUMBER(9)", precision: 9, nullable: false),
                     BADGENUMBER = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false),
+                    LASTMODIFIEDDATE = table.Column<DateTime>(type: "DATE", nullable: false, defaultValue: new DateTime(2024, 7, 29, 14, 39, 19, 207, DateTimeKind.Local).AddTicks(4633)),
                     FULLNAME = table.Column<string>(type: "NVARCHAR2(60)", maxLength: 60, nullable: false, comment: "FullName"),
                     LASTNAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "LastName"),
                     FIRSTNAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "FirstName"),

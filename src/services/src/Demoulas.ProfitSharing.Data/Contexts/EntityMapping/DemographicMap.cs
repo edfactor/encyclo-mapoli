@@ -128,6 +128,11 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
         });
 
 
+        _ = builder.Property(e => e.LastModifiedDate)
+            .HasColumnType("DATE")
+            .HasDefaultValue(DateTime.Now);
+
+
         builder.HasOne(e => e.PayClassification)
             .WithMany(e => e.Employees)
             .HasForeignKey(e => e.PayClassificationId);
