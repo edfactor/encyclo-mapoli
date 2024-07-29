@@ -1,7 +1,9 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Contracts.Request;
 
@@ -53,6 +55,7 @@ public sealed class OracleDemographicsService
 
     private async IAsyncEnumerable<OracleEmployee?> FetchOracleDemographic(string initialUrl, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
+        OracleHcmActivitySource.Instance.StartActivity(nameof(FetchOracleDemographic), ActivityKind.Internal);
         // Task to fetch data and enqueue it
         string url = initialUrl;
 

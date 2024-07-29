@@ -1,4 +1,6 @@
 ﻿using System.Collections.Frozen;
+using Demoulas.ProfitSharing.Common.ActivitySources;
+using System.Diagnostics;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -42,13 +44,7 @@ public class DemographicsService : IDemographicsServiceInternal
 
     public async Task<ISet<DemographicsResponseDto>?> AddDemographics(IEnumerable<DemographicsRequestDto> demographics, CancellationToken cancellationToken)
     {
-        /*
-         *
-         * TODO: This needs to be an upsert. People who have retired will stay in Profit sharing, but would be removed from 
-         *
-         *
-         */
-
+        using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(AddDemographics), ActivityKind.Internal);
 
         List<Demographic> entities = await _dataContextFactory.UseWritableContext(async context =>
         {

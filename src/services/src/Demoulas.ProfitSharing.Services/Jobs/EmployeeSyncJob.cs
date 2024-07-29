@@ -1,4 +1,6 @@
-﻿using Demoulas.ProfitSharing.Common.Configuration;
+﻿using System.Diagnostics;
+using Demoulas.ProfitSharing.Common.ActivitySources;
+using Demoulas.ProfitSharing.Common.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -30,6 +32,7 @@ public sealed class EmployeeSyncJob : IJob
 
     public Task SynchronizeEmployees(CancellationToken cancellationToken)
     {
+        using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(SynchronizeEmployees), ActivityKind.Internal);
         var oracleHcmEmployees = _oracleDemographicsService.GetAllEmployees(cancellationToken);
         var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees);
         return _demographicsService.AddDemographicsStream(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);

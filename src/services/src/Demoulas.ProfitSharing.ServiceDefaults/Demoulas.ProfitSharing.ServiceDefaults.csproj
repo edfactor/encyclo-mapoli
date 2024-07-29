@@ -19,6 +19,11 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" />
     <PackageReference Include="AspNetCore.HealthChecks.UI.Client" />
+    <PackageReference Include="Oracle.ManagedDataAccess.OpenTelemetry" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Demoulas.ProfitSharing.Common\Demoulas.ProfitSharing.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>
