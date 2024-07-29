@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Bogus.Extensions.UnitedStates;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
@@ -58,7 +59,7 @@ public sealed class EmployeeSyncJob : IJob
                 FullName = employee.Name.DisplayName,
 
 
-                SSN = employee.NationalIdentifier?.NationalIdentifierNumber.ConvertSsnToLong() ?? 0,
+                SSN = (employee.NationalIdentifier?.NationalIdentifierNumber ?? GetFakeSsn()).ConvertSsnToLong() ?? 0,
                 StoreNumber = 0,
                 DepartmentId = Department.Constants.Beer_And_Wine,
                 PayClassificationId = PayClassification.Constants.ApprMeatCutters,
@@ -86,6 +87,14 @@ public sealed class EmployeeSyncJob : IJob
                     CountryISO = employee.Address.Country
                 }
             };
+        }
+
+        yield break;
+
+        string GetFakeSsn()
+        {
+            Bogus.Faker faker = new Bogus.Faker();
+            return faker.Person.Ssn();
         }
     }
 }
