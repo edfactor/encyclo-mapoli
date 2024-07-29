@@ -25,6 +25,9 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new ZeroContributionReasonMap());
         modelBuilder.ApplyConfiguration(new BeneficiaryMap());
         modelBuilder.ApplyConfiguration(new EmploymentStatusMap());
+        modelBuilder.ApplyConfiguration(new JobMap());
+
+        
 
 
         // Force table names to be upper case for consistency with all existing DSM projects

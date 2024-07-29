@@ -1,4 +1,5 @@
 ﻿using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Data.Interfaces;
@@ -11,4 +12,6 @@ public interface IProfitSharingDbContext
 
     DbSet<Beneficiary> Beneficiaries { get; set; }
     DbSet<PayProfit> PayProfits { get; set; }
+
+    DbSet<Job> Jobs { get; set; }
 }

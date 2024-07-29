@@ -1,5 +1,6 @@
 ﻿using Demoulas.Common.Data.Contexts.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +30,7 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
 
     public virtual DbSet<Beneficiary> Beneficiaries { get; set; }
     public virtual DbSet<PayProfit> PayProfits { get; set; }
+    public DbSet<Job> Jobs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

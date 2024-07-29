@@ -66,6 +66,10 @@ public static class ServicesExtension
         });
 
 
+
+        builder.Services.ConfigureMassTransitServices();
+
+
         #region Mappers
 
         builder.Services.AddSingleton<AddressMapper>();
