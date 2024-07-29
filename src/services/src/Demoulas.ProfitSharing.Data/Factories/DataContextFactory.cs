@@ -80,7 +80,7 @@ public sealed class DataContextFactory : IProfitSharingDataContextFactory
             }
 
             MethodInfo addContext = addOracleDatabaseDbContext.MakeGenericMethod(contextFactoryRequest.ContextType);
-            addContext.Invoke(null,
+            _ = addContext.Invoke(null,
             [
                 builder, contextFactoryRequest.ConnectionName, contextFactoryRequest.ConfigureSettings, contextFactoryRequest.ConfigureDbContextOptions
             ]);

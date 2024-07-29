@@ -103,7 +103,7 @@ public sealed class OracleDemographicsService
             Console.ForegroundColor = ConsoleColor.White;
         }
 
-        response.EnsureSuccessStatusCode();
+        _ = response.EnsureSuccessStatusCode();
         return response;
     }
 }

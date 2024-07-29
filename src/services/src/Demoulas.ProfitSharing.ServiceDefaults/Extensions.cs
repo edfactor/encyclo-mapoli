@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Common.ActivitySources;
+﻿using System.Diagnostics;
+using Demoulas.ProfitSharing.Common.ActivitySources;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -17,6 +18,8 @@ public static class Extensions
 {
     public static IHostApplicationBuilder AddServiceDefaults(this IHostApplicationBuilder builder)
     {
+        builder.Services.AddRedaction();
+
         builder.ConfigureOpenTelemetry();
 
         builder.AddDefaultHealthChecks();
@@ -26,10 +29,16 @@ public static class Extensions
         builder.Services.ConfigureHttpClientDefaults(http =>
         {
             // Turn on resilience by default
-            http.AddStandardResilienceHandler();
+            _ = http.AddStandardResilienceHandler();
 
             // Turn on service discovery by default
-            http.AddServiceDiscovery();
+            _ = http.AddServiceDiscovery();
+            _ = http.RedactLoggedHeaders(new[] { "Authorization" });
+
+            if (Debugger.IsAttached)
+            {
+                _ = http.AddExtendedHttpClientLogging();
+            }
         });
 
         // Uncomment the following to restrict the allowed schemes for service discovery.
