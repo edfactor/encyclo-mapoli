@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Globalization;
 using System.Reflection;
 using Aspire.Oracle.EntityFrameworkCore;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
@@ -48,6 +49,7 @@ public sealed class DataContextFactory : IProfitSharingDataContextFactory
             _ = dbBuilder.EnableSensitiveDataLogging(Debugger.IsAttached);
             _ = dbBuilder.EnableDetailedErrors(Debugger.IsAttached);
             _ = dbBuilder.UseOracle(optionsBuilder => _ = optionsBuilder.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion21));
+            _ = dbBuilder.UseUpperCaseNamingConvention();
         }
 
         MethodInfo addOracleDatabaseDbContext = typeof(AspireOracleEFCoreExtensions)
@@ -131,7 +133,7 @@ public sealed class DataContextFactory : IProfitSharingDataContextFactory
                 {
                     // Roll back the transaction if any operation fails
                     await transaction.RollbackAsync(cancellationToken);
-                    _logger.LogError(ex, "Failed to execute operation, rolling back");
+                    _logger.LogError(ex, "Failed to execute operation, rolling back : {message}", ex.Message);
                     throw;
                 }
             });

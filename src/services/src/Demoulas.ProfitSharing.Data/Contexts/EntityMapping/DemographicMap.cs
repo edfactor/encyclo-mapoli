@@ -47,21 +47,17 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
 
         _ = builder.Property(e => e.MiddleName)
             .HasMaxLength(25)
-            .HasComment("MiddleName")
-            .HasColumnName("PY_MNAME");
+            .HasComment("MiddleName");
 
         _ = builder.Property(e => e.StoreNumber)
             .HasPrecision(3)
-            .HasComment("StoreNumber")
-            .HasColumnName("PY_STOR");
+            .HasComment("StoreNumber");
 
         _ = builder.Property(e => e.DepartmentId)
             .HasPrecision(1)
-            .HasComment("Department")
-            .HasColumnName("PY_DP");
+            .HasComment("Department");
 
         builder.Property(e => e.PayClassificationId)
-            .HasColumnName("PY_CLA")
             .HasComment("PayClassification")
             .HasPrecision(2);
 
@@ -110,14 +106,14 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
 
         builder.OwnsOne(e => e.Address, address =>
         {
-            address.Property(a => a.Street).HasMaxLength(30).HasColumnName("Street").HasComment("Street").IsRequired();
-            address.Property(a => a.Street2).HasMaxLength(30).HasColumnName("Street2").HasComment("Street2");
-            address.Property(a => a.Street3).HasMaxLength(30).HasColumnName("Street3").HasComment("Street3");
-            address.Property(a => a.Street4).HasMaxLength(30).HasColumnName("Street4").HasComment("Street4");
-            address.Property(a => a.City).HasMaxLength(25).HasColumnName("City").HasComment("City").IsRequired();
-            address.Property(a => a.State).HasMaxLength(3).HasColumnName("State").HasComment("State").IsRequired();
-            address.Property(a => a.PostalCode).HasMaxLength(9).HasColumnName("PostalCode").HasComment("Postal Code").IsRequired();
-            address.Property(a => a.CountryISO).HasMaxLength(2).HasColumnName("CountryISO").HasDefaultValue(Constants.US);
+            address.Property(a => a.Street).HasMaxLength(30).HasColumnName("STREET").HasComment("Street").IsRequired();
+            address.Property(a => a.Street2).HasMaxLength(30).HasColumnName("STREET2").HasComment("Street2");
+            address.Property(a => a.Street3).HasMaxLength(30).HasColumnName("STREET3").HasComment("Street3");
+            address.Property(a => a.Street4).HasMaxLength(30).HasColumnName("STREET4").HasComment("Street4");
+            address.Property(a => a.City).HasMaxLength(25).HasColumnName("CITY").HasComment("City").IsRequired();
+            address.Property(a => a.State).HasMaxLength(3).HasColumnName("STATE").HasComment("State").IsRequired();
+            address.Property(a => a.PostalCode).HasMaxLength(9).HasColumnName("POSTAL_CODE").HasComment("Postal Code").IsRequired();
+            address.Property(a => a.CountryISO).HasMaxLength(2).HasColumnName("COUNTRY_ISO").HasDefaultValue(Constants.US);
 
             address.HasOne<Country>()
                 .WithMany()
@@ -126,9 +122,9 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
 
         builder.OwnsOne(e => e.ContactInfo, contact =>
         {
-            contact.Property(a => a.PhoneNumber).HasMaxLength(15).HasColumnName("PhoneNumber");
-            contact.Property(a => a.MobileNumber).HasMaxLength(15).HasColumnName("MobileNumber");
-            contact.Property(a => a.EmailAddress).HasMaxLength(50).HasColumnName("EmailAddress");
+            contact.Property(a => a.PhoneNumber).HasMaxLength(15).HasColumnName("PHONE_NUMBER");
+            contact.Property(a => a.MobileNumber).HasMaxLength(15).HasColumnName("MOBILE_NUMBER");
+            contact.Property(a => a.EmailAddress).HasMaxLength(50).HasColumnName("EMAIL_ADDRESS");
         });
 
 
