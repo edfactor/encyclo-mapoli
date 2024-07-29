@@ -105,6 +105,15 @@ public sealed class YearEndClient : IYearEndService
 
     #endregion
 
+    public Task<ReportResponseBase<NamesMissingCommaResponse>> GetNamesMissingComma(CancellationToken cancellationToken = default)
+    {
+        return CallReportEndpoint<NamesMissingCommaResponse>("names-missing-commas", cancellationToken);
+    }
+
+    public Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetDuplicateNamesAndBirthdays(CancellationToken cancellationToken = default)
+    {
+        return CallReportEndpoint<DuplicateNamesAndBirthdaysResponse>("duplicate-names-and-birthdays", cancellationToken);
+    }
 
     private async Task<ReportResponseBase<TResponseDto>> CallReportEndpoint<TResponseDto>(string endpointRoute, CancellationToken cancellationToken) where TResponseDto : class
     {
@@ -119,4 +128,5 @@ public sealed class YearEndClient : IYearEndService
             Results = new HashSet<TResponseDto>(0)
         };
     }
+
 }

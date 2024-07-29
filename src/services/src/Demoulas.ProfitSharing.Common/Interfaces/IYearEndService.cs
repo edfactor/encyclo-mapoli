@@ -13,4 +13,8 @@ public interface IYearEndService
 
     Task<ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto>> GetPayrollDuplicateSsnsOnPayprofit(CancellationToken cancellationToken = default);
     Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfit(CancellationToken cancellationToken = default);
+
+    Task<ReportResponseBase<NamesMissingCommaResponse>> GetNamesMissingComma(CancellationToken cancellationToken = default);
+
+    Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetDuplicateNamesAndBirthdays(CancellationToken cancellationToken = default);
 }
