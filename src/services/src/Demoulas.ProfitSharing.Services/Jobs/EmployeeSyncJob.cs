@@ -93,6 +93,7 @@ public sealed class EmployeeSyncJob : IJob
 
         string GetFakeSsn()
         {
+            // We MUST construct the object here, otherwise we will always get the same SSN
             Bogus.Faker faker = new Bogus.Faker();
             return faker.Person.Ssn();
         }
