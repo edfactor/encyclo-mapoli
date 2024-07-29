@@ -4,18 +4,20 @@ using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Services.HostedServices;
 using Demoulas.ProfitSharing.Services.Jobs;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Demoulas.ProfitSharing.Services.Extensions;
 internal static class MassTransitExtension
 {
-    public static void ConfigureMassTransitServices(this IServiceCollection services)
+    public static void ConfigureMassTransitServices(this IHostApplicationBuilder builder)
     {
-        services.AddMassTransit(x =>
+        builder.Services.AddMassTransit(x =>
         {
             x.AddConsumer<JobConsumer>();
 
@@ -25,6 +27,9 @@ internal static class MassTransitExtension
             });
         });
 
-        services.AddHostedService<OracleHcmHostedService>();
+        if (!builder.Environment.IsTestEnvironment())
+        {
+            _ = builder.Services.AddHostedService<OracleHcmHostedService>();
+        }
     }
 }

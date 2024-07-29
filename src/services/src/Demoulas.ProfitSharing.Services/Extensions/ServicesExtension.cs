@@ -43,11 +43,6 @@ public static class ServicesExtension
         _ = builder.Services.AddSingleton<EmployeeSyncJob>();
         _ = builder.Services.AddSingleton<IDemographicsServiceInternal, DemographicsService>();
 
-        if (!builder.Environment.IsTestEnvironment())
-        {
-            _ = builder.Services.AddHostedService<OracleHcmHostedService>();
-        }
-
         _ = builder.Services.AddHttpClient<OracleDemographicsService>((services, client) =>
         {
             OracleHcmConfig config = services.GetRequiredService<OracleHcmConfig>();
@@ -67,7 +62,7 @@ public static class ServicesExtension
 
 
 
-        builder.Services.ConfigureMassTransitServices();
+        builder.ConfigureMassTransitServices();
 
 
         #region Mappers

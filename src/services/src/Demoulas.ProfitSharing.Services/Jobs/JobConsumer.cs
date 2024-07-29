@@ -16,14 +16,17 @@ namespace Demoulas.ProfitSharing.Services.Jobs;
 public class JobConsumer : IConsumer<MessageRequest<OracleHcmJobRequest>>
 {
     private readonly IProfitSharingDataContextFactory _dataContext;
+    private readonly EmployeeSyncJob _employeeSyncJob;
 
-    public JobConsumer(IProfitSharingDataContextFactory context)
+    public JobConsumer(IProfitSharingDataContextFactory context, EmployeeSyncJob employeeSyncJob)
     {
         _dataContext = context;
+        _employeeSyncJob = employeeSyncJob;
     }
 
     public async Task Consume(ConsumeContext<MessageRequest<OracleHcmJobRequest>> context)
     {
+        CancellationToken cancellationToken = context.CancellationToken;
         var message = context.Message;
 
         if (message.Body.JobType is "Full" or "Delta")
@@ -33,7 +36,7 @@ public class JobConsumer : IConsumer<MessageRequest<OracleHcmJobRequest>>
                 var runningJobs = c.Jobs
                     .Where(j => (j.JobType == "Full" || j.JobType == "Delta") && j.Status == Data.Entities.MassTransit.Job.JobStatus.Running);
 
-                return runningJobs.AnyAsync();
+                return runningJobs.AnyAsync(cancellationToken: cancellationToken);
             });
 
             if (jobIsAlreadyRunning)
@@ -55,28 +58,26 @@ public class JobConsumer : IConsumer<MessageRequest<OracleHcmJobRequest>>
             await _dataContext.UseWritableContext(c =>
             {
                 c.Jobs.Add(job);
-                return c.SaveChangesAsync();
-            });
+                return c.SaveChangesAsync(cancellationToken);
+            }, cancellationToken);
 
 
             // Execute the job
-            await ExecuteJob(job);
+            await ExecuteJob(cancellationToken);
 
             await _dataContext.UseWritableContext(c =>
             {
                 job.Completed = DateTime.Now;
                 job.Status = Data.Entities.MassTransit.Job.JobStatus.Completed;
-                return c.SaveChangesAsync();
-            });
+                return c.SaveChangesAsync(cancellationToken);
+            }, cancellationToken);
 
         }
     }
 
-    private Task ExecuteJob(Demoulas.ProfitSharing.Data.Entities.MassTransit.Job job)
+    private Task ExecuteJob(CancellationToken cancellationToken)
     {
-        // Implement the job execution logic here
-        Console.WriteLine(job);
-        return Task.CompletedTask;
+        return _employeeSyncJob.SynchronizeEmployees(cancellationToken);
     }
 }
 

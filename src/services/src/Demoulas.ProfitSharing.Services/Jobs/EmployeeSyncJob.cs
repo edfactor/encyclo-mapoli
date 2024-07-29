@@ -11,7 +11,7 @@ using Demoulas.ProfitSharing.OracleHcm.Contracts.Request;
 using Quartz;
 
 namespace Demoulas.ProfitSharing.Services.Jobs;
-public sealed class EmployeeSyncJob : IJob
+public sealed class EmployeeSyncJob
 {
     private readonly OracleDemographicsService _oracleDemographicsService;
     private readonly IDemographicsServiceInternal _demographicsService;
@@ -24,11 +24,6 @@ public sealed class EmployeeSyncJob : IJob
         _oracleDemographicsService = oracleDemographicsService;
         _demographicsService = demographicsService;
         _oracleHcmConfig = oracleHcmConfig;
-    }
-
-    public Task Execute(IJobExecutionContext context)
-    {
-        return SynchronizeEmployees(context.CancellationToken);
     }
 
     public Task SynchronizeEmployees(CancellationToken cancellationToken)
