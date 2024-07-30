@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
+﻿using System.Globalization;
 using System.Text;
-using System.Threading.Tasks;
 using CsvHelper.Configuration;
 using CsvHelper;
-using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using FastEndpoints;
+using Demoulas.Common.Contracts.Request;
 
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Csv;
+namespace Demoulas.ProfitSharing.Endpoints.Base;
+
 /// <summary>
 /// Endpoints deriving from this class will automatically be able to return a CSV when the accept headers contain text/csv.
 /// The developer needs to override the GetResponse member to provide a response via a DTO.  The developer also needs to override the report filename property.
@@ -20,28 +17,31 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Csv;
 /// <typeparam name="RespType">Response type of the endpoint.</typeparam>
 /// <typeparam name="MapType">A mapping class that converts from a dto to a CSV format</typeparam>
 public abstract class EndpointWithCSVBase<ReqType, RespType, MapType> : Endpoint<ReqType, ReportResponseBase<RespType>>
-    where ReqType : notnull
+    where ReqType : PaginationRequestDto
     where RespType : class
     where MapType : ClassMap<RespType>
 {
+    /// <summary>
+    /// Use to provide a simple example request when no more complex than a simple Pagination Request is needed
+    /// </summary>
+    protected PaginationRequestDto SimpleExampleRequest => new PaginationRequestDto { Skip = 0, Take = byte.MaxValue };
 
     /// <summary>
     /// Called when the service is requested.  Developer should return a dto
     /// </summary>
     /// <param name="ct"></param>
     /// <returns></returns>
-    public abstract Task<ReportResponseBase<RespType>> GetResponse(CancellationToken ct);
+    public abstract Task<ReportResponseBase<RespType>> GetResponse(ReqType req, CancellationToken ct);
 
     /// <summary>
     /// Returns the base portion of the filename downloaded to the browser.
     /// </summary>
-    public virtual string ReportFileName { get { return "data"; } }
+    public abstract string ReportFileName { get; }
 
-    public override sealed async Task HandleAsync(ReqType req, CancellationToken ct)
+    public sealed override async Task HandleAsync(ReqType req, CancellationToken ct)
     {
         string acceptHeader = HttpContext.Request.Headers["Accept"].ToString().ToLower(CultureInfo.InvariantCulture);
-
-        var response = await GetResponse(ct);
+        var response = await GetResponse(req, ct);
 
         if (acceptHeader.Contains("text/csv"))
         {
@@ -63,9 +63,10 @@ public abstract class EndpointWithCSVBase<ReqType, RespType, MapType> : Endpoint
             streamWriter.WriteLine(report.ReportName);
 
             csvWriter.Context.RegisterClassMap<MapType>();
-            csvWriter.WriteRecords(report.Results);
+            csvWriter.WriteRecords(report.Response.Results);
             streamWriter.Flush();
         }
+
         memoryStream.Position = 0; // Reset the stream position to the beginning
         return memoryStream;
     }

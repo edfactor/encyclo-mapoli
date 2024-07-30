@@ -1,7 +1,6 @@
 ﻿using System.Collections.Frozen;
-using Demoulas.Common.Contracts.Request;
-using Demoulas.Common.Contracts.Response;
-using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.ProfitSharing.Common.ActivitySources;
+using System.Diagnostics;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -11,7 +10,7 @@ using Demoulas.ProfitSharing.Services.Mappers;
 
 namespace Demoulas.ProfitSharing.Services;
 
-public class DemographicsService : IDemographicsService
+public class DemographicsService : IDemographicsServiceInternal
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly DemographicMapper _mapper;
@@ -22,15 +21,31 @@ public class DemographicsService : IDemographicsService
         _mapper = mapper;
     }
 
+    public async Task AddDemographicsStream(IAsyncEnumerable<DemographicsRequestDto> employees, byte batchSize = byte.MaxValue, CancellationToken cancellationToken = default)
+    {
+        using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(AddDemographicsStream), ActivityKind.Internal);
+        var batch = new List<DemographicsRequestDto>();
+
+        await foreach (var employee in employees.WithCancellation(cancellationToken))
+        {
+            batch.Add(employee);
+
+            if (batch.Count >= batchSize)
+            {
+                _ = await AddDemographics(batch, cancellationToken);
+                batch.Clear();
+            }
+        }
+
+        if (batch.Count > 0)
+        {
+            _ = await AddDemographics(batch, cancellationToken);
+        }
+    }
+
     public async Task<ISet<DemographicsResponseDto>?> AddDemographics(IEnumerable<DemographicsRequestDto> demographics, CancellationToken cancellationToken)
     {
-        /*
-         *
-         * TODO: This needs to be an upsert. People who have retired will stay in Profit sharing, but would be removed from 
-         *
-         *
-         */
-
+        using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(AddDemographics), ActivityKind.Internal);
 
         List<Demographic> entities = await _dataContextFactory.UseWritableContext(async context =>
         {

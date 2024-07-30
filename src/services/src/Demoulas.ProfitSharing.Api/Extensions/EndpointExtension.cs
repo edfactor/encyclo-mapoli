@@ -4,6 +4,7 @@ using System.Reflection;
 using Asp.Versioning;
 using Demoulas.ProfitSharing.Api.Converters;
 using Demoulas.ProfitSharing.Api.Middleware;
+using Demoulas.ProfitSharing.Api.Utilities;
 using Demoulas.ProfitSharing.ServiceDefaults;
 using FastEndpoints;
 using FastEndpoints.AspVersioning;
@@ -30,14 +31,11 @@ internal static class EndpointExtension
 
         _ = builder.AddServiceDefaults();
 
-        _ = builder.Services.AddProjectServices();
+        _ = builder.AddProjectServices();
 
         // Add services to the container.
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         _ = builder.Services.AddEndpointsApiExplorer();
-
-        _ = builder.AddSwaggerOpenApi(enableJwtBearerAuth: false)
-            .AddSwaggerOpenApi(version: 2, enableJwtBearerAuth: false);
 
         // Compression
         _ = builder.Services.AddResponseCompression(options =>
@@ -48,17 +46,6 @@ internal static class EndpointExtension
         });
 
         _ = builder.Services.AddHttpContextAccessor();
-
-        //RolePermissionService rolePermissionService = new RolePermissionService();
-
-        //if (builder.Environment.EnvironmentName != "Testing")
-        //{
-        //    _ = builder.Services.AddOktaSecurity(builder.Configuration, rolePermissionService);
-        //}
-        //else
-        //{
-        //    _ = builder.Services.AddTestingSecurity(builder.Configuration, rolePermissionService);
-        //}
 
         _ = builder.Services
             .AddFastEndpoints(options =>
@@ -98,6 +85,9 @@ internal static class EndpointExtension
                 options.SerializerOptions.PropertyNameCaseInsensitive = true;
             })
             .AddAntiforgery(o => o.HeaderName = "x-csrf-token");
+
+
+        _ = builder.Services.AddSingleton<AppVersionInfo>();
 
         return builder;
     }

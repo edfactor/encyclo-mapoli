@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Data.Factories;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +11,7 @@ namespace Demoulas.ProfitSharing.Data.Extensions;
 
 public static class DatabaseServicesExtension
 {
-    public static IHostApplicationBuilder AddDatabaseServices(this IHostApplicationBuilder builder,
+    public static async Task<IHostApplicationBuilder> AddDatabaseServices(this IHostApplicationBuilder builder,
        IEnumerable<ContextFactoryRequest> contextFactoryRequests, bool runMigration = false, bool dropAndRecreate = false)
     {
         if (builder.Services.Any(s => s.ServiceType == typeof(IProfitSharingDataContextFactory)))
@@ -19,26 +20,29 @@ public static class DatabaseServicesExtension
         }
 
         IProfitSharingDataContextFactory factory = DataContextFactory.Initialize(builder, contextFactoryRequests: contextFactoryRequests);
-        builder.Services.AddSingleton(factory);
+        _ = builder.Services.AddSingleton(factory);
+
+        if (builder.Environment.IsTestEnvironment())
+        {
+            return builder;
+        }
 
         if (runMigration && Debugger.IsAttached)
         {
-            factory.UseWritableContext(context =>
+            await factory.UseWritableContext(async context =>
             {
                 try
                 {
                     if (dropAndRecreate)
                     {
-                        context.Database.EnsureDeleted();
+                        await context.Database.EnsureDeletedAsync();
                     }
 
-                    IEnumerable<string> pendingMigrations = context.Database.GetPendingMigrations();
+                    IEnumerable<string> pendingMigrations = await context.Database.GetPendingMigrationsAsync();
                     if (pendingMigrations.Any())
                     {
-                        context.Database.Migrate();
+                        await context.Database.MigrateAsync();
                     }
-
-                    return Task.CompletedTask;
                 }
                 catch (Exception e)
                 {
