@@ -11,6 +11,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 using Demoulas.Common.Contracts.Request;
+using Demoulas.Common.Contracts.Response;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 public class NamesMissingCommasEndpoint : EndpointWithCSVBase<PaginationRequestDto, NamesMissingCommaResponse, NamesMissingCommasEndpoint.NamesMissingCommasResponseMap>
@@ -29,6 +30,25 @@ public class NamesMissingCommasEndpoint : EndpointWithCSVBase<PaginationRequestD
         Summary(s =>
         {
             s.Summary = "Lists employees whose full names don't have commas";
+            s.ResponseExamples = new Dictionary<int, object>
+            {
+                {
+                    200,
+                    new ReportResponseBase<NamesMissingCommaResponse>
+                    {
+                        ReportDate = DateTime.Now,
+                        ReportName = "MISSING COMMA IN PY_NAME",
+                        Response = new PaginatedResponseDto<NamesMissingCommaResponse>
+                        {
+                            Results = new List<NamesMissingCommaResponse>
+                            {
+                                new NamesMissingCommaResponse() {EmployeeName="Jane Doe", EmployeeBadge=10010, EmployeeSSN = 999999999}
+                            }
+                        }
+                    }
+                }
+            };
+            s.ExampleRequest = SimpleExampleRequest;
         });
         Group<YearEndGroup>();
     }

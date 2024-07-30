@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Request;
+using Demoulas.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -30,6 +31,47 @@ public class DuplicateNamesAndBirthdaysEndpoint:EndpointWithCSVBase<PaginationRe
         Summary(s =>
         {
             s.Summary = "List of duplicate names, and SSNs in the demographics area";
+            s.ExampleRequest = SimpleExampleRequest;
+            s.ResponseExamples = new Dictionary<int, object>
+            {
+                {
+                    200,
+                    new ReportResponseBase<DuplicateNamesAndBirthdaysResponse>
+                    {
+                        ReportDate = DateTime.Now,
+                        ReportName = "MISSING COMMA IN PY_NAME",
+                        Response = new PaginatedResponseDto<DuplicateNamesAndBirthdaysResponse>
+                        {
+                            Results = new List<DuplicateNamesAndBirthdaysResponse>
+                            {
+                                new DuplicateNamesAndBirthdaysResponse
+                                {
+                                    Address = new AddressResponseDto
+                                    {
+                                        State = "MA",
+                                        PostalCode = "01876",
+                                        City = "Tewksbury",
+                                        Street = "1900 Main St",
+                                        CountryISO="US"
+                                    },
+                                    BadgeNumber = 100110,
+                                    Count = 2,
+                                    EarningsCurrentYear = 23003,
+                                    DateOfBirth = new DateOnly(1990,7,30),
+                                    HireDate = new DateOnly(2015,9,14),
+                                    HoursCurrentYear = 1524,
+                                    Name = "Henry Rollins",
+                                    NetBalance = 52500,
+                                    SSN = 99999999,
+                                    Status = 'A',
+                                    StoreNumber = 22,
+                                    Years = 3
+                                }
+                            }
+                        }
+                    }
+                }
+            };
         });
         Group<YearEndGroup>();
     }

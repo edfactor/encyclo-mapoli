@@ -37,7 +37,7 @@ public class YearEndServiceTests:ApiTestBase<Program>
     [Fact(DisplayName = "PS-147: Check Duplicate SSNs (CSV)")]
     public async Task GetDuplicateSSNsTestCsv()
     {
-        var stream = await _yearEndClient.DownloadDuplicateSsNs(CancellationToken.None);
+        var stream = await _yearEndClient.DownloadDuplicateSSNs(CancellationToken.None);
         stream.Should().NotBeNull();
 
         using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
@@ -47,7 +47,7 @@ public class YearEndServiceTests:ApiTestBase<Program>
         _testOutputHelper.WriteLine(result);
     }
 
-    [Fact(DisplayName ="PS-150: Payprofit badges w/o Demographics")]
+    [Fact(DisplayName ="PS-150: Payprofit badges w/o Demographics (JSON)")]
     public async Task GetPayProfitBadgesNotInDemographics()
     {
         
@@ -76,11 +76,51 @@ public class YearEndServiceTests:ApiTestBase<Program>
             response.Response.Results.Should().HaveCount(mismatchedValues);
 
             _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+
+            var oneRecord = new PaginationRequestDto { Skip=0, Take=1 };
+            response = await _yearEndClient.GetPayProfitBadgesNotInDemographics(oneRecord, CancellationToken.None);
+            response.Should().NotBeNull();
+            response.Response.Results.Should().HaveCount(1);
+
+            _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
         });
     }
 
-    [Fact(DisplayName = "PS-151: Demographic badges without payprofit")]
-    public async Task GetDemogrpahicBadgesWithoutPayProfitTests()
+    [Fact(DisplayName = "PS-150: Payprofit badges w/o Demographics (CSV)")]
+    public async Task GetPayProfitBadgesNotInDemographicsCsv()
+    {
+
+        await MockDbContextFactory.UseWritableContext(async c =>
+        {
+            byte mismatchedValues = 5;
+
+            await c.PayProfits.Take(mismatchedValues).ForEachAsync(pp =>
+            {
+                if (pp.Demographic != null)
+                {
+                    pp.Demographic.BadgeNumber = pp.EmployeeBadge + c.Demographics.Count() + 1;
+                }
+            });
+
+            await c.SaveChangesAsync();
+
+            var stream = await _yearEndClient.DownloadPayProfitBadgesNotInDemographics(CancellationToken.None);
+            stream.Should().NotBeNull();
+
+            using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
+            string result = await reader.ReadToEndAsync();
+            result.Should().NotBeNullOrEmpty();
+
+            var lines = result.Split(Environment.NewLine);
+            lines.Count().Should().Be(mismatchedValues + 4);
+
+
+            _testOutputHelper.WriteLine(result);
+        });
+    }
+
+    [Fact(DisplayName = "PS-151: Demographic badges without payprofit (JSON)")]
+    public async Task GetDemographicBadgesWithoutPayProfitTests()
     {
         await MockDbContextFactory.UseWritableContext(async c =>
         {
@@ -104,10 +144,46 @@ public class YearEndServiceTests:ApiTestBase<Program>
             response.Response.Results.Should().HaveCount(mismatchedValues);
 
             _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+
+            var oneRecord = new PaginationRequestDto { Skip = 0, Take = 1 };
+            response = await _yearEndClient.GetDemographicBadgesNotInPayProfit(oneRecord, CancellationToken.None);
+            response.Should().NotBeNull();
+            response.Response.Results.Should().HaveCount(1);
+
+            _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
         });
     }
 
-    [Fact(DisplayName ="PS-153: Names without commas")]
+    [Fact(DisplayName = "PS-151: Demographic badges without payprofit (CSV)")]
+    public async Task GetDemographicBadgesWithoutPayProfitTestsCsv()
+    {
+        await MockDbContextFactory.UseWritableContext(async c =>
+        {
+            
+            byte mismatchedValues = 5;
+
+            await c.Demographics.Take(mismatchedValues).ForEachAsync(dem =>
+            {
+                dem.BadgeNumber = dem.BadgeNumber + c.PayProfits.Count() + 1;
+            });
+
+            await c.SaveChangesAsync();
+
+            var stream = await _yearEndClient.DownloadDemographicBadgesNotInPayProfit(CancellationToken.None);
+            stream.Should().NotBeNull();
+
+            using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
+            string result = await reader.ReadToEndAsync();
+            result.Should().NotBeNullOrEmpty();
+
+            var lines = result.Split(Environment.NewLine);
+            lines.Count().Should().Be(mismatchedValues + 4);
+
+            _testOutputHelper.WriteLine(result);
+        });
+    }
+
+    [Fact(DisplayName ="PS-153: Names without commas (JSON)")]
     public async Task GetNamesWithoutCommas()
     {
         await MockDbContextFactory.UseWritableContext(async ctx =>
@@ -132,6 +208,40 @@ public class YearEndServiceTests:ApiTestBase<Program>
             response.Response.Results.Count().Should().Be(disruptedNameCount);
 
             _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+
+            var oneRecord = new PaginationRequestDto { Skip = 0, Take = 1 };
+            response = await _yearEndClient.GetNamesMissingComma(oneRecord, CancellationToken.None);
+            response.Should().NotBeNull();
+            response.Response.Results.Should().HaveCount(1);
+
+            _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+        });
+    }
+
+    [Fact(DisplayName = "PS-153: Names without commas (CSV)")]
+    public async Task GetNamesWithoutCommasCsv()
+    {
+        await MockDbContextFactory.UseWritableContext(async ctx =>
+        {
+            byte disruptedNameCount = 10;
+            await ctx.Demographics.Take(disruptedNameCount).ForEachAsync(dem =>
+            {
+                dem.FullName = dem.FullName?.Replace(", ", " ");
+            });
+
+            await ctx.SaveChangesAsync();
+
+            var stream = await _yearEndClient.DownloadNamesMissingComma(CancellationToken.None);
+            stream.Should().NotBeNull();
+
+            using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
+            string result = await reader.ReadToEndAsync();
+            result.Should().NotBeNullOrEmpty();
+
+            var lines = result.Split(Environment.NewLine);
+            lines.Count().Should().Be(disruptedNameCount + 4);
+
+            _testOutputHelper.WriteLine(result);
         });
     }
 
@@ -158,6 +268,13 @@ public class YearEndServiceTests:ApiTestBase<Program>
         response.Response.Results.Should().HaveCount(negativeValues);
 
         _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+
+        var oneRecord = new PaginationRequestDto { Skip = 0, Take = 1 };
+        response = await _yearEndClient.GetNegativeETVAForSSNsOnPayProfitResponse(oneRecord, CancellationToken.None);
+        response.Should().NotBeNull();
+        response.Response.Results.Should().HaveCount(1);
+
+        _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
     }
 
     [Fact(DisplayName = "PS-145 : Negative ETVA for SSNs on PayProfit (CSV)")]
@@ -173,7 +290,6 @@ public class YearEndServiceTests:ApiTestBase<Program>
         _testOutputHelper.WriteLine(result);
     }
 
-
     [Fact(DisplayName = "PS-149 : Mismatched Ssns Payprofit and Demographics On Same Badge (JSON)")]
     public async Task GetMismatchedSsnsPayprofitAndDemographicsOnSameBadgeJson()
     {
@@ -185,7 +301,20 @@ public class YearEndServiceTests:ApiTestBase<Program>
         _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
     }
 
-    [Fact(DisplayName = "PS-152 : Duplicate names and Birthdays")]
+    [Fact(DisplayName = "PS-149 : Mismatched Ssns Payprofit and Demographics On Same Badge (CSV)")]
+    public async Task GetMismatchedSsnsPayprofitAndDemographicsOnSameBadgeCsv()
+    {
+        var stream = await _yearEndClient.DownloadMismatchedSsnsPayprofitAndDemographicsOnSameBadge(CancellationToken.None);
+        stream.Should().NotBeNull();
+
+        using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
+        string result = await reader.ReadToEndAsync();
+        result.Should().NotBeNullOrEmpty();
+
+        _testOutputHelper.WriteLine(result);
+    }
+
+    [Fact(DisplayName = "PS-152 : Duplicate names and Birthdays (JSON)")]
     public async Task GetDuplicateNamesAndBirthdays()
     {
         var request = new PaginationRequestDto { Take = 1000, Skip = 0 };
@@ -217,19 +346,45 @@ public class YearEndServiceTests:ApiTestBase<Program>
 
         _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
 
+        var oneRecord = new PaginationRequestDto { Skip = 0, Take = 1 };
+        response = await _yearEndClient.GetDuplicateNamesAndBirthdays(oneRecord, CancellationToken.None);
+        response.Should().NotBeNull();
+        response.Response.Results.Should().HaveCount(1);
+
+        _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
     }
 
-    [Fact(DisplayName = "PS-149 : Mismatched Ssns Payprofit and Demographics On Same Badge (CSV)")]
-    public async Task GetMismatchedSsnsPayprofitAndDemographicsOnSameBadgeCsv()
+    [Fact(DisplayName = "PS-152 : Duplicate names and Birthdays (CSV)")]
+    public async Task GetDuplicateNamesAndBirthdaysCsv()
     {
-        var stream = await _yearEndClient.DownloadMismatchedSsnsPayprofitAndDemographicsOnSameBadge(CancellationToken.None);
+        byte duplicateRows = 5;
+        await MockDbContextFactory.UseWritableContext(async c =>
+        {
+            var modelDemographic = await c.Demographics.FirstAsync();
+
+            await c.Demographics.Skip(1).Take(duplicateRows).ForEachAsync(dem =>
+            {
+                dem.DateOfBirth = modelDemographic.DateOfBirth;
+                dem.FirstName = modelDemographic.FirstName;
+                dem.LastName = modelDemographic.LastName;
+                dem.FullName = modelDemographic.FullName;
+            });
+
+            await c.SaveChangesAsync();
+        });
+
+        var stream = await _yearEndClient.DownloadDuplicateNamesAndBirthdays(CancellationToken.None);
         stream.Should().NotBeNull();
 
         using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
         string result = await reader.ReadToEndAsync();
         result.Should().NotBeNullOrEmpty();
 
-       _testOutputHelper.WriteLine(result);
+        var lines = result.Split(Environment.NewLine);
+        lines.Count().Should().Be(duplicateRows + 4 + 1); //Includes initial row that was used as the template to create duplicates
+
+        _testOutputHelper.WriteLine(result);
+
     }
 
     [Fact(DisplayName = "PS-148 : Payroll Duplicate Ssns On Payprofit (JSON)")]
