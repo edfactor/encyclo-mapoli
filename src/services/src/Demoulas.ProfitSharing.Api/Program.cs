@@ -49,8 +49,6 @@ void OktaSettingsAction(OktaSwaggerConfiguration settings)
     builder.Configuration.Bind("Okta", settings);
 }
 
-//_ = builder.Services.AddAuthentication();
-//_ = builder.Services.AddAuthorization();
 builder.ConfigureDefaultEndpoints()
     .AddSwaggerOpenApi(oktaSettingsAction: OktaSettingsAction)
     .AddSwaggerOpenApi(version: 2, oktaSettingsAction: OktaSettingsAction);
@@ -70,8 +68,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors();
 
-//app.UseAuthentication()
-//    .UseAuthorization();
 app.UseDefaultEndpoints(OktaSettingsAction);
 
 app.Run();
