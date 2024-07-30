@@ -35,12 +35,12 @@ public class JobConsumer : IConsumer<MessageRequest<OracleHcmJobRequest>>
         CancellationToken cancellationToken = context.CancellationToken;
         var message = context.Message;
 
-        if (message.Body.JobType is OracleHcmJobRequest.Enum.JobTypeEnum.Full or OracleHcmJobRequest.Enum.JobTypeEnum.Delta)
+        if (message.Body.JobType is JobType.Constants.Full or JobType.Constants.Delta)
         {
             bool jobIsAlreadyRunning = await _dataContext.UseReadOnlyContext(c =>
             {
                 var runningJobs = c.Jobs
-                    .Where(j => (j.JobType == OracleHcmJobRequest.Enum.JobTypeEnum.Full || j.JobType == OracleHcmJobRequest.Enum.JobTypeEnum.Delta) &&
+                    .Where(j => (j.JobTypeId == JobType.Constants.Full || j.JobTypeId == JobType.Constants.Delta) &&
                                 j.JobStatusId == JobStatus.Constants.Running);
 
                 return runningJobs.AnyAsync(cancellationToken: cancellationToken);
@@ -56,7 +56,7 @@ public class JobConsumer : IConsumer<MessageRequest<OracleHcmJobRequest>>
             _= OracleHcmActivitySource.Instance.StartActivity(name: $"Sync Employees from OracleHCM - Start new {message.Body.JobType} sync job", kind: ActivityKind.Internal);
             var job = new Job
             {
-                JobType = message.Body.JobType,
+                JobTypeId = message.Body.JobType,
                 StartMethodId = StartMethod.Constants.System,
                 RequestedBy = message.Body.RequestedBy,
                 JobStatusId = JobStatus.Constants.Running,

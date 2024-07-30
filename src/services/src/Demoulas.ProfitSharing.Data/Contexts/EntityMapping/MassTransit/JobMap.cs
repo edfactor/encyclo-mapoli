@@ -12,7 +12,7 @@ internal sealed class JobMap : IEntityTypeConfiguration<Job>
         builder.ToTable("Job");
 
         builder.Property(b => b.RequestedBy).HasMaxLength(30);
-        builder.Property(b => b.JobType).IsRequired().HasPrecision(2);
+        builder.Property(b => b.JobTypeId).IsRequired().HasPrecision(3);
         builder.Property(b => b.JobStatusId).IsRequired().HasPrecision(3);
         builder.Property(b => b.StartMethodId).IsRequired().HasPrecision(3);
         builder.Property(b => b.Started).IsRequired().HasColumnType("DATE");
@@ -20,5 +20,6 @@ internal sealed class JobMap : IEntityTypeConfiguration<Job>
 
         builder.HasOne(b => b.JobStatus).WithMany(j => j.Jobs).HasForeignKey(j => j.JobStatusId);
         builder.HasOne(b => b.StartMethod).WithMany(j => j.Jobs).HasForeignKey(j => j.StartMethodId);
+        builder.HasOne(b => b.JobType).WithMany(j => j.Jobs).HasForeignKey(j => j.JobTypeId);
     }
 }

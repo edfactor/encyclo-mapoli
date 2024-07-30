@@ -24,7 +24,7 @@ public class OracleHcmHostedService : BackgroundService
             ApplicationName = _hostEnvironment.ApplicationName,
             Body = new OracleHcmJobRequest
             {
-                JobType = OracleHcmJobRequest.Enum.JobTypeEnum.Delta,
+                JobType = JobType.Constants.Delta,
                 StartMethod = StartMethod.Constants.System,
                 RequestedBy = nameof(StartMethod.Constants.System)
             }
