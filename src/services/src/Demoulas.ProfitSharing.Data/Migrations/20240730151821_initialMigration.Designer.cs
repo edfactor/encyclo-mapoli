@@ -12,7 +12,7 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    [Migration("20240730142518_initialMigration")]
+    [Migration("20240730151821_initialMigration")]
     partial class initialMigration
     {
         /// <inheritdoc />
@@ -1567,7 +1567,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<DateTime>("LastModifiedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("DATE")
-                        .HasDefaultValue(new DateTime(2024, 7, 30, 10, 25, 17, 779, DateTimeKind.Local).AddTicks(7821))
+                        .HasDefaultValue(new DateTime(2024, 7, 30, 11, 18, 20, 310, DateTimeKind.Local).AddTicks(8749))
                         .HasColumnName("LASTMODIFIEDDATE");
 
                     b.Property<string>("LastName")
@@ -1912,8 +1912,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("COMPLETED");
 
                     b.Property<byte>("JobStatusId")
-                        .HasPrecision(2)
-                        .HasColumnType("NUMBER(2)")
+                        .HasPrecision(3)
+                        .HasColumnType("NUMBER(3)")
                         .HasColumnName("JOBSTATUSID");
 
                     b.Property<byte>("JobType")
@@ -1927,10 +1927,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NVARCHAR2(30)")
                         .HasColumnName("REQUESTEDBY");
 
-                    b.Property<byte>("StartMethod")
-                        .HasPrecision(2)
-                        .HasColumnType("NUMBER(2)")
-                        .HasColumnName("STARTMETHOD");
+                    b.Property<byte>("StartMethodId")
+                        .HasPrecision(3)
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("STARTMETHODID");
 
                     b.Property<DateTime>("Started")
                         .HasColumnType("DATE")
@@ -1942,14 +1942,17 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasIndex("JobStatusId")
                         .HasDatabaseName("IX_JOB_JOBSTATUSID");
 
+                    b.HasIndex("StartMethodId")
+                        .HasDatabaseName("IX_JOB_STARTMETHODID");
+
                     b.ToTable("JOB", (string)null);
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.MassTransit.JobStatus", b =>
                 {
                     b.Property<byte>("Id")
-                        .HasPrecision(2)
-                        .HasColumnType("NUMBER(2)")
+                        .HasPrecision(3)
+                        .HasColumnType("NUMBER(3)")
                         .HasColumnName("ID");
 
                     b.Property<string>("Name")
@@ -1983,6 +1986,37 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         {
                             Id = (byte)1,
                             Name = "Running"
+                        });
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.MassTransit.StartMethod", b =>
+                {
+                    b.Property<byte>("Id")
+                        .HasPrecision(3)
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("ID");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)")
+                        .HasColumnName("NAME");
+
+                    b.HasKey("Id")
+                        .HasName("PK_JOBSTARTMETHOD");
+
+                    b.ToTable("JOBSTARTMETHOD", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = (byte)0,
+                            Name = "System"
+                        },
+                        new
+                        {
+                            Id = (byte)1,
+                            Name = "OnDemand"
                         });
                 });
 
@@ -3246,7 +3280,16 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_JOB_JOBSTATUS_JOBSTATUSID");
 
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.MassTransit.StartMethod", "StartMethod")
+                        .WithMany("Jobs")
+                        .HasForeignKey("StartMethodId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_JOB_JOBSTARTMETHOD_STARTMETHODID");
+
                     b.Navigation("JobStatus");
+
+                    b.Navigation("StartMethod");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.PayProfit", b =>
@@ -3351,6 +3394,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.MassTransit.JobStatus", b =>
+                {
+                    b.Navigation("Jobs");
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.MassTransit.StartMethod", b =>
                 {
                     b.Navigation("Jobs");
                 });

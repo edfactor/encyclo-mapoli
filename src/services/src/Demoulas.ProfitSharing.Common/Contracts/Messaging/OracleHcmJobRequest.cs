@@ -10,17 +10,9 @@ public sealed record OracleHcmJobRequest
             Delta = 1,
             Individual = 2
         }
-
-        public enum StartMethodEnum : byte
-        {
-            System = 0,
-            OnDemand = 1
-        }
-
-       
     }
 
     public required Enum.JobTypeEnum JobType { get; set; } // Full, Delta, Individual
-    public required Enum.StartMethodEnum StartMethod { get; set; } // System, on-demand
+    public required byte StartMethod { get; set; } // System, on-demand
     public required string RequestedBy { get; set; }
 }

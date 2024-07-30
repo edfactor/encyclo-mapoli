@@ -1,6 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.ActivitySources;
 using System.Diagnostics;
 using Demoulas.ProfitSharing.Common.Contracts.Messaging;
+using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using MassTransit;
 using Microsoft.Extensions.Hosting;
 
@@ -24,8 +25,8 @@ public class OracleHcmHostedService : BackgroundService
             Body = new OracleHcmJobRequest
             {
                 JobType = OracleHcmJobRequest.Enum.JobTypeEnum.Delta,
-                StartMethod = OracleHcmJobRequest.Enum.StartMethodEnum.System,
-                RequestedBy = "System"
+                StartMethod = StartMethod.Constants.System,
+                RequestedBy = nameof(StartMethod.Constants.System)
             }
         };
 

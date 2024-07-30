@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping.OracleHcm;
+namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping.MassTransit;
 
 internal sealed class JobStatusMap : IEntityTypeConfiguration<JobStatus>
 {

@@ -57,7 +57,7 @@ public class JobConsumer : IConsumer<MessageRequest<OracleHcmJobRequest>>
             var job = new Job
             {
                 JobType = message.Body.JobType,
-                StartMethod = message.Body.StartMethod,
+                StartMethodId = StartMethod.Constants.System,
                 RequestedBy = message.Body.RequestedBy,
                 JobStatusId = JobStatus.Constants.Running,
                 Started = DateTime.Now

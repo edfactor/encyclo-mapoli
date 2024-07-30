@@ -5,7 +5,8 @@ public sealed class Job
 {
     public int Id { get; set; }
     public required OracleHcmJobRequest.Enum.JobTypeEnum JobType { get; set; }
-    public required OracleHcmJobRequest.Enum.StartMethodEnum StartMethod { get; set; }
+    public StartMethod? StartMethod { get; set; }
+    public required byte StartMethodId { get; set; }
     public required string RequestedBy { get; set; }
     public JobStatus? JobStatus { get; set; }
     public required byte JobStatusId { get; set; }
