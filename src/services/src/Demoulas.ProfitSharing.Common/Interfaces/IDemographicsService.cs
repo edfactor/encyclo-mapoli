@@ -1,6 +1,4 @@
-﻿using Demoulas.Common.Contracts.Request;
-using Demoulas.Common.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 
 namespace Demoulas.ProfitSharing.Common.Interfaces;

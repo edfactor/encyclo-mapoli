@@ -1,21 +1,17 @@
-﻿using System.Globalization;
-using System.Text;
-using CsvHelper;
-using CsvHelper.Configuration;
+﻿using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Request;
 using Demoulas.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Csv;
+using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 
-public class NegativeETVAForSSNsOnPayProfitEndPoint : EndpointWithCSVBase<EmptyRequest, NegativeETVAForSSNsOnPayProfitResponse, NegativeETVAForSSNsOnPayProfitEndPoint.NegativeETVAForSSNsOnPayProfitResponseMap>
+public class NegativeETVAForSSNsOnPayProfitEndPoint : EndpointWithCSVBase<PaginationRequestDto, NegativeETVAForSSNsOnPayProfitResponse, NegativeETVAForSSNsOnPayProfitEndPoint.NegativeETVAForSSNsOnPayProfitResponseMap>
 {
     private readonly IYearEndService _reportService;
 
@@ -31,20 +27,21 @@ public class NegativeETVAForSSNsOnPayProfitEndPoint : EndpointWithCSVBase<EmptyR
         Summary(s =>
         {
             s.Summary = "Negative ETVA for SSNs on PayProfit";
+            s.ExampleRequest = SimpleExampleRequest;
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
                     200,
                     new ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>
                     {
-                        ReportName = "NEGATIVE ETVA FOR SSNs ON PAYPROFIT",
+                        ReportName = ReportFileName,
                         ReportDate = DateTimeOffset.Now,
-                        Results = new HashSet<NegativeETVAForSSNsOnPayProfitResponse>
+                        Response = new PaginatedResponseDto<NegativeETVAForSSNsOnPayProfitResponse>()
                         {
-                            new NegativeETVAForSSNsOnPayProfitResponse { EmployeeBadge = 47425, EmployeeSSN = 900047425, EtvaValue = -1293.43m },
-                            new NegativeETVAForSSNsOnPayProfitResponse { EmployeeBadge = 82424, EmployeeSSN = 900082424, EtvaValue = -1152.33m },
-                            new NegativeETVAForSSNsOnPayProfitResponse { EmployeeBadge = 85744, EmployeeSSN = 900085744, EtvaValue = -2899.78m },
-                            new NegativeETVAForSSNsOnPayProfitResponse { EmployeeBadge = 94861, EmployeeSSN = 900094861, EtvaValue = -1200.00m }
+                            Results = new List<NegativeETVAForSSNsOnPayProfitResponse>
+                            {
+                                new NegativeETVAForSSNsOnPayProfitResponse { EmployeeBadge = 47425, EmployeeSSN = 900047425, EtvaValue = -1293.43m }
+                            }
                         }
                     }
                 }
@@ -54,9 +51,9 @@ public class NegativeETVAForSSNsOnPayProfitEndPoint : EndpointWithCSVBase<EmptyR
         Options(x => x.CacheOutput(p => p.Expire(TimeSpan.FromMinutes(5))));
     }
 
-    public override async Task<ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>> GetResponse(CancellationToken ct)
+    public override async Task<ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>> GetResponse(PaginationRequestDto req, CancellationToken ct)
     {
-        return await _reportService.GetNegativeETVAForSSNsOnPayProfitResponse(ct);
+        return await _reportService.GetNegativeETVAForSSNsOnPayProfitResponse(req, ct);
     }
 
     public override string ReportFileName => "ETVA-LESS-THAN-ZERO";

@@ -14,39 +14,35 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
         //https://demoulas.atlassian.net/wiki/spaces/MAIN/pages/31909725/Employee+Hiring+data+fields
         //https://demoulas.atlassian.net/wiki/spaces/~bherrmann/pages/39944312/Quick+Guide+to+Profit+Sharing+Tables
 
-        _ = builder.HasKey(e => e.SSN);
         _ = builder.ToTable("Demographics");
+        _ = builder.HasKey(e => e.OracleHcmId);
 
+        _ = builder.HasIndex(e => e.SSN, "IX_SSN");
         _ = builder.Property(e => e.SSN)
             .HasPrecision(9)
             .IsRequired()
-            .ValueGeneratedNever()
-            .HasColumnName("DEM_SSN");
+            .ValueGeneratedNever();
 
         _ = builder.Property(e => e.BadgeNumber)
-            .HasPrecision(7)
-            .HasColumnName("DEM_BADGE");
+            .HasPrecision(7);
 
         _ = builder.Property(e => e.OracleHcmId)
             .HasPrecision(15)
-            .HasColumnName("PY_ASSIGN_ID");
+            .ValueGeneratedNever();
 
         _ = builder.Property(e => e.FullName)
             .HasMaxLength(60)
             .HasComment("FullName")
-            .HasColumnName("PY_NAM")
             .IsRequired();
 
         _ = builder.Property(e => e.LastName)
             .HasMaxLength(30)
             .HasComment("LastName")
-            .HasColumnName("PY_LNAME")
             .IsRequired();
 
         _ = builder.Property(e => e.FirstName)
             .HasMaxLength(30)
             .HasComment("FirstName")
-            .HasColumnName("PY_FNAME")
             .IsRequired();
 
         _ = builder.Property(e => e.MiddleName)
@@ -86,8 +82,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
 
         _ = builder.Property(e => e.TerminationCodeId)
             .HasMaxLength(1)
-            .HasComment("TerminationCode")
-            .HasColumnName("PY_TERM");
+            .HasComment("TerminationCode");
 
 
         _ = builder.Property(e => e.TerminationDate)
@@ -102,27 +97,26 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
 
         _ = builder.Property(e => e.EmploymentTypeId)
             .HasMaxLength(2)
-            .HasComment("EmploymentType")
-            .HasColumnName("PY_FUL");
+            .HasComment("EmploymentType");
 
         _ = builder.Property(e => e.PayFrequencyId)
             .HasMaxLength(1)
-            .HasComment("PayFrequency")
-            .HasColumnName("PY_FREQ");
+            .HasComment("PayFrequency");
 
         _ = builder.Property(e => e.GenderId)
             .HasMaxLength(1)
-            .HasComment("Gender")
-            .HasColumnName("PY_GENDER");
+            .HasComment("Gender");
 
 
         builder.OwnsOne(e => e.Address, address =>
         {
-            address.Property(a => a.Street).HasMaxLength(30).HasColumnName("PY_ADD").HasComment("Street").IsRequired();
-            address.Property(a => a.Street2).HasMaxLength(30).HasColumnName("PY_ADD2").HasComment("Street2");
-            address.Property(a => a.City).HasMaxLength(25).HasColumnName("PY_CITY").HasComment("City").IsRequired();
-            address.Property(a => a.State).HasMaxLength(3).HasColumnName("PY_STATE").HasComment("State").IsRequired();
-            address.Property(a => a.PostalCode).HasPrecision(9).HasColumnName("PY_ZIP").HasComment("Postal Code").IsRequired().HasConversion<PostalCodeConverter>();
+            address.Property(a => a.Street).HasMaxLength(30).HasColumnName("Street").HasComment("Street").IsRequired();
+            address.Property(a => a.Street2).HasMaxLength(30).HasColumnName("Street2").HasComment("Street2");
+            address.Property(a => a.Street3).HasMaxLength(30).HasColumnName("Street3").HasComment("Street3");
+            address.Property(a => a.Street4).HasMaxLength(30).HasColumnName("Street4").HasComment("Street4");
+            address.Property(a => a.City).HasMaxLength(25).HasColumnName("City").HasComment("City").IsRequired();
+            address.Property(a => a.State).HasMaxLength(3).HasColumnName("State").HasComment("State").IsRequired();
+            address.Property(a => a.PostalCode).HasMaxLength(9).HasColumnName("PostalCode").HasComment("Postal Code").IsRequired();
             address.Property(a => a.CountryISO).HasMaxLength(2).HasColumnName("CountryISO").HasDefaultValue(Constants.US);
 
             address.HasOne<Country>()
@@ -132,7 +126,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
 
         builder.OwnsOne(e => e.ContactInfo, contact =>
         {
-            contact.Property(a => a.PhoneNumber).HasMaxLength(15).HasColumnName("PY_EMP_TELNO").HasComment("PhoneNumber").IsRequired();
+            contact.Property(a => a.PhoneNumber).HasMaxLength(15).HasColumnName("PhoneNumber");
             contact.Property(a => a.MobileNumber).HasMaxLength(15).HasColumnName("MobileNumber");
             contact.Property(a => a.EmailAddress).HasMaxLength(50).HasColumnName("EmailAddress");
         });

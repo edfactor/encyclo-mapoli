@@ -18,7 +18,6 @@ internal sealed class DemographicFaker : Faker<Demographic>
         PayClassificationFaker payClassificationFaker = new PayClassificationFaker();
         EmploymentStatusFaker employmentStatusFaker = new EmploymentStatusFaker();
 
-
         RuleFor(d => d.BadgeNumber, f => _badgeNumberCounter++)
             .RuleFor(d => d.SSN, f => f.Person.Ssn().ConvertSsnToLong())
             .RuleFor(d => d.OracleHcmId, f => f.Random.Long(100000, 999999))

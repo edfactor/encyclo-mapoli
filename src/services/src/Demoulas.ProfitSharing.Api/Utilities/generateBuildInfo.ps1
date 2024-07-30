@@ -9,10 +9,10 @@ if (-not (Test-Path -Path $publishOutputDir -PathType Container)) {
 # Create a hashtable with the build information
 $buildInfo = @{
     BuildNumber = (Get-Date).ToUniversalTime().ToString("yyyyMMdd") # Current date in "yyyyMMdd" format
-    BuildId = ${bamboo.buildNumber} # Bamboo build number ( no quotes, this is a number )
-    PlanName = "${bamboo.planName}" # Bamboo plan name
-    PlanRepository = "${bamboo.planRepository.branch}" # Bamboo plan repository branch
-    RevisionNumber = "${bamboo.repository.revision.number}" #The revision number of the source that was checked out when the job runs
+    BuildId = $env:BITBUCKET_BUILD_NUMBER # Bitbucket build number
+    PlanName = $env:BITBUCKET_REPO_FULL_NAME # Bitbucket repository name
+    PlanRepository = $env:BITBUCKET_BRANCH # Bitbucket branch
+    RevisionNumber = $env:BITBUCKET_COMMIT # The commit hash
 }
 
 # Convert the hashtable to a JSON string

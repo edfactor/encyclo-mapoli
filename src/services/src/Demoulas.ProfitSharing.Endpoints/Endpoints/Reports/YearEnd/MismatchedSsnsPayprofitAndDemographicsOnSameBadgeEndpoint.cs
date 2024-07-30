@@ -1,18 +1,19 @@
-﻿using System.Globalization;
-using System.Text;
-using CsvHelper;
-using CsvHelper.Configuration;
+﻿using CsvHelper.Configuration;
+using Demoulas.Common.Contracts.Request;
+using Demoulas.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 using Microsoft.Extensions.DependencyInjection;
+using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.MismatchedSsnsPayprofitAndDemographicsOnSameBadgeEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 
-public class MismatchedSsnsPayprofitAndDemographicsOnSameBadgeEndpoint : EndpointWithoutRequest<ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>>
+public class MismatchedSsnsPayprofitAndDemographicsOnSameBadgeEndpoint : EndpointWithCSVBase<PaginationRequestDto, MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto, MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseMap>
 {
     private readonly IYearEndService _reportService;
 
@@ -28,21 +29,43 @@ public class MismatchedSsnsPayprofitAndDemographicsOnSameBadgeEndpoint : Endpoin
         Summary(s =>
         {
             s.Summary = "Mismatched SSN's On Pay Profit And Demographics with the same badge number";
-            s.Description = @"SSN and ""clean up"" reports to highlight possible problems which should be corrected before profit sharing is run. This job can be run multiple times.";
+            s.Description =
+                @"SSN and ""clean up"" reports to highlight possible problems which should be corrected before profit sharing is run. This job can be run multiple times.";
+            s.ExampleRequest = SimpleExampleRequest;
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
                     200,
                     new ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>
                     {
-                        ReportName = "MISMATCHED SSNs PAYPROFIT AND DEMO ON SAME BADGE", 
+                        ReportName = ReportFileName,
                         ReportDate = DateTimeOffset.Now,
-                        Results = new HashSet<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>
+                        Response = new PaginatedResponseDto<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>()
                         {
-                            new MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto { EmployeeBadge = 47425, EmployeeSSN = 900047425, Name = "John", Status = EmploymentStatus.Constants.Active},
-                            new MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto { EmployeeBadge = 82424, EmployeeSSN = 900082424, Name = "Jane", Status = EmploymentStatus.Constants.Delete},
-                            new MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto { EmployeeBadge = 85744, EmployeeSSN = 900085744, Name = "Tim", Status = EmploymentStatus.Constants.Inactive},
-                            new MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto { EmployeeBadge = 94861, EmployeeSSN = 900094861, Name = "Sally", Status = EmploymentStatus.Constants.Terminated}
+                            Results = new List<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>
+                            {
+                                new MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto
+                                {
+                                    EmployeeBadge = 47425, EmployeeSSN = 900047425, Name = "John", Status = EmploymentStatus.Constants.Active
+                                },
+                                new MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto
+                                {
+                                    EmployeeBadge = 82424, EmployeeSSN = 900082424, Name = "Jane", Status = EmploymentStatus.Constants.Delete
+                                },
+                                new MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto
+                                {
+                                    EmployeeBadge = 85744, EmployeeSSN = 900085744, Name = "Tim", Status = EmploymentStatus.Constants.Inactive
+                                },
+                                new MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto
+                                {
+                                    EmployeeBadge = 94861,
+                                    EmployeeSSN = 900094861,
+                                    Name = "Sally",
+                                    Status = EmploymentStatus.Constants.Terminated,
+                                    Store = 4,
+                                    PayProfitSSN = 123_45_6789
+                                }
+                            }
                         }
                     }
                 }
@@ -52,41 +75,15 @@ public class MismatchedSsnsPayprofitAndDemographicsOnSameBadgeEndpoint : Endpoin
         Options(x => x.CacheOutput(p => p.Expire(TimeSpan.FromMinutes(5))));
     }
 
-    public override async Task HandleAsync(CancellationToken ct)
+    public override string ReportFileName => "MISMATCHED-PAYPROF-DEM-SSNS";
+
+    public override Task<ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>> GetResponse(PaginationRequestDto req, CancellationToken ct)
     {
-        string acceptHeader = HttpContext.Request.Headers["Accept"].ToString().ToLower(CultureInfo.InvariantCulture);
-
-        ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto> response = await _reportService.GetMismatchedSsnsPayprofitAndDemographicsOnSameBadge(ct);
-
-        if (acceptHeader.Contains("text/csv"))
-        {
-            await using MemoryStream csvData = GenerateCsvStream(response);
-            await SendStreamAsync(csvData, "MISMATCHED-PAYPROF-DEM-SSNS.csv", cancellation: ct);
-            return;
-        }
-
-        await SendOkAsync(response, ct);
+        return _reportService.GetMismatchedSsnsPayprofitAndDemographicsOnSameBadge(req, ct);
     }
 
 
-    private MemoryStream GenerateCsvStream(ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto> report)
-    {
-        MemoryStream memoryStream = new MemoryStream();
-        using (StreamWriter streamWriter = new StreamWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
-        using (CsvWriter csvWriter = new CsvWriter(streamWriter, new CsvConfiguration(CultureInfo.InvariantCulture) { Delimiter = "," }))
-        {
-            streamWriter.WriteLine($"{report.ReportDate:MMM dd yyyy HH:mm}");
-            streamWriter.WriteLine(report.ReportName);
-
-            csvWriter.Context.RegisterClassMap<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseMap>();
-            csvWriter.WriteRecords(report.Results);
-            streamWriter.Flush();
-        }
-        memoryStream.Position = 0; // Reset the stream position to the beginning
-        return memoryStream;
-    }
-
-    private sealed class MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseMap : ClassMap<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>
+    public sealed class MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseMap : ClassMap<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>
     {
         public MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseMap()
         {

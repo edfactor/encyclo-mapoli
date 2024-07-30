@@ -15,7 +15,7 @@ public sealed class PayProfit
     /// <summary>
     /// Hours towards Profit Sharing in the current year (updated weekly)
     /// </summary>
-    public required decimal HoursCurrentYear { get; set; }
+    public decimal? HoursCurrentYear { get; set; }
 
     /// <summary>
     /// hours towards PS last year 
@@ -25,7 +25,7 @@ public sealed class PayProfit
     /// <summary>
     /// Dollars earned by the employee in the current year (updated weekly)
     /// </summary>
-    public required decimal EarningsCurrentYear { get; set; }
+    public decimal? EarningsCurrentYear { get; set; }
 
     /// <summary>
     /// Dollars earned by the employee last year

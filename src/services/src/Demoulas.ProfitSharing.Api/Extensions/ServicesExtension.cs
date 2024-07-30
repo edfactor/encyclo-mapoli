@@ -1,12 +1,4 @@
-﻿using Demoulas.Common.Caching.Interfaces;
-using Demoulas.ProfitSharing.Api.Utilities;
-using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Services;
-using Demoulas.ProfitSharing.Services.HostedServices;
-using Demoulas.ProfitSharing.Services.InternalEntities;
-using Demoulas.ProfitSharing.Services.Mappers;
-using Demoulas.ProfitSharing.Services.Reports;
+﻿using Demoulas.ProfitSharing.Api.Utilities;
 
 namespace Demoulas.ProfitSharing.Api.Extensions;
 
@@ -15,34 +7,10 @@ namespace Demoulas.ProfitSharing.Api.Extensions;
 /// </summary>
 public static class ServicesExtension
 {
-    public static IServiceCollection AddProjectServices(this IServiceCollection services)
+    public static IHostApplicationBuilder AddProjectServices(this IHostApplicationBuilder builder)
     {
-        _ = services.AddSingleton<AppVersionInfo>();
-        _ = services.AddSingleton<IBaseCacheService<PayClassificationResponseCache>, PayClassificationHostedService>();
+        _ = Services.Extensions.ServicesExtension.AddProjectServices(builder);
 
-        _ = services.AddScoped<IPayClassificationService, PayClassificationService>();
-        _ = services.AddScoped<IDemographicsService, DemographicsService>();
-        _ = services.AddScoped<IYearEndService, YearEndService>();
-        _ = services.AddScoped<IPayProfitService, PayProfitService>();
-
-
-        #region Mappers
-
-        services.AddSingleton<AddressMapper>();
-        services.AddSingleton<ContactInfoMapper>();
-        services.AddSingleton<DemographicMapper>();
-        services.AddSingleton<TerminationCodeMapper>();
-        services.AddSingleton<PayFrequencyMapper>();
-        services.AddSingleton<GenderMapper>();
-        services.AddSingleton<EmploymentTypeMapper>();
-        services.AddSingleton<DepartmentMapper>();
-        services.AddSingleton<PayProfitMapper>();
-        services.AddSingleton<ZeroContributionReasonMapper>();
-        services.AddSingleton<BeneficiaryTypeMapper>();
-        services.AddSingleton<EmployeeTypeMapper>();
-
-        #endregion
-
-        return services;
+        return builder;
     }
 }
