@@ -1,4 +1,6 @@
-﻿using HealthChecks.UI.Client;
+﻿using System.Diagnostics;
+using Demoulas.ProfitSharing.Common.ActivitySources;
+using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using Oracle.ManagedDataAccess.OpenTelemetry;
 
 namespace Demoulas.ProfitSharing.ServiceDefaults;
 
@@ -15,6 +18,8 @@ public static class Extensions
 {
     public static IHostApplicationBuilder AddServiceDefaults(this IHostApplicationBuilder builder)
     {
+        builder.Services.AddRedaction();
+
         builder.ConfigureOpenTelemetry();
 
         builder.AddDefaultHealthChecks();
@@ -24,10 +29,16 @@ public static class Extensions
         builder.Services.ConfigureHttpClientDefaults(http =>
         {
             // Turn on resilience by default
-            http.AddStandardResilienceHandler();
+            _ = http.AddStandardResilienceHandler();
 
             // Turn on service discovery by default
-            http.AddServiceDiscovery();
+            _ = http.AddServiceDiscovery();
+            _ = http.RedactLoggedHeaders(new[] { "Authorization" });
+
+            if (Debugger.IsAttached)
+            {
+                _ = http.AddExtendedHttpClientLogging();
+            }
         });
 
         // Uncomment the following to restrict the allowed schemes for service discovery.
@@ -59,7 +70,15 @@ public static class Extensions
                 tracing.AddAspNetCoreInstrumentation()
                     // Uncomment the following line to enable gRPC instrumentation (requires the OpenTelemetry.Instrumentation.GrpcNetClient package)
                     //.AddGrpcClientInstrumentation()
-                    .AddHttpClientInstrumentation();
+                    .AddHttpClientInstrumentation()
+                    .AddOracleDataProviderInstrumentation(o =>
+                    {
+                        o.EnableConnectionLevelAttributes = true;
+                        o.RecordException = true;
+                        o.InstrumentOracleDataReaderRead = true;
+                        o.SetDbStatementForText = true;
+                    })
+                    .AddSource(OracleHcmActivitySource.Instance.Name);
             });
 
         builder.AddOpenTelemetryExporters();
@@ -73,7 +92,8 @@ public static class Extensions
 
         if (useOtlpExporter)
         {
-            builder.Services.AddOpenTelemetry().UseOtlpExporter();
+            builder.Services.AddOpenTelemetry()
+                .UseOtlpExporter();
         }
 
         // Uncomment the following lines to enable the Azure Monitor exporter (requires the Azure.Monitor.OpenTelemetry.AspNetCore package)

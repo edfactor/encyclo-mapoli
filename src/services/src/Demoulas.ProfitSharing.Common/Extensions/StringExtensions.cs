@@ -1,8 +1,10 @@
-﻿namespace Demoulas.ProfitSharing.Common.Extensions;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Demoulas.ProfitSharing.Common.Extensions;
 
 public static class StringExtensions
 {
-    public static long? ConvertSsnToLong(this string ssn)
+    public static long? ConvertSsnToLong([StringSyntax("###-##-####")]this string ssn)
     {
         if (string.IsNullOrWhiteSpace(ssn))
         {

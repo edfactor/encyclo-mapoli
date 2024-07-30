@@ -1,4 +1,7 @@
-﻿using Demoulas.ProfitSharing.Common.Configuration;
+﻿using System.Diagnostics;
+using Bogus.Extensions.UnitedStates;
+using Demoulas.ProfitSharing.Common.ActivitySources;
+using Demoulas.ProfitSharing.Common.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -30,6 +33,7 @@ public sealed class EmployeeSyncJob : IJob
 
     public Task SynchronizeEmployees(CancellationToken cancellationToken)
     {
+        using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(SynchronizeEmployees), ActivityKind.Internal);
         var oracleHcmEmployees = _oracleDemographicsService.GetAllEmployees(cancellationToken);
         var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees);
         return _demographicsService.AddDemographicsStream(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
@@ -37,6 +41,7 @@ public sealed class EmployeeSyncJob : IJob
 
     private async IAsyncEnumerable<DemographicsRequestDto> ConvertToRequestDto(IAsyncEnumerable<OracleEmployee?> asyncEnumerable)
     {
+        using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(ConvertToRequestDto), ActivityKind.Internal);
         await foreach (OracleEmployee? employee in asyncEnumerable)
         {
             if (employee?.Address == null)
@@ -54,7 +59,7 @@ public sealed class EmployeeSyncJob : IJob
                 FullName = employee.Name.DisplayName,
 
 
-                SSN = employee.NationalIdentifier?.NationalIdentifierNumber.ConvertSsnToLong() ?? 0,
+                SSN = (employee.NationalIdentifier?.NationalIdentifierNumber ?? GetFakeSsn()).ConvertSsnToLong() ?? 0,
                 StoreNumber = 0,
                 DepartmentId = Department.Constants.Beer_And_Wine,
                 PayClassificationId = PayClassification.Constants.ApprMeatCutters,
@@ -82,6 +87,15 @@ public sealed class EmployeeSyncJob : IJob
                     CountryISO = employee.Address.Country
                 }
             };
+        }
+
+        yield break;
+
+        string GetFakeSsn()
+        {
+            // We MUST construct the object here, otherwise we will always get the same SSN
+            Bogus.Faker faker = new Bogus.Faker();
+            return faker.Person.Ssn();
         }
     }
 }
