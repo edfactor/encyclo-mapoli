@@ -2330,14 +2330,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<byte?>("EnrollmentId")
                         .HasColumnType("NUMBER(3)");
 
-                    b.Property<decimal>("ExecutiveEarnings")
-                        .HasPrecision(8, 2)
-                        .HasColumnType("DECIMAL(8,2)");
-
-                    b.Property<decimal>("ExecutiveHours")
-                        .HasPrecision(4, 2)
-                        .HasColumnType("DECIMAL(4,2)");
-
                     b.Property<decimal>("ForfeitureAmountLastYear")
                         .HasPrecision(9, 2)
                         .HasColumnType("DECIMAL(9,2)");
@@ -2391,8 +2383,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.Property<byte?>("ZeroContributionReasonId")
                         .HasColumnType("NUMBER(3)");
-                    
-                    
 
                     b.HasKey("EmployeeBadge");
 
