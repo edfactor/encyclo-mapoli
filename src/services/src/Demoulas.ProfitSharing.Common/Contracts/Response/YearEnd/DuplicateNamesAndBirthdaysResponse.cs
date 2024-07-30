@@ -19,6 +19,6 @@ public class DuplicateNamesAndBirthdaysResponse
     public required short StoreNumber { get; set; }
     public required int Count { get; set; }
     public required Decimal NetBalance { get; set; }
-    public required decimal HoursCurrentYear { get; set; }
-    public required decimal EarningsCurrentYear { get; set; }
+    public required decimal? HoursCurrentYear { get; set; }
+    public required decimal? EarningsCurrentYear { get; set; }
 }

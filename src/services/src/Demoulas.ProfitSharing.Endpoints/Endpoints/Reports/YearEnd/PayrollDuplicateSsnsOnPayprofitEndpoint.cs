@@ -1,18 +1,20 @@
-﻿using System.Globalization;
-using System.Text;
-using CsvHelper;
+﻿using CsvHelper;
 using CsvHelper.Configuration;
+using CsvHelper.TypeConversion;
+using Demoulas.Common.Contracts.Request;
+using Demoulas.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 
-public partial class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithoutRequest<ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto>>
+public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithCSVBase<PaginationRequestDto, PayrollDuplicateSsnsOnPayprofitResponseDto, PayrollDuplicateSsnsOnPayprofitEndpoint.PayrollDuplicateSsnsOnPayprofitResponseMap>
 {
     private readonly IYearEndService _reportService;
 
@@ -28,35 +30,40 @@ public partial class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithoutRe
         Summary(s =>
         {
             s.Summary = "Payroll duplicate ssns on payprofit";
-            s.Description = @"SSN and ""clean up"" reports to highlight possible problems which should be corrected before profit sharing is run. This job can be run multiple times.";
+            s.Description =
+                @"SSN and ""clean up"" reports to highlight possible problems which should be corrected before profit sharing is run. This job can be run multiple times.";
+            s.ExampleRequest = SimpleExampleRequest;
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
                     200,
                     new ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto>
                     {
-                        ReportName = "PAYROLL DUPLICATE SSNs ON PAYPROFIT", 
+                        ReportName = ReportFileName,
                         ReportDate = DateTimeOffset.Now,
-                        Results = new HashSet<PayrollDuplicateSsnsOnPayprofitResponseDto>
+                        Response = new PaginatedResponseDto<PayrollDuplicateSsnsOnPayprofitResponseDto>
                         {
-                            new PayrollDuplicateSsnsOnPayprofitResponseDto
+                            Results = new List<PayrollDuplicateSsnsOnPayprofitResponseDto>
                             {
-                                EmployeeBadge = 47425, 
-                                EmployeeSSN = 900047425, 
-                                Name = "John", 
-                                Status = EmploymentStatus.Constants.Active, 
-                                Store = 14,
-                                EarningsCurrentYear = 32_100,
-                                PayProfitSSN = 900047425,
-                                Address = new AddressResponseDto
+                                new PayrollDuplicateSsnsOnPayprofitResponseDto
                                 {
-                                    Street = "123 Main",
-                                    City = "Sydney",
-                                    State = "HI",
-                                    CountryISO = Common.Constants.US,
-                                    PostalCode = "01234"
-                                },
-                                ContactInfo = new ContactInfoResponseDto()
+                                    EmployeeBadge = 47425,
+                                    EmployeeSSN = 900047425,
+                                    Name = "John",
+                                    Status = EmploymentStatus.Constants.Active,
+                                    Store = 14,
+                                    EarningsCurrentYear = 32_100,
+                                    PayProfitSSN = 900047425,
+                                    Address = new AddressResponseDto
+                                    {
+                                        Street = "123 Main",
+                                        City = "Sydney",
+                                        State = "HI",
+                                        CountryISO = Common.Constants.US,
+                                        PostalCode = "01234"
+                                    },
+                                    ContactInfo = new ContactInfoResponseDto()
+                                }
                             }
                         }
                     }
@@ -67,41 +74,28 @@ public partial class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithoutRe
         Options(x => x.CacheOutput(p => p.Expire(TimeSpan.FromMinutes(5))));
     }
 
-    public override async Task HandleAsync(CancellationToken ct)
+    public override string ReportFileName => "PAYROLL DUPLICATE SSNs ON PAYPROFIT";
+
+    public override async Task<ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto>> GetResponse(PaginationRequestDto req, CancellationToken ct)
     {
-        string acceptHeader = HttpContext.Request.Headers["Accept"].ToString().ToLower(CultureInfo.InvariantCulture);
-
-        ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto> response = await _reportService.GetPayrollDuplicateSsnsOnPayprofit(ct);
-
-        if (acceptHeader.Contains("text/csv"))
-        {
-            await using MemoryStream csvData = GenerateCsvStream(response);
-            await SendStreamAsync(csvData, "PAYROLL DUPLICATE SSNs ON PAYPROFIT.csv", cancellation: ct);
-            return;
-        }
-
-        await SendOkAsync(response, ct);
+        return await _reportService.GetPayrollDuplicateSsnsOnPayprofit(req, ct);
     }
 
-
-    private MemoryStream GenerateCsvStream(ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto> report)
+    public sealed class YearMonthDayTypeConverter : DefaultTypeConverter
     {
-        MemoryStream memoryStream = new MemoryStream();
-        using (StreamWriter streamWriter = new StreamWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
-        using (CsvWriter csvWriter = new CsvWriter(streamWriter, new CsvConfiguration(CultureInfo.InvariantCulture) { Delimiter = "," }))
+        public override string? ConvertToString(object? value, IWriterRow row, MemberMapData memberMapData)
         {
-            streamWriter.WriteLine($"{report.ReportDate:MMM dd yyyy HH:mm}");
-            streamWriter.WriteLine(report.ReportName);
+            if (value == null)
+            {
+                return null;
+            }
 
-            csvWriter.Context.RegisterClassMap<PayrollDuplicateSsnsOnPayprofitResponseMap>();
-            csvWriter.WriteRecords(report.Results);
-            streamWriter.Flush();
+            var d = (DateOnly)value;
+            return d.ToString("YYYYMMDD");
         }
-        memoryStream.Position = 0; // Reset the stream position to the beginning
-        return memoryStream;
     }
 
-    private sealed class PayrollDuplicateSsnsOnPayprofitResponseMap : ClassMap<PayrollDuplicateSsnsOnPayprofitResponseDto>
+    public sealed class PayrollDuplicateSsnsOnPayprofitResponseMap : ClassMap<PayrollDuplicateSsnsOnPayprofitResponseDto>
     {
         public PayrollDuplicateSsnsOnPayprofitResponseMap()
         {

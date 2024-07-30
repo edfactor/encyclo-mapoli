@@ -4,15 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CsvHelper.Configuration;
+using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Csv;
 using FastEndpoints;
+using Demoulas.Common.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
-public class NamesMissingCommasEndpoint : EndpointWithCSVBase<EmptyRequest, NamesMissingCommaResponse, NamesMissingCommasEndpoint.NamesMissingCommasResponseMap>
+public class NamesMissingCommasEndpoint : EndpointWithCSVBase<PaginationRequestDto, NamesMissingCommaResponse, NamesMissingCommasEndpoint.NamesMissingCommasResponseMap>
 {
     private readonly IYearEndService _yearEndService;
 
@@ -34,9 +35,9 @@ public class NamesMissingCommasEndpoint : EndpointWithCSVBase<EmptyRequest, Name
 
     public override string ReportFileName => "NAMES-MISSING-COMMAS";
 
-    public override async Task<ReportResponseBase<NamesMissingCommaResponse>> GetResponse(CancellationToken ct)
+    public override async Task<ReportResponseBase<NamesMissingCommaResponse>> GetResponse(PaginationRequestDto req, CancellationToken ct)
     {
-        return await _yearEndService.GetNamesMissingComma(ct);
+        return await _yearEndService.GetNamesMissingComma(req, ct);
     }
 
     public sealed class NamesMissingCommasResponseMap : ClassMap<NamesMissingCommaResponse>

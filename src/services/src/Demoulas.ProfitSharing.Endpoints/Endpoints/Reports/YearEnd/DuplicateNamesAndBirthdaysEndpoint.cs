@@ -4,16 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CsvHelper.Configuration;
+using Demoulas.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Csv;
+using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PayrollDuplicateSsnsOnPayprofitEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
-public class DuplicateNamesAndBirthdaysEndpoint:EndpointWithCSVBase<EmptyRequest, DuplicateNamesAndBirthdaysResponse, DuplicateNamesAndBirthdaysEndpoint.DuplicateNamesAndBirthdaysResponseMap>
+public class DuplicateNamesAndBirthdaysEndpoint:EndpointWithCSVBase<PaginationRequestDto, DuplicateNamesAndBirthdaysResponse, DuplicateNamesAndBirthdaysEndpoint.DuplicateNamesAndBirthdaysResponseMap>
 {
     private readonly IYearEndService _yearEndService;
 
@@ -35,9 +36,9 @@ public class DuplicateNamesAndBirthdaysEndpoint:EndpointWithCSVBase<EmptyRequest
 
     public override string ReportFileName => "duplicate-names-and-birthdays";
 
-    public override Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetResponse(CancellationToken ct)
+    public override Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetResponse(PaginationRequestDto req, CancellationToken ct)
     {
-        return _yearEndService.GetDuplicateNamesAndBirthdays(ct);
+        return _yearEndService.GetDuplicateNamesAndBirthdays(req, ct);
     }
 
     public sealed class DuplicateNamesAndBirthdaysResponseMap:ClassMap<DuplicateNamesAndBirthdaysResponse>

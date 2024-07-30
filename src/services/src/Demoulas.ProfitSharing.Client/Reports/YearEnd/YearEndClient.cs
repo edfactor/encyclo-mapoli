@@ -1,12 +1,17 @@
-﻿using System.Data.SqlTypes;
+﻿using System;
+using System.Data.SqlTypes;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading;
+using System.Web;
+using Demoulas.Common.Contracts.Request;
+using Demoulas.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Client.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Client.Reports.YearEnd;
 public sealed class YearEndClient : IYearEndService
@@ -32,92 +37,85 @@ public sealed class YearEndClient : IYearEndService
         _options = Constants.GetJsonSerializerOptions();
     }
 
-    public async Task<ReportResponseBase<PayrollDuplicateSSNResponseDto>> GetDuplicateSSNs(CancellationToken ct)
+    public Task<ReportResponseBase<PayrollDuplicateSSNResponseDto>> GetDuplicateSSNs(PaginationRequestDto req, CancellationToken ct)
     {
-        var response = await _httpClient.GetAsync($"{BaseApiPath}/duplicatessns", ct);
-        _ = response.EnsureSuccessStatusCode();
-
-        var rslt = await response.Content.ReadFromJsonAsync<ReportResponseBase<PayrollDuplicateSSNResponseDto>>(_options, ct);
-        return rslt ?? new ReportResponseBase<PayrollDuplicateSSNResponseDto> 
-        {
-            ReportName = Constants.ErrorMessages.ReportNotFound,
-            ReportDate = SqlDateTime.MinValue.Value,
-            Results = new HashSet<PayrollDuplicateSSNResponseDto>(0)
-        };
+        return CallReportEndpoint<PayrollDuplicateSSNResponseDto>(req, "duplicate-ssns", ct);
     }
 
-    public Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfit(CancellationToken ct = default)
+    public Task<Stream> DownloadDuplicateSsNs(CancellationToken cancellationToken)
     {
-        return CallReportEndpoint<DemographicBadgesNotInPayProfitResponse>("demographic-badges-not-in-payprofit", ct);
+        return DownloadCsvReport("duplicate-ssns", cancellationToken);
+    }
+
+    public Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfit(PaginationRequestDto req, CancellationToken ct = default)
+    {
+        return CallReportEndpoint<DemographicBadgesNotInPayProfitResponse>(req, "demographic-badges-not-in-payprofit", ct);
     }
 
     #region Negative ETVA For SSNs On PayProfit
 
-    public Task<ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>> GetNegativeETVAForSSNsOnPayProfitResponse(CancellationToken cancellationToken = default)
+    public Task<ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>> GetNegativeETVAForSSNsOnPayProfitResponse(PaginationRequestDto req, CancellationToken cancellationToken = default)
     {
-        return CallReportEndpoint<NegativeETVAForSSNsOnPayProfitResponse>("negative-evta-ssn", cancellationToken);
+        return CallReportEndpoint<NegativeETVAForSSNsOnPayProfitResponse>(req, "negative-evta-ssn", cancellationToken);
     }
 
     public Task<Stream> DownloadNegativeETVAForSSNsOnPayProfitResponse(CancellationToken cancellationToken = default)
     {
-        return _httpDownloadClient.GetStreamAsync($"{BaseApiPath}/negative-evta-ssn", cancellationToken);
+        return DownloadCsvReport("negative-evta-ssn", cancellationToken);
     }
 
     #endregion
 
     #region Mismatched Ssns Payprofit And Demographics On Same Badge
-    public Task<ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>> GetMismatchedSsnsPayprofitAndDemographicsOnSameBadge(CancellationToken cancellationToken = default)
+    public Task<ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>> GetMismatchedSsnsPayprofitAndDemographicsOnSameBadge(PaginationRequestDto req, CancellationToken cancellationToken = default)
     {
-        return CallReportEndpoint<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>("mismatched-ssns-payprofit-and-demo-on-same-badge", cancellationToken);
+        return CallReportEndpoint<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>(req, "mismatched-ssns-payprofit-and-demo-on-same-badge", cancellationToken);
     }
 
     public Task<Stream> DownloadMismatchedSsnsPayprofitAndDemographicsOnSameBadge(CancellationToken cancellationToken = default)
     {
-        return _httpDownloadClient.GetStreamAsync($"{BaseApiPath}/mismatched-ssns-payprofit-and-demo-on-same-badge", cancellationToken);
+        return DownloadCsvReport("mismatched-ssns-payprofit-and-demo-on-same-badge", cancellationToken);
     }
 
-    public async Task<ReportResponseBase<PayProfitBadgesNotInDemographicsResponse>> GetPayProfitBadgesNotInDemographics(CancellationToken cancellationToken = default)
+    public Task<ReportResponseBase<PayProfitBadgesNotInDemographicsResponse>> GetPayProfitBadgesNotInDemographics(PaginationRequestDto req, CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.GetAsync($"{BaseApiPath}/payprofit-badges-without-demographics", cancellationToken);
-        _ = response.EnsureSuccessStatusCode();
-
-        var rslt = await response.Content.ReadFromJsonAsync<ReportResponseBase<PayProfitBadgesNotInDemographicsResponse>>(_options, cancellationToken);
-        return rslt ?? new ReportResponseBase<PayProfitBadgesNotInDemographicsResponse>
-        {
-            ReportName = Constants.ErrorMessages.ReportNotFound,
-            ReportDate = SqlDateTime.MinValue.Value,
-            Results = new HashSet<PayProfitBadgesNotInDemographicsResponse>(0)
-        };
+        return CallReportEndpoint<PayProfitBadgesNotInDemographicsResponse>(req, "payprofit-badges-without-demographics", cancellationToken);
     }
 
     #endregion
 
     #region Get Payroll Duplicate Ssns On Payprofit
-    public Task<ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto>> GetPayrollDuplicateSsnsOnPayprofit(CancellationToken cancellationToken = default)
+    public Task<ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto>> GetPayrollDuplicateSsnsOnPayprofit(PaginationRequestDto req, CancellationToken cancellationToken = default)
     {
-        return CallReportEndpoint<PayrollDuplicateSsnsOnPayprofitResponseDto>("payroll-duplicate-ssns-on-payprofit", cancellationToken);
+        return CallReportEndpoint<PayrollDuplicateSsnsOnPayprofitResponseDto>(req, "payroll-duplicate-ssns-on-payprofit", cancellationToken);
     }
 
     public Task<Stream> DownloadPayrollDuplicateSsnsOnPayprofit(CancellationToken cancellationToken = default)
     {
-        return _httpDownloadClient.GetStreamAsync($"{BaseApiPath}/payroll-duplicate-ssns-on-payprofit", cancellationToken);
+        return DownloadCsvReport("payroll-duplicate-ssns-on-payprofit", cancellationToken);
     }
 
     #endregion
 
-    public Task<ReportResponseBase<NamesMissingCommaResponse>> GetNamesMissingComma(CancellationToken cancellationToken = default)
+    private Task<Stream> DownloadCsvReport(string endpointRoute, CancellationToken cancellationToken)
     {
-        return CallReportEndpoint<NamesMissingCommaResponse>("names-missing-commas", cancellationToken);
+        UriBuilder uriBuilder = BuildPaginatedUrl(new PaginationRequestDto { Skip = 0, Take = int.MaxValue }, endpointRoute);
+        return _httpDownloadClient.GetStreamAsync(uriBuilder.Uri, cancellationToken);
+    }
+    public Task<ReportResponseBase<NamesMissingCommaResponse>> GetNamesMissingComma(PaginationRequestDto req, CancellationToken cancellationToken = default)
+    {
+        return CallReportEndpoint<NamesMissingCommaResponse>(req, "names-missing-commas", cancellationToken);
     }
 
-    public Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetDuplicateNamesAndBirthdays(CancellationToken cancellationToken = default)
+    public Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetDuplicateNamesAndBirthdays(PaginationRequestDto req, CancellationToken cancellationToken = default)
     {
-        return CallReportEndpoint<DuplicateNamesAndBirthdaysResponse>("duplicate-names-and-birthdays", cancellationToken);
+        return CallReportEndpoint<DuplicateNamesAndBirthdaysResponse>(req, "duplicate-names-and-birthdays", cancellationToken);
     }
 
-    private async Task<ReportResponseBase<TResponseDto>> CallReportEndpoint<TResponseDto>(string endpointRoute, CancellationToken cancellationToken) where TResponseDto : class
+    private async Task<ReportResponseBase<TResponseDto>> CallReportEndpoint<TResponseDto>(PaginationRequestDto req, string endpointRoute, CancellationToken cancellationToken) where TResponseDto : class
     {
-        var response = await _httpClient.GetAsync($"{BaseApiPath}/{endpointRoute}", cancellationToken);
+        UriBuilder uriBuilder = BuildPaginatedUrl(req, endpointRoute);
+        var response = await _httpClient.GetAsync(uriBuilder.Uri, cancellationToken);
         _ = response.EnsureSuccessStatusCode();
 
         var rslt = await response.Content.ReadFromJsonAsync<ReportResponseBase<TResponseDto>>(_options, cancellationToken);
@@ -125,8 +123,29 @@ public sealed class YearEndClient : IYearEndService
         {
             ReportName = Constants.ErrorMessages.ReportNotFound,
             ReportDate = SqlDateTime.MinValue.Value,
-            Results = new HashSet<TResponseDto>(0)
+            Response = new PaginatedResponseDto<TResponseDto>()
         };
+    }
+
+    private UriBuilder BuildPaginatedUrl(PaginationRequestDto req, string endpointRoute)
+    {
+        var query = HttpUtility.ParseQueryString(string.Empty);
+
+        if (req.Skip.HasValue)
+        {
+            query["skip"] = req.Skip.Value.ToString();
+        }
+
+        if (req.Take.HasValue)
+        {
+            query["take"] = req.Take.Value.ToString();
+        }
+
+        var uriBuilder = new UriBuilder($"{_httpClient.BaseAddress}{BaseApiPath}/{endpointRoute}/")
+        {
+            Query = query.ToString()
+        };
+        return uriBuilder;
     }
 
 }

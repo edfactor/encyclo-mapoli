@@ -1,18 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CsvHelper.Configuration;
+﻿using CsvHelper.Configuration;
+using Demoulas.Common.Contracts.Request;
+using Demoulas.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Csv;
+using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
-public class DemographicBadgesNotInPayProfitEndpoint:EndpointWithCSVBase<EmptyRequest, DemographicBadgesNotInPayProfitResponse, DemographicBadgesNotInPayProfitEndpoint.DemographicBadgesNotInPayProfitResponseMap>
+
+public class DemographicBadgesNotInPayProfitEndpoint : EndpointWithCSVBase<PaginationRequestDto, DemographicBadgesNotInPayProfitResponse,
+    DemographicBadgesNotInPayProfitEndpoint.DemographicBadgesNotInPayProfitResponseMap>
 {
     private readonly IYearEndService _yearEndService;
 
@@ -28,18 +28,65 @@ public class DemographicBadgesNotInPayProfitEndpoint:EndpointWithCSVBase<EmptyRe
         Summary(s =>
         {
             s.Summary = "Demographic badges not in Payprofit";
+            s.ExampleRequest = SimpleExampleRequest;
+            s.ResponseExamples = new Dictionary<int, object>
+            {
+                {
+                    200,
+                    new ReportResponseBase<DemographicBadgesNotInPayProfitResponse>
+                    {
+                        ReportName = ReportFileName,
+                        ReportDate = DateTimeOffset.Now,
+                        Response = new PaginatedResponseDto<DemographicBadgesNotInPayProfitResponse>()
+                        {
+                            Results = new List<DemographicBadgesNotInPayProfitResponse>
+                            {
+                                new DemographicBadgesNotInPayProfitResponse()
+                                {
+                                    EmployeeBadge = 47425,
+                                    EmployeeSSN = 900047425,
+                                    EmployeeName = "John",
+                                    Status = EmploymentStatus.Constants.Active
+                                },
+                                new DemographicBadgesNotInPayProfitResponse
+                                {
+                                    EmployeeBadge = 82424,
+                                    EmployeeSSN = 900082424,
+                                    EmployeeName = "Jane",
+                                    Status = EmploymentStatus.Constants.Delete
+                                },
+                                new DemographicBadgesNotInPayProfitResponse
+                                {
+                                    EmployeeBadge = 85744,
+                                    EmployeeSSN = 900085744,
+                                    EmployeeName = "Tim",
+                                    Status = EmploymentStatus.Constants.Inactive
+                                },
+                                new DemographicBadgesNotInPayProfitResponse
+                                {
+                                    EmployeeBadge = 94861,
+                                    EmployeeSSN = 900094861,
+                                    EmployeeName = "Sally",
+                                    Status = EmploymentStatus.Constants.Terminated,
+                                    Store = 4
+                                }
+                            }
+                        }
+                    }
+                }
+            };
         });
         Group<YearEndGroup>();
     }
 
     public override string ReportFileName => "DEMOGRAPHIC-WITHOUT-DEMOGRAPHICS";
 
-    public override async Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetResponse(CancellationToken ct)
+    public override async Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetResponse(PaginationRequestDto req, CancellationToken ct)
     {
-        return await _yearEndService.GetDemographicBadgesNotInPayProfit(ct);
+        return await _yearEndService.GetDemographicBadgesNotInPayProfit(req, ct);
     }
 
-    public sealed class DemographicBadgesNotInPayProfitResponseMap: ClassMap<DemographicBadgesNotInPayProfitResponse>
+    public sealed class DemographicBadgesNotInPayProfitResponseMap : ClassMap<DemographicBadgesNotInPayProfitResponse>
     {
         public DemographicBadgesNotInPayProfitResponseMap()
         {

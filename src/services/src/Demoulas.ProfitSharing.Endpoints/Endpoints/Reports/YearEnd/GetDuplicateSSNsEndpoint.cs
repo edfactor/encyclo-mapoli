@@ -1,15 +1,19 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Response;
+﻿using System.Data.SqlTypes;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
-using CsvHelper;
 using CsvHelper.Configuration;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Csv;
+using Demoulas.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Extensions;
+using Demoulas.ProfitSharing.Data.Entities;
 
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
-public class GetDuplicateSSNsEndpoint : EndpointWithCSVBase<EmptyRequest, PayrollDuplicateSSNResponseDto, GetDuplicateSSNsEndpoint.GetDuplicateSSNsResponseMap>
+public class GetDuplicateSSNsEndpoint : EndpointWithCSVBase<PaginationRequestDto, PayrollDuplicateSSNResponseDto, GetDuplicateSSNsEndpoint.GetDuplicateSSNsResponseMap>
 {
     private readonly IYearEndService _yearEndService;
 
@@ -21,19 +25,59 @@ public class GetDuplicateSSNsEndpoint : EndpointWithCSVBase<EmptyRequest, Payrol
     public override void Configure()
     {
         AllowAnonymous();
-        Get("duplicatessns");
+        Get("duplicate-ssns");
         Summary(s =>
         {
             s.Summary = "Get SSNs that are duplicated in the demographics area";
+            s.ExampleRequest = SimpleExampleRequest;
+            s.ResponseExamples = new Dictionary<int, object>
+            {
+                {
+                    200,
+                    new ReportResponseBase<PayrollDuplicateSSNResponseDto>
+                    {
+                        ReportName = ReportFileName,
+                        ReportDate = DateTimeOffset.Now,
+                        Response = new PaginatedResponseDto<PayrollDuplicateSSNResponseDto>
+                        {
+                            Results = new List<PayrollDuplicateSSNResponseDto>
+                            {
+                                new PayrollDuplicateSSNResponseDto
+                                {
+                                    BadgeNumber = 123,
+                                    SSN = 123_45_6789,
+                                    Name = "John Doe",
+                                    Address = new AddressResponseDto
+                                    {
+                                        Street = "123 Main",
+                                        City = "Ashand",
+                                        State = "NM",
+                                        PostalCode = "90210",
+                                        CountryISO = Common.Constants.US
+                                    },
+                                    HireDate = SqlDateTime.MinValue.Value.ToDateOnly(),
+                                    TerminationDate = DateTime.Today.ToDateOnly(),
+                                    Status = EmploymentStatus.Constants.Terminated,
+                                    StoreNumber = 6,
+                                    ProfitSharingRecords = 17,
+                                    HoursCurrentYear = 1024,
+                                    HoursLastYear = 2048,
+                                    EarningsCurrentYear = ushort.MaxValue
+                                }
+                            }
+                        }
+                    }
+                }
+            };
         });
         Group<YearEndGroup>();
     }
 
     public override string ReportFileName => "DuplicateSSns";
 
-    public override Task<ReportResponseBase<PayrollDuplicateSSNResponseDto>> GetResponse(CancellationToken ct)
+    public override Task<ReportResponseBase<PayrollDuplicateSSNResponseDto>> GetResponse(PaginationRequestDto req, CancellationToken ct)
     {
-        return _yearEndService.GetDuplicateSSNs(ct);
+        return _yearEndService.GetDuplicateSSNs(req, ct);
     }
     
     public sealed class GetDuplicateSSNsResponseMap : ClassMap<PayrollDuplicateSSNResponseDto>
@@ -44,10 +88,10 @@ public class GetDuplicateSSNsEndpoint : EndpointWithCSVBase<EmptyRequest, Payrol
             Map().Index(1).Convert(_ => string.Empty);
             Map(m => m.BadgeNumber).Index(2).Name("BADGE");
             Map(m => m.SSN).Index(3).Name("SSN");
-            Map(m => m.Address).Index(4).Name("ADDR");
-            Map(m => m.City).Index(5).Name("CITY");
-            Map(m => m.State).Index(6).Name("ST");
-            Map(m => m.PostalCode).Index(7).Name("ZIP");
+            Map(m => m.Address.Street).Index(4).Name("ADDR");
+            Map(m => m.Address.City).Index(5).Name("CITY");
+            Map(m => m.Address.State).Index(6).Name("ST");
+            Map(m => m.Address.PostalCode).Index(7).Name("ZIP");
             Map(m => m.HireDate).Index(8).Name("HIRE");
             Map(m => m.TerminationDate).Index(9).Name("TERM");
             Map(m => m.RehireDate).Index(10).Name("REHIRE");
