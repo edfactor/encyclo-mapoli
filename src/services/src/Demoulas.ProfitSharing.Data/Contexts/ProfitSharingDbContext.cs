@@ -19,13 +19,6 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
     {
 
     }
-    
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information);
-        // Or for more detailed logging:
-        // optionsBuilder.LogTo(Console.WriteLine, new[] { DbLoggerCategory.Database.Command.Name }, LogLevel.Information);
-    }
 
     public virtual DbSet<Demographic> Demographics { get; set; }
     public virtual DbSet<Country> Countries { get; set; }
