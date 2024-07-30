@@ -1,14 +1,13 @@
 ﻿using System.Diagnostics;
-using System.Reflection.Metadata.Ecma335;
+using Demoulas.Common.Api.Extensions;
+using Demoulas.Common.Contracts.Configuration;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.ProfitSharing.Api.Extensions;
-using Demoulas.ProfitSharing.Common.Configuration;
-using Demoulas.ProfitSharing.Common.Contracts.Configuration;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.ServiceDefaults;
+using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.StoreInfo.Entities.Contexts;
-
 WebApplicationBuilder builder = WebApplication.CreateBuilder();
 
 builder.Configuration.AddUserSecrets<Program>();
@@ -42,17 +41,17 @@ await builder.AddDatabaseServices(list);
 #endif
 
 builder.AddCachingServices();
+builder.AddProjectServices();
 
 
-void OktaSettingsAction(OktaSettings settings)
+void OktaSettingsAction(OktaSwaggerConfiguration settings)
 {
-    const string notSet = "Not Set";
-    settings = builder.Configuration.GetSection("Okta").Get<OktaSettings>() ?? new OktaSettings { AuthorizationEndpoint = notSet, ClientId = notSet, Issuer = notSet, TokenEndpoint = notSet };
+    builder.Configuration.Bind("Okta", settings);
 }
 
 builder.ConfigureDefaultEndpoints()
-    .AddSwaggerOpenApi(enableJwtBearerAuth: false, oktaSettingsAction: OktaSettingsAction)
-    .AddSwaggerOpenApi(version: 2, enableJwtBearerAuth: false, oktaSettingsAction: OktaSettingsAction);
+    .AddSwaggerOpenApi(oktaSettingsAction: OktaSettingsAction)
+    .AddSwaggerOpenApi(version: 2, oktaSettingsAction: OktaSettingsAction);
 
 WebApplication app = builder.Build();
 

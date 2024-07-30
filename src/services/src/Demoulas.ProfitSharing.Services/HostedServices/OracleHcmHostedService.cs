@@ -17,7 +17,7 @@ public class OracleHcmHostedService : BackgroundService
         _hostEnvironment = hostEnvironment;
     }
 
-    protected override Task ExecuteAsync(CancellationToken cancellationToken)
+    protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         var message = new MessageRequest<OracleHcmJobRequest>
         {
@@ -30,7 +30,7 @@ public class OracleHcmHostedService : BackgroundService
             }
         };
 
-        using var activity = OracleHcmActivitySource.Instance.StartActivity(name: "Sync Employees from OracleHCM - Application Startup", kind: ActivityKind.Internal);
-        return _bus.Publish(message: message, cancellationToken: cancellationToken);
+        _= OracleHcmActivitySource.Instance.StartActivity(name: "Sync Employees from OracleHCM - Application Startup", kind: ActivityKind.Internal);
+        await _bus.Publish(message: message, cancellationToken: cancellationToken);
     }
 }
