@@ -9,6 +9,7 @@
   </PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Demoulas.Common.Api" />
 		<PackageReference Include="FastEndpoints.AspVersioning" />
 		<PackageReference Include="FastEndpoints.Swagger" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
@@ -30,7 +31,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\..\..\..\demoulas.common\src\Demoulas.Common.Api\Demoulas.Common.Api.csproj" />
 	  <ProjectReference Include="..\Demoulas.ProfitSharing.Endpoints\Demoulas.ProfitSharing.Endpoints.csproj" />
 	  <ProjectReference Include="..\Demoulas.ProfitSharing.ServiceDefaults\Demoulas.ProfitSharing.ServiceDefaults.csproj" />
 	  <ProjectReference Include="..\Demoulas.ProfitSharing.Services\Demoulas.ProfitSharing.Services.csproj" />
