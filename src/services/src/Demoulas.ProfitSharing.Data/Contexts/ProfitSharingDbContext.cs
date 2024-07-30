@@ -3,6 +3,7 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Data.Contexts;
 
@@ -17,6 +18,13 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
         : base(options)
     {
 
+    }
+    
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information);
+        // Or for more detailed logging:
+        // optionsBuilder.LogTo(Console.WriteLine, new[] { DbLoggerCategory.Database.Command.Name }, LogLevel.Information);
     }
 
     public virtual DbSet<Demographic> Demographics { get; set; }
