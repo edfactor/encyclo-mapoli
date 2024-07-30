@@ -136,7 +136,7 @@ public sealed class PayProfit
     public decimal ExecutiveHours { get; set; }
     
     /// <summary>
-    /// executive earnings``
+    /// executive earnings
     /// </summary>
     public decimal ExecutiveEarnings { get; set; }
     
