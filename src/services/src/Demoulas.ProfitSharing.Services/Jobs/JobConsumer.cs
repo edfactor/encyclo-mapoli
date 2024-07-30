@@ -10,6 +10,10 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using static Quartz.Logging.OperationName;
 using Demoulas.ProfitSharing.OracleHcm.Contracts.Request;
+using Demoulas.ProfitSharing.Common.ActivitySources;
+using System.Diagnostics;
+using Demoulas.ProfitSharing.Data.Entities.MassTransit;
+using Job = Demoulas.ProfitSharing.Data.Entities.MassTransit.Job;
 
 namespace Demoulas.ProfitSharing.Services.Jobs;
 
@@ -26,32 +30,35 @@ public class JobConsumer : IConsumer<MessageRequest<OracleHcmJobRequest>>
 
     public async Task Consume(ConsumeContext<MessageRequest<OracleHcmJobRequest>> context)
     {
+        _ = OracleHcmActivitySource.Instance.StartActivity(name: "Sync Employees from OracleHCM - Message received", kind: ActivityKind.Internal);
         CancellationToken cancellationToken = context.CancellationToken;
         var message = context.Message;
 
-        if (message.Body.JobType is "Full" or "Delta")
+        if (message.Body.JobType is OracleHcmJobRequest.Enum.JobTypeEnum.Full or OracleHcmJobRequest.Enum.JobTypeEnum.Delta)
         {
             bool jobIsAlreadyRunning = await _dataContext.UseReadOnlyContext(c =>
             {
                 var runningJobs = c.Jobs
-                    .Where(j => (j.JobType == "Full" || j.JobType == "Delta") && j.Status == Data.Entities.MassTransit.Job.JobStatus.Running);
+                    .Where(j => (j.JobType == OracleHcmJobRequest.Enum.JobTypeEnum.Full || j.JobType == OracleHcmJobRequest.Enum.JobTypeEnum.Delta) &&
+                                j.StatusEnum == OracleHcmJobRequest.Enum.JobStatusEnum.Running);
 
                 return runningJobs.AnyAsync(cancellationToken: cancellationToken);
             });
 
             if (jobIsAlreadyRunning)
             {
-                {
-                    return;
-                }
+                _ = OracleHcmActivitySource.Instance.StartActivity(name: "Sync Employees from OracleHCM - Job already running. Exiting", kind: ActivityKind.Internal);
+                return;
+                
             }
 
-            var job = new Demoulas.ProfitSharing.Data.Entities.MassTransit.Job
+            _= OracleHcmActivitySource.Instance.StartActivity(name: $"Sync Employees from OracleHCM - Start new {message.Body.JobType} sync job", kind: ActivityKind.Internal);
+            var job = new Job
             {
                 JobType = message.Body.JobType,
                 StartMethod = message.Body.StartMethod,
                 RequestedBy = message.Body.RequestedBy,
-                Status = Data.Entities.MassTransit.Job.JobStatus.Running,
+                StatusEnum = OracleHcmJobRequest.Enum.JobStatusEnum.Running,
                 Started = DateTime.Now
             };
 
@@ -68,7 +75,7 @@ public class JobConsumer : IConsumer<MessageRequest<OracleHcmJobRequest>>
             await _dataContext.UseWritableContext(c =>
             {
                 job.Completed = DateTime.Now;
-                job.Status = Data.Entities.MassTransit.Job.JobStatus.Completed;
+                job.StatusEnum = OracleHcmJobRequest.Enum.JobStatusEnum.Completed;
                 return c.SaveChangesAsync(cancellationToken);
             }, cancellationToken);
 

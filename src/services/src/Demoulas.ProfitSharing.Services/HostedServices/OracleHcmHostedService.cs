@@ -1,4 +1,6 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Messaging;
+﻿using Demoulas.ProfitSharing.Common.ActivitySources;
+using System.Diagnostics;
+using Demoulas.ProfitSharing.Common.Contracts.Messaging;
 using MassTransit;
 using Microsoft.Extensions.Hosting;
 
@@ -6,19 +8,28 @@ namespace Demoulas.ProfitSharing.Services.HostedServices;
 public class OracleHcmHostedService : BackgroundService
 {
     private readonly IBus _bus;
+    private readonly IHostEnvironment _hostEnvironment;
 
-    public OracleHcmHostedService(IBus bus)
+    public OracleHcmHostedService(IBus bus, IHostEnvironment hostEnvironment)
     {
         _bus = bus;
+        _hostEnvironment = hostEnvironment;
     }
 
     protected override Task ExecuteAsync(CancellationToken cancellationToken)
     {
         var message = new MessageRequest<OracleHcmJobRequest>
         {
-            Body = new OracleHcmJobRequest { JobType = "Delta", StartMethod = "System", RequestedBy = "System" }
+            ApplicationName = _hostEnvironment.ApplicationName,
+            Body = new OracleHcmJobRequest
+            {
+                JobType = OracleHcmJobRequest.Enum.JobTypeEnum.Delta,
+                StartMethod = OracleHcmJobRequest.Enum.StartMethodEnum.System,
+                RequestedBy = "System"
+            }
         };
 
-        return _bus.Publish(message, cancellationToken);
+        using var activity = OracleHcmActivitySource.Instance.StartActivity(name: "Sync Employees from OracleHCM - Application Startup", kind: ActivityKind.Internal);
+        return _bus.Publish(message: message, cancellationToken: cancellationToken);
     }
 }

@@ -14,9 +14,10 @@ internal sealed class JobMap : IEntityTypeConfiguration<Job>
         builder.HasKey(c => c.Id);
         builder.ToTable("Job");
 
-        builder.Property(b => b.StartMethod).IsRequired().HasMaxLength(30);
         builder.Property(b => b.RequestedBy).HasMaxLength(30);
-        builder.Property(b => b.JobType).IsRequired().HasMaxLength(30);
+        builder.Property(b => b.StartMethod).IsRequired().HasPrecision(2);
+        builder.Property(b => b.JobType).IsRequired().HasPrecision(2);
+        builder.Property(b => b.StatusEnum).IsRequired().HasPrecision(2);
         builder.Property(b => b.Started).IsRequired().HasColumnType("DATE");
         builder.Property(b => b.Completed).HasColumnType("DATE");
     }
