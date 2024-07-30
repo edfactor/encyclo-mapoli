@@ -1,5 +1,5 @@
 ﻿using Bogus;
-using Demoulas.StoreInfo.DTOs;
+using Demoulas.Common.Data.Services.DTOs;
 
 namespace Demoulas.ProfitSharing.UnitTests.Fakes;
 

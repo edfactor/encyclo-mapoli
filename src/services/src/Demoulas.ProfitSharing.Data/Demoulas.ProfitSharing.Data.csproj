@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.Oracle.EntityFrameworkCore" />
-    <PackageReference Include="Demoulas.StoreInfo" />
+    <PackageReference Include="Demoulas.Common.Data.Services" />
     <PackageReference Include="EFCore.NamingConventions" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
       <PrivateAssets>all</PrivateAssets>

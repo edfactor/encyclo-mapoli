@@ -2,12 +2,12 @@
 using Demoulas.Common.Api.Extensions;
 using Demoulas.Common.Contracts.Configuration;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
+using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.ProfitSharing.Api.Extensions;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.ServiceDefaults;
 using Demoulas.ProfitSharing.Services.Extensions;
-using Demoulas.StoreInfo.Entities.Contexts;
 WebApplicationBuilder builder = WebApplication.CreateBuilder();
 
 builder.Configuration.AddUserSecrets<Program>();
@@ -31,7 +31,7 @@ List<ContextFactoryRequest> list = new List<ContextFactoryRequest>
 {
     ContextFactoryRequest.Initialize<ProfitSharingDbContext>("ProfitSharing"),
     ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"),
-    ContextFactoryRequest.Initialize<StoreInfoDbContext>("StoreInfo")
+    ContextFactoryRequest.Initialize<DemoulasCommonDataContext>("StoreInfo")
 };
 
 #if RUSS

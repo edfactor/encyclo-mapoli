@@ -1,6 +1,5 @@
 ﻿using Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.MassTransit;
-using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Data.Extensions;

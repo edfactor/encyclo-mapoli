@@ -1,15 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Common.Contracts.Messaging;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Messaging;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using MassTransit.Contracts.JobService;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
-using static Quartz.Logging.OperationName;
-using Demoulas.ProfitSharing.OracleHcm.Contracts.Request;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using System.Diagnostics;
 using Demoulas.ProfitSharing.Data.Entities.MassTransit;

@@ -4,14 +4,12 @@ using Demoulas.Common.Caching.Interfaces;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.OracleHcm;
 using Demoulas.ProfitSharing.OracleHcm.Contracts.Request;
 using Demoulas.ProfitSharing.Services.InternalEntities;
-using Quartz;
 
 namespace Demoulas.ProfitSharing.Services.Jobs;
 

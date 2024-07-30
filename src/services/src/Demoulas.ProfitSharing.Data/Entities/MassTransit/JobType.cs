@@ -1,5 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Messaging;
-using Demoulas.ProfitSharing.Data.Interfaces;
+﻿using Demoulas.ProfitSharing.Data.Interfaces;
 
 namespace Demoulas.ProfitSharing.Data.Entities.MassTransit;
 public sealed class JobType : ILookupTable<byte>

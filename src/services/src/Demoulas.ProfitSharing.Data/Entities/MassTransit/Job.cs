@@ -1,6 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Messaging;
-
-namespace Demoulas.ProfitSharing.Data.Entities.MassTransit;
+﻿namespace Demoulas.ProfitSharing.Data.Entities.MassTransit;
 public sealed class Job
 {
     public int Id { get; set; }

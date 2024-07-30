@@ -1,11 +1,9 @@
 ﻿using System.Diagnostics;
-using System.Globalization;
 using System.Reflection;
-using Aspire.Oracle.EntityFrameworkCore;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
+using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.StoreInfo.Entities.Contexts;
 using EntityFramework.Exceptions.Oracle;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -173,14 +171,14 @@ public sealed class DataContextFactory : IProfitSharingDataContextFactory
     /// <typeparam name="T"></typeparam>
     /// <param name="func"></param>
     /// <returns></returns>
-    public async Task<T> UseStoreInfoContext<T>(Func<StoreInfoDbContext, Task<T>> func)
+    public async Task<T> UseStoreInfoContext<T>(Func<DemoulasCommonDataContext, Task<T>> func)
     {
         using (_logger.BeginScope("Store Info DB Operation"))
         {
             try
             {
                 await using AsyncServiceScope scope = _serviceProvider.CreateAsyncScope();
-                StoreInfoDbContext dbContext = scope.ServiceProvider.GetRequiredService<StoreInfoDbContext>();
+                DemoulasCommonDataContext dbContext = scope.ServiceProvider.GetRequiredService<DemoulasCommonDataContext>();
                 return await func(dbContext);
             }
             catch (Exception ex)

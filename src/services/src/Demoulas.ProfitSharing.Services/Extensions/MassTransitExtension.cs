@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Common.Extensions;
+﻿using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Services.HostedServices;
 using Demoulas.ProfitSharing.Services.Jobs;
 using MassTransit;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 

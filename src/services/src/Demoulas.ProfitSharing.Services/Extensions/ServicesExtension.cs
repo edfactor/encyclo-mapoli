@@ -16,7 +16,6 @@ using Quartz.Spi;
 using Quartz;
 using System.Net.Http.Headers;
 using System.Text;
-using Demoulas.ProfitSharing.Common.Extensions;
 using Microsoft.Extensions.Http.Resilience;
 
 namespace Demoulas.ProfitSharing.Services.Extensions;

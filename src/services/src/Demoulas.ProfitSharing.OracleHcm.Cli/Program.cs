@@ -1,26 +1,11 @@
-﻿
-using System.Collections.Generic;
-using System.Data.SqlTypes;
-using System.Diagnostics;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Text.Json;
-using Demoulas.Common.Data.Contexts.DTOs.Context;
-using Demoulas.ProfitSharing.Common.Configuration;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Extensions;
-using Demoulas.ProfitSharing.Common.Interfaces;
+﻿using Demoulas.Common.Data.Contexts.DTOs.Context;
+using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.ProfitSharing.Data.Contexts;
-using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Extensions;
-using Demoulas.ProfitSharing.OracleHcm.Contracts.Request;
-using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Jobs;
-using Demoulas.StoreInfo.Entities.Contexts;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Http.Resilience;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Cli;
 
@@ -35,7 +20,7 @@ public class Program
         {
             ContextFactoryRequest.Initialize<ProfitSharingDbContext>("ProfitSharing"),
             ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"),
-            ContextFactoryRequest.Initialize<StoreInfoDbContext>("StoreInfo")
+            ContextFactoryRequest.Initialize<DemoulasCommonDataContext>("StoreInfo")
         };
         await builder.AddDatabaseServices(list, true, true);
         Services.Extensions.ServicesExtension.AddProjectServices(builder);
