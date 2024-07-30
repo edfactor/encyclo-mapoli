@@ -11,6 +11,7 @@ using Demoulas.ProfitSharing.OracleHcm.Contracts.Request;
 using Quartz;
 
 namespace Demoulas.ProfitSharing.Services.Jobs;
+
 public sealed class EmployeeSyncJob
 {
     private readonly OracleDemographicsService _oracleDemographicsService;
@@ -44,6 +45,7 @@ public sealed class EmployeeSyncJob
                 continue;
             }
 
+            Bogus.Faker faker = new Bogus.Faker();
             yield return new DemographicsRequestDto
             {
                 OracleHcmId = employee.PersonId,
@@ -52,24 +54,21 @@ public sealed class EmployeeSyncJob
                 FirstName = employee.Name.FirstName,
                 LastName = employee.Name.LastName,
                 FullName = employee.Name.DisplayName,
-
-
-                SSN = (employee.NationalIdentifier?.NationalIdentifierNumber ?? GetFakeSsn()).ConvertSsnToLong() ?? 0,
-                StoreNumber = 0,
-                DepartmentId = Department.Constants.Beer_And_Wine,
-                PayClassificationId = PayClassification.Constants.ApprMeatCutters,
                 HireDate = employee.Name.EffectiveStartDate.ToDateOnly(),
-                EmploymentTypeCode = EmploymentType.Constants.PartTime,
-                PayFrequencyId = PayFrequency.Constants.Weekly,
-                EmploymentStatusId = EmploymentStatus.Constants.Active,
-                GenderCode = Gender.Constants.Other,
+
+                SSN = (employee.NationalIdentifier?.NationalIdentifierNumber ?? faker.Person.Ssn()).ConvertSsnToLong() ?? 0,
+                StoreNumber = faker.Random.Short(1, 99),
+                DepartmentId = faker.Random.Byte(1, 7),
+                PayClassificationId = faker.Random.Byte(1, 98),
+                EmploymentTypeCode = faker.PickRandom('P', 'H', 'G', 'F'),
+                PayFrequencyId = faker.PickRandom(PayFrequency.Constants.Weekly, PayFrequency.Constants.Monthly),
+                EmploymentStatusId = faker.PickRandom(EmploymentStatus.Constants.Active, EmploymentStatus.Constants.Delete, EmploymentStatus.Constants.Inactive,
+                    EmploymentStatus.Constants.Terminated),
+                GenderCode = faker.PickRandom('M', 'F', 'X'),
 
 
-                ContactInfo = new ContactInfoRequestDto
-                {
-                    PhoneNumber = employee.Phone?.PhoneNumber,
-                    EmailAddress = employee.Email?.EmailAddress
-                },
+
+                ContactInfo = new ContactInfoRequestDto { PhoneNumber = employee.Phone?.PhoneNumber, EmailAddress = employee.Email?.EmailAddress },
                 Address = new AddressRequestDto
                 {
                     Street = employee.Address.AddressLine1,
@@ -82,15 +81,6 @@ public sealed class EmployeeSyncJob
                     CountryISO = employee.Address.Country
                 }
             };
-        }
-
-        yield break;
-
-        string GetFakeSsn()
-        {
-            // We MUST construct the object here, otherwise we will always get the same SSN
-            Bogus.Faker faker = new Bogus.Faker();
-            return faker.Person.Ssn();
         }
     }
 }
