@@ -14,6 +14,7 @@ using Demoulas.ProfitSharing.Common.ActivitySources;
 using System.Diagnostics;
 using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Job = Demoulas.ProfitSharing.Data.Entities.MassTransit.Job;
+using JobStatus = Demoulas.ProfitSharing.Data.Entities.MassTransit.JobStatus;
 
 namespace Demoulas.ProfitSharing.Services.Jobs;
 
@@ -40,7 +41,7 @@ public class JobConsumer : IConsumer<MessageRequest<OracleHcmJobRequest>>
             {
                 var runningJobs = c.Jobs
                     .Where(j => (j.JobType == OracleHcmJobRequest.Enum.JobTypeEnum.Full || j.JobType == OracleHcmJobRequest.Enum.JobTypeEnum.Delta) &&
-                                j.StatusEnum == OracleHcmJobRequest.Enum.JobStatusEnum.Running);
+                                j.JobStatusId == JobStatus.Constants.Running);
 
                 return runningJobs.AnyAsync(cancellationToken: cancellationToken);
             });
@@ -58,7 +59,7 @@ public class JobConsumer : IConsumer<MessageRequest<OracleHcmJobRequest>>
                 JobType = message.Body.JobType,
                 StartMethod = message.Body.StartMethod,
                 RequestedBy = message.Body.RequestedBy,
-                StatusEnum = OracleHcmJobRequest.Enum.JobStatusEnum.Running,
+                JobStatusId = JobStatus.Constants.Running,
                 Started = DateTime.Now
             };
 
@@ -75,7 +76,7 @@ public class JobConsumer : IConsumer<MessageRequest<OracleHcmJobRequest>>
             await _dataContext.UseWritableContext(c =>
             {
                 job.Completed = DateTime.Now;
-                job.StatusEnum = OracleHcmJobRequest.Enum.JobStatusEnum.Completed;
+                job.JobStatusId = JobStatus.Constants.Completed;
                 return c.SaveChangesAsync(cancellationToken);
             }, cancellationToken);
 

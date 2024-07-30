@@ -17,13 +17,7 @@ public sealed record OracleHcmJobRequest
             OnDemand = 1
         }
 
-        public enum JobStatusEnum
-        {
-            Pending,
-            Running,
-            Completed,
-            Failed
-        }
+       
     }
 
     public required Enum.JobTypeEnum JobType { get; set; } // Full, Delta, Individual

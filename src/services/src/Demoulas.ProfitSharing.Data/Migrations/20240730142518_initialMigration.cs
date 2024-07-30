@@ -112,6 +112,18 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "JOBSTATUS",
+                columns: table => new
+                {
+                    ID = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false),
+                    NAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_JOBSTATUS", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "PAYCLASSIFICATION",
                 columns: table => new
                 {
@@ -226,6 +238,30 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "JOB",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "NUMBER(10)", nullable: false)
+                        .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
+                    JOBTYPE = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false),
+                    STARTMETHOD = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false),
+                    REQUESTEDBY = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false),
+                    JOBSTATUSID = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false),
+                    STARTED = table.Column<DateTime>(type: "DATE", nullable: false),
+                    COMPLETED = table.Column<DateTime>(type: "DATE", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_JOB", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_JOB_JOBSTATUS_JOBSTATUSID",
+                        column: x => x.JOBSTATUSID,
+                        principalTable: "JOBSTATUS",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "PROFITDETAIL",
                 columns: table => new
                 {
@@ -270,7 +306,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     ORACLEHCMID = table.Column<long>(type: "NUMBER(15)", precision: 15, nullable: false),
                     SSN = table.Column<long>(type: "NUMBER(9)", precision: 9, nullable: false),
                     BADGENUMBER = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false),
-                    LASTMODIFIEDDATE = table.Column<DateTime>(type: "DATE", nullable: false, defaultValue: new DateTime(2024, 7, 29, 14, 39, 19, 207, DateTimeKind.Local).AddTicks(4633)),
+                    LASTMODIFIEDDATE = table.Column<DateTime>(type: "DATE", nullable: false, defaultValue: new DateTime(2024, 7, 30, 10, 25, 17, 779, DateTimeKind.Local).AddTicks(7821)),
                     FULLNAME = table.Column<string>(type: "NVARCHAR2(60)", maxLength: 60, nullable: false, comment: "FullName"),
                     LASTNAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "LastName"),
                     FIRSTNAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "FirstName"),
@@ -692,6 +728,17 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "JOBSTATUS",
+                columns: new[] { "ID", "NAME" },
+                values: new object[,]
+                {
+                    { (byte)0, "Pending" },
+                    { (byte)1, "Running" },
+                    { (byte)2, "Completed" },
+                    { (byte)99, "Failed" }
+                });
+
+            migrationBuilder.InsertData(
                 table: "PAYCLASSIFICATION",
                 columns: new[] { "ID", "NAME" },
                 values: new object[,]
@@ -902,6 +949,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 column: "TERMINATIONCODEID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_JOB_JOBSTATUSID",
+                table: "JOB",
+                column: "JOBSTATUSID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PAYPROFIT_BENEFICIARYTYPEID",
                 table: "PAYPROFIT",
                 column: "BENEFICIARYTYPEID");
@@ -944,10 +996,16 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "BENEFICIARY");
 
             migrationBuilder.DropTable(
+                name: "JOB");
+
+            migrationBuilder.DropTable(
                 name: "PAYPROFIT");
 
             migrationBuilder.DropTable(
                 name: "PROFITDETAIL");
+
+            migrationBuilder.DropTable(
+                name: "JOBSTATUS");
 
             migrationBuilder.DropTable(
                 name: "BENEFICIARYTYPE");

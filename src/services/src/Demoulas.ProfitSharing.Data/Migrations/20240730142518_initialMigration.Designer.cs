@@ -12,8 +12,8 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    [Migration("20240729210618_quartzJobs")]
-    partial class quartzJobs
+    [Migration("20240730142518_initialMigration")]
+    partial class initialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1567,7 +1567,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<DateTime>("LastModifiedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("DATE")
-                        .HasDefaultValue(new DateTime(2024, 7, 29, 17, 6, 17, 494, DateTimeKind.Local).AddTicks(9117))
+                        .HasDefaultValue(new DateTime(2024, 7, 30, 10, 25, 17, 779, DateTimeKind.Local).AddTicks(7821))
                         .HasColumnName("LASTMODIFIEDDATE");
 
                     b.Property<string>("LastName")
@@ -1911,10 +1911,14 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DATE")
                         .HasColumnName("COMPLETED");
 
-                    b.Property<string>("JobType")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("NVARCHAR2(30)")
+                    b.Property<byte>("JobStatusId")
+                        .HasPrecision(2)
+                        .HasColumnType("NUMBER(2)")
+                        .HasColumnName("JOBSTATUSID");
+
+                    b.Property<byte>("JobType")
+                        .HasPrecision(2)
+                        .HasColumnType("NUMBER(2)")
                         .HasColumnName("JOBTYPE");
 
                     b.Property<string>("RequestedBy")
@@ -1923,24 +1927,63 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NVARCHAR2(30)")
                         .HasColumnName("REQUESTEDBY");
 
-                    b.Property<string>("StartMethod")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("NVARCHAR2(30)")
+                    b.Property<byte>("StartMethod")
+                        .HasPrecision(2)
+                        .HasColumnType("NUMBER(2)")
                         .HasColumnName("STARTMETHOD");
 
                     b.Property<DateTime>("Started")
                         .HasColumnType("DATE")
                         .HasColumnName("STARTED");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("STATUS");
-
                     b.HasKey("Id")
                         .HasName("PK_JOB");
 
+                    b.HasIndex("JobStatusId")
+                        .HasDatabaseName("IX_JOB_JOBSTATUSID");
+
                     b.ToTable("JOB", (string)null);
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.MassTransit.JobStatus", b =>
+                {
+                    b.Property<byte>("Id")
+                        .HasPrecision(2)
+                        .HasColumnType("NUMBER(2)")
+                        .HasColumnName("ID");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)")
+                        .HasColumnName("NAME");
+
+                    b.HasKey("Id")
+                        .HasName("PK_JOBSTATUS");
+
+                    b.ToTable("JOBSTATUS", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = (byte)0,
+                            Name = "Pending"
+                        },
+                        new
+                        {
+                            Id = (byte)2,
+                            Name = "Completed"
+                        },
+                        new
+                        {
+                            Id = (byte)99,
+                            Name = "Failed"
+                        },
+                        new
+                        {
+                            Id = (byte)1,
+                            Name = "Running"
+                        });
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.PayClassification", b =>
@@ -3194,6 +3237,18 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Navigation("TerminationCode");
                 });
 
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.MassTransit.Job", b =>
+                {
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.MassTransit.JobStatus", "JobStatus")
+                        .WithMany("Jobs")
+                        .HasForeignKey("JobStatusId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_JOB_JOBSTATUS_JOBSTATUSID");
+
+                    b.Navigation("JobStatus");
+                });
+
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.PayProfit", b =>
                 {
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.BeneficiaryType", "BeneficiaryType")
@@ -3293,6 +3348,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Gender", b =>
                 {
                     b.Navigation("Demographics");
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.MassTransit.JobStatus", b =>
+                {
+                    b.Navigation("Jobs");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.PayClassification", b =>

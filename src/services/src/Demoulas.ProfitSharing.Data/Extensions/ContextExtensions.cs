@@ -1,4 +1,5 @@
 ﻿using Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
+using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.OracleHcm;
 using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,8 +27,9 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new BeneficiaryMap());
         modelBuilder.ApplyConfiguration(new EmploymentStatusMap());
         modelBuilder.ApplyConfiguration(new JobMap());
+        modelBuilder.ApplyConfiguration(new JobStatusMap());
 
-        
+
 
 
         // Force table names to be upper case for consistency with all existing DSM projects
