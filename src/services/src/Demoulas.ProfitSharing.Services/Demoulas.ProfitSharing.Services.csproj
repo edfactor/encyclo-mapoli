@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AspNetCore.HealthChecks.UI.Client" />
     <PackageReference Include="Demoulas.Common.Caching" />
     <PackageReference Include="Bogus" />
     <PackageReference Include="Quartz" />
