@@ -4,10 +4,15 @@ using Demoulas.Common.Contracts.Configuration;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.ProfitSharing.Api.Extensions;
+using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.ServiceDefaults;
 using Demoulas.ProfitSharing.Services.Extensions;
+using MassTransit;
+using MassTransit.Logging;
+using MassTransit.Monitoring;
+
 WebApplicationBuilder builder = WebApplication.CreateBuilder();
 
 builder.Configuration.AddUserSecrets<Program>();
@@ -49,7 +54,8 @@ void OktaSettingsAction(OktaSwaggerConfiguration settings)
     builder.Configuration.Bind("Okta", settings);
 }
 
-builder.ConfigureDefaultEndpoints()
+builder.ConfigureDefaultEndpoints(meterNames: new[] { InstrumentationOptions.MeterName },
+        activitySourceNames: new[] { OracleHcmActivitySource.Instance.Name })
     .AddSwaggerOpenApi(oktaSettingsAction: OktaSettingsAction)
     .AddSwaggerOpenApi(version: 2, oktaSettingsAction: OktaSettingsAction);
 

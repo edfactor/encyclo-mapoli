@@ -12,6 +12,8 @@ internal static class MassTransitExtension
     {
         builder.Services.AddMassTransit(x =>
         {
+            x.SetKebabCaseEndpointNameFormatter();
+
             x.AddConsumer<JobConsumer>();
 
             x.UsingInMemory((context, cfg) =>
