@@ -7,10 +7,7 @@ using Demoulas.ProfitSharing.Api.Extensions;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
-using Demoulas.ProfitSharing.ServiceDefaults;
 using Demoulas.ProfitSharing.Services.Extensions;
-using MassTransit;
-using MassTransit.Logging;
 using MassTransit.Monitoring;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder();
@@ -60,8 +57,6 @@ builder.ConfigureDefaultEndpoints(meterNames: new[] { InstrumentationOptions.Met
     .AddSwaggerOpenApi(version: 2, oktaSettingsAction: OktaSettingsAction);
 
 WebApplication app = builder.Build();
-
-app.MapDefaultEndpoints();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
