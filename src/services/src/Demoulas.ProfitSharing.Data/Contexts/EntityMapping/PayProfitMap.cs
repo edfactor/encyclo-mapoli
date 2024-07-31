@@ -83,9 +83,14 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
 
         _ = builder.Property(e => e.ForfeitureAmountLastYear).HasPrecision(9, 2);
 
+        _ = builder.Property(e => e.ForfeitureAmountLastYear).HasPrecision(9, 2);
+        
+        _ = builder.Property(e => e.ExecutiveEarnings)
+            .HasPrecision(8, 2);
 
-
-
+        _ = builder.Property(e => e.ExecutiveHours)
+            .HasPrecision(4, 2);
+        
         _ = builder.HasOne(e => e.Enrollment)
             .WithMany(p => p.Profits);
 

@@ -129,6 +129,16 @@ public sealed class PayProfit
     public required EmployeeType? EmployeeType { get; set; }
 
     public ZeroContributionReason? ZeroContributionReason { get; set; }
-
+    
+    /// <summary>
+    /// executive hours
+    /// </summary>
+    public decimal ExecutiveHours { get; set; }
+    
+    /// <summary>
+    /// executive earnings
+    /// </summary>
+    public decimal ExecutiveEarnings { get; set; }
+    
     public Demographic? Demographic { get; set; }
 }
