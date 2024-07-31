@@ -5,8 +5,10 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Mappers;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services;
@@ -47,6 +49,16 @@ public class DemographicsService : IDemographicsServiceInternal
         {
             _ = await AddDemographics(batch, cancellationToken);
         }
+    }
+
+    public Task<DateTime?> GetLastOracleHcmSyncDate(CancellationToken cancellationToken = default)
+    {
+        return _dataContextFactory.UseReadOnlyContext(c =>
+        {
+            return c.Jobs.Where(c =>
+                    c.JobStatusId == JobStatus.Constants.Completed && (c.JobTypeId == JobType.Constants.Full || c.JobTypeId == JobType.Constants.Delta))
+                .MaxAsync(j => j.Completed, cancellationToken: cancellationToken);
+        });
     }
 
     public async Task<ISet<DemographicsResponseDto>?> AddDemographics(IEnumerable<DemographicsRequestDto> demographics, CancellationToken cancellationToken)

@@ -38,6 +38,8 @@ public sealed class EmployeeSyncJob
         var payClassifications = await _payClassificationService.GetAllAsync(cancellationToken);
         var idCollection = payClassifications.Select(p => p.Id).ToArray();
 
+        var lastSync = await _demographicsService.GetLastOracleHcmSyncDate(cancellationToken);
+
         var oracleHcmEmployees = _oracleDemographicsService.GetAllEmployees(cancellationToken);
         var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, idCollection);
         await _demographicsService.AddDemographicsStream(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
