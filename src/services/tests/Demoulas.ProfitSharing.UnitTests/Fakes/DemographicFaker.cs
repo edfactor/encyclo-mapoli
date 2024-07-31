@@ -24,7 +24,7 @@ internal sealed class DemographicFaker : Faker<Demographic>
             .RuleFor(d => d.LastName, f => f.Name.LastName())
             .RuleFor(d => d.FirstName, f => f.Name.FirstName())
             .RuleFor(d => d.MiddleName, f => f.Name.FirstName())
-            .RuleFor(d => d.FullName, (f, d) => $"{d.FirstName} {d.LastName}")
+            .RuleFor(d => d.FullName, (f, d) => $"{d.LastName}, {d.FirstName}")
             .RuleFor(d => d.StoreNumber, f => f.Random.Short(1, 100))
             .RuleFor(d => d.DepartmentId, f => f.PickRandom<byte>(1, 2, 3, 4, 5, 6, 7))
             .RuleFor(d => d.PayClassification, f => payClassificationFaker.Generate())

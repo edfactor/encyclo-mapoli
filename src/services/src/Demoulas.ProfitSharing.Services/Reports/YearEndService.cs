@@ -279,4 +279,110 @@ public class YearEndService : IYearEndService
             };
         }
     }
+
+    public async Task<ReportResponseBase<NamesMissingCommaResponse>> GetNamesMissingComma(PaginationRequestDto req, CancellationToken cancellationToken = default)
+    {
+        using (_logger.BeginScope("Request BEGIN DEMOGRAPHIC BADGES NOT IN PAY PROFIT"))
+        {
+            var results = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+            {
+                var query = from dem in ctx.Demographics
+                            where dem.FullName == null || !dem.FullName.Contains(",")
+                            select new NamesMissingCommaResponse
+                            {
+                                EmployeeBadge = dem.BadgeNumber,
+                                EmployeeSSN = dem.SSN,
+                                EmployeeName = dem.FullName ?? "",
+                            };
+                return await query.ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken: cancellationToken);
+            });
+
+            _logger.LogInformation("Returned {results} records", results.Results.Count());
+
+            return new ReportResponseBase<NamesMissingCommaResponse>
+            {
+                ReportDate = DateTimeOffset.Now,
+                ReportName = "MISSING COMMA IN PY_NAME",
+                Response = results
+            };
+        }
+    }
+
+    public async Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetDuplicateNamesAndBirthdays(PaginationRequestDto req, CancellationToken cancellationToken = default)
+    {
+        using (_logger.BeginScope("Request BEGIN DUPLICATE NAMES AND BIRTHDAYS"))
+        {
+            var results = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+            {
+                var dupNameSlashDateOfBirth = await (from dem in ctx.Demographics
+                                                 group dem by new { dem.FullName, dem.DateOfBirth } into g
+                                                 where g.Count() > 1
+                                                 select g.Key.FullName).ToListAsync();
+
+                var query = from dem in ctx.Demographics
+                            join ppLj in ctx.PayProfits on dem.BadgeNumber equals ppLj.EmployeeBadge into tmpPayProfit
+                            from pp in tmpPayProfit.DefaultIfEmpty()
+                            join pdLj in ctx.ProfitDetails on dem.SSN equals pdLj.SSN into tmpProfitDetails
+                            from pd in tmpProfitDetails.DefaultIfEmpty()
+                            where dupNameSlashDateOfBirth.Contains(dem.FullName)
+                            group new { dem, pp, pd } by new
+                            {
+                                dem.BadgeNumber,
+                                dem.SSN,
+                                dem.FullName,
+                                dem.DateOfBirth,
+                                dem.Address.Street,
+                                dem.Address.City,
+                                dem.Address.State,
+                                dem.Address.PostalCode,
+                                dem.Address.CountryISO,
+                                pp.CompanyContributionYears,
+                                dem.HireDate,
+                                dem.TerminationDate,
+                                dem.EmploymentStatusId,
+                                dem.StoreNumber,
+                                PdSsn = (long?)(pd != null ? pd.SSN : null),
+                                pp.NetBalanceLastYear,
+                                pp.HoursCurrentYear,
+                                pp.EarningsCurrentYear
+                            } into g
+                            orderby g.Key.FullName, g.Key.DateOfBirth, g.Key.SSN, g.Key.BadgeNumber
+                            select new DuplicateNamesAndBirthdaysResponse
+                            {
+                                BadgeNumber = g.Key.BadgeNumber,
+                                SSN = g.Key.SSN,
+                                Name = g.Key.FullName,
+                                DateOfBirth = g.Key.DateOfBirth,
+                                Address = new AddressResponseDto()
+                                {
+                                    City = g.Key.City,
+                                    State = g.Key.State,
+                                    Street = g.Key.Street,
+                                    CountryISO = g.Key.CountryISO,
+                                    PostalCode = g.Key.PostalCode,
+                                },
+                                Years = g.Key.CompanyContributionYears,
+                                HireDate = g.Key.HireDate,
+                                TerminationDate = g.Key.TerminationDate,
+                                Status = g.Key.EmploymentStatusId,
+                                StoreNumber = g.Key.StoreNumber,
+                                Count = g.Count(),
+                                NetBalance = g.Key.NetBalanceLastYear,
+                                HoursCurrentYear = g.Key.HoursCurrentYear,
+                                EarningsCurrentYear = g.Key.EarningsCurrentYear
+                            };
+
+                return await query.ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken: cancellationToken);
+            });
+
+            _logger.LogInformation("Returned {results} records", results.Results.Count());
+
+            return new ReportResponseBase<DuplicateNamesAndBirthdaysResponse>()
+            {
+                ReportDate = DateTimeOffset.Now,
+                ReportName = "DUPLICATE NAMES AND BIRTHDAYS",
+                Response = results
+            };
+        }
+    }
 }
