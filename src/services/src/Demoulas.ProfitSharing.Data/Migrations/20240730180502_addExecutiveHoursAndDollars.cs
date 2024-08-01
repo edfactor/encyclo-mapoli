@@ -12,7 +12,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
         {
             migrationBuilder.AddColumn<decimal>(
                 name: "ExecutiveEarnings",
-                table: "PayProfit",
+                table: "PAYPROFIT",
                 type: "DECIMAL(8,2)",
                 precision: 8,
                 scale: 2,
@@ -21,7 +21,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             migrationBuilder.AddColumn<decimal>(
                 name: "ExecutiveHours",
-                table: "PayProfit",
+                table: "PAYPROFIT",
                 type: "DECIMAL(4,2)",
                 precision: 4,
                 scale: 2,
@@ -33,11 +33,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
         {
             migrationBuilder.DropColumn(
                 name: "ExecutiveHours",
-                table: "PayProfit");
+                table: "PAYPROFIT");
 
             migrationBuilder.DropColumn(
                 name: "ExecutiveEarnings",
-                table: "PayProfit");
+                table: "PAYPROFIT");
         }
 
     }
