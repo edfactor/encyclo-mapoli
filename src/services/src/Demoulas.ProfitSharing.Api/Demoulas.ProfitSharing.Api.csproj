@@ -13,25 +13,19 @@
 		<PackageReference Include="FastEndpoints.AspVersioning" />
 		<PackageReference Include="FastEndpoints.Swagger" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
-		<PackageReference Include="Microsoft.AspNetCore.OpenApi" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" />
 		<PackageReference Include="Serilog.AspNetCore" />
 		<PackageReference Include="Serilog.Enrichers.Environment" />
 		<PackageReference Include="Serilog.Enrichers.MassTransit" />
 		<PackageReference Include="Serilog.Enrichers.Memory" />
-		<PackageReference Include="Serilog.Enrichers.OpenTelemetry" />
 		<PackageReference Include="Serilog.Enrichers.Process" />
 		<PackageReference Include="Serilog.Enrichers.Sensitive" />
 		<PackageReference Include="Serilog.Enrichers.Thread" />
-		<PackageReference Include="Serilog.Exceptions.EntityFrameworkCore" />
-		<PackageReference Include="Serilog.Expressions" />
 		<PackageReference Include="Serilog.Sinks.Console" />
-		<PackageReference Include="Serilog.Sinks.Debug" />
 		<PackageReference Include="Elastic.Serilog.Sinks" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Demoulas.ProfitSharing.Endpoints\Demoulas.ProfitSharing.Endpoints.csproj" />
 	  <ProjectReference Include="..\Demoulas.ProfitSharing.Services\Demoulas.ProfitSharing.Services.csproj" />
 	</ItemGroup>
 
