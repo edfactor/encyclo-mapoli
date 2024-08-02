@@ -4,12 +4,12 @@ public sealed record PayProfitResponseDto
     /// <summary>
     /// Employee badge number
     /// </summary>
-    public required long EmployeeBadge { get; set; }
+    public required long BadgeNumber { get; set; }
 
     /// <summary>
     /// Employee social security number
     /// </summary>
-    public required string EmployeeSSN { get; set; }
+    public required string SSN { get; set; }
 
     /// <summary>
     /// Hours towards Profit Sharing in the current year (updated weekly)
