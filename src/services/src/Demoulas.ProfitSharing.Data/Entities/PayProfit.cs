@@ -5,12 +5,12 @@ public sealed class PayProfit
     /// <summary>
     /// Employee badge number
     /// </summary>
-    public required int EmployeeBadge { get; set; }
+    public required int BadgeNumber { get; set; }
 
     /// <summary>
     /// Employee social security number
     /// </summary>
-    public required long EmployeeSSN { get; set; }
+    public required long SSN { get; set; }
 
     /// <summary>
     /// Hours towards Profit Sharing in the current year (updated weekly)
@@ -139,6 +139,4 @@ public sealed class PayProfit
     /// executive earnings
     /// </summary>
     public decimal ExecutiveEarnings { get; set; }
-    
-    public Demographic? Demographic { get; set; }
 }
