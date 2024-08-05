@@ -1564,7 +1564,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<DateTime>("LastModifiedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("DATE")
-                        .HasDefaultValue(new DateTime(2024, 7, 30, 11, 57, 34, 900, DateTimeKind.Local).AddTicks(4785))
+                        .HasDefaultValue(new DateTime(2024, 8, 5, 9, 10, 48, 780, DateTimeKind.Local).AddTicks(1739))
                         .HasColumnName("LASTMODIFIEDDATE");
 
                     b.Property<string>("LastName")
@@ -1914,8 +1914,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("JOBSTATUSID");
 
                     b.Property<byte>("JobTypeId")
-                        .HasPrecision(2)
-                        .HasColumnType("NUMBER(2)")
+                        .HasPrecision(3)
+                        .HasColumnType("NUMBER(3)")
                         .HasColumnName("JOBTYPEID");
 
                     b.Property<string>("RequestedBy")
@@ -2538,7 +2538,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<int>("BadgeNumber")
                         .HasPrecision(7)
                         .HasColumnType("NUMBER(7)")
-                        .HasColumnName("EMPLOYEEBADGE");
+                        .HasColumnName("BADGENUMBER");
 
                     b.Property<byte?>("BeneficiaryTypeId")
                         .HasColumnType("NUMBER(3)")
@@ -2561,7 +2561,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<decimal?>("EarningsCurrentYear")
                         .IsRequired()
                         .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)");
+                        .HasColumnType("DECIMAL(9,2)")
+                        .HasColumnName("EARNINGSCURRENTYEAR");
 
                     b.Property<decimal>("EarningsEtvaValue")
                         .HasPrecision(9, 2)
@@ -2570,16 +2571,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.Property<decimal>("EarningsLastYear")
                         .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)");
+                        .HasColumnType("DECIMAL(9,2)")
+                        .HasColumnName("EARNINGSLASTYEAR");
 
                     b.Property<decimal?>("EarningsPriorEtvaValue")
                         .HasPrecision(9, 2)
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("EARNINGSPRIORETVAVALUE");
-
-                    b.Property<long>("EmployeeSSN")
-                        .HasMaxLength(9)
-                        .HasColumnType("NUMBER(15)");
 
                     b.Property<byte?>("EmployeeTypeId")
                         .HasColumnType("NUMBER(3)")
@@ -2591,11 +2589,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.Property<decimal>("ExecutiveEarnings")
                         .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)");
+                        .HasColumnType("DECIMAL(9,2)")
+                        .HasColumnName("EXECUTIVEEARNINGS");
 
                     b.Property<decimal>("ExecutiveHours")
                         .HasPrecision(6, 2)
-                        .HasColumnType("DECIMAL(6,2)");
+                        .HasColumnType("DECIMAL(6,2)")
+                        .HasColumnName("EXECUTIVEHOURS");
 
                     b.Property<decimal>("ForfeitureAmountLastYear")
                         .HasPrecision(9, 2)
@@ -2605,11 +2605,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<decimal?>("HoursCurrentYear")
                         .IsRequired()
                         .HasPrecision(6, 2)
-                        .HasColumnType("DECIMAL(6,2)");
+                        .HasColumnType("DECIMAL(6,2)")
+                        .HasColumnName("HOURSCURRENTYEAR");
 
                     b.Property<decimal>("HoursLastYear")
                         .HasPrecision(6, 2)
-                        .HasColumnType("DECIMAL(6,2)");
+                        .HasColumnType("DECIMAL(6,2)")
+                        .HasColumnName("HOURSLASTYEAR");
 
                     b.Property<short>("InitialContributionYear")
                         .HasPrecision(4)
@@ -2637,7 +2639,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.Property<long>("SSN")
                         .HasMaxLength(9)
-                        .HasColumnType("NUMBER(19)");
+                        .HasColumnType("NUMBER(19)")
+                        .HasColumnName("SSN");
 
                     b.Property<decimal?>("SecondaryEarnings")
                         .HasPrecision(9, 2)
@@ -2668,14 +2671,14 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("ZEROCONTRIBUTIONREASONID");
 
-                    b.HasKey("BadgeNumber");
+                    b.HasKey("BadgeNumber")
+                        .HasName("PK_PAYPROFIT");
 
                     b.HasIndex("BeneficiaryTypeId")
                         .HasDatabaseName("IX_PAYPROFIT_BENEFICIARYTYPEID");
 
-                    b.HasIndex("EmployeeSSN");
-
-                    b.HasIndex("EmployeeTypeId");
+                    b.HasIndex("EmployeeTypeId")
+                        .HasDatabaseName("IX_PAYPROFIT_EMPLOYEETYPEID");
 
                     b.HasIndex("EnrollmentId")
                         .HasDatabaseName("IX_PAYPROFIT_ENROLLMENTID");
@@ -3347,12 +3350,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .WithMany("Profits")
                         .HasForeignKey("BeneficiaryTypeId")
                         .HasConstraintName("FK_PAYPROFIT_BENEFICIARYTYPE_BENEFICIARYTYPEID");
-
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Demographic", "Demographic")
-                        .WithMany("PayProfit")
-                        .HasForeignKey("EmployeeSSN")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
 
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.EmployeeType", "EmployeeType")
                         .WithMany("Profits")
