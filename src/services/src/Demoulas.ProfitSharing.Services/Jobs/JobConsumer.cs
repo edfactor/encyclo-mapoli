@@ -1,0 +1,84 @@
+﻿using Demoulas.ProfitSharing.Common.Contracts.Messaging;
+using Demoulas.ProfitSharing.Data.Interfaces;
+using MassTransit;
+using Microsoft.EntityFrameworkCore;
+using Demoulas.ProfitSharing.Common.ActivitySources;
+using System.Diagnostics;
+using Demoulas.ProfitSharing.Data.Entities.MassTransit;
+using Job = Demoulas.ProfitSharing.Data.Entities.MassTransit.Job;
+using JobStatus = Demoulas.ProfitSharing.Data.Entities.MassTransit.JobStatus;
+
+namespace Demoulas.ProfitSharing.Services.Jobs;
+
+public class JobConsumer : IConsumer<MessageRequest<OracleHcmJobRequest>>
+{
+    private readonly IProfitSharingDataContextFactory _dataContext;
+    private readonly EmployeeSyncJob _employeeSyncJob;
+
+    public JobConsumer(IProfitSharingDataContextFactory context, EmployeeSyncJob employeeSyncJob)
+    {
+        _dataContext = context;
+        _employeeSyncJob = employeeSyncJob;
+    }
+
+    public async Task Consume(ConsumeContext<MessageRequest<OracleHcmJobRequest>> context)
+    {
+        _ = OracleHcmActivitySource.Instance.StartActivity(name: "Sync Employees from OracleHCM - Message received", kind: ActivityKind.Internal);
+        CancellationToken cancellationToken = context.CancellationToken;
+        var message = context.Message;
+
+        if (message.Body.JobType is JobType.Constants.Full or JobType.Constants.Delta)
+        {
+            bool jobIsAlreadyRunning = await _dataContext.UseReadOnlyContext(c =>
+            {
+                var runningJobs = c.Jobs
+                    .Where(j => (j.JobTypeId == JobType.Constants.Full || j.JobTypeId == JobType.Constants.Delta) &&
+                                j.JobStatusId == JobStatus.Constants.Running);
+
+                return runningJobs.AnyAsync(cancellationToken: cancellationToken);
+            });
+
+            if (jobIsAlreadyRunning)
+            {
+                _ = OracleHcmActivitySource.Instance.StartActivity(name: "Sync Employees from OracleHCM - Job already running. Exiting", kind: ActivityKind.Internal);
+                return;
+                
+            }
+
+            _= OracleHcmActivitySource.Instance.StartActivity(name: $"Sync Employees from OracleHCM - Start new {message.Body.JobType} sync job", kind: ActivityKind.Internal);
+            var job = new Job
+            {
+                JobTypeId = message.Body.JobType,
+                StartMethodId = StartMethod.Constants.System,
+                RequestedBy = message.Body.RequestedBy,
+                JobStatusId = JobStatus.Constants.Running,
+                Started = DateTime.Now
+            };
+
+            await _dataContext.UseWritableContext(c =>
+            {
+                c.Jobs.Add(job);
+                return c.SaveChangesAsync(cancellationToken);
+            }, cancellationToken);
+
+
+            // Execute the job
+            await ExecuteJob(cancellationToken);
+
+            await _dataContext.UseWritableContext(c =>
+            {
+                job.Completed = DateTime.Now;
+                job.JobStatusId = JobStatus.Constants.Completed;
+                return c.SaveChangesAsync(cancellationToken);
+            }, cancellationToken);
+
+        }
+    }
+
+    private Task ExecuteJob(CancellationToken cancellationToken)
+    {
+        return _employeeSyncJob.SynchronizeEmployees(cancellationToken);
+    }
+}
+
+

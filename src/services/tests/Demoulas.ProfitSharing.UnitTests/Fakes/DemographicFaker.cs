@@ -3,7 +3,6 @@ using Bogus.Extensions.UnitedStates;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.UnitTests.Extensions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Fakes;
 
@@ -25,10 +24,10 @@ internal sealed class DemographicFaker : Faker<Demographic>
             .RuleFor(d => d.FirstName, f => f.Name.FirstName())
             .RuleFor(d => d.MiddleName, f => f.Name.FirstName())
             .RuleFor(d => d.FullName, (f, d) => $"{d.LastName}, {d.FirstName}")
-            .RuleFor(d => d.StoreNumber, f => f.Random.Short(1, 100))
+            .RuleFor(d => d.StoreNumber, f => f.Random.Short(1, 99))
             .RuleFor(d => d.DepartmentId, f => f.PickRandom<byte>(1, 2, 3, 4, 5, 6, 7))
             .RuleFor(d => d.PayClassification, f => payClassificationFaker.Generate())
-            .RuleFor(d => d.PayClassificationId, f => f.PickRandom<byte>(1, 2, 10, 11, 13, 14, 15, 16, 17, 18, 19, 20))
+            .RuleFor(d => d.PayClassificationId, f => f.Random.Byte(1, 98))
             .RuleFor(d => d.ContactInfo, f => contactInfoFaker.Generate())
             .RuleFor(d => d.Address, f => addressFaker.Generate())
             .RuleFor(d => d.DateOfBirth, f => f.Date.Past(30, DateTime.Now.AddYears(-18)).ToDateOnly())

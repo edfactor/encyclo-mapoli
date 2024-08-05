@@ -57,38 +57,7 @@ public class AddDemographicsEndpoint : Endpoint<IEnumerable<DemographicsRequestD
                     EmploymentStatusId = EmploymentStatus.Constants.Active
                 }
             };
-            s.ResponseExamples = new Dictionary<int, object> {
-            {
-                200, new List<DemographicsResponseDto>
-                {
-                    new DemographicsResponseDto
-                    {
-                        SSN = "123-45-6789",
-                        OracleHcmId = 0,
-                        FullName = "John Doe",
-                        LastName = "John",
-                        FirstName = "Doe",
-                        StoreNumber = 0,
-                        Department = new DepartmentResponseDto { Id = Department.Constants.Produce, Name = "Produce"},
-                        PayClassificationId = 0,
-                        ContactInfo = new ContactInfoResponseDto(),
-                        Address = new AddressResponseDto
-                        {
-                            Street = "123 Street",
-                            State = "MA",
-                            City = "Andover",
-                            PostalCode = "02589",
-                            CountryISO = Constants.US
-                        },
-                        DateOfBirth = default,
-                        HireDate = default,
-                        ReHireDate = default,
-                        EmploymentType = new EmploymentTypeResponseDto { Name = "Supreme Leader"},
-                        PayFrequency = new PayFrequencyResponseDto { Name = "Hourly"},
-                        Gender = new GenderResponseDto { Name = "Yes"}
-                    }
-                }
-            } };
+            s.ResponseExamples = new Dictionary<int, object> { { 200, new List<DemographicsResponseDto> { DemographicsResponseDto.ResponseExample() } } };
         });
         Group<DemographicsGroup>();
     }

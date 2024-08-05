@@ -1,15 +1,11 @@
-﻿using System.Data.SqlTypes;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using FastEndpoints;
 using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.Common.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Extensions;
-using Demoulas.ProfitSharing.Data.Entities;
 
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
@@ -42,28 +38,7 @@ public class GetDuplicateSSNsEndpoint : EndpointWithCSVBase<PaginationRequestDto
                         {
                             Results = new List<PayrollDuplicateSSNResponseDto>
                             {
-                                new PayrollDuplicateSSNResponseDto
-                                {
-                                    BadgeNumber = 123,
-                                    SSN = 123_45_6789,
-                                    Name = "John Doe",
-                                    Address = new AddressResponseDto
-                                    {
-                                        Street = "123 Main",
-                                        City = "Ashand",
-                                        State = "NM",
-                                        PostalCode = "90210",
-                                        CountryISO = Common.Constants.US
-                                    },
-                                    HireDate = SqlDateTime.MinValue.Value.ToDateOnly(),
-                                    TerminationDate = DateTime.Today.ToDateOnly(),
-                                    Status = EmploymentStatus.Constants.Terminated,
-                                    StoreNumber = 6,
-                                    ProfitSharingRecords = 17,
-                                    HoursCurrentYear = 1024,
-                                    HoursLastYear = 2048,
-                                    EarningsCurrentYear = ushort.MaxValue
-                                }
+                                PayrollDuplicateSSNResponseDto.ResponseExample()
                             }
                         }
                     }

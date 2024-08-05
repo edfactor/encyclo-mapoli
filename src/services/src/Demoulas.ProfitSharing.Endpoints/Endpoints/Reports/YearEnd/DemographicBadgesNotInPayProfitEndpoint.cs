@@ -7,7 +7,6 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 
@@ -96,7 +95,7 @@ public class DemographicBadgesNotInPayProfitEndpoint : EndpointWithCSVBase<Pagin
             Map(m => m.EmployeeSSN).Index(3).Name("DEM SSN");
             Map(m => m.EmployeeName).Index(4).Name("Name");
             Map(m => m.Store).Index(5).Name("Store");
-            Map(m => m.Status).Index(6).Name("Status");
+            Map(m => m.Status).Index(6).Name("StatusEnum");
         }
     }
 }

@@ -33,4 +33,27 @@ public record DemographicsResponseDto : MemberResponseDto
 
     public required GenderResponseDto? Gender { get; set; }
 
+
+    public static DemographicsResponseDto ResponseExample()
+    {
+        return new DemographicsResponseDto
+        {
+            SSN = "123-45-6789",
+            OracleHcmId = 0,
+            FullName = "John Doe",
+            LastName = "John",
+            FirstName = "Doe",
+            StoreNumber = 0,
+            Department = new DepartmentResponseDto { Id = 3, Name = "Produce" },
+            PayClassificationId = 0,
+            ContactInfo = ContactInfoResponseDto.ResponseExample(),
+            Address = AddressResponseDto.ResponseExample(),
+            DateOfBirth = default,
+            HireDate = default,
+            ReHireDate = default,
+            EmploymentType = new EmploymentTypeResponseDto { Name = "Supreme Leader" },
+            PayFrequency = new PayFrequencyResponseDto { Name = "Hourly" },
+            Gender = new GenderResponseDto { Name = "Yes" }
+        };
+    }
 }

@@ -1,4 +1,7 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+﻿using Demoulas.ProfitSharing.Common.Extensions;
+using System.Data.SqlTypes;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 public sealed record PayrollDuplicateSSNResponseDto
 {
     public required long BadgeNumber { get; set; }
@@ -14,4 +17,23 @@ public sealed record PayrollDuplicateSSNResponseDto
     public required decimal HoursCurrentYear { get; set; }
     public decimal HoursLastYear { get; set; }
     public required decimal EarningsCurrentYear { get; set; }
+
+    public static PayrollDuplicateSSNResponseDto ResponseExample()
+    {
+        return new PayrollDuplicateSSNResponseDto
+        {
+            BadgeNumber = 123,
+            SSN = 123_45_6789,
+            Name = "John Doe",
+            Address = AddressResponseDto.ResponseExample(),
+            HireDate = SqlDateTime.MinValue.Value.ToDateOnly(),
+            TerminationDate = DateTime.Today.ToDateOnly(),
+            Status = 't',
+            StoreNumber = 6,
+            ProfitSharingRecords = 17,
+            HoursCurrentYear = 1024,
+            HoursLastYear = 2048,
+            EarningsCurrentYear = ushort.MaxValue
+        };
+    }
 }

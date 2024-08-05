@@ -1,10 +1,8 @@
-﻿using System.Threading;
+﻿using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.UnitTests.Fakes;
-using Demoulas.StoreInfo.Entities.Contexts;
-using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using MockQueryable.Moq;
 using Moq;
@@ -15,7 +13,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
 {
     private readonly Mock<ProfitSharingDbContext> _profitSharingDbContext;
     private readonly Mock<ProfitSharingReadOnlyDbContext> _profitSharingReadOnlyDbContext;
-    private readonly Mock<StoreInfoDbContext> _storeInfoDbContext;
+    private readonly Mock<DemoulasCommonDataContext> _storeInfoDbContext;
 
     private MockDataContextFactory()
     {
@@ -23,7 +21,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(ctx => ctx.SaveChangesAsync(true, It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
         _profitSharingReadOnlyDbContext = new Mock<ProfitSharingReadOnlyDbContext>();
-        _storeInfoDbContext = new Mock<StoreInfoDbContext>();
+        _storeInfoDbContext = new Mock<DemoulasCommonDataContext>();
 
         List<Demographic>? demographics = new DemographicFaker().Generate(500);
         Mock<DbSet<Demographic>> mockDemographic = demographics.AsQueryable().BuildMockDbSet();
@@ -114,7 +112,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
     }
 
 
-    public Task<T> UseStoreInfoContext<T>(Func<StoreInfoDbContext, Task<T>> func)
+    public Task<T> UseStoreInfoContext<T>(Func<DemoulasCommonDataContext, Task<T>> func)
     {
         return func.Invoke(_storeInfoDbContext.Object);
     }

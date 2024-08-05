@@ -1,60 +1,36 @@
-﻿using Demoulas.ProfitSharing.Services.Jobs;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Demoulas.ProfitSharing.Common.ActivitySources;
+using System.Diagnostics;
+using Demoulas.ProfitSharing.Common.Contracts.Messaging;
+using Demoulas.ProfitSharing.Data.Entities.MassTransit;
+using MassTransit;
 using Microsoft.Extensions.Hosting;
-using Quartz;
-using Quartz.Impl;
-using Quartz.Spi;
 
 namespace Demoulas.ProfitSharing.Services.HostedServices;
-public class OracleHcmHostedService : IHostedService
+public class OracleHcmHostedService : BackgroundService
 {
-    private readonly ISchedulerFactory _schedulerFactory;
-    private readonly IJobFactory _jobFactory;
-    private readonly IServiceProvider _serviceProvider;
-    private IScheduler? _scheduler;
+    private readonly IBus _bus;
+    private readonly IHostEnvironment _hostEnvironment;
 
-    public OracleHcmHostedService(ISchedulerFactory schedulerFactory, IJobFactory jobFactory,
-        IServiceProvider serviceProvider)
+    public OracleHcmHostedService(IBus bus, IHostEnvironment hostEnvironment)
     {
-        _schedulerFactory = schedulerFactory;
-        _jobFactory = jobFactory;
-        _serviceProvider = serviceProvider;
+        _bus = bus;
+        _hostEnvironment = hostEnvironment;
     }
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+    protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
-        _scheduler = await _schedulerFactory.GetScheduler(cancellationToken);
-        _scheduler.JobFactory = _jobFactory;
-
-        // Run the initial task ( Fire and forget )
-        _ = RunStartupTask(cancellationToken);
-
-        // Schedule the recurring job
-        var job = JobBuilder.Create<EmployeeSyncJob>()
-            .WithIdentity("dailyJob")
-            .Build();
-
-        var trigger = TriggerBuilder.Create()
-            .WithIdentity("dailyTrigger")
-            .WithCronSchedule("0 0 0 * * ?") // Runs daily at midnight
-            .Build();
-
-        await _scheduler.ScheduleJob(job, trigger, cancellationToken);
-
-        await _scheduler.Start(cancellationToken);
-    }
-
-    public async Task StopAsync(CancellationToken cancellationToken)
-    {
-        if (_scheduler != null)
+        var message = new MessageRequest<OracleHcmJobRequest>
         {
-            await _scheduler.Shutdown(cancellationToken);
-        }
-    }
+            ApplicationName = _hostEnvironment.ApplicationName,
+            Body = new OracleHcmJobRequest
+            {
+                JobType = JobType.Constants.Delta,
+                StartMethod = StartMethod.Constants.System,
+                RequestedBy = nameof(StartMethod.Constants.System)
+            }
+        };
 
-    private Task RunStartupTask(CancellationToken cancellationToken)
-    {
-        var employeeSyncJob = _serviceProvider.GetRequiredService<EmployeeSyncJob>();
-        return employeeSyncJob.SynchronizeEmployees(cancellationToken);
+        _= OracleHcmActivitySource.Instance.StartActivity(name: "Sync Employees from OracleHCM - Application Startup", kind: ActivityKind.Internal);
+        await _bus.Publish(message: message, cancellationToken: cancellationToken);
     }
 }

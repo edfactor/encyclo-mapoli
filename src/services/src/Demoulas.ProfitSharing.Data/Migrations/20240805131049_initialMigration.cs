@@ -17,12 +17,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "BENEFICIARYTYPE",
                 columns: table => new
                 {
-                    Id = table.Column<byte>(type: "NUMBER(3)", nullable: false),
-                    Name = table.Column<string>(type: "NVARCHAR2(20)", maxLength: 20, nullable: false)
+                    ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    NAME = table.Column<string>(type: "NVARCHAR2(20)", maxLength: 20, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BENEFICIARYTYPE", x => x.Id);
+                    table.PrimaryKey("PK_BENEFICIARYTYPE", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
@@ -30,9 +30,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 columns: table => new
                 {
                     ISO = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: false),
-                    Id = table.Column<short>(type: "NUMBER(3)", precision: 3, nullable: false),
-                    Name = table.Column<string>(type: "NVARCHAR2(100)", maxLength: 100, nullable: false),
-                    TelephoneCode = table.Column<string>(type: "NVARCHAR2(10)", maxLength: 10, nullable: false)
+                    ID = table.Column<short>(type: "NUMBER(3)", precision: 3, nullable: false),
+                    NAME = table.Column<string>(type: "NVARCHAR2(100)", maxLength: 100, nullable: false),
+                    TELEPHONECODE = table.Column<string>(type: "NVARCHAR2(10)", maxLength: 10, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -43,145 +43,181 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "DEPARTMENT",
                 columns: table => new
                 {
-                    Id = table.Column<byte>(type: "NUMBER(3)", nullable: false),
-                    Name = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: false)
+                    ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    NAME = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DEPARTMENT", x => x.Id);
+                    table.PrimaryKey("PK_DEPARTMENT", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
                 name: "EMPLOYEETYPE",
                 columns: table => new
                 {
-                    Id = table.Column<byte>(type: "NUMBER(3)", nullable: false),
-                    Name = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false)
+                    ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    NAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EMPLOYEETYPE", x => x.Id);
+                    table.PrimaryKey("PK_EMPLOYEETYPE", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
                 name: "EMPLOYMENTSTATUS",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
-                    Name = table.Column<string>(type: "NVARCHAR2(20)", maxLength: 20, nullable: false)
+                    ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
+                    NAME = table.Column<string>(type: "NVARCHAR2(20)", maxLength: 20, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EMPLOYMENTSTATUS", x => x.Id);
+                    table.PrimaryKey("PK_EMPLOYMENTSTATUS", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
                 name: "EMPLOYMENTTYPE",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
-                    Name = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: false)
+                    ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
+                    NAME = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EMPLOYMENTTYPE", x => x.Id);
+                    table.PrimaryKey("PK_EMPLOYMENTTYPE", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
                 name: "ENROLLMENT",
                 columns: table => new
                 {
-                    Id = table.Column<byte>(type: "NUMBER(3)", nullable: false),
-                    Name = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: false)
+                    ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    NAME = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ENROLLMENT", x => x.Id);
+                    table.PrimaryKey("PK_ENROLLMENT", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
                 name: "GENDER",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
-                    Name = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: false)
+                    ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
+                    NAME = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_GENDER", x => x.Id);
+                    table.PrimaryKey("PK_GENDER", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "JOBSTARTMETHOD",
+                columns: table => new
+                {
+                    ID = table.Column<byte>(type: "NUMBER(3)", precision: 3, nullable: false),
+                    NAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_JOBSTARTMETHOD", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "JOBSTATUS",
+                columns: table => new
+                {
+                    ID = table.Column<byte>(type: "NUMBER(3)", precision: 3, nullable: false),
+                    NAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_JOBSTATUS", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "JOBTYPE",
+                columns: table => new
+                {
+                    ID = table.Column<byte>(type: "NUMBER(3)", precision: 3, nullable: false),
+                    NAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_JOBTYPE", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
                 name: "PAYCLASSIFICATION",
                 columns: table => new
                 {
-                    Id = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false),
-                    Name = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: false, comment: "Pay Classification")
+                    ID = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false),
+                    NAME = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: false, comment: "Pay Classification")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PAYCLASSIFICATION", x => x.Id);
+                    table.PrimaryKey("PK_PAYCLASSIFICATION", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
                 name: "PAYFREQUENCY",
                 columns: table => new
                 {
-                    Id = table.Column<byte>(type: "NUMBER(3)", nullable: false),
-                    Name = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: false)
+                    ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    NAME = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PAYFREQUENCY", x => x.Id);
+                    table.PrimaryKey("PK_PAYFREQUENCY", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
                 name: "PROFITCODE",
                 columns: table => new
                 {
-                    Code = table.Column<short>(type: "NUMBER(5)", nullable: false),
-                    Definition = table.Column<string>(type: "NVARCHAR2(128)", maxLength: 128, nullable: false),
-                    Frequency = table.Column<string>(type: "NVARCHAR2(128)", maxLength: 128, nullable: false)
+                    CODE = table.Column<short>(type: "NUMBER(5)", nullable: false),
+                    DEFINITION = table.Column<string>(type: "NVARCHAR2(128)", maxLength: 128, nullable: false),
+                    FREQUENCY = table.Column<string>(type: "NVARCHAR2(128)", maxLength: 128, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PROFITCODE", x => x.Code);
+                    table.PrimaryKey("PK_PROFITCODE", x => x.CODE);
                 });
 
             migrationBuilder.CreateTable(
                 name: "TAXCODE",
                 columns: table => new
                 {
-                    Code = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
-                    Description = table.Column<string>(type: "NVARCHAR2(128)", maxLength: 128, nullable: false)
+                    CODE = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
+                    DESCRIPTION = table.Column<string>(type: "NVARCHAR2(128)", maxLength: 128, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TAXCODE", x => x.Code);
+                    table.PrimaryKey("PK_TAXCODE", x => x.CODE);
                 });
 
             migrationBuilder.CreateTable(
                 name: "TERMINATIONCODE",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
-                    Name = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: false)
+                    ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
+                    NAME = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TERMINATIONCODE", x => x.Id);
+                    table.PrimaryKey("PK_TERMINATIONCODE", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
                 name: "ZEROCONTRIBUTIONREASON",
                 columns: table => new
                 {
-                    Id = table.Column<byte>(type: "NUMBER(3)", nullable: false),
-                    Name = table.Column<string>(type: "NVARCHAR2(100)", maxLength: 100, nullable: false)
+                    ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    NAME = table.Column<string>(type: "NVARCHAR2(100)", maxLength: 100, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ZEROCONTRIBUTIONREASON", x => x.Id);
+                    table.PrimaryKey("PK_ZEROCONTRIBUTIONREASON", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
@@ -191,37 +227,73 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     PSN = table.Column<long>(type: "NUMBER(9)", precision: 9, nullable: false)
                         .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
                     SSN = table.Column<long>(type: "NUMBER(9)", precision: 9, nullable: false),
-                    FirstName = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false),
-                    MiddleName = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true),
-                    LastName = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false),
-                    DateOfBirth = table.Column<DateTime>(type: "DATE", nullable: false),
-                    Street = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "Street"),
-                    Street2 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true, comment: "Street2"),
-                    Street3 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true, comment: "Street3"),
-                    Street4 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true, comment: "Street4"),
-                    City = table.Column<string>(type: "NVARCHAR2(25)", maxLength: 25, nullable: false, comment: "City"),
-                    State = table.Column<string>(type: "NVARCHAR2(3)", maxLength: 3, nullable: false, comment: "State"),
-                    PostalCode = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false, comment: "Postal Code"),
-                    CountryISO = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: false, defaultValue: "US"),
-                    ContactInfo_PhoneNumber = table.Column<string>(type: "NVARCHAR2(15)", maxLength: 15, nullable: false, comment: "PhoneNumber"),
-                    MobileNumber = table.Column<string>(type: "NVARCHAR2(15)", maxLength: 15, nullable: true),
-                    EmailAddress = table.Column<string>(type: "NVARCHAR2(50)", maxLength: 50, nullable: true),
-                    TypeId = table.Column<byte>(type: "NUMBER(3)", nullable: false)
+                    FIRSTNAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false),
+                    MIDDLENAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true),
+                    LASTNAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false),
+                    DATEOFBIRTH = table.Column<DateTime>(type: "DATE", nullable: false),
+                    STREET = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "Street"),
+                    STREET2 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true, comment: "Street2"),
+                    STREET3 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true, comment: "Street3"),
+                    STREET4 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true, comment: "Street4"),
+                    CITY = table.Column<string>(type: "NVARCHAR2(25)", maxLength: 25, nullable: false, comment: "City"),
+                    STATE = table.Column<string>(type: "NVARCHAR2(3)", maxLength: 3, nullable: false, comment: "State"),
+                    POSTAL_CODE = table.Column<string>(type: "NVARCHAR2(9)", maxLength: 9, nullable: false, comment: "Postal Code"),
+                    COUNTRY_ISO = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: false, defaultValue: "US"),
+                    PHONE_NUMBER = table.Column<string>(type: "NVARCHAR2(15)", maxLength: 15, nullable: true),
+                    MOBILE_NUMBER = table.Column<string>(type: "NVARCHAR2(15)", maxLength: 15, nullable: true),
+                    EMAIL_ADDRESS = table.Column<string>(type: "NVARCHAR2(50)", maxLength: 50, nullable: true),
+                    TYPEID = table.Column<byte>(type: "NUMBER(3)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_BENEFICIARY", x => x.PSN);
                     table.ForeignKey(
-                        name: "FK_BENEFICIARY_BENEFICIARYTYPE_TypeId",
-                        column: x => x.TypeId,
+                        name: "FK_BENEFICIARY_BENEFICIARYTYPE_TYPEID",
+                        column: x => x.TYPEID,
                         principalTable: "BENEFICIARYTYPE",
-                        principalColumn: "Id",
+                        principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_BENEFICIARY_COUNTRY_CountryISO",
-                        column: x => x.CountryISO,
+                        name: "FK_BENEFICIARY_COUNTRY_COUNTRY_ISO",
+                        column: x => x.COUNTRY_ISO,
                         principalTable: "COUNTRY",
                         principalColumn: "ISO",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "JOB",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "NUMBER(10)", nullable: false)
+                        .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
+                    JOBTYPEID = table.Column<byte>(type: "NUMBER(3)", precision: 3, nullable: false),
+                    STARTMETHODID = table.Column<byte>(type: "NUMBER(3)", precision: 3, nullable: false),
+                    REQUESTEDBY = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false),
+                    JOBSTATUSID = table.Column<byte>(type: "NUMBER(3)", precision: 3, nullable: false),
+                    STARTED = table.Column<DateTime>(type: "DATE", nullable: false),
+                    COMPLETED = table.Column<DateTime>(type: "DATE", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_JOB", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_JOB_JOBSTARTMETHOD_STARTMETHODID",
+                        column: x => x.STARTMETHODID,
+                        principalTable: "JOBSTARTMETHOD",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_JOB_JOBSTATUS_JOBSTATUSID",
+                        column: x => x.JOBSTATUSID,
+                        principalTable: "JOBSTATUS",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_JOB_JOBTYPE_JOBTYPEID",
+                        column: x => x.JOBTYPEID,
+                        principalTable: "JOBTYPE",
+                        principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -229,37 +301,37 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "PROFITDETAIL",
                 columns: table => new
                 {
-                    ProfitYear = table.Column<short>(type: "NUMBER(5)", nullable: false),
-                    ProfitYearIteration = table.Column<byte>(type: "NUMBER(3)", nullable: false),
-                    ProfitClient = table.Column<short>(type: "NUMBER(5)", nullable: false),
-                    ProfitCodeId = table.Column<short>(type: "NUMBER(5)", nullable: false),
-                    Contribution = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
-                    Earnings = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
-                    Forfeiture = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
-                    Month = table.Column<byte>(type: "NUMBER(3)", nullable: false),
-                    Year = table.Column<short>(type: "NUMBER(5)", nullable: false),
-                    Comment = table.Column<string>(type: "NVARCHAR2(16)", maxLength: 16, nullable: false),
-                    ZeroCont = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
-                    FederalTaxes = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
-                    StateTaxes = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
-                    TaxCodeId = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
+                    PROFITYEAR = table.Column<short>(type: "NUMBER(5)", nullable: false),
+                    PROFITYEARITERATION = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    PROFITCLIENT = table.Column<short>(type: "NUMBER(5)", nullable: false),
+                    PROFITCODEID = table.Column<short>(type: "NUMBER(5)", nullable: false),
+                    CONTRIBUTION = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    EARNINGS = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    FORFEITURE = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    MONTH = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    YEAR = table.Column<short>(type: "NUMBER(5)", nullable: false),
+                    COMMENT = table.Column<string>(type: "NVARCHAR2(16)", maxLength: 16, nullable: false),
+                    ZEROCONT = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
+                    FEDERALTAXES = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    STATETAXES = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    TAXCODEID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
                     SSN = table.Column<long>(type: "NUMBER(19)", nullable: false),
-                    ProfDistId = table.Column<int>(type: "NUMBER(10)", nullable: false)
+                    PROFDISTID = table.Column<int>(type: "NUMBER(10)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PROFITDETAIL", x => new { x.ProfitYear, x.ProfitYearIteration });
+                    table.PrimaryKey("PK_PROFITDETAIL", x => new { x.PROFITYEAR, x.PROFITYEARITERATION });
                     table.ForeignKey(
-                        name: "FK_PROFITDETAIL_PROFITCODE_ProfitCodeId",
-                        column: x => x.ProfitCodeId,
+                        name: "FK_PROFITDETAIL_PROFITCODE_PROFITCODEID",
+                        column: x => x.PROFITCODEID,
                         principalTable: "PROFITCODE",
-                        principalColumn: "Code",
+                        principalColumn: "CODE",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PROFITDETAIL_TAXCODE_TaxCodeId",
-                        column: x => x.TaxCodeId,
+                        name: "FK_PROFITDETAIL_TAXCODE_TAXCODEID",
+                        column: x => x.TAXCODEID,
                         principalTable: "TAXCODE",
-                        principalColumn: "Code",
+                        principalColumn: "CODE",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -267,155 +339,152 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "DEMOGRAPHICS",
                 columns: table => new
                 {
-                    OracleHcmId = table.Column<long>(type: "NUMBER(15)", precision: 15, nullable: false),
+                    ORACLEHCMID = table.Column<long>(type: "NUMBER(15)", precision: 15, nullable: false),
                     SSN = table.Column<long>(type: "NUMBER(9)", precision: 9, nullable: false),
-                    BadgeNumber = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false),
-                    FullName = table.Column<string>(type: "NVARCHAR2(60)", maxLength: 60, nullable: false, comment: "FullName"),
-                    LastName = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "LastName"),
-                    FirstName = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "FirstName"),
-                    PY_MNAME = table.Column<string>(type: "NVARCHAR2(25)", maxLength: 25, nullable: true, comment: "MiddleName"),
-                    PY_STOR = table.Column<short>(type: "NUMBER(3)", precision: 3, nullable: false, comment: "StoreNumber"),
-                    PY_CLA = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false, comment: "PayClassification"),
-                    PhoneNumber = table.Column<string>(type: "NVARCHAR2(15)", maxLength: 15, nullable: true),
-                    MobileNumber = table.Column<string>(type: "NVARCHAR2(15)", maxLength: 15, nullable: true),
-                    EmailAddress = table.Column<string>(type: "NVARCHAR2(50)", maxLength: 50, nullable: true),
-                    Street = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "Street"),
-                    Street2 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true, comment: "Street2"),
-                    Street3 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true, comment: "Street3"),
-                    Street4 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true, comment: "Street4"),
-                    City = table.Column<string>(type: "NVARCHAR2(25)", maxLength: 25, nullable: false, comment: "City"),
-                    State = table.Column<string>(type: "NVARCHAR2(3)", maxLength: 3, nullable: false, comment: "State"),
-                    PostalCode = table.Column<string>(type: "NVARCHAR2(9)", maxLength: 9, nullable: false, comment: "Postal Code"),
-                    CountryISO = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: false, defaultValue: "US"),
-                    DateOfBirth = table.Column<DateTime>(type: "DATE", nullable: false, comment: "DateOfBirth"),
-                    FullTimeDate = table.Column<DateTime>(type: "DATE", nullable: true, comment: "FullTimeDate"),
-                    HireDate = table.Column<DateTime>(type: "DATE", nullable: false, comment: "HireDate"),
-                    ReHireDate = table.Column<DateTime>(type: "DATE", nullable: true, comment: "ReHireDate"),
-                    TerminationDate = table.Column<DateTime>(type: "DATE", nullable: true, comment: "TerminationDate"),
-                    PY_DP = table.Column<byte>(type: "NUMBER(1)", precision: 1, nullable: false, comment: "Department"),
-                    EmploymentTypeId = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: false, comment: "EmploymentType"),
-                    GenderId = table.Column<string>(type: "NVARCHAR2(1)", maxLength: 1, nullable: false, comment: "Gender"),
-                    PayFrequencyId = table.Column<byte>(type: "NUMBER(3)", maxLength: 1, nullable: false, comment: "PayFrequency"),
-                    TerminationCodeId = table.Column<string>(type: "NVARCHAR2(1)", maxLength: 1, nullable: true, comment: "TerminationCode"),
-                    EmploymentStatusId = table.Column<string>(type: "NVARCHAR2(1)", nullable: false)
+                    BADGENUMBER = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false),
+                    LASTMODIFIEDDATE = table.Column<DateTime>(type: "DATE", nullable: false, defaultValue: new DateTime(2024, 8, 5, 9, 10, 48, 780, DateTimeKind.Local).AddTicks(1739)),
+                    FULLNAME = table.Column<string>(type: "NVARCHAR2(60)", maxLength: 60, nullable: false, comment: "FullName"),
+                    LASTNAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "LastName"),
+                    FIRSTNAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "FirstName"),
+                    MIDDLENAME = table.Column<string>(type: "NVARCHAR2(25)", maxLength: 25, nullable: true, comment: "MiddleName"),
+                    STORENUMBER = table.Column<short>(type: "NUMBER(3)", precision: 3, nullable: false, comment: "StoreNumber"),
+                    PAYCLASSIFICATIONID = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false, comment: "PayClassification"),
+                    PHONE_NUMBER = table.Column<string>(type: "NVARCHAR2(15)", maxLength: 15, nullable: true),
+                    MOBILE_NUMBER = table.Column<string>(type: "NVARCHAR2(15)", maxLength: 15, nullable: true),
+                    EMAIL_ADDRESS = table.Column<string>(type: "NVARCHAR2(50)", maxLength: 50, nullable: true),
+                    STREET = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "Street"),
+                    STREET2 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true, comment: "Street2"),
+                    STREET3 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true, comment: "Street3"),
+                    STREET4 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true, comment: "Street4"),
+                    CITY = table.Column<string>(type: "NVARCHAR2(25)", maxLength: 25, nullable: false, comment: "City"),
+                    STATE = table.Column<string>(type: "NVARCHAR2(3)", maxLength: 3, nullable: false, comment: "State"),
+                    POSTAL_CODE = table.Column<string>(type: "NVARCHAR2(9)", maxLength: 9, nullable: false, comment: "Postal Code"),
+                    COUNTRY_ISO = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: false, defaultValue: "US"),
+                    DATEOFBIRTH = table.Column<DateTime>(type: "DATE", nullable: false, comment: "DateOfBirth"),
+                    FULLTIMEDATE = table.Column<DateTime>(type: "DATE", nullable: true, comment: "FullTimeDate"),
+                    HIREDATE = table.Column<DateTime>(type: "DATE", nullable: false, comment: "HireDate"),
+                    REHIREDATE = table.Column<DateTime>(type: "DATE", nullable: true, comment: "ReHireDate"),
+                    TERMINATIONDATE = table.Column<DateTime>(type: "DATE", nullable: true, comment: "TerminationDate"),
+                    DEPARTMENTID = table.Column<byte>(type: "NUMBER(1)", precision: 1, nullable: false, comment: "Department"),
+                    EMPLOYMENTTYPEID = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: false, comment: "EmploymentType"),
+                    GENDERID = table.Column<string>(type: "NVARCHAR2(1)", maxLength: 1, nullable: false, comment: "Gender"),
+                    PAYFREQUENCYID = table.Column<byte>(type: "NUMBER(3)", maxLength: 1, nullable: false, comment: "PayFrequency"),
+                    TERMINATIONCODEID = table.Column<string>(type: "NVARCHAR2(1)", maxLength: 1, nullable: true, comment: "TerminationCode"),
+                    EMPLOYMENTSTATUSID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DEMOGRAPHICS", x => x.OracleHcmId);
+                    table.PrimaryKey("PK_DEMOGRAPHICS", x => x.ORACLEHCMID);
                     table.ForeignKey(
-                        name: "FK_DEMOGRAPHICS_COUNTRY_CountryISO",
-                        column: x => x.CountryISO,
+                        name: "FK_DEMOGRAPHICS_COUNTRY_COUNTRY_ISO",
+                        column: x => x.COUNTRY_ISO,
                         principalTable: "COUNTRY",
                         principalColumn: "ISO",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_DEMOGRAPHICS_DEPARTMENT_PY_DP",
-                        column: x => x.PY_DP,
+                        name: "FK_DEMOGRAPHICS_DEPARTMENT_DEPARTMENTID",
+                        column: x => x.DEPARTMENTID,
                         principalTable: "DEPARTMENT",
-                        principalColumn: "Id",
+                        principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_DEMOGRAPHICS_EMPLOYMENTSTATUS_EmploymentStatusId",
-                        column: x => x.EmploymentStatusId,
+                        name: "FK_DEMOGRAPHICS_EMPLOYMENTSTATUS_EMPLOYMENTSTATUSID",
+                        column: x => x.EMPLOYMENTSTATUSID,
                         principalTable: "EMPLOYMENTSTATUS",
-                        principalColumn: "Id",
+                        principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_DEMOGRAPHICS_EMPLOYMENTTYPE_EmploymentTypeId",
-                        column: x => x.EmploymentTypeId,
+                        name: "FK_DEMOGRAPHICS_EMPLOYMENTTYPE_EMPLOYMENTTYPEID",
+                        column: x => x.EMPLOYMENTTYPEID,
                         principalTable: "EMPLOYMENTTYPE",
-                        principalColumn: "Id",
+                        principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_DEMOGRAPHICS_GENDER_GenderId",
-                        column: x => x.GenderId,
+                        name: "FK_DEMOGRAPHICS_GENDER_GENDERID",
+                        column: x => x.GENDERID,
                         principalTable: "GENDER",
-                        principalColumn: "Id",
+                        principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_DEMOGRAPHICS_PAYCLASSIFICATION_PY_CLA",
-                        column: x => x.PY_CLA,
+                        name: "FK_DEMOGRAPHICS_PAYCLASSIFICATION_PAYCLASSIFICATIONID",
+                        column: x => x.PAYCLASSIFICATIONID,
                         principalTable: "PAYCLASSIFICATION",
-                        principalColumn: "Id",
+                        principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_DEMOGRAPHICS_PAYFREQUENCY_PayFrequencyId",
-                        column: x => x.PayFrequencyId,
+                        name: "FK_DEMOGRAPHICS_PAYFREQUENCY_PAYFREQUENCYID",
+                        column: x => x.PAYFREQUENCYID,
                         principalTable: "PAYFREQUENCY",
-                        principalColumn: "Id",
+                        principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_DEMOGRAPHICS_TERMINATIONCODE_TerminationCodeId",
-                        column: x => x.TerminationCodeId,
+                        name: "FK_DEMOGRAPHICS_TERMINATIONCODE_TERMINATIONCODEID",
+                        column: x => x.TERMINATIONCODEID,
                         principalTable: "TERMINATIONCODE",
-                        principalColumn: "Id");
+                        principalColumn: "ID");
                 });
 
             migrationBuilder.CreateTable(
                 name: "PAYPROFIT",
                 columns: table => new
                 {
-                    EmployeeBadge = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false),
-                    EmployeeSSN = table.Column<long>(type: "NUMBER(15)", maxLength: 9, nullable: false),
-                    HoursCurrentYear = table.Column<decimal>(type: "DECIMAL(4,2)", precision: 4, scale: 2, nullable: false),
-                    HoursLastYear = table.Column<decimal>(type: "DECIMAL(4,2)", precision: 4, scale: 2, nullable: false),
-                    EarningsCurrentYear = table.Column<decimal>(type: "DECIMAL(8,2)", precision: 8, scale: 2, nullable: false),
-                    EarningsLastYear = table.Column<decimal>(type: "DECIMAL(8,2)", precision: 8, scale: 2, nullable: false),
-                    EarningsAfterApplyingVestingRules = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
-                    EarningsEtvaValue = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
-                    SecondaryEarnings = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: true),
-                    SecondaryEtvaEarnings = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: true),
-                    EarningsPriorEtvaValue = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: true),
-                    WeeksWorkedYear = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false),
-                    WeeksWorkedLastYear = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false),
-                    CompanyContributionYears = table.Column<byte>(type: "NUMBER(3)", nullable: false),
-                    PSCertificateIssuedDate = table.Column<string>(type: "NVARCHAR2(10)", nullable: true),
-                    InitialContributionYear = table.Column<short>(type: "NUMBER(4)", precision: 4, nullable: false),
-                    NetBalanceLastYear = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
-                    NumberOfDollarsEarningLastYear = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
-                    PointsEarnedLastYear = table.Column<int>(type: "NUMBER(5)", precision: 5, nullable: false),
-                    VestedBalanceLastYear = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
-                    ContributionAmountLastYear = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
-                    ForfeitureAmountLastYear = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
-                    EnrollmentId = table.Column<byte>(type: "NUMBER(3)", nullable: true),
-                    BeneficiaryTypeId = table.Column<byte>(type: "NUMBER(3)", nullable: true),
-                    EmployeeTypeId = table.Column<byte>(type: "NUMBER(3)", nullable: true),
-                    ZeroContributionReasonId = table.Column<byte>(type: "NUMBER(3)", nullable: true)
+                    BADGENUMBER = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false),
+                    SSN = table.Column<long>(type: "NUMBER(19)", maxLength: 9, nullable: false),
+                    HOURSCURRENTYEAR = table.Column<decimal>(type: "DECIMAL(6,2)", precision: 6, scale: 2, nullable: false),
+                    HOURSLASTYEAR = table.Column<decimal>(type: "DECIMAL(6,2)", precision: 6, scale: 2, nullable: false),
+                    EARNINGSCURRENTYEAR = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    EARNINGSLASTYEAR = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    EARNINGSAFTERAPPLYINGVESTINGRULES = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    EARNINGSETVAVALUE = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    SECONDARYEARNINGS = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: true),
+                    SECONDARYETVAEARNINGS = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: true),
+                    EARNINGSPRIORETVAVALUE = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: true),
+                    WEEKSWORKEDYEAR = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false),
+                    WEEKSWORKEDLASTYEAR = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false),
+                    COMPANYCONTRIBUTIONYEARS = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    PSCERTIFICATEISSUEDDATE = table.Column<string>(type: "NVARCHAR2(10)", nullable: true),
+                    INITIALCONTRIBUTIONYEAR = table.Column<short>(type: "NUMBER(4)", precision: 4, nullable: false),
+                    NETBALANCELASTYEAR = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    NUMBEROFDOLLARSEARNINGLASTYEAR = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    POINTSEARNEDLASTYEAR = table.Column<int>(type: "NUMBER(5)", precision: 5, nullable: false),
+                    VESTEDBALANCELASTYEAR = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    CONTRIBUTIONAMOUNTLASTYEAR = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    FORFEITUREAMOUNTLASTYEAR = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    ENROLLMENTID = table.Column<byte>(type: "NUMBER(3)", nullable: true),
+                    BENEFICIARYTYPEID = table.Column<byte>(type: "NUMBER(3)", nullable: true),
+                    EMPLOYEETYPEID = table.Column<byte>(type: "NUMBER(3)", nullable: true),
+                    ZEROCONTRIBUTIONREASONID = table.Column<byte>(type: "NUMBER(3)", nullable: true),
+                    EXECUTIVEHOURS = table.Column<decimal>(type: "DECIMAL(6,2)", precision: 6, scale: 2, nullable: false),
+                    EXECUTIVEEARNINGS = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PAYPROFIT", x => x.EmployeeBadge);
+                    table.PrimaryKey("PK_PAYPROFIT", x => x.BADGENUMBER);
                     table.ForeignKey(
-                        name: "FK_PAYPROFIT_BENEFICIARYTYPE_BeneficiaryTypeId",
-                        column: x => x.BeneficiaryTypeId,
+                        name: "FK_PAYPROFIT_BENEFICIARYTYPE_BENEFICIARYTYPEID",
+                        column: x => x.BENEFICIARYTYPEID,
                         principalTable: "BENEFICIARYTYPE",
-                        principalColumn: "Id");
+                        principalColumn: "ID");
                     table.ForeignKey(
-                        name: "FK_PAYPROFIT_DEMOGRAPHICS_EmployeeSSN",
-                        column: x => x.EmployeeSSN,
-                        principalTable: "DEMOGRAPHICS",
-                        principalColumn: "OracleHcmId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_PAYPROFIT_EMPLOYEETYPE_EmployeeTypeId",
-                        column: x => x.EmployeeTypeId,
+                        name: "FK_PAYPROFIT_EMPLOYEETYPE_EMPLOYEETYPEID",
+                        column: x => x.EMPLOYEETYPEID,
                         principalTable: "EMPLOYEETYPE",
-                        principalColumn: "Id");
+                        principalColumn: "ID");
                     table.ForeignKey(
-                        name: "FK_PAYPROFIT_ENROLLMENT_EnrollmentId",
-                        column: x => x.EnrollmentId,
+                        name: "FK_PAYPROFIT_ENROLLMENT_ENROLLMENTID",
+                        column: x => x.ENROLLMENTID,
                         principalTable: "ENROLLMENT",
-                        principalColumn: "Id");
+                        principalColumn: "ID");
                     table.ForeignKey(
-                        name: "FK_PAYPROFIT_ZEROCONTRIBUTIONREASON_ZeroContributionReasonId",
-                        column: x => x.ZeroContributionReasonId,
+                        name: "FK_PAYPROFIT_ZEROCONTRIBUTIONREASON_ZEROCONTRIBUTIONREASONID",
+                        column: x => x.ZEROCONTRIBUTIONREASONID,
                         principalTable: "ZEROCONTRIBUTIONREASON",
-                        principalColumn: "Id");
+                        principalColumn: "ID");
                 });
 
             migrationBuilder.InsertData(
                 table: "BENEFICIARYTYPE",
-                columns: new[] { "Id", "Name" },
+                columns: new[] { "ID", "NAME" },
                 values: new object[,]
                 {
                     { (byte)0, "Employee" },
@@ -424,7 +493,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "COUNTRY",
-                columns: new[] { "ISO", "Id", "Name", "TelephoneCode" },
+                columns: new[] { "ISO", "ID", "NAME", "TELEPHONECODE" },
                 values: new object[,]
                 {
                     { "AD", (short)4, "Andorra", "+376" },
@@ -625,7 +694,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "DEPARTMENT",
-                columns: new[] { "Id", "Name" },
+                columns: new[] { "ID", "NAME" },
                 values: new object[,]
                 {
                     { (byte)1, "Grocery" },
@@ -639,7 +708,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "EMPLOYEETYPE",
-                columns: new[] { "Id", "Name" },
+                columns: new[] { "ID", "NAME" },
                 values: new object[,]
                 {
                     { (byte)0, "NOT New in plan last year" },
@@ -648,7 +717,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "EMPLOYMENTSTATUS",
-                columns: new[] { "Id", "Name" },
+                columns: new[] { "ID", "NAME" },
                 values: new object[,]
                 {
                     { "a", "Active" },
@@ -659,7 +728,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "EMPLOYMENTTYPE",
-                columns: new[] { "Id", "Name" },
+                columns: new[] { "ID", "NAME" },
                 values: new object[,]
                 {
                     { "F", "FullTimeEightPaidHolidays" },
@@ -670,7 +739,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "ENROLLMENT",
-                columns: new[] { "Id", "Name" },
+                columns: new[] { "ID", "NAME" },
                 values: new object[,]
                 {
                     { (byte)0, "Not Enrolled" },
@@ -682,7 +751,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "GENDER",
-                columns: new[] { "Id", "Name" },
+                columns: new[] { "ID", "NAME" },
                 values: new object[,]
                 {
                     { "F", "Female" },
@@ -691,8 +760,38 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "JOBSTARTMETHOD",
+                columns: new[] { "ID", "NAME" },
+                values: new object[,]
+                {
+                    { (byte)0, "System" },
+                    { (byte)1, "OnDemand" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "JOBSTATUS",
+                columns: new[] { "ID", "NAME" },
+                values: new object[,]
+                {
+                    { (byte)0, "Pending" },
+                    { (byte)1, "Running" },
+                    { (byte)2, "Completed" },
+                    { (byte)99, "Failed" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "JOBTYPE",
+                columns: new[] { "ID", "NAME" },
+                values: new object[,]
+                {
+                    { (byte)0, "Full" },
+                    { (byte)1, "Delta" },
+                    { (byte)2, "Individual" }
+                });
+
+            migrationBuilder.InsertData(
                 table: "PAYCLASSIFICATION",
-                columns: new[] { "Id", "Name" },
+                columns: new[] { "ID", "NAME" },
                 values: new object[,]
                 {
                     { (byte)1, "MANAGER" },
@@ -784,7 +883,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "PAYFREQUENCY",
-                columns: new[] { "Id", "Name" },
+                columns: new[] { "ID", "NAME" },
                 values: new object[,]
                 {
                     { (byte)1, "Weekly" },
@@ -793,7 +892,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "PROFITCODE",
-                columns: new[] { "Code", "Definition", "Frequency" },
+                columns: new[] { "CODE", "DEFINITION", "FREQUENCY" },
                 values: new object[,]
                 {
                     { (short)0, "Incoming contributions, forfeitures, earnings", "Year-end only" },
@@ -808,7 +907,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "TERMINATIONCODE",
-                columns: new[] { "Id", "Name" },
+                columns: new[] { "ID", "NAME" },
                 values: new object[,]
                 {
                     { "A", "Left On Own" },
@@ -827,7 +926,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "ZEROCONTRIBUTIONREASON",
-                columns: new[] { "Id", "Name" },
+                columns: new[] { "ID", "NAME" },
                 values: new object[,]
                 {
                     { (byte)0, "Normal" },
@@ -841,99 +940,109 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_BENEFICIARY_CountryISO",
+                name: "IX_BENEFICIARY_COUNTRY_ISO",
                 table: "BENEFICIARY",
-                column: "CountryISO");
+                column: "COUNTRY_ISO");
 
             migrationBuilder.CreateIndex(
-                name: "IX_BENEFICIARY_TypeId",
-                table: "BENEFICIARY",
-                column: "TypeId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SSN",
+                name: "IX_BENEFICIARY_SSN",
                 table: "BENEFICIARY",
                 column: "SSN");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DEMOGRAPHICS_CountryISO",
-                table: "DEMOGRAPHICS",
-                column: "CountryISO");
+                name: "IX_BENEFICIARY_TYPEID",
+                table: "BENEFICIARY",
+                column: "TYPEID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DEMOGRAPHICS_EmploymentStatusId",
+                name: "IX_DEMOGRAPHICS_COUNTRY_ISO",
                 table: "DEMOGRAPHICS",
-                column: "EmploymentStatusId");
+                column: "COUNTRY_ISO");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DEMOGRAPHICS_EmploymentTypeId",
+                name: "IX_DEMOGRAPHICS_DEPARTMENTID",
                 table: "DEMOGRAPHICS",
-                column: "EmploymentTypeId");
+                column: "DEPARTMENTID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DEMOGRAPHICS_GenderId",
+                name: "IX_DEMOGRAPHICS_EMPLOYMENTSTATUSID",
                 table: "DEMOGRAPHICS",
-                column: "GenderId");
+                column: "EMPLOYMENTSTATUSID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DEMOGRAPHICS_PayFrequencyId",
+                name: "IX_DEMOGRAPHICS_EMPLOYMENTTYPEID",
                 table: "DEMOGRAPHICS",
-                column: "PayFrequencyId");
+                column: "EMPLOYMENTTYPEID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DEMOGRAPHICS_PY_CLA",
+                name: "IX_DEMOGRAPHICS_GENDERID",
                 table: "DEMOGRAPHICS",
-                column: "PY_CLA");
+                column: "GENDERID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DEMOGRAPHICS_PY_DP",
+                name: "IX_DEMOGRAPHICS_PAYCLASSIFICATIONID",
                 table: "DEMOGRAPHICS",
-                column: "PY_DP");
+                column: "PAYCLASSIFICATIONID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DEMOGRAPHICS_TerminationCodeId",
+                name: "IX_DEMOGRAPHICS_PAYFREQUENCYID",
                 table: "DEMOGRAPHICS",
-                column: "TerminationCodeId");
+                column: "PAYFREQUENCYID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SSN1",
+                name: "IX_DEMOGRAPHICS_SSN",
                 table: "DEMOGRAPHICS",
                 column: "SSN");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PAYPROFIT_BeneficiaryTypeId",
-                table: "PAYPROFIT",
-                column: "BeneficiaryTypeId");
+                name: "IX_DEMOGRAPHICS_TERMINATIONCODEID",
+                table: "DEMOGRAPHICS",
+                column: "TERMINATIONCODEID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PAYPROFIT_EmployeeSSN",
-                table: "PAYPROFIT",
-                column: "EmployeeSSN");
+                name: "IX_JOB_JOBSTATUSID",
+                table: "JOB",
+                column: "JOBSTATUSID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PAYPROFIT_EmployeeTypeId",
-                table: "PAYPROFIT",
-                column: "EmployeeTypeId");
+                name: "IX_JOB_JOBTYPEID",
+                table: "JOB",
+                column: "JOBTYPEID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PAYPROFIT_EnrollmentId",
-                table: "PAYPROFIT",
-                column: "EnrollmentId");
+                name: "IX_JOB_STARTMETHODID",
+                table: "JOB",
+                column: "STARTMETHODID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PAYPROFIT_ZeroContributionReasonId",
+                name: "IX_PAYPROFIT_BENEFICIARYTYPEID",
                 table: "PAYPROFIT",
-                column: "ZeroContributionReasonId");
+                column: "BENEFICIARYTYPEID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PROFITDETAIL_ProfitCodeId",
+                name: "IX_PAYPROFIT_EMPLOYEETYPEID",
+                table: "PAYPROFIT",
+                column: "EMPLOYEETYPEID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PAYPROFIT_ENROLLMENTID",
+                table: "PAYPROFIT",
+                column: "ENROLLMENTID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PAYPROFIT_ZEROCONTRIBUTIONREASONID",
+                table: "PAYPROFIT",
+                column: "ZEROCONTRIBUTIONREASONID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PROFITDETAIL_PROFITCODEID",
                 table: "PROFITDETAIL",
-                column: "ProfitCodeId");
+                column: "PROFITCODEID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PROFITDETAIL_TaxCodeId",
+                name: "IX_PROFITDETAIL_TAXCODEID",
                 table: "PROFITDETAIL",
-                column: "TaxCodeId");
+                column: "TAXCODEID");
         }
 
         /// <inheritdoc />
@@ -943,31 +1052,16 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "BENEFICIARY");
 
             migrationBuilder.DropTable(
+                name: "DEMOGRAPHICS");
+
+            migrationBuilder.DropTable(
+                name: "JOB");
+
+            migrationBuilder.DropTable(
                 name: "PAYPROFIT");
 
             migrationBuilder.DropTable(
                 name: "PROFITDETAIL");
-
-            migrationBuilder.DropTable(
-                name: "BENEFICIARYTYPE");
-
-            migrationBuilder.DropTable(
-                name: "DEMOGRAPHICS");
-
-            migrationBuilder.DropTable(
-                name: "EMPLOYEETYPE");
-
-            migrationBuilder.DropTable(
-                name: "ENROLLMENT");
-
-            migrationBuilder.DropTable(
-                name: "ZEROCONTRIBUTIONREASON");
-
-            migrationBuilder.DropTable(
-                name: "PROFITCODE");
-
-            migrationBuilder.DropTable(
-                name: "TAXCODE");
 
             migrationBuilder.DropTable(
                 name: "COUNTRY");
@@ -992,6 +1086,33 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "TERMINATIONCODE");
+
+            migrationBuilder.DropTable(
+                name: "JOBSTARTMETHOD");
+
+            migrationBuilder.DropTable(
+                name: "JOBSTATUS");
+
+            migrationBuilder.DropTable(
+                name: "JOBTYPE");
+
+            migrationBuilder.DropTable(
+                name: "BENEFICIARYTYPE");
+
+            migrationBuilder.DropTable(
+                name: "EMPLOYEETYPE");
+
+            migrationBuilder.DropTable(
+                name: "ENROLLMENT");
+
+            migrationBuilder.DropTable(
+                name: "ZEROCONTRIBUTIONREASON");
+
+            migrationBuilder.DropTable(
+                name: "PROFITCODE");
+
+            migrationBuilder.DropTable(
+                name: "TAXCODE");
         }
     }
 }

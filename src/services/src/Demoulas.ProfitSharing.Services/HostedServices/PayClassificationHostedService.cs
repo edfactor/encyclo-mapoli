@@ -16,7 +16,7 @@ public sealed class PayClassificationHostedService : BaseCacheHostedService<PayC
 
     public PayClassificationHostedService(IHostEnvironment hostEnvironment,
         IDistributedCache distributedCache,
-        IProfitSharingDataContextFactory contextFactory) : base(hostEnvironment, distributedCache)
+        IProfitSharingDataContextFactory contextFactory) : base(hostEnvironment: hostEnvironment, distributedCache: distributedCache)
     {
         _contextFactory = contextFactory;
     }
@@ -24,25 +24,25 @@ public sealed class PayClassificationHostedService : BaseCacheHostedService<PayC
 
     public override Task<IEnumerable<PayClassificationResponseCache>> GetDataToUpdateCacheAsync(CacheDataDictionary cdd, CancellationToken cancellation = default)
     {
-        return GetAllPayClassifications(cancellation);
+        return GetAllPayClassifications(cancellationToken: cancellation);
     }
 
     public override Task<IEnumerable<PayClassificationResponseCache>> GetInitialDataToCacheAsync(CancellationToken cancellation = default)
     {
-        return GetAllPayClassifications(cancellation);
+        return GetAllPayClassifications(cancellationToken: cancellation);
     }
 
     private async Task<IEnumerable<PayClassificationResponseCache>> GetAllPayClassifications(CancellationToken cancellationToken)
     {
-        return await _contextFactory.UseReadOnlyContext(context =>
+        return await _contextFactory.UseReadOnlyContext(func: context =>
         {
             return context.PayClassifications
-                .Select(c => new PayClassificationResponseCache
+                .Select(selector: c => new PayClassificationResponseCache
                 {
                     Id = c.Id,
                     Name = c.Name
                 })
-                .ToListAsync(cancellationToken);
+                .ToListAsync(cancellationToken: cancellationToken);
         });
     }
 }

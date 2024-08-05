@@ -1,6 +1,5 @@
 ﻿using Demoulas.ProfitSharing.Client.Common;
 using Demoulas.ProfitSharing.Client.Reports.YearEnd;
-using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 

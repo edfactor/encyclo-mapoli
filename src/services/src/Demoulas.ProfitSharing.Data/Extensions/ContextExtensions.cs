@@ -1,5 +1,5 @@
 ﻿using Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
-using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.MassTransit;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Data.Extensions;
@@ -25,6 +25,10 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new ZeroContributionReasonMap());
         modelBuilder.ApplyConfiguration(new BeneficiaryMap());
         modelBuilder.ApplyConfiguration(new EmploymentStatusMap());
+        modelBuilder.ApplyConfiguration(new JobMap());
+        modelBuilder.ApplyConfiguration(new JobStatusMap());
+        modelBuilder.ApplyConfiguration(new StartMethodMap());
+        modelBuilder.ApplyConfiguration(new JobTypeMap());
 
 
         // Force table names to be upper case for consistency with all existing DSM projects

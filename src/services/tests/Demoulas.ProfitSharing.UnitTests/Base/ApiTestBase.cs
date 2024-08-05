@@ -1,5 +1,4 @@
-﻿using Demoulas.ProfitSharing.Client.Extensions;
-using Demoulas.ProfitSharing.Data.Interfaces;
+﻿using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.UnitTests.Mocks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;

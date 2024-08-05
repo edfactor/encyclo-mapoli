@@ -1,9 +1,6 @@
-﻿using System;
-using System.Data.SqlTypes;
-using System.Net.Http;
+﻿using System.Data.SqlTypes;
 using System.Net.Http.Json;
 using System.Text.Json;
-using System.Threading;
 using System.Web;
 using Demoulas.Common.Contracts.Request;
 using Demoulas.Common.Contracts.Response;
@@ -11,7 +8,6 @@ using Demoulas.ProfitSharing.Client.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Client.Reports.YearEnd;
 public sealed class YearEndClient : IYearEndService
