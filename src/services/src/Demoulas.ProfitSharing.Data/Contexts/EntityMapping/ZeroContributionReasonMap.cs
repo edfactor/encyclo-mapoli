@@ -16,8 +16,6 @@ internal sealed class ZeroContributionReasonMap : IEntityTypeConfiguration<ZeroC
 
         builder.Property(c => c.Name).IsRequired().HasMaxLength(100).HasColumnName("NAME");
 
-        builder.HasMany(b => b.Profits).WithOne(p => p.ZeroContributionReason);
-
         builder.HasData(
             new PayFrequency { Id = ZeroContributionReason.Constants.Normal, Name = "Normal" },
             new PayFrequency { Id = ZeroContributionReason.Constants.Under21WithOver1Khours, Name = "18, 19, OR 20 WITH > 1000 HOURS" },

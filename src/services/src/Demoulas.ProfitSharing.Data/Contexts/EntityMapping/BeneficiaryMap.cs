@@ -24,6 +24,7 @@ public sealed class BeneficiaryMap : IEntityTypeConfiguration<Beneficiary>
 
         builder.Property(b => b.DateOfBirth).HasColumnType("DATE").HasConversion<DateOnlyConverter>().HasColumnName("DATE_OF_BIRTH");
 
+        builder.Property(b => b.BeneficiaryTypeId).IsRequired().HasColumnName("BENEFICIARY_TYPE_ID");
 
         builder.OwnsOne(e => e.Address, address =>
         {
@@ -47,5 +48,9 @@ public sealed class BeneficiaryMap : IEntityTypeConfiguration<Beneficiary>
             contact.Property(a => a.MobileNumber).HasMaxLength(15).HasColumnName("MOBILE_NUMBER");
             contact.Property(a => a.EmailAddress).HasMaxLength(50).HasColumnName("EMAIL_ADDRESS");
         });
+
+        builder.HasOne(d => d.BeneficiaryType)
+            .WithMany(p => p.Beneficiaries)
+            .HasForeignKey(d => d.BeneficiaryTypeId);
     }
 }

@@ -114,17 +114,33 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
         _ = builder.Property(e => e.ExecutiveHours)
             .HasColumnName("EXECUTIVE_HOURS")
             .HasPrecision(6, 2);
-        
+
+        _ = builder.Property(e => e.ZeroContributionReasonId)
+            .HasColumnName("ZERO_CONTRIBUTION_REASON_ID");
+
+        _ = builder.Property(e => e.EnrollmentId)
+            .HasColumnName("ENROLLMENT_ID");
+
+        _ = builder.Property(e => e.BeneficiaryTypeId)
+            .HasColumnName("BENEFICIARY_ID");
+
+        _ = builder.Property(e => e.EmployeeTypeId)
+            .HasColumnName("EMPLOYEE_TYPE_ID");
+
         _ = builder.HasOne(e => e.Enrollment)
-            .WithMany(p => p.Profits);
+            .WithMany(p => p.Profits)
+            .HasForeignKey(p => p.EnrollmentId);
 
         _ = builder.HasOne(e => e.BeneficiaryType)
-            .WithMany(p => p.Profits);
+            .WithMany(p => p.Profits)
+            .HasForeignKey(p => p.BeneficiaryTypeId);
 
         _ = builder.HasOne(e => e.EmployeeType)
-            .WithMany(p => p.Profits);
-
-        _ = builder.HasOne(e => e.ZeroContributionReason)
-            .WithMany(p => p.Profits);
+            .WithMany(p => p.Profits)
+            .HasForeignKey(p => p.EmployeeTypeId);
+            
+       _ = builder.HasOne(d => d.ZeroContributionReason)
+            .WithMany(p => p.Profits)
+            .HasForeignKey(d => d.ZeroContributionReasonId);
     }
 }
