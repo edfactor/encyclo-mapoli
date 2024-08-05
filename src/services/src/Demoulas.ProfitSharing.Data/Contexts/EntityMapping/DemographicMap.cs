@@ -24,84 +24,105 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             .ValueGeneratedNever();
 
         _ = builder.Property(e => e.BadgeNumber)
-            .HasPrecision(7);
+            .HasPrecision(7)
+            .HasColumnName("BADGE_NUMBER");
 
         _ = builder.Property(e => e.OracleHcmId)
             .HasPrecision(15)
-            .ValueGeneratedNever();
+            .ValueGeneratedNever()
+            .HasColumnName("ORACLE_HCM_ID");
 
         _ = builder.Property(e => e.FullName)
             .HasMaxLength(60)
             .HasComment("FullName")
+            .HasColumnName("FULL_NAME")
             .IsRequired();
 
         _ = builder.Property(e => e.LastName)
             .HasMaxLength(30)
             .HasComment("LastName")
+            .HasColumnName("LAST_NAME")
             .IsRequired();
 
         _ = builder.Property(e => e.FirstName)
             .HasMaxLength(30)
             .HasComment("FirstName")
+            .HasColumnName("FIRST_NAME")
             .IsRequired();
 
         _ = builder.Property(e => e.MiddleName)
             .HasMaxLength(25)
+            .HasColumnName("MIDDLE_NAME")
             .HasComment("MiddleName");
 
         _ = builder.Property(e => e.StoreNumber)
             .HasPrecision(3)
+            .HasColumnName("STORE_NUMBER")
             .HasComment("StoreNumber");
 
         _ = builder.Property(e => e.DepartmentId)
             .HasPrecision(1)
+            .HasColumnName("DEPARTMENT")
             .HasComment("Department");
 
         builder.Property(e => e.PayClassificationId)
             .HasComment("PayClassification")
+            .HasColumnName("PAY_CLASSIFICATION_ID")
             .HasPrecision(2);
 
         _ = builder.Property(e => e.DateOfBirth)
             .HasComment("DateOfBirth")
+            .HasColumnName("DATE_OF_BIRTH")
             .HasColumnType("DATE")
             .HasConversion<DateOnlyConverter>();
 
         _ = builder.Property(e => e.HireDate)
             .HasComment("HireDate")
             .HasColumnType("DATE")
+            .HasColumnName("HIRE_DATE")
             .HasConversion<DateOnlyConverter>();
 
         _ = builder.Property(e => e.ReHireDate)
             .HasComment("ReHireDate")
+            .HasColumnName("REHIRE_DATE")
             .HasColumnType("DATE")
             .HasConversion<DateOnlyConverter>();
 
         _ = builder.Property(e => e.TerminationCodeId)
             .HasMaxLength(1)
+            .HasColumnName("TERMINATION_CODE_ID")
             .HasComment("TerminationCode");
 
 
         _ = builder.Property(e => e.TerminationDate)
             .HasComment("TerminationDate")
+            .HasColumnName("TERMINATION_DATE")
             .HasColumnType("DATE")
             .HasConversion<DateOnlyConverter>();
 
         _ = builder.Property(e => e.FullTimeDate)
             .HasComment("FullTimeDate")
+            .HasColumnName("FULL_TIME_DATE")
             .HasColumnType("DATE")
             .HasConversion<DateOnlyConverter>();
 
         _ = builder.Property(e => e.EmploymentTypeId)
             .HasMaxLength(2)
+            .HasColumnName("EMPLOYEMENT_TYPE_ID")
             .HasComment("EmploymentType");
 
         _ = builder.Property(e => e.PayFrequencyId)
             .HasMaxLength(1)
+            .HasColumnName("PAY_FREQUENCY_ID")
             .HasComment("PayFrequency");
 
         _ = builder.Property(e => e.GenderId)
             .HasMaxLength(1)
+            .HasColumnName("GENDER_ID")
             .HasComment("Gender");
+
+        _ = builder.Property(e => e.EmploymentStatusId)
+            .HasColumnName("EMPLOYMENT_STATUS_ID");
 
 
         builder.OwnsOne(e => e.Address, address =>
@@ -130,6 +151,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
 
         _ = builder.Property(e => e.LastModifiedDate)
             .HasColumnType("DATE")
+            .HasColumnName("LAST_MODIFIED_DATE")
             .HasDefaultValue(DateTime.Now);
 
 

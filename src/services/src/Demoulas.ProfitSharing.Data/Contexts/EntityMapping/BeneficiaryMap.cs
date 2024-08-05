@@ -18,11 +18,11 @@ public sealed class BeneficiaryMap : IEntityTypeConfiguration<Beneficiary>
         builder.HasIndex(c => c.SSN, "IX_SSN");
         builder.Property(c => c.SSN).IsRequired().HasPrecision(9);
 
-        builder.Property(b => b.FirstName).IsRequired().HasMaxLength(30);
-        builder.Property(b => b.MiddleName).HasMaxLength(30);
-        builder.Property(b => b.LastName).IsRequired().HasMaxLength(30);
+        builder.Property(b => b.FirstName).IsRequired().HasMaxLength(30).HasColumnName("FIRST_NAME");
+        builder.Property(b => b.MiddleName).HasMaxLength(30).HasColumnName("MIDDLE_NAME");
+        builder.Property(b => b.LastName).IsRequired().HasMaxLength(30).HasColumnName("LAST_NAME");
 
-        builder.Property(b => b.DateOfBirth).HasColumnType("DATE").HasConversion<DateOnlyConverter>();
+        builder.Property(b => b.DateOfBirth).HasColumnType("DATE").HasConversion<DateOnlyConverter>().HasColumnName("DATE_OF_BIRTH");
 
 
         builder.OwnsOne(e => e.Address, address =>

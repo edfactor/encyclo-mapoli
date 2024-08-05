@@ -12,7 +12,9 @@ internal sealed class ZeroContributionReasonMap : IEntityTypeConfiguration<ZeroC
 
         builder.HasKey(c => c.Id);
 
-        builder.Property(c => c.Name).IsRequired().HasMaxLength(100);
+        builder.Property(c => c.Id).HasColumnName("ID");
+
+        builder.Property(c => c.Name).IsRequired().HasMaxLength(100).HasColumnName("NAME");
 
         builder.HasMany(b => b.Profits).WithOne(p => p.ZeroContributionReason);
 

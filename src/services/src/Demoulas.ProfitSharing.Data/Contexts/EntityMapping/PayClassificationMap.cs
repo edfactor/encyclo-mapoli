@@ -15,11 +15,13 @@ internal sealed class PayClassificationMap : IEntityTypeConfiguration<PayClassif
             .HasPrecision(2)
             .ValueGeneratedNever()
             .HasConversion<byte>()
+            .HasColumnName("ID")
             .IsRequired();
 
         _ = builder.Property(e => e.Name)
             .HasMaxLength(64)
             .IsRequired()
+            .HasColumnName("NAME")
             .HasComment("Pay Classification");
 
         builder.HasData(
