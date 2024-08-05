@@ -3,6 +3,7 @@ using System;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 
@@ -11,9 +12,11 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    partial class ProfitSharingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240805154219_ChangeColumnNamesToSnakeCase")]
+    partial class ChangeColumnNamesToSnakeCase
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,10 +35,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("PSN");
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("PSN"));
-
-                    b.Property<byte>("BeneficiaryTypeId")
-                        .HasColumnType("NUMBER(3)")
-                        .HasColumnName("BENEFICIARY_TYPE_ID");
 
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("DATE")
@@ -63,11 +62,15 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(9)")
                         .HasColumnName("SSN");
 
+                    b.Property<byte>("TypeId")
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("TYPEID");
+
                     b.HasKey("PSN")
                         .HasName("PK_BENEFICIARY");
 
-                    b.HasIndex("BeneficiaryTypeId")
-                        .HasDatabaseName("IX_BENEFICIARY_BENEFICIARY_TYPE_ID");
+                    b.HasIndex("TypeId")
+                        .HasDatabaseName("IX_BENEFICIARY_TYPEID");
 
                     b.HasIndex(new[] { "SSN" }, "IX_SSN")
                         .HasDatabaseName("IX_BENEFICIARY_SSN");
@@ -1521,7 +1524,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<string>("EmploymentStatusId")
                         .IsRequired()
                         .HasColumnType("NVARCHAR2(1)")
-                        .HasColumnName("EMPLOYMENT_STATUS_ID");
+                        .HasColumnName("EMPLOYMENTSTATUSID");
 
                     b.Property<string>("EmploymentTypeId")
                         .IsRequired()
@@ -1564,7 +1567,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<DateTime>("LastModifiedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("DATE")
-                        .HasDefaultValue(new DateTime(2024, 8, 5, 14, 37, 1, 235, DateTimeKind.Local).AddTicks(1415))
+                        .HasDefaultValue(new DateTime(2024, 8, 5, 11, 42, 17, 986, DateTimeKind.Local).AddTicks(4660))
                         .HasColumnName("LAST_MODIFIED_DATE");
 
                     b.Property<string>("LastName")
@@ -1626,7 +1629,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasDatabaseName("IX_DEMOGRAPHICS_DEPARTMENT");
 
                     b.HasIndex("EmploymentStatusId")
-                        .HasDatabaseName("IX_DEMOGRAPHICS_EMPLOYMENT_STATUS_ID");
+                        .HasDatabaseName("IX_DEMOGRAPHICS_EMPLOYMENTSTATUSID");
 
                     b.HasIndex("EmploymentTypeId")
                         .HasDatabaseName("IX_DEMOGRAPHICS_EMPLOYEMENT_TYPE_ID");
@@ -2535,14 +2538,14 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.PayProfit", b =>
                 {
-                    b.Property<int>("PSN")
+                    b.Property<int>("BadgeNumber")
                         .HasPrecision(7)
                         .HasColumnType("NUMBER(7)")
-                        .HasColumnName("PSN");
+                        .HasColumnName("PROFIT_SHARING_NUMBER");
 
-                    b.Property<byte>("BeneficiaryTypeId")
+                    b.Property<byte?>("BeneficiaryTypeId")
                         .HasColumnType("NUMBER(3)")
-                        .HasColumnName("BENEFICIARY_ID");
+                        .HasColumnName("BENEFICIARYTYPEID");
 
                     b.Property<byte>("CompanyContributionYears")
                         .HasColumnType("NUMBER(3)")
@@ -2579,13 +2582,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("EARNINGS_PRIOR_ETVA_VALUE");
 
-                    b.Property<byte>("EmployeeTypeId")
+                    b.Property<byte?>("EmployeeTypeId")
                         .HasColumnType("NUMBER(3)")
-                        .HasColumnName("EMPLOYEE_TYPE_ID");
+                        .HasColumnName("EMPLOYEETYPEID");
 
-                    b.Property<byte>("EnrollmentId")
+                    b.Property<byte?>("EnrollmentId")
                         .HasColumnType("NUMBER(3)")
-                        .HasColumnName("ENROLLMENT_ID");
+                        .HasColumnName("ENROLLMENTID");
 
                     b.Property<decimal>("ExecutiveEarnings")
                         .HasPrecision(9, 2)
@@ -2669,22 +2672,22 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.Property<byte?>("ZeroContributionReasonId")
                         .HasColumnType("NUMBER(3)")
-                        .HasColumnName("ZERO_CONTRIBUTION_REASON_ID");
+                        .HasColumnName("ZEROCONTRIBUTIONREASONID");
 
-                    b.HasKey("PSN")
+                    b.HasKey("BadgeNumber")
                         .HasName("PK_PAYPROFIT");
 
                     b.HasIndex("BeneficiaryTypeId")
-                        .HasDatabaseName("IX_PAYPROFIT_BENEFICIARY_ID");
+                        .HasDatabaseName("IX_PAYPROFIT_BENEFICIARYTYPEID");
 
                     b.HasIndex("EmployeeTypeId")
-                        .HasDatabaseName("IX_PAYPROFIT_EMPLOYEE_TYPE_ID");
+                        .HasDatabaseName("IX_PAYPROFIT_EMPLOYEETYPEID");
 
                     b.HasIndex("EnrollmentId")
-                        .HasDatabaseName("IX_PAYPROFIT_ENROLLMENT_ID");
+                        .HasDatabaseName("IX_PAYPROFIT_ENROLLMENTID");
 
                     b.HasIndex("ZeroContributionReasonId")
-                        .HasDatabaseName("IX_PAYPROFIT_ZERO_CONTRIBUTION_REASON_ID");
+                        .HasDatabaseName("IX_PAYPROFIT_ZEROCONTRIBUTIONREASONID");
 
                     b.ToTable("PAYPROFIT", (string)null);
                 });
@@ -2805,11 +2808,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.Property<int>("ProfDistId")
                         .HasColumnType("NUMBER(10)")
-                        .HasColumnName("PROF_DIST_ID");
+                        .HasColumnName("PROFDISTID");
 
                     b.Property<short>("ProfitClient")
                         .HasColumnType("NUMBER(5)")
-                        .HasColumnName("PROFIT_CLIENT");
+                        .HasColumnName("PROFITCLIENT");
 
                     b.Property<short>("ProfitCodeId")
                         .HasColumnType("NUMBER(5)")
@@ -3010,12 +3013,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Beneficiary", b =>
                 {
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.BeneficiaryType", "BeneficiaryType")
-                        .WithMany("Beneficiaries")
-                        .HasForeignKey("BeneficiaryTypeId")
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.BeneficiaryType", "Type")
+                        .WithMany()
+                        .HasForeignKey("TypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK_BENEFICIARY_BENEFICIARYTYPE_BENEFICIARY_TYPE_ID");
+                        .HasConstraintName("FK_BENEFICIARY_BENEFICIARYTYPE_TYPEID");
 
                     b.OwnsOne("Demoulas.ProfitSharing.Data.Entities.Address", "Address", b1 =>
                         {
@@ -3129,10 +3132,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Navigation("Address")
                         .IsRequired();
 
-                    b.Navigation("BeneficiaryType");
-
                     b.Navigation("ContactInfo")
                         .IsRequired();
+
+                    b.Navigation("Type");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Demographic", b =>
@@ -3149,7 +3152,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasForeignKey("EmploymentStatusId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK_DEMOGRAPHICS_EMPLOYMENTSTATUS_EMPLOYMENT_STATUS_ID");
+                        .HasConstraintName("FK_DEMOGRAPHICS_EMPLOYMENTSTATUS_EMPLOYMENTSTATUSID");
 
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.EmploymentType", "EmploymentType")
                         .WithMany("Demographics")
@@ -3349,28 +3352,22 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.BeneficiaryType", "BeneficiaryType")
                         .WithMany("Profits")
                         .HasForeignKey("BeneficiaryTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_PAYPROFIT_BENEFICIARYTYPE_BENEFICIARY_ID");
+                        .HasConstraintName("FK_PAYPROFIT_BENEFICIARYTYPE_BENEFICIARYTYPEID");
 
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.EmployeeType", "EmployeeType")
                         .WithMany("Profits")
                         .HasForeignKey("EmployeeTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_PAYPROFIT_EMPLOYEETYPE_EMPLOYEE_TYPE_ID");
+                        .HasConstraintName("FK_PAYPROFIT_EMPLOYEETYPE_EMPLOYEETYPEID");
 
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.Enrollment", "Enrollment")
                         .WithMany("Profits")
                         .HasForeignKey("EnrollmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_PAYPROFIT_ENROLLMENT_ENROLLMENT_ID");
+                        .HasConstraintName("FK_PAYPROFIT_ENROLLMENT_ENROLLMENTID");
 
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.ZeroContributionReason", "ZeroContributionReason")
                         .WithMany("Profits")
                         .HasForeignKey("ZeroContributionReasonId")
-                        .HasConstraintName("FK_PAYPROFIT_ZEROCONTRIBUTIONREASON_ZERO_CONTRIBUTION_REASON_ID");
+                        .HasConstraintName("FK_PAYPROFIT_ZEROCONTRIBUTIONREASON_ZEROCONTRIBUTIONREASONID");
 
                     b.Navigation("BeneficiaryType");
 
@@ -3404,8 +3401,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BeneficiaryType", b =>
                 {
-                    b.Navigation("Beneficiaries");
-
                     b.Navigation("Profits");
                 });
 

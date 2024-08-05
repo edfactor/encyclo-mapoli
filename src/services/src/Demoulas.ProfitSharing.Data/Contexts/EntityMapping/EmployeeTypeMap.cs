@@ -12,7 +12,8 @@ internal sealed class EmployeeTypeMap : IEntityTypeConfiguration<EmployeeType>
 
         builder.HasKey(c => c.Id);
 
-        builder.Property(c => c.Name).IsRequired().HasMaxLength(30);
+        builder.Property(c => c.Id).HasColumnName("ID");
+        builder.Property(c => c.Name).IsRequired().HasMaxLength(30).HasColumnName("NAME");
 
         builder.HasMany(b => b.Profits).WithOne(p => p.EmployeeType);
 

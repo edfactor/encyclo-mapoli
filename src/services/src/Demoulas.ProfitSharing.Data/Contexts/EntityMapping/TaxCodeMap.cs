@@ -10,8 +10,8 @@ internal sealed class TaxCodeMap : IEntityTypeConfiguration<TaxCode>
         builder.HasKey(x=> x.Code);
         builder.ToTable("TaxCode");
 
-        builder.Property(x => x.Code).IsRequired().ValueGeneratedNever();
-        builder.Property(x => x.Description).IsRequired().HasMaxLength(128);
+        builder.Property(x => x.Code).IsRequired().ValueGeneratedNever().HasColumnName("CODE");
+        builder.Property(x => x.Description).IsRequired().HasMaxLength(128).HasColumnName("DESCRIPTION");
 
     }
 

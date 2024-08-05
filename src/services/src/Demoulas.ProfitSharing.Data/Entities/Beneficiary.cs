@@ -12,5 +12,6 @@ public sealed class Beneficiary
 
     public required Address Address { get; set; }
     public required ContactInfo ContactInfo { get; set; }
-    public required BeneficiaryType Type { get; set; }
+    public required byte BeneficiaryTypeId { get; set; }
+    public required BeneficiaryType BeneficiaryType { get; set; }
 }

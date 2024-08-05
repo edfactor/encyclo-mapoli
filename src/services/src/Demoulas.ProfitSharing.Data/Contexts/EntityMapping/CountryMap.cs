@@ -11,9 +11,9 @@ public sealed class CountryMap : IEntityTypeConfiguration<Country>
         _ = builder.ToTable("Country");
 
         _ = builder.Property(c => c.ISO).IsRequired().HasMaxLength(2);
-        _ = builder.Property(c => c.Id).IsRequired().HasPrecision(3);
-        _ = builder.Property(c => c.Name).IsRequired().HasMaxLength(100);
-        _ = builder.Property(c => c.TelephoneCode).IsRequired().HasMaxLength(10);
+        _ = builder.Property(c => c.Id).IsRequired().HasPrecision(3).HasColumnName("ID");
+        _ = builder.Property(c => c.Name).IsRequired().HasMaxLength(100).HasColumnName("NAME");
+        _ = builder.Property(c => c.TelephoneCode).IsRequired().HasMaxLength(10).HasColumnName("TELEPHONE_CODE");
 
         _ = builder.HasData(GetPredefinedCountries());
     }

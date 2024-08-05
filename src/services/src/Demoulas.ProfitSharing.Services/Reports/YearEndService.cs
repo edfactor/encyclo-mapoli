@@ -88,11 +88,11 @@ public class YearEndService : IYearEndService
         var results = await _dataContextFactory.UseReadOnlyContext(ctx =>
         {
             return (from pp in ctx.PayProfits
-             join dem in ctx.Demographics on pp.BadgeNumber equals dem.BadgeNumber into demTmp
+             join dem in ctx.Demographics on pp.PSN equals dem.BadgeNumber into demTmp
              from dem in demTmp.DefaultIfEmpty()
              where dem == null
-             orderby pp.BadgeNumber, pp.SSN
-             select new PayProfitBadgesNotInDemographicsResponse { EmployeeBadge = pp.BadgeNumber, EmployeeSSN = pp.SSN }
+             orderby pp.PSN, pp.SSN
+             select new PayProfitBadgesNotInDemographicsResponse { EmployeeBadge = pp.PSN, EmployeeSSN = pp.SSN }
             ).ToPaginationResultsAsync(req, forceSingleQuery: true, ct);
         });
 
@@ -116,7 +116,7 @@ public class YearEndService : IYearEndService
                     .Where(p => ssnUnion.Contains(p.SSN) && p.EarningsEtvaValue < 0)
                     .Select(p => new NegativeETVAForSSNsOnPayProfitResponse
                     {
-                        EmployeeBadge = p.BadgeNumber, EmployeeSSN = p.SSN, EtvaValue = p.EarningsEtvaValue
+                        EmployeeBadge = p.PSN, EmployeeSSN = p.SSN, EtvaValue = p.EarningsEtvaValue
                     })
                     .OrderBy(p => p.EmployeeBadge)
                     .ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken);
@@ -139,7 +139,7 @@ public class YearEndService : IYearEndService
             {
                 var query = from demographic in c.Demographics
                     join payProfit in c.PayProfits
-                        on demographic.BadgeNumber equals payProfit.BadgeNumber
+                        on demographic.BadgeNumber equals payProfit.PSN
                             where payProfit.SSN != demographic.SSN
                     orderby demographic.BadgeNumber, demographic.SSN, payProfit.SSN
                     select new MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto
@@ -174,7 +174,7 @@ public class YearEndService : IYearEndService
             {
                 var query = from payProfit in context.PayProfits
                             join demographics in context.Demographics
-                                on payProfit.BadgeNumber equals demographics.BadgeNumber into demGroup
+                                on payProfit.PSN equals demographics.BadgeNumber into demGroup
                             from demographics in demGroup.DefaultIfEmpty()
                             join profitDetail in context.ProfitDetails
                                 on payProfit.SSN equals profitDetail.SSN into detGroup
@@ -186,7 +186,7 @@ public class YearEndService : IYearEndService
                                 .Contains(payProfit.SSN)
                             group new { payProfit, demographics, profitDetail } by new
                             {
-                                payProfit.BadgeNumber,
+                                BadgeNumber=payProfit.PSN,
                                 payProfit.SSN,
                                 demographics.FullName,
                                 demographics.HireDate,
@@ -256,7 +256,7 @@ public class YearEndService : IYearEndService
             var results = await _dataContextFactory.UseReadOnlyContext(ctx =>
             {
                 var query = from dem in ctx.Demographics
-                            where !(from pp in ctx.PayProfits select pp.BadgeNumber).Contains(dem.BadgeNumber)
+                            where !(from pp in ctx.PayProfits select pp.PSN).Contains(dem.BadgeNumber)
                             select new DemographicBadgesNotInPayProfitResponse
                             {
                                 EmployeeBadge = dem.BadgeNumber,
@@ -319,7 +319,7 @@ public class YearEndService : IYearEndService
                                                  select g.Key.FullName).ToListAsync();
 
                 var query = from dem in ctx.Demographics
-                            join ppLj in ctx.PayProfits on dem.BadgeNumber equals ppLj.BadgeNumber into tmpPayProfit
+                            join ppLj in ctx.PayProfits on dem.BadgeNumber equals ppLj.PSN into tmpPayProfit
                             from pp in tmpPayProfit.DefaultIfEmpty()
                             join pdLj in ctx.ProfitDetails on dem.SSN equals pdLj.SSN into tmpProfitDetails
                             from pd in tmpProfitDetails.DefaultIfEmpty()

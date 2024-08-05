@@ -3,9 +3,9 @@
 public sealed class PayProfit
 {
     /// <summary>
-    /// Employee badge number
+    /// Profit sharing number
     /// </summary>
-    public required int BadgeNumber { get; set; }
+    public required int PSN { get; set; }
 
     /// <summary>
     /// Employee social security number
@@ -116,18 +116,25 @@ public sealed class PayProfit
     /// <summary>
     /// Employee enrollment status
     /// </summary>
+    /// 
+    public byte EnrollmentId { get; set; }
     public required Enrollment? Enrollment { get; set; }
 
     /// <summary>
     /// 0=Employee, 1=Beneficiary
     /// </summary>
+    ///
+    public byte BeneficiaryTypeId { get; set; }
     public required BeneficiaryType? BeneficiaryType { get; set; }
 
     /// <summary>
     /// 0=NOT New in plan last year, 1=New last year    
     /// </summary>
+    /// 
+    public byte EmployeeTypeId { get; set; }
     public required EmployeeType? EmployeeType { get; set; }
 
+    public byte? ZeroContributionReasonId { get; set; }
     public ZeroContributionReason? ZeroContributionReason { get; set; }
     
     /// <summary>

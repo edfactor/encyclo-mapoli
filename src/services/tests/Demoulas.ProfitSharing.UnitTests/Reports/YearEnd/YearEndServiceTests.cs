@@ -61,9 +61,9 @@ public class YearEndServiceTests:ApiTestBase<Program>
 
             await c.PayProfits.Take(mismatchedValues).ForEachAsync(async pp =>
             {
-                var demographic = await c.Demographics.FirstAsync(x=>x.BadgeNumber == pp.BadgeNumber && x.SSN == pp.SSN);
+                var demographic = await c.Demographics.FirstAsync(x=>x.BadgeNumber == pp.PSN && x.SSN == pp.SSN);
 
-                demographic.BadgeNumber = pp.BadgeNumber + c.Demographics.Count() + 1;
+                demographic.BadgeNumber = pp.PSN + c.Demographics.Count() + 1;
             });
 
             await c.SaveChangesAsync();
@@ -93,9 +93,9 @@ public class YearEndServiceTests:ApiTestBase<Program>
 
             await c.PayProfits.Take(mismatchedValues).ForEachAsync(async pp =>
             {
-                var demographic = await c.Demographics.FirstAsync(x => x.BadgeNumber == pp.BadgeNumber && x.SSN == pp.SSN);
+                var demographic = await c.Demographics.FirstAsync(x => x.BadgeNumber == pp.PSN && x.SSN == pp.SSN);
 
-                demographic.BadgeNumber = pp.BadgeNumber + c.Demographics.Count() + 1;
+                demographic.BadgeNumber = pp.PSN + c.Demographics.Count() + 1;
             });
 
             await c.SaveChangesAsync();
