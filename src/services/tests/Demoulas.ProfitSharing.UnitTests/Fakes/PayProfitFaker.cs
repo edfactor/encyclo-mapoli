@@ -8,9 +8,17 @@ internal sealed class PayProfitFaker : Faker<PayProfit>
     {
         var demographicQueue = new Queue<Demographic>(demographicFakes);
 
-        RuleFor(pc => pc.Demographic, f => demographicQueue.Dequeue())
-            .RuleFor(pc => pc.EmployeeBadge, (f,o) => (o.Demographic?.BadgeNumber ?? 0))
-            .RuleFor(d => d.EmployeeSSN, (f,o) => (o.Demographic?.SSN ??  0))
+        Demographic currentDemographic = demographicQueue.Dequeue();
+
+        RuleFor(pc => pc.BadgeNumber, (f,o) => (currentDemographic.BadgeNumber))
+            .RuleFor(d => d.SSN, (f,o) => {                                    // This code is non-intuitive.   The idea is that when the demographic
+                var rslt = currentDemographic.SSN;                             // association is made, we want the badge number and SSN to relate to existing
+                if (demographicQueue.Any())                                    // demographic record that contains the both of them
+                {                                                              // So by keeping a state field outside the lamdba, we can refer to an existing demographic
+                    currentDemographic = demographicQueue.Dequeue();           // record and copy its values.
+                }
+                return rslt;
+             })
             .RuleFor(pc => pc.HoursCurrentYear, f => f.Random.Int(min: 0, max: 3000))
             .RuleFor(pc => pc.HoursLastYear, f => f.Random.Int(min: 0, max: 3000))
             .RuleFor(pc => pc.WeeksWorkedYear, f => f.Random.Byte(min: 0, max: 53))

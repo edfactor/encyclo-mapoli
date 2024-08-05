@@ -1,4 +1,4 @@
-# Demoulas Accounts Receivable project #
+# Demoulas Profit Sharing project #
 
 ## Project Links ##
 - [Blue QA](http://appa84d:8080/home.seam?cid=4413)

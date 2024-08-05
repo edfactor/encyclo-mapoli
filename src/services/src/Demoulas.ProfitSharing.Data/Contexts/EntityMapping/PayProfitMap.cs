@@ -9,23 +9,23 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
     {
         _ = builder.ToTable("PayProfit");
 
-        _ = builder.HasKey(e => e.EmployeeBadge);
+        _ = builder.HasKey(e => e.BadgeNumber);
 
-        _ = builder.Property(e => e.EmployeeBadge)
+        _ = builder.Property(e => e.BadgeNumber)
             .HasPrecision(7)
             .ValueGeneratedNever()
             .IsRequired();
 
-        _ = builder.Property(e => e.EmployeeSSN)
+        _ = builder.Property(e => e.SSN)
             .HasMaxLength(9)
             .IsRequired();
 
         _ = builder.Property(e => e.HoursCurrentYear)
-            .HasPrecision(4, 2)
+            .HasPrecision(6, 2)
             .IsRequired();
 
         _ = builder.Property(e => e.HoursLastYear)
-            .HasPrecision(4, 2);
+            .HasPrecision(6, 2);
 
         _ = builder.Property(e => e.WeeksWorkedYear)
             .HasPrecision(2)
@@ -36,11 +36,11 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
             .IsRequired();
 
         _ = builder.Property(e => e.EarningsCurrentYear)
-            .HasPrecision(8, 2)
+            .HasPrecision(9, 2)
             .IsRequired();
 
         _ = builder.Property(e => e.EarningsLastYear)
-            .HasPrecision(8, 2)
+            .HasPrecision(9, 2)
             .IsRequired();
 
         _ = builder.Property(e => e.EarningsAfterApplyingVestingRules)
@@ -83,9 +83,14 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
 
         _ = builder.Property(e => e.ForfeitureAmountLastYear).HasPrecision(9, 2);
 
+        _ = builder.Property(e => e.ForfeitureAmountLastYear).HasPrecision(9, 2);
+        
+        _ = builder.Property(e => e.ExecutiveEarnings)
+            .HasPrecision(9, 2);
 
-
-
+        _ = builder.Property(e => e.ExecutiveHours)
+            .HasPrecision(6, 2);
+        
         _ = builder.HasOne(e => e.Enrollment)
             .WithMany(p => p.Profits);
 
@@ -97,9 +102,5 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
 
         _ = builder.HasOne(e => e.ZeroContributionReason)
             .WithMany(p => p.Profits);
-
-        _ = builder.HasOne(d => d.Demographic)
-            .WithMany(p => p.PayProfit)
-            .HasForeignKey(p => p.EmployeeSSN);
     }
 }

@@ -55,6 +55,4 @@ public sealed class Demographic : Member
 
     public char EmploymentStatusId { get; set; }
     public EmploymentStatus? EmploymentStatus { get; set; }
-
-    public IEnumerable<PayProfit>? PayProfit { get; set; }
 }

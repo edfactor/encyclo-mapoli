@@ -38,7 +38,7 @@ public sealed class YearEndClient : IYearEndService
         return CallReportEndpoint<PayrollDuplicateSSNResponseDto>(req, "duplicate-ssns", ct);
     }
 
-    public Task<Stream> DownloadDuplicateSsNs(CancellationToken cancellationToken)
+    public Task<Stream> DownloadDuplicateSSNs(CancellationToken cancellationToken)
     {
         return DownloadCsvReport("duplicate-ssns", cancellationToken);
     }
@@ -46,6 +46,11 @@ public sealed class YearEndClient : IYearEndService
     public Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfit(PaginationRequestDto req, CancellationToken ct = default)
     {
         return CallReportEndpoint<DemographicBadgesNotInPayProfitResponse>(req, "demographic-badges-not-in-payprofit", ct);
+    }
+
+    public Task<Stream> DownloadDemographicBadgesNotInPayProfit(CancellationToken ct = default)
+    {
+        return DownloadCsvReport("demographic-badges-not-in-payprofit", ct);
     }
 
     #region Negative ETVA For SSNs On PayProfit
@@ -78,6 +83,11 @@ public sealed class YearEndClient : IYearEndService
         return CallReportEndpoint<PayProfitBadgesNotInDemographicsResponse>(req, "payprofit-badges-without-demographics", cancellationToken);
     }
 
+    public Task<Stream> DownloadPayProfitBadgesNotInDemographics(CancellationToken cancellationToken = default)
+    {
+        return DownloadCsvReport("payprofit-badges-without-demographics", cancellationToken);
+    }
+
     #endregion
 
     #region Get Payroll Duplicate Ssns On Payprofit
@@ -93,10 +103,24 @@ public sealed class YearEndClient : IYearEndService
 
     #endregion
 
-    private Task<Stream> DownloadCsvReport(string endpointRoute, CancellationToken cancellationToken)
+    public Task<ReportResponseBase<NamesMissingCommaResponse>> GetNamesMissingComma(PaginationRequestDto req, CancellationToken cancellationToken = default)
     {
-        UriBuilder uriBuilder = BuildPaginatedUrl(new PaginationRequestDto { Skip = 0, Take = int.MaxValue }, endpointRoute);
-        return _httpDownloadClient.GetStreamAsync(uriBuilder.Uri, cancellationToken);
+        return CallReportEndpoint<NamesMissingCommaResponse>(req, "names-missing-commas", cancellationToken);
+    }
+
+    public Task<Stream> DownloadNamesMissingComma(CancellationToken cancellationToken = default)
+    {
+        return DownloadCsvReport("names-missing-commas", cancellationToken);
+    }
+
+    public Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetDuplicateNamesAndBirthdays(PaginationRequestDto req, CancellationToken cancellationToken = default)
+    {
+        return CallReportEndpoint<DuplicateNamesAndBirthdaysResponse>(req, "duplicate-names-and-birthdays", cancellationToken);
+    }
+
+    public Task<Stream> DownloadDuplicateNamesAndBirthdays(CancellationToken cancellationToken = default)
+    {
+        return DownloadCsvReport("duplicate-names-and-birthdays", cancellationToken);
     }
 
     private async Task<ReportResponseBase<TResponseDto>> CallReportEndpoint<TResponseDto>(PaginationRequestDto req, string endpointRoute, CancellationToken cancellationToken) where TResponseDto : class
@@ -112,6 +136,11 @@ public sealed class YearEndClient : IYearEndService
             ReportDate = SqlDateTime.MinValue.Value,
             Response = new PaginatedResponseDto<TResponseDto>()
         };
+    }
+    private Task<Stream> DownloadCsvReport(string endpointRoute, CancellationToken cancellationToken)
+    {
+        UriBuilder uriBuilder = BuildPaginatedUrl(new PaginationRequestDto { Skip = 0, Take = int.MaxValue }, endpointRoute);
+        return _httpDownloadClient.GetStreamAsync(uriBuilder.Uri, cancellationToken);
     }
 
     private UriBuilder BuildPaginatedUrl(PaginationRequestDto req, string endpointRoute)
@@ -134,4 +163,5 @@ public sealed class YearEndClient : IYearEndService
         };
         return uriBuilder;
     }
+
 }
