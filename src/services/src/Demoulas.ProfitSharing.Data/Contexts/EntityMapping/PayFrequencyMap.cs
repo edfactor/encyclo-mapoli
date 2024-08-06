@@ -13,10 +13,12 @@ internal sealed class PayFrequencyMap : IEntityTypeConfiguration<PayFrequency>
 
         builder.Property(e => e.Id)
             .ValueGeneratedNever()
+            .HasColumnName("ID")
             .IsRequired();
 
         builder.Property(e => e.Name)
             .HasMaxLength(64)
+            .HasColumnName("NAME")
             .IsRequired();
 
         builder.HasData(

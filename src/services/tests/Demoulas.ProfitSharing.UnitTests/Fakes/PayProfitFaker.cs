@@ -10,7 +10,7 @@ internal sealed class PayProfitFaker : Faker<PayProfit>
 
         Demographic currentDemographic = demographicQueue.Dequeue();
 
-        RuleFor(pc => pc.BadgeNumber, (f,o) => (currentDemographic.BadgeNumber))
+        RuleFor(pc => pc.PSN, (f,o) => (currentDemographic.BadgeNumber))
             .RuleFor(d => d.SSN, (f,o) => {                                    // This code is non-intuitive.   The idea is that when the demographic
                 var rslt = currentDemographic.SSN;                             // association is made, we want the badge number and SSN to relate to existing
                 if (demographicQueue.Any())                                    // demographic record that contains the both of them

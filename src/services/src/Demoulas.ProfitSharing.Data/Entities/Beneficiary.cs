@@ -12,5 +12,12 @@ public sealed class Beneficiary
 
     public required Address Address { get; set; }
     public required ContactInfo ContactInfo { get; set; }
-    public required BeneficiaryType Type { get; set; }
+
+    public required byte BeneficiaryTypeId { get; set; }
+    public required BeneficiaryType BeneficiaryType { get; set; }
+
+    public decimal Distribution{ get; set; }
+    public decimal Amount { get; set; }
+    public decimal Earnings { get; set; }
+    public decimal SecondaryEarnings { get; set; }
 }

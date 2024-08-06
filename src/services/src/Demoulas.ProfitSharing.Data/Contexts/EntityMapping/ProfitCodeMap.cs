@@ -10,9 +10,9 @@ internal sealed class ProfitCodeMap : IEntityTypeConfiguration<ProfitCode>
         builder.HasKey(x => x.Code);
         builder.ToTable("ProfitCode");
 
-        builder.Property(x => x.Code).IsRequired().ValueGeneratedNever();
-        builder.Property(x => x.Definition).IsRequired().HasMaxLength(128);
-        builder.Property(x => x.Frequency).IsRequired().HasMaxLength(128);
+        builder.Property(x => x.Code).IsRequired().ValueGeneratedNever().HasColumnName("CODE");
+        builder.Property(x => x.Definition).IsRequired().HasMaxLength(128).HasColumnName("DEFINITION");
+        builder.Property(x => x.Frequency).IsRequired().HasMaxLength(128).HasColumnName("FREQUENCY");
 
         builder.HasData(GetPredefinedProfitCodes());
     }

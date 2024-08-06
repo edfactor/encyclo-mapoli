@@ -3,6 +3,7 @@ using System;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 
@@ -11,9 +12,11 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    partial class ProfitSharingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240805183702_ChangeColumnNamesInForeignKeys")]
+    partial class ChangeColumnNamesInForeignKeys
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,11 +36,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("PSN"));
 
-                    b.Property<decimal>("Amount")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("AMOUNT");
-
                     b.Property<byte>("BeneficiaryTypeId")
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("BENEFICIARY_TYPE_ID");
@@ -45,21 +43,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("DATE")
                         .HasColumnName("DATE_OF_BIRTH");
-
-                    b.Property<decimal>("Distribution")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("DISTRIBUTION");
-
-                    b.Property<decimal>("Earnings")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("EARNINGS");
-
-                    b.Property<decimal>("Earnings2")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("EARNINGS2");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -83,18 +66,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(9)")
                         .HasColumnName("SSN");
 
-                    b.Property<byte>("TypeId")
-                        .HasColumnType("NUMBER(3)")
-                        .HasColumnName("TYPEID");
-
                     b.HasKey("PSN")
                         .HasName("PK_BENEFICIARY");
 
                     b.HasIndex("BeneficiaryTypeId")
                         .HasDatabaseName("IX_BENEFICIARY_BENEFICIARY_TYPE_ID");
-
-                    b.HasIndex("TypeId")
-                        .HasDatabaseName("IX_BENEFICIARY_TYPEID");
 
                     b.HasIndex(new[] { "SSN" }, "IX_SSN")
                         .HasDatabaseName("IX_BENEFICIARY_SSN");
@@ -1591,7 +1567,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<DateTime>("LastModifiedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("DATE")
-                        .HasDefaultValue(new DateTime(2024, 8, 5, 16, 28, 21, 241, DateTimeKind.Local).AddTicks(8793))
+                        .HasDefaultValue(new DateTime(2024, 8, 5, 14, 37, 1, 235, DateTimeKind.Local).AddTicks(1415))
                         .HasColumnName("LAST_MODIFIED_DATE");
 
                     b.Property<string>("LastName")
@@ -2972,76 +2948,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         {
                             Id = "K",
                             Name = "School Or Sports"
-                        },
-                        new
-                        {
-                            Id = "L",
-                            Name = "Move Out of Area"
-                        },
-                        new
-                        {
-                            Id = "M",
-                            Name = "Poor Performance"
-                        },
-                        new
-                        {
-                            Id = "N",
-                            Name = "Off For Summer"
-                        },
-                        new
-                        {
-                            Id = "O",
-                            Name = "Workmans Compensation"
-                        },
-                        new
-                        {
-                            Id = "P",
-                            Name = "Injured"
-                        },
-                        new
-                        {
-                            Id = "Q",
-                            Name = "Transferred"
-                        },
-                        new
-                        {
-                            Id = "R",
-                            Name = "Retired"
-                        },
-                        new
-                        {
-                            Id = "S",
-                            Name = "Competition"
-                        },
-                        new
-                        {
-                            Id = "T",
-                            Name = "Another Job"
-                        },
-                        new
-                        {
-                            Id = "U",
-                            Name = "Would Not Rehire"
-                        },
-                        new
-                        {
-                            Id = "V",
-                            Name = "Never Reported"
-                        },
-                        new
-                        {
-                            Id = "W",
-                            Name = "Retired Receiving Pension"
-                        },
-                        new
-                        {
-                            Id = "Y",
-                            Name = "FMLA Approved"
-                        },
-                        new
-                        {
-                            Id = "Z",
-                            Name = "Deceased"
                         });
                 });
 
@@ -3113,13 +3019,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_BENEFICIARY_BENEFICIARYTYPE_BENEFICIARY_TYPE_ID");
-
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.BeneficiaryType", "Type")
-                        .WithMany()
-                        .HasForeignKey("TypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_BENEFICIARY_BENEFICIARYTYPE_TYPEID");
 
                     b.OwnsOne("Demoulas.ProfitSharing.Data.Entities.Address", "Address", b1 =>
                         {
@@ -3237,8 +3136,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.Navigation("ContactInfo")
                         .IsRequired();
-
-                    b.Navigation("Type");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Demographic", b =>

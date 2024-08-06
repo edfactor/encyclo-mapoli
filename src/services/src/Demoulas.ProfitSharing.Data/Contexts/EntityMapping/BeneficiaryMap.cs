@@ -18,12 +18,13 @@ public sealed class BeneficiaryMap : IEntityTypeConfiguration<Beneficiary>
         builder.HasIndex(c => c.SSN, "IX_SSN");
         builder.Property(c => c.SSN).IsRequired().HasPrecision(9);
 
-        builder.Property(b => b.FirstName).IsRequired().HasMaxLength(30);
-        builder.Property(b => b.MiddleName).HasMaxLength(30);
-        builder.Property(b => b.LastName).IsRequired().HasMaxLength(30);
+        builder.Property(b => b.FirstName).IsRequired().HasMaxLength(30).HasColumnName("FIRST_NAME");
+        builder.Property(b => b.MiddleName).HasMaxLength(30).HasColumnName("MIDDLE_NAME");
+        builder.Property(b => b.LastName).IsRequired().HasMaxLength(30).HasColumnName("LAST_NAME");
 
-        builder.Property(b => b.DateOfBirth).HasColumnType("DATE").HasConversion<DateOnlyConverter>();
+        builder.Property(b => b.DateOfBirth).HasColumnType("DATE").HasConversion<DateOnlyConverter>().HasColumnName("DATE_OF_BIRTH");
 
+        builder.Property(b => b.BeneficiaryTypeId).IsRequired().HasColumnName("BENEFICIARY_TYPE_ID");
 
         builder.OwnsOne(e => e.Address, address =>
         {
@@ -47,5 +48,15 @@ public sealed class BeneficiaryMap : IEntityTypeConfiguration<Beneficiary>
             contact.Property(a => a.MobileNumber).HasMaxLength(15).HasColumnName("MOBILE_NUMBER");
             contact.Property(a => a.EmailAddress).HasMaxLength(50).HasColumnName("EMAIL_ADDRESS");
         });
+
+        builder.HasOne(d => d.BeneficiaryType)
+            .WithMany(p => p.Beneficiaries)
+            .HasForeignKey(d => d.BeneficiaryTypeId);
+
+        builder.Property(e => e.Distribution).HasPrecision(9, 2);
+        builder.Property(e => e.Amount).HasPrecision(9, 2);
+        builder.Property(e => e.Earnings).HasPrecision(9, 2);
+        builder.Property(e => e.SecondaryEarnings).HasPrecision(9, 2);
+
     }
 }

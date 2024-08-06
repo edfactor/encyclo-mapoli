@@ -12,7 +12,8 @@ internal sealed class EmploymentStatusMap : IEntityTypeConfiguration<EmploymentS
 
         builder.HasKey(c => c.Id);
 
-        builder.Property(c => c.Name).IsRequired().HasMaxLength(20);
+        builder.Property(c => c.Id).HasColumnName("ID");
+        builder.Property(c => c.Name).IsRequired().HasMaxLength(20).HasColumnName("NAME");
 
         builder.HasMany(b => b.Demographics).WithOne(p => p.EmploymentStatus);
 

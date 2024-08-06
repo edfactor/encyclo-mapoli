@@ -12,10 +12,12 @@ internal sealed class EnrollmentMap : IEntityTypeConfiguration<Enrollment>
 
         builder.Property(e => e.Id)
             .ValueGeneratedNever()
+            .HasColumnName("ID")
             .IsRequired();
 
         builder.Property(e => e.Name)
             .HasMaxLength(64)
+            .HasColumnName("NAME")
             .IsRequired();
 
         builder.HasMany(e => e.Profits).WithOne(p => p.Enrollment);

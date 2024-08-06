@@ -2,9 +2,9 @@
 public sealed record PayProfitResponseDto
 {
     /// <summary>
-    /// Employee badge number
+    /// Profit Sharing Number
     /// </summary>
-    public required long BadgeNumber { get; set; }
+    public required long PSN { get; set; }
 
     /// <summary>
     /// Employee social security number
