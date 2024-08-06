@@ -19,5 +19,5 @@ public sealed class Beneficiary
     public decimal Distribution{ get; set; }
     public decimal Amount { get; set; }
     public decimal Earnings { get; set; }
-    public decimal Earnings2 { get; set; }
+    public decimal SecondaryEarnings { get; set; }
 }
