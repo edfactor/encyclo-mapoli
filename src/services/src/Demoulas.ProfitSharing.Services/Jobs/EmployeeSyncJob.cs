@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Data.SqlTypes;
+using System.Diagnostics;
 using Bogus.Extensions.UnitedStates;
 using Demoulas.Common.Caching.Interfaces;
 using Demoulas.ProfitSharing.Common.ActivitySources;
@@ -65,7 +66,8 @@ public sealed class EmployeeSyncJob
                 MiddleName = employee.Name.MiddleNames,
                 LastName = employee.Name.LastName,
                 FullName = employee.Name.DisplayName,
-                HireDate = employee.Name.EffectiveStartDate.ToDateOnly(),
+                HireDate = employee.WorkRelationship?.StartDate ?? SqlDateTime.MinValue.Value.ToDateOnly(),
+                TerminationDate = employee.WorkRelationship?.TerminationDate,
 
                 SSN = (employee.NationalIdentifier?.NationalIdentifierNumber ?? faker.Person.Ssn()).ConvertSsnToLong() ?? 0,
                 StoreNumber = faker.Random.Short(1, 99),

@@ -15,6 +15,7 @@ public record OracleEmployee(
     [property: JsonPropertyName("emails")] Emails Emails,
     [property: JsonPropertyName("names")] Names Names,
     [property: JsonPropertyName("phones")] Phones? Phones,
+    [property: JsonPropertyName("workRelationships")] WorkRelationships? WorkRelationships,
     [property: JsonPropertyName("nationalIdentifiers")] NationalIdentifiers? NationalIdentifiers,
     [property: JsonPropertyName("@context")]
     Context Context
@@ -34,6 +35,9 @@ public record OracleEmployee(
 
     [JsonIgnore]
     public NationalIdentifier? NationalIdentifier => NationalIdentifiers?.Items.FirstOrDefault(a => a.PrimaryFlag ?? false);
+
+    [JsonIgnore]
+    public WorkRelationship? WorkRelationship => WorkRelationships?.Items.FirstOrDefault(a => a.PrimaryFlag ?? false);
 
 }
 
