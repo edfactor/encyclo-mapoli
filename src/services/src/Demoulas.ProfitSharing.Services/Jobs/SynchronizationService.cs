@@ -27,14 +27,14 @@ public sealed class SynchronizationService : ISynchronizationService
     {
         var message = new MessageRequest<OracleHcmJobRequest> { ApplicationName = _hostEnvironment.ApplicationName, Body = request };
 
-        bool isJobTypeAlreadyRunning = await _dataContextFactory.UseReadOnlyContext(c =>
+        bool jobTypeIsAlreadyRunning = await _dataContextFactory.UseReadOnlyContext(c =>
             {
                 return c.Jobs.AnyAsync(j => j.JobTypeId == request.JobType && j.JobStatusId == JobStatus.Constants.Running,
                     cancellationToken: cancellationToken);
             }
         );
 
-        if (isJobTypeAlreadyRunning)
+        if (jobTypeIsAlreadyRunning)
         {
             return false;
         }

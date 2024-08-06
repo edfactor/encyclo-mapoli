@@ -44,7 +44,8 @@ public sealed class OracleDemographicsService
             { "totalResults", "false" },
             { "onlyData", "true" },
             { "expand", "addresses,emails,names" },
-            { "fields", "addresses:AddressId,AddressLine1,AddressLine2,AddressLine3,AddressLine4,TownOrCity,Region1,Region2,Country,CountryName,PostalCode,LongPostalCode,Building,FloorNumber,CreatedBy,CreationDate,LastUpdatedBy,PersonAddrUsageId,AddressType,AddressTypeMeaning,PrimaryFlag;emails:EmailAddressId,EmailType,EmailAddress,PrimaryFlag;names:PersonNameId,EffectiveStartDate,EffectiveEndDate,LegislationCode,LastName,FirstName,Title,PreNameAdjunct,Suffix,MiddleNames,KnownAs,PreviousLastName,DisplayName,FullName,MilitaryRank,NameLanguage,LastUpdateDate;nationalIdentifiers:NationalIdentifierNumber,LastUpdateDate,PrimaryFlag,NationalIdentifierId;PersonNumber,PersonId,DateOfBirth,LastUpdateDate" }
+            { "fields", HttpRequestFields.ToFormattedString() },
+            //{ "fields", "addresses:AddressId,AddressLine1,AddressLine2,AddressLine3,AddressLine4,TownOrCity,Region1,Region2,Country,CountryName,PostalCode,LongPostalCode,Building,FloorNumber,CreatedBy,CreationDate,LastUpdatedBy,PersonAddrUsageId,AddressType,AddressTypeMeaning,PrimaryFlag;emails:EmailAddressId,EmailType,EmailAddress,PrimaryFlag;names:PersonNameId,EffectiveStartDate,EffectiveEndDate,LegislationCode,LastName,FirstName,Title,PreNameAdjunct,Suffix,MiddleNames,KnownAs,PreviousLastName,DisplayName,FullName,MilitaryRank,NameLanguage,LastUpdateDate;nationalIdentifiers:NationalIdentifierNumber,LastUpdateDate,PrimaryFlag,NationalIdentifierId;PersonNumber,PersonId,DateOfBirth,LastUpdateDate" }
         };
         UriBuilder initialUriBuilder = new UriBuilder(url);
         string initialQueryString = await new FormUrlEncodedContent(initialQuery).ReadAsStringAsync(cancellationToken);
