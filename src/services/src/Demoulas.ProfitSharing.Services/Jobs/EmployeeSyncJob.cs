@@ -70,13 +70,12 @@ public sealed class EmployeeSyncJob
                 TerminationDate = employee.WorkRelationship?.TerminationDate,
 
                 SSN = (employee.NationalIdentifier?.NationalIdentifierNumber ?? faker.Person.Ssn()).ConvertSsnToLong() ?? 0,
-                StoreNumber = faker.Random.Short(1, 99),
+                StoreNumber = employee.WorkRelationship.Assignments,
                 DepartmentId = faker.Random.Byte(1, 7),
                 PayClassificationId = faker.PickRandom(payClassifications),
                 EmploymentTypeCode = faker.PickRandom('P', 'H', 'G', 'F'),
                 PayFrequencyId = faker.PickRandom(PayFrequency.Constants.Weekly, PayFrequency.Constants.Monthly),
-                EmploymentStatusId = faker.PickRandom(EmploymentStatus.Constants.Active, EmploymentStatus.Constants.Delete, EmploymentStatus.Constants.Inactive,
-                    EmploymentStatus.Constants.Terminated),
+                EmploymentStatusId = employee.WorkRelationship?.TerminationDate == null ? EmploymentStatus.Constants.Active : EmploymentStatus.Constants.Terminated,
                 GenderCode = faker.PickRandom('M', 'F', 'X'),
 
 

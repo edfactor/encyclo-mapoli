@@ -42,6 +42,16 @@ internal sealed record HttpRequestFields
     ];
 
     // ReSharper disable once InconsistentNaming
+    public HashSet<string> workRelationships_assignments =
+    [
+        "LocationCode", // Store Number
+        "JobCode", // Pay Classification
+        "PositionCode", // Split on dash "-", Department will be the last value Example: "14-CASHIERS - PM-1" Department = 1
+        "FullPartTime", // Might need to be mapped for EmploymentType
+        "Frequency" // W = 1(Weekly) M=2(Monthly)
+    ];
+
+    // ReSharper disable once InconsistentNaming
     public HashSet<string> emails =
     [
         "EmailAddressId",
@@ -88,6 +98,7 @@ internal sealed record HttpRequestFields
         {
             { "addresses", request.addresses },
             { "workRelationships", request.workRelationships },
+            { "workRelationships.assignments", request.workRelationships_assignments },
             { "emails", request.emails },
             { "names", request.names },
             { "nationalIdentifiers", request.nationalIdentifiers }
