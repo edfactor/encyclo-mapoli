@@ -12,7 +12,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.RenameColumn(
-                name: "SECONDARYEARNINGS",
+                name: "EARNINGS2",
                 table: "BENEFICIARY",
                 newName: "SECONDARY_EARNINGS");
 
@@ -1391,7 +1391,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             migrationBuilder.RenameColumn(
                 name: "SECONDARY_EARNINGS",
                 table: "BENEFICIARY",
-                newName: "SECONDARYEARNINGS");
+                newName: "EARNINGS2");
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "LAST_MODIFIED_DATE",
