@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Contracts.Request;
+﻿using Demoulas.Common.Contracts.Contracts.Request;
 using FastEndpoints;
 using FluentValidation;
 

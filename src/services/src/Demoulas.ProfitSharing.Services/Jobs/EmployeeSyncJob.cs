@@ -11,22 +11,27 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.OracleHcm;
 using Demoulas.ProfitSharing.OracleHcm.Contracts.Request;
 using Demoulas.ProfitSharing.Services.InternalEntities;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.Jobs;
 
 public sealed class EmployeeSyncJob
 {
+    private const int MAX_STORE_ID = 899;
     private readonly OracleDemographicsService _oracleDemographicsService;
     private readonly IDemographicsServiceInternal _demographicsService;
     private readonly OracleHcmConfig _oracleHcmConfig;
+    private readonly ILogger<EmployeeSyncJob> _logger;
 
     public EmployeeSyncJob(OracleDemographicsService oracleDemographicsService,
         IDemographicsServiceInternal demographicsService,
-        OracleHcmConfig oracleHcmConfig)
+        OracleHcmConfig oracleHcmConfig,
+        ILogger<EmployeeSyncJob> logger)
     {
         _oracleDemographicsService = oracleDemographicsService;
         _demographicsService = demographicsService;
         _oracleHcmConfig = oracleHcmConfig;
+        _logger = logger;
     }
 
     public async Task SynchronizeEmployees(CancellationToken cancellationToken)
@@ -47,8 +52,46 @@ public sealed class EmployeeSyncJob
         {
             if (employee?.Address == null)
             {
+                _logger.LogCritical("No address found for employee with '{BadgeNumber}'.", employee?.BadgeNumber);
                 continue;
             }
+
+            if (employee.WorkRelationship?.Assignment.GetEmploymentType() is null or char.MinValue)
+            {
+                _logger.LogCritical("Unable to determine Employment Type for employee with {BadgeNumber}. Value received is '{FullPartTime}' ",
+                    employee.BadgeNumber, employee.WorkRelationship?.Assignment.FullPartTime ?? "null");
+                continue;
+            }
+
+            if (employee.WorkRelationship?.Assignment.JobCode > 98)
+            {
+                _logger.LogCritical("Unknown pay classification for employee with {BadgeNumber}. Value received is '{JobCode}' ", employee.BadgeNumber,
+                    employee.WorkRelationship?.Assignment.JobCode);
+                continue;
+            }
+
+            if (employee.WorkRelationship?.Assignment.GetPayFrequency() is null or byte.MinValue)
+            {
+                _logger.LogCritical("Unknown pay frequency for employee with {BadgeNumber}. Value received is '{Frequency}' ", employee.BadgeNumber,
+                    employee.WorkRelationship?.Assignment.Frequency);
+                continue;
+            }
+
+            if (employee.WorkRelationship?.Assignment.GetPayFrequency() is null or byte.MinValue)
+            {
+                _logger.LogCritical("Unknown pay frequency for employee with {BadgeNumber}. Value received is '{Frequency}' ", employee.BadgeNumber,
+                    employee.WorkRelationship?.Assignment.Frequency);
+                continue;
+            }
+
+            if (employee.WorkRelationship?.Assignment.LocationCode > MAX_STORE_ID)
+            {
+                _logger.LogCritical("Unknown store location for employee with {BadgeNumber}. Value received is '{LocationCode}' ", employee.BadgeNumber,
+                    employee.WorkRelationship?.Assignment.LocationCode);
+                continue;
+            }
+            
+
 
             Bogus.Faker faker = new Bogus.Faker();
             yield return new DemographicsRequestDto
@@ -67,8 +110,8 @@ public sealed class EmployeeSyncJob
                 StoreNumber = employee.WorkRelationship?.Assignment.LocationCode ?? 0,
                 DepartmentId = employee.WorkRelationship?.Assignment.GetDepartmentId() ?? 0,
                 PayClassificationId = employee.WorkRelationship?.Assignment.JobCode ?? 0,
-                EmploymentTypeCode = faker.PickRandom('P', 'H', 'G', 'F'),
-                PayFrequencyId = faker.PickRandom(PayFrequency.Constants.Weekly, PayFrequency.Constants.Monthly),
+                EmploymentTypeCode = employee.WorkRelationship?.Assignment.GetEmploymentType() ?? char.MinValue,
+                PayFrequencyId = employee.WorkRelationship?.Assignment.GetPayFrequency() ?? byte.MinValue,
                 EmploymentStatusId = employee.WorkRelationship?.TerminationDate == null ? EmploymentStatus.Constants.Active : EmploymentStatus.Constants.Terminated,
                 GenderCode = faker.PickRandom('M', 'F', 'X'),
 

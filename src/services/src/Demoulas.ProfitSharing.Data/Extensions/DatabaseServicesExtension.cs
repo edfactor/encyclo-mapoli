@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
+using Demoulas.Common.Data.Services.Interfaces;
+using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Data.Factories;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -12,14 +14,15 @@ namespace Demoulas.ProfitSharing.Data.Extensions;
 public static class DatabaseServicesExtension
 {
     public static async Task<IHostApplicationBuilder> AddDatabaseServices(this IHostApplicationBuilder builder,
-       IEnumerable<ContextFactoryRequest> contextFactoryRequests, bool runMigration = false, bool dropAndRecreate = false)
+        IEnumerable<ContextFactoryRequest> contextFactoryRequests, bool runMigration = false, bool dropAndRecreate = false)
     {
         if (builder.Services.Any(s => s.ServiceType == typeof(IProfitSharingDataContextFactory)))
         {
             throw new InvalidOperationException($"Service type {typeof(IProfitSharingDataContextFactory).FullName} is already registered.");
         }
 
-        IProfitSharingDataContextFactory factory = DataContextFactory.Initialize(builder, contextFactoryRequests: contextFactoryRequests);
+        List<ContextFactoryRequest> factoryRequests = contextFactoryRequests.ToList();
+        IProfitSharingDataContextFactory factory = DataContextFactory.Initialize(builder, contextFactoryRequests: factoryRequests);
         _ = builder.Services.AddSingleton(factory);
 
         if (builder.Environment.IsTestEnvironment())

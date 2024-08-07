@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Common.Contracts.Messaging;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Messaging;
 
 namespace Demoulas.ProfitSharing.Common.Interfaces;
 public interface ISynchronizationService

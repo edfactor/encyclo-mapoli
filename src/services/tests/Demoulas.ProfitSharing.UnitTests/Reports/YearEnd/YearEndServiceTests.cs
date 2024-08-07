@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text;
-using Demoulas.Common.Contracts.Request;
+using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Client.Reports.YearEnd;
 using Demoulas.ProfitSharing.UnitTests.Base;
