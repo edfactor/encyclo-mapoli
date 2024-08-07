@@ -13,5 +13,5 @@ public record WorkRelationship(
     WorkRelationshipAssignments Assignments
 )
 {
-    public WorkRelationshipAssignment? Assignment => Assignments.Items.First();
+    public WorkRelationshipAssignment Assignment => Assignments.Items.First();
 }

@@ -18,17 +18,14 @@ public sealed class EmployeeSyncJob
 {
     private readonly OracleDemographicsService _oracleDemographicsService;
     private readonly IDemographicsServiceInternal _demographicsService;
-    private readonly IBaseCacheService<PayClassificationResponseCache> _payClassificationService;
     private readonly OracleHcmConfig _oracleHcmConfig;
 
     public EmployeeSyncJob(OracleDemographicsService oracleDemographicsService,
         IDemographicsServiceInternal demographicsService,
-        IBaseCacheService<PayClassificationResponseCache> payClassificationService,
         OracleHcmConfig oracleHcmConfig)
     {
         _oracleDemographicsService = oracleDemographicsService;
         _demographicsService = demographicsService;
-        _payClassificationService = payClassificationService;
         _oracleHcmConfig = oracleHcmConfig;
     }
 
@@ -36,17 +33,14 @@ public sealed class EmployeeSyncJob
     {
         using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(SynchronizeEmployees), ActivityKind.Internal);
 
-        var payClassifications = await _payClassificationService.GetAllAsync(cancellationToken);
-        var idCollection = payClassifications.Select(p => p.Id).ToArray();
-
         var lastSync = await _demographicsService.GetLastOracleHcmSyncDate(cancellationToken);
 
         var oracleHcmEmployees = _oracleDemographicsService.GetAllEmployees(cancellationToken);
-        var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, idCollection);
+        var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees);
         await _demographicsService.AddDemographicsStream(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
     }
 
-    private async IAsyncEnumerable<DemographicsRequestDto> ConvertToRequestDto(IAsyncEnumerable<OracleEmployee?> asyncEnumerable, byte[] payClassifications)
+    private async IAsyncEnumerable<DemographicsRequestDto> ConvertToRequestDto(IAsyncEnumerable<OracleEmployee?> asyncEnumerable)
     {
         using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(ConvertToRequestDto), ActivityKind.Internal);
         await foreach (OracleEmployee? employee in asyncEnumerable)
@@ -70,9 +64,9 @@ public sealed class EmployeeSyncJob
                 TerminationDate = employee.WorkRelationship?.TerminationDate,
 
                 SSN = (employee.NationalIdentifier?.NationalIdentifierNumber ?? faker.Person.Ssn()).ConvertSsnToLong() ?? 0,
-                StoreNumber = employee.WorkRelationship.Assignments,
-                DepartmentId = faker.Random.Byte(1, 7),
-                PayClassificationId = faker.PickRandom(payClassifications),
+                StoreNumber = employee.WorkRelationship?.Assignment.LocationCode ?? 0,
+                DepartmentId = employee.WorkRelationship?.Assignment.GetDepartmentId() ?? 0,
+                PayClassificationId = employee.WorkRelationship?.Assignment.JobCode ?? 0,
                 EmploymentTypeCode = faker.PickRandom('P', 'H', 'G', 'F'),
                 PayFrequencyId = faker.PickRandom(PayFrequency.Constants.Weekly, PayFrequency.Constants.Monthly),
                 EmploymentStatusId = employee.WorkRelationship?.TerminationDate == null ? EmploymentStatus.Constants.Active : EmploymentStatus.Constants.Terminated,
