@@ -20,16 +20,19 @@ public sealed class EmployeeSyncJob
     private const int MAX_STORE_ID = 899;
     private readonly OracleDemographicsService _oracleDemographicsService;
     private readonly IDemographicsServiceInternal _demographicsService;
+    private readonly IBaseCacheService<PayClassificationResponseCache> _payCacheService;
     private readonly OracleHcmConfig _oracleHcmConfig;
     private readonly ILogger<EmployeeSyncJob> _logger;
 
     public EmployeeSyncJob(OracleDemographicsService oracleDemographicsService,
         IDemographicsServiceInternal demographicsService,
+        IBaseCacheService<PayClassificationResponseCache> payCacheService,
         OracleHcmConfig oracleHcmConfig,
         ILogger<EmployeeSyncJob> logger)
     {
         _oracleDemographicsService = oracleDemographicsService;
         _demographicsService = demographicsService;
+        _payCacheService = payCacheService;
         _oracleHcmConfig = oracleHcmConfig;
         _logger = logger;
     }
@@ -39,13 +42,15 @@ public sealed class EmployeeSyncJob
         using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(SynchronizeEmployees), ActivityKind.Internal);
 
         var lastSync = await _demographicsService.GetLastOracleHcmSyncDate(cancellationToken);
+        var cache = await _payCacheService.GetAllAsync(cancellationToken);
+        HashSet<byte> payClassifications = cache.Select(p => p.Id).ToHashSet();
 
         var oracleHcmEmployees = _oracleDemographicsService.GetAllEmployees(cancellationToken);
-        var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees);
+        var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, payClassifications);
         await _demographicsService.AddDemographicsStream(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
     }
 
-    private async IAsyncEnumerable<DemographicsRequestDto> ConvertToRequestDto(IAsyncEnumerable<OracleEmployee?> asyncEnumerable)
+    private async IAsyncEnumerable<DemographicsRequestDto> ConvertToRequestDto(IAsyncEnumerable<OracleEmployee?> asyncEnumerable, ISet<byte> payClassifications)
     {
         using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(ConvertToRequestDto), ActivityKind.Internal);
         await foreach (OracleEmployee? employee in asyncEnumerable)
@@ -63,7 +68,7 @@ public sealed class EmployeeSyncJob
                 continue;
             }
 
-            if (employee.WorkRelationship?.Assignment.JobCode > 98)
+            if (!payClassifications.Contains(employee.WorkRelationship?.Assignment.JobCode ?? 0))
             {
                 _logger.LogCritical("Unknown pay classification for employee with {BadgeNumber}. Value received is '{JobCode}' ", employee.BadgeNumber,
                     employee.WorkRelationship?.Assignment.JobCode);
