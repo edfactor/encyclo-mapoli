@@ -24,7 +24,7 @@ public sealed class BeneficiaryMap : IEntityTypeConfiguration<Beneficiary>
 
         builder.Property(b => b.DateOfBirth).HasColumnType("DATE").HasConversion<DateOnlyConverter>().HasColumnName("DATE_OF_BIRTH");
 
-        builder.Property(b => b.BeneficiaryTypeId).IsRequired().HasColumnName("BENEFICIARY_TYPE_ID");
+        builder.Property(b => b.KindId).IsRequired().HasColumnName("KIND_ID");
 
         builder.OwnsOne(e => e.Address, address =>
         {
@@ -49,9 +49,9 @@ public sealed class BeneficiaryMap : IEntityTypeConfiguration<Beneficiary>
             contact.Property(a => a.EmailAddress).HasMaxLength(50).HasColumnName("EMAIL_ADDRESS");
         });
 
-        builder.HasOne(d => d.BeneficiaryType)
+        builder.HasOne(d => d.Kind)
             .WithMany(p => p.Beneficiaries)
-            .HasForeignKey(d => d.BeneficiaryTypeId);
+            .HasForeignKey(d => d.KindId);
 
         builder.Property(e => e.Distribution).HasPrecision(9, 2);
         builder.Property(e => e.Amount).HasPrecision(9, 2);
