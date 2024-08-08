@@ -3,6 +3,7 @@ using System;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 
@@ -11,9 +12,11 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    partial class ProfitSharingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240808164456_AddBeneficiaryKind")]
+    partial class AddBeneficiaryKind
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1616,7 +1619,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<DateTime>("LastModifiedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("DATE")
-                        .HasDefaultValue(new DateTime(2024, 8, 8, 13, 15, 56, 681, DateTimeKind.Local).AddTicks(4590))
+                        .HasDefaultValue(new DateTime(2024, 8, 8, 12, 44, 55, 596, DateTimeKind.Local).AddTicks(9434))
                         .HasColumnName("LAST_MODIFIED_DATE");
 
                     b.Property<string>("LastName")
@@ -2918,98 +2921,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasName("PK_TAXCODE");
 
                     b.ToTable("TAXCODE", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Code = "1",
-                            Description = "Early (Premature) dist no known exception"
-                        },
-                        new
-                        {
-                            Code = "2",
-                            Description = "Early (Premature) dist exception applies"
-                        },
-                        new
-                        {
-                            Code = "3",
-                            Description = "Disability"
-                        },
-                        new
-                        {
-                            Code = "4",
-                            Description = "Death"
-                        },
-                        new
-                        {
-                            Code = "5",
-                            Description = "Prohibited transaction"
-                        },
-                        new
-                        {
-                            Code = "6",
-                            Description = "Section 1035 exchange"
-                        },
-                        new
-                        {
-                            Code = "7",
-                            Description = "Normal distribution"
-                        },
-                        new
-                        {
-                            Code = "8",
-                            Description = "Excess contributions + earnings/deferrals"
-                        },
-                        new
-                        {
-                            Code = "9",
-                            Description = "PS 58 cost"
-                        },
-                        new
-                        {
-                            Code = "A",
-                            Description = "Qualifies for 5- or 10-year averaging"
-                        },
-                        new
-                        {
-                            Code = "B",
-                            Description = "Qualifies for death benefit exclusion"
-                        },
-                        new
-                        {
-                            Code = "C",
-                            Description = "Qualifies for both A and B"
-                        },
-                        new
-                        {
-                            Code = "D",
-                            Description = "Excess contributions + earnings deferrals"
-                        },
-                        new
-                        {
-                            Code = "E",
-                            Description = "Excess annual additions under section 415"
-                        },
-                        new
-                        {
-                            Code = "F",
-                            Description = "Charitable gift annuity"
-                        },
-                        new
-                        {
-                            Code = "G",
-                            Description = "Direct rollover to IRA"
-                        },
-                        new
-                        {
-                            Code = "H",
-                            Description = "Direct rollover to plan/tax sheltered annuity"
-                        },
-                        new
-                        {
-                            Code = "P",
-                            Description = "Excess contributions + earnings/deferrals"
-                        });
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.TerminationCode", b =>

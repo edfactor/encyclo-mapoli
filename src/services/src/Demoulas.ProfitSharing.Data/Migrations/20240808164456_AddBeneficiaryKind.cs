@@ -3,28 +3,65 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class renameSecondaryEarnings : Migration
+    public partial class AddBeneficiaryKind : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.RenameColumn(
-                name: "EARNINGS2",
-                table: "BENEFICIARY",
-                newName: "SECONDARY_EARNINGS");
+            migrationBuilder.DropForeignKey(
+                name: "FK_BENEFICIARY_BENEFICIARYTYPE_BENEFICIARY_TYPE_ID",
+                table: "BENEFICIARY");
+
+            migrationBuilder.DropIndex(
+                name: "IX_BENEFICIARY_BENEFICIARY_TYPE_ID",
+                table: "BENEFICIARY");
+
+            migrationBuilder.DropColumn(
+                name: "BENEFICIARY_TYPE_ID",
+                table: "BENEFICIARY");
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "LAST_MODIFIED_DATE",
                 table: "DEMOGRAPHICS",
                 type: "DATE",
                 nullable: false,
-                defaultValue: new DateTime(2024, 8, 6, 10, 15, 14, 27, DateTimeKind.Local).AddTicks(3416),
+                defaultValue: new DateTime(2024, 8, 8, 12, 44, 55, 596, DateTimeKind.Local).AddTicks(9434),
                 oldClrType: typeof(DateTime),
                 oldType: "DATE",
-                oldDefaultValue: new DateTime(2024, 8, 6, 10, 2, 5, 741, DateTimeKind.Local).AddTicks(5430));
+                oldDefaultValue: new DateTime(2024, 8, 6, 10, 15, 14, 27, DateTimeKind.Local).AddTicks(3416));
+
+            migrationBuilder.AddColumn<string>(
+                name: "KIND_ID",
+                table: "BENEFICIARY",
+                type: "NVARCHAR2(1)",
+                nullable: false,
+                defaultValue: "");
+
+            migrationBuilder.CreateTable(
+                name: "BENEFICIARY_KIND",
+                columns: table => new
+                {
+                    ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
+                    NAME = table.Column<string>(type: "NVARCHAR2(20)", maxLength: 20, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BENEFICIARY_KIND", x => x.ID);
+                });
+
+            migrationBuilder.InsertData(
+                table: "BENEFICIARY_KIND",
+                columns: new[] { "ID", "NAME" },
+                values: new object[,]
+                {
+                    { "P", "Primary" },
+                    { "S", "Secondary" }
+                });
 
             migrationBuilder.UpdateData(
                 table: "COUNTRY",
@@ -1383,25 +1420,55 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 keyValue: "ZW",
                 column: "ID",
                 value: (short)194);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BENEFICIARY_KIND_ID",
+                table: "BENEFICIARY",
+                column: "KIND_ID");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_BENEFICIARY_BENEFICIARY_KIND_KIND_ID",
+                table: "BENEFICIARY",
+                column: "KIND_ID",
+                principalTable: "BENEFICIARY_KIND",
+                principalColumn: "ID",
+                onDelete: ReferentialAction.Cascade);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.RenameColumn(
-                name: "SECONDARY_EARNINGS",
-                table: "BENEFICIARY",
-                newName: "SECONDARYEARNINGS");
+            migrationBuilder.DropForeignKey(
+                name: "FK_BENEFICIARY_BENEFICIARY_KIND_KIND_ID",
+                table: "BENEFICIARY");
+
+            migrationBuilder.DropTable(
+                name: "BENEFICIARY_KIND");
+
+            migrationBuilder.DropIndex(
+                name: "IX_BENEFICIARY_KIND_ID",
+                table: "BENEFICIARY");
+
+            migrationBuilder.DropColumn(
+                name: "KIND_ID",
+                table: "BENEFICIARY");
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "LAST_MODIFIED_DATE",
                 table: "DEMOGRAPHICS",
                 type: "DATE",
                 nullable: false,
-                defaultValue: new DateTime(2024, 8, 6, 10, 2, 5, 741, DateTimeKind.Local).AddTicks(5430),
+                defaultValue: new DateTime(2024, 8, 6, 10, 15, 14, 27, DateTimeKind.Local).AddTicks(3416),
                 oldClrType: typeof(DateTime),
                 oldType: "DATE",
-                oldDefaultValue: new DateTime(2024, 8, 6, 10, 15, 14, 27, DateTimeKind.Local).AddTicks(3416));
+                oldDefaultValue: new DateTime(2024, 8, 8, 12, 44, 55, 596, DateTimeKind.Local).AddTicks(9434));
+
+            migrationBuilder.AddColumn<byte>(
+                name: "BENEFICIARY_TYPE_ID",
+                table: "BENEFICIARY",
+                type: "NUMBER(3)",
+                nullable: false,
+                defaultValue: (byte)0);
 
             migrationBuilder.UpdateData(
                 table: "COUNTRY",
@@ -2760,6 +2827,19 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 keyValue: "ZW",
                 column: "ID",
                 value: (byte)194);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BENEFICIARY_BENEFICIARY_TYPE_ID",
+                table: "BENEFICIARY",
+                column: "BENEFICIARY_TYPE_ID");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_BENEFICIARY_BENEFICIARYTYPE_BENEFICIARY_TYPE_ID",
+                table: "BENEFICIARY",
+                column: "BENEFICIARY_TYPE_ID",
+                principalTable: "BENEFICIARYTYPE",
+                principalColumn: "ID",
+                onDelete: ReferentialAction.Cascade);
         }
     }
 }

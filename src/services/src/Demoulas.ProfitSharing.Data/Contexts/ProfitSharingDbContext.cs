@@ -33,6 +33,7 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
     public virtual DbSet<Enrollment> Enrollments { get; set; }
     public virtual DbSet<BeneficiaryType> BeneficiaryTypes { get; set; }
     public virtual DbSet<EmployeeType> EmployeeTypes { get; set; }
+    public virtual DbSet<BeneficiaryKind> BeneficiaryKinds { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

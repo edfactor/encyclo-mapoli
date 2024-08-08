@@ -12,7 +12,7 @@ internal sealed class TaxCodeMap : IEntityTypeConfiguration<TaxCode>
 
         builder.Property(x => x.Code).IsRequired().ValueGeneratedNever().HasColumnName("CODE");
         builder.Property(x => x.Description).IsRequired().HasMaxLength(128).HasColumnName("DESCRIPTION");
-
+        builder.HasData(GetPredefinedTaxCodes());
     }
 
     private List<TaxCode> GetPredefinedTaxCodes()

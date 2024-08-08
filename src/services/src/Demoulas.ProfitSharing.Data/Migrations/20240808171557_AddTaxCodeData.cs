@@ -3,28 +3,25 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class renameSecondaryEarnings : Migration
+    public partial class AddTaxCodeData : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.RenameColumn(
-                name: "EARNINGS2",
-                table: "BENEFICIARY",
-                newName: "SECONDARY_EARNINGS");
-
             migrationBuilder.AlterColumn<DateTime>(
                 name: "LAST_MODIFIED_DATE",
                 table: "DEMOGRAPHICS",
                 type: "DATE",
                 nullable: false,
-                defaultValue: new DateTime(2024, 8, 6, 10, 15, 14, 27, DateTimeKind.Local).AddTicks(3416),
+                defaultValue: new DateTime(2024, 8, 8, 13, 15, 56, 681, DateTimeKind.Local).AddTicks(4590),
                 oldClrType: typeof(DateTime),
                 oldType: "DATE",
-                oldDefaultValue: new DateTime(2024, 8, 6, 10, 2, 5, 741, DateTimeKind.Local).AddTicks(5430));
+                oldDefaultValue: new DateTime(2024, 8, 8, 12, 44, 55, 596, DateTimeKind.Local).AddTicks(9434));
 
             migrationBuilder.UpdateData(
                 table: "COUNTRY",
@@ -1383,25 +1380,135 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 keyValue: "ZW",
                 column: "ID",
                 value: (short)194);
+
+            migrationBuilder.InsertData(
+                table: "TAXCODE",
+                columns: new[] { "CODE", "DESCRIPTION" },
+                values: new object[,]
+                {
+                    { "1", "Early (Premature) dist no known exception" },
+                    { "2", "Early (Premature) dist exception applies" },
+                    { "3", "Disability" },
+                    { "4", "Death" },
+                    { "5", "Prohibited transaction" },
+                    { "6", "Section 1035 exchange" },
+                    { "7", "Normal distribution" },
+                    { "8", "Excess contributions + earnings/deferrals" },
+                    { "9", "PS 58 cost" },
+                    { "A", "Qualifies for 5- or 10-year averaging" },
+                    { "B", "Qualifies for death benefit exclusion" },
+                    { "C", "Qualifies for both A and B" },
+                    { "D", "Excess contributions + earnings deferrals" },
+                    { "E", "Excess annual additions under section 415" },
+                    { "F", "Charitable gift annuity" },
+                    { "G", "Direct rollover to IRA" },
+                    { "H", "Direct rollover to plan/tax sheltered annuity" },
+                    { "P", "Excess contributions + earnings/deferrals" }
+                });
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.RenameColumn(
-                name: "SECONDARY_EARNINGS",
-                table: "BENEFICIARY",
-                newName: "SECONDARYEARNINGS");
+            migrationBuilder.DeleteData(
+                table: "TAXCODE",
+                keyColumn: "CODE",
+                keyValue: "1");
+
+            migrationBuilder.DeleteData(
+                table: "TAXCODE",
+                keyColumn: "CODE",
+                keyValue: "2");
+
+            migrationBuilder.DeleteData(
+                table: "TAXCODE",
+                keyColumn: "CODE",
+                keyValue: "3");
+
+            migrationBuilder.DeleteData(
+                table: "TAXCODE",
+                keyColumn: "CODE",
+                keyValue: "4");
+
+            migrationBuilder.DeleteData(
+                table: "TAXCODE",
+                keyColumn: "CODE",
+                keyValue: "5");
+
+            migrationBuilder.DeleteData(
+                table: "TAXCODE",
+                keyColumn: "CODE",
+                keyValue: "6");
+
+            migrationBuilder.DeleteData(
+                table: "TAXCODE",
+                keyColumn: "CODE",
+                keyValue: "7");
+
+            migrationBuilder.DeleteData(
+                table: "TAXCODE",
+                keyColumn: "CODE",
+                keyValue: "8");
+
+            migrationBuilder.DeleteData(
+                table: "TAXCODE",
+                keyColumn: "CODE",
+                keyValue: "9");
+
+            migrationBuilder.DeleteData(
+                table: "TAXCODE",
+                keyColumn: "CODE",
+                keyValue: "A");
+
+            migrationBuilder.DeleteData(
+                table: "TAXCODE",
+                keyColumn: "CODE",
+                keyValue: "B");
+
+            migrationBuilder.DeleteData(
+                table: "TAXCODE",
+                keyColumn: "CODE",
+                keyValue: "C");
+
+            migrationBuilder.DeleteData(
+                table: "TAXCODE",
+                keyColumn: "CODE",
+                keyValue: "D");
+
+            migrationBuilder.DeleteData(
+                table: "TAXCODE",
+                keyColumn: "CODE",
+                keyValue: "E");
+
+            migrationBuilder.DeleteData(
+                table: "TAXCODE",
+                keyColumn: "CODE",
+                keyValue: "F");
+
+            migrationBuilder.DeleteData(
+                table: "TAXCODE",
+                keyColumn: "CODE",
+                keyValue: "G");
+
+            migrationBuilder.DeleteData(
+                table: "TAXCODE",
+                keyColumn: "CODE",
+                keyValue: "H");
+
+            migrationBuilder.DeleteData(
+                table: "TAXCODE",
+                keyColumn: "CODE",
+                keyValue: "P");
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "LAST_MODIFIED_DATE",
                 table: "DEMOGRAPHICS",
                 type: "DATE",
                 nullable: false,
-                defaultValue: new DateTime(2024, 8, 6, 10, 2, 5, 741, DateTimeKind.Local).AddTicks(5430),
+                defaultValue: new DateTime(2024, 8, 8, 12, 44, 55, 596, DateTimeKind.Local).AddTicks(9434),
                 oldClrType: typeof(DateTime),
                 oldType: "DATE",
-                oldDefaultValue: new DateTime(2024, 8, 6, 10, 15, 14, 27, DateTimeKind.Local).AddTicks(3416));
+                oldDefaultValue: new DateTime(2024, 8, 8, 13, 15, 56, 681, DateTimeKind.Local).AddTicks(4590));
 
             migrationBuilder.UpdateData(
                 table: "COUNTRY",
