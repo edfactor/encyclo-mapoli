@@ -30,7 +30,7 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new StartMethodMap());
         modelBuilder.ApplyConfiguration(new JobTypeMap());
         modelBuilder.ApplyConfiguration(new BeneficiaryKindMap());
-
+        modelBuilder.ApplyConfiguration(new BeneficiaryRelPercentMap());
 
         // Force table names to be upper case for consistency with all existing DSM projects
         foreach (var entity in modelBuilder.Model.GetEntityTypes())

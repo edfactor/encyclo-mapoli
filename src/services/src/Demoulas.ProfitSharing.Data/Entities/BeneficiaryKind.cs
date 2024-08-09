@@ -13,4 +13,6 @@ public sealed class BeneficiaryKind : ILookupTable<char>
     public required string Name { get; set; }
 
     public ICollection<Beneficiary>? Beneficiaries { get; set; }
+    public ICollection<BeneficiaryRelPercent>? BeneficiaryRelPercents { get; set; }
+
 }
