@@ -37,15 +37,15 @@ internal sealed class BeneficiaryFaker : Faker<Beneficiary>
             MobileNumber = f.Phone.PhoneNumber("###-###-####"),
             EmailAddress = f.Internet.Email()
         });
-        RuleFor(b => b.BeneficiaryType, f => f.PickRandom(new List<BeneficiaryType>
+        RuleFor(b => b.Kind, f => f.PickRandom(new List<BeneficiaryKind>
         {
-            new BeneficiaryType
+            new BeneficiaryKind
             {
-                Id = BeneficiaryType.Constants.Beneficiary, Name = "Beneficiary",
+                Id = BeneficiaryKind.Constants.Primary, Name = "Primary",
             },
-            new BeneficiaryType
+            new BeneficiaryKind
             {
-                Id = BeneficiaryType.Constants.Employee, Name = "Employee",
+                Id = BeneficiaryKind.Constants.Secondary, Name = "Secondary",
 
             }
         }));
