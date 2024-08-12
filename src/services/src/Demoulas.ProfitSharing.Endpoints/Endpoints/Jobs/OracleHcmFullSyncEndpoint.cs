@@ -27,7 +27,7 @@ public class OracleHcmFullSyncEndpoint : EndpointWithoutRequest<SendMessageRespo
                 "A full synchronization job will begin the process of downloading all employees from OracleHCM and ensuring that the profit sharing database is fully synchronized.";
             s.ResponseExamples = new Dictionary<int, object> { { 202, new SendMessageResponse() } };
         });
-        Group<LookupGroup>();
+        Group<JobsGroup>();
     }
 
     public override async Task HandleAsync(CancellationToken ct)

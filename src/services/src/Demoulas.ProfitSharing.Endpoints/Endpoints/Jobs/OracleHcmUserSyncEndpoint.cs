@@ -30,7 +30,7 @@ public class OracleHcmUserSyncEndpoint : Endpoint<UserSyncRequestDto, UserSyncRe
             s.ExampleRequest = new UserSyncRequestDto { BadgeNumber = 1_234_567 };
             s.ResponseExamples = new Dictionary<int, object> { { 200, new UserSyncResponseDto { Message = "Success Message" } } };
         });
-        Group<LookupGroup>();
+        Group<JobsGroup>();
     }
 
     public override async Task<UserSyncResponseDto> ExecuteAsync(UserSyncRequestDto req, CancellationToken ct)

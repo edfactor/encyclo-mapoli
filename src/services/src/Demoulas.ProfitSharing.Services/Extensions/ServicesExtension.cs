@@ -29,19 +29,20 @@ public static class ServicesExtension
 {
     public static IHostApplicationBuilder AddProjectServices(this IHostApplicationBuilder builder)
     {
+        _ = builder.Services.AddTransient<IEmployeeSyncJob, EmployeeSyncJob>();
+
         _ = builder.Services.AddScoped<IPayClassificationService, PayClassificationService>();
         _ = builder.Services.AddScoped<IDemographicsService, DemographicsService>();
         _ = builder.Services.AddScoped<IYearEndService, YearEndService>();
         _ = builder.Services.AddScoped<IPayProfitService, PayProfitService>();
         _ = builder.Services.AddScoped<ISynchronizationService, SynchronizationService>();
 
-
+        
         OracleHcmConfig oktaSettings = builder.Configuration.GetSection("OracleHcm").Get<OracleHcmConfig>() ?? new OracleHcmConfig { Url = string.Empty };
         _ = builder.Services.AddSingleton(oktaSettings);
 
         _ = builder.Services.AddSingleton<IJobFactory, SimpleJobFactory>();
-        _ = builder.Services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
-        _ = builder.Services.AddSingleton<EmployeeSyncJob>();
+        _ = builder.Services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();        
         _ = builder.Services.AddSingleton<IDemographicsServiceInternal, DemographicsService>();
         _ = builder.Services.AddSingleton<ISynchronizationService, SynchronizationService>();
         _ = builder.Services.AddSingleton<IStoreService, StoreService>();

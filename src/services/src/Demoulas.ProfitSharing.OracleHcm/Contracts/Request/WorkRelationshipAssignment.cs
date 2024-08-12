@@ -8,8 +8,8 @@
 public record WorkRelationshipAssignment(
     short? LocationCode,
     byte? JobCode,
-    string PositionCode,
-    string FullPartTime,
+    string? PositionCode,
+    string? FullPartTime,
     char? Frequency
 )
 {
@@ -30,7 +30,7 @@ public record WorkRelationshipAssignment(
 
     public byte GetDepartmentId()
     {
-        _ = byte.TryParse(PositionCode.Split('-').LastOrDefault(), out byte departmentId);
+        _ = byte.TryParse(PositionCode?.Split('-').LastOrDefault(), out byte departmentId);
         return departmentId;
     }
 
