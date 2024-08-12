@@ -84,10 +84,15 @@ public sealed class EmployeeSyncJob : IEmployeeSyncJob
     {
         return _profitSharingDataContextFactory.UseWritableContext(c =>
         {
+            for (int i = 0; i < args.Length; i++)
+            {
+                args[i] ??= "null"; // Replace null with a default value
+            }
+
             DemographicSyncAudit audit = new DemographicSyncAudit
             {
                 BadgeNumber = badgeNumber,
-                Message = string.Format(messageTemplate, args),
+                Message = messageTemplate,//, args),
                 UserName = appUser?.UserName
             };
             c.DemographicSyncAudit.Add(audit);
