@@ -1,5 +1,6 @@
 ﻿using System.Data.SqlTypes;
 using System.Diagnostics;
+using System.Threading;
 using Bogus.Extensions.UnitedStates;
 using Demoulas.Common.Caching.Interfaces;
 using Demoulas.ProfitSharing.Common.ActivitySources;
@@ -15,7 +16,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.Jobs;
 
-public sealed class EmployeeSyncJob
+public sealed class EmployeeSyncJob : IEmployeeSyncJob
 {
     private const int MAX_STORE_ID = 899;
     private readonly OracleDemographicsService _oracleDemographicsService;
@@ -37,17 +38,41 @@ public sealed class EmployeeSyncJob
         _logger = logger;
     }
 
+    public async Task SynchronizeEmployee(int badgeNumber, CancellationToken cancellationToken)
+    {
+        using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(SynchronizeEmployee), ActivityKind.Internal);
+        var employee = await _demographicsService.GetDemographicByBadgeNumber(badgeNumber, cancellationToken);
+
+        if (employee == null)
+        {
+            _logger.LogError("Unable to find employee with badge number of '{badgeNumber}'", badgeNumber);
+            return;
+        }
+
+        var lastSync = await _demographicsService.GetLastOracleHcmSyncDate(cancellationToken);
+
+        var payClassifications = await GetPayClassifications(cancellationToken);
+        var oracleHcmEmployees = _oracleDemographicsService.GetAllEmployees(cancellationToken);
+        var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, payClassifications);
+        await _demographicsService.AddDemographicsStream(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
+    }
+
     public async Task SynchronizeEmployees(CancellationToken cancellationToken)
     {
         using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(SynchronizeEmployees), ActivityKind.Internal);
 
         var lastSync = await _demographicsService.GetLastOracleHcmSyncDate(cancellationToken);
-        var cache = await _payCacheService.GetAllAsync(cancellationToken);
-        HashSet<byte> payClassifications = cache.Select(p => p.Id).ToHashSet();
+        var payClassifications = await GetPayClassifications(cancellationToken);
 
         var oracleHcmEmployees = _oracleDemographicsService.GetAllEmployees(cancellationToken);
         var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, payClassifications);
         await _demographicsService.AddDemographicsStream(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
+    }
+
+    private async Task<ISet<byte>> GetPayClassifications(CancellationToken cancellationToken)
+    {
+        var payClassificationResponseCaches = await _payCacheService.GetAllAsync(cancellationToken);
+        return payClassificationResponseCaches.Select(p => p.Id).ToHashSet();
     }
 
     private async IAsyncEnumerable<DemographicsRequestDto> ConvertToRequestDto(IAsyncEnumerable<OracleEmployee?> asyncEnumerable, ISet<byte> payClassifications)

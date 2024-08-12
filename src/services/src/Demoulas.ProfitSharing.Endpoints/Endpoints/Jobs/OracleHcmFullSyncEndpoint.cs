@@ -7,11 +7,11 @@ using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Jobs;
 
-public class OracleHcmSyncEndpoint : EndpointWithoutRequest<SendMessageResponse>
+public class OracleHcmFullSyncEndpoint : EndpointWithoutRequest<SendMessageResponse>
 {
     private readonly ISynchronizationService _synchronizationService;
 
-    public OracleHcmSyncEndpoint(ISynchronizationService synchronizationService)
+    public OracleHcmFullSyncEndpoint(ISynchronizationService synchronizationService)
     {
         _synchronizationService = synchronizationService;
     }
@@ -24,7 +24,7 @@ public class OracleHcmSyncEndpoint : EndpointWithoutRequest<SendMessageResponse>
         {
             s.Summary = "Queues a full synchronization job with Oracle HCM.";
             s.Description =
-                @"A full synchronization job will begin the process of downloading all employees from OracleHCM and ensuring that the profit sharing database is fully synchronized.";
+                "A full synchronization job will begin the process of downloading all employees from OracleHCM and ensuring that the profit sharing database is fully synchronized.";
             s.ResponseExamples = new Dictionary<int, object> { { 202, new SendMessageResponse() } };
         });
         Group<LookupGroup>();

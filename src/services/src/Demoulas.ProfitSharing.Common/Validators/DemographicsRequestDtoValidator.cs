@@ -10,14 +10,14 @@ public class DemographicsRequestDtoValidator : Validator<DemographicsRequestDto>
     {
         RuleFor(x => x.SSN)
             .NotEmpty()
-            .InclusiveBetween(1000000, 999999999).WithMessage("Must be a valid SSN number.");
+            .InclusiveBetween(1000000, 999_99_9999).WithMessage("Must be a valid SSN number.");
 
         RuleFor(x => x.BadgeNumber)
-            .InclusiveBetween(1, 9999999).WithMessage("BadgeNumber must be a 7-digit number.");
+            .InclusiveBetween(1, 9_999_999).WithMessage("BadgeNumber must be a 7-digit number.");
 
         RuleFor(x => x.OracleHcmId)
             .NotEmpty()
-            .InclusiveBetween(1, 999999999999999).WithMessage("OracleHcmId must be a 15-digit number.");
+            .InclusiveBetween(1, 999_999_999_999_999).WithMessage("OracleHcmId must be a 15-digit number.");
 
         RuleFor(x => x.FullName)
             .MaximumLength(60).WithMessage("FullName cannot exceed 60 characters.");

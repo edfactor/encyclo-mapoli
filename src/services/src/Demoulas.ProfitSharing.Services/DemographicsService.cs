@@ -61,7 +61,7 @@ public class DemographicsService : IDemographicsServiceInternal
         });
     }
 
-    public async Task<ISet<DemographicsResponseDto>?> AddDemographics(IEnumerable<DemographicsRequestDto> demographics, CancellationToken cancellationToken)
+    public async Task<ISet<DemographicResponseDto>?> AddDemographics(IEnumerable<DemographicsRequestDto> demographics, CancellationToken cancellationToken)
     {
         using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(AddDemographics), ActivityKind.Internal);
         try
@@ -77,6 +77,27 @@ public class DemographicsService : IDemographicsServiceInternal
             }, cancellationToken);
 
             return _mapper.Map(entities).ToFrozenSet();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Unable to add to the {Demographics} table: {message}.", nameof(Demographic), e.Message);
+            throw;
+        }
+    }
+
+    public async Task<DemographicResponseDto?> GetDemographicByBadgeNumber(int badgeNumber, CancellationToken cancellationToken)
+    {
+        using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(AddDemographics), ActivityKind.Internal);
+        try
+        {
+            DateTime lastModificationDate = DateTime.Now;
+            Demographic? entity = await _dataContextFactory.UseReadOnlyContext(context =>
+            {
+                return context.Demographics.Where(d => d.BadgeNumber == badgeNumber).FirstOrDefaultAsync(cancellationToken);
+                
+            });
+
+            return _mapper.Map(entity);
         }
         catch (Exception e)
         {

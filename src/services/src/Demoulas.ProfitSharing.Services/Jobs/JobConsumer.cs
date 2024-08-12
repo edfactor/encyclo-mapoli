@@ -13,9 +13,9 @@ namespace Demoulas.ProfitSharing.Services.Jobs;
 public class JobConsumer : IConsumer<MessageRequest<OracleHcmJobRequest>>
 {
     private readonly IProfitSharingDataContextFactory _dataContext;
-    private readonly EmployeeSyncJob _employeeSyncJob;
+    private readonly IEmployeeSyncJob _employeeSyncJob;
 
-    public JobConsumer(IProfitSharingDataContextFactory context, EmployeeSyncJob employeeSyncJob)
+    public JobConsumer(IProfitSharingDataContextFactory context, IEmployeeSyncJob employeeSyncJob)
     {
         _dataContext = context;
         _employeeSyncJob = employeeSyncJob;

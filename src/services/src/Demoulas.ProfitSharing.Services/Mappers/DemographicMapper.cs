@@ -65,11 +65,16 @@ public partial class DemographicMapper
         return target;
     }
 
-    public partial IEnumerable<DemographicsResponseDto> Map(IEnumerable<Demographic> sources);
+    public partial IEnumerable<DemographicResponseDto> Map(IEnumerable<Demographic> sources);
 
-    public DemographicsResponseDto Map(Demographic source)
+    public DemographicResponseDto? Map(Demographic? source)
     {
-        DemographicsResponseDto target = new DemographicsResponseDto
+        if (source == null)
+        {
+            return null;
+        }
+
+        DemographicResponseDto target = new DemographicResponseDto
         {
             SSN = MaskSsn(source.SSN),
             OracleHcmId = source.OracleHcmId,
