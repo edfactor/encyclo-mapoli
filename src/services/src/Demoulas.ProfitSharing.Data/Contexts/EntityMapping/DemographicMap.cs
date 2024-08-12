@@ -152,7 +152,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
         _ = builder.Property(e => e.LastModifiedDate)
             .HasColumnType("DATE")
             .HasColumnName("LAST_MODIFIED_DATE")
-            .HasDefaultValue(DateTime.Now);
+            .HasDefaultValueSql("SYSDATE");
 
 
         builder.HasOne(e => e.PayClassification)

@@ -8,6 +8,7 @@ using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -55,11 +56,15 @@ public sealed class EmployeeSyncJob : IEmployeeSyncJob
             return;
         }
 
-        var lastSync = await _demographicsService.GetLastOracleHcmSyncDate(cancellationToken);
+        async IAsyncEnumerable<OracleEmployee?> GetSingleValueAsync(long oracleHcmId)
+        {
+            // Yield return a single value
+            yield return await _oracleDemographicsService.GetEmployee(oracleHcmId, cancellationToken);
+        }
+
 
         var payClassifications = await GetPayClassifications(cancellationToken);
-        var oracleHcmEmployees = _oracleDemographicsService.GetAllEmployees(cancellationToken);
-        var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, payClassifications, cancellationToken);
+        var requestDtoEnumerable = ConvertToRequestDto(GetSingleValueAsync(employee.OracleHcmId), payClassifications, cancellationToken);
         await _demographicsService.AddDemographicsStream(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
     }
 
@@ -89,6 +94,8 @@ public sealed class EmployeeSyncJob : IEmployeeSyncJob
             return c.SaveChangesAsync(cancellationToken);
         }, cancellationToken);
     }
+
+
 
     private async Task<ISet<byte>> GetPayClassifications(CancellationToken cancellationToken)
     {

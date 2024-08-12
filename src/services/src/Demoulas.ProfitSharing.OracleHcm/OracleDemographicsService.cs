@@ -29,7 +29,7 @@ public sealed class OracleDemographicsService
     /// <param name="workersUniqId">This is the Demographic.OracleHcmId</param>
     /// <param name="cancellationToken"></param>
     /// <returns>OracleEmployee</returns>
-    public async Task<OracleEmployee?> GetAllEmployee(long workersUniqId, CancellationToken cancellationToken = default)
+    public async Task<OracleEmployee?> GetEmployee(long workersUniqId, CancellationToken cancellationToken = default)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(workersUniqId);
 
