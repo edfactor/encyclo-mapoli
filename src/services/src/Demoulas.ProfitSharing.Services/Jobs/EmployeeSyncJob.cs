@@ -139,10 +139,19 @@ public sealed class EmployeeSyncJob : IEmployeeSyncJob
                 continue;
             }
 
+            if (employee.WorkRelationship?.Assignment.GetDepartmentId() == null)
+            {
+                string messageTemplate = "Unknown department for employee with {BadgeNumber}. Value received is '{PositionCode}' ";
+                _logger.LogCritical(messageTemplate, badgeNumber, employee.WorkRelationship?.Assignment.PositionCode);
+                await AuditError(badgeNumber, messageTemplate, appUser: null, cancellationToken: cancellationToken, badgeNumber, employee.WorkRelationship?.Assignment.PositionCode);
+                continue;
+            }
+
             if (employee.WorkRelationship?.Assignment.GetPayFrequency() is null or byte.MinValue)
             {
-                _logger.LogCritical("Unknown pay frequency for employee with {BadgeNumber}. Value received is '{Frequency}' ", employee.BadgeNumber,
-                    employee.WorkRelationship?.Assignment.Frequency);
+                string messageTemplate = "Unknown pay frequency for employee with {BadgeNumber}. Value received is '{Frequency}'";
+                _logger.LogCritical(messageTemplate, badgeNumber, employee.WorkRelationship?.Assignment.Frequency);
+                await AuditError(badgeNumber, messageTemplate, appUser: null, cancellationToken: cancellationToken, badgeNumber, employee.WorkRelationship?.Assignment.Frequency);
                 continue;
             }
 
