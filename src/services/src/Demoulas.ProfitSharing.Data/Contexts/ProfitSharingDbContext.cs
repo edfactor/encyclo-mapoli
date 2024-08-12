@@ -16,9 +16,8 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
     public ProfitSharingDbContext(DbContextOptions<ProfitSharingDbContext> options)
     : base(options)
     {
-
     }
-
+    
     public virtual DbSet<Demographic> Demographics { get; set; }
     public virtual DbSet<Country> Countries { get; set; }
     public virtual DbSet<PayClassification> PayClassifications { get; set; }
@@ -27,6 +26,7 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
     public virtual DbSet<TaxCode> TaxCodes { get; set; }
     public virtual DbSet<Beneficiary> Beneficiaries { get; set; }
     public virtual DbSet<PayProfit> PayProfits { get; set; }
+    public virtual DbSet<Distribution> Distributions { get; set; }
 
     public DbSet<Job> Jobs { get; set; }
 
@@ -34,6 +34,8 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
     public virtual DbSet<BeneficiaryType> BeneficiaryTypes { get; set; }
     public virtual DbSet<EmployeeType> EmployeeTypes { get; set; }
     public virtual DbSet<BeneficiaryKind> BeneficiaryKinds { get; set; }
+    public virtual DbSet<DistributionStatus> DistributionStatuses { get; set; }
+    public virtual DbSet<DistributionFrequency> DistributionFrequencies { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
