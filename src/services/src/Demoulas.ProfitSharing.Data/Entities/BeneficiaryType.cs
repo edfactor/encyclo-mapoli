@@ -13,5 +13,4 @@ public sealed class BeneficiaryType : ILookupTable<byte>
     public required string Name { get; set; }
 
     public ICollection<PayProfit>? Profits { get; set; }
-    public ICollection<Beneficiary>? Beneficiaries { get; set; }
 }

@@ -3,6 +3,7 @@ using System;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 
@@ -11,9 +12,11 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    partial class ProfitSharingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240808171557_AddTaxCodeData")]
+    partial class AddTaxCodeData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1616,7 +1619,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<DateTime>("LastModifiedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("DATE")
-                        .HasDefaultValue(new DateTime(2024, 8, 9, 10, 57, 19, 160, DateTimeKind.Local).AddTicks(1282))
+                        .HasDefaultValue(new DateTime(2024, 8, 8, 13, 15, 56, 681, DateTimeKind.Local).AddTicks(4590))
                         .HasColumnName("LAST_MODIFIED_DATE");
 
                     b.Property<string>("LastName")
@@ -2817,21 +2820,24 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.ProfitDetail", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("ID");
+                    b.Property<short>("ProfitYear")
+                        .HasColumnType("NUMBER(5)")
+                        .HasColumnName("PROFIT_YEAR");
 
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<byte>("ProfitYearIteration")
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("PROFIT_YEAR_ITERATION");
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("NVARCHAR2(16)")
+                        .HasColumnName("COMMENT");
 
                     b.Property<decimal>("Contribution")
                         .HasPrecision(9, 2)
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("CONTRIBUTION");
-
-                    b.Property<int>("DistributionSequence")
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("DISTRIBUTION_SEQUENCE");
 
                     b.Property<decimal>("Earnings")
                         .HasPrecision(9, 2)
@@ -2848,27 +2854,21 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("FORFEITURE");
 
-                    b.Property<byte>("MonthToDate")
-                        .HasPrecision(2)
-                        .HasColumnType("NUMBER(2,0)")
-                        .HasColumnName("MONTH_TO_DATE");
+                    b.Property<byte>("Month")
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("MONTH");
+
+                    b.Property<int>("ProfDistId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("PROF_DIST_ID");
+
+                    b.Property<short>("ProfitClient")
+                        .HasColumnType("NUMBER(5)")
+                        .HasColumnName("PROFIT_CLIENT");
 
                     b.Property<short>("ProfitCodeId")
                         .HasColumnType("NUMBER(5)")
                         .HasColumnName("PROFIT_CODE_ID");
-
-                    b.Property<short>("ProfitYear")
-                        .HasColumnType("NUMBER(5)")
-                        .HasColumnName("PROFIT_YEAR");
-
-                    b.Property<byte>("ProfitYearIteration")
-                        .HasColumnType("NUMBER(3)")
-                        .HasColumnName("PROFIT_YEAR_ITERATION");
-
-                    b.Property<string>("Remark")
-                        .HasMaxLength(32)
-                        .HasColumnType("NVARCHAR2(32)")
-                        .HasColumnName("REMARK");
 
                     b.Property<long>("SSN")
                         .HasColumnType("NUMBER(19)")
@@ -2884,25 +2884,25 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NVARCHAR2(1)")
                         .HasColumnName("TAX_CODE_ID");
 
-                    b.Property<short>("YearToDate")
-                        .HasPrecision(4)
-                        .HasColumnType("NUMBER(4,0)")
-                        .HasColumnName("YEAR_TO_DATE");
+                    b.Property<short>("Year")
+                        .HasColumnType("NUMBER(5)")
+                        .HasColumnName("YEAR");
 
                     b.Property<string>("ZeroCont")
+                        .IsRequired()
                         .HasColumnType("NVARCHAR2(1)")
                         .HasColumnName("ZEROCONT");
 
-                    b.HasKey("Id")
-                        .HasName("PK_PROFIT_DETAIL");
+                    b.HasKey("ProfitYear", "ProfitYearIteration")
+                        .HasName("PK_PROFITDETAIL");
 
                     b.HasIndex("ProfitCodeId")
-                        .HasDatabaseName("IX_PROFIT_DETAIL_PROFIT_CODE_ID");
+                        .HasDatabaseName("IX_PROFITDETAIL_PROFIT_CODE_ID");
 
                     b.HasIndex("TaxCodeId")
-                        .HasDatabaseName("IX_PROFIT_DETAIL_TAX_CODE_ID");
+                        .HasDatabaseName("IX_PROFITDETAIL_TAX_CODE_ID");
 
-                    b.ToTable("PROFIT_DETAIL", (string)null);
+                    b.ToTable("PROFITDETAIL", (string)null);
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.TaxCode", b =>
@@ -3605,14 +3605,14 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasForeignKey("ProfitCodeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK_PROFIT_DETAIL_PROFITCODE_PROFIT_CODE_ID");
+                        .HasConstraintName("FK_PROFITDETAIL_PROFITCODE_PROFIT_CODE_ID");
 
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.TaxCode", "TaxCode")
                         .WithMany()
                         .HasForeignKey("TaxCodeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK_PROFIT_DETAIL_TAXCODE_TAX_CODE_ID");
+                        .HasConstraintName("FK_PROFITDETAIL_TAXCODE_TAX_CODE_ID");
 
                     b.Navigation("ProfitCode");
 
