@@ -30,6 +30,10 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new StartMethodMap());
         modelBuilder.ApplyConfiguration(new JobTypeMap());
         modelBuilder.ApplyConfiguration(new BeneficiaryKindMap());
+        modelBuilder.ApplyConfiguration(new DistributionStatusMap());
+        modelBuilder.ApplyConfiguration(new DistributionFrequencyMap());
+        modelBuilder.ApplyConfiguration(new DistributionMap());
+        modelBuilder.ApplyConfiguration(new BeneficiaryRelPercentMap());
 
 
         // Force table names to be upper case for consistency with all existing DSM projects

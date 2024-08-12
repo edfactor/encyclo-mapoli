@@ -3,6 +3,7 @@ using System;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 
@@ -11,9 +12,11 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    partial class ProfitSharingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240809163620_AddBeneficiaryRelPercent")]
+    partial class AddBeneficiaryRelPercent
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -125,6 +128,48 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             Id = "S",
                             Name = "Secondary"
                         });
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BeneficiaryRelPercent", b =>
+                {
+                    b.Property<long>("PSN")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(9)
+                        .HasColumnType("NUMBER(9)")
+                        .HasColumnName("PSN");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("PSN"));
+
+                    b.Property<string>("KindId")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR2(1)")
+                        .HasColumnName("KIND_ID");
+
+                    b.Property<decimal>("Percent")
+                        .HasPrecision(3)
+                        .HasColumnType("numeric(3,0)")
+                        .HasColumnName("PERCENT");
+
+                    b.Property<string>("Relationship")
+                        .HasMaxLength(10)
+                        .HasColumnType("NVARCHAR2(10)")
+                        .HasColumnName("RELATIONSHIP");
+
+                    b.Property<long>("SSN")
+                        .HasPrecision(9)
+                        .HasColumnType("NUMBER(9)")
+                        .HasColumnName("SSN");
+
+                    b.HasKey("PSN")
+                        .HasName("PK_BENEFICIARY_REL_PERCENT");
+
+                    b.HasIndex("KindId")
+                        .HasDatabaseName("IX_BENEFICIARY_REL_PERCENT_KINDID");
+
+                    b.HasIndex(new[] { "SSN" }, "IX_SSN")
+                        .HasDatabaseName("IX_BENEFICIARY_REL_PERCENT_SSN");
+
+                    b.ToTable("BENEFICIARY_REL_PERCENT", (string)null);
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BeneficiaryType", b =>
@@ -1616,7 +1661,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<DateTime>("LastModifiedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("DATE")
-                        .HasDefaultValue(new DateTime(2024, 8, 9, 16, 20, 53, 405, DateTimeKind.Local).AddTicks(8037))
+                        .HasDefaultValue(new DateTime(2024, 8, 9, 12, 36, 19, 485, DateTimeKind.Local).AddTicks(2160))
                         .HasColumnName("LAST_MODIFIED_DATE");
 
                     b.Property<string>("LastName")
@@ -1753,251 +1798,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         {
                             Id = (byte)7,
                             Name = "Bakery"
-                        });
-                });
-
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Distribution", b =>
-                {
-                    b.Property<long>("SSN")
-                        .HasColumnType("NUMBER(19)")
-                        .HasColumnName("SSN");
-
-                    b.Property<int>("SequenceNumber")
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("SEQUENCE_NUMBER");
-
-                    b.Property<decimal>("CheckAmount")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("CHECK_AMOUNT");
-
-                    b.Property<bool>("Deceased")
-                        .HasColumnType("NUMBER(1)")
-                        .HasColumnName("DECEASED");
-
-                    b.Property<string>("EmployeeName")
-                        .IsRequired()
-                        .HasMaxLength(25)
-                        .HasColumnType("NVARCHAR2(25)")
-                        .HasColumnName("EMPLOYEE_NAME");
-
-                    b.Property<decimal>("FederalTaxAmount")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("FEDERAL_TAX_AMOUNTE");
-
-                    b.Property<decimal>("FederalTaxPercentage")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("FEDERAL_TAX_PERCENTAGE");
-
-                    b.Property<string>("ForTheBenefitOfAccountType")
-                        .HasColumnType("NVARCHAR2(2000)")
-                        .HasColumnName("FORTHEBENEFITOF_ACCOUNT_TYPE");
-
-                    b.Property<string>("ForTheBenefitOfPayee")
-                        .HasColumnType("NVARCHAR2(2000)")
-                        .HasColumnName("FORTHEBENEFITOF_PAYEE");
-
-                    b.Property<string>("FrequencyId")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR2(1)")
-                        .HasColumnName("FREQUENCY_ID");
-
-                    b.Property<string>("GenderId")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR2(1)")
-                        .HasColumnName("GENDERID");
-
-                    b.Property<decimal>("GrossAmount")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("GROSS_AMOUNT");
-
-                    b.Property<string>("Memo")
-                        .HasColumnType("NVARCHAR2(2000)")
-                        .HasColumnName("MEMO");
-
-                    b.Property<string>("PayeeName")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)")
-                        .HasColumnName("PAYEE_NAME");
-
-                    b.Property<long>("PayeeSSN")
-                        .HasColumnType("NUMBER(19)")
-                        .HasColumnName("PAYEE_SSN");
-
-                    b.Property<bool>("QualifiedDomesticRelationsOrder")
-                        .HasColumnType("NUMBER(1)")
-                        .HasColumnName("QDRO");
-
-                    b.Property<bool>("RothIRA")
-                        .HasColumnType("NUMBER(1)")
-                        .HasColumnName("ROTH_IRA");
-
-                    b.Property<decimal>("StateTaxAmount")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("STATE_TAX_AMOUNT");
-
-                    b.Property<decimal>("StateTaxPercentage")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("STATE_TAX_PERCENTAGE");
-
-                    b.Property<string>("StatusId")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR2(1)")
-                        .HasColumnName("STATUS_ID");
-
-                    b.Property<bool>("Tax1099ForBeneficiary")
-                        .HasColumnType("NUMBER(1)")
-                        .HasColumnName("TAX1099_FOR_BENEFICIARY");
-
-                    b.Property<bool>("Tax1099ForEmployee")
-                        .HasColumnType("NUMBER(1)")
-                        .HasColumnName("TAX1099_FOR_EMPLOYEE");
-
-                    b.Property<string>("TaxCodeId")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR2(1)")
-                        .HasColumnName("TAXCODEID");
-
-                    b.Property<string>("ThirdPartyName")
-                        .HasColumnType("NVARCHAR2(2000)")
-                        .HasColumnName("THIRD_PARTY_NAME");
-
-                    b.Property<string>("ThirdPartyPayee")
-                        .HasColumnType("NVARCHAR2(2000)")
-                        .HasColumnName("THIRD_PARTY_PAYEEE");
-
-                    b.HasKey("SSN", "SequenceNumber")
-                        .HasName("PK_DISTRIBUTION");
-
-                    b.HasIndex("FrequencyId")
-                        .HasDatabaseName("IX_DISTRIBUTION_FREQUENCY_ID");
-
-                    b.HasIndex("GenderId")
-                        .HasDatabaseName("IX_DISTRIBUTION_GENDERID");
-
-                    b.HasIndex("StatusId")
-                        .HasDatabaseName("IX_DISTRIBUTION_STATUS_ID");
-
-                    b.HasIndex("TaxCodeId")
-                        .HasDatabaseName("IX_DISTRIBUTION_TAXCODEID");
-
-                    b.ToTable("DISTRIBUTION", (string)null);
-                });
-
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.DistributionFrequency", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("NVARCHAR2(1)")
-                        .HasColumnName("ID");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("NVARCHAR2(20)")
-                        .HasColumnName("NAME");
-
-                    b.HasKey("Id")
-                        .HasName("PK_DISTRIBUTION_FREQUENCY");
-
-                    b.ToTable("DISTRIBUTION_FREQUENCY", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "M",
-                            Name = "Monthly"
-                        },
-                        new
-                        {
-                            Id = "A",
-                            Name = "Annually"
-                        },
-                        new
-                        {
-                            Id = "Q",
-                            Name = "Quarterly"
-                        },
-                        new
-                        {
-                            Id = "H",
-                            Name = "Hardship"
-                        },
-                        new
-                        {
-                            Id = "P",
-                            Name = "Pay Direct"
-                        },
-                        new
-                        {
-                            Id = "R",
-                            Name = "Rollover Direct"
-                        });
-                });
-
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.DistributionStatus", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("NVARCHAR2(1)")
-                        .HasColumnName("ID");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("NVARCHAR2(100)")
-                        .HasColumnName("NAME");
-
-                    b.HasKey("Id")
-                        .HasName("PK_DISTRIBUTION_STATUS");
-
-                    b.ToTable("DISTRIBUTION_STATUS", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "C",
-                            Name = "Manual Check"
-                        },
-                        new
-                        {
-                            Id = "D",
-                            Name = "Purge this Record"
-                        },
-                        new
-                        {
-                            Id = "H",
-                            Name = "Request is on hold"
-                        },
-                        new
-                        {
-                            Id = "O",
-                            Name = "Override vested amount in check (death or > 64 and 5 years vested"
-                        },
-                        new
-                        {
-                            Id = "P",
-                            Name = "Payment as been made"
-                        },
-                        new
-                        {
-                            Id = "Y",
-                            Name = "Request is OK to pay"
-                        },
-                        new
-                        {
-                            Id = "X",
-                            Name = "Purge all records for the SSN"
-                        },
-                        new
-                        {
-                            Id = "Z",
-                            Name = "Purge all records for the SSN"
                         });
                 });
 
@@ -3597,6 +3397,18 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Navigation("Kind");
                 });
 
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BeneficiaryRelPercent", b =>
+                {
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.BeneficiaryKind", "Kind")
+                        .WithMany("BeneficiaryRelPercents")
+                        .HasForeignKey("KindId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_BENEFICIARY_REL_PERCENT_BENEFICIARY_KIND_KINDID");
+
+                    b.Navigation("Kind");
+                });
+
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Demographic", b =>
                 {
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.Department", "Department")
@@ -3776,197 +3588,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Navigation("TerminationCode");
                 });
 
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Distribution", b =>
-                {
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.DistributionFrequency", "Frequency")
-                        .WithMany()
-                        .HasForeignKey("FrequencyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_DISTRIBUTION_DISTRIBUTION_FREQUENCY_FREQUENCY_ID");
-
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Gender", "Gender")
-                        .WithMany()
-                        .HasForeignKey("GenderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_DISTRIBUTION_GENDER_GENDERID");
-
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.DistributionStatus", "Status")
-                        .WithMany()
-                        .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_DISTRIBUTION_DISTRIBUTION_STATUS_STATUS_ID");
-
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.TaxCode", "TaxCode")
-                        .WithMany()
-                        .HasForeignKey("TaxCodeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_DISTRIBUTION_TAXCODE_TAXCODEID");
-
-                    b.OwnsOne("Demoulas.ProfitSharing.Data.Entities.AddressOptional", "ThirdPartyAddress", b1 =>
-                        {
-                            b1.Property<long>("DistributionSSN")
-                                .HasColumnType("NUMBER(19)")
-                                .HasColumnName("SSN");
-
-                            b1.Property<int>("DistributionSequenceNumber")
-                                .HasColumnType("NUMBER(10)")
-                                .HasColumnName("SEQUENCE_NUMBER");
-
-                            b1.Property<string>("City")
-                                .HasMaxLength(25)
-                                .HasColumnType("NVARCHAR2(25)")
-                                .HasColumnName("THIRD_PARTY_CITY");
-
-                            b1.Property<string>("CountryISO")
-                                .ValueGeneratedOnAdd()
-                                .HasMaxLength(2)
-                                .HasColumnType("NVARCHAR2(2)")
-                                .HasDefaultValue("US")
-                                .HasColumnName("THIRD_PARTY_COUNTRY_ISO");
-
-                            b1.Property<string>("PostalCode")
-                                .HasMaxLength(9)
-                                .HasColumnType("NVARCHAR2(9)")
-                                .HasColumnName("THIRD_PARTY_POSTAL_CODE");
-
-                            b1.Property<string>("State")
-                                .HasMaxLength(3)
-                                .HasColumnType("NVARCHAR2(3)")
-                                .HasColumnName("THIRD_PARTY_STATE");
-
-                            b1.Property<string>("Street")
-                                .HasMaxLength(30)
-                                .HasColumnType("NVARCHAR2(30)")
-                                .HasColumnName("THIRD_PARTY_STREET");
-
-                            b1.Property<string>("Street2")
-                                .HasMaxLength(30)
-                                .HasColumnType("NVARCHAR2(30)")
-                                .HasColumnName("THIRD_PARTY_STREET2");
-
-                            b1.Property<string>("Street3")
-                                .HasMaxLength(30)
-                                .HasColumnType("NVARCHAR2(30)")
-                                .HasColumnName("THIRD_PARTY_STREET3");
-
-                            b1.Property<string>("Street4")
-                                .HasMaxLength(30)
-                                .HasColumnType("NVARCHAR2(30)")
-                                .HasColumnName("THIRD_PARTY_STREET4");
-
-                            b1.HasKey("DistributionSSN", "DistributionSequenceNumber")
-                                .HasName("PK_DISTRIBUTION");
-
-                            b1.HasIndex("CountryISO")
-                                .HasDatabaseName("IX_DISTRIBUTION_THIRD_PARTY_COUNTRY_ISO");
-
-                            b1.ToTable("DISTRIBUTION");
-
-                            b1.HasOne("Demoulas.ProfitSharing.Data.Entities.Country", null)
-                                .WithMany()
-                                .HasForeignKey("CountryISO")
-                                .HasConstraintName("FK_DISTRIBUTION_COUNTRY_THIRD_PARTY_COUNTRY_ISO");
-
-                            b1.WithOwner()
-                                .HasForeignKey("DistributionSSN", "DistributionSequenceNumber")
-                                .HasConstraintName("FK_DISTRIBUTION_DISTRIBUTION_SSN_SEQUENCE_NUMBER");
-                        });
-
-                    b.OwnsOne("Demoulas.ProfitSharing.Data.Entities.Address", "PayeeAddress", b1 =>
-                        {
-                            b1.Property<long>("DistributionSSN")
-                                .HasColumnType("NUMBER(19)")
-                                .HasColumnName("SSN");
-
-                            b1.Property<int>("DistributionSequenceNumber")
-                                .HasColumnType("NUMBER(10)")
-                                .HasColumnName("SEQUENCE_NUMBER");
-
-                            b1.Property<string>("City")
-                                .IsRequired()
-                                .HasMaxLength(25)
-                                .HasColumnType("NVARCHAR2(25)")
-                                .HasColumnName("CITY");
-
-                            b1.Property<string>("CountryISO")
-                                .IsRequired()
-                                .ValueGeneratedOnAdd()
-                                .HasMaxLength(2)
-                                .HasColumnType("NVARCHAR2(2)")
-                                .HasDefaultValue("US")
-                                .HasColumnName("COUNTRY_ISO");
-
-                            b1.Property<string>("PostalCode")
-                                .IsRequired()
-                                .HasMaxLength(9)
-                                .HasColumnType("NVARCHAR2(9)")
-                                .HasColumnName("POSTAL_CODE");
-
-                            b1.Property<string>("State")
-                                .IsRequired()
-                                .HasMaxLength(3)
-                                .HasColumnType("NVARCHAR2(3)")
-                                .HasColumnName("STATE");
-
-                            b1.Property<string>("Street")
-                                .IsRequired()
-                                .HasMaxLength(30)
-                                .HasColumnType("NVARCHAR2(30)")
-                                .HasColumnName("STREET");
-
-                            b1.Property<string>("Street2")
-                                .HasMaxLength(30)
-                                .HasColumnType("NVARCHAR2(30)")
-                                .HasColumnName("STREET2");
-
-                            b1.Property<string>("Street3")
-                                .HasMaxLength(30)
-                                .HasColumnType("NVARCHAR2(30)")
-                                .HasColumnName("STREET3");
-
-                            b1.Property<string>("Street4")
-                                .HasMaxLength(30)
-                                .HasColumnType("NVARCHAR2(30)")
-                                .HasColumnName("STREET4");
-
-                            b1.HasKey("DistributionSSN", "DistributionSequenceNumber");
-
-                            b1.HasIndex("CountryISO")
-                                .HasDatabaseName("IX_DISTRIBUTION_COUNTRY_ISO");
-
-                            b1.ToTable("DISTRIBUTION");
-
-                            b1.HasOne("Demoulas.ProfitSharing.Data.Entities.Country", null)
-                                .WithMany()
-                                .HasForeignKey("CountryISO")
-                                .OnDelete(DeleteBehavior.Cascade)
-                                .IsRequired()
-                                .HasConstraintName("FK_DISTRIBUTION_COUNTRY_COUNTRY_ISO");
-
-                            b1.WithOwner()
-                                .HasForeignKey("DistributionSSN", "DistributionSequenceNumber")
-                                .HasConstraintName("FK_DISTRIBUTION_DISTRIBUTION_SSN_SEQUENCE_NUMBER");
-                        });
-
-                    b.Navigation("Frequency");
-
-                    b.Navigation("Gender");
-
-                    b.Navigation("PayeeAddress")
-                        .IsRequired();
-
-                    b.Navigation("Status");
-
-                    b.Navigation("TaxCode");
-
-                    b.Navigation("ThirdPartyAddress")
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.MassTransit.Job", b =>
                 {
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.MassTransit.JobStatus", "JobStatus")
@@ -4058,6 +3679,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BeneficiaryKind", b =>
                 {
                     b.Navigation("Beneficiaries");
+
+                    b.Navigation("BeneficiaryRelPercents");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BeneficiaryType", b =>
