@@ -1,14 +1,17 @@
 ﻿using System.Data.SqlTypes;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using Bogus.Extensions.UnitedStates;
 using Demoulas.Common.Caching.Interfaces;
+using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm;
 using Demoulas.ProfitSharing.OracleHcm.Contracts.Request;
 using Demoulas.ProfitSharing.Services.InternalEntities;
@@ -21,18 +24,21 @@ public sealed class EmployeeSyncJob : IEmployeeSyncJob
     private const int MAX_STORE_ID = 899;
     private readonly OracleDemographicsService _oracleDemographicsService;
     private readonly IDemographicsServiceInternal _demographicsService;
+    private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
     private readonly IBaseCacheService<PayClassificationResponseCache> _payCacheService;
     private readonly OracleHcmConfig _oracleHcmConfig;
     private readonly ILogger<EmployeeSyncJob> _logger;
 
     public EmployeeSyncJob(OracleDemographicsService oracleDemographicsService,
         IDemographicsServiceInternal demographicsService,
+        IProfitSharingDataContextFactory profitSharingDataContextFactory,
         IBaseCacheService<PayClassificationResponseCache> payCacheService,
         OracleHcmConfig oracleHcmConfig,
         ILogger<EmployeeSyncJob> logger)
     {
         _oracleDemographicsService = oracleDemographicsService;
         _demographicsService = demographicsService;
+        _profitSharingDataContextFactory = profitSharingDataContextFactory;
         _payCacheService = payCacheService;
         _oracleHcmConfig = oracleHcmConfig;
         _logger = logger;
@@ -53,7 +59,7 @@ public sealed class EmployeeSyncJob : IEmployeeSyncJob
 
         var payClassifications = await GetPayClassifications(cancellationToken);
         var oracleHcmEmployees = _oracleDemographicsService.GetAllEmployees(cancellationToken);
-        var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, payClassifications);
+        var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, payClassifications, cancellationToken);
         await _demographicsService.AddDemographicsStream(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
     }
 
@@ -65,8 +71,23 @@ public sealed class EmployeeSyncJob : IEmployeeSyncJob
         var payClassifications = await GetPayClassifications(cancellationToken);
 
         var oracleHcmEmployees = _oracleDemographicsService.GetAllEmployees(cancellationToken);
-        var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, payClassifications);
+        var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, payClassifications, cancellationToken);
         await _demographicsService.AddDemographicsStream(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
+    }
+
+    private Task AuditError(int badgeNumber, string messageTemplate, IAppUser? appUser = null, CancellationToken cancellationToken = default, params object?[] args)
+    {
+        return _profitSharingDataContextFactory.UseWritableContext(c =>
+        {
+            DemographicSyncAudit audit = new DemographicSyncAudit
+            {
+                BadgeNumber = badgeNumber,
+                Message = string.Format(messageTemplate, args),
+                UserName = appUser?.UserName
+            };
+            c.DemographicSyncAudit.Add(audit);
+            return c.SaveChangesAsync(cancellationToken);
+        }, cancellationToken);
     }
 
     private async Task<ISet<byte>> GetPayClassifications(CancellationToken cancellationToken)
@@ -75,28 +96,34 @@ public sealed class EmployeeSyncJob : IEmployeeSyncJob
         return payClassificationResponseCaches.Select(p => p.Id).ToHashSet();
     }
 
-    private async IAsyncEnumerable<DemographicsRequestDto> ConvertToRequestDto(IAsyncEnumerable<OracleEmployee?> asyncEnumerable, ISet<byte> payClassifications)
+    private async IAsyncEnumerable<DemographicsRequestDto> ConvertToRequestDto(IAsyncEnumerable<OracleEmployee?> asyncEnumerable, ISet<byte> payClassifications, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(ConvertToRequestDto), ActivityKind.Internal);
-        await foreach (OracleEmployee? employee in asyncEnumerable)
+        await foreach (OracleEmployee? employee in asyncEnumerable.WithCancellation(cancellationToken))
         {
+            int badgeNumber = employee?.BadgeNumber ?? 0;
             if (employee?.Address == null)
             {
-                _logger.LogCritical("No address found for employee with '{BadgeNumber}'.", employee?.BadgeNumber);
+                string messageTemplate = "No address found for employee with '{BadgeNumber}'.";
+                _logger.LogCritical(messageTemplate, employee?.BadgeNumber);
+                await AuditError(badgeNumber, messageTemplate, args: badgeNumber, cancellationToken: cancellationToken);
                 continue;
             }
 
             if (employee.WorkRelationship?.Assignment.GetEmploymentType() is null or char.MinValue)
             {
-                _logger.LogCritical("Unable to determine Employment Type for employee with {BadgeNumber}. Value received is '{FullPartTime}' ",
-                    employee.BadgeNumber, employee.WorkRelationship?.Assignment.FullPartTime ?? "null");
+                string messageTemplate = "Unable to determine Employment Type for employee with {BadgeNumber}. Value received is '{FullPartTime}' ";
+                _logger.LogCritical(messageTemplate, badgeNumber, employee.WorkRelationship?.Assignment.FullPartTime ?? "null");
+                await AuditError(badgeNumber, messageTemplate, args: new object[] { badgeNumber, employee.WorkRelationship?.Assignment.FullPartTime ?? "null" },
+                    cancellationToken: cancellationToken);
                 continue;
             }
 
             if (!payClassifications.Contains(employee.WorkRelationship?.Assignment.JobCode ?? 0))
             {
-                _logger.LogCritical("Unknown pay classification for employee with {BadgeNumber}. Value received is '{JobCode}' ", employee.BadgeNumber,
-                    employee.WorkRelationship?.Assignment.JobCode);
+                string messageTemplate = "Unknown pay classification for employee with {BadgeNumber}. Value received is '{JobCode}' ";
+                _logger.LogCritical(messageTemplate, badgeNumber, employee.WorkRelationship?.Assignment.JobCode);
+                await AuditError(badgeNumber, messageTemplate, appUser: null, cancellationToken: cancellationToken, badgeNumber, employee.WorkRelationship?.Assignment.JobCode);
                 continue;
             }
 
