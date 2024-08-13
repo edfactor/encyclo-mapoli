@@ -15,7 +15,9 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm;
 using Demoulas.ProfitSharing.OracleHcm.Contracts.Request;
+using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.ProfitSharing.Services.InternalEntities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.Jobs;
@@ -64,7 +66,8 @@ public sealed class EmployeeSyncJob : IEmployeeSyncJob
 
 
         var payClassifications = await GetPayClassifications(cancellationToken);
-        var requestDtoEnumerable = ConvertToRequestDto(GetSingleValueAsync(employee.OracleHcmId), payClassifications, cancellationToken);
+        var departments = await GetDepartments(cancellationToken);
+        var requestDtoEnumerable = ConvertToRequestDto(GetSingleValueAsync(employee.OracleHcmId), payClassifications, departments, cancellationToken);
         await _demographicsService.AddDemographicsStream(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
     }
 
@@ -74,9 +77,10 @@ public sealed class EmployeeSyncJob : IEmployeeSyncJob
 
         var lastSync = await _demographicsService.GetLastOracleHcmSyncDate(cancellationToken);
         var payClassifications = await GetPayClassifications(cancellationToken);
+        var departments = await GetDepartments(cancellationToken);
 
         var oracleHcmEmployees = _oracleDemographicsService.GetAllEmployees(cancellationToken);
-        var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, payClassifications, cancellationToken);
+        var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, payClassifications, departments, cancellationToken);
         await _demographicsService.AddDemographicsStream(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
     }
 
@@ -92,10 +96,10 @@ public sealed class EmployeeSyncJob : IEmployeeSyncJob
             DemographicSyncAudit audit = new DemographicSyncAudit
             {
                 BadgeNumber = badgeNumber,
-                Message = messageTemplate,//, args),
+                Message = messageTemplate.ReplaceNamedParams(args),
                 UserName = appUser?.UserName
             };
-            c.DemographicSyncAudit.Add(audit);
+            c.DemographicSyncAudit.AddAsync(audit);
             return c.SaveChangesAsync(cancellationToken);
         }, cancellationToken);
     }
@@ -108,7 +112,18 @@ public sealed class EmployeeSyncJob : IEmployeeSyncJob
         return payClassificationResponseCaches.Select(p => p.Id).ToHashSet();
     }
 
-    private async IAsyncEnumerable<DemographicsRequestDto> ConvertToRequestDto(IAsyncEnumerable<OracleEmployee?> asyncEnumerable, ISet<byte> payClassifications, [EnumeratorCancellation] CancellationToken cancellationToken)
+    private Task<List<byte>> GetDepartments(CancellationToken cancellationToken)
+    {
+        return _profitSharingDataContextFactory.UseReadOnlyContext(c =>
+        {
+            return c.Departments.Select(d => d.Id).ToListAsync(cancellationToken);
+        });
+    }
+
+    private async IAsyncEnumerable<DemographicsRequestDto> ConvertToRequestDto(IAsyncEnumerable<OracleEmployee?> asyncEnumerable, 
+        ISet<byte> payClassifications, 
+        IList<byte> departments,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(ConvertToRequestDto), ActivityKind.Internal);
         await foreach (OracleEmployee? employee in asyncEnumerable.WithCancellation(cancellationToken))
@@ -124,7 +139,7 @@ public sealed class EmployeeSyncJob : IEmployeeSyncJob
 
             if (employee.WorkRelationship?.Assignment.GetEmploymentType() is null or char.MinValue)
             {
-                string messageTemplate = "Unable to determine Employment Type for employee with {BadgeNumber}. Value received is '{FullPartTime}' ";
+                string messageTemplate = "Unable to determine Employment Type for employee with BadgeNumber {BadgeNumber}. Value received is '{FullPartTime}' ";
                 _logger.LogCritical(messageTemplate, badgeNumber, employee.WorkRelationship?.Assignment.FullPartTime ?? "null");
                 await AuditError(badgeNumber, messageTemplate, args: new object[] { badgeNumber, employee.WorkRelationship?.Assignment.FullPartTime ?? "null" },
                     cancellationToken: cancellationToken);
@@ -133,23 +148,24 @@ public sealed class EmployeeSyncJob : IEmployeeSyncJob
 
             if (!payClassifications.Contains(employee.WorkRelationship?.Assignment.JobCode ?? 0))
             {
-                string messageTemplate = "Unknown pay classification for employee with {BadgeNumber}. Value received is '{JobCode}' ";
+                string messageTemplate = "Unknown pay classification for employee with BadgeNumber {BadgeNumber}. Value received is '{JobCode}' ";
                 _logger.LogCritical(messageTemplate, badgeNumber, employee.WorkRelationship?.Assignment.JobCode);
                 await AuditError(badgeNumber, messageTemplate, appUser: null, cancellationToken: cancellationToken, badgeNumber, employee.WorkRelationship?.Assignment.JobCode);
                 continue;
             }
 
-            if (employee.WorkRelationship?.Assignment.GetDepartmentId() == null)
+            if (!departments.Contains(employee.WorkRelationship?.Assignment.GetDepartmentId() ?? 0))
             {
-                string messageTemplate = "Unknown department for employee with {BadgeNumber}. Value received is '{PositionCode}' ";
+                string messageTemplate = "Unknown department for employee with BadgeNumber {BadgeNumber}. Value received is '{PositionCode}' ";
                 _logger.LogCritical(messageTemplate, badgeNumber, employee.WorkRelationship?.Assignment.PositionCode);
-                await AuditError(badgeNumber, messageTemplate, appUser: null, cancellationToken: cancellationToken, badgeNumber, employee.WorkRelationship?.Assignment.PositionCode);
+                await AuditError(badgeNumber, messageTemplate, appUser: null, cancellationToken: cancellationToken, badgeNumber,
+                    employee.WorkRelationship?.Assignment.PositionCode);
                 continue;
             }
 
             if (employee.WorkRelationship?.Assignment.GetPayFrequency() is null or byte.MinValue)
             {
-                string messageTemplate = "Unknown pay frequency for employee with {BadgeNumber}. Value received is '{Frequency}'";
+                string messageTemplate = "Unknown pay frequency for employee with BadgeNumber {BadgeNumber}. Value received is '{Frequency}'";
                 _logger.LogCritical(messageTemplate, badgeNumber, employee.WorkRelationship?.Assignment.Frequency);
                 await AuditError(badgeNumber, messageTemplate, appUser: null, cancellationToken: cancellationToken, badgeNumber, employee.WorkRelationship?.Assignment.Frequency);
                 continue;
@@ -157,14 +173,14 @@ public sealed class EmployeeSyncJob : IEmployeeSyncJob
 
             if (employee.WorkRelationship?.Assignment.GetPayFrequency() is null or byte.MinValue)
             {
-                _logger.LogCritical("Unknown pay frequency for employee with {BadgeNumber}. Value received is '{Frequency}' ", employee.BadgeNumber,
+                _logger.LogCritical("Unknown pay frequency for employee with BadgeNumber {BadgeNumber}. Value received is '{Frequency}' ", employee.BadgeNumber,
                     employee.WorkRelationship?.Assignment.Frequency);
                 continue;
             }
 
             if (employee.WorkRelationship?.Assignment.LocationCode > MAX_STORE_ID)
             {
-                _logger.LogCritical("Unknown store location for employee with {BadgeNumber}. Value received is '{LocationCode}' ", employee.BadgeNumber,
+                _logger.LogCritical("Unknown store location for employee with BadgeNumber{BadgeNumber}. Value received is '{LocationCode}' ", employee.BadgeNumber,
                     employee.WorkRelationship?.Assignment.LocationCode);
                 continue;
             }
