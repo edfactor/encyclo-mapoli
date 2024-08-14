@@ -112,7 +112,7 @@ public sealed class EmployeeSyncJob : IEmployeeSyncJob
             {
                 BadgeNumber = badgeNumber,
                 Message = messageTemplate.ReplaceNamedParams(args),
-                UserName = appUser?.UserName
+                UserName = appUser?.UserName ?? "System"
             };
             c.DemographicSyncAudit.Add(audit);
             return c.SaveChangesAsync(cancellationToken);
