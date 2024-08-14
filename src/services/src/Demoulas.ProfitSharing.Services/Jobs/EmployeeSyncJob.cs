@@ -154,7 +154,7 @@ public sealed class EmployeeSyncJob : IEmployeeSyncJob
 
             if (employee.WorkRelationship?.Assignment.GetEmploymentType() is null or char.MinValue)
             {
-                string messageTemplate = "Unable to determine Employment Type for employee with BadgeNumber {BadgeNumber}. Value received is '{FullPartTime}' ";
+                string messageTemplate = "Unknown Employment Type for employee with BadgeNumber {BadgeNumber}. Value received is '{FullPartTime}' ";
                 _logger.LogCritical(messageTemplate, badgeNumber, employee.WorkRelationship?.Assignment.FullPartTime ?? "null");
                 await AuditError(badgeNumber, messageTemplate, args: new object[] { badgeNumber, employee.WorkRelationship?.Assignment.FullPartTime ?? "null" },
                     cancellationToken: cancellationToken);
