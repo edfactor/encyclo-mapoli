@@ -132,7 +132,7 @@ public partial class DemographicMapper
         };
     }
 
-    internal static string MaskSsn(long ssn)
+    private static string MaskSsn(long ssn)
     {
         Span<char> ssnSpan = stackalloc char[9];
         ssn.ToString().AsSpan().CopyTo(ssnSpan[(9 - ssn.ToString().Length)..]);

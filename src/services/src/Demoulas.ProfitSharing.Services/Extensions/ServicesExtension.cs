@@ -19,6 +19,7 @@ using System.Text;
 using Microsoft.Extensions.Http.Resilience;
 using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.Common.Data.Services.Service;
+using Demoulas.ProfitSharing.Services.Validators;
 
 namespace Demoulas.ProfitSharing.Services.Extensions;
 
@@ -47,7 +48,7 @@ public static class ServicesExtension
         _ = builder.Services.AddSingleton<IDemographicsServiceInternal, DemographicsService>();
         _ = builder.Services.AddSingleton<ISynchronizationService, SynchronizationService>();
         _ = builder.Services.AddSingleton<IStoreService, StoreService>();
-
+        _ = builder.Services.AddSingleton<OracleEmployeeValidator>();
 
 
         _ = builder.Services.AddHttpClient("OracleHcm", (services, client) =>
