@@ -186,17 +186,11 @@ public sealed class EmployeeSyncJob : IEmployeeSyncJob
                 continue;
             }
 
-            if (employee.WorkRelationship?.Assignment.GetPayFrequency() is null or byte.MinValue)
-            {
-                _logger.LogCritical("Unknown pay frequency for employee with BadgeNumber {BadgeNumber}. Value received is '{Frequency}' ", employee.BadgeNumber,
-                    employee.WorkRelationship?.Assignment.Frequency);
-                continue;
-            }
-
             if (employee.WorkRelationship?.Assignment.LocationCode > MAX_STORE_ID)
             {
-                _logger.LogCritical("Unknown store location for employee with BadgeNumber{BadgeNumber}. Value received is '{LocationCode}' ", employee.BadgeNumber,
-                    employee.WorkRelationship?.Assignment.LocationCode);
+                string messageTemplate = "Unknown store location for employee with BadgeNumber {BadgeNumber}. Value received is '{LocationCode}'";
+                _logger.LogCritical(messageTemplate, badgeNumber, employee.WorkRelationship?.Assignment.LocationCode);
+                await AuditError(badgeNumber, messageTemplate, appUser: null, cancellationToken: cancellationToken, badgeNumber, employee.WorkRelationship?.Assignment.LocationCode);
                 continue;
             }
             
