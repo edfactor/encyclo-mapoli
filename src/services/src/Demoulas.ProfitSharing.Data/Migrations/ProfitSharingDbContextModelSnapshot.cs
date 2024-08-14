@@ -1658,8 +1658,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<DateTime>("LastModifiedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("DATE")
+<<<<<<< HEAD
                         .HasColumnName("LAST_MODIFIED_DATE")
                         .HasDefaultValueSql("SYSDATE");
+=======
+                        .HasDefaultValue(new DateTime(2024, 8, 12, 17, 28, 33, 3, DateTimeKind.Local).AddTicks(3230))
+                        .HasColumnName("LAST_MODIFIED_DATE");
+>>>>>>> origin/develop
 
                     b.Property<string>("LastName")
                         .IsRequired()
