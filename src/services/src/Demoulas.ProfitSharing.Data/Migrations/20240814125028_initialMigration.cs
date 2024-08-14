@@ -26,7 +26,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "BENEFICIARYTYPE",
+                name: "BENEFICIARY_TYPE",
                 columns: table => new
                 {
                     ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
@@ -104,7 +104,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "EMPLOYEETYPE",
+                name: "EMPLOYEE_TYPE",
                 columns: table => new
                 {
                     ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
@@ -112,11 +112,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EMPLOYEETYPE", x => x.ID);
+                    table.PrimaryKey("PK_EMPLOYEE_TYPE", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
-                name: "EMPLOYMENTSTATUS",
+                name: "EMPLOYMENT_STATUS",
                 columns: table => new
                 {
                     ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
@@ -124,11 +124,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EMPLOYMENTSTATUS", x => x.ID);
+                    table.PrimaryKey("PK_EMPLOYMENT_STATUS", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
-                name: "EMPLOYMENTTYPE",
+                name: "EMPLOYMENT_TYPE",
                 columns: table => new
                 {
                     ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
@@ -136,7 +136,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EMPLOYMENTTYPE", x => x.ID);
+                    table.PrimaryKey("PK_EMPLOYMENT_TYPE", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
@@ -200,7 +200,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PAYCLASSIFICATION",
+                name: "PAY_CLASSIFICATION",
                 columns: table => new
                 {
                     ID = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false),
@@ -208,11 +208,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PAYCLASSIFICATION", x => x.ID);
+                    table.PrimaryKey("PK_PAY_CLASSIFICATION", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
-                name: "PAYFREQUENCY",
+                name: "PAY_FREQUENCY",
                 columns: table => new
                 {
                     ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
@@ -220,11 +220,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PAYFREQUENCY", x => x.ID);
+                    table.PrimaryKey("PK_PAY_FREQUENCY", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
-                name: "PROFITCODE",
+                name: "PROFIT_CODE",
                 columns: table => new
                 {
                     CODE = table.Column<short>(type: "NUMBER(5)", nullable: false),
@@ -233,11 +233,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PROFITCODE", x => x.CODE);
+                    table.PrimaryKey("PK_PROFIT_CODE", x => x.CODE);
                 });
 
             migrationBuilder.CreateTable(
-                name: "TAXCODE",
+                name: "TAX_CODE",
                 columns: table => new
                 {
                     CODE = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
@@ -245,11 +245,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TAXCODE", x => x.CODE);
+                    table.PrimaryKey("PK_TAX_CODE", x => x.CODE);
                 });
 
             migrationBuilder.CreateTable(
-                name: "TERMINATIONCODE",
+                name: "TERMINATION_CODE",
                 columns: table => new
                 {
                     ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
@@ -257,11 +257,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TERMINATIONCODE", x => x.ID);
+                    table.PrimaryKey("PK_TERMINATION_CODE", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
-                name: "ZEROCONTRIBUTIONREASON",
+                name: "ZERO_CONTRIBUTION_REASON",
                 columns: table => new
                 {
                     ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
@@ -269,7 +269,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ZEROCONTRIBUTIONREASON", x => x.ID);
+                    table.PrimaryKey("PK_ZERO_CONTRIBUTION_REASON", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
@@ -326,7 +326,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 {
                     table.PrimaryKey("PK_BENEFICIARY", x => x.PSN);
                     table.ForeignKey(
-                        name: "FK_BENEFICIARY_BENEFICIARY_KIND_KIND_ID",
+                        name: "FK_BENEFICIARY_BENEFICIARYKINDS_KINDID",
                         column: x => x.KIND_ID,
                         principalTable: "BENEFICIARY_KIND",
                         principalColumn: "ID",
@@ -454,9 +454,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_DISTRIBUTION_TAXCODE_TAXCODEID",
+                        name: "FK_DISTRIBUTION_TAX_CODE_TAXCODEID",
                         column: x => x.TAXCODEID,
-                        principalTable: "TAXCODE",
+                        principalTable: "TAX_CODE",
                         principalColumn: "CODE",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -487,21 +487,21 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 {
                     table.PrimaryKey("PK_PROFIT_DETAIL", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_PROFIT_DETAIL_PROFITCODE_PROFIT_CODE_ID",
+                        name: "FK_PROFIT_DETAIL_PROFITCODES_PROFIT_CODE_ID",
                         column: x => x.PROFIT_CODE_ID,
-                        principalTable: "PROFITCODE",
+                        principalTable: "PROFIT_CODE",
                         principalColumn: "CODE",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PROFIT_DETAIL_TAXCODE_TAX_CODE_ID",
+                        name: "FK_PROFIT_DETAIL_TAXCODES_TAX_CODE_ID",
                         column: x => x.TAX_CODE_ID,
-                        principalTable: "TAXCODE",
+                        principalTable: "TAX_CODE",
                         principalColumn: "CODE",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "DEMOGRAPHICS",
+                name: "DEMOGRAPHIC",
                 columns: table => new
                 {
                     ORACLE_HCM_ID = table.Column<long>(type: "NUMBER(15)", precision: 15, nullable: false),
@@ -539,58 +539,58 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DEMOGRAPHICS", x => x.ORACLE_HCM_ID);
+                    table.PrimaryKey("PK_DEMOGRAPHIC", x => x.ORACLE_HCM_ID);
                     table.ForeignKey(
-                        name: "FK_DEMOGRAPHICS_COUNTRY_COUNTRY_ISO",
+                        name: "FK_DEMOGRAPHIC_COUNTRY_COUNTRY_ISO",
                         column: x => x.COUNTRY_ISO,
                         principalTable: "COUNTRY",
                         principalColumn: "ISO",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_DEMOGRAPHICS_DEPARTMENT_DEPARTMENTID",
+                        name: "FK_DEMOGRAPHIC_DEPARTMENT_DEPARTMENTID",
                         column: x => x.DEPARTMENT,
                         principalTable: "DEPARTMENT",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_DEMOGRAPHICS_EMPLOYMENTSTATUS_EMPLOYMENTSTATUSID",
+                        name: "FK_DEMOGRAPHIC_EMPLOYMENTSTATUS_EMPLOYMENTSTATUSID",
                         column: x => x.EMPLOYMENT_STATUS_ID,
-                        principalTable: "EMPLOYMENTSTATUS",
+                        principalTable: "EMPLOYMENT_STATUS",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_DEMOGRAPHICS_EMPLOYMENTTYPE_EMPLOYMENTTYPEID",
+                        name: "FK_DEMOGRAPHIC_EMPLOYMENTTYPE_EMPLOYMENTTYPEID",
                         column: x => x.EMPLOYEMENT_TYPE_ID,
-                        principalTable: "EMPLOYMENTTYPE",
+                        principalTable: "EMPLOYMENT_TYPE",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_DEMOGRAPHICS_GENDER_GENDERID",
+                        name: "FK_DEMOGRAPHIC_GENDER_GENDERID",
                         column: x => x.GENDER_ID,
                         principalTable: "GENDER",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_DEMOGRAPHICS_PAYCLASSIFICATIONS_PAYCLASSIFICATIONID",
+                        name: "FK_DEMOGRAPHIC_PAYCLASSIFICATIONS_PAYCLASSIFICATIONID",
                         column: x => x.PAY_CLASSIFICATION_ID,
-                        principalTable: "PAYCLASSIFICATION",
+                        principalTable: "PAY_CLASSIFICATION",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_DEMOGRAPHICS_PAYFREQUENCY_PAYFREQUENCYID",
+                        name: "FK_DEMOGRAPHIC_PAYFREQUENCY_PAYFREQUENCYID",
                         column: x => x.PAY_FREQUENCY_ID,
-                        principalTable: "PAYFREQUENCY",
+                        principalTable: "PAY_FREQUENCY",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_DEMOGRAPHICS_TERMINATIONCODE_TERMINATIONCODEID",
+                        name: "FK_DEMOGRAPHIC_TERMINATIONCODE_TERMINATIONCODEID",
                         column: x => x.TERMINATION_CODE_ID,
-                        principalTable: "TERMINATIONCODE",
+                        principalTable: "TERMINATION_CODE",
                         principalColumn: "ID");
                 });
 
             migrationBuilder.CreateTable(
-                name: "PAYPROFIT",
+                name: "PAY_PROFIT",
                 columns: table => new
                 {
                     PSN = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false),
@@ -624,39 +624,30 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PAYPROFIT", x => x.PSN);
+                    table.PrimaryKey("PK_PAY_PROFIT", x => x.PSN);
                     table.ForeignKey(
-                        name: "FK_PAYPROFIT_BENEFICIARYTYPE_BENEFICIARY_ID",
+                        name: "FK_PAY_PROFIT_BENEFICIARYTYPES_BENEFICIARYTYPEID",
                         column: x => x.BENEFICIARY_ID,
-                        principalTable: "BENEFICIARYTYPE",
+                        principalTable: "BENEFICIARY_TYPE",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PAYPROFIT_EMPLOYEETYPE_EMPLOYEE_TYPE_ID",
+                        name: "FK_PAY_PROFIT_EMPLOYEETYPES_EMPLOYEETYPEID",
                         column: x => x.EMPLOYEE_TYPE_ID,
-                        principalTable: "EMPLOYEETYPE",
+                        principalTable: "EMPLOYEE_TYPE",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PAYPROFIT_ENROLLMENT_ENROLLMENT_ID",
+                        name: "FK_PAY_PROFIT_ENROLLMENT_ENROLLMENTID",
                         column: x => x.ENROLLMENT_ID,
                         principalTable: "ENROLLMENT",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PAYPROFIT_ZEROCONTRIBUTIONREASON_ZERO_CONTRIBUTION_REASON_ID",
+                        name: "FK_PAY_PROFIT_ZEROCONTRIBUTIONREASON_ZEROCONTRIBUTIONREASONID",
                         column: x => x.ZERO_CONTRIBUTION_REASON_ID,
-                        principalTable: "ZEROCONTRIBUTIONREASON",
+                        principalTable: "ZERO_CONTRIBUTION_REASON",
                         principalColumn: "ID");
-                });
-
-            migrationBuilder.InsertData(
-                table: "BENEFICIARYTYPE",
-                columns: new[] { "ID", "NAME" },
-                values: new object[,]
-                {
-                    { (byte)0, "Employee" },
-                    { (byte)1, "Beneficiary" }
                 });
 
             migrationBuilder.InsertData(
@@ -666,6 +657,15 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 {
                     { "P", "Primary" },
                     { "S", "Secondary" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "BENEFICIARY_TYPE",
+                columns: new[] { "ID", "NAME" },
+                values: new object[,]
+                {
+                    { (byte)0, "Employee" },
+                    { (byte)1, "Beneficiary" }
                 });
 
             migrationBuilder.InsertData(
@@ -912,7 +912,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "EMPLOYEETYPE",
+                table: "EMPLOYEE_TYPE",
                 columns: new[] { "ID", "NAME" },
                 values: new object[,]
                 {
@@ -921,7 +921,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "EMPLOYMENTSTATUS",
+                table: "EMPLOYMENT_STATUS",
                 columns: new[] { "ID", "NAME" },
                 values: new object[,]
                 {
@@ -932,7 +932,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "EMPLOYMENTTYPE",
+                table: "EMPLOYMENT_TYPE",
                 columns: new[] { "ID", "NAME" },
                 values: new object[,]
                 {
@@ -995,7 +995,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "PAYCLASSIFICATION",
+                table: "PAY_CLASSIFICATION",
                 columns: new[] { "ID", "NAME" },
                 values: new object[,]
                 {
@@ -1087,7 +1087,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "PAYFREQUENCY",
+                table: "PAY_FREQUENCY",
                 columns: new[] { "ID", "NAME" },
                 values: new object[,]
                 {
@@ -1096,7 +1096,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "PROFITCODE",
+                table: "PROFIT_CODE",
                 columns: new[] { "CODE", "DEFINITION", "FREQUENCY" },
                 values: new object[,]
                 {
@@ -1111,7 +1111,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "TAXCODE",
+                table: "TAX_CODE",
                 columns: new[] { "CODE", "DESCRIPTION" },
                 values: new object[,]
                 {
@@ -1136,7 +1136,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "TERMINATIONCODE",
+                table: "TERMINATION_CODE",
                 columns: new[] { "ID", "NAME" },
                 values: new object[,]
                 {
@@ -1169,7 +1169,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "ZEROCONTRIBUTIONREASON",
+                table: "ZERO_CONTRIBUTION_REASON",
                 columns: new[] { "ID", "NAME" },
                 values: new object[,]
                 {
@@ -1189,7 +1189,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 column: "COUNTRY_ISO");
 
             migrationBuilder.CreateIndex(
-                name: "IX_BENEFICIARY_KIND_ID",
+                name: "IX_BENEFICIARY_KINDID",
                 table: "BENEFICIARY",
                 column: "KIND_ID");
 
@@ -1209,48 +1209,48 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 column: "SSN");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DEMOGRAPHICS_COUNTRY_ISO",
-                table: "DEMOGRAPHICS",
+                name: "IX_DEMOGRAPHIC_COUNTRY_ISO",
+                table: "DEMOGRAPHIC",
                 column: "COUNTRY_ISO");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DEMOGRAPHICS_DEPARTMENTID",
-                table: "DEMOGRAPHICS",
+                name: "IX_DEMOGRAPHIC_DEPARTMENTID",
+                table: "DEMOGRAPHIC",
                 column: "DEPARTMENT");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DEMOGRAPHICS_EMPLOYMENTSTATUSID",
-                table: "DEMOGRAPHICS",
+                name: "IX_DEMOGRAPHIC_EMPLOYMENTSTATUSID",
+                table: "DEMOGRAPHIC",
                 column: "EMPLOYMENT_STATUS_ID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DEMOGRAPHICS_EMPLOYMENTTYPEID",
-                table: "DEMOGRAPHICS",
+                name: "IX_DEMOGRAPHIC_EMPLOYMENTTYPEID",
+                table: "DEMOGRAPHIC",
                 column: "EMPLOYEMENT_TYPE_ID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DEMOGRAPHICS_GENDERID",
-                table: "DEMOGRAPHICS",
+                name: "IX_DEMOGRAPHIC_GENDERID",
+                table: "DEMOGRAPHIC",
                 column: "GENDER_ID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DEMOGRAPHICS_PAYCLASSIFICATIONID",
-                table: "DEMOGRAPHICS",
+                name: "IX_DEMOGRAPHIC_PAYCLASSIFICATIONID",
+                table: "DEMOGRAPHIC",
                 column: "PAY_CLASSIFICATION_ID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DEMOGRAPHICS_PAYFREQUENCYID",
-                table: "DEMOGRAPHICS",
+                name: "IX_DEMOGRAPHIC_PAYFREQUENCYID",
+                table: "DEMOGRAPHIC",
                 column: "PAY_FREQUENCY_ID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DEMOGRAPHICS_SSN",
-                table: "DEMOGRAPHICS",
+                name: "IX_DEMOGRAPHIC_SSN",
+                table: "DEMOGRAPHIC",
                 column: "SSN");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DEMOGRAPHICS_TERMINATIONCODEID",
-                table: "DEMOGRAPHICS",
+                name: "IX_DEMOGRAPHIC_TERMINATIONCODEID",
+                table: "DEMOGRAPHIC",
                 column: "TERMINATION_CODE_ID");
 
             migrationBuilder.CreateIndex(
@@ -1299,23 +1299,23 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 column: "STARTMETHODID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PAYPROFIT_BENEFICIARY_ID",
-                table: "PAYPROFIT",
+                name: "IX_PAY_PROFIT_BENEFICIARYTYPEID",
+                table: "PAY_PROFIT",
                 column: "BENEFICIARY_ID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PAYPROFIT_EMPLOYEE_TYPE_ID",
-                table: "PAYPROFIT",
+                name: "IX_PAY_PROFIT_EMPLOYEETYPEID",
+                table: "PAY_PROFIT",
                 column: "EMPLOYEE_TYPE_ID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PAYPROFIT_ENROLLMENT_ID",
-                table: "PAYPROFIT",
+                name: "IX_PAY_PROFIT_ENROLLMENTID",
+                table: "PAY_PROFIT",
                 column: "ENROLLMENT_ID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PAYPROFIT_ZERO_CONTRIBUTION_REASON_ID",
-                table: "PAYPROFIT",
+                name: "IX_PAY_PROFIT_ZEROCONTRIBUTIONREASONID",
+                table: "PAY_PROFIT",
                 column: "ZERO_CONTRIBUTION_REASON_ID");
 
             migrationBuilder.CreateIndex(
@@ -1324,7 +1324,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 column: "PROFIT_CODE_ID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PROFIT_DETAIL_TAX_CODE_ID",
+                name: "IX_PROFIT_DETAIL_TAXCODEID",
                 table: "PROFIT_DETAIL",
                 column: "TAX_CODE_ID");
         }
@@ -1339,10 +1339,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "BENEFICIARY_REL_PERCENT");
 
             migrationBuilder.DropTable(
-                name: "DEMOGRAPHIC_SYNC_AUDIT");
+                name: "DEMOGRAPHIC");
 
             migrationBuilder.DropTable(
-                name: "DEMOGRAPHICS");
+                name: "DEMOGRAPHIC_SYNC_AUDIT");
 
             migrationBuilder.DropTable(
                 name: "DISTRIBUTION");
@@ -1351,7 +1351,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "JOB");
 
             migrationBuilder.DropTable(
-                name: "PAYPROFIT");
+                name: "PAY_PROFIT");
 
             migrationBuilder.DropTable(
                 name: "PROFIT_DETAIL");
@@ -1363,19 +1363,19 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "DEPARTMENT");
 
             migrationBuilder.DropTable(
-                name: "EMPLOYMENTSTATUS");
+                name: "EMPLOYMENT_STATUS");
 
             migrationBuilder.DropTable(
-                name: "EMPLOYMENTTYPE");
+                name: "EMPLOYMENT_TYPE");
 
             migrationBuilder.DropTable(
-                name: "PAYCLASSIFICATION");
+                name: "PAY_CLASSIFICATION");
 
             migrationBuilder.DropTable(
-                name: "PAYFREQUENCY");
+                name: "PAY_FREQUENCY");
 
             migrationBuilder.DropTable(
-                name: "TERMINATIONCODE");
+                name: "TERMINATION_CODE");
 
             migrationBuilder.DropTable(
                 name: "COUNTRY");
@@ -1399,22 +1399,22 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "JOBTYPE");
 
             migrationBuilder.DropTable(
-                name: "BENEFICIARYTYPE");
+                name: "BENEFICIARY_TYPE");
 
             migrationBuilder.DropTable(
-                name: "EMPLOYEETYPE");
+                name: "EMPLOYEE_TYPE");
 
             migrationBuilder.DropTable(
                 name: "ENROLLMENT");
 
             migrationBuilder.DropTable(
-                name: "ZEROCONTRIBUTIONREASON");
+                name: "ZERO_CONTRIBUTION_REASON");
 
             migrationBuilder.DropTable(
-                name: "PROFITCODE");
+                name: "PROFIT_CODE");
 
             migrationBuilder.DropTable(
-                name: "TAXCODE");
+                name: "TAX_CODE");
         }
     }
 }

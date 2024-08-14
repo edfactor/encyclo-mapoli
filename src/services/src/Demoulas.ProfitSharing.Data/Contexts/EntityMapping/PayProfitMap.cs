@@ -7,7 +7,7 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
 {
     public void Configure(EntityTypeBuilder<PayProfit> builder)
     {
-        _ = builder.ToTable("PayProfit");
+        _ = builder.ToTable("PAY_PROFIT");
 
         _ = builder.HasKey(e => e.PSN);
 

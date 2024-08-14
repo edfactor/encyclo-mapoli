@@ -7,7 +7,8 @@ internal sealed class ProfitDetailMap : IEntityTypeConfiguration<ProfitDetail>
 {
     public void Configure(EntityTypeBuilder<ProfitDetail> builder)
     {
-        _ = builder.ToTable("Profit_Detail");
+        _ = builder.ToTable("PROFIT_DETAIL");
+
         _ = builder.Property(e => e.Id).ValueGeneratedOnAdd();
         _ = builder.Property(x=>x.ProfitYear).IsRequired().HasColumnName("PROFIT_YEAR");
         _ = builder.Property(x => x.ProfitYearIteration).IsRequired().HasColumnName("PROFIT_YEAR_ITERATION");

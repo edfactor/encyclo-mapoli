@@ -7,7 +7,7 @@ internal sealed class EnrollmentMap : IEntityTypeConfiguration<Enrollment>
 {
     public void Configure(EntityTypeBuilder<Enrollment> builder)
     {
-        builder.ToTable("Enrollment");
+        builder.ToTable("ENROLLMENT");
         builder.HasKey(e => e.Id);
 
         builder.Property(e => e.Id)

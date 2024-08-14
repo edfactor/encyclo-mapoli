@@ -8,7 +8,7 @@ internal sealed class EmployeeTypeMap : IEntityTypeConfiguration<EmployeeType>
 {
     public void Configure(EntityTypeBuilder<EmployeeType> builder)
     {
-        builder.ToTable("EmployeeType");
+        builder.ToTable("EMPLOYEE_TYPE");
 
         builder.HasKey(c => c.Id);
 

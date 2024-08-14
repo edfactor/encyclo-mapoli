@@ -14,7 +14,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
         //https://demoulas.atlassian.net/wiki/spaces/MAIN/pages/31909725/Employee+Hiring+data+fields
         //https://demoulas.atlassian.net/wiki/spaces/~bherrmann/pages/39944312/Quick+Guide+to+Profit+Sharing+Tables
 
-        _ = builder.ToTable("DEMOGRAPHICS");
+        _ = builder.ToTable("DEMOGRAPHIC");
         _ = builder.HasKey(e => e.OracleHcmId);
 
         _ = builder.HasIndex(e => e.SSN, "IX_SSN");

@@ -11,7 +11,7 @@ public sealed class BeneficiaryMap : IEntityTypeConfiguration<Beneficiary>
     public void Configure(EntityTypeBuilder<Beneficiary> builder)
     {
         builder.HasKey(c => c.PSN);
-        builder.ToTable("Beneficiary");
+        builder.ToTable("BENEFICIARY");
 
         builder.Property(c => c.PSN).IsRequired().HasPrecision(9);
 
