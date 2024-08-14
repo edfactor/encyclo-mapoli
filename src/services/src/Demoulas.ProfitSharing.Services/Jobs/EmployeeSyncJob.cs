@@ -114,7 +114,7 @@ public sealed class EmployeeSyncJob : IEmployeeSyncJob
                 Message = messageTemplate.ReplaceNamedParams(args),
                 UserName = appUser?.UserName
             };
-            c.DemographicSyncAudit.AddAsync(audit);
+            c.DemographicSyncAudit.Add(audit);
             return c.SaveChangesAsync(cancellationToken);
         }, cancellationToken);
     }
