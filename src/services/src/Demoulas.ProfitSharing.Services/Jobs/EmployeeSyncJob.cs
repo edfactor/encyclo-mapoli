@@ -47,28 +47,43 @@ public sealed class EmployeeSyncJob : IEmployeeSyncJob
         _logger = logger;
     }
 
-    public async Task SynchronizeEmployee(int badgeNumber, CancellationToken cancellationToken)
+    public async Task<bool> SynchronizeEmployee(int badgeNumber, CancellationToken cancellationToken)
     {
-        using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(SynchronizeEmployee), ActivityKind.Internal);
-        var employee = await _demographicsService.GetDemographicByBadgeNumber(badgeNumber, cancellationToken);
-
-        if (employee == null)
+        try
         {
-            _logger.LogError("Unable to find employee with badge number of '{badgeNumber}'", badgeNumber);
-            return;
-        }
+            using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(SynchronizeEmployee), ActivityKind.Internal);
+            var employee = await _demographicsService.GetDemographicByBadgeNumber(badgeNumber, cancellationToken);
 
-        async IAsyncEnumerable<OracleEmployee?> GetSingleValueAsync(long oracleHcmId)
+            if (employee == null)
+            {
+                _logger.LogError("Unable to find employee with badge number of '{badgeNumber}'", badgeNumber);
+                return false;
+            }
+
+            async IAsyncEnumerable<OracleEmployee?> GetSingleValueAsync(long oracleHcmId)
+            {
+                // Yield return a single value
+                yield return await _oracleDemographicsService.GetEmployee(oracleHcmId, cancellationToken);
+            }
+
+
+            var payClassifications = await GetPayClassifications(cancellationToken);
+            var departments = await GetDepartments(cancellationToken);
+            var requestDtoEnumerable = ConvertToRequestDto(GetSingleValueAsync(employee.OracleHcmId), payClassifications, departments, cancellationToken);
+            var user = requestDtoEnumerable.ToBlockingEnumerable(cancellationToken).ToHashSet();
+            if (!user.Any())
+            {
+                return false;
+            }
+
+            var response = await _demographicsService.AddDemographics(user, cancellationToken);
+            return response != null;
+        }
+        catch (Exception ex)
         {
-            // Yield return a single value
-            yield return await _oracleDemographicsService.GetEmployee(oracleHcmId, cancellationToken);
+            _logger.LogError(ex, "Unable to Synchronize Employee {badgeNumber} because {message}.", badgeNumber, ex.Message);
+            return false;
         }
-
-
-        var payClassifications = await GetPayClassifications(cancellationToken);
-        var departments = await GetDepartments(cancellationToken);
-        var requestDtoEnumerable = ConvertToRequestDto(GetSingleValueAsync(employee.OracleHcmId), payClassifications, departments, cancellationToken);
-        await _demographicsService.AddDemographicsStream(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
     }
 
     public async Task SynchronizeEmployees(CancellationToken cancellationToken)

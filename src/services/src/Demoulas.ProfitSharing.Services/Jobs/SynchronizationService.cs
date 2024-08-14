@@ -29,7 +29,9 @@ public sealed class SynchronizationService : ISynchronizationService
 
         bool jobTypeIsAlreadyRunning = await _dataContextFactory.UseReadOnlyContext(c =>
             {
-                return c.Jobs.AnyAsync(j => j.JobTypeId == request.JobType && j.JobStatusId == JobStatus.Constants.Running,
+                return c.Jobs.AnyAsync(j => j.JobTypeId == request.JobType 
+                                            && j.JobStatusId == JobStatus.Constants.Running
+                                            && j.Started > DateTime.Now.AddDays(-1),
                     cancellationToken: cancellationToken);
             }
         );
@@ -39,7 +41,7 @@ public sealed class SynchronizationService : ISynchronizationService
             return false;
         }
 
-        _ = OracleHcmActivitySource.Instance.StartActivity(name: "Sync Employees from OracleHCM - Application Startup", kind: ActivityKind.Internal);
+        _ = OracleHcmActivitySource.Instance.StartActivity(name: "Full Sync Employees from OracleHCM", kind: ActivityKind.Internal);
         await _bus.Publish(message: message, cancellationToken: cancellationToken);
 
         return true;

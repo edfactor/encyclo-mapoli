@@ -17,6 +17,7 @@ internal sealed class DemographicSyncAuditMap : IEntityTypeConfiguration<Demogra
             .IsRequired()
             .ValueGeneratedOnAdd();
 
+        _ = builder.HasIndex(e => e.BadgeNumber, "IX_BADGENUMBER");
         _ = builder.Property(e => e.BadgeNumber)
             .HasPrecision(7)
             .HasColumnName("BADGE_NUMBER");

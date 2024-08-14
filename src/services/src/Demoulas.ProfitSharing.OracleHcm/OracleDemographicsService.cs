@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.Json;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Configuration;
@@ -15,9 +17,17 @@ public sealed class OracleDemographicsService
     private readonly JsonSerializerOptions _jsonSerializerOptions;
     
 
-    public OracleDemographicsService(HttpClient httpClient, OracleHcmConfig oracleHcmConfig)
+    public OracleDemographicsService(IHttpClientFactory factory, OracleHcmConfig oracleHcmConfig)
     {
-        _httpClient = httpClient;
+        _httpClient = factory.CreateClient();
+        
+        byte[] bytes = Encoding.UTF8.GetBytes($"{oracleHcmConfig.Username}:{oracleHcmConfig.Password}");
+        string encodedAuth = Convert.ToBase64String(bytes);
+
+        _httpClient.BaseAddress = new Uri(oracleHcmConfig.Url, UriKind.Absolute);
+        _httpClient.DefaultRequestHeaders.Add("REST-Framework-Version", oracleHcmConfig.RestFrameworkVersion);
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", encodedAuth);
+
         _oracleHcmConfig = oracleHcmConfig;
         _jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
     }
@@ -33,7 +43,7 @@ public sealed class OracleDemographicsService
     {
         ArgumentOutOfRangeException.ThrowIfNegative(workersUniqId);
 
-        string url = $"{_oracleHcmConfig.Url}/{workersUniqId}/".Replace("//", "/");
+        string url = $"{_oracleHcmConfig.Url}/{workersUniqId}/";
         string initialUrl = await BuildUrl(url, cancellationToken: cancellationToken);
 
         HttpResponseMessage response = await GetOracleHcmValue(initialUrl, cancellationToken);

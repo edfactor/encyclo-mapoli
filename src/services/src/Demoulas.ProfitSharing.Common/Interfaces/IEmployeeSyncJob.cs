@@ -1,7 +1,7 @@
-﻿namespace Demoulas.ProfitSharing.Services.Jobs;
+﻿namespace Demoulas.ProfitSharing.Common.Interfaces;
 
 public interface IEmployeeSyncJob
 {
-    Task SynchronizeEmployee(int badgeNumber, CancellationToken cancellationToken);
+    Task<bool> SynchronizeEmployee(int badgeNumber, CancellationToken cancellationToken);
     Task SynchronizeEmployees(CancellationToken cancellationToken);
 }

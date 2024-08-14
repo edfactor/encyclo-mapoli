@@ -4,7 +4,6 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.Job;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using Demoulas.ProfitSharing.Services.Jobs;
 using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Jobs;
@@ -35,7 +34,11 @@ public class OracleHcmUserSyncEndpoint : Endpoint<UserSyncRequestDto, UserSyncRe
 
     public override async Task<UserSyncResponseDto> ExecuteAsync(UserSyncRequestDto req, CancellationToken ct)
     {
-       await _employeeSyncJob.SynchronizeEmployee(req.BadgeNumber, ct);
-       return new UserSyncResponseDto { Message = "Synchronization Complete" };
+       var success = await _employeeSyncJob.SynchronizeEmployee(req.BadgeNumber, ct);
+       if (success)
+       {
+           return new UserSyncResponseDto { Message = "Synchronization Complete" };
+       }
+       return new UserSyncResponseDto { Message = "Synchronization Failed. Please check logs for more details about the failure." };
     }
 }
