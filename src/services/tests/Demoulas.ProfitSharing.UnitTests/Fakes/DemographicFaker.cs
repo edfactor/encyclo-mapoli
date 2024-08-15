@@ -48,7 +48,7 @@ internal sealed class DemographicFaker : Faker<Demographic>
                     City = f.Address.City(),
                     State = f.Address.StateAbbr(),
                     PostalCode = f.Address.ZipCode(),
-                    CountryISO = Constants.US
+                    CountryISO = Country.Constants.US
                 })
             .RuleFor(b => b.ContactInfo,
                 f => new ContactInfo { PhoneNumber = f.Phone.PhoneNumber("###-###-####"), MobileNumber = f.Phone.PhoneNumber("###-###-####"), EmailAddress = f.Internet.Email() });

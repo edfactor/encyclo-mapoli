@@ -4,6 +4,7 @@ using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -63,7 +64,7 @@ public class YearEndService : IYearEndService
                             City = grp.Key.City,
                             State = grp.Key.State,
                             PostalCode = grp.Key.PostalCode,
-                            CountryISO = Constants.US
+                            CountryISO = Country.Constants.US
                         },
                         HireDate = grp.Key.HireDate,
                         TerminationDate = grp.Key.TerminationDate,

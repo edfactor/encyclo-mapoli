@@ -15,7 +15,7 @@ public sealed class Distribution
     public required Address PayeeAddress { get; set; }
     public string? ThirdPartyPayee { get; set; }
     public string? ThirdPartyName { get; set; }
-    public required AddressOptional ThirdPartyAddress { get; set; }
+    public required Address ThirdPartyAddress { get; set; }
     public string? ForTheBenefitOfPayee { get; set; }
     public string? ForTheBenefitOfAccountType { get; set; }
     public bool Tax1099ForEmployee { get; set; }

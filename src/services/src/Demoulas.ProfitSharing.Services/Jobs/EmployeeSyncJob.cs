@@ -50,43 +50,6 @@ public sealed class EmployeeSyncJob : IEmployeeSyncJob
         _logger = logger;
     }
 
-    public async Task<bool> SynchronizeEmployee(int badgeNumber, CancellationToken cancellationToken)
-    {
-        try
-        {
-            using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(SynchronizeEmployee), ActivityKind.Internal);
-            var employee = await _demographicsService.GetDemographicByBadgeNumber(badgeNumber, cancellationToken);
-
-            if (employee == null)
-            {
-                _logger.LogError("Unable to find employee with badge number of '{badgeNumber}'", badgeNumber);
-                return false;
-            }
-
-            async IAsyncEnumerable<OracleEmployee?> GetSingleValueAsync(long oracleHcmId)
-            {
-                // Yield return a single value
-                yield return await _oracleDemographicsService.GetEmployee(oracleHcmId, cancellationToken);
-            }
-
-
-            var requestDtoEnumerable = ConvertToRequestDto(GetSingleValueAsync(employee.OracleHcmId), cancellationToken);
-            var user = requestDtoEnumerable.ToBlockingEnumerable(cancellationToken).ToHashSet();
-            if (!user.Any())
-            {
-                return false;
-            }
-
-            var response = await _demographicsService.AddDemographics(user, cancellationToken);
-            return response != null;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Unable to Synchronize Employee {badgeNumber} because {message}.", badgeNumber, ex.Message);
-            return false;
-        }
-    }
-
     public async Task SynchronizeEmployees(CancellationToken cancellationToken)
     {
         using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(SynchronizeEmployees), ActivityKind.Internal);

@@ -46,7 +46,7 @@ public class AddDemographicsEndpoint : Endpoint<IEnumerable<DemographicsRequestD
                         State = "MA",
                         City = "Andover",
                         PostalCode = "02589",
-                        CountryISO = Constants.US
+                        CountryISO = Country.Constants.US
                     },
                     DateOfBirth = default,
                     HireDate = default,

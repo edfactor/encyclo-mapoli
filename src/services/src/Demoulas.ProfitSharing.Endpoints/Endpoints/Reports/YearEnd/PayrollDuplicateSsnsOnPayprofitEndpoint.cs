@@ -58,7 +58,7 @@ public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithCSVBase<Pagin
                                         Street = "123 Main",
                                         City = "Sydney",
                                         State = "HI",
-                                        CountryISO = Common.Constants.US,
+                                        CountryISO = Country.Constants.US,
                                         PostalCode = "01234"
                                     },
                                     ContactInfo = new ContactInfoResponseDto()

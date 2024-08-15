@@ -28,7 +28,7 @@ internal sealed class DistributionMap : IEntityTypeConfiguration<Distribution>
             address.Property(a => a.State).HasMaxLength(3).HasColumnName("STATE");
             address.Property(a => a.PostalCode).HasMaxLength(9).HasColumnName("POSTAL_CODE");
             address.Property(a => a.CountryISO).HasMaxLength(2).HasColumnName("COUNTRY_ISO")
-                .HasDefaultValue(Constants.US);
+                .HasDefaultValue(Country.Constants.US);
             address.HasOne<Country>()
                 .WithMany()
                 .HasForeignKey(o => o.CountryISO);
@@ -45,7 +45,7 @@ internal sealed class DistributionMap : IEntityTypeConfiguration<Distribution>
             address.Property(a => a.State).HasMaxLength(3).HasColumnName("THIRD_PARTY_STATE");
             address.Property(a => a.PostalCode).HasMaxLength(9).HasColumnName("THIRD_PARTY_POSTAL_CODE");
             address.Property(a => a.CountryISO).HasMaxLength(2).HasColumnName("THIRD_PARTY_COUNTRY_ISO")
-                .HasDefaultValue(Constants.US);
+                .HasDefaultValue(Country.Constants.US);
             address.HasOne<Country>()
                 .WithMany()
                 .HasForeignKey(o => o.CountryISO);
