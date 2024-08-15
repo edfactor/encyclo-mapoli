@@ -14,7 +14,7 @@ internal static class MassTransitExtension
         {
             x.SetKebabCaseEndpointNameFormatter();
 
-            x.AddConsumer<JobConsumer>();
+            x.AddConsumer<OracleHcmJobConsumer>();
 
             x.UsingInMemory((context, cfg) =>
             {

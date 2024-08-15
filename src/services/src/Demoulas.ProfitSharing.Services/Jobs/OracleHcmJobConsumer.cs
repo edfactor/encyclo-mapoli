@@ -12,15 +12,15 @@ using JobStatus = Demoulas.ProfitSharing.Data.Entities.MassTransit.JobStatus;
 
 namespace Demoulas.ProfitSharing.Services.Jobs;
 
-public class JobConsumer : IConsumer<MessageRequest<OracleHcmJobRequest>>
+public class OracleHcmJobConsumer : IConsumer<MessageRequest<OracleHcmJobRequest>>
 {
     private readonly IProfitSharingDataContextFactory _dataContext;
     private readonly IEmployeeSyncJob _employeeSyncJob;
-    private readonly ILogger<JobConsumer> _logger;
+    private readonly ILogger<OracleHcmJobConsumer> _logger;
 
-    public JobConsumer(IProfitSharingDataContextFactory context, 
+    public OracleHcmJobConsumer(IProfitSharingDataContextFactory context, 
         IEmployeeSyncJob employeeSyncJob,
-        ILogger<JobConsumer> logger)
+        ILogger<OracleHcmJobConsumer> logger)
     {
         _dataContext = context;
         _employeeSyncJob = employeeSyncJob;

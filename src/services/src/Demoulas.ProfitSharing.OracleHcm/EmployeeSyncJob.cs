@@ -1,27 +1,19 @@
 ﻿using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using Bogus.Extensions.UnitedStates;
-using Demoulas.Common.Caching.Interfaces;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.OracleHcm;
 using Demoulas.ProfitSharing.OracleHcm.Contracts.Request;
-using Demoulas.ProfitSharing.Services.Extensions;
-using Demoulas.ProfitSharing.Services.InternalEntities;
-using Demoulas.ProfitSharing.Services.Validators;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+using Demoulas.ProfitSharing.OracleHcm.Validators;
 
-namespace Demoulas.ProfitSharing.Services.Jobs;
+namespace Demoulas.ProfitSharing.OracleHcm;
 
 public sealed class EmployeeSyncJob : IEmployeeSyncJob
 {
@@ -73,12 +65,12 @@ public sealed class EmployeeSyncJob : IEmployeeSyncJob
                     PropertyName = e.PropertyName
                 });
             c.DemographicSyncAudit.AddRange(auditRecords);
-     
+
             return c.SaveChangesAsync(cancellationToken);
         }, cancellationToken);
     }
 
-    private async IAsyncEnumerable<DemographicsRequestDto> ConvertToRequestDto(IAsyncEnumerable<OracleEmployee?> asyncEnumerable, 
+    private async IAsyncEnumerable<DemographicsRequestDto> ConvertToRequestDto(IAsyncEnumerable<OracleEmployee?> asyncEnumerable,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(ConvertToRequestDto), ActivityKind.Internal);

@@ -1,17 +1,12 @@
-﻿using System.Linq;
-using System.Threading;
-using Demoulas.Common.Caching.Interfaces;
-using Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.Common.Caching.Interfaces;
+using Demoulas.ProfitSharing.Common.Caching;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Contracts.Request;
-using Demoulas.ProfitSharing.Services.Extensions;
-using Demoulas.ProfitSharing.Services.InternalEntities;
 using FastEndpoints;
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
-namespace Demoulas.ProfitSharing.Services.Validators;
+namespace Demoulas.ProfitSharing.OracleHcm.Validators;
 public class OracleEmployeeValidator : Validator<OracleEmployee>
 {
     private const int MAX_STORE_ID = 899;

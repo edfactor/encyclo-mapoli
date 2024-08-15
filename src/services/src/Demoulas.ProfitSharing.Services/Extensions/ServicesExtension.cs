@@ -3,7 +3,6 @@ using Demoulas.ProfitSharing.Common.Configuration;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm;
 using Demoulas.ProfitSharing.Services.HostedServices;
-using Demoulas.ProfitSharing.Services.InternalEntities;
 using Demoulas.ProfitSharing.Services.Jobs;
 using Demoulas.ProfitSharing.Services.Mappers;
 using Demoulas.ProfitSharing.Services.Reports;
@@ -19,7 +18,8 @@ using System.Text;
 using Microsoft.Extensions.Http.Resilience;
 using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.Common.Data.Services.Service;
-using Demoulas.ProfitSharing.Services.Validators;
+using Demoulas.ProfitSharing.Common.Caching;
+using Demoulas.ProfitSharing.OracleHcm.Validators;
 
 namespace Demoulas.ProfitSharing.Services.Extensions;
 

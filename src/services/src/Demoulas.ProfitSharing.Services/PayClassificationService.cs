@@ -1,8 +1,8 @@
 ﻿using System.Collections.Frozen;
 using Demoulas.Common.Caching.Interfaces;
+using Demoulas.ProfitSharing.Common.Caching;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Services.InternalEntities;
 
 namespace Demoulas.ProfitSharing.Services;
 
