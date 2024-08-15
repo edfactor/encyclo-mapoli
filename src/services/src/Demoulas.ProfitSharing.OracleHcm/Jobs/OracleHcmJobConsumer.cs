@@ -1,16 +1,16 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Messaging;
+﻿using System.Diagnostics;
+using Demoulas.ProfitSharing.Common.ActivitySources;
+using Demoulas.ProfitSharing.Common.Contracts.Messaging;
+using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
-using Demoulas.ProfitSharing.Common.ActivitySources;
-using System.Diagnostics;
-using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Microsoft.Extensions.Logging;
 using Job = Demoulas.ProfitSharing.Data.Entities.MassTransit.Job;
 using JobStatus = Demoulas.ProfitSharing.Data.Entities.MassTransit.JobStatus;
 
-namespace Demoulas.ProfitSharing.Services.Jobs;
+namespace Demoulas.ProfitSharing.OracleHcm.Jobs;
 
 public class OracleHcmJobConsumer : IConsumer<MessageRequest<OracleHcmJobRequest>>
 {
