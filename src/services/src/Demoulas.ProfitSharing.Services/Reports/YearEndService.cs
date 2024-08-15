@@ -49,12 +49,12 @@ public class YearEndService : IYearEndService
                             dem.EmploymentStatusId,
                             dem.StoreNumber,
                             DemPdPp.HoursCurrentYear,
-                            DemPdPp.EarningsCurrentYear
+                            DemPdPp.IncomeCurrentYear
                         }
                     into grp
                     select new PayrollDuplicateSSNResponseDto
                     {
-                        BadgeNumber = grp.Key.BadgeNumber,
+                        Badge = grp.Key.BadgeNumber,
                         SSN = grp.Key.SSN,
                         Name = grp.Key.FullName,
                         Address = new AddressResponseDto
@@ -72,7 +72,7 @@ public class YearEndService : IYearEndService
                         StoreNumber = grp.Key.StoreNumber,
                         ProfitSharingRecords = grp.Count(),
                         HoursCurrentYear = grp.Key.HoursCurrentYear ?? 0,
-                        EarningsCurrentYear = grp.Key.EarningsCurrentYear ?? 0,
+                        IncomeCurrentYear = grp.Key.IncomeCurrentYear ?? 0,
                     }
                 ).ToPaginationResultsAsync(req, forceSingleQuery: true, ct);
 

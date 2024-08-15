@@ -8,7 +8,7 @@ internal sealed class PayClassificationMap : IEntityTypeConfiguration<PayClassif
 {
     public void Configure(EntityTypeBuilder<PayClassification> builder)
     {
-        builder.ToTable("PayClassification");
+        builder.ToTable("PAY_CLASSIFICATION");
         builder.HasKey(e => e.Id);
 
         _ = builder.Property(e => e.Id)

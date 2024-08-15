@@ -8,7 +8,7 @@ internal sealed class TerminationCodeMap : IEntityTypeConfiguration<TerminationC
 {
     public void Configure(EntityTypeBuilder<TerminationCode> builder)
     {
-        builder.ToTable("TerminationCode");
+        builder.ToTable("TERMINATION_CODE");
         builder.HasKey(e => e.Id);
 
         builder.Property(e => e.Id)

@@ -8,7 +8,7 @@ internal sealed class PayFrequencyMap : IEntityTypeConfiguration<PayFrequency>
 {
     public void Configure(EntityTypeBuilder<PayFrequency> builder)
     {
-        builder.ToTable("PayFrequency");
+        builder.ToTable("PAY_FREQUENCY");
         builder.HasKey(e => e.Id);
 
         builder.Property(e => e.Id)

@@ -19,11 +19,12 @@ internal sealed class ProfitDetailMap : IEntityTypeConfiguration<ProfitDetail>
         _ = builder.Property(x => x.MonthToDate).IsRequired().HasPrecision(2,0).HasColumnName("MONTH_TO_DATE");
         _ = builder.Property(x => x.YearToDate).IsRequired().HasPrecision(4,0).HasColumnName("YEAR_TO_DATE");
         _ = builder.Property(x => x.Remark).HasMaxLength(32).HasColumnName("REMARK");
+        _ = builder.Property(x => x.ZeroContributionReasonId).HasColumnName("ZERO_CONTRIBUTION_REASON_ID");
         _ = builder.Property(x => x.FederalTaxes).IsRequired().HasPrecision(9, 2).HasColumnName("FEDERAL_TAXES");
         _ = builder.Property(x => x.StateTaxes).IsRequired().HasPrecision(9, 2).HasColumnName("STATE_TAXES");
         _ = builder.HasOne(x=> x.TaxCode).WithMany().HasForeignKey(t => t.TaxCodeId);
         _ = builder.Property(x => x.TaxCodeId).IsRequired().HasColumnName("TAX_CODE_ID");
-        _ = builder.Property(x => x.SSN).IsRequired();
+        _ = builder.Property(x => x.SSN).HasPrecision(19).IsRequired();
         _ = builder.Property(x => x.DistributionSequence).HasColumnName("DISTRIBUTION_SEQUENCE");
 
     }

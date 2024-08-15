@@ -8,7 +8,7 @@ internal sealed class ProfitCodeMap : IEntityTypeConfiguration<ProfitCode>
     public void Configure(EntityTypeBuilder<ProfitCode> builder)
     {
         builder.HasKey(x => x.Code);
-        builder.ToTable("ProfitCode");
+        builder.ToTable("PROFIT_CODE");
 
         builder.Property(x => x.Code).IsRequired().ValueGeneratedNever().HasColumnName("CODE");
         builder.Property(x => x.Definition).IsRequired().HasMaxLength(128).HasColumnName("DEFINITION");
