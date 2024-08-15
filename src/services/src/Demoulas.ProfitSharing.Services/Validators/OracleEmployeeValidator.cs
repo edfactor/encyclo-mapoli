@@ -16,46 +16,54 @@ public class OracleEmployeeValidator : Validator<OracleEmployee>
 {
     private const int MAX_STORE_ID = 899;
 
-    private const string BadAddress = "No address found for employee with BadgeNumber '{BadgeNumber}'";
-    private const string BadWorkRelationship = "No work relationship found for employee with BadgeNumber '{BadgeNumber}'";
-    private const string UnknownEmploymentType = "Unknown Employment Type for employee with BadgeNumber {BadgeNumber}. Value received is '{FullPartTime}'";
-    private const string UnknownPayClassification = "Unknown pay classification for employee with BadgeNumber {BadgeNumber}. Value received is '{JobCode}' ";
-    private const string UnknownDepartment = "Unknown department for employee with BadgeNumber {BadgeNumber}. Value received is '{PositionCode}' ";
-    private const string UnknownPayFrequency = "Unknown pay frequency for employee with BadgeNumber {BadgeNumber}. Value received is '{Frequency}'";
-    private const string UnknownStoreLocation = "Unknown store location for employee with BadgeNumber {BadgeNumber}. Value received is '{LocationCode}'";
-
+    private const string BadAddress = "No address found for employee";
+    private const string BadWorkRelationship = "No work relationship found for employee";
+    private const string UnknownEmploymentType = "Unknown Employment Type for employee";
+    private const string UnknownPayFrequency = "Unknown pay frequency for employee";
+    private const string UnknownStoreLocation = "Unknown store location for employee";
+    private const string UnknownPayClassification = "Unknown pay classification for employee";
+    private const string UnknownDepartment = "Unknown department for employee";
+    
 
     public OracleEmployeeValidator()
     {
         RuleFor(e => e.Address)
             .Must(v => v != null)
-            .WithMessage(e=> BadAddress.ReplaceNamedParams(e.BadgeNumber));
+            .WithMessage(e=> BadAddress);
 
         RuleFor(e => e.WorkRelationship)
-            .Must(v => v != null )
-            .WithMessage(e=> BadWorkRelationship.ReplaceNamedParams(e.BadgeNumber));
+            .Must(v => v != null)
+            .WithMessage(e => BadWorkRelationship);
 
         RuleFor(e => e.WorkRelationship!.Assignment.GetEmploymentType())
             .Must(v => v is not char.MinValue)
-            .WithMessage(e=> UnknownEmploymentType.ReplaceNamedParams(e.BadgeNumber, e.WorkRelationship?.Assignment.FullPartTime));
+            .WithMessage(e=> UnknownEmploymentType)
+            .WithState(e => e.WorkRelationship?.Assignment.FullPartTime)
+            .OverridePropertyName("OracleEmployee.WorkRelationship.Assignment.FullPartTime");
 
         RuleFor(e => e.WorkRelationship!.Assignment.GetPayFrequency())
             .Must(v => v is not byte.MinValue)
-            .WithMessage(e => UnknownPayFrequency.ReplaceNamedParams(e.BadgeNumber, e.WorkRelationship?.Assignment.Frequency));
+            .WithMessage(e => UnknownPayFrequency)
+            .WithState(e => e.WorkRelationship?.Assignment.Frequency)
+            .OverridePropertyName("OracleEmployee.WorkRelationship.Assignment.Frequency");
 
 
         RuleFor(e => e.WorkRelationship!.Assignment.LocationCode)
             .Must(v => v < MAX_STORE_ID)
-            .WithMessage(e => UnknownStoreLocation.ReplaceNamedParams(e.BadgeNumber, e.WorkRelationship?.Assignment.LocationCode));
-        
+            .WithMessage(e => UnknownStoreLocation)
+            .WithState(e => e.WorkRelationship?.Assignment.LocationCode);
+
 
         RuleFor(e => e.WorkRelationship!.Assignment.JobCode)
             .MustAsync(ValidatePayClassificationAsync)
-            .WithMessage(e => UnknownPayClassification.ReplaceNamedParams(e.BadgeNumber, e.WorkRelationship?.Assignment.JobCode));
+            .WithMessage(e => UnknownPayClassification)
+            .WithState(e => e.WorkRelationship?.Assignment.JobCode);
 
         RuleFor(e => e.WorkRelationship!.Assignment.GetDepartmentId())
             .MustAsync(ValidateDepartmentIdAsync)
-            .WithMessage(e => UnknownDepartment.ReplaceNamedParams(e.BadgeNumber, e.WorkRelationship?.Assignment.PositionCode));
+            .WithMessage(e => UnknownDepartment)
+            .WithState(e => e.WorkRelationship?.Assignment.PositionCode)
+            .OverridePropertyName("OracleEmployee.WorkRelationship.Assignment.PositionCode");
 
     }
 

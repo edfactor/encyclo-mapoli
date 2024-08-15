@@ -25,7 +25,6 @@ namespace Demoulas.ProfitSharing.Services.Jobs;
 
 public sealed class EmployeeSyncJob : IEmployeeSyncJob
 {
-    private const int MAX_STORE_ID = 899;
     private readonly OracleDemographicsService _oracleDemographicsService;
     private readonly IDemographicsServiceInternal _demographicsService;
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
@@ -97,7 +96,7 @@ public sealed class EmployeeSyncJob : IEmployeeSyncJob
         await _demographicsService.AddDemographicsStream(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
     }
 
-    private Task AuditError(int badgeNumber, IEnumerable<string> errorMessages, IAppUser? appUser = null, CancellationToken cancellationToken = default,
+    private Task AuditError(int badgeNumber, IEnumerable<FluentValidation.Results.ValidationFailure> errorMessages, IAppUser? appUser = null, CancellationToken cancellationToken = default,
         params object?[] args)
     {
         return _profitSharingDataContextFactory.UseWritableContext(c =>
@@ -108,7 +107,14 @@ public sealed class EmployeeSyncJob : IEmployeeSyncJob
             }
 
             var auditRecords = errorMessages.Select(e =>
-                new DemographicSyncAudit { BadgeNumber = badgeNumber, Message = e, UserName = appUser?.UserName ?? "System" });
+                new DemographicSyncAudit
+                {
+                    BadgeNumber = badgeNumber,
+                    InvalidValue = e.AttemptedValue?.ToString() ?? e.CustomState?.ToString(),
+                    Message = e.ErrorMessage,
+                    UserName = appUser?.UserName ?? "System",
+                    PropertyName = e.PropertyName
+                });
             c.DemographicSyncAudit.AddRange(auditRecords);
      
             return c.SaveChangesAsync(cancellationToken);
@@ -130,7 +136,7 @@ public sealed class EmployeeSyncJob : IEmployeeSyncJob
             var result = await _employeeValidator.ValidateAsync(employee!, cancellationToken);
             if (!result.IsValid)
             {
-                await AuditError(badgeNumber, result.Errors.Select(v => v.ErrorMessage), null, cancellationToken);
+                await AuditError(badgeNumber, result.Errors, null, cancellationToken);
                 continue;
             }
 

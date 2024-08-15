@@ -1762,10 +1762,21 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DATE")
                         .HasColumnName("CREATED");
 
+                    b.Property<string>("InvalidValue")
+                        .HasMaxLength(256)
+                        .HasColumnType("NVARCHAR2(256)")
+                        .HasColumnName("INVALID_VALUE");
+
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasMaxLength(512)
+                        .HasColumnType("NVARCHAR2(512)")
                         .HasColumnName("MESSAGE");
+
+                    b.Property<string>("PropertyName")
+                        .HasMaxLength(128)
+                        .HasColumnType("NVARCHAR2(128)")
+                        .HasColumnName("PROPERTY_NAME");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(96)
@@ -1774,6 +1785,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasKey("Id")
                         .HasName("PK_DEMOGRAPHIC_SYNC_AUDIT");
+
+                    b.HasIndex(new[] { "BadgeNumber" }, "IX_BADGENUMBER")
+                        .HasDatabaseName("IX_DEMOGRAPHIC_SYNC_AUDIT_BADGENUMBER");
 
                     b.ToTable("DEMOGRAPHIC_SYNC_AUDIT", (string)null);
                 });

@@ -22,8 +22,17 @@ internal sealed class DemographicSyncAuditMap : IEntityTypeConfiguration<Demogra
             .HasPrecision(7)
             .HasColumnName("BADGE_NUMBER");
 
+        _ = builder.Property(e => e.InvalidValue)
+            .HasColumnName("INVALID_VALUE")
+            .HasMaxLength(256);
+
+        _ = builder.Property(e => e.PropertyName)
+            .HasColumnName("PROPERTY_NAME")
+            .HasMaxLength(128);
+
         _ = builder.Property(e => e.Message)
-            .HasColumnName("MESSAGE");
+            .HasColumnName("MESSAGE")
+            .HasMaxLength(512);
 
         _ = builder.Property(e => e.UserName)
             .HasColumnName("USERNAME")

@@ -58,8 +58,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     ID = table.Column<long>(type: "NUMBER(19)", nullable: false)
                         .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
                     BADGE_NUMBER = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false),
+                    INVALID_VALUE = table.Column<string>(type: "NVARCHAR2(256)", maxLength: 256, nullable: true),
                     USERNAME = table.Column<string>(type: "NVARCHAR2(96)", maxLength: 96, nullable: true),
-                    MESSAGE = table.Column<string>(type: "NVARCHAR2(2000)", nullable: false),
+                    PROPERTY_NAME = table.Column<string>(type: "NVARCHAR2(128)", maxLength: 128, nullable: true),
+                    MESSAGE = table.Column<string>(type: "NVARCHAR2(512)", maxLength: 512, nullable: false),
                     CREATED = table.Column<DateTime>(type: "DATE", nullable: false)
                 },
                 constraints: table =>
@@ -1252,6 +1254,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "IX_DEMOGRAPHIC_TERMINATIONCODEID",
                 table: "DEMOGRAPHIC",
                 column: "TERMINATION_CODE_ID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DEMOGRAPHIC_SYNC_AUDIT_BADGENUMBER",
+                table: "DEMOGRAPHIC_SYNC_AUDIT",
+                column: "BADGE_NUMBER");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DISTRIBUTION_COUNTRY_ISO",
