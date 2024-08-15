@@ -8,7 +8,7 @@ internal sealed class ZeroContributionReasonMap : IEntityTypeConfiguration<ZeroC
 {
     public void Configure(EntityTypeBuilder<ZeroContributionReason> builder)
     {
-        builder.ToTable("ZeroContributionReason");
+        builder.ToTable("ZERO_CONTRIBUTION_REASON");
 
         builder.HasKey(c => c.Id);
 

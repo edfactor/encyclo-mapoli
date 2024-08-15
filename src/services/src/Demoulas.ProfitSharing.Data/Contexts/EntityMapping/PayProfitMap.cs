@@ -7,15 +7,15 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
 {
     public void Configure(EntityTypeBuilder<PayProfit> builder)
     {
-        _ = builder.ToTable("PayProfit");
+        _ = builder.ToTable("PAY_PROFIT");
 
-        _ = builder.HasKey(e => e.PSN);
+        _ = builder.HasKey(e => e.Badge);
 
-        _ = builder.Property(e => e.PSN)
+        _ = builder.Property(e => e.Badge)
             .HasPrecision(7)
             .ValueGeneratedNever()
             .IsRequired()
-            .HasColumnName("PSN");
+            .HasColumnName("BADGE");
 
         _ = builder.Property(e => e.SSN)
             .HasMaxLength(9)
@@ -40,13 +40,13 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
             .HasPrecision(2)
             .IsRequired();
 
-        _ = builder.Property(e => e.EarningsCurrentYear)
-            .HasColumnName("EARNINGS_CURRENT_YEAR")
+        _ = builder.Property(e => e.IncomeCurrentYear)
+            .HasColumnName("INCOME_CURRENT_YEAR")
             .HasPrecision(9, 2)
             .IsRequired();
 
-        _ = builder.Property(e => e.EarningsLastYear)
-            .HasColumnName("EARNINGS_LAST_YEAR")
+        _ = builder.Property(e => e.IncomeLastYear)
+            .HasColumnName("INCOME_LAST_YEAR")
             .HasPrecision(9, 2)
             .IsRequired();
 
@@ -87,8 +87,8 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
             .HasColumnName("NET_BALANCE_LAST_YEAR")
             .HasPrecision(9, 2);
 
-        _ = builder.Property(e => e.NumberOfDollarsEarningLastYear)
-            .HasColumnName("NUMBER_OF_DOLLARS_EARNING_LAST_YEAR")
+        _ = builder.Property(e => e.EarningLastYear)
+            .HasColumnName("EARNINGS_LAST_YEAR")
             .HasPrecision(9, 2);
 
         _ = builder.Property(e => e.PointsEarnedLastYear)
@@ -107,12 +107,12 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
             .HasColumnName("FORFEITURE_AMOUNT_LAST_YEAR")
             .HasPrecision(9, 2);
         
-        _ = builder.Property(e => e.ExecutiveEarnings)
-            .HasColumnName("EXECUTIVE_EARNINGS")
+        _ = builder.Property(e => e.IncomeExecutive)
+            .HasColumnName("INCOME_EXECUTIVE")
             .HasPrecision(9, 2);
 
-        _ = builder.Property(e => e.ExecutiveHours)
-            .HasColumnName("EXECUTIVE_HOURS")
+        _ = builder.Property(e => e.HoursExective)
+            .HasColumnName("HOURS_EXECUTIVE")
             .HasPrecision(6, 2);
 
         _ = builder.Property(e => e.ZeroContributionReasonId)
@@ -126,6 +126,7 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
 
         _ = builder.Property(e => e.EmployeeTypeId)
             .HasColumnName("EMPLOYEE_TYPE_ID");
+
 
         _ = builder.HasOne(e => e.Enrollment)
             .WithMany(p => p.Profits)

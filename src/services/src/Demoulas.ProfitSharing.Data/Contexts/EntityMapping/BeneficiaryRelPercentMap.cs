@@ -12,7 +12,7 @@ public sealed class BeneficiaryRelPercentMap : IEntityTypeConfiguration<Benefici
     {
         builder.ToTable("BENEFICIARY_REL_PERCENT");
         builder.HasKey(c => c.PSN);
-        builder.Property(c => c.PSN).IsRequired().HasPrecision(9);
+        builder.Property(c => c.PSN).IsRequired().HasPrecision(11).ValueGeneratedNever();
         builder.HasIndex(c => c.SSN, "IX_SSN");
         builder.Property(c => c.SSN).IsRequired().HasPrecision(9);
         builder.Property(b => b.KindId).IsRequired().HasColumnName("KIND_ID");

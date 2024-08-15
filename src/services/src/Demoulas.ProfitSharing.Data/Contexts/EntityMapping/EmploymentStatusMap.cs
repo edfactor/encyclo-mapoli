@@ -8,7 +8,7 @@ internal sealed class EmploymentStatusMap : IEntityTypeConfiguration<EmploymentS
 {
     public void Configure(EntityTypeBuilder<EmploymentStatus> builder)
     {
-        builder.ToTable("EmploymentStatus");
+        builder.ToTable("EMPLOYEE_STATUS");
 
         builder.HasKey(c => c.Id);
 
