@@ -4,7 +4,7 @@ public sealed record PayProfitResponseDto
     /// <summary>
     /// Profit Sharing Number
     /// </summary>
-    public required long PSN { get; set; }
+    public required int BadgeNumber { get; set; }
 
     /// <summary>
     /// Employee social security number
@@ -24,12 +24,12 @@ public sealed record PayProfitResponseDto
     /// <summary>
     /// Dollars earned by the employee in the current year (updated weekly)
     /// </summary>
-    public required decimal EarningsCurrentYear { get; set; }
+    public required decimal IncomeCurrentYear { get; set; }
 
     /// <summary>
     /// Dollars earned by the employee last year
     /// </summary>
-    public required decimal EarningsLastYear { get; set; }
+    public required decimal IncomeLastYear { get; set; }
 
     /// <summary>
     /// amount after applying vesting rules.This can be updated when new transactions occur.For example, QDRO.

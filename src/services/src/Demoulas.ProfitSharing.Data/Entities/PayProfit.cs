@@ -3,9 +3,9 @@
 public sealed class PayProfit
 {
     /// <summary>
-    /// Profit sharing number
+    /// Employee BadgeNumber number (0-7 digits)
     /// </summary>
-    public required int PSN { get; set; }
+    public required int BadgeNumber { get; set; }
 
     /// <summary>
     /// Employee social security number
@@ -23,14 +23,14 @@ public sealed class PayProfit
     public decimal HoursLastYear { get; set; }
 
     /// <summary>
-    /// Dollars earned by the employee in the current year (updated weekly)
+    /// Income (Wage) accomulated so far in the current year (updated weekly)
     /// </summary>
-    public decimal? EarningsCurrentYear { get; set; }
+    public decimal? IncomeCurrentYear { get; set; }
 
     /// <summary>
     /// Dollars earned by the employee last year
     /// </summary>
-    public required decimal EarningsLastYear { get; set; }
+    public required decimal IncomeLastYear { get; set; }
 
     /// <summary>
     /// amount after applying vesting rules.This can be updated when new transactions occur.For example, QDRO.
@@ -90,8 +90,7 @@ public sealed class PayProfit
     /// <summary>
     /// number of dollars earning in PS last year
     /// </summary>
-    public decimal NumberOfDollarsEarningLastYear { get; set; }
-
+    public decimal EarningLastYear { get; set; }
 
     /// <summary>
     /// points earned last year
@@ -140,10 +139,10 @@ public sealed class PayProfit
     /// <summary>
     /// executive hours
     /// </summary>
-    public decimal ExecutiveHours { get; set; }
+    public decimal HoursExective { get; set; }
     
     /// <summary>
     /// executive earnings
     /// </summary>
-    public decimal ExecutiveEarnings { get; set; }
+    public decimal IncomeExecutive { get; set; }
 }

@@ -13,7 +13,7 @@ public sealed class BeneficiaryMap : IEntityTypeConfiguration<Beneficiary>
         builder.HasKey(c => c.PSN);
         builder.ToTable("BENEFICIARY");
 
-        builder.Property(c => c.PSN).IsRequired().HasPrecision(9);
+        builder.Property(c => c.PSN).IsRequired().HasPrecision(11).ValueGeneratedNever();
 
         builder.HasIndex(c => c.SSN, "IX_SSN");
         builder.Property(c => c.SSN).IsRequired().HasPrecision(9);

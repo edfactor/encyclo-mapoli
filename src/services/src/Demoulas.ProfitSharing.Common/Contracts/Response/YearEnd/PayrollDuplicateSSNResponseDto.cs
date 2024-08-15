@@ -16,13 +16,13 @@ public sealed record PayrollDuplicateSSNResponseDto
     public required int ProfitSharingRecords { get; set; }
     public required decimal HoursCurrentYear { get; set; }
     public decimal HoursLastYear { get; set; }
-    public required decimal EarningsCurrentYear { get; set; }
+    public required decimal IncomeCurrentYear { get; set; }
 
     public static PayrollDuplicateSSNResponseDto ResponseExample()
     {
         return new PayrollDuplicateSSNResponseDto
         {
-            BadgeNumber = 123,
+            Badge = 123,
             SSN = 123_45_6789,
             Name = "John Doe",
             Address = AddressResponseDto.ResponseExample(),
@@ -33,7 +33,7 @@ public sealed record PayrollDuplicateSSNResponseDto
             ProfitSharingRecords = 17,
             HoursCurrentYear = 1024,
             HoursLastYear = 2048,
-            EarningsCurrentYear = ushort.MaxValue
+            IncomeCurrentYear = ushort.MaxValue
         };
     }
 }
