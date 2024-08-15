@@ -28,26 +28,20 @@ public sealed class EmployeeSyncJob : IEmployeeSyncJob
     private readonly OracleDemographicsService _oracleDemographicsService;
     private readonly IDemographicsServiceInternal _demographicsService;
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
-    private readonly IBaseCacheService<PayClassificationResponseCache> _payCacheService;
     private readonly OracleHcmConfig _oracleHcmConfig;
     private readonly OracleEmployeeValidator _employeeValidator;
-    private readonly ILogger<EmployeeSyncJob> _logger;
 
     public EmployeeSyncJob(OracleDemographicsService oracleDemographicsService,
         IDemographicsServiceInternal demographicsService,
         IProfitSharingDataContextFactory profitSharingDataContextFactory,
-        IBaseCacheService<PayClassificationResponseCache> payCacheService,
         OracleHcmConfig oracleHcmConfig,
-        OracleEmployeeValidator employeeValidator,
-        ILogger<EmployeeSyncJob> logger)
+        OracleEmployeeValidator employeeValidator)
     {
         _oracleDemographicsService = oracleDemographicsService;
         _demographicsService = demographicsService;
         _profitSharingDataContextFactory = profitSharingDataContextFactory;
-        _payCacheService = payCacheService;
         _oracleHcmConfig = oracleHcmConfig;
         _employeeValidator = employeeValidator;
-        _logger = logger;
     }
 
     public async Task SynchronizeEmployees(CancellationToken cancellationToken)
