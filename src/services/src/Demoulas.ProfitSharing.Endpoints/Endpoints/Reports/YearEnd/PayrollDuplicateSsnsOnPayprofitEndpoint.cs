@@ -51,7 +51,7 @@ public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithCSVBase<Pagin
                                     Name = "John",
                                     Status = EmploymentStatus.Constants.Active,
                                     Store = 14,
-                                    EarningsCurrentYear = 32_100,
+                                    IncomeCurrentYear = 32_100,
                                     PayProfitSSN = 900047425,
                                     Address = new AddressResponseDto
                                     {
@@ -114,7 +114,7 @@ public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithCSVBase<Pagin
             Map(m => m.Store).Index(13).Name("STR");
             Map(m => m.PayProfitSSN).Index(13).Name("PS RECS");
 
-            Map(m => m.EarningsCurrentYear).Index(15).Name("CUR WAGE");
+            Map(m => m.IncomeCurrentYear).Index(15).Name("CUR WAGE");
         }
     }
 }

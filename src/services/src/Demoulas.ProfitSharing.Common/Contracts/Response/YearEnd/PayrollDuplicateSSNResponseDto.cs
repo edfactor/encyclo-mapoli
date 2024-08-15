@@ -22,7 +22,7 @@ public sealed record PayrollDuplicateSSNResponseDto
     {
         return new PayrollDuplicateSSNResponseDto
         {
-            Badge = 123,
+            BadgeNumber = 123,
             SSN = 123_45_6789,
             Name = "John Doe",
             Address = AddressResponseDto.ResponseExample(),

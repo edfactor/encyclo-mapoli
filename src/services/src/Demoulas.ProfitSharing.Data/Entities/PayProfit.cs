@@ -23,7 +23,7 @@ public sealed class PayProfit
     public decimal HoursLastYear { get; set; }
 
     /// <summary>
-    /// Income (Wage) accomulated so far in the current year (updated weekly)
+    /// Income (Wage) accumulated so far in the current year (updated weekly)
     /// </summary>
     public decimal? IncomeCurrentYear { get; set; }
 

@@ -50,7 +50,7 @@ public class DuplicateNamesAndBirthdaysEndpoint:EndpointWithCSVBase<PaginationRe
                                     },
                                     BadgeNumber = 100110,
                                     Count = 2,
-                                    EarningsCurrentYear = 23003,
+                                    IncomeCurrentYear = 23003,
                                     DateOfBirth = new DateOnly(1990,7,30),
                                     HireDate = new DateOnly(2015,9,14),
                                     HoursCurrentYear = 1524,
@@ -98,7 +98,7 @@ public class DuplicateNamesAndBirthdaysEndpoint:EndpointWithCSVBase<PaginationRe
             Map(m => m.Count).Index(14).Name("PS#");
             Map(m => m.NetBalance).Index(15).Name("PSBAL");
             Map(m => m.HoursCurrentYear).Index(16).Name("CUR HURS");
-            Map(m => m.EarningsCurrentYear).Index(17).Name("CUR WAGE");
+            Map(m => m.IncomeCurrentYear).Index(17).Name("CUR WAGE");
         }
     }
 }

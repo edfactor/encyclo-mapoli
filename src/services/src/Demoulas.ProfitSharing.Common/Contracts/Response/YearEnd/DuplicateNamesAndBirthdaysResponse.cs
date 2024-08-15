@@ -14,5 +14,5 @@ public class DuplicateNamesAndBirthdaysResponse
     public required int Count { get; set; }
     public required Decimal NetBalance { get; set; }
     public required decimal? HoursCurrentYear { get; set; }
-    public required decimal? EarningsCurrentYear { get; set; }
+    public required decimal? IncomeCurrentYear { get; set; }
 }
