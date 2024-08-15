@@ -170,7 +170,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             migrationBuilder.RenameColumn(
                 name: "PSN",
                 table: "PAY_PROFIT",
-                newName: "BADGE");
+                newName: "BADGE_NUMBER");
 
             migrationBuilder.RenameIndex(
                 name: "IX_PAYPROFIT_ZERO_CONTRIBUTION_REASON_ID",
@@ -203,7 +203,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 table: "DEMOGRAPHICS",
                 type: "DATE",
                 nullable: false,
-                defaultValue: new DateTime(2024, 8, 15, 11, 52, 37, 700, DateTimeKind.Local).AddTicks(8799),
+                defaultValue: new DateTime(2024, 8, 15, 12, 9, 17, 295, DateTimeKind.Local).AddTicks(3205),
                 oldClrType: typeof(DateTime),
                 oldType: "DATE",
                 oldDefaultValue: new DateTime(2024, 8, 12, 17, 28, 33, 3, DateTimeKind.Local).AddTicks(3230));
@@ -253,7 +253,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             migrationBuilder.AddPrimaryKey(
                 name: "PK_PAY_PROFIT",
                 table: "PAY_PROFIT",
-                column: "BADGE");
+                column: "BADGE_NUMBER");
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_PAY_FREQUENCY",
@@ -1913,7 +1913,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 newName: "EXECUTIVE_HOURS");
 
             migrationBuilder.RenameColumn(
-                name: "BADGE",
+                name: "BADGE_NUMBER",
                 table: "PAYPROFIT",
                 newName: "PSN");
 
@@ -1951,7 +1951,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 defaultValue: new DateTime(2024, 8, 12, 17, 28, 33, 3, DateTimeKind.Local).AddTicks(3230),
                 oldClrType: typeof(DateTime),
                 oldType: "DATE",
-                oldDefaultValue: new DateTime(2024, 8, 15, 11, 52, 37, 700, DateTimeKind.Local).AddTicks(8799));
+                oldDefaultValue: new DateTime(2024, 8, 15, 12, 9, 17, 295, DateTimeKind.Local).AddTicks(3205));
 
             migrationBuilder.AlterColumn<int>(
                 name: "PSN",

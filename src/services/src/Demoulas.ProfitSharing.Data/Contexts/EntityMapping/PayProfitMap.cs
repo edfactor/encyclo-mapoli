@@ -9,13 +9,13 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
     {
         _ = builder.ToTable("PAY_PROFIT");
 
-        _ = builder.HasKey(e => e.Badge);
+        _ = builder.HasKey(e => e.BadgeNumber);
 
-        _ = builder.Property(e => e.Badge)
+        _ = builder.Property(e => e.BadgeNumber)
             .HasPrecision(7)
             .ValueGeneratedNever()
             .IsRequired()
-            .HasColumnName("BADGE");
+            .HasColumnName("BADGE_NUMBER");
 
         _ = builder.Property(e => e.SSN)
             .HasMaxLength(9)

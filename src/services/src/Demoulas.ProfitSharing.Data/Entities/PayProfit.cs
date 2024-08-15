@@ -3,9 +3,9 @@
 public sealed class PayProfit
 {
     /// <summary>
-    /// Employee Badge number (0-7 digits)
+    /// Employee BadgeNumber number (0-7 digits)
     /// </summary>
-    public required int Badge { get; set; }
+    public required int BadgeNumber { get; set; }
 
     /// <summary>
     /// Employee social security number

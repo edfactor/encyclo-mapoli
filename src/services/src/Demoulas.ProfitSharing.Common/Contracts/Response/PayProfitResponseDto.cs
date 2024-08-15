@@ -4,7 +4,7 @@ public sealed record PayProfitResponseDto
     /// <summary>
     /// Profit Sharing Number
     /// </summary>
-    public required long Badge { get; set; }
+    public required int BadgeNumber { get; set; }
 
     /// <summary>
     /// Employee social security number

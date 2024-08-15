@@ -12,7 +12,7 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    [Migration("20240815155239_RenameTableAndCols")]
+    [Migration("20240815160918_RenameTableAndCols")]
     partial class RenameTableAndCols
     {
         /// <inheritdoc />
@@ -1655,7 +1655,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<DateTime>("LastModifiedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("DATE")
-                        .HasDefaultValue(new DateTime(2024, 8, 15, 11, 52, 37, 700, DateTimeKind.Local).AddTicks(8799))
+                        .HasDefaultValue(new DateTime(2024, 8, 15, 12, 9, 17, 295, DateTimeKind.Local).AddTicks(3205))
                         .HasColumnName("LAST_MODIFIED_DATE");
 
                     b.Property<string>("LastName")
@@ -2871,10 +2871,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.PayProfit", b =>
                 {
-                    b.Property<int>("Badge")
+                    b.Property<int>("BadgeNumber")
                         .HasPrecision(7)
                         .HasColumnType("NUMBER(7)")
-                        .HasColumnName("BADGE");
+                        .HasColumnName("BADGE_NUMBER");
 
                     b.Property<byte>("BeneficiaryTypeId")
                         .HasColumnType("NUMBER(3)")
@@ -3007,7 +3007,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("ZERO_CONTRIBUTION_REASON_ID");
 
-                    b.HasKey("Badge")
+                    b.HasKey("BadgeNumber")
                         .HasName("PK_PAY_PROFIT");
 
                     b.HasIndex("BeneficiaryTypeId")
