@@ -39,13 +39,13 @@ public class OracleEmployeeValidator : Validator<OracleEmployee>
             .Must(v => v is not char.MinValue)
             .WithMessage(e=> UnknownEmploymentType)
             .WithState(e => e.WorkRelationship?.Assignment.FullPartTime)
-            .OverridePropertyName("OracleEmployee.WorkRelationship.Assignment.FullPartTime");
+            .OverridePropertyName("WorkRelationship.Assignment.FullPartTime");
 
         RuleFor(e => e.WorkRelationship!.Assignment.GetPayFrequency())
             .Must(v => v is not byte.MinValue)
             .WithMessage(e => UnknownPayFrequency)
             .WithState(e => e.WorkRelationship?.Assignment.Frequency)
-            .OverridePropertyName("OracleEmployee.WorkRelationship.Assignment.Frequency");
+            .OverridePropertyName("WorkRelationship.Assignment.Frequency");
 
 
         RuleFor(e => e.WorkRelationship!.Assignment.LocationCode)
@@ -63,7 +63,7 @@ public class OracleEmployeeValidator : Validator<OracleEmployee>
             .MustAsync(ValidateDepartmentIdAsync)
             .WithMessage(e => UnknownDepartment)
             .WithState(e => e.WorkRelationship?.Assignment.PositionCode)
-            .OverridePropertyName("OracleEmployee.WorkRelationship.Assignment.PositionCode");
+            .OverridePropertyName("WorkRelationship.Assignment.PositionCode");
 
     }
 

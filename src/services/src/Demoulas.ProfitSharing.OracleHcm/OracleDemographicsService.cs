@@ -15,19 +15,11 @@ public sealed class OracleDemographicsService
     private readonly HttpClient _httpClient;
     private readonly OracleHcmConfig _oracleHcmConfig;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
-    
 
-    public OracleDemographicsService(IHttpClientFactory factory, OracleHcmConfig oracleHcmConfig)
+
+    public OracleDemographicsService(HttpClient httpClient, OracleHcmConfig oracleHcmConfig)
     {
-        _httpClient = factory.CreateClient();
-        
-        byte[] bytes = Encoding.UTF8.GetBytes($"{oracleHcmConfig.Username}:{oracleHcmConfig.Password}");
-        string encodedAuth = Convert.ToBase64String(bytes);
-
-        _httpClient.BaseAddress = new Uri(oracleHcmConfig.Url, UriKind.Absolute);
-        _httpClient.DefaultRequestHeaders.Add("REST-Framework-Version", oracleHcmConfig.RestFrameworkVersion);
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", encodedAuth);
-
+        _httpClient = httpClient;
         _oracleHcmConfig = oracleHcmConfig;
         _jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
     }
