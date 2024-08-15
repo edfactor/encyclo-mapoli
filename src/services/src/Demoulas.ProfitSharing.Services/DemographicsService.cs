@@ -10,6 +10,7 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Mappers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Demoulas.ProfitSharing.Common.Exceptions;
 
 namespace Demoulas.ProfitSharing.Services;
 
@@ -80,8 +81,8 @@ public class DemographicsService : IDemographicsServiceInternal
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Unable to add to the {Demographics} table: {message}.", nameof(Demographic), e.Message);
-            throw;
+            _logger.LogError(e, "Unable to add to the {Demographics} table: {Message}.", nameof(Demographic), e.Message);
+            throw new DemographicException("Unable to add new Demographic object");
         }
     }
 }

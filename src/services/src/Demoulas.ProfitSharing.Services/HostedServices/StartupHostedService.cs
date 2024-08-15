@@ -13,12 +13,12 @@ public class StartupHostedService : BackgroundService
         _oracleHcmSynchronizationService = oracleHcmSynchronizationService;
     }
 
-    protected override Task ExecuteAsync(CancellationToken cancellationToken)
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         return _oracleHcmSynchronizationService.SendSynchronizationRequest(
             new OracleHcmJobRequest
             {
                 JobType = JobType.Constants.Delta, StartMethod = StartMethod.Constants.System, RequestedBy = nameof(StartMethod.Constants.System)
-            }, cancellationToken);
+            }, stoppingToken);
     }
 }

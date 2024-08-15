@@ -78,7 +78,7 @@ public partial class DemographicMapper
         {
             SSN = MaskSsn(source.SSN),
             OracleHcmId = source.OracleHcmId,
-            FullName = source.FullName ?? throw new ArgumentNullException(nameof(source.FullName)),
+            FullName = source.FullName ?? $"{source.FirstName} {source.LastName}",
             LastName = source.LastName,
             FirstName = source.FirstName,
             StoreNumber = source.StoreNumber,

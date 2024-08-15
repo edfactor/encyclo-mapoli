@@ -123,7 +123,7 @@ public class YearEndService : IYearEndService
                     .ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken);
             });
 
-            _logger.LogWarning("Returned {results} records", results.Results.Count());
+            _logger.LogWarning("Returned {Results} records", results.Results.Count());
 
             return new ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>
             {
@@ -156,7 +156,7 @@ public class YearEndService : IYearEndService
                 return query.ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken);
             });
 
-            _logger.LogWarning("Returned {results} records", results.Results.Count());
+            _logger.LogWarning("Returned {Results} records", results.Results.Count());
 
             return new ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>
             {
@@ -239,7 +239,7 @@ public class YearEndService : IYearEndService
                 return query.ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken: cancellationToken);
             });
 
-            _logger.LogWarning("Returned {results} records", results.Results.Count());
+            _logger.LogWarning("Returned {Results} records", results.Results.Count());
 
             return new ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto>
             {
@@ -269,7 +269,7 @@ public class YearEndService : IYearEndService
                 return query.ToPaginationResultsAsync(req, forceSingleQuery:true, cancellationToken: cancellationToken);
             });
 
-            _logger.LogInformation("Returned {results} records", results.Results.Count());
+            _logger.LogInformation("Returned {Results} records", results.Results.Count());
 
             return new ReportResponseBase<DemographicBadgesNotInPayProfitResponse>
             {
@@ -297,7 +297,7 @@ public class YearEndService : IYearEndService
                 return await query.ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken: cancellationToken);
             });
 
-            _logger.LogInformation("Returned {results} records", results.Results.Count());
+            _logger.LogInformation("Returned {Results} records", results.Results.Count());
 
             return new ReportResponseBase<NamesMissingCommaResponse>
             {
@@ -375,7 +375,7 @@ public class YearEndService : IYearEndService
                 return await query.ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken: cancellationToken);
             });
 
-            _logger.LogInformation("Returned {results} records", results.Results.Count());
+            _logger.LogInformation("Returned {Results} records", results.Results.Count());
 
             return new ReportResponseBase<DuplicateNamesAndBirthdaysResponse>()
             {
