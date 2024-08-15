@@ -1,8 +1,8 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
 using CsvHelper.TypeConversion;
-using Demoulas.Common.Contracts.Request;
-using Demoulas.Common.Contracts.Response;
+using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -51,14 +51,14 @@ public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithCSVBase<Pagin
                                     Name = "John",
                                     Status = EmploymentStatus.Constants.Active,
                                     Store = 14,
-                                    EarningsCurrentYear = 32_100,
+                                    IncomeCurrentYear = 32_100,
                                     PayProfitSSN = 900047425,
                                     Address = new AddressResponseDto
                                     {
                                         Street = "123 Main",
                                         City = "Sydney",
                                         State = "HI",
-                                        CountryISO = Common.Constants.US,
+                                        CountryISO = Country.Constants.US,
                                         PostalCode = "01234"
                                     },
                                     ContactInfo = new ContactInfoResponseDto()
@@ -114,7 +114,7 @@ public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithCSVBase<Pagin
             Map(m => m.Store).Index(13).Name("STR");
             Map(m => m.PayProfitSSN).Index(13).Name("PS RECS");
 
-            Map(m => m.EarningsCurrentYear).Index(15).Name("CUR WAGE");
+            Map(m => m.IncomeCurrentYear).Index(15).Name("CUR WAGE");
         }
     }
 }

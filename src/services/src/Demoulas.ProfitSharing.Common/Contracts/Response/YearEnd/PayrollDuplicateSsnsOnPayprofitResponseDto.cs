@@ -9,7 +9,7 @@ public sealed record PayrollDuplicateSsnsOnPayprofitResponseDto
     public short Store { get; set; }
     public char Status { get; set; }
     public DateOnly HireDate { get; set; }
-    public decimal EarningsCurrentYear { get; set; }
+    public decimal IncomeCurrentYear { get; set; }
     public DateOnly? RehireDate { get; set; }
     public DateOnly? TermDate { get; set; }
 

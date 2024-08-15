@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 public class DuplicateNamesAndBirthdaysResponse
 {
-    public required long BadgeNumber { get; set; }
+    public required int BadgeNumber { get; set; }
     public required long SSN { get; set; }
     public string? Name { get; set; }
     public required DateOnly DateOfBirth { get; set; }
@@ -20,5 +14,5 @@ public class DuplicateNamesAndBirthdaysResponse
     public required int Count { get; set; }
     public required Decimal NetBalance { get; set; }
     public required decimal? HoursCurrentYear { get; set; }
-    public required decimal? EarningsCurrentYear { get; set; }
+    public required decimal? IncomeCurrentYear { get; set; }
 }

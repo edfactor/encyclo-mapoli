@@ -4,7 +4,7 @@ using System.Data.SqlTypes;
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 public sealed record PayrollDuplicateSSNResponseDto
 {
-    public required long Badge { get; set; }
+    public required int BadgeNumber { get; set; }
     public required long SSN { get; set; }
     public string? Name { get; set; }
     public required AddressResponseDto Address { get; set; }
@@ -22,7 +22,7 @@ public sealed record PayrollDuplicateSSNResponseDto
     {
         return new PayrollDuplicateSSNResponseDto
         {
-            Badge = 123,
+            BadgeNumber = 123,
             SSN = 123_45_6789,
             Name = "John Doe",
             Address = AddressResponseDto.ResponseExample(),

@@ -17,6 +17,7 @@ public static class CachingExtension
         if (!builder.Environment.IsTestEnvironment())
         {
             _ = builder.Services.AddHostedService<PayClassificationHostedService>();
+            //_ = builder.Services.AddHostedService<StoreHostedService>(); // TODO: Does PS care about specific stores???
         }
 
         return builder;

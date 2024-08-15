@@ -29,7 +29,7 @@ internal sealed class BeneficiaryFaker : Faker<Beneficiary>
             City = f.Address.City(),
             State = f.Address.StateAbbr(),
             PostalCode = f.Address.ZipCode(),
-            CountryISO = Constants.US
+            CountryISO = Country.Constants.US
         });
         RuleFor(b => b.ContactInfo, f => new ContactInfo
         {

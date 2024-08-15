@@ -2,9 +2,9 @@
 using System.Text;
 using CsvHelper.Configuration;
 using CsvHelper;
+using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using FastEndpoints;
-using Demoulas.Common.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.Endpoints.Base;
 

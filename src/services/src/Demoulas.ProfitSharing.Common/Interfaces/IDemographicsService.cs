@@ -5,5 +5,5 @@ namespace Demoulas.ProfitSharing.Common.Interfaces;
 
 public interface IDemographicsService
 {
-    Task<ISet<DemographicsResponseDto>?> AddDemographics(IEnumerable<DemographicsRequestDto> demographics, CancellationToken cancellationToken);
+    Task<ISet<DemographicResponseDto>?> AddDemographics(IEnumerable<DemographicsRequestDto> demographics, CancellationToken cancellationToken);
 }

@@ -1,5 +1,5 @@
 ﻿using Bogus;
-using Demoulas.Common.Data.Services.DTOs;
+using Demoulas.Common.Contracts.Contracts.Response;
 
 namespace Demoulas.ProfitSharing.UnitTests.Fakes;
 

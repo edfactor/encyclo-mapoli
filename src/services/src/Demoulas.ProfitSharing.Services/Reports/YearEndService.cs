@@ -1,9 +1,10 @@
-﻿using Demoulas.Common.Contracts.Request;
+﻿using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -54,7 +55,7 @@ public class YearEndService : IYearEndService
                     into grp
                     select new PayrollDuplicateSSNResponseDto
                     {
-                        Badge = grp.Key.BadgeNumber,
+                        BadgeNumber = grp.Key.BadgeNumber,
                         SSN = grp.Key.SSN,
                         Name = grp.Key.FullName,
                         Address = new AddressResponseDto
@@ -63,7 +64,7 @@ public class YearEndService : IYearEndService
                             City = grp.Key.City,
                             State = grp.Key.State,
                             PostalCode = grp.Key.PostalCode,
-                            CountryISO = Constants.US
+                            CountryISO = Country.Constants.US
                         },
                         HireDate = grp.Key.HireDate,
                         TerminationDate = grp.Key.TerminationDate,
@@ -88,11 +89,11 @@ public class YearEndService : IYearEndService
         var results = await _dataContextFactory.UseReadOnlyContext(ctx =>
         {
             return (from pp in ctx.PayProfits
-             join dem in ctx.Demographics on pp.PSN equals dem.BadgeNumber into demTmp
+             join dem in ctx.Demographics on pp.BadgeNumber equals dem.BadgeNumber into demTmp
              from dem in demTmp.DefaultIfEmpty()
              where dem == null
-             orderby pp.PSN, pp.SSN
-             select new PayProfitBadgesNotInDemographicsResponse { EmployeeBadge = pp.PSN, EmployeeSSN = pp.SSN }
+             orderby pp.BadgeNumber, pp.SSN
+             select new PayProfitBadgesNotInDemographicsResponse { EmployeeBadge = pp.BadgeNumber, EmployeeSSN = pp.SSN }
             ).ToPaginationResultsAsync(req, forceSingleQuery: true, ct);
         });
 
@@ -116,7 +117,7 @@ public class YearEndService : IYearEndService
                     .Where(p => ssnUnion.Contains(p.SSN) && p.EarningsEtvaValue < 0)
                     .Select(p => new NegativeETVAForSSNsOnPayProfitResponse
                     {
-                        EmployeeBadge = p.PSN, EmployeeSSN = p.SSN, EtvaValue = p.EarningsEtvaValue
+                        EmployeeBadge = p.BadgeNumber, EmployeeSSN = p.SSN, EtvaValue = p.EarningsEtvaValue
                     })
                     .OrderBy(p => p.EmployeeBadge)
                     .ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken);
@@ -139,7 +140,7 @@ public class YearEndService : IYearEndService
             {
                 var query = from demographic in c.Demographics
                     join payProfit in c.PayProfits
-                        on demographic.BadgeNumber equals payProfit.PSN
+                        on demographic.BadgeNumber equals payProfit.BadgeNumber
                             where payProfit.SSN != demographic.SSN
                     orderby demographic.BadgeNumber, demographic.SSN, payProfit.SSN
                     select new MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto
@@ -174,7 +175,7 @@ public class YearEndService : IYearEndService
             {
                 var query = from payProfit in context.PayProfits
                             join demographics in context.Demographics
-                                on payProfit.PSN equals demographics.BadgeNumber into demGroup
+                                on payProfit.BadgeNumber equals demographics.BadgeNumber into demGroup
                             from demographics in demGroup.DefaultIfEmpty()
                             join profitDetail in context.ProfitDetails
                                 on payProfit.SSN equals profitDetail.SSN into detGroup
@@ -186,7 +187,7 @@ public class YearEndService : IYearEndService
                                 .Contains(payProfit.SSN)
                             group new { payProfit, demographics, profitDetail } by new
                             {
-                                BadgeNumber=payProfit.PSN,
+                                BadgeNumber=payProfit.BadgeNumber,
                                 payProfit.SSN,
                                 demographics.FullName,
                                 demographics.HireDate,
@@ -203,7 +204,7 @@ public class YearEndService : IYearEndService
                                 demographics.ContactInfo.EmailAddress,
                                 demographics.ContactInfo.PhoneNumber,
                                 demographics.ContactInfo.MobileNumber,
-                                payProfit.EarningsCurrentYear
+                                payProfit.IncomeCurrentYear
                             } into g
                             orderby g.Key.SSN, g.Key.BadgeNumber
                             select new PayrollDuplicateSsnsOnPayprofitResponseDto
@@ -217,7 +218,7 @@ public class YearEndService : IYearEndService
                                 RehireDate = g.Key.ReHireDate,
                                 Status = g.Key.EmploymentStatusId,
                                 Store = g.Key.StoreNumber,
-                                EarningsCurrentYear = g.Key.EarningsCurrentYear ?? 0,
+                                IncomeCurrentYear = g.Key.IncomeCurrentYear ?? 0,
                                 ContactInfo = new ContactInfoResponseDto
                                 {
                                     EmailAddress = g.Key.EmailAddress,
@@ -256,7 +257,7 @@ public class YearEndService : IYearEndService
             var results = await _dataContextFactory.UseReadOnlyContext(ctx =>
             {
                 var query = from dem in ctx.Demographics
-                            where !(from pp in ctx.PayProfits select pp.PSN).Contains(dem.BadgeNumber)
+                            where !(from pp in ctx.PayProfits select pp.BadgeNumber).Contains(dem.BadgeNumber)
                             select new DemographicBadgesNotInPayProfitResponse
                             {
                                 EmployeeBadge = dem.BadgeNumber,
@@ -319,7 +320,7 @@ public class YearEndService : IYearEndService
                                                  select g.Key.FullName).ToListAsync();
 
                 var query = from dem in ctx.Demographics
-                            join ppLj in ctx.PayProfits on dem.BadgeNumber equals ppLj.PSN into tmpPayProfit
+                            join ppLj in ctx.PayProfits on dem.BadgeNumber equals ppLj.BadgeNumber into tmpPayProfit
                             from pp in tmpPayProfit.DefaultIfEmpty()
                             join pdLj in ctx.ProfitDetails on dem.SSN equals pdLj.SSN into tmpProfitDetails
                             from pd in tmpProfitDetails.DefaultIfEmpty()
@@ -343,7 +344,7 @@ public class YearEndService : IYearEndService
                                 PdSsn = (long?)(pd != null ? pd.SSN : null),
                                 pp.NetBalanceLastYear,
                                 pp.HoursCurrentYear,
-                                pp.EarningsCurrentYear
+                                pp.IncomeCurrentYear
                             } into g
                             orderby g.Key.FullName, g.Key.DateOfBirth, g.Key.SSN, g.Key.BadgeNumber
                             select new DuplicateNamesAndBirthdaysResponse
@@ -368,7 +369,7 @@ public class YearEndService : IYearEndService
                                 Count = g.Count(),
                                 NetBalance = g.Key.NetBalanceLastYear,
                                 HoursCurrentYear = g.Key.HoursCurrentYear,
-                                EarningsCurrentYear = g.Key.EarningsCurrentYear
+                                IncomeCurrentYear = g.Key.IncomeCurrentYear
                             };
 
                 return await query.ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken: cancellationToken);

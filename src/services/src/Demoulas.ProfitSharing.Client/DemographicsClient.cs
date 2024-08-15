@@ -25,14 +25,14 @@ public sealed class DemographicsClient : IDemographicsService
         _options = Constants.GetJsonSerializerOptions();
     }
    
-    public async Task<ISet<DemographicsResponseDto>?> AddDemographics(IEnumerable<DemographicsRequestDto> demographics, CancellationToken cancellationToken)
+    public async Task<ISet<DemographicResponseDto>?> AddDemographics(IEnumerable<DemographicsRequestDto> demographics, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(demographics);
 
         IEnumerable<DemographicsRequestDto> demographicsRequestDtos = demographics.ToList();
         if (!demographicsRequestDtos.Any())
         {
-            return new HashSet<DemographicsResponseDto>(0);
+            return new HashSet<DemographicResponseDto>(0);
         }
 
         foreach (DemographicsRequestDto demo in demographicsRequestDtos)
@@ -43,6 +43,6 @@ public sealed class DemographicsClient : IDemographicsService
         HttpResponseMessage response = await _httpClient.PostAsJsonAsync(BaseApiPath, demographicsRequestDtos, cancellationToken);
         response.EnsureSuccessStatusCode();
 
-        return await response.Content.ReadFromJsonAsync<ISet<DemographicsResponseDto>>(_options, cancellationToken).ConfigureAwait(false) ?? new HashSet<DemographicsResponseDto>(0);
+        return await response.Content.ReadFromJsonAsync<ISet<DemographicResponseDto>>(_options, cancellationToken).ConfigureAwait(false) ?? new HashSet<DemographicResponseDto>(0);
     }
 }

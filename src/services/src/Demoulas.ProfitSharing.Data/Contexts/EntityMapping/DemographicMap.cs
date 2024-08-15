@@ -14,7 +14,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
         //https://demoulas.atlassian.net/wiki/spaces/MAIN/pages/31909725/Employee+Hiring+data+fields
         //https://demoulas.atlassian.net/wiki/spaces/~bherrmann/pages/39944312/Quick+Guide+to+Profit+Sharing+Tables
 
-        _ = builder.ToTable("Demographics");
+        _ = builder.ToTable("DEMOGRAPHIC");
         _ = builder.HasKey(e => e.OracleHcmId);
 
         _ = builder.HasIndex(e => e.SSN, "IX_SSN");
@@ -134,7 +134,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             address.Property(a => a.City).HasMaxLength(25).HasColumnName("CITY").HasComment("City").IsRequired();
             address.Property(a => a.State).HasMaxLength(3).HasColumnName("STATE").HasComment("State").IsRequired();
             address.Property(a => a.PostalCode).HasMaxLength(9).HasColumnName("POSTAL_CODE").HasComment("Postal Code").IsRequired();
-            address.Property(a => a.CountryISO).HasMaxLength(2).HasColumnName("COUNTRY_ISO").HasDefaultValue(Constants.US);
+            address.Property(a => a.CountryISO).HasMaxLength(2).HasColumnName("COUNTRY_ISO").HasDefaultValue(Country.Constants.US);
 
             address.HasOne<Country>()
                 .WithMany()
@@ -152,7 +152,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
         _ = builder.Property(e => e.LastModifiedDate)
             .HasColumnType("DATE")
             .HasColumnName("LAST_MODIFIED_DATE")
-            .HasDefaultValue(DateTime.Now);
+            .HasDefaultValueSql("SYSDATE");
 
 
         builder.HasOne(e => e.PayClassification)

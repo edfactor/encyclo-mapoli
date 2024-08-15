@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Demoulas.Common.Caching.Helpers;
+using Demoulas.Common.Contracts.Caching;
 
 
 namespace Demoulas.ProfitSharing.Services.InternalEntities;

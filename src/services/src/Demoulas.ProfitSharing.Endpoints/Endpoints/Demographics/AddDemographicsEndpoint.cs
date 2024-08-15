@@ -8,7 +8,7 @@ using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Demographics;
 
-public class AddDemographicsEndpoint : Endpoint<IEnumerable<DemographicsRequestDto>, ISet<DemographicsResponseDto>?>
+public class AddDemographicsEndpoint : Endpoint<IEnumerable<DemographicsRequestDto>, ISet<DemographicResponseDto>?>
 {
     private readonly IDemographicsService _demographicsService;
 
@@ -46,7 +46,7 @@ public class AddDemographicsEndpoint : Endpoint<IEnumerable<DemographicsRequestD
                         State = "MA",
                         City = "Andover",
                         PostalCode = "02589",
-                        CountryISO = Constants.US
+                        CountryISO = Country.Constants.US
                     },
                     DateOfBirth = default,
                     HireDate = default,
@@ -57,12 +57,12 @@ public class AddDemographicsEndpoint : Endpoint<IEnumerable<DemographicsRequestD
                     EmploymentStatusId = EmploymentStatus.Constants.Active
                 }
             };
-            s.ResponseExamples = new Dictionary<int, object> { { 200, new List<DemographicsResponseDto> { DemographicsResponseDto.ResponseExample() } } };
+            s.ResponseExamples = new Dictionary<int, object> { { 200, new List<DemographicResponseDto> { DemographicResponseDto.ResponseExample() } } };
         });
         Group<DemographicsGroup>();
     }
 
-    public override Task<ISet<DemographicsResponseDto>?> ExecuteAsync(IEnumerable<DemographicsRequestDto> req, CancellationToken ct)
+    public override Task<ISet<DemographicResponseDto>?> ExecuteAsync(IEnumerable<DemographicsRequestDto> req, CancellationToken ct)
     {
         return _demographicsService.AddDemographics(req, ct);
     }

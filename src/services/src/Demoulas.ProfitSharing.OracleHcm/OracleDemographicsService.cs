@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.Json;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Configuration;
@@ -13,7 +15,7 @@ public sealed class OracleDemographicsService
     private readonly HttpClient _httpClient;
     private readonly OracleHcmConfig _oracleHcmConfig;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
-    
+
 
     public OracleDemographicsService(HttpClient httpClient, OracleHcmConfig oracleHcmConfig)
     {
@@ -22,6 +24,33 @@ public sealed class OracleDemographicsService
         _jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
     }
 
+    /// <summary>
+    /// Will retrieve a single employee from OracleHCM
+    /// https://docs.oracle.com/en/cloud/saas/human-resources/24c/farws/op-workers-workersuniqid-get.html
+    /// </summary>
+    /// <param name="workersUniqId">This is the Demographic.OracleHcmId</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns>OracleEmployee</returns>
+    public async Task<OracleEmployee?> GetEmployee(long workersUniqId, CancellationToken cancellationToken = default)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(workersUniqId);
+
+        string url = $"{_oracleHcmConfig.Url}/{workersUniqId}/";
+        string initialUrl = await BuildUrl(url, cancellationToken: cancellationToken);
+
+        HttpResponseMessage response = await GetOracleHcmValue(initialUrl, cancellationToken);
+        OracleDemographics? demographics = await response.Content.ReadFromJsonAsync<OracleDemographics>(_jsonSerializerOptions, cancellationToken);
+
+        return demographics?.Employees.FirstOrDefault();
+    }
+
+
+    /// <summary>
+    /// Will retrieve all employees from OracleHCM
+    /// https://docs.oracle.com/en/cloud/saas/human-resources/24c/farws/op-workers-get.html
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     public async IAsyncEnumerable<OracleEmployee?> GetAllEmployees([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         string initialUrl = await BuildUrl(_oracleHcmConfig.Url, cancellationToken: cancellationToken);
@@ -44,7 +73,7 @@ public sealed class OracleDemographicsService
             { "totalResults", "false" },
             { "onlyData", "true" },
             { "expand", "addresses,emails,names" },
-            { "fields", "addresses:AddressId,AddressLine1,AddressLine2,AddressLine3,AddressLine4,TownOrCity,Region1,Region2,Country,CountryName,PostalCode,LongPostalCode,Building,FloorNumber,CreatedBy,CreationDate,LastUpdatedBy,PersonAddrUsageId,AddressType,AddressTypeMeaning,PrimaryFlag;emails:EmailAddressId,EmailType,EmailAddress,PrimaryFlag;names:PersonNameId,EffectiveStartDate,EffectiveEndDate,LegislationCode,LastName,FirstName,Title,PreNameAdjunct,Suffix,MiddleNames,KnownAs,PreviousLastName,DisplayName,FullName,MilitaryRank,NameLanguage,LastUpdateDate;nationalIdentifiers:NationalIdentifierNumber,LastUpdateDate,PrimaryFlag,NationalIdentifierId;PersonNumber,PersonId,DateOfBirth,LastUpdateDate" }
+            { "fields", HttpRequestFields.ToFormattedString() }
         };
         UriBuilder initialUriBuilder = new UriBuilder(url);
         string initialQueryString = await new FormUrlEncodedContent(initialQuery).ReadAsStringAsync(cancellationToken);

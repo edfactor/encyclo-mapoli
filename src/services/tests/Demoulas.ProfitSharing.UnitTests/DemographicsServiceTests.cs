@@ -39,17 +39,17 @@ public class DemographicsServiceTests : IClassFixture<ApiTestBase<Program>>
         List<Demographic>? demographics = new DemographicFaker().Generate(count);
         IEnumerable<DemographicsRequestDto> demographicsRequest = _mapper.MapToRequest(demographics);
 
-        ISet<DemographicsResponseDto>? response = await _demographicsClient.AddDemographics(demographicsRequest, cancellationToken: CancellationToken.None);
+        ISet<DemographicResponseDto>? response = await _demographicsClient.AddDemographics(demographicsRequest, cancellationToken: CancellationToken.None);
 
         response.Should().NotBeNull();
         response.Should().HaveCount(count);
         _ = response!.Select(d => d.SSN.Should().MatchRegex(@"XXX-XX-\d{4}"));
 
-        Dictionary<int, DemographicsResponseDto> responseDict = response!.ToDictionary(k => k.BadgeNumber);
+        Dictionary<int, DemographicResponseDto> responseDict = response!.ToDictionary(k => k.BadgeNumber);
 
         demographics.ForEach(d =>
         {
-            if (!responseDict.TryGetValue(d.BadgeNumber, out DemographicsResponseDto? responseDto))
+            if (!responseDict.TryGetValue(d.BadgeNumber, out DemographicResponseDto? responseDto))
             {
                 Assert.Fail($"Unable to find the matching BadgeNumber: {d.BadgeNumber}");
             }

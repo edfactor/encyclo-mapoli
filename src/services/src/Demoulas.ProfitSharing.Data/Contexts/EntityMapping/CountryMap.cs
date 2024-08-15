@@ -8,7 +8,7 @@ public sealed class CountryMap : IEntityTypeConfiguration<Country>
     public void Configure(EntityTypeBuilder<Country> builder)
     {
         _ = builder.HasKey(c => c.ISO);
-        _ = builder.ToTable("Country");
+        _ = builder.ToTable("COUNTRY");
 
         _ = builder.Property(c => c.ISO).IsRequired().HasMaxLength(2);
         _ = builder.Property(c => c.Id).IsRequired().HasPrecision(3).HasColumnName("ID");

@@ -8,7 +8,7 @@ internal sealed class GenderMap : IEntityTypeConfiguration<Gender>
 {
     public void Configure(EntityTypeBuilder<Gender> builder)
     {
-        builder.ToTable("Gender");
+        builder.ToTable("GENDER");
         builder.HasKey(e => e.Id);
 
         builder.Property(e => e.Id)

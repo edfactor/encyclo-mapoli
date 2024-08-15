@@ -3,9 +3,9 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using CsvHelper.Configuration;
-using Demoulas.Common.Contracts.Request;
+using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.Common.Contracts.Response;
 
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
@@ -61,7 +61,7 @@ public class GetDuplicateSSNsEndpoint : EndpointWithCSVBase<PaginationRequestDto
         {
             Map().Index(0).Convert(_ => string.Empty);
             Map().Index(1).Convert(_ => string.Empty);
-            Map(m => m.Badge).Index(2).Name("BADGE");
+            Map(m => m.BadgeNumber).Index(2).Name("BADGE");
             Map(m => m.SSN).Index(3).Name("SSN");
             Map(m => m.Address.Street).Index(4).Name("ADDR");
             Map(m => m.Address.City).Index(5).Name("CITY");

@@ -8,7 +8,7 @@ internal sealed class DepartmentMap : IEntityTypeConfiguration<Department>
 {
     public void Configure(EntityTypeBuilder<Department> builder)
     {
-        builder.ToTable("Department");
+        builder.ToTable("DEPARTMENT");
         builder.HasKey(e => e.Id);
 
         builder.Property(e => e.Id)
