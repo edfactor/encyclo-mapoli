@@ -68,7 +68,8 @@ public static class ServicesExtension
 
 
 
-        _ = builder.Services.AddSingleton<IBaseCacheService<PayClassificationResponseCache>, PayClassificationHostedService>();
+        _ = builder.Services.AddKeyedSingleton<IBaseCacheService<LookupTableCache<byte>>, PayClassificationHostedService>(nameof(PayClassificationHostedService));
+        _ = builder.Services.AddKeyedSingleton<IBaseCacheService<LookupTableCache<byte>>, DepartmentHostedService>(nameof(DepartmentHostedService));
 
 
         builder.ConfigureMassTransitServices();

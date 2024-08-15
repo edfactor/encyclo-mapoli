@@ -1,14 +1,15 @@
 ﻿using Demoulas.Common.Caching.Interfaces;
 using Demoulas.ProfitSharing.Common.Caching;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
-using Demoulas.ProfitSharing.Data.Interfaces;
 using FastEndpoints;
 using FluentValidation;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Validators;
 public class OracleEmployeeValidator : Validator<OracleEmployee>
 {
+    private readonly IBaseCacheService<LookupTableCache<byte>> _accountCache;
+    private readonly IBaseCacheService<LookupTableCache<byte>> _depCache;
     private const int MAX_STORE_ID = 899;
 
     private const string BadAddress = "No address found for employee";
@@ -20,8 +21,13 @@ public class OracleEmployeeValidator : Validator<OracleEmployee>
     private const string UnknownDepartment = "Unknown department for employee";
     
 
-    public OracleEmployeeValidator()
+    public OracleEmployeeValidator(
+        [FromKeyedServices("PayClassificationHostedService")] IBaseCacheService<LookupTableCache<byte>> accountCache,
+        [FromKeyedServices("DepartmentHostedService")] IBaseCacheService<LookupTableCache<byte>> depCache)
     {
+        _accountCache = accountCache;
+        _depCache = depCache;
+
         RuleFor(e => e.Address)
             .Must(v => v != null)
             .WithMessage(e=> BadAddress);
@@ -64,18 +70,15 @@ public class OracleEmployeeValidator : Validator<OracleEmployee>
 
     private async Task<bool> ValidatePayClassificationAsync(byte? jobCode, CancellationToken ct)
     {
-        var payCacheService = Resolve<IBaseCacheService<PayClassificationResponseCache>>();
-        var payClassifications = await payCacheService.GetAllAsync(ct);
-        var codes = payClassifications.Select(p => p.Id).ToHashSet();
+        var lookup = await _accountCache.GetAllAsync(ct);
+        var codes = lookup.Select(p => p.Id).ToHashSet();
         return codes.Contains(jobCode ?? 0);
     }
 
-    private Task<bool> ValidateDepartmentIdAsync(byte departmentId, CancellationToken ct)
+    private async Task<bool> ValidateDepartmentIdAsync(byte departmentId, CancellationToken ct)
     {
-        var dbContextFactory = Resolve<IProfitSharingDataContextFactory>();
-        return dbContextFactory.UseReadOnlyContext(c =>
-        {
-            return c.Departments.AnyAsync(d=> d.Id == departmentId, ct);
-        });
+        var lookup = await _depCache.GetAllAsync(ct);
+        var codes = lookup.Select(p => p.Id).ToHashSet();
+        return codes.Contains(departmentId);
     }
 }
