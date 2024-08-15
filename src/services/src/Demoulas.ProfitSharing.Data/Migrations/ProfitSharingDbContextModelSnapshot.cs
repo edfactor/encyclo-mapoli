@@ -1652,7 +1652,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<DateTime>("LastModifiedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("DATE")
-                        .HasDefaultValue(new DateTime(2024, 8, 15, 10, 50, 46, 624, DateTimeKind.Local).AddTicks(8388))
+                        .HasDefaultValue(new DateTime(2024, 8, 15, 11, 52, 37, 700, DateTimeKind.Local).AddTicks(8799))
                         .HasColumnName("LAST_MODIFIED_DATE");
 
                     b.Property<string>("LastName")
@@ -3171,9 +3171,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(4,0)")
                         .HasColumnName("YEAR_TO_DATE");
 
-                    b.Property<string>("ZeroCont")
-                        .HasColumnType("NVARCHAR2(1)")
-                        .HasColumnName("ZEROCONT");
+                    b.Property<byte?>("ZeroContributionReasonId")
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("ZERO_CONTRIBUTION_REASON_ID");
 
                     b.HasKey("Id")
                         .HasName("PK_PROFIT_DETAIL");
@@ -3183,6 +3183,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasIndex("TaxCodeId")
                         .HasDatabaseName("IX_PROFIT_DETAIL_TAX_CODE_ID");
+
+                    b.HasIndex("ZeroContributionReasonId")
+                        .HasDatabaseName("IX_PROFIT_DETAIL_ZERO_CONTRIBUTION_REASON_ID");
 
                     b.ToTable("PROFIT_DETAIL", (string)null);
                 });
@@ -4098,9 +4101,16 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_PROFIT_DETAIL_TAX_CODE_TAX_CODE_ID");
 
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.ZeroContributionReason", "ZeroContributionReason")
+                        .WithMany()
+                        .HasForeignKey("ZeroContributionReasonId")
+                        .HasConstraintName("FK_PROFIT_DETAIL_ZERO_CONTRIBUTION_REASON_ZERO_CONTRIBUTION_REASON_ID");
+
                     b.Navigation("ProfitCode");
 
                     b.Navigation("TaxCode");
+
+                    b.Navigation("ZeroContributionReason");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BeneficiaryKind", b =>

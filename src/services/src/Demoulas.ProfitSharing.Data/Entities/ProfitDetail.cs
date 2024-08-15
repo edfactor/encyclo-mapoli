@@ -13,7 +13,8 @@ public class ProfitDetail
     public byte MonthToDate { get; set; }
     public short YearToDate { get; set; }
     public string? Remark { get; set; }
-    public char? ZeroCont { get; set; }
+    public byte? ZeroContributionReasonId { get; set; }
+    public ZeroContributionReason? ZeroContributionReason { get; set; }
     public decimal FederalTaxes {get; set;}
     public decimal StateTaxes { get; set;}
     public required TaxCode? TaxCode { get; set; }

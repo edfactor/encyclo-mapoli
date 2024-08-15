@@ -99,6 +99,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "PK_EMPLOYEETYPE",
                 table: "EMPLOYEETYPE");
 
+            migrationBuilder.DropColumn(
+                name: "ZEROCONT",
+                table: "PROFIT_DETAIL");
+
             migrationBuilder.RenameTable(
                 name: "ZEROCONTRIBUTIONREASON",
                 newName: "ZERO_CONTRIBUTION_REASON");
@@ -188,12 +192,18 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 table: "PAY_PROFIT",
                 newName: "IX_PAY_PROFIT_BENEFICIARYTYPEID");
 
+            migrationBuilder.AddColumn<byte>(
+                name: "ZERO_CONTRIBUTION_REASON_ID",
+                table: "PROFIT_DETAIL",
+                type: "NUMBER(3)",
+                nullable: true);
+
             migrationBuilder.AlterColumn<DateTime>(
                 name: "LAST_MODIFIED_DATE",
                 table: "DEMOGRAPHICS",
                 type: "DATE",
                 nullable: false,
-                defaultValue: new DateTime(2024, 8, 15, 10, 50, 46, 624, DateTimeKind.Local).AddTicks(8388),
+                defaultValue: new DateTime(2024, 8, 15, 11, 52, 37, 700, DateTimeKind.Local).AddTicks(8799),
                 oldClrType: typeof(DateTime),
                 oldType: "DATE",
                 oldDefaultValue: new DateTime(2024, 8, 12, 17, 28, 33, 3, DateTimeKind.Local).AddTicks(3230));
@@ -1628,6 +1638,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 column: "ID",
                 value: (short)194);
 
+            migrationBuilder.CreateIndex(
+                name: "IX_PROFIT_DETAIL_ZERO_CONTRIBUTION_REASON_ID",
+                table: "PROFIT_DETAIL",
+                column: "ZERO_CONTRIBUTION_REASON_ID");
+
             migrationBuilder.AddForeignKey(
                 name: "FK_DEMOGRAPHICS_EMPLOYEE_STATUS_EMPLOYMENT_STATUS_ID",
                 table: "DEMOGRAPHICS",
@@ -1721,6 +1736,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 principalTable: "TAX_CODE",
                 principalColumn: "CODE",
                 onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_PROFIT_DETAIL_ZERO_CONTRIBUTION_REASON_ZERO_CONTRIBUTION_REASON_ID",
+                table: "PROFIT_DETAIL",
+                column: "ZERO_CONTRIBUTION_REASON_ID",
+                principalTable: "ZERO_CONTRIBUTION_REASON",
+                principalColumn: "ID");
         }
 
         /// <inheritdoc />
@@ -1774,6 +1796,14 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "FK_PROFIT_DETAIL_TAX_CODE_TAX_CODE_ID",
                 table: "PROFIT_DETAIL");
 
+            migrationBuilder.DropForeignKey(
+                name: "FK_PROFIT_DETAIL_ZERO_CONTRIBUTION_REASON_ZERO_CONTRIBUTION_REASON_ID",
+                table: "PROFIT_DETAIL");
+
+            migrationBuilder.DropIndex(
+                name: "IX_PROFIT_DETAIL_ZERO_CONTRIBUTION_REASON_ID",
+                table: "PROFIT_DETAIL");
+
             migrationBuilder.DropPrimaryKey(
                 name: "PK_ZERO_CONTRIBUTION_REASON",
                 table: "ZERO_CONTRIBUTION_REASON");
@@ -1813,6 +1843,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             migrationBuilder.DropPrimaryKey(
                 name: "PK_EMPLOYEE_STATUS",
                 table: "EMPLOYEE_STATUS");
+
+            migrationBuilder.DropColumn(
+                name: "ZERO_CONTRIBUTION_REASON_ID",
+                table: "PROFIT_DETAIL");
 
             migrationBuilder.RenameTable(
                 name: "ZERO_CONTRIBUTION_REASON",
@@ -1903,6 +1937,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 table: "PAYPROFIT",
                 newName: "IX_PAYPROFIT_BENEFICIARY_ID");
 
+            migrationBuilder.AddColumn<string>(
+                name: "ZEROCONT",
+                table: "PROFIT_DETAIL",
+                type: "NVARCHAR2(1)",
+                nullable: true);
+
             migrationBuilder.AlterColumn<DateTime>(
                 name: "LAST_MODIFIED_DATE",
                 table: "DEMOGRAPHICS",
@@ -1911,7 +1951,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 defaultValue: new DateTime(2024, 8, 12, 17, 28, 33, 3, DateTimeKind.Local).AddTicks(3230),
                 oldClrType: typeof(DateTime),
                 oldType: "DATE",
-                oldDefaultValue: new DateTime(2024, 8, 15, 10, 50, 46, 624, DateTimeKind.Local).AddTicks(8388));
+                oldDefaultValue: new DateTime(2024, 8, 15, 11, 52, 37, 700, DateTimeKind.Local).AddTicks(8799));
 
             migrationBuilder.AlterColumn<int>(
                 name: "PSN",
