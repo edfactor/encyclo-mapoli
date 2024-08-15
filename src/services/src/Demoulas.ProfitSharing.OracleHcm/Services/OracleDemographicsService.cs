@@ -4,11 +4,12 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Configuration;
-using Demoulas.ProfitSharing.OracleHcm.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
+using Demoulas.ProfitSharing.Common.Interfaces;
 
-namespace Demoulas.ProfitSharing.OracleHcm;
+namespace Demoulas.ProfitSharing.OracleHcm.Services;
 
-public sealed class OracleDemographicsService
+public sealed class OracleDemographicsService : IOracleDemographicsService
 {
     private readonly HttpClient _httpClient;
     private readonly OracleHcmConfig _oracleHcmConfig;
@@ -21,27 +22,6 @@ public sealed class OracleDemographicsService
         _oracleHcmConfig = oracleHcmConfig;
         _jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
     }
-
-    /// <summary>
-    /// Will retrieve a single employee from OracleHCM
-    /// https://docs.oracle.com/en/cloud/saas/human-resources/24c/farws/op-workers-workersuniqid-get.html
-    /// </summary>
-    /// <param name="workersUniqId">This is the Demographic.OracleHcmId</param>
-    /// <param name="cancellationToken"></param>
-    /// <returns>OracleEmployee</returns>
-    public async Task<OracleEmployee?> GetEmployee(long workersUniqId, CancellationToken cancellationToken = default)
-    {
-        ArgumentOutOfRangeException.ThrowIfNegative(workersUniqId);
-
-        string url = $"{_oracleHcmConfig.Url}/{workersUniqId}/";
-        string initialUrl = await BuildUrl(url, cancellationToken: cancellationToken);
-
-        HttpResponseMessage response = await GetOracleHcmValue(initialUrl, cancellationToken);
-        OracleDemographics? demographics = await response.Content.ReadFromJsonAsync<OracleDemographics>(_jsonSerializerOptions, cancellationToken);
-
-        return demographics?.Employees.FirstOrDefault();
-    }
-
 
     /// <summary>
     /// Will retrieve all employees from OracleHCM

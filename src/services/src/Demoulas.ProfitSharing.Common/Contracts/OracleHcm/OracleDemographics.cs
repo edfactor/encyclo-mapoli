@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Demoulas.ProfitSharing.OracleHcm.Contracts.Request;
+namespace Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 
 public record OracleDemographics(
     [property: JsonPropertyName("items")] IReadOnlyList<OracleEmployee> Employees,

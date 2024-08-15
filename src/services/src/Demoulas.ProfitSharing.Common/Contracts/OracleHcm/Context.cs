@@ -2,7 +2,7 @@
 
 using System.Text.Json.Serialization;
 
-namespace Demoulas.ProfitSharing.OracleHcm.Contracts.Request;
+namespace Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 
 public record Context(
     [property: JsonPropertyName("key")] string Key,

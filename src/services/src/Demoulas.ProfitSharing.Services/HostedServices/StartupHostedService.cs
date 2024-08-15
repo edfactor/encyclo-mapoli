@@ -4,18 +4,18 @@ using Microsoft.Extensions.Hosting;
 using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Services.HostedServices;
-public class OracleHcmHostedService : BackgroundService
+public class StartupHostedService : BackgroundService
 {
-    private readonly ISynchronizationService _synchronizationService;
+    private readonly IOracleHcmSynchronizationService _oracleHcmSynchronizationService;
 
-    public OracleHcmHostedService(ISynchronizationService synchronizationService)
+    public StartupHostedService(IOracleHcmSynchronizationService oracleHcmSynchronizationService)
     {
-        _synchronizationService = synchronizationService;
+        _oracleHcmSynchronizationService = oracleHcmSynchronizationService;
     }
 
     protected override Task ExecuteAsync(CancellationToken cancellationToken)
     {
-        return _synchronizationService.SendSynchronizationRequest(
+        return _oracleHcmSynchronizationService.SendSynchronizationRequest(
             new OracleHcmJobRequest
             {
                 JobType = JobType.Constants.Delta, StartMethod = StartMethod.Constants.System, RequestedBy = nameof(StartMethod.Constants.System)

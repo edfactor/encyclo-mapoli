@@ -1,5 +1,5 @@
-﻿namespace Demoulas.ProfitSharing.OracleHcm.Contracts.Request;
-internal sealed record HttpRequestFields
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
+public sealed record HttpRequestFields
 {
     public HashSet<string> Root = ["PersonNumber", "PersonId", "DateOfBirth", "LastUpdateDate"];
 

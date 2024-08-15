@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Demoulas.ProfitSharing.OracleHcm.Contracts.Request;
+namespace Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 
 public record WorkRelationshipAssignments(
     [property: JsonPropertyName("items")] IReadOnlyList<WorkRelationshipAssignment> Items,

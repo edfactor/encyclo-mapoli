@@ -8,15 +8,15 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 
-namespace Demoulas.ProfitSharing.Services.Jobs;
+namespace Demoulas.ProfitSharing.OracleHcm.Jobs;
 
-public sealed class SynchronizationService : ISynchronizationService
+public sealed class OracleHcmOracleHcmSynchronizationService : IOracleHcmSynchronizationService
 {
     private readonly IBus _bus;
     private readonly IHostEnvironment _hostEnvironment;
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
 
-    public SynchronizationService(IBus bus, IHostEnvironment hostEnvironment, IProfitSharingDataContextFactory dataContextFactory)
+    public OracleHcmOracleHcmSynchronizationService(IBus bus, IHostEnvironment hostEnvironment, IProfitSharingDataContextFactory dataContextFactory)
     {
         _bus = bus;
         _hostEnvironment = hostEnvironment;

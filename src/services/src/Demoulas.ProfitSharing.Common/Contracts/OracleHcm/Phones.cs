@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Demoulas.ProfitSharing.OracleHcm.Contracts.Request;
-public record Emails(
-    [property: JsonPropertyName("items")] IReadOnlyList<EmailItem> Items,
+namespace Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
+public record Phones(
+    [property: JsonPropertyName("items")] IReadOnlyList<PhoneItem> Items,
     [property: JsonPropertyName("totalResults")] int? TotalResults,
     [property: JsonPropertyName("count")] int? Count,
     [property: JsonPropertyName("hasMore")] bool? HasMore,

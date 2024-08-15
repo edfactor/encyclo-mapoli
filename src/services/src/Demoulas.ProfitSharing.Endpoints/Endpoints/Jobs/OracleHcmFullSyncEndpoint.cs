@@ -9,11 +9,11 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Jobs;
 
 public class OracleHcmFullSyncEndpoint : EndpointWithoutRequest<SendMessageResponse>
 {
-    private readonly ISynchronizationService _synchronizationService;
+    private readonly IOracleHcmSynchronizationService _oracleHcmSynchronizationService;
 
-    public OracleHcmFullSyncEndpoint(ISynchronizationService synchronizationService)
+    public OracleHcmFullSyncEndpoint(IOracleHcmSynchronizationService oracleHcmSynchronizationService)
     {
-        _synchronizationService = synchronizationService;
+        _oracleHcmSynchronizationService = oracleHcmSynchronizationService;
     }
 
     public override void Configure()
@@ -32,7 +32,7 @@ public class OracleHcmFullSyncEndpoint : EndpointWithoutRequest<SendMessageRespo
 
     public override async Task HandleAsync(CancellationToken ct)
     {
-        bool jobStarted = await _synchronizationService.SendSynchronizationRequest(
+        bool jobStarted = await _oracleHcmSynchronizationService.SendSynchronizationRequest(
             new OracleHcmJobRequest { JobType = JobType.Constants.Full, StartMethod = StartMethod.Constants.OnDemand, RequestedBy = "Not Implemented" }, ct);
 
         var message = new SendMessageResponse();

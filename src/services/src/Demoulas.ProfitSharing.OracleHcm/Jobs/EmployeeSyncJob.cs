@@ -5,15 +5,16 @@ using Bogus.Extensions.UnitedStates;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Configuration;
+using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.OracleHcm.Contracts.Request;
+using Demoulas.ProfitSharing.OracleHcm.Services;
 using Demoulas.ProfitSharing.OracleHcm.Validators;
 
-namespace Demoulas.ProfitSharing.OracleHcm;
+namespace Demoulas.ProfitSharing.OracleHcm.Jobs;
 
 public sealed class EmployeeSyncJob : IEmployeeSyncJob
 {

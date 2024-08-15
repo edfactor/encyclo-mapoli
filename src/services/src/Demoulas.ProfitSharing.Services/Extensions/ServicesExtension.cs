@@ -1,9 +1,7 @@
 ﻿using Demoulas.Common.Caching.Interfaces;
 using Demoulas.ProfitSharing.Common.Configuration;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.OracleHcm;
 using Demoulas.ProfitSharing.Services.HostedServices;
-using Demoulas.ProfitSharing.Services.Jobs;
 using Demoulas.ProfitSharing.Services.Mappers;
 using Demoulas.ProfitSharing.Services.Reports;
 using Microsoft.Extensions.Configuration;
@@ -19,7 +17,9 @@ using Microsoft.Extensions.Http.Resilience;
 using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Caching;
+using Demoulas.ProfitSharing.OracleHcm.Jobs;
 using Demoulas.ProfitSharing.OracleHcm.Validators;
+using Demoulas.ProfitSharing.OracleHcm.Services;
 
 namespace Demoulas.ProfitSharing.Services.Extensions;
 
@@ -37,7 +37,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IDemographicsService, DemographicsService>();
         _ = builder.Services.AddScoped<IYearEndService, YearEndService>();
         _ = builder.Services.AddScoped<IPayProfitService, PayProfitService>();
-        _ = builder.Services.AddScoped<ISynchronizationService, SynchronizationService>();
+        _ = builder.Services.AddScoped<IOracleHcmSynchronizationService, OracleHcmOracleHcmSynchronizationService>();
 
 
         OracleHcmConfig oktaSettings = builder.Configuration.GetSection("OracleHcm").Get<OracleHcmConfig>() ?? new OracleHcmConfig { Url = string.Empty };
@@ -46,7 +46,7 @@ public static class ServicesExtension
         _ = builder.Services.AddSingleton<IJobFactory, SimpleJobFactory>();
         _ = builder.Services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
         _ = builder.Services.AddSingleton<IDemographicsServiceInternal, DemographicsService>();
-        _ = builder.Services.AddSingleton<ISynchronizationService, SynchronizationService>();
+        _ = builder.Services.AddSingleton<IOracleHcmSynchronizationService, OracleHcmOracleHcmSynchronizationService>();
         _ = builder.Services.AddSingleton<IStoreService, StoreService>();
 
         _ = builder.Services.AddHttpClient<OracleDemographicsService>((services, client) =>

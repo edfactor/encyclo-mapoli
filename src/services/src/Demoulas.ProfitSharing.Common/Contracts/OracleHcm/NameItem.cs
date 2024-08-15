@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.OracleHcm.Contracts.Request;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 public record NameItem(
     string PersonNameId,
     DateTime EffectiveStartDate,

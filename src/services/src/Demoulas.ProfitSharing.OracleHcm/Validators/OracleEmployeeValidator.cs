@@ -1,7 +1,7 @@
 ﻿using Demoulas.Common.Caching.Interfaces;
 using Demoulas.ProfitSharing.Common.Caching;
+using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.OracleHcm.Contracts.Request;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
