@@ -24,7 +24,7 @@ internal sealed class ProfitDetailMap : IEntityTypeConfiguration<ProfitDetail>
         _ = builder.Property(x => x.StateTaxes).IsRequired().HasPrecision(9, 2).HasColumnName("STATE_TAXES");
         _ = builder.HasOne(x=> x.TaxCode).WithMany().HasForeignKey(t => t.TaxCodeId);
         _ = builder.Property(x => x.TaxCodeId).IsRequired().HasColumnName("TAX_CODE_ID");
-        _ = builder.Property(x => x.SSN).IsRequired();
+        _ = builder.Property(x => x.SSN).HasPrecision(9).IsRequired();
         _ = builder.Property(x => x.DistributionSequence).HasColumnName("DISTRIBUTION_SEQUENCE");
 
     }

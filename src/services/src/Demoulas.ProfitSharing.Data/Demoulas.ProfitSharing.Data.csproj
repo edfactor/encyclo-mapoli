@@ -6,6 +6,10 @@
     <Nullable>enable</Nullable>
     <Configurations>Debug;Release;Russ</Configurations>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="C:\Users\russh\.nuget\packages\demoulas.common.data.services\3.0.0\contentFiles\any\net8.0\readme.md" />
+  </ItemGroup>
  
 
   <ItemGroup>
