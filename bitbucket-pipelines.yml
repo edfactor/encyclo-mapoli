@@ -15,8 +15,6 @@ pipelines:
             - windows
             - self.hosted
             - appt125
-          caches:
-            - dotnetcore
           script:
             - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
             - $env:REPORTS_PATH="../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}"
@@ -35,7 +33,3 @@ pipelines:
   pull-requests:
     '**':
       - step: *build-and-test
-
-definitions:
-  caches:
-    dotnetcore: ~/.nuget/packages
