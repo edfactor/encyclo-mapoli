@@ -12,7 +12,7 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    [Migration("20240815131559_initialMigration")]
+    [Migration("20240815154144_initialMigration")]
     partial class initialMigration
     {
         /// <inheritdoc />
@@ -3210,7 +3210,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("REMARK");
 
                     b.Property<long>("SSN")
-                        .HasColumnType("NUMBER(19)")
+                        .HasPrecision(9)
+                        .HasColumnType("NUMBER(9)")
                         .HasColumnName("SSN");
 
                     b.Property<decimal>("StateTaxes")
@@ -3587,7 +3588,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                                 .HasComment("City");
 
                             b1.Property<string>("CountryISO")
-                                .IsRequired()
                                 .ValueGeneratedOnAdd()
                                 .HasMaxLength(2)
                                 .HasColumnType("NVARCHAR2(2)")
@@ -3647,8 +3647,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             b1.HasOne("Demoulas.ProfitSharing.Data.Entities.Country", null)
                                 .WithMany()
                                 .HasForeignKey("CountryISO")
-                                .OnDelete(DeleteBehavior.Cascade)
-                                .IsRequired()
                                 .HasConstraintName("FK_BENEFICIARY_COUNTRY_COUNTRY_ISO");
                         });
 
@@ -3766,7 +3764,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                                 .HasComment("City");
 
                             b1.Property<string>("CountryISO")
-                                .IsRequired()
                                 .ValueGeneratedOnAdd()
                                 .HasMaxLength(2)
                                 .HasColumnType("NVARCHAR2(2)")
@@ -3822,8 +3819,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             b1.HasOne("Demoulas.ProfitSharing.Data.Entities.Country", null)
                                 .WithMany()
                                 .HasForeignKey("CountryISO")
-                                .OnDelete(DeleteBehavior.Cascade)
-                                .IsRequired()
                                 .HasConstraintName("FK_DEMOGRAPHIC_COUNTRY_COUNTRY_ISO");
 
                             b1.WithOwner()
@@ -3912,75 +3907,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_DISTRIBUTION_TAX_CODE_TAXCODEID");
 
-                    b.OwnsOne("Demoulas.ProfitSharing.Data.Entities.AddressOptional", "ThirdPartyAddress", b1 =>
-                        {
-                            b1.Property<long>("DistributionSSN")
-                                .HasColumnType("NUMBER(19)")
-                                .HasColumnName("SSN");
-
-                            b1.Property<int>("DistributionSequenceNumber")
-                                .HasColumnType("NUMBER(10)")
-                                .HasColumnName("SEQUENCE_NUMBER");
-
-                            b1.Property<string>("City")
-                                .HasMaxLength(25)
-                                .HasColumnType("NVARCHAR2(25)")
-                                .HasColumnName("THIRD_PARTY_CITY");
-
-                            b1.Property<string>("CountryISO")
-                                .ValueGeneratedOnAdd()
-                                .HasMaxLength(2)
-                                .HasColumnType("NVARCHAR2(2)")
-                                .HasDefaultValue("US")
-                                .HasColumnName("THIRD_PARTY_COUNTRY_ISO");
-
-                            b1.Property<string>("PostalCode")
-                                .HasMaxLength(9)
-                                .HasColumnType("NVARCHAR2(9)")
-                                .HasColumnName("THIRD_PARTY_POSTAL_CODE");
-
-                            b1.Property<string>("State")
-                                .HasMaxLength(3)
-                                .HasColumnType("NVARCHAR2(3)")
-                                .HasColumnName("THIRD_PARTY_STATE");
-
-                            b1.Property<string>("Street")
-                                .HasMaxLength(30)
-                                .HasColumnType("NVARCHAR2(30)")
-                                .HasColumnName("THIRD_PARTY_STREET");
-
-                            b1.Property<string>("Street2")
-                                .HasMaxLength(30)
-                                .HasColumnType("NVARCHAR2(30)")
-                                .HasColumnName("THIRD_PARTY_STREET2");
-
-                            b1.Property<string>("Street3")
-                                .HasMaxLength(30)
-                                .HasColumnType("NVARCHAR2(30)")
-                                .HasColumnName("THIRD_PARTY_STREET3");
-
-                            b1.Property<string>("Street4")
-                                .HasMaxLength(30)
-                                .HasColumnType("NVARCHAR2(30)")
-                                .HasColumnName("THIRD_PARTY_STREET4");
-
-                            b1.HasKey("DistributionSSN", "DistributionSequenceNumber");
-
-                            b1.HasIndex("CountryISO")
-                                .HasDatabaseName("IX_DISTRIBUTION_THIRD_PARTY_COUNTRY_ISO");
-
-                            b1.ToTable("DISTRIBUTION");
-
-                            b1.HasOne("Demoulas.ProfitSharing.Data.Entities.Country", null)
-                                .WithMany()
-                                .HasForeignKey("CountryISO")
-                                .HasConstraintName("FK_DISTRIBUTION_COUNTRY_THIRD_PARTY_COUNTRY_ISO");
-
-                            b1.WithOwner()
-                                .HasForeignKey("DistributionSSN", "DistributionSequenceNumber")
-                                .HasConstraintName("FK_DISTRIBUTION_DISTRIBUTION_SSN_SEQUENCE_NUMBER");
-                        });
-
                     b.OwnsOne("Demoulas.ProfitSharing.Data.Entities.Address", "PayeeAddress", b1 =>
                         {
                             b1.Property<long>("DistributionSSN")
@@ -3992,13 +3918,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                                 .HasColumnName("SEQUENCE_NUMBER");
 
                             b1.Property<string>("City")
-                                .IsRequired()
                                 .HasMaxLength(25)
                                 .HasColumnType("NVARCHAR2(25)")
                                 .HasColumnName("CITY");
 
                             b1.Property<string>("CountryISO")
-                                .IsRequired()
                                 .ValueGeneratedOnAdd()
                                 .HasMaxLength(2)
                                 .HasColumnType("NVARCHAR2(2)")
@@ -4006,13 +3930,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                                 .HasColumnName("COUNTRY_ISO");
 
                             b1.Property<string>("PostalCode")
-                                .IsRequired()
                                 .HasMaxLength(9)
                                 .HasColumnType("NVARCHAR2(9)")
                                 .HasColumnName("POSTAL_CODE");
 
                             b1.Property<string>("State")
-                                .IsRequired()
                                 .HasMaxLength(3)
                                 .HasColumnType("NVARCHAR2(3)")
                                 .HasColumnName("STATE");
@@ -4048,9 +3970,77 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             b1.HasOne("Demoulas.ProfitSharing.Data.Entities.Country", null)
                                 .WithMany()
                                 .HasForeignKey("CountryISO")
-                                .OnDelete(DeleteBehavior.Cascade)
-                                .IsRequired()
                                 .HasConstraintName("FK_DISTRIBUTION_COUNTRY_COUNTRY_ISO");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DistributionSSN", "DistributionSequenceNumber")
+                                .HasConstraintName("FK_DISTRIBUTION_DISTRIBUTION_SSN_SEQUENCE_NUMBER");
+                        });
+
+                    b.OwnsOne("Demoulas.ProfitSharing.Data.Entities.Address", "ThirdPartyAddress", b1 =>
+                        {
+                            b1.Property<long>("DistributionSSN")
+                                .HasColumnType("NUMBER(19)")
+                                .HasColumnName("SSN");
+
+                            b1.Property<int>("DistributionSequenceNumber")
+                                .HasColumnType("NUMBER(10)")
+                                .HasColumnName("SEQUENCE_NUMBER");
+
+                            b1.Property<string>("City")
+                                .HasMaxLength(25)
+                                .HasColumnType("NVARCHAR2(25)")
+                                .HasColumnName("THIRD_PARTY_CITY");
+
+                            b1.Property<string>("CountryISO")
+                                .ValueGeneratedOnAdd()
+                                .HasMaxLength(2)
+                                .HasColumnType("NVARCHAR2(2)")
+                                .HasDefaultValue("US")
+                                .HasColumnName("THIRD_PARTY_COUNTRY_ISO");
+
+                            b1.Property<string>("PostalCode")
+                                .HasMaxLength(9)
+                                .HasColumnType("NVARCHAR2(9)")
+                                .HasColumnName("THIRD_PARTY_POSTAL_CODE");
+
+                            b1.Property<string>("State")
+                                .HasMaxLength(3)
+                                .HasColumnType("NVARCHAR2(3)")
+                                .HasColumnName("THIRD_PARTY_STATE");
+
+                            b1.Property<string>("Street")
+                                .IsRequired()
+                                .HasMaxLength(30)
+                                .HasColumnType("NVARCHAR2(30)")
+                                .HasColumnName("THIRD_PARTY_STREET");
+
+                            b1.Property<string>("Street2")
+                                .HasMaxLength(30)
+                                .HasColumnType("NVARCHAR2(30)")
+                                .HasColumnName("THIRD_PARTY_STREET2");
+
+                            b1.Property<string>("Street3")
+                                .HasMaxLength(30)
+                                .HasColumnType("NVARCHAR2(30)")
+                                .HasColumnName("THIRD_PARTY_STREET3");
+
+                            b1.Property<string>("Street4")
+                                .HasMaxLength(30)
+                                .HasColumnType("NVARCHAR2(30)")
+                                .HasColumnName("THIRD_PARTY_STREET4");
+
+                            b1.HasKey("DistributionSSN", "DistributionSequenceNumber");
+
+                            b1.HasIndex("CountryISO")
+                                .HasDatabaseName("IX_DISTRIBUTION_THIRD_PARTY_COUNTRY_ISO");
+
+                            b1.ToTable("DISTRIBUTION");
+
+                            b1.HasOne("Demoulas.ProfitSharing.Data.Entities.Country", null)
+                                .WithMany()
+                                .HasForeignKey("CountryISO")
+                                .HasConstraintName("FK_DISTRIBUTION_COUNTRY_THIRD_PARTY_COUNTRY_ISO");
 
                             b1.WithOwner()
                                 .HasForeignKey("DistributionSSN", "DistributionSequenceNumber")

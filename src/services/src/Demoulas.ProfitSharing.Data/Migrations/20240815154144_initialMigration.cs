@@ -314,7 +314,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     CITY = table.Column<string>(type: "NVARCHAR2(25)", maxLength: 25, nullable: false, comment: "City"),
                     STATE = table.Column<string>(type: "NVARCHAR2(3)", maxLength: 3, nullable: false, comment: "State"),
                     POSTAL_CODE = table.Column<string>(type: "NVARCHAR2(9)", maxLength: 9, nullable: false, comment: "Postal Code"),
-                    COUNTRY_ISO = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: false, defaultValue: "US"),
+                    COUNTRY_ISO = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: true, defaultValue: "US"),
                     PHONE_NUMBER = table.Column<string>(type: "NVARCHAR2(15)", maxLength: 15, nullable: true),
                     MOBILE_NUMBER = table.Column<string>(type: "NVARCHAR2(15)", maxLength: 15, nullable: true),
                     EMAIL_ADDRESS = table.Column<string>(type: "NVARCHAR2(50)", maxLength: 50, nullable: true),
@@ -337,8 +337,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         name: "FK_BENEFICIARY_COUNTRY_COUNTRY_ISO",
                         column: x => x.COUNTRY_ISO,
                         principalTable: "COUNTRY",
-                        principalColumn: "ISO",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "ISO");
                 });
 
             migrationBuilder.CreateTable(
@@ -392,13 +391,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     STREET2 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true),
                     STREET3 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true),
                     STREET4 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true),
-                    CITY = table.Column<string>(type: "NVARCHAR2(25)", maxLength: 25, nullable: false),
-                    STATE = table.Column<string>(type: "NVARCHAR2(3)", maxLength: 3, nullable: false),
-                    POSTAL_CODE = table.Column<string>(type: "NVARCHAR2(9)", maxLength: 9, nullable: false),
-                    COUNTRY_ISO = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: false, defaultValue: "US"),
+                    CITY = table.Column<string>(type: "NVARCHAR2(25)", maxLength: 25, nullable: true),
+                    STATE = table.Column<string>(type: "NVARCHAR2(3)", maxLength: 3, nullable: true),
+                    POSTAL_CODE = table.Column<string>(type: "NVARCHAR2(9)", maxLength: 9, nullable: true),
+                    COUNTRY_ISO = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: true, defaultValue: "US"),
                     THIRD_PARTY_PAYEEE = table.Column<string>(type: "NVARCHAR2(2000)", nullable: true),
                     THIRD_PARTY_NAME = table.Column<string>(type: "NVARCHAR2(2000)", nullable: true),
-                    THIRD_PARTY_STREET = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true),
+                    THIRD_PARTY_STREET = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false),
                     THIRD_PARTY_STREET2 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true),
                     THIRD_PARTY_STREET3 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true),
                     THIRD_PARTY_STREET4 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true),
@@ -430,8 +429,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         name: "FK_DISTRIBUTION_COUNTRY_COUNTRY_ISO",
                         column: x => x.COUNTRY_ISO,
                         principalTable: "COUNTRY",
-                        principalColumn: "ISO",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "ISO");
                     table.ForeignKey(
                         name: "FK_DISTRIBUTION_COUNTRY_THIRD_PARTY_COUNTRY_ISO",
                         column: x => x.THIRD_PARTY_COUNTRY_ISO,
@@ -482,7 +480,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     FEDERAL_TAXES = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
                     STATE_TAXES = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
                     TAX_CODE_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
-                    SSN = table.Column<long>(type: "NUMBER(19)", nullable: false),
+                    SSN = table.Column<long>(type: "NUMBER(9)", precision: 9, nullable: false),
                     DISTRIBUTION_SEQUENCE = table.Column<int>(type: "NUMBER(10)", nullable: false)
                 },
                 constraints: table =>
@@ -526,7 +524,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     CITY = table.Column<string>(type: "NVARCHAR2(25)", maxLength: 25, nullable: false, comment: "City"),
                     STATE = table.Column<string>(type: "NVARCHAR2(3)", maxLength: 3, nullable: false, comment: "State"),
                     POSTAL_CODE = table.Column<string>(type: "NVARCHAR2(9)", maxLength: 9, nullable: false, comment: "Postal Code"),
-                    COUNTRY_ISO = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: false, defaultValue: "US"),
+                    COUNTRY_ISO = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: true, defaultValue: "US"),
                     DATE_OF_BIRTH = table.Column<DateTime>(type: "DATE", nullable: false, comment: "DateOfBirth"),
                     FULL_TIME_DATE = table.Column<DateTime>(type: "DATE", nullable: true, comment: "FullTimeDate"),
                     HIRE_DATE = table.Column<DateTime>(type: "DATE", nullable: false, comment: "HireDate"),
@@ -546,8 +544,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         name: "FK_DEMOGRAPHIC_COUNTRY_COUNTRY_ISO",
                         column: x => x.COUNTRY_ISO,
                         principalTable: "COUNTRY",
-                        principalColumn: "ISO",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "ISO");
                     table.ForeignKey(
                         name: "FK_DEMOGRAPHIC_DEPARTMENT_DEPARTMENTID",
                         column: x => x.DEPARTMENT,
