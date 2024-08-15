@@ -45,9 +45,4 @@ public sealed class DemographicsClient : IDemographicsService
 
         return await response.Content.ReadFromJsonAsync<ISet<DemographicResponseDto>>(_options, cancellationToken).ConfigureAwait(false) ?? new HashSet<DemographicResponseDto>(0);
     }
-
-    public Task<DemographicResponseDto?> GetDemographicByBadgeNumber(int badgeNumber, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
 }

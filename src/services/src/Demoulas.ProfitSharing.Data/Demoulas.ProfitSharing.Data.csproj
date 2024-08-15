@@ -6,12 +6,7 @@
     <Nullable>enable</Nullable>
     <Configurations>Debug;Release;Russ</Configurations>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Content Remove="C:\Users\russh\.nuget\packages\demoulas.common.data.services\1.0.0\contentFiles\any\net8.0\readme.md" />
-    <Content Remove="C:\Users\russh\.nuget\packages\demoulas.common.data.services\3.0.0\contentFiles\any\net8.0\readme.md" />
-    <Content Remove="C:\Users\russh\.nuget\packages\demoulas.storeinfo\1.7.2\contentFiles\any\net8.0\readme.md" />
-  </ItemGroup>
+ 
 
   <ItemGroup>
     <PackageReference Include="Aspire.Oracle.EntityFrameworkCore" />
