@@ -2130,9 +2130,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("NAME");
 
                     b.HasKey("Id")
-                        .HasName("PK_EMPLOYMENTSTATUS");
+                        .HasName("PK_EMPLOYMENT_STATUS");
 
-                    b.ToTable("EMPLOYMENTSTATUS", (string)null);
+                    b.ToTable("EMPLOYMENT_STATUS", (string)null);
 
                     b.HasData(
                         new
@@ -3053,8 +3053,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("ZERO_CONTRIBUTION_REASON_ID");
 
-                    b.HasKey("PSN")
-                        .HasName("PK_PAYPROFIT");
+                    b.HasKey("BadgeNumber")
+                        .HasName("PK_PAY_PROFIT");
 
                     b.HasIndex("BeneficiaryTypeId")
                         .HasDatabaseName("IX_PAY_PROFIT_BENEFICIARYTYPEID");
@@ -3201,7 +3201,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("REMARK");
 
                     b.Property<long>("SSN")
-                        .HasColumnType("NUMBER(19)")
+                        .HasPrecision(9)
+                        .HasColumnType("NUMBER(9)")
                         .HasColumnName("SSN");
 
                     b.Property<decimal>("StateTaxes")
@@ -3233,7 +3234,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasDatabaseName("IX_PROFIT_DETAIL_TAXCODEID");
 
                     b.HasIndex("ZeroContributionReasonId")
-                        .HasDatabaseName("IX_PROFIT_DETAIL_ZERO_CONTRIBUTION_REASON_ID");
+                        .HasDatabaseName("IX_PROFIT_DETAIL_ZEROCONTRIBUTIONREASONID");
 
                     b.ToTable("PROFIT_DETAIL", (string)null);
                 });
@@ -3708,14 +3709,14 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasForeignKey("EmploymentStatusId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK_DEMOGRAPHICS_EMPLOYMENTSTATUS_EMPLOYMENT_STATUS_ID");
+                        .HasConstraintName("FK_DEMOGRAPHIC_EMPLOYMENTSTATUS_EMPLOYMENTSTATUSID");
 
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.EmploymentType", "EmploymentType")
                         .WithMany("Demographics")
                         .HasForeignKey("EmploymentTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK_DEMOGRAPHICS_EMPLOYMENTTYPE_EMPLOYEMENT_TYPE_ID");
+                        .HasConstraintName("FK_DEMOGRAPHIC_EMPLOYMENTTYPE_EMPLOYMENTTYPEID");
 
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.Gender", "Gender")
                         .WithMany("Demographics")
@@ -3729,19 +3730,19 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasForeignKey("PayClassificationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK_DEMOGRAPHICS_PAYCLASSIFICATION_PAY_CLASSIFICATION_ID");
+                        .HasConstraintName("FK_DEMOGRAPHIC_PAYCLASSIFICATIONS_PAYCLASSIFICATIONID");
 
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.PayFrequency", "PayFrequency")
                         .WithMany("Demographics")
                         .HasForeignKey("PayFrequencyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK_DEMOGRAPHICS_PAYFREQUENCY_PAY_FREQUENCY_ID");
+                        .HasConstraintName("FK_DEMOGRAPHIC_PAYFREQUENCY_PAYFREQUENCYID");
 
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.TerminationCode", "TerminationCode")
                         .WithMany("Demographics")
                         .HasForeignKey("TerminationCodeId")
-                        .HasConstraintName("FK_DEMOGRAPHICS_TERMINATIONCODE_TERMINATION_CODE_ID");
+                        .HasConstraintName("FK_DEMOGRAPHIC_TERMINATIONCODE_TERMINATIONCODEID");
 
                     b.OwnsOne("Demoulas.ProfitSharing.Data.Entities.Address", "Address", b1 =>
                         {
@@ -4129,14 +4130,19 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasForeignKey("ProfitCodeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK_PROFIT_DETAIL_PROFITCODE_PROFIT_CODE_ID");
+                        .HasConstraintName("FK_PROFIT_DETAIL_PROFITCODES_PROFIT_CODE_ID");
 
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.TaxCode", "TaxCode")
                         .WithMany()
                         .HasForeignKey("TaxCodeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK_PROFIT_DETAIL_TAXCODE_TAX_CODE_ID");
+                        .HasConstraintName("FK_PROFIT_DETAIL_TAXCODES_TAX_CODE_ID");
+
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.ZeroContributionReason", "ZeroContributionReason")
+                        .WithMany()
+                        .HasForeignKey("ZeroContributionReasonId")
+                        .HasConstraintName("FK_PROFIT_DETAIL_ZEROCONTRIBUTIONREASON_ZEROCONTRIBUTIONREASONID");
 
                     b.Navigation("ProfitCode");
 
