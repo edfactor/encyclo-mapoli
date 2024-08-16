@@ -23,13 +23,13 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
     private readonly OracleHcmConfig _oracleHcmConfig;
     private readonly OracleEmployeeValidator _employeeValidator;
 
-    public EmployeeSyncService(OracleDemographicsService oracleDemographicsService,
+    public EmployeeSyncService(HttpClient httpClient,
         IDemographicsServiceInternal demographicsService,
         IProfitSharingDataContextFactory profitSharingDataContextFactory,
         OracleHcmConfig oracleHcmConfig,
         OracleEmployeeValidator employeeValidator)
     {
-        _oracleDemographicsService = oracleDemographicsService;
+        _oracleDemographicsService = new OracleDemographicsService(httpClient, oracleHcmConfig);
         _demographicsService = demographicsService;
         _profitSharingDataContextFactory = profitSharingDataContextFactory;
         _oracleHcmConfig = oracleHcmConfig;

@@ -9,7 +9,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services;
 
-public sealed class OracleDemographicsService : IOracleDemographicsService
+internal sealed class OracleDemographicsService
 {
     private readonly HttpClient _httpClient;
     private readonly OracleHcmConfig _oracleHcmConfig;
