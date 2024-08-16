@@ -72,6 +72,8 @@ public sealed class PayProfit
     /// </summary>
     public required byte CompanyContributionYears { get; set; }
 
+    public bool CertificateIssuedLastYear { get; set; }
+
     /// <summary>
     /// Date the last PS Certificate was issued
     /// </summary>
