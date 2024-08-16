@@ -30,14 +30,14 @@ public static class ServicesExtension
 {
     public static IHostApplicationBuilder AddProjectServices(this IHostApplicationBuilder builder)
     {
-        _ = builder.Services.AddSingleton<IEmployeeSyncJob, EmployeeSyncJob>();
+        _ = builder.Services.AddSingleton<IEmployeeSyncService, EmployeeSyncService>();
         _ = builder.Services.AddSingleton<OracleEmployeeValidator>();
 
         _ = builder.Services.AddScoped<IPayClassificationService, PayClassificationService>();
         _ = builder.Services.AddScoped<IDemographicsService, DemographicsService>();
         _ = builder.Services.AddScoped<IYearEndService, YearEndService>();
         _ = builder.Services.AddScoped<IPayProfitService, PayProfitService>();
-        _ = builder.Services.AddScoped<IOracleHcmSynchronizationService, OracleHcmOracleHcmSynchronizationService>();
+        _ = builder.Services.AddScoped<IOracleHcmSynchronizationService, OracleHcmSynchronizationService>();
 
 
         OracleHcmConfig oktaSettings = builder.Configuration.GetSection("OracleHcm").Get<OracleHcmConfig>() ?? new OracleHcmConfig { Url = string.Empty };
@@ -46,7 +46,7 @@ public static class ServicesExtension
         _ = builder.Services.AddSingleton<IJobFactory, SimpleJobFactory>();
         _ = builder.Services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
         _ = builder.Services.AddSingleton<IDemographicsServiceInternal, DemographicsService>();
-        _ = builder.Services.AddSingleton<IOracleHcmSynchronizationService, OracleHcmOracleHcmSynchronizationService>();
+        _ = builder.Services.AddSingleton<IOracleHcmSynchronizationService, OracleHcmSynchronizationService>();
         _ = builder.Services.AddSingleton<IStoreService, StoreService>();
 
         _ = builder.Services.AddHttpClient<OracleDemographicsService>((services, client) =>

@@ -317,7 +317,7 @@ public class YearEndService : IYearEndService
                 var dupNameSlashDateOfBirth = await (from dem in ctx.Demographics
                                                  group dem by new { dem.FullName, dem.DateOfBirth } into g
                                                  where g.Count() > 1
-                                                 select g.Key.FullName).ToListAsync();
+                                                 select g.Key.FullName).ToListAsync(cancellationToken: cancellationToken);
 
                 var query = from dem in ctx.Demographics
                             join ppLj in ctx.PayProfits on dem.BadgeNumber equals ppLj.BadgeNumber into tmpPayProfit

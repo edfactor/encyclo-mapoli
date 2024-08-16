@@ -11,12 +11,11 @@ using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.OracleHcm.Services;
 using Demoulas.ProfitSharing.OracleHcm.Validators;
 
-namespace Demoulas.ProfitSharing.OracleHcm.Jobs;
+namespace Demoulas.ProfitSharing.OracleHcm.Services;
 
-public sealed class EmployeeSyncJob : IEmployeeSyncJob
+public sealed class EmployeeSyncService : IEmployeeSyncService
 {
     private readonly OracleDemographicsService _oracleDemographicsService;
     private readonly IDemographicsServiceInternal _demographicsService;
@@ -24,7 +23,7 @@ public sealed class EmployeeSyncJob : IEmployeeSyncJob
     private readonly OracleHcmConfig _oracleHcmConfig;
     private readonly OracleEmployeeValidator _employeeValidator;
 
-    public EmployeeSyncJob(OracleDemographicsService oracleDemographicsService,
+    public EmployeeSyncService(OracleDemographicsService oracleDemographicsService,
         IDemographicsServiceInternal demographicsService,
         IProfitSharingDataContextFactory profitSharingDataContextFactory,
         OracleHcmConfig oracleHcmConfig,

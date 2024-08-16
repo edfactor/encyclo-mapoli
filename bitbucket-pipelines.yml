@@ -6,10 +6,9 @@
 #
 # ------------------------------------------------------------------------
 
-pipelines:
-  branches:
-    master:
-      - step: &build-and-test
+definitions:
+  steps:
+    build-and-test: &build-and-test-backend
           name: Build and Test
           runs-on:
             - windows
@@ -27,9 +26,36 @@ pipelines:
             - test-reports/**
             - build/**
             - publishOutput/**
+
+    lint-the-code: &lint-the-code
+      name: Lint the code
+      caches:
+        - dotnetcore
+      script:
+        - export SOLUTION_NAME=Demoulas.Common
+        - export REPORTS_PATH=linter-reports
+        - dotnet new tool-manifest
+        - dotnet tool install JetBrains.ReSharper.GlobalTools
+        - dotnet tool restore
+        - dotnet jb inspectcode ${SOLUTION_NAME}.sln --output="${REPORTS_PATH}/jb-${BITBUCKET_BUILD_NUMBER}.xml"
+      artifacts:
+        - linter-reports/**
+
+
+pipelines:
+  branches:
+    master:
+      - parallel:
+          - step: *build-and-test-backend
+          - step: *lint-the-code
+  
     develop:
-      - step: *build-and-test
+      - parallel:
+          - step: *build-and-test-backend
+          - step: *lint-the-code
 
   pull-requests:
     '**':
-      - step: *build-and-test
+      - parallel:
+          - step: *build-and-test-backend
+          - step: *lint-the-code

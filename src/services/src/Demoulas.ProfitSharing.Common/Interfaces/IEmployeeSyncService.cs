@@ -1,6 +1,6 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Interfaces;
 
-public interface IEmployeeSyncJob
+public interface IEmployeeSyncService
 {
     Task SynchronizeEmployees(CancellationToken cancellationToken);
 }

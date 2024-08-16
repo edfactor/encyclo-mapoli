@@ -15,15 +15,15 @@ namespace Demoulas.ProfitSharing.OracleHcm.Jobs;
 public class OracleHcmJobConsumer : IConsumer<MessageRequest<OracleHcmJobRequest>>
 {
     private readonly IProfitSharingDataContextFactory _dataContext;
-    private readonly IEmployeeSyncJob _employeeSyncJob;
+    private readonly IEmployeeSyncService _employeeSyncService;
     private readonly ILogger<OracleHcmJobConsumer> _logger;
 
     public OracleHcmJobConsumer(IProfitSharingDataContextFactory context, 
-        IEmployeeSyncJob employeeSyncJob,
+        IEmployeeSyncService employeeSyncService,
         ILogger<OracleHcmJobConsumer> logger)
     {
         _dataContext = context;
-        _employeeSyncJob = employeeSyncJob;
+        _employeeSyncService = employeeSyncService;
         _logger = logger;
     }
 
@@ -85,7 +85,7 @@ public class OracleHcmJobConsumer : IConsumer<MessageRequest<OracleHcmJobRequest
 
     private Task ExecuteJob(CancellationToken cancellationToken)
     {
-        return _employeeSyncJob.SynchronizeEmployees(cancellationToken);
+        return _employeeSyncService.SynchronizeEmployees(cancellationToken);
     }
 }
 
