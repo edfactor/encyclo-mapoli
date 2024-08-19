@@ -39,8 +39,8 @@ definitions:
       artifacts:
         - linter-reports/**
 
-    create-artifacts: &create-artifacts
-      name: Create Artifacts      
+    create-frontend-artifacts: &create-frontend-artifacts
+      name: Create FrontEnd Artifacts      
       runs-on:
         - windows
         - self.hosted
@@ -51,10 +51,8 @@ definitions:
         - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
         - cd .\src\UI
         -  install --legacy-peer-deps;
-        - {$env:NPM} run build:qa;
-        - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.Smart.UI.qa.zip" -Force
-        - {$env:NPM} run build:uat
-        - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.Smart.UI.uat.zip" -Force
+        - {$env:NPM} run build:$env:ENV
+        - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.$env:ENV.zip" -Force        
 
 
 pipelines:

@@ -72,7 +72,6 @@
     <PackageVersion Include="EntityFramework.Serilog" Version="1.0.15" />
     <PackageVersion Include="coverlet.collector" Version="6.0.2" />
     <PackageVersion Include="MockQueryable.Moq" Version="7.0.1" />
-    <PackageVersion Include="SonarAnalyzer.CSharp" Version="9.32.0.97167" />
     <PackageVersion Include="xunit" Version="2.9.0" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
     <PackageVersion Include="JsonSchema.Net" Version="6.0.2" />
@@ -82,6 +81,7 @@
     <PackageVersion Include="Roslynator.Analyzers" Version="4.12.4" />
     <PackageVersion Include="Roslynator.Formatting.Analyzers" Version="4.12.4" />
     <PackageVersion Include="AsyncAwaitBestPractices" Version="8.0.0" />
+    <PackageVersion Include="SonarAnalyzer.CSharp" Version="9.32.0.97167" />
     <PackageVersion Include="Microsoft.SourceLink.Bitbucket.Git" Version="8.0.0" />
   </ItemGroup>
 </Project>
