@@ -1,6 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Demoulas.Common.Data.Contexts.ValueConverters;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
 internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
@@ -18,7 +19,7 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
             .HasColumnName("BADGE_NUMBER");
 
         _ = builder.Property(e => e.SSN)
-            .HasMaxLength(9)
+            .HasPrecision(9)
             .IsRequired();
 
         _ = builder.Property(e => e.HoursCurrentYear)
@@ -76,8 +77,15 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
             .HasColumnName("COMPANY_CONTRIBUTION_YEARS")
             .IsRequired();
 
+        _ = builder.Property(d => d.CertificateIssuedLastYear)
+            .HasColumnType("NUMBER(1)")
+            .HasDefaultValue(0)
+            .HasColumnName("CERTIFICATE_ISSUED_LAST_YEAR");
+
         _ = builder.Property(e => e.PSCertificateIssuedDate)
-            .HasColumnName("PS_CERTIFICATE_ISSUED_DATE");
+            .HasColumnName("PS_CERTIFICATE_ISSUED_DATE")
+            .HasColumnType("DATE")
+            .HasConversion<DateOnlyConverter>();
 
         _ = builder.Property(e => e.InitialContributionYear)
             .HasColumnName("INITIAL_CONTRIBUTION_YEAR")
