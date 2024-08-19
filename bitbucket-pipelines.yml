@@ -20,12 +20,10 @@ definitions:
             - $env:NUGET_ORG="https://api.nuget.org/v3/index.json"
             - dotnet workload update --source $env:NUGET_ORG
             - dotnet restore src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
-            - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml" -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
-            - powershell -File generateBuildInfo.ps1
+            - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml" -p:RestoreAdditionalProjectSources=$env:NUGET_ORG            
           artifacts:
             - test-reports/**
             - build/**
-            - publishOutput/**
 
     lint-the-code: &lint-the-code
       name: Lint the code
@@ -72,3 +70,28 @@ pipelines:
       - parallel:
           - step: *build-and-test-backend
           - step: *lint-the-code
+  
+  custom:
+    deploy_profitsharing:
+      - variables: # https://bitbucket.org/blog/predefine-values-of-custom-pipeline-variables
+          - name: ENV
+            default: QA
+            allowed-values:  # optionally restrict variable values
+              - QA
+              - UAT
+              - Production
+      - parallel:
+          - step: *build-and-test-backend
+          - step: *lint-the-code
+      - parallel:
+          - step:
+             name: Compress API
+             runs-on:
+               - windows
+               - self.hosted
+               - appt125
+             artifacts:
+               - dist\**
+             script: 
+               - Compress-Archive -Path ./publishOutput/* -DestinationPath ./Demoulas.ProfitSharing.Api.zip -Force
+          - step: *create-frontend-artifacts
