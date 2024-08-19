@@ -29,8 +29,6 @@ definitions:
 
     lint-the-code: &lint-the-code
       name: Lint the code
-      caches:
-        - dotnetcore
       script:
         - export SOLUTION_NAME=Demoulas.Common
         - export REPORTS_PATH=linter-reports
@@ -40,6 +38,23 @@ definitions:
         - dotnet jb inspectcode ${SOLUTION_NAME}.sln --output="${REPORTS_PATH}/jb-${BITBUCKET_BUILD_NUMBER}.xml"
       artifacts:
         - linter-reports/**
+
+    create-artifacts: &create-artifacts
+      name: Create Artifacts      
+      runs-on:
+        - windows
+        - self.hosted
+        - appt125
+      artifacts:
+        - dist\**
+      script:
+        - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
+        - cd .\src\UI
+        -  install --legacy-peer-deps;
+        - {$env:NPM} run build:qa;
+        - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.Smart.UI.qa.zip" -Force
+        - {$env:NPM} run build:uat
+        - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.Smart.UI.uat.zip" -Force
 
 
 pipelines:
