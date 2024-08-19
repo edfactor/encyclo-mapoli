@@ -93,5 +93,7 @@ pipelines:
              artifacts:
                - dist\**
              script: 
+               - dotnet tool install Demoulas.Common.Build.Cli
+               - Demoulas.Common.Build.Cli --buildid ${BITBUCKET_BUILD_NUMBER} --Branch ${BITBUCKET_BRANCH} --CommitHash ${BITBUCKET_COMMIT}
                - Compress-Archive -Path ./publishOutput/* -DestinationPath ./Demoulas.ProfitSharing.Api.zip -Force
           - step: *create-frontend-artifacts
