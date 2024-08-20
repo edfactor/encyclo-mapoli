@@ -6,6 +6,8 @@
 #
 # ------------------------------------------------------------------------
 
+image: mcr.microsoft.com/dotnet/sdk:8.0
+
 definitions:
   steps:
     build-and-test: &build-and-test-backend
