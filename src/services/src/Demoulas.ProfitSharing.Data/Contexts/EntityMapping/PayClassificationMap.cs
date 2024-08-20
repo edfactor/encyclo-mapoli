@@ -25,8 +25,10 @@ internal sealed class PayClassificationMap : IEntityTypeConfiguration<PayClassif
             .HasComment("Pay Classification");
 
         builder.HasData(
+            new PayClassification { Id = PayClassification.Constants.ZeroOne, Name = "01" }, // There are 4 people in the obfuscation dataset with this JOBCLASS 
             new PayClassification { Id = PayClassification.Constants.Manager, Name = "MANAGER" },
             new PayClassification { Id = PayClassification.Constants.AssistantManager, Name = "ASSISTANT MANAGER" },
+            new PayClassification { Id = PayClassification.Constants.SpiritsClerkPT, Name = "SPIRITS CLERK - PT" }, // 1 person in obfuscation dataset with this JOBCLASS
             new PayClassification { Id = PayClassification.Constants.FrontEndManager, Name = "FRONT END MANAGER" },
             new PayClassification { Id = PayClassification.Constants.AssistantHeadCashier, Name = "ASSISTANT HEAD CASHIER" },
             new PayClassification { Id = PayClassification.Constants.CashiersAM, Name = "CASHIERS - AM" },
