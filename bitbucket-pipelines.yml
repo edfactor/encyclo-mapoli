@@ -29,6 +29,10 @@ definitions:
 
     test-frontend: &test-frontend
           name:  Build and Test Frontend UI
+          runs-on:
+           - windows
+           - self.hosted
+           - appt125
           script:
            - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
           artifacts:
