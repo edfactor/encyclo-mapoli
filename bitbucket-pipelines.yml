@@ -47,7 +47,7 @@ definitions:
       artifacts:
         - dist\**
       script:
-        - dotnet tool install --global Demoulas.Common.Build.Cli
+        - dotnet tool update --global Demoulas.Common.Build.Cli
         - Demoulas.Common.Build.Cli --buildid ${BITBUCKET_BUILD_NUMBER} --Branch ${BITBUCKET_BRANCH} --CommitHash ${BITBUCKET_COMMIT}
         - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.Api -c Release -p:PublishProfile=FolderProfile -o ./publishOutput
         - Compress-Archive -Path ./publishOutput/* -DestinationPath ./Demoulas.ProfitSharing.Api.zip -Force
