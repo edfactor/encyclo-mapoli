@@ -30,7 +30,7 @@ definitions:
     lint-the-code: &lint-the-code
       name: Lint the code
       script:
-        - export SOLUTION_NAME=Demoulas.Common
+        - export SOLUTION_NAME=Demoulas.ProfitSharing
         - export REPORTS_PATH=linter-reports
         - dotnet new tool-manifest
         - dotnet tool install JetBrains.ReSharper.GlobalTools
