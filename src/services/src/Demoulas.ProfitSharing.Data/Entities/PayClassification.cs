@@ -11,8 +11,10 @@ public sealed class PayClassification : ILookupTable<byte>
 {
     public static class Constants
     {
+        public const byte ZeroOne = 0; // at least 4 people in prod have this Pay Classification/JobClass (see PROFITSHARE)
         public const byte Manager = 1;
         public const byte AssistantManager = 2;
+        public const byte SpiritsClerkPT = 7;  //  at least 1 person in prod has this Pay Classification/JobClass (see PROFITSHARE)
         public const byte FrontEndManager = 10;
         public const byte AssistantHeadCashier = 11;
         public const byte CashiersAM = 13;

@@ -3,6 +3,7 @@ using System;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 
@@ -11,9 +12,11 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    partial class ProfitSharingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240820133330_PS332TableTroubles")]
+    partial class PS332TableTroubles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -71,7 +74,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NVARCHAR2(30)")
                         .HasColumnName("MIDDLE_NAME");
 
-                    b.Property<int>("SSN")
+                    b.Property<long>("SSN")
                         .HasPrecision(9)
                         .HasColumnType("NUMBER(9)")
                         .HasColumnName("SSN");
@@ -146,7 +149,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NVARCHAR2(10)")
                         .HasColumnName("RELATIONSHIP");
 
-                    b.Property<int>("SSN")
+                    b.Property<long>("SSN")
                         .HasPrecision(9)
                         .HasColumnType("NUMBER(9)")
                         .HasColumnName("SSN");
@@ -200,7 +203,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NVARCHAR2(2)")
                         .HasColumnName("ISO");
 
-                    b.Property<byte>("Id")
+                    b.Property<short>("Id")
                         .HasPrecision(3)
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("ID");
@@ -226,1358 +229,1358 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         new
                         {
                             ISO = "AF",
-                            Id = (byte)1,
+                            Id = (short)1,
                             Name = "Afghanistan",
                             TelephoneCode = "+93"
                         },
                         new
                         {
                             ISO = "AL",
-                            Id = (byte)2,
+                            Id = (short)2,
                             Name = "Albania",
                             TelephoneCode = "+355"
                         },
                         new
                         {
                             ISO = "DZ",
-                            Id = (byte)3,
+                            Id = (short)3,
                             Name = "Algeria",
                             TelephoneCode = "+213"
                         },
                         new
                         {
                             ISO = "AD",
-                            Id = (byte)4,
+                            Id = (short)4,
                             Name = "Andorra",
                             TelephoneCode = "+376"
                         },
                         new
                         {
                             ISO = "AO",
-                            Id = (byte)5,
+                            Id = (short)5,
                             Name = "Angola",
                             TelephoneCode = "+244"
                         },
                         new
                         {
                             ISO = "AG",
-                            Id = (byte)6,
+                            Id = (short)6,
                             Name = "Antigua and Barbuda",
                             TelephoneCode = "+1-268"
                         },
                         new
                         {
                             ISO = "AR",
-                            Id = (byte)7,
+                            Id = (short)7,
                             Name = "Argentina",
                             TelephoneCode = "+54"
                         },
                         new
                         {
                             ISO = "AM",
-                            Id = (byte)8,
+                            Id = (short)8,
                             Name = "Armenia",
                             TelephoneCode = "+374"
                         },
                         new
                         {
                             ISO = "AU",
-                            Id = (byte)9,
+                            Id = (short)9,
                             Name = "Australia",
                             TelephoneCode = "+61"
                         },
                         new
                         {
                             ISO = "AT",
-                            Id = (byte)10,
+                            Id = (short)10,
                             Name = "Austria",
                             TelephoneCode = "+43"
                         },
                         new
                         {
                             ISO = "AZ",
-                            Id = (byte)11,
+                            Id = (short)11,
                             Name = "Azerbaijan",
                             TelephoneCode = "+994"
                         },
                         new
                         {
                             ISO = "BS",
-                            Id = (byte)12,
+                            Id = (short)12,
                             Name = "Bahamas",
                             TelephoneCode = "+1-242"
                         },
                         new
                         {
                             ISO = "BH",
-                            Id = (byte)13,
+                            Id = (short)13,
                             Name = "Bahrain",
                             TelephoneCode = "+973"
                         },
                         new
                         {
                             ISO = "BD",
-                            Id = (byte)14,
+                            Id = (short)14,
                             Name = "Bangladesh",
                             TelephoneCode = "+880"
                         },
                         new
                         {
                             ISO = "BB",
-                            Id = (byte)15,
+                            Id = (short)15,
                             Name = "Barbados",
                             TelephoneCode = "+1-246"
                         },
                         new
                         {
                             ISO = "BY",
-                            Id = (byte)16,
+                            Id = (short)16,
                             Name = "Belarus",
                             TelephoneCode = "+375"
                         },
                         new
                         {
                             ISO = "BE",
-                            Id = (byte)17,
+                            Id = (short)17,
                             Name = "Belgium",
                             TelephoneCode = "+32"
                         },
                         new
                         {
                             ISO = "BZ",
-                            Id = (byte)18,
+                            Id = (short)18,
                             Name = "Belize",
                             TelephoneCode = "+501"
                         },
                         new
                         {
                             ISO = "BJ",
-                            Id = (byte)19,
+                            Id = (short)19,
                             Name = "Benin",
                             TelephoneCode = "+229"
                         },
                         new
                         {
                             ISO = "BT",
-                            Id = (byte)20,
+                            Id = (short)20,
                             Name = "Bhutan",
                             TelephoneCode = "+975"
                         },
                         new
                         {
                             ISO = "BO",
-                            Id = (byte)21,
+                            Id = (short)21,
                             Name = "Bolivia",
                             TelephoneCode = "+591"
                         },
                         new
                         {
                             ISO = "BA",
-                            Id = (byte)22,
+                            Id = (short)22,
                             Name = "Bosnia and Herzegovina",
                             TelephoneCode = "+387"
                         },
                         new
                         {
                             ISO = "BW",
-                            Id = (byte)23,
+                            Id = (short)23,
                             Name = "Botswana",
                             TelephoneCode = "+267"
                         },
                         new
                         {
                             ISO = "BR",
-                            Id = (byte)24,
+                            Id = (short)24,
                             Name = "Brazil",
                             TelephoneCode = "+55"
                         },
                         new
                         {
                             ISO = "BN",
-                            Id = (byte)25,
+                            Id = (short)25,
                             Name = "Brunei",
                             TelephoneCode = "+673"
                         },
                         new
                         {
                             ISO = "BG",
-                            Id = (byte)26,
+                            Id = (short)26,
                             Name = "Bulgaria",
                             TelephoneCode = "+359"
                         },
                         new
                         {
                             ISO = "BF",
-                            Id = (byte)27,
+                            Id = (short)27,
                             Name = "Burkina Faso",
                             TelephoneCode = "+226"
                         },
                         new
                         {
                             ISO = "BI",
-                            Id = (byte)28,
+                            Id = (short)28,
                             Name = "Burundi",
                             TelephoneCode = "+257"
                         },
                         new
                         {
                             ISO = "CV",
-                            Id = (byte)29,
+                            Id = (short)29,
                             Name = "Cabo Verde",
                             TelephoneCode = "+238"
                         },
                         new
                         {
                             ISO = "KH",
-                            Id = (byte)30,
+                            Id = (short)30,
                             Name = "Cambodia",
                             TelephoneCode = "+855"
                         },
                         new
                         {
                             ISO = "CM",
-                            Id = (byte)31,
+                            Id = (short)31,
                             Name = "Cameroon",
                             TelephoneCode = "+237"
                         },
                         new
                         {
                             ISO = "CA",
-                            Id = (byte)32,
+                            Id = (short)32,
                             Name = "Canada",
                             TelephoneCode = "+1"
                         },
                         new
                         {
                             ISO = "CF",
-                            Id = (byte)33,
+                            Id = (short)33,
                             Name = "Central African Republic",
                             TelephoneCode = "+236"
                         },
                         new
                         {
                             ISO = "TD",
-                            Id = (byte)34,
+                            Id = (short)34,
                             Name = "Chad",
                             TelephoneCode = "+235"
                         },
                         new
                         {
                             ISO = "CL",
-                            Id = (byte)35,
+                            Id = (short)35,
                             Name = "Chile",
                             TelephoneCode = "+56"
                         },
                         new
                         {
                             ISO = "CN",
-                            Id = (byte)36,
+                            Id = (short)36,
                             Name = "China",
                             TelephoneCode = "+86"
                         },
                         new
                         {
                             ISO = "CO",
-                            Id = (byte)37,
+                            Id = (short)37,
                             Name = "Colombia",
                             TelephoneCode = "+57"
                         },
                         new
                         {
                             ISO = "KM",
-                            Id = (byte)38,
+                            Id = (short)38,
                             Name = "Comoros",
                             TelephoneCode = "+269"
                         },
                         new
                         {
                             ISO = "CG",
-                            Id = (byte)39,
+                            Id = (short)39,
                             Name = "Congo (Congo-Brazzaville)",
                             TelephoneCode = "+242"
                         },
                         new
                         {
                             ISO = "CR",
-                            Id = (byte)40,
+                            Id = (short)40,
                             Name = "Costa Rica",
                             TelephoneCode = "+506"
                         },
                         new
                         {
                             ISO = "HR",
-                            Id = (byte)41,
+                            Id = (short)41,
                             Name = "Croatia",
                             TelephoneCode = "+385"
                         },
                         new
                         {
                             ISO = "CU",
-                            Id = (byte)42,
+                            Id = (short)42,
                             Name = "Cuba",
                             TelephoneCode = "+53"
                         },
                         new
                         {
                             ISO = "CY",
-                            Id = (byte)43,
+                            Id = (short)43,
                             Name = "Cyprus",
                             TelephoneCode = "+357"
                         },
                         new
                         {
                             ISO = "CZ",
-                            Id = (byte)44,
+                            Id = (short)44,
                             Name = "Czechia (Czech Republic)",
                             TelephoneCode = "+420"
                         },
                         new
                         {
                             ISO = "CD",
-                            Id = (byte)45,
+                            Id = (short)45,
                             Name = "Democratic Republic of the Congo",
                             TelephoneCode = "+243"
                         },
                         new
                         {
                             ISO = "DK",
-                            Id = (byte)46,
+                            Id = (short)46,
                             Name = "Denmark",
                             TelephoneCode = "+45"
                         },
                         new
                         {
                             ISO = "DJ",
-                            Id = (byte)47,
+                            Id = (short)47,
                             Name = "Djibouti",
                             TelephoneCode = "+253"
                         },
                         new
                         {
                             ISO = "DM",
-                            Id = (byte)48,
+                            Id = (short)48,
                             Name = "Dominica",
                             TelephoneCode = "+1-767"
                         },
                         new
                         {
                             ISO = "DO",
-                            Id = (byte)49,
+                            Id = (short)49,
                             Name = "Dominican Republic",
                             TelephoneCode = "+1-809"
                         },
                         new
                         {
                             ISO = "EC",
-                            Id = (byte)50,
+                            Id = (short)50,
                             Name = "Ecuador",
                             TelephoneCode = "+593"
                         },
                         new
                         {
                             ISO = "EG",
-                            Id = (byte)51,
+                            Id = (short)51,
                             Name = "Egypt",
                             TelephoneCode = "+20"
                         },
                         new
                         {
                             ISO = "SV",
-                            Id = (byte)52,
+                            Id = (short)52,
                             Name = "El Salvador",
                             TelephoneCode = "+503"
                         },
                         new
                         {
                             ISO = "GQ",
-                            Id = (byte)53,
+                            Id = (short)53,
                             Name = "Equatorial Guinea",
                             TelephoneCode = "+240"
                         },
                         new
                         {
                             ISO = "ER",
-                            Id = (byte)54,
+                            Id = (short)54,
                             Name = "Eritrea",
                             TelephoneCode = "+291"
                         },
                         new
                         {
                             ISO = "EE",
-                            Id = (byte)55,
+                            Id = (short)55,
                             Name = "Estonia",
                             TelephoneCode = "+372"
                         },
                         new
                         {
                             ISO = "SZ",
-                            Id = (byte)56,
+                            Id = (short)56,
                             Name = "Eswatini (Swaziland)",
                             TelephoneCode = "+268"
                         },
                         new
                         {
                             ISO = "ET",
-                            Id = (byte)57,
+                            Id = (short)57,
                             Name = "Ethiopia",
                             TelephoneCode = "+251"
                         },
                         new
                         {
                             ISO = "FJ",
-                            Id = (byte)58,
+                            Id = (short)58,
                             Name = "Fiji",
                             TelephoneCode = "+679"
                         },
                         new
                         {
                             ISO = "FI",
-                            Id = (byte)59,
+                            Id = (short)59,
                             Name = "Finland",
                             TelephoneCode = "+358"
                         },
                         new
                         {
                             ISO = "FR",
-                            Id = (byte)60,
+                            Id = (short)60,
                             Name = "France",
                             TelephoneCode = "+33"
                         },
                         new
                         {
                             ISO = "GA",
-                            Id = (byte)61,
+                            Id = (short)61,
                             Name = "Gabon",
                             TelephoneCode = "+241"
                         },
                         new
                         {
                             ISO = "GM",
-                            Id = (byte)62,
+                            Id = (short)62,
                             Name = "Gambia",
                             TelephoneCode = "+220"
                         },
                         new
                         {
                             ISO = "GE",
-                            Id = (byte)63,
+                            Id = (short)63,
                             Name = "Georgia",
                             TelephoneCode = "+995"
                         },
                         new
                         {
                             ISO = "DE",
-                            Id = (byte)64,
+                            Id = (short)64,
                             Name = "Germany",
                             TelephoneCode = "+49"
                         },
                         new
                         {
                             ISO = "GH",
-                            Id = (byte)65,
+                            Id = (short)65,
                             Name = "Ghana",
                             TelephoneCode = "+233"
                         },
                         new
                         {
                             ISO = "GR",
-                            Id = (byte)66,
+                            Id = (short)66,
                             Name = "Greece",
                             TelephoneCode = "+30"
                         },
                         new
                         {
                             ISO = "GD",
-                            Id = (byte)67,
+                            Id = (short)67,
                             Name = "Grenada",
                             TelephoneCode = "+1-473"
                         },
                         new
                         {
                             ISO = "GT",
-                            Id = (byte)68,
+                            Id = (short)68,
                             Name = "Guatemala",
                             TelephoneCode = "+502"
                         },
                         new
                         {
                             ISO = "GN",
-                            Id = (byte)69,
+                            Id = (short)69,
                             Name = "Guinea",
                             TelephoneCode = "+224"
                         },
                         new
                         {
                             ISO = "GW",
-                            Id = (byte)70,
+                            Id = (short)70,
                             Name = "Guinea-Bissau",
                             TelephoneCode = "+245"
                         },
                         new
                         {
                             ISO = "GY",
-                            Id = (byte)71,
+                            Id = (short)71,
                             Name = "Guyana",
                             TelephoneCode = "+592"
                         },
                         new
                         {
                             ISO = "HT",
-                            Id = (byte)72,
+                            Id = (short)72,
                             Name = "Haiti",
                             TelephoneCode = "+509"
                         },
                         new
                         {
                             ISO = "HN",
-                            Id = (byte)73,
+                            Id = (short)73,
                             Name = "Honduras",
                             TelephoneCode = "+504"
                         },
                         new
                         {
                             ISO = "HU",
-                            Id = (byte)74,
+                            Id = (short)74,
                             Name = "Hungary",
                             TelephoneCode = "+36"
                         },
                         new
                         {
                             ISO = "IS",
-                            Id = (byte)75,
+                            Id = (short)75,
                             Name = "Iceland",
                             TelephoneCode = "+354"
                         },
                         new
                         {
                             ISO = "IN",
-                            Id = (byte)76,
+                            Id = (short)76,
                             Name = "India",
                             TelephoneCode = "+91"
                         },
                         new
                         {
                             ISO = "ID",
-                            Id = (byte)77,
+                            Id = (short)77,
                             Name = "Indonesia",
                             TelephoneCode = "+62"
                         },
                         new
                         {
                             ISO = "IR",
-                            Id = (byte)78,
+                            Id = (short)78,
                             Name = "Iran",
                             TelephoneCode = "+98"
                         },
                         new
                         {
                             ISO = "IQ",
-                            Id = (byte)79,
+                            Id = (short)79,
                             Name = "Iraq",
                             TelephoneCode = "+964"
                         },
                         new
                         {
                             ISO = "IE",
-                            Id = (byte)80,
+                            Id = (short)80,
                             Name = "Ireland",
                             TelephoneCode = "+353"
                         },
                         new
                         {
                             ISO = "IL",
-                            Id = (byte)81,
+                            Id = (short)81,
                             Name = "Israel",
                             TelephoneCode = "+972"
                         },
                         new
                         {
                             ISO = "IT",
-                            Id = (byte)82,
+                            Id = (short)82,
                             Name = "Italy",
                             TelephoneCode = "+39"
                         },
                         new
                         {
                             ISO = "JM",
-                            Id = (byte)83,
+                            Id = (short)83,
                             Name = "Jamaica",
                             TelephoneCode = "+1-876"
                         },
                         new
                         {
                             ISO = "JP",
-                            Id = (byte)84,
+                            Id = (short)84,
                             Name = "Japan",
                             TelephoneCode = "+81"
                         },
                         new
                         {
                             ISO = "JO",
-                            Id = (byte)85,
+                            Id = (short)85,
                             Name = "Jordan",
                             TelephoneCode = "+962"
                         },
                         new
                         {
                             ISO = "KZ",
-                            Id = (byte)86,
+                            Id = (short)86,
                             Name = "Kazakhstan",
                             TelephoneCode = "+7"
                         },
                         new
                         {
                             ISO = "KE",
-                            Id = (byte)87,
+                            Id = (short)87,
                             Name = "Kenya",
                             TelephoneCode = "+254"
                         },
                         new
                         {
                             ISO = "KI",
-                            Id = (byte)88,
+                            Id = (short)88,
                             Name = "Kiribati",
                             TelephoneCode = "+686"
                         },
                         new
                         {
                             ISO = "KW",
-                            Id = (byte)89,
+                            Id = (short)89,
                             Name = "Kuwait",
                             TelephoneCode = "+965"
                         },
                         new
                         {
                             ISO = "KG",
-                            Id = (byte)90,
+                            Id = (short)90,
                             Name = "Kyrgyzstan",
                             TelephoneCode = "+996"
                         },
                         new
                         {
                             ISO = "LA",
-                            Id = (byte)91,
+                            Id = (short)91,
                             Name = "Laos",
                             TelephoneCode = "+856"
                         },
                         new
                         {
                             ISO = "LV",
-                            Id = (byte)92,
+                            Id = (short)92,
                             Name = "Latvia",
                             TelephoneCode = "+371"
                         },
                         new
                         {
                             ISO = "LB",
-                            Id = (byte)93,
+                            Id = (short)93,
                             Name = "Lebanon",
                             TelephoneCode = "+961"
                         },
                         new
                         {
                             ISO = "LS",
-                            Id = (byte)94,
+                            Id = (short)94,
                             Name = "Lesotho",
                             TelephoneCode = "+266"
                         },
                         new
                         {
                             ISO = "LR",
-                            Id = (byte)95,
+                            Id = (short)95,
                             Name = "Liberia",
                             TelephoneCode = "+231"
                         },
                         new
                         {
                             ISO = "LY",
-                            Id = (byte)96,
+                            Id = (short)96,
                             Name = "Libya",
                             TelephoneCode = "+218"
                         },
                         new
                         {
                             ISO = "LI",
-                            Id = (byte)97,
+                            Id = (short)97,
                             Name = "Liechtenstein",
                             TelephoneCode = "+423"
                         },
                         new
                         {
                             ISO = "LT",
-                            Id = (byte)98,
+                            Id = (short)98,
                             Name = "Lithuania",
                             TelephoneCode = "+370"
                         },
                         new
                         {
                             ISO = "LU",
-                            Id = (byte)99,
+                            Id = (short)99,
                             Name = "Luxembourg",
                             TelephoneCode = "+352"
                         },
                         new
                         {
                             ISO = "MG",
-                            Id = (byte)100,
+                            Id = (short)100,
                             Name = "Madagascar",
                             TelephoneCode = "+261"
                         },
                         new
                         {
                             ISO = "MW",
-                            Id = (byte)101,
+                            Id = (short)101,
                             Name = "Malawi",
                             TelephoneCode = "+265"
                         },
                         new
                         {
                             ISO = "MY",
-                            Id = (byte)102,
+                            Id = (short)102,
                             Name = "Malaysia",
                             TelephoneCode = "+60"
                         },
                         new
                         {
                             ISO = "MV",
-                            Id = (byte)103,
+                            Id = (short)103,
                             Name = "Maldives",
                             TelephoneCode = "+960"
                         },
                         new
                         {
                             ISO = "ML",
-                            Id = (byte)104,
+                            Id = (short)104,
                             Name = "Mali",
                             TelephoneCode = "+223"
                         },
                         new
                         {
                             ISO = "MT",
-                            Id = (byte)105,
+                            Id = (short)105,
                             Name = "Malta",
                             TelephoneCode = "+356"
                         },
                         new
                         {
                             ISO = "MH",
-                            Id = (byte)106,
+                            Id = (short)106,
                             Name = "Marshall Islands",
                             TelephoneCode = "+692"
                         },
                         new
                         {
                             ISO = "MR",
-                            Id = (byte)107,
+                            Id = (short)107,
                             Name = "Mauritania",
                             TelephoneCode = "+222"
                         },
                         new
                         {
                             ISO = "MU",
-                            Id = (byte)108,
+                            Id = (short)108,
                             Name = "Mauritius",
                             TelephoneCode = "+230"
                         },
                         new
                         {
                             ISO = "MX",
-                            Id = (byte)109,
+                            Id = (short)109,
                             Name = "Mexico",
                             TelephoneCode = "+52"
                         },
                         new
                         {
                             ISO = "FM",
-                            Id = (byte)110,
+                            Id = (short)110,
                             Name = "Micronesia",
                             TelephoneCode = "+691"
                         },
                         new
                         {
                             ISO = "MD",
-                            Id = (byte)111,
+                            Id = (short)111,
                             Name = "Moldova",
                             TelephoneCode = "+373"
                         },
                         new
                         {
                             ISO = "MC",
-                            Id = (byte)112,
+                            Id = (short)112,
                             Name = "Monaco",
                             TelephoneCode = "+377"
                         },
                         new
                         {
                             ISO = "MN",
-                            Id = (byte)113,
+                            Id = (short)113,
                             Name = "Mongolia",
                             TelephoneCode = "+976"
                         },
                         new
                         {
                             ISO = "ME",
-                            Id = (byte)114,
+                            Id = (short)114,
                             Name = "Montenegro",
                             TelephoneCode = "+382"
                         },
                         new
                         {
                             ISO = "MA",
-                            Id = (byte)115,
+                            Id = (short)115,
                             Name = "Morocco",
                             TelephoneCode = "+212"
                         },
                         new
                         {
                             ISO = "MZ",
-                            Id = (byte)116,
+                            Id = (short)116,
                             Name = "Mozambique",
                             TelephoneCode = "+258"
                         },
                         new
                         {
                             ISO = "MM",
-                            Id = (byte)117,
+                            Id = (short)117,
                             Name = "Myanmar (Burma)",
                             TelephoneCode = "+95"
                         },
                         new
                         {
                             ISO = "NA",
-                            Id = (byte)118,
+                            Id = (short)118,
                             Name = "Namibia",
                             TelephoneCode = "+264"
                         },
                         new
                         {
                             ISO = "NR",
-                            Id = (byte)119,
+                            Id = (short)119,
                             Name = "Nauru",
                             TelephoneCode = "+674"
                         },
                         new
                         {
                             ISO = "NP",
-                            Id = (byte)120,
+                            Id = (short)120,
                             Name = "Nepal",
                             TelephoneCode = "+977"
                         },
                         new
                         {
                             ISO = "NL",
-                            Id = (byte)121,
+                            Id = (short)121,
                             Name = "Netherlands",
                             TelephoneCode = "+31"
                         },
                         new
                         {
                             ISO = "NZ",
-                            Id = (byte)122,
+                            Id = (short)122,
                             Name = "New Zealand",
                             TelephoneCode = "+64"
                         },
                         new
                         {
                             ISO = "NI",
-                            Id = (byte)123,
+                            Id = (short)123,
                             Name = "Nicaragua",
                             TelephoneCode = "+505"
                         },
                         new
                         {
                             ISO = "NE",
-                            Id = (byte)124,
+                            Id = (short)124,
                             Name = "Niger",
                             TelephoneCode = "+227"
                         },
                         new
                         {
                             ISO = "NG",
-                            Id = (byte)125,
+                            Id = (short)125,
                             Name = "Nigeria",
                             TelephoneCode = "+234"
                         },
                         new
                         {
                             ISO = "KP",
-                            Id = (byte)126,
+                            Id = (short)126,
                             Name = "North Korea",
                             TelephoneCode = "+850"
                         },
                         new
                         {
                             ISO = "MK",
-                            Id = (byte)127,
+                            Id = (short)127,
                             Name = "North Macedonia",
                             TelephoneCode = "+389"
                         },
                         new
                         {
                             ISO = "NO",
-                            Id = (byte)128,
+                            Id = (short)128,
                             Name = "Norway",
                             TelephoneCode = "+47"
                         },
                         new
                         {
                             ISO = "OM",
-                            Id = (byte)129,
+                            Id = (short)129,
                             Name = "Oman",
                             TelephoneCode = "+968"
                         },
                         new
                         {
                             ISO = "PK",
-                            Id = (byte)130,
+                            Id = (short)130,
                             Name = "Pakistan",
                             TelephoneCode = "+92"
                         },
                         new
                         {
                             ISO = "PW",
-                            Id = (byte)131,
+                            Id = (short)131,
                             Name = "Palau",
                             TelephoneCode = "+680"
                         },
                         new
                         {
                             ISO = "PS",
-                            Id = (byte)132,
+                            Id = (short)132,
                             Name = "Palestine State",
                             TelephoneCode = "+970"
                         },
                         new
                         {
                             ISO = "PA",
-                            Id = (byte)133,
+                            Id = (short)133,
                             Name = "Panama",
                             TelephoneCode = "+507"
                         },
                         new
                         {
                             ISO = "PG",
-                            Id = (byte)134,
+                            Id = (short)134,
                             Name = "Papua New Guinea",
                             TelephoneCode = "+675"
                         },
                         new
                         {
                             ISO = "PY",
-                            Id = (byte)135,
+                            Id = (short)135,
                             Name = "Paraguay",
                             TelephoneCode = "+595"
                         },
                         new
                         {
                             ISO = "PE",
-                            Id = (byte)136,
+                            Id = (short)136,
                             Name = "Peru",
                             TelephoneCode = "+51"
                         },
                         new
                         {
                             ISO = "PH",
-                            Id = (byte)137,
+                            Id = (short)137,
                             Name = "Philippines",
                             TelephoneCode = "+63"
                         },
                         new
                         {
                             ISO = "PL",
-                            Id = (byte)138,
+                            Id = (short)138,
                             Name = "Poland",
                             TelephoneCode = "+48"
                         },
                         new
                         {
                             ISO = "PT",
-                            Id = (byte)139,
+                            Id = (short)139,
                             Name = "Portugal",
                             TelephoneCode = "+351"
                         },
                         new
                         {
                             ISO = "QA",
-                            Id = (byte)140,
+                            Id = (short)140,
                             Name = "Qatar",
                             TelephoneCode = "+974"
                         },
                         new
                         {
                             ISO = "RO",
-                            Id = (byte)141,
+                            Id = (short)141,
                             Name = "Romania",
                             TelephoneCode = "+40"
                         },
                         new
                         {
                             ISO = "RU",
-                            Id = (byte)142,
+                            Id = (short)142,
                             Name = "Russia",
                             TelephoneCode = "+7"
                         },
                         new
                         {
                             ISO = "RW",
-                            Id = (byte)143,
+                            Id = (short)143,
                             Name = "Rwanda",
                             TelephoneCode = "+250"
                         },
                         new
                         {
                             ISO = "KN",
-                            Id = (byte)144,
+                            Id = (short)144,
                             Name = "Saint Kitts and Nevis",
                             TelephoneCode = "+1-869"
                         },
                         new
                         {
                             ISO = "LC",
-                            Id = (byte)145,
+                            Id = (short)145,
                             Name = "Saint Lucia",
                             TelephoneCode = "+1-758"
                         },
                         new
                         {
                             ISO = "VC",
-                            Id = (byte)146,
+                            Id = (short)146,
                             Name = "Saint Vincent and the Grenadines",
                             TelephoneCode = "+1-784"
                         },
                         new
                         {
                             ISO = "WS",
-                            Id = (byte)147,
+                            Id = (short)147,
                             Name = "Samoa",
                             TelephoneCode = "+685"
                         },
                         new
                         {
                             ISO = "SM",
-                            Id = (byte)148,
+                            Id = (short)148,
                             Name = "San Marino",
                             TelephoneCode = "+378"
                         },
                         new
                         {
                             ISO = "ST",
-                            Id = (byte)149,
+                            Id = (short)149,
                             Name = "Sao Tome and Principe",
                             TelephoneCode = "+239"
                         },
                         new
                         {
                             ISO = "SA",
-                            Id = (byte)150,
+                            Id = (short)150,
                             Name = "Saudi Arabia",
                             TelephoneCode = "+966"
                         },
                         new
                         {
                             ISO = "SN",
-                            Id = (byte)151,
+                            Id = (short)151,
                             Name = "Senegal",
                             TelephoneCode = "+221"
                         },
                         new
                         {
                             ISO = "RS",
-                            Id = (byte)152,
+                            Id = (short)152,
                             Name = "Serbia",
                             TelephoneCode = "+381"
                         },
                         new
                         {
                             ISO = "SC",
-                            Id = (byte)153,
+                            Id = (short)153,
                             Name = "Seychelles",
                             TelephoneCode = "+248"
                         },
                         new
                         {
                             ISO = "SL",
-                            Id = (byte)154,
+                            Id = (short)154,
                             Name = "Sierra Leone",
                             TelephoneCode = "+232"
                         },
                         new
                         {
                             ISO = "SG",
-                            Id = (byte)155,
+                            Id = (short)155,
                             Name = "Singapore",
                             TelephoneCode = "+65"
                         },
                         new
                         {
                             ISO = "SK",
-                            Id = (byte)156,
+                            Id = (short)156,
                             Name = "Slovakia",
                             TelephoneCode = "+421"
                         },
                         new
                         {
                             ISO = "SI",
-                            Id = (byte)157,
+                            Id = (short)157,
                             Name = "Slovenia",
                             TelephoneCode = "+386"
                         },
                         new
                         {
                             ISO = "SB",
-                            Id = (byte)158,
+                            Id = (short)158,
                             Name = "Solomon Islands",
                             TelephoneCode = "+677"
                         },
                         new
                         {
                             ISO = "SO",
-                            Id = (byte)159,
+                            Id = (short)159,
                             Name = "Somalia",
                             TelephoneCode = "+252"
                         },
                         new
                         {
                             ISO = "ZA",
-                            Id = (byte)160,
+                            Id = (short)160,
                             Name = "South Africa",
                             TelephoneCode = "+27"
                         },
                         new
                         {
                             ISO = "KR",
-                            Id = (byte)161,
+                            Id = (short)161,
                             Name = "South Korea",
                             TelephoneCode = "+82"
                         },
                         new
                         {
                             ISO = "SS",
-                            Id = (byte)162,
+                            Id = (short)162,
                             Name = "South Sudan",
                             TelephoneCode = "+211"
                         },
                         new
                         {
                             ISO = "ES",
-                            Id = (byte)163,
+                            Id = (short)163,
                             Name = "Spain",
                             TelephoneCode = "+34"
                         },
                         new
                         {
                             ISO = "LK",
-                            Id = (byte)164,
+                            Id = (short)164,
                             Name = "Sri Lanka",
                             TelephoneCode = "+94"
                         },
                         new
                         {
                             ISO = "SD",
-                            Id = (byte)165,
+                            Id = (short)165,
                             Name = "Sudan",
                             TelephoneCode = "+249"
                         },
                         new
                         {
                             ISO = "SR",
-                            Id = (byte)166,
+                            Id = (short)166,
                             Name = "Suriname",
                             TelephoneCode = "+597"
                         },
                         new
                         {
                             ISO = "SE",
-                            Id = (byte)167,
+                            Id = (short)167,
                             Name = "Sweden",
                             TelephoneCode = "+46"
                         },
                         new
                         {
                             ISO = "CH",
-                            Id = (byte)168,
+                            Id = (short)168,
                             Name = "Switzerland",
                             TelephoneCode = "+41"
                         },
                         new
                         {
                             ISO = "SY",
-                            Id = (byte)169,
+                            Id = (short)169,
                             Name = "Syria",
                             TelephoneCode = "+963"
                         },
                         new
                         {
                             ISO = "TW",
-                            Id = (byte)170,
+                            Id = (short)170,
                             Name = "Taiwan",
                             TelephoneCode = "+886"
                         },
                         new
                         {
                             ISO = "TJ",
-                            Id = (byte)171,
+                            Id = (short)171,
                             Name = "Tajikistan",
                             TelephoneCode = "+992"
                         },
                         new
                         {
                             ISO = "TZ",
-                            Id = (byte)172,
+                            Id = (short)172,
                             Name = "Tanzania",
                             TelephoneCode = "+255"
                         },
                         new
                         {
                             ISO = "TH",
-                            Id = (byte)173,
+                            Id = (short)173,
                             Name = "Thailand",
                             TelephoneCode = "+66"
                         },
                         new
                         {
                             ISO = "TL",
-                            Id = (byte)174,
+                            Id = (short)174,
                             Name = "Timor-Leste",
                             TelephoneCode = "+670"
                         },
                         new
                         {
                             ISO = "TG",
-                            Id = (byte)175,
+                            Id = (short)175,
                             Name = "Togo",
                             TelephoneCode = "+228"
                         },
                         new
                         {
                             ISO = "TO",
-                            Id = (byte)176,
+                            Id = (short)176,
                             Name = "Tonga",
                             TelephoneCode = "+676"
                         },
                         new
                         {
                             ISO = "TT",
-                            Id = (byte)177,
+                            Id = (short)177,
                             Name = "Trinidad and Tobago",
                             TelephoneCode = "+1-868"
                         },
                         new
                         {
                             ISO = "TN",
-                            Id = (byte)178,
+                            Id = (short)178,
                             Name = "Tunisia",
                             TelephoneCode = "+216"
                         },
                         new
                         {
                             ISO = "TR",
-                            Id = (byte)179,
+                            Id = (short)179,
                             Name = "Turkey",
                             TelephoneCode = "+90"
                         },
                         new
                         {
                             ISO = "TM",
-                            Id = (byte)180,
+                            Id = (short)180,
                             Name = "Turkmenistan",
                             TelephoneCode = "+993"
                         },
                         new
                         {
                             ISO = "TV",
-                            Id = (byte)181,
+                            Id = (short)181,
                             Name = "Tuvalu",
                             TelephoneCode = "+688"
                         },
                         new
                         {
                             ISO = "UG",
-                            Id = (byte)182,
+                            Id = (short)182,
                             Name = "Uganda",
                             TelephoneCode = "+256"
                         },
                         new
                         {
                             ISO = "UA",
-                            Id = (byte)183,
+                            Id = (short)183,
                             Name = "Ukraine",
                             TelephoneCode = "+380"
                         },
                         new
                         {
                             ISO = "AE",
-                            Id = (byte)184,
+                            Id = (short)184,
                             Name = "United Arab Emirates",
                             TelephoneCode = "+971"
                         },
                         new
                         {
                             ISO = "GB",
-                            Id = (byte)185,
+                            Id = (short)185,
                             Name = "United Kingdom",
                             TelephoneCode = "+44"
                         },
                         new
                         {
                             ISO = "US",
-                            Id = (byte)186,
+                            Id = (short)186,
                             Name = "United States of America",
                             TelephoneCode = "+1"
                         },
                         new
                         {
                             ISO = "UY",
-                            Id = (byte)187,
+                            Id = (short)187,
                             Name = "Uruguay",
                             TelephoneCode = "+598"
                         },
                         new
                         {
                             ISO = "UZ",
-                            Id = (byte)188,
+                            Id = (short)188,
                             Name = "Uzbekistan",
                             TelephoneCode = "+998"
                         },
                         new
                         {
                             ISO = "VU",
-                            Id = (byte)189,
+                            Id = (short)189,
                             Name = "Vanuatu",
                             TelephoneCode = "+678"
                         },
                         new
                         {
                             ISO = "VE",
-                            Id = (byte)190,
+                            Id = (short)190,
                             Name = "Venezuela",
                             TelephoneCode = "+58"
                         },
                         new
                         {
                             ISO = "VN",
-                            Id = (byte)191,
+                            Id = (short)191,
                             Name = "Vietnam",
                             TelephoneCode = "+84"
                         },
                         new
                         {
                             ISO = "YE",
-                            Id = (byte)192,
+                            Id = (short)192,
                             Name = "Yemen",
                             TelephoneCode = "+967"
                         },
                         new
                         {
                             ISO = "ZM",
-                            Id = (byte)193,
+                            Id = (short)193,
                             Name = "Zambia",
                             TelephoneCode = "+260"
                         },
                         new
                         {
                             ISO = "ZW",
-                            Id = (byte)194,
+                            Id = (short)194,
                             Name = "Zimbabwe",
                             TelephoneCode = "+263"
                         });
@@ -1685,12 +1688,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("REHIRE_DATE")
                         .HasComment("ReHireDate");
 
-                    b.Property<int>("SSN")
+                    b.Property<long>("SSN")
                         .HasPrecision(9)
                         .HasColumnType("NUMBER(9)")
                         .HasColumnName("SSN");
 
-                    b.Property<byte>("StoreNumber")
+                    b.Property<short>("StoreNumber")
                         .HasPrecision(3)
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("STORE_NUMBER")
@@ -1843,7 +1846,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Distribution", b =>
                 {
-                    b.Property<int>("SSN")
+                    b.Property<long>("SSN")
                         .HasPrecision(9)
                         .HasColumnType("NUMBER(9)")
                         .HasColumnName("SSN");
@@ -1911,7 +1914,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NVARCHAR2(30)")
                         .HasColumnName("PAYEE_NAME");
 
-                    b.Property<int>("PayeeSSN")
+                    b.Property<long>("PayeeSSN")
                         .HasPrecision(9)
                         .HasColumnType("NUMBER(9)")
                         .HasColumnName("PAYEE_SSN");
@@ -3027,7 +3030,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("INCOME_LAST_YEAR");
 
-                    b.Property<byte>("InitialContributionYear")
+                    b.Property<short>("InitialContributionYear")
                         .HasPrecision(4)
                         .HasColumnType("NUMBER(4)")
                         .HasColumnName("INITIAL_CONTRIBUTION_YEAR");
@@ -3041,12 +3044,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DATE")
                         .HasColumnName("PS_CERTIFICATE_ISSUED_DATE");
 
-                    b.Property<short>("PointsEarnedLastYear")
+                    b.Property<int>("PointsEarnedLastYear")
                         .HasPrecision(5)
                         .HasColumnType("NUMBER(5)")
                         .HasColumnName("POINTS_EARNED_LAST_YEAR");
 
-                    b.Property<int>("SSN")
+                    b.Property<long>("SSN")
                         .HasPrecision(9)
                         .HasColumnType("NUMBER(9)")
                         .HasColumnName("SSN");
@@ -3227,7 +3230,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NVARCHAR2(32)")
                         .HasColumnName("REMARK");
 
-                    b.Property<int>("SSN")
+                    b.Property<long>("SSN")
                         .HasPrecision(9)
                         .HasColumnType("NUMBER(9)")
                         .HasColumnName("SSN");
@@ -3242,7 +3245,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NVARCHAR2(1)")
                         .HasColumnName("TAX_CODE_ID");
 
-                    b.Property<byte>("YearToDate")
+                    b.Property<short>("YearToDate")
                         .HasPrecision(4)
                         .HasColumnType("NUMBER(4,0)")
                         .HasColumnName("YEAR_TO_DATE");
@@ -3623,7 +3626,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_BENEFICIARY_BENEFICIARYKINDS_KINDID");
 
-                    b.OwnsOne("Demoulas.ProfitSharing.Data.Entities.Beneficiary.Address#Demoulas.ProfitSharing.Data.Entities.Address", "Address", b1 =>
+                    b.OwnsOne("Demoulas.ProfitSharing.Data.Entities.Address", "Address", b1 =>
                         {
                             b1.Property<long>("BeneficiaryPSN")
                                 .HasColumnType("NUMBER(11)")
@@ -3687,7 +3690,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             b1.HasIndex("CountryISO")
                                 .HasDatabaseName("IX_BENEFICIARY_COUNTRY_ISO");
 
-                            b1.ToTable("BENEFICIARY", (string)null);
+                            b1.ToTable("BENEFICIARY");
 
                             b1.WithOwner()
                                 .HasForeignKey("BeneficiaryPSN")
@@ -3699,7 +3702,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                                 .HasConstraintName("FK_BENEFICIARY_COUNTRY_COUNTRY_ISO");
                         });
 
-                    b.OwnsOne("Demoulas.ProfitSharing.Data.Entities.Beneficiary.ContactInfo#Demoulas.ProfitSharing.Data.Entities.ContactInfo", "ContactInfo", b1 =>
+                    b.OwnsOne("Demoulas.ProfitSharing.Data.Entities.ContactInfo", "ContactInfo", b1 =>
                         {
                             b1.Property<long>("BeneficiaryPSN")
                                 .HasColumnType("NUMBER(11)")
@@ -3722,7 +3725,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                             b1.HasKey("BeneficiaryPSN");
 
-                            b1.ToTable("BENEFICIARY", (string)null);
+                            b1.ToTable("BENEFICIARY");
 
                             b1.WithOwner()
                                 .HasForeignKey("BeneficiaryPSN")
@@ -3799,7 +3802,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasForeignKey("TerminationCodeId")
                         .HasConstraintName("FK_DEMOGRAPHIC_TERMINATIONCODE_TERMINATIONCODEID");
 
-                    b.OwnsOne("Demoulas.ProfitSharing.Data.Entities.Demographic.Address#Demoulas.ProfitSharing.Data.Entities.Address", "Address", b1 =>
+                    b.OwnsOne("Demoulas.ProfitSharing.Data.Entities.Address", "Address", b1 =>
                         {
                             b1.Property<long>("DemographicOracleHcmId")
                                 .HasColumnType("NUMBER(15)")
@@ -3863,7 +3866,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             b1.HasIndex("CountryISO")
                                 .HasDatabaseName("IX_DEMOGRAPHIC_COUNTRY_ISO");
 
-                            b1.ToTable("DEMOGRAPHIC", (string)null);
+                            b1.ToTable("DEMOGRAPHIC");
 
                             b1.HasOne("Demoulas.ProfitSharing.Data.Entities.Country", null)
                                 .WithMany()
@@ -3875,7 +3878,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                                 .HasConstraintName("FK_DEMOGRAPHIC_DEMOGRAPHIC_ORACLE_HCM_ID");
                         });
 
-                    b.OwnsOne("Demoulas.ProfitSharing.Data.Entities.Demographic.ContactInfo#Demoulas.ProfitSharing.Data.Entities.ContactInfo", "ContactInfo", b1 =>
+                    b.OwnsOne("Demoulas.ProfitSharing.Data.Entities.ContactInfo", "ContactInfo", b1 =>
                         {
                             b1.Property<long>("DemographicOracleHcmId")
                                 .HasColumnType("NUMBER(15)")
@@ -3898,7 +3901,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                             b1.HasKey("DemographicOracleHcmId");
 
-                            b1.ToTable("DEMOGRAPHIC", (string)null);
+                            b1.ToTable("DEMOGRAPHIC");
 
                             b1.WithOwner()
                                 .HasForeignKey("DemographicOracleHcmId")
@@ -3954,9 +3957,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_DISTRIBUTION_TAX_CODE_TAXCODEID");
 
-                    b.OwnsOne("Demoulas.ProfitSharing.Data.Entities.Distribution.PayeeAddress#Demoulas.ProfitSharing.Data.Entities.Address", "PayeeAddress", b1 =>
+                    b.OwnsOne("Demoulas.ProfitSharing.Data.Entities.Address", "PayeeAddress", b1 =>
                         {
-                            b1.Property<int>("DistributionSSN")
+                            b1.Property<long>("DistributionSSN")
                                 .HasColumnType("NUMBER(9)")
                                 .HasColumnName("SSN");
 
@@ -4012,7 +4015,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             b1.HasIndex("CountryISO")
                                 .HasDatabaseName("IX_DISTRIBUTION_COUNTRY_ISO");
 
-                            b1.ToTable("DISTRIBUTION", (string)null);
+                            b1.ToTable("DISTRIBUTION");
 
                             b1.HasOne("Demoulas.ProfitSharing.Data.Entities.Country", null)
                                 .WithMany()
@@ -4024,9 +4027,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                                 .HasConstraintName("FK_DISTRIBUTION_DISTRIBUTION_SSN_SEQUENCE_NUMBER");
                         });
 
-                    b.OwnsOne("Demoulas.ProfitSharing.Data.Entities.Distribution.ThirdPartyAddress#Demoulas.ProfitSharing.Data.Entities.Address", "ThirdPartyAddress", b1 =>
+                    b.OwnsOne("Demoulas.ProfitSharing.Data.Entities.Address", "ThirdPartyAddress", b1 =>
                         {
-                            b1.Property<int>("DistributionSSN")
+                            b1.Property<long>("DistributionSSN")
                                 .HasColumnType("NUMBER(9)")
                                 .HasColumnName("SSN");
 
@@ -4082,7 +4085,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             b1.HasIndex("CountryISO")
                                 .HasDatabaseName("IX_DISTRIBUTION_THIRD_PARTY_COUNTRY_ISO");
 
-                            b1.ToTable("DISTRIBUTION", (string)null);
+                            b1.ToTable("DISTRIBUTION");
 
                             b1.HasOne("Demoulas.ProfitSharing.Data.Entities.Country", null)
                                 .WithMany()

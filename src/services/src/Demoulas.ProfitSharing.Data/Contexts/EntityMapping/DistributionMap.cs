@@ -16,8 +16,8 @@ internal sealed class DistributionMap : IEntityTypeConfiguration<Distribution>
         builder.Property(d => d.EmployeeName).HasMaxLength(25).HasColumnName("EMPLOYEE_NAME");
         builder.Property(d => d.FrequencyId).HasColumnName("FREQUENCY_ID");
         builder.Property(d => d.StatusId).HasColumnName("STATUS_ID");
-        builder.Property(d => d.PayeeSSN).HasColumnName("PAYEE_SSN");
-        builder.Property(d => d.PayeeName).HasColumnName("PAYEE_NAME");
+        builder.Property(d => d.PayeeSSN).HasPrecision(9).HasColumnName("PAYEE_SSN");
+        builder.Property(d => d.PayeeName).HasMaxLength(30).HasColumnName("PAYEE_NAME");
         builder.Property(d => d.PayeeSSN).HasColumnName("PAYEE_SSN");
         builder.OwnsOne(d => d.PayeeAddress, address =>
         {
@@ -34,8 +34,9 @@ internal sealed class DistributionMap : IEntityTypeConfiguration<Distribution>
                 .WithMany()
                 .HasForeignKey(o => o.CountryISO);
         });
-        builder.Property(d => d.ThirdPartyPayee).HasColumnName("THIRD_PARTY_PAYEEE");
-        builder.Property(d => d.ThirdPartyName).HasColumnName("THIRD_PARTY_NAME");
+        builder.Property(d => d.ThirdPartyPayee).HasMaxLength(30).HasColumnName("THIRD_PARTY_PAYEEE");
+        builder.Property(d => d.ThirdPartyName).HasMaxLength(30).HasColumnName("THIRD_PARTY_NAME");
+        builder.Property(d => d.ThirdPartyAccount).HasMaxLength(30).HasColumnName("THIRD_PARTY_ACCOUNT");
         builder.OwnsOne(d => d.ThirdPartyAddress, address =>
         {
             address.Property(a => a.Street).HasMaxLength(30).HasColumnName("THIRD_PARTY_STREET");
@@ -51,18 +52,20 @@ internal sealed class DistributionMap : IEntityTypeConfiguration<Distribution>
                 .WithMany()
                 .HasForeignKey(o => o.CountryISO);
         });
-        builder.Property(d => d.ForTheBenefitOfPayee).HasColumnName("FORTHEBENEFITOF_PAYEE");
-        builder.Property(d => d.ForTheBenefitOfAccountType).HasColumnName("FORTHEBENEFITOF_ACCOUNT_TYPE");
+        builder.Property(d => d.ForTheBenefitOfPayee).HasMaxLength(30).HasColumnName("FORTHEBENEFITOF_PAYEE");
+        builder.Property(d => d.ForTheBenefitOfAccountType).HasMaxLength(30).HasColumnName("FORTHEBENEFITOF_ACCOUNT_TYPE");
 
         builder.Property(d => d.Tax1099ForEmployee).HasColumnType("NUMBER(1)").HasColumnName("TAX1099_FOR_EMPLOYEE");
         builder.Property(d => d.Tax1099ForBeneficiary).HasColumnType("NUMBER(1)").HasColumnName("TAX1099_FOR_BENEFICIARY");
         builder.Property(d => d.FederalTaxPercentage).HasPrecision(9, 2).HasColumnName("FEDERAL_TAX_PERCENTAGE");
         builder.Property(d => d.StateTaxPercentage).HasPrecision(9, 2).HasColumnName("STATE_TAX_PERCENTAGE");
         builder.Property(d => d.GrossAmount).HasPrecision(9, 2).HasColumnName("GROSS_AMOUNT");
-        builder.Property(d => d.FederalTaxAmount).HasPrecision(9, 2).HasColumnName("FEDERAL_TAX_AMOUNTE");
+        builder.Property(d => d.FederalTaxAmount).HasPrecision(9, 2).HasColumnName("FEDERAL_TAX_AMOUNT");
         builder.Property(d => d.StateTaxAmount).HasPrecision(9, 2).HasColumnName("STATE_TAX_AMOUNT");
         builder.Property(d => d.CheckAmount).HasPrecision(9, 2).HasColumnName("CHECK_AMOUNT");
+        builder.Property(d => d.TaxCodeId).HasColumnName("TAX_CODE_ID");
         builder.Property(d => d.Deceased).HasColumnType("NUMBER(1)");
+        builder.Property(d => d.GenderId).HasColumnName("GENDER_ID");
         builder.Property(d => d.QualifiedDomesticRelationsOrder).HasColumnType("NUMBER(1)").HasColumnName("QDRO");
         builder.Property(d => d.RothIRA).HasColumnType("NUMBER(1)").HasColumnName("ROTH_IRA");
 
