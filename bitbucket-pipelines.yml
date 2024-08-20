@@ -117,18 +117,23 @@ pipelines:
           # - step: *create-frontend-artifact-prod
            # Deployment Stage
       - step:
-          name: "Deployment to QA"
+          name: "Deployment"
+          variables: # https://bitbucket.org/blog/predefine-values-of-custom-pipeline-variables
+            - name: ENV
+              default: QA
+              allowed-values:  # optionally restrict variable values
+                - QA
+                - UAT
+                - Production
           runs-on:
             - windows
             - self.hosted
             - appt125
-          deployment: QA
+          deployment: $env:ENV
           trigger: "manual"
           script:
             - echo "Deploying application..."
-            - powershell .\scripts\NGDS_SMART_ISPGenDeployApp.ps1 $env:ENV_QA $env:SERVER_QA
-            - echo "Deploying background services..."
-            - powershell .\scripts\webDeploy.ps1 $env:ENV_QA $env:SERVER_QA
+            - powershell .\scripts\webDeploy.ps1 $env:ENV $env:SERVER_QA
    
   
     develop:
