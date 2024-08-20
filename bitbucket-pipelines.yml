@@ -10,8 +10,8 @@ image: mcr.microsoft.com/dotnet/sdk:8.0
 
 definitions:
   steps:
-    build-and-test: &build-and-test-backend
-          name: Build and Test
+    build-and-test-backend: &build-and-test-backend
+          name: Build and Test Backend API
           runs-on:
             - windows
             - self.hosted
@@ -26,9 +26,15 @@ definitions:
           artifacts:
             - test-reports/**
             - build/**
-   
 
-    create-frontend-artifacts: &create-frontend-artifacts
+    test-frontend: &test-frontend
+          name:  Build and Test Frontend UI
+          script:
+           - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
+          artifacts:
+            - build/**
+   
+    create-api-artifacts: &create-api-artifacts
       name: Create FrontEnd Artifacts      
       runs-on:
         - windows
@@ -37,9 +43,55 @@ definitions:
       artifacts:
         - dist\**
       script:
+        - dotnet tool install --global Demoulas.Common.Build.Cli
+        - Demoulas.Common.Build.Cli --buildid ${BITBUCKET_BUILD_NUMBER} --Branch ${BITBUCKET_BRANCH} --CommitHash ${BITBUCKET_COMMIT}
+        - Compress-Archive -Path ./publishOutput/* -DestinationPath ./Demoulas.ProfitSharing.Api.zip -Force
+
+    create-frontend-artifact-qa: &create-frontend-artifact-qa
+      name: Create FrontEnd Artifacts (QA)     
+      runs-on:
+        - windows
+        - self.hosted
+        - appt125
+      artifacts:
+        - dist\**
+      script:
         - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
+        - ${env:ENV} = "qa"
         - cd .\src\UI
-        -  install --legacy-peer-deps;
+        - install --legacy-peer-deps;
+        - ${env:NPM} run build:${env:ENV}
+        - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.$env:ENV.zip" -Force        
+
+    create-frontend-artifact-uat: &create-frontend-artifact-uat
+      name: Create FrontEnd Artifacts (UAT)     
+      runs-on:
+        - windows
+        - self.hosted
+        - appt125
+      artifacts:
+        - dist\**
+      script:
+        - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
+        - ${env:ENV} = "uat"
+        - cd .\src\UI
+        - install --legacy-peer-deps;
+        - ${env:NPM} run build:${env:ENV}
+        - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.$env:ENV.zip" -Force        
+
+    create-frontend-artifact-prod: &create-frontend-artifact-prod
+      name: Create FrontEnd Artifacts (PROD)     
+      runs-on:
+        - windows
+        - self.hosted
+        - appt125
+      artifacts:
+        - dist\**
+      script:
+        - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
+        - ${env:ENV} = "prod"
+        - cd .\src\UI
+        - install --legacy-peer-deps;
         - ${env:NPM} run build:${env:ENV}
         - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.$env:ENV.zip" -Force        
 
@@ -49,16 +101,24 @@ pipelines:
     master:
       - parallel:
           - step: *build-and-test-backend
+          - step: *test-frontend
+      - parallel:
+          - step: *create-api-artifacts
+          - step: *create-frontend-artifact-qa
+          - step: *create-frontend-artifact-uat
+          - step: *create-frontend-artifact-prod
 
   
     develop:
       - parallel:
           - step: *build-and-test-backend
+          - step: *test-frontend
 
   pull-requests:
     '**':
       - parallel:
           - step: *build-and-test-backend
+          - step: *test-frontend
   
   custom:
     deploy_profitsharing:
@@ -84,4 +144,4 @@ pipelines:
                - dotnet tool install --global Demoulas.Common.Build.Cli
                - Demoulas.Common.Build.Cli --buildid ${BITBUCKET_BUILD_NUMBER} --Branch ${BITBUCKET_BRANCH} --CommitHash ${BITBUCKET_COMMIT}
                - Compress-Archive -Path ./publishOutput/* -DestinationPath ./Demoulas.ProfitSharing.Api.zip -Force
-          - step: *create-frontend-artifacts
+          
