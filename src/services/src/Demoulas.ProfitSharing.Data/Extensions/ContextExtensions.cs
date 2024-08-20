@@ -35,7 +35,7 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new DistributionMap());
         modelBuilder.ApplyConfiguration(new BeneficiaryRelPercentMap());
         modelBuilder.ApplyConfiguration(new DemographicSyncAuditMap());
-        
+        modelBuilder.ApplyConfiguration(new StateTaxMap());
 
 
         // Force table names to be upper case for consistency with all existing DSM projects
