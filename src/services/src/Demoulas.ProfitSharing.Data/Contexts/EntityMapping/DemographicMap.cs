@@ -108,7 +108,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
 
         _ = builder.Property(e => e.EmploymentTypeId)
             .HasMaxLength(2)
-            .HasColumnName("EMPLOYEMENT_TYPE_ID")
+            .HasColumnName("EMPLOYMENT_TYPE_ID")
             .HasComment("EmploymentType");
 
         _ = builder.Property(e => e.PayFrequencyId)
