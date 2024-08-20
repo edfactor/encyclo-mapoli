@@ -35,7 +35,7 @@ definitions:
             - build/**
    
     create-api-artifacts: &create-api-artifacts
-      name: Create FrontEnd Artifacts      
+      name: Create API Artifacts      
       runs-on:
         - windows
         - self.hosted
@@ -105,9 +105,9 @@ pipelines:
           - step: *test-frontend
       - parallel:
           - step: *create-api-artifacts
-          - step: *create-frontend-artifact-qa
-          - step: *create-frontend-artifact-uat
-          - step: *create-frontend-artifact-prod
+          # - step: *create-frontend-artifact-qa
+          # - step: *create-frontend-artifact-uat
+          # - step: *create-frontend-artifact-prod
 
   
     develop:
