@@ -2,8 +2,7 @@
 param (
     [string]$envTarget,
     [string]$envServerName,
-    [string]$bitbucketUsername,
-    [string]$bitbucketPassword,
+    [string]$profitSharingConnectionString,
     [int]$stopAppTimeout = 5,
     [switch]$Verbose
 )
@@ -12,15 +11,13 @@ param (
 function Set-EnvironmentVariables {
     param (
         [string]$serverName,
-        [string]$username,
-        [string]$password
+        [string]$profitSharingConnectionString
     )
 
     Invoke-Command -ComputerName $serverName -ScriptBlock {
-        param ($u, $p)
-        [System.Environment]::SetEnvironmentVariable("BITBUCKET_USERNAME", $u, [System.EnvironmentVariableTarget]::Machine)
-        [System.Environment]::SetEnvironmentVariable("BITBUCKET_PASSWORD", $p, [System.EnvironmentVariableTarget]::Machine)
-    } -ArgumentList $username, $password
+        param ($profitSharingConnectionString)
+        [System.Environment]::SetEnvironmentVariable("ConnectionStrings:ProfitSharing", $profitSharingConnectionString, [System.EnvironmentVariableTarget]::Machine)
+    } -ArgumentList $profitSharingConnectionString
 }
 
 # Function to get configuration environment
@@ -125,7 +122,7 @@ function Validate-Deployment {
 }
 
 # Set environment variables on the server
-Set-EnvironmentVariables -serverName $envServerName -username $bitbucketUsername -password $bitbucketPassword
+Set-EnvironmentVariables -serverName $envServerName -profitSharingConnectionString $profitSharingConnectionString
 
 # Get the config environment based on target
 $configTarget = Get-ConfigEnvironment -target $envTarget
@@ -140,19 +137,17 @@ if ($Verbose) {
 # Deployments for both API and UI
 $Deployments = @(
     @{
-        Artifact = "Demoulas.Smart.API.zip"
+        Artifact = "Demoulas.ProfitSharing.Api.zip"
         TargetPath = "C:\inetpub\wwwroot\api"
         SiteName = "API"
         AppPoolName = "NETSApiAppPool"
-        IgnoreFiles = @("credSettings.$($envTarget).json")
         ConfigEnvironment = $configTarget
     },
     @{
-        Artifact = "Demoulas.Smart.UI.$($envTarget).zip"
+        Artifact = "Demoulas.ProfitSharing.UI.$($envTarget).zip"
         TargetPath = "C:\inetpub\wwwroot\frontend"
         SiteName = "Frontend"
         AppPoolName = "NETSFrontendAppPool"
-        IgnoreFiles = @("credSettings.$($envTarget).json")
         ConfigEnvironment = $configTarget
     }
 )
