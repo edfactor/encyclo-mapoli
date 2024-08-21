@@ -51,11 +51,15 @@ definitions:
         - Write-Host ${env:BITBUCKET_BUILD_NUMBER}
         - Write-Host ${env:BITBUCKET_BRANCH}
         - Write-Host ${env:BITBUCKET_COMMIT}
-        - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
-        - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.Api -c Release -p:PublishProfile=FolderProfile -o .\publishOutput
         - Write-Host $(Get-Location)
         - Write-Host (Get-ChildItem)
         - New-Item -ItemType Directory -Path "dist"
+        
+        - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.Api -c Release -p:PublishProfile=FolderProfile -o .\publishOutput
+        
+        - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
+        - Copy-Item -Path ".buildinfo.json" -Destination ".\publishOutput\"
+        
         - Compress-Archive -Path .\publishOutput\* -DestinationPath .\dist\Demoulas.ProfitSharing.Api.zip -Force
 
     create-frontend-artifact-qa: &create-frontend-artifact-qa
