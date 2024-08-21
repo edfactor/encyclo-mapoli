@@ -22,7 +22,7 @@ public class YearEndService : IYearEndService
         _logger = factory.CreateLogger<YearEndService>();
     }
 
-    public async Task<ReportResponseBase<PayrollDuplicateSSNResponseDto>> GetDuplicateSSNs(PaginationRequestDto req, CancellationToken ct)
+    public async Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSSNs(PaginationRequestDto req, CancellationToken ct)
     {
         return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
@@ -53,10 +53,10 @@ public class YearEndService : IYearEndService
                             DemPdPp.IncomeCurrentYear
                         }
                     into grp
-                    select new PayrollDuplicateSSNResponseDto
+                    select new PayrollDuplicateSsnResponseDto
                     {
                         BadgeNumber = grp.Key.BadgeNumber,
-                        SSN = grp.Key.SSN,
+                        Ssn = grp.Key.SSN,
                         Name = grp.Key.FullName,
                         Address = new AddressResponseDto
                         {
@@ -77,7 +77,7 @@ public class YearEndService : IYearEndService
                     }
                 ).ToPaginationResultsAsync(req, forceSingleQuery: true, ct);
 
-            return new ReportResponseBase<PayrollDuplicateSSNResponseDto>
+            return new ReportResponseBase<PayrollDuplicateSsnResponseDto>
             {
                 ReportDate = DateTimeOffset.Now, ReportName = "Duplicate SSNs", Response = rslts
             };
@@ -93,7 +93,7 @@ public class YearEndService : IYearEndService
              from dem in demTmp.DefaultIfEmpty()
              where dem == null
              orderby pp.BadgeNumber, pp.SSN
-             select new PayProfitBadgesNotInDemographicsResponse { EmployeeBadge = pp.BadgeNumber, EmployeeSSN = pp.SSN }
+             select new PayProfitBadgesNotInDemographicsResponse { EmployeeBadge = pp.BadgeNumber, EmployeeSsn = pp.SSN }
             ).ToPaginationResultsAsync(req, forceSingleQuery: true, ct);
         });
 
@@ -105,7 +105,7 @@ public class YearEndService : IYearEndService
         };
     }
 
-    public async Task<ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>> GetNegativeETVAForSSNsOnPayProfitResponse(PaginationRequestDto req, CancellationToken cancellationToken = default)
+    public async Task<ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>> GetNegativeETVAForSSNsOnPayProfitResponse(PaginationRequestDto req, CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("Request NEGATIVE ETVA FOR SSNs ON PAYPROFIT"))
         {
@@ -115,9 +115,9 @@ public class YearEndService : IYearEndService
 
                 return c.PayProfits
                     .Where(p => ssnUnion.Contains(p.SSN) && p.EarningsEtvaValue < 0)
-                    .Select(p => new NegativeETVAForSSNsOnPayProfitResponse
+                    .Select(p => new NegativeEtvaForSsNsOnPayProfitResponse
                     {
-                        EmployeeBadge = p.BadgeNumber, EmployeeSSN = p.SSN, EtvaValue = p.EarningsEtvaValue
+                        EmployeeBadge = p.BadgeNumber, EmployeeSsn = p.SSN, EtvaValue = p.EarningsEtvaValue
                     })
                     .OrderBy(p => p.EmployeeBadge)
                     .ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken);
@@ -125,7 +125,7 @@ public class YearEndService : IYearEndService
 
             _logger.LogWarning("Returned {Results} records", results.Results.Count());
 
-            return new ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>
+            return new ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>
             {
                 ReportName = "NEGATIVE ETVA FOR SSNs ON PAYPROFIT", ReportDate = DateTimeOffset.Now, Response = results
             };
@@ -147,8 +147,8 @@ public class YearEndService : IYearEndService
                     {
                         Name = demographic.FullName ?? $"{demographic.FirstName} {demographic.LastName}",
                         EmployeeBadge = demographic.BadgeNumber,
-                        EmployeeSSN = demographic.SSN,
-                        PayProfitSSN = payProfit.SSN,
+                        EmployeeSsn = demographic.SSN,
+                        PayProfitSsn = payProfit.SSN,
                        Store = demographic.StoreNumber,
                        Status = demographic.EmploymentStatusId
                     };
@@ -211,7 +211,7 @@ public class YearEndService : IYearEndService
                             {
                                 Count = g.Count(),
                                 EmployeeBadge = g.Key.BadgeNumber,
-                                EmployeeSSN = g.Key.SSN,
+                                EmployeeSsn = g.Key.SSN,
                                 Name = g.Key.FullName,
                                 HireDate = g.Key.HireDate,
                                 TermDate = g.Key.TerminationDate,
@@ -261,7 +261,7 @@ public class YearEndService : IYearEndService
                             select new DemographicBadgesNotInPayProfitResponse
                             {
                                 EmployeeBadge = dem.BadgeNumber,
-                                EmployeeSSN = dem.SSN,
+                                EmployeeSsn = dem.SSN,
                                 EmployeeName = dem.FullName ?? "",
                                 Status = dem.EmploymentStatusId,
                                 Store = dem.StoreNumber,
@@ -291,7 +291,7 @@ public class YearEndService : IYearEndService
                             select new NamesMissingCommaResponse
                             {
                                 EmployeeBadge = dem.BadgeNumber,
-                                EmployeeSSN = dem.SSN,
+                                EmployeeSsn = dem.SSN,
                                 EmployeeName = dem.FullName ?? "",
                             };
                 return await query.ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken: cancellationToken);
@@ -350,7 +350,7 @@ public class YearEndService : IYearEndService
                             select new DuplicateNamesAndBirthdaysResponse
                             {
                                 BadgeNumber = g.Key.BadgeNumber,
-                                SSN = g.Key.SSN,
+                                Ssn = g.Key.SSN,
                                 Name = g.Key.FullName,
                                 DateOfBirth = g.Key.DateOfBirth,
                                 Address = new AddressResponseDto()

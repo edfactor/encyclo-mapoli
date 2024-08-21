@@ -12,4 +12,8 @@ public class DemographicException : Exception
     {
         
     }
+
+    public DemographicException() : base()
+    {
+    }
 }

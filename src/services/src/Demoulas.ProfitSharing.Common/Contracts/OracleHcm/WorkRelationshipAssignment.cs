@@ -1,10 +1,13 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 
-/// <param name="LocationCode">Store Number</param>
-/// <param name="JobCode">Pay Classification</param>
-/// <param name="PositionCode">Split on dash "-", Department will be the last value Example: "14-CASHIERS - PM-1" Department = 1</param>
-/// <param name="FullPartTime">EmploymentType</param>
-/// <param name="Frequency">Pay Frequency W = 1(Weekly) M=2(Monthly)</param>
+/// <summary>
+/// Represents an assignment within a work relationship in the Oracle HCM system.
+/// </summary>
+/// <param name="LocationCode">The code representing the location of the assignment.</param>
+/// <param name="JobCode">The code representing the job associated with the assignment.</param>
+/// <param name="PositionCode">The code representing the position of the assignment.</param>
+/// <param name="FullPartTime">Indicates whether the assignment is full-time or part-time.</param>
+/// <param name="Frequency">The frequency of the assignment, such as weekly or monthly.</param>
 public record WorkRelationshipAssignment(
     short? LocationCode,
     byte? JobCode,
@@ -38,8 +41,6 @@ public record WorkRelationshipAssignment(
     {
         const char PartTime = 'P';
         const char FullTimeStraightSalary = 'H';
-        //const char FullTimeAccruedPaidHolidays = 'G';
-        //const char FullTimeEightPaidHolidays = 'F';
 
         return FullPartTime switch
         {

@@ -1,10 +1,12 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
+﻿using System.Text;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 public sealed record HttpRequestFields
 {
-    public HashSet<string> Root = ["PersonNumber", "PersonId", "DateOfBirth", "LastUpdateDate"];
+    private readonly HashSet<string> Root = ["PersonNumber", "PersonId", "DateOfBirth", "LastUpdateDate"];
 
     // ReSharper disable once InconsistentNaming
-    public HashSet<string> addresses =
+    public HashSet<string> addresses { get; }=
     [
         "AddressId",
         "AddressLine1",
@@ -30,7 +32,7 @@ public sealed record HttpRequestFields
     ];
 
     // ReSharper disable once InconsistentNaming
-    public HashSet<string> workRelationships =
+    public HashSet<string> workRelationships { get; } =
     [
         "WorkerType",
         "StartDate",
@@ -42,7 +44,7 @@ public sealed record HttpRequestFields
     ];
 
     // ReSharper disable once InconsistentNaming
-    public HashSet<string> workRelationships_assignments =
+    public HashSet<string> workRelationships_assignments { get; } =
     [
         "LocationCode", // Store Number
         "JobCode", // Pay Classification
@@ -52,7 +54,7 @@ public sealed record HttpRequestFields
     ];
 
     // ReSharper disable once InconsistentNaming
-    public HashSet<string> emails =
+    public HashSet<string> emails { get; } =
     [
         "EmailAddressId",
         "EmailType",
@@ -61,7 +63,7 @@ public sealed record HttpRequestFields
     ];
 
     // ReSharper disable once InconsistentNaming
-    public HashSet<string> names =
+    public HashSet<string> names { get; } =
     [
         "PersonNameId",
         "EffectiveStartDate",
@@ -83,7 +85,7 @@ public sealed record HttpRequestFields
     ];
 
     // ReSharper disable once InconsistentNaming
-    public HashSet<string> nationalIdentifiers =
+    public HashSet<string> nationalIdentifiers { get; } =
     [
         "NationalIdentifierNumber",
         "LastUpdateDate",
@@ -104,12 +106,22 @@ public sealed record HttpRequestFields
             { "nationalIdentifiers", request.nationalIdentifiers }
         };
 
-        string formattedString = string.Join(",", request.Root) + ";";
+        StringBuilder sb = new StringBuilder();
+
+        // Append the root elements
+        sb.Append(string.Join(",", request.Root));
+        sb.Append(';');
+
+        // Append the key-value pairs
         foreach (var kvp in collections)
         {
-            formattedString += $"{kvp.Key}:{string.Join(",", kvp.Value)};";
+            sb.Append(kvp.Key);
+            sb.Append(':');
+            sb.Append(string.Join(",", kvp.Value));
+            sb.Append(';');
         }
 
-        return formattedString.TrimEnd(';');
+        // Return the formatted string, trimmed of the trailing semicolon
+        return sb.ToString().TrimEnd(';');
     }
 }

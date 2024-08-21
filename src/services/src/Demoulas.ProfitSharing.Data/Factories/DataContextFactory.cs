@@ -34,17 +34,9 @@ public sealed class DataContextFactory : DataContextFactoryBase<ProfitSharingDbC
     {
         using (Logger.BeginScope("Store Info DB Operation"))
         {
-            try
-            {
-                await using AsyncServiceScope scope = ServiceProvider.CreateAsyncScope();
-                DemoulasCommonDataContext dbContext = scope.ServiceProvider.GetRequiredService<DemoulasCommonDataContext>();
-                return await func(dbContext);
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex, "Failed to execute readonly Store Info query");
-                throw;
-            }
+            await using AsyncServiceScope scope = ServiceProvider.CreateAsyncScope();
+            DemoulasCommonDataContext dbContext = scope.ServiceProvider.GetRequiredService<DemoulasCommonDataContext>();
+            return await func(dbContext);
         }
     }
 }

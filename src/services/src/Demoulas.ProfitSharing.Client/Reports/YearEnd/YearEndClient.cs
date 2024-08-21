@@ -33,9 +33,9 @@ public sealed class YearEndClient : IYearEndService
         _options = Constants.GetJsonSerializerOptions();
     }
 
-    public Task<ReportResponseBase<PayrollDuplicateSSNResponseDto>> GetDuplicateSSNs(PaginationRequestDto req, CancellationToken ct)
+    public Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSSNs(PaginationRequestDto req, CancellationToken ct)
     {
-        return CallReportEndpoint<PayrollDuplicateSSNResponseDto>(req, "duplicate-ssns", ct);
+        return CallReportEndpoint<PayrollDuplicateSsnResponseDto>(req, "duplicate-ssns", ct);
     }
 
     public Task<Stream> DownloadDuplicateSSNs(CancellationToken cancellationToken)
@@ -55,9 +55,9 @@ public sealed class YearEndClient : IYearEndService
 
     #region Negative ETVA For SSNs On PayProfit
 
-    public Task<ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>> GetNegativeETVAForSSNsOnPayProfitResponse(PaginationRequestDto req, CancellationToken cancellationToken = default)
+    public Task<ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>> GetNegativeETVAForSSNsOnPayProfitResponse(PaginationRequestDto req, CancellationToken cancellationToken = default)
     {
-        return CallReportEndpoint<NegativeETVAForSSNsOnPayProfitResponse>(req, "negative-evta-ssn", cancellationToken);
+        return CallReportEndpoint<NegativeEtvaForSsNsOnPayProfitResponse>(req, "negative-evta-ssn", cancellationToken);
     }
 
     public Task<Stream> DownloadNegativeETVAForSSNsOnPayProfitResponse(CancellationToken cancellationToken = default)

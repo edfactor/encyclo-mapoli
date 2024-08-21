@@ -37,7 +37,7 @@ public class DemographicsServiceTests : IClassFixture<ApiTestBase<Program>>
     public async Task AddNewDemographicsTest(int count)
     {
         List<Demographic>? demographics = new DemographicFaker().Generate(count);
-        IEnumerable<DemographicsRequestDto> demographicsRequest = _mapper.MapToRequest(demographics);
+        IEnumerable<DemographicsRequest> demographicsRequest = _mapper.MapToRequest(demographics);
 
         ISet<DemographicResponseDto>? response = await _demographicsClient.AddDemographics(demographicsRequest, cancellationToken: CancellationToken.None);
 

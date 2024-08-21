@@ -8,7 +8,7 @@ using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Demographics;
 
-public class AddDemographicsEndpoint : Endpoint<IEnumerable<DemographicsRequestDto>, ISet<DemographicResponseDto>?>
+public class AddDemographicsEndpoint : Endpoint<IEnumerable<DemographicsRequest>, ISet<DemographicResponseDto>?>
 {
     private readonly IDemographicsService _demographicsService;
 
@@ -25,9 +25,9 @@ public class AddDemographicsEndpoint : Endpoint<IEnumerable<DemographicsRequestD
         {
             s.Summary = "Add Demographics";
             s.Description = "API to add a collection of employee's into the Demographics table";
-            s.ExampleRequest = new List<DemographicsRequestDto>
+            s.ExampleRequest = new List<DemographicsRequest>
             {
-                new DemographicsRequestDto
+                new DemographicsRequest
                 {
                     BadgeNumber = 123456789,
                     SSN = 123456789,
@@ -62,7 +62,7 @@ public class AddDemographicsEndpoint : Endpoint<IEnumerable<DemographicsRequestD
         Group<DemographicsGroup>();
     }
 
-    public override Task<ISet<DemographicResponseDto>?> ExecuteAsync(IEnumerable<DemographicsRequestDto> req, CancellationToken ct)
+    public override Task<ISet<DemographicResponseDto>?> ExecuteAsync(IEnumerable<DemographicsRequest> req, CancellationToken ct)
     {
         return _demographicsService.AddDemographics(req, ct);
     }

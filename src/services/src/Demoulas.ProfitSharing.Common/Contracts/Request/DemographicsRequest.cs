@@ -1,7 +1,7 @@
 ﻿
 namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 
-public record DemographicsRequestDto : MemberRequestDto
+public record DemographicsRequest : IMemberRequest
 {
     public required long SSN { get; set; }
     public int BadgeNumber { get; set; }

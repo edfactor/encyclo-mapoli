@@ -70,7 +70,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
         }, cancellationToken);
     }
 
-    private async IAsyncEnumerable<DemographicsRequestDto> ConvertToRequestDto(IAsyncEnumerable<OracleEmployee?> asyncEnumerable,
+    private async IAsyncEnumerable<DemographicsRequest> ConvertToRequestDto(IAsyncEnumerable<OracleEmployee?> asyncEnumerable,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(ConvertToRequestDto), ActivityKind.Internal);
@@ -90,7 +90,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
             }
 
             Bogus.Faker faker = new Bogus.Faker();
-            yield return new DemographicsRequestDto
+            yield return new DemographicsRequest
             {
                 OracleHcmId = employee.PersonId,
                 BadgeNumber = employee.BadgeNumber,

@@ -47,12 +47,12 @@ public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithCSVBase<Pagin
                                 new PayrollDuplicateSsnsOnPayprofitResponseDto
                                 {
                                     EmployeeBadge = 47425,
-                                    EmployeeSSN = 900047425,
+                                    EmployeeSsn = 900047425,
                                     Name = "John",
                                     Status = EmploymentStatus.Constants.Active,
                                     Store = 14,
                                     IncomeCurrentYear = 32_100,
-                                    PayProfitSSN = 900047425,
+                                    PayProfitSsn = 900047425,
                                     Address = new AddressResponseDto
                                     {
                                         Street = "123 Main",
@@ -101,7 +101,7 @@ public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithCSVBase<Pagin
             Map().Index(0).Convert(_ => string.Empty);
             Map().Index(1).Convert(_ => string.Empty);
             Map(m => m.EmployeeBadge).Index(2).Name("BADGE");
-            Map(m => m.PayProfitSSN).Index(3).Name("SSN");
+            Map(m => m.PayProfitSsn).Index(3).Name("SSN");
             Map(m => m.Name).Index(4).Name("NAME");
             Map(m => m.Address.Street).Index(5).Name("ADDR");
             Map(m => m.Address.City).Index(6).Name("CITY");
@@ -112,7 +112,7 @@ public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithCSVBase<Pagin
             Map(m => m.RehireDate).Index(11).Name("REHIRE").TypeConverter<YearMonthDayTypeConverter>(); 
             Map(m => m.Status).Index(12).Name("ST");
             Map(m => m.Store).Index(13).Name("STR");
-            Map(m => m.PayProfitSSN).Index(13).Name("PS RECS");
+            Map(m => m.PayProfitSsn).Index(13).Name("PS RECS");
 
             Map(m => m.IncomeCurrentYear).Index(15).Name("CUR WAGE");
         }

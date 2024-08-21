@@ -28,7 +28,7 @@ public record OracleEmployee(
     public EmailItem? Email => Emails.Items.FirstOrDefault(a => a.PrimaryFlag ?? false);
 
     [JsonIgnore]
-    public NameItem Name => Names.Items.First();
+    public NameItem Name => Names.Items[0];
     
     [JsonIgnore] 
     public PhoneItem? Phone => Phones?.Items.FirstOrDefault(a => a.PrimaryFlag ?? false);

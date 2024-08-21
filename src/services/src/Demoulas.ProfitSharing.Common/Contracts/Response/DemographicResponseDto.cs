@@ -1,6 +1,6 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 
-public record DemographicResponseDto : MemberResponseDto
+public record DemographicResponseDto : IMemberResponse
 {
     public required string SSN { get; set; }
     public int BadgeNumber { get; set; }

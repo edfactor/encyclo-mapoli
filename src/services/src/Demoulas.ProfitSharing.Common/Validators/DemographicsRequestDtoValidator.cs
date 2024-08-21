@@ -4,7 +4,7 @@ using FluentValidation;
 
 namespace Demoulas.ProfitSharing.Common.Validators;
 
-public class DemographicsRequestDtoValidator : Validator<DemographicsRequestDto>
+public class DemographicsRequestDtoValidator : Validator<DemographicsRequest>
 {
     public DemographicsRequestDtoValidator()
     {

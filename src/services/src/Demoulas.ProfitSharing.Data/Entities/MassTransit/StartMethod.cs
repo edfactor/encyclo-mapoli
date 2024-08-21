@@ -10,13 +10,6 @@ public sealed class StartMethod : ILookupTable<byte>
         public const byte OnDemand = 1;
     }
 
-
-    public enum StartMethodEnum : byte
-    {
-        System = 0,
-        OnDemand = 1
-    }
-
     public byte Id { get; set; }
     public required string Name { get; set; }
 

@@ -29,11 +29,11 @@ public class DemographicsService : IDemographicsServiceInternal
         _logger = logger;
     }
 
-    public async Task AddDemographicsStream(IAsyncEnumerable<DemographicsRequestDto> employees, byte batchSize = byte.MaxValue,
+    public async Task AddDemographicsStream(IAsyncEnumerable<DemographicsRequest> employees, byte batchSize = byte.MaxValue,
         CancellationToken cancellationToken = default)
     {
         using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(AddDemographicsStream), ActivityKind.Internal);
-        var batch = new List<DemographicsRequestDto>();
+        var batch = new List<DemographicsRequest>();
 
         await foreach (var employee in employees.WithCancellation(cancellationToken))
         {
@@ -62,7 +62,7 @@ public class DemographicsService : IDemographicsServiceInternal
         });
     }
 
-    public async Task<ISet<DemographicResponseDto>?> AddDemographics(IEnumerable<DemographicsRequestDto> demographics, CancellationToken cancellationToken)
+    public async Task<ISet<DemographicResponseDto>?> AddDemographics(IEnumerable<DemographicsRequest> demographics, CancellationToken cancellationToken)
     {
         using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(AddDemographics), ActivityKind.Internal);
         try

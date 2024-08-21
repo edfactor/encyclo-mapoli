@@ -4,6 +4,8 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 namespace Demoulas.ProfitSharing.Data.Entities;
 public sealed class ZeroContributionReason : ILookupTable<byte>
 {
+#pragma warning disable S1133
+#pragma warning disable CS0618
     public static class Constants
     {
         public const byte Normal = 0;
@@ -20,19 +22,21 @@ public sealed class ZeroContributionReason : ILookupTable<byte>
         /// <summary>
         /// OVER 64 AND < 1000 HOURS GETS 1 YEAR VESTING (obsolete 11/20)
         /// </summary>
-        [Obsolete]
+
+        [Obsolete("Carried over from COBOL. No longer used.")]
         public const byte Over64WithLess1000Hours1YearVesting = 3;
+
 
         /// <summary>
         /// OVER 64 AND < 1000 HOURS GETS 2 YEARS VESTING (obsolete 11/20)
         /// </summary>
-        [Obsolete]
+        [Obsolete("Carried over from COBOL. No longer used.")]
         public const byte Over64WithLess1000Hours2YearsVesting = 4;
 
         /// <summary>
         /// OVER 64 AND > 1000 HOURS GETS 3 YEARS VESTING (obsolete 11/20)
         /// </summary>
-        [Obsolete]
+        [Obsolete("Carried over from COBOL. No longer used.")]
         public const byte Over64WithOver1000Hours3YearsVesting = 5;
 
         /// <summary>
@@ -45,6 +49,8 @@ public sealed class ZeroContributionReason : ILookupTable<byte>
         /// </summary>
         public const byte SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay = 7;
     }
+#pragma warning restore S1133
+#pragma warning restore CS0618
 
     public byte Id { get; set; }
     public required string Name { get; set; }
