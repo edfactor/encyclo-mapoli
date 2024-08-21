@@ -52,7 +52,7 @@ definitions:
         - Write-Host ${env:BITBUCKET_BRANCH}
         - Write-Host ${env:BITBUCKET_COMMIT}
         - Write-Host $(Get-Location)
-        - Write-Host (Get-ChildItem)
+        - Write-Host $(Get-ChildItem)
         - New-Item -ItemType Directory -Path "dist"
         
         - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.Api -c Release -p:PublishProfile=FolderProfile -o .\publishOutput
@@ -135,7 +135,9 @@ pipelines:
           script:
             - $env:NUGET_ORG="https://api.nuget.org/v3/index.json"
             - echo "Upgrading Database..."
-            - dotnet tool update --global dotnet-ef --add-source $env:NUGET_ORG    
+            - dotnet tool update --global dotnet-ef --add-source $env:NUGET_ORG   
+            - Write-Host $(Get-Location)
+            - Write-Host $(Get-ChildItem) 
             - dotnet ef database update --assembly .\dist\Demoulas.ProfitSharing.Data.dll --context ProfitSharingDbContext --connection "${env:ConnectionStrings_ProfitSharing_QA}"
 
       - step:
