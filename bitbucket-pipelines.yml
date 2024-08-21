@@ -135,7 +135,7 @@ pipelines:
           script:
             - echo "Upgrading Database..."
             - dotnet tool update --global dotnet-ef           
-            - dotnet ef database update --project .\src\services\src\Demoulas.ProfitSharing.Data\Demoulas.ProfitSharing.Data.csproj --context ProfitSharingDbContext --connection "${env:ConnectionStrings_ProfitSharing_QA}"
+            - dotnet ef database update --assembly .\publishOutput\Demoulas.ProfitSharing.Data.dll --context ProfitSharingDbContext --connection "${env:ConnectionStrings_ProfitSharing_QA}"
 
       - step:
           name: "Application Deployment"
