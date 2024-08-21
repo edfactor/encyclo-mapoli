@@ -138,9 +138,9 @@ pipelines:
             - dotnet tool update --global dotnet-ef --add-source $env:NUGET_ORG   
             - Write-Host $(Get-Location)
             - Write-Host $(Get-ChildItem) 
-            - cd .\dist
-            - Write-Host $(Get-ChildItem) 
-            - dotnet ef database update --assembly .\dist\Demoulas.ProfitSharing.Data.dll --context ProfitSharingDbContext --connection "${env:ConnectionStrings_ProfitSharing_QA}"
+            - New-Item -Path .\publish -ItemType Directory
+            - Expand-Archive -Path .\dist\Demoulas.ProfitSharing.Api.zip -DestinationPath .\publish
+            - dotnet ef database update --assembly .\publish\Demoulas.ProfitSharing.Data.dll --context ProfitSharingDbContext --connection "${env:ConnectionStrings_ProfitSharing_QA}"
 
       - step:
           name: "Application Deployment"
