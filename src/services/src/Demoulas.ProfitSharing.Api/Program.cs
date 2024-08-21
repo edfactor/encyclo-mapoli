@@ -12,7 +12,9 @@ using MassTransit.Monitoring;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder();
 
-builder.Configuration.AddUserSecrets<Program>();
+builder.Configuration
+    .AddEnvironmentVariables()
+    .AddUserSecrets<Program>();
 
 ElasticSearchConfig smartConfig = new ElasticSearchConfig();
 builder.Configuration.Bind("Logging:Smart", smartConfig);
