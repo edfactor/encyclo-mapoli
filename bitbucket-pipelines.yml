@@ -133,8 +133,9 @@ pipelines:
           deployment: QA
           trigger: "manual"
           script:
+            - $env:NUGET_ORG="https://api.nuget.org/v3/index.json"
             - echo "Upgrading Database..."
-            - dotnet tool update --global dotnet-ef           
+            - dotnet tool update --global dotnet-ef --add-source $env:NUGET_ORG    
             - dotnet ef database update --assembly .\dist\Demoulas.ProfitSharing.Data.dll --context ProfitSharingDbContext --connection "${env:ConnectionStrings_ProfitSharing_QA}"
 
       - step:
