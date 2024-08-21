@@ -123,14 +123,27 @@ pipelines:
           # - step: *create-frontend-artifact-uat
           # - step: *create-frontend-artifact-prod
            # Deployment Stage
+      
       - step:
-          name: "Deployment"
+          name: "Database upgrade"
           runs-on:
             - windows
             - self.hosted
             - appt125
           deployment: QA
           trigger: "manual"
+          script:
+            - echo "Upgrading Database..."
+            - dotnet tool update --global dotnet-ef           
+            - dotnet ef database update --project .\src\services\src\Demoulas.ProfitSharing.Data\Demoulas.ProfitSharing.Data.csproj --context ProfitSharingDbContext --connection "${env:ConnectionStrings_ProfitSharing_QA}"
+
+      - step:
+          name: "Application Deployment"
+          runs-on:
+            - windows
+            - self.hosted
+            - appt125
+          deployment: QA
           script:
             - echo "Deploying application..."
             - $env:API_SERVER_QA = "appt23d"            
