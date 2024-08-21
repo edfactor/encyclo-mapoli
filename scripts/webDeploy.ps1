@@ -1,164 +1,99 @@
-param (
-    [string]$envTarget,
-    [string]$envServerName,
-    [string]$profitSharingConnectionString,
-    [int]$stopAppTimeout = 5,
-    [switch]$Verbose
-)
+$StopAppTimeout = 5
+$envTarget = $args[0]
+$envServerName = $args[1]
+$configTarget = ''
 
-# Function to set environment variables on the target server
-function Set-EnvironmentVariables {
-    param (
-        [string]$serverName,
-        [string]$connectionString
-    )
-
-    Invoke-Command -ComputerName $serverName -ScriptBlock {
-        param ($profitSharingConnectionString)
-        [System.Environment]::SetEnvironmentVariable("ConnectionStrings:ProfitSharing", "$connectionString", [System.EnvironmentVariableTarget]::Machine)
-    } -ArgumentList "$connectionString"
-}
-
-# Function to get configuration environment
-function Get-ConfigEnvironment {
-    param (
-        [string]$target
-    )
-
-    switch ($target) {
-        "qa"    { return "QA" }
-        "uat"   { return "UAT" }
-        "prod"  { return "Production" }
-        default { Write-Warning "Unknown environment: $target"; return $null }
+function get-ConfigEnvironment($envTargetVar)
+{
+    Write-Host "The value for envTargetVar is $($envTargetVar)"
+    if ($envTargetVar -eq "qa"){
+        Write-Host "ENV is QA"
+        return "QA"
+    }
+    elseif ($envTargetVar -eq "uat"){
+        Write-Host "ENV is UAT"
+        return "UAT"
+    }
+    elseif ($envTargetVar -eq "prod"){
+        Write-Host "ENV is PRODUCTION"
+        return "Production"
+    }
+    else{
+        Write-Host "Unknown ENV"
     }
 }
 
-# Function to stop the IIS App Pool
-function Stop-AppPool {
-    param (
-        [string]$appPoolName,
-        [int]$timeout
-    )
+$configTarget = get-ConfigEnvironment $envTarget
 
-    try {
-        Write-Host "Stopping IIS App Pool: $appPoolName"
-        Stop-WebAppPool -Name $appPoolName
-        Start-Sleep -Seconds $timeout
-    } catch {
-        Write-Error "Failed to stop IIS App Pool: $appPoolName"
-        throw
-    }
-}
-
-# Function to start the IIS App Pool
-function Start-AppPool {
-    param (
-        [string]$appPoolName
-    )
-
-    try {
-        Write-Host "Starting IIS App Pool: $appPoolName"
-        Start-WebAppPool -Name $appPoolName
-    } catch {
-        Write-Error "Failed to start IIS App Pool: $appPoolName"
-        throw
-    }
-}
-
-# Function to deploy an artifact
-function Deploy-Artifact {
-    param (
-        [string]$artifact,
-        [string]$targetPath,
-        [array]$ignoreFiles
-    )
-
-    try {
-        Write-Host "Deploying $artifact to $targetPath"
-        # Include additional logic to handle ignoring files or other deployment specifics
-        $tempPath = Join-Path $env:TEMP "deploy_temp"
-        Expand-Archive -Path $artifact -DestinationPath $tempPath -Force
-
-        # Remove ignored files
-        foreach ($ignoreFile in $ignoreFiles) {
-            $fullPath = Join-Path $tempPath $ignoreFile
-            if (Test-Path $fullPath) {
-                Remove-Item -Path $fullPath -Force
-                Write-Host "Ignored file: $fullPath"
-            }
-        }
-
-        # Move the files to the target path
-        Copy-Item -Path "$tempPath\*" -Destination $targetPath -Recurse -Force
-
-        # Clean up temporary files
-        Remove-Item -Path $tempPath -Recurse -Force
-    } catch {
-        Write-Error "Deployment failed for $artifact"
-        throw
-    }
-}
-
-# Function to validate the deployment setup
-function Validate-Deployment {
-    param (
-        [string]$artifact,
-        [string]$appPoolName
-    )
-
-    if (-not (Test-Path $artifact)) {
-        Write-Error "Artifact not found: $artifact"
-        throw "Artifact not found: $artifact"
-    }
-
-    try {
-        Get-WebAppPoolState -Name $appPoolName | Out-Null
-    } catch {
-        Write-Error "IIS App Pool does not exist: $appPoolName"
-        throw "IIS App Pool does not exist: $appPoolName"
-    }
-}
-
-# Set environment variables on the server
-Set-EnvironmentVariables -serverName $envServerName -$connectionString "$profitSharingConnectionString"
-
-# Get the config environment based on target
-$configTarget = Get-ConfigEnvironment -target $envTarget
-
-# Verbose output
-if ($Verbose) {
-    Write-Host "Deployment target: $envTarget"
-    Write-Host "Server name: $envServerName"
-    Write-Host "Config environment: $configTarget"
-}
-
-# Deployments for both API and UI
 $Deployments = @(
     @{
-        Artifact = "Demoulas.ProfitSharing.Api.zip"
-        TargetPath = "C:\\inetpub\\wwwroot\\api"
-        SiteName = "API"
-        AppPoolName = "NETSApiAppPool"
+        Artifact = 'Demoulas.ProfitSharing.Api.zip'
+        TargetPath = 'C:\inetpub\wwwroot\api'
+        SiteName = 'API'
+        AppPoolName = 'NETSApiAppPool'
+        IgnoreFiles = @("credSettings.$($envTarget).json")
         ConfigEnvironment = $configTarget
     },
     @{
-        Artifact = "Demoulas.ProfitSharing.UI.$($envTarget).zip"
-        TargetPath = "C:\\inetpub\\wwwroot\\frontend"
-        SiteName = "Frontend"
-        AppPoolName = "NETSFrontendAppPool"
+        Artifact = "Demoulas.Smart.UI.$($envTarget).zip"
+        TargetPath = 'C:\inetpub\wwwroot\frontend'
+        SiteName = 'Frontend'
+        AppPoolName = 'FrontendUIAppPool'
+        IgnoreFiles = @()
         ConfigEnvironment = $configTarget
     }
 )
 
-# Validate, stop app pool, deploy, and restart app pool for each deployment
-ForEach ($deployment in $Deployments) {
-    Validate-Deployment -artifact $deployment.Artifact -appPoolName $deployment.AppPoolName
+$Failed = $false
+try {
+    $Session = New-PSSession $envServerName
 
-    Stop-AppPool -appPoolName $deployment.AppPoolName -timeout $stopAppTimeout
-    
-    Deploy-Artifact -artifact $deployment.Artifact -targetPath $deployment.TargetPath -ignoreFiles $deployment.IgnoreFiles
-    
-    Start-AppPool -appPoolName $deployment.AppPoolName
+    foreach ($Deploy in $Deployments) {
+        Invoke-Command -Session $Session -ScriptBlock {
+            $Site = Get-IISSite -Name $Using:Deploy.SiteName
+            $Site | Stop-IISSite -Confirm:$false
+            $AppPool = Get-IISAppPool -Name $Using:Deploy.AppPoolName
+            if ($AppPool.State -ne 'Stopped') {
+                $AppPool | Stop-WebAppPool
+                for ($i = 0; $i -lt $Using:StopAppTimeout; $i++) {
+                    if ($AppPool.State -eq 'Stopped') {
+                        break
+                    }
+                    Start-Sleep -Seconds 1
+                }
+                if ($AppPool.State -ne 'Stopped') {
+                    Write-Error -Message "Failed to stop App Pool '$($AppPool.Name)'"
+                    exit 1
+                }
+            }
+            Get-ChildItem -Path $Using:Deploy.TargetPath -Exclude $Using:Deploy.IgnoreFiles | Remove-Item -Force -Recurse
+        }
+        if (!$?) {$Failed = $true; break}
+        
+        Copy-Item -ToSession $Session -Path .\dist\$($Deploy.Artifact) -Destination $Deploy.TargetPath
+        if (!$?) {$Failed = $true; break}
+        
+        Invoke-Command -Session $Session -ScriptBlock {
+            Expand-Archive -Force -Path "$($Using:Deploy.TargetPath)\$($Using:Deploy.Artifact)" -DestinationPath $Using:Deploy.TargetPath
+            Remove-Item -Force -Path "$($Using:Deploy.TargetPath)\$($Using:Deploy.Artifact)"
+            if (Test-Path -Path "$($Using:Deploy.TargetPath)\web.config" -PathType Leaf) {
+                Write-Output "$($Using:Deploy.TargetPath)\web.config"
+                (Get-Content -path "$($Using:Deploy.TargetPath)\web.config" -Raw) -replace 'Development', $Using:Deploy.ConfigEnvironment | Set-Content -Path "$($Using:Deploy.TargetPath)\web.config"
+                Get-Content -path "$($Using:Deploy.TargetPath)\web.config" -Raw
+            }
+            $AppPool | Start-WebAppPool
+            $Site | Start-IISSite
+        }
+        
+        if (!$?) {$Failed = $true; break}
+    }
+} catch {
+    $Failed = $true
+} finally {
+    if ($null -ne $Session) {
+        Remove-PSSession -Session $Session
+        $Session = $null
+    }
 }
 
-Write-Host "Deployment completed successfully."
+if ($Failed) {exit 1}
