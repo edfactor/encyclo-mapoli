@@ -15,6 +15,7 @@ public sealed class Distribution
     public required Address PayeeAddress { get; set; }
     public string? ThirdPartyPayee { get; set; }
     public string? ThirdPartyName { get; set; }
+    public string? ThirdPartyAccount { get; internal set; }
     public required Address ThirdPartyAddress { get; set; }
     public string? ForTheBenefitOfPayee { get; set; }
     public string? ForTheBenefitOfAccountType { get; set; }
@@ -29,7 +30,7 @@ public sealed class Distribution
     public char TaxCodeId { get; set; }
     public required TaxCode TaxCode { get; set; }
     public bool Deceased { get; set; }
-    public char GenderId { get; set; }
+    public char? GenderId { get; set; }
     public Gender? Gender { get; set; }
     public bool QualifiedDomesticRelationsOrder { get; set; }
     public string? Memo { get; set; }
