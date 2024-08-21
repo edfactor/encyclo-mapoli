@@ -138,6 +138,8 @@ pipelines:
             - dotnet tool update --global dotnet-ef --add-source $env:NUGET_ORG   
             - Write-Host $(Get-Location)
             - Write-Host $(Get-ChildItem) 
+            - cd c:\dist
+            - Write-Host $(Get-ChildItem) 
             - dotnet ef database update --assembly .\dist\Demoulas.ProfitSharing.Data.dll --context ProfitSharingDbContext --connection "${env:ConnectionStrings_ProfitSharing_QA}"
 
       - step:
