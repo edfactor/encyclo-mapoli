@@ -33,7 +33,7 @@ $Deployments = @(
         AppPoolName = 'NETSApiAppPool'
         IgnoreFiles = @("credSettings.$($envTarget).json")
         ConfigEnvironment = $configTarget
-    },
+    }
     #@{
     #    Artifact = "Demoulas.Smart.UI.$($envTarget).zip"
     #    TargetPath = 'C:\inetpub\wwwroot\frontend'
