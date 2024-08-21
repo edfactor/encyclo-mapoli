@@ -54,6 +54,8 @@ definitions:
         - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
         - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.Api -c Release -p:PublishProfile=FolderProfile -o .\publishOutput
         - Write-Host $(Get-Location)
+        - Write-Host (Get-ChildItem)
+        - New-Item -ItemType Directory -Path "dist"
         - Compress-Archive -Path .\publishOutput\* -DestinationPath .\dist\Demoulas.ProfitSharing.Api.zip -Force
 
     create-frontend-artifact-qa: &create-frontend-artifact-qa
