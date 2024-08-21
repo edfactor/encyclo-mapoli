@@ -134,7 +134,7 @@ pipelines:
           script:
             - echo "Deploying application..."
             - $env:API_SERVER_QA = "appt23d"            
-            - powershell .\scripts\webDeploy.ps1 QA $env:API_SERVER_QA "$env:ConnectionStrings_ProfitSharing_QA"
+            - powershell .\scripts\webDeploy.ps1 QA ${env:API_SERVER_QA} "${env:ConnectionStrings_ProfitSharing_QA}"
    
   
     develop:

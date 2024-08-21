@@ -10,13 +10,13 @@ param (
 function Set-EnvironmentVariables {
     param (
         [string]$serverName,
-        [string]$profitSharingConnectionString
+        [string]$connectionString
     )
 
     Invoke-Command -ComputerName $serverName -ScriptBlock {
         param ($profitSharingConnectionString)
-        [System.Environment]::SetEnvironmentVariable("ConnectionStrings:ProfitSharing", "$profitSharingConnectionString", [System.EnvironmentVariableTarget]::Machine)
-    } -ArgumentList "$profitSharingConnectionString"
+        [System.Environment]::SetEnvironmentVariable("ConnectionStrings:ProfitSharing", "$connectionString", [System.EnvironmentVariableTarget]::Machine)
+    } -ArgumentList "$connectionString"
 }
 
 # Function to get configuration environment
@@ -120,7 +120,7 @@ function Validate-Deployment {
 }
 
 # Set environment variables on the server
-Set-EnvironmentVariables -serverName $envServerName -profitSharingConnectionString "$profitSharingConnectionString"
+Set-EnvironmentVariables -serverName $envServerName -$connectionString "$profitSharingConnectionString"
 
 # Get the config environment based on target
 $configTarget = Get-ConfigEnvironment -target $envTarget
