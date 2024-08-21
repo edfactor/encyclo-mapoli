@@ -125,29 +125,29 @@ pipelines:
            # Deployment Stage
       
       - step:
-          name: "Database upgrade"
+          name: "Application Deployment"
           runs-on:
             - windows
             - self.hosted
             - appt125
           deployment: QA
           trigger: "manual"
-          script:
-            - $env:NUGET_ORG="https://api.nuget.org/v3/index.json"
-            - echo "Upgrading Database..."
-            - dotnet tool update --global dotnet-ef --add-source $env:NUGET_ORG   
-            - Write-Host $(Get-Location)
-            - Write-Host $(Get-ChildItem) 
-            - New-Item -Path .\publish -ItemType Directory
-            - Expand-Archive -Path .\dist\Demoulas.ProfitSharing.Api.zip -DestinationPath .\publish
-            - dotnet ef database update --assembly .\publish\Demoulas.ProfitSharing.Data.dll --context ProfitSharingDbContext --connection "${env:ConnectionStrings_ProfitSharing_QA}"
+      #     script:
+      #       - $env:NUGET_ORG="https://api.nuget.org/v3/index.json"
+      #       - echo "Upgrading Database..."
+      #       - dotnet tool update --global dotnet-ef --add-source $env:NUGET_ORG   
+      #       - Write-Host $(Get-Location)
+      #       - Write-Host $(Get-ChildItem) 
+      #       - New-Item -Path .\publish -ItemType Directory
+      #       - Expand-Archive -Path .\dist\Demoulas.ProfitSharing.Api.zip -DestinationPath .\publish
+      #       - dotnet ef database update --assembly .\publish\Demoulas.ProfitSharing.Data.dll --context ProfitSharingDbContext --connection "${env:ConnectionStrings_ProfitSharing_QA}"
 
-      - step:
-          name: "Application Deployment"
-          runs-on:
-            - windows
-            - self.hosted
-            - appt125
+      # - step:
+      #     name: "Application Deployment"
+      #     runs-on:
+      #       - windows
+      #       - self.hosted
+      #       - appt125
           script:
             - echo "Deploying application..."
             - $env:API_SERVER_QA = "appt23d"            
