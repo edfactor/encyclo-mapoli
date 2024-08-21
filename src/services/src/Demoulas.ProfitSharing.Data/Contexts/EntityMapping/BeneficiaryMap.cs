@@ -10,23 +10,23 @@ public sealed class BeneficiaryMap : IEntityTypeConfiguration<Beneficiary>
 {
     public void Configure(EntityTypeBuilder<Beneficiary> builder)
     {
-        builder.HasKey(c => c.PSN);
-        builder.ToTable("BENEFICIARY");
+        _ = builder.HasKey(c => c.PSN);
+        _ = builder.ToTable("BENEFICIARY");
 
-        builder.Property(c => c.PSN).IsRequired().HasPrecision(11).ValueGeneratedNever();
+        _ = builder.Property(c => c.PSN).IsRequired().HasPrecision(11).ValueGeneratedNever();
 
-        builder.HasIndex(c => c.SSN, "IX_SSN");
-        builder.Property(c => c.SSN).IsRequired().HasPrecision(9);
+        _ = builder.HasIndex(c => c.SSN, "IX_SSN");
+        _ = builder.Property(c => c.SSN).IsRequired().HasPrecision(9);
 
-        builder.Property(b => b.FirstName).IsRequired().HasMaxLength(30).HasColumnName("FIRST_NAME");
-        builder.Property(b => b.MiddleName).HasMaxLength(30).HasColumnName("MIDDLE_NAME");
-        builder.Property(b => b.LastName).IsRequired().HasMaxLength(30).HasColumnName("LAST_NAME");
+        _ = builder.Property(b => b.FirstName).IsRequired().HasMaxLength(30).HasColumnName("FIRST_NAME");
+        _ = builder.Property(b => b.MiddleName).HasMaxLength(30).HasColumnName("MIDDLE_NAME");
+        _ = builder.Property(b => b.LastName).IsRequired().HasMaxLength(30).HasColumnName("LAST_NAME");
 
-        builder.Property(b => b.DateOfBirth).HasColumnType("DATE").HasConversion<DateOnlyConverter>().HasColumnName("DATE_OF_BIRTH");
+        _ = builder.Property(b => b.DateOfBirth).HasColumnType("DATE").HasConversion<DateOnlyConverter>().HasColumnName("DATE_OF_BIRTH");
 
-        builder.Property(b => b.KindId).IsRequired().HasColumnName("KIND_ID");
+        _ = builder.Property(b => b.KindId).IsRequired().HasColumnName("KIND_ID");
 
-        builder.OwnsOne(e => e.Address, address =>
+        _ = builder.OwnsOne(e => e.Address, address =>
         {
             address.Property(a => a.Street).HasMaxLength(30).HasColumnName("STREET").HasComment("Street").IsRequired();
             address.Property(a => a.Street2).HasMaxLength(30).HasColumnName("STREET2").HasComment("Street2");
@@ -42,21 +42,21 @@ public sealed class BeneficiaryMap : IEntityTypeConfiguration<Beneficiary>
                 .HasForeignKey(o => o.CountryISO);
         });
 
-        builder.OwnsOne(e => e.ContactInfo, contact =>
+        _ = builder.OwnsOne(e => e.ContactInfo, contact =>
         {
             contact.Property(a => a.PhoneNumber).HasMaxLength(15).HasColumnName("PHONE_NUMBER");
             contact.Property(a => a.MobileNumber).HasMaxLength(15).HasColumnName("MOBILE_NUMBER");
             contact.Property(a => a.EmailAddress).HasMaxLength(50).HasColumnName("EMAIL_ADDRESS");
         });
 
-        builder.HasOne(d => d.Kind)
+        _ = builder.HasOne(d => d.Kind)
             .WithMany(p => p.Beneficiaries)
             .HasForeignKey(d => d.KindId);
 
-        builder.Property(e => e.Distribution).HasPrecision(9, 2);
-        builder.Property(e => e.Amount).HasPrecision(9, 2);
-        builder.Property(e => e.Earnings).HasPrecision(9, 2);
-        builder.Property(e => e.SecondaryEarnings).HasPrecision(9, 2).HasColumnName("SECONDARY_EARNINGS");
+        _ = builder.Property(e => e.Distribution).HasPrecision(9, 2);
+        _ = builder.Property(e => e.Amount).HasPrecision(9, 2);
+        _ = builder.Property(e => e.Earnings).HasPrecision(9, 2);
+        _ = builder.Property(e => e.SecondaryEarnings).HasPrecision(9, 2).HasColumnName("SECONDARY_EARNINGS");
 
     }
 }
