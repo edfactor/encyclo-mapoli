@@ -143,7 +143,6 @@ pipelines:
             - windows
             - self.hosted
             - appt125
-          deployment: QA
           script:
             - echo "Deploying application..."
             - $env:API_SERVER_QA = "appt23d"            
