@@ -1,4 +1,3 @@
-
 param (
     [string]$envTarget,
     [string]$envServerName,
@@ -16,7 +15,7 @@ function Set-EnvironmentVariables {
 
     Invoke-Command -ComputerName $serverName -ScriptBlock {
         param ($profitSharingConnectionString)
-        [System.Environment]::SetEnvironmentVariable("ConnectionStrings:ProfitSharing", $profitSharingConnectionString, [System.EnvironmentVariableTarget]::Machine)
+        [System.Environment]::SetEnvironmentVariable("ConnectionStrings:ProfitSharing", "$profitSharingConnectionString", [System.EnvironmentVariableTarget]::Machine)
     } -ArgumentList $profitSharingConnectionString
 }
 
@@ -76,8 +75,7 @@ function Deploy-Artifact {
 
     try {
         Write-Host "Deploying $artifact to $targetPath"
-
-        # Expand the archive to a temporary location
+        # Include additional logic to handle ignoring files or other deployment specifics
         $tempPath = Join-Path $env:TEMP "deploy_temp"
         Expand-Archive -Path $artifact -DestinationPath $tempPath -Force
 
@@ -96,7 +94,7 @@ function Deploy-Artifact {
         # Clean up temporary files
         Remove-Item -Path $tempPath -Recurse -Force
     } catch {
-        Write-Error "Failed to deploy $artifact to $targetPath"
+        Write-Error "Deployment failed for $artifact"
         throw
     }
 }
@@ -138,14 +136,14 @@ if ($Verbose) {
 $Deployments = @(
     @{
         Artifact = "Demoulas.ProfitSharing.Api.zip"
-        TargetPath = "C:\inetpub\wwwroot\api"
+        TargetPath = "C:\\inetpub\\wwwroot\\api"
         SiteName = "API"
         AppPoolName = "NETSApiAppPool"
         ConfigEnvironment = $configTarget
     },
     @{
         Artifact = "Demoulas.ProfitSharing.UI.$($envTarget).zip"
-        TargetPath = "C:\inetpub\wwwroot\frontend"
+        TargetPath = "C:\\inetpub\\wwwroot\\frontend"
         SiteName = "Frontend"
         AppPoolName = "NETSFrontendAppPool"
         ConfigEnvironment = $configTarget
