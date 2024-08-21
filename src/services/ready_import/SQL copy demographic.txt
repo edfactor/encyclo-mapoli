@@ -1,0 +1,151 @@
+-- FIRST EMPTY OUT THE TABLE
+TRUNCATE TABLE TALGER.DEMOGRAPHIC;
+
+--LOAD DEMOGRAPHIC TABLE TO - TALGER FROM - MTPR2 
+
+
+INSERT INTO TALGER.DEMOGRAPHIC
+   (ORACLE_HCM_ID,
+    SSN,
+    BADGE_NUMBER,
+    FULL_NAME,
+    LAST_NAME,
+    FIRST_NAME,
+    MIDDLE_NAME,
+    STORE_NUMBER,
+    PAY_CLASSIFICATION_ID,
+    PHONE_NUMBER,
+    STREET,
+    STREET2,
+    CITY,
+    STATE,
+    POSTAL_CODE,
+    DATE_OF_BIRTH,
+    FULL_TIME_DATE,
+    HIRE_DATE,
+    REHIRE_DATE,
+    TERMINATION_DATE,
+    DEPARTMENT,
+    EMPLOYMENT_TYPE_ID,
+    GENDER_ID,
+    PAY_FREQUENCY_ID,
+    TERMINATION_CODE_ID,
+    EMPLOYMENT_STATUS_ID)
+SELECT
+    ROWNUM AS ORACLEHCMID,     
+    DEM_SSN,
+    DEM_BADGE,
+    PY_NAM,
+    PY_LNAME,
+    PY_FNAME,
+    PY_MNAME,
+    PY_STOR,
+    PY_CLA,
+    PY_EMP_TELNO,
+    PY_ADD,
+    PY_ADD2,
+    PY_CITY,
+    PY_STATE,
+    PY_ZIP,
+    CASE
+            WHEN LENGTH(PY_DOB) = 8
+                AND TO_NUMBER(SUBSTR(PY_DOB, 5, 2)) BETWEEN 1 AND 12
+                AND (
+                    (TO_NUMBER(SUBSTR(PY_DOB, 5, 2)) IN (1, 3, 5, 7, 8, 10, 12) AND TO_NUMBER(SUBSTR(PY_DOB, 7, 2)) BETWEEN 1 AND 31) OR
+                    (TO_NUMBER(SUBSTR(PY_DOB, 5, 2)) IN (4, 6, 9, 11) AND TO_NUMBER(SUBSTR(PY_DOB, 7, 2)) BETWEEN 1 AND 30) OR
+                    (TO_NUMBER(SUBSTR(PY_DOB, 5, 2)) = 2 AND TO_NUMBER(SUBSTR(PY_DOB, 7, 2)) BETWEEN 1 AND 
+                        CASE
+                            WHEN MOD(TO_NUMBER(SUBSTR(PY_DOB, 1, 4)), 400) = 0 OR (MOD(TO_NUMBER(SUBSTR(PY_DOB, 1, 4)), 4) = 0 AND MOD(TO_NUMBER(SUBSTR(PY_DOB, 1, 4)), 100) != 0)
+                            THEN 29
+                            ELSE 28
+                        END
+                    )
+                )
+            THEN TO_DATE(PY_DOB, 'YYYYMMDD')
+            ELSE DATE '1900-01-01'
+    END AS converted_date,
+    CASE
+            WHEN PY_FULL_DT = 0 THEN NULL
+            WHEN LENGTH(PY_FULL_DT) = 8
+                AND TO_NUMBER(SUBSTR(PY_FULL_DT, 5, 2)) BETWEEN 1 AND 12
+                AND (
+                    (TO_NUMBER(SUBSTR(PY_FULL_DT, 5, 2)) IN (1, 3, 5, 7, 8, 10, 12) AND TO_NUMBER(SUBSTR(PY_FULL_DT, 7, 2)) BETWEEN 1 AND 31) OR
+                    (TO_NUMBER(SUBSTR(PY_FULL_DT, 5, 2)) IN (4, 6, 9, 11) AND TO_NUMBER(SUBSTR(PY_FULL_DT, 7, 2)) BETWEEN 1 AND 30) OR
+                    (TO_NUMBER(SUBSTR(PY_FULL_DT, 5, 2)) = 2 AND TO_NUMBER(SUBSTR(PY_FULL_DT, 7, 2)) BETWEEN 1 AND 
+                        CASE
+                            WHEN MOD(TO_NUMBER(SUBSTR(PY_FULL_DT, 1, 4)), 400) = 0 OR (MOD(TO_NUMBER(SUBSTR(PY_FULL_DT, 1, 4)), 4) = 0 AND MOD(TO_NUMBER(SUBSTR(PY_FULL_DT, 1, 4)), 100) != 0)
+                            THEN 29
+                            ELSE 28
+                        END
+                    )
+                )
+            THEN TO_DATE(PY_FULL_DT, 'YYYYMMDD')
+            ELSE DATE '1900-01-01'
+    END AS converted_date,
+    CASE
+            WHEN LENGTH(PY_HIRE_DT) = 8
+                AND TO_NUMBER(SUBSTR(PY_HIRE_DT, 5, 2)) BETWEEN 1 AND 12
+                AND (
+                    (TO_NUMBER(SUBSTR(PY_HIRE_DT, 5, 2)) IN (1, 3, 5, 7, 8, 10, 12) AND TO_NUMBER(SUBSTR(PY_HIRE_DT, 7, 2)) BETWEEN 1 AND 31) OR
+                    (TO_NUMBER(SUBSTR(PY_HIRE_DT, 5, 2)) IN (4, 6, 9, 11) AND TO_NUMBER(SUBSTR(PY_HIRE_DT, 7, 2)) BETWEEN 1 AND 30) OR
+                    (TO_NUMBER(SUBSTR(PY_HIRE_DT, 5, 2)) = 2 AND TO_NUMBER(SUBSTR(PY_HIRE_DT, 7, 2)) BETWEEN 1 AND 
+                        CASE
+                            WHEN MOD(TO_NUMBER(SUBSTR(PY_HIRE_DT, 1, 4)), 400) = 0 OR (MOD(TO_NUMBER(SUBSTR(PY_HIRE_DT, 1, 4)), 4) = 0 AND MOD(TO_NUMBER(SUBSTR(PY_HIRE_DT, 1, 4)), 100) != 0)
+                            THEN 29
+                            ELSE 28
+                        END
+                    )
+                )
+            THEN TO_DATE(PY_HIRE_DT, 'YYYYMMDD')
+            ELSE DATE '1900-01-01'
+    END AS converted_date,
+    CASE
+            WHEN PY_REHIRE_DT = 0 THEN NULL
+            WHEN LENGTH(PY_REHIRE_DT) = 8
+                AND TO_NUMBER(SUBSTR(PY_REHIRE_DT, 5, 2)) BETWEEN 1 AND 12
+                AND (
+                    (TO_NUMBER(SUBSTR(PY_REHIRE_DT, 5, 2)) IN (1, 3, 5, 7, 8, 10, 12) AND TO_NUMBER(SUBSTR(PY_REHIRE_DT, 7, 2)) BETWEEN 1 AND 31) OR
+                    (TO_NUMBER(SUBSTR(PY_REHIRE_DT, 5, 2)) IN (4, 6, 9, 11) AND TO_NUMBER(SUBSTR(PY_REHIRE_DT, 7, 2)) BETWEEN 1 AND 30) OR
+                    (TO_NUMBER(SUBSTR(PY_REHIRE_DT, 5, 2)) = 2 AND TO_NUMBER(SUBSTR(PY_REHIRE_DT, 7, 2)) BETWEEN 1 AND 
+                        CASE
+                            WHEN MOD(TO_NUMBER(SUBSTR(PY_REHIRE_DT, 1, 4)), 400) = 0 OR (MOD(TO_NUMBER(SUBSTR(PY_REHIRE_DT, 1, 4)), 4) = 0 AND MOD(TO_NUMBER(SUBSTR(PY_REHIRE_DT, 1, 4)), 100) != 0)
+                            THEN 29
+                            ELSE 28
+                        END
+                    )
+                )
+            THEN TO_DATE(PY_REHIRE_DT, 'YYYYMMDD')
+            ELSE DATE '1900-01-01'
+    END AS converted_date,
+    CASE
+            WHEN PY_TERM_DT = 0 THEN NULL
+            WHEN LENGTH(PY_TERM_DT) = 8
+                AND TO_NUMBER(SUBSTR(PY_TERM_DT, 5, 2)) BETWEEN 1 AND 12
+                AND (
+                    (TO_NUMBER(SUBSTR(PY_TERM_DT, 5, 2)) IN (1, 3, 5, 7, 8, 10, 12) AND TO_NUMBER(SUBSTR(PY_TERM_DT, 7, 2)) BETWEEN 1 AND 31) OR
+                    (TO_NUMBER(SUBSTR(PY_TERM_DT, 5, 2)) IN (4, 6, 9, 11) AND TO_NUMBER(SUBSTR(PY_TERM_DT, 7, 2)) BETWEEN 1 AND 30) OR
+                    (TO_NUMBER(SUBSTR(PY_TERM_DT, 5, 2)) = 2 AND TO_NUMBER(SUBSTR(PY_TERM_DT, 7, 2)) BETWEEN 1 AND 
+                        CASE
+                            WHEN MOD(TO_NUMBER(SUBSTR(PY_TERM_DT, 1, 4)), 400) = 0 OR (MOD(TO_NUMBER(SUBSTR(PY_TERM_DT, 1, 4)), 4) = 0 AND MOD(TO_NUMBER(SUBSTR(PY_TERM_DT, 1, 4)), 100) != 0)
+                            THEN 29
+                            ELSE 28
+                        END
+                    )
+                )
+            THEN TO_DATE(PY_TERM_DT, 'YYYYMMDD')
+            ELSE DATE '1900-01-01'
+    END AS converted_date, 
+    PY_DP,
+    TRIM(PY_FUL),
+    PY_GENDER,
+    PY_FREQ,
+    CASE
+            WHEN PY_TERM = ' ' THEN NULL
+            ELSE PY_TERM
+    END,
+    (
+     SELECT ID
+     FROM EMPLOYMENT_STATUS
+     WHERE ID=LOWER(PY_SCOD)
+    )
+FROM PROFITSHARE.DEMOGRAPHICS;
