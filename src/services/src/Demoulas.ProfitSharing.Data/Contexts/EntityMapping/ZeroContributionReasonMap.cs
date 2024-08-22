@@ -50,6 +50,11 @@ internal sealed class ZeroContributionReasonMap : IEntityTypeConfiguration<ZeroC
             {
                 Id = ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay,
                 Name = "=64 AND 1ST CONTRIBUTION >=5 YEARS AGO GETS 100% VESTED ON THEIR BIRTHDAY"
+            },
+            new PayFrequency
+            {
+                Id = ZeroContributionReason.Constants.UNKNOWN,
+                Name = "Unknown"
             }
         );
     }

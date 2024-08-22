@@ -2,113 +2,14 @@
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
-namespace Demoulas.ProfitSharing.Data.Migrations;
-
+namespace Demoulas.ProfitSharing.Data.Migrations
+{
     /// <inheritdoc />
-    public partial class PS332TableTroubles : Migration
+    public partial class ZeroConf8 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_DISTRIBUTION_GENDER_GENDERID",
-                table: "DISTRIBUTION");
-
-            migrationBuilder.RenameColumn(
-                name: "TAXCODEID",
-                table: "DISTRIBUTION",
-                newName: "TAX_CODE_ID");
-
-            migrationBuilder.RenameColumn(
-                name: "GENDERID",
-                table: "DISTRIBUTION",
-                newName: "GENDER_ID");
-
-            migrationBuilder.RenameColumn(
-                name: "FEDERAL_TAX_AMOUNTE",
-                table: "DISTRIBUTION",
-                newName: "FEDERAL_TAX_AMOUNT");
-
-            migrationBuilder.RenameColumn(
-                name: "EMPLOYEMENT_TYPE_ID",
-                table: "DEMOGRAPHIC",
-                newName: "EMPLOYMENT_TYPE_ID");
-
-            migrationBuilder.AlterColumn<string>(
-                name: "THIRD_PARTY_PAYEEE",
-                table: "DISTRIBUTION",
-                type: "NVARCHAR2(30)",
-                maxLength: 30,
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "NVARCHAR2(2000)",
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<string>(
-                name: "THIRD_PARTY_NAME",
-                table: "DISTRIBUTION",
-                type: "NVARCHAR2(30)",
-                maxLength: 30,
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "NVARCHAR2(2000)",
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<long>(
-                name: "PAYEE_SSN",
-                table: "DISTRIBUTION",
-                type: "NUMBER(9)",
-                precision: 9,
-                nullable: false,
-                oldClrType: typeof(long),
-                oldType: "NUMBER(19)");
-
-            migrationBuilder.AlterColumn<string>(
-                name: "PAYEE_NAME",
-                table: "DISTRIBUTION",
-                type: "NVARCHAR2(30)",
-                maxLength: 30,
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "NVARCHAR2(2000)");
-
-            migrationBuilder.AlterColumn<string>(
-                name: "FORTHEBENEFITOF_PAYEE",
-                table: "DISTRIBUTION",
-                type: "NVARCHAR2(30)",
-                maxLength: 30,
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "NVARCHAR2(2000)",
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<string>(
-                name: "FORTHEBENEFITOF_ACCOUNT_TYPE",
-                table: "DISTRIBUTION",
-                type: "NVARCHAR2(30)",
-                maxLength: 30,
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "NVARCHAR2(2000)",
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<string>(
-                name: "GENDER_ID",
-                table: "DISTRIBUTION",
-                type: "NVARCHAR2(1)",
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "NVARCHAR2(1)");
-
-            migrationBuilder.AddColumn<string>(
-                name: "THIRD_PARTY_ACCOUNT",
-                table: "DISTRIBUTION",
-                type: "NVARCHAR2(30)",
-                maxLength: 30,
-                nullable: true);
-
             migrationBuilder.UpdateData(
                 table: "COUNTRY",
                 keyColumn: "ISO",
@@ -1468,130 +1369,18 @@ namespace Demoulas.ProfitSharing.Data.Migrations;
                 value: (short)194);
 
             migrationBuilder.InsertData(
-                table: "PAY_CLASSIFICATION",
+                table: "ZERO_CONTRIBUTION_REASON",
                 columns: new[] { "ID", "NAME" },
-                values: new object[,]
-                {
-                    { (byte)0, "01" },
-                    { (byte)7, "SPIRITS CLERK - PT" }
-                });
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_DISTRIBUTION_GENDER_GENDERID",
-                table: "DISTRIBUTION",
-                column: "GENDER_ID",
-                principalTable: "GENDER",
-                principalColumn: "ID");
+                values: new object[] { (byte)8, "Unknown" });
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_DISTRIBUTION_GENDER_GENDERID",
-                table: "DISTRIBUTION");
-
             migrationBuilder.DeleteData(
-                table: "PAY_CLASSIFICATION",
+                table: "ZERO_CONTRIBUTION_REASON",
                 keyColumn: "ID",
-                keyValue: (byte)0);
-
-            migrationBuilder.DeleteData(
-                table: "PAY_CLASSIFICATION",
-                keyColumn: "ID",
-                keyValue: (byte)7);
-
-            migrationBuilder.DropColumn(
-                name: "THIRD_PARTY_ACCOUNT",
-                table: "DISTRIBUTION");
-
-            migrationBuilder.RenameColumn(
-                name: "TAX_CODE_ID",
-                table: "DISTRIBUTION",
-                newName: "TAXCODEID");
-
-            migrationBuilder.RenameColumn(
-                name: "GENDER_ID",
-                table: "DISTRIBUTION",
-                newName: "GENDERID");
-
-            migrationBuilder.RenameColumn(
-                name: "FEDERAL_TAX_AMOUNT",
-                table: "DISTRIBUTION",
-                newName: "FEDERAL_TAX_AMOUNTE");
-
-            migrationBuilder.RenameColumn(
-                name: "EMPLOYMENT_TYPE_ID",
-                table: "DEMOGRAPHIC",
-                newName: "EMPLOYEMENT_TYPE_ID");
-
-            migrationBuilder.AlterColumn<string>(
-                name: "THIRD_PARTY_PAYEEE",
-                table: "DISTRIBUTION",
-                type: "NVARCHAR2(2000)",
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "NVARCHAR2(30)",
-                oldMaxLength: 30,
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<string>(
-                name: "THIRD_PARTY_NAME",
-                table: "DISTRIBUTION",
-                type: "NVARCHAR2(2000)",
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "NVARCHAR2(30)",
-                oldMaxLength: 30,
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<long>(
-                name: "PAYEE_SSN",
-                table: "DISTRIBUTION",
-                type: "NUMBER(19)",
-                nullable: false,
-                oldClrType: typeof(long),
-                oldType: "NUMBER(9)",
-                oldPrecision: 9);
-
-            migrationBuilder.AlterColumn<string>(
-                name: "PAYEE_NAME",
-                table: "DISTRIBUTION",
-                type: "NVARCHAR2(2000)",
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "NVARCHAR2(30)",
-                oldMaxLength: 30);
-
-            migrationBuilder.AlterColumn<string>(
-                name: "FORTHEBENEFITOF_PAYEE",
-                table: "DISTRIBUTION",
-                type: "NVARCHAR2(2000)",
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "NVARCHAR2(30)",
-                oldMaxLength: 30,
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<string>(
-                name: "FORTHEBENEFITOF_ACCOUNT_TYPE",
-                table: "DISTRIBUTION",
-                type: "NVARCHAR2(2000)",
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "NVARCHAR2(30)",
-                oldMaxLength: 30,
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<string>(
-                name: "GENDERID",
-                table: "DISTRIBUTION",
-                type: "NVARCHAR2(1)",
-                nullable: false,
-                defaultValue: "",
-                oldClrType: typeof(string),
-                oldType: "NVARCHAR2(1)",
-                oldNullable: true);
+                keyValue: (byte)8);
 
             migrationBuilder.UpdateData(
                 table: "COUNTRY",
@@ -2950,14 +2739,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations;
                 keyValue: "ZW",
                 column: "ID",
                 value: (byte)194);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_DISTRIBUTION_GENDER_GENDERID",
-                table: "DISTRIBUTION",
-                column: "GENDERID",
-                principalTable: "GENDER",
-                principalColumn: "ID",
-                onDelete: ReferentialAction.Cascade);
         }
     }
-
+}
