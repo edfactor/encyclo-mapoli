@@ -10,36 +10,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.EnsureSchema(
-                name: "MTPR");
-
-            migrationBuilder.CreateTable(
+            migrationBuilder.RenameTable(
                 name: "CALDAR_RECORD",
                 schema: "MTPR",
-                columns: table => new
-                {
-                    ACC_WKEND_N = table.Column<int>(type: "NUMBER(10)", nullable: false)
-                        .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
-                    ACC_APWKEND = table.Column<int>(type: "NUMBER(10)", nullable: true),
-                    ACC_WEEKN = table.Column<int>(type: "NUMBER(10)", nullable: true),
-                    ACC_PERIOD = table.Column<int>(type: "NUMBER(10)", nullable: true),
-                    ACC_QUARTER = table.Column<int>(type: "NUMBER(10)", nullable: true),
-                    ACC_CALPERIOD = table.Column<int>(type: "NUMBER(10)", nullable: true),
-                    ACC_CLN60_WEEK = table.Column<int>(type: "NUMBER(10)", nullable: true),
-                    ACC_CLN60_PERIOD = table.Column<int>(type: "NUMBER(10)", nullable: true),
-                    ACC_CLN61_WEEK = table.Column<int>(type: "NUMBER(10)", nullable: true),
-                    ACC_CLN61_PERIOD = table.Column<int>(type: "NUMBER(10)", nullable: true),
-                    ACC_CLN7X_WEEK = table.Column<int>(type: "NUMBER(10)", nullable: true),
-                    ACC_CLN7X_PERIOD = table.Column<int>(type: "NUMBER(10)", nullable: true),
-                    ACC_CLN6X_WEEK = table.Column<int>(type: "NUMBER(10)", nullable: true),
-                    ACC_CLN6X_PERIOD = table.Column<int>(type: "NUMBER(10)", nullable: true),
-                    ACC_WKEND2_N = table.Column<long>(type: "NUMBER(19)", nullable: true),
-                    ACC_ALT_KEY_NUM = table.Column<long>(type: "NUMBER(19)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CALDAR_RECORD", x => x.ACC_WKEND_N);
-                });
+                newName: "CALDAR_RECORD");
 
             migrationBuilder.UpdateData(
                 table: "COUNTRY",
@@ -1398,30 +1372,18 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 keyValue: "ZW",
                 column: "ID",
                 value: (short)194);
-
-            migrationBuilder.CreateIndex(
-                name: "CALDAR_RECORD_ACC_APWKEND_N",
-                schema: "MTPR",
-                table: "CALDAR_RECORD",
-                column: "ACC_APWKEND",
-                unique: true,
-                filter: "\"ACC_APWKEND\" IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "CALDAR_RECORD_ACC_WEDATE2",
-                schema: "MTPR",
-                table: "CALDAR_RECORD",
-                column: "ACC_WKEND2_N",
-                unique: true,
-                filter: "\"ACC_WKEND2_N\" IS NOT NULL");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
+            migrationBuilder.EnsureSchema(
+                name: "MTPR");
+
+            migrationBuilder.RenameTable(
                 name: "CALDAR_RECORD",
-                schema: "MTPR");
+                newName: "CALDAR_RECORD",
+                newSchema: "MTPR");
 
             migrationBuilder.UpdateData(
                 table: "COUNTRY",

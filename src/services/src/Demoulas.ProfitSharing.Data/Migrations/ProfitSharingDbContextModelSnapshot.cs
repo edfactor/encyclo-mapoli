@@ -2531,7 +2531,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasDatabaseName("CALDAR_RECORD_ACC_WEDATE2")
                         .HasFilter("\"ACC_WKEND2_N\" IS NOT NULL");
 
-                    b.ToTable("CALDAR_RECORD", "MTPR");
+                    b.ToTable("CALDAR_RECORD", (string)null);
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.PayClassification", b =>

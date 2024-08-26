@@ -12,7 +12,7 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    [Migration("20240826154523_addCaldarRecordSchema")]
+    [Migration("20240826154634_addCaldarRecordSchema")]
     partial class addCaldarRecordSchema
     {
         /// <inheritdoc />
@@ -2534,7 +2534,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasDatabaseName("CALDAR_RECORD_ACC_WEDATE2")
                         .HasFilter("\"ACC_WKEND2_N\" IS NOT NULL");
 
-                    b.ToTable("CALDAR_RECORD", "MTPR");
+                    b.ToTable("CALDAR_RECORD", (string)null);
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.PayClassification", b =>

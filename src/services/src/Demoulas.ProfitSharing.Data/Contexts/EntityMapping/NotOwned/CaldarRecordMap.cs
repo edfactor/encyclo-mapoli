@@ -12,7 +12,7 @@ internal sealed class CaldarRecordMap : IEntityTypeConfiguration<CaldarRecord>
 {
     public void Configure(EntityTypeBuilder<CaldarRecord> builder)
     {
-        builder.ToTable("CALDAR_RECORD", "MTPR");
+        builder.ToTable("CALDAR_RECORD");
 
         builder.HasKey(e => e.AccWkendN)
             .HasName("PK_CALDAR_RECORD");
