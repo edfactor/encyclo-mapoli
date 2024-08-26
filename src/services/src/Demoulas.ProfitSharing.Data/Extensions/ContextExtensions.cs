@@ -1,5 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.MassTransit;
+using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.NotOwned;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Data.Extensions;
@@ -36,6 +37,10 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new BeneficiaryRelPercentMap());
         modelBuilder.ApplyConfiguration(new DemographicSyncAuditMap());
         modelBuilder.ApplyConfiguration(new StateTaxMap());
+
+        modelBuilder.ApplyConfiguration(new CaldarRecordMap());
+
+        
 
 
         // Force table names to be upper case for consistency with all existing DSM projects
