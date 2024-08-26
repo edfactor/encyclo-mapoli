@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Data.Entities.NotOwned;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
 
+
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping.NotOwned;
 internal sealed class CaldarRecordMap : IEntityTypeConfiguration<CaldarRecord>
 {
@@ -74,5 +75,7 @@ internal sealed class CaldarRecordMap : IEntityTypeConfiguration<CaldarRecord>
         builder.HasIndex(e => e.AccWkend2N)
             .IsUnique()
             .HasDatabaseName("CALDAR_RECORD_ACC_WEDATE2");
+
+        CaldarRecordSeeder.Seed(builder);
     }
 }
