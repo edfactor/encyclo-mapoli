@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="Demoulas.Common.Api" />
+    <PackageReference Include="Demoulas.Security" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" />
   </ItemGroup>
 
