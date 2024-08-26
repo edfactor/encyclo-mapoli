@@ -20,4 +20,6 @@ public sealed class Beneficiary
     public decimal Amount { get; set; }
     public decimal Earnings { get; set; }
     public decimal SecondaryEarnings { get; set; }
+
+    public List<PayProfit>? PayProfits { get; set; }
 }
