@@ -48,6 +48,11 @@ public sealed class ZeroContributionReason : ILookupTable<byte>
         /// =64 AND 1ST CONTRIBUTION >=5 YEARS AGO GETS 100% VESTED ON THEIR BIRTHDAY
         /// </summary>
         public const byte SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay = 7;
+
+        /// <summary>
+        /// "Half the battle for DSM is remembering why 8 was used in 2007 so we can identify them even if never used again" -- Kevin Bouchard
+        /// </summary>
+        public const byte UNKNOWN = 8;
     }
 #pragma warning restore S1133
 #pragma warning restore CS0618

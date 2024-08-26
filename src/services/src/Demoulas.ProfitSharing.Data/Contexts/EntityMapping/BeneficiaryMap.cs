@@ -53,10 +53,10 @@ public sealed class BeneficiaryMap : IEntityTypeConfiguration<Beneficiary>
             .WithMany(p => p.Beneficiaries)
             .HasForeignKey(d => d.KindId);
 
-        _ = builder.Property(e => e.Distribution).HasPrecision(9, 2);
-        _ = builder.Property(e => e.Amount).HasPrecision(9, 2);
-        _ = builder.Property(e => e.Earnings).HasPrecision(9, 2);
-        _ = builder.Property(e => e.SecondaryEarnings).HasPrecision(9, 2).HasColumnName("SECONDARY_EARNINGS");
+       _ = builder.Property(e => e.Distribution).HasPrecision(9, 2).HasColumnName("DISTRIBUTION");
+       _ = builder.Property(e => e.Amount).HasPrecision(9, 2).HasColumnName("AMOUNT");
+       _ = builder.Property(e => e.Earnings).HasPrecision(9, 2).HasColumnName("EARNINGS");
+       _ = builder.Property(e => e.SecondaryEarnings).HasPrecision(9, 2).HasColumnName("SECONDARY_EARNINGS");
 
     }
 }
