@@ -13,13 +13,15 @@ public sealed class Beneficiary
     public required Address Address { get; set; }
     public required ContactInfo ContactInfo { get; set; }
 
-    public required char KindId { get; set; }
-    public required BeneficiaryKind Kind { get; set; }
+    public  char? KindId { get; set; }
+    public  BeneficiaryKind? Kind { get; set; }
 
     public decimal Distribution{ get; set; }
     public decimal Amount { get; set; }
     public decimal Earnings { get; set; }
     public decimal SecondaryEarnings { get; set; }
+    public required decimal Percent { get; set; }
+    public string? Relationship { get; set; }
 
     public List<PayProfit>? PayProfits { get; set; }
 }
