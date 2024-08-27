@@ -1,6 +1,5 @@
 ﻿using Bogus;
 using Bogus.Extensions.UnitedStates;
-using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Data.Entities;
 

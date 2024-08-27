@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Demoulas.Common.Api.Extensions;
 using Demoulas.Common.Contracts.Configuration;
 using Demoulas.Common.Data.Contexts.DTOs.Context;

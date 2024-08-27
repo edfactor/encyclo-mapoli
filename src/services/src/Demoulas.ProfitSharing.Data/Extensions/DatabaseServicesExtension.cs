@@ -1,7 +1,5 @@
 ﻿using System.Diagnostics;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
-using Demoulas.Common.Data.Services.Interfaces;
-using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Data.Factories;
 using Demoulas.ProfitSharing.Data.Interfaces;

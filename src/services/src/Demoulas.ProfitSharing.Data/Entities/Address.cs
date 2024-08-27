@@ -1,6 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common;
-
-namespace Demoulas.ProfitSharing.Data.Entities;
+﻿namespace Demoulas.ProfitSharing.Data.Entities;
 public sealed class Address
 {
     public required string Street { get; set; }

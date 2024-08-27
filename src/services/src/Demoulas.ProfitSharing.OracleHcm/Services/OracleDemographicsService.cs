@@ -5,7 +5,6 @@ using System.Text.Json;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
-using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services;
 

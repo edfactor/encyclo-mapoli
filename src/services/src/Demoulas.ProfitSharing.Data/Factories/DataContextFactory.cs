@@ -5,7 +5,6 @@ using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Data.Factories;
 

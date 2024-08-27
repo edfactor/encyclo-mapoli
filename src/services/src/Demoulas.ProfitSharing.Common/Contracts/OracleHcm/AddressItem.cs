@@ -1,28 +1,29 @@
 ﻿using System.Text.Json.Serialization;
 
+
 namespace Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
-public record AddressItem(
-    [property: JsonPropertyName("AddressId")] string AddressId,
-    [property: JsonPropertyName("EffectiveStartDate")] string EffectiveStartDate,
-    [property: JsonPropertyName("EffectiveEndDate")] string EffectiveEndDate,
-    [property: JsonPropertyName("AddressLine1")] string AddressLine1,
-    [property: JsonPropertyName("AddressLine2")] string AddressLine2,
-    [property: JsonPropertyName("AddressLine3")] string AddressLine3,
-    [property: JsonPropertyName("AddressLine4")] string AddressLine4,
-    [property: JsonPropertyName("TownOrCity")] string TownOrCity,
-    [property: JsonPropertyName("Region1")] string County,
-    [property: JsonPropertyName("Region2")] string State,
-    [property: JsonPropertyName("Country")] string Country,
-    [property: JsonPropertyName("CountryName")] string CountryName,
-    [property: JsonPropertyName("PostalCode")] string PostalCode,
-    [property: JsonPropertyName("LongPostalCode")] object LongPostalCode,
-    [property: JsonPropertyName("Building")] object Building,
-    [property: JsonPropertyName("FloorNumber")] object FloorNumber,
-    [property: JsonPropertyName("CreatedBy")] string CreatedBy,
-    [property: JsonPropertyName("CreationDate")] DateTime? CreationDate,
-    [property: JsonPropertyName("LastUpdatedBy")] string LastUpdatedBy,
-    [property: JsonPropertyName("PersonAddrUsageId")] string PersonAddrUsageId,
-    [property: JsonPropertyName("AddressType")] string AddressType,
-    [property: JsonPropertyName("AddressTypeMeaning")] string AddressTypeMeaning,
-    [property: JsonPropertyName("PrimaryFlag")] bool? PrimaryFlag
-);
+public record AddressItem
+{
+    [JsonPropertyName("AddressLine1")]
+    public required string AddressLine1 { get; init; }
+    [JsonPropertyName("AddressLine2")]
+    public string? AddressLine2 { get; init; }
+    [JsonPropertyName("AddressLine3")]
+    public string? AddressLine3 { get; init; }
+    [JsonPropertyName("AddressLine4")]
+    public string? AddressLine4 { get; init; }
+    [JsonPropertyName("TownOrCity")]
+    public required string TownOrCity { get; init; }
+    
+    [JsonPropertyName("Region2")]
+    public required string State { get; init; }
+    
+    [JsonPropertyName("Country")]
+    public string? Country { get; init; }
+    
+    [JsonPropertyName("PostalCode")]
+    public required string PostalCode { get; init; }
+
+    public bool? PrimaryFlag { get; init; }
+}
+

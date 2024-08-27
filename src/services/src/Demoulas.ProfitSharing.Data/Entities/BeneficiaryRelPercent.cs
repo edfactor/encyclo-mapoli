@@ -1,6 +1,4 @@
 ﻿
-using System.ComponentModel.DataAnnotations;
-
 namespace Demoulas.ProfitSharing.Data.Entities;
 public sealed class BeneficiaryRelPercent
 {
