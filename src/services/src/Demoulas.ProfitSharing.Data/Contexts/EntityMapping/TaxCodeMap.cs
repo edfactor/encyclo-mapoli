@@ -19,6 +19,7 @@ internal sealed class TaxCodeMap : IEntityTypeConfiguration<TaxCode>
     {
         return
         [
+            new TaxCode{Code='0', Description="Unknown - not legal tax code, yet 24 records in the ofuscated set have this value." },
             new TaxCode{Code='1', Description="Early (Premature) dist no known exception" },
             new TaxCode{Code='2', Description="Early (Premature) dist exception applies" },
             new TaxCode{Code='3', Description="Disability" },
