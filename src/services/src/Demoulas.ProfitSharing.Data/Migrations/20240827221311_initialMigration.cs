@@ -316,26 +316,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "BENEFICIARY_REL_PERCENT",
-                columns: table => new
-                {
-                    PSN = table.Column<long>(type: "NUMBER(11)", precision: 11, nullable: false),
-                    SSN = table.Column<long>(type: "NUMBER(9)", precision: 9, nullable: false),
-                    KIND_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
-                    PERCENT = table.Column<decimal>(type: "numeric(3,0)", precision: 3, nullable: false),
-                    RELATIONSHIP = table.Column<string>(type: "NVARCHAR2(10)", maxLength: 10, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_BENEFICIARY_REL_PERCENT", x => x.PSN);
-                    table.ForeignKey(
-                        name: "FK_BENEFICIARY_REL_PERCENT_BENEFICIARY_KIND_KINDID",
-                        column: x => x.KIND_ID,
-                        principalTable: "BENEFICIARY_KIND",
-                        principalColumn: "ID");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "BENEFICIARY",
                 columns: table => new
                 {
@@ -356,11 +336,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     PHONE_NUMBER = table.Column<string>(type: "NVARCHAR2(15)", maxLength: 15, nullable: true),
                     MOBILE_NUMBER = table.Column<string>(type: "NVARCHAR2(15)", maxLength: 15, nullable: true),
                     EMAIL_ADDRESS = table.Column<string>(type: "NVARCHAR2(50)", maxLength: 50, nullable: true),
-                    KIND_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
+                    KIND_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: true),
                     DISTRIBUTION = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
                     AMOUNT = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
                     EARNINGS = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
-                    SECONDARY_EARNINGS = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false)
+                    SECONDARY_EARNINGS = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    PERCENT = table.Column<decimal>(type: "numeric(3,0)", precision: 3, nullable: false),
+                    RELATIONSHIP = table.Column<string>(type: "NVARCHAR2(10)", maxLength: 10, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -2517,6 +2499,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 columns: new[] { "CODE", "DESCRIPTION" },
                 values: new object[,]
                 {
+                    { "0", "Unknown - not legal tax code, yet 24 records in the ofuscated set have this value." },
                     { "1", "Early (Premature) dist no known exception" },
                     { "2", "Early (Premature) dist exception applies" },
                     { "3", "Disability" },
@@ -2595,16 +2578,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "IX_BENEFICIARY_KINDID",
                 table: "BENEFICIARY",
                 column: "KIND_ID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_BENEFICIARY_REL_PERCENT_KINDID",
-                table: "BENEFICIARY_REL_PERCENT",
-                column: "KIND_ID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_BENEFICIARY_REL_PERCENT_SSN",
-                table: "BENEFICIARY_REL_PERCENT",
-                column: "SSN");
 
             migrationBuilder.CreateIndex(
                 name: "CALDAR_RECORD_ACC_APWKEND_N",
@@ -2754,9 +2727,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "BENEFICIARY_REL_PERCENT");
-
             migrationBuilder.DropTable(
                 name: "CALDAR_RECORD");
 

@@ -12,9 +12,9 @@ public sealed class BeneficiaryMap : IEntityTypeConfiguration<Beneficiary>
         _ = builder.HasKey(c => c.Psn);
         _ = builder.ToTable("BENEFICIARY");
 
-        _ = builder.Property(c => c.Psn).IsRequired().HasPrecision(11).ValueGeneratedNever();
+        _ = builder.Property(c => c.Psn).HasColumnName("PSN").IsRequired().HasPrecision(11).ValueGeneratedNever();
 
-        _ = builder.Property(c => c.Ssn).IsRequired().HasPrecision(9);
+        _ = builder.Property(c => c.Ssn).HasColumnName("SSN").IsRequired().HasPrecision(9);
 
         _ = builder.Property(b => b.FirstName).IsRequired().HasMaxLength(30).HasColumnName("FIRST_NAME");
         _ = builder.Property(b => b.MiddleName).HasMaxLength(30).HasColumnName("MIDDLE_NAME");
