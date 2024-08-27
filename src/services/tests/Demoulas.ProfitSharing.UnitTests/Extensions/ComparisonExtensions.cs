@@ -1,15 +1,16 @@
 ﻿using System.Collections;
 using System.Reflection;
+using Castle.Core.Internal;
 using FluentAssertions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Extensions;
 
 public static class ComparisonExtensions
 {
-    public static void ShouldBeEquivalentTo<T, TU>(this T entity, TU dto)
+    public static void ShouldBeEquivalentTo<T, Tu>(this T entity, Tu dto)
     {
         PropertyInfo[] entityProperties = typeof(T).GetProperties();
-        PropertyInfo[] dtoProperties = typeof(TU).GetProperties();
+        PropertyInfo[] dtoProperties = typeof(Tu).GetProperties();
 
         foreach (PropertyInfo entityProperty in entityProperties)
         {
@@ -19,7 +20,7 @@ public static class ComparisonExtensions
                 continue;
             }
 
-            PropertyInfo? dtoProperty = dtoProperties.FirstOrDefault(p => p.Name == entityProperty.Name);
+            PropertyInfo? dtoProperty = dtoProperties.Find(p => p.Name == entityProperty.Name);
 
             if (dtoProperty == null)
             {

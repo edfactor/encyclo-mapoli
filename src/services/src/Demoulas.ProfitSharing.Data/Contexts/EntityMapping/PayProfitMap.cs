@@ -18,7 +18,7 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
             .IsRequired()
             .HasColumnName("BADGE_NUMBER");
 
-        _ = builder.Property(e => e.SSN)
+        _ = builder.Property(e => e.Ssn)
             .HasPrecision(9)
             .IsRequired();
 
@@ -82,7 +82,7 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
             .HasDefaultValue(0)
             .HasColumnName("CERTIFICATE_ISSUED_LAST_YEAR");
 
-        _ = builder.Property(e => e.PSCertificateIssuedDate)
+        _ = builder.Property(e => e.PsCertificateIssuedDate)
             .HasColumnName("PS_CERTIFICATE_ISSUED_DATE")
             .HasColumnType("DATE")
             .HasConversion<DateOnlyConverter>();
@@ -157,13 +157,13 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
             .OnDelete(DeleteBehavior.NoAction);
 
        _ = builder.HasOne(p => p.Demographic).WithMany(p => p.PayProfits)
-           .HasForeignKey(p => p.SSN)
-           .HasPrincipalKey(d=> d.SSN)
+           .HasForeignKey(p => p.Ssn)
+           .HasPrincipalKey(d=> d.Ssn)
            .OnDelete(DeleteBehavior.NoAction);
 
         _ = builder.HasOne(p => p.Beneficiary).WithMany(p => p.PayProfits)
-            .HasForeignKey(p => p.SSN)
-            .HasPrincipalKey(d => d.SSN)
+            .HasForeignKey(p => p.Ssn)
+            .HasPrincipalKey(d => d.Ssn)
             .OnDelete(DeleteBehavior.NoAction);
     }
 }

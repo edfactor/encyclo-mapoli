@@ -1,6 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common;
-
-namespace Demoulas.ProfitSharing.Data.Entities;
+﻿namespace Demoulas.ProfitSharing.Data.Entities;
 public sealed class Address
 {
     public required string Street { get; set; }
@@ -10,5 +8,5 @@ public sealed class Address
     public string? City { get; set; }
     public string? State { get; set; }
     public string? PostalCode { get; set; }
-    public string? CountryISO { get; set; } = Country.Constants.US;
+    public string? CountryIso { get; set; } = Country.Constants.Us;
 }

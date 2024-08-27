@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Demoulas.ProfitSharing.Data.Entities.NotOwned;
+﻿namespace Demoulas.ProfitSharing.Data.Entities.NotOwned;
 public sealed class CaldarRecord
 {
     public int AccWkendN { get; set; }

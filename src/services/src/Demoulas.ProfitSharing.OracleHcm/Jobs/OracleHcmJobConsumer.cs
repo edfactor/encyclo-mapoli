@@ -47,7 +47,7 @@ public class OracleHcmJobConsumer : IConsumer<MessageRequest<OracleHcmJobRequest
 
             if (jobIsAlreadyRunning)
             {
-                _logger.LogWarning("Sync Employees from OracleHCM - Job [{message}] already running. Exiting", message);
+                _logger.LogWarning("Sync Employees from OracleHCM - Job [{Message}] already running. Exiting", message);
                 return;
             }
 
@@ -69,7 +69,7 @@ public class OracleHcmJobConsumer : IConsumer<MessageRequest<OracleHcmJobRequest
 
 
             // Execute the job
-            _logger.LogWarning("Sync Employees from OracleHCM - Start new job : {job}", job);
+            _logger.LogWarning("Sync Employees from OracleHCM - Start new job : {Job}", job);
             await ExecuteJob(cancellationToken);
 
             await _dataContext.UseWritableContext(c =>
@@ -78,7 +78,7 @@ public class OracleHcmJobConsumer : IConsumer<MessageRequest<OracleHcmJobRequest
                 job.JobStatusId = JobStatus.Constants.Completed;
                 return c.SaveChangesAsync(cancellationToken);
             }, cancellationToken);
-            _logger.LogWarning("Sync Employees from OracleHCM - Completed job : {job}", job);
+            _logger.LogWarning("Sync Employees from OracleHCM - Completed job : {Job}", job);
 
         }
     }

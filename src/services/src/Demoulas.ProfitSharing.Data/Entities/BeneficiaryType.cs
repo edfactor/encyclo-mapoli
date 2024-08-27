@@ -1,5 +1,4 @@
 ﻿using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Interfaces;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
 public sealed class BeneficiaryType : ILookupTable<byte>

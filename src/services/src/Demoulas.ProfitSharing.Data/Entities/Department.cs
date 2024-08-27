@@ -1,5 +1,4 @@
 ﻿using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Interfaces;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
 
@@ -12,7 +11,7 @@ public sealed class Department : ILookupTable<byte>
         public const byte Produce = 3;
         public const byte Deli = 4;
         public const byte Dairy = 5;
-        public const byte Beer_And_Wine = 6;
+        public const byte BeerAndWine = 6;
         public const byte Bakery = 7;
     }
 

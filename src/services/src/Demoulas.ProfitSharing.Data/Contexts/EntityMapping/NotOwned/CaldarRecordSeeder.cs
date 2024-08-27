@@ -1,7 +1,6 @@
 ﻿
 using Demoulas.ProfitSharing.Data.Entities.NotOwned;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping.NotOwned;
 

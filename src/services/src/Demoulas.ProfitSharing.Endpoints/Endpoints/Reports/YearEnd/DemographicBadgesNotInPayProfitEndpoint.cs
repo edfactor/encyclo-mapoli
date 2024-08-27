@@ -10,7 +10,7 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 
-public class DemographicBadgesNotInPayProfitEndpoint : EndpointWithCSVBase<PaginationRequestDto, DemographicBadgesNotInPayProfitResponse,
+public class DemographicBadgesNotInPayProfitEndpoint : EndpointWithCsvBase<PaginationRequestDto, DemographicBadgesNotInPayProfitResponse,
     DemographicBadgesNotInPayProfitEndpoint.DemographicBadgesNotInPayProfitResponseMap>
 {
     private readonly IYearEndService _yearEndService;

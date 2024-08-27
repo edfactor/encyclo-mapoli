@@ -10,7 +10,7 @@ public sealed class PayProfit
     /// <summary>
     /// Employee social security number
     /// </summary>
-    public required long SSN { get; set; }
+    public required long Ssn { get; set; }
 
     /// <summary>
     /// Hours towards Profit Sharing in the current year (updated weekly)
@@ -77,7 +77,7 @@ public sealed class PayProfit
     /// <summary>
     /// Date the last PS Certificate was issued
     /// </summary>
-    public DateOnly? PSCertificateIssuedDate { get; set; }
+    public DateOnly? PsCertificateIssuedDate { get; set; }
 
     /// <summary>
     /// Year of initial contribution

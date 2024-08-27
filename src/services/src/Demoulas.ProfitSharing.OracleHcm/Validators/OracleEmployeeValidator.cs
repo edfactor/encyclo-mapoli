@@ -10,7 +10,7 @@ public class OracleEmployeeValidator : Validator<OracleEmployee>
 {
     private readonly IBaseCacheService<LookupTableCache<byte>> _accountCache;
     private readonly IBaseCacheService<LookupTableCache<byte>> _depCache;
-    private const int MAX_STORE_ID = 899;
+    private const int MaxStoreId = 899;
 
     private const string BadAddress = "No address found for employee";
     private const string BadWorkRelationship = "No work relationship found for employee";
@@ -50,7 +50,7 @@ public class OracleEmployeeValidator : Validator<OracleEmployee>
 
 
         RuleFor(e => e.WorkRelationship!.Assignment.LocationCode)
-            .Must(v => v < MAX_STORE_ID)
+            .Must(v => v < MaxStoreId)
             .WithMessage(e => UnknownStoreLocation)
             .WithState(e => e.WorkRelationship?.Assignment.LocationCode);
 

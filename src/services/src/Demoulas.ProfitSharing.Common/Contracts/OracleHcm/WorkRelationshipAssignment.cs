@@ -18,14 +18,14 @@ public record WorkRelationshipAssignment(
 {
     public byte GetPayFrequency()
     {
-        const byte Weekly = 1;
-        const byte Monthly = 2;
+        const byte weekly = 1;
+        const byte monthly = 2;
         switch (Frequency)
         {
             case 'W':
-                return Weekly;
+                return weekly;
             case 'M':
-                return Monthly;
+                return monthly;
             default:
                 return byte.MinValue;
         }
@@ -39,13 +39,13 @@ public record WorkRelationshipAssignment(
 
     public char GetEmploymentType()
     {
-        const char PartTime = 'P';
-        const char FullTimeStraightSalary = 'H';
+        const char partTime = 'P';
+        const char fullTimeStraightSalary = 'H';
 
         return FullPartTime switch
         {
-            "PART_TIME" => PartTime,
-            "FULL_TIME" => FullTimeStraightSalary,
+            "PART_TIME" => partTime,
+            "FULL_TIME" => fullTimeStraightSalary,
             _ => char.MinValue
         };
     }

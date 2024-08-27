@@ -59,7 +59,7 @@ internal sealed class ZeroContributionReasonMap : IEntityTypeConfiguration<ZeroC
             },
             new PayFrequency
             {
-                Id = ZeroContributionReason.Constants.UNKNOWN,
+                Id = ZeroContributionReason.Constants.Unknown,
                 Name = "Unknown"
             }
         );

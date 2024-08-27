@@ -1,5 +1,4 @@
 ﻿using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Interfaces;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
 public sealed class ZeroContributionReason : ILookupTable<byte>
@@ -52,7 +51,7 @@ public sealed class ZeroContributionReason : ILookupTable<byte>
         /// <summary>
         /// "Half the battle for DSM is remembering why 8 was used in 2007 so we can identify them even if never used again" -- Kevin Bouchard
         /// </summary>
-        public const byte UNKNOWN = 8;
+        public const byte Unknown = 8;
     }
 #pragma warning restore S1133
 #pragma warning restore CS0618

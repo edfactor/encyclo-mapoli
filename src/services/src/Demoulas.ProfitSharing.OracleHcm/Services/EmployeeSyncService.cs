@@ -102,7 +102,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
                 HireDate = employee.WorkRelationship?.StartDate ?? SqlDateTime.MinValue.Value.ToDateOnly(),
                 TerminationDate = employee.WorkRelationship?.TerminationDate,
 
-                SSN = (employee.NationalIdentifier?.NationalIdentifierNumber ?? faker.Person.Ssn()).ConvertSsnToLong() ?? 0,
+                Ssn = (employee.NationalIdentifier?.NationalIdentifierNumber ?? faker.Person.Ssn()).ConvertSsnToLong() ?? 0,
                 StoreNumber = employee.WorkRelationship?.Assignment.LocationCode ?? 0,
                 DepartmentId = employee.WorkRelationship?.Assignment.GetDepartmentId() ?? 0,
                 PayClassificationId = employee.WorkRelationship?.Assignment.JobCode ?? 0,
@@ -123,7 +123,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
                     City = employee.Address.TownOrCity,
                     State = employee.Address.State,
                     PostalCode = employee.Address.PostalCode,
-                    CountryISO = employee.Address.Country
+                    CountryIso = employee.Address.Country
                 }
             };
         }

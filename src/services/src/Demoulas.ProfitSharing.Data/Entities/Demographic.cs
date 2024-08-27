@@ -10,7 +10,7 @@ namespace Demoulas.ProfitSharing.Data.Entities;
 public sealed class Demographic : Member
 {
     public required long OracleHcmId { get; set; }
-    public required long SSN { get; set; }
+    public required long Ssn { get; set; }
     public required int BadgeNumber { get; set; }
     public DateTime LastModifiedDate { get; set; }
 

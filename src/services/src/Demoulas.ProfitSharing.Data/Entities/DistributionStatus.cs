@@ -2,7 +2,6 @@
 
 namespace Demoulas.ProfitSharing.Data.Entities;
 
-using Demoulas.ProfitSharing.Data.Interfaces;
 public class DistributionStatus: ILookupTable<char>
 {
     public static class Constants
@@ -13,8 +12,8 @@ public class DistributionStatus: ILookupTable<char>
         public const char Override = 'O';
         public const char PaymentMade = 'P';
         public const char OkayToPay = 'Y';
-        public const char PurgeAllRecordsForSSN = 'X';
-        public const char PurgeAllRecordsForSSN2 = 'Z';
+        public const char PurgeAllRecordsForSsn = 'X';
+        public const char PurgeAllRecordsForSsn2 = 'Z';
     }
 
     public required char Id { get; set; }
