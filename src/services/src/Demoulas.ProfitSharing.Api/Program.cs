@@ -65,19 +65,16 @@ builder.ConfigureDefaultEndpoints(meterNames: new[] { InstrumentationOptions.Met
 WebApplication app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() && Debugger.IsAttached)
 {
-    if (Debugger.IsAttached)
-    {
-        // Put code here that ONLY runs when attached to the debugger.
-    }
+    // Put code here that ONLY runs when attached to the debugger.
 }
 
 app.UseCors();
 
 app.UseDefaultEndpoints(OktaSettingsAction);
 
-app.Run();
+await app.RunAsync();
 
 
 namespace Demoulas.ProfitSharing.Api

@@ -29,7 +29,7 @@ public class AddDemographicsEndpoint : Endpoint<IEnumerable<DemographicsRequest>
                 new DemographicsRequest
                 {
                     BadgeNumber = 123456789,
-                    SSN = 123456789,
+                    Ssn = 123456789,
                     OracleHcmId = 0,
                     FullName = "John Doe",
                     FirstName = "John",
@@ -45,7 +45,7 @@ public class AddDemographicsEndpoint : Endpoint<IEnumerable<DemographicsRequest>
                         State = "MA",
                         City = "Andover",
                         PostalCode = "02589",
-                        CountryISO = Country.Constants.US
+                        CountryIso = Country.Constants.Us
                     },
                     DateOfBirth = default,
                     HireDate = default,

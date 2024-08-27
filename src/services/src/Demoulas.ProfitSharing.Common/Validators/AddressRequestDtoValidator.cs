@@ -27,7 +27,7 @@ public class AddressRequestDtoValidator : Validator<AddressRequestDto>
             .NotEmpty()
             .Matches(@"^\d{5}(-\d{4})?$").WithMessage("PostalCode must be in a valid format.");
 
-        RuleFor(x => x.CountryISO)
+        RuleFor(x => x.CountryIso)
             .NotEmpty()
             .MaximumLength(2)
             .WithMessage("CountryISO cannot exceed 2 characters.");

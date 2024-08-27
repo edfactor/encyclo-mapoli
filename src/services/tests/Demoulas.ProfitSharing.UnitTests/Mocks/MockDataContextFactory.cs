@@ -60,12 +60,6 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingReadOnlyDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
 
 
-
-
-        HashSet<int> badgeNumbers = mockDemographic.Object.Select(d => d.BadgeNumber).ToHashSet();
-        HashSet<long> ssnUnion = mockDemographic.Object.Select(d => d.SSN)
-            .Union(mockBeneficiaries.Object.Select(b => b.SSN)).ToHashSet();
-
         List<PayProfit>? profits = new PayProfitFaker(demographics).Generate(demographics.Count);
         Mock<DbSet<PayProfit>> mockProfits = profits.AsQueryable().BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.PayProfits).Returns(mockProfits.Object);

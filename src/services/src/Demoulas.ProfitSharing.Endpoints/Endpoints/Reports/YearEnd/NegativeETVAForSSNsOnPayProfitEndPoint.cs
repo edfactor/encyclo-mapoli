@@ -10,11 +10,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 
-public class NegativeETVAForSSNsOnPayProfitEndPoint : EndpointWithCSVBase<PaginationRequestDto, NegativeEtvaForSsNsOnPayProfitResponse, NegativeETVAForSSNsOnPayProfitEndPoint.NegativeETVAForSSNsOnPayProfitResponseMap>
+public class NegativeEtvaForSsNsOnPayProfitEndPoint : EndpointWithCsvBase<PaginationRequestDto, NegativeEtvaForSsNsOnPayProfitResponse, NegativeEtvaForSsNsOnPayProfitEndPoint.NegativeEtvaForSsNsOnPayProfitResponseMap>
 {
     private readonly IYearEndService _reportService;
 
-    public NegativeETVAForSSNsOnPayProfitEndPoint(IYearEndService reportService)
+    public NegativeEtvaForSsNsOnPayProfitEndPoint(IYearEndService reportService)
     {
         _reportService = reportService;
     }
@@ -57,9 +57,9 @@ public class NegativeETVAForSSNsOnPayProfitEndPoint : EndpointWithCSVBase<Pagina
 
     public override string ReportFileName => "ETVA-LESS-THAN-ZERO";
 
-    public sealed class NegativeETVAForSSNsOnPayProfitResponseMap : ClassMap<NegativeEtvaForSsNsOnPayProfitResponse>
+    public sealed class NegativeEtvaForSsNsOnPayProfitResponseMap : ClassMap<NegativeEtvaForSsNsOnPayProfitResponse>
     {
-        public NegativeETVAForSSNsOnPayProfitResponseMap()
+        public NegativeEtvaForSsNsOnPayProfitResponseMap()
         {
             Map().Index(0).Convert(_ => string.Empty);
             Map().Index(1).Convert(_ => string.Empty);

@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 
 namespace Demoulas.ProfitSharing.Client.Common;
-internal sealed class Constants
+internal static class Constants
 {
     public static class Http
     {

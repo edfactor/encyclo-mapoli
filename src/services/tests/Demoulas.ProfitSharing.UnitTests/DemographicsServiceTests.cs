@@ -43,7 +43,7 @@ public class DemographicsServiceTests : IClassFixture<ApiTestBase<Program>>
 
         response.Should().NotBeNull();
         response.Should().HaveCount(count);
-        _ = response!.Select(d => d.SSN.Should().MatchRegex(@"XXX-XX-\d{4}"));
+        _ = response!.Select(d => d.Ssn.Should().MatchRegex(@"XXX-XX-\d{4}"));
 
         Dictionary<int, DemographicResponseDto> responseDict = response!.ToDictionary(k => k.BadgeNumber);
 

@@ -6,11 +6,11 @@ public sealed class Enrollment : ILookupTable<byte>
 {
     public static class Constants
     {
-        public const byte Not_Enrolled = 0;
-        public const byte Old_Vesting_Plan_Has_Contributions = 1;
-        public const byte New_Vesting_Plan_Has_Contributions = 2;
-        public const byte Old_Vesting_Plan_Has_Forfeiture_Records = 3;
-        public const byte New_Vesting_Plan_Has_Forfeiture_Records = 4;
+        public const byte NotEnrolled = 0;
+        public const byte OldVestingPlanHasContributions = 1;
+        public const byte NewVestingPlanHasContributions = 2;
+        public const byte OldVestingPlanHasForfeitureRecords = 3;
+        public const byte NewVestingPlanHasForfeitureRecords = 4;
     }
 
     public byte Id { get; set; }

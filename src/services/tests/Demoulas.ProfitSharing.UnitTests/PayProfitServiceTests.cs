@@ -10,13 +10,11 @@ namespace Demoulas.ProfitSharing.UnitTests;
 
 public class PayProfitServiceTests : IClassFixture<ApiTestBase<Program>>
 {
-    //private readonly PayProfitMapper _mapper;
     private readonly PayProfitClient _payProfitClient;
 
     public PayProfitServiceTests(ApiTestBase<Program> fixture)
     {
         _payProfitClient = new PayProfitClient(fixture.ApiClient);
-      //  _mapper = new PayProfitMapper();
     }
 
     [Fact(DisplayName = "Get all the profit!")]

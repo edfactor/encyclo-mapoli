@@ -9,5 +9,5 @@ public record AddressRequestDto
     public string? City { get; init; }
     public string? State { get; init; }
     public string? PostalCode { get; init; }
-    public string? CountryISO { get; init; }
+    public string? CountryIso { get; init; }
 }

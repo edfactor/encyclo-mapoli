@@ -8,7 +8,7 @@ public class DemographicsRequestDtoValidator : Validator<DemographicsRequest>
 {
     public DemographicsRequestDtoValidator()
     {
-        RuleFor(x => x.SSN)
+        RuleFor(x => x.Ssn)
             .NotEmpty()
             .InclusiveBetween(1000000, 999_99_9999).WithMessage("Must be a valid SSN number.");
 

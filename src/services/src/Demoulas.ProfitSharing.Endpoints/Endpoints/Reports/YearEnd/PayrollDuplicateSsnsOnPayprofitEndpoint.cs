@@ -13,7 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 
-public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithCSVBase<PaginationRequestDto, PayrollDuplicateSsnsOnPayprofitResponseDto, PayrollDuplicateSsnsOnPayprofitEndpoint.PayrollDuplicateSsnsOnPayprofitResponseMap>
+public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithCsvBase<PaginationRequestDto, PayrollDuplicateSsnsOnPayprofitResponseDto, PayrollDuplicateSsnsOnPayprofitEndpoint.PayrollDuplicateSsnsOnPayprofitResponseMap>
 {
     private readonly IYearEndService _reportService;
 
@@ -58,7 +58,7 @@ public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithCSVBase<Pagin
                                         Street = "123 Main",
                                         City = "Sydney",
                                         State = "HI",
-                                        CountryISO = Country.Constants.US,
+                                        CountryIso = Country.Constants.Us,
                                         PostalCode = "01234"
                                     },
                                     ContactInfo = new ContactInfoResponseDto()
@@ -108,7 +108,7 @@ public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithCSVBase<Pagin
             Map(m => m.Address.State).Index(7).Name("ST");
             Map(m => m.Address.PostalCode).Index(8).Name("ZIP");
             Map(m => m.HireDate).Index(9).Name("HIRE").TypeConverter<YearMonthDayTypeConverter>();
-            Map(m => m.TermDate).Index(10).Name("TERM").TypeConverter<YearMonthDayTypeConverter>(); ;
+            Map(m => m.TermDate).Index(10).Name("TERM").TypeConverter<YearMonthDayTypeConverter>();
             Map(m => m.RehireDate).Index(11).Name("REHIRE").TypeConverter<YearMonthDayTypeConverter>(); 
             Map(m => m.Status).Index(12).Name("ST");
             Map(m => m.Store).Index(13).Name("STR");

@@ -16,8 +16,8 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
         _ = builder.ToTable("DEMOGRAPHIC");
         _ = builder.HasKey(e => e.OracleHcmId);
 
-        _ = builder.HasIndex(e => e.SSN, "IX_SSN");
-        _ = builder.Property(e => e.SSN)
+        _ = builder.HasIndex(e => e.Ssn, "IX_SSN");
+        _ = builder.Property(e => e.Ssn)
             .HasPrecision(9)
             .IsRequired()
             .ValueGeneratedNever();
@@ -133,11 +133,11 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             address.Property(a => a.City).HasMaxLength(25).HasColumnName("CITY").HasComment("City").IsRequired();
             address.Property(a => a.State).HasMaxLength(3).HasColumnName("STATE").HasComment("State").IsRequired();
             address.Property(a => a.PostalCode).HasMaxLength(9).HasColumnName("POSTAL_CODE").HasComment("Postal Code").IsRequired();
-            address.Property(a => a.CountryISO).HasMaxLength(2).HasColumnName("COUNTRY_ISO").HasDefaultValue(Country.Constants.US);
+            address.Property(a => a.CountryIso).HasMaxLength(2).HasColumnName("COUNTRY_ISO").HasDefaultValue(Country.Constants.Us);
 
             address.HasOne<Country>()
                 .WithMany()
-                .HasForeignKey(o => o.CountryISO);
+                .HasForeignKey(o => o.CountryIso);
         });
 
         builder.OwnsOne(e => e.ContactInfo, contact =>

@@ -8,7 +8,6 @@ internal sealed class ProfitDetailFaker: Faker<ProfitDetail>
 {
     internal ProfitDetailFaker()
     {
-        var profitCodeFaker = new ProfitCodeFaker();
         var taxCodeFaker = new TaxCodeFaker();
 
         RuleFor(pd => pd.ProfitYear, fake => Convert.ToInt16(DateTime.Now.Year)).RuleFor(pd => pd.ProfitYearIteration, fake => (byte)0)
@@ -18,6 +17,6 @@ internal sealed class ProfitDetailFaker: Faker<ProfitDetail>
             .RuleFor(pd => pd.YearToDate, fake => Convert.ToInt16(DateTime.Now.Year)).RuleFor(pd => pd.Remark, fake => fake.Lorem.Slug())
             .RuleFor(pd => pd.ZeroContributionReasonId, fake => (byte?)0).RuleFor(pd => pd.FederalTaxes, fake => fake.PickRandom<byte>(1, 2, 3, 4, 5, 6 ,7))
             .RuleFor(pd => pd.StateTaxes, fake => fake.Finance.Amount(0, 1000)).RuleFor(pd => pd.TaxCode, fake => taxCodeFaker.Generate())
-            .RuleFor(pd => pd.TaxCodeId, fake => taxCodeFaker.Generate().Code).RuleFor(pd => pd.SSN, fake => fake.Person.Ssn().ConvertSsnToLong());
+            .RuleFor(pd => pd.TaxCodeId, fake => taxCodeFaker.Generate().Code).RuleFor(pd => pd.Ssn, fake => fake.Person.Ssn().ConvertSsnToLong());
     }
 }

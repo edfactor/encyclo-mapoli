@@ -39,7 +39,7 @@ public partial class DemographicMapper
     {
         DemographicsRequest target = new DemographicsRequest
         {
-            SSN = source.SSN,
+            Ssn = source.Ssn,
             OracleHcmId = source.OracleHcmId,
             LastName = source.LastName,
             FirstName = source.FirstName,
@@ -76,7 +76,7 @@ public partial class DemographicMapper
 
         DemographicResponseDto target = new DemographicResponseDto
         {
-            SSN = MaskSsn(source.SSN),
+            Ssn = MaskSsn(source.Ssn),
             OracleHcmId = source.OracleHcmId,
             FullName = source.FullName ?? $"{source.FirstName} {source.LastName}",
             LastName = source.LastName,
@@ -107,7 +107,7 @@ public partial class DemographicMapper
     {
         return new Demographic
         {
-            SSN = source.SSN,
+            Ssn = source.Ssn,
             BadgeNumber = source.BadgeNumber,
             OracleHcmId = source.OracleHcmId,
             FullName = source.FullName,

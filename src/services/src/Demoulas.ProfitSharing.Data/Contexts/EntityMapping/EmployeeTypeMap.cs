@@ -18,8 +18,8 @@ internal sealed class EmployeeTypeMap : IEntityTypeConfiguration<EmployeeType>
         builder.HasMany(b => b.Profits).WithOne(p => p.EmployeeType);
 
         builder.HasData(
-            new EmployeeType { Id = EmployeeType.Constants.Not_New_LastYear, Name = "NOT New in plan last year" },
-            new EmployeeType { Id = EmployeeType.Constants.New_LastYear, Name = "New last year" }
+            new EmployeeType { Id = EmployeeType.Constants.NotNewLastYear, Name = "NOT New in plan last year" },
+            new EmployeeType { Id = EmployeeType.Constants.NewLastYear, Name = "New last year" }
         );
     }
 }

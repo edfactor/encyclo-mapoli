@@ -1,8 +1,8 @@
 ﻿namespace Demoulas.ProfitSharing.Data.Entities;
 public sealed class Beneficiary
 {
-    public required long PSN { get; set; }
-    public required long SSN { get; set; }
+    public required long Psn { get; set; }
+    public required long Ssn { get; set; }
 
     public required string FirstName { get; set; } = string.Empty;
     public string? MiddleName { get; set; }

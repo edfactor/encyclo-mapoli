@@ -11,10 +11,10 @@ public sealed class TerminationCode : ILookupTable<char>
         public const char CouldNotWorkAvailableHours = 'C';
         public const char Stealing = 'D';
         public const char NotFollowingCompanyPolicy = 'E';
-        public const char FMLAExpired = 'F';
+        public const char FmlaExpired = 'F';
         public const char TerminatedPrivate = 'G';
         public const char JobAbandonment = 'H';
-        public const char HealthReasonsNonFMLA = 'I';
+        public const char HealthReasonsNonFmla = 'I';
         public const char LayoffNoWork = 'J';
         public const char SchoolOrSports = 'K';
         public const char MoveOutOfArea = 'L';
@@ -30,7 +30,7 @@ public sealed class TerminationCode : ILookupTable<char>
         public const char NeverReported = 'V';
         public const char RetiredReceivingPension = 'W';
         public const char Military = 'X';
-        public const char FMLAApproved = 'Y';
+        public const char FmlaApproved = 'Y';
         public const char Deceased = 'Z';
     }
 

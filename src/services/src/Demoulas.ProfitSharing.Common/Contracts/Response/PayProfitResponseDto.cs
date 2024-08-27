@@ -9,7 +9,7 @@ public sealed record PayProfitResponseDto
     /// <summary>
     /// Employee social security number
     /// </summary>
-    public required string SSN { get; set; }
+    public required string Ssn { get; set; }
 
     /// <summary>
     /// Hours towards Profit Sharing in the current year (updated weekly)
@@ -74,7 +74,7 @@ public sealed record PayProfitResponseDto
     /// <summary>
     /// Date the last PS Certificate was issued
     /// </summary>
-    public DateOnly? PSCertificateIssuedDate { get; set; }
+    public DateOnly? PsCertificateIssuedDate { get; set; }
 
     /// <summary>
     /// Year of initial contribution

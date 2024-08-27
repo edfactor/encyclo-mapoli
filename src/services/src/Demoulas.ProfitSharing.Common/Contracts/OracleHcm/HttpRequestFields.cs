@@ -3,7 +3,7 @@
 namespace Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 public sealed record HttpRequestFields
 {
-    private readonly HashSet<string> Root = ["PersonNumber", "PersonId", "DateOfBirth", "LastUpdateDate"];
+    private readonly HashSet<string> _root = ["PersonNumber", "PersonId", "DateOfBirth", "LastUpdateDate"];
 
     // ReSharper disable once InconsistentNaming
     public HashSet<string> addresses { get; }=
@@ -109,7 +109,7 @@ public sealed record HttpRequestFields
         StringBuilder sb = new StringBuilder();
 
         // Append the root elements
-        sb.Append(string.Join(",", request.Root));
+        sb.Append(string.Join(",", request._root));
         sb.Append(';');
 
         // Append the key-value pairs

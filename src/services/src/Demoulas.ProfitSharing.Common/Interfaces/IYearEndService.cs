@@ -5,7 +5,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 namespace Demoulas.ProfitSharing.Common.Interfaces;
 public interface IYearEndService
 {
-    Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSSNs(PaginationRequestDto req, CancellationToken ct);
+    Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsNs(PaginationRequestDto req, CancellationToken ct);
 
     Task<ReportResponseBase<PayProfitBadgesNotInDemographicsResponse>> GetPayProfitBadgesNotInDemographics(PaginationRequestDto req, CancellationToken ct = default);
 

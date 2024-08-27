@@ -33,19 +33,19 @@ public sealed class YearEndClient : IYearEndService
         _options = Constants.GetJsonSerializerOptions();
     }
 
-    public Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSSNs(PaginationRequestDto req, CancellationToken ct)
+    public Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsNs(PaginationRequestDto req, CancellationToken ct)
     {
         return CallReportEndpoint<PayrollDuplicateSsnResponseDto>(req, "duplicate-ssns", ct);
     }
 
-    public Task<Stream> DownloadDuplicateSSNs(CancellationToken cancellationToken)
+    public Task<Stream> DownloadDuplicateSsNs(CancellationToken cancellationToken)
     {
         return DownloadCsvReport("duplicate-ssns", cancellationToken);
     }
 
-    public Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfit(PaginationRequestDto req, CancellationToken ct = default)
+    public Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfit(PaginationRequestDto req, CancellationToken cancellationToken = default)
     {
-        return CallReportEndpoint<DemographicBadgesNotInPayProfitResponse>(req, "demographic-badges-not-in-payprofit", ct);
+        return CallReportEndpoint<DemographicBadgesNotInPayProfitResponse>(req, "demographic-badges-not-in-payprofit", cancellationToken);
     }
 
     public Task<Stream> DownloadDemographicBadgesNotInPayProfit(CancellationToken ct = default)
@@ -78,9 +78,9 @@ public sealed class YearEndClient : IYearEndService
         return DownloadCsvReport("mismatched-ssns-payprofit-and-demo-on-same-badge", cancellationToken);
     }
 
-    public Task<ReportResponseBase<PayProfitBadgesNotInDemographicsResponse>> GetPayProfitBadgesNotInDemographics(PaginationRequestDto req, CancellationToken cancellationToken = default)
+    public Task<ReportResponseBase<PayProfitBadgesNotInDemographicsResponse>> GetPayProfitBadgesNotInDemographics(PaginationRequestDto req, CancellationToken ct = default)
     {
-        return CallReportEndpoint<PayProfitBadgesNotInDemographicsResponse>(req, "payprofit-badges-without-demographics", cancellationToken);
+        return CallReportEndpoint<PayProfitBadgesNotInDemographicsResponse>(req, "payprofit-badges-without-demographics", ct);
     }
 
     public Task<Stream> DownloadPayProfitBadgesNotInDemographics(CancellationToken cancellationToken = default)

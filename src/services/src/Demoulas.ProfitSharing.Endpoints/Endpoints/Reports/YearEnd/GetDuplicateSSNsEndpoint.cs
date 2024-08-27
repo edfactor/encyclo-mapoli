@@ -9,11 +9,11 @@ using Demoulas.ProfitSharing.Endpoints.Base;
 
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
-public class GetDuplicateSSNsEndpoint : EndpointWithCSVBase<PaginationRequestDto, PayrollDuplicateSsnResponseDto, GetDuplicateSSNsEndpoint.GetDuplicateSSNsResponseMap>
+public class GetDuplicateSsNsEndpoint : EndpointWithCsvBase<PaginationRequestDto, PayrollDuplicateSsnResponseDto, GetDuplicateSsNsEndpoint.GetDuplicateSsNsResponseMap>
 {
     private readonly IYearEndService _yearEndService;
 
-    public GetDuplicateSSNsEndpoint(IYearEndService yearEndService)
+    public GetDuplicateSsNsEndpoint(IYearEndService yearEndService)
     {
         _yearEndService = yearEndService;
     }
@@ -52,12 +52,12 @@ public class GetDuplicateSSNsEndpoint : EndpointWithCSVBase<PaginationRequestDto
 
     public override Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetResponse(PaginationRequestDto req, CancellationToken ct)
     {
-        return _yearEndService.GetDuplicateSSNs(req, ct);
+        return _yearEndService.GetDuplicateSsNs(req, ct);
     }
     
-    public sealed class GetDuplicateSSNsResponseMap : ClassMap<PayrollDuplicateSsnResponseDto>
+    public sealed class GetDuplicateSsNsResponseMap : ClassMap<PayrollDuplicateSsnResponseDto>
     {
-        public GetDuplicateSSNsResponseMap()
+        public GetDuplicateSsNsResponseMap()
         {
             Map().Index(0).Convert(_ => string.Empty);
             Map().Index(1).Convert(_ => string.Empty);
