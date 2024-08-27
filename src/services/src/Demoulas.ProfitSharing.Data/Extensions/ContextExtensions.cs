@@ -50,6 +50,15 @@ internal static class ContextExtensions
             entity.SetTableName(entity.GetTableName()?.ToUpper());
         }
 
+        // Set the global delete behavior to NoAction for all relationships
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            foreach (var foreignKey in entityType.GetForeignKeys())
+            {
+                foreignKey.DeleteBehavior = DeleteBehavior.NoAction;
+            }
+        }
+
         return modelBuilder;
     }
 }
