@@ -18,7 +18,6 @@ internal sealed class DistributionRequestMap : IEntityTypeConfiguration<Distribu
         builder.HasKey(d => d.Id);
         builder.Property(d => d.Id).ValueGeneratedOnAdd();
         builder.Property(c => c.PSN).HasPrecision(11);
-        builder.Property(c => c.PSN).HasPrecision(11);
         builder.Property(c => c.ReasonId).HasColumnName("REASON_ID");
         builder.Property(c => c.StatusId).HasColumnName("STATUS_ID");
         builder.Property(c => c.TypeId).HasColumnName("TYPE_ID");
