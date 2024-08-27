@@ -22,7 +22,7 @@ public sealed class BeneficiaryMap : IEntityTypeConfiguration<Beneficiary>
 
         _ = builder.Property(b => b.DateOfBirth).HasColumnType("DATE").HasConversion<DateOnlyConverter>().HasColumnName("DATE_OF_BIRTH");
 
-        _ = builder.Property(b => b.KindId).IsRequired().HasColumnName("KIND_ID");
+        _ = builder.Property(b => b.KindId).HasColumnName("KIND_ID");
 
         _ = builder.OwnsOne(e => e.Address, address =>
         {
@@ -55,6 +55,9 @@ public sealed class BeneficiaryMap : IEntityTypeConfiguration<Beneficiary>
        _ = builder.Property(e => e.Amount).HasPrecision(9, 2).HasColumnName("AMOUNT");
        _ = builder.Property(e => e.Earnings).HasPrecision(9, 2).HasColumnName("EARNINGS");
        _ = builder.Property(e => e.SecondaryEarnings).HasPrecision(9, 2).HasColumnName("SECONDARY_EARNINGS");
+
+       _ = builder.Property(e => e.Percent).IsRequired().HasColumnType("numeric(3,0)").HasPrecision(3);
+       _ = builder.Property(e => e.Relationship).HasMaxLength(10);
 
     }
 }
