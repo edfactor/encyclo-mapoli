@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Data.Interfaces;
+﻿using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
 

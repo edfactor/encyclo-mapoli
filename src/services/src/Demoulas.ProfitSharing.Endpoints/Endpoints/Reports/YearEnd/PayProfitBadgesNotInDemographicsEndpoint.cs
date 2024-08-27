@@ -8,7 +8,7 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Endpoints.Base;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
-public class PayProfitBadgesNotInDemographicsEndpoint: EndpointWithCSVBase<PaginationRequestDto, PayProfitBadgesNotInDemographicsResponse, PayProfitBadgesNotInDemographicsEndpoint.PayProfitBadgesNotInDemographicsResponseMap>
+public class PayProfitBadgesNotInDemographicsEndpoint: EndpointWithCsvBase<PaginationRequestDto, PayProfitBadgesNotInDemographicsResponse, PayProfitBadgesNotInDemographicsEndpoint.PayProfitBadgesNotInDemographicsResponseMap>
 {
     private readonly IYearEndService _yearEndService;
 
@@ -37,7 +37,7 @@ public class PayProfitBadgesNotInDemographicsEndpoint: EndpointWithCSVBase<Pagin
                         {
                             Results = new List<PayProfitBadgesNotInDemographicsResponse>
                             {
-                                new PayProfitBadgesNotInDemographicsResponse { EmployeeBadge = 47425, EmployeeSSN = 900047425 }
+                                new PayProfitBadgesNotInDemographicsResponse { EmployeeBadge = 47425, EmployeeSsn = 900047425 }
                             }
                         }
                     }
@@ -61,7 +61,7 @@ public class PayProfitBadgesNotInDemographicsEndpoint: EndpointWithCSVBase<Pagin
             Map().Index(0).Convert(_ => string.Empty);
             Map().Index(1).Convert(_ => string.Empty);
             Map(m => m.EmployeeBadge).Index(2).Name("BADGE");
-            Map(m => m.EmployeeSSN).Index(3).Name("SSN");
+            Map(m => m.EmployeeSsn).Index(3).Name("SSN");
         }
     }
 }

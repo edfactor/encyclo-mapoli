@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Data.Interfaces;
+﻿using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Data.Entities.MassTransit;
 public sealed class StartMethod : ILookupTable<byte>
@@ -7,13 +7,6 @@ public sealed class StartMethod : ILookupTable<byte>
     {
         public const byte System = 0;
         public const byte OnDemand = 1;
-    }
-
-
-    public enum StartMethodEnum : byte
-    {
-        System = 0,
-        OnDemand = 1
     }
 
     public byte Id { get; set; }

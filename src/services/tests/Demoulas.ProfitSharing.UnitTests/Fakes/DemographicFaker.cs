@@ -1,6 +1,5 @@
 ﻿using Bogus;
 using Bogus.Extensions.UnitedStates;
-using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Data.Entities;
 
@@ -18,7 +17,7 @@ internal sealed class DemographicFaker : Faker<Demographic>
         EmploymentStatusFaker employmentStatusFaker = new EmploymentStatusFaker();
 
         RuleFor(d => d.BadgeNumber, f => _badgeNumberCounter++)
-            .RuleFor(d => d.SSN, f => f.Person.Ssn().ConvertSsnToLong())
+            .RuleFor(d => d.Ssn, f => f.Person.Ssn().ConvertSsnToLong())
             .RuleFor(d => d.OracleHcmId, f => f.Random.Long(100000, 999999))
             .RuleFor(d => d.LastName, f => f.Name.LastName())
             .RuleFor(d => d.FirstName, f => f.Name.FirstName())
@@ -48,7 +47,7 @@ internal sealed class DemographicFaker : Faker<Demographic>
                     City = f.Address.City(),
                     State = f.Address.StateAbbr(),
                     PostalCode = f.Address.ZipCode(),
-                    CountryISO = Country.Constants.US
+                    CountryIso = Country.Constants.Us
                 })
             .RuleFor(b => b.ContactInfo,
                 f => new ContactInfo { PhoneNumber = f.Phone.PhoneNumber("###-###-####"), MobileNumber = f.Phone.PhoneNumber("###-###-####"), EmailAddress = f.Internet.Email() });

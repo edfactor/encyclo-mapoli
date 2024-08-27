@@ -1,5 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -8,7 +7,7 @@ using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Demographics;
 
-public class AddDemographicsEndpoint : Endpoint<IEnumerable<DemographicsRequestDto>, ISet<DemographicResponseDto>?>
+public class AddDemographicsEndpoint : Endpoint<IEnumerable<DemographicsRequest>, ISet<DemographicResponseDto>?>
 {
     private readonly IDemographicsService _demographicsService;
 
@@ -25,12 +24,12 @@ public class AddDemographicsEndpoint : Endpoint<IEnumerable<DemographicsRequestD
         {
             s.Summary = "Add Demographics";
             s.Description = "API to add a collection of employee's into the Demographics table";
-            s.ExampleRequest = new List<DemographicsRequestDto>
+            s.ExampleRequest = new List<DemographicsRequest>
             {
-                new DemographicsRequestDto
+                new DemographicsRequest
                 {
                     BadgeNumber = 123456789,
-                    SSN = 123456789,
+                    Ssn = 123456789,
                     OracleHcmId = 0,
                     FullName = "John Doe",
                     FirstName = "John",
@@ -46,7 +45,7 @@ public class AddDemographicsEndpoint : Endpoint<IEnumerable<DemographicsRequestD
                         State = "MA",
                         City = "Andover",
                         PostalCode = "02589",
-                        CountryISO = Country.Constants.US
+                        CountryIso = Country.Constants.Us
                     },
                     DateOfBirth = default,
                     HireDate = default,
@@ -62,7 +61,7 @@ public class AddDemographicsEndpoint : Endpoint<IEnumerable<DemographicsRequestD
         Group<DemographicsGroup>();
     }
 
-    public override Task<ISet<DemographicResponseDto>?> ExecuteAsync(IEnumerable<DemographicsRequestDto> req, CancellationToken ct)
+    public override Task<ISet<DemographicResponseDto>?> ExecuteAsync(IEnumerable<DemographicsRequest> req, CancellationToken ct)
     {
         return _demographicsService.AddDemographics(req, ct);
     }

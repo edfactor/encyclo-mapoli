@@ -2,4 +2,4 @@
 
 builder.AddProject<Projects.Demoulas_ProfitSharing_Api>("demoulas-profitsharing-api");
 
-builder.Build().Run();
+await builder.Build().RunAsync();

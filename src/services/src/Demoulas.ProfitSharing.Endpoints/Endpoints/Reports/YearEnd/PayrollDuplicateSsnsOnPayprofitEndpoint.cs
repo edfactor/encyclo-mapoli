@@ -13,7 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 
-public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithCSVBase<PaginationRequestDto, PayrollDuplicateSsnsOnPayprofitResponseDto, PayrollDuplicateSsnsOnPayprofitEndpoint.PayrollDuplicateSsnsOnPayprofitResponseMap>
+public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithCsvBase<PaginationRequestDto, PayrollDuplicateSsnsOnPayprofitResponseDto, PayrollDuplicateSsnsOnPayprofitEndpoint.PayrollDuplicateSsnsOnPayprofitResponseMap>
 {
     private readonly IYearEndService _reportService;
 
@@ -47,18 +47,18 @@ public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithCSVBase<Pagin
                                 new PayrollDuplicateSsnsOnPayprofitResponseDto
                                 {
                                     EmployeeBadge = 47425,
-                                    EmployeeSSN = 900047425,
+                                    EmployeeSsn = 900047425,
                                     Name = "John",
                                     Status = EmploymentStatus.Constants.Active,
                                     Store = 14,
                                     IncomeCurrentYear = 32_100,
-                                    PayProfitSSN = 900047425,
+                                    PayProfitSsn = 900047425,
                                     Address = new AddressResponseDto
                                     {
                                         Street = "123 Main",
                                         City = "Sydney",
                                         State = "HI",
-                                        CountryISO = Country.Constants.US,
+                                        CountryIso = Country.Constants.Us,
                                         PostalCode = "01234"
                                     },
                                     ContactInfo = new ContactInfoResponseDto()
@@ -101,18 +101,18 @@ public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithCSVBase<Pagin
             Map().Index(0).Convert(_ => string.Empty);
             Map().Index(1).Convert(_ => string.Empty);
             Map(m => m.EmployeeBadge).Index(2).Name("BADGE");
-            Map(m => m.PayProfitSSN).Index(3).Name("SSN");
+            Map(m => m.PayProfitSsn).Index(3).Name("SSN");
             Map(m => m.Name).Index(4).Name("NAME");
             Map(m => m.Address.Street).Index(5).Name("ADDR");
             Map(m => m.Address.City).Index(6).Name("CITY");
             Map(m => m.Address.State).Index(7).Name("ST");
             Map(m => m.Address.PostalCode).Index(8).Name("ZIP");
             Map(m => m.HireDate).Index(9).Name("HIRE").TypeConverter<YearMonthDayTypeConverter>();
-            Map(m => m.TermDate).Index(10).Name("TERM").TypeConverter<YearMonthDayTypeConverter>(); ;
+            Map(m => m.TermDate).Index(10).Name("TERM").TypeConverter<YearMonthDayTypeConverter>();
             Map(m => m.RehireDate).Index(11).Name("REHIRE").TypeConverter<YearMonthDayTypeConverter>(); 
             Map(m => m.Status).Index(12).Name("ST");
             Map(m => m.Store).Index(13).Name("STR");
-            Map(m => m.PayProfitSSN).Index(13).Name("PS RECS");
+            Map(m => m.PayProfitSsn).Index(13).Name("PS RECS");
 
             Map(m => m.IncomeCurrentYear).Index(15).Name("CUR WAGE");
         }

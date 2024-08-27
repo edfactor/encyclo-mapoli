@@ -37,13 +37,13 @@ public class DemographicsServiceTests : IClassFixture<ApiTestBase<Program>>
     public async Task AddNewDemographicsTest(int count)
     {
         List<Demographic>? demographics = new DemographicFaker().Generate(count);
-        IEnumerable<DemographicsRequestDto> demographicsRequest = _mapper.MapToRequest(demographics);
+        IEnumerable<DemographicsRequest> demographicsRequest = _mapper.MapToRequest(demographics);
 
         ISet<DemographicResponseDto>? response = await _demographicsClient.AddDemographics(demographicsRequest, cancellationToken: CancellationToken.None);
 
         response.Should().NotBeNull();
         response.Should().HaveCount(count);
-        _ = response!.Select(d => d.SSN.Should().MatchRegex(@"XXX-XX-\d{4}"));
+        _ = response!.Select(d => d.Ssn.Should().MatchRegex(@"XXX-XX-\d{4}"));
 
         Dictionary<int, DemographicResponseDto> responseDict = response!.ToDictionary(k => k.BadgeNumber);
 

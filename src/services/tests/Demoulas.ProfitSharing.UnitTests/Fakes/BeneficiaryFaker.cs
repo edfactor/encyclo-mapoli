@@ -1,6 +1,5 @@
 ﻿using Bogus;
 using Bogus.Extensions.UnitedStates;
-using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Data.Entities;
 
@@ -16,8 +15,8 @@ internal sealed class BeneficiaryFaker : Faker<Beneficiary>
     /// </summary>
     internal BeneficiaryFaker()
     {
-        RuleFor(b => b.PSN, f => f.Random.Long(1000000000, 9999999999));
-        RuleFor(b => b.SSN, f => f.Person.Ssn().ConvertSsnToLong());
+        RuleFor(b => b.Psn, f => f.Random.Long(1000000000, 9999999999));
+        RuleFor(b => b.Ssn, f => f.Person.Ssn().ConvertSsnToLong());
         RuleFor(b => b.FirstName, f => f.Name.FirstName());
         RuleFor(b => b.MiddleName, f => f.Name.FirstName().OrNull(f));
         RuleFor(b => b.LastName, f => f.Name.LastName());
@@ -29,7 +28,7 @@ internal sealed class BeneficiaryFaker : Faker<Beneficiary>
             City = f.Address.City(),
             State = f.Address.StateAbbr(),
             PostalCode = f.Address.ZipCode(),
-            CountryISO = Country.Constants.US
+            CountryIso = Country.Constants.Us
         });
         RuleFor(b => b.ContactInfo, f => new ContactInfo
         {

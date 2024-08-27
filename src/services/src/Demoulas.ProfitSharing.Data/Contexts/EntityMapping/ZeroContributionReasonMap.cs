@@ -27,17 +27,23 @@ internal sealed class ZeroContributionReasonMap : IEntityTypeConfiguration<ZeroC
 #pragma warning disable CS0612 // Type or member is obsolete
             new PayFrequency
             {
+#pragma warning disable CS0618 // Type or member is obsolete
                 Id = ZeroContributionReason.Constants.Over64WithLess1000Hours1YearVesting,
+#pragma warning restore CS0618 // Type or member is obsolete
                 Name = "OVER 64 AND < 1000 HOURS GETS 1 YEAR VESTING (obsolete 11/20)"
             },
             new PayFrequency
             {
+#pragma warning disable CS0618 // Type or member is obsolete
                 Id = ZeroContributionReason.Constants.Over64WithLess1000Hours2YearsVesting,
+#pragma warning restore CS0618 // Type or member is obsolete
                 Name = "OVER 64 AND < 1000 HOURS GETS 2 YEARS VESTING (obsolete 11/20)"
             },
             new PayFrequency
             {
+#pragma warning disable CS0618 // Type or member is obsolete
                 Id = ZeroContributionReason.Constants.Over64WithOver1000Hours3YearsVesting,
+#pragma warning restore CS0618 // Type or member is obsolete
                 Name = "OVER 64 AND > 1000 HOURS GETS 3 YEARS VESTING (obsolete 11/20)"
             },
 #pragma warning restore CS0612 // Type or member is obsolete
@@ -50,6 +56,11 @@ internal sealed class ZeroContributionReasonMap : IEntityTypeConfiguration<ZeroC
             {
                 Id = ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay,
                 Name = "=64 AND 1ST CONTRIBUTION >=5 YEARS AGO GETS 100% VESTED ON THEIR BIRTHDAY"
+            },
+            new PayFrequency
+            {
+                Id = ZeroContributionReason.Constants.Unknown,
+                Name = "Unknown"
             }
         );
     }

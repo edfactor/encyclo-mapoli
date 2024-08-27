@@ -3,14 +3,14 @@ namespace Demoulas.ProfitSharing.Data.Entities;
 
 public sealed class Distribution
 {
-    public required long SSN { get; set; }
+    public required long Ssn { get; set; }
     public required int SequenceNumber{ get; set; }
     public required string EmployeeName { get; set; }
     public required char FrequencyId { get; set; }
     public required DistributionFrequency Frequency { get; set; }
     public required char StatusId { get; set; }
     public required DistributionStatus Status { get; set; }
-    public long PayeeSSN { get; set; }
+    public long PayeeSsn { get; set; }
     public required string PayeeName { get; set; }
     public required Address PayeeAddress { get; set; }
     public string? ThirdPartyPayee { get; set; }
@@ -34,5 +34,5 @@ public sealed class Distribution
     public Gender? Gender { get; set; }
     public bool QualifiedDomesticRelationsOrder { get; set; }
     public string? Memo { get; set; }
-    public bool RothIRA { get; set; }
+    public bool RothIra { get; set; }
 }

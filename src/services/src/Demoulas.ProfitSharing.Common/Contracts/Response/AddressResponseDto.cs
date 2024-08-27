@@ -6,7 +6,7 @@ public record AddressResponseDto
     public required string City { get; init; }
     public required string State { get; init; }
     public required string PostalCode { get; init; }
-    public required string CountryISO { get; init; }
+    public required string CountryIso { get; init; }
 
 
     public static AddressResponseDto ResponseExample()
@@ -17,7 +17,7 @@ public record AddressResponseDto
             PostalCode = "01876",
             City = "Tewksbury",
             Street = "1900 Main St",
-            CountryISO = "US"
+            CountryIso = "US"
         };
     }
 }

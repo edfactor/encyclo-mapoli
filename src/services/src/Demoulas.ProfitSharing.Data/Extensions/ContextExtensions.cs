@@ -1,5 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.MassTransit;
+using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.NotOwned;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Data.Extensions;
@@ -37,12 +38,25 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new DemographicSyncAuditMap());
         modelBuilder.ApplyConfiguration(new StateTaxMap());
 
+        modelBuilder.ApplyConfiguration(new CaldarRecordMap());
+
+        
+
 
         // Force table names to be upper case for consistency with all existing DSM projects
         foreach (var entity in modelBuilder.Model.GetEntityTypes())
         {
             // Set table name to upper case
             entity.SetTableName(entity.GetTableName()?.ToUpper());
+        }
+
+        // Set the global delete behavior to NoAction for all relationships
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            foreach (var foreignKey in entityType.GetForeignKeys())
+            {
+                foreignKey.DeleteBehavior = DeleteBehavior.NoAction;
+            }
         }
 
         return modelBuilder;

@@ -1,6 +1,5 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Data.Contexts.Extensions;
-using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -22,23 +21,23 @@ public class YearEndService : IYearEndService
         _logger = factory.CreateLogger<YearEndService>();
     }
 
-    public async Task<ReportResponseBase<PayrollDuplicateSSNResponseDto>> GetDuplicateSSNs(PaginationRequestDto req, CancellationToken ct)
+    public async Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsNs(PaginationRequestDto req, CancellationToken ct)
     {
         return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var dupSsns = await ctx.Demographics.GroupBy(x => x.SSN).Where(x => x.Count() > 1).Select(x => x.Key).ToListAsync(cancellationToken: ct);
+            var dupSsns = await ctx.Demographics.GroupBy(x => x.Ssn).Where(x => x.Count() > 1).Select(x => x.Key).ToListAsync(cancellationToken: ct);
 
             var rslts = await (from dem in ctx.Demographics
-                    join pdJoin in ctx.ProfitDetails on dem.SSN equals pdJoin.SSN into demPdJoin
+                    join pdJoin in ctx.ProfitDetails on dem.Ssn equals pdJoin.Ssn into demPdJoin
                     from pd in demPdJoin.DefaultIfEmpty()
-                    join pp in ctx.PayProfits on dem.SSN equals pp.SSN  into DemPdPpJoin
+                    join pp in ctx.PayProfits on dem.Ssn equals pp.Ssn  into DemPdPpJoin
                     from DemPdPp in DemPdPpJoin.DefaultIfEmpty()
-                    where dupSsns.Contains(dem.SSN)
+                    where dupSsns.Contains(dem.Ssn)
                     group new { dem, DemPdPp }
                         by new
                         {
                             dem.BadgeNumber,
-                            dem.SSN,
+                            SSN = dem.Ssn,
                             dem.FullName,
                             dem.Address.Street,
                             dem.Address.City,
@@ -53,10 +52,10 @@ public class YearEndService : IYearEndService
                             DemPdPp.IncomeCurrentYear
                         }
                     into grp
-                    select new PayrollDuplicateSSNResponseDto
+                    select new PayrollDuplicateSsnResponseDto
                     {
                         BadgeNumber = grp.Key.BadgeNumber,
-                        SSN = grp.Key.SSN,
+                        Ssn = grp.Key.SSN,
                         Name = grp.Key.FullName,
                         Address = new AddressResponseDto
                         {
@@ -64,7 +63,7 @@ public class YearEndService : IYearEndService
                             City = grp.Key.City,
                             State = grp.Key.State,
                             PostalCode = grp.Key.PostalCode,
-                            CountryISO = Country.Constants.US
+                            CountryIso = Country.Constants.Us
                         },
                         HireDate = grp.Key.HireDate,
                         TerminationDate = grp.Key.TerminationDate,
@@ -77,7 +76,7 @@ public class YearEndService : IYearEndService
                     }
                 ).ToPaginationResultsAsync(req, forceSingleQuery: true, ct);
 
-            return new ReportResponseBase<PayrollDuplicateSSNResponseDto>
+            return new ReportResponseBase<PayrollDuplicateSsnResponseDto>
             {
                 ReportDate = DateTimeOffset.Now, ReportName = "Duplicate SSNs", Response = rslts
             };
@@ -92,8 +91,8 @@ public class YearEndService : IYearEndService
              join dem in ctx.Demographics on pp.BadgeNumber equals dem.BadgeNumber into demTmp
              from dem in demTmp.DefaultIfEmpty()
              where dem == null
-             orderby pp.BadgeNumber, pp.SSN
-             select new PayProfitBadgesNotInDemographicsResponse { EmployeeBadge = pp.BadgeNumber, EmployeeSSN = pp.SSN }
+             orderby pp.BadgeNumber, pp.Ssn
+             select new PayProfitBadgesNotInDemographicsResponse { EmployeeBadge = pp.BadgeNumber, EmployeeSsn = pp.Ssn }
             ).ToPaginationResultsAsync(req, forceSingleQuery: true, ct);
         });
 
@@ -105,27 +104,27 @@ public class YearEndService : IYearEndService
         };
     }
 
-    public async Task<ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>> GetNegativeETVAForSSNsOnPayProfitResponse(PaginationRequestDto req, CancellationToken cancellationToken = default)
+    public async Task<ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>> GetNegativeETVAForSSNsOnPayProfitResponse(PaginationRequestDto req, CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("Request NEGATIVE ETVA FOR SSNs ON PAYPROFIT"))
         {
             var results = await _dataContextFactory.UseReadOnlyContext(c =>
             {
-                var ssnUnion = c.Demographics.Select(d => d.SSN).Union(c.Beneficiaries.Select(b => b.SSN));
+                var ssnUnion = c.Demographics.Select(d => d.Ssn).Union(c.Beneficiaries.Select(b => b.Ssn));
 
                 return c.PayProfits
-                    .Where(p => ssnUnion.Contains(p.SSN) && p.EarningsEtvaValue < 0)
-                    .Select(p => new NegativeETVAForSSNsOnPayProfitResponse
+                    .Where(p => ssnUnion.Contains(p.Ssn) && p.EarningsEtvaValue < 0)
+                    .Select(p => new NegativeEtvaForSsNsOnPayProfitResponse
                     {
-                        EmployeeBadge = p.BadgeNumber, EmployeeSSN = p.SSN, EtvaValue = p.EarningsEtvaValue
+                        EmployeeBadge = p.BadgeNumber, EmployeeSsn = p.Ssn, EtvaValue = p.EarningsEtvaValue
                     })
                     .OrderBy(p => p.EmployeeBadge)
                     .ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken);
             });
 
-            _logger.LogWarning("Returned {results} records", results.Results.Count());
+            _logger.LogWarning("Returned {Results} records", results.Results.Count());
 
-            return new ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>
+            return new ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>
             {
                 ReportName = "NEGATIVE ETVA FOR SSNs ON PAYPROFIT", ReportDate = DateTimeOffset.Now, Response = results
             };
@@ -141,14 +140,14 @@ public class YearEndService : IYearEndService
                 var query = from demographic in c.Demographics
                     join payProfit in c.PayProfits
                         on demographic.BadgeNumber equals payProfit.BadgeNumber
-                            where payProfit.SSN != demographic.SSN
-                    orderby demographic.BadgeNumber, demographic.SSN, payProfit.SSN
+                            where payProfit.Ssn != demographic.Ssn
+                    orderby demographic.BadgeNumber, demographic.Ssn, payProfit.Ssn
                     select new MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto
                     {
                         Name = demographic.FullName ?? $"{demographic.FirstName} {demographic.LastName}",
                         EmployeeBadge = demographic.BadgeNumber,
-                        EmployeeSSN = demographic.SSN,
-                        PayProfitSSN = payProfit.SSN,
+                        EmployeeSsn = demographic.Ssn,
+                        PayProfitSsn = payProfit.Ssn,
                        Store = demographic.StoreNumber,
                        Status = demographic.EmploymentStatusId
                     };
@@ -156,7 +155,7 @@ public class YearEndService : IYearEndService
                 return query.ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken);
             });
 
-            _logger.LogWarning("Returned {results} records", results.Results.Count());
+            _logger.LogWarning("Returned {Results} records", results.Results.Count());
 
             return new ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>
             {
@@ -178,17 +177,17 @@ public class YearEndService : IYearEndService
                                 on payProfit.BadgeNumber equals demographics.BadgeNumber into demGroup
                             from demographics in demGroup.DefaultIfEmpty()
                             join profitDetail in context.ProfitDetails
-                                on payProfit.SSN equals profitDetail.SSN into detGroup
+                                on payProfit.Ssn equals profitDetail.Ssn into detGroup
                             from profitDetail in detGroup.DefaultIfEmpty()
                             where context.PayProfits
-                                .GroupBy(p => p.SSN)
+                                .GroupBy(p => p.Ssn)
                                 .Where(g => g.Count() > 1)
                                 .Select(g => g.Key)
-                                .Contains(payProfit.SSN)
+                                .Contains(payProfit.Ssn)
                             group new { payProfit, demographics, profitDetail } by new
                             {
                                 BadgeNumber=payProfit.BadgeNumber,
-                                payProfit.SSN,
+                                SSN = payProfit.Ssn,
                                 demographics.FullName,
                                 demographics.HireDate,
                                 demographics.TerminationDate,
@@ -200,7 +199,7 @@ public class YearEndService : IYearEndService
                                 demographics.Address.City,
                                 demographics.Address.State,
                                 demographics.Address.PostalCode,
-                                demographics.Address.CountryISO,
+                                CountryISO = demographics.Address.CountryIso,
                                 demographics.ContactInfo.EmailAddress,
                                 demographics.ContactInfo.PhoneNumber,
                                 demographics.ContactInfo.MobileNumber,
@@ -211,7 +210,7 @@ public class YearEndService : IYearEndService
                             {
                                 Count = g.Count(),
                                 EmployeeBadge = g.Key.BadgeNumber,
-                                EmployeeSSN = g.Key.SSN,
+                                EmployeeSsn = g.Key.SSN,
                                 Name = g.Key.FullName,
                                 HireDate = g.Key.HireDate,
                                 TermDate = g.Key.TerminationDate,
@@ -232,14 +231,14 @@ public class YearEndService : IYearEndService
                                     City = g.Key.City,
                                     State = g.Key.State,
                                     PostalCode = g.Key.PostalCode,
-                                    CountryISO = g.Key.CountryISO
+                                    CountryIso = g.Key.CountryISO
                                 }
                             };
 
                 return query.ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken: cancellationToken);
             });
 
-            _logger.LogWarning("Returned {results} records", results.Results.Count());
+            _logger.LogWarning("Returned {Results} records", results.Results.Count());
 
             return new ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto>
             {
@@ -261,7 +260,7 @@ public class YearEndService : IYearEndService
                             select new DemographicBadgesNotInPayProfitResponse
                             {
                                 EmployeeBadge = dem.BadgeNumber,
-                                EmployeeSSN = dem.SSN,
+                                EmployeeSsn = dem.Ssn,
                                 EmployeeName = dem.FullName ?? "",
                                 Status = dem.EmploymentStatusId,
                                 Store = dem.StoreNumber,
@@ -269,7 +268,7 @@ public class YearEndService : IYearEndService
                 return query.ToPaginationResultsAsync(req, forceSingleQuery:true, cancellationToken: cancellationToken);
             });
 
-            _logger.LogInformation("Returned {results} records", results.Results.Count());
+            _logger.LogInformation("Returned {Results} records", results.Results.Count());
 
             return new ReportResponseBase<DemographicBadgesNotInPayProfitResponse>
             {
@@ -291,13 +290,13 @@ public class YearEndService : IYearEndService
                             select new NamesMissingCommaResponse
                             {
                                 EmployeeBadge = dem.BadgeNumber,
-                                EmployeeSSN = dem.SSN,
+                                EmployeeSsn = dem.Ssn,
                                 EmployeeName = dem.FullName ?? "",
                             };
                 return await query.ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken: cancellationToken);
             });
 
-            _logger.LogInformation("Returned {results} records", results.Results.Count());
+            _logger.LogInformation("Returned {Results} records", results.Results.Count());
 
             return new ReportResponseBase<NamesMissingCommaResponse>
             {
@@ -317,31 +316,31 @@ public class YearEndService : IYearEndService
                 var dupNameSlashDateOfBirth = await (from dem in ctx.Demographics
                                                  group dem by new { dem.FullName, dem.DateOfBirth } into g
                                                  where g.Count() > 1
-                                                 select g.Key.FullName).ToListAsync();
+                                                 select g.Key.FullName).ToListAsync(cancellationToken: cancellationToken);
 
                 var query = from dem in ctx.Demographics
                             join ppLj in ctx.PayProfits on dem.BadgeNumber equals ppLj.BadgeNumber into tmpPayProfit
                             from pp in tmpPayProfit.DefaultIfEmpty()
-                            join pdLj in ctx.ProfitDetails on dem.SSN equals pdLj.SSN into tmpProfitDetails
+                            join pdLj in ctx.ProfitDetails on dem.Ssn equals pdLj.Ssn into tmpProfitDetails
                             from pd in tmpProfitDetails.DefaultIfEmpty()
                             where dupNameSlashDateOfBirth.Contains(dem.FullName)
                             group new { dem, pp, pd } by new
                             {
                                 dem.BadgeNumber,
-                                dem.SSN,
+                                SSN = dem.Ssn,
                                 dem.FullName,
                                 dem.DateOfBirth,
                                 dem.Address.Street,
                                 dem.Address.City,
                                 dem.Address.State,
                                 dem.Address.PostalCode,
-                                dem.Address.CountryISO,
+                                CountryISO = dem.Address.CountryIso,
                                 pp.CompanyContributionYears,
                                 dem.HireDate,
                                 dem.TerminationDate,
                                 dem.EmploymentStatusId,
                                 dem.StoreNumber,
-                                PdSsn = (long?)(pd != null ? pd.SSN : null),
+                                PdSsn = (long?)(pd != null ? pd.Ssn : null),
                                 pp.NetBalanceLastYear,
                                 pp.HoursCurrentYear,
                                 pp.IncomeCurrentYear
@@ -350,7 +349,7 @@ public class YearEndService : IYearEndService
                             select new DuplicateNamesAndBirthdaysResponse
                             {
                                 BadgeNumber = g.Key.BadgeNumber,
-                                SSN = g.Key.SSN,
+                                Ssn = g.Key.SSN,
                                 Name = g.Key.FullName,
                                 DateOfBirth = g.Key.DateOfBirth,
                                 Address = new AddressResponseDto()
@@ -358,7 +357,7 @@ public class YearEndService : IYearEndService
                                     City = g.Key.City,
                                     State = g.Key.State,
                                     Street = g.Key.Street,
-                                    CountryISO = g.Key.CountryISO,
+                                    CountryIso = g.Key.CountryISO,
                                     PostalCode = g.Key.PostalCode,
                                 },
                                 Years = g.Key.CompanyContributionYears,
@@ -375,7 +374,7 @@ public class YearEndService : IYearEndService
                 return await query.ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken: cancellationToken);
             });
 
-            _logger.LogInformation("Returned {results} records", results.Results.Count());
+            _logger.LogInformation("Returned {Results} records", results.Results.Count());
 
             return new ReportResponseBase<DuplicateNamesAndBirthdaysResponse>()
             {

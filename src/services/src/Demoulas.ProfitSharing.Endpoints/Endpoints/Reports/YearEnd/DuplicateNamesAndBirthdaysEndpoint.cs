@@ -9,7 +9,7 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PayrollDuplicateSsnsOnPayprofitEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
-public class DuplicateNamesAndBirthdaysEndpoint:EndpointWithCSVBase<PaginationRequestDto, DuplicateNamesAndBirthdaysResponse, DuplicateNamesAndBirthdaysEndpoint.DuplicateNamesAndBirthdaysResponseMap>
+public class DuplicateNamesAndBirthdaysEndpoint:EndpointWithCsvBase<PaginationRequestDto, DuplicateNamesAndBirthdaysResponse, DuplicateNamesAndBirthdaysEndpoint.DuplicateNamesAndBirthdaysResponseMap>
 {
     private readonly IYearEndService _yearEndService;
 
@@ -46,7 +46,7 @@ public class DuplicateNamesAndBirthdaysEndpoint:EndpointWithCSVBase<PaginationRe
                                         PostalCode = "01876",
                                         City = "Tewksbury",
                                         Street = "1900 Main St",
-                                        CountryISO="US"
+                                        CountryIso="US"
                                     },
                                     BadgeNumber = 100110,
                                     Count = 2,
@@ -56,7 +56,7 @@ public class DuplicateNamesAndBirthdaysEndpoint:EndpointWithCSVBase<PaginationRe
                                     HoursCurrentYear = 1524,
                                     Name = "Henry Rollins",
                                     NetBalance = 52500,
-                                    SSN = 99999999,
+                                    Ssn = 99999999,
                                     Status = 'A',
                                     StoreNumber = 22,
                                     Years = 3
@@ -84,9 +84,9 @@ public class DuplicateNamesAndBirthdaysEndpoint:EndpointWithCSVBase<PaginationRe
             Map().Index(0).Convert(_ => string.Empty);
             Map().Index(1).Convert(_ => string.Empty);
             Map(m => m.BadgeNumber).Index(2).Name("BADGE");
-            Map(m => m.SSN).Index(3).Name("SSN");
+            Map(m => m.Ssn).Index(3).Name("SSN");
             Map(m => m.Name).Index(4).Name("NAME");
-            Map(m => m.DateOfBirth).Index(5).Name("DOB").TypeConverter<YearMonthDayTypeConverter>(); ;
+            Map(m => m.DateOfBirth).Index(5).Name("DOB").TypeConverter<YearMonthDayTypeConverter>();
             Map(m => m.Address.Street).Index(6).Name("ADDRESS");
             Map(m => m.Address.City).Index(7).Name("CITY");
             Map(m => m.Address.State).Index(8).Name("ST");

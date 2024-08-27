@@ -9,11 +9,11 @@ using Demoulas.ProfitSharing.Endpoints.Base;
 
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
-public class GetDuplicateSSNsEndpoint : EndpointWithCSVBase<PaginationRequestDto, PayrollDuplicateSSNResponseDto, GetDuplicateSSNsEndpoint.GetDuplicateSSNsResponseMap>
+public class GetDuplicateSsNsEndpoint : EndpointWithCsvBase<PaginationRequestDto, PayrollDuplicateSsnResponseDto, GetDuplicateSsNsEndpoint.GetDuplicateSsNsResponseMap>
 {
     private readonly IYearEndService _yearEndService;
 
-    public GetDuplicateSSNsEndpoint(IYearEndService yearEndService)
+    public GetDuplicateSsNsEndpoint(IYearEndService yearEndService)
     {
         _yearEndService = yearEndService;
     }
@@ -30,15 +30,15 @@ public class GetDuplicateSSNsEndpoint : EndpointWithCSVBase<PaginationRequestDto
             {
                 {
                     200,
-                    new ReportResponseBase<PayrollDuplicateSSNResponseDto>
+                    new ReportResponseBase<PayrollDuplicateSsnResponseDto>
                     {
                         ReportName = ReportFileName,
                         ReportDate = DateTimeOffset.Now,
-                        Response = new PaginatedResponseDto<PayrollDuplicateSSNResponseDto>
+                        Response = new PaginatedResponseDto<PayrollDuplicateSsnResponseDto>
                         {
-                            Results = new List<PayrollDuplicateSSNResponseDto>
+                            Results = new List<PayrollDuplicateSsnResponseDto>
                             {
-                                PayrollDuplicateSSNResponseDto.ResponseExample()
+                                PayrollDuplicateSsnResponseDto.ResponseExample()
                             }
                         }
                     }
@@ -50,19 +50,19 @@ public class GetDuplicateSSNsEndpoint : EndpointWithCSVBase<PaginationRequestDto
 
     public override string ReportFileName => "DuplicateSSns";
 
-    public override Task<ReportResponseBase<PayrollDuplicateSSNResponseDto>> GetResponse(PaginationRequestDto req, CancellationToken ct)
+    public override Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetResponse(PaginationRequestDto req, CancellationToken ct)
     {
-        return _yearEndService.GetDuplicateSSNs(req, ct);
+        return _yearEndService.GetDuplicateSsNs(req, ct);
     }
     
-    public sealed class GetDuplicateSSNsResponseMap : ClassMap<PayrollDuplicateSSNResponseDto>
+    public sealed class GetDuplicateSsNsResponseMap : ClassMap<PayrollDuplicateSsnResponseDto>
     {
-        public GetDuplicateSSNsResponseMap()
+        public GetDuplicateSsNsResponseMap()
         {
             Map().Index(0).Convert(_ => string.Empty);
             Map().Index(1).Convert(_ => string.Empty);
             Map(m => m.BadgeNumber).Index(2).Name("BADGE");
-            Map(m => m.SSN).Index(3).Name("SSN");
+            Map(m => m.Ssn).Index(3).Name("SSN");
             Map(m => m.Address.Street).Index(4).Name("ADDR");
             Map(m => m.Address.City).Index(5).Name("CITY");
             Map(m => m.Address.State).Index(6).Name("ST");

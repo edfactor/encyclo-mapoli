@@ -1,5 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common;
-using Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -10,15 +9,15 @@ internal sealed class DistributionMap : IEntityTypeConfiguration<Distribution>
     public void Configure(EntityTypeBuilder<Distribution> builder)
     {
         builder.ToTable("DISTRIBUTION");
-        builder.HasKey(d => new { d.SSN, d.SequenceNumber });
-        builder.Property(d => d.SSN).HasPrecision(9);
+        builder.HasKey(d => new { SSN = d.Ssn, d.SequenceNumber });
+        builder.Property(d => d.Ssn).HasPrecision(9);
         builder.Property(d => d.SequenceNumber).HasColumnName("SEQUENCE_NUMBER");
         builder.Property(d => d.EmployeeName).HasMaxLength(25).HasColumnName("EMPLOYEE_NAME");
         builder.Property(d => d.FrequencyId).HasColumnName("FREQUENCY_ID");
         builder.Property(d => d.StatusId).HasColumnName("STATUS_ID");
-        builder.Property(d => d.PayeeSSN).HasPrecision(9).HasColumnName("PAYEE_SSN");
+        builder.Property(d => d.PayeeSsn).HasPrecision(9).HasColumnName("PAYEE_SSN");
         builder.Property(d => d.PayeeName).HasMaxLength(30).HasColumnName("PAYEE_NAME");
-        builder.Property(d => d.PayeeSSN).HasColumnName("PAYEE_SSN");
+        builder.Property(d => d.PayeeSsn).HasColumnName("PAYEE_SSN");
         builder.OwnsOne(d => d.PayeeAddress, address =>
         {
             address.Property(a => a.Street).HasMaxLength(30).HasColumnName("STREET");
@@ -28,11 +27,11 @@ internal sealed class DistributionMap : IEntityTypeConfiguration<Distribution>
             address.Property(a => a.City).HasMaxLength(25).HasColumnName("CITY");
             address.Property(a => a.State).HasMaxLength(3).HasColumnName("STATE");
             address.Property(a => a.PostalCode).HasMaxLength(9).HasColumnName("POSTAL_CODE");
-            address.Property(a => a.CountryISO).HasMaxLength(2).HasColumnName("COUNTRY_ISO")
-                .HasDefaultValue(Country.Constants.US);
+            address.Property(a => a.CountryIso).HasMaxLength(2).HasColumnName("COUNTRY_ISO")
+                .HasDefaultValue(Country.Constants.Us);
             address.HasOne<Country>()
                 .WithMany()
-                .HasForeignKey(o => o.CountryISO);
+                .HasForeignKey(o => o.CountryIso);
         });
         builder.Property(d => d.ThirdPartyPayee).HasMaxLength(30).HasColumnName("THIRD_PARTY_PAYEEE");
         builder.Property(d => d.ThirdPartyName).HasMaxLength(30).HasColumnName("THIRD_PARTY_NAME");
@@ -46,11 +45,11 @@ internal sealed class DistributionMap : IEntityTypeConfiguration<Distribution>
             address.Property(a => a.City).HasMaxLength(25).HasColumnName("THIRD_PARTY_CITY");
             address.Property(a => a.State).HasMaxLength(3).HasColumnName("THIRD_PARTY_STATE");
             address.Property(a => a.PostalCode).HasMaxLength(9).HasColumnName("THIRD_PARTY_POSTAL_CODE");
-            address.Property(a => a.CountryISO).HasMaxLength(2).HasColumnName("THIRD_PARTY_COUNTRY_ISO")
-                .HasDefaultValue(Country.Constants.US);
+            address.Property(a => a.CountryIso).HasMaxLength(2).HasColumnName("THIRD_PARTY_COUNTRY_ISO")
+                .HasDefaultValue(Country.Constants.Us);
             address.HasOne<Country>()
                 .WithMany()
-                .HasForeignKey(o => o.CountryISO);
+                .HasForeignKey(o => o.CountryIso);
         });
         builder.Property(d => d.ForTheBenefitOfPayee).HasMaxLength(30).HasColumnName("FORTHEBENEFITOF_PAYEE");
         builder.Property(d => d.ForTheBenefitOfAccountType).HasMaxLength(30).HasColumnName("FORTHEBENEFITOF_ACCOUNT_TYPE");
@@ -67,7 +66,7 @@ internal sealed class DistributionMap : IEntityTypeConfiguration<Distribution>
         builder.Property(d => d.Deceased).HasColumnType("NUMBER(1)");
         builder.Property(d => d.GenderId).HasColumnName("GENDER_ID");
         builder.Property(d => d.QualifiedDomesticRelationsOrder).HasColumnType("NUMBER(1)").HasColumnName("QDRO");
-        builder.Property(d => d.RothIRA).HasColumnType("NUMBER(1)").HasColumnName("ROTH_IRA");
+        builder.Property(d => d.RothIra).HasColumnType("NUMBER(1)").HasColumnName("ROTH_IRA");
 
         builder.HasOne(d => d.Gender).WithMany().HasForeignKey(d => d.GenderId);
         builder.HasOne(d => d.Frequency).WithMany().HasForeignKey(d => d.FrequencyId);

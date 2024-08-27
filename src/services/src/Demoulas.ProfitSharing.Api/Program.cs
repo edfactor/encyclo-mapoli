@@ -5,6 +5,7 @@ using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.ProfitSharing.Api.Extensions;
 using Demoulas.ProfitSharing.Common.ActivitySources;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Services.Extensions;
@@ -12,7 +13,12 @@ using MassTransit.Monitoring;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder();
 
-builder.Configuration.AddUserSecrets<Program>();
+if (!builder.Environment.IsTestEnvironment())
+{
+    builder.Configuration
+        .AddJsonFile($"credSettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+        .AddUserSecrets<Program>();
+}
 
 ElasticSearchConfig smartConfig = new ElasticSearchConfig();
 builder.Configuration.Bind("Logging:Smart", smartConfig);
@@ -59,19 +65,16 @@ builder.ConfigureDefaultEndpoints(meterNames: new[] { InstrumentationOptions.Met
 WebApplication app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() && Debugger.IsAttached)
 {
-    if (Debugger.IsAttached)
-    {
-        // Put code here that ONLY runs when attached to the debugger.
-    }
+    // Put code here that ONLY runs when attached to the debugger.
 }
 
 app.UseCors();
 
 app.UseDefaultEndpoints(OktaSettingsAction);
 
-app.Run();
+await app.RunAsync();
 
 
 namespace Demoulas.ProfitSharing.Api

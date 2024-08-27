@@ -1,8 +1,8 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 
-public record DemographicResponseDto : MemberResponseDto
+public record DemographicResponseDto : IMemberResponse
 {
-    public required string SSN { get; set; }
+    public required string Ssn { get; set; }
     public int BadgeNumber { get; set; }
 
     public required long OracleHcmId { get; set; }
@@ -38,7 +38,7 @@ public record DemographicResponseDto : MemberResponseDto
     {
         return new DemographicResponseDto
         {
-            SSN = "123-45-6789",
+            Ssn = "123-45-6789",
             OracleHcmId = 0,
             FullName = "John Doe",
             LastName = "John",

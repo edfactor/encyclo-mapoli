@@ -10,7 +10,7 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 
-public class DemographicBadgesNotInPayProfitEndpoint : EndpointWithCSVBase<PaginationRequestDto, DemographicBadgesNotInPayProfitResponse,
+public class DemographicBadgesNotInPayProfitEndpoint : EndpointWithCsvBase<PaginationRequestDto, DemographicBadgesNotInPayProfitResponse,
     DemographicBadgesNotInPayProfitEndpoint.DemographicBadgesNotInPayProfitResponseMap>
 {
     private readonly IYearEndService _yearEndService;
@@ -43,28 +43,28 @@ public class DemographicBadgesNotInPayProfitEndpoint : EndpointWithCSVBase<Pagin
                                 new DemographicBadgesNotInPayProfitResponse()
                                 {
                                     EmployeeBadge = 47425,
-                                    EmployeeSSN = 900047425,
+                                    EmployeeSsn = 900047425,
                                     EmployeeName = "John",
                                     Status = EmploymentStatus.Constants.Active
                                 },
                                 new DemographicBadgesNotInPayProfitResponse
                                 {
                                     EmployeeBadge = 82424,
-                                    EmployeeSSN = 900082424,
+                                    EmployeeSsn = 900082424,
                                     EmployeeName = "Jane",
                                     Status = EmploymentStatus.Constants.Delete
                                 },
                                 new DemographicBadgesNotInPayProfitResponse
                                 {
                                     EmployeeBadge = 85744,
-                                    EmployeeSSN = 900085744,
+                                    EmployeeSsn = 900085744,
                                     EmployeeName = "Tim",
                                     Status = EmploymentStatus.Constants.Inactive
                                 },
                                 new DemographicBadgesNotInPayProfitResponse
                                 {
                                     EmployeeBadge = 94861,
-                                    EmployeeSSN = 900094861,
+                                    EmployeeSsn = 900094861,
                                     EmployeeName = "Sally",
                                     Status = EmploymentStatus.Constants.Terminated,
                                     Store = 4
@@ -92,7 +92,7 @@ public class DemographicBadgesNotInPayProfitEndpoint : EndpointWithCSVBase<Pagin
             Map().Index(0).Convert(_ => string.Empty);
             Map().Index(1).Convert(_ => string.Empty);
             Map(m => m.EmployeeBadge).Index(2).Name("BADGE");
-            Map(m => m.EmployeeSSN).Index(3).Name("DEM SSN");
+            Map(m => m.EmployeeSsn).Index(3).Name("DEM SSN");
             Map(m => m.EmployeeName).Index(4).Name("Name");
             Map(m => m.Store).Index(5).Name("Store");
             Map(m => m.Status).Index(6).Name("StatusEnum");

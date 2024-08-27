@@ -19,6 +19,6 @@ public class ProfitDetail
     public decimal StateTaxes { get; set;}
     public required TaxCode? TaxCode { get; set; }
     public char? TaxCodeId { get; set; }
-    public long SSN { get; set; }
+    public long Ssn { get; set; }
     public int DistributionSequence { get; set; }
 }

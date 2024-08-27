@@ -18,7 +18,7 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
             .IsRequired()
             .HasColumnName("BADGE_NUMBER");
 
-        _ = builder.Property(e => e.SSN)
+        _ = builder.Property(e => e.Ssn)
             .HasPrecision(9)
             .IsRequired();
 
@@ -79,10 +79,9 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
 
         _ = builder.Property(d => d.CertificateIssuedLastYear)
             .HasColumnType("NUMBER(1)")
-            .HasDefaultValue(0)
             .HasColumnName("CERTIFICATE_ISSUED_LAST_YEAR");
 
-        _ = builder.Property(e => e.PSCertificateIssuedDate)
+        _ = builder.Property(e => e.PsCertificateIssuedDate)
             .HasColumnName("PS_CERTIFICATE_ISSUED_DATE")
             .HasColumnType("DATE")
             .HasConversion<DateOnlyConverter>();
@@ -138,18 +137,32 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
 
         _ = builder.HasOne(e => e.Enrollment)
             .WithMany(p => p.Profits)
-            .HasForeignKey(p => p.EnrollmentId);
+            .HasForeignKey(p => p.EnrollmentId)
+            .OnDelete(DeleteBehavior.NoAction);
 
         _ = builder.HasOne(e => e.BeneficiaryType)
             .WithMany(p => p.Profits)
-            .HasForeignKey(p => p.BeneficiaryTypeId);
+            .HasForeignKey(p => p.BeneficiaryTypeId)
+            .OnDelete(DeleteBehavior.NoAction);
 
         _ = builder.HasOne(e => e.EmployeeType)
             .WithMany(p => p.Profits)
-            .HasForeignKey(p => p.EmployeeTypeId);
+            .HasForeignKey(p => p.EmployeeTypeId)
+            .OnDelete(DeleteBehavior.NoAction);
             
        _ = builder.HasOne(d => d.ZeroContributionReason)
             .WithMany(p => p.Profits)
-            .HasForeignKey(d => d.ZeroContributionReasonId);
+            .HasForeignKey(d => d.ZeroContributionReasonId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+       _ = builder.HasOne(p => p.Demographic).WithMany(p => p.PayProfits)
+           .HasForeignKey(p => p.Ssn)
+           .HasPrincipalKey(d=> d.Ssn)
+           .OnDelete(DeleteBehavior.NoAction);
+
+        _ = builder.HasOne(p => p.Beneficiary).WithMany(p => p.PayProfits)
+            .HasForeignKey(p => p.Ssn)
+            .HasPrincipalKey(d => d.Ssn)
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }

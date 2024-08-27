@@ -10,11 +10,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 
-public class NegativeETVAForSSNsOnPayProfitEndPoint : EndpointWithCSVBase<PaginationRequestDto, NegativeETVAForSSNsOnPayProfitResponse, NegativeETVAForSSNsOnPayProfitEndPoint.NegativeETVAForSSNsOnPayProfitResponseMap>
+public class NegativeEtvaForSsNsOnPayProfitEndPoint : EndpointWithCsvBase<PaginationRequestDto, NegativeEtvaForSsNsOnPayProfitResponse, NegativeEtvaForSsNsOnPayProfitEndPoint.NegativeEtvaForSsNsOnPayProfitResponseMap>
 {
     private readonly IYearEndService _reportService;
 
-    public NegativeETVAForSSNsOnPayProfitEndPoint(IYearEndService reportService)
+    public NegativeEtvaForSsNsOnPayProfitEndPoint(IYearEndService reportService)
     {
         _reportService = reportService;
     }
@@ -31,15 +31,15 @@ public class NegativeETVAForSSNsOnPayProfitEndPoint : EndpointWithCSVBase<Pagina
             {
                 {
                     200,
-                    new ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>
+                    new ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>
                     {
                         ReportName = ReportFileName,
                         ReportDate = DateTimeOffset.Now,
-                        Response = new PaginatedResponseDto<NegativeETVAForSSNsOnPayProfitResponse>()
+                        Response = new PaginatedResponseDto<NegativeEtvaForSsNsOnPayProfitResponse>()
                         {
-                            Results = new List<NegativeETVAForSSNsOnPayProfitResponse>
+                            Results = new List<NegativeEtvaForSsNsOnPayProfitResponse>
                             {
-                                new NegativeETVAForSSNsOnPayProfitResponse { EmployeeBadge = 47425, EmployeeSSN = 900047425, EtvaValue = -1293.43m }
+                                new NegativeEtvaForSsNsOnPayProfitResponse { EmployeeBadge = 47425, EmployeeSsn = 900047425, EtvaValue = -1293.43m }
                             }
                         }
                     }
@@ -50,21 +50,21 @@ public class NegativeETVAForSSNsOnPayProfitEndPoint : EndpointWithCSVBase<Pagina
         Options(x => x.CacheOutput(p => p.Expire(TimeSpan.FromMinutes(5))));
     }
 
-    public override async Task<ReportResponseBase<NegativeETVAForSSNsOnPayProfitResponse>> GetResponse(PaginationRequestDto req, CancellationToken ct)
+    public override async Task<ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>> GetResponse(PaginationRequestDto req, CancellationToken ct)
     {
         return await _reportService.GetNegativeETVAForSSNsOnPayProfitResponse(req, ct);
     }
 
     public override string ReportFileName => "ETVA-LESS-THAN-ZERO";
 
-    public sealed class NegativeETVAForSSNsOnPayProfitResponseMap : ClassMap<NegativeETVAForSSNsOnPayProfitResponse>
+    public sealed class NegativeEtvaForSsNsOnPayProfitResponseMap : ClassMap<NegativeEtvaForSsNsOnPayProfitResponse>
     {
-        public NegativeETVAForSSNsOnPayProfitResponseMap()
+        public NegativeEtvaForSsNsOnPayProfitResponseMap()
         {
             Map().Index(0).Convert(_ => string.Empty);
             Map().Index(1).Convert(_ => string.Empty);
             Map(m => m.EmployeeBadge).Index(2).Name("BADGE");
-            Map(m => m.EmployeeSSN).Index(3).Name("SSN");
+            Map(m => m.EmployeeSsn).Index(3).Name("SSN");
             Map(m => m.EtvaValue).Index(4).Name("ETVA");
         }
     }

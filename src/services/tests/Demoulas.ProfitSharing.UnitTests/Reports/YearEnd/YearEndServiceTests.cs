@@ -25,17 +25,17 @@ public class YearEndServiceTests:ApiTestBase<Program>
     
 
     [Fact(DisplayName ="PS-147: Check Duplicate SSNs (JSON)")]
-    public async Task GetDuplicateSSNsTestJson()
+    public async Task GetDuplicateSsNsTestJson()
     {
-        var response = await _yearEndClient.GetDuplicateSSNs(_paginationRequest, CancellationToken.None);
+        var response = await _yearEndClient.GetDuplicateSsNs(_paginationRequest, CancellationToken.None);
         response.Should().NotBeNull();
         response.Response.Results.Count().Should().Be(0); //Duplicate SSNs aren't allowed in our data model, prohibited by primary key on SSN in the demographics table.
     }
 
     [Fact(DisplayName = "PS-147: Check Duplicate SSNs (CSV)")]
-    public async Task GetDuplicateSSNsTestCsv()
+    public async Task GetDuplicateSsNsTestCsv()
     {
-        var stream = await _yearEndClient.DownloadDuplicateSSNs(CancellationToken.None);
+        var stream = await _yearEndClient.DownloadDuplicateSsNs(CancellationToken.None);
         stream.Should().NotBeNull();
 
         using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
@@ -61,9 +61,9 @@ public class YearEndServiceTests:ApiTestBase<Program>
 
             await c.PayProfits.Take(mismatchedValues).ForEachAsync(async pp =>
             {
-                var demographic = await c.Demographics.FirstAsync(x=>x.BadgeNumber == pp.BadgeNumber && x.SSN == pp.SSN);
+                var demographic = await c.Demographics.FirstAsync(x=>x.BadgeNumber == pp.BadgeNumber && x.Ssn == pp.Ssn);
 
-                demographic.BadgeNumber = pp.BadgeNumber + c.Demographics.Count() + 1;
+                demographic.BadgeNumber = pp.BadgeNumber + await c.Demographics.CountAsync() + 1;
             });
 
             await c.SaveChangesAsync();
@@ -93,9 +93,9 @@ public class YearEndServiceTests:ApiTestBase<Program>
 
             await c.PayProfits.Take(mismatchedValues).ForEachAsync(async pp =>
             {
-                var demographic = await c.Demographics.FirstAsync(x => x.BadgeNumber == pp.BadgeNumber && x.SSN == pp.SSN);
+                var demographic = await c.Demographics.FirstAsync(x => x.BadgeNumber == pp.BadgeNumber && x.Ssn == pp.Ssn);
 
-                demographic.BadgeNumber = pp.BadgeNumber + c.Demographics.Count() + 1;
+                demographic.BadgeNumber = pp.BadgeNumber + await c.Demographics.CountAsync() + 1;
             });
 
             await c.SaveChangesAsync();
@@ -242,7 +242,7 @@ public class YearEndServiceTests:ApiTestBase<Program>
     }
 
     [Fact(DisplayName = "PS-145 : Negative ETVA for SSNs on PayProfit (JSON)")]
-    public async Task GetNegativeETVAReportJson()
+    public async Task GetNegativeEtvaReportJson()
     {
         byte negativeValues = 5;
         await MockDbContextFactory.UseWritableContext(async c =>
@@ -274,7 +274,7 @@ public class YearEndServiceTests:ApiTestBase<Program>
     }
 
     [Fact(DisplayName = "PS-145 : Negative ETVA for SSNs on PayProfit (CSV)")]
-    public async Task GetNegativeETVAReportCsv()
+    public async Task GetNegativeEtvaReportCsv()
     {
         var stream = await _yearEndClient.DownloadNegativeETVAForSSNsOnPayProfitResponse(CancellationToken.None);
         stream.Should().NotBeNull();

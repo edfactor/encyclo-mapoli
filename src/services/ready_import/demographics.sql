@@ -1,6 +1,7 @@
 
-truncate TABLE DEMOGRAPHIC;
-    INSERT INTO demographic (
+TRUNCATE TABLE DEMOGRAPHIC;
+
+INSERT INTO demographic (
         oracle_hcm_id,
         ssn,
         badge_number,
@@ -21,7 +22,7 @@ truncate TABLE DEMOGRAPHIC;
         hire_date,
         rehire_date,
         termination_date,
-        department,
+        department,  
         employment_type_id,
         gender_id,
         pay_frequency_id,

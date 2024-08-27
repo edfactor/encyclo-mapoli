@@ -1,6 +1,6 @@
-﻿namespace Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.ProfitSharing.Common.Interfaces;
 
-using Demoulas.ProfitSharing.Data.Interfaces;
+namespace Demoulas.ProfitSharing.Data.Entities;
 
 public class DistributionFrequency  : ILookupTable<char>
 {

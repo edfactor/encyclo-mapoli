@@ -12,7 +12,7 @@ using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Mismatch
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 
-public class MismatchedSsnsPayprofitAndDemographicsOnSameBadgeEndpoint : EndpointWithCSVBase<PaginationRequestDto, MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto, MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseMap>
+public class MismatchedSsnsPayprofitAndDemographicsOnSameBadgeEndpoint : EndpointWithCsvBase<PaginationRequestDto, MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto, MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseMap>
 {
     private readonly IYearEndService _reportService;
 
@@ -45,24 +45,24 @@ public class MismatchedSsnsPayprofitAndDemographicsOnSameBadgeEndpoint : Endpoin
                             {
                                 new MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto
                                 {
-                                    EmployeeBadge = 47425, EmployeeSSN = 900047425, Name = "John", Status = EmploymentStatus.Constants.Active
+                                    EmployeeBadge = 47425, EmployeeSsn = 900047425, Name = "John", Status = EmploymentStatus.Constants.Active
                                 },
                                 new MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto
                                 {
-                                    EmployeeBadge = 82424, EmployeeSSN = 900082424, Name = "Jane", Status = EmploymentStatus.Constants.Delete
+                                    EmployeeBadge = 82424, EmployeeSsn = 900082424, Name = "Jane", Status = EmploymentStatus.Constants.Delete
                                 },
                                 new MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto
                                 {
-                                    EmployeeBadge = 85744, EmployeeSSN = 900085744, Name = "Tim", Status = EmploymentStatus.Constants.Inactive
+                                    EmployeeBadge = 85744, EmployeeSsn = 900085744, Name = "Tim", Status = EmploymentStatus.Constants.Inactive
                                 },
                                 new MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto
                                 {
                                     EmployeeBadge = 94861,
-                                    EmployeeSSN = 900094861,
+                                    EmployeeSsn = 900094861,
                                     Name = "Sally",
                                     Status = EmploymentStatus.Constants.Terminated,
                                     Store = 4,
-                                    PayProfitSSN = 123_45_6789
+                                    PayProfitSsn = 123_45_6789
                                 }
                             }
                         }
@@ -89,8 +89,8 @@ public class MismatchedSsnsPayprofitAndDemographicsOnSameBadgeEndpoint : Endpoin
             Map().Index(0).Convert(_ => string.Empty);
             Map().Index(1).Convert(_ => string.Empty);
             Map(m => m.EmployeeBadge).Index(2).Name("BADGE");
-            Map(m => m.PayProfitSSN).Index(3).Name("PAYPROFIT SSN");
-            Map(m => m.EmployeeSSN).Index(4).Name("DEMOGRAPHICS SSN");
+            Map(m => m.PayProfitSsn).Index(3).Name("PAYPROFIT SSN");
+            Map(m => m.EmployeeSsn).Index(4).Name("DEMOGRAPHICS SSN");
             Map(m => m.Name).Index(5).Name("NAME");
             Map(m => m.Store).Index(6).Name("STORE");
             Map(m => m.Status).Index(7).Name("STATUS");

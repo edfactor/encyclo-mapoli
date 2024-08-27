@@ -11,6 +11,6 @@ internal sealed class AddressFaker : Faker<Address>
             .RuleFor(a => a.City, f => f.Address.City())
             .RuleFor(a => a.State, f => f.Address.StateAbbr())
             .RuleFor(a => a.PostalCode, f => f.Address.ZipCode())
-            .RuleFor(a => a.CountryISO, f => f.Address.CountryCode());
+            .RuleFor(a => a.CountryIso, f => f.Address.CountryCode());
     }
 }

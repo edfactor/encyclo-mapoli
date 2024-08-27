@@ -8,7 +8,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
-public class NamesMissingCommasEndpoint : EndpointWithCSVBase<PaginationRequestDto, NamesMissingCommaResponse, NamesMissingCommasEndpoint.NamesMissingCommasResponseMap>
+public class NamesMissingCommasEndpoint : EndpointWithCsvBase<PaginationRequestDto, NamesMissingCommaResponse, NamesMissingCommasEndpoint.NamesMissingCommasResponseMap>
 {
     private readonly IYearEndService _yearEndService;
 
@@ -36,7 +36,7 @@ public class NamesMissingCommasEndpoint : EndpointWithCSVBase<PaginationRequestD
                         {
                             Results = new List<NamesMissingCommaResponse>
                             {
-                                new NamesMissingCommaResponse() {EmployeeName="Jane Doe", EmployeeBadge=10010, EmployeeSSN = 999999999}
+                                new NamesMissingCommaResponse() {EmployeeName="Jane Doe", EmployeeBadge=10010, EmployeeSsn = 999999999}
                             }
                         }
                     }
@@ -61,7 +61,7 @@ public class NamesMissingCommasEndpoint : EndpointWithCSVBase<PaginationRequestD
             Map().Index(0).Convert(_ => string.Empty);
             Map().Index(1).Convert(_ => string.Empty);
             Map(m => m.EmployeeBadge).Index(2).Name("BADGE");
-            Map(m => m.EmployeeSSN).Index(3).Name("DEM SSN");
+            Map(m => m.EmployeeSsn).Index(3).Name("DEM SSN");
             Map(m => m.EmployeeName).Index(4).Name("Name");
         }
     }
