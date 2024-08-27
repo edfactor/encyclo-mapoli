@@ -34,7 +34,6 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new DistributionStatusMap());
         modelBuilder.ApplyConfiguration(new DistributionFrequencyMap());
         modelBuilder.ApplyConfiguration(new DistributionMap());
-        modelBuilder.ApplyConfiguration(new BeneficiaryRelPercentMap());
         modelBuilder.ApplyConfiguration(new DemographicSyncAuditMap());
         modelBuilder.ApplyConfiguration(new StateTaxMap());
 
