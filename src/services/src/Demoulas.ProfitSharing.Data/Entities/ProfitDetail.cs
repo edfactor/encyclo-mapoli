@@ -17,7 +17,7 @@ public class ProfitDetail
     public ZeroContributionReason? ZeroContributionReason { get; set; }
     public decimal FederalTaxes {get; set;}
     public decimal StateTaxes { get; set;}
-    public required TaxCode? TaxCode { get; set; }
+    public TaxCode? TaxCode { get; set; }
     public char? TaxCodeId { get; set; }
     public long Ssn { get; set; }
     public int DistributionSequence { get; set; }

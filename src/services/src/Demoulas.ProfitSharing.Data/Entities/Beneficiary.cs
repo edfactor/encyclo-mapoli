@@ -24,4 +24,10 @@ public sealed class Beneficiary
     public string? Relationship { get; set; }
 
     public List<PayProfit>? PayProfits { get; set; }
+
+    public string GetFullName()
+    {
+        return $"{LastName}, {FirstName} {MiddleName}";
+    }
+
 }
