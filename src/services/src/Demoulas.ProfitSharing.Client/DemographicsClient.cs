@@ -25,17 +25,17 @@ public sealed class DemographicsClient : IDemographicsService
         _options = Constants.GetJsonSerializerOptions();
     }
    
-    public async Task<ISet<DemographicResponseDto>?> AddDemographics(IEnumerable<DemographicsRequestDto> demographics, CancellationToken cancellationToken)
+    public async Task<ISet<DemographicResponseDto>?> AddDemographics(IEnumerable<DemographicsRequest> demographics, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(demographics);
 
-        IEnumerable<DemographicsRequestDto> demographicsRequestDtos = demographics.ToList();
+        IEnumerable<DemographicsRequest> demographicsRequestDtos = demographics.ToList();
         if (!demographicsRequestDtos.Any())
         {
             return new HashSet<DemographicResponseDto>(0);
         }
 
-        foreach (DemographicsRequestDto demo in demographicsRequestDtos)
+        foreach (DemographicsRequest demo in demographicsRequestDtos)
         {
             await _validator.ValidateAndThrowAsync(demo, cancellationToken);
         }

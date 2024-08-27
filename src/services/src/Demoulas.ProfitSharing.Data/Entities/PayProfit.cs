@@ -147,4 +147,8 @@ public sealed class PayProfit
     /// executive earnings
     /// </summary>
     public decimal IncomeExecutive { get; set; }
+
+    public Demographic? Demographic { get; set; }
+
+    public Beneficiary? Beneficiary { get; set; }
 }

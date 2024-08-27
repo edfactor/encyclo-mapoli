@@ -138,18 +138,32 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
 
         _ = builder.HasOne(e => e.Enrollment)
             .WithMany(p => p.Profits)
-            .HasForeignKey(p => p.EnrollmentId);
+            .HasForeignKey(p => p.EnrollmentId)
+            .OnDelete(DeleteBehavior.NoAction);
 
         _ = builder.HasOne(e => e.BeneficiaryType)
             .WithMany(p => p.Profits)
-            .HasForeignKey(p => p.BeneficiaryTypeId);
+            .HasForeignKey(p => p.BeneficiaryTypeId)
+            .OnDelete(DeleteBehavior.NoAction);
 
         _ = builder.HasOne(e => e.EmployeeType)
             .WithMany(p => p.Profits)
-            .HasForeignKey(p => p.EmployeeTypeId);
+            .HasForeignKey(p => p.EmployeeTypeId)
+            .OnDelete(DeleteBehavior.NoAction);
             
        _ = builder.HasOne(d => d.ZeroContributionReason)
             .WithMany(p => p.Profits)
-            .HasForeignKey(d => d.ZeroContributionReasonId);
+            .HasForeignKey(d => d.ZeroContributionReasonId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+       _ = builder.HasOne(p => p.Demographic).WithMany(p => p.PayProfits)
+           .HasForeignKey(p => p.SSN)
+           .HasPrincipalKey(d=> d.SSN)
+           .OnDelete(DeleteBehavior.NoAction);
+
+        _ = builder.HasOne(p => p.Beneficiary).WithMany(p => p.PayProfits)
+            .HasForeignKey(p => p.SSN)
+            .HasPrincipalKey(d => d.SSN)
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }

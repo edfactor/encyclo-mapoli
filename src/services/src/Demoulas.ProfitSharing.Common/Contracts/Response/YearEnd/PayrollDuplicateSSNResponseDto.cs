@@ -2,10 +2,10 @@
 using System.Data.SqlTypes;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-public sealed record PayrollDuplicateSSNResponseDto
+public sealed record PayrollDuplicateSsnResponseDto
 {
     public required int BadgeNumber { get; set; }
-    public required long SSN { get; set; }
+    public required long Ssn { get; set; }
     public string? Name { get; set; }
     public required AddressResponseDto Address { get; set; }
     public required DateOnly HireDate { get; set; }
@@ -18,12 +18,12 @@ public sealed record PayrollDuplicateSSNResponseDto
     public decimal HoursLastYear { get; set; }
     public required decimal IncomeCurrentYear { get; set; }
 
-    public static PayrollDuplicateSSNResponseDto ResponseExample()
+    public static PayrollDuplicateSsnResponseDto ResponseExample()
     {
-        return new PayrollDuplicateSSNResponseDto
+        return new PayrollDuplicateSsnResponseDto
         {
             BadgeNumber = 123,
-            SSN = 123_45_6789,
+            Ssn = 123_45_6789,
             Name = "John Doe",
             Address = AddressResponseDto.ResponseExample(),
             HireDate = SqlDateTime.MinValue.Value.ToDateOnly(),

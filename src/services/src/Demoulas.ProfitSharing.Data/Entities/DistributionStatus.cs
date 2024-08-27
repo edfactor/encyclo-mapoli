@@ -1,4 +1,6 @@
-﻿namespace Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.ProfitSharing.Common.Interfaces;
+
+namespace Demoulas.ProfitSharing.Data.Entities;
 
 using Demoulas.ProfitSharing.Data.Interfaces;
 public class DistributionStatus: ILookupTable<char>

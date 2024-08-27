@@ -2,8 +2,8 @@
 public sealed record MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto
 {
     public long EmployeeBadge { get; set; }
-    public long PayProfitSSN { get; set; }
-    public long EmployeeSSN { get; set; }
+    public long PayProfitSsn { get; set; }
+    public long EmployeeSsn { get; set; }
     public required string Name { get; set; }
     public short Store { get; set; }
     public char Status { get; set; }

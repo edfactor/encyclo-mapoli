@@ -56,7 +56,7 @@ public class DuplicateNamesAndBirthdaysEndpoint:EndpointWithCSVBase<PaginationRe
                                     HoursCurrentYear = 1524,
                                     Name = "Henry Rollins",
                                     NetBalance = 52500,
-                                    SSN = 99999999,
+                                    Ssn = 99999999,
                                     Status = 'A',
                                     StoreNumber = 22,
                                     Years = 3
@@ -84,7 +84,7 @@ public class DuplicateNamesAndBirthdaysEndpoint:EndpointWithCSVBase<PaginationRe
             Map().Index(0).Convert(_ => string.Empty);
             Map().Index(1).Convert(_ => string.Empty);
             Map(m => m.BadgeNumber).Index(2).Name("BADGE");
-            Map(m => m.SSN).Index(3).Name("SSN");
+            Map(m => m.Ssn).Index(3).Name("SSN");
             Map(m => m.Name).Index(4).Name("NAME");
             Map(m => m.DateOfBirth).Index(5).Name("DOB").TypeConverter<YearMonthDayTypeConverter>(); ;
             Map(m => m.Address.Street).Index(6).Name("ADDRESS");

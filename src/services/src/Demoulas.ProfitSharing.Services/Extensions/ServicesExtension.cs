@@ -1,10 +1,7 @@
 ﻿using Demoulas.Common.Caching.Interfaces;
 using Demoulas.ProfitSharing.Common.Configuration;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.OracleHcm;
 using Demoulas.ProfitSharing.Services.HostedServices;
-using Demoulas.ProfitSharing.Services.InternalEntities;
-using Demoulas.ProfitSharing.Services.Jobs;
 using Demoulas.ProfitSharing.Services.Mappers;
 using Demoulas.ProfitSharing.Services.Reports;
 using Microsoft.Extensions.Configuration;
@@ -19,7 +16,10 @@ using System.Text;
 using Microsoft.Extensions.Http.Resilience;
 using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.Common.Data.Services.Service;
-using Demoulas.ProfitSharing.Services.Validators;
+using Demoulas.ProfitSharing.Common.Caching;
+using Demoulas.ProfitSharing.OracleHcm.Jobs;
+using Demoulas.ProfitSharing.OracleHcm.Validators;
+using Demoulas.ProfitSharing.OracleHcm.Services;
 
 namespace Demoulas.ProfitSharing.Services.Extensions;
 
@@ -30,26 +30,25 @@ public static class ServicesExtension
 {
     public static IHostApplicationBuilder AddProjectServices(this IHostApplicationBuilder builder)
     {
-        _ = builder.Services.AddSingleton<IEmployeeSyncJob, EmployeeSyncJob>();
-        _ = builder.Services.AddSingleton<OracleEmployeeValidator>();
-
+        
         _ = builder.Services.AddScoped<IPayClassificationService, PayClassificationService>();
         _ = builder.Services.AddScoped<IDemographicsService, DemographicsService>();
         _ = builder.Services.AddScoped<IYearEndService, YearEndService>();
         _ = builder.Services.AddScoped<IPayProfitService, PayProfitService>();
-        _ = builder.Services.AddScoped<ISynchronizationService, SynchronizationService>();
+        _ = builder.Services.AddScoped<IOracleHcmSynchronizationService, OracleHcmSynchronizationService>();
 
 
         OracleHcmConfig oktaSettings = builder.Configuration.GetSection("OracleHcm").Get<OracleHcmConfig>() ?? new OracleHcmConfig { Url = string.Empty };
         _ = builder.Services.AddSingleton(oktaSettings);
 
+        _ = builder.Services.AddSingleton<OracleEmployeeValidator>();
         _ = builder.Services.AddSingleton<IJobFactory, SimpleJobFactory>();
         _ = builder.Services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
         _ = builder.Services.AddSingleton<IDemographicsServiceInternal, DemographicsService>();
-        _ = builder.Services.AddSingleton<ISynchronizationService, SynchronizationService>();
+        _ = builder.Services.AddSingleton<IOracleHcmSynchronizationService, OracleHcmSynchronizationService>();
         _ = builder.Services.AddSingleton<IStoreService, StoreService>();
 
-        _ = builder.Services.AddHttpClient<OracleDemographicsService>((services, client) =>
+        _ = builder.Services.AddHttpClient<IEmployeeSyncService, EmployeeSyncService>((services, client) =>
         {
             OracleHcmConfig config = services.GetRequiredService<OracleHcmConfig>();
 
@@ -68,7 +67,8 @@ public static class ServicesExtension
 
 
 
-        _ = builder.Services.AddSingleton<IBaseCacheService<PayClassificationResponseCache>, PayClassificationHostedService>();
+        _ = builder.Services.AddKeyedSingleton<IBaseCacheService<LookupTableCache<byte>>, PayClassificationHostedService>(nameof(PayClassificationHostedService));
+        _ = builder.Services.AddKeyedSingleton<IBaseCacheService<LookupTableCache<byte>>, DepartmentHostedService>(nameof(DepartmentHostedService));
 
 
         builder.ConfigureMassTransitServices();

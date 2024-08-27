@@ -1,18 +1,18 @@
 ﻿using Demoulas.Common.Caching;
 using Demoulas.Common.Contracts.Caching;
+using Demoulas.ProfitSharing.Common.Caching;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Services.InternalEntities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Hosting;
 
 namespace Demoulas.ProfitSharing.Services.HostedServices;
-public sealed class PayClassificationHostedService : BaseCacheHostedService<PayClassificationResponseCache>
+public sealed class PayClassificationHostedService : BaseCacheHostedService<LookupTableCache<byte>>
 {
     private readonly IProfitSharingDataContextFactory _contextFactory;
     protected override string BaseKeyName => "ACS";
 
-    protected override ushort RefreshSeconds { get; set; } = 3600; // Hourly refresh
+    protected override ushort RefreshSeconds { get; set; } = 7200; // Every two hours refresh
 
     public PayClassificationHostedService(IHostEnvironment hostEnvironment,
         IDistributedCache distributedCache,
@@ -22,22 +22,22 @@ public sealed class PayClassificationHostedService : BaseCacheHostedService<PayC
     }
 
 
-    public override Task<IEnumerable<PayClassificationResponseCache>> GetDataToUpdateCacheAsync(CacheDataDictionary cdd, CancellationToken cancellation = default)
+    public override Task<IEnumerable<LookupTableCache<byte>>> GetDataToUpdateCacheAsync(CacheDataDictionary cdd, CancellationToken cancellation = default)
     {
         return GetAllPayClassifications(cancellationToken: cancellation);
     }
 
-    public override Task<IEnumerable<PayClassificationResponseCache>> GetInitialDataToCacheAsync(CancellationToken cancellation = default)
+    public override Task<IEnumerable<LookupTableCache<byte>>> GetInitialDataToCacheAsync(CancellationToken cancellation = default)
     {
         return GetAllPayClassifications(cancellationToken: cancellation);
     }
 
-    private async Task<IEnumerable<PayClassificationResponseCache>> GetAllPayClassifications(CancellationToken cancellationToken)
+    private async Task<IEnumerable<LookupTableCache<byte>>> GetAllPayClassifications(CancellationToken cancellationToken)
     {
         return await _contextFactory.UseReadOnlyContext(func: context =>
         {
             return context.PayClassifications
-                .Select(selector: c => new PayClassificationResponseCache
+                .Select(selector: c => new LookupTableCache<byte>
                 {
                     Id = c.Id,
                     Name = c.Name

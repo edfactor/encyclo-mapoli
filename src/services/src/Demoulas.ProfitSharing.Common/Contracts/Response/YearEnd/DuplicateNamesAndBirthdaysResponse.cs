@@ -2,7 +2,7 @@
 public class DuplicateNamesAndBirthdaysResponse
 {
     public required int BadgeNumber { get; set; }
-    public required long SSN { get; set; }
+    public required long Ssn { get; set; }
     public string? Name { get; set; }
     public required DateOnly DateOfBirth { get; set; }
     public required AddressResponseDto Address { get; set; }

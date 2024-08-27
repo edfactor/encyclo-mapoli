@@ -6,11 +6,12 @@
 #
 # ------------------------------------------------------------------------
 
-pipelines:
-  branches:
-    master:
-      - step: &build-and-test
-          name: Build and Test
+image: mcr.microsoft.com/dotnet/sdk:8.0
+
+definitions:
+  steps:
+    build-and-test-backend: &build-and-test-backend
+          name: Build and Test Backend API
           runs-on:
             - windows
             - self.hosted
@@ -21,15 +22,145 @@ pipelines:
             - $env:NUGET_ORG="https://api.nuget.org/v3/index.json"
             - dotnet workload update --source $env:NUGET_ORG
             - dotnet restore src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
-            - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml" -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
-            - powershell -File generateBuildInfo.ps1
+            - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml" -p:RestoreAdditionalProjectSources=$env:NUGET_ORG            
           artifacts:
             - test-reports/**
             - build/**
-            - publishOutput/**
+
+    test-frontend: &test-frontend
+          name:  Build and Test Frontend UI
+          runs-on:
+           - windows
+           - self.hosted
+           - appt125
+          script:
+           - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
+          artifacts:
+            - build/**
+   
+    create-api-artifacts: &create-api-artifacts
+      name: Create API Artifacts      
+      runs-on:
+        - windows
+        - self.hosted
+        - appt125
+      artifacts:
+        - dist\**
+      script:
+        - dotnet tool update --global Demoulas.Common.Build.Cli
+        - Write-Host ${env:BITBUCKET_BUILD_NUMBER}
+        - Write-Host ${env:BITBUCKET_BRANCH}
+        - Write-Host ${env:BITBUCKET_COMMIT}
+        - Write-Host $(Get-Location)
+        - Write-Host $(Get-ChildItem)
+        - New-Item -ItemType Directory -Path "dist"
+        
+        - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.Api -c Release -p:PublishProfile=FolderProfile -o .\publishOutput
+        
+        - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
+        - Copy-Item -Path ".buildinfo.json" -Destination ".\publishOutput\"
+        
+        - Compress-Archive -Path .\publishOutput\* -DestinationPath .\dist\Demoulas.ProfitSharing.Api.zip -Force
+
+    create-frontend-artifact-qa: &create-frontend-artifact-qa
+      name: Create FrontEnd Artifacts (QA)     
+      runs-on:
+        - windows
+        - self.hosted
+        - appt125
+      artifacts:
+        - dist\**
+      script:
+        - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
+        - ${env:ENV} = "qa"
+        - cd .\src\UI
+        - install --legacy-peer-deps;
+        - ${env:NPM} run build:${env:ENV}
+        - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.${env:ENV}.zip" -Force        
+
+    create-frontend-artifact-uat: &create-frontend-artifact-uat
+      name: Create FrontEnd Artifacts (UAT)     
+      runs-on:
+        - windows
+        - self.hosted
+        - appt125
+      artifacts:
+        - dist\**
+      script:
+        - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
+        - ${env:ENV} = "uat"
+        - cd .\src\UI
+        - install --legacy-peer-deps;
+        - ${env:NPM} run build:${env:ENV}
+        - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.$env:ENV.zip" -Force        
+
+    create-frontend-artifact-prod: &create-frontend-artifact-prod
+      name: Create FrontEnd Artifacts (PROD)     
+      runs-on:
+        - windows
+        - self.hosted
+        - appt125
+      artifacts:
+        - dist\**
+      script:
+        - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
+        - ${env:ENV} = "prod"
+        - cd .\src\UI
+        - install --legacy-peer-deps;
+        - ${env:NPM} run build:${env:ENV}
+        - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.$env:ENV.zip" -Force        
+
+
+pipelines:
+  branches:
+    master:
+      - parallel:
+          - step: *build-and-test-backend
+          - step: *test-frontend
+      - parallel:
+          - step: *create-api-artifacts
+          # - step: *create-frontend-artifact-qa
+          # - step: *create-frontend-artifact-uat
+          # - step: *create-frontend-artifact-prod
+           # Deployment Stage
+      
+      - step:
+          name: "Application Deployment"
+          runs-on:
+            - windows
+            - self.hosted
+            - appt125
+          deployment: QA
+          trigger: "manual"
+      #     script:
+      #       - $env:NUGET_ORG="https://api.nuget.org/v3/index.json"
+      #       - echo "Upgrading Database..."
+      #       - dotnet tool update --global dotnet-ef --add-source $env:NUGET_ORG   
+      #       - Write-Host $(Get-Location)
+      #       - Write-Host $(Get-ChildItem) 
+      #       - New-Item -Path .\publish -ItemType Directory
+      #       - Expand-Archive -Path .\dist\Demoulas.ProfitSharing.Api.zip -DestinationPath .\publish
+      #       - dotnet ef database update --assembly .\publish\Demoulas.ProfitSharing.Data.dll --context ProfitSharingDbContext --connection "${env:ConnectionStrings_ProfitSharing_QA}"
+
+      # - step:
+      #     name: "Application Deployment"
+      #     runs-on:
+      #       - windows
+      #       - self.hosted
+      #       - appt125
+          script:
+            - echo "Deploying application..."
+            - $env:API_SERVER_QA = "appt23d"            
+            - powershell .\scripts\webDeploy.ps1 QA $env:API_SERVER_QA
+   
+  
     develop:
-      - step: *build-and-test
+      - parallel:
+          - step: *build-and-test-backend
+          - step: *test-frontend
 
   pull-requests:
     '**':
-      - step: *build-and-test
+      - parallel:
+          - step: *build-and-test-backend
+          - step: *test-frontend

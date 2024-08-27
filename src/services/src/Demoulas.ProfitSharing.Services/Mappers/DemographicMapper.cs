@@ -33,11 +33,11 @@ public partial class DemographicMapper
         _terminationCodeMapper = terminationCodeMapper;
     }
 
-    public partial IEnumerable<DemographicsRequestDto> MapToRequest(IEnumerable<Demographic> sources);
+    public partial IEnumerable<DemographicsRequest> MapToRequest(IEnumerable<Demographic> sources);
 
-    public DemographicsRequestDto MapToRequest(Demographic source)
+    public DemographicsRequest MapToRequest(Demographic source)
     {
-        DemographicsRequestDto target = new DemographicsRequestDto
+        DemographicsRequest target = new DemographicsRequest
         {
             SSN = source.SSN,
             OracleHcmId = source.OracleHcmId,
@@ -78,7 +78,7 @@ public partial class DemographicMapper
         {
             SSN = MaskSsn(source.SSN),
             OracleHcmId = source.OracleHcmId,
-            FullName = source.FullName ?? throw new ArgumentNullException(nameof(source.FullName)),
+            FullName = source.FullName ?? $"{source.FirstName} {source.LastName}",
             LastName = source.LastName,
             FirstName = source.FirstName,
             StoreNumber = source.StoreNumber,
@@ -101,9 +101,9 @@ public partial class DemographicMapper
         return target;
     }
 
-    public partial IEnumerable<Demographic> Map(IEnumerable<DemographicsRequestDto> sources);
+    public partial IEnumerable<Demographic> Map(IEnumerable<DemographicsRequest> sources);
 
-    public Demographic Map(DemographicsRequestDto source)
+    public Demographic Map(DemographicsRequest source)
     {
         return new Demographic
         {
