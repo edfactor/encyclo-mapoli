@@ -79,7 +79,6 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
 
         _ = builder.Property(d => d.CertificateIssuedLastYear)
             .HasColumnType("NUMBER(1)")
-            .HasDefaultValue(0)
             .HasColumnName("CERTIFICATE_ISSUED_LAST_YEAR");
 
         _ = builder.Property(e => e.PsCertificateIssuedDate)
