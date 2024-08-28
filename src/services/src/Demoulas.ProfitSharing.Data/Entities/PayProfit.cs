@@ -129,7 +129,7 @@ public sealed class PayProfit
     public required BeneficiaryType? BeneficiaryType { get; set; }
 
     /// <summary>
-    /// 0=NOT New in plan last year, 1=New last year    
+    /// 0=NOT New in plan last year, 1=New last year
     /// </summary>
     /// 
     public byte EmployeeTypeId { get; set; }
@@ -147,8 +147,4 @@ public sealed class PayProfit
     /// executive earnings
     /// </summary>
     public decimal IncomeExecutive { get; set; }
-
-    public Demographic? Demographic { get; set; }
-
-    public Beneficiary? Beneficiary { get; set; }
 }

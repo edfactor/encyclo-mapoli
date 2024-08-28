@@ -154,15 +154,5 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
             .WithMany(p => p.Profits)
             .HasForeignKey(d => d.ZeroContributionReasonId)
             .OnDelete(DeleteBehavior.NoAction);
-
-       _ = builder.HasOne(p => p.Demographic).WithMany(p => p.PayProfits)
-           .HasForeignKey(p => p.Ssn)
-           .HasPrincipalKey(d=> d.Ssn)
-           .OnDelete(DeleteBehavior.NoAction);
-
-        _ = builder.HasOne(p => p.Beneficiary).WithMany(p => p.PayProfits)
-            .HasForeignKey(p => p.Ssn)
-            .HasPrincipalKey(d => d.Ssn)
-            .OnDelete(DeleteBehavior.NoAction);
     }
 }
