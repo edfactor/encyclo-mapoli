@@ -25,9 +25,4 @@ public sealed class Beneficiary
 
     public List<PayProfit>? PayProfits { get; set; }
 
-    public string GetFullName()
-    {
-        return $"{LastName}, {FirstName} {MiddleName}";
-    }
-
 }
