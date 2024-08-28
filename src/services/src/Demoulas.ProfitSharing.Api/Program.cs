@@ -23,7 +23,7 @@ if (!builder.Environment.IsTestEnvironment())
 ElasticSearchConfig smartConfig = new ElasticSearchConfig();
 builder.Configuration.Bind("Logging:Smart", smartConfig);
 
-builder.SetDefaultLoggerConfiguration(smartConfig);
+await builder.SetDefaultLoggerConfigurationAsync(smartConfig);
 
 builder.Services.AddCors(options =>
 {
