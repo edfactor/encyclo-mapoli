@@ -212,6 +212,7 @@ csharp_style_prefer_extended_property_pattern = true:suggestion
 dotnet_diagnostic.CA2016.severity = warning
 dotnet_diagnostic.IDE0058.severity = suggestion
 dotnet_diagnostic.RCS1225.severity = warning
+dotnet_diagnostic.IDE0060.severity = none
 
 # Visual Basic files
 [*.vb]
