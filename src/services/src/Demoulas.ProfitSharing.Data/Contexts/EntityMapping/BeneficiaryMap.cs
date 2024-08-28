@@ -58,9 +58,5 @@ public sealed class BeneficiaryMap : IEntityTypeConfiguration<Beneficiary>
 
        _ = builder.Property(e => e.Percent).IsRequired().HasColumnType("numeric(3,0)").HasPrecision(3);
        _ = builder.Property(e => e.Relationship).HasMaxLength(10);
-
-       _ = builder.HasMany(p => p.PayProfits)
-           .WithOne()
-           .HasForeignKey(p => p.Ssn);
     }
 }
