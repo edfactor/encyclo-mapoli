@@ -93,9 +93,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasKey("Psn")
                         .HasName("PK_BENEFICIARY");
 
-                    b.HasAlternateKey("Ssn")
-                        .HasName("AK_BENEFICIARIES_SSN");
-
                     b.HasIndex("KindId")
                         .HasDatabaseName("IX_BENEFICIARY_KINDID");
 
@@ -1679,9 +1676,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasKey("OracleHcmId")
                         .HasName("PK_DEMOGRAPHIC");
-
-                    b.HasAlternateKey("Ssn")
-                        .HasName("AK_DEMOGRAPHIC_SSN");
 
                     b.HasIndex("DepartmentId")
                         .HasDatabaseName("IX_DEMOGRAPHIC_DEPARTMENTID");
@@ -29987,21 +29981,19 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_PAY_PROFIT_ENROLLMENT_ENROLLMENTID");
 
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Beneficiary", "Beneficiary")
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Demographic", null)
                         .WithMany("PayProfits")
                         .HasForeignKey("Ssn")
-                        .HasPrincipalKey("Ssn")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_PAY_PROFIT_BENEFICIARIES_SSN");
-
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Demographic", "Demographic")
-                        .WithMany("PayProfits")
-                        .HasForeignKey("Ssn")
-                        .HasPrincipalKey("Ssn")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_PAY_PROFIT_DEMOGRAPHIC_SSN");
+
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Beneficiary", null)
+                        .WithMany("PayProfits")
+                        .HasForeignKey("Ssn")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_PAY_PROFIT_BENEFICIARY_SSN");
 
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.ZeroContributionReason", "ZeroContributionReason")
                         .WithMany("Profits")
@@ -30009,11 +30001,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("FK_PAY_PROFIT_ZEROCONTRIBUTIONREASON_ZEROCONTRIBUTIONREASONID");
 
-                    b.Navigation("Beneficiary");
-
                     b.Navigation("BeneficiaryType");
-
-                    b.Navigation("Demographic");
 
                     b.Navigation("EmployeeType");
 
