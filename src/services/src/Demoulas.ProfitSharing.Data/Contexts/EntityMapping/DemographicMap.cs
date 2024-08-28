@@ -19,7 +19,8 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
         _ = builder.Property(e => e.Ssn)
             .HasPrecision(9)
             .IsRequired()
-            .ValueGeneratedNever();
+            .ValueGeneratedNever()
+            .HasColumnName("SSN");
 
         _ = builder.Property(e => e.BadgeNumber)
             .HasPrecision(7)
