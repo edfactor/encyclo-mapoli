@@ -12,7 +12,7 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    [Migration("20240828130104_initialMigration")]
+    [Migration("20240828130434_initialMigration")]
     partial class initialMigration
     {
         /// <inheritdoc />
@@ -29057,7 +29057,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("STATE_TAXES");
 
                     b.Property<string>("TaxCodeId")
-                        .IsRequired()
                         .HasColumnType("NVARCHAR2(1)")
                         .HasColumnName("TAX_CODE_ID");
 
@@ -30026,7 +30025,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .WithMany()
                         .HasForeignKey("TaxCodeId")
                         .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
                         .HasConstraintName("FK_PROFIT_DETAIL_TAXCODES_TAX_CODE_ID");
 
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.ZeroContributionReason", "ZeroContributionReason")

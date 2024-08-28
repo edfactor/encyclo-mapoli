@@ -574,7 +574,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     ZERO_CONTRIBUTION_REASON_ID = table.Column<byte>(type: "NUMBER(3)", nullable: true),
                     FEDERAL_TAXES = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
                     STATE_TAXES = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
-                    TAX_CODE_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
+                    TAX_CODE_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: true),
                     SSN = table.Column<long>(type: "NUMBER(9)", precision: 9, nullable: false),
                     DISTRIBUTION_SEQUENCE = table.Column<int>(type: "NUMBER(10)", nullable: false)
                 },
