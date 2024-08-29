@@ -341,7 +341,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     AMOUNT = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
                     EARNINGS = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
                     SECONDARY_EARNINGS = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
-                    PERCENT = table.Column<decimal>(type: "DECIMAL(3)", precision: 3, nullable: false),
+                    PERCENT = table.Column<decimal>(type: "numeric(3,0)", precision: 3, nullable: false),
                     RELATIONSHIP = table.Column<string>(type: "NVARCHAR2(10)", maxLength: 10, nullable: true)
                 },
                 constraints: table =>
@@ -436,7 +436,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     DECEASED = table.Column<bool>(type: "NUMBER(1)", nullable: false),
                     GENDER_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: true),
                     QDRO = table.Column<bool>(type: "NUMBER(1)", nullable: false),
-                    MEMO = table.Column<string>(type: "NVARCHAR2(2000)", nullable: true),
+                    MEMO = table.Column<string>(type: "NVARCHAR2(25)", maxLength: 25, nullable: true),
                     ROTH_IRA = table.Column<bool>(type: "NUMBER(1)", nullable: false)
                 },
                 constraints: table =>

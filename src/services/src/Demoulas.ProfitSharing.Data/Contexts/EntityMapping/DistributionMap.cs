@@ -10,7 +10,7 @@ internal sealed class DistributionMap : IEntityTypeConfiguration<Distribution>
     {
         builder.ToTable("DISTRIBUTION");
         builder.HasKey(d => new { SSN = d.Ssn, d.SequenceNumber });
-        builder.Property(d => d.Ssn).HasPrecision(9);
+        builder.Property(d => d.Ssn).HasColumnName("SSN").HasPrecision(9);
         builder.Property(d => d.SequenceNumber).HasColumnName("SEQUENCE_NUMBER");
         builder.Property(d => d.EmployeeName).HasMaxLength(25).HasColumnName("EMPLOYEE_NAME");
         builder.Property(d => d.FrequencyId).HasColumnName("FREQUENCY_ID");
@@ -63,10 +63,11 @@ internal sealed class DistributionMap : IEntityTypeConfiguration<Distribution>
         builder.Property(d => d.StateTaxAmount).HasPrecision(9, 2).HasColumnName("STATE_TAX_AMOUNT");
         builder.Property(d => d.CheckAmount).HasPrecision(9, 2).HasColumnName("CHECK_AMOUNT");
         builder.Property(d => d.TaxCodeId).HasColumnName("TAX_CODE_ID");
-        builder.Property(d => d.Deceased).HasColumnType("NUMBER(1)");
+        builder.Property(d => d.Deceased).HasColumnName("DECEASED").HasColumnType("NUMBER(1)");
         builder.Property(d => d.GenderId).HasColumnName("GENDER_ID");
         builder.Property(d => d.QualifiedDomesticRelationsOrder).HasColumnType("NUMBER(1)").HasColumnName("QDRO");
         builder.Property(d => d.RothIra).HasColumnType("NUMBER(1)").HasColumnName("ROTH_IRA");
+        builder.Property(d => d.Memo).HasColumnName("MEMO").HasMaxLength(25);
 
         builder.HasOne(d => d.Gender).WithMany().HasForeignKey(d => d.GenderId);
         builder.HasOne(d => d.Frequency).WithMany().HasForeignKey(d => d.FrequencyId);

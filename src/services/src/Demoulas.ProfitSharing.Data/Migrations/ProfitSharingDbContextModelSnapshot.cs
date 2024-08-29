@@ -72,7 +72,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.Property<decimal>("Percent")
                         .HasPrecision(3)
-                        .HasColumnType("DECIMAL(3)")
+                        .HasColumnType("numeric(3,0)")
                         .HasColumnName("PERCENT");
 
                     b.Property<string>("Relationship")
@@ -1866,7 +1866,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("GROSS_AMOUNT");
 
                     b.Property<string>("Memo")
-                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasMaxLength(25)
+                        .HasColumnType("NVARCHAR2(25)")
                         .HasColumnName("MEMO");
 
                     b.Property<string>("PayeeName")
