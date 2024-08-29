@@ -52,8 +52,8 @@ public sealed class BeneficiaryMap : IEntityTypeConfiguration<Beneficiary>
        _ = builder.Property(e => e.Earnings).HasPrecision(9, 2).HasColumnName("EARNINGS");
        _ = builder.Property(e => e.SecondaryEarnings).HasPrecision(9, 2).HasColumnName("SECONDARY_EARNINGS");
 
-       _ = builder.Property(e => e.Percent).IsRequired().HasPrecision(3);
-       _ = builder.Property(e => e.Relationship).HasMaxLength(10);
+       _ = builder.Property(e => e.Percent).HasColumnName("PERCENT").IsRequired().HasPrecision(3);
+       _ = builder.Property(e => e.Relationship).HasColumnName("RELATIONSHIP").HasMaxLength(10);
 
 
 

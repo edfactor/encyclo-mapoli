@@ -12,8 +12,8 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    [Migration("20240829142007_Testing")]
-    partial class Testing
+    [Migration("20240829145228_initialMigration")]
+    partial class initialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -75,7 +75,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.Property<decimal>("Percent")
                         .HasPrecision(3)
-                        .HasColumnType("numeric(3,0)")
+                        .HasColumnType("DECIMAL(3)")
                         .HasColumnName("PERCENT");
 
                     b.Property<string>("Relationship")
@@ -28778,10 +28778,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("CONTRIBUTION_AMOUNT_LAST_YEAR");
 
-                    b.Property<long?>("DemographicOracleHcmId")
-                        .HasColumnType("NUMBER(15)")
-                        .HasColumnName("DEMOGRAPHICORACLEHCMID");
-
                     b.Property<decimal>("EarningLastYear")
                         .HasPrecision(9, 2)
                         .HasColumnType("DECIMAL(9,2)")
@@ -28905,9 +28901,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasIndex("BeneficiaryTypeId")
                         .HasDatabaseName("IX_PAY_PROFIT_BENEFICIARYTYPEID");
-
-                    b.HasIndex("DemographicOracleHcmId")
-                        .HasDatabaseName("IX_PAY_PROFIT_DEMOGRAPHICORACLEHCMID");
 
                     b.HasIndex("EmployeeTypeId")
                         .HasDatabaseName("IX_PAY_PROFIT_EMPLOYEETYPEID");
@@ -29973,12 +29966,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_PAY_PROFIT_BENEFICIARYTYPES_BENEFICIARYTYPEID");
 
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Demographic", null)
-                        .WithMany("PayProfits")
-                        .HasForeignKey("DemographicOracleHcmId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_PAY_PROFIT_DEMOGRAPHIC_DEMOGRAPHICORACLEHCMID");
-
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.EmployeeType", "EmployeeType")
                         .WithMany("Profits")
                         .HasForeignKey("EmployeeTypeId")
@@ -30044,11 +30031,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BeneficiaryType", b =>
                 {
                     b.Navigation("Profits");
-                });
-
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Demographic", b =>
-                {
-                    b.Navigation("PayProfits");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Department", b =>
