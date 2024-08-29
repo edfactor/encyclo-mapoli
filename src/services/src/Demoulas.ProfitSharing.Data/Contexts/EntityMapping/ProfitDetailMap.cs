@@ -9,7 +9,7 @@ internal sealed class ProfitDetailMap : IEntityTypeConfiguration<ProfitDetail>
     {
         _ = builder.ToTable("PROFIT_DETAIL");
 
-        _ = builder.Property(e => e.Id).ValueGeneratedOnAdd();
+        _ = builder.Property(e => e.Id).HasColumnName("ID").ValueGeneratedOnAdd();
         _ = builder.Property(x=>x.ProfitYear).IsRequired().HasColumnName("PROFIT_YEAR");
         _ = builder.Property(x => x.ProfitYearIteration).IsRequired().HasColumnName("PROFIT_YEAR_ITERATION");
         _ = builder.Property(x => x.ProfitCodeId).IsRequired().HasColumnName("PROFIT_CODE_ID");
@@ -25,7 +25,7 @@ internal sealed class ProfitDetailMap : IEntityTypeConfiguration<ProfitDetail>
         _ = builder.Property(x => x.StateTaxes).IsRequired().HasPrecision(9, 2).HasColumnName("STATE_TAXES");
         _ = builder.HasOne(x=> x.TaxCode).WithMany().HasForeignKey(t => t.TaxCodeId);
         _ = builder.Property(x => x.TaxCodeId).HasColumnName("TAX_CODE_ID");
-        _ = builder.Property(x => x.Ssn).HasPrecision(9).IsRequired();
+        _ = builder.Property(x => x.Ssn).HasColumnName("SSN").HasPrecision(9).IsRequired();
         _ = builder.Property(x => x.DistributionSequence).HasColumnName("DISTRIBUTION_SEQUENCE");
 
     }

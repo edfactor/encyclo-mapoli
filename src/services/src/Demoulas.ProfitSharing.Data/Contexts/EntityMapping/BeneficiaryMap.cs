@@ -12,9 +12,9 @@ public sealed class BeneficiaryMap : IEntityTypeConfiguration<Beneficiary>
         _ = builder.HasKey(c => c.Psn);
         _ = builder.ToTable("BENEFICIARY");
 
-        _ = builder.Property(c => c.Psn).HasColumnName("PSN").IsRequired().HasPrecision(11).ValueGeneratedNever();
+        _ = builder.Property(c => c.Psn).IsRequired().HasPrecision(11).ValueGeneratedNever().HasColumnName("PSN");
 
-        _ = builder.Property(c => c.Ssn).HasColumnName("SSN").IsRequired().HasPrecision(9);
+        _ = builder.Property(c => c.Ssn).IsRequired().HasPrecision(9).HasColumnName("SSN");
 
         _ = builder.Property(b => b.FirstName).IsRequired().HasMaxLength(30).HasColumnName("FIRST_NAME");
         _ = builder.Property(b => b.MiddleName).HasMaxLength(30).HasColumnName("MIDDLE_NAME");
@@ -47,16 +47,22 @@ public sealed class BeneficiaryMap : IEntityTypeConfiguration<Beneficiary>
             contact.Property(a => a.EmailAddress).HasMaxLength(50).HasColumnName("EMAIL_ADDRESS");
         });
 
-        _ = builder.HasOne(d => d.Kind)
-            .WithMany(p => p.Beneficiaries)
-            .HasForeignKey(d => d.KindId);
-
        _ = builder.Property(e => e.Distribution).HasPrecision(9, 2).HasColumnName("DISTRIBUTION");
        _ = builder.Property(e => e.Amount).HasPrecision(9, 2).HasColumnName("AMOUNT");
        _ = builder.Property(e => e.Earnings).HasPrecision(9, 2).HasColumnName("EARNINGS");
        _ = builder.Property(e => e.SecondaryEarnings).HasPrecision(9, 2).HasColumnName("SECONDARY_EARNINGS");
 
-       _ = builder.Property(e => e.Percent).IsRequired().HasColumnType("numeric(3,0)").HasPrecision(3);
-       _ = builder.Property(e => e.Relationship).HasMaxLength(10);
+       _ = builder.Property(e => e.Percent).HasColumnName("PERCENT")
+           .HasColumnType("numeric(3,0)")
+           .HasPrecision(3)
+           .IsRequired();
+       
+       _ = builder.Property(e => e.Relationship).HasColumnName("RELATIONSHIP").HasMaxLength(10);
+
+
+
+       _ = builder.HasOne(d => d.Kind)
+           .WithMany(p => p.Beneficiaries)
+           .HasForeignKey(d => d.KindId);
     }
 }

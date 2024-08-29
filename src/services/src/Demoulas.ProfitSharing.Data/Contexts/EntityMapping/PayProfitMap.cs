@@ -20,7 +20,8 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
 
         _ = builder.Property(e => e.Ssn)
             .HasPrecision(9)
-            .IsRequired();
+            .IsRequired()
+            .HasColumnName("SSN");
 
         _ = builder.Property(e => e.HoursCurrentYear)
             .HasPrecision(6, 2)

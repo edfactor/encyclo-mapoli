@@ -1866,7 +1866,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("GROSS_AMOUNT");
 
                     b.Property<string>("Memo")
-                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasMaxLength(25)
+                        .HasColumnType("NVARCHAR2(25)")
                         .HasColumnName("MEMO");
 
                     b.Property<string>("PayeeName")
@@ -28758,10 +28759,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(7)")
                         .HasColumnName("BADGE_NUMBER");
 
-                    b.Property<long?>("BeneficiaryPsn")
-                        .HasColumnType("NUMBER(11)")
-                        .HasColumnName("BENEFICIARYPSN");
-
                     b.Property<byte>("BeneficiaryTypeId")
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("BENEFICIARY_ID");
@@ -28778,10 +28775,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasPrecision(9, 2)
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("CONTRIBUTION_AMOUNT_LAST_YEAR");
-
-                    b.Property<long?>("DemographicOracleHcmId")
-                        .HasColumnType("NUMBER(15)")
-                        .HasColumnName("DEMOGRAPHICORACLEHCMID");
 
                     b.Property<decimal>("EarningLastYear")
                         .HasPrecision(9, 2)
@@ -28904,14 +28897,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasKey("BadgeNumber")
                         .HasName("PK_PAY_PROFIT");
 
-                    b.HasIndex("BeneficiaryPsn")
-                        .HasDatabaseName("IX_PAY_PROFIT_BENEFICIARYPSN");
-
                     b.HasIndex("BeneficiaryTypeId")
                         .HasDatabaseName("IX_PAY_PROFIT_BENEFICIARYTYPEID");
-
-                    b.HasIndex("DemographicOracleHcmId")
-                        .HasDatabaseName("IX_PAY_PROFIT_DEMOGRAPHICORACLEHCMID");
 
                     b.HasIndex("EmployeeTypeId")
                         .HasDatabaseName("IX_PAY_PROFIT_EMPLOYEETYPEID");
@@ -29970,24 +29957,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.PayProfit", b =>
                 {
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Beneficiary", null)
-                        .WithMany("PayProfits")
-                        .HasForeignKey("BeneficiaryPsn")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_PAY_PROFIT_BENEFICIARIES_BENEFICIARYPSN");
-
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.BeneficiaryType", "BeneficiaryType")
                         .WithMany("Profits")
                         .HasForeignKey("BeneficiaryTypeId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_PAY_PROFIT_BENEFICIARYTYPES_BENEFICIARYTYPEID");
-
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Demographic", null)
-                        .WithMany("PayProfits")
-                        .HasForeignKey("DemographicOracleHcmId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_PAY_PROFIT_DEMOGRAPHIC_DEMOGRAPHICORACLEHCMID");
 
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.EmployeeType", "EmployeeType")
                         .WithMany("Profits")
@@ -30046,11 +30021,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Navigation("ZeroContributionReason");
                 });
 
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Beneficiary", b =>
-                {
-                    b.Navigation("PayProfits");
-                });
-
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BeneficiaryKind", b =>
                 {
                     b.Navigation("Beneficiaries");
@@ -30059,11 +30029,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BeneficiaryType", b =>
                 {
                     b.Navigation("Profits");
-                });
-
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Demographic", b =>
-                {
-                    b.Navigation("PayProfits");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Department", b =>
