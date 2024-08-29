@@ -113,7 +113,7 @@ definitions:
 
 pipelines:
   branches:
-    master:
+    release:
       - parallel:
           - step: *build-and-test-backend
           - step: *test-frontend
