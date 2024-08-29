@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿#if DEBUG || RUSS
+using System.Diagnostics;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.UnitTests.Base;
@@ -36,3 +37,4 @@ public class DatabaseDataTest : IClassFixture<ApiTestBase<Program>>
         Assert.True(true);
     }
 }
+#endif
