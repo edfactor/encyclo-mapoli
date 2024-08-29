@@ -22,7 +22,4 @@ public sealed class Beneficiary
     public decimal SecondaryEarnings { get; set; }
     public required decimal Percent { get; set; }
     public string? Relationship { get; set; }
-
-    public List<PayProfit>? PayProfits { get; set; }
-
 }

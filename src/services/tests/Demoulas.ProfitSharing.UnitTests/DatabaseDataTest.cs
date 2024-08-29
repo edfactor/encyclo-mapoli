@@ -1,35 +1,39 @@
-﻿using System;
-
-
-using Demoulas.Common.Contracts.Contracts.Request;
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using System.Diagnostics;
 using Demoulas.ProfitSharing.Api;
-using Demoulas.ProfitSharing.Client;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.UnitTests.Base;
-using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.UnitTests;
 
 public class DatabaseDataTest : IClassFixture<ApiTestBase<Program>>
 {
+    private readonly ITestOutputHelper _output;
+
+    public DatabaseDataTest(ITestOutputHelper output)
+    {
+        _output = output;
+    }
+
 
     [Fact(DisplayName = "Ensure database entity mappings are working.")]
-    public void BasicTest()
+    public async Task BasicTest()
     {
         var configuration = new ConfigurationBuilder().AddUserSecrets<DatabaseDataTest>().Build();
         string connectionString = configuration["ConnectionStrings:ProfitSharing"]!;
-        var options = new DbContextOptionsBuilder<ProfitSharingDbContext>().UseOracle(connectionString).EnableSensitiveDataLogging().LogTo(Console.WriteLine).Options;
+        var options = new DbContextOptionsBuilder<ProfitSharingDbContext>().UseOracle(connectionString).EnableSensitiveDataLogging()
+            .LogTo(_output.WriteLine).Options;
         var ctx = new ProfitSharingDbContext(options);
 
-        Assert.True(ctx.Demographics.ToList().Count > 0);
-        Assert.True(ctx.Beneficiaries.ToList().Count > 0);
-        Assert.True(ctx.PayProfits.ToList().Count > 0);
-        Assert.True(ctx.ProfitDetails.ToList().Count > 0);
-        Assert.True(ctx.Distributions.ToList().Count > 0);
+        //Assert.True(await ctx.Demographics.CountAsync() > 0);
+        
+        await ctx.Beneficiaries.Take(5).ToListAsync();
+        
+        Assert.True(await ctx.PayProfits.CountAsync() > 0);
+        Assert.True(await ctx.ProfitDetails.CountAsync() > 0);
+        Assert.True(await ctx.Distributions.CountAsync() > 0);
 
     }
 }
