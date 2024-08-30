@@ -5,6 +5,7 @@
   <ItemGroup>
     <PackageVersion Include="Aspire.Hosting.AppHost" Version="8.2.0" />
     <PackageVersion Include="Aspire.Oracle.EntityFrameworkCore" Version="8.2.0" />
+    <PackageVersion Include="Demoulas.Util" Version="2.3.1" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="8.2.0" />
     <PackageVersion Include="CsvHelper" Version="33.0.1" />
     <PackageVersion Include="Demoulas.Common.Api" Version="1.2.0" />

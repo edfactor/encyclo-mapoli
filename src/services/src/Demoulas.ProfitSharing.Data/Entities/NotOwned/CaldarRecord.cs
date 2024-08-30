@@ -1,8 +1,9 @@
 ﻿namespace Demoulas.ProfitSharing.Data.Entities.NotOwned;
 public sealed class CaldarRecord
 {
-    public int AccWkendN { get; set; }
-    public int AccApWkend { get; set; }
+    public DateOnly WeekEndingDate { get; set; }
+    public DateOnly WeekDate { get; set; }
+    public DateOnly AccApWkend { get; set; }
     public int? AccWeekN { get; set; }
     public int? AccPeriod { get; set; }
     public int? AccQuarter { get; set; }
@@ -15,6 +16,5 @@ public sealed class CaldarRecord
     public int? AccCln7XPeriod { get; set; }
     public int? AccCln6XWeek { get; set; }
     public int? AccCln6XPeriod { get; set; }
-    public DateOnly WeekendingDate { get; set; }
     public long? AccAltKeyNum { get; set; }
 }

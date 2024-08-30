@@ -11,15 +11,17 @@ internal sealed class CaldarRecordMap : IEntityTypeConfiguration<CaldarRecord>
     {
         builder.ToTable("CALDAR_RECORD");
 
-        builder.HasKey(e => e.AccWkendN)
+        builder.HasKey(e => e.WeekEndingDate)
             .HasName("PK_CALDAR_RECORD");
 
-        builder.Property(e => e.AccWkendN)
+        builder.Property(e => e.WeekEndingDate)
             .HasColumnName("ACC_WKEND_N")
+            .HasConversion<IntegerToDateOnlyConverterYyMMdd>()
             .IsRequired();
 
         builder.Property(e => e.AccApWkend)
-            .HasColumnName("ACC_APWKEND");
+            .HasColumnName("ACC_APWKEND")
+            .HasConversion<IntegerToDateOnlyConverterYyMMdd>();
 
         builder.Property(e => e.AccWeekN)
             .HasColumnName("ACC_WEEKN");
@@ -57,7 +59,7 @@ internal sealed class CaldarRecordMap : IEntityTypeConfiguration<CaldarRecord>
         builder.Property(e => e.AccCln6XPeriod)
             .HasColumnName("ACC_CLN6X_PERIOD");
 
-        builder.Property(e => e.WeekendingDate)
+        builder.Property(e => e.WeekDate)
             .HasColumnName("ACC_WKEND2_N")
             .HasConversion<IntegerToDateOnlyConverterYyyyMMdd>();
 
@@ -69,7 +71,7 @@ internal sealed class CaldarRecordMap : IEntityTypeConfiguration<CaldarRecord>
             .IsUnique()
             .HasDatabaseName("CALDAR_RECORD_ACC_APWKEND_N");
 
-        builder.HasIndex(e => e.WeekendingDate)
+        builder.HasIndex(e => e.WeekDate)
             .IsUnique()
             .HasDatabaseName("CALDAR_RECORD_ACC_WEDATE2");
 

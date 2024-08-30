@@ -9,6 +9,7 @@ using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Services.Extensions;
+using Demoulas.Util.Extensions;
 using MassTransit.Monitoring;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder();
