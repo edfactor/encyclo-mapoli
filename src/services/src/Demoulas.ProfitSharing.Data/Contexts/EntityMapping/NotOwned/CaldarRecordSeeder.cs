@@ -1,16 +1,15 @@
 ﻿
 using Demoulas.ProfitSharing.Data.Entities.NotOwned;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Globalization;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping.NotOwned;
 
 public static class CaldarRecordSeeder
 {
-    public static void Seed(EntityTypeBuilder<CaldarRecord> builder)
+    public static CaldarRecord[] Records => new []
     {
-        builder.HasData(
-
-            new CaldarRecord
+        new CaldarRecord
             {
                 AccWkendN = 41023,
                 AccApWkend = 41030,
@@ -26,7 +25,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 42,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20041023,
+                WeekendingDate = DateOnly.ParseExact("20041023", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -66
             },
 
@@ -46,7 +45,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 43,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20041030,
+                WeekendingDate = DateOnly.ParseExact("20041030", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -65
             },
 
@@ -66,7 +65,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 46,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20041120,
+                WeekendingDate = DateOnly.ParseExact("20041120", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -62
             },
 
@@ -86,7 +85,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 48,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20041204,
+                WeekendingDate = DateOnly.ParseExact("20041204", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -60
             },
 
@@ -106,7 +105,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 49,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20041211,
+                WeekendingDate = DateOnly.ParseExact("20041211", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -59
             },
 
@@ -126,7 +125,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 51,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20041225,
+                WeekendingDate = DateOnly.ParseExact("20041225", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -57
             },
 
@@ -146,7 +145,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 34,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20020824,
+                WeekendingDate = DateOnly.ParseExact("20020824", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -194
             },
 
@@ -166,7 +165,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 35,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20020831,
+                WeekendingDate = DateOnly.ParseExact("20020831", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -193
             },
 
@@ -186,7 +185,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 7,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20020216,
+                WeekendingDate = DateOnly.ParseExact("20020216", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -221
             },
 
@@ -206,7 +205,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 8,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20020223,
+                WeekendingDate = DateOnly.ParseExact("20020223", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -220
             },
 
@@ -226,7 +225,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 10,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20020309,
+                WeekendingDate = DateOnly.ParseExact("20020309", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -218
             },
 
@@ -246,7 +245,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 12,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20020323,
+                WeekendingDate = DateOnly.ParseExact("20020323", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -216
             },
 
@@ -266,7 +265,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 13,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20020330,
+                WeekendingDate = DateOnly.ParseExact("20020330", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -215
             },
 
@@ -286,7 +285,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 14,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20020406,
+                WeekendingDate = DateOnly.ParseExact("20020406", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -214
             },
 
@@ -306,7 +305,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 16,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20020420,
+                WeekendingDate = DateOnly.ParseExact("20020420", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -212
             },
 
@@ -326,7 +325,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 17,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20020427,
+                WeekendingDate = DateOnly.ParseExact("20020427", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -211
             },
 
@@ -346,7 +345,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 19,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20020511,
+                WeekendingDate = DateOnly.ParseExact("20020511", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -209
             },
 
@@ -366,7 +365,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 22,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20020601,
+                WeekendingDate = DateOnly.ParseExact("20020601", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -206
             },
 
@@ -386,7 +385,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 24,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20020615,
+                WeekendingDate = DateOnly.ParseExact("20020615", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -204
             },
 
@@ -406,7 +405,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 27,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20020706,
+                WeekendingDate = DateOnly.ParseExact("20020706", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -201
             },
 
@@ -426,7 +425,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 31,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20010804,
+                WeekendingDate = DateOnly.ParseExact("20010804", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -257
             },
 
@@ -446,7 +445,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 36,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20010908,
+                WeekendingDate = DateOnly.ParseExact("20010908", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -252
             },
 
@@ -466,7 +465,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 37,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20010915,
+                WeekendingDate = DateOnly.ParseExact("20010915", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -251
             },
 
@@ -486,7 +485,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 42,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20011020,
+                WeekendingDate = DateOnly.ParseExact("20011020", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -246
             },
 
@@ -506,7 +505,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 44,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20011103,
+                WeekendingDate = DateOnly.ParseExact("20011103", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -244
             },
 
@@ -526,7 +525,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 47,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20011124,
+                WeekendingDate = DateOnly.ParseExact("20011124", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -241
             },
 
@@ -546,7 +545,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 50,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20011215,
+                WeekendingDate = DateOnly.ParseExact("20011215", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -238
             },
 
@@ -566,7 +565,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 7,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20010217,
+                WeekendingDate = DateOnly.ParseExact("20010217", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -281
             },
 
@@ -586,7 +585,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 12,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20010324,
+                WeekendingDate = DateOnly.ParseExact("20010324", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -276
             },
 
@@ -606,7 +605,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 21,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20010526,
+                WeekendingDate = DateOnly.ParseExact("20010526", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -267
             },
 
@@ -626,7 +625,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 25,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20010623,
+                WeekendingDate = DateOnly.ParseExact("20010623", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -263
             },
 
@@ -646,7 +645,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 1,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20010106,
+                WeekendingDate = DateOnly.ParseExact("20010106", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -287
             },
 
@@ -666,7 +665,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 2,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20010113,
+                WeekendingDate = DateOnly.ParseExact("20010113", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -286
             },
 
@@ -686,7 +685,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 39,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20020928,
+                WeekendingDate = DateOnly.ParseExact("20020928", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -189
             },
 
@@ -706,7 +705,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 42,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20021019,
+                WeekendingDate = DateOnly.ParseExact("20021019", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -186
             },
 
@@ -726,7 +725,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 44,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20021102,
+                WeekendingDate = DateOnly.ParseExact("20021102", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -184
             },
 
@@ -746,7 +745,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 47,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20021123,
+                WeekendingDate = DateOnly.ParseExact("20021123", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -181
             },
 
@@ -766,7 +765,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 49,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20021207,
+                WeekendingDate = DateOnly.ParseExact("20021207", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -179
             },
 
@@ -786,7 +785,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 8,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20050226,
+                WeekendingDate = DateOnly.ParseExact("20050226", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -40
             },
 
@@ -806,7 +805,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 9,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20050305,
+                WeekendingDate = DateOnly.ParseExact("20050305", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -39
             },
 
@@ -826,7 +825,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 10,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20050312,
+                WeekendingDate = DateOnly.ParseExact("20050312", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -38
             },
 
@@ -846,7 +845,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 11,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20050319,
+                WeekendingDate = DateOnly.ParseExact("20050319", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -37
             },
 
@@ -866,7 +865,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 14,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20050409,
+                WeekendingDate = DateOnly.ParseExact("20050409", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -34
             },
 
@@ -886,7 +885,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 15,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20050416,
+                WeekendingDate = DateOnly.ParseExact("20050416", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -33
             },
 
@@ -906,7 +905,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 17,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20050430,
+                WeekendingDate = DateOnly.ParseExact("20050430", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -31
             },
 
@@ -926,7 +925,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 18,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20050507,
+                WeekendingDate = DateOnly.ParseExact("20050507", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -30
             },
 
@@ -946,7 +945,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 19,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20050514,
+                WeekendingDate = DateOnly.ParseExact("20050514", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -29
             },
 
@@ -966,7 +965,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 31,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20040807,
+                WeekendingDate = DateOnly.ParseExact("20040807", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -77
             },
 
@@ -986,7 +985,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 32,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20040814,
+                WeekendingDate = DateOnly.ParseExact("20040814", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -76
             },
 
@@ -1006,7 +1005,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 33,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20040821,
+                WeekendingDate = DateOnly.ParseExact("20040821", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -75
             },
 
@@ -1026,7 +1025,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 38,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20040925,
+                WeekendingDate = DateOnly.ParseExact("20040925", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -70
             },
 
@@ -1046,7 +1045,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 44,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20041106,
+                WeekendingDate = DateOnly.ParseExact("20041106", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -64
             },
 
@@ -1066,7 +1065,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 45,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20041113,
+                WeekendingDate = DateOnly.ParseExact("20041113", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -63
             },
 
@@ -1086,7 +1085,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 47,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20041127,
+                WeekendingDate = DateOnly.ParseExact("20041127", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -61
             },
 
@@ -1106,7 +1105,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 50,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20041218,
+                WeekendingDate = DateOnly.ParseExact("20041218", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -58
             },
 
@@ -1126,7 +1125,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 52,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20050101,
+                WeekendingDate = DateOnly.ParseExact("20050101", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -56
             },
 
@@ -1146,7 +1145,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 2,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20050115,
+                WeekendingDate = DateOnly.ParseExact("20050115", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -46
             },
 
@@ -1166,7 +1165,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 5,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20040207,
+                WeekendingDate = DateOnly.ParseExact("20040207", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -103
             },
 
@@ -1186,7 +1185,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 6,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20040214,
+                WeekendingDate = DateOnly.ParseExact("20040214", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -102
             },
 
@@ -1206,7 +1205,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 9,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20040306,
+                WeekendingDate = DateOnly.ParseExact("20040306", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -99
             },
 
@@ -1226,7 +1225,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 10,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20040313,
+                WeekendingDate = DateOnly.ParseExact("20040313", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -98
             },
 
@@ -1246,7 +1245,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 11,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20040320,
+                WeekendingDate = DateOnly.ParseExact("20040320", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -97
             },
 
@@ -1266,7 +1265,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 19,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20040515,
+                WeekendingDate = DateOnly.ParseExact("20040515", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -89
             },
 
@@ -1286,7 +1285,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 21,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20040529,
+                WeekendingDate = DateOnly.ParseExact("20040529", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -87
             },
 
@@ -1306,7 +1305,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 22,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20040605,
+                WeekendingDate = DateOnly.ParseExact("20040605", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -86
             },
 
@@ -1326,7 +1325,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 26,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20040703,
+                WeekendingDate = DateOnly.ParseExact("20040703", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -82
             },
 
@@ -1346,7 +1345,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 28,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20040717,
+                WeekendingDate = DateOnly.ParseExact("20040717", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -80
             },
 
@@ -1366,7 +1365,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 29,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20040724,
+                WeekendingDate = DateOnly.ParseExact("20040724", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -79
             },
 
@@ -1386,7 +1385,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 32,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20030809,
+                WeekendingDate = DateOnly.ParseExact("20030809", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -136
             },
 
@@ -1406,7 +1405,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 34,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20030823,
+                WeekendingDate = DateOnly.ParseExact("20030823", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -134
             },
 
@@ -1426,7 +1425,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 35,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20030830,
+                WeekendingDate = DateOnly.ParseExact("20030830", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -133
             },
 
@@ -1446,7 +1445,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 42,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20031018,
+                WeekendingDate = DateOnly.ParseExact("20031018", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -126
             },
 
@@ -1466,7 +1465,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 45,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20031108,
+                WeekendingDate = DateOnly.ParseExact("20031108", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -123
             },
 
@@ -1486,7 +1485,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 50,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20031213,
+                WeekendingDate = DateOnly.ParseExact("20031213", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -118
             },
 
@@ -1506,7 +1505,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 51,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20031220,
+                WeekendingDate = DateOnly.ParseExact("20031220", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -117
             },
 
@@ -1526,7 +1525,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 2,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20040117,
+                WeekendingDate = DateOnly.ParseExact("20040117", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -106
             },
 
@@ -1546,7 +1545,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 4,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20040131,
+                WeekendingDate = DateOnly.ParseExact("20040131", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -104
             },
 
@@ -1566,7 +1565,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 1,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20050108,
+                WeekendingDate = DateOnly.ParseExact("20050108", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -47
             },
 
@@ -1586,7 +1585,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 3,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20050122,
+                WeekendingDate = DateOnly.ParseExact("20050122", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -45
             },
 
@@ -1606,7 +1605,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 4,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20050129,
+                WeekendingDate = DateOnly.ParseExact("20050129", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -44
             },
 
@@ -1626,7 +1625,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 5,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20050205,
+                WeekendingDate = DateOnly.ParseExact("20050205", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -43
             },
 
@@ -1646,7 +1645,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 6,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20050212,
+                WeekendingDate = DateOnly.ParseExact("20050212", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -42
             },
 
@@ -1666,7 +1665,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 7,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20050219,
+                WeekendingDate = DateOnly.ParseExact("20050219", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -41
             },
 
@@ -1686,7 +1685,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 26,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20030628,
+                WeekendingDate = DateOnly.ParseExact("20030628", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -142
             },
 
@@ -1706,7 +1705,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 27,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20030705,
+                WeekendingDate = DateOnly.ParseExact("20030705", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -141
             },
 
@@ -1726,7 +1725,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 30,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20030726,
+                WeekendingDate = DateOnly.ParseExact("20030726", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -138
             },
 
@@ -1746,7 +1745,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 12,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20050326,
+                WeekendingDate = DateOnly.ParseExact("20050326", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -36
             },
 
@@ -1766,7 +1765,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 13,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20050402,
+                WeekendingDate = DateOnly.ParseExact("20050402", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -35
             },
 
@@ -1786,7 +1785,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 16,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20050423,
+                WeekendingDate = DateOnly.ParseExact("20050423", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -32
             },
 
@@ -1806,7 +1805,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 20,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20050521,
+                WeekendingDate = DateOnly.ParseExact("20050521", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -28
             },
 
@@ -1826,7 +1825,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 22,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20050604,
+                WeekendingDate = DateOnly.ParseExact("20050604", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -26
             },
 
@@ -1846,7 +1845,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 23,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20050611,
+                WeekendingDate = DateOnly.ParseExact("20050611", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -25
             },
 
@@ -1866,7 +1865,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 24,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20050618,
+                WeekendingDate = DateOnly.ParseExact("20050618", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -24
             },
 
@@ -1886,7 +1885,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 25,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20050625,
+                WeekendingDate = DateOnly.ParseExact("20050625", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -23
             },
 
@@ -1906,7 +1905,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 28,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20050716,
+                WeekendingDate = DateOnly.ParseExact("20050716", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -20
             },
 
@@ -1926,7 +1925,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 29,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20050723,
+                WeekendingDate = DateOnly.ParseExact("20050723", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -19
             },
 
@@ -1946,7 +1945,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 30,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20050730,
+                WeekendingDate = DateOnly.ParseExact("20050730", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -18
             },
 
@@ -1966,7 +1965,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 32,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20050813,
+                WeekendingDate = DateOnly.ParseExact("20050813", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -16
             },
 
@@ -1986,7 +1985,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 33,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20050820,
+                WeekendingDate = DateOnly.ParseExact("20050820", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -15
             },
 
@@ -2006,7 +2005,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 34,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20050827,
+                WeekendingDate = DateOnly.ParseExact("20050827", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -14
             },
 
@@ -2026,7 +2025,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 35,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20050903,
+                WeekendingDate = DateOnly.ParseExact("20050903", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -13
             },
 
@@ -2046,7 +2045,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 36,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20050910,
+                WeekendingDate = DateOnly.ParseExact("20050910", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -12
             },
 
@@ -2066,7 +2065,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 38,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20050924,
+                WeekendingDate = DateOnly.ParseExact("20050924", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -10
             },
 
@@ -2086,7 +2085,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 39,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20051001,
+                WeekendingDate = DateOnly.ParseExact("20051001", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -9
             },
 
@@ -2106,7 +2105,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 41,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20051015,
+                WeekendingDate = DateOnly.ParseExact("20051015", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -7
             },
 
@@ -2126,7 +2125,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 42,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20051022,
+                WeekendingDate = DateOnly.ParseExact("20051022", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -6
             },
 
@@ -2146,7 +2145,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 44,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20051105,
+                WeekendingDate = DateOnly.ParseExact("20051105", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -4
             },
 
@@ -2166,7 +2165,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 45,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20051112,
+                WeekendingDate = DateOnly.ParseExact("20051112", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -3
             },
 
@@ -2186,7 +2185,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 46,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20051119,
+                WeekendingDate = DateOnly.ParseExact("20051119", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -2
             },
 
@@ -2206,7 +2205,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 48,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20051203,
+                WeekendingDate = DateOnly.ParseExact("20051203", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 0
             },
 
@@ -2226,7 +2225,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 49,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20051210,
+                WeekendingDate = DateOnly.ParseExact("20051210", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1
             },
 
@@ -2246,7 +2245,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 50,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20051217,
+                WeekendingDate = DateOnly.ParseExact("20051217", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 2
             },
 
@@ -2266,7 +2265,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 51,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20051224,
+                WeekendingDate = DateOnly.ParseExact("20051224", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 3
             },
 
@@ -2286,7 +2285,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 52,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20051231,
+                WeekendingDate = DateOnly.ParseExact("20051231", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 4
             },
 
@@ -2306,7 +2305,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 1,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20060107,
+                WeekendingDate = DateOnly.ParseExact("20060107", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 13
             },
 
@@ -2326,7 +2325,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 2,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20060114,
+                WeekendingDate = DateOnly.ParseExact("20060114", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 14
             },
 
@@ -2346,7 +2345,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 3,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20060121,
+                WeekendingDate = DateOnly.ParseExact("20060121", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 15
             },
 
@@ -2366,7 +2365,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 4,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20060128,
+                WeekendingDate = DateOnly.ParseExact("20060128", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 16
             },
 
@@ -2386,7 +2385,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 5,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20060204,
+                WeekendingDate = DateOnly.ParseExact("20060204", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 17
             },
 
@@ -2406,7 +2405,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 6,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20060211,
+                WeekendingDate = DateOnly.ParseExact("20060211", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 18
             },
 
@@ -2426,7 +2425,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 7,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20060218,
+                WeekendingDate = DateOnly.ParseExact("20060218", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 19
             },
 
@@ -2446,7 +2445,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 8,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20060225,
+                WeekendingDate = DateOnly.ParseExact("20060225", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 20
             },
 
@@ -2466,7 +2465,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 9,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20060304,
+                WeekendingDate = DateOnly.ParseExact("20060304", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 21
             },
 
@@ -2486,7 +2485,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 10,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20060311,
+                WeekendingDate = DateOnly.ParseExact("20060311", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 22
             },
 
@@ -2506,7 +2505,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 11,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20060318,
+                WeekendingDate = DateOnly.ParseExact("20060318", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 23
             },
 
@@ -2526,7 +2525,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 12,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20060325,
+                WeekendingDate = DateOnly.ParseExact("20060325", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 24
             },
 
@@ -2546,7 +2545,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 13,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20060401,
+                WeekendingDate = DateOnly.ParseExact("20060401", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 25
             },
 
@@ -2566,7 +2565,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 14,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20060408,
+                WeekendingDate = DateOnly.ParseExact("20060408", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 26
             },
 
@@ -2586,7 +2585,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 15,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20060415,
+                WeekendingDate = DateOnly.ParseExact("20060415", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 27
             },
 
@@ -2606,7 +2605,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 16,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20060422,
+                WeekendingDate = DateOnly.ParseExact("20060422", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 28
             },
 
@@ -2626,7 +2625,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 17,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20060429,
+                WeekendingDate = DateOnly.ParseExact("20060429", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 29
             },
 
@@ -2646,7 +2645,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 18,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20060506,
+                WeekendingDate = DateOnly.ParseExact("20060506", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 30
             },
 
@@ -2666,7 +2665,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 19,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20060513,
+                WeekendingDate = DateOnly.ParseExact("20060513", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 31
             },
 
@@ -2686,7 +2685,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 20,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20060520,
+                WeekendingDate = DateOnly.ParseExact("20060520", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 32
             },
 
@@ -2706,7 +2705,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 21,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20060527,
+                WeekendingDate = DateOnly.ParseExact("20060527", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 33
             },
 
@@ -2726,7 +2725,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 22,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20060603,
+                WeekendingDate = DateOnly.ParseExact("20060603", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 34
             },
 
@@ -2746,7 +2745,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 23,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20060610,
+                WeekendingDate = DateOnly.ParseExact("20060610", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 35
             },
 
@@ -2766,7 +2765,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 24,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20060617,
+                WeekendingDate = DateOnly.ParseExact("20060617", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 36
             },
 
@@ -2786,7 +2785,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 25,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20060624,
+                WeekendingDate = DateOnly.ParseExact("20060624", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 37
             },
 
@@ -2806,7 +2805,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 26,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20060701,
+                WeekendingDate = DateOnly.ParseExact("20060701", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 38
             },
 
@@ -2826,7 +2825,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 27,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20060708,
+                WeekendingDate = DateOnly.ParseExact("20060708", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 39
             },
 
@@ -2846,7 +2845,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 28,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20060715,
+                WeekendingDate = DateOnly.ParseExact("20060715", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 40
             },
 
@@ -2866,7 +2865,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 29,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20060722,
+                WeekendingDate = DateOnly.ParseExact("20060722", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 41
             },
 
@@ -2886,7 +2885,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 30,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20060729,
+                WeekendingDate = DateOnly.ParseExact("20060729", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 42
             },
 
@@ -2906,7 +2905,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 31,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20060805,
+                WeekendingDate = DateOnly.ParseExact("20060805", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 43
             },
 
@@ -2926,7 +2925,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 32,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20060812,
+                WeekendingDate = DateOnly.ParseExact("20060812", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 44
             },
 
@@ -2946,7 +2945,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 33,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20060819,
+                WeekendingDate = DateOnly.ParseExact("20060819", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 45
             },
 
@@ -2966,7 +2965,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 34,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20060826,
+                WeekendingDate = DateOnly.ParseExact("20060826", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 46
             },
 
@@ -2986,7 +2985,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 35,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20060902,
+                WeekendingDate = DateOnly.ParseExact("20060902", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 47
             },
 
@@ -3006,7 +3005,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 36,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20060909,
+                WeekendingDate = DateOnly.ParseExact("20060909", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 48
             },
 
@@ -3026,7 +3025,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 37,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20060916,
+                WeekendingDate = DateOnly.ParseExact("20060916", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 49
             },
 
@@ -3046,7 +3045,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 38,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20060923,
+                WeekendingDate = DateOnly.ParseExact("20060923", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 50
             },
 
@@ -3066,7 +3065,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 39,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20060930,
+                WeekendingDate = DateOnly.ParseExact("20060930", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 51
             },
 
@@ -3086,7 +3085,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 40,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20061007,
+                WeekendingDate = DateOnly.ParseExact("20061007", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 52
             },
 
@@ -3106,7 +3105,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 41,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20061014,
+                WeekendingDate = DateOnly.ParseExact("20061014", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 53
             },
 
@@ -3126,7 +3125,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 42,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20061021,
+                WeekendingDate = DateOnly.ParseExact("20061021", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 54
             },
 
@@ -3146,7 +3145,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 43,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20061028,
+                WeekendingDate = DateOnly.ParseExact("20061028", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 55
             },
 
@@ -3166,7 +3165,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 44,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20061104,
+                WeekendingDate = DateOnly.ParseExact("20061104", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 56
             },
 
@@ -3186,7 +3185,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 45,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20061111,
+                WeekendingDate = DateOnly.ParseExact("20061111", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 57
             },
 
@@ -3206,7 +3205,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 46,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20061118,
+                WeekendingDate = DateOnly.ParseExact("20061118", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 58
             },
 
@@ -3226,7 +3225,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 47,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20061125,
+                WeekendingDate = DateOnly.ParseExact("20061125", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 59
             },
 
@@ -3246,7 +3245,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 48,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20061202,
+                WeekendingDate = DateOnly.ParseExact("20061202", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 60
             },
 
@@ -3266,7 +3265,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 49,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20061209,
+                WeekendingDate = DateOnly.ParseExact("20061209", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 61
             },
 
@@ -3286,7 +3285,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 50,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20061216,
+                WeekendingDate = DateOnly.ParseExact("20061216", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 62
             },
 
@@ -3306,7 +3305,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 51,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20061223,
+                WeekendingDate = DateOnly.ParseExact("20061223", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 63
             },
 
@@ -3326,7 +3325,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 52,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20061230,
+                WeekendingDate = DateOnly.ParseExact("20061230", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 64
             },
 
@@ -3346,7 +3345,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 1,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20070106,
+                WeekendingDate = DateOnly.ParseExact("20070106", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 73
             },
 
@@ -3366,7 +3365,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 2,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20070113,
+                WeekendingDate = DateOnly.ParseExact("20070113", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 74
             },
 
@@ -3386,7 +3385,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 3,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20070120,
+                WeekendingDate = DateOnly.ParseExact("20070120", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 75
             },
 
@@ -3406,7 +3405,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 4,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20070127,
+                WeekendingDate = DateOnly.ParseExact("20070127", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 76
             },
 
@@ -3426,7 +3425,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 5,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20070203,
+                WeekendingDate = DateOnly.ParseExact("20070203", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 77
             },
 
@@ -3446,7 +3445,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 6,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20070210,
+                WeekendingDate = DateOnly.ParseExact("20070210", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 78
             },
 
@@ -3466,7 +3465,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 7,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20070217,
+                WeekendingDate = DateOnly.ParseExact("20070217", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 79
             },
 
@@ -3486,7 +3485,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 8,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20070224,
+                WeekendingDate = DateOnly.ParseExact("20070224", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 80
             },
 
@@ -3506,7 +3505,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 9,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20070303,
+                WeekendingDate = DateOnly.ParseExact("20070303", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 81
             },
 
@@ -3526,7 +3525,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 10,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20070310,
+                WeekendingDate = DateOnly.ParseExact("20070310", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 82
             },
 
@@ -3546,7 +3545,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 11,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20070317,
+                WeekendingDate = DateOnly.ParseExact("20070317", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 83
             },
 
@@ -3566,7 +3565,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 12,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20070324,
+                WeekendingDate = DateOnly.ParseExact("20070324", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 84
             },
 
@@ -3586,7 +3585,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 13,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20070331,
+                WeekendingDate = DateOnly.ParseExact("20070331", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 85
             },
 
@@ -3606,7 +3605,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 14,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20070407,
+                WeekendingDate = DateOnly.ParseExact("20070407", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 86
             },
 
@@ -3626,7 +3625,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 15,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20070414,
+                WeekendingDate = DateOnly.ParseExact("20070414", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 87
             },
 
@@ -3646,7 +3645,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 16,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20070421,
+                WeekendingDate = DateOnly.ParseExact("20070421", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 88
             },
 
@@ -3666,7 +3665,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 17,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20070428,
+                WeekendingDate = DateOnly.ParseExact("20070428", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 89
             },
 
@@ -3686,7 +3685,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 18,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20070505,
+                WeekendingDate = DateOnly.ParseExact("20070505", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 90
             },
 
@@ -3706,7 +3705,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 19,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20070512,
+                WeekendingDate = DateOnly.ParseExact("20070512", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 91
             },
 
@@ -3726,7 +3725,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 20,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20070519,
+                WeekendingDate = DateOnly.ParseExact("20070519", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 92
             },
 
@@ -3746,7 +3745,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 21,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20070526,
+                WeekendingDate = DateOnly.ParseExact("20070526", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 93
             },
 
@@ -3766,7 +3765,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 22,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20070602,
+                WeekendingDate = DateOnly.ParseExact("20070602", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 94
             },
 
@@ -3786,7 +3785,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 23,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20070609,
+                WeekendingDate = DateOnly.ParseExact("20070609", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 95
             },
 
@@ -3806,7 +3805,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 24,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20070616,
+                WeekendingDate = DateOnly.ParseExact("20070616", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 96
             },
 
@@ -3826,7 +3825,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 25,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20070623,
+                WeekendingDate = DateOnly.ParseExact("20070623", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 97
             },
 
@@ -3846,7 +3845,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 26,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20070630,
+                WeekendingDate = DateOnly.ParseExact("20070630", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 98
             },
 
@@ -3866,7 +3865,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 27,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20070707,
+                WeekendingDate = DateOnly.ParseExact("20070707", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 99
             },
 
@@ -3886,7 +3885,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 28,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20070714,
+                WeekendingDate = DateOnly.ParseExact("20070714", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 100
             },
 
@@ -3906,7 +3905,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 29,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20070721,
+                WeekendingDate = DateOnly.ParseExact("20070721", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 101
             },
 
@@ -3926,7 +3925,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 30,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20070728,
+                WeekendingDate = DateOnly.ParseExact("20070728", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 102
             },
 
@@ -3946,7 +3945,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 31,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20070804,
+                WeekendingDate = DateOnly.ParseExact("20070804", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 103
             },
 
@@ -3966,7 +3965,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 32,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20070811,
+                WeekendingDate = DateOnly.ParseExact("20070811", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 104
             },
 
@@ -3986,7 +3985,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 33,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20070818,
+                WeekendingDate = DateOnly.ParseExact("20070818", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 105
             },
 
@@ -4006,7 +4005,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 34,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20070825,
+                WeekendingDate = DateOnly.ParseExact("20070825", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 106
             },
 
@@ -4026,7 +4025,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 35,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20070901,
+                WeekendingDate = DateOnly.ParseExact("20070901", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 107
             },
 
@@ -4046,7 +4045,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 36,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20070908,
+                WeekendingDate = DateOnly.ParseExact("20070908", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 108
             },
 
@@ -4066,7 +4065,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 37,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20070915,
+                WeekendingDate = DateOnly.ParseExact("20070915", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 109
             },
 
@@ -4086,7 +4085,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 38,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20070922,
+                WeekendingDate = DateOnly.ParseExact("20070922", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 110
             },
 
@@ -4106,7 +4105,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 39,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20070929,
+                WeekendingDate = DateOnly.ParseExact("20070929", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 111
             },
 
@@ -4126,7 +4125,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 40,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20071006,
+                WeekendingDate = DateOnly.ParseExact("20071006", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 112
             },
 
@@ -4146,7 +4145,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 41,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20071013,
+                WeekendingDate = DateOnly.ParseExact("20071013", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 113
             },
 
@@ -4166,7 +4165,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 42,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20071020,
+                WeekendingDate = DateOnly.ParseExact("20071020", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 114
             },
 
@@ -4186,7 +4185,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 43,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20071027,
+                WeekendingDate = DateOnly.ParseExact("20071027", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 115
             },
 
@@ -4206,7 +4205,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 44,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20071103,
+                WeekendingDate = DateOnly.ParseExact("20071103", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 116
             },
 
@@ -4226,7 +4225,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 45,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20071110,
+                WeekendingDate = DateOnly.ParseExact("20071110", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 117
             },
 
@@ -4246,7 +4245,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 46,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20071117,
+                WeekendingDate = DateOnly.ParseExact("20071117", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 118
             },
 
@@ -4266,7 +4265,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 47,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20071124,
+                WeekendingDate = DateOnly.ParseExact("20071124", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 119
             },
 
@@ -4286,7 +4285,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 48,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20071201,
+                WeekendingDate = DateOnly.ParseExact("20071201", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 120
             },
 
@@ -4306,7 +4305,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 49,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20071208,
+                WeekendingDate = DateOnly.ParseExact("20071208", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 121
             },
 
@@ -4326,7 +4325,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 50,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20071215,
+                WeekendingDate = DateOnly.ParseExact("20071215", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 122
             },
 
@@ -4346,7 +4345,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 51,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20071222,
+                WeekendingDate = DateOnly.ParseExact("20071222", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 123
             },
 
@@ -4366,7 +4365,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 52,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20071229,
+                WeekendingDate = DateOnly.ParseExact("20071229", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 124
             },
 
@@ -4386,7 +4385,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 1,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20080105,
+                WeekendingDate = DateOnly.ParseExact("20080105", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 133
             },
 
@@ -4406,7 +4405,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 2,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20080112,
+                WeekendingDate = DateOnly.ParseExact("20080112", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 134
             },
 
@@ -4426,7 +4425,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 3,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20080119,
+                WeekendingDate = DateOnly.ParseExact("20080119", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 135
             },
 
@@ -4446,7 +4445,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 4,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20080126,
+                WeekendingDate = DateOnly.ParseExact("20080126", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 136
             },
 
@@ -4466,7 +4465,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 5,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20080202,
+                WeekendingDate = DateOnly.ParseExact("20080202", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 137
             },
 
@@ -4486,7 +4485,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 6,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20080209,
+                WeekendingDate = DateOnly.ParseExact("20080209", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 138
             },
 
@@ -4506,7 +4505,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 7,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20080216,
+                WeekendingDate = DateOnly.ParseExact("20080216", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 139
             },
 
@@ -4526,7 +4525,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 8,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20080223,
+                WeekendingDate = DateOnly.ParseExact("20080223", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 140
             },
 
@@ -4546,7 +4545,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 9,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20080301,
+                WeekendingDate = DateOnly.ParseExact("20080301", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 141
             },
 
@@ -4566,7 +4565,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 10,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20080308,
+                WeekendingDate = DateOnly.ParseExact("20080308", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 142
             },
 
@@ -4586,7 +4585,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 11,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20080315,
+                WeekendingDate = DateOnly.ParseExact("20080315", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 143
             },
 
@@ -4606,7 +4605,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 12,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20080322,
+                WeekendingDate = DateOnly.ParseExact("20080322", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 144
             },
 
@@ -4626,7 +4625,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 13,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20080329,
+                WeekendingDate = DateOnly.ParseExact("20080329", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 145
             },
 
@@ -4646,7 +4645,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 14,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20080405,
+                WeekendingDate = DateOnly.ParseExact("20080405", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 146
             },
 
@@ -4666,7 +4665,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 15,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20080412,
+                WeekendingDate = DateOnly.ParseExact("20080412", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 147
             },
 
@@ -4686,7 +4685,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 16,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20080419,
+                WeekendingDate = DateOnly.ParseExact("20080419", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 148
             },
 
@@ -4706,7 +4705,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 17,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20080426,
+                WeekendingDate = DateOnly.ParseExact("20080426", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 149
             },
 
@@ -4726,7 +4725,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 18,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20080503,
+                WeekendingDate = DateOnly.ParseExact("20080503", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 150
             },
 
@@ -4746,7 +4745,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 19,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20080510,
+                WeekendingDate = DateOnly.ParseExact("20080510", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 151
             },
 
@@ -4766,7 +4765,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 20,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20080517,
+                WeekendingDate = DateOnly.ParseExact("20080517", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 152
             },
 
@@ -4786,7 +4785,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 21,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20080524,
+                WeekendingDate = DateOnly.ParseExact("20080524", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 153
             },
 
@@ -4806,7 +4805,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 22,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20080531,
+                WeekendingDate = DateOnly.ParseExact("20080531", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 154
             },
 
@@ -4826,7 +4825,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 23,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20080607,
+                WeekendingDate = DateOnly.ParseExact("20080607", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 155
             },
 
@@ -4846,7 +4845,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 24,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20080614,
+                WeekendingDate = DateOnly.ParseExact("20080614", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 156
             },
 
@@ -4866,7 +4865,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 25,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20080621,
+                WeekendingDate = DateOnly.ParseExact("20080621", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 157
             },
 
@@ -4886,7 +4885,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 26,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20080628,
+                WeekendingDate = DateOnly.ParseExact("20080628", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 158
             },
 
@@ -4906,7 +4905,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 27,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20080705,
+                WeekendingDate = DateOnly.ParseExact("20080705", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 159
             },
 
@@ -4926,7 +4925,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 28,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20080712,
+                WeekendingDate = DateOnly.ParseExact("20080712", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 160
             },
 
@@ -4946,7 +4945,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 29,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20080719,
+                WeekendingDate = DateOnly.ParseExact("20080719", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 161
             },
 
@@ -4966,7 +4965,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 30,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20080726,
+                WeekendingDate = DateOnly.ParseExact("20080726", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 162
             },
 
@@ -4986,7 +4985,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 31,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20080802,
+                WeekendingDate = DateOnly.ParseExact("20080802", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 163
             },
 
@@ -5006,7 +5005,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 32,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20080809,
+                WeekendingDate = DateOnly.ParseExact("20080809", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 164
             },
 
@@ -5026,7 +5025,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 33,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20080816,
+                WeekendingDate = DateOnly.ParseExact("20080816", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 165
             },
 
@@ -5046,7 +5045,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 34,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20080823,
+                WeekendingDate = DateOnly.ParseExact("20080823", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 166
             },
 
@@ -5066,7 +5065,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 35,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20080830,
+                WeekendingDate = DateOnly.ParseExact("20080830", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 167
             },
 
@@ -5086,7 +5085,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 36,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20080906,
+                WeekendingDate = DateOnly.ParseExact("20080906", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 168
             },
 
@@ -5106,7 +5105,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 37,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20080913,
+                WeekendingDate = DateOnly.ParseExact("20080913", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 169
             },
 
@@ -5126,7 +5125,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 38,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20080920,
+                WeekendingDate = DateOnly.ParseExact("20080920", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 170
             },
 
@@ -5146,7 +5145,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 39,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20080927,
+                WeekendingDate = DateOnly.ParseExact("20080927", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 171
             },
 
@@ -5166,7 +5165,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 40,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20081004,
+                WeekendingDate = DateOnly.ParseExact("20081004", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 172
             },
 
@@ -5186,7 +5185,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 41,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20081011,
+                WeekendingDate = DateOnly.ParseExact("20081011", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 173
             },
 
@@ -5206,7 +5205,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 42,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20081018,
+                WeekendingDate = DateOnly.ParseExact("20081018", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 174
             },
 
@@ -5226,7 +5225,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 43,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20081025,
+                WeekendingDate = DateOnly.ParseExact("20081025", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 175
             },
 
@@ -5246,7 +5245,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 44,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20081101,
+                WeekendingDate = DateOnly.ParseExact("20081101", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 176
             },
 
@@ -5266,7 +5265,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 45,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20081108,
+                WeekendingDate = DateOnly.ParseExact("20081108", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 177
             },
 
@@ -5286,7 +5285,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 46,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20081115,
+                WeekendingDate = DateOnly.ParseExact("20081115", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 178
             },
 
@@ -5306,7 +5305,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 47,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20081122,
+                WeekendingDate = DateOnly.ParseExact("20081122", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 179
             },
 
@@ -5326,7 +5325,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 48,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20081129,
+                WeekendingDate = DateOnly.ParseExact("20081129", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 180
             },
 
@@ -5346,7 +5345,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 49,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20081206,
+                WeekendingDate = DateOnly.ParseExact("20081206", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 181
             },
 
@@ -5366,7 +5365,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 50,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20081213,
+                WeekendingDate = DateOnly.ParseExact("20081213", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 182
             },
 
@@ -5386,7 +5385,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 51,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20081220,
+                WeekendingDate = DateOnly.ParseExact("20081220", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 183
             },
 
@@ -5406,7 +5405,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 52,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20081227,
+                WeekendingDate = DateOnly.ParseExact("20081227", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 184
             },
 
@@ -5426,7 +5425,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 53,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20090103,
+                WeekendingDate = DateOnly.ParseExact("20090103", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 185
             },
 
@@ -5446,7 +5445,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 1,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20090110,
+                WeekendingDate = DateOnly.ParseExact("20090110", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 193
             },
 
@@ -5466,7 +5465,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 2,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20090117,
+                WeekendingDate = DateOnly.ParseExact("20090117", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 194
             },
 
@@ -5486,7 +5485,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 3,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20090124,
+                WeekendingDate = DateOnly.ParseExact("20090124", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 195
             },
 
@@ -5506,7 +5505,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 4,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20090131,
+                WeekendingDate = DateOnly.ParseExact("20090131", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 196
             },
 
@@ -5526,7 +5525,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 5,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20090207,
+                WeekendingDate = DateOnly.ParseExact("20090207", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 197
             },
 
@@ -5546,7 +5545,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 6,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20090214,
+                WeekendingDate = DateOnly.ParseExact("20090214", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 198
             },
 
@@ -5566,7 +5565,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 7,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20090221,
+                WeekendingDate = DateOnly.ParseExact("20090221", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 199
             },
 
@@ -5586,7 +5585,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 8,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20090228,
+                WeekendingDate = DateOnly.ParseExact("20090228", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 200
             },
 
@@ -5606,7 +5605,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 9,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20090307,
+                WeekendingDate = DateOnly.ParseExact("20090307", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 201
             },
 
@@ -5626,7 +5625,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 10,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20090314,
+                WeekendingDate = DateOnly.ParseExact("20090314", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 202
             },
 
@@ -5646,7 +5645,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 11,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20090321,
+                WeekendingDate = DateOnly.ParseExact("20090321", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 203
             },
 
@@ -5666,7 +5665,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 12,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20090328,
+                WeekendingDate = DateOnly.ParseExact("20090328", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 204
             },
 
@@ -5686,7 +5685,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 13,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20090404,
+                WeekendingDate = DateOnly.ParseExact("20090404", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 205
             },
 
@@ -5706,7 +5705,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 14,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20090411,
+                WeekendingDate = DateOnly.ParseExact("20090411", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 206
             },
 
@@ -5726,7 +5725,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 15,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20090418,
+                WeekendingDate = DateOnly.ParseExact("20090418", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 207
             },
 
@@ -5746,7 +5745,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 16,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20090425,
+                WeekendingDate = DateOnly.ParseExact("20090425", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 208
             },
 
@@ -5766,7 +5765,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 17,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20090502,
+                WeekendingDate = DateOnly.ParseExact("20090502", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 209
             },
 
@@ -5786,7 +5785,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 18,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20090509,
+                WeekendingDate = DateOnly.ParseExact("20090509", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 210
             },
 
@@ -5806,7 +5805,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 19,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20090516,
+                WeekendingDate = DateOnly.ParseExact("20090516", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 211
             },
 
@@ -5826,7 +5825,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 20,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20090523,
+                WeekendingDate = DateOnly.ParseExact("20090523", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 212
             },
 
@@ -5846,7 +5845,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 21,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20090530,
+                WeekendingDate = DateOnly.ParseExact("20090530", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 213
             },
 
@@ -5866,7 +5865,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 22,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20090606,
+                WeekendingDate = DateOnly.ParseExact("20090606", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 214
             },
 
@@ -5886,7 +5885,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 23,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20090613,
+                WeekendingDate = DateOnly.ParseExact("20090613", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 215
             },
 
@@ -5906,7 +5905,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 24,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20090620,
+                WeekendingDate = DateOnly.ParseExact("20090620", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 216
             },
 
@@ -5926,7 +5925,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 25,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20090627,
+                WeekendingDate = DateOnly.ParseExact("20090627", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 217
             },
 
@@ -5946,7 +5945,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 26,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20090704,
+                WeekendingDate = DateOnly.ParseExact("20090704", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 218
             },
 
@@ -5966,7 +5965,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 27,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20090711,
+                WeekendingDate = DateOnly.ParseExact("20090711", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 219
             },
 
@@ -5986,7 +5985,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 28,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20090718,
+                WeekendingDate = DateOnly.ParseExact("20090718", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 220
             },
 
@@ -6006,7 +6005,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 29,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20090725,
+                WeekendingDate = DateOnly.ParseExact("20090725", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 221
             },
 
@@ -6026,7 +6025,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 30,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20090801,
+                WeekendingDate = DateOnly.ParseExact("20090801", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 222
             },
 
@@ -6046,7 +6045,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 31,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20090808,
+                WeekendingDate = DateOnly.ParseExact("20090808", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 223
             },
 
@@ -6066,7 +6065,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 32,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20090815,
+                WeekendingDate = DateOnly.ParseExact("20090815", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 224
             },
 
@@ -6086,7 +6085,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 33,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20090822,
+                WeekendingDate = DateOnly.ParseExact("20090822", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 225
             },
 
@@ -6106,7 +6105,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 34,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20090829,
+                WeekendingDate = DateOnly.ParseExact("20090829", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 226
             },
 
@@ -6126,7 +6125,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 35,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20090905,
+                WeekendingDate = DateOnly.ParseExact("20090905", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 227
             },
 
@@ -6146,7 +6145,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 36,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20090912,
+                WeekendingDate = DateOnly.ParseExact("20090912", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 228
             },
 
@@ -6166,7 +6165,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 37,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20090919,
+                WeekendingDate = DateOnly.ParseExact("20090919", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 229
             },
 
@@ -6186,7 +6185,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 38,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20090926,
+                WeekendingDate = DateOnly.ParseExact("20090926", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 230
             },
 
@@ -6206,7 +6205,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 39,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20091003,
+                WeekendingDate = DateOnly.ParseExact("20091003", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 231
             },
 
@@ -6226,7 +6225,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 40,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20091010,
+                WeekendingDate = DateOnly.ParseExact("20091010", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 232
             },
 
@@ -6246,7 +6245,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 41,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20091017,
+                WeekendingDate = DateOnly.ParseExact("20091017", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 233
             },
 
@@ -6266,7 +6265,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 42,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20091024,
+                WeekendingDate = DateOnly.ParseExact("20091024", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 234
             },
 
@@ -6286,7 +6285,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 43,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20091031,
+                WeekendingDate = DateOnly.ParseExact("20091031", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 235
             },
 
@@ -6306,7 +6305,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 44,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20091107,
+                WeekendingDate = DateOnly.ParseExact("20091107", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 236
             },
 
@@ -6326,7 +6325,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 45,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20091114,
+                WeekendingDate = DateOnly.ParseExact("20091114", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 237
             },
 
@@ -6346,7 +6345,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 46,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20091121,
+                WeekendingDate = DateOnly.ParseExact("20091121", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 238
             },
 
@@ -6366,7 +6365,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 47,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20091128,
+                WeekendingDate = DateOnly.ParseExact("20091128", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 239
             },
 
@@ -6386,7 +6385,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 48,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20091205,
+                WeekendingDate = DateOnly.ParseExact("20091205", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 240
             },
 
@@ -6406,7 +6405,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 49,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20091212,
+                WeekendingDate = DateOnly.ParseExact("20091212", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 241
             },
 
@@ -6426,7 +6425,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 50,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20091219,
+                WeekendingDate = DateOnly.ParseExact("20091219", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 242
             },
 
@@ -6446,7 +6445,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 51,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20091226,
+                WeekendingDate = DateOnly.ParseExact("20091226", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 243
             },
 
@@ -6466,7 +6465,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 1,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20030104,
+                WeekendingDate = DateOnly.ParseExact("20030104", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -167
             },
 
@@ -6486,7 +6485,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 3,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20030118,
+                WeekendingDate = DateOnly.ParseExact("20030118", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -165
             },
 
@@ -6506,7 +6505,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 6,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20030208,
+                WeekendingDate = DateOnly.ParseExact("20030208", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -162
             },
 
@@ -6526,7 +6525,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 7,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20030215,
+                WeekendingDate = DateOnly.ParseExact("20030215", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -161
             },
 
@@ -6546,7 +6545,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 8,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20030222,
+                WeekendingDate = DateOnly.ParseExact("20030222", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -160
             },
 
@@ -6566,7 +6565,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 11,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20030315,
+                WeekendingDate = DateOnly.ParseExact("20030315", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -157
             },
 
@@ -6586,7 +6585,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 17,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20030426,
+                WeekendingDate = DateOnly.ParseExact("20030426", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -151
             },
 
@@ -6606,7 +6605,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 22,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20030531,
+                WeekendingDate = DateOnly.ParseExact("20030531", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -146
             },
 
@@ -6626,7 +6625,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 21,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20050528,
+                WeekendingDate = DateOnly.ParseExact("20050528", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -27
             },
 
@@ -6646,7 +6645,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 26,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20050702,
+                WeekendingDate = DateOnly.ParseExact("20050702", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -22
             },
 
@@ -6666,7 +6665,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 27,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20050709,
+                WeekendingDate = DateOnly.ParseExact("20050709", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -21
             },
 
@@ -6686,7 +6685,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 31,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20050806,
+                WeekendingDate = DateOnly.ParseExact("20050806", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -17
             },
 
@@ -6706,7 +6705,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 37,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20050917,
+                WeekendingDate = DateOnly.ParseExact("20050917", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -11
             },
 
@@ -6726,7 +6725,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 40,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20051008,
+                WeekendingDate = DateOnly.ParseExact("20051008", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -8
             },
 
@@ -6746,7 +6745,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 43,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20051029,
+                WeekendingDate = DateOnly.ParseExact("20051029", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -5
             },
 
@@ -6766,7 +6765,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 47,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20051126,
+                WeekendingDate = DateOnly.ParseExact("20051126", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -1
             },
 
@@ -6786,7 +6785,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 52,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20100102,
+                WeekendingDate = DateOnly.ParseExact("20100102", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 244
             },
 
@@ -6806,7 +6805,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 1,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20100109,
+                WeekendingDate = DateOnly.ParseExact("20100109", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 253
             },
 
@@ -6826,7 +6825,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 2,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20100116,
+                WeekendingDate = DateOnly.ParseExact("20100116", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 254
             },
 
@@ -6846,7 +6845,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 3,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20100123,
+                WeekendingDate = DateOnly.ParseExact("20100123", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 255
             },
 
@@ -6866,7 +6865,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 4,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20100130,
+                WeekendingDate = DateOnly.ParseExact("20100130", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 256
             },
 
@@ -6886,7 +6885,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 5,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20100206,
+                WeekendingDate = DateOnly.ParseExact("20100206", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 257
             },
 
@@ -6906,7 +6905,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 6,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20100213,
+                WeekendingDate = DateOnly.ParseExact("20100213", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 258
             },
 
@@ -6926,7 +6925,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 7,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20100220,
+                WeekendingDate = DateOnly.ParseExact("20100220", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 259
             },
 
@@ -6946,7 +6945,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 8,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20100227,
+                WeekendingDate = DateOnly.ParseExact("20100227", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 260
             },
 
@@ -6966,7 +6965,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 9,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20100306,
+                WeekendingDate = DateOnly.ParseExact("20100306", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 261
             },
 
@@ -6986,7 +6985,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 10,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20100313,
+                WeekendingDate = DateOnly.ParseExact("20100313", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 262
             },
 
@@ -7006,7 +7005,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 11,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20100320,
+                WeekendingDate = DateOnly.ParseExact("20100320", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 263
             },
 
@@ -7026,7 +7025,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 12,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20100327,
+                WeekendingDate = DateOnly.ParseExact("20100327", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 264
             },
 
@@ -7046,7 +7045,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 13,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20100403,
+                WeekendingDate = DateOnly.ParseExact("20100403", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 265
             },
 
@@ -7066,7 +7065,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 14,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20100410,
+                WeekendingDate = DateOnly.ParseExact("20100410", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 266
             },
 
@@ -7086,7 +7085,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 15,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20100417,
+                WeekendingDate = DateOnly.ParseExact("20100417", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 267
             },
 
@@ -7106,7 +7105,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 16,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20100424,
+                WeekendingDate = DateOnly.ParseExact("20100424", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 268
             },
 
@@ -7126,7 +7125,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 17,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20100501,
+                WeekendingDate = DateOnly.ParseExact("20100501", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 269
             },
 
@@ -7146,7 +7145,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 18,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20100508,
+                WeekendingDate = DateOnly.ParseExact("20100508", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 270
             },
 
@@ -7166,7 +7165,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 19,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20100515,
+                WeekendingDate = DateOnly.ParseExact("20100515", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 271
             },
 
@@ -7186,7 +7185,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 20,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20100522,
+                WeekendingDate = DateOnly.ParseExact("20100522", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 272
             },
 
@@ -7206,7 +7205,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 21,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20100529,
+                WeekendingDate = DateOnly.ParseExact("20100529", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 273
             },
 
@@ -7226,7 +7225,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 22,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20100605,
+                WeekendingDate = DateOnly.ParseExact("20100605", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 274
             },
 
@@ -7246,7 +7245,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 23,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20100612,
+                WeekendingDate = DateOnly.ParseExact("20100612", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 275
             },
 
@@ -7266,7 +7265,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 24,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20100619,
+                WeekendingDate = DateOnly.ParseExact("20100619", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 276
             },
 
@@ -7286,7 +7285,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 25,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20100626,
+                WeekendingDate = DateOnly.ParseExact("20100626", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 277
             },
 
@@ -7306,7 +7305,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 26,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20100703,
+                WeekendingDate = DateOnly.ParseExact("20100703", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 278
             },
 
@@ -7326,7 +7325,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 27,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20100710,
+                WeekendingDate = DateOnly.ParseExact("20100710", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 279
             },
 
@@ -7346,7 +7345,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 28,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20100717,
+                WeekendingDate = DateOnly.ParseExact("20100717", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 280
             },
 
@@ -7366,7 +7365,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 29,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20100724,
+                WeekendingDate = DateOnly.ParseExact("20100724", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 281
             },
 
@@ -7386,7 +7385,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 30,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20100731,
+                WeekendingDate = DateOnly.ParseExact("20100731", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 282
             },
 
@@ -7406,7 +7405,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 31,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20100807,
+                WeekendingDate = DateOnly.ParseExact("20100807", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 283
             },
 
@@ -7426,7 +7425,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 32,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20100814,
+                WeekendingDate = DateOnly.ParseExact("20100814", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 284
             },
 
@@ -7446,7 +7445,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 33,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20100821,
+                WeekendingDate = DateOnly.ParseExact("20100821", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 285
             },
 
@@ -7466,7 +7465,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 34,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20100828,
+                WeekendingDate = DateOnly.ParseExact("20100828", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 286
             },
 
@@ -7486,7 +7485,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 35,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20100904,
+                WeekendingDate = DateOnly.ParseExact("20100904", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 287
             },
 
@@ -7506,7 +7505,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 36,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20100911,
+                WeekendingDate = DateOnly.ParseExact("20100911", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 288
             },
 
@@ -7526,7 +7525,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 37,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20100918,
+                WeekendingDate = DateOnly.ParseExact("20100918", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 289
             },
 
@@ -7546,7 +7545,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 38,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20100925,
+                WeekendingDate = DateOnly.ParseExact("20100925", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 290
             },
 
@@ -7566,7 +7565,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 39,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20101002,
+                WeekendingDate = DateOnly.ParseExact("20101002", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 291
             },
 
@@ -7586,7 +7585,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 40,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20101009,
+                WeekendingDate = DateOnly.ParseExact("20101009", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 292
             },
 
@@ -7606,7 +7605,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 41,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20101016,
+                WeekendingDate = DateOnly.ParseExact("20101016", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 293
             },
 
@@ -7626,7 +7625,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 42,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20101023,
+                WeekendingDate = DateOnly.ParseExact("20101023", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 294
             },
 
@@ -7646,7 +7645,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 43,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20101030,
+                WeekendingDate = DateOnly.ParseExact("20101030", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 295
             },
 
@@ -7666,7 +7665,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 44,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20101106,
+                WeekendingDate = DateOnly.ParseExact("20101106", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 296
             },
 
@@ -7686,7 +7685,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 45,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20101113,
+                WeekendingDate = DateOnly.ParseExact("20101113", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 297
             },
 
@@ -7706,7 +7705,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 46,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20101120,
+                WeekendingDate = DateOnly.ParseExact("20101120", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 298
             },
 
@@ -7726,7 +7725,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 47,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20101127,
+                WeekendingDate = DateOnly.ParseExact("20101127", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 299
             },
 
@@ -7746,7 +7745,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 48,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20101204,
+                WeekendingDate = DateOnly.ParseExact("20101204", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 300
             },
 
@@ -7766,7 +7765,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 49,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20101211,
+                WeekendingDate = DateOnly.ParseExact("20101211", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 301
             },
 
@@ -7786,7 +7785,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 50,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20101218,
+                WeekendingDate = DateOnly.ParseExact("20101218", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 302
             },
 
@@ -7806,7 +7805,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 51,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20101225,
+                WeekendingDate = DateOnly.ParseExact("20101225", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 303
             },
 
@@ -7826,7 +7825,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 52,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20110101,
+                WeekendingDate = DateOnly.ParseExact("20110101", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 304
             },
 
@@ -7846,7 +7845,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 1,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20110108,
+                WeekendingDate = DateOnly.ParseExact("20110108", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 313
             },
 
@@ -7866,7 +7865,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 2,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20110115,
+                WeekendingDate = DateOnly.ParseExact("20110115", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 314
             },
 
@@ -7886,7 +7885,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 3,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20110122,
+                WeekendingDate = DateOnly.ParseExact("20110122", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 315
             },
 
@@ -7906,7 +7905,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 4,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20110129,
+                WeekendingDate = DateOnly.ParseExact("20110129", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 316
             },
 
@@ -7926,7 +7925,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 5,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20110205,
+                WeekendingDate = DateOnly.ParseExact("20110205", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 317
             },
 
@@ -7946,7 +7945,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 6,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20110212,
+                WeekendingDate = DateOnly.ParseExact("20110212", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 318
             },
 
@@ -7966,7 +7965,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 7,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20110219,
+                WeekendingDate = DateOnly.ParseExact("20110219", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 319
             },
 
@@ -7986,7 +7985,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 8,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20110226,
+                WeekendingDate = DateOnly.ParseExact("20110226", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 320
             },
 
@@ -8006,7 +8005,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 9,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20110305,
+                WeekendingDate = DateOnly.ParseExact("20110305", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 321
             },
 
@@ -8026,7 +8025,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 10,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20110312,
+                WeekendingDate = DateOnly.ParseExact("20110312", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 322
             },
 
@@ -8046,7 +8045,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 11,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20110319,
+                WeekendingDate = DateOnly.ParseExact("20110319", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 323
             },
 
@@ -8066,7 +8065,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 12,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20110326,
+                WeekendingDate = DateOnly.ParseExact("20110326", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 324
             },
 
@@ -8086,7 +8085,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 13,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20110402,
+                WeekendingDate = DateOnly.ParseExact("20110402", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 325
             },
 
@@ -8106,7 +8105,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 14,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20110409,
+                WeekendingDate = DateOnly.ParseExact("20110409", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 326
             },
 
@@ -8126,7 +8125,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 15,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20110416,
+                WeekendingDate = DateOnly.ParseExact("20110416", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 327
             },
 
@@ -8146,7 +8145,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 16,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20110423,
+                WeekendingDate = DateOnly.ParseExact("20110423", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 328
             },
 
@@ -8166,7 +8165,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 17,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20110430,
+                WeekendingDate = DateOnly.ParseExact("20110430", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 329
             },
 
@@ -8186,7 +8185,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 18,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20110507,
+                WeekendingDate = DateOnly.ParseExact("20110507", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 330
             },
 
@@ -8206,7 +8205,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 19,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20110514,
+                WeekendingDate = DateOnly.ParseExact("20110514", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 331
             },
 
@@ -8226,7 +8225,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 20,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20110521,
+                WeekendingDate = DateOnly.ParseExact("20110521", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 332
             },
 
@@ -8246,7 +8245,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 21,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20110528,
+                WeekendingDate = DateOnly.ParseExact("20110528", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 333
             },
 
@@ -8266,7 +8265,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 22,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20110604,
+                WeekendingDate = DateOnly.ParseExact("20110604", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 334
             },
 
@@ -8286,7 +8285,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 23,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20110611,
+                WeekendingDate = DateOnly.ParseExact("20110611", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 335
             },
 
@@ -8306,7 +8305,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 24,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20110618,
+                WeekendingDate = DateOnly.ParseExact("20110618", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 336
             },
 
@@ -8326,7 +8325,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 25,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20110625,
+                WeekendingDate = DateOnly.ParseExact("20110625", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 337
             },
 
@@ -8346,7 +8345,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 26,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20110702,
+                WeekendingDate = DateOnly.ParseExact("20110702", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 338
             },
 
@@ -8366,7 +8365,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 27,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20110709,
+                WeekendingDate = DateOnly.ParseExact("20110709", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 339
             },
 
@@ -8386,7 +8385,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 28,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20110716,
+                WeekendingDate = DateOnly.ParseExact("20110716", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 340
             },
 
@@ -8406,7 +8405,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 29,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20110723,
+                WeekendingDate = DateOnly.ParseExact("20110723", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 341
             },
 
@@ -8426,7 +8425,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 30,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20110730,
+                WeekendingDate = DateOnly.ParseExact("20110730", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 342
             },
 
@@ -8446,7 +8445,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 31,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20110806,
+                WeekendingDate = DateOnly.ParseExact("20110806", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 343
             },
 
@@ -8466,7 +8465,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 32,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20110813,
+                WeekendingDate = DateOnly.ParseExact("20110813", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 344
             },
 
@@ -8486,7 +8485,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 33,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20110820,
+                WeekendingDate = DateOnly.ParseExact("20110820", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 345
             },
 
@@ -8506,7 +8505,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 34,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20110827,
+                WeekendingDate = DateOnly.ParseExact("20110827", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 346
             },
 
@@ -8526,7 +8525,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 35,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20110903,
+                WeekendingDate = DateOnly.ParseExact("20110903", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 347
             },
 
@@ -8546,7 +8545,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 36,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20110910,
+                WeekendingDate = DateOnly.ParseExact("20110910", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 348
             },
 
@@ -8566,7 +8565,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 37,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20110917,
+                WeekendingDate = DateOnly.ParseExact("20110917", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 349
             },
 
@@ -8586,7 +8585,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 38,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20110924,
+                WeekendingDate = DateOnly.ParseExact("20110924", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 350
             },
 
@@ -8606,7 +8605,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 39,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20111001,
+                WeekendingDate = DateOnly.ParseExact("20111001", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 351
             },
 
@@ -8626,7 +8625,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 40,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20111008,
+                WeekendingDate = DateOnly.ParseExact("20111008", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 352
             },
 
@@ -8646,7 +8645,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 41,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20111015,
+                WeekendingDate = DateOnly.ParseExact("20111015", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 353
             },
 
@@ -8666,7 +8665,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 42,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20111022,
+                WeekendingDate = DateOnly.ParseExact("20111022", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 354
             },
 
@@ -8686,7 +8685,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 43,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20111029,
+                WeekendingDate = DateOnly.ParseExact("20111029", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 355
             },
 
@@ -8706,7 +8705,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 44,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20111105,
+                WeekendingDate = DateOnly.ParseExact("20111105", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 356
             },
 
@@ -8726,7 +8725,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 45,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20111112,
+                WeekendingDate = DateOnly.ParseExact("20111112", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 357
             },
 
@@ -8746,7 +8745,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 46,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20111119,
+                WeekendingDate = DateOnly.ParseExact("20111119", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 358
             },
 
@@ -8766,7 +8765,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 47,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20111126,
+                WeekendingDate = DateOnly.ParseExact("20111126", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 359
             },
 
@@ -8786,7 +8785,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 48,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20111203,
+                WeekendingDate = DateOnly.ParseExact("20111203", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 360
             },
 
@@ -8806,7 +8805,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 49,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20111210,
+                WeekendingDate = DateOnly.ParseExact("20111210", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 361
             },
 
@@ -8826,7 +8825,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 50,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20111217,
+                WeekendingDate = DateOnly.ParseExact("20111217", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 362
             },
 
@@ -8846,7 +8845,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 51,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20111224,
+                WeekendingDate = DateOnly.ParseExact("20111224", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 363
             },
 
@@ -8866,7 +8865,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 52,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20111231,
+                WeekendingDate = DateOnly.ParseExact("20111231", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 364
             },
 
@@ -8886,7 +8885,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 1,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20120107,
+                WeekendingDate = DateOnly.ParseExact("20120107", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 373
             },
 
@@ -8906,7 +8905,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 2,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20120114,
+                WeekendingDate = DateOnly.ParseExact("20120114", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 374
             },
 
@@ -8926,7 +8925,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 3,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20120121,
+                WeekendingDate = DateOnly.ParseExact("20120121", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 375
             },
 
@@ -8946,7 +8945,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 4,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20120128,
+                WeekendingDate = DateOnly.ParseExact("20120128", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 376
             },
 
@@ -8966,7 +8965,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 5,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20120204,
+                WeekendingDate = DateOnly.ParseExact("20120204", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 377
             },
 
@@ -8986,7 +8985,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 6,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20120211,
+                WeekendingDate = DateOnly.ParseExact("20120211", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 378
             },
 
@@ -9006,7 +9005,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 7,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20120218,
+                WeekendingDate = DateOnly.ParseExact("20120218", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 379
             },
 
@@ -9026,7 +9025,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 8,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20120225,
+                WeekendingDate = DateOnly.ParseExact("20120225", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 380
             },
 
@@ -9046,7 +9045,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 9,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20120303,
+                WeekendingDate = DateOnly.ParseExact("20120303", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 381
             },
 
@@ -9066,7 +9065,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 10,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20120310,
+                WeekendingDate = DateOnly.ParseExact("20120310", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 382
             },
 
@@ -9086,7 +9085,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 11,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20120317,
+                WeekendingDate = DateOnly.ParseExact("20120317", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 383
             },
 
@@ -9106,7 +9105,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 12,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20120324,
+                WeekendingDate = DateOnly.ParseExact("20120324", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 384
             },
 
@@ -9126,7 +9125,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 13,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20120331,
+                WeekendingDate = DateOnly.ParseExact("20120331", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 385
             },
 
@@ -9146,7 +9145,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 14,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20120407,
+                WeekendingDate = DateOnly.ParseExact("20120407", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 386
             },
 
@@ -9166,7 +9165,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 15,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20120414,
+                WeekendingDate = DateOnly.ParseExact("20120414", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 387
             },
 
@@ -9186,7 +9185,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 16,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20120421,
+                WeekendingDate = DateOnly.ParseExact("20120421", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 388
             },
 
@@ -9206,7 +9205,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 17,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20120428,
+                WeekendingDate = DateOnly.ParseExact("20120428", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 389
             },
 
@@ -9226,7 +9225,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 18,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20120505,
+                WeekendingDate = DateOnly.ParseExact("20120505", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 390
             },
 
@@ -9246,7 +9245,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 19,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20120512,
+                WeekendingDate = DateOnly.ParseExact("20120512", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 391
             },
 
@@ -9266,7 +9265,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 20,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20120519,
+                WeekendingDate = DateOnly.ParseExact("20120519", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 392
             },
 
@@ -9286,7 +9285,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 21,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20120526,
+                WeekendingDate = DateOnly.ParseExact("20120526", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 393
             },
 
@@ -9306,7 +9305,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 22,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20120602,
+                WeekendingDate = DateOnly.ParseExact("20120602", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 394
             },
 
@@ -9326,7 +9325,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 23,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20120609,
+                WeekendingDate = DateOnly.ParseExact("20120609", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 395
             },
 
@@ -9346,7 +9345,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 24,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20120616,
+                WeekendingDate = DateOnly.ParseExact("20120616", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 396
             },
 
@@ -9366,7 +9365,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 25,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20120623,
+                WeekendingDate = DateOnly.ParseExact("20120623", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 397
             },
 
@@ -9386,7 +9385,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 26,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20120630,
+                WeekendingDate = DateOnly.ParseExact("20120630", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 398
             },
 
@@ -9406,7 +9405,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 27,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20120707,
+                WeekendingDate = DateOnly.ParseExact("20120707", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 399
             },
 
@@ -9426,7 +9425,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 28,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20120714,
+                WeekendingDate = DateOnly.ParseExact("20120714", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 400
             },
 
@@ -9446,7 +9445,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 29,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20120721,
+                WeekendingDate = DateOnly.ParseExact("20120721", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 401
             },
 
@@ -9466,7 +9465,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 30,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20120728,
+                WeekendingDate = DateOnly.ParseExact("20120728", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 402
             },
 
@@ -9486,7 +9485,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 31,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20120804,
+                WeekendingDate = DateOnly.ParseExact("20120804", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 403
             },
 
@@ -9506,7 +9505,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 32,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20120811,
+                WeekendingDate = DateOnly.ParseExact("20120811", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 404
             },
 
@@ -9526,7 +9525,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 33,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20120818,
+                WeekendingDate = DateOnly.ParseExact("20120818", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 405
             },
 
@@ -9546,7 +9545,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 34,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20120825,
+                WeekendingDate = DateOnly.ParseExact("20120825", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 406
             },
 
@@ -9566,7 +9565,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 35,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20120901,
+                WeekendingDate = DateOnly.ParseExact("20120901", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 407
             },
 
@@ -9586,7 +9585,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 36,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20120908,
+                WeekendingDate = DateOnly.ParseExact("20120908", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 408
             },
 
@@ -9606,7 +9605,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 37,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20120915,
+                WeekendingDate = DateOnly.ParseExact("20120915", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 409
             },
 
@@ -9626,7 +9625,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 38,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20120922,
+                WeekendingDate = DateOnly.ParseExact("20120922", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 410
             },
 
@@ -9646,7 +9645,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 39,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20120929,
+                WeekendingDate = DateOnly.ParseExact("20120929", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 411
             },
 
@@ -9666,7 +9665,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 40,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20121006,
+                WeekendingDate = DateOnly.ParseExact("20121006", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 412
             },
 
@@ -9686,7 +9685,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 41,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20121013,
+                WeekendingDate = DateOnly.ParseExact("20121013", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 413
             },
 
@@ -9706,7 +9705,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 42,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20121020,
+                WeekendingDate = DateOnly.ParseExact("20121020", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 414
             },
 
@@ -9726,7 +9725,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 43,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20121027,
+                WeekendingDate = DateOnly.ParseExact("20121027", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 415
             },
 
@@ -9746,7 +9745,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 44,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20121103,
+                WeekendingDate = DateOnly.ParseExact("20121103", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 416
             },
 
@@ -9766,7 +9765,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 45,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20121110,
+                WeekendingDate = DateOnly.ParseExact("20121110", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 417
             },
 
@@ -9786,7 +9785,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 46,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20121117,
+                WeekendingDate = DateOnly.ParseExact("20121117", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 418
             },
 
@@ -9806,7 +9805,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 47,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20121124,
+                WeekendingDate = DateOnly.ParseExact("20121124", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 419
             },
 
@@ -9826,7 +9825,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 48,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20121201,
+                WeekendingDate = DateOnly.ParseExact("20121201", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 420
             },
 
@@ -9846,7 +9845,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 49,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20121208,
+                WeekendingDate = DateOnly.ParseExact("20121208", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 421
             },
 
@@ -9866,7 +9865,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 50,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20121215,
+                WeekendingDate = DateOnly.ParseExact("20121215", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 422
             },
 
@@ -9886,7 +9885,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 51,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20121222,
+                WeekendingDate = DateOnly.ParseExact("20121222", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 423
             },
 
@@ -9906,7 +9905,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 52,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20121229,
+                WeekendingDate = DateOnly.ParseExact("20121229", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 424
             },
 
@@ -9926,7 +9925,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 1,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20130105,
+                WeekendingDate = DateOnly.ParseExact("20130105", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 433
             },
 
@@ -9946,7 +9945,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 2,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20130112,
+                WeekendingDate = DateOnly.ParseExact("20130112", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 434
             },
 
@@ -9966,7 +9965,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 3,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20130119,
+                WeekendingDate = DateOnly.ParseExact("20130119", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 435
             },
 
@@ -9986,7 +9985,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 4,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20130126,
+                WeekendingDate = DateOnly.ParseExact("20130126", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 436
             },
 
@@ -10006,7 +10005,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 5,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20130202,
+                WeekendingDate = DateOnly.ParseExact("20130202", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 437
             },
 
@@ -10026,7 +10025,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 6,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20130209,
+                WeekendingDate = DateOnly.ParseExact("20130209", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 438
             },
 
@@ -10046,7 +10045,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 7,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20130216,
+                WeekendingDate = DateOnly.ParseExact("20130216", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 439
             },
 
@@ -10066,7 +10065,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 8,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20130223,
+                WeekendingDate = DateOnly.ParseExact("20130223", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 440
             },
 
@@ -10086,7 +10085,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 9,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20130302,
+                WeekendingDate = DateOnly.ParseExact("20130302", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 441
             },
 
@@ -10106,7 +10105,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 10,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20130309,
+                WeekendingDate = DateOnly.ParseExact("20130309", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 442
             },
 
@@ -10126,7 +10125,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 11,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20130316,
+                WeekendingDate = DateOnly.ParseExact("20130316", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 443
             },
 
@@ -10146,7 +10145,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 12,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20130323,
+                WeekendingDate = DateOnly.ParseExact("20130323", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 444
             },
 
@@ -10166,7 +10165,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 13,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20130330,
+                WeekendingDate = DateOnly.ParseExact("20130330", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 445
             },
 
@@ -10186,7 +10185,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 14,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20130406,
+                WeekendingDate = DateOnly.ParseExact("20130406", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 446
             },
 
@@ -10206,7 +10205,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 15,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20130413,
+                WeekendingDate = DateOnly.ParseExact("20130413", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 447
             },
 
@@ -10226,7 +10225,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 16,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20130420,
+                WeekendingDate = DateOnly.ParseExact("20130420", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 448
             },
 
@@ -10246,7 +10245,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 17,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20130427,
+                WeekendingDate = DateOnly.ParseExact("20130427", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 449
             },
 
@@ -10266,7 +10265,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 18,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20130504,
+                WeekendingDate = DateOnly.ParseExact("20130504", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 450
             },
 
@@ -10286,7 +10285,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 19,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20130511,
+                WeekendingDate = DateOnly.ParseExact("20130511", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 451
             },
 
@@ -10306,7 +10305,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 20,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20130518,
+                WeekendingDate = DateOnly.ParseExact("20130518", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 452
             },
 
@@ -10326,7 +10325,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 21,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20130525,
+                WeekendingDate = DateOnly.ParseExact("20130525", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 453
             },
 
@@ -10346,7 +10345,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 22,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20130601,
+                WeekendingDate = DateOnly.ParseExact("20130601", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 454
             },
 
@@ -10366,7 +10365,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 23,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20130608,
+                WeekendingDate = DateOnly.ParseExact("20130608", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 455
             },
 
@@ -10386,7 +10385,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 24,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20130615,
+                WeekendingDate = DateOnly.ParseExact("20130615", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 456
             },
 
@@ -10406,7 +10405,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 25,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20130622,
+                WeekendingDate = DateOnly.ParseExact("20130622", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 457
             },
 
@@ -10426,7 +10425,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 26,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20130629,
+                WeekendingDate = DateOnly.ParseExact("20130629", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 458
             },
 
@@ -10446,7 +10445,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 27,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20130706,
+                WeekendingDate = DateOnly.ParseExact("20130706", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 459
             },
 
@@ -10466,7 +10465,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 28,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20130713,
+                WeekendingDate = DateOnly.ParseExact("20130713", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 460
             },
 
@@ -10486,7 +10485,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 29,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20130720,
+                WeekendingDate = DateOnly.ParseExact("20130720", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 461
             },
 
@@ -10506,7 +10505,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 30,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20130727,
+                WeekendingDate = DateOnly.ParseExact("20130727", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 462
             },
 
@@ -10526,7 +10525,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 31,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20130803,
+                WeekendingDate = DateOnly.ParseExact("20130803", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 463
             },
 
@@ -10546,7 +10545,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 32,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20130810,
+                WeekendingDate = DateOnly.ParseExact("20130810", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 464
             },
 
@@ -10566,7 +10565,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 33,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20130817,
+                WeekendingDate = DateOnly.ParseExact("20130817", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 465
             },
 
@@ -10586,7 +10585,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 34,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20130824,
+                WeekendingDate = DateOnly.ParseExact("20130824", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 466
             },
 
@@ -10606,7 +10605,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 35,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20130831,
+                WeekendingDate = DateOnly.ParseExact("20130831", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 467
             },
 
@@ -10626,7 +10625,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 36,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20130907,
+                WeekendingDate = DateOnly.ParseExact("20130907", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 468
             },
 
@@ -10646,7 +10645,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 37,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20130914,
+                WeekendingDate = DateOnly.ParseExact("20130914", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 469
             },
 
@@ -10666,7 +10665,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 38,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20130921,
+                WeekendingDate = DateOnly.ParseExact("20130921", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 470
             },
 
@@ -10686,7 +10685,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 39,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20130928,
+                WeekendingDate = DateOnly.ParseExact("20130928", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 471
             },
 
@@ -10706,7 +10705,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 40,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20131005,
+                WeekendingDate = DateOnly.ParseExact("20131005", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 472
             },
 
@@ -10726,7 +10725,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 41,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20131012,
+                WeekendingDate = DateOnly.ParseExact("20131012", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 473
             },
 
@@ -10746,7 +10745,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 42,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20131019,
+                WeekendingDate = DateOnly.ParseExact("20131019", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 474
             },
 
@@ -10766,7 +10765,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 43,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20131026,
+                WeekendingDate = DateOnly.ParseExact("20131026", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 475
             },
 
@@ -10786,7 +10785,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 44,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20131102,
+                WeekendingDate = DateOnly.ParseExact("20131102", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 476
             },
 
@@ -10806,7 +10805,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 45,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20131109,
+                WeekendingDate = DateOnly.ParseExact("20131109", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 477
             },
 
@@ -10826,7 +10825,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 46,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20131116,
+                WeekendingDate = DateOnly.ParseExact("20131116", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 478
             },
 
@@ -10846,7 +10845,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 47,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20131123,
+                WeekendingDate = DateOnly.ParseExact("20131123", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 479
             },
 
@@ -10866,7 +10865,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 48,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20131130,
+                WeekendingDate = DateOnly.ParseExact("20131130", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 480
             },
 
@@ -10886,7 +10885,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 49,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20131207,
+                WeekendingDate = DateOnly.ParseExact("20131207", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 481
             },
 
@@ -10906,7 +10905,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 50,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20131214,
+                WeekendingDate = DateOnly.ParseExact("20131214", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 482
             },
 
@@ -10926,7 +10925,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 51,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20131221,
+                WeekendingDate = DateOnly.ParseExact("20131221", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 483
             },
 
@@ -10946,7 +10945,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 52,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20131228,
+                WeekendingDate = DateOnly.ParseExact("20131228", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 484
             },
 
@@ -10966,7 +10965,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 1,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20140104,
+                WeekendingDate = DateOnly.ParseExact("20140104", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 493
             },
 
@@ -10986,7 +10985,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 2,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20140111,
+                WeekendingDate = DateOnly.ParseExact("20140111", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 494
             },
 
@@ -11006,7 +11005,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 3,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20140118,
+                WeekendingDate = DateOnly.ParseExact("20140118", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 495
             },
 
@@ -11026,7 +11025,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 4,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20140125,
+                WeekendingDate = DateOnly.ParseExact("20140125", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 496
             },
 
@@ -11046,7 +11045,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 5,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20140201,
+                WeekendingDate = DateOnly.ParseExact("20140201", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 497
             },
 
@@ -11066,7 +11065,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 6,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20140208,
+                WeekendingDate = DateOnly.ParseExact("20140208", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 498
             },
 
@@ -11086,7 +11085,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 7,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20140215,
+                WeekendingDate = DateOnly.ParseExact("20140215", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 499
             },
 
@@ -11106,7 +11105,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 8,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20140222,
+                WeekendingDate = DateOnly.ParseExact("20140222", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 500
             },
 
@@ -11126,7 +11125,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 9,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20140301,
+                WeekendingDate = DateOnly.ParseExact("20140301", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 501
             },
 
@@ -11146,7 +11145,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 10,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20140308,
+                WeekendingDate = DateOnly.ParseExact("20140308", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 502
             },
 
@@ -11166,7 +11165,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 11,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20140315,
+                WeekendingDate = DateOnly.ParseExact("20140315", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 503
             },
 
@@ -11186,7 +11185,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 12,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20140322,
+                WeekendingDate = DateOnly.ParseExact("20140322", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 504
             },
 
@@ -11206,7 +11205,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 13,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20140329,
+                WeekendingDate = DateOnly.ParseExact("20140329", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 505
             },
 
@@ -11226,7 +11225,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 14,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20140405,
+                WeekendingDate = DateOnly.ParseExact("20140405", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 506
             },
 
@@ -11246,7 +11245,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 15,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20140412,
+                WeekendingDate = DateOnly.ParseExact("20140412", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 507
             },
 
@@ -11266,7 +11265,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 16,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20140419,
+                WeekendingDate = DateOnly.ParseExact("20140419", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 508
             },
 
@@ -11286,7 +11285,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 17,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20140426,
+                WeekendingDate = DateOnly.ParseExact("20140426", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 509
             },
 
@@ -11306,7 +11305,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 18,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20140503,
+                WeekendingDate = DateOnly.ParseExact("20140503", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 510
             },
 
@@ -11326,7 +11325,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 19,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20140510,
+                WeekendingDate = DateOnly.ParseExact("20140510", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 511
             },
 
@@ -11346,7 +11345,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 20,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20140517,
+                WeekendingDate = DateOnly.ParseExact("20140517", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 512
             },
 
@@ -11366,7 +11365,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 21,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20140524,
+                WeekendingDate = DateOnly.ParseExact("20140524", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 513
             },
 
@@ -11386,7 +11385,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 22,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20140531,
+                WeekendingDate = DateOnly.ParseExact("20140531", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 514
             },
 
@@ -11406,7 +11405,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 23,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20140607,
+                WeekendingDate = DateOnly.ParseExact("20140607", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 515
             },
 
@@ -11426,7 +11425,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 24,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20140614,
+                WeekendingDate = DateOnly.ParseExact("20140614", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 516
             },
 
@@ -11446,7 +11445,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 25,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20140621,
+                WeekendingDate = DateOnly.ParseExact("20140621", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 517
             },
 
@@ -11466,7 +11465,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 26,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20140628,
+                WeekendingDate = DateOnly.ParseExact("20140628", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 518
             },
 
@@ -11486,7 +11485,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 27,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20140705,
+                WeekendingDate = DateOnly.ParseExact("20140705", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 519
             },
 
@@ -11506,7 +11505,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 28,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20140712,
+                WeekendingDate = DateOnly.ParseExact("20140712", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 520
             },
 
@@ -11526,7 +11525,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 29,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20140719,
+                WeekendingDate = DateOnly.ParseExact("20140719", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 521
             },
 
@@ -11546,7 +11545,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 30,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20140726,
+                WeekendingDate = DateOnly.ParseExact("20140726", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 522
             },
 
@@ -11566,7 +11565,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 31,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20140802,
+                WeekendingDate = DateOnly.ParseExact("20140802", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 523
             },
 
@@ -11586,7 +11585,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 32,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20140809,
+                WeekendingDate = DateOnly.ParseExact("20140809", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 524
             },
 
@@ -11606,7 +11605,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 33,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20140816,
+                WeekendingDate = DateOnly.ParseExact("20140816", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 525
             },
 
@@ -11626,7 +11625,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 34,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20140823,
+                WeekendingDate = DateOnly.ParseExact("20140823", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 526
             },
 
@@ -11646,7 +11645,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 35,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20140830,
+                WeekendingDate = DateOnly.ParseExact("20140830", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 527
             },
 
@@ -11666,7 +11665,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 36,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20140906,
+                WeekendingDate = DateOnly.ParseExact("20140906", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 528
             },
 
@@ -11686,7 +11685,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 37,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20140913,
+                WeekendingDate = DateOnly.ParseExact("20140913", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 529
             },
 
@@ -11706,7 +11705,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 38,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20140920,
+                WeekendingDate = DateOnly.ParseExact("20140920", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 530
             },
 
@@ -11726,7 +11725,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 39,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20140927,
+                WeekendingDate = DateOnly.ParseExact("20140927", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 531
             },
 
@@ -11746,7 +11745,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 40,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20141004,
+                WeekendingDate = DateOnly.ParseExact("20141004", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 532
             },
 
@@ -11766,7 +11765,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 41,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20141011,
+                WeekendingDate = DateOnly.ParseExact("20141011", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 533
             },
 
@@ -11786,7 +11785,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 42,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20141018,
+                WeekendingDate = DateOnly.ParseExact("20141018", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 534
             },
 
@@ -11806,7 +11805,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 43,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20141025,
+                WeekendingDate = DateOnly.ParseExact("20141025", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 535
             },
 
@@ -11826,7 +11825,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 44,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20141101,
+                WeekendingDate = DateOnly.ParseExact("20141101", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 536
             },
 
@@ -11846,7 +11845,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 45,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20141108,
+                WeekendingDate = DateOnly.ParseExact("20141108", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 537
             },
 
@@ -11866,7 +11865,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 46,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20141115,
+                WeekendingDate = DateOnly.ParseExact("20141115", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 538
             },
 
@@ -11886,7 +11885,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 47,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20141122,
+                WeekendingDate = DateOnly.ParseExact("20141122", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 539
             },
 
@@ -11906,7 +11905,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 48,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20141129,
+                WeekendingDate = DateOnly.ParseExact("20141129", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 540
             },
 
@@ -11926,7 +11925,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 49,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20141206,
+                WeekendingDate = DateOnly.ParseExact("20141206", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 541
             },
 
@@ -11946,7 +11945,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 50,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20141213,
+                WeekendingDate = DateOnly.ParseExact("20141213", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 542
             },
 
@@ -11966,7 +11965,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 51,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20141220,
+                WeekendingDate = DateOnly.ParseExact("20141220", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 543
             },
 
@@ -11986,7 +11985,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 52,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20141227,
+                WeekendingDate = DateOnly.ParseExact("20141227", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 544
             },
 
@@ -12006,7 +12005,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 53,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20150103,
+                WeekendingDate = DateOnly.ParseExact("20150103", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 545
             },
 
@@ -12026,7 +12025,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 1,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20150110,
+                WeekendingDate = DateOnly.ParseExact("20150110", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 553
             },
 
@@ -12046,7 +12045,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 2,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20150117,
+                WeekendingDate = DateOnly.ParseExact("20150117", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 554
             },
 
@@ -12066,7 +12065,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 3,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20150124,
+                WeekendingDate = DateOnly.ParseExact("20150124", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 555
             },
 
@@ -12086,7 +12085,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 4,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20150131,
+                WeekendingDate = DateOnly.ParseExact("20150131", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 556
             },
 
@@ -12106,7 +12105,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 5,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20150207,
+                WeekendingDate = DateOnly.ParseExact("20150207", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 557
             },
 
@@ -12126,7 +12125,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 6,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20150214,
+                WeekendingDate = DateOnly.ParseExact("20150214", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 558
             },
 
@@ -12146,7 +12145,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 7,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20150221,
+                WeekendingDate = DateOnly.ParseExact("20150221", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 559
             },
 
@@ -12166,7 +12165,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 8,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20150228,
+                WeekendingDate = DateOnly.ParseExact("20150228", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 560
             },
 
@@ -12186,7 +12185,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 9,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20150307,
+                WeekendingDate = DateOnly.ParseExact("20150307", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 561
             },
 
@@ -12206,7 +12205,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 10,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20150314,
+                WeekendingDate = DateOnly.ParseExact("20150314", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 562
             },
 
@@ -12226,7 +12225,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 11,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20150321,
+                WeekendingDate = DateOnly.ParseExact("20150321", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 563
             },
 
@@ -12246,7 +12245,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 12,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20150328,
+                WeekendingDate = DateOnly.ParseExact("20150328", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 564
             },
 
@@ -12266,7 +12265,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 13,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20150404,
+                WeekendingDate = DateOnly.ParseExact("20150404", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 565
             },
 
@@ -12286,7 +12285,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 14,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20150411,
+                WeekendingDate = DateOnly.ParseExact("20150411", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 566
             },
 
@@ -12306,7 +12305,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 15,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20150418,
+                WeekendingDate = DateOnly.ParseExact("20150418", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 567
             },
 
@@ -12326,7 +12325,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 16,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20150425,
+                WeekendingDate = DateOnly.ParseExact("20150425", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 568
             },
 
@@ -12346,7 +12345,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 17,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20150502,
+                WeekendingDate = DateOnly.ParseExact("20150502", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 569
             },
 
@@ -12366,7 +12365,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 18,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20150509,
+                WeekendingDate = DateOnly.ParseExact("20150509", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 570
             },
 
@@ -12386,7 +12385,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 19,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20150516,
+                WeekendingDate = DateOnly.ParseExact("20150516", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 571
             },
 
@@ -12406,7 +12405,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 20,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20150523,
+                WeekendingDate = DateOnly.ParseExact("20150523", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 572
             },
 
@@ -12426,7 +12425,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 21,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20150530,
+                WeekendingDate = DateOnly.ParseExact("20150530", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 573
             },
 
@@ -12446,7 +12445,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 22,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20150606,
+                WeekendingDate = DateOnly.ParseExact("20150606", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 574
             },
 
@@ -12466,7 +12465,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 23,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20150613,
+                WeekendingDate = DateOnly.ParseExact("20150613", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 575
             },
 
@@ -12486,7 +12485,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 24,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20150620,
+                WeekendingDate = DateOnly.ParseExact("20150620", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 576
             },
 
@@ -12506,7 +12505,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 25,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20150627,
+                WeekendingDate = DateOnly.ParseExact("20150627", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 577
             },
 
@@ -12526,7 +12525,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 26,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20150704,
+                WeekendingDate = DateOnly.ParseExact("20150704", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 578
             },
 
@@ -12546,7 +12545,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 27,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20150711,
+                WeekendingDate = DateOnly.ParseExact("20150711", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 579
             },
 
@@ -12566,7 +12565,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 28,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20150718,
+                WeekendingDate = DateOnly.ParseExact("20150718", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 580
             },
 
@@ -12586,7 +12585,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 29,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20150725,
+                WeekendingDate = DateOnly.ParseExact("20150725", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 581
             },
 
@@ -12606,7 +12605,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 30,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20150801,
+                WeekendingDate = DateOnly.ParseExact("20150801", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 582
             },
 
@@ -12626,7 +12625,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 31,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20150808,
+                WeekendingDate = DateOnly.ParseExact("20150808", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 583
             },
 
@@ -12646,7 +12645,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 32,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20150815,
+                WeekendingDate = DateOnly.ParseExact("20150815", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 584
             },
 
@@ -12666,7 +12665,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 33,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20150822,
+                WeekendingDate = DateOnly.ParseExact("20150822", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 585
             },
 
@@ -12686,7 +12685,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 34,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20150829,
+                WeekendingDate = DateOnly.ParseExact("20150829", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 586
             },
 
@@ -12706,7 +12705,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 35,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20150905,
+                WeekendingDate = DateOnly.ParseExact("20150905", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 587
             },
 
@@ -12726,7 +12725,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 36,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20150912,
+                WeekendingDate = DateOnly.ParseExact("20150912", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 588
             },
 
@@ -12746,7 +12745,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 37,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20150919,
+                WeekendingDate = DateOnly.ParseExact("20150919", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 589
             },
 
@@ -12766,7 +12765,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 38,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20150926,
+                WeekendingDate = DateOnly.ParseExact("20150926", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 590
             },
 
@@ -12786,7 +12785,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 39,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20151003,
+                WeekendingDate = DateOnly.ParseExact("20151003", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 591
             },
 
@@ -12806,7 +12805,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 40,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20151010,
+                WeekendingDate = DateOnly.ParseExact("20151010", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 592
             },
 
@@ -12826,7 +12825,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 41,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20151017,
+                WeekendingDate = DateOnly.ParseExact("20151017", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 593
             },
 
@@ -12846,7 +12845,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 42,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20151024,
+                WeekendingDate = DateOnly.ParseExact("20151024", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 594
             },
 
@@ -12866,7 +12865,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 43,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20151031,
+                WeekendingDate = DateOnly.ParseExact("20151031", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 595
             },
 
@@ -12886,7 +12885,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 44,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20151107,
+                WeekendingDate = DateOnly.ParseExact("20151107", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 596
             },
 
@@ -12906,7 +12905,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 45,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20151114,
+                WeekendingDate = DateOnly.ParseExact("20151114", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 597
             },
 
@@ -12926,7 +12925,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 46,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20151121,
+                WeekendingDate = DateOnly.ParseExact("20151121", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 598
             },
 
@@ -12946,7 +12945,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 47,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20151128,
+                WeekendingDate = DateOnly.ParseExact("20151128", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 599
             },
 
@@ -12966,7 +12965,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 48,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20151205,
+                WeekendingDate = DateOnly.ParseExact("20151205", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 600
             },
 
@@ -12986,7 +12985,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 49,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20151212,
+                WeekendingDate = DateOnly.ParseExact("20151212", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 601
             },
 
@@ -13006,7 +13005,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 50,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20151219,
+                WeekendingDate = DateOnly.ParseExact("20151219", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 602
             },
 
@@ -13026,7 +13025,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 51,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20151226,
+                WeekendingDate = DateOnly.ParseExact("20151226", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 603
             },
 
@@ -13046,7 +13045,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 52,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20160102,
+                WeekendingDate = DateOnly.ParseExact("20160102", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 604
             },
 
@@ -13066,7 +13065,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 1,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20180106,
+                WeekendingDate = DateOnly.ParseExact("20180106", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 733
             },
 
@@ -13086,7 +13085,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 2,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20180113,
+                WeekendingDate = DateOnly.ParseExact("20180113", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 734
             },
 
@@ -13106,7 +13105,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 3,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20180120,
+                WeekendingDate = DateOnly.ParseExact("20180120", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 735
             },
 
@@ -13126,7 +13125,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 4,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20180127,
+                WeekendingDate = DateOnly.ParseExact("20180127", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 736
             },
 
@@ -13146,7 +13145,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 5,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20180203,
+                WeekendingDate = DateOnly.ParseExact("20180203", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 737
             },
 
@@ -13166,7 +13165,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 6,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20180210,
+                WeekendingDate = DateOnly.ParseExact("20180210", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 738
             },
 
@@ -13186,7 +13185,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 7,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20180217,
+                WeekendingDate = DateOnly.ParseExact("20180217", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 739
             },
 
@@ -13206,7 +13205,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 8,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20180224,
+                WeekendingDate = DateOnly.ParseExact("20180224", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 740
             },
 
@@ -13226,7 +13225,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 9,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20180303,
+                WeekendingDate = DateOnly.ParseExact("20180303", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 741
             },
 
@@ -13246,7 +13245,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 10,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20180310,
+                WeekendingDate = DateOnly.ParseExact("20180310", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 742
             },
 
@@ -13266,7 +13265,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 11,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20180317,
+                WeekendingDate = DateOnly.ParseExact("20180317", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 743
             },
 
@@ -13286,7 +13285,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 12,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20180324,
+                WeekendingDate = DateOnly.ParseExact("20180324", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 744
             },
 
@@ -13306,7 +13305,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 13,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20180331,
+                WeekendingDate = DateOnly.ParseExact("20180331", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 745
             },
 
@@ -13326,7 +13325,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 14,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20180407,
+                WeekendingDate = DateOnly.ParseExact("20180407", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 746
             },
 
@@ -13346,7 +13345,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 15,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20180414,
+                WeekendingDate = DateOnly.ParseExact("20180414", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 747
             },
 
@@ -13366,7 +13365,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 16,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20180421,
+                WeekendingDate = DateOnly.ParseExact("20180421", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 748
             },
 
@@ -13386,7 +13385,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 17,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20180428,
+                WeekendingDate = DateOnly.ParseExact("20180428", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 749
             },
 
@@ -13406,7 +13405,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 18,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20180505,
+                WeekendingDate = DateOnly.ParseExact("20180505", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 750
             },
 
@@ -13426,7 +13425,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 19,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20180512,
+                WeekendingDate = DateOnly.ParseExact("20180512", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 751
             },
 
@@ -13446,7 +13445,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 20,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20180519,
+                WeekendingDate = DateOnly.ParseExact("20180519", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 752
             },
 
@@ -13466,7 +13465,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 21,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20180526,
+                WeekendingDate = DateOnly.ParseExact("20180526", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 753
             },
 
@@ -13486,7 +13485,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 22,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20180602,
+                WeekendingDate = DateOnly.ParseExact("20180602", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 754
             },
 
@@ -13506,7 +13505,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 23,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20180609,
+                WeekendingDate = DateOnly.ParseExact("20180609", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 755
             },
 
@@ -13526,7 +13525,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 24,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20180616,
+                WeekendingDate = DateOnly.ParseExact("20180616", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 756
             },
 
@@ -13546,7 +13545,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 25,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20180623,
+                WeekendingDate = DateOnly.ParseExact("20180623", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 757
             },
 
@@ -13566,7 +13565,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 26,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20180630,
+                WeekendingDate = DateOnly.ParseExact("20180630", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 758
             },
 
@@ -13586,7 +13585,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 27,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20180707,
+                WeekendingDate = DateOnly.ParseExact("20180707", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 759
             },
 
@@ -13606,7 +13605,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 28,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20180714,
+                WeekendingDate = DateOnly.ParseExact("20180714", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 760
             },
 
@@ -13626,7 +13625,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 29,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20180721,
+                WeekendingDate = DateOnly.ParseExact("20180721", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 761
             },
 
@@ -13646,7 +13645,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 30,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20180728,
+                WeekendingDate = DateOnly.ParseExact("20180728", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 762
             },
 
@@ -13666,7 +13665,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 31,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20180804,
+                WeekendingDate = DateOnly.ParseExact("20180804", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 763
             },
 
@@ -13686,7 +13685,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 32,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20180811,
+                WeekendingDate = DateOnly.ParseExact("20180811", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 764
             },
 
@@ -13706,7 +13705,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 33,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20180818,
+                WeekendingDate = DateOnly.ParseExact("20180818", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 765
             },
 
@@ -13726,7 +13725,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 34,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20180825,
+                WeekendingDate = DateOnly.ParseExact("20180825", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 766
             },
 
@@ -13746,7 +13745,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 35,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20180901,
+                WeekendingDate = DateOnly.ParseExact("20180901", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 767
             },
 
@@ -13766,7 +13765,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 36,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20180908,
+                WeekendingDate = DateOnly.ParseExact("20180908", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 768
             },
 
@@ -13786,7 +13785,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 37,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20180915,
+                WeekendingDate = DateOnly.ParseExact("20180915", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 769
             },
 
@@ -13806,7 +13805,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 38,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20180922,
+                WeekendingDate = DateOnly.ParseExact("20180922", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 770
             },
 
@@ -13826,7 +13825,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 39,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20180929,
+                WeekendingDate = DateOnly.ParseExact("20180929", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 771
             },
 
@@ -13846,7 +13845,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 40,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20181006,
+                WeekendingDate = DateOnly.ParseExact("20181006", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 772
             },
 
@@ -13866,7 +13865,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 41,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20181013,
+                WeekendingDate = DateOnly.ParseExact("20181013", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 773
             },
 
@@ -13886,7 +13885,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 42,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20181020,
+                WeekendingDate = DateOnly.ParseExact("20181020", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 774
             },
 
@@ -13906,7 +13905,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 43,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20181027,
+                WeekendingDate = DateOnly.ParseExact("20181027", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 775
             },
 
@@ -13926,7 +13925,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 44,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20181103,
+                WeekendingDate = DateOnly.ParseExact("20181103", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 776
             },
 
@@ -13946,7 +13945,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 45,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20181110,
+                WeekendingDate = DateOnly.ParseExact("20181110", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 777
             },
 
@@ -13966,7 +13965,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 46,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20181117,
+                WeekendingDate = DateOnly.ParseExact("20181117", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 778
             },
 
@@ -13986,7 +13985,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 47,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20181124,
+                WeekendingDate = DateOnly.ParseExact("20181124", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 779
             },
 
@@ -14006,7 +14005,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 48,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20181201,
+                WeekendingDate = DateOnly.ParseExact("20181201", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 780
             },
 
@@ -14026,7 +14025,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 49,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20181208,
+                WeekendingDate = DateOnly.ParseExact("20181208", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 781
             },
 
@@ -14046,7 +14045,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 50,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20181215,
+                WeekendingDate = DateOnly.ParseExact("20181215", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 782
             },
 
@@ -14066,7 +14065,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 51,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20181222,
+                WeekendingDate = DateOnly.ParseExact("20181222", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 783
             },
 
@@ -14086,7 +14085,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 52,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20181229,
+                WeekendingDate = DateOnly.ParseExact("20181229", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 784
             },
 
@@ -14106,7 +14105,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 1,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20190105,
+                WeekendingDate = DateOnly.ParseExact("20190105", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 793
             },
 
@@ -14126,7 +14125,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 2,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20190112,
+                WeekendingDate = DateOnly.ParseExact("20190112", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 794
             },
 
@@ -14146,7 +14145,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 3,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20190119,
+                WeekendingDate = DateOnly.ParseExact("20190119", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 795
             },
 
@@ -14166,7 +14165,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 4,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20190126,
+                WeekendingDate = DateOnly.ParseExact("20190126", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 796
             },
 
@@ -14186,7 +14185,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 5,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20190202,
+                WeekendingDate = DateOnly.ParseExact("20190202", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 797
             },
 
@@ -14206,7 +14205,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 6,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20190209,
+                WeekendingDate = DateOnly.ParseExact("20190209", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 798
             },
 
@@ -14226,7 +14225,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 7,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20190216,
+                WeekendingDate = DateOnly.ParseExact("20190216", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 799
             },
 
@@ -14246,7 +14245,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 8,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20190223,
+                WeekendingDate = DateOnly.ParseExact("20190223", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 800
             },
 
@@ -14266,7 +14265,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 9,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20190302,
+                WeekendingDate = DateOnly.ParseExact("20190302", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 801
             },
 
@@ -14286,7 +14285,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 10,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20190309,
+                WeekendingDate = DateOnly.ParseExact("20190309", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 802
             },
 
@@ -14306,7 +14305,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 11,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20190316,
+                WeekendingDate = DateOnly.ParseExact("20190316", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 803
             },
 
@@ -14326,7 +14325,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 12,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20190323,
+                WeekendingDate = DateOnly.ParseExact("20190323", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 804
             },
 
@@ -14346,7 +14345,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 13,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20190330,
+                WeekendingDate = DateOnly.ParseExact("20190330", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 805
             },
 
@@ -14366,7 +14365,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 14,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20190406,
+                WeekendingDate = DateOnly.ParseExact("20190406", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 806
             },
 
@@ -14386,7 +14385,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 15,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20190413,
+                WeekendingDate = DateOnly.ParseExact("20190413", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 807
             },
 
@@ -14406,7 +14405,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 16,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20190420,
+                WeekendingDate = DateOnly.ParseExact("20190420", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 808
             },
 
@@ -14426,7 +14425,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 17,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20190427,
+                WeekendingDate = DateOnly.ParseExact("20190427", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 809
             },
 
@@ -14446,7 +14445,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 18,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20190504,
+                WeekendingDate = DateOnly.ParseExact("20190504", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 810
             },
 
@@ -14466,7 +14465,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 19,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20190511,
+                WeekendingDate = DateOnly.ParseExact("20190511", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 811
             },
 
@@ -14486,7 +14485,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 20,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20190518,
+                WeekendingDate = DateOnly.ParseExact("20190518", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 812
             },
 
@@ -14506,7 +14505,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 21,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20190525,
+                WeekendingDate = DateOnly.ParseExact("20190525", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 813
             },
 
@@ -14526,7 +14525,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 22,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20190601,
+                WeekendingDate = DateOnly.ParseExact("20190601", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 814
             },
 
@@ -14546,7 +14545,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 23,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20190608,
+                WeekendingDate = DateOnly.ParseExact("20190608", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 815
             },
 
@@ -14566,7 +14565,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 24,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20190615,
+                WeekendingDate = DateOnly.ParseExact("20190615", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 816
             },
 
@@ -14586,7 +14585,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 25,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20190622,
+                WeekendingDate = DateOnly.ParseExact("20190622", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 817
             },
 
@@ -14606,7 +14605,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 26,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20190629,
+                WeekendingDate = DateOnly.ParseExact("20190629", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 818
             },
 
@@ -14626,7 +14625,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 27,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20190706,
+                WeekendingDate = DateOnly.ParseExact("20190706", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 819
             },
 
@@ -14646,7 +14645,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 28,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20190713,
+                WeekendingDate = DateOnly.ParseExact("20190713", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 820
             },
 
@@ -14666,7 +14665,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 29,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20190720,
+                WeekendingDate = DateOnly.ParseExact("20190720", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 821
             },
 
@@ -14686,7 +14685,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 30,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20190727,
+                WeekendingDate = DateOnly.ParseExact("20190727", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 822
             },
 
@@ -14706,7 +14705,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 31,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20190803,
+                WeekendingDate = DateOnly.ParseExact("20190803", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 823
             },
 
@@ -14726,7 +14725,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 32,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20190810,
+                WeekendingDate = DateOnly.ParseExact("20190810", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 824
             },
 
@@ -14746,7 +14745,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 33,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20190817,
+                WeekendingDate = DateOnly.ParseExact("20190817", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 825
             },
 
@@ -14766,7 +14765,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 34,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20190824,
+                WeekendingDate = DateOnly.ParseExact("20190824", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 826
             },
 
@@ -14786,7 +14785,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 35,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20190831,
+                WeekendingDate = DateOnly.ParseExact("20190831", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 827
             },
 
@@ -14806,7 +14805,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 36,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20190907,
+                WeekendingDate = DateOnly.ParseExact("20190907", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 828
             },
 
@@ -14826,7 +14825,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 37,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20190914,
+                WeekendingDate = DateOnly.ParseExact("20190914", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 829
             },
 
@@ -14846,7 +14845,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 38,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20190921,
+                WeekendingDate = DateOnly.ParseExact("20190921", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 830
             },
 
@@ -14866,7 +14865,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 39,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20190928,
+                WeekendingDate = DateOnly.ParseExact("20190928", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 831
             },
 
@@ -14886,7 +14885,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 40,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20191005,
+                WeekendingDate = DateOnly.ParseExact("20191005", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 832
             },
 
@@ -14906,7 +14905,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 41,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20191012,
+                WeekendingDate = DateOnly.ParseExact("20191012", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 833
             },
 
@@ -14926,7 +14925,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 42,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20191019,
+                WeekendingDate = DateOnly.ParseExact("20191019", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 834
             },
 
@@ -14946,7 +14945,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 43,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20191026,
+                WeekendingDate = DateOnly.ParseExact("20191026", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 835
             },
 
@@ -14966,7 +14965,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 44,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20191102,
+                WeekendingDate = DateOnly.ParseExact("20191102", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 836
             },
 
@@ -14986,7 +14985,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 45,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20191109,
+                WeekendingDate = DateOnly.ParseExact("20191109", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 837
             },
 
@@ -15006,7 +15005,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 46,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20191116,
+                WeekendingDate = DateOnly.ParseExact("20191116", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 838
             },
 
@@ -15026,7 +15025,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 47,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20191123,
+                WeekendingDate = DateOnly.ParseExact("20191123", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 839
             },
 
@@ -15046,7 +15045,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 48,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20191130,
+                WeekendingDate = DateOnly.ParseExact("20191130", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 840
             },
 
@@ -15066,7 +15065,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 49,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20191207,
+                WeekendingDate = DateOnly.ParseExact("20191207", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 841
             },
 
@@ -15086,7 +15085,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 50,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20191214,
+                WeekendingDate = DateOnly.ParseExact("20191214", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 842
             },
 
@@ -15106,7 +15105,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 51,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20191221,
+                WeekendingDate = DateOnly.ParseExact("20191221", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 843
             },
 
@@ -15126,7 +15125,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 52,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20191228,
+                WeekendingDate = DateOnly.ParseExact("20191228", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 844
             },
 
@@ -15146,7 +15145,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 1,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20200104,
+                WeekendingDate = DateOnly.ParseExact("20200104", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 853
             },
 
@@ -15166,7 +15165,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 2,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20200111,
+                WeekendingDate = DateOnly.ParseExact("20200111", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 854
             },
 
@@ -15186,7 +15185,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 3,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20200118,
+                WeekendingDate = DateOnly.ParseExact("20200118", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 855
             },
 
@@ -15206,7 +15205,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 4,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20200125,
+                WeekendingDate = DateOnly.ParseExact("20200125", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 856
             },
 
@@ -15226,7 +15225,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 5,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20200201,
+                WeekendingDate = DateOnly.ParseExact("20200201", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 857
             },
 
@@ -15246,7 +15245,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 6,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20200208,
+                WeekendingDate = DateOnly.ParseExact("20200208", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 858
             },
 
@@ -15266,7 +15265,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 7,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20200215,
+                WeekendingDate = DateOnly.ParseExact("20200215", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 859
             },
 
@@ -15286,7 +15285,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 8,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20200222,
+                WeekendingDate = DateOnly.ParseExact("20200222", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 860
             },
 
@@ -15306,7 +15305,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 9,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20200229,
+                WeekendingDate = DateOnly.ParseExact("20200229", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 861
             },
 
@@ -15326,7 +15325,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 10,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20200307,
+                WeekendingDate = DateOnly.ParseExact("20200307", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 862
             },
 
@@ -15346,7 +15345,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 11,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20200314,
+                WeekendingDate = DateOnly.ParseExact("20200314", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 863
             },
 
@@ -15366,7 +15365,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 12,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20200321,
+                WeekendingDate = DateOnly.ParseExact("20200321", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 864
             },
 
@@ -15386,7 +15385,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 13,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20200328,
+                WeekendingDate = DateOnly.ParseExact("20200328", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 865
             },
 
@@ -15406,7 +15405,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 14,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20200404,
+                WeekendingDate = DateOnly.ParseExact("20200404", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 866
             },
 
@@ -15426,7 +15425,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 15,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20200411,
+                WeekendingDate = DateOnly.ParseExact("20200411", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 867
             },
 
@@ -15446,7 +15445,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 16,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20200418,
+                WeekendingDate = DateOnly.ParseExact("20200418", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 868
             },
 
@@ -15466,7 +15465,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 17,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20200425,
+                WeekendingDate = DateOnly.ParseExact("20200425", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 869
             },
 
@@ -15486,7 +15485,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 18,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20200502,
+                WeekendingDate = DateOnly.ParseExact("20200502", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 870
             },
 
@@ -15506,7 +15505,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 19,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20200509,
+                WeekendingDate = DateOnly.ParseExact("20200509", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 871
             },
 
@@ -15526,7 +15525,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 20,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20200516,
+                WeekendingDate = DateOnly.ParseExact("20200516", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 872
             },
 
@@ -15546,7 +15545,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 21,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20200523,
+                WeekendingDate = DateOnly.ParseExact("20200523", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 873
             },
 
@@ -15566,7 +15565,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 22,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20200530,
+                WeekendingDate = DateOnly.ParseExact("20200530", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 874
             },
 
@@ -15586,7 +15585,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 23,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20200606,
+                WeekendingDate = DateOnly.ParseExact("20200606", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 875
             },
 
@@ -15606,7 +15605,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 24,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20200613,
+                WeekendingDate = DateOnly.ParseExact("20200613", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 876
             },
 
@@ -15626,7 +15625,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 25,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20200620,
+                WeekendingDate = DateOnly.ParseExact("20200620", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 877
             },
 
@@ -15646,7 +15645,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 26,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20200627,
+                WeekendingDate = DateOnly.ParseExact("20200627", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 878
             },
 
@@ -15666,7 +15665,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 27,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20200704,
+                WeekendingDate = DateOnly.ParseExact("20200704", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 879
             },
 
@@ -15686,7 +15685,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 28,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20200711,
+                WeekendingDate = DateOnly.ParseExact("20200711", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 880
             },
 
@@ -15706,7 +15705,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 29,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20200718,
+                WeekendingDate = DateOnly.ParseExact("20200718", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 881
             },
 
@@ -15726,7 +15725,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 30,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20200725,
+                WeekendingDate = DateOnly.ParseExact("20200725", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 882
             },
 
@@ -15746,7 +15745,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 31,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20200801,
+                WeekendingDate = DateOnly.ParseExact("20200801", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 883
             },
 
@@ -15766,7 +15765,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 32,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20200808,
+                WeekendingDate = DateOnly.ParseExact("20200808", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 884
             },
 
@@ -15786,7 +15785,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 33,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20200815,
+                WeekendingDate = DateOnly.ParseExact("20200815", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 885
             },
 
@@ -15806,7 +15805,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 34,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20200822,
+                WeekendingDate = DateOnly.ParseExact("20200822", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 886
             },
 
@@ -15826,7 +15825,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 35,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20200829,
+                WeekendingDate = DateOnly.ParseExact("20200829", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 887
             },
 
@@ -15846,7 +15845,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 36,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20200905,
+                WeekendingDate = DateOnly.ParseExact("20200905", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 888
             },
 
@@ -15866,7 +15865,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 37,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20200912,
+                WeekendingDate = DateOnly.ParseExact("20200912", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 889
             },
 
@@ -15886,7 +15885,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 38,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20200919,
+                WeekendingDate = DateOnly.ParseExact("20200919", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 890
             },
 
@@ -15906,7 +15905,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 39,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20200926,
+                WeekendingDate = DateOnly.ParseExact("20200926", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 891
             },
 
@@ -15926,7 +15925,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 40,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20201003,
+                WeekendingDate = DateOnly.ParseExact("20201003", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 892
             },
 
@@ -15946,7 +15945,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 41,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20201010,
+                WeekendingDate = DateOnly.ParseExact("20201010", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 893
             },
 
@@ -15966,7 +15965,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 42,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20201017,
+                WeekendingDate = DateOnly.ParseExact("20201017", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 894
             },
 
@@ -15986,7 +15985,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 43,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20201024,
+                WeekendingDate = DateOnly.ParseExact("20201024", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 895
             },
 
@@ -16006,7 +16005,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 44,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20201031,
+                WeekendingDate = DateOnly.ParseExact("20201031", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 896
             },
 
@@ -16026,7 +16025,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 45,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20201107,
+                WeekendingDate = DateOnly.ParseExact("20201107", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 897
             },
 
@@ -16046,7 +16045,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 46,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20201114,
+                WeekendingDate = DateOnly.ParseExact("20201114", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 898
             },
 
@@ -16066,7 +16065,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 47,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20201121,
+                WeekendingDate = DateOnly.ParseExact("20201121", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 899
             },
 
@@ -16086,7 +16085,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 48,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20201128,
+                WeekendingDate = DateOnly.ParseExact("20201128", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 900
             },
 
@@ -16106,7 +16105,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 49,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20201205,
+                WeekendingDate = DateOnly.ParseExact("20201205", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 901
             },
 
@@ -16126,7 +16125,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 50,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20201212,
+                WeekendingDate = DateOnly.ParseExact("20201212", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 902
             },
 
@@ -16146,7 +16145,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 51,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20201219,
+                WeekendingDate = DateOnly.ParseExact("20201219", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 903
             },
 
@@ -16166,7 +16165,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 52,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20201226,
+                WeekendingDate = DateOnly.ParseExact("20201226", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 904
             },
 
@@ -16186,7 +16185,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 53,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20210102,
+                WeekendingDate = DateOnly.ParseExact("20210102", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 905
             },
 
@@ -16206,7 +16205,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 1,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20160109,
+                WeekendingDate = DateOnly.ParseExact("20160109", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 613
             },
 
@@ -16226,7 +16225,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 2,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20160116,
+                WeekendingDate = DateOnly.ParseExact("20160116", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 614
             },
 
@@ -16246,7 +16245,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 3,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20160123,
+                WeekendingDate = DateOnly.ParseExact("20160123", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 615
             },
 
@@ -16266,7 +16265,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 4,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20160130,
+                WeekendingDate = DateOnly.ParseExact("20160130", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 616
             },
 
@@ -16286,7 +16285,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 5,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20160206,
+                WeekendingDate = DateOnly.ParseExact("20160206", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 617
             },
 
@@ -16306,7 +16305,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 6,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20160213,
+                WeekendingDate = DateOnly.ParseExact("20160213", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 618
             },
 
@@ -16326,7 +16325,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 7,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20160220,
+                WeekendingDate = DateOnly.ParseExact("20160220", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 619
             },
 
@@ -16346,7 +16345,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 8,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20160227,
+                WeekendingDate = DateOnly.ParseExact("20160227", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 620
             },
 
@@ -16366,7 +16365,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 9,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20160305,
+                WeekendingDate = DateOnly.ParseExact("20160305", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 621
             },
 
@@ -16386,7 +16385,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 10,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20160312,
+                WeekendingDate = DateOnly.ParseExact("20160312", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 622
             },
 
@@ -16406,7 +16405,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 11,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20160319,
+                WeekendingDate = DateOnly.ParseExact("20160319", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 623
             },
 
@@ -16426,7 +16425,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 12,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20160326,
+                WeekendingDate = DateOnly.ParseExact("20160326", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 624
             },
 
@@ -16446,7 +16445,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 13,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20160402,
+                WeekendingDate = DateOnly.ParseExact("20160402", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 625
             },
 
@@ -16466,7 +16465,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 14,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20160409,
+                WeekendingDate = DateOnly.ParseExact("20160409", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 626
             },
 
@@ -16486,7 +16485,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 15,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20160416,
+                WeekendingDate = DateOnly.ParseExact("20160416", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 627
             },
 
@@ -16506,7 +16505,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 16,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20160423,
+                WeekendingDate = DateOnly.ParseExact("20160423", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 628
             },
 
@@ -16526,7 +16525,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 17,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20160430,
+                WeekendingDate = DateOnly.ParseExact("20160430", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 629
             },
 
@@ -16546,7 +16545,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 18,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20160507,
+                WeekendingDate = DateOnly.ParseExact("20160507", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 630
             },
 
@@ -16566,7 +16565,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 19,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20160514,
+                WeekendingDate = DateOnly.ParseExact("20160514", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 631
             },
 
@@ -16586,7 +16585,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 20,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20160521,
+                WeekendingDate = DateOnly.ParseExact("20160521", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 632
             },
 
@@ -16606,7 +16605,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 21,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20160528,
+                WeekendingDate = DateOnly.ParseExact("20160528", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 633
             },
 
@@ -16626,7 +16625,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 22,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20160604,
+                WeekendingDate = DateOnly.ParseExact("20160604", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 634
             },
 
@@ -16646,7 +16645,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 23,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20160611,
+                WeekendingDate = DateOnly.ParseExact("20160611", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 635
             },
 
@@ -16666,7 +16665,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 24,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20160618,
+                WeekendingDate = DateOnly.ParseExact("20160618", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 636
             },
 
@@ -16686,7 +16685,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 25,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20160625,
+                WeekendingDate = DateOnly.ParseExact("20160625", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 637
             },
 
@@ -16706,7 +16705,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 26,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20160702,
+                WeekendingDate = DateOnly.ParseExact("20160702", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 638
             },
 
@@ -16726,7 +16725,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 27,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20160709,
+                WeekendingDate = DateOnly.ParseExact("20160709", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 639
             },
 
@@ -16746,7 +16745,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 28,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20160716,
+                WeekendingDate = DateOnly.ParseExact("20160716", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 640
             },
 
@@ -16766,7 +16765,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 29,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20160723,
+                WeekendingDate = DateOnly.ParseExact("20160723", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 641
             },
 
@@ -16786,7 +16785,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 30,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20160730,
+                WeekendingDate = DateOnly.ParseExact("20160730", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 642
             },
 
@@ -16806,7 +16805,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 31,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20160806,
+                WeekendingDate = DateOnly.ParseExact("20160806", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 643
             },
 
@@ -16826,7 +16825,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 32,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20160813,
+                WeekendingDate = DateOnly.ParseExact("20160813", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 644
             },
 
@@ -16846,7 +16845,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 33,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20160820,
+                WeekendingDate = DateOnly.ParseExact("20160820", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 645
             },
 
@@ -16866,7 +16865,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 34,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20160827,
+                WeekendingDate = DateOnly.ParseExact("20160827", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 646
             },
 
@@ -16886,7 +16885,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 35,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20160903,
+                WeekendingDate = DateOnly.ParseExact("20160903", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 647
             },
 
@@ -16906,7 +16905,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 36,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20160910,
+                WeekendingDate = DateOnly.ParseExact("20160910", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 648
             },
 
@@ -16926,7 +16925,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 37,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20160917,
+                WeekendingDate = DateOnly.ParseExact("20160917", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 649
             },
 
@@ -16946,7 +16945,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 38,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20160924,
+                WeekendingDate = DateOnly.ParseExact("20160924", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 650
             },
 
@@ -16966,7 +16965,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 39,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20161001,
+                WeekendingDate = DateOnly.ParseExact("20161001", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 651
             },
 
@@ -16986,7 +16985,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 40,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20161008,
+                WeekendingDate = DateOnly.ParseExact("20161008", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 652
             },
 
@@ -17006,7 +17005,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 41,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20161015,
+                WeekendingDate = DateOnly.ParseExact("20161015", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 653
             },
 
@@ -17026,7 +17025,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 42,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20161022,
+                WeekendingDate = DateOnly.ParseExact("20161022", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 654
             },
 
@@ -17046,7 +17045,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 43,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20161029,
+                WeekendingDate = DateOnly.ParseExact("20161029", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 655
             },
 
@@ -17066,7 +17065,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 44,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20161105,
+                WeekendingDate = DateOnly.ParseExact("20161105", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 656
             },
 
@@ -17086,7 +17085,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 45,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20161112,
+                WeekendingDate = DateOnly.ParseExact("20161112", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 657
             },
 
@@ -17106,7 +17105,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 46,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20161119,
+                WeekendingDate = DateOnly.ParseExact("20161119", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 658
             },
 
@@ -17126,7 +17125,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 47,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20161126,
+                WeekendingDate = DateOnly.ParseExact("20161126", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 659
             },
 
@@ -17146,7 +17145,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 48,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20161203,
+                WeekendingDate = DateOnly.ParseExact("20161203", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 660
             },
 
@@ -17166,7 +17165,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 49,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20161210,
+                WeekendingDate = DateOnly.ParseExact("20161210", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 661
             },
 
@@ -17186,7 +17185,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 50,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20161217,
+                WeekendingDate = DateOnly.ParseExact("20161217", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 662
             },
 
@@ -17206,7 +17205,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 51,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20161224,
+                WeekendingDate = DateOnly.ParseExact("20161224", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 663
             },
 
@@ -17226,7 +17225,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 52,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20161231,
+                WeekendingDate = DateOnly.ParseExact("20161231", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 664
             },
 
@@ -17246,7 +17245,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 1,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20170107,
+                WeekendingDate = DateOnly.ParseExact("20170107", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 673
             },
 
@@ -17266,7 +17265,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 2,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20170114,
+                WeekendingDate = DateOnly.ParseExact("20170114", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 674
             },
 
@@ -17286,7 +17285,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 3,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20170121,
+                WeekendingDate = DateOnly.ParseExact("20170121", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 675
             },
 
@@ -17306,7 +17305,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 4,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20170128,
+                WeekendingDate = DateOnly.ParseExact("20170128", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 676
             },
 
@@ -17326,7 +17325,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 5,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20170204,
+                WeekendingDate = DateOnly.ParseExact("20170204", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 677
             },
 
@@ -17346,7 +17345,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 6,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20170211,
+                WeekendingDate = DateOnly.ParseExact("20170211", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 678
             },
 
@@ -17366,7 +17365,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 7,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20170218,
+                WeekendingDate = DateOnly.ParseExact("20170218", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 679
             },
 
@@ -17386,7 +17385,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 8,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20170225,
+                WeekendingDate = DateOnly.ParseExact("20170225", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 680
             },
 
@@ -17406,7 +17405,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 9,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20170304,
+                WeekendingDate = DateOnly.ParseExact("20170304", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 681
             },
 
@@ -17426,7 +17425,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 10,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20170311,
+                WeekendingDate = DateOnly.ParseExact("20170311", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 682
             },
 
@@ -17446,7 +17445,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 11,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20170318,
+                WeekendingDate = DateOnly.ParseExact("20170318", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 683
             },
 
@@ -17466,7 +17465,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 12,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20170325,
+                WeekendingDate = DateOnly.ParseExact("20170325", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 684
             },
 
@@ -17486,7 +17485,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 13,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20170401,
+                WeekendingDate = DateOnly.ParseExact("20170401", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 685
             },
 
@@ -17506,7 +17505,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 14,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20170408,
+                WeekendingDate = DateOnly.ParseExact("20170408", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 686
             },
 
@@ -17526,7 +17525,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 15,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20170415,
+                WeekendingDate = DateOnly.ParseExact("20170415", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 687
             },
 
@@ -17546,7 +17545,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 16,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20170422,
+                WeekendingDate = DateOnly.ParseExact("20170422", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 688
             },
 
@@ -17566,7 +17565,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 17,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20170429,
+                WeekendingDate = DateOnly.ParseExact("20170429", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 689
             },
 
@@ -17586,7 +17585,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 18,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20170506,
+                WeekendingDate = DateOnly.ParseExact("20170506", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 690
             },
 
@@ -17606,7 +17605,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 19,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20170513,
+                WeekendingDate = DateOnly.ParseExact("20170513", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 691
             },
 
@@ -17626,7 +17625,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 20,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20170520,
+                WeekendingDate = DateOnly.ParseExact("20170520", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 692
             },
 
@@ -17646,7 +17645,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 21,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20170527,
+                WeekendingDate = DateOnly.ParseExact("20170527", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 693
             },
 
@@ -17666,7 +17665,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 22,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20170603,
+                WeekendingDate = DateOnly.ParseExact("20170603", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 694
             },
 
@@ -17686,7 +17685,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 23,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20170610,
+                WeekendingDate = DateOnly.ParseExact("20170610", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 695
             },
 
@@ -17706,7 +17705,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 24,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20170617,
+                WeekendingDate = DateOnly.ParseExact("20170617", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 696
             },
 
@@ -17726,7 +17725,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 25,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20170624,
+                WeekendingDate = DateOnly.ParseExact("20170624", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 697
             },
 
@@ -17746,7 +17745,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 26,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20170701,
+                WeekendingDate = DateOnly.ParseExact("20170701", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 698
             },
 
@@ -17766,7 +17765,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 27,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20170708,
+                WeekendingDate = DateOnly.ParseExact("20170708", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 699
             },
 
@@ -17786,7 +17785,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 28,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20170715,
+                WeekendingDate = DateOnly.ParseExact("20170715", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 700
             },
 
@@ -17806,7 +17805,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 29,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20170722,
+                WeekendingDate = DateOnly.ParseExact("20170722", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 701
             },
 
@@ -17826,7 +17825,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 30,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20170729,
+                WeekendingDate = DateOnly.ParseExact("20170729", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 702
             },
 
@@ -17846,7 +17845,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 31,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20170805,
+                WeekendingDate = DateOnly.ParseExact("20170805", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 703
             },
 
@@ -17866,7 +17865,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 32,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20170812,
+                WeekendingDate = DateOnly.ParseExact("20170812", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 704
             },
 
@@ -17886,7 +17885,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 33,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20170819,
+                WeekendingDate = DateOnly.ParseExact("20170819", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 705
             },
 
@@ -17906,7 +17905,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 34,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20170826,
+                WeekendingDate = DateOnly.ParseExact("20170826", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 706
             },
 
@@ -17926,7 +17925,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 35,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20170902,
+                WeekendingDate = DateOnly.ParseExact("20170902", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 707
             },
 
@@ -17946,7 +17945,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 36,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20170909,
+                WeekendingDate = DateOnly.ParseExact("20170909", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 708
             },
 
@@ -17966,7 +17965,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 37,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20170916,
+                WeekendingDate = DateOnly.ParseExact("20170916", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 709
             },
 
@@ -17986,7 +17985,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 38,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20170923,
+                WeekendingDate = DateOnly.ParseExact("20170923", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 710
             },
 
@@ -18006,7 +18005,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 39,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20170930,
+                WeekendingDate = DateOnly.ParseExact("20170930", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 711
             },
 
@@ -18026,7 +18025,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 40,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20171007,
+                WeekendingDate = DateOnly.ParseExact("20171007", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 712
             },
 
@@ -18046,7 +18045,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 41,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20171014,
+                WeekendingDate = DateOnly.ParseExact("20171014", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 713
             },
 
@@ -18066,7 +18065,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 42,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20171021,
+                WeekendingDate = DateOnly.ParseExact("20171021", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 714
             },
 
@@ -18086,7 +18085,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 43,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20171028,
+                WeekendingDate = DateOnly.ParseExact("20171028", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 715
             },
 
@@ -18106,7 +18105,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 44,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20171104,
+                WeekendingDate = DateOnly.ParseExact("20171104", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 716
             },
 
@@ -18126,7 +18125,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 45,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20171111,
+                WeekendingDate = DateOnly.ParseExact("20171111", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 717
             },
 
@@ -18146,7 +18145,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 46,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20171118,
+                WeekendingDate = DateOnly.ParseExact("20171118", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 718
             },
 
@@ -18166,7 +18165,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 47,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20171125,
+                WeekendingDate = DateOnly.ParseExact("20171125", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 719
             },
 
@@ -18186,7 +18185,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 48,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20171202,
+                WeekendingDate = DateOnly.ParseExact("20171202", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 720
             },
 
@@ -18206,7 +18205,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 49,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20171209,
+                WeekendingDate = DateOnly.ParseExact("20171209", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 721
             },
 
@@ -18226,7 +18225,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 50,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20171216,
+                WeekendingDate = DateOnly.ParseExact("20171216", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 722
             },
 
@@ -18246,7 +18245,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 51,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20171223,
+                WeekendingDate = DateOnly.ParseExact("20171223", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 723
             },
 
@@ -18266,7 +18265,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 52,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20171230,
+                WeekendingDate = DateOnly.ParseExact("20171230", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 724
             },
 
@@ -18286,7 +18285,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 3,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20010120,
+                WeekendingDate = DateOnly.ParseExact("20010120", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -285
             },
 
@@ -18306,7 +18305,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 4,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20010127,
+                WeekendingDate = DateOnly.ParseExact("20010127", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -284
             },
 
@@ -18326,7 +18325,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 5,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20010203,
+                WeekendingDate = DateOnly.ParseExact("20010203", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -283
             },
 
@@ -18346,7 +18345,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 6,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20010210,
+                WeekendingDate = DateOnly.ParseExact("20010210", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -282
             },
 
@@ -18366,7 +18365,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 8,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20010224,
+                WeekendingDate = DateOnly.ParseExact("20010224", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -280
             },
 
@@ -18386,7 +18385,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 9,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20010303,
+                WeekendingDate = DateOnly.ParseExact("20010303", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -279
             },
 
@@ -18406,7 +18405,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 10,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20010310,
+                WeekendingDate = DateOnly.ParseExact("20010310", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -278
             },
 
@@ -18426,7 +18425,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 11,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20010317,
+                WeekendingDate = DateOnly.ParseExact("20010317", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -277
             },
 
@@ -18446,7 +18445,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 13,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20010331,
+                WeekendingDate = DateOnly.ParseExact("20010331", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -275
             },
 
@@ -18466,7 +18465,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 14,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20010407,
+                WeekendingDate = DateOnly.ParseExact("20010407", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -274
             },
 
@@ -18486,7 +18485,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 15,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20010414,
+                WeekendingDate = DateOnly.ParseExact("20010414", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -273
             },
 
@@ -18506,7 +18505,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 16,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20010421,
+                WeekendingDate = DateOnly.ParseExact("20010421", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -272
             },
 
@@ -18526,7 +18525,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 17,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20010428,
+                WeekendingDate = DateOnly.ParseExact("20010428", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -271
             },
 
@@ -18546,7 +18545,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 18,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20010505,
+                WeekendingDate = DateOnly.ParseExact("20010505", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -270
             },
 
@@ -18566,7 +18565,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 19,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20010512,
+                WeekendingDate = DateOnly.ParseExact("20010512", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -269
             },
 
@@ -18586,7 +18585,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 20,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20010519,
+                WeekendingDate = DateOnly.ParseExact("20010519", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -268
             },
 
@@ -18606,7 +18605,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 22,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20010602,
+                WeekendingDate = DateOnly.ParseExact("20010602", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -266
             },
 
@@ -18626,7 +18625,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 23,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20010609,
+                WeekendingDate = DateOnly.ParseExact("20010609", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -265
             },
 
@@ -18646,7 +18645,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 24,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20010616,
+                WeekendingDate = DateOnly.ParseExact("20010616", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -264
             },
 
@@ -18666,7 +18665,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 26,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20010630,
+                WeekendingDate = DateOnly.ParseExact("20010630", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -262
             },
 
@@ -18686,7 +18685,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 27,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20010707,
+                WeekendingDate = DateOnly.ParseExact("20010707", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -261
             },
 
@@ -18706,7 +18705,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 28,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20010714,
+                WeekendingDate = DateOnly.ParseExact("20010714", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -260
             },
 
@@ -18726,7 +18725,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 29,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20010721,
+                WeekendingDate = DateOnly.ParseExact("20010721", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -259
             },
 
@@ -18746,7 +18745,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 30,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20010728,
+                WeekendingDate = DateOnly.ParseExact("20010728", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -258
             },
 
@@ -18766,7 +18765,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 32,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20010811,
+                WeekendingDate = DateOnly.ParseExact("20010811", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -256
             },
 
@@ -18786,7 +18785,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 33,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20010818,
+                WeekendingDate = DateOnly.ParseExact("20010818", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -255
             },
 
@@ -18806,7 +18805,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 34,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20010825,
+                WeekendingDate = DateOnly.ParseExact("20010825", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -254
             },
 
@@ -18826,7 +18825,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 35,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20010901,
+                WeekendingDate = DateOnly.ParseExact("20010901", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -253
             },
 
@@ -18846,7 +18845,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 38,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20010922,
+                WeekendingDate = DateOnly.ParseExact("20010922", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -250
             },
 
@@ -18866,7 +18865,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 39,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20010929,
+                WeekendingDate = DateOnly.ParseExact("20010929", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -249
             },
 
@@ -18886,7 +18885,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 40,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20011006,
+                WeekendingDate = DateOnly.ParseExact("20011006", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -248
             },
 
@@ -18906,7 +18905,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 41,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20011013,
+                WeekendingDate = DateOnly.ParseExact("20011013", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -247
             },
 
@@ -18926,7 +18925,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 43,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20011027,
+                WeekendingDate = DateOnly.ParseExact("20011027", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -245
             },
 
@@ -18946,7 +18945,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 45,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20011110,
+                WeekendingDate = DateOnly.ParseExact("20011110", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -243
             },
 
@@ -18966,7 +18965,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 46,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20011117,
+                WeekendingDate = DateOnly.ParseExact("20011117", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -242
             },
 
@@ -18986,7 +18985,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 48,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20011201,
+                WeekendingDate = DateOnly.ParseExact("20011201", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -240
             },
 
@@ -19006,7 +19005,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 49,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20011208,
+                WeekendingDate = DateOnly.ParseExact("20011208", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -239
             },
 
@@ -19026,7 +19025,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 51,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20011222,
+                WeekendingDate = DateOnly.ParseExact("20011222", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -237
             },
 
@@ -19046,7 +19045,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 52,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20011229,
+                WeekendingDate = DateOnly.ParseExact("20011229", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -236
             },
 
@@ -19066,7 +19065,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 1,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20020105,
+                WeekendingDate = DateOnly.ParseExact("20020105", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -227
             },
 
@@ -19086,7 +19085,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 2,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20020112,
+                WeekendingDate = DateOnly.ParseExact("20020112", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -226
             },
 
@@ -19106,7 +19105,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 3,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20020119,
+                WeekendingDate = DateOnly.ParseExact("20020119", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -225
             },
 
@@ -19126,7 +19125,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 4,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20020126,
+                WeekendingDate = DateOnly.ParseExact("20020126", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -224
             },
 
@@ -19146,7 +19145,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 5,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20020202,
+                WeekendingDate = DateOnly.ParseExact("20020202", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -223
             },
 
@@ -19166,7 +19165,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 6,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20020209,
+                WeekendingDate = DateOnly.ParseExact("20020209", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -222
             },
 
@@ -19186,7 +19185,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 9,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20020302,
+                WeekendingDate = DateOnly.ParseExact("20020302", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -219
             },
 
@@ -19206,7 +19205,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 11,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20020316,
+                WeekendingDate = DateOnly.ParseExact("20020316", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -217
             },
 
@@ -19226,7 +19225,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 15,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20020413,
+                WeekendingDate = DateOnly.ParseExact("20020413", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -213
             },
 
@@ -19246,7 +19245,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 18,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20020504,
+                WeekendingDate = DateOnly.ParseExact("20020504", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -210
             },
 
@@ -19266,7 +19265,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 20,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20020518,
+                WeekendingDate = DateOnly.ParseExact("20020518", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -208
             },
 
@@ -19286,7 +19285,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 21,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20020525,
+                WeekendingDate = DateOnly.ParseExact("20020525", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -207
             },
 
@@ -19306,7 +19305,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 23,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20020608,
+                WeekendingDate = DateOnly.ParseExact("20020608", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -205
             },
 
@@ -19326,7 +19325,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 25,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20020622,
+                WeekendingDate = DateOnly.ParseExact("20020622", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -203
             },
 
@@ -19346,7 +19345,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 26,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20020629,
+                WeekendingDate = DateOnly.ParseExact("20020629", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -202
             },
 
@@ -19366,7 +19365,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 28,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20020713,
+                WeekendingDate = DateOnly.ParseExact("20020713", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -200
             },
 
@@ -19386,7 +19385,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 29,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20020720,
+                WeekendingDate = DateOnly.ParseExact("20020720", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -199
             },
 
@@ -19406,7 +19405,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 30,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20020727,
+                WeekendingDate = DateOnly.ParseExact("20020727", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -198
             },
 
@@ -19426,7 +19425,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 31,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20020803,
+                WeekendingDate = DateOnly.ParseExact("20020803", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -197
             },
 
@@ -19446,7 +19445,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 32,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20020810,
+                WeekendingDate = DateOnly.ParseExact("20020810", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -196
             },
 
@@ -19466,7 +19465,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 33,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20020817,
+                WeekendingDate = DateOnly.ParseExact("20020817", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -195
             },
 
@@ -19486,7 +19485,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 36,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20020907,
+                WeekendingDate = DateOnly.ParseExact("20020907", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -192
             },
 
@@ -19506,7 +19505,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 37,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20020914,
+                WeekendingDate = DateOnly.ParseExact("20020914", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -191
             },
 
@@ -19526,7 +19525,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 38,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20020921,
+                WeekendingDate = DateOnly.ParseExact("20020921", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -190
             },
 
@@ -19546,7 +19545,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 40,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20021005,
+                WeekendingDate = DateOnly.ParseExact("20021005", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -188
             },
 
@@ -19566,7 +19565,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 41,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20021012,
+                WeekendingDate = DateOnly.ParseExact("20021012", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -187
             },
 
@@ -19586,7 +19585,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 43,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20021026,
+                WeekendingDate = DateOnly.ParseExact("20021026", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -185
             },
 
@@ -19606,7 +19605,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 45,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20021109,
+                WeekendingDate = DateOnly.ParseExact("20021109", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -183
             },
 
@@ -19626,7 +19625,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 46,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20021116,
+                WeekendingDate = DateOnly.ParseExact("20021116", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -182
             },
 
@@ -19646,7 +19645,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 48,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20021130,
+                WeekendingDate = DateOnly.ParseExact("20021130", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -180
             },
 
@@ -19666,7 +19665,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 50,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20021214,
+                WeekendingDate = DateOnly.ParseExact("20021214", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -178
             },
 
@@ -19686,7 +19685,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 51,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20021221,
+                WeekendingDate = DateOnly.ParseExact("20021221", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -177
             },
 
@@ -19706,7 +19705,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 52,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20021228,
+                WeekendingDate = DateOnly.ParseExact("20021228", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -176
             },
 
@@ -19726,7 +19725,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 2,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20030111,
+                WeekendingDate = DateOnly.ParseExact("20030111", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -166
             },
 
@@ -19746,7 +19745,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 4,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20030125,
+                WeekendingDate = DateOnly.ParseExact("20030125", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -164
             },
 
@@ -19766,7 +19765,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 5,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20030201,
+                WeekendingDate = DateOnly.ParseExact("20030201", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -163
             },
 
@@ -19786,7 +19785,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 9,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20030301,
+                WeekendingDate = DateOnly.ParseExact("20030301", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -159
             },
 
@@ -19806,7 +19805,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 10,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20030308,
+                WeekendingDate = DateOnly.ParseExact("20030308", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -158
             },
 
@@ -19826,7 +19825,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 12,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20030322,
+                WeekendingDate = DateOnly.ParseExact("20030322", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -156
             },
 
@@ -19846,7 +19845,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 13,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20030329,
+                WeekendingDate = DateOnly.ParseExact("20030329", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -155
             },
 
@@ -19866,7 +19865,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 14,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20030405,
+                WeekendingDate = DateOnly.ParseExact("20030405", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -154
             },
 
@@ -19886,7 +19885,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 15,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20030412,
+                WeekendingDate = DateOnly.ParseExact("20030412", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -153
             },
 
@@ -19906,7 +19905,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 16,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20030419,
+                WeekendingDate = DateOnly.ParseExact("20030419", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -152
             },
 
@@ -19926,7 +19925,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 18,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20030503,
+                WeekendingDate = DateOnly.ParseExact("20030503", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -150
             },
 
@@ -19946,7 +19945,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 19,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20030510,
+                WeekendingDate = DateOnly.ParseExact("20030510", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -149
             },
 
@@ -19966,7 +19965,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 20,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20030517,
+                WeekendingDate = DateOnly.ParseExact("20030517", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -148
             },
 
@@ -19986,7 +19985,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 21,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20030524,
+                WeekendingDate = DateOnly.ParseExact("20030524", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -147
             },
 
@@ -20006,7 +20005,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 23,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20030607,
+                WeekendingDate = DateOnly.ParseExact("20030607", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -145
             },
 
@@ -20026,7 +20025,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 24,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20030614,
+                WeekendingDate = DateOnly.ParseExact("20030614", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -144
             },
 
@@ -20046,7 +20045,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 25,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20030621,
+                WeekendingDate = DateOnly.ParseExact("20030621", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -143
             },
 
@@ -20066,7 +20065,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 28,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20030712,
+                WeekendingDate = DateOnly.ParseExact("20030712", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -140
             },
 
@@ -20086,7 +20085,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 29,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20030719,
+                WeekendingDate = DateOnly.ParseExact("20030719", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -139
             },
 
@@ -20106,7 +20105,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 31,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20030802,
+                WeekendingDate = DateOnly.ParseExact("20030802", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -137
             },
 
@@ -20126,7 +20125,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 33,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20030816,
+                WeekendingDate = DateOnly.ParseExact("20030816", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -135
             },
 
@@ -20146,7 +20145,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 36,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20030906,
+                WeekendingDate = DateOnly.ParseExact("20030906", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -132
             },
 
@@ -20166,7 +20165,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 37,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20030913,
+                WeekendingDate = DateOnly.ParseExact("20030913", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -131
             },
 
@@ -20186,7 +20185,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 38,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20030920,
+                WeekendingDate = DateOnly.ParseExact("20030920", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -130
             },
 
@@ -20206,7 +20205,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 39,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20030927,
+                WeekendingDate = DateOnly.ParseExact("20030927", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -129
             },
 
@@ -20226,7 +20225,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 40,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20031004,
+                WeekendingDate = DateOnly.ParseExact("20031004", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -128
             },
 
@@ -20246,7 +20245,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 41,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20031011,
+                WeekendingDate = DateOnly.ParseExact("20031011", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -127
             },
 
@@ -20266,7 +20265,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 43,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20031025,
+                WeekendingDate = DateOnly.ParseExact("20031025", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -125
             },
 
@@ -20286,7 +20285,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 44,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20031101,
+                WeekendingDate = DateOnly.ParseExact("20031101", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -124
             },
 
@@ -20306,7 +20305,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 46,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20031115,
+                WeekendingDate = DateOnly.ParseExact("20031115", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -122
             },
 
@@ -20326,7 +20325,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 47,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20031122,
+                WeekendingDate = DateOnly.ParseExact("20031122", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -121
             },
 
@@ -20346,7 +20345,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 48,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20031129,
+                WeekendingDate = DateOnly.ParseExact("20031129", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -120
             },
 
@@ -20366,7 +20365,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 49,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20031206,
+                WeekendingDate = DateOnly.ParseExact("20031206", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -119
             },
 
@@ -20386,7 +20385,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 52,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20031227,
+                WeekendingDate = DateOnly.ParseExact("20031227", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -116
             },
 
@@ -20406,7 +20405,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 53,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20040103,
+                WeekendingDate = DateOnly.ParseExact("20040103", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -115
             },
 
@@ -20426,7 +20425,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 1,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20040110,
+                WeekendingDate = DateOnly.ParseExact("20040110", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -107
             },
 
@@ -20446,7 +20445,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 3,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20040124,
+                WeekendingDate = DateOnly.ParseExact("20040124", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -105
             },
 
@@ -20466,7 +20465,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 7,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20040221,
+                WeekendingDate = DateOnly.ParseExact("20040221", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -101
             },
 
@@ -20486,7 +20485,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 8,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20040228,
+                WeekendingDate = DateOnly.ParseExact("20040228", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -100
             },
 
@@ -20506,7 +20505,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 12,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20040327,
+                WeekendingDate = DateOnly.ParseExact("20040327", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -96
             },
 
@@ -20526,7 +20525,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 13,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20040403,
+                WeekendingDate = DateOnly.ParseExact("20040403", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -95
             },
 
@@ -20546,7 +20545,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 14,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20040410,
+                WeekendingDate = DateOnly.ParseExact("20040410", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -94
             },
 
@@ -20566,7 +20565,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 15,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20040417,
+                WeekendingDate = DateOnly.ParseExact("20040417", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -93
             },
 
@@ -20586,7 +20585,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 16,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20040424,
+                WeekendingDate = DateOnly.ParseExact("20040424", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -92
             },
 
@@ -20606,7 +20605,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 17,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20040501,
+                WeekendingDate = DateOnly.ParseExact("20040501", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -91
             },
 
@@ -20626,7 +20625,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 18,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20040508,
+                WeekendingDate = DateOnly.ParseExact("20040508", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -90
             },
 
@@ -20646,7 +20645,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 20,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20040522,
+                WeekendingDate = DateOnly.ParseExact("20040522", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -88
             },
 
@@ -20666,7 +20665,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 23,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20040612,
+                WeekendingDate = DateOnly.ParseExact("20040612", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -85
             },
 
@@ -20686,7 +20685,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 24,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20040619,
+                WeekendingDate = DateOnly.ParseExact("20040619", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -84
             },
 
@@ -20706,7 +20705,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 25,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20040626,
+                WeekendingDate = DateOnly.ParseExact("20040626", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -83
             },
 
@@ -20726,7 +20725,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 27,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20040710,
+                WeekendingDate = DateOnly.ParseExact("20040710", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -81
             },
 
@@ -20746,7 +20745,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 30,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20040731,
+                WeekendingDate = DateOnly.ParseExact("20040731", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -78
             },
 
@@ -20766,7 +20765,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 34,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20040828,
+                WeekendingDate = DateOnly.ParseExact("20040828", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -74
             },
 
@@ -20786,7 +20785,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 35,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20040904,
+                WeekendingDate = DateOnly.ParseExact("20040904", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -73
             },
 
@@ -20806,7 +20805,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 36,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20040911,
+                WeekendingDate = DateOnly.ParseExact("20040911", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -72
             },
 
@@ -20826,7 +20825,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 37,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20040918,
+                WeekendingDate = DateOnly.ParseExact("20040918", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -71
             },
 
@@ -20846,7 +20845,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 39,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20041002,
+                WeekendingDate = DateOnly.ParseExact("20041002", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -69
             },
 
@@ -20866,7 +20865,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 40,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20041009,
+                WeekendingDate = DateOnly.ParseExact("20041009", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -68
             },
 
@@ -20886,7 +20885,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 41,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20041016,
+                WeekendingDate = DateOnly.ParseExact("20041016", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -67
             },
 
@@ -20906,7 +20905,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 1,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20220108,
+                WeekendingDate = DateOnly.ParseExact("20220108", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 973
             },
 
@@ -20926,7 +20925,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 2,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20220115,
+                WeekendingDate = DateOnly.ParseExact("20220115", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 974
             },
 
@@ -20946,7 +20945,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 3,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20220122,
+                WeekendingDate = DateOnly.ParseExact("20220122", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 975
             },
 
@@ -20966,7 +20965,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 4,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20220129,
+                WeekendingDate = DateOnly.ParseExact("20220129", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 976
             },
 
@@ -20986,7 +20985,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 5,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20220205,
+                WeekendingDate = DateOnly.ParseExact("20220205", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 977
             },
 
@@ -21006,7 +21005,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 6,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20220212,
+                WeekendingDate = DateOnly.ParseExact("20220212", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 978
             },
 
@@ -21026,7 +21025,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 13,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20220402,
+                WeekendingDate = DateOnly.ParseExact("20220402", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 985
             },
 
@@ -21046,7 +21045,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 14,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20220409,
+                WeekendingDate = DateOnly.ParseExact("20220409", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 986
             },
 
@@ -21066,7 +21065,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 15,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20220416,
+                WeekendingDate = DateOnly.ParseExact("20220416", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 987
             },
 
@@ -21086,7 +21085,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 19,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20220514,
+                WeekendingDate = DateOnly.ParseExact("20220514", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 991
             },
 
@@ -21106,7 +21105,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 20,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20220521,
+                WeekendingDate = DateOnly.ParseExact("20220521", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 992
             },
 
@@ -21126,7 +21125,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 21,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20220528,
+                WeekendingDate = DateOnly.ParseExact("20220528", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 993
             },
 
@@ -21146,7 +21145,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 22,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20220604,
+                WeekendingDate = DateOnly.ParseExact("20220604", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 994
             },
 
@@ -21166,7 +21165,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 23,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20220611,
+                WeekendingDate = DateOnly.ParseExact("20220611", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 995
             },
 
@@ -21186,7 +21185,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 24,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20220618,
+                WeekendingDate = DateOnly.ParseExact("20220618", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 996
             },
 
@@ -21206,7 +21205,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 25,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20220625,
+                WeekendingDate = DateOnly.ParseExact("20220625", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 997
             },
 
@@ -21226,7 +21225,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 26,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20220702,
+                WeekendingDate = DateOnly.ParseExact("20220702", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 998
             },
 
@@ -21246,7 +21245,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 27,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20220709,
+                WeekendingDate = DateOnly.ParseExact("20220709", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 999
             },
 
@@ -21266,7 +21265,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 28,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20220716,
+                WeekendingDate = DateOnly.ParseExact("20220716", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1000
             },
 
@@ -21286,7 +21285,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 29,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20220723,
+                WeekendingDate = DateOnly.ParseExact("20220723", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1001
             },
 
@@ -21306,7 +21305,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 30,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20220730,
+                WeekendingDate = DateOnly.ParseExact("20220730", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1002
             },
 
@@ -21326,7 +21325,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 31,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20220806,
+                WeekendingDate = DateOnly.ParseExact("20220806", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1003
             },
 
@@ -21346,7 +21345,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 32,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20220813,
+                WeekendingDate = DateOnly.ParseExact("20220813", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1004
             },
 
@@ -21366,7 +21365,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 33,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20220820,
+                WeekendingDate = DateOnly.ParseExact("20220820", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1005
             },
 
@@ -21386,7 +21385,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 34,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20220827,
+                WeekendingDate = DateOnly.ParseExact("20220827", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1006
             },
 
@@ -21406,7 +21405,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 35,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20220903,
+                WeekendingDate = DateOnly.ParseExact("20220903", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1007
             },
 
@@ -21426,7 +21425,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 36,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20220910,
+                WeekendingDate = DateOnly.ParseExact("20220910", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1008
             },
 
@@ -21446,7 +21445,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 40,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20221008,
+                WeekendingDate = DateOnly.ParseExact("20221008", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1012
             },
 
@@ -21466,7 +21465,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 41,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20221015,
+                WeekendingDate = DateOnly.ParseExact("20221015", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1013
             },
 
@@ -21486,7 +21485,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 42,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20221022,
+                WeekendingDate = DateOnly.ParseExact("20221022", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1014
             },
 
@@ -21506,7 +21505,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 43,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20221029,
+                WeekendingDate = DateOnly.ParseExact("20221029", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1015
             },
 
@@ -21526,7 +21525,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 44,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20221105,
+                WeekendingDate = DateOnly.ParseExact("20221105", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1016
             },
 
@@ -21546,7 +21545,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 45,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20221112,
+                WeekendingDate = DateOnly.ParseExact("20221112", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1017
             },
 
@@ -21566,7 +21565,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 46,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20221119,
+                WeekendingDate = DateOnly.ParseExact("20221119", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1018
             },
 
@@ -21586,7 +21585,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 47,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20221126,
+                WeekendingDate = DateOnly.ParseExact("20221126", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1019
             },
 
@@ -21606,7 +21605,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 48,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20221203,
+                WeekendingDate = DateOnly.ParseExact("20221203", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1020
             },
 
@@ -21626,7 +21625,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 49,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20221210,
+                WeekendingDate = DateOnly.ParseExact("20221210", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1021
             },
 
@@ -21646,7 +21645,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 50,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20221217,
+                WeekendingDate = DateOnly.ParseExact("20221217", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1022
             },
 
@@ -21666,7 +21665,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 51,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20221224,
+                WeekendingDate = DateOnly.ParseExact("20221224", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1023
             },
 
@@ -21686,7 +21685,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 10,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20210313,
+                WeekendingDate = DateOnly.ParseExact("20210313", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 922
             },
 
@@ -21706,7 +21705,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 11,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20210320,
+                WeekendingDate = DateOnly.ParseExact("20210320", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 923
             },
 
@@ -21726,7 +21725,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 12,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20210327,
+                WeekendingDate = DateOnly.ParseExact("20210327", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 924
             },
 
@@ -21746,7 +21745,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 13,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20210403,
+                WeekendingDate = DateOnly.ParseExact("20210403", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 925
             },
 
@@ -21766,7 +21765,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 14,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20210410,
+                WeekendingDate = DateOnly.ParseExact("20210410", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 926
             },
 
@@ -21786,7 +21785,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 15,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20210417,
+                WeekendingDate = DateOnly.ParseExact("20210417", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 927
             },
 
@@ -21806,7 +21805,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 19,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20210515,
+                WeekendingDate = DateOnly.ParseExact("20210515", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 931
             },
 
@@ -21826,7 +21825,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 20,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20210522,
+                WeekendingDate = DateOnly.ParseExact("20210522", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 932
             },
 
@@ -21846,7 +21845,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 21,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20210529,
+                WeekendingDate = DateOnly.ParseExact("20210529", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 933
             },
 
@@ -21866,7 +21865,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 28,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20210717,
+                WeekendingDate = DateOnly.ParseExact("20210717", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 940
             },
 
@@ -21886,7 +21885,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 29,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20210724,
+                WeekendingDate = DateOnly.ParseExact("20210724", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 941
             },
 
@@ -21906,7 +21905,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 30,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20210731,
+                WeekendingDate = DateOnly.ParseExact("20210731", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 942
             },
 
@@ -21926,7 +21925,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 37,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20210918,
+                WeekendingDate = DateOnly.ParseExact("20210918", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 949
             },
 
@@ -21946,7 +21945,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 38,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20210925,
+                WeekendingDate = DateOnly.ParseExact("20210925", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 950
             },
 
@@ -21966,7 +21965,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 39,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20211002,
+                WeekendingDate = DateOnly.ParseExact("20211002", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 951
             },
 
@@ -21986,7 +21985,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 43,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20211030,
+                WeekendingDate = DateOnly.ParseExact("20211030", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 955
             },
 
@@ -22006,7 +22005,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 44,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20211106,
+                WeekendingDate = DateOnly.ParseExact("20211106", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 956
             },
 
@@ -22026,7 +22025,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 45,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20211113,
+                WeekendingDate = DateOnly.ParseExact("20211113", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 957
             },
 
@@ -22046,7 +22045,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 46,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20211120,
+                WeekendingDate = DateOnly.ParseExact("20211120", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 958
             },
 
@@ -22066,7 +22065,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 47,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20211127,
+                WeekendingDate = DateOnly.ParseExact("20211127", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 959
             },
 
@@ -22086,7 +22085,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 48,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20211204,
+                WeekendingDate = DateOnly.ParseExact("20211204", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 960
             },
 
@@ -22106,7 +22105,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 52,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20220101,
+                WeekendingDate = DateOnly.ParseExact("20220101", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 964
             },
 
@@ -22126,7 +22125,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 7,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20220219,
+                WeekendingDate = DateOnly.ParseExact("20220219", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 979
             },
 
@@ -22146,7 +22145,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 8,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20220226,
+                WeekendingDate = DateOnly.ParseExact("20220226", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 980
             },
 
@@ -22166,7 +22165,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 9,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20220305,
+                WeekendingDate = DateOnly.ParseExact("20220305", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 981
             },
 
@@ -22186,7 +22185,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 10,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20220312,
+                WeekendingDate = DateOnly.ParseExact("20220312", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 982
             },
 
@@ -22206,7 +22205,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 11,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20220319,
+                WeekendingDate = DateOnly.ParseExact("20220319", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 983
             },
 
@@ -22226,7 +22225,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 12,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20220326,
+                WeekendingDate = DateOnly.ParseExact("20220326", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 984
             },
 
@@ -22246,7 +22245,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 16,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20220423,
+                WeekendingDate = DateOnly.ParseExact("20220423", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 988
             },
 
@@ -22266,7 +22265,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 17,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20220430,
+                WeekendingDate = DateOnly.ParseExact("20220430", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 989
             },
 
@@ -22286,7 +22285,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 18,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20220507,
+                WeekendingDate = DateOnly.ParseExact("20220507", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 990
             },
 
@@ -22306,7 +22305,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 37,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20220917,
+                WeekendingDate = DateOnly.ParseExact("20220917", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1009
             },
 
@@ -22326,7 +22325,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 38,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20220924,
+                WeekendingDate = DateOnly.ParseExact("20220924", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1010
             },
 
@@ -22346,7 +22345,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 39,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20221001,
+                WeekendingDate = DateOnly.ParseExact("20221001", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1011
             },
 
@@ -22366,7 +22365,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 52,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20221231,
+                WeekendingDate = DateOnly.ParseExact("20221231", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1024
             },
 
@@ -22386,7 +22385,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 4,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20210130,
+                WeekendingDate = DateOnly.ParseExact("20210130", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 916
             },
 
@@ -22406,7 +22405,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 5,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20210206,
+                WeekendingDate = DateOnly.ParseExact("20210206", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 917
             },
 
@@ -22426,7 +22425,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 6,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20210213,
+                WeekendingDate = DateOnly.ParseExact("20210213", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 918
             },
 
@@ -22446,7 +22445,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 16,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20210424,
+                WeekendingDate = DateOnly.ParseExact("20210424", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 928
             },
 
@@ -22466,7 +22465,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 17,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20210501,
+                WeekendingDate = DateOnly.ParseExact("20210501", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 929
             },
 
@@ -22486,7 +22485,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 18,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20210508,
+                WeekendingDate = DateOnly.ParseExact("20210508", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 930
             },
 
@@ -22506,7 +22505,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 22,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20210605,
+                WeekendingDate = DateOnly.ParseExact("20210605", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 934
             },
 
@@ -22526,7 +22525,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 23,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20210612,
+                WeekendingDate = DateOnly.ParseExact("20210612", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 935
             },
 
@@ -22546,7 +22545,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 24,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20210619,
+                WeekendingDate = DateOnly.ParseExact("20210619", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 936
             },
 
@@ -22566,7 +22565,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 25,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20210626,
+                WeekendingDate = DateOnly.ParseExact("20210626", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 937
             },
 
@@ -22586,7 +22585,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 26,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20210703,
+                WeekendingDate = DateOnly.ParseExact("20210703", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 938
             },
 
@@ -22606,7 +22605,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 27,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20210710,
+                WeekendingDate = DateOnly.ParseExact("20210710", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 939
             },
 
@@ -22626,7 +22625,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 31,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20210807,
+                WeekendingDate = DateOnly.ParseExact("20210807", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 943
             },
 
@@ -22646,7 +22645,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 32,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20210814,
+                WeekendingDate = DateOnly.ParseExact("20210814", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 944
             },
 
@@ -22666,7 +22665,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 33,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20210821,
+                WeekendingDate = DateOnly.ParseExact("20210821", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 945
             },
 
@@ -22686,7 +22685,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 34,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20210828,
+                WeekendingDate = DateOnly.ParseExact("20210828", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 946
             },
 
@@ -22706,7 +22705,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 35,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20210904,
+                WeekendingDate = DateOnly.ParseExact("20210904", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 947
             },
 
@@ -22726,7 +22725,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 36,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20210911,
+                WeekendingDate = DateOnly.ParseExact("20210911", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 948
             },
 
@@ -22746,7 +22745,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 40,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20211009,
+                WeekendingDate = DateOnly.ParseExact("20211009", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 952
             },
 
@@ -22766,7 +22765,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 41,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20211016,
+                WeekendingDate = DateOnly.ParseExact("20211016", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 953
             },
 
@@ -22786,7 +22785,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 42,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20211023,
+                WeekendingDate = DateOnly.ParseExact("20211023", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 954
             },
 
@@ -22806,7 +22805,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 49,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20211211,
+                WeekendingDate = DateOnly.ParseExact("20211211", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 961
             },
 
@@ -22826,7 +22825,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 50,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20211218,
+                WeekendingDate = DateOnly.ParseExact("20211218", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 962
             },
 
@@ -22846,7 +22845,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 51,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20211225,
+                WeekendingDate = DateOnly.ParseExact("20211225", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 963
             },
 
@@ -22866,7 +22865,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 1,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20210109,
+                WeekendingDate = DateOnly.ParseExact("20210109", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 913
             },
 
@@ -22886,7 +22885,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 2,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20210116,
+                WeekendingDate = DateOnly.ParseExact("20210116", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 914
             },
 
@@ -22906,7 +22905,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 3,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20210123,
+                WeekendingDate = DateOnly.ParseExact("20210123", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 915
             },
 
@@ -22926,7 +22925,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 7,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20210220,
+                WeekendingDate = DateOnly.ParseExact("20210220", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 919
             },
 
@@ -22946,7 +22945,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 8,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20210227,
+                WeekendingDate = DateOnly.ParseExact("20210227", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 920
             },
 
@@ -22966,7 +22965,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 9,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20210306,
+                WeekendingDate = DateOnly.ParseExact("20210306", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 921
             },
 
@@ -22986,7 +22985,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 16,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20230422,
+                WeekendingDate = DateOnly.ParseExact("20230422", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1048
             },
 
@@ -23006,7 +23005,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 17,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20230429,
+                WeekendingDate = DateOnly.ParseExact("20230429", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1049
             },
 
@@ -23026,7 +23025,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 18,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20230506,
+                WeekendingDate = DateOnly.ParseExact("20230506", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1050
             },
 
@@ -23046,7 +23045,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 37,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20230916,
+                WeekendingDate = DateOnly.ParseExact("20230916", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1069
             },
 
@@ -23066,7 +23065,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 38,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20230923,
+                WeekendingDate = DateOnly.ParseExact("20230923", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1070
             },
 
@@ -23086,7 +23085,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 39,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20230930,
+                WeekendingDate = DateOnly.ParseExact("20230930", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1071
             },
 
@@ -23106,7 +23105,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 43,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20231028,
+                WeekendingDate = DateOnly.ParseExact("20231028", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1075
             },
 
@@ -23126,7 +23125,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 44,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20231104,
+                WeekendingDate = DateOnly.ParseExact("20231104", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1076
             },
 
@@ -23146,7 +23145,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 45,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20231111,
+                WeekendingDate = DateOnly.ParseExact("20231111", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1077
             },
 
@@ -23166,7 +23165,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 46,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20231118,
+                WeekendingDate = DateOnly.ParseExact("20231118", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1078
             },
 
@@ -23186,7 +23185,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 47,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20231125,
+                WeekendingDate = DateOnly.ParseExact("20231125", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1079
             },
 
@@ -23206,7 +23205,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 48,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20231202,
+                WeekendingDate = DateOnly.ParseExact("20231202", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1080
             },
 
@@ -23226,7 +23225,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 1,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20230107,
+                WeekendingDate = DateOnly.ParseExact("20230107", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1033
             },
 
@@ -23246,7 +23245,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 2,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20230114,
+                WeekendingDate = DateOnly.ParseExact("20230114", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1034
             },
 
@@ -23266,7 +23265,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 3,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20230121,
+                WeekendingDate = DateOnly.ParseExact("20230121", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1035
             },
 
@@ -23286,7 +23285,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 2,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20000115,
+                WeekendingDate = DateOnly.ParseExact("20000115", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -346
             },
 
@@ -23306,7 +23305,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 3,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20000122,
+                WeekendingDate = DateOnly.ParseExact("20000122", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -345
             },
 
@@ -23326,7 +23325,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 4,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20000129,
+                WeekendingDate = DateOnly.ParseExact("20000129", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -344
             },
 
@@ -23346,7 +23345,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 6,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20000212,
+                WeekendingDate = DateOnly.ParseExact("20000212", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -342
             },
 
@@ -23366,7 +23365,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 8,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20000226,
+                WeekendingDate = DateOnly.ParseExact("20000226", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -340
             },
 
@@ -23386,7 +23385,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 10,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20000311,
+                WeekendingDate = DateOnly.ParseExact("20000311", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -338
             },
 
@@ -23406,7 +23405,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 11,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20000318,
+                WeekendingDate = DateOnly.ParseExact("20000318", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -337
             },
 
@@ -23426,7 +23425,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 12,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20000325,
+                WeekendingDate = DateOnly.ParseExact("20000325", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -336
             },
 
@@ -23446,7 +23445,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 13,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20000401,
+                WeekendingDate = DateOnly.ParseExact("20000401", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -335
             },
 
@@ -23466,7 +23465,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 14,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20000408,
+                WeekendingDate = DateOnly.ParseExact("20000408", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -334
             },
 
@@ -23486,7 +23485,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 15,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20000415,
+                WeekendingDate = DateOnly.ParseExact("20000415", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -333
             },
 
@@ -23506,7 +23505,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 16,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20000422,
+                WeekendingDate = DateOnly.ParseExact("20000422", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -332
             },
 
@@ -23526,7 +23525,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 18,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20000506,
+                WeekendingDate = DateOnly.ParseExact("20000506", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -330
             },
 
@@ -23546,7 +23545,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 21,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20000527,
+                WeekendingDate = DateOnly.ParseExact("20000527", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -327
             },
 
@@ -23566,7 +23565,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 23,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20000610,
+                WeekendingDate = DateOnly.ParseExact("20000610", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -325
             },
 
@@ -23586,7 +23585,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 25,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20000624,
+                WeekendingDate = DateOnly.ParseExact("20000624", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -323
             },
 
@@ -23606,7 +23605,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 27,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20000708,
+                WeekendingDate = DateOnly.ParseExact("20000708", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -321
             },
 
@@ -23626,7 +23625,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 28,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20000715,
+                WeekendingDate = DateOnly.ParseExact("20000715", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -320
             },
 
@@ -23646,7 +23645,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 29,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20000722,
+                WeekendingDate = DateOnly.ParseExact("20000722", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -319
             },
 
@@ -23666,7 +23665,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 31,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20000805,
+                WeekendingDate = DateOnly.ParseExact("20000805", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -317
             },
 
@@ -23686,7 +23685,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 32,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20000812,
+                WeekendingDate = DateOnly.ParseExact("20000812", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -316
             },
 
@@ -23706,7 +23705,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 33,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20000819,
+                WeekendingDate = DateOnly.ParseExact("20000819", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -315
             },
 
@@ -23726,7 +23725,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 34,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20000826,
+                WeekendingDate = DateOnly.ParseExact("20000826", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -314
             },
 
@@ -23746,7 +23745,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 35,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20000902,
+                WeekendingDate = DateOnly.ParseExact("20000902", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -313
             },
 
@@ -23766,7 +23765,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 37,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20000916,
+                WeekendingDate = DateOnly.ParseExact("20000916", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -311
             },
 
@@ -23786,7 +23785,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 38,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20000923,
+                WeekendingDate = DateOnly.ParseExact("20000923", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -310
             },
 
@@ -23806,7 +23805,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 39,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20000930,
+                WeekendingDate = DateOnly.ParseExact("20000930", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -309
             },
 
@@ -23826,7 +23825,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 40,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20001007,
+                WeekendingDate = DateOnly.ParseExact("20001007", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -308
             },
 
@@ -23846,7 +23845,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 42,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20001021,
+                WeekendingDate = DateOnly.ParseExact("20001021", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -306
             },
 
@@ -23866,7 +23865,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 44,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20001104,
+                WeekendingDate = DateOnly.ParseExact("20001104", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -304
             },
 
@@ -23886,7 +23885,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 45,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20001111,
+                WeekendingDate = DateOnly.ParseExact("20001111", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -303
             },
 
@@ -23906,7 +23905,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 46,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20001118,
+                WeekendingDate = DateOnly.ParseExact("20001118", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -302
             },
 
@@ -23926,7 +23925,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 47,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20001125,
+                WeekendingDate = DateOnly.ParseExact("20001125", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -301
             },
 
@@ -23946,7 +23945,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 49,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20001209,
+                WeekendingDate = DateOnly.ParseExact("20001209", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -299
             },
 
@@ -23966,7 +23965,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 51,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20001223,
+                WeekendingDate = DateOnly.ParseExact("20001223", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -297
             },
 
@@ -23986,7 +23985,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 52,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20001230,
+                WeekendingDate = DateOnly.ParseExact("20001230", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -296
             },
 
@@ -24006,7 +24005,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 30,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20000729,
+                WeekendingDate = DateOnly.ParseExact("20000729", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -318
             },
 
@@ -24026,7 +24025,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 36,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20000909,
+                WeekendingDate = DateOnly.ParseExact("20000909", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -312
             },
 
@@ -24046,7 +24045,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 41,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20001014,
+                WeekendingDate = DateOnly.ParseExact("20001014", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -307
             },
 
@@ -24066,7 +24065,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 43,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20001028,
+                WeekendingDate = DateOnly.ParseExact("20001028", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -305
             },
 
@@ -24086,7 +24085,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 48,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20001202,
+                WeekendingDate = DateOnly.ParseExact("20001202", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -300
             },
 
@@ -24106,7 +24105,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 50,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20001216,
+                WeekendingDate = DateOnly.ParseExact("20001216", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -298
             },
 
@@ -24126,7 +24125,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 1,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20000108,
+                WeekendingDate = DateOnly.ParseExact("20000108", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -347
             },
 
@@ -24146,7 +24145,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 5,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20000205,
+                WeekendingDate = DateOnly.ParseExact("20000205", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -343
             },
 
@@ -24166,7 +24165,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 7,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20000219,
+                WeekendingDate = DateOnly.ParseExact("20000219", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -341
             },
 
@@ -24186,7 +24185,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 9,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20000304,
+                WeekendingDate = DateOnly.ParseExact("20000304", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -339
             },
 
@@ -24206,7 +24205,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 17,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20000429,
+                WeekendingDate = DateOnly.ParseExact("20000429", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -331
             },
 
@@ -24226,7 +24225,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 19,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20000513,
+                WeekendingDate = DateOnly.ParseExact("20000513", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -329
             },
 
@@ -24246,7 +24245,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 20,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20000520,
+                WeekendingDate = DateOnly.ParseExact("20000520", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -328
             },
 
@@ -24266,7 +24265,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 22,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20000603,
+                WeekendingDate = DateOnly.ParseExact("20000603", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -326
             },
 
@@ -24286,7 +24285,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 24,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20000617,
+                WeekendingDate = DateOnly.ParseExact("20000617", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -324
             },
 
@@ -24306,7 +24305,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 26,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20000701,
+                WeekendingDate = DateOnly.ParseExact("20000701", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -322
             },
 
@@ -24326,7 +24325,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 4,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20230128,
+                WeekendingDate = DateOnly.ParseExact("20230128", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1036
             },
 
@@ -24346,7 +24345,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 5,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20230204,
+                WeekendingDate = DateOnly.ParseExact("20230204", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1037
             },
 
@@ -24366,7 +24365,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 6,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20230211,
+                WeekendingDate = DateOnly.ParseExact("20230211", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1038
             },
 
@@ -24386,7 +24385,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 7,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20230218,
+                WeekendingDate = DateOnly.ParseExact("20230218", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1039
             },
 
@@ -24406,7 +24405,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 8,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20230225,
+                WeekendingDate = DateOnly.ParseExact("20230225", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1040
             },
 
@@ -24426,7 +24425,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 9,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20230304,
+                WeekendingDate = DateOnly.ParseExact("20230304", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1041
             },
 
@@ -24446,7 +24445,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 10,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20230311,
+                WeekendingDate = DateOnly.ParseExact("20230311", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1042
             },
 
@@ -24466,7 +24465,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 11,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20230318,
+                WeekendingDate = DateOnly.ParseExact("20230318", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1043
             },
 
@@ -24486,7 +24485,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 12,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20230325,
+                WeekendingDate = DateOnly.ParseExact("20230325", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1044
             },
 
@@ -24506,7 +24505,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 13,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20230401,
+                WeekendingDate = DateOnly.ParseExact("20230401", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1045
             },
 
@@ -24526,7 +24525,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 14,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20230408,
+                WeekendingDate = DateOnly.ParseExact("20230408", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1046
             },
 
@@ -24546,7 +24545,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 15,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20230415,
+                WeekendingDate = DateOnly.ParseExact("20230415", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1047
             },
 
@@ -24566,7 +24565,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 19,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20230513,
+                WeekendingDate = DateOnly.ParseExact("20230513", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1051
             },
 
@@ -24586,7 +24585,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 20,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20230520,
+                WeekendingDate = DateOnly.ParseExact("20230520", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1052
             },
 
@@ -24606,7 +24605,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 21,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20230527,
+                WeekendingDate = DateOnly.ParseExact("20230527", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1053
             },
 
@@ -24626,7 +24625,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 22,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20230603,
+                WeekendingDate = DateOnly.ParseExact("20230603", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1054
             },
 
@@ -24646,7 +24645,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 23,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20230610,
+                WeekendingDate = DateOnly.ParseExact("20230610", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1055
             },
 
@@ -24666,7 +24665,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 24,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20230617,
+                WeekendingDate = DateOnly.ParseExact("20230617", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1056
             },
 
@@ -24686,7 +24685,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 25,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20230624,
+                WeekendingDate = DateOnly.ParseExact("20230624", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1057
             },
 
@@ -24706,7 +24705,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 26,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20230701,
+                WeekendingDate = DateOnly.ParseExact("20230701", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1058
             },
 
@@ -24726,7 +24725,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 27,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20230708,
+                WeekendingDate = DateOnly.ParseExact("20230708", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1059
             },
 
@@ -24746,7 +24745,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 28,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20230715,
+                WeekendingDate = DateOnly.ParseExact("20230715", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1060
             },
 
@@ -24766,7 +24765,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 29,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20230722,
+                WeekendingDate = DateOnly.ParseExact("20230722", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1061
             },
 
@@ -24786,7 +24785,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 30,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20230729,
+                WeekendingDate = DateOnly.ParseExact("20230729", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1062
             },
 
@@ -24806,7 +24805,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 31,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20230805,
+                WeekendingDate = DateOnly.ParseExact("20230805", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1063
             },
 
@@ -24826,7 +24825,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 32,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20230812,
+                WeekendingDate = DateOnly.ParseExact("20230812", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1064
             },
 
@@ -24846,7 +24845,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 33,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20230819,
+                WeekendingDate = DateOnly.ParseExact("20230819", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1065
             },
 
@@ -24866,7 +24865,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 34,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20230826,
+                WeekendingDate = DateOnly.ParseExact("20230826", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1066
             },
 
@@ -24886,7 +24885,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 35,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20230902,
+                WeekendingDate = DateOnly.ParseExact("20230902", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1067
             },
 
@@ -24906,7 +24905,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 36,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20230909,
+                WeekendingDate = DateOnly.ParseExact("20230909", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1068
             },
 
@@ -24926,7 +24925,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 40,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20231007,
+                WeekendingDate = DateOnly.ParseExact("20231007", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1072
             },
 
@@ -24946,7 +24945,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 41,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20231014,
+                WeekendingDate = DateOnly.ParseExact("20231014", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1073
             },
 
@@ -24966,7 +24965,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 42,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20231021,
+                WeekendingDate = DateOnly.ParseExact("20231021", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1074
             },
 
@@ -24986,7 +24985,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 49,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20231209,
+                WeekendingDate = DateOnly.ParseExact("20231209", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1081
             },
 
@@ -25006,7 +25005,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 50,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20231216,
+                WeekendingDate = DateOnly.ParseExact("20231216", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1082
             },
 
@@ -25026,7 +25025,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 51,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20231223,
+                WeekendingDate = DateOnly.ParseExact("20231223", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1083
             },
 
@@ -25046,7 +25045,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 52,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20231230,
+                WeekendingDate = DateOnly.ParseExact("20231230", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1084
             },
 
@@ -25066,7 +25065,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 7,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20240217,
+                WeekendingDate = DateOnly.ParseExact("20240217", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1099
             },
 
@@ -25086,7 +25085,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 8,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20240224,
+                WeekendingDate = DateOnly.ParseExact("20240224", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1100
             },
 
@@ -25106,7 +25105,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 9,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20240302,
+                WeekendingDate = DateOnly.ParseExact("20240302", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1101
             },
 
@@ -25126,7 +25125,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 10,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20240309,
+                WeekendingDate = DateOnly.ParseExact("20240309", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1102
             },
 
@@ -25146,7 +25145,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 11,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20240316,
+                WeekendingDate = DateOnly.ParseExact("20240316", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1103
             },
 
@@ -25166,7 +25165,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 12,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20240323,
+                WeekendingDate = DateOnly.ParseExact("20240323", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1104
             },
 
@@ -25186,7 +25185,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 13,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20240330,
+                WeekendingDate = DateOnly.ParseExact("20240330", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1105
             },
 
@@ -25206,7 +25205,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 14,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20240406,
+                WeekendingDate = DateOnly.ParseExact("20240406", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1106
             },
 
@@ -25226,7 +25225,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 15,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20240413,
+                WeekendingDate = DateOnly.ParseExact("20240413", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1107
             },
 
@@ -25246,7 +25245,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 16,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20240420,
+                WeekendingDate = DateOnly.ParseExact("20240420", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1108
             },
 
@@ -25266,7 +25265,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 17,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 20240427,
+                WeekendingDate = DateOnly.ParseExact("20240427", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1109
             },
 
@@ -25286,7 +25285,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 18,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20240504,
+                WeekendingDate = DateOnly.ParseExact("20240504", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1110
             },
 
@@ -25306,7 +25305,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 19,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20240511,
+                WeekendingDate = DateOnly.ParseExact("20240511", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1111
             },
 
@@ -25326,7 +25325,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 20,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20240518,
+                WeekendingDate = DateOnly.ParseExact("20240518", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1112
             },
 
@@ -25346,7 +25345,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 21,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20240525,
+                WeekendingDate = DateOnly.ParseExact("20240525", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1113
             },
 
@@ -25366,7 +25365,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 31,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20240803,
+                WeekendingDate = DateOnly.ParseExact("20240803", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1123
             },
 
@@ -25386,7 +25385,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 32,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20240810,
+                WeekendingDate = DateOnly.ParseExact("20240810", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1124
             },
 
@@ -25406,7 +25405,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 33,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20240817,
+                WeekendingDate = DateOnly.ParseExact("20240817", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1125
             },
 
@@ -25426,7 +25425,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 40,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20241005,
+                WeekendingDate = DateOnly.ParseExact("20241005", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1132
             },
 
@@ -25446,7 +25445,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 41,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20241012,
+                WeekendingDate = DateOnly.ParseExact("20241012", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1133
             },
 
@@ -25466,7 +25465,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 42,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20241019,
+                WeekendingDate = DateOnly.ParseExact("20241019", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1134
             },
 
@@ -25486,7 +25485,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 49,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20241207,
+                WeekendingDate = DateOnly.ParseExact("20241207", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1141
             },
 
@@ -25506,7 +25505,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 50,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20241214,
+                WeekendingDate = DateOnly.ParseExact("20241214", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1142
             },
 
@@ -25526,7 +25525,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 51,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20241221,
+                WeekendingDate = DateOnly.ParseExact("20241221", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1143
             },
 
@@ -25546,7 +25545,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 1,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20240106,
+                WeekendingDate = DateOnly.ParseExact("20240106", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1093
             },
 
@@ -25566,7 +25565,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 2,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20240113,
+                WeekendingDate = DateOnly.ParseExact("20240113", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1094
             },
 
@@ -25586,7 +25585,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 3,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20240120,
+                WeekendingDate = DateOnly.ParseExact("20240120", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1095
             },
 
@@ -25606,7 +25605,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 4,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20240127,
+                WeekendingDate = DateOnly.ParseExact("20240127", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1096
             },
 
@@ -25626,7 +25625,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 5,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 20240203,
+                WeekendingDate = DateOnly.ParseExact("20240203", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1097
             },
 
@@ -25646,7 +25645,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 6,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 20240210,
+                WeekendingDate = DateOnly.ParseExact("20240210", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1098
             },
 
@@ -25666,7 +25665,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 22,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 20240601,
+                WeekendingDate = DateOnly.ParseExact("20240601", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1114
             },
 
@@ -25686,7 +25685,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 23,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20240608,
+                WeekendingDate = DateOnly.ParseExact("20240608", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1115
             },
 
@@ -25706,7 +25705,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 24,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20240615,
+                WeekendingDate = DateOnly.ParseExact("20240615", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1116
             },
 
@@ -25726,7 +25725,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 25,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20240622,
+                WeekendingDate = DateOnly.ParseExact("20240622", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1117
             },
 
@@ -25746,7 +25745,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 27,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20240706,
+                WeekendingDate = DateOnly.ParseExact("20240706", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1119
             },
 
@@ -25766,7 +25765,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 28,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20240713,
+                WeekendingDate = DateOnly.ParseExact("20240713", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1120
             },
 
@@ -25786,7 +25785,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 29,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 20240720,
+                WeekendingDate = DateOnly.ParseExact("20240720", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1121
             },
 
@@ -25806,7 +25805,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 30,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 20240727,
+                WeekendingDate = DateOnly.ParseExact("20240727", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1122
             },
 
@@ -25826,7 +25825,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 34,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20240824,
+                WeekendingDate = DateOnly.ParseExact("20240824", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1126
             },
 
@@ -25846,7 +25845,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 35,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 20240831,
+                WeekendingDate = DateOnly.ParseExact("20240831", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1127
             },
 
@@ -25866,7 +25865,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 36,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20240907,
+                WeekendingDate = DateOnly.ParseExact("20240907", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1128
             },
 
@@ -25886,7 +25885,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 37,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20240914,
+                WeekendingDate = DateOnly.ParseExact("20240914", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1129
             },
 
@@ -25906,7 +25905,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 38,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20240921,
+                WeekendingDate = DateOnly.ParseExact("20240921", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1130
             },
 
@@ -25926,7 +25925,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 39,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 20240928,
+                WeekendingDate = DateOnly.ParseExact("20240928", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1131
             },
 
@@ -25946,7 +25945,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 43,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20241026,
+                WeekendingDate = DateOnly.ParseExact("20241026", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1135
             },
 
@@ -25966,7 +25965,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 44,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 20241102,
+                WeekendingDate = DateOnly.ParseExact("20241102", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1136
             },
 
@@ -25986,7 +25985,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 45,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20241109,
+                WeekendingDate = DateOnly.ParseExact("20241109", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1137
             },
 
@@ -26006,7 +26005,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 46,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20241116,
+                WeekendingDate = DateOnly.ParseExact("20241116", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1138
             },
 
@@ -26026,7 +26025,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 47,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20241123,
+                WeekendingDate = DateOnly.ParseExact("20241123", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1139
             },
 
@@ -26046,7 +26045,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 48,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 20241130,
+                WeekendingDate = DateOnly.ParseExact("20241130", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1140
             },
 
@@ -26066,7 +26065,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 52,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20241228,
+                WeekendingDate = DateOnly.ParseExact("20241228", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1144
             },
 
@@ -26086,7 +26085,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 26,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 20240629,
+                WeekendingDate = DateOnly.ParseExact("20240629", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1145
             },
 
@@ -26106,7 +26105,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 2,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 19990116,
+                WeekendingDate = DateOnly.ParseExact("19990116", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -406
             },
 
@@ -26126,7 +26125,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 3,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 19990123,
+                WeekendingDate = DateOnly.ParseExact("19990123", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -405
             },
 
@@ -26146,7 +26145,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 5,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 19990206,
+                WeekendingDate = DateOnly.ParseExact("19990206", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -403
             },
 
@@ -26166,7 +26165,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 6,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 19990213,
+                WeekendingDate = DateOnly.ParseExact("19990213", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -402
             },
 
@@ -26186,7 +26185,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 7,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 19990220,
+                WeekendingDate = DateOnly.ParseExact("19990220", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -401
             },
 
@@ -26206,7 +26205,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 9,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 19990306,
+                WeekendingDate = DateOnly.ParseExact("19990306", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -399
             },
 
@@ -26226,7 +26225,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 11,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 19990320,
+                WeekendingDate = DateOnly.ParseExact("19990320", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -397
             },
 
@@ -26246,7 +26245,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 14,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 19990410,
+                WeekendingDate = DateOnly.ParseExact("19990410", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -394
             },
 
@@ -26266,7 +26265,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 15,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 19990417,
+                WeekendingDate = DateOnly.ParseExact("19990417", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -393
             },
 
@@ -26286,7 +26285,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 16,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 19990424,
+                WeekendingDate = DateOnly.ParseExact("19990424", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -392
             },
 
@@ -26306,7 +26305,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 17,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 19990501,
+                WeekendingDate = DateOnly.ParseExact("19990501", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -391
             },
 
@@ -26326,7 +26325,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 20,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 19990522,
+                WeekendingDate = DateOnly.ParseExact("19990522", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -388
             },
 
@@ -26346,7 +26345,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 21,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 19990529,
+                WeekendingDate = DateOnly.ParseExact("19990529", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -387
             },
 
@@ -26366,7 +26365,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 23,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 19990612,
+                WeekendingDate = DateOnly.ParseExact("19990612", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -385
             },
 
@@ -26386,7 +26385,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 24,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 19990619,
+                WeekendingDate = DateOnly.ParseExact("19990619", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -384
             },
 
@@ -26406,7 +26405,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 25,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 19990626,
+                WeekendingDate = DateOnly.ParseExact("19990626", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -383
             },
 
@@ -26426,7 +26425,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 28,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 19990717,
+                WeekendingDate = DateOnly.ParseExact("19990717", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -380
             },
 
@@ -26446,7 +26445,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 29,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 19990724,
+                WeekendingDate = DateOnly.ParseExact("19990724", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -379
             },
 
@@ -26466,7 +26465,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 30,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 19990731,
+                WeekendingDate = DateOnly.ParseExact("19990731", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -378
             },
 
@@ -26486,7 +26485,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 32,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 19990814,
+                WeekendingDate = DateOnly.ParseExact("19990814", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -376
             },
 
@@ -26506,7 +26505,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 33,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 19990821,
+                WeekendingDate = DateOnly.ParseExact("19990821", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -375
             },
 
@@ -26526,7 +26525,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 35,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 19990904,
+                WeekendingDate = DateOnly.ParseExact("19990904", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -373
             },
 
@@ -26546,7 +26545,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 37,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 19990918,
+                WeekendingDate = DateOnly.ParseExact("19990918", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -371
             },
 
@@ -26566,7 +26565,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 40,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 19991009,
+                WeekendingDate = DateOnly.ParseExact("19991009", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -368
             },
 
@@ -26586,7 +26585,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 42,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 19991023,
+                WeekendingDate = DateOnly.ParseExact("19991023", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -366
             },
 
@@ -26606,7 +26605,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 43,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 19991030,
+                WeekendingDate = DateOnly.ParseExact("19991030", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -365
             },
 
@@ -26626,7 +26625,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 47,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 19991127,
+                WeekendingDate = DateOnly.ParseExact("19991127", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -361
             },
 
@@ -26646,7 +26645,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 48,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 19991204,
+                WeekendingDate = DateOnly.ParseExact("19991204", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -360
             },
 
@@ -26666,7 +26665,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 51,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 19991225,
+                WeekendingDate = DateOnly.ParseExact("19991225", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -357
             },
 
@@ -26686,7 +26685,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 52,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 20000101,
+                WeekendingDate = DateOnly.ParseExact("20000101", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -356
             },
 
@@ -26706,7 +26705,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 7,
                 AccCln6XWeek = 27,
                 AccCln6XPeriod = 7,
-                AccWkend2N = 19990710,
+                WeekendingDate = DateOnly.ParseExact("19990710", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -381
             },
 
@@ -26726,7 +26725,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 31,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 19990807,
+                WeekendingDate = DateOnly.ParseExact("19990807", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -377
             },
 
@@ -26746,7 +26745,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 8,
                 AccCln6XWeek = 34,
                 AccCln6XPeriod = 8,
-                AccWkend2N = 19990828,
+                WeekendingDate = DateOnly.ParseExact("19990828", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -374
             },
 
@@ -26766,7 +26765,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 36,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 19990911,
+                WeekendingDate = DateOnly.ParseExact("19990911", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -372
             },
 
@@ -26786,7 +26785,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 38,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 19990925,
+                WeekendingDate = DateOnly.ParseExact("19990925", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -370
             },
 
@@ -26806,7 +26805,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 9,
                 AccCln6XWeek = 39,
                 AccCln6XPeriod = 9,
-                AccWkend2N = 19991002,
+                WeekendingDate = DateOnly.ParseExact("19991002", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -369
             },
 
@@ -26826,7 +26825,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 10,
                 AccCln6XWeek = 41,
                 AccCln6XPeriod = 10,
-                AccWkend2N = 19991016,
+                WeekendingDate = DateOnly.ParseExact("19991016", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -367
             },
 
@@ -26846,7 +26845,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 44,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 19991106,
+                WeekendingDate = DateOnly.ParseExact("19991106", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -364
             },
 
@@ -26866,7 +26865,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 45,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 19991113,
+                WeekendingDate = DateOnly.ParseExact("19991113", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -363
             },
 
@@ -26886,7 +26885,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 11,
                 AccCln6XWeek = 46,
                 AccCln6XPeriod = 11,
-                AccWkend2N = 19991120,
+                WeekendingDate = DateOnly.ParseExact("19991120", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -362
             },
 
@@ -26906,7 +26905,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 49,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 19991211,
+                WeekendingDate = DateOnly.ParseExact("19991211", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -359
             },
 
@@ -26926,7 +26925,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 12,
                 AccCln6XWeek = 50,
                 AccCln6XPeriod = 12,
-                AccWkend2N = 19991218,
+                WeekendingDate = DateOnly.ParseExact("19991218", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -358
             },
 
@@ -26946,7 +26945,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 1,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 19990109,
+                WeekendingDate = DateOnly.ParseExact("19990109", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -407
             },
 
@@ -26966,7 +26965,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 1,
                 AccCln6XWeek = 4,
                 AccCln6XPeriod = 1,
-                AccWkend2N = 19990130,
+                WeekendingDate = DateOnly.ParseExact("19990130", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -404
             },
 
@@ -26986,7 +26985,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 2,
                 AccCln6XWeek = 8,
                 AccCln6XPeriod = 2,
-                AccWkend2N = 19990227,
+                WeekendingDate = DateOnly.ParseExact("19990227", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -400
             },
 
@@ -27006,7 +27005,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 10,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 19990313,
+                WeekendingDate = DateOnly.ParseExact("19990313", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -398
             },
 
@@ -27026,7 +27025,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 3,
                 AccCln6XWeek = 12,
                 AccCln6XPeriod = 3,
-                AccWkend2N = 19990327,
+                WeekendingDate = DateOnly.ParseExact("19990327", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -396
             },
 
@@ -27046,7 +27045,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 4,
                 AccCln6XWeek = 13,
                 AccCln6XPeriod = 4,
-                AccWkend2N = 19990403,
+                WeekendingDate = DateOnly.ParseExact("19990403", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -395
             },
 
@@ -27066,7 +27065,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 18,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 19990508,
+                WeekendingDate = DateOnly.ParseExact("19990508", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -390
             },
 
@@ -27086,7 +27085,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 5,
                 AccCln6XWeek = 19,
                 AccCln6XPeriod = 5,
-                AccWkend2N = 19990515,
+                WeekendingDate = DateOnly.ParseExact("19990515", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -389
             },
 
@@ -27106,7 +27105,7 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 22,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 19990605,
+                WeekendingDate = DateOnly.ParseExact("19990605", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -386
             },
 
@@ -27126,11 +27125,14 @@ public static class CaldarRecordSeeder
                 AccCln7XPeriod = 6,
                 AccCln6XWeek = 26,
                 AccCln6XPeriod = 6,
-                AccWkend2N = 19990703,
+                WeekendingDate = DateOnly.ParseExact("19990703", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = -382
             }
-
-        );
+    };
+    
+    public static void Seed(EntityTypeBuilder<CaldarRecord> builder)
+    {
+        builder.HasData(Records);
     }
 }
 
