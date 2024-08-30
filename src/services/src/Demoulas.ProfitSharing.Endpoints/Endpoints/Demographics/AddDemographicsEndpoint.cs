@@ -23,7 +23,7 @@ public class AddDemographicsEndpoint : Endpoint<IEnumerable<DemographicsRequest>
         Summary(s =>
         {
             s.Summary = "Add Demographics";
-            s.Description = "API to add a collection of employee's into the Demographics table";
+            s.Description = "API to add a collection of employees into the Demographics table. This endpoint allows the addition of multiple employee records, including their personal and employment details, into the system.\n\n### Expected Input\n- A list of `DemographicsRequest` objects containing employee details such as BadgeNumber, Ssn, OracleHcmId, FullName, FirstName, MiddleName, LastName, StoreNumber, DepartmentId, PayClassificationId, ContactInfo, Address, DateOfBirth, HireDate, ReHireDate, EmploymentTypeCode, PayFrequencyId, GenderCode, and EmploymentStatusId.\n\n### Expected Results\n- A set of `DemographicResponseDto` objects representing the added employee records.";
             s.ExampleRequest = new List<DemographicsRequest>
             {
                 new DemographicsRequest
