@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.NotOwned;
+﻿using System.Net;
+using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.NotOwned;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.UnitTests.Base;
@@ -30,16 +31,23 @@ public class MilitaryAndRehireServiceTests : ApiTestBase<Demoulas.ProfitSharing.
         count.ShouldBeEquivalentTo(CaldarRecordSeeder.Records.Length);
     }
 
-    [Fact(DisplayName = "Find Weekending Date")]
-    public async Task FindWeekendingDate()
+    [InlineData("990203")]
+    [InlineData("000203")]
+    [InlineData("020509")]
+    [InlineData("081009")]
+    [InlineData("221009")]
+    [Theory(DisplayName = "Find Weekending Date")]
+    public async Task FindWeekendingDate(string sDate)
     {
+        var date = DateOnly.ParseExact(sDate, "yyMMdd");
         var calendarService = ServiceProvider?.GetRequiredService<CalendarService>()!;
 
-        var date = DateTime.Today.AddYears(-5).ToDateOnly();
         var weekEndingDate =await calendarService.FindWeekendingDateFromDate(date);
 
         weekEndingDate.Should().BeOnOrAfter(date);
-        weekEndingDate.Should().HaveDay(7);
+        
+        // Verify that the weekEndingDate is a Saturday
+        weekEndingDate.DayOfWeek.Should().Be(DayOfWeek.Saturday);
     }
 
 }
