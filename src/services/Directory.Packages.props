@@ -10,7 +10,7 @@
     <PackageVersion Include="CsvHelper" Version="33.0.1" />
     <PackageVersion Include="Demoulas.Common.Api" Version="1.2.1" />
     <PackageVersion Include="Demoulas.Common.Data.Contexts" Version="2.1.4" />
-    <PackageVersion Include="Demoulas.Common.Data.Services" Version="3.1.0" />
+    <PackageVersion Include="Demoulas.Common.Data.Services" Version="3.1.1" />
     <PackageVersion Include="Demoulas.Security" Version="3.3.2" />
     <PackageVersion Include="EFCore.NamingConventions" Version="8.0.3" />
     <PackageVersion Include="FluentValidation" Version="11.9.1" />
