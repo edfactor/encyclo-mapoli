@@ -24,6 +24,7 @@ public class MilitaryAndRehireEndpoint : EndpointWithCsvBase<PaginationRequestDt
 
     public override void Configure()
     {
+        AllowAnonymous();
         Get("military-and-rehire");
         Summary(s =>
         {
