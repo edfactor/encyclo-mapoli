@@ -5,6 +5,8 @@ using CsvHelper;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using FastEndpoints;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Endpoints.Base;
 
@@ -21,6 +23,12 @@ public abstract class EndpointWithCsvBase<ReqType, RespType, MapType> : Endpoint
     where RespType : class
     where MapType : ClassMap<RespType>
 {
+    public override void Configure()
+    {
+        Options(x => x.CacheOutput(p => p.Expire(TimeSpan.FromMinutes(5))));
+        Description(b => b.Produces<ReportResponseBase<RespType>>(200, "application/json", "text/csv"));
+    }
+
     /// <summary>
     /// Use to provide a simple example request when no more complex than a simple Pagination Request is needed
     /// </summary>

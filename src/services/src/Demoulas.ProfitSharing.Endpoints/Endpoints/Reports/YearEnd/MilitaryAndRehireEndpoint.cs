@@ -8,7 +8,6 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using Microsoft.Extensions.DependencyInjection;
 using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.MilitaryAndRehireEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
@@ -31,6 +30,7 @@ public class MilitaryAndRehireEndpoint : EndpointWithCsvBase<PaginationRequestDt
             s.Summary = "Military and Rehire Report Endpoint";
             s.Description =
                 "Provides a report on employees who are on military leave or have been rehired. This report helps identify potential issues that need to be addressed before running profit sharing. The endpoint can be executed multiple times.";
+
             s.ExampleRequest = SimpleExampleRequest;
             s.ResponseExamples = new Dictionary<int, object>
             {
@@ -49,7 +49,7 @@ public class MilitaryAndRehireEndpoint : EndpointWithCsvBase<PaginationRequestDt
             };
         });
         Group<YearEndGroup>();
-        Options(x => x.CacheOutput(p => p.Expire(TimeSpan.FromMinutes(5))));
+        base.Configure();
     }
 
     public override string ReportFileName => "EMPLOYEES ON MILITARY LEAVE";
@@ -83,7 +83,7 @@ public class MilitaryAndRehireEndpoint : EndpointWithCsvBase<PaginationRequestDt
             Map(m => m.BadgeNumber).Index(3).Name("BADGE");
             Map(m => m.FullName).Index(4).Name("EMPLOYEE NAME");
             Map(m => m.DateOfBirth).Index(5).Name("BIRTH DATE").TypeConverter<YearMonthDayTypeConverter>();
-            Map(m => m.Ssn.Replace('X', '0').Replace("-", string.Empty)).Index(6).Name("SSN");
+            Map(m => m.Ssn).Index(6).Name("SSN");
             Map(m => m.TerminationDate).Index(7).Name("TERM DATE").TypeConverter<YearMonthDayTypeConverter>();
         }
     }

@@ -45,6 +45,7 @@ public class PayProfitBadgesNotInDemographicsEndpoint: EndpointWithCsvBase<Pagin
             };
         });
         Group<YearEndGroup>();
+        base.Configure();
     }
 
     public override string ReportFileName => "PAYPROFIT-WITOUT-DEMOGRAPHICS";

@@ -45,6 +45,7 @@ public class NamesMissingCommasEndpoint : EndpointWithCsvBase<PaginationRequestD
             s.ExampleRequest = SimpleExampleRequest;
         });
         Group<YearEndGroup>();
+        base.Configure();
     }
 
     public override string ReportFileName => "NAMES-MISSING-COMMAS";

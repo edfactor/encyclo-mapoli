@@ -7,7 +7,6 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using Microsoft.Extensions.DependencyInjection;
 using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.MismatchedSsnsPayprofitAndDemographicsOnSameBadgeEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
@@ -71,7 +70,7 @@ public class MismatchedSsnsPayprofitAndDemographicsOnSameBadgeEndpoint : Endpoin
             };
         });
         Group<YearEndGroup>();
-        Options(x => x.CacheOutput(p => p.Expire(TimeSpan.FromMinutes(5))));
+        base.Configure();
     }
 
     public override string ReportFileName => "MISMATCHED-PAYPROF-DEM-SSNS";

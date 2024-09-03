@@ -76,6 +76,7 @@ public class DemographicBadgesNotInPayProfitEndpoint : EndpointWithCsvBase<Pagin
             };
         });
         Group<YearEndGroup>();
+        base.Configure();
     }
 
     public override string ReportFileName => "DEMOGRAPHIC-WITHOUT-DEMOGRAPHICS";

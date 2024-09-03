@@ -6,7 +6,6 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 
@@ -47,7 +46,7 @@ public class NegativeEtvaForSsNsOnPayProfitEndPoint : EndpointWithCsvBase<Pagina
             };
         });
         Group<YearEndGroup>();
-        Options(x => x.CacheOutput(p => p.Expire(TimeSpan.FromMinutes(5))));
+        base.Configure();
     }
 
     public override async Task<ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>> GetResponse(PaginationRequestDto req, CancellationToken ct)

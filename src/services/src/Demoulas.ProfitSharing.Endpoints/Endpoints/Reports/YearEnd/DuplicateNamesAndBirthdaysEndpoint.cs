@@ -68,6 +68,7 @@ public class DuplicateNamesAndBirthdaysEndpoint:EndpointWithCsvBase<PaginationRe
             };
         });
         Group<YearEndGroup>();
+        base.Configure();
     }
 
     public override string ReportFileName => "duplicate-names-and-birthdays";

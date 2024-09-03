@@ -46,6 +46,7 @@ public class GetDuplicateSsNsEndpoint : EndpointWithCsvBase<PaginationRequestDto
             };
         });
         Group<YearEndGroup>();
+        base.Configure();
     }
 
     public override string ReportFileName => "DuplicateSSns";
