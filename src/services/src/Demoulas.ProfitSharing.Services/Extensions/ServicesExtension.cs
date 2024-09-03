@@ -54,8 +54,11 @@ public static class ServicesExtension
 
             byte[] bytes = Encoding.UTF8.GetBytes($"{config.Username}:{config.Password}");
             string encodedAuth = Convert.ToBase64String(bytes);
+            if (!string.IsNullOrEmpty(config.Url))
+            {
+                client.BaseAddress = new Uri(config.Url, UriKind.Absolute);
+            }
 
-            client.BaseAddress = new Uri(config.Url, UriKind.Absolute);
             client.DefaultRequestHeaders.Add("REST-Framework-Version", config.RestFrameworkVersion);
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", encodedAuth);
         }).AddStandardResilienceHandler(options =>

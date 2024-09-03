@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Security;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 public class PayProfitBadgesNotInDemographicsEndpoint: EndpointWithCsvBase<PaginationRequestDto, PayProfitBadgesNotInDemographicsResponse, PayProfitBadgesNotInDemographicsEndpoint.PayProfitBadgesNotInDemographicsResponseMap>
@@ -19,7 +20,6 @@ public class PayProfitBadgesNotInDemographicsEndpoint: EndpointWithCsvBase<Pagin
 
     public override void Configure()
     {
-        AllowAnonymous();
         Get("payprofit-badges-without-demographics");
         Summary(s =>
         {
@@ -43,6 +43,7 @@ public class PayProfitBadgesNotInDemographicsEndpoint: EndpointWithCsvBase<Pagin
                     }
                 }
             };
+            s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
         Group<YearEndGroup>();
     }

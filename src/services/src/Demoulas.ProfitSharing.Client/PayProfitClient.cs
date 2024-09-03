@@ -10,7 +10,7 @@ using Demoulas.ProfitSharing.Common.Validators;
 using FluentValidation;
 
 namespace Demoulas.ProfitSharing.Client;
-public sealed class PayProfitClient : IPayProfitService
+public sealed class PayProfitClient : ClientBase, IPayProfitService
 {
     private const string BaseApiPath = "api/payprofit";
 
@@ -18,7 +18,7 @@ public sealed class PayProfitClient : IPayProfitService
     private readonly JsonSerializerOptions _options;
     private readonly PayProfitRequestDtoValidator _validator;
 
-    public PayProfitClient(HttpClient? client)
+    public PayProfitClient(HttpClient? client): base(client)
     {
         ArgumentNullException.ThrowIfNull(client);
         

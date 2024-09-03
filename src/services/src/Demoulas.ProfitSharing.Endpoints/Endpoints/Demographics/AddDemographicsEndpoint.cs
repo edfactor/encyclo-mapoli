@@ -3,6 +3,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Demographics;
@@ -18,7 +19,7 @@ public class AddDemographicsEndpoint : Endpoint<IEnumerable<DemographicsRequest>
 
     public override void Configure()
     {
-        AllowAnonymous();
+        Policies(Security.Policy.CanAddDemographics);
         Post("");
         Summary(s =>
         {
@@ -57,6 +58,7 @@ public class AddDemographicsEndpoint : Endpoint<IEnumerable<DemographicsRequest>
                 }
             };
             s.ResponseExamples = new Dictionary<int, object> { { 200, new List<DemographicResponseDto> { DemographicResponseDto.ResponseExample() } } };
+            s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR}";
         });
         Group<DemographicsGroup>();
     }

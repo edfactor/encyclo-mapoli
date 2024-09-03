@@ -8,7 +8,7 @@ using Demoulas.ProfitSharing.Common.Validators;
 using FluentValidation;
 
 namespace Demoulas.ProfitSharing.Client;
-public sealed class DemographicsClient : IDemographicsService
+public sealed class DemographicsClient : ClientBase, IDemographicsService
 {
     private const string BaseApiPath = "api/demographics";
 
@@ -16,7 +16,7 @@ public sealed class DemographicsClient : IDemographicsService
     private readonly JsonSerializerOptions _options;
     private readonly DemographicsRequestDtoValidator _validator;
 
-    public DemographicsClient(HttpClient? client)
+    public DemographicsClient(HttpClient? client) : base (client)
     {
         ArgumentNullException.ThrowIfNull(client);
         

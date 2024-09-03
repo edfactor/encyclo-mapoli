@@ -1,6 +1,7 @@
 ﻿using FastEndpoints;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Demoulas.ProfitSharing.Security;
 
 namespace Demoulas.ProfitSharing.Endpoints.Groups;
 
@@ -17,6 +18,7 @@ public sealed class YearEndGroup : Group
                 .ProducesProblemFE<Microsoft.AspNetCore.Mvc.ProblemDetails>(500)
                 .WithRequestTimeout(TimeSpan.FromMinutes(1))
                 .WithTags(RouteName));
+            ep.Policies(Policy.CanViewYearEndReports);
         });
     }
 }

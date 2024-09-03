@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Security;
 using Microsoft.Extensions.DependencyInjection;
 using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.MismatchedSsnsPayprofitAndDemographicsOnSameBadgeEndpoint;
 
@@ -23,7 +24,6 @@ public class MismatchedSsnsPayprofitAndDemographicsOnSameBadgeEndpoint : Endpoin
 
     public override void Configure()
     {
-        AllowAnonymous();
         Get("mismatched-ssns-payprofit-and-demo-on-same-badge");
         Summary(s =>
         {
@@ -69,6 +69,7 @@ public class MismatchedSsnsPayprofitAndDemographicsOnSameBadgeEndpoint : Endpoin
                     }
                 }
             };
+            s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
         Group<YearEndGroup>();
         Options(x => x.CacheOutput(p => p.Expire(TimeSpan.FromMinutes(5))));
