@@ -137,14 +137,14 @@ public sealed class PayProfit
 
     public byte? ZeroContributionReasonId { get; set; }
     public ZeroContributionReason? ZeroContributionReason { get; set; }
-    
+
     /// <summary>
-    /// executive hours
+    /// Executive hours
     /// </summary>
-    public decimal HoursExective { get; set; }
-    
+    public decimal HoursExecutive { get; set; }
+
     /// <summary>
-    /// executive earnings
+    /// Executive earnings
     /// </summary>
     public decimal IncomeExecutive { get; set; }
 }
