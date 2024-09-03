@@ -1,40 +1,57 @@
-﻿using Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 
-public sealed class MilitaryAndRehireService
+public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
-    private readonly CalendarService _calendarService;
 
-    public MilitaryAndRehireService(IProfitSharingDataContextFactory dataContextFactory, CalendarService calendarService)
+    public MilitaryAndRehireService(IProfitSharingDataContextFactory dataContextFactory)
     {
         _dataContextFactory = dataContextFactory;
-        _calendarService = calendarService;
     }
 
     /// <summary>
-    /// Retrieves all inactive military members for a specified calendar year. (QPAY 511 "Military and Rehire")
+    /// Generates a report of employees who are on military leave and have been rehired.
     /// </summary>
+    /// <param name="req">The pagination request details.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <returns>A task that represents the asynchronous operation. The task result contains a list of inactive military members.</returns>
-    /// <remarks>
-    /// This method queries the database for members who have a termination code indicating military service and an employment status of inactive,
-    /// within the specified calendar year.
-    /// </remarks>
-    public async Task GetAllInactiveMilitaryMembers(CancellationToken cancellationToken)
+    /// <returns>A task that represents the asynchronous operation. The task result contains the report response with details of employees on military leave.</returns>
+    public async Task<ReportResponseBase<MilitaryAndRehireReportResponse>> GetMilitaryAndRehireReport(PaginationRequestDto req, CancellationToken cancellationToken)
     {
-        await _dataContextFactory.UseReadOnlyContext(async context =>
+        var militaryMembers = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
             var inactiveMilitaryMembers = await context.Demographics.Where(d => d.TerminationCodeId == TerminationCode.Constants.Military
                                                                                 && d.EmploymentStatusId == EmploymentStatus.Constants.Inactive)
-                .OrderBy(d=> d.FullName)
-                .ToListAsync(cancellationToken: cancellationToken);
+                .OrderBy(d => d.FullName)
+                .Select(d => new MilitaryAndRehireReportResponse
+                {
+                    DepartmentId = d.DepartmentId,
+                    BadgeNumber = d.BadgeNumber,
+                    Ssn = d.Ssn.MaskSsn(),
+                    FullName = d.FullName,
+                    DateOfBirth = d.DateOfBirth,
+                    TerminationDate = d.TerminationDate
+                })
+                .ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
 
             return inactiveMilitaryMembers;
         });
+
+        return new ReportResponseBase<MilitaryAndRehireReportResponse>
+        {
+            ReportName = "EMPLOYEES ON MILITARY LEAVE",
+            ReportDate = DateTimeOffset.Now,
+            Response = militaryMembers
+        };
     }
 }
