@@ -36,7 +36,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IYearEndService, YearEndService>();
         _ = builder.Services.AddScoped<IPayProfitService, PayProfitService>();
         _ = builder.Services.AddScoped<IOracleHcmSynchronizationService, OracleHcmSynchronizationService>();
-        _ = builder.Services.AddScoped<IMilitaryAndRehireService, MilitaryAndRehireService>();
+        _ = builder.Services.AddScoped<IMilitaryAndRehireService, Reports.CalendarService>();
 
 
         OracleHcmConfig oktaSettings = builder.Configuration.GetSection("OracleHcm").Get<OracleHcmConfig>() ?? new OracleHcmConfig { Url = string.Empty };
