@@ -11,11 +11,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 
-public sealed class CalendarService : IMilitaryAndRehireService
+public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
 
-    public CalendarService(IProfitSharingDataContextFactory dataContextFactory)
+    public MilitaryAndRehireService(IProfitSharingDataContextFactory dataContextFactory)
     {
         _dataContextFactory = dataContextFactory;
     }
