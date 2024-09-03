@@ -17,26 +17,21 @@ public sealed class MilitaryAndRehireService
     }
 
     /// <summary>
-    /// Retrieves all inactive military members for a specified calendar year.
+    /// Retrieves all inactive military members for a specified calendar year. (QPAY 511 "Military and Rehire")
     /// </summary>
-    /// <param name="calendarYear">The calendar year for which to retrieve inactive military members.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a list of inactive military members.</returns>
     /// <remarks>
     /// This method queries the database for members who have a termination code indicating military service and an employment status of inactive,
     /// within the specified calendar year.
     /// </remarks>
-    public async Task GetAllInactiveMilitaryMembers(short calendarYear, CancellationToken cancellationToken)
+    public async Task GetAllInactiveMilitaryMembers(CancellationToken cancellationToken)
     {
-        var startingDate = await _calendarService.FindWeekendingDateFromDate(new DateOnly(calendarYear, 01, 01), cancellationToken);
-        var endingDate = await _calendarService.FindWeekendingDateFromDate(new DateOnly(calendarYear, 12, 31), cancellationToken);
-
         await _dataContextFactory.UseReadOnlyContext(async context =>
         {
             var inactiveMilitaryMembers = await context.Demographics.Where(d => d.TerminationCodeId == TerminationCode.Constants.Military
-                                                                                && d.EmploymentStatusId == EmploymentStatus.Constants.Inactive
-                                                                                && d.TerminationDate >= startingDate
-                                                                                && d.TerminationDate <= endingDate)
+                                                                                && d.EmploymentStatusId == EmploymentStatus.Constants.Inactive)
+                .OrderBy(d=> d.FullName)
                 .ToListAsync(cancellationToken: cancellationToken);
 
             return inactiveMilitaryMembers;

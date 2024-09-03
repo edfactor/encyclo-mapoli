@@ -1,6 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Extensions;
 using Riok.Mapperly.Abstractions;
 
 namespace Demoulas.ProfitSharing.Services.Mappers;
@@ -76,7 +77,7 @@ public partial class DemographicMapper
 
         DemographicResponseDto target = new DemographicResponseDto
         {
-            Ssn = MaskSsn(source.Ssn),
+            Ssn = source.Ssn.MaskSsn(),
             OracleHcmId = source.OracleHcmId,
             FullName = source.FullName ?? $"{source.FirstName} {source.LastName}",
             LastName = source.LastName,
@@ -130,18 +131,5 @@ public partial class DemographicMapper
             GenderId = source.GenderCode,
             EmploymentStatusId = source.EmploymentStatusId
         };
-    }
-
-    private static string MaskSsn(long ssn)
-    {
-        Span<char> ssnSpan = stackalloc char[9];
-        ssn.ToString().AsSpan().CopyTo(ssnSpan[(9 - ssn.ToString().Length)..]);
-        ssnSpan[..(9 - ssn.ToString().Length)].Fill('0');
-
-        Span<char> resultSpan = stackalloc char[11];
-        "XXX-XX-".AsSpan().CopyTo(resultSpan);
-        ssnSpan.Slice(5, 4).CopyTo(resultSpan[7..]);
-
-        return new string(resultSpan);
     }
 }
