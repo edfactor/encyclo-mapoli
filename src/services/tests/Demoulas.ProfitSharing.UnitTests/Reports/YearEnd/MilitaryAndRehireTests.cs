@@ -1,7 +1,6 @@
-﻿using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
+﻿using System.Net;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-using Demoulas.ProfitSharing.Common.Interfaces;
-using Moq;
 using FluentAssertions;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -11,7 +10,12 @@ using JetBrains.Annotations;
 using Demoulas.ProfitSharing.UnitTests.Base;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Extensions;
+using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.UnitTests.Extensions;
+using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
+using Demoulas.ProfitSharing.Data.Contexts;
+using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -31,42 +35,55 @@ public class MilitaryAndRehireTests : ApiTestBase<Api.Program>
     {
         await MockDbContextFactory.UseWritableContext(async c =>
         {
-            // Setup
-            var example = MilitaryAndRehireReportResponse.ResponseExample();
+            var setup = await SetupTestEmployee(c);
 
-            var demo = await c.Demographics.FirstAsync();
-            demo.TerminationCodeId = TerminationCode.Constants.Military;
-            demo.EmploymentStatusId = EmploymentStatus.Constants.Inactive;
-            
-            demo.DepartmentId = example.DepartmentId;
-            demo.BadgeNumber = example.BadgeNumber;
-            demo.DateOfBirth = example.DateOfBirth;
-            demo.TerminationDate = example.TerminationDate;
-            await c.SaveChangesAsync();
-
-            example.Ssn = demo.Ssn.MaskSsn();
-            example.FullName = demo.FullName;
-            
-
-            // Arrange
-            var request = new PaginationRequestDto { Skip = 0, Take = 10 };
-            var cancellationToken = CancellationToken.None;
             var expectedResponse = new ReportResponseBase<MilitaryAndRehireReportResponse>
             {
                 ReportName = "EMPLOYEES ON MILITARY LEAVE",
                 ReportDate = DateTimeOffset.Now,
                 Response = new PaginatedResponseDto<MilitaryAndRehireReportResponse>
                 {
-                    Results = new List<MilitaryAndRehireReportResponse> { example }
+                    Results = new List<MilitaryAndRehireReportResponse> { setup.ExpectedResponse }
                 }
             };
 
             // Act
-            var response = await _endpoint.GetResponse(request, cancellationToken);
+            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+            var response = await ApiClient.GETAsync<MilitaryAndRehireEndpoint, PaginationRequestDto, ReportResponseBase<MilitaryAndRehireReportResponse>>(setup.Request);
 
             // Assert
-            response.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
-            response.Response.Results.Should().BeEquivalentTo(expectedResponse.Response.Results);
+            response.Result.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
+            response.Result.Response.Results.Should().BeEquivalentTo(expectedResponse.Response.Results);
+        });
+    }
+
+    [Fact(DisplayName = "PS-156: Check for Military (CSV)")]
+    public async Task GetResponse_Should_ReturnReportResponse_WhenCalledWithValidRequest_CSV()
+    {
+        await MockDbContextFactory.UseWritableContext(async c =>
+        {
+            var setup = await SetupTestEmployee(c);
+
+            // Act
+            DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+            var response = await DownloadClient.GETAsync<MilitaryAndRehireEndpoint, PaginationRequestDto, StreamContent>(setup.Request);
+            response.Response.Content.Should().NotBeNull();
+
+            string result = await response.Response.Content.ReadAsStringAsync();
+            result.Should().NotBeNullOrEmpty();
+        });
+    }
+
+    [Fact(DisplayName = "PS-156: Check to ensure unauthorized")]
+    public async Task Unauthorized()
+    {
+        await MockDbContextFactory.UseWritableContext(async c =>
+        {
+            var setup = await SetupTestEmployee(c);
+
+            var response = await ApiClient.GETAsync<MilitaryAndRehireEndpoint, PaginationRequestDto, ReportResponseBase<MilitaryAndRehireReportResponse>>(setup.Request);
+
+            response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
         });
     }
 
@@ -123,5 +140,27 @@ public class MilitaryAndRehireTests : ApiTestBase<Api.Program>
 
         // Assert
         reportFileName.Should().Be("EMPLOYEES ON MILITARY LEAVE");
+    }
+
+    private static async Task<(PaginationRequestDto Request, MilitaryAndRehireReportResponse ExpectedResponse)> SetupTestEmployee(ProfitSharingDbContext c)
+    {
+        // Setup
+        MilitaryAndRehireReportResponse example = MilitaryAndRehireReportResponse.ResponseExample();
+
+        var demo = await c.Demographics.FirstAsync();
+        demo.TerminationCodeId = TerminationCode.Constants.Military;
+        demo.EmploymentStatusId = EmploymentStatus.Constants.Inactive;
+
+        demo.DepartmentId = example.DepartmentId;
+        demo.BadgeNumber = example.BadgeNumber;
+        demo.DateOfBirth = example.DateOfBirth;
+        demo.TerminationDate = example.TerminationDate;
+        await c.SaveChangesAsync();
+
+        example.Ssn = demo.Ssn.MaskSsn();
+        example.FullName = demo.FullName;
+
+
+        return (new PaginationRequestDto { Skip = 0, Take = 10 }, example);
     }
 }

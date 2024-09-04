@@ -8,6 +8,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Security;
 using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.MilitaryAndRehireEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
@@ -23,7 +24,6 @@ public class MilitaryAndRehireEndpoint : EndpointWithCsvBase<PaginationRequestDt
 
     public override void Configure()
     {
-        AllowAnonymous();
         Get("military-and-rehire");
         Summary(s =>
         {
@@ -47,6 +47,7 @@ public class MilitaryAndRehireEndpoint : EndpointWithCsvBase<PaginationRequestDt
                     }
                 }
             };
+            s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
         Group<YearEndGroup>();
         base.Configure();
