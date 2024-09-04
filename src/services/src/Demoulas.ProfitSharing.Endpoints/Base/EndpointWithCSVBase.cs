@@ -4,6 +4,7 @@ using CsvHelper.Configuration;
 using CsvHelper;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.Util.Extensions;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,8 +26,15 @@ public abstract class EndpointWithCsvBase<ReqType, RespType, MapType> : Endpoint
 {
     public override void Configure()
     {
-        Options(x => x.CacheOutput(p => p.Expire(TimeSpan.FromMinutes(5))));
-        Description(b => b.Produces<ReportResponseBase<RespType>>(200, "application/json", "text/csv"));
+        if (!Env.IsTestEnvironment())
+        {
+           // Specify caching duration and store it in metadata
+           var cacheDuration = TimeSpan.FromMinutes(5);
+            Options(x => x.CacheOutput(p => p.Expire(cacheDuration)));
+        }
+
+        Description(b => 
+            b.Produces<ReportResponseBase<RespType>>(200, "application/json", "text/csv"));
     }
 
     /// <summary>
@@ -35,10 +43,11 @@ public abstract class EndpointWithCsvBase<ReqType, RespType, MapType> : Endpoint
     protected PaginationRequestDto SimpleExampleRequest => new PaginationRequestDto { Skip = 0, Take = byte.MaxValue };
 
     /// <summary>
-    /// Called when the service is requested.  Developer should return a dto
+    /// Asynchronously retrieves a response for the given request.
     /// </summary>
-    /// <param name="ct"></param>
-    /// <returns></returns>
+    /// <param name="req">The request object containing the necessary parameters.</param>
+    /// <param name="ct">A cancellation token that can be used to cancel the operation.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the response object.</returns>
     public abstract Task<ReportResponseBase<RespType>> GetResponse(ReqType req, CancellationToken ct);
 
     /// <summary>

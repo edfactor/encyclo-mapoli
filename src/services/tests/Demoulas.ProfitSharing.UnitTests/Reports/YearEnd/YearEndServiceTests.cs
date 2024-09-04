@@ -59,11 +59,11 @@ public class YearEndServiceTests:ApiTestBase<Program>
 
             byte mismatchedValues = 5;
 
-            await c.PayProfits.Take(mismatchedValues).ForEachAsync(async pp =>
+            await Parallel.ForEachAsync(c.PayProfits.Take(mismatchedValues), async (pp, token) =>
             {
-                var demographic = await c.Demographics.FirstAsync(x=>x.BadgeNumber == pp.BadgeNumber && x.Ssn == pp.Ssn);
+                var demographic = await c.Demographics.FirstAsync(x => x.BadgeNumber == pp.BadgeNumber && x.Ssn == pp.Ssn, cancellationToken: token);
 
-                demographic.BadgeNumber = pp.BadgeNumber + await c.Demographics.CountAsync() + 1;
+                demographic.BadgeNumber = pp.BadgeNumber + await c.Demographics.CountAsync(token) + 1;
             });
 
             await c.SaveChangesAsync();
@@ -128,10 +128,10 @@ public class YearEndServiceTests:ApiTestBase<Program>
 
             byte mismatchedValues = 5;
 
-            await c.Demographics.Take(mismatchedValues).ForEachAsync(dem =>
+            foreach (var dem in c.Demographics.Take(mismatchedValues))
             {
                 dem.BadgeNumber = dem.BadgeNumber + c.PayProfits.Count() + 1;
-            });
+            };
 
             await c.SaveChangesAsync();
 
@@ -192,10 +192,10 @@ public class YearEndServiceTests:ApiTestBase<Program>
             _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
 
             byte disruptedNameCount = 10;
-            await ctx.Demographics.Take(disruptedNameCount).ForEachAsync(dem =>
+            foreach (var dem in ctx.Demographics.Take(disruptedNameCount))
             {
                 dem.FullName = dem.FullName?.Replace(", ", " ");
-            });
+            }
 
             await ctx.SaveChangesAsync();
 
@@ -325,13 +325,13 @@ public class YearEndServiceTests:ApiTestBase<Program>
         {
             var modelDemographic = await c.Demographics.FirstAsync();
 
-            await c.Demographics.Skip(1).Take(duplicateRows).ForEachAsync(dem =>
+            foreach (var dem in c.Demographics.Skip(1).Take(duplicateRows))
             {
                 dem.DateOfBirth = modelDemographic.DateOfBirth;
                 dem.FirstName = modelDemographic.FirstName;
                 dem.LastName = modelDemographic.LastName;
                 dem.FullName = modelDemographic.FullName;
-            });
+            };
 
             await c.SaveChangesAsync();
         });

@@ -27,6 +27,7 @@ public class DemographicBadgesNotInPayProfitEndpoint : EndpointWithCsvBase<Pagin
         Summary(s =>
         {
             s.Summary = "Demographic badges not in Payprofit";
+            s.Description = "Returns a list of employees who have demographic badges but are not in Payprofit.";
             s.ExampleRequest = SimpleExampleRequest;
             s.ResponseExamples = new Dictionary<int, object>
             {

@@ -1,4 +1,5 @@
-﻿using Demoulas.Common.Data.Services.Entities.Contexts;
+﻿using Demoulas.Common.Data.Contexts.Contexts;
+using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.NotOwned;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -71,8 +72,8 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingReadOnlyDbContext.Setup(m => m.CaldarRecords).Returns(mockCalendar.Object);
 
 
-        _profitSharingReadOnlyDbContext.Setup(s => s.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
-
+        _profitSharingDbContext.Setup(s => s.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
+        _profitSharingReadOnlyDbContext.Setup(s => s.SaveChangesAsync(It.IsAny<CancellationToken>())).ThrowsAsync(new NotImplementedException("This is a read only context, saving changes is not allowed."));
     }
 
     public static IProfitSharingDataContextFactory InitializeForTesting()
