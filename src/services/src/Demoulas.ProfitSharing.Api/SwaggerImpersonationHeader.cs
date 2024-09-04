@@ -1,0 +1,25 @@
+﻿using NJsonSchema;
+using NSwag.Generation.Processors.Contexts;
+using NSwag.Generation.Processors;
+using NSwag;
+
+namespace Demoulas.ProfitSharing.Security;
+public class SwaggerImpersonationHeader : IOperationProcessor
+{
+    public bool Process(OperationProcessorContext context)
+    {
+        var hdrParameter = new OpenApiParameter()
+        {
+            Name = Role.IMPERSONATION,
+            Kind = OpenApiParameterKind.Header,
+            IsRequired = false,
+            Type = JsonObjectType.String,
+            Default = "",
+            Description = "A pipe-delimited list of roles to impersonate"
+        };
+
+        context.OperationDescription.Operation.Parameters.Add(hdrParameter);
+
+        return true;
+    }
+}

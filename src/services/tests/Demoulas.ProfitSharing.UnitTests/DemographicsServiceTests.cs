@@ -4,6 +4,7 @@ using Demoulas.ProfitSharing.Client;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.Mappers;
 using Demoulas.ProfitSharing.UnitTests.Base;
 using Demoulas.ProfitSharing.UnitTests.Extensions;
@@ -36,6 +37,7 @@ public class DemographicsServiceTests : IClassFixture<ApiTestBase<Program>>
     [Description("https://demoulas.atlassian.net/browse/PS-82")]
     public async Task AddNewDemographicsTest(int count)
     {
+        _demographicsClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         List<Demographic>? demographics = new DemographicFaker().Generate(count);
         IEnumerable<DemographicsRequest> demographicsRequest = _mapper.MapToRequest(demographics);
 
@@ -56,4 +58,19 @@ public class DemographicsServiceTests : IClassFixture<ApiTestBase<Program>>
             d.ShouldBeEquivalentTo(responseDto);
         });
     }
+
+    [Fact(DisplayName ="Demographics auth check")]
+    public async Task AddDemographicsAuthCheck()
+    {
+        _demographicsClient.CreateAndAssignTokenForClient(Role.HARDSHIPADMINISTRATOR);
+        List<Demographic>? demographics = new DemographicFaker().Generate(1);
+        IEnumerable<DemographicsRequest> demographicsRequest = _mapper.MapToRequest(demographics);
+
+        await Assert.ThrowsAsync<HttpRequestException>(async () =>
+        {
+            _ = await _demographicsClient.AddDemographics(demographicsRequest, cancellationToken: CancellationToken.None);
+        });
+
+    }
+
 }

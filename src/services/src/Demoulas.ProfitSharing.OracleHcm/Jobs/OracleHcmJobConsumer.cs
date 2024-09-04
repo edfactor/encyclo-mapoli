@@ -18,7 +18,7 @@ public class OracleHcmJobConsumer : IConsumer<MessageRequest<OracleHcmJobRequest
     private readonly IEmployeeSyncService _employeeSyncService;
     private readonly ILogger<OracleHcmJobConsumer> _logger;
 
-    public OracleHcmJobConsumer(IProfitSharingDataContextFactory context, 
+    public OracleHcmJobConsumer(IProfitSharingDataContextFactory context,
         IEmployeeSyncService employeeSyncService,
         ILogger<OracleHcmJobConsumer> logger)
     {
@@ -51,7 +51,7 @@ public class OracleHcmJobConsumer : IConsumer<MessageRequest<OracleHcmJobRequest
                 return;
             }
 
-            _= OracleHcmActivitySource.Instance.StartActivity(name: $"Sync Employees from OracleHCM - Start new {message.Body.JobType} sync job", kind: ActivityKind.Internal);
+            _ = OracleHcmActivitySource.Instance.StartActivity(name: $"Sync Employees from OracleHCM - Start new {message.Body.JobType} sync job", kind: ActivityKind.Internal);
             var job = new Job
             {
                 JobTypeId = message.Body.JobType,

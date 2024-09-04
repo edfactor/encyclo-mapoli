@@ -3,10 +3,12 @@ using System.Text.Json;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Client.Reports.YearEnd;
+using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Base;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Xunit.Abstractions;
+using System.Net.Http;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 public class YearEndServiceTests:ApiTestBase<Program>
@@ -27,6 +29,7 @@ public class YearEndServiceTests:ApiTestBase<Program>
     [Fact(DisplayName ="PS-147: Check Duplicate SSNs (JSON)")]
     public async Task GetDuplicateSsNsTestJson()
     {
+        _yearEndClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         var response = await _yearEndClient.GetDuplicateSsNs(_paginationRequest, CancellationToken.None);
         response.Should().NotBeNull();
         response.Response.Results.Count().Should().Be(0); //Duplicate SSNs aren't allowed in our data model, prohibited by primary key on SSN in the demographics table.
@@ -35,6 +38,7 @@ public class YearEndServiceTests:ApiTestBase<Program>
     [Fact(DisplayName = "PS-147: Check Duplicate SSNs (CSV)")]
     public async Task GetDuplicateSsNsTestCsv()
     {
+        _yearEndClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         var stream = await _yearEndClient.DownloadDuplicateSsNs(CancellationToken.None);
         stream.Should().NotBeNull();
 
@@ -48,7 +52,7 @@ public class YearEndServiceTests:ApiTestBase<Program>
     [Fact(DisplayName ="PS-150: Payprofit badges w/o Demographics (JSON)")]
     public async Task GetPayProfitBadgesNotInDemographics()
     {
-        
+        _yearEndClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         await MockDbContextFactory.UseWritableContext(async c =>
         {
             var response = await _yearEndClient.GetPayProfitBadgesNotInDemographics(_paginationRequest, CancellationToken.None);
@@ -86,7 +90,7 @@ public class YearEndServiceTests:ApiTestBase<Program>
     [Fact(DisplayName = "PS-150: Payprofit badges w/o Demographics (CSV)")]
     public async Task GetPayProfitBadgesNotInDemographicsCsv()
     {
-
+        _yearEndClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         await MockDbContextFactory.UseWritableContext(async c =>
         {
             byte mismatchedValues = 5;
@@ -118,6 +122,7 @@ public class YearEndServiceTests:ApiTestBase<Program>
     [Fact(DisplayName = "PS-151: Demographic badges without payprofit (JSON)")]
     public async Task GetDemographicBadgesWithoutPayProfitTests()
     {
+        _yearEndClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         await MockDbContextFactory.UseWritableContext(async c =>
         {
             var response = await _yearEndClient.GetDemographicBadgesNotInPayProfit(_paginationRequest, CancellationToken.None);
@@ -153,6 +158,7 @@ public class YearEndServiceTests:ApiTestBase<Program>
     [Fact(DisplayName = "PS-151: Demographic badges without payprofit (CSV)")]
     public async Task GetDemographicBadgesWithoutPayProfitTestsCsv()
     {
+        _yearEndClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         await MockDbContextFactory.UseWritableContext(async c =>
         {
             
@@ -182,6 +188,7 @@ public class YearEndServiceTests:ApiTestBase<Program>
     [Fact(DisplayName ="PS-153: Names without commas (JSON)")]
     public async Task GetNamesWithoutCommas()
     {
+        _yearEndClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         await MockDbContextFactory.UseWritableContext(async ctx =>
         {
             var request = new PaginationRequestDto() { Skip = 0, Take = 1000 };
@@ -217,6 +224,7 @@ public class YearEndServiceTests:ApiTestBase<Program>
     [Fact(DisplayName = "PS-153: Names without commas (CSV)")]
     public async Task GetNamesWithoutCommasCsv()
     {
+        _yearEndClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         await MockDbContextFactory.UseWritableContext(async ctx =>
         {
             byte disruptedNameCount = 10;
@@ -244,6 +252,7 @@ public class YearEndServiceTests:ApiTestBase<Program>
     [Fact(DisplayName = "PS-145 : Negative ETVA for SSNs on PayProfit (JSON)")]
     public async Task GetNegativeEtvaReportJson()
     {
+        _yearEndClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         byte negativeValues = 5;
         await MockDbContextFactory.UseWritableContext(async c =>
         {
@@ -276,6 +285,7 @@ public class YearEndServiceTests:ApiTestBase<Program>
     [Fact(DisplayName = "PS-145 : Negative ETVA for SSNs on PayProfit (CSV)")]
     public async Task GetNegativeEtvaReportCsv()
     {
+        _yearEndClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         var stream = await _yearEndClient.DownloadNegativeETVAForSSNsOnPayProfitResponse(CancellationToken.None);
         stream.Should().NotBeNull();
 
@@ -289,6 +299,7 @@ public class YearEndServiceTests:ApiTestBase<Program>
     [Fact(DisplayName = "PS-149 : Mismatched Ssns Payprofit and Demographics On Same Badge (JSON)")]
     public async Task GetMismatchedSsnsPayprofitAndDemographicsOnSameBadgeJson()
     {
+        _yearEndClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         var response = await _yearEndClient.GetMismatchedSsnsPayprofitAndDemographicsOnSameBadge(_paginationRequest, CancellationToken.None);
 
         response.Should().NotBeNull();
@@ -300,6 +311,7 @@ public class YearEndServiceTests:ApiTestBase<Program>
     [Fact(DisplayName = "PS-149 : Mismatched Ssns Payprofit and Demographics On Same Badge (CSV)")]
     public async Task GetMismatchedSsnsPayprofitAndDemographicsOnSameBadgeCsv()
     {
+        _yearEndClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         var stream = await _yearEndClient.DownloadMismatchedSsnsPayprofitAndDemographicsOnSameBadge(CancellationToken.None);
         stream.Should().NotBeNull();
 
@@ -313,6 +325,7 @@ public class YearEndServiceTests:ApiTestBase<Program>
     [Fact(DisplayName = "PS-152 : Duplicate names and Birthdays (JSON)")]
     public async Task GetDuplicateNamesAndBirthdays()
     {
+        _yearEndClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         var request = new PaginationRequestDto { Take = 1000, Skip = 0 };
         var response = await _yearEndClient.GetDuplicateNamesAndBirthdays(request, CancellationToken.None);
         response.Should().NotBeNull();
@@ -353,6 +366,7 @@ public class YearEndServiceTests:ApiTestBase<Program>
     [Fact(DisplayName = "PS-152 : Duplicate names and Birthdays (CSV)")]
     public async Task GetDuplicateNamesAndBirthdaysCsv()
     {
+        _yearEndClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         byte duplicateRows = 5;
         await MockDbContextFactory.UseWritableContext(async c =>
         {
@@ -386,6 +400,7 @@ public class YearEndServiceTests:ApiTestBase<Program>
     [Fact(DisplayName = "PS-148 : Payroll Duplicate Ssns On Payprofit (JSON)")]
     public async Task GetPayrollDuplicateSsnsOnPayprofitJson()
     {
+        _yearEndClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         var response = await _yearEndClient.GetPayrollDuplicateSsnsOnPayprofit(_paginationRequest, CancellationToken.None);
 
         response.Should().NotBeNull();
@@ -397,6 +412,7 @@ public class YearEndServiceTests:ApiTestBase<Program>
     [Fact(DisplayName = "PS-148 : Payroll Duplicate Ssns On Payprofit (CSV)")]
     public async Task GetPayrollDuplicateSsnsOnPayprofitCsv()
     {
+        _yearEndClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         var stream = await _yearEndClient.DownloadPayrollDuplicateSsnsOnPayprofit(CancellationToken.None);
         stream.Should().NotBeNull();
 
@@ -405,5 +421,12 @@ public class YearEndServiceTests:ApiTestBase<Program>
         result.Should().NotBeNullOrEmpty();
 
         _testOutputHelper.WriteLine(result);
+    }
+
+    [Fact(DisplayName = "YearEndService auth check")]
+    public async Task YearEndServiceAuthCheck()
+    {
+        _yearEndClient.CreateAndAssignTokenForClient(Role.HARDSHIPADMINISTRATOR);
+        await Assert.ThrowsAsync<HttpRequestException>(async () => { _ = await _yearEndClient.GetPayrollDuplicateSsnsOnPayprofit(_paginationRequest, CancellationToken.None); });
     }
 }

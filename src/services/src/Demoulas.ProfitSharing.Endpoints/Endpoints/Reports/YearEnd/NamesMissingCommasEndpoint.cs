@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Security;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 public class NamesMissingCommasEndpoint : EndpointWithCsvBase<PaginationRequestDto, NamesMissingCommaResponse, NamesMissingCommasEndpoint.NamesMissingCommasResponseMap>
@@ -19,7 +20,6 @@ public class NamesMissingCommasEndpoint : EndpointWithCsvBase<PaginationRequestD
 
     public override void Configure()
     {
-        AllowAnonymous();
         Get("names-missing-commas");
         Summary(s =>
         {
@@ -43,6 +43,7 @@ public class NamesMissingCommasEndpoint : EndpointWithCsvBase<PaginationRequestD
                 }
             };
             s.ExampleRequest = SimpleExampleRequest;
+            s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
         Group<YearEndGroup>();
         base.Configure();

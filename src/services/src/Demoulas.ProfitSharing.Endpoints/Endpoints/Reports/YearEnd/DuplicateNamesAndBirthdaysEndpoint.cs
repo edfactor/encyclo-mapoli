@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Security;
 using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PayrollDuplicateSsnsOnPayprofitEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
@@ -20,7 +21,6 @@ public class DuplicateNamesAndBirthdaysEndpoint:EndpointWithCsvBase<PaginationRe
 
     public override void Configure()
     {
-        AllowAnonymous();
         Get("duplicate-names-and-birthdays");
         Summary(s =>
         {
@@ -66,6 +66,7 @@ public class DuplicateNamesAndBirthdaysEndpoint:EndpointWithCsvBase<PaginationRe
                     }
                 }
             };
+            s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
         Group<YearEndGroup>();
         base.Configure();

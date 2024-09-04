@@ -8,9 +8,13 @@ using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
+using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.Extensions;
-using Demoulas.Util.Extensions;
+using Demoulas.Security;
+using FastEndpoints.Security;
 using MassTransit.Monitoring;
+using Microsoft.AspNetCore.Authentication;
+using NSwag.Generation.AspNetCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder();
 
@@ -25,6 +29,20 @@ ElasticSearchConfig smartConfig = new ElasticSearchConfig();
 builder.Configuration.Bind("Logging:Smart", smartConfig);
 
 await builder.SetDefaultLoggerConfigurationAsync(smartConfig);
+builder.Services.AddTransient<IClaimsTransformation, ImpersonationAndEnvironmentAwareClaimsTransformation>();
+if (!builder.Environment.IsTestEnvironment())
+{
+    var rolePermissionService = new RolePermissionService();
+    builder.Services.AddOktaSecurity(builder.Configuration, rolePermissionService);
+} 
+else
+{
+    builder.Services.AddAuthenticationJwtBearer(s => {
+        s.SigningKey = string.Concat(Enumerable.Repeat("UNIT TEST SECRET KEY", 16));
+    }).AddAuthorization();
+}
+
+builder.ConfigurePolicies();
 
 builder.Services.AddCors(options =>
 {
@@ -58,10 +76,15 @@ void OktaSettingsAction(OktaSwaggerConfiguration settings)
     builder.Configuration.Bind("Okta", settings);
 }
 
+void OktaDocumentSettings(AspNetCoreOpenApiDocumentGeneratorSettings settings)
+{
+    settings.OperationProcessors.Add(new SwaggerImpersonationHeader());
+}
+
 builder.ConfigureDefaultEndpoints(meterNames: new[] { InstrumentationOptions.MeterName },
         activitySourceNames: new[] { OracleHcmActivitySource.Instance.Name })
-    .AddSwaggerOpenApi(oktaSettingsAction: OktaSettingsAction)
-    .AddSwaggerOpenApi(version: 2, oktaSettingsAction: OktaSettingsAction);
+    .AddSwaggerOpenApi(oktaSettingsAction: OktaSettingsAction, documentSettingsAction: OktaDocumentSettings)
+    .AddSwaggerOpenApi(version: 2, oktaSettingsAction: OktaSettingsAction, documentSettingsAction: OktaDocumentSettings);
 
 WebApplication app = builder.Build();
 

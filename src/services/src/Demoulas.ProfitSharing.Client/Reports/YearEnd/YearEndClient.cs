@@ -10,7 +10,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Client.Reports.YearEnd;
-public sealed class YearEndClient : IYearEndService
+public sealed class YearEndClient : ClientBase, IYearEndService
 {
     private const string BaseApiPath = "api/yearend";
 
@@ -24,7 +24,7 @@ public sealed class YearEndClient : IYearEndService
     {
         
     }
-    public YearEndClient(HttpClient? jsonClient, HttpClient? fileDownloadClient)
+    public YearEndClient(HttpClient? jsonClient, HttpClient? fileDownloadClient) : base(jsonClient, fileDownloadClient)
     {
         ArgumentNullException.ThrowIfNull(jsonClient);
         ArgumentNullException.ThrowIfNull(fileDownloadClient);

@@ -6,6 +6,7 @@ using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Security;
 
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
@@ -20,7 +21,6 @@ public class GetDuplicateSsNsEndpoint : EndpointWithCsvBase<PaginationRequestDto
 
     public override void Configure()
     {
-        AllowAnonymous();
         Get("duplicate-ssns");
         Summary(s =>
         {
@@ -44,6 +44,7 @@ public class GetDuplicateSsNsEndpoint : EndpointWithCsvBase<PaginationRequestDto
                     }
                 }
             };
+            s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
         Group<YearEndGroup>();
         base.Configure();
