@@ -9,7 +9,7 @@
     <PackageVersion Include="FastEndpoints.Testing" Version="5.29.0" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="8.2.0" />
     <PackageVersion Include="CsvHelper" Version="33.0.1" />
-    <PackageVersion Include="Demoulas.Common.Api" Version="1.2.2" />
+    <PackageVersion Include="Demoulas.Common.Api" Version="1.2.1" />
     <PackageVersion Include="Demoulas.Common.Data.Contexts" Version="2.1.4" />
     <PackageVersion Include="Demoulas.Common.Data.Services" Version="3.1.1" />
     <PackageVersion Include="Demoulas.Security" Version="3.3.2" />
