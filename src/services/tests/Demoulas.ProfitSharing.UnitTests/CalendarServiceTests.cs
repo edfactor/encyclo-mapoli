@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit.Abstractions;
 
-namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
+namespace Demoulas.ProfitSharing.UnitTests;
 
 public class CalendarServiceTests : ApiTestBase<Api.Program>
 {
@@ -42,10 +42,10 @@ public class CalendarServiceTests : ApiTestBase<Api.Program>
         var date = DateOnly.ParseExact(sDate, "yyMMdd");
         var calendarService = ServiceProvider?.GetRequiredService<CalendarService>()!;
 
-        var weekEndingDate =await calendarService.FindWeekendingDateFromDate(date);
+        var weekEndingDate = await calendarService.FindWeekendingDateFromDate(date);
 
         weekEndingDate.Should().BeOnOrAfter(date);
-        
+
         // Verify that the weekEndingDate is a Saturday
         weekEndingDate.DayOfWeek.Should().Be(DayOfWeek.Saturday);
     }

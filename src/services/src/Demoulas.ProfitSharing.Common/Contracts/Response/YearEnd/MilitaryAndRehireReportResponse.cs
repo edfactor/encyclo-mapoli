@@ -21,7 +21,7 @@ public sealed record MilitaryAndRehireReportResponse
             DepartmentId = 6,
             BadgeNumber = 123,
             Ssn = "XXX-XX-1234",
-            FullName = "John Doe",
+            FullName = "Doe, John",
             TerminationDate = DateTime.Today.ToDateOnly(),
             DateOfBirth = DateTime.Today.AddYears(-25).ToDateOnly()
         };
