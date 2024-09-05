@@ -13,4 +13,14 @@ public interface IMilitaryAndRehireService
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the report response with details of employees on military leave and rehired.</returns>
     Task<ReportResponseBase<MilitaryAndRehireReportResponse>> GetMilitaryAndRehireReport(PaginationRequestDto req, CancellationToken cancellationToken);
+
+    
+    /// <summary>
+    /// Finds rehires who may be entitled to forfeitures taken out in prior years.
+    /// </summary>
+    /// <param name="req">The pagination request details.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the report response with details of rehires and their potential entitlements.</returns>
+    Task<ReportResponseBase<MilitaryRehireProfitSharingResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYears(PaginationRequestDto req,
+        CancellationToken cancellationToken);
 }
