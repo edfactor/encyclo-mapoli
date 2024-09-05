@@ -6,7 +6,7 @@ using Demoulas.Common.Contracts.Contracts.Response;
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 public sealed record MilitaryRehireProfitSharingDetailResponse
 {
-    public required short Year { get; set; }
+    public required short ProfitYear { get; set; }
     public required decimal Forfeiture { get; set; }
-    public required string Comment { get; set; }
+    public required string? Remark { get; set; }
 }

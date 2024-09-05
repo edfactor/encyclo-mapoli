@@ -10,8 +10,8 @@ public sealed record MilitaryRehireProfitSharingResponse
     public required string? FullName { get; set; }
     public required string Ssn { get; set; }
     public required DateOnly ReHiredDate { get; set; }
-    public required byte Years { get; set; }
-    public required decimal Hours { get; set; }
+    public required byte CompanyContributionYears { get; set; }
+    public required decimal HoursCurrentYear { get; set; }
     public required List<MilitaryRehireProfitSharingDetailResponse> Details { get; set; }
 
 
@@ -19,12 +19,21 @@ public sealed record MilitaryRehireProfitSharingResponse
     {
         return new MilitaryRehireProfitSharingResponse
         {
-            DepartmentId = 6,
             BadgeNumber = 123,
             Ssn = "XXX-XX-1234",
             FullName = "Doe, John",
-            TerminationDate = DateTime.Today.ToDateOnly(),
-            DateOfBirth = DateTime.Today.AddYears(-25).ToDateOnly()
+            HoursCurrentYear = (decimal)2345.6,
+            CompanyContributionYears = 3,
+            ReHiredDate = DateTime.Today.AddYears(-2).ToDateOnly(),
+            Details = new List<MilitaryRehireProfitSharingDetailResponse>
+            {
+                new MilitaryRehireProfitSharingDetailResponse
+                {
+                    Forfeiture = (decimal)3254.14,
+                    ProfitYear = (short)DateTime.Today.AddYears(-3).Year,
+                    Remark = "Example remarks here"
+                }
+            }
         };
     }
 }

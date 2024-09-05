@@ -1,4 +1,6 @@
-﻿using Demoulas.Common.Contracts.Contracts.Request;
+﻿using System.Data.SqlTypes;
+using System.Runtime.Intrinsics.X86;
+using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -7,6 +9,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
@@ -55,9 +58,9 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
         };
     }
 
-    public async Task<ReportResponseBase<MilitaryAndRehireReportResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYears(PaginationRequestDto req, CancellationToken cancellationToken)
+    public async Task<ReportResponseBase<MilitaryRehireProfitSharingResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYears(PaginationRequestDto req, CancellationToken cancellationToken)
     {
-        var militaryMembers = await _dataContextFactory.UseReadOnlyContext(async context =>
+        var militaryMembers = await _dataContextFactory.UseReadOnlyContext(context =>
         {
             var query = context.Demographics
                 .Join(
@@ -76,9 +79,9 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
                         demographics.EmploymentStatusId
                     }
                 )
-                .Where(m=> 
+                .Where(m =>
                     m.EmploymentStatusId == EmploymentStatus.Constants.Active
-                && m.ReHireDate != null 
+                    && m.ReHireDate != null
                     && m.ReHireDate > new DateOnly(2000, 01, 01))
                 .Join(
                     context.ProfitDetails, // Table to join with (ProfitDetail)
@@ -100,11 +103,35 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
                     }
                 )
                 .Where(pd => pd.ProfitCodeId == 2)
-                .OrderBy(m=> m.BadgeNumber);
+                .OrderBy(m => m.BadgeNumber)
+                .GroupBy(m => new
+                {
+                    m.BadgeNumber,
+                    m.FullName,
+                    m.Ssn,
+                    m.ReHireDate,
+                    m.CompanyContributionYears,
+                    m.HoursCurrentYear
+                }) // Group by employee details
+                .Select(group =>
+                    new MilitaryRehireProfitSharingResponse
+                    {
+                        BadgeNumber = group.Key.BadgeNumber,
+                        Ssn = group.Key.Ssn.MaskSsn(),
+                        FullName = group.Key.FullName,
+                        HoursCurrentYear = group.Key.HoursCurrentYear ?? 0,
+                        ReHiredDate = group.Key.ReHireDate ?? SqlDateTime.MinValue.Value.ToDateOnly(),
+                        CompanyContributionYears = group.Key.CompanyContributionYears,
+                        Details = group.Select(pd => new MilitaryRehireProfitSharingDetailResponse
+                        {
+                            Forfeiture = pd.Forfeiture, Remark = pd.Remark, ProfitYear = pd.ProfitYear
+                        }).ToList()
+                    });
             
+            return query.ToPaginationResultsAsync(req, cancellationToken);
         });
 
-        return new ReportResponseBase<MilitaryAndRehireReportResponse>
+        return new ReportResponseBase<MilitaryRehireProfitSharingResponse>
         {
             ReportName = "REHIRE'S PROFIT SHARING DATA",
             ReportDate = DateTimeOffset.Now,
