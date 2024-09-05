@@ -54,4 +54,61 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
             Response = militaryMembers
         };
     }
+
+    public async Task<ReportResponseBase<MilitaryAndRehireReportResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYears(PaginationRequestDto req, CancellationToken cancellationToken)
+    {
+        var militaryMembers = await _dataContextFactory.UseReadOnlyContext(async context =>
+        {
+            var query = context.Demographics
+                .Join(
+                    context.PayProfits, // Table to join with (PayProfit)
+                    demographics => demographics.Ssn, // Primary key selector from Demographics
+                    payProfit => payProfit.Ssn, // Foreign key selector from PayProfit
+                    (demographics, payProfit) => new // Result selector after joining
+                    {
+                        demographics.BadgeNumber,
+                        demographics.FullName,
+                        demographics.Ssn,
+                        demographics.ReHireDate,
+                        payProfit.CompanyContributionYears,
+                        payProfit.EnrollmentId,
+                        payProfit.HoursCurrentYear,
+                        demographics.EmploymentStatusId
+                    }
+                )
+                .Where(m=> 
+                    m.EmploymentStatusId == EmploymentStatus.Constants.Active
+                && m.ReHireDate != null 
+                    && m.ReHireDate > new DateOnly(2000, 01, 01))
+                .Join(
+                    context.ProfitDetails, // Table to join with (ProfitDetail)
+                    combined => combined.Ssn, // Key selector from the result of the first join
+                    profitDetail => profitDetail.Ssn, // Foreign key selector from ProfitDetail
+                    (member, profitDetail) => new // Result selector after joining ProfitDetail
+                    {
+                        member.BadgeNumber,
+                        member.FullName,
+                        member.Ssn,
+                        member.ReHireDate,
+                        member.CompanyContributionYears,
+                        member.EnrollmentId,
+                        member.HoursCurrentYear,
+                        profitDetail.Forfeiture,
+                        profitDetail.Remark,
+                        profitDetail.ProfitYear,
+                        profitDetail.ProfitCodeId
+                    }
+                )
+                .Where(pd => pd.ProfitCodeId == 2)
+                .OrderBy(m=> m.BadgeNumber);
+            
+        });
+
+        return new ReportResponseBase<MilitaryAndRehireReportResponse>
+        {
+            ReportName = "REHIRE'S PROFIT SHARING DATA",
+            ReportDate = DateTimeOffset.Now,
+            Response = militaryMembers
+        };
+    }
 }
