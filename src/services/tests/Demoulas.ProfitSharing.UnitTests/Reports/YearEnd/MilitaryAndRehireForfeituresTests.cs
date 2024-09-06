@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Data.SqlTypes;
+using System.Net;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using FluentAssertions;
@@ -153,7 +154,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
         var demo = await c.Demographics.FirstAsync();
         demo.EmploymentStatusId = EmploymentStatus.Constants.Active;
         demo.ReHireDate = DateTime.Today.ToDateOnly();
-        demo.BadgeNumber = example.BadgeNumber;
+        
 
         var payProfit = await c.PayProfits.FirstAsync(pp => pp.Ssn == demo.Ssn);
         payProfit.EnrollmentId = Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
@@ -171,8 +172,16 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
 
         await c.SaveChangesAsync();
 
+        example.BadgeNumber = demo.BadgeNumber;
         example.Ssn = demo.Ssn.MaskSsn();
         example.FullName = demo.FullName;
+        example.CompanyContributionYears = payProfit.CompanyContributionYears;
+        example.HoursCurrentYear = payProfit.HoursCurrentYear ?? 0;
+        example.ReHiredDate = demo.ReHireDate ?? SqlDateTime.MinValue.Value.ToDateOnly();
+        example.Details = details.Select(pd => new MilitaryRehireProfitSharingDetailResponse
+        {
+            Forfeiture = pd.Forfeiture, Remark = pd.Remark, ProfitYear = pd.ProfitYear
+        }).ToList();
 
 
         return (new PaginationRequestDto { Skip = 0, Take = 10 }, example);
