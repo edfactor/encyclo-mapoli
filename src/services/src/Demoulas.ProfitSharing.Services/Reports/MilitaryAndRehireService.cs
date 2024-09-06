@@ -61,7 +61,7 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
     /// <param name="req">The pagination request containing the necessary parameters for the search.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a report response with the rehire profit sharing data.</returns>
-    public async Task<ReportResponseBase<MilitaryRehireProfitSharingResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYears(PaginationRequestDto req, CancellationToken cancellationToken)
+    public async Task<ReportResponseBase<MilitaryAndRehireForfeituresResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYears(PaginationRequestDto req, CancellationToken cancellationToken)
     {
         var militaryMembers = await _dataContextFactory.UseReadOnlyContext(context =>
         {
@@ -105,7 +105,7 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
                         profitDetail.ProfitCodeId
                     }
                 )
-                .Where(pd => pd.ProfitCodeId == 2)
+                .Where(pd => pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id)
                 .OrderBy(m => m.BadgeNumber)
                 .GroupBy(m => new
                 {
@@ -117,7 +117,7 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
                     m.HoursCurrentYear
                 }) // Group by employee details
                 .Select(group =>
-                    new MilitaryRehireProfitSharingResponse
+                    new MilitaryAndRehireForfeituresResponse
                     {
                         BadgeNumber = group.Key.BadgeNumber,
                         Ssn = group.Key.Ssn.MaskSsn(),
@@ -134,7 +134,7 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
             return query.ToPaginationResultsAsync(req, cancellationToken);
         });
 
-        return new ReportResponseBase<MilitaryRehireProfitSharingResponse>
+        return new ReportResponseBase<MilitaryAndRehireForfeituresResponse>
         {
             ReportName = "REHIRE'S PROFIT SHARING DATA",
             ReportDate = DateTimeOffset.Now,

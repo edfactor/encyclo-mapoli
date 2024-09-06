@@ -13,12 +13,12 @@ using Demoulas.ProfitSharing.Security;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 
-public class MilitaryAndRehireEndpointForfeitures :
-    EndpointWithCsvBase<PaginationRequestDto, MilitaryRehireProfitSharingResponse, MilitaryAndRehireEndpointForfeitures.MilitaryRehireProfitSharingResponseMap>
+public class MilitaryAndRehireForfeituresEndpoint :
+    EndpointWithCsvBase<PaginationRequestDto, MilitaryAndRehireForfeituresResponse, MilitaryAndRehireForfeituresEndpoint.MilitaryRehireProfitSharingResponseMap>
 {
     private readonly IMilitaryAndRehireService _reportService;
 
-    public MilitaryAndRehireEndpointForfeitures(IMilitaryAndRehireService reportService)
+    public MilitaryAndRehireForfeituresEndpoint(IMilitaryAndRehireService reportService)
     {
         _reportService = reportService;
     }
@@ -37,13 +37,13 @@ public class MilitaryAndRehireEndpointForfeitures :
             {
                 {
                     200,
-                    new ReportResponseBase<MilitaryRehireProfitSharingResponse>
+                    new ReportResponseBase<MilitaryAndRehireForfeituresResponse>
                     {
                         ReportName = ReportFileName,
                         ReportDate = DateTimeOffset.Now,
-                        Response = new PaginatedResponseDto<MilitaryRehireProfitSharingResponse>
+                        Response = new PaginatedResponseDto<MilitaryAndRehireForfeituresResponse>
                         {
-                            Results = new List<MilitaryRehireProfitSharingResponse> { MilitaryRehireProfitSharingResponse.ResponseExample() }
+                            Results = new List<MilitaryAndRehireForfeituresResponse> { MilitaryAndRehireForfeituresResponse.ResponseExample() }
                         }
                     }
                 }
@@ -56,12 +56,12 @@ public class MilitaryAndRehireEndpointForfeitures :
 
     public override string ReportFileName => "REHIRE'S PROFIT SHARING DATA";
 
-    public override async Task<ReportResponseBase<MilitaryRehireProfitSharingResponse>> GetResponse(PaginationRequestDto req, CancellationToken ct)
+    public override async Task<ReportResponseBase<MilitaryAndRehireForfeituresResponse>> GetResponse(PaginationRequestDto req, CancellationToken ct)
     {
         return await _reportService.FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYears(req, ct);
     }
 
-    protected internal override void GenerateCsvContent(CsvWriter csvWriter, ReportResponseBase<MilitaryRehireProfitSharingResponse> report)
+    protected internal override void GenerateCsvContent(CsvWriter csvWriter, ReportResponseBase<MilitaryAndRehireForfeituresResponse> report)
     {
         csvWriter.Context.RegisterClassMap<MilitaryRehireProfitSharingResponseMap>();
 
@@ -89,7 +89,7 @@ public class MilitaryAndRehireEndpointForfeitures :
         }
     }
 
-    public sealed class MilitaryRehireProfitSharingResponseMap : ClassMap<MilitaryRehireProfitSharingResponse>
+    public sealed class MilitaryRehireProfitSharingResponseMap : ClassMap<MilitaryAndRehireForfeituresResponse>
     {
         public MilitaryRehireProfitSharingResponseMap()
         {

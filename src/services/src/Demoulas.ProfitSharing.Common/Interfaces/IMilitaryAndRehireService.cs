@@ -21,6 +21,6 @@ public interface IMilitaryAndRehireService
     /// <param name="req">The pagination request details.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the report response with details of rehires and their potential entitlements.</returns>
-    Task<ReportResponseBase<MilitaryRehireProfitSharingResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYears(PaginationRequestDto req,
+    Task<ReportResponseBase<MilitaryAndRehireForfeituresResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYears(PaginationRequestDto req,
         CancellationToken cancellationToken);
 }

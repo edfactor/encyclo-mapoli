@@ -6,7 +6,7 @@ public class ProfitDetail
     public short ProfitYear { get; set; }
     public byte ProfitYearIteration { get; set; }
     public required ProfitCode ProfitCode { get; set; }
-    public short ProfitCodeId { get; set; }
+    public byte ProfitCodeId { get; set; }
     public decimal Contribution { get; set; }
     public decimal Earnings { get; set; }
     public decimal Forfeiture { get; set; }

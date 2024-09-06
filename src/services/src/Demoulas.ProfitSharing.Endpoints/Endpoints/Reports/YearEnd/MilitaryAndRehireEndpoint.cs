@@ -1,6 +1,4 @@
-﻿using CsvHelper;
-using CsvHelper.Configuration;
-using CsvHelper.TypeConversion;
+﻿using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -10,11 +8,10 @@ using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Endpoints.TypeConverters;
 using Demoulas.ProfitSharing.Security;
-using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.MilitaryAndRehireEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 
-public class MilitaryAndRehireEndpoint : EndpointWithCsvBase<PaginationRequestDto, MilitaryAndRehireReportResponse, MilitaryAndRehireReportResponseMap>
+public class MilitaryAndRehireEndpoint : EndpointWithCsvBase<PaginationRequestDto, MilitaryAndRehireReportResponse, MilitaryAndRehireEndpoint.MilitaryAndRehireReportResponseMap>
 {
     private readonly IMilitaryAndRehireService _reportService;
 

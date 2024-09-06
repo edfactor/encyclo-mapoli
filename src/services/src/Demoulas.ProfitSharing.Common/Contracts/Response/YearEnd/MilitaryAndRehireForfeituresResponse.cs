@@ -1,10 +1,8 @@
 ﻿
 using Demoulas.Util.Extensions;
-using System.Data.SqlTypes;
-using Demoulas.Common.Contracts.Contracts.Response;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-public sealed record MilitaryRehireProfitSharingResponse
+public sealed record MilitaryAndRehireForfeituresResponse
 {
     public required int BadgeNumber { get; set; }
     public required string? FullName { get; set; }
@@ -15,9 +13,9 @@ public sealed record MilitaryRehireProfitSharingResponse
     public required List<MilitaryRehireProfitSharingDetailResponse> Details { get; set; }
 
 
-    public static MilitaryRehireProfitSharingResponse ResponseExample()
+    public static MilitaryAndRehireForfeituresResponse ResponseExample()
     {
-        return new MilitaryRehireProfitSharingResponse
+        return new MilitaryAndRehireForfeituresResponse
         {
             BadgeNumber = 123,
             Ssn = "XXX-XX-1234",
