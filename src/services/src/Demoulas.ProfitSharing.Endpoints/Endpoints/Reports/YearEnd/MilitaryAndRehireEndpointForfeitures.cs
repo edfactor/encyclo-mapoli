@@ -8,11 +8,12 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Endpoints.TypeConverters;
 using Demoulas.ProfitSharing.Security;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 
-public class MilitaryAndRehireEndpointForfeitures : 
+public class MilitaryAndRehireEndpointForfeitures :
     EndpointWithCsvBase<PaginationRequestDto, MilitaryRehireProfitSharingResponse, MilitaryAndRehireEndpointForfeitures.MilitaryRehireProfitSharingResponseMap>
 {
     private readonly IMilitaryAndRehireService _reportService;
@@ -69,6 +70,31 @@ public class MilitaryAndRehireEndpointForfeitures :
             Map(m => m.BadgeNumber).Index(2).Name("BADGE");
             Map(m => m.FullName).Index(3).Name("EMPLOYEE NAME");
             Map(m => m.Ssn).Index(4).Name("SSN");
+            Map(m => m.ReHiredDate).Index(5).Name("REHIRED").TypeConverter<YearMonthDayTypeConverter>();
+            Map(m => m.CompanyContributionYears).Index(6).Name("PY-YRS");
+            Map(m => m.HoursCurrentYear).Index(7).Name("YTD HOURS").TypeConverterOption.Format("0.00");
+            Map().Index(8).Name("EC"); // Assuming EC is blank, leave an empty column
+            
+            Map(m => m.Details)
+        }
+    }
+
+    public sealed class DetailsMap : ClassMap<MilitaryRehireProfitSharingDetailResponse>
+    {
+        public DetailsMap()
+        {
+            Map().Index(0).Convert(_ => string.Empty);
+            Map().Index(1).Convert(_ => string.Empty);
+            Map().Index(2).Convert(_ => string.Empty);
+            Map().Index(3).Convert(_ => string.Empty);
+            Map().Index(4).Convert(_ => string.Empty);
+            Map().Index(5).Convert(_ => string.Empty);
+            Map().Index(6).Convert(_ => string.Empty);
+
+            Map(m => m.ProfitYear).Index(7).Name("YEAR");
+            Map(m => m.Forfeiture).Index(8).Name("FORFEITURES").TypeConverterOption.Format("0.00");
+            Map(m => m.Remark).Index(9).Name("COMMENT");
         }
     }
 }
+    

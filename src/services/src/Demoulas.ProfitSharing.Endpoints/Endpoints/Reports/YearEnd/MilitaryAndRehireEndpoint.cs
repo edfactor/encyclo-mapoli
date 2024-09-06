@@ -8,6 +8,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Endpoints.TypeConverters;
 using Demoulas.ProfitSharing.Security;
 using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.MilitaryAndRehireEndpoint;
 
@@ -60,19 +61,7 @@ public class MilitaryAndRehireEndpoint : EndpointWithCsvBase<PaginationRequestDt
         return await _reportService.GetMilitaryAndRehireReport(req, ct);
     }
 
-    public sealed class YearMonthDayTypeConverter : DefaultTypeConverter
-    {
-        public override string? ConvertToString(object? value, IWriterRow row, MemberMapData memberMapData)
-        {
-            if (value == null)
-            {
-                return null;
-            }
-
-            var d = (DateOnly)value;
-            return d.ToString("d");
-        }
-    }
+ 
 
     public sealed class MilitaryAndRehireReportResponseMap : ClassMap<MilitaryAndRehireReportResponse>
     {
