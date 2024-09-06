@@ -135,8 +135,8 @@ public class YearEndServiceTests:ApiTestBase<Program>
 
             foreach (var dem in c.Demographics.Take(mismatchedValues))
             {
-                dem.BadgeNumber = dem.BadgeNumber + c.PayProfits.Count() + 1;
-            };
+                dem.BadgeNumber = dem.BadgeNumber + await c.PayProfits.CountAsync() + 1;
+            }
 
             await c.SaveChangesAsync();
 
@@ -344,7 +344,7 @@ public class YearEndServiceTests:ApiTestBase<Program>
                 dem.FirstName = modelDemographic.FirstName;
                 dem.LastName = modelDemographic.LastName;
                 dem.FullName = modelDemographic.FullName;
-            };
+            }
 
             await c.SaveChangesAsync();
         });

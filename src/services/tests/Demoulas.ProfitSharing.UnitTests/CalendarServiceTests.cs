@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Globalization;
+using System.Net;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.NotOwned;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services;
@@ -39,7 +40,7 @@ public class CalendarServiceTests : ApiTestBase<Api.Program>
     [Theory(DisplayName = "Find Weekending Date")]
     public async Task FindWeekendingDate(string sDate)
     {
-        var date = DateOnly.ParseExact(sDate, "yyMMdd");
+        var date = DateOnly.ParseExact(sDate, "yyMMdd", CultureInfo.InvariantCulture);
         var calendarService = ServiceProvider?.GetRequiredService<CalendarService>()!;
 
         var weekEndingDate = await calendarService.FindWeekendingDateFromDate(date);
@@ -74,7 +75,7 @@ public class CalendarServiceTests : ApiTestBase<Api.Program>
     [Fact(DisplayName = "Find Weekending Date - Valid Date")]
     public async Task FindWeekendingDate_ValidDate()
     {
-        var validDate = DateOnly.ParseExact("230101", "yyMMdd");
+        var validDate = DateOnly.ParseExact("230101", "yyMMdd", CultureInfo.InvariantCulture);
         var calendarService = ServiceProvider?.GetRequiredService<CalendarService>()!;
         var weekEndingDate = await calendarService.FindWeekendingDateFromDate(validDate);
         weekEndingDate.Should().BeOnOrAfter(validDate);
