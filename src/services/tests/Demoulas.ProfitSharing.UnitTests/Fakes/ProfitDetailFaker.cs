@@ -7,6 +7,8 @@ namespace Demoulas.ProfitSharing.UnitTests.Fakes;
 
 internal sealed class ProfitDetailFaker : Faker<ProfitDetail>
 {
+    private static int _profitDetailCounter = 1000;
+
     internal ProfitDetailFaker(IList<Demographic> demographicFakes)
     {
         var demographicQueue = new Queue<Demographic>(demographicFakes);
@@ -14,6 +16,8 @@ internal sealed class ProfitDetailFaker : Faker<ProfitDetail>
         Demographic currentDemographic = demographicQueue.Dequeue();
         var taxCodeFaker = new TaxCodeFaker();
 
+        RuleFor(d => d.Id, f => _profitDetailCounter++);
+        
         RuleFor(d => d.Ssn, (f, o) =>
         {
             // This code is non-intuitive.   The idea is that when the demographic
@@ -26,7 +30,9 @@ internal sealed class ProfitDetailFaker : Faker<ProfitDetail>
 
             return rslt;
         });
-        RuleFor(pd => pd.ProfitYear, fake => Convert.ToInt16(DateTime.Now.Year)).RuleFor(pd => pd.ProfitYearIteration, fake => (byte)0)
+        
+        RuleFor(pd => pd.ProfitYear, fake => fake.Random.Int(Convert.ToInt16(DateTime.Now.Year-10), Convert.ToInt16(DateTime.Now.Year)))
+            .RuleFor(pd => pd.ProfitYearIteration, fake => (byte)0)
             .RuleFor(pd => pd.ProfitCodeId, fake => fake.PickRandom<byte>(ProfitCode.Constants.IncomingContributions.Id,
                 ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
                 ProfitCode.Constants.OutgoingForfeitures.Id,
@@ -46,5 +52,6 @@ internal sealed class ProfitDetailFaker : Faker<ProfitDetail>
             .RuleFor(pd => pd.StateTaxes, fake => fake.Finance.Amount(0, 1000))
             .RuleFor(pd => pd.TaxCode, fake => taxCodeFaker.Generate())
             .RuleFor(pd => pd.TaxCodeId, fake => taxCodeFaker.Generate().Code);
+
     }
 }
