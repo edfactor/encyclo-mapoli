@@ -46,6 +46,7 @@ public class PayProfitBadgesNotInDemographicsEndpoint: EndpointWithCsvBase<Pagin
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
         Group<YearEndGroup>();
+        base.Configure();
     }
 
     public override string ReportFileName => "PAYPROFIT-WITOUT-DEMOGRAPHICS";

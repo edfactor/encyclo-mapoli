@@ -1,5 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
+# 17
 VisualStudioVersion = 17.8.0.0
 MinimumVisualStudioVersion = 17.8.0.0
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.AppHost", "src\Demoulas.ProfitSharing.AppHost\Demoulas.ProfitSharing.AppHost.csproj", "{92A3B192-25F3-40C4-94BD-A13779CF0B81}"
@@ -108,8 +108,8 @@ Global
 		{2376B169-4E82-463C-8EF3-3EE4AF7E195C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2376B169-4E82-463C-8EF3-3EE4AF7E195C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2376B169-4E82-463C-8EF3-3EE4AF7E195C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2376B169-4E82-463C-8EF3-3EE4AF7E195C}.Russ|Any CPU.ActiveCfg = Release|Any CPU
-		{2376B169-4E82-463C-8EF3-3EE4AF7E195C}.Russ|Any CPU.Build.0 = Release|Any CPU
+		{2376B169-4E82-463C-8EF3-3EE4AF7E195C}.Russ|Any CPU.ActiveCfg = Debug|Any CPU
+		{2376B169-4E82-463C-8EF3-3EE4AF7E195C}.Russ|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

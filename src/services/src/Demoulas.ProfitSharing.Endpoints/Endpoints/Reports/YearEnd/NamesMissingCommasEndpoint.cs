@@ -46,6 +46,7 @@ public class NamesMissingCommasEndpoint : EndpointWithCsvBase<PaginationRequestD
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
         Group<YearEndGroup>();
+        base.Configure();
     }
 
     public override string ReportFileName => "NAMES-MISSING-COMMAS";

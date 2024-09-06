@@ -69,6 +69,7 @@ public class DuplicateNamesAndBirthdaysEndpoint:EndpointWithCsvBase<PaginationRe
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
         Group<YearEndGroup>();
+        base.Configure();
     }
 
     public override string ReportFileName => "duplicate-names-and-birthdays";

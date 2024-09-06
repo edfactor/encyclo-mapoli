@@ -119,7 +119,7 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
             .HasColumnName("INCOME_EXECUTIVE")
             .HasPrecision(9, 2);
 
-        _ = builder.Property(e => e.HoursExective)
+        _ = builder.Property(e => e.HoursExecutive)
             .HasColumnName("HOURS_EXECUTIVE")
             .HasPrecision(6, 2);
 

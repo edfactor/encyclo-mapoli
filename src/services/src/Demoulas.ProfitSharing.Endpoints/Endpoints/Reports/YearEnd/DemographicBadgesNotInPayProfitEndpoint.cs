@@ -27,6 +27,7 @@ public class DemographicBadgesNotInPayProfitEndpoint : EndpointWithCsvBase<Pagin
         Summary(s =>
         {
             s.Summary = "Demographic badges not in Payprofit";
+            s.Description = "Returns a list of employees who have demographic badges but are not in Payprofit.";
             s.ExampleRequest = SimpleExampleRequest;
             s.ResponseExamples = new Dictionary<int, object>
             {
@@ -77,6 +78,7 @@ public class DemographicBadgesNotInPayProfitEndpoint : EndpointWithCsvBase<Pagin
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
         Group<YearEndGroup>();
+        base.Configure();
     }
 
     public override string ReportFileName => "DEMOGRAPHIC-WITHOUT-DEMOGRAPHICS";

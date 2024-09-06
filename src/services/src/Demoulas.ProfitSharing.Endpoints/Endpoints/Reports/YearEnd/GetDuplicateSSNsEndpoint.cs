@@ -47,6 +47,7 @@ public class GetDuplicateSsNsEndpoint : EndpointWithCsvBase<PaginationRequestDto
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
         Group<YearEndGroup>();
+        base.Configure();
     }
 
     public override string ReportFileName => "DuplicateSSns";

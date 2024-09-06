@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Demoulas.Common.Contracts" />
+    <PackageReference Include="Demoulas.Util" />
     <PackageReference Include="FastEndpoints" />
   </ItemGroup>
 

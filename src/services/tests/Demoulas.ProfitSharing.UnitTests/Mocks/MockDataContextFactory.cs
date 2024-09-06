@@ -1,6 +1,8 @@
 ﻿using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.ProfitSharing.Data.Contexts;
+using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.NotOwned;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities.NotOwned;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.UnitTests.Fakes;
 using Microsoft.EntityFrameworkCore;
@@ -59,17 +61,26 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
 
-
         List<PayProfit>? profits = new PayProfitFaker(demographics).Generate(demographics.Count);
         Mock<DbSet<PayProfit>> mockProfits = profits.AsQueryable().BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.PayProfits).Returns(mockProfits.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.PayProfits).Returns(mockProfits.Object);
 
 
+        Mock<DbSet<CaldarRecord>>? mockCalendar = CaldarRecordSeeder.Records.AsQueryable().BuildMockDbSet();
+        _profitSharingReadOnlyDbContext.Setup(m => m.CaldarRecords).Returns(mockCalendar.Object);
 
 
-        _profitSharingReadOnlyDbContext.Setup(s => s.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
-
+        _profitSharingReadOnlyDbContext.Setup(s => s.SaveChangesAsync(It.IsAny<CancellationToken>())).ThrowsAsync(new NotImplementedException("This is a read only context, saving changes is not allowed."));
+        _profitSharingDbContext.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .Returns<CancellationToken>(token =>
+            {
+                if (token.IsCancellationRequested)
+                {
+                    throw new OperationCanceledException(token);
+                }
+                return Task.FromResult(1); // Return some result for non-canceled token
+            });
     }
 
     public static IProfitSharingDataContextFactory InitializeForTesting()

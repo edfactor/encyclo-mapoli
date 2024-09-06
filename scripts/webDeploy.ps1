@@ -48,6 +48,8 @@ $Failed = $false
 try {
     $Session = New-PSSession $envServerName
 
+    Invoke-Command -Session $Session -ScriptBlock { dotnet workload update }
+
     foreach ($Deploy in $Deployments) {
         Invoke-Command -Session $Session -ScriptBlock {
             $Site = Get-IISSite -Name $Using:Deploy.SiteName

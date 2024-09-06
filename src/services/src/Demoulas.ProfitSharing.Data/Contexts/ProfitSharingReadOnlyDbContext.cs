@@ -32,7 +32,7 @@ public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitShar
     public virtual DbSet<PayProfit> PayProfits { get; set; }
     public DbSet<Job> Jobs { get; set; }
 
-    public DbSet<CaldarRecord> CaldarRecords { get; set; }
+    public virtual DbSet<CaldarRecord> CaldarRecords { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

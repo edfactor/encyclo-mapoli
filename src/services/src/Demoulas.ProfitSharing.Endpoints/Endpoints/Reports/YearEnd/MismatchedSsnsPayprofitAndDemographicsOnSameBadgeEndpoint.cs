@@ -72,7 +72,7 @@ public class MismatchedSsnsPayprofitAndDemographicsOnSameBadgeEndpoint : Endpoin
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
         Group<YearEndGroup>();
-        Options(x => x.CacheOutput(p => p.Expire(TimeSpan.FromMinutes(5))));
+        base.Configure();
     }
 
     public override string ReportFileName => "MISMATCHED-PAYPROF-DEM-SSNS";

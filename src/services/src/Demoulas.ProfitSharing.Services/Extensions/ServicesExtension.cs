@@ -36,6 +36,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IYearEndService, YearEndService>();
         _ = builder.Services.AddScoped<IPayProfitService, PayProfitService>();
         _ = builder.Services.AddScoped<IOracleHcmSynchronizationService, OracleHcmSynchronizationService>();
+        _ = builder.Services.AddScoped<IMilitaryAndRehireService, MilitaryAndRehireService>();
 
 
         OracleHcmConfig oktaSettings = builder.Configuration.GetSection("OracleHcm").Get<OracleHcmConfig>() ?? new OracleHcmConfig { Url = string.Empty };
@@ -47,6 +48,8 @@ public static class ServicesExtension
         _ = builder.Services.AddSingleton<IDemographicsServiceInternal, DemographicsService>();
         _ = builder.Services.AddSingleton<IOracleHcmSynchronizationService, OracleHcmSynchronizationService>();
         _ = builder.Services.AddSingleton<IStoreService, StoreService>();
+        _ = builder.Services.AddSingleton<CalendarService>();
+        
 
         _ = builder.Services.AddHttpClient<IEmployeeSyncService, EmployeeSyncService>((services, client) =>
         {
