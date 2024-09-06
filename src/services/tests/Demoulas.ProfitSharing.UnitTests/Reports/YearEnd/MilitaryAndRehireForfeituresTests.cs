@@ -57,6 +57,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
 
             // Assert
             response.Result.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
+            response.Result.Response.Results.Should().HaveCountGreaterThan(0);
             response.Result.Response.Results.Should().BeEquivalentTo(expectedResponse.Response.Results);
         });
     }
@@ -165,6 +166,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
             detail.Forfeiture = short.MaxValue;
             detail.ProfitYear = 2021;
             detail.Remark = "Test remarks";
+            detail.ProfitCodeId = ProfitCode.Constants.OutgoingForfeitures.Id;
         }
 
         await c.SaveChangesAsync();

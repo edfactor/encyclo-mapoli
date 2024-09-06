@@ -27,6 +27,11 @@ internal sealed class ProfitDetailFaker : Faker<ProfitDetail>
                 // So by keeping a state field outside the lamdba, we can refer to an existing demographic
                 currentDemographic = demographicQueue.Dequeue(); // record and copy its values.
             }
+            else
+            {
+                demographicQueue = new Queue<Demographic>(demographicFakes);
+                currentDemographic = demographicQueue.Dequeue();
+            }
 
             return rslt;
         });
