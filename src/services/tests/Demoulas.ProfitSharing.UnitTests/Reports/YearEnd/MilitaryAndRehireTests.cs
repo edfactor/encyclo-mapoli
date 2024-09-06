@@ -87,7 +87,7 @@ public class MilitaryAndRehireTests : ApiTestBase<Api.Program>
         });
     }
 
-    [Fact]
+    [Fact(DisplayName = "PS-156: Empty Results")]
     public async Task GetResponse_Should_HandleEmptyResults()
     {
         // Arrange
@@ -111,7 +111,7 @@ public class MilitaryAndRehireTests : ApiTestBase<Api.Program>
         response.Response.Results.Should().BeEquivalentTo(expectedResponse.Response.Results);
     }
 
-    [Fact]
+    [Fact(DisplayName = "PS-156: Null Results")]
     public async Task GetResponse_Should_HandleNullResults()
     {
         // Arrange
@@ -132,7 +132,7 @@ public class MilitaryAndRehireTests : ApiTestBase<Api.Program>
         response.Response.Results.Should().BeEquivalentTo(expectedResponse.Response.Results);
     }
 
-    [Fact]
+    [Fact(DisplayName = "PS-156: Report name is correct")]
     public void ReportFileName_Should_ReturnCorrectValue()
     {
         // Act
