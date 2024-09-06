@@ -1,7 +1,5 @@
 ﻿using System.Data.SqlTypes;
-using System.Runtime.Intrinsics.X86;
 using Demoulas.Common.Contracts.Contracts.Request;
-using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -10,7 +8,6 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.Util.Extensions;
-using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 
@@ -58,6 +55,12 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
         };
     }
 
+    /// <summary>
+    /// Finds rehires who may be entitled to forfeitures taken out in prior years.
+    /// </summary>
+    /// <param name="req">The pagination request containing the necessary parameters for the search.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a report response with the rehire profit sharing data.</returns>
     public async Task<ReportResponseBase<MilitaryRehireProfitSharingResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYears(PaginationRequestDto req, CancellationToken cancellationToken)
     {
         var militaryMembers = await _dataContextFactory.UseReadOnlyContext(context =>
