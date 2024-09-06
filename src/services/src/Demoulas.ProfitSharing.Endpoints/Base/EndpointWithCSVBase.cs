@@ -36,7 +36,7 @@ public abstract class EndpointWithCsvBase<ReqType, RespType, MapType> : Endpoint
         Description(b => 
             b.Produces<ReportResponseBase<RespType>>(200, "application/json", "text/csv"));
     }
-
+    
     /// <summary>
     /// Use to provide a simple example request when no more complex than a simple Pagination Request is needed
     /// </summary>

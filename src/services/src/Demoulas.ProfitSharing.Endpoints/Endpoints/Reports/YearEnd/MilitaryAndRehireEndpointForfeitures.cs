@@ -28,22 +28,22 @@ public class MilitaryAndRehireEndpointForfeitures :
         Get("military-and-rehire-forfeitures");
         Summary(s =>
         {
-            s.Summary = "Military and Rehire Report Endpoint";
+            s.Summary = "Military and Rehire Profit Sharing Data Report Endpoint";
             s.Description =
-                "Provides a report on employees who are on military leave or have been rehired. This report helps identify potential issues that need to be addressed before running profit sharing. The endpoint can be executed multiple times.";
+                "The Military and Rehire Profit Sharing Data endpoint produces a comprehensive report on employees who are either currently on military leave or have been rehired, focusing on their eligibility for forfeiture adjustments in profit-sharing. The report contains employee information, such as badge number, rehire date, and current year-to-date hours, along with profit-sharing records, including profit year, forfeiture amounts, and comments. This report supports multiple executions and is primarily used to address forfeiture discrepancies before profit sharing is finalized.";
 
             s.ExampleRequest = SimpleExampleRequest;
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
                     200,
-                    new ReportResponseBase<MilitaryAndRehireReportResponse>
+                    new ReportResponseBase<MilitaryRehireProfitSharingResponse>
                     {
                         ReportName = ReportFileName,
                         ReportDate = DateTimeOffset.Now,
-                        Response = new PaginatedResponseDto<MilitaryAndRehireReportResponse>
+                        Response = new PaginatedResponseDto<MilitaryRehireProfitSharingResponse>
                         {
-                            Results = new List<MilitaryAndRehireReportResponse> { MilitaryAndRehireReportResponse.ResponseExample() }
+                            Results = new List<MilitaryRehireProfitSharingResponse> { MilitaryRehireProfitSharingResponse.ResponseExample() }
                         }
                     }
                 }
@@ -54,11 +54,39 @@ public class MilitaryAndRehireEndpointForfeitures :
         base.Configure();
     }
 
-    public override string ReportFileName => "EMPLOYEES ON MILITARY LEAVE";
+    public override string ReportFileName => "REHIRE'S PROFIT SHARING DATA";
 
     public override async Task<ReportResponseBase<MilitaryRehireProfitSharingResponse>> GetResponse(PaginationRequestDto req, CancellationToken ct)
     {
         return await _reportService.FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYears(req, ct);
+    }
+
+    protected internal override void GenerateCsvContent(CsvWriter csvWriter, ReportResponseBase<MilitaryRehireProfitSharingResponse> report)
+    {
+        csvWriter.Context.RegisterClassMap<MilitaryRehireProfitSharingResponseMap>();
+
+        foreach (var member in report.Response.Results)
+        {
+            // Write the member details once
+            csvWriter.WriteRecord(member);
+            csvWriter.NextRecord();
+
+            // Write each profit-detail record under the employee details
+            foreach (var record in member.Details)
+            {
+                csvWriter.WriteField(string.Empty); // Empty field for BadgeNumber
+                csvWriter.WriteField(string.Empty); // Empty field for EmployeeName
+                csvWriter.WriteField(string.Empty); // Empty field for SSN
+                csvWriter.WriteField(string.Empty); // Empty field for ReHireDate
+                csvWriter.WriteField(string.Empty); // Empty field for PY-YRS
+                csvWriter.WriteField(string.Empty); // Empty field for YTD HOURS
+                csvWriter.WriteField(string.Empty); // Empty field for EC
+                csvWriter.WriteField(record.ProfitYear); // YEAR
+                csvWriter.WriteField(record.Forfeiture); // FORFEITURES
+                csvWriter.WriteField(record.Remark); // COMMENT
+                csvWriter.NextRecord();
+            }
+        }
     }
 
     public sealed class MilitaryRehireProfitSharingResponseMap : ClassMap<MilitaryRehireProfitSharingResponse>
@@ -74,26 +102,6 @@ public class MilitaryAndRehireEndpointForfeitures :
             Map(m => m.CompanyContributionYears).Index(6).Name("PY-YRS");
             Map(m => m.HoursCurrentYear).Index(7).Name("YTD HOURS").TypeConverterOption.Format("0.00");
             Map().Index(8).Name("EC"); // Assuming EC is blank, leave an empty column
-            
-            Map(m => m.Details)
-        }
-    }
-
-    public sealed class DetailsMap : ClassMap<MilitaryRehireProfitSharingDetailResponse>
-    {
-        public DetailsMap()
-        {
-            Map().Index(0).Convert(_ => string.Empty);
-            Map().Index(1).Convert(_ => string.Empty);
-            Map().Index(2).Convert(_ => string.Empty);
-            Map().Index(3).Convert(_ => string.Empty);
-            Map().Index(4).Convert(_ => string.Empty);
-            Map().Index(5).Convert(_ => string.Empty);
-            Map().Index(6).Convert(_ => string.Empty);
-
-            Map(m => m.ProfitYear).Index(7).Name("YEAR");
-            Map(m => m.Forfeiture).Index(8).Name("FORFEITURES").TypeConverterOption.Format("0.00");
-            Map(m => m.Remark).Index(9).Name("COMMENT");
         }
     }
 }
