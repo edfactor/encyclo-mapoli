@@ -13,7 +13,7 @@ The first 5 copy individual tables
   to Smart schema you are in TABLE PROFIT_DETAIL
 
 This combines the first 5 to load all the tables at once.
-6. SQL copy all from ready to smart ps - This copies all 5 talbes from the ready schema PROFITSHARE
+6. SQL copy all from ready to smart ps - This copies all 5 tables from the ready schema PROFITSHARE
   to Smart schema you are in
 7. SQL counts smart vs ready - this confirms the table copy has the same row counts in both
-   The Smart syste and Ready system.
+   The Smart system and Ready system.
