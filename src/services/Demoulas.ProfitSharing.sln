@@ -103,6 +103,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{57F4
 		..\database\obfuscation\scripts\test_view_data.sql = ..\database\obfuscation\scripts\test_view_data.sql
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ready_import", "ready_import", "{0A7F4CAF-BDEA-44BC-8BEC-1F3979CF355B}"
+	ProjectSection(SolutionItems) = preProject
+		..\database\ready_import\Readme.txt = ..\database\ready_import\Readme.txt
+		..\database\ready_import\SQL copy all from ready to smart ps.txt = ..\database\ready_import\SQL copy all from ready to smart ps.txt
+		..\database\ready_import\SQL copy beneficiary.txt = ..\database\ready_import\SQL copy beneficiary.txt
+		..\database\ready_import\SQL copy demographic.txt = ..\database\ready_import\SQL copy demographic.txt
+		..\database\ready_import\SQL copy distribution.txt = ..\database\ready_import\SQL copy distribution.txt
+		..\database\ready_import\SQL copy pay_profit.txt = ..\database\ready_import\SQL copy pay_profit.txt
+		..\database\ready_import\SQL copy profit_detail.txt = ..\database\ready_import\SQL copy profit_detail.txt
+		..\database\ready_import\SQL counts smart vs ready.txt = ..\database\ready_import\SQL counts smart vs ready.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -179,6 +191,7 @@ Global
 		{66B0DDDA-624B-4BF3-A4C7-CAEBC3E3DA62} = {D1297442-67BE-4098-A95F-727F04A68FA3}
 		{FDE7E8B7-3735-42D6-BF0E-B4FB1BF0FA86} = {946306F4-A7A7-40C5-A4EA-D32A46E09328}
 		{57F488D4-7A41-4A7F-ABEF-4B1437B5B5A6} = {FDE7E8B7-3735-42D6-BF0E-B4FB1BF0FA86}
+		{0A7F4CAF-BDEA-44BC-8BEC-1F3979CF355B} = {946306F4-A7A7-40C5-A4EA-D32A46E09328}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FB1CB19A-BE8B-4F91-9186-FE7C9F3CE4D7}
