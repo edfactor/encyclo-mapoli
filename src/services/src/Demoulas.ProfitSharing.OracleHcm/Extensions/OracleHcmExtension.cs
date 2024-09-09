@@ -44,6 +44,7 @@ public static class OracleHcmExtension
         OracleHcmConfig oktaSettings = builder.Configuration.GetSection("OracleHcm").Get<OracleHcmConfig>() ?? new OracleHcmConfig { Url = string.Empty };
         _ = builder.Services.AddSingleton(oktaSettings);
 
+        _ = builder.Services.AddSingleton<OracleHcmJobConsumer>();
         _ = builder.Services.AddSingleton<OracleEmployeeValidator>();
         _ = builder.Services.AddSingleton<IJobFactory, SimpleJobFactory>();
         _ = builder.Services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();

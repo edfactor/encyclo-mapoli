@@ -5,6 +5,7 @@ using MassTransit;
 using Microsoft.Extensions.Hosting;
 
 namespace Demoulas.ProfitSharing.Services.Extensions;
+
 internal static class MassTransitExtension
 {
     public static IHostApplicationBuilder ConfigureMassTransitServices(this IHostApplicationBuilder builder)
@@ -15,16 +16,9 @@ internal static class MassTransitExtension
 
             x.AddConsumer<OracleHcmJobConsumer>();
 
-            x.UsingInMemory((context, cfg) =>
-            {
-                cfg.ConfigureEndpoints(context);
-            });
+            x.UsingInMemory((context, cfg) => { cfg.ConfigureEndpoints(context); });
         });
 
-        if (!builder.Environment.IsTestEnvironment())
-        {
-            _ = builder.ConfigureOracleHcm();
-        }
 
         return builder;
     }

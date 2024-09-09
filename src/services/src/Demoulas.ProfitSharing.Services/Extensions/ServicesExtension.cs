@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Caching;
+using Demoulas.ProfitSharing.OracleHcm.Extensions;
 
 namespace Demoulas.ProfitSharing.Services.Extensions;
 
@@ -35,7 +36,8 @@ public static class ServicesExtension
         _ = builder.Services.AddKeyedSingleton<IBaseCacheService<LookupTableCache<byte>>, DepartmentHostedService>(nameof(DepartmentHostedService));
 
 
-        builder.ConfigureMassTransitServices();
+        _ = builder.ConfigureMassTransitServices();
+        _ = builder.ConfigureOracleHcm();
 
         #region Mappers
 
