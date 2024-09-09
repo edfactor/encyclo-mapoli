@@ -17,8 +17,6 @@ using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.Util.Extensions;
-using Microsoft.AspNetCore.Http.Features;
-using YamlDotNet.Core;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 

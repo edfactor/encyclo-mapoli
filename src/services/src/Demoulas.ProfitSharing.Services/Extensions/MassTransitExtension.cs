@@ -1,4 +1,6 @@
-﻿using Demoulas.ProfitSharing.OracleHcm.Jobs;
+﻿using Demoulas.ProfitSharing.OracleHcm.Extensions;
+using Demoulas.ProfitSharing.OracleHcm.HostedServices;
+using Demoulas.ProfitSharing.OracleHcm.Jobs;
 using Demoulas.ProfitSharing.Services.HostedServices;
 using Demoulas.Util.Extensions;
 using MassTransit;
@@ -24,7 +26,7 @@ internal static class MassTransitExtension
 
         if (!builder.Environment.IsTestEnvironment())
         {
-            _ = builder.Services.AddHostedService<StartupHostedService>();
+            builder.Services.AddOracleHcmQuartzServices();
         }
     }
 }
