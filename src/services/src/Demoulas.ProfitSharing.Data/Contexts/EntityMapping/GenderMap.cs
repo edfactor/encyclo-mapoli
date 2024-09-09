@@ -24,7 +24,8 @@ internal sealed class GenderMap : IEntityTypeConfiguration<Gender>
         builder.HasData(
             new Gender { Id = Gender.Constants.Male, Name = "Male" },
             new Gender { Id = Gender.Constants.Female, Name = "Female" },
-            new Gender { Id = Gender.Constants.Other, Name = "Other" }
+            new Gender { Id = Gender.Constants.Nonbinary, Name = "Nonbinary" },
+            new Gender { Id = Gender.Constants.Unknown, Name = "Unknown" }
         );
     }
 }

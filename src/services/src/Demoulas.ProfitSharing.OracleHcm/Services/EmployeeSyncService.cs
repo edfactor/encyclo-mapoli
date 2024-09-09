@@ -102,17 +102,21 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
                 FullName = employee.Name.DisplayName,
                 HireDate = employee.WorkRelationship?.StartDate ?? SqlDateTime.MinValue.Value.ToDateOnly(),
                 TerminationDate = employee.WorkRelationship?.TerminationDate,
-
                 Ssn = (employee.NationalIdentifier?.NationalIdentifierNumber ?? faker.Person.Ssn()).ConvertSsnToLong() ?? 0,
                 StoreNumber = employee.WorkRelationship?.Assignment.LocationCode ?? 0,
                 DepartmentId = employee.WorkRelationship?.Assignment.GetDepartmentId() ?? 0,
                 PayClassificationId = employee.WorkRelationship?.Assignment.JobCode ?? 0,
                 EmploymentTypeCode = employee.WorkRelationship?.Assignment.GetEmploymentType() ?? char.MinValue,
                 PayFrequencyId = employee.WorkRelationship?.Assignment.GetPayFrequency() ?? byte.MinValue,
-                EmploymentStatusId = employee.WorkRelationship?.TerminationDate == null ? EmploymentStatus.Constants.Active : EmploymentStatus.Constants.Terminated,
-                GenderCode = faker.PickRandom('M', 'F', 'X'),
-
-
+                EmploymentStatusId =
+                    employee.WorkRelationship?.TerminationDate == null ? EmploymentStatus.Constants.Active : EmploymentStatus.Constants.Terminated,
+                GenderCode = employee.LegislativeInfoItem?.Gender switch
+                {
+                    "M" => Gender.Constants.Male,
+                    "F" => Gender.Constants.Female,
+                    "ORA_HRX_X" => Gender.Constants.Nonbinary,
+                    _ => Gender.Constants.Unknown
+                },
 
                 ContactInfo = new ContactInfoRequestDto { PhoneNumber = employee.Phone?.PhoneNumber, EmailAddress = employee.Email?.EmailAddress },
                 Address = new AddressRequestDto

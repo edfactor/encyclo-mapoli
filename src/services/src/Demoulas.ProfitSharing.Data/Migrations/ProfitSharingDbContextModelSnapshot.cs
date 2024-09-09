@@ -2249,7 +2249,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         new
                         {
                             Id = "X",
-                            Name = "Other"
+                            Name = "Nonbinary"
+                        },
+                        new
+                        {
+                            Id = "U",
+                            Name = "Unknown"
                         });
                 });
 

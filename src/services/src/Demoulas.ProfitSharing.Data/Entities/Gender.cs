@@ -12,7 +12,8 @@ public sealed class Gender : ILookupTable<char>
     {
         public const char Male = 'M';
         public const char Female = 'F';
-        public const char Other = 'X';
+        public const char Nonbinary = 'X';
+        public const char Unknown = 'U';
     }
 
     public char Id { get; set; }

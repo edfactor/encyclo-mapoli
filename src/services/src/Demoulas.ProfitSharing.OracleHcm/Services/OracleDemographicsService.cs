@@ -49,7 +49,6 @@ internal sealed class OracleDemographicsService
             { "offset", $"{offset}" },
             { "totalResults", "false" },
             { "onlyData", "true" },
-            { "expand", "addresses,emails,names" },
             { "fields", HttpRequestFields.ToFormattedString() }
         };
         UriBuilder initialUriBuilder = new UriBuilder(url);

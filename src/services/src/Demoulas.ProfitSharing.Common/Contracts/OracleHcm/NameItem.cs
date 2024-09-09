@@ -17,9 +17,9 @@ public record NameItem(
     string MilitaryRank,
     string NameLanguage,
     string CreatedBy,
-    DateTime CreationDate,
+    DateTimeOffset CreationDate,
     string LastUpdatedBy,
-    DateTime LastUpdateDate,
+    DateTimeOffset LastUpdateDate,
     Context Context
 );
 

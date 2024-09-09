@@ -12,7 +12,7 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    [Migration("20240829150548_initialMigration")]
+    [Migration("20240909153155_initialMigration")]
     partial class initialMigration
     {
         /// <inheritdoc />
@@ -21,7 +21,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .UseCollation("USING_NLS_COMP")
-                .HasAnnotation("ProductVersion", "8.0.7")
+                .HasAnnotation("ProductVersion", "8.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             OracleModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -2253,6 +2253,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         {
                             Id = "X",
                             Name = "Other"
+                        },
+                        new
+                        {
+                            Id = "U",
+                            Name = "Unknown"
                         });
                 });
 
@@ -2419,18 +2424,15 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.NotOwned.CaldarRecord", b =>
                 {
-                    b.Property<int>("AccWkendN")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("WeekEndingDate")
                         .HasColumnType("NUMBER(10)")
                         .HasColumnName("ACC_WKEND_N");
-
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AccWkendN"));
 
                     b.Property<long?>("AccAltKeyNum")
                         .HasColumnType("NUMBER(19)")
                         .HasColumnName("ACC_ALT_KEY_NUM");
 
-                    b.Property<int?>("AccApWkend")
+                    b.Property<int>("AccApWkend")
                         .HasColumnType("NUMBER(10)")
                         .HasColumnName("ACC_APWKEND");
 
@@ -2482,29 +2484,27 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(10)")
                         .HasColumnName("ACC_WEEKN");
 
-                    b.Property<long?>("AccWkend2N")
-                        .HasColumnType("NUMBER(19)")
+                    b.Property<int>("WeekDate")
+                        .HasColumnType("NUMBER(10)")
                         .HasColumnName("ACC_WKEND2_N");
 
-                    b.HasKey("AccWkendN")
+                    b.HasKey("WeekEndingDate")
                         .HasName("PK_CALDAR_RECORD");
 
                     b.HasIndex("AccApWkend")
                         .IsUnique()
-                        .HasDatabaseName("CALDAR_RECORD_ACC_APWKEND_N")
-                        .HasFilter("\"ACC_APWKEND\" IS NOT NULL");
+                        .HasDatabaseName("CALDAR_RECORD_ACC_APWKEND_N");
 
-                    b.HasIndex("AccWkend2N")
+                    b.HasIndex("WeekDate")
                         .IsUnique()
-                        .HasDatabaseName("CALDAR_RECORD_ACC_WEDATE2")
-                        .HasFilter("\"ACC_WKEND2_N\" IS NOT NULL");
+                        .HasDatabaseName("CALDAR_RECORD_ACC_WEDATE2");
 
                     b.ToTable("CALDAR_RECORD", (string)null);
 
                     b.HasData(
                         new
                         {
-                            AccWkendN = 41023,
+                            WeekEndingDate = 41023,
                             AccAltKeyNum = -66L,
                             AccApWkend = 41030,
                             AccCalPeriod = 10,
@@ -2519,11 +2519,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 42,
-                            AccWkend2N = 20041023L
+                            WeekDate = 20041023
                         },
                         new
                         {
-                            AccWkendN = 41030,
+                            WeekEndingDate = 41030,
                             AccAltKeyNum = -65L,
                             AccApWkend = 41106,
                             AccCalPeriod = 10,
@@ -2538,11 +2538,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 43,
-                            AccWkend2N = 20041030L
+                            WeekDate = 20041030
                         },
                         new
                         {
-                            AccWkendN = 41120,
+                            WeekEndingDate = 41120,
                             AccAltKeyNum = -62L,
                             AccApWkend = 41127,
                             AccCalPeriod = 11,
@@ -2557,11 +2557,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 46,
-                            AccWkend2N = 20041120L
+                            WeekDate = 20041120
                         },
                         new
                         {
-                            AccWkendN = 41204,
+                            WeekEndingDate = 41204,
                             AccAltKeyNum = -60L,
                             AccApWkend = 41211,
                             AccCalPeriod = 12,
@@ -2576,11 +2576,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 48,
-                            AccWkend2N = 20041204L
+                            WeekDate = 20041204
                         },
                         new
                         {
-                            AccWkendN = 41211,
+                            WeekEndingDate = 41211,
                             AccAltKeyNum = -59L,
                             AccApWkend = 41218,
                             AccCalPeriod = 12,
@@ -2595,11 +2595,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 49,
-                            AccWkend2N = 20041211L
+                            WeekDate = 20041211
                         },
                         new
                         {
-                            AccWkendN = 41225,
+                            WeekEndingDate = 41225,
                             AccAltKeyNum = -57L,
                             AccApWkend = 50101,
                             AccCalPeriod = 12,
@@ -2614,11 +2614,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 51,
-                            AccWkend2N = 20041225L
+                            WeekDate = 20041225
                         },
                         new
                         {
-                            AccWkendN = 20824,
+                            WeekEndingDate = 20824,
                             AccAltKeyNum = -194L,
                             AccApWkend = 20831,
                             AccCalPeriod = 8,
@@ -2633,11 +2633,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 34,
-                            AccWkend2N = 20020824L
+                            WeekDate = 20020824
                         },
                         new
                         {
-                            AccWkendN = 20831,
+                            WeekEndingDate = 20831,
                             AccAltKeyNum = -193L,
                             AccApWkend = 20907,
                             AccCalPeriod = 8,
@@ -2652,11 +2652,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 35,
-                            AccWkend2N = 20020831L
+                            WeekDate = 20020831
                         },
                         new
                         {
-                            AccWkendN = 20216,
+                            WeekEndingDate = 20216,
                             AccAltKeyNum = -221L,
                             AccApWkend = 20223,
                             AccCalPeriod = 2,
@@ -2671,11 +2671,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 7,
-                            AccWkend2N = 20020216L
+                            WeekDate = 20020216
                         },
                         new
                         {
-                            AccWkendN = 20223,
+                            WeekEndingDate = 20223,
                             AccAltKeyNum = -220L,
                             AccApWkend = 20302,
                             AccCalPeriod = 2,
@@ -2690,11 +2690,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 8,
-                            AccWkend2N = 20020223L
+                            WeekDate = 20020223
                         },
                         new
                         {
-                            AccWkendN = 20309,
+                            WeekEndingDate = 20309,
                             AccAltKeyNum = -218L,
                             AccApWkend = 20316,
                             AccCalPeriod = 3,
@@ -2709,11 +2709,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 10,
-                            AccWkend2N = 20020309L
+                            WeekDate = 20020309
                         },
                         new
                         {
-                            AccWkendN = 20323,
+                            WeekEndingDate = 20323,
                             AccAltKeyNum = -216L,
                             AccApWkend = 20330,
                             AccCalPeriod = 3,
@@ -2728,11 +2728,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 12,
-                            AccWkend2N = 20020323L
+                            WeekDate = 20020323
                         },
                         new
                         {
-                            AccWkendN = 20330,
+                            WeekEndingDate = 20330,
                             AccAltKeyNum = -215L,
                             AccApWkend = 20406,
                             AccCalPeriod = 3,
@@ -2747,11 +2747,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 2,
                             AccWeekN = 13,
-                            AccWkend2N = 20020330L
+                            WeekDate = 20020330
                         },
                         new
                         {
-                            AccWkendN = 20406,
+                            WeekEndingDate = 20406,
                             AccAltKeyNum = -214L,
                             AccApWkend = 20413,
                             AccCalPeriod = 4,
@@ -2766,11 +2766,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 14,
-                            AccWkend2N = 20020406L
+                            WeekDate = 20020406
                         },
                         new
                         {
-                            AccWkendN = 20420,
+                            WeekEndingDate = 20420,
                             AccAltKeyNum = -212L,
                             AccApWkend = 20427,
                             AccCalPeriod = 4,
@@ -2785,11 +2785,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 16,
-                            AccWkend2N = 20020420L
+                            WeekDate = 20020420
                         },
                         new
                         {
-                            AccWkendN = 20427,
+                            WeekEndingDate = 20427,
                             AccAltKeyNum = -211L,
                             AccApWkend = 20504,
                             AccCalPeriod = 4,
@@ -2804,11 +2804,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 17,
-                            AccWkend2N = 20020427L
+                            WeekDate = 20020427
                         },
                         new
                         {
-                            AccWkendN = 20511,
+                            WeekEndingDate = 20511,
                             AccAltKeyNum = -209L,
                             AccApWkend = 20518,
                             AccCalPeriod = 5,
@@ -2823,11 +2823,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 19,
-                            AccWkend2N = 20020511L
+                            WeekDate = 20020511
                         },
                         new
                         {
-                            AccWkendN = 20601,
+                            WeekEndingDate = 20601,
                             AccAltKeyNum = -206L,
                             AccApWkend = 20608,
                             AccCalPeriod = 5,
@@ -2842,11 +2842,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 22,
-                            AccWkend2N = 20020601L
+                            WeekDate = 20020601
                         },
                         new
                         {
-                            AccWkendN = 20615,
+                            WeekEndingDate = 20615,
                             AccAltKeyNum = -204L,
                             AccApWkend = 20622,
                             AccCalPeriod = 6,
@@ -2861,11 +2861,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 24,
-                            AccWkend2N = 20020615L
+                            WeekDate = 20020615
                         },
                         new
                         {
-                            AccWkendN = 20706,
+                            WeekEndingDate = 20706,
                             AccAltKeyNum = -201L,
                             AccApWkend = 20713,
                             AccCalPeriod = 7,
@@ -2880,11 +2880,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 27,
-                            AccWkend2N = 20020706L
+                            WeekDate = 20020706
                         },
                         new
                         {
-                            AccWkendN = 10804,
+                            WeekEndingDate = 10804,
                             AccAltKeyNum = -257L,
                             AccApWkend = 10811,
                             AccCalPeriod = 8,
@@ -2899,11 +2899,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 31,
-                            AccWkend2N = 20010804L
+                            WeekDate = 20010804
                         },
                         new
                         {
-                            AccWkendN = 10908,
+                            WeekEndingDate = 10908,
                             AccAltKeyNum = -252L,
                             AccApWkend = 10915,
                             AccCalPeriod = 9,
@@ -2918,11 +2918,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 36,
-                            AccWkend2N = 20010908L
+                            WeekDate = 20010908
                         },
                         new
                         {
-                            AccWkendN = 10915,
+                            WeekEndingDate = 10915,
                             AccAltKeyNum = -251L,
                             AccApWkend = 10922,
                             AccCalPeriod = 9,
@@ -2937,11 +2937,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 37,
-                            AccWkend2N = 20010915L
+                            WeekDate = 20010915
                         },
                         new
                         {
-                            AccWkendN = 11020,
+                            WeekEndingDate = 11020,
                             AccAltKeyNum = -246L,
                             AccApWkend = 11027,
                             AccCalPeriod = 10,
@@ -2956,11 +2956,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 42,
-                            AccWkend2N = 20011020L
+                            WeekDate = 20011020
                         },
                         new
                         {
-                            AccWkendN = 11103,
+                            WeekEndingDate = 11103,
                             AccAltKeyNum = -244L,
                             AccApWkend = 11110,
                             AccCalPeriod = 10,
@@ -2975,11 +2975,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 44,
-                            AccWkend2N = 20011103L
+                            WeekDate = 20011103
                         },
                         new
                         {
-                            AccWkendN = 11124,
+                            WeekEndingDate = 11124,
                             AccAltKeyNum = -241L,
                             AccApWkend = 11201,
                             AccCalPeriod = 11,
@@ -2994,11 +2994,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 47,
-                            AccWkend2N = 20011124L
+                            WeekDate = 20011124
                         },
                         new
                         {
-                            AccWkendN = 11215,
+                            WeekEndingDate = 11215,
                             AccAltKeyNum = -238L,
                             AccApWkend = 11222,
                             AccCalPeriod = 12,
@@ -3013,11 +3013,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 50,
-                            AccWkend2N = 20011215L
+                            WeekDate = 20011215
                         },
                         new
                         {
-                            AccWkendN = 10217,
+                            WeekEndingDate = 10217,
                             AccAltKeyNum = -281L,
                             AccApWkend = 10224,
                             AccCalPeriod = 2,
@@ -3032,11 +3032,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 7,
-                            AccWkend2N = 20010217L
+                            WeekDate = 20010217
                         },
                         new
                         {
-                            AccWkendN = 10324,
+                            WeekEndingDate = 10324,
                             AccAltKeyNum = -276L,
                             AccApWkend = 10331,
                             AccCalPeriod = 3,
@@ -3051,11 +3051,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 12,
-                            AccWkend2N = 20010324L
+                            WeekDate = 20010324
                         },
                         new
                         {
-                            AccWkendN = 10526,
+                            WeekEndingDate = 10526,
                             AccAltKeyNum = -267L,
                             AccApWkend = 10602,
                             AccCalPeriod = 5,
@@ -3070,11 +3070,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 21,
-                            AccWkend2N = 20010526L
+                            WeekDate = 20010526
                         },
                         new
                         {
-                            AccWkendN = 10623,
+                            WeekEndingDate = 10623,
                             AccAltKeyNum = -263L,
                             AccApWkend = 10630,
                             AccCalPeriod = 6,
@@ -3089,11 +3089,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 25,
-                            AccWkend2N = 20010623L
+                            WeekDate = 20010623
                         },
                         new
                         {
-                            AccWkendN = 10106,
+                            WeekEndingDate = 10106,
                             AccAltKeyNum = -287L,
                             AccApWkend = 10113,
                             AccCalPeriod = 1,
@@ -3108,11 +3108,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 1,
-                            AccWkend2N = 20010106L
+                            WeekDate = 20010106
                         },
                         new
                         {
-                            AccWkendN = 10113,
+                            WeekEndingDate = 10113,
                             AccAltKeyNum = -286L,
                             AccApWkend = 10120,
                             AccCalPeriod = 1,
@@ -3127,11 +3127,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 2,
-                            AccWkend2N = 20010113L
+                            WeekDate = 20010113
                         },
                         new
                         {
-                            AccWkendN = 20928,
+                            WeekEndingDate = 20928,
                             AccAltKeyNum = -189L,
                             AccApWkend = 21005,
                             AccCalPeriod = 9,
@@ -3146,11 +3146,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 4,
                             AccWeekN = 39,
-                            AccWkend2N = 20020928L
+                            WeekDate = 20020928
                         },
                         new
                         {
-                            AccWkendN = 21019,
+                            WeekEndingDate = 21019,
                             AccAltKeyNum = -186L,
                             AccApWkend = 21026,
                             AccCalPeriod = 10,
@@ -3165,11 +3165,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 42,
-                            AccWkend2N = 20021019L
+                            WeekDate = 20021019
                         },
                         new
                         {
-                            AccWkendN = 21102,
+                            WeekEndingDate = 21102,
                             AccAltKeyNum = -184L,
                             AccApWkend = 21109,
                             AccCalPeriod = 10,
@@ -3184,11 +3184,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 44,
-                            AccWkend2N = 20021102L
+                            WeekDate = 20021102
                         },
                         new
                         {
-                            AccWkendN = 21123,
+                            WeekEndingDate = 21123,
                             AccAltKeyNum = -181L,
                             AccApWkend = 21130,
                             AccCalPeriod = 11,
@@ -3203,11 +3203,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 47,
-                            AccWkend2N = 20021123L
+                            WeekDate = 20021123
                         },
                         new
                         {
-                            AccWkendN = 21207,
+                            WeekEndingDate = 21207,
                             AccAltKeyNum = -179L,
                             AccApWkend = 21214,
                             AccCalPeriod = 12,
@@ -3222,11 +3222,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 49,
-                            AccWkend2N = 20021207L
+                            WeekDate = 20021207
                         },
                         new
                         {
-                            AccWkendN = 50226,
+                            WeekEndingDate = 50226,
                             AccAltKeyNum = -40L,
                             AccApWkend = 50305,
                             AccCalPeriod = 2,
@@ -3241,11 +3241,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 8,
-                            AccWkend2N = 20050226L
+                            WeekDate = 20050226
                         },
                         new
                         {
-                            AccWkendN = 50305,
+                            WeekEndingDate = 50305,
                             AccAltKeyNum = -39L,
                             AccApWkend = 50312,
                             AccCalPeriod = 3,
@@ -3260,11 +3260,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 9,
-                            AccWkend2N = 20050305L
+                            WeekDate = 20050305
                         },
                         new
                         {
-                            AccWkendN = 50312,
+                            WeekEndingDate = 50312,
                             AccAltKeyNum = -38L,
                             AccApWkend = 50319,
                             AccCalPeriod = 3,
@@ -3279,11 +3279,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 10,
-                            AccWkend2N = 20050312L
+                            WeekDate = 20050312
                         },
                         new
                         {
-                            AccWkendN = 50319,
+                            WeekEndingDate = 50319,
                             AccAltKeyNum = -37L,
                             AccApWkend = 50326,
                             AccCalPeriod = 3,
@@ -3298,11 +3298,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 11,
-                            AccWkend2N = 20050319L
+                            WeekDate = 20050319
                         },
                         new
                         {
-                            AccWkendN = 50409,
+                            WeekEndingDate = 50409,
                             AccAltKeyNum = -34L,
                             AccApWkend = 50416,
                             AccCalPeriod = 4,
@@ -3317,11 +3317,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 14,
-                            AccWkend2N = 20050409L
+                            WeekDate = 20050409
                         },
                         new
                         {
-                            AccWkendN = 50416,
+                            WeekEndingDate = 50416,
                             AccAltKeyNum = -33L,
                             AccApWkend = 50423,
                             AccCalPeriod = 4,
@@ -3336,11 +3336,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 15,
-                            AccWkend2N = 20050416L
+                            WeekDate = 20050416
                         },
                         new
                         {
-                            AccWkendN = 50430,
+                            WeekEndingDate = 50430,
                             AccAltKeyNum = -31L,
                             AccApWkend = 50507,
                             AccCalPeriod = 4,
@@ -3355,11 +3355,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 17,
-                            AccWkend2N = 20050430L
+                            WeekDate = 20050430
                         },
                         new
                         {
-                            AccWkendN = 50507,
+                            WeekEndingDate = 50507,
                             AccAltKeyNum = -30L,
                             AccApWkend = 50514,
                             AccCalPeriod = 5,
@@ -3374,11 +3374,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 18,
-                            AccWkend2N = 20050507L
+                            WeekDate = 20050507
                         },
                         new
                         {
-                            AccWkendN = 50514,
+                            WeekEndingDate = 50514,
                             AccAltKeyNum = -29L,
                             AccApWkend = 50521,
                             AccCalPeriod = 5,
@@ -3393,11 +3393,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 19,
-                            AccWkend2N = 20050514L
+                            WeekDate = 20050514
                         },
                         new
                         {
-                            AccWkendN = 40807,
+                            WeekEndingDate = 40807,
                             AccAltKeyNum = -77L,
                             AccApWkend = 40814,
                             AccCalPeriod = 8,
@@ -3412,11 +3412,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 31,
-                            AccWkend2N = 20040807L
+                            WeekDate = 20040807
                         },
                         new
                         {
-                            AccWkendN = 40814,
+                            WeekEndingDate = 40814,
                             AccAltKeyNum = -76L,
                             AccApWkend = 40821,
                             AccCalPeriod = 8,
@@ -3431,11 +3431,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 32,
-                            AccWkend2N = 20040814L
+                            WeekDate = 20040814
                         },
                         new
                         {
-                            AccWkendN = 40821,
+                            WeekEndingDate = 40821,
                             AccAltKeyNum = -75L,
                             AccApWkend = 40828,
                             AccCalPeriod = 8,
@@ -3450,11 +3450,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 33,
-                            AccWkend2N = 20040821L
+                            WeekDate = 20040821
                         },
                         new
                         {
-                            AccWkendN = 40925,
+                            WeekEndingDate = 40925,
                             AccAltKeyNum = -70L,
                             AccApWkend = 41002,
                             AccCalPeriod = 9,
@@ -3469,11 +3469,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 38,
-                            AccWkend2N = 20040925L
+                            WeekDate = 20040925
                         },
                         new
                         {
-                            AccWkendN = 41106,
+                            WeekEndingDate = 41106,
                             AccAltKeyNum = -64L,
                             AccApWkend = 41113,
                             AccCalPeriod = 11,
@@ -3488,11 +3488,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 44,
-                            AccWkend2N = 20041106L
+                            WeekDate = 20041106
                         },
                         new
                         {
-                            AccWkendN = 41113,
+                            WeekEndingDate = 41113,
                             AccAltKeyNum = -63L,
                             AccApWkend = 41120,
                             AccCalPeriod = 11,
@@ -3507,11 +3507,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 45,
-                            AccWkend2N = 20041113L
+                            WeekDate = 20041113
                         },
                         new
                         {
-                            AccWkendN = 41127,
+                            WeekEndingDate = 41127,
                             AccAltKeyNum = -61L,
                             AccApWkend = 41204,
                             AccCalPeriod = 11,
@@ -3526,11 +3526,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 47,
-                            AccWkend2N = 20041127L
+                            WeekDate = 20041127
                         },
                         new
                         {
-                            AccWkendN = 41218,
+                            WeekEndingDate = 41218,
                             AccAltKeyNum = -58L,
                             AccApWkend = 41225,
                             AccCalPeriod = 12,
@@ -3545,11 +3545,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 50,
-                            AccWkend2N = 20041218L
+                            WeekDate = 20041218
                         },
                         new
                         {
-                            AccWkendN = 50101,
+                            WeekEndingDate = 50101,
                             AccAltKeyNum = -56L,
                             AccApWkend = 50108,
                             AccCalPeriod = 12,
@@ -3564,11 +3564,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 1,
                             AccWeekN = 52,
-                            AccWkend2N = 20050101L
+                            WeekDate = 20050101
                         },
                         new
                         {
-                            AccWkendN = 50115,
+                            WeekEndingDate = 50115,
                             AccAltKeyNum = -46L,
                             AccApWkend = 50122,
                             AccCalPeriod = 1,
@@ -3583,11 +3583,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 2,
-                            AccWkend2N = 20050115L
+                            WeekDate = 20050115
                         },
                         new
                         {
-                            AccWkendN = 40207,
+                            WeekEndingDate = 40207,
                             AccAltKeyNum = -103L,
                             AccApWkend = 40214,
                             AccCalPeriod = 2,
@@ -3602,11 +3602,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 5,
-                            AccWkend2N = 20040207L
+                            WeekDate = 20040207
                         },
                         new
                         {
-                            AccWkendN = 40214,
+                            WeekEndingDate = 40214,
                             AccAltKeyNum = -102L,
                             AccApWkend = 40221,
                             AccCalPeriod = 2,
@@ -3621,11 +3621,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 6,
-                            AccWkend2N = 20040214L
+                            WeekDate = 20040214
                         },
                         new
                         {
-                            AccWkendN = 40306,
+                            WeekEndingDate = 40306,
                             AccAltKeyNum = -99L,
                             AccApWkend = 40313,
                             AccCalPeriod = 3,
@@ -3640,11 +3640,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 9,
-                            AccWkend2N = 20040306L
+                            WeekDate = 20040306
                         },
                         new
                         {
-                            AccWkendN = 40313,
+                            WeekEndingDate = 40313,
                             AccAltKeyNum = -98L,
                             AccApWkend = 40320,
                             AccCalPeriod = 3,
@@ -3659,11 +3659,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 10,
-                            AccWkend2N = 20040313L
+                            WeekDate = 20040313
                         },
                         new
                         {
-                            AccWkendN = 40320,
+                            WeekEndingDate = 40320,
                             AccAltKeyNum = -97L,
                             AccApWkend = 40327,
                             AccCalPeriod = 3,
@@ -3678,11 +3678,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 11,
-                            AccWkend2N = 20040320L
+                            WeekDate = 20040320
                         },
                         new
                         {
-                            AccWkendN = 40515,
+                            WeekEndingDate = 40515,
                             AccAltKeyNum = -89L,
                             AccApWkend = 40522,
                             AccCalPeriod = 5,
@@ -3697,11 +3697,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 19,
-                            AccWkend2N = 20040515L
+                            WeekDate = 20040515
                         },
                         new
                         {
-                            AccWkendN = 40529,
+                            WeekEndingDate = 40529,
                             AccAltKeyNum = -87L,
                             AccApWkend = 40605,
                             AccCalPeriod = 5,
@@ -3716,11 +3716,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 21,
-                            AccWkend2N = 20040529L
+                            WeekDate = 20040529
                         },
                         new
                         {
-                            AccWkendN = 40605,
+                            WeekEndingDate = 40605,
                             AccAltKeyNum = -86L,
                             AccApWkend = 40612,
                             AccCalPeriod = 6,
@@ -3735,11 +3735,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 22,
-                            AccWkend2N = 20040605L
+                            WeekDate = 20040605
                         },
                         new
                         {
-                            AccWkendN = 40703,
+                            WeekEndingDate = 40703,
                             AccAltKeyNum = -82L,
                             AccApWkend = 40710,
                             AccCalPeriod = 6,
@@ -3754,11 +3754,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 3,
                             AccWeekN = 26,
-                            AccWkend2N = 20040703L
+                            WeekDate = 20040703
                         },
                         new
                         {
-                            AccWkendN = 40717,
+                            WeekEndingDate = 40717,
                             AccAltKeyNum = -80L,
                             AccApWkend = 40724,
                             AccCalPeriod = 7,
@@ -3773,11 +3773,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 28,
-                            AccWkend2N = 20040717L
+                            WeekDate = 20040717
                         },
                         new
                         {
-                            AccWkendN = 40724,
+                            WeekEndingDate = 40724,
                             AccAltKeyNum = -79L,
                             AccApWkend = 40731,
                             AccCalPeriod = 7,
@@ -3792,11 +3792,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 29,
-                            AccWkend2N = 20040724L
+                            WeekDate = 20040724
                         },
                         new
                         {
-                            AccWkendN = 30809,
+                            WeekEndingDate = 30809,
                             AccAltKeyNum = -136L,
                             AccApWkend = 30816,
                             AccCalPeriod = 8,
@@ -3811,11 +3811,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 32,
-                            AccWkend2N = 20030809L
+                            WeekDate = 20030809
                         },
                         new
                         {
-                            AccWkendN = 30823,
+                            WeekEndingDate = 30823,
                             AccAltKeyNum = -134L,
                             AccApWkend = 30830,
                             AccCalPeriod = 8,
@@ -3830,11 +3830,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 34,
-                            AccWkend2N = 20030823L
+                            WeekDate = 20030823
                         },
                         new
                         {
-                            AccWkendN = 30830,
+                            WeekEndingDate = 30830,
                             AccAltKeyNum = -133L,
                             AccApWkend = 30906,
                             AccCalPeriod = 8,
@@ -3849,11 +3849,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 35,
-                            AccWkend2N = 20030830L
+                            WeekDate = 20030830
                         },
                         new
                         {
-                            AccWkendN = 31018,
+                            WeekEndingDate = 31018,
                             AccAltKeyNum = -126L,
                             AccApWkend = 31025,
                             AccCalPeriod = 10,
@@ -3868,11 +3868,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 42,
-                            AccWkend2N = 20031018L
+                            WeekDate = 20031018
                         },
                         new
                         {
-                            AccWkendN = 31108,
+                            WeekEndingDate = 31108,
                             AccAltKeyNum = -123L,
                             AccApWkend = 31115,
                             AccCalPeriod = 11,
@@ -3887,11 +3887,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 45,
-                            AccWkend2N = 20031108L
+                            WeekDate = 20031108
                         },
                         new
                         {
-                            AccWkendN = 31213,
+                            WeekEndingDate = 31213,
                             AccAltKeyNum = -118L,
                             AccApWkend = 31220,
                             AccCalPeriod = 12,
@@ -3906,11 +3906,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 50,
-                            AccWkend2N = 20031213L
+                            WeekDate = 20031213
                         },
                         new
                         {
-                            AccWkendN = 31220,
+                            WeekEndingDate = 31220,
                             AccAltKeyNum = -117L,
                             AccApWkend = 31227,
                             AccCalPeriod = 12,
@@ -3925,11 +3925,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 51,
-                            AccWkend2N = 20031220L
+                            WeekDate = 20031220
                         },
                         new
                         {
-                            AccWkendN = 40117,
+                            WeekEndingDate = 40117,
                             AccAltKeyNum = -106L,
                             AccApWkend = 40124,
                             AccCalPeriod = 1,
@@ -3944,11 +3944,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 2,
-                            AccWkend2N = 20040117L
+                            WeekDate = 20040117
                         },
                         new
                         {
-                            AccWkendN = 40131,
+                            WeekEndingDate = 40131,
                             AccAltKeyNum = -104L,
                             AccApWkend = 40207,
                             AccCalPeriod = 1,
@@ -3963,11 +3963,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 4,
-                            AccWkend2N = 20040131L
+                            WeekDate = 20040131
                         },
                         new
                         {
-                            AccWkendN = 50108,
+                            WeekEndingDate = 50108,
                             AccAltKeyNum = -47L,
                             AccApWkend = 50115,
                             AccCalPeriod = 1,
@@ -3982,11 +3982,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 1,
-                            AccWkend2N = 20050108L
+                            WeekDate = 20050108
                         },
                         new
                         {
-                            AccWkendN = 50122,
+                            WeekEndingDate = 50122,
                             AccAltKeyNum = -45L,
                             AccApWkend = 50129,
                             AccCalPeriod = 1,
@@ -4001,11 +4001,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 3,
-                            AccWkend2N = 20050122L
+                            WeekDate = 20050122
                         },
                         new
                         {
-                            AccWkendN = 50129,
+                            WeekEndingDate = 50129,
                             AccAltKeyNum = -44L,
                             AccApWkend = 50205,
                             AccCalPeriod = 1,
@@ -4020,11 +4020,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 4,
-                            AccWkend2N = 20050129L
+                            WeekDate = 20050129
                         },
                         new
                         {
-                            AccWkendN = 50205,
+                            WeekEndingDate = 50205,
                             AccAltKeyNum = -43L,
                             AccApWkend = 50212,
                             AccCalPeriod = 2,
@@ -4039,11 +4039,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 5,
-                            AccWkend2N = 20050205L
+                            WeekDate = 20050205
                         },
                         new
                         {
-                            AccWkendN = 50212,
+                            WeekEndingDate = 50212,
                             AccAltKeyNum = -42L,
                             AccApWkend = 50219,
                             AccCalPeriod = 2,
@@ -4058,11 +4058,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 6,
-                            AccWkend2N = 20050212L
+                            WeekDate = 20050212
                         },
                         new
                         {
-                            AccWkendN = 50219,
+                            WeekEndingDate = 50219,
                             AccAltKeyNum = -41L,
                             AccApWkend = 50226,
                             AccCalPeriod = 2,
@@ -4077,11 +4077,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 7,
-                            AccWkend2N = 20050219L
+                            WeekDate = 20050219
                         },
                         new
                         {
-                            AccWkendN = 30628,
+                            WeekEndingDate = 30628,
                             AccAltKeyNum = -142L,
                             AccApWkend = 30705,
                             AccCalPeriod = 6,
@@ -4096,11 +4096,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 3,
                             AccWeekN = 26,
-                            AccWkend2N = 20030628L
+                            WeekDate = 20030628
                         },
                         new
                         {
-                            AccWkendN = 30705,
+                            WeekEndingDate = 30705,
                             AccAltKeyNum = -141L,
                             AccApWkend = 30712,
                             AccCalPeriod = 7,
@@ -4115,11 +4115,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 27,
-                            AccWkend2N = 20030705L
+                            WeekDate = 20030705
                         },
                         new
                         {
-                            AccWkendN = 30726,
+                            WeekEndingDate = 30726,
                             AccAltKeyNum = -138L,
                             AccApWkend = 30802,
                             AccCalPeriod = 7,
@@ -4134,11 +4134,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 30,
-                            AccWkend2N = 20030726L
+                            WeekDate = 20030726
                         },
                         new
                         {
-                            AccWkendN = 50326,
+                            WeekEndingDate = 50326,
                             AccAltKeyNum = -36L,
                             AccApWkend = 50402,
                             AccCalPeriod = 3,
@@ -4153,11 +4153,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 12,
-                            AccWkend2N = 20050326L
+                            WeekDate = 20050326
                         },
                         new
                         {
-                            AccWkendN = 50402,
+                            WeekEndingDate = 50402,
                             AccAltKeyNum = -35L,
                             AccApWkend = 50409,
                             AccCalPeriod = 3,
@@ -4172,11 +4172,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 2,
                             AccWeekN = 13,
-                            AccWkend2N = 20050402L
+                            WeekDate = 20050402
                         },
                         new
                         {
-                            AccWkendN = 50423,
+                            WeekEndingDate = 50423,
                             AccAltKeyNum = -32L,
                             AccApWkend = 50430,
                             AccCalPeriod = 4,
@@ -4191,11 +4191,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 16,
-                            AccWkend2N = 20050423L
+                            WeekDate = 20050423
                         },
                         new
                         {
-                            AccWkendN = 50521,
+                            WeekEndingDate = 50521,
                             AccAltKeyNum = -28L,
                             AccApWkend = 50528,
                             AccCalPeriod = 5,
@@ -4210,11 +4210,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 20,
-                            AccWkend2N = 20050521L
+                            WeekDate = 20050521
                         },
                         new
                         {
-                            AccWkendN = 50604,
+                            WeekEndingDate = 50604,
                             AccAltKeyNum = -26L,
                             AccApWkend = 50611,
                             AccCalPeriod = 6,
@@ -4229,11 +4229,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 22,
-                            AccWkend2N = 20050604L
+                            WeekDate = 20050604
                         },
                         new
                         {
-                            AccWkendN = 50611,
+                            WeekEndingDate = 50611,
                             AccAltKeyNum = -25L,
                             AccApWkend = 50618,
                             AccCalPeriod = 6,
@@ -4248,11 +4248,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 23,
-                            AccWkend2N = 20050611L
+                            WeekDate = 20050611
                         },
                         new
                         {
-                            AccWkendN = 50618,
+                            WeekEndingDate = 50618,
                             AccAltKeyNum = -24L,
                             AccApWkend = 50625,
                             AccCalPeriod = 6,
@@ -4267,11 +4267,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 24,
-                            AccWkend2N = 20050618L
+                            WeekDate = 20050618
                         },
                         new
                         {
-                            AccWkendN = 50625,
+                            WeekEndingDate = 50625,
                             AccAltKeyNum = -23L,
                             AccApWkend = 50702,
                             AccCalPeriod = 6,
@@ -4286,11 +4286,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 25,
-                            AccWkend2N = 20050625L
+                            WeekDate = 20050625
                         },
                         new
                         {
-                            AccWkendN = 50716,
+                            WeekEndingDate = 50716,
                             AccAltKeyNum = -20L,
                             AccApWkend = 50723,
                             AccCalPeriod = 7,
@@ -4305,11 +4305,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 28,
-                            AccWkend2N = 20050716L
+                            WeekDate = 20050716
                         },
                         new
                         {
-                            AccWkendN = 50723,
+                            WeekEndingDate = 50723,
                             AccAltKeyNum = -19L,
                             AccApWkend = 50730,
                             AccCalPeriod = 7,
@@ -4324,11 +4324,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 29,
-                            AccWkend2N = 20050723L
+                            WeekDate = 20050723
                         },
                         new
                         {
-                            AccWkendN = 50730,
+                            WeekEndingDate = 50730,
                             AccAltKeyNum = -18L,
                             AccApWkend = 50806,
                             AccCalPeriod = 7,
@@ -4343,11 +4343,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 30,
-                            AccWkend2N = 20050730L
+                            WeekDate = 20050730
                         },
                         new
                         {
-                            AccWkendN = 50813,
+                            WeekEndingDate = 50813,
                             AccAltKeyNum = -16L,
                             AccApWkend = 50820,
                             AccCalPeriod = 8,
@@ -4362,11 +4362,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 32,
-                            AccWkend2N = 20050813L
+                            WeekDate = 20050813
                         },
                         new
                         {
-                            AccWkendN = 50820,
+                            WeekEndingDate = 50820,
                             AccAltKeyNum = -15L,
                             AccApWkend = 50827,
                             AccCalPeriod = 8,
@@ -4381,11 +4381,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 33,
-                            AccWkend2N = 20050820L
+                            WeekDate = 20050820
                         },
                         new
                         {
-                            AccWkendN = 50827,
+                            WeekEndingDate = 50827,
                             AccAltKeyNum = -14L,
                             AccApWkend = 50903,
                             AccCalPeriod = 8,
@@ -4400,11 +4400,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 34,
-                            AccWkend2N = 20050827L
+                            WeekDate = 20050827
                         },
                         new
                         {
-                            AccWkendN = 50903,
+                            WeekEndingDate = 50903,
                             AccAltKeyNum = -13L,
                             AccApWkend = 50910,
                             AccCalPeriod = 8,
@@ -4419,11 +4419,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 35,
-                            AccWkend2N = 20050903L
+                            WeekDate = 20050903
                         },
                         new
                         {
-                            AccWkendN = 50910,
+                            WeekEndingDate = 50910,
                             AccAltKeyNum = -12L,
                             AccApWkend = 50917,
                             AccCalPeriod = 9,
@@ -4438,11 +4438,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 36,
-                            AccWkend2N = 20050910L
+                            WeekDate = 20050910
                         },
                         new
                         {
-                            AccWkendN = 50924,
+                            WeekEndingDate = 50924,
                             AccAltKeyNum = -10L,
                             AccApWkend = 51001,
                             AccCalPeriod = 9,
@@ -4457,11 +4457,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 38,
-                            AccWkend2N = 20050924L
+                            WeekDate = 20050924
                         },
                         new
                         {
-                            AccWkendN = 51001,
+                            WeekEndingDate = 51001,
                             AccAltKeyNum = -9L,
                             AccApWkend = 51008,
                             AccCalPeriod = 9,
@@ -4476,11 +4476,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 4,
                             AccWeekN = 39,
-                            AccWkend2N = 20051001L
+                            WeekDate = 20051001
                         },
                         new
                         {
-                            AccWkendN = 51015,
+                            WeekEndingDate = 51015,
                             AccAltKeyNum = -7L,
                             AccApWkend = 51022,
                             AccCalPeriod = 10,
@@ -4495,11 +4495,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 41,
-                            AccWkend2N = 20051015L
+                            WeekDate = 20051015
                         },
                         new
                         {
-                            AccWkendN = 51022,
+                            WeekEndingDate = 51022,
                             AccAltKeyNum = -6L,
                             AccApWkend = 51029,
                             AccCalPeriod = 10,
@@ -4514,11 +4514,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 42,
-                            AccWkend2N = 20051022L
+                            WeekDate = 20051022
                         },
                         new
                         {
-                            AccWkendN = 51105,
+                            WeekEndingDate = 51105,
                             AccAltKeyNum = -4L,
                             AccApWkend = 51112,
                             AccCalPeriod = 11,
@@ -4533,11 +4533,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 44,
-                            AccWkend2N = 20051105L
+                            WeekDate = 20051105
                         },
                         new
                         {
-                            AccWkendN = 51112,
+                            WeekEndingDate = 51112,
                             AccAltKeyNum = -3L,
                             AccApWkend = 51119,
                             AccCalPeriod = 11,
@@ -4552,11 +4552,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 45,
-                            AccWkend2N = 20051112L
+                            WeekDate = 20051112
                         },
                         new
                         {
-                            AccWkendN = 51119,
+                            WeekEndingDate = 51119,
                             AccAltKeyNum = -2L,
                             AccApWkend = 51126,
                             AccCalPeriod = 11,
@@ -4571,11 +4571,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 46,
-                            AccWkend2N = 20051119L
+                            WeekDate = 20051119
                         },
                         new
                         {
-                            AccWkendN = 51203,
+                            WeekEndingDate = 51203,
                             AccAltKeyNum = 0L,
                             AccApWkend = 51210,
                             AccCalPeriod = 11,
@@ -4590,11 +4590,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 48,
-                            AccWkend2N = 20051203L
+                            WeekDate = 20051203
                         },
                         new
                         {
-                            AccWkendN = 51210,
+                            WeekEndingDate = 51210,
                             AccAltKeyNum = 1L,
                             AccApWkend = 51217,
                             AccCalPeriod = 12,
@@ -4609,11 +4609,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 49,
-                            AccWkend2N = 20051210L
+                            WeekDate = 20051210
                         },
                         new
                         {
-                            AccWkendN = 51217,
+                            WeekEndingDate = 51217,
                             AccAltKeyNum = 2L,
                             AccApWkend = 51224,
                             AccCalPeriod = 12,
@@ -4628,11 +4628,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 50,
-                            AccWkend2N = 20051217L
+                            WeekDate = 20051217
                         },
                         new
                         {
-                            AccWkendN = 51224,
+                            WeekEndingDate = 51224,
                             AccAltKeyNum = 3L,
                             AccApWkend = 51231,
                             AccCalPeriod = 12,
@@ -4647,11 +4647,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 51,
-                            AccWkend2N = 20051224L
+                            WeekDate = 20051224
                         },
                         new
                         {
-                            AccWkendN = 51231,
+                            WeekEndingDate = 51231,
                             AccAltKeyNum = 4L,
                             AccApWkend = 60107,
                             AccCalPeriod = 12,
@@ -4666,11 +4666,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 1,
                             AccWeekN = 52,
-                            AccWkend2N = 20051231L
+                            WeekDate = 20051231
                         },
                         new
                         {
-                            AccWkendN = 60107,
+                            WeekEndingDate = 60107,
                             AccAltKeyNum = 13L,
                             AccApWkend = 60114,
                             AccCalPeriod = 1,
@@ -4685,11 +4685,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 1,
-                            AccWkend2N = 20060107L
+                            WeekDate = 20060107
                         },
                         new
                         {
-                            AccWkendN = 60114,
+                            WeekEndingDate = 60114,
                             AccAltKeyNum = 14L,
                             AccApWkend = 60121,
                             AccCalPeriod = 1,
@@ -4704,11 +4704,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 2,
-                            AccWkend2N = 20060114L
+                            WeekDate = 20060114
                         },
                         new
                         {
-                            AccWkendN = 60121,
+                            WeekEndingDate = 60121,
                             AccAltKeyNum = 15L,
                             AccApWkend = 60128,
                             AccCalPeriod = 1,
@@ -4723,11 +4723,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 3,
-                            AccWkend2N = 20060121L
+                            WeekDate = 20060121
                         },
                         new
                         {
-                            AccWkendN = 60128,
+                            WeekEndingDate = 60128,
                             AccAltKeyNum = 16L,
                             AccApWkend = 60204,
                             AccCalPeriod = 1,
@@ -4742,11 +4742,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 4,
-                            AccWkend2N = 20060128L
+                            WeekDate = 20060128
                         },
                         new
                         {
-                            AccWkendN = 60204,
+                            WeekEndingDate = 60204,
                             AccAltKeyNum = 17L,
                             AccApWkend = 60211,
                             AccCalPeriod = 2,
@@ -4761,11 +4761,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 5,
-                            AccWkend2N = 20060204L
+                            WeekDate = 20060204
                         },
                         new
                         {
-                            AccWkendN = 60211,
+                            WeekEndingDate = 60211,
                             AccAltKeyNum = 18L,
                             AccApWkend = 60218,
                             AccCalPeriod = 2,
@@ -4780,11 +4780,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 6,
-                            AccWkend2N = 20060211L
+                            WeekDate = 20060211
                         },
                         new
                         {
-                            AccWkendN = 60218,
+                            WeekEndingDate = 60218,
                             AccAltKeyNum = 19L,
                             AccApWkend = 60225,
                             AccCalPeriod = 2,
@@ -4799,11 +4799,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 7,
-                            AccWkend2N = 20060218L
+                            WeekDate = 20060218
                         },
                         new
                         {
-                            AccWkendN = 60225,
+                            WeekEndingDate = 60225,
                             AccAltKeyNum = 20L,
                             AccApWkend = 60304,
                             AccCalPeriod = 2,
@@ -4818,11 +4818,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 8,
-                            AccWkend2N = 20060225L
+                            WeekDate = 20060225
                         },
                         new
                         {
-                            AccWkendN = 60304,
+                            WeekEndingDate = 60304,
                             AccAltKeyNum = 21L,
                             AccApWkend = 60311,
                             AccCalPeriod = 3,
@@ -4837,11 +4837,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 9,
-                            AccWkend2N = 20060304L
+                            WeekDate = 20060304
                         },
                         new
                         {
-                            AccWkendN = 60311,
+                            WeekEndingDate = 60311,
                             AccAltKeyNum = 22L,
                             AccApWkend = 60318,
                             AccCalPeriod = 3,
@@ -4856,11 +4856,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 10,
-                            AccWkend2N = 20060311L
+                            WeekDate = 20060311
                         },
                         new
                         {
-                            AccWkendN = 60318,
+                            WeekEndingDate = 60318,
                             AccAltKeyNum = 23L,
                             AccApWkend = 60325,
                             AccCalPeriod = 3,
@@ -4875,11 +4875,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 11,
-                            AccWkend2N = 20060318L
+                            WeekDate = 20060318
                         },
                         new
                         {
-                            AccWkendN = 60325,
+                            WeekEndingDate = 60325,
                             AccAltKeyNum = 24L,
                             AccApWkend = 60401,
                             AccCalPeriod = 3,
@@ -4894,11 +4894,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 12,
-                            AccWkend2N = 20060325L
+                            WeekDate = 20060325
                         },
                         new
                         {
-                            AccWkendN = 60401,
+                            WeekEndingDate = 60401,
                             AccAltKeyNum = 25L,
                             AccApWkend = 60408,
                             AccCalPeriod = 3,
@@ -4913,11 +4913,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 2,
                             AccWeekN = 13,
-                            AccWkend2N = 20060401L
+                            WeekDate = 20060401
                         },
                         new
                         {
-                            AccWkendN = 60408,
+                            WeekEndingDate = 60408,
                             AccAltKeyNum = 26L,
                             AccApWkend = 60415,
                             AccCalPeriod = 4,
@@ -4932,11 +4932,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 14,
-                            AccWkend2N = 20060408L
+                            WeekDate = 20060408
                         },
                         new
                         {
-                            AccWkendN = 60415,
+                            WeekEndingDate = 60415,
                             AccAltKeyNum = 27L,
                             AccApWkend = 60422,
                             AccCalPeriod = 4,
@@ -4951,11 +4951,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 15,
-                            AccWkend2N = 20060415L
+                            WeekDate = 20060415
                         },
                         new
                         {
-                            AccWkendN = 60422,
+                            WeekEndingDate = 60422,
                             AccAltKeyNum = 28L,
                             AccApWkend = 60429,
                             AccCalPeriod = 4,
@@ -4970,11 +4970,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 16,
-                            AccWkend2N = 20060422L
+                            WeekDate = 20060422
                         },
                         new
                         {
-                            AccWkendN = 60429,
+                            WeekEndingDate = 60429,
                             AccAltKeyNum = 29L,
                             AccApWkend = 60506,
                             AccCalPeriod = 4,
@@ -4989,11 +4989,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 17,
-                            AccWkend2N = 20060429L
+                            WeekDate = 20060429
                         },
                         new
                         {
-                            AccWkendN = 60506,
+                            WeekEndingDate = 60506,
                             AccAltKeyNum = 30L,
                             AccApWkend = 60513,
                             AccCalPeriod = 5,
@@ -5008,11 +5008,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 18,
-                            AccWkend2N = 20060506L
+                            WeekDate = 20060506
                         },
                         new
                         {
-                            AccWkendN = 60513,
+                            WeekEndingDate = 60513,
                             AccAltKeyNum = 31L,
                             AccApWkend = 60520,
                             AccCalPeriod = 5,
@@ -5027,11 +5027,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 19,
-                            AccWkend2N = 20060513L
+                            WeekDate = 20060513
                         },
                         new
                         {
-                            AccWkendN = 60520,
+                            WeekEndingDate = 60520,
                             AccAltKeyNum = 32L,
                             AccApWkend = 60527,
                             AccCalPeriod = 5,
@@ -5046,11 +5046,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 20,
-                            AccWkend2N = 20060520L
+                            WeekDate = 20060520
                         },
                         new
                         {
-                            AccWkendN = 60527,
+                            WeekEndingDate = 60527,
                             AccAltKeyNum = 33L,
                             AccApWkend = 60603,
                             AccCalPeriod = 5,
@@ -5065,11 +5065,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 21,
-                            AccWkend2N = 20060527L
+                            WeekDate = 20060527
                         },
                         new
                         {
-                            AccWkendN = 60603,
+                            WeekEndingDate = 60603,
                             AccAltKeyNum = 34L,
                             AccApWkend = 60610,
                             AccCalPeriod = 5,
@@ -5084,11 +5084,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 22,
-                            AccWkend2N = 20060603L
+                            WeekDate = 20060603
                         },
                         new
                         {
-                            AccWkendN = 60610,
+                            WeekEndingDate = 60610,
                             AccAltKeyNum = 35L,
                             AccApWkend = 60617,
                             AccCalPeriod = 6,
@@ -5103,11 +5103,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 23,
-                            AccWkend2N = 20060610L
+                            WeekDate = 20060610
                         },
                         new
                         {
-                            AccWkendN = 60617,
+                            WeekEndingDate = 60617,
                             AccAltKeyNum = 36L,
                             AccApWkend = 60624,
                             AccCalPeriod = 6,
@@ -5122,11 +5122,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 24,
-                            AccWkend2N = 20060617L
+                            WeekDate = 20060617
                         },
                         new
                         {
-                            AccWkendN = 60624,
+                            WeekEndingDate = 60624,
                             AccAltKeyNum = 37L,
                             AccApWkend = 60701,
                             AccCalPeriod = 6,
@@ -5141,11 +5141,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 25,
-                            AccWkend2N = 20060624L
+                            WeekDate = 20060624
                         },
                         new
                         {
-                            AccWkendN = 60701,
+                            WeekEndingDate = 60701,
                             AccAltKeyNum = 38L,
                             AccApWkend = 60708,
                             AccCalPeriod = 6,
@@ -5160,11 +5160,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 3,
                             AccWeekN = 26,
-                            AccWkend2N = 20060701L
+                            WeekDate = 20060701
                         },
                         new
                         {
-                            AccWkendN = 60708,
+                            WeekEndingDate = 60708,
                             AccAltKeyNum = 39L,
                             AccApWkend = 60715,
                             AccCalPeriod = 7,
@@ -5179,11 +5179,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 27,
-                            AccWkend2N = 20060708L
+                            WeekDate = 20060708
                         },
                         new
                         {
-                            AccWkendN = 60715,
+                            WeekEndingDate = 60715,
                             AccAltKeyNum = 40L,
                             AccApWkend = 60722,
                             AccCalPeriod = 7,
@@ -5198,11 +5198,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 28,
-                            AccWkend2N = 20060715L
+                            WeekDate = 20060715
                         },
                         new
                         {
-                            AccWkendN = 60722,
+                            WeekEndingDate = 60722,
                             AccAltKeyNum = 41L,
                             AccApWkend = 60729,
                             AccCalPeriod = 7,
@@ -5217,11 +5217,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 29,
-                            AccWkend2N = 20060722L
+                            WeekDate = 20060722
                         },
                         new
                         {
-                            AccWkendN = 60729,
+                            WeekEndingDate = 60729,
                             AccAltKeyNum = 42L,
                             AccApWkend = 60805,
                             AccCalPeriod = 7,
@@ -5236,11 +5236,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 30,
-                            AccWkend2N = 20060729L
+                            WeekDate = 20060729
                         },
                         new
                         {
-                            AccWkendN = 60805,
+                            WeekEndingDate = 60805,
                             AccAltKeyNum = 43L,
                             AccApWkend = 60812,
                             AccCalPeriod = 8,
@@ -5255,11 +5255,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 31,
-                            AccWkend2N = 20060805L
+                            WeekDate = 20060805
                         },
                         new
                         {
-                            AccWkendN = 60812,
+                            WeekEndingDate = 60812,
                             AccAltKeyNum = 44L,
                             AccApWkend = 60819,
                             AccCalPeriod = 8,
@@ -5274,11 +5274,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 32,
-                            AccWkend2N = 20060812L
+                            WeekDate = 20060812
                         },
                         new
                         {
-                            AccWkendN = 60819,
+                            WeekEndingDate = 60819,
                             AccAltKeyNum = 45L,
                             AccApWkend = 60826,
                             AccCalPeriod = 8,
@@ -5293,11 +5293,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 33,
-                            AccWkend2N = 20060819L
+                            WeekDate = 20060819
                         },
                         new
                         {
-                            AccWkendN = 60826,
+                            WeekEndingDate = 60826,
                             AccAltKeyNum = 46L,
                             AccApWkend = 60902,
                             AccCalPeriod = 8,
@@ -5312,11 +5312,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 34,
-                            AccWkend2N = 20060826L
+                            WeekDate = 20060826
                         },
                         new
                         {
-                            AccWkendN = 60902,
+                            WeekEndingDate = 60902,
                             AccAltKeyNum = 47L,
                             AccApWkend = 60909,
                             AccCalPeriod = 8,
@@ -5331,11 +5331,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 35,
-                            AccWkend2N = 20060902L
+                            WeekDate = 20060902
                         },
                         new
                         {
-                            AccWkendN = 60909,
+                            WeekEndingDate = 60909,
                             AccAltKeyNum = 48L,
                             AccApWkend = 60916,
                             AccCalPeriod = 9,
@@ -5350,11 +5350,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 36,
-                            AccWkend2N = 20060909L
+                            WeekDate = 20060909
                         },
                         new
                         {
-                            AccWkendN = 60916,
+                            WeekEndingDate = 60916,
                             AccAltKeyNum = 49L,
                             AccApWkend = 60923,
                             AccCalPeriod = 9,
@@ -5369,11 +5369,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 37,
-                            AccWkend2N = 20060916L
+                            WeekDate = 20060916
                         },
                         new
                         {
-                            AccWkendN = 60923,
+                            WeekEndingDate = 60923,
                             AccAltKeyNum = 50L,
                             AccApWkend = 60930,
                             AccCalPeriod = 9,
@@ -5388,11 +5388,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 38,
-                            AccWkend2N = 20060923L
+                            WeekDate = 20060923
                         },
                         new
                         {
-                            AccWkendN = 60930,
+                            WeekEndingDate = 60930,
                             AccAltKeyNum = 51L,
                             AccApWkend = 61007,
                             AccCalPeriod = 9,
@@ -5407,11 +5407,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 4,
                             AccWeekN = 39,
-                            AccWkend2N = 20060930L
+                            WeekDate = 20060930
                         },
                         new
                         {
-                            AccWkendN = 61007,
+                            WeekEndingDate = 61007,
                             AccAltKeyNum = 52L,
                             AccApWkend = 61014,
                             AccCalPeriod = 10,
@@ -5426,11 +5426,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 40,
-                            AccWkend2N = 20061007L
+                            WeekDate = 20061007
                         },
                         new
                         {
-                            AccWkendN = 61014,
+                            WeekEndingDate = 61014,
                             AccAltKeyNum = 53L,
                             AccApWkend = 61021,
                             AccCalPeriod = 10,
@@ -5445,11 +5445,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 41,
-                            AccWkend2N = 20061014L
+                            WeekDate = 20061014
                         },
                         new
                         {
-                            AccWkendN = 61021,
+                            WeekEndingDate = 61021,
                             AccAltKeyNum = 54L,
                             AccApWkend = 61028,
                             AccCalPeriod = 10,
@@ -5464,11 +5464,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 42,
-                            AccWkend2N = 20061021L
+                            WeekDate = 20061021
                         },
                         new
                         {
-                            AccWkendN = 61028,
+                            WeekEndingDate = 61028,
                             AccAltKeyNum = 55L,
                             AccApWkend = 61104,
                             AccCalPeriod = 10,
@@ -5483,11 +5483,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 43,
-                            AccWkend2N = 20061028L
+                            WeekDate = 20061028
                         },
                         new
                         {
-                            AccWkendN = 61104,
+                            WeekEndingDate = 61104,
                             AccAltKeyNum = 56L,
                             AccApWkend = 61111,
                             AccCalPeriod = 11,
@@ -5502,11 +5502,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 44,
-                            AccWkend2N = 20061104L
+                            WeekDate = 20061104
                         },
                         new
                         {
-                            AccWkendN = 61111,
+                            WeekEndingDate = 61111,
                             AccAltKeyNum = 57L,
                             AccApWkend = 61118,
                             AccCalPeriod = 11,
@@ -5521,11 +5521,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 45,
-                            AccWkend2N = 20061111L
+                            WeekDate = 20061111
                         },
                         new
                         {
-                            AccWkendN = 61118,
+                            WeekEndingDate = 61118,
                             AccAltKeyNum = 58L,
                             AccApWkend = 61125,
                             AccCalPeriod = 11,
@@ -5540,11 +5540,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 46,
-                            AccWkend2N = 20061118L
+                            WeekDate = 20061118
                         },
                         new
                         {
-                            AccWkendN = 61125,
+                            WeekEndingDate = 61125,
                             AccAltKeyNum = 59L,
                             AccApWkend = 61202,
                             AccCalPeriod = 11,
@@ -5559,11 +5559,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 47,
-                            AccWkend2N = 20061125L
+                            WeekDate = 20061125
                         },
                         new
                         {
-                            AccWkendN = 61202,
+                            WeekEndingDate = 61202,
                             AccAltKeyNum = 60L,
                             AccApWkend = 61209,
                             AccCalPeriod = 11,
@@ -5578,11 +5578,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 48,
-                            AccWkend2N = 20061202L
+                            WeekDate = 20061202
                         },
                         new
                         {
-                            AccWkendN = 61209,
+                            WeekEndingDate = 61209,
                             AccAltKeyNum = 61L,
                             AccApWkend = 61216,
                             AccCalPeriod = 12,
@@ -5597,11 +5597,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 49,
-                            AccWkend2N = 20061209L
+                            WeekDate = 20061209
                         },
                         new
                         {
-                            AccWkendN = 61216,
+                            WeekEndingDate = 61216,
                             AccAltKeyNum = 62L,
                             AccApWkend = 61223,
                             AccCalPeriod = 12,
@@ -5616,11 +5616,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 50,
-                            AccWkend2N = 20061216L
+                            WeekDate = 20061216
                         },
                         new
                         {
-                            AccWkendN = 61223,
+                            WeekEndingDate = 61223,
                             AccAltKeyNum = 63L,
                             AccApWkend = 61230,
                             AccCalPeriod = 12,
@@ -5635,11 +5635,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 51,
-                            AccWkend2N = 20061223L
+                            WeekDate = 20061223
                         },
                         new
                         {
-                            AccWkendN = 61230,
+                            WeekEndingDate = 61230,
                             AccAltKeyNum = 64L,
                             AccApWkend = 70106,
                             AccCalPeriod = 12,
@@ -5654,11 +5654,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 1,
                             AccWeekN = 52,
-                            AccWkend2N = 20061230L
+                            WeekDate = 20061230
                         },
                         new
                         {
-                            AccWkendN = 70106,
+                            WeekEndingDate = 70106,
                             AccAltKeyNum = 73L,
                             AccApWkend = 70113,
                             AccCalPeriod = 1,
@@ -5673,11 +5673,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 1,
-                            AccWkend2N = 20070106L
+                            WeekDate = 20070106
                         },
                         new
                         {
-                            AccWkendN = 70113,
+                            WeekEndingDate = 70113,
                             AccAltKeyNum = 74L,
                             AccApWkend = 70120,
                             AccCalPeriod = 1,
@@ -5692,11 +5692,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 2,
-                            AccWkend2N = 20070113L
+                            WeekDate = 20070113
                         },
                         new
                         {
-                            AccWkendN = 70120,
+                            WeekEndingDate = 70120,
                             AccAltKeyNum = 75L,
                             AccApWkend = 70127,
                             AccCalPeriod = 1,
@@ -5711,11 +5711,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 3,
-                            AccWkend2N = 20070120L
+                            WeekDate = 20070120
                         },
                         new
                         {
-                            AccWkendN = 70127,
+                            WeekEndingDate = 70127,
                             AccAltKeyNum = 76L,
                             AccApWkend = 70203,
                             AccCalPeriod = 1,
@@ -5730,11 +5730,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 4,
-                            AccWkend2N = 20070127L
+                            WeekDate = 20070127
                         },
                         new
                         {
-                            AccWkendN = 70203,
+                            WeekEndingDate = 70203,
                             AccAltKeyNum = 77L,
                             AccApWkend = 70210,
                             AccCalPeriod = 1,
@@ -5749,11 +5749,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 5,
-                            AccWkend2N = 20070203L
+                            WeekDate = 20070203
                         },
                         new
                         {
-                            AccWkendN = 70210,
+                            WeekEndingDate = 70210,
                             AccAltKeyNum = 78L,
                             AccApWkend = 70217,
                             AccCalPeriod = 2,
@@ -5768,11 +5768,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 6,
-                            AccWkend2N = 20070210L
+                            WeekDate = 20070210
                         },
                         new
                         {
-                            AccWkendN = 70217,
+                            WeekEndingDate = 70217,
                             AccAltKeyNum = 79L,
                             AccApWkend = 70224,
                             AccCalPeriod = 2,
@@ -5787,11 +5787,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 7,
-                            AccWkend2N = 20070217L
+                            WeekDate = 20070217
                         },
                         new
                         {
-                            AccWkendN = 70224,
+                            WeekEndingDate = 70224,
                             AccAltKeyNum = 80L,
                             AccApWkend = 70303,
                             AccCalPeriod = 2,
@@ -5806,11 +5806,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 8,
-                            AccWkend2N = 20070224L
+                            WeekDate = 20070224
                         },
                         new
                         {
-                            AccWkendN = 70303,
+                            WeekEndingDate = 70303,
                             AccAltKeyNum = 81L,
                             AccApWkend = 70310,
                             AccCalPeriod = 2,
@@ -5825,11 +5825,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 9,
-                            AccWkend2N = 20070303L
+                            WeekDate = 20070303
                         },
                         new
                         {
-                            AccWkendN = 70310,
+                            WeekEndingDate = 70310,
                             AccAltKeyNum = 82L,
                             AccApWkend = 70317,
                             AccCalPeriod = 3,
@@ -5844,11 +5844,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 10,
-                            AccWkend2N = 20070310L
+                            WeekDate = 20070310
                         },
                         new
                         {
-                            AccWkendN = 70317,
+                            WeekEndingDate = 70317,
                             AccAltKeyNum = 83L,
                             AccApWkend = 70324,
                             AccCalPeriod = 3,
@@ -5863,11 +5863,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 11,
-                            AccWkend2N = 20070317L
+                            WeekDate = 20070317
                         },
                         new
                         {
-                            AccWkendN = 70324,
+                            WeekEndingDate = 70324,
                             AccAltKeyNum = 84L,
                             AccApWkend = 70331,
                             AccCalPeriod = 3,
@@ -5882,11 +5882,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 12,
-                            AccWkend2N = 20070324L
+                            WeekDate = 20070324
                         },
                         new
                         {
-                            AccWkendN = 70331,
+                            WeekEndingDate = 70331,
                             AccAltKeyNum = 85L,
                             AccApWkend = 70407,
                             AccCalPeriod = 3,
@@ -5901,11 +5901,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 2,
                             AccWeekN = 13,
-                            AccWkend2N = 20070331L
+                            WeekDate = 20070331
                         },
                         new
                         {
-                            AccWkendN = 70407,
+                            WeekEndingDate = 70407,
                             AccAltKeyNum = 86L,
                             AccApWkend = 70414,
                             AccCalPeriod = 4,
@@ -5920,11 +5920,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 14,
-                            AccWkend2N = 20070407L
+                            WeekDate = 20070407
                         },
                         new
                         {
-                            AccWkendN = 70414,
+                            WeekEndingDate = 70414,
                             AccAltKeyNum = 87L,
                             AccApWkend = 70421,
                             AccCalPeriod = 4,
@@ -5939,11 +5939,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 15,
-                            AccWkend2N = 20070414L
+                            WeekDate = 20070414
                         },
                         new
                         {
-                            AccWkendN = 70421,
+                            WeekEndingDate = 70421,
                             AccAltKeyNum = 88L,
                             AccApWkend = 70428,
                             AccCalPeriod = 4,
@@ -5958,11 +5958,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 16,
-                            AccWkend2N = 20070421L
+                            WeekDate = 20070421
                         },
                         new
                         {
-                            AccWkendN = 70428,
+                            WeekEndingDate = 70428,
                             AccAltKeyNum = 89L,
                             AccApWkend = 70505,
                             AccCalPeriod = 4,
@@ -5977,11 +5977,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 17,
-                            AccWkend2N = 20070428L
+                            WeekDate = 20070428
                         },
                         new
                         {
-                            AccWkendN = 70505,
+                            WeekEndingDate = 70505,
                             AccAltKeyNum = 90L,
                             AccApWkend = 70512,
                             AccCalPeriod = 5,
@@ -5996,11 +5996,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 18,
-                            AccWkend2N = 20070505L
+                            WeekDate = 20070505
                         },
                         new
                         {
-                            AccWkendN = 70512,
+                            WeekEndingDate = 70512,
                             AccAltKeyNum = 91L,
                             AccApWkend = 70519,
                             AccCalPeriod = 5,
@@ -6015,11 +6015,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 19,
-                            AccWkend2N = 20070512L
+                            WeekDate = 20070512
                         },
                         new
                         {
-                            AccWkendN = 70519,
+                            WeekEndingDate = 70519,
                             AccAltKeyNum = 92L,
                             AccApWkend = 70526,
                             AccCalPeriod = 5,
@@ -6034,11 +6034,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 20,
-                            AccWkend2N = 20070519L
+                            WeekDate = 20070519
                         },
                         new
                         {
-                            AccWkendN = 70526,
+                            WeekEndingDate = 70526,
                             AccAltKeyNum = 93L,
                             AccApWkend = 70602,
                             AccCalPeriod = 5,
@@ -6053,11 +6053,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 21,
-                            AccWkend2N = 20070526L
+                            WeekDate = 20070526
                         },
                         new
                         {
-                            AccWkendN = 70602,
+                            WeekEndingDate = 70602,
                             AccAltKeyNum = 94L,
                             AccApWkend = 70609,
                             AccCalPeriod = 5,
@@ -6072,11 +6072,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 22,
-                            AccWkend2N = 20070602L
+                            WeekDate = 20070602
                         },
                         new
                         {
-                            AccWkendN = 70609,
+                            WeekEndingDate = 70609,
                             AccAltKeyNum = 95L,
                             AccApWkend = 70616,
                             AccCalPeriod = 6,
@@ -6091,11 +6091,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 23,
-                            AccWkend2N = 20070609L
+                            WeekDate = 20070609
                         },
                         new
                         {
-                            AccWkendN = 70616,
+                            WeekEndingDate = 70616,
                             AccAltKeyNum = 96L,
                             AccApWkend = 70623,
                             AccCalPeriod = 6,
@@ -6110,11 +6110,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 24,
-                            AccWkend2N = 20070616L
+                            WeekDate = 20070616
                         },
                         new
                         {
-                            AccWkendN = 70623,
+                            WeekEndingDate = 70623,
                             AccAltKeyNum = 97L,
                             AccApWkend = 70630,
                             AccCalPeriod = 6,
@@ -6129,11 +6129,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 25,
-                            AccWkend2N = 20070623L
+                            WeekDate = 20070623
                         },
                         new
                         {
-                            AccWkendN = 70630,
+                            WeekEndingDate = 70630,
                             AccAltKeyNum = 98L,
                             AccApWkend = 70707,
                             AccCalPeriod = 6,
@@ -6148,11 +6148,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 3,
                             AccWeekN = 26,
-                            AccWkend2N = 20070630L
+                            WeekDate = 20070630
                         },
                         new
                         {
-                            AccWkendN = 70707,
+                            WeekEndingDate = 70707,
                             AccAltKeyNum = 99L,
                             AccApWkend = 70714,
                             AccCalPeriod = 7,
@@ -6167,11 +6167,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 27,
-                            AccWkend2N = 20070707L
+                            WeekDate = 20070707
                         },
                         new
                         {
-                            AccWkendN = 70714,
+                            WeekEndingDate = 70714,
                             AccAltKeyNum = 100L,
                             AccApWkend = 70721,
                             AccCalPeriod = 7,
@@ -6186,11 +6186,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 28,
-                            AccWkend2N = 20070714L
+                            WeekDate = 20070714
                         },
                         new
                         {
-                            AccWkendN = 70721,
+                            WeekEndingDate = 70721,
                             AccAltKeyNum = 101L,
                             AccApWkend = 70728,
                             AccCalPeriod = 7,
@@ -6205,11 +6205,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 29,
-                            AccWkend2N = 20070721L
+                            WeekDate = 20070721
                         },
                         new
                         {
-                            AccWkendN = 70728,
+                            WeekEndingDate = 70728,
                             AccAltKeyNum = 102L,
                             AccApWkend = 70804,
                             AccCalPeriod = 7,
@@ -6224,11 +6224,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 30,
-                            AccWkend2N = 20070728L
+                            WeekDate = 20070728
                         },
                         new
                         {
-                            AccWkendN = 70804,
+                            WeekEndingDate = 70804,
                             AccAltKeyNum = 103L,
                             AccApWkend = 70811,
                             AccCalPeriod = 8,
@@ -6243,11 +6243,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 31,
-                            AccWkend2N = 20070804L
+                            WeekDate = 20070804
                         },
                         new
                         {
-                            AccWkendN = 70811,
+                            WeekEndingDate = 70811,
                             AccAltKeyNum = 104L,
                             AccApWkend = 70818,
                             AccCalPeriod = 8,
@@ -6262,11 +6262,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 32,
-                            AccWkend2N = 20070811L
+                            WeekDate = 20070811
                         },
                         new
                         {
-                            AccWkendN = 70818,
+                            WeekEndingDate = 70818,
                             AccAltKeyNum = 105L,
                             AccApWkend = 70825,
                             AccCalPeriod = 8,
@@ -6281,11 +6281,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 33,
-                            AccWkend2N = 20070818L
+                            WeekDate = 20070818
                         },
                         new
                         {
-                            AccWkendN = 70825,
+                            WeekEndingDate = 70825,
                             AccAltKeyNum = 106L,
                             AccApWkend = 70901,
                             AccCalPeriod = 8,
@@ -6300,11 +6300,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 34,
-                            AccWkend2N = 20070825L
+                            WeekDate = 20070825
                         },
                         new
                         {
-                            AccWkendN = 70901,
+                            WeekEndingDate = 70901,
                             AccAltKeyNum = 107L,
                             AccApWkend = 70908,
                             AccCalPeriod = 8,
@@ -6319,11 +6319,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 35,
-                            AccWkend2N = 20070901L
+                            WeekDate = 20070901
                         },
                         new
                         {
-                            AccWkendN = 70908,
+                            WeekEndingDate = 70908,
                             AccAltKeyNum = 108L,
                             AccApWkend = 70915,
                             AccCalPeriod = 9,
@@ -6338,11 +6338,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 36,
-                            AccWkend2N = 20070908L
+                            WeekDate = 20070908
                         },
                         new
                         {
-                            AccWkendN = 70915,
+                            WeekEndingDate = 70915,
                             AccAltKeyNum = 109L,
                             AccApWkend = 70922,
                             AccCalPeriod = 9,
@@ -6357,11 +6357,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 37,
-                            AccWkend2N = 20070915L
+                            WeekDate = 20070915
                         },
                         new
                         {
-                            AccWkendN = 70922,
+                            WeekEndingDate = 70922,
                             AccAltKeyNum = 110L,
                             AccApWkend = 70929,
                             AccCalPeriod = 9,
@@ -6376,11 +6376,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 38,
-                            AccWkend2N = 20070922L
+                            WeekDate = 20070922
                         },
                         new
                         {
-                            AccWkendN = 70929,
+                            WeekEndingDate = 70929,
                             AccAltKeyNum = 111L,
                             AccApWkend = 71006,
                             AccCalPeriod = 9,
@@ -6395,11 +6395,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 4,
                             AccWeekN = 39,
-                            AccWkend2N = 20070929L
+                            WeekDate = 20070929
                         },
                         new
                         {
-                            AccWkendN = 71006,
+                            WeekEndingDate = 71006,
                             AccAltKeyNum = 112L,
                             AccApWkend = 71013,
                             AccCalPeriod = 10,
@@ -6414,11 +6414,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 40,
-                            AccWkend2N = 20071006L
+                            WeekDate = 20071006
                         },
                         new
                         {
-                            AccWkendN = 71013,
+                            WeekEndingDate = 71013,
                             AccAltKeyNum = 113L,
                             AccApWkend = 71020,
                             AccCalPeriod = 10,
@@ -6433,11 +6433,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 41,
-                            AccWkend2N = 20071013L
+                            WeekDate = 20071013
                         },
                         new
                         {
-                            AccWkendN = 71020,
+                            WeekEndingDate = 71020,
                             AccAltKeyNum = 114L,
                             AccApWkend = 71027,
                             AccCalPeriod = 10,
@@ -6452,11 +6452,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 42,
-                            AccWkend2N = 20071020L
+                            WeekDate = 20071020
                         },
                         new
                         {
-                            AccWkendN = 71027,
+                            WeekEndingDate = 71027,
                             AccAltKeyNum = 115L,
                             AccApWkend = 71103,
                             AccCalPeriod = 10,
@@ -6471,11 +6471,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 43,
-                            AccWkend2N = 20071027L
+                            WeekDate = 20071027
                         },
                         new
                         {
-                            AccWkendN = 71103,
+                            WeekEndingDate = 71103,
                             AccAltKeyNum = 116L,
                             AccApWkend = 71110,
                             AccCalPeriod = 10,
@@ -6490,11 +6490,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 44,
-                            AccWkend2N = 20071103L
+                            WeekDate = 20071103
                         },
                         new
                         {
-                            AccWkendN = 71110,
+                            WeekEndingDate = 71110,
                             AccAltKeyNum = 117L,
                             AccApWkend = 71117,
                             AccCalPeriod = 11,
@@ -6509,11 +6509,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 45,
-                            AccWkend2N = 20071110L
+                            WeekDate = 20071110
                         },
                         new
                         {
-                            AccWkendN = 71117,
+                            WeekEndingDate = 71117,
                             AccAltKeyNum = 118L,
                             AccApWkend = 71124,
                             AccCalPeriod = 11,
@@ -6528,11 +6528,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 46,
-                            AccWkend2N = 20071117L
+                            WeekDate = 20071117
                         },
                         new
                         {
-                            AccWkendN = 71124,
+                            WeekEndingDate = 71124,
                             AccAltKeyNum = 119L,
                             AccApWkend = 71201,
                             AccCalPeriod = 11,
@@ -6547,11 +6547,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 47,
-                            AccWkend2N = 20071124L
+                            WeekDate = 20071124
                         },
                         new
                         {
-                            AccWkendN = 71201,
+                            WeekEndingDate = 71201,
                             AccAltKeyNum = 120L,
                             AccApWkend = 71208,
                             AccCalPeriod = 11,
@@ -6566,11 +6566,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 48,
-                            AccWkend2N = 20071201L
+                            WeekDate = 20071201
                         },
                         new
                         {
-                            AccWkendN = 71208,
+                            WeekEndingDate = 71208,
                             AccAltKeyNum = 121L,
                             AccApWkend = 71215,
                             AccCalPeriod = 12,
@@ -6585,11 +6585,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 49,
-                            AccWkend2N = 20071208L
+                            WeekDate = 20071208
                         },
                         new
                         {
-                            AccWkendN = 71215,
+                            WeekEndingDate = 71215,
                             AccAltKeyNum = 122L,
                             AccApWkend = 71222,
                             AccCalPeriod = 12,
@@ -6604,11 +6604,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 50,
-                            AccWkend2N = 20071215L
+                            WeekDate = 20071215
                         },
                         new
                         {
-                            AccWkendN = 71222,
+                            WeekEndingDate = 71222,
                             AccAltKeyNum = 123L,
                             AccApWkend = 71229,
                             AccCalPeriod = 12,
@@ -6623,11 +6623,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 51,
-                            AccWkend2N = 20071222L
+                            WeekDate = 20071222
                         },
                         new
                         {
-                            AccWkendN = 71229,
+                            WeekEndingDate = 71229,
                             AccAltKeyNum = 124L,
                             AccApWkend = 80105,
                             AccCalPeriod = 12,
@@ -6642,11 +6642,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 1,
                             AccWeekN = 52,
-                            AccWkend2N = 20071229L
+                            WeekDate = 20071229
                         },
                         new
                         {
-                            AccWkendN = 80105,
+                            WeekEndingDate = 80105,
                             AccAltKeyNum = 133L,
                             AccApWkend = 80112,
                             AccCalPeriod = 1,
@@ -6661,11 +6661,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 1,
-                            AccWkend2N = 20080105L
+                            WeekDate = 20080105
                         },
                         new
                         {
-                            AccWkendN = 80112,
+                            WeekEndingDate = 80112,
                             AccAltKeyNum = 134L,
                             AccApWkend = 80119,
                             AccCalPeriod = 1,
@@ -6680,11 +6680,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 2,
-                            AccWkend2N = 20080112L
+                            WeekDate = 20080112
                         },
                         new
                         {
-                            AccWkendN = 80119,
+                            WeekEndingDate = 80119,
                             AccAltKeyNum = 135L,
                             AccApWkend = 80126,
                             AccCalPeriod = 1,
@@ -6699,11 +6699,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 3,
-                            AccWkend2N = 20080119L
+                            WeekDate = 20080119
                         },
                         new
                         {
-                            AccWkendN = 80126,
+                            WeekEndingDate = 80126,
                             AccAltKeyNum = 136L,
                             AccApWkend = 80202,
                             AccCalPeriod = 1,
@@ -6718,11 +6718,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 4,
-                            AccWkend2N = 20080126L
+                            WeekDate = 20080126
                         },
                         new
                         {
-                            AccWkendN = 80202,
+                            WeekEndingDate = 80202,
                             AccAltKeyNum = 137L,
                             AccApWkend = 80209,
                             AccCalPeriod = 1,
@@ -6737,11 +6737,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 5,
-                            AccWkend2N = 20080202L
+                            WeekDate = 20080202
                         },
                         new
                         {
-                            AccWkendN = 80209,
+                            WeekEndingDate = 80209,
                             AccAltKeyNum = 138L,
                             AccApWkend = 80216,
                             AccCalPeriod = 2,
@@ -6756,11 +6756,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 6,
-                            AccWkend2N = 20080209L
+                            WeekDate = 20080209
                         },
                         new
                         {
-                            AccWkendN = 80216,
+                            WeekEndingDate = 80216,
                             AccAltKeyNum = 139L,
                             AccApWkend = 80223,
                             AccCalPeriod = 2,
@@ -6775,11 +6775,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 7,
-                            AccWkend2N = 20080216L
+                            WeekDate = 20080216
                         },
                         new
                         {
-                            AccWkendN = 80223,
+                            WeekEndingDate = 80223,
                             AccAltKeyNum = 140L,
                             AccApWkend = 80301,
                             AccCalPeriod = 2,
@@ -6794,11 +6794,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 8,
-                            AccWkend2N = 20080223L
+                            WeekDate = 20080223
                         },
                         new
                         {
-                            AccWkendN = 80301,
+                            WeekEndingDate = 80301,
                             AccAltKeyNum = 141L,
                             AccApWkend = 80308,
                             AccCalPeriod = 2,
@@ -6813,11 +6813,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 9,
-                            AccWkend2N = 20080301L
+                            WeekDate = 20080301
                         },
                         new
                         {
-                            AccWkendN = 80308,
+                            WeekEndingDate = 80308,
                             AccAltKeyNum = 142L,
                             AccApWkend = 80315,
                             AccCalPeriod = 3,
@@ -6832,11 +6832,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 10,
-                            AccWkend2N = 20080308L
+                            WeekDate = 20080308
                         },
                         new
                         {
-                            AccWkendN = 80315,
+                            WeekEndingDate = 80315,
                             AccAltKeyNum = 143L,
                             AccApWkend = 80322,
                             AccCalPeriod = 3,
@@ -6851,11 +6851,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 11,
-                            AccWkend2N = 20080315L
+                            WeekDate = 20080315
                         },
                         new
                         {
-                            AccWkendN = 80322,
+                            WeekEndingDate = 80322,
                             AccAltKeyNum = 144L,
                             AccApWkend = 80329,
                             AccCalPeriod = 3,
@@ -6870,11 +6870,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 12,
-                            AccWkend2N = 20080322L
+                            WeekDate = 20080322
                         },
                         new
                         {
-                            AccWkendN = 80329,
+                            WeekEndingDate = 80329,
                             AccAltKeyNum = 145L,
                             AccApWkend = 80405,
                             AccCalPeriod = 3,
@@ -6889,11 +6889,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 2,
                             AccWeekN = 13,
-                            AccWkend2N = 20080329L
+                            WeekDate = 20080329
                         },
                         new
                         {
-                            AccWkendN = 80405,
+                            WeekEndingDate = 80405,
                             AccAltKeyNum = 146L,
                             AccApWkend = 80412,
                             AccCalPeriod = 4,
@@ -6908,11 +6908,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 14,
-                            AccWkend2N = 20080405L
+                            WeekDate = 20080405
                         },
                         new
                         {
-                            AccWkendN = 80412,
+                            WeekEndingDate = 80412,
                             AccAltKeyNum = 147L,
                             AccApWkend = 80419,
                             AccCalPeriod = 4,
@@ -6927,11 +6927,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 15,
-                            AccWkend2N = 20080412L
+                            WeekDate = 20080412
                         },
                         new
                         {
-                            AccWkendN = 80419,
+                            WeekEndingDate = 80419,
                             AccAltKeyNum = 148L,
                             AccApWkend = 80426,
                             AccCalPeriod = 4,
@@ -6946,11 +6946,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 16,
-                            AccWkend2N = 20080419L
+                            WeekDate = 20080419
                         },
                         new
                         {
-                            AccWkendN = 80426,
+                            WeekEndingDate = 80426,
                             AccAltKeyNum = 149L,
                             AccApWkend = 80503,
                             AccCalPeriod = 4,
@@ -6965,11 +6965,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 17,
-                            AccWkend2N = 20080426L
+                            WeekDate = 20080426
                         },
                         new
                         {
-                            AccWkendN = 80503,
+                            WeekEndingDate = 80503,
                             AccAltKeyNum = 150L,
                             AccApWkend = 80510,
                             AccCalPeriod = 4,
@@ -6984,11 +6984,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 18,
-                            AccWkend2N = 20080503L
+                            WeekDate = 20080503
                         },
                         new
                         {
-                            AccWkendN = 80510,
+                            WeekEndingDate = 80510,
                             AccAltKeyNum = 151L,
                             AccApWkend = 80517,
                             AccCalPeriod = 5,
@@ -7003,11 +7003,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 19,
-                            AccWkend2N = 20080510L
+                            WeekDate = 20080510
                         },
                         new
                         {
-                            AccWkendN = 80517,
+                            WeekEndingDate = 80517,
                             AccAltKeyNum = 152L,
                             AccApWkend = 80524,
                             AccCalPeriod = 5,
@@ -7022,11 +7022,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 20,
-                            AccWkend2N = 20080517L
+                            WeekDate = 20080517
                         },
                         new
                         {
-                            AccWkendN = 80524,
+                            WeekEndingDate = 80524,
                             AccAltKeyNum = 153L,
                             AccApWkend = 80531,
                             AccCalPeriod = 5,
@@ -7041,11 +7041,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 21,
-                            AccWkend2N = 20080524L
+                            WeekDate = 20080524
                         },
                         new
                         {
-                            AccWkendN = 80531,
+                            WeekEndingDate = 80531,
                             AccAltKeyNum = 154L,
                             AccApWkend = 80607,
                             AccCalPeriod = 5,
@@ -7060,11 +7060,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 22,
-                            AccWkend2N = 20080531L
+                            WeekDate = 20080531
                         },
                         new
                         {
-                            AccWkendN = 80607,
+                            WeekEndingDate = 80607,
                             AccAltKeyNum = 155L,
                             AccApWkend = 80614,
                             AccCalPeriod = 6,
@@ -7079,11 +7079,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 23,
-                            AccWkend2N = 20080607L
+                            WeekDate = 20080607
                         },
                         new
                         {
-                            AccWkendN = 80614,
+                            WeekEndingDate = 80614,
                             AccAltKeyNum = 156L,
                             AccApWkend = 80621,
                             AccCalPeriod = 6,
@@ -7098,11 +7098,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 24,
-                            AccWkend2N = 20080614L
+                            WeekDate = 20080614
                         },
                         new
                         {
-                            AccWkendN = 80621,
+                            WeekEndingDate = 80621,
                             AccAltKeyNum = 157L,
                             AccApWkend = 80628,
                             AccCalPeriod = 6,
@@ -7117,11 +7117,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 25,
-                            AccWkend2N = 20080621L
+                            WeekDate = 20080621
                         },
                         new
                         {
-                            AccWkendN = 80628,
+                            WeekEndingDate = 80628,
                             AccAltKeyNum = 158L,
                             AccApWkend = 80705,
                             AccCalPeriod = 6,
@@ -7136,11 +7136,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 3,
                             AccWeekN = 26,
-                            AccWkend2N = 20080628L
+                            WeekDate = 20080628
                         },
                         new
                         {
-                            AccWkendN = 80705,
+                            WeekEndingDate = 80705,
                             AccAltKeyNum = 159L,
                             AccApWkend = 80712,
                             AccCalPeriod = 7,
@@ -7155,11 +7155,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 27,
-                            AccWkend2N = 20080705L
+                            WeekDate = 20080705
                         },
                         new
                         {
-                            AccWkendN = 80712,
+                            WeekEndingDate = 80712,
                             AccAltKeyNum = 160L,
                             AccApWkend = 80719,
                             AccCalPeriod = 7,
@@ -7174,11 +7174,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 28,
-                            AccWkend2N = 20080712L
+                            WeekDate = 20080712
                         },
                         new
                         {
-                            AccWkendN = 80719,
+                            WeekEndingDate = 80719,
                             AccAltKeyNum = 161L,
                             AccApWkend = 80726,
                             AccCalPeriod = 7,
@@ -7193,11 +7193,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 29,
-                            AccWkend2N = 20080719L
+                            WeekDate = 20080719
                         },
                         new
                         {
-                            AccWkendN = 80726,
+                            WeekEndingDate = 80726,
                             AccAltKeyNum = 162L,
                             AccApWkend = 80802,
                             AccCalPeriod = 7,
@@ -7212,11 +7212,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 30,
-                            AccWkend2N = 20080726L
+                            WeekDate = 20080726
                         },
                         new
                         {
-                            AccWkendN = 80802,
+                            WeekEndingDate = 80802,
                             AccAltKeyNum = 163L,
                             AccApWkend = 80809,
                             AccCalPeriod = 7,
@@ -7231,11 +7231,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 31,
-                            AccWkend2N = 20080802L
+                            WeekDate = 20080802
                         },
                         new
                         {
-                            AccWkendN = 80809,
+                            WeekEndingDate = 80809,
                             AccAltKeyNum = 164L,
                             AccApWkend = 80816,
                             AccCalPeriod = 8,
@@ -7250,11 +7250,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 32,
-                            AccWkend2N = 20080809L
+                            WeekDate = 20080809
                         },
                         new
                         {
-                            AccWkendN = 80816,
+                            WeekEndingDate = 80816,
                             AccAltKeyNum = 165L,
                             AccApWkend = 80823,
                             AccCalPeriod = 8,
@@ -7269,11 +7269,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 33,
-                            AccWkend2N = 20080816L
+                            WeekDate = 20080816
                         },
                         new
                         {
-                            AccWkendN = 80823,
+                            WeekEndingDate = 80823,
                             AccAltKeyNum = 166L,
                             AccApWkend = 80830,
                             AccCalPeriod = 8,
@@ -7288,11 +7288,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 34,
-                            AccWkend2N = 20080823L
+                            WeekDate = 20080823
                         },
                         new
                         {
-                            AccWkendN = 80830,
+                            WeekEndingDate = 80830,
                             AccAltKeyNum = 167L,
                             AccApWkend = 80906,
                             AccCalPeriod = 8,
@@ -7307,11 +7307,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 35,
-                            AccWkend2N = 20080830L
+                            WeekDate = 20080830
                         },
                         new
                         {
-                            AccWkendN = 80906,
+                            WeekEndingDate = 80906,
                             AccAltKeyNum = 168L,
                             AccApWkend = 80913,
                             AccCalPeriod = 9,
@@ -7326,11 +7326,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 36,
-                            AccWkend2N = 20080906L
+                            WeekDate = 20080906
                         },
                         new
                         {
-                            AccWkendN = 80913,
+                            WeekEndingDate = 80913,
                             AccAltKeyNum = 169L,
                             AccApWkend = 80920,
                             AccCalPeriod = 9,
@@ -7345,11 +7345,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 37,
-                            AccWkend2N = 20080913L
+                            WeekDate = 20080913
                         },
                         new
                         {
-                            AccWkendN = 80920,
+                            WeekEndingDate = 80920,
                             AccAltKeyNum = 170L,
                             AccApWkend = 80927,
                             AccCalPeriod = 9,
@@ -7364,11 +7364,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 38,
-                            AccWkend2N = 20080920L
+                            WeekDate = 20080920
                         },
                         new
                         {
-                            AccWkendN = 80927,
+                            WeekEndingDate = 80927,
                             AccAltKeyNum = 171L,
                             AccApWkend = 81004,
                             AccCalPeriod = 9,
@@ -7383,11 +7383,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 4,
                             AccWeekN = 39,
-                            AccWkend2N = 20080927L
+                            WeekDate = 20080927
                         },
                         new
                         {
-                            AccWkendN = 81004,
+                            WeekEndingDate = 81004,
                             AccAltKeyNum = 172L,
                             AccApWkend = 81011,
                             AccCalPeriod = 10,
@@ -7402,11 +7402,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 40,
-                            AccWkend2N = 20081004L
+                            WeekDate = 20081004
                         },
                         new
                         {
-                            AccWkendN = 81011,
+                            WeekEndingDate = 81011,
                             AccAltKeyNum = 173L,
                             AccApWkend = 81018,
                             AccCalPeriod = 10,
@@ -7421,11 +7421,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 41,
-                            AccWkend2N = 20081011L
+                            WeekDate = 20081011
                         },
                         new
                         {
-                            AccWkendN = 81018,
+                            WeekEndingDate = 81018,
                             AccAltKeyNum = 174L,
                             AccApWkend = 81025,
                             AccCalPeriod = 10,
@@ -7440,11 +7440,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 42,
-                            AccWkend2N = 20081018L
+                            WeekDate = 20081018
                         },
                         new
                         {
-                            AccWkendN = 81025,
+                            WeekEndingDate = 81025,
                             AccAltKeyNum = 175L,
                             AccApWkend = 81101,
                             AccCalPeriod = 10,
@@ -7459,11 +7459,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 43,
-                            AccWkend2N = 20081025L
+                            WeekDate = 20081025
                         },
                         new
                         {
-                            AccWkendN = 81101,
+                            WeekEndingDate = 81101,
                             AccAltKeyNum = 176L,
                             AccApWkend = 81108,
                             AccCalPeriod = 10,
@@ -7478,11 +7478,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 44,
-                            AccWkend2N = 20081101L
+                            WeekDate = 20081101
                         },
                         new
                         {
-                            AccWkendN = 81108,
+                            WeekEndingDate = 81108,
                             AccAltKeyNum = 177L,
                             AccApWkend = 81115,
                             AccCalPeriod = 11,
@@ -7497,11 +7497,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 45,
-                            AccWkend2N = 20081108L
+                            WeekDate = 20081108
                         },
                         new
                         {
-                            AccWkendN = 81115,
+                            WeekEndingDate = 81115,
                             AccAltKeyNum = 178L,
                             AccApWkend = 81122,
                             AccCalPeriod = 11,
@@ -7516,11 +7516,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 46,
-                            AccWkend2N = 20081115L
+                            WeekDate = 20081115
                         },
                         new
                         {
-                            AccWkendN = 81122,
+                            WeekEndingDate = 81122,
                             AccAltKeyNum = 179L,
                             AccApWkend = 81129,
                             AccCalPeriod = 11,
@@ -7535,11 +7535,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 47,
-                            AccWkend2N = 20081122L
+                            WeekDate = 20081122
                         },
                         new
                         {
-                            AccWkendN = 81129,
+                            WeekEndingDate = 81129,
                             AccAltKeyNum = 180L,
                             AccApWkend = 81206,
                             AccCalPeriod = 11,
@@ -7554,11 +7554,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 48,
-                            AccWkend2N = 20081129L
+                            WeekDate = 20081129
                         },
                         new
                         {
-                            AccWkendN = 81206,
+                            WeekEndingDate = 81206,
                             AccAltKeyNum = 181L,
                             AccApWkend = 81213,
                             AccCalPeriod = 12,
@@ -7573,11 +7573,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 49,
-                            AccWkend2N = 20081206L
+                            WeekDate = 20081206
                         },
                         new
                         {
-                            AccWkendN = 81213,
+                            WeekEndingDate = 81213,
                             AccAltKeyNum = 182L,
                             AccApWkend = 81220,
                             AccCalPeriod = 12,
@@ -7592,11 +7592,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 50,
-                            AccWkend2N = 20081213L
+                            WeekDate = 20081213
                         },
                         new
                         {
-                            AccWkendN = 81220,
+                            WeekEndingDate = 81220,
                             AccAltKeyNum = 183L,
                             AccApWkend = 81227,
                             AccCalPeriod = 12,
@@ -7611,11 +7611,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 51,
-                            AccWkend2N = 20081220L
+                            WeekDate = 20081220
                         },
                         new
                         {
-                            AccWkendN = 81227,
+                            WeekEndingDate = 81227,
                             AccAltKeyNum = 184L,
                             AccApWkend = 90103,
                             AccCalPeriod = 12,
@@ -7630,11 +7630,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 1,
                             AccWeekN = 52,
-                            AccWkend2N = 20081227L
+                            WeekDate = 20081227
                         },
                         new
                         {
-                            AccWkendN = 90103,
+                            WeekEndingDate = 90103,
                             AccAltKeyNum = 185L,
                             AccApWkend = 90110,
                             AccCalPeriod = 12,
@@ -7649,11 +7649,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 1,
                             AccWeekN = 53,
-                            AccWkend2N = 20090103L
+                            WeekDate = 20090103
                         },
                         new
                         {
-                            AccWkendN = 90110,
+                            WeekEndingDate = 90110,
                             AccAltKeyNum = 193L,
                             AccApWkend = 90117,
                             AccCalPeriod = 1,
@@ -7668,11 +7668,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 1,
-                            AccWkend2N = 20090110L
+                            WeekDate = 20090110
                         },
                         new
                         {
-                            AccWkendN = 90117,
+                            WeekEndingDate = 90117,
                             AccAltKeyNum = 194L,
                             AccApWkend = 90124,
                             AccCalPeriod = 1,
@@ -7687,11 +7687,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 2,
-                            AccWkend2N = 20090117L
+                            WeekDate = 20090117
                         },
                         new
                         {
-                            AccWkendN = 90124,
+                            WeekEndingDate = 90124,
                             AccAltKeyNum = 195L,
                             AccApWkend = 90131,
                             AccCalPeriod = 1,
@@ -7706,11 +7706,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 3,
-                            AccWkend2N = 20090124L
+                            WeekDate = 20090124
                         },
                         new
                         {
-                            AccWkendN = 90131,
+                            WeekEndingDate = 90131,
                             AccAltKeyNum = 196L,
                             AccApWkend = 90207,
                             AccCalPeriod = 1,
@@ -7725,11 +7725,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 4,
-                            AccWkend2N = 20090131L
+                            WeekDate = 20090131
                         },
                         new
                         {
-                            AccWkendN = 90207,
+                            WeekEndingDate = 90207,
                             AccAltKeyNum = 197L,
                             AccApWkend = 90214,
                             AccCalPeriod = 2,
@@ -7744,11 +7744,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 5,
-                            AccWkend2N = 20090207L
+                            WeekDate = 20090207
                         },
                         new
                         {
-                            AccWkendN = 90214,
+                            WeekEndingDate = 90214,
                             AccAltKeyNum = 198L,
                             AccApWkend = 90221,
                             AccCalPeriod = 2,
@@ -7763,11 +7763,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 6,
-                            AccWkend2N = 20090214L
+                            WeekDate = 20090214
                         },
                         new
                         {
-                            AccWkendN = 90221,
+                            WeekEndingDate = 90221,
                             AccAltKeyNum = 199L,
                             AccApWkend = 90228,
                             AccCalPeriod = 2,
@@ -7782,11 +7782,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 7,
-                            AccWkend2N = 20090221L
+                            WeekDate = 20090221
                         },
                         new
                         {
-                            AccWkendN = 90228,
+                            WeekEndingDate = 90228,
                             AccAltKeyNum = 200L,
                             AccApWkend = 90307,
                             AccCalPeriod = 2,
@@ -7801,11 +7801,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 8,
-                            AccWkend2N = 20090228L
+                            WeekDate = 20090228
                         },
                         new
                         {
-                            AccWkendN = 90307,
+                            WeekEndingDate = 90307,
                             AccAltKeyNum = 201L,
                             AccApWkend = 90314,
                             AccCalPeriod = 3,
@@ -7820,11 +7820,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 9,
-                            AccWkend2N = 20090307L
+                            WeekDate = 20090307
                         },
                         new
                         {
-                            AccWkendN = 90314,
+                            WeekEndingDate = 90314,
                             AccAltKeyNum = 202L,
                             AccApWkend = 90321,
                             AccCalPeriod = 3,
@@ -7839,11 +7839,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 10,
-                            AccWkend2N = 20090314L
+                            WeekDate = 20090314
                         },
                         new
                         {
-                            AccWkendN = 90321,
+                            WeekEndingDate = 90321,
                             AccAltKeyNum = 203L,
                             AccApWkend = 90328,
                             AccCalPeriod = 3,
@@ -7858,11 +7858,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 11,
-                            AccWkend2N = 20090321L
+                            WeekDate = 20090321
                         },
                         new
                         {
-                            AccWkendN = 90328,
+                            WeekEndingDate = 90328,
                             AccAltKeyNum = 204L,
                             AccApWkend = 90404,
                             AccCalPeriod = 3,
@@ -7877,11 +7877,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 2,
                             AccWeekN = 12,
-                            AccWkend2N = 20090328L
+                            WeekDate = 20090328
                         },
                         new
                         {
-                            AccWkendN = 90404,
+                            WeekEndingDate = 90404,
                             AccAltKeyNum = 205L,
                             AccApWkend = 90411,
                             AccCalPeriod = 4,
@@ -7896,11 +7896,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 13,
-                            AccWkend2N = 20090404L
+                            WeekDate = 20090404
                         },
                         new
                         {
-                            AccWkendN = 90411,
+                            WeekEndingDate = 90411,
                             AccAltKeyNum = 206L,
                             AccApWkend = 90418,
                             AccCalPeriod = 4,
@@ -7915,11 +7915,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 14,
-                            AccWkend2N = 20090411L
+                            WeekDate = 20090411
                         },
                         new
                         {
-                            AccWkendN = 90418,
+                            WeekEndingDate = 90418,
                             AccAltKeyNum = 207L,
                             AccApWkend = 90425,
                             AccCalPeriod = 4,
@@ -7934,11 +7934,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 15,
-                            AccWkend2N = 20090418L
+                            WeekDate = 20090418
                         },
                         new
                         {
-                            AccWkendN = 90425,
+                            WeekEndingDate = 90425,
                             AccAltKeyNum = 208L,
                             AccApWkend = 90502,
                             AccCalPeriod = 4,
@@ -7953,11 +7953,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 16,
-                            AccWkend2N = 20090425L
+                            WeekDate = 20090425
                         },
                         new
                         {
-                            AccWkendN = 90502,
+                            WeekEndingDate = 90502,
                             AccAltKeyNum = 209L,
                             AccApWkend = 90509,
                             AccCalPeriod = 4,
@@ -7972,11 +7972,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 17,
-                            AccWkend2N = 20090502L
+                            WeekDate = 20090502
                         },
                         new
                         {
-                            AccWkendN = 90509,
+                            WeekEndingDate = 90509,
                             AccAltKeyNum = 210L,
                             AccApWkend = 90516,
                             AccCalPeriod = 5,
@@ -7991,11 +7991,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 18,
-                            AccWkend2N = 20090509L
+                            WeekDate = 20090509
                         },
                         new
                         {
-                            AccWkendN = 90516,
+                            WeekEndingDate = 90516,
                             AccAltKeyNum = 211L,
                             AccApWkend = 90523,
                             AccCalPeriod = 5,
@@ -8010,11 +8010,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 19,
-                            AccWkend2N = 20090516L
+                            WeekDate = 20090516
                         },
                         new
                         {
-                            AccWkendN = 90523,
+                            WeekEndingDate = 90523,
                             AccAltKeyNum = 212L,
                             AccApWkend = 90530,
                             AccCalPeriod = 5,
@@ -8029,11 +8029,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 20,
-                            AccWkend2N = 20090523L
+                            WeekDate = 20090523
                         },
                         new
                         {
-                            AccWkendN = 90530,
+                            WeekEndingDate = 90530,
                             AccAltKeyNum = 213L,
                             AccApWkend = 90606,
                             AccCalPeriod = 5,
@@ -8048,11 +8048,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 21,
-                            AccWkend2N = 20090530L
+                            WeekDate = 20090530
                         },
                         new
                         {
-                            AccWkendN = 90606,
+                            WeekEndingDate = 90606,
                             AccAltKeyNum = 214L,
                             AccApWkend = 90613,
                             AccCalPeriod = 6,
@@ -8067,11 +8067,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 22,
-                            AccWkend2N = 20090606L
+                            WeekDate = 20090606
                         },
                         new
                         {
-                            AccWkendN = 90613,
+                            WeekEndingDate = 90613,
                             AccAltKeyNum = 215L,
                             AccApWkend = 90620,
                             AccCalPeriod = 6,
@@ -8086,11 +8086,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 23,
-                            AccWkend2N = 20090613L
+                            WeekDate = 20090613
                         },
                         new
                         {
-                            AccWkendN = 90620,
+                            WeekEndingDate = 90620,
                             AccAltKeyNum = 216L,
                             AccApWkend = 90627,
                             AccCalPeriod = 6,
@@ -8105,11 +8105,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 24,
-                            AccWkend2N = 20090620L
+                            WeekDate = 20090620
                         },
                         new
                         {
-                            AccWkendN = 90627,
+                            WeekEndingDate = 90627,
                             AccAltKeyNum = 217L,
                             AccApWkend = 90704,
                             AccCalPeriod = 6,
@@ -8124,11 +8124,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 3,
                             AccWeekN = 25,
-                            AccWkend2N = 20090627L
+                            WeekDate = 20090627
                         },
                         new
                         {
-                            AccWkendN = 90704,
+                            WeekEndingDate = 90704,
                             AccAltKeyNum = 218L,
                             AccApWkend = 90711,
                             AccCalPeriod = 7,
@@ -8143,11 +8143,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 26,
-                            AccWkend2N = 20090704L
+                            WeekDate = 20090704
                         },
                         new
                         {
-                            AccWkendN = 90711,
+                            WeekEndingDate = 90711,
                             AccAltKeyNum = 219L,
                             AccApWkend = 90718,
                             AccCalPeriod = 7,
@@ -8162,11 +8162,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 27,
-                            AccWkend2N = 20090711L
+                            WeekDate = 20090711
                         },
                         new
                         {
-                            AccWkendN = 90718,
+                            WeekEndingDate = 90718,
                             AccAltKeyNum = 220L,
                             AccApWkend = 90725,
                             AccCalPeriod = 7,
@@ -8181,11 +8181,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 28,
-                            AccWkend2N = 20090718L
+                            WeekDate = 20090718
                         },
                         new
                         {
-                            AccWkendN = 90725,
+                            WeekEndingDate = 90725,
                             AccAltKeyNum = 221L,
                             AccApWkend = 90801,
                             AccCalPeriod = 7,
@@ -8200,11 +8200,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 29,
-                            AccWkend2N = 20090725L
+                            WeekDate = 20090725
                         },
                         new
                         {
-                            AccWkendN = 90801,
+                            WeekEndingDate = 90801,
                             AccAltKeyNum = 222L,
                             AccApWkend = 90808,
                             AccCalPeriod = 7,
@@ -8219,11 +8219,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 30,
-                            AccWkend2N = 20090801L
+                            WeekDate = 20090801
                         },
                         new
                         {
-                            AccWkendN = 90808,
+                            WeekEndingDate = 90808,
                             AccAltKeyNum = 223L,
                             AccApWkend = 90815,
                             AccCalPeriod = 8,
@@ -8238,11 +8238,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 31,
-                            AccWkend2N = 20090808L
+                            WeekDate = 20090808
                         },
                         new
                         {
-                            AccWkendN = 90815,
+                            WeekEndingDate = 90815,
                             AccAltKeyNum = 224L,
                             AccApWkend = 90822,
                             AccCalPeriod = 8,
@@ -8257,11 +8257,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 32,
-                            AccWkend2N = 20090815L
+                            WeekDate = 20090815
                         },
                         new
                         {
-                            AccWkendN = 90822,
+                            WeekEndingDate = 90822,
                             AccAltKeyNum = 225L,
                             AccApWkend = 90829,
                             AccCalPeriod = 8,
@@ -8276,11 +8276,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 33,
-                            AccWkend2N = 20090822L
+                            WeekDate = 20090822
                         },
                         new
                         {
-                            AccWkendN = 90829,
+                            WeekEndingDate = 90829,
                             AccAltKeyNum = 226L,
                             AccApWkend = 90905,
                             AccCalPeriod = 8,
@@ -8295,11 +8295,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 34,
-                            AccWkend2N = 20090829L
+                            WeekDate = 20090829
                         },
                         new
                         {
-                            AccWkendN = 90905,
+                            WeekEndingDate = 90905,
                             AccAltKeyNum = 227L,
                             AccApWkend = 90912,
                             AccCalPeriod = 9,
@@ -8314,11 +8314,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 35,
-                            AccWkend2N = 20090905L
+                            WeekDate = 20090905
                         },
                         new
                         {
-                            AccWkendN = 90912,
+                            WeekEndingDate = 90912,
                             AccAltKeyNum = 228L,
                             AccApWkend = 90919,
                             AccCalPeriod = 9,
@@ -8333,11 +8333,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 36,
-                            AccWkend2N = 20090912L
+                            WeekDate = 20090912
                         },
                         new
                         {
-                            AccWkendN = 90919,
+                            WeekEndingDate = 90919,
                             AccAltKeyNum = 229L,
                             AccApWkend = 90926,
                             AccCalPeriod = 9,
@@ -8352,11 +8352,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 37,
-                            AccWkend2N = 20090919L
+                            WeekDate = 20090919
                         },
                         new
                         {
-                            AccWkendN = 90926,
+                            WeekEndingDate = 90926,
                             AccAltKeyNum = 230L,
                             AccApWkend = 91003,
                             AccCalPeriod = 9,
@@ -8371,11 +8371,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 4,
                             AccWeekN = 38,
-                            AccWkend2N = 20090926L
+                            WeekDate = 20090926
                         },
                         new
                         {
-                            AccWkendN = 91003,
+                            WeekEndingDate = 91003,
                             AccAltKeyNum = 231L,
                             AccApWkend = 91010,
                             AccCalPeriod = 9,
@@ -8390,11 +8390,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 4,
                             AccWeekN = 39,
-                            AccWkend2N = 20091003L
+                            WeekDate = 20091003
                         },
                         new
                         {
-                            AccWkendN = 91010,
+                            WeekEndingDate = 91010,
                             AccAltKeyNum = 232L,
                             AccApWkend = 91017,
                             AccCalPeriod = 10,
@@ -8409,11 +8409,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 40,
-                            AccWkend2N = 20091010L
+                            WeekDate = 20091010
                         },
                         new
                         {
-                            AccWkendN = 91017,
+                            WeekEndingDate = 91017,
                             AccAltKeyNum = 233L,
                             AccApWkend = 91024,
                             AccCalPeriod = 10,
@@ -8428,11 +8428,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 41,
-                            AccWkend2N = 20091017L
+                            WeekDate = 20091017
                         },
                         new
                         {
-                            AccWkendN = 91024,
+                            WeekEndingDate = 91024,
                             AccAltKeyNum = 234L,
                             AccApWkend = 91031,
                             AccCalPeriod = 10,
@@ -8447,11 +8447,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 42,
-                            AccWkend2N = 20091024L
+                            WeekDate = 20091024
                         },
                         new
                         {
-                            AccWkendN = 91031,
+                            WeekEndingDate = 91031,
                             AccAltKeyNum = 235L,
                             AccApWkend = 91107,
                             AccCalPeriod = 10,
@@ -8466,11 +8466,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 43,
-                            AccWkend2N = 20091031L
+                            WeekDate = 20091031
                         },
                         new
                         {
-                            AccWkendN = 91107,
+                            WeekEndingDate = 91107,
                             AccAltKeyNum = 236L,
                             AccApWkend = 91114,
                             AccCalPeriod = 11,
@@ -8485,11 +8485,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 44,
-                            AccWkend2N = 20091107L
+                            WeekDate = 20091107
                         },
                         new
                         {
-                            AccWkendN = 91114,
+                            WeekEndingDate = 91114,
                             AccAltKeyNum = 237L,
                             AccApWkend = 91121,
                             AccCalPeriod = 11,
@@ -8504,11 +8504,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 45,
-                            AccWkend2N = 20091114L
+                            WeekDate = 20091114
                         },
                         new
                         {
-                            AccWkendN = 91121,
+                            WeekEndingDate = 91121,
                             AccAltKeyNum = 238L,
                             AccApWkend = 91128,
                             AccCalPeriod = 11,
@@ -8523,11 +8523,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 46,
-                            AccWkend2N = 20091121L
+                            WeekDate = 20091121
                         },
                         new
                         {
-                            AccWkendN = 91128,
+                            WeekEndingDate = 91128,
                             AccAltKeyNum = 239L,
                             AccApWkend = 91205,
                             AccCalPeriod = 11,
@@ -8542,11 +8542,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 47,
-                            AccWkend2N = 20091128L
+                            WeekDate = 20091128
                         },
                         new
                         {
-                            AccWkendN = 91205,
+                            WeekEndingDate = 91205,
                             AccAltKeyNum = 240L,
                             AccApWkend = 91212,
                             AccCalPeriod = 12,
@@ -8561,11 +8561,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 48,
-                            AccWkend2N = 20091205L
+                            WeekDate = 20091205
                         },
                         new
                         {
-                            AccWkendN = 91212,
+                            WeekEndingDate = 91212,
                             AccAltKeyNum = 241L,
                             AccApWkend = 91219,
                             AccCalPeriod = 12,
@@ -8580,11 +8580,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 49,
-                            AccWkend2N = 20091212L
+                            WeekDate = 20091212
                         },
                         new
                         {
-                            AccWkendN = 91219,
+                            WeekEndingDate = 91219,
                             AccAltKeyNum = 242L,
                             AccApWkend = 91226,
                             AccCalPeriod = 12,
@@ -8599,11 +8599,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 50,
-                            AccWkend2N = 20091219L
+                            WeekDate = 20091219
                         },
                         new
                         {
-                            AccWkendN = 91226,
+                            WeekEndingDate = 91226,
                             AccAltKeyNum = 243L,
                             AccApWkend = 100102,
                             AccCalPeriod = 12,
@@ -8618,11 +8618,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 51,
-                            AccWkend2N = 20091226L
+                            WeekDate = 20091226
                         },
                         new
                         {
-                            AccWkendN = 30104,
+                            WeekEndingDate = 30104,
                             AccAltKeyNum = -167L,
                             AccApWkend = 30111,
                             AccCalPeriod = 1,
@@ -8637,11 +8637,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 1,
-                            AccWkend2N = 20030104L
+                            WeekDate = 20030104
                         },
                         new
                         {
-                            AccWkendN = 30118,
+                            WeekEndingDate = 30118,
                             AccAltKeyNum = -165L,
                             AccApWkend = 30125,
                             AccCalPeriod = 1,
@@ -8656,11 +8656,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 3,
-                            AccWkend2N = 20030118L
+                            WeekDate = 20030118
                         },
                         new
                         {
-                            AccWkendN = 30208,
+                            WeekEndingDate = 30208,
                             AccAltKeyNum = -162L,
                             AccApWkend = 30215,
                             AccCalPeriod = 2,
@@ -8675,11 +8675,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 6,
-                            AccWkend2N = 20030208L
+                            WeekDate = 20030208
                         },
                         new
                         {
-                            AccWkendN = 30215,
+                            WeekEndingDate = 30215,
                             AccAltKeyNum = -161L,
                             AccApWkend = 30222,
                             AccCalPeriod = 2,
@@ -8694,11 +8694,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 7,
-                            AccWkend2N = 20030215L
+                            WeekDate = 20030215
                         },
                         new
                         {
-                            AccWkendN = 30222,
+                            WeekEndingDate = 30222,
                             AccAltKeyNum = -160L,
                             AccApWkend = 30301,
                             AccCalPeriod = 2,
@@ -8713,11 +8713,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 8,
-                            AccWkend2N = 20030222L
+                            WeekDate = 20030222
                         },
                         new
                         {
-                            AccWkendN = 30315,
+                            WeekEndingDate = 30315,
                             AccAltKeyNum = -157L,
                             AccApWkend = 30322,
                             AccCalPeriod = 3,
@@ -8732,11 +8732,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 11,
-                            AccWkend2N = 20030315L
+                            WeekDate = 20030315
                         },
                         new
                         {
-                            AccWkendN = 30426,
+                            WeekEndingDate = 30426,
                             AccAltKeyNum = -151L,
                             AccApWkend = 30503,
                             AccCalPeriod = 4,
@@ -8751,11 +8751,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 17,
-                            AccWkend2N = 20030426L
+                            WeekDate = 20030426
                         },
                         new
                         {
-                            AccWkendN = 30531,
+                            WeekEndingDate = 30531,
                             AccAltKeyNum = -146L,
                             AccApWkend = 30607,
                             AccCalPeriod = 5,
@@ -8770,11 +8770,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 22,
-                            AccWkend2N = 20030531L
+                            WeekDate = 20030531
                         },
                         new
                         {
-                            AccWkendN = 50528,
+                            WeekEndingDate = 50528,
                             AccAltKeyNum = -27L,
                             AccApWkend = 50604,
                             AccCalPeriod = 5,
@@ -8789,11 +8789,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 21,
-                            AccWkend2N = 20050528L
+                            WeekDate = 20050528
                         },
                         new
                         {
-                            AccWkendN = 50702,
+                            WeekEndingDate = 50702,
                             AccAltKeyNum = -22L,
                             AccApWkend = 50709,
                             AccCalPeriod = 6,
@@ -8808,11 +8808,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 3,
                             AccWeekN = 26,
-                            AccWkend2N = 20050702L
+                            WeekDate = 20050702
                         },
                         new
                         {
-                            AccWkendN = 50709,
+                            WeekEndingDate = 50709,
                             AccAltKeyNum = -21L,
                             AccApWkend = 50716,
                             AccCalPeriod = 7,
@@ -8827,11 +8827,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 27,
-                            AccWkend2N = 20050709L
+                            WeekDate = 20050709
                         },
                         new
                         {
-                            AccWkendN = 50806,
+                            WeekEndingDate = 50806,
                             AccAltKeyNum = -17L,
                             AccApWkend = 50813,
                             AccCalPeriod = 8,
@@ -8846,11 +8846,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 31,
-                            AccWkend2N = 20050806L
+                            WeekDate = 20050806
                         },
                         new
                         {
-                            AccWkendN = 50917,
+                            WeekEndingDate = 50917,
                             AccAltKeyNum = -11L,
                             AccApWkend = 50924,
                             AccCalPeriod = 9,
@@ -8865,11 +8865,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 37,
-                            AccWkend2N = 20050917L
+                            WeekDate = 20050917
                         },
                         new
                         {
-                            AccWkendN = 51008,
+                            WeekEndingDate = 51008,
                             AccAltKeyNum = -8L,
                             AccApWkend = 51015,
                             AccCalPeriod = 10,
@@ -8884,11 +8884,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 40,
-                            AccWkend2N = 20051008L
+                            WeekDate = 20051008
                         },
                         new
                         {
-                            AccWkendN = 51029,
+                            WeekEndingDate = 51029,
                             AccAltKeyNum = -5L,
                             AccApWkend = 51105,
                             AccCalPeriod = 10,
@@ -8903,11 +8903,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 43,
-                            AccWkend2N = 20051029L
+                            WeekDate = 20051029
                         },
                         new
                         {
-                            AccWkendN = 51126,
+                            WeekEndingDate = 51126,
                             AccAltKeyNum = -1L,
                             AccApWkend = 51203,
                             AccCalPeriod = 11,
@@ -8922,11 +8922,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 47,
-                            AccWkend2N = 20051126L
+                            WeekDate = 20051126
                         },
                         new
                         {
-                            AccWkendN = 100102,
+                            WeekEndingDate = 100102,
                             AccAltKeyNum = 244L,
                             AccApWkend = 100109,
                             AccCalPeriod = 12,
@@ -8941,11 +8941,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 1,
                             AccWeekN = 52,
-                            AccWkend2N = 20100102L
+                            WeekDate = 20100102
                         },
                         new
                         {
-                            AccWkendN = 100109,
+                            WeekEndingDate = 100109,
                             AccAltKeyNum = 253L,
                             AccApWkend = 100116,
                             AccCalPeriod = 1,
@@ -8960,11 +8960,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 1,
-                            AccWkend2N = 20100109L
+                            WeekDate = 20100109
                         },
                         new
                         {
-                            AccWkendN = 100116,
+                            WeekEndingDate = 100116,
                             AccAltKeyNum = 254L,
                             AccApWkend = 100123,
                             AccCalPeriod = 1,
@@ -8979,11 +8979,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 2,
-                            AccWkend2N = 20100116L
+                            WeekDate = 20100116
                         },
                         new
                         {
-                            AccWkendN = 100123,
+                            WeekEndingDate = 100123,
                             AccAltKeyNum = 255L,
                             AccApWkend = 100130,
                             AccCalPeriod = 1,
@@ -8998,11 +8998,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 3,
-                            AccWkend2N = 20100123L
+                            WeekDate = 20100123
                         },
                         new
                         {
-                            AccWkendN = 100130,
+                            WeekEndingDate = 100130,
                             AccAltKeyNum = 256L,
                             AccApWkend = 100206,
                             AccCalPeriod = 1,
@@ -9017,11 +9017,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 4,
-                            AccWkend2N = 20100130L
+                            WeekDate = 20100130
                         },
                         new
                         {
-                            AccWkendN = 100206,
+                            WeekEndingDate = 100206,
                             AccAltKeyNum = 257L,
                             AccApWkend = 100213,
                             AccCalPeriod = 2,
@@ -9036,11 +9036,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 5,
-                            AccWkend2N = 20100206L
+                            WeekDate = 20100206
                         },
                         new
                         {
-                            AccWkendN = 100213,
+                            WeekEndingDate = 100213,
                             AccAltKeyNum = 258L,
                             AccApWkend = 100220,
                             AccCalPeriod = 2,
@@ -9055,11 +9055,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 6,
-                            AccWkend2N = 20100213L
+                            WeekDate = 20100213
                         },
                         new
                         {
-                            AccWkendN = 100220,
+                            WeekEndingDate = 100220,
                             AccAltKeyNum = 259L,
                             AccApWkend = 100227,
                             AccCalPeriod = 2,
@@ -9074,11 +9074,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 7,
-                            AccWkend2N = 20100220L
+                            WeekDate = 20100220
                         },
                         new
                         {
-                            AccWkendN = 100227,
+                            WeekEndingDate = 100227,
                             AccAltKeyNum = 260L,
                             AccApWkend = 100306,
                             AccCalPeriod = 2,
@@ -9093,11 +9093,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 8,
-                            AccWkend2N = 20100227L
+                            WeekDate = 20100227
                         },
                         new
                         {
-                            AccWkendN = 100306,
+                            WeekEndingDate = 100306,
                             AccAltKeyNum = 261L,
                             AccApWkend = 100313,
                             AccCalPeriod = 3,
@@ -9112,11 +9112,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 9,
-                            AccWkend2N = 20100306L
+                            WeekDate = 20100306
                         },
                         new
                         {
-                            AccWkendN = 100313,
+                            WeekEndingDate = 100313,
                             AccAltKeyNum = 262L,
                             AccApWkend = 100320,
                             AccCalPeriod = 3,
@@ -9131,11 +9131,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 10,
-                            AccWkend2N = 20100313L
+                            WeekDate = 20100313
                         },
                         new
                         {
-                            AccWkendN = 100320,
+                            WeekEndingDate = 100320,
                             AccAltKeyNum = 263L,
                             AccApWkend = 100327,
                             AccCalPeriod = 3,
@@ -9150,11 +9150,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 11,
-                            AccWkend2N = 20100320L
+                            WeekDate = 20100320
                         },
                         new
                         {
-                            AccWkendN = 100327,
+                            WeekEndingDate = 100327,
                             AccAltKeyNum = 264L,
                             AccApWkend = 100403,
                             AccCalPeriod = 3,
@@ -9169,11 +9169,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 2,
                             AccWeekN = 12,
-                            AccWkend2N = 20100327L
+                            WeekDate = 20100327
                         },
                         new
                         {
-                            AccWkendN = 100403,
+                            WeekEndingDate = 100403,
                             AccAltKeyNum = 265L,
                             AccApWkend = 100410,
                             AccCalPeriod = 4,
@@ -9188,11 +9188,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 13,
-                            AccWkend2N = 20100403L
+                            WeekDate = 20100403
                         },
                         new
                         {
-                            AccWkendN = 100410,
+                            WeekEndingDate = 100410,
                             AccAltKeyNum = 266L,
                             AccApWkend = 100417,
                             AccCalPeriod = 4,
@@ -9207,11 +9207,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 14,
-                            AccWkend2N = 20100410L
+                            WeekDate = 20100410
                         },
                         new
                         {
-                            AccWkendN = 100417,
+                            WeekEndingDate = 100417,
                             AccAltKeyNum = 267L,
                             AccApWkend = 100424,
                             AccCalPeriod = 4,
@@ -9226,11 +9226,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 15,
-                            AccWkend2N = 20100417L
+                            WeekDate = 20100417
                         },
                         new
                         {
-                            AccWkendN = 100424,
+                            WeekEndingDate = 100424,
                             AccAltKeyNum = 268L,
                             AccApWkend = 100501,
                             AccCalPeriod = 4,
@@ -9245,11 +9245,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 16,
-                            AccWkend2N = 20100424L
+                            WeekDate = 20100424
                         },
                         new
                         {
-                            AccWkendN = 100501,
+                            WeekEndingDate = 100501,
                             AccAltKeyNum = 269L,
                             AccApWkend = 100508,
                             AccCalPeriod = 4,
@@ -9264,11 +9264,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 17,
-                            AccWkend2N = 20100501L
+                            WeekDate = 20100501
                         },
                         new
                         {
-                            AccWkendN = 100508,
+                            WeekEndingDate = 100508,
                             AccAltKeyNum = 270L,
                             AccApWkend = 100515,
                             AccCalPeriod = 5,
@@ -9283,11 +9283,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 18,
-                            AccWkend2N = 20100508L
+                            WeekDate = 20100508
                         },
                         new
                         {
-                            AccWkendN = 100515,
+                            WeekEndingDate = 100515,
                             AccAltKeyNum = 271L,
                             AccApWkend = 100522,
                             AccCalPeriod = 5,
@@ -9302,11 +9302,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 19,
-                            AccWkend2N = 20100515L
+                            WeekDate = 20100515
                         },
                         new
                         {
-                            AccWkendN = 100522,
+                            WeekEndingDate = 100522,
                             AccAltKeyNum = 272L,
                             AccApWkend = 100529,
                             AccCalPeriod = 5,
@@ -9321,11 +9321,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 20,
-                            AccWkend2N = 20100522L
+                            WeekDate = 20100522
                         },
                         new
                         {
-                            AccWkendN = 100529,
+                            WeekEndingDate = 100529,
                             AccAltKeyNum = 273L,
                             AccApWkend = 100605,
                             AccCalPeriod = 5,
@@ -9340,11 +9340,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 21,
-                            AccWkend2N = 20100529L
+                            WeekDate = 20100529
                         },
                         new
                         {
-                            AccWkendN = 100605,
+                            WeekEndingDate = 100605,
                             AccAltKeyNum = 274L,
                             AccApWkend = 100612,
                             AccCalPeriod = 6,
@@ -9359,11 +9359,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 22,
-                            AccWkend2N = 20100605L
+                            WeekDate = 20100605
                         },
                         new
                         {
-                            AccWkendN = 100612,
+                            WeekEndingDate = 100612,
                             AccAltKeyNum = 275L,
                             AccApWkend = 100619,
                             AccCalPeriod = 6,
@@ -9378,11 +9378,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 23,
-                            AccWkend2N = 20100612L
+                            WeekDate = 20100612
                         },
                         new
                         {
-                            AccWkendN = 100619,
+                            WeekEndingDate = 100619,
                             AccAltKeyNum = 276L,
                             AccApWkend = 100626,
                             AccCalPeriod = 6,
@@ -9397,11 +9397,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 24,
-                            AccWkend2N = 20100619L
+                            WeekDate = 20100619
                         },
                         new
                         {
-                            AccWkendN = 100626,
+                            WeekEndingDate = 100626,
                             AccAltKeyNum = 277L,
                             AccApWkend = 100703,
                             AccCalPeriod = 6,
@@ -9416,11 +9416,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 3,
                             AccWeekN = 25,
-                            AccWkend2N = 20100626L
+                            WeekDate = 20100626
                         },
                         new
                         {
-                            AccWkendN = 100703,
+                            WeekEndingDate = 100703,
                             AccAltKeyNum = 278L,
                             AccApWkend = 100710,
                             AccCalPeriod = 6,
@@ -9435,11 +9435,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 3,
                             AccWeekN = 26,
-                            AccWkend2N = 20100703L
+                            WeekDate = 20100703
                         },
                         new
                         {
-                            AccWkendN = 100710,
+                            WeekEndingDate = 100710,
                             AccAltKeyNum = 279L,
                             AccApWkend = 100717,
                             AccCalPeriod = 7,
@@ -9454,11 +9454,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 27,
-                            AccWkend2N = 20100710L
+                            WeekDate = 20100710
                         },
                         new
                         {
-                            AccWkendN = 100717,
+                            WeekEndingDate = 100717,
                             AccAltKeyNum = 280L,
                             AccApWkend = 100724,
                             AccCalPeriod = 7,
@@ -9473,11 +9473,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 28,
-                            AccWkend2N = 20100717L
+                            WeekDate = 20100717
                         },
                         new
                         {
-                            AccWkendN = 100724,
+                            WeekEndingDate = 100724,
                             AccAltKeyNum = 281L,
                             AccApWkend = 100731,
                             AccCalPeriod = 7,
@@ -9492,11 +9492,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 29,
-                            AccWkend2N = 20100724L
+                            WeekDate = 20100724
                         },
                         new
                         {
-                            AccWkendN = 100731,
+                            WeekEndingDate = 100731,
                             AccAltKeyNum = 282L,
                             AccApWkend = 100807,
                             AccCalPeriod = 7,
@@ -9511,11 +9511,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 30,
-                            AccWkend2N = 20100731L
+                            WeekDate = 20100731
                         },
                         new
                         {
-                            AccWkendN = 100807,
+                            WeekEndingDate = 100807,
                             AccAltKeyNum = 283L,
                             AccApWkend = 100814,
                             AccCalPeriod = 8,
@@ -9530,11 +9530,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 31,
-                            AccWkend2N = 20100807L
+                            WeekDate = 20100807
                         },
                         new
                         {
-                            AccWkendN = 100814,
+                            WeekEndingDate = 100814,
                             AccAltKeyNum = 284L,
                             AccApWkend = 100821,
                             AccCalPeriod = 8,
@@ -9549,11 +9549,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 32,
-                            AccWkend2N = 20100814L
+                            WeekDate = 20100814
                         },
                         new
                         {
-                            AccWkendN = 100821,
+                            WeekEndingDate = 100821,
                             AccAltKeyNum = 285L,
                             AccApWkend = 100828,
                             AccCalPeriod = 8,
@@ -9568,11 +9568,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 33,
-                            AccWkend2N = 20100821L
+                            WeekDate = 20100821
                         },
                         new
                         {
-                            AccWkendN = 100828,
+                            WeekEndingDate = 100828,
                             AccAltKeyNum = 286L,
                             AccApWkend = 100904,
                             AccCalPeriod = 8,
@@ -9587,11 +9587,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 34,
-                            AccWkend2N = 20100828L
+                            WeekDate = 20100828
                         },
                         new
                         {
-                            AccWkendN = 100904,
+                            WeekEndingDate = 100904,
                             AccAltKeyNum = 287L,
                             AccApWkend = 100911,
                             AccCalPeriod = 9,
@@ -9606,11 +9606,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 35,
-                            AccWkend2N = 20100904L
+                            WeekDate = 20100904
                         },
                         new
                         {
-                            AccWkendN = 100911,
+                            WeekEndingDate = 100911,
                             AccAltKeyNum = 288L,
                             AccApWkend = 100918,
                             AccCalPeriod = 9,
@@ -9625,11 +9625,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 36,
-                            AccWkend2N = 20100911L
+                            WeekDate = 20100911
                         },
                         new
                         {
-                            AccWkendN = 100918,
+                            WeekEndingDate = 100918,
                             AccAltKeyNum = 289L,
                             AccApWkend = 100925,
                             AccCalPeriod = 9,
@@ -9644,11 +9644,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 37,
-                            AccWkend2N = 20100918L
+                            WeekDate = 20100918
                         },
                         new
                         {
-                            AccWkendN = 100925,
+                            WeekEndingDate = 100925,
                             AccAltKeyNum = 290L,
                             AccApWkend = 101002,
                             AccCalPeriod = 9,
@@ -9663,11 +9663,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 38,
-                            AccWkend2N = 20100925L
+                            WeekDate = 20100925
                         },
                         new
                         {
-                            AccWkendN = 101002,
+                            WeekEndingDate = 101002,
                             AccAltKeyNum = 291L,
                             AccApWkend = 101009,
                             AccCalPeriod = 9,
@@ -9682,11 +9682,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 4,
                             AccWeekN = 39,
-                            AccWkend2N = 20101002L
+                            WeekDate = 20101002
                         },
                         new
                         {
-                            AccWkendN = 101009,
+                            WeekEndingDate = 101009,
                             AccAltKeyNum = 292L,
                             AccApWkend = 101016,
                             AccCalPeriod = 10,
@@ -9701,11 +9701,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 40,
-                            AccWkend2N = 20101009L
+                            WeekDate = 20101009
                         },
                         new
                         {
-                            AccWkendN = 101016,
+                            WeekEndingDate = 101016,
                             AccAltKeyNum = 293L,
                             AccApWkend = 101023,
                             AccCalPeriod = 10,
@@ -9720,11 +9720,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 41,
-                            AccWkend2N = 20101016L
+                            WeekDate = 20101016
                         },
                         new
                         {
-                            AccWkendN = 101023,
+                            WeekEndingDate = 101023,
                             AccAltKeyNum = 294L,
                             AccApWkend = 101030,
                             AccCalPeriod = 10,
@@ -9739,11 +9739,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 42,
-                            AccWkend2N = 20101023L
+                            WeekDate = 20101023
                         },
                         new
                         {
-                            AccWkendN = 101030,
+                            WeekEndingDate = 101030,
                             AccAltKeyNum = 295L,
                             AccApWkend = 101106,
                             AccCalPeriod = 10,
@@ -9758,11 +9758,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 43,
-                            AccWkend2N = 20101030L
+                            WeekDate = 20101030
                         },
                         new
                         {
-                            AccWkendN = 101106,
+                            WeekEndingDate = 101106,
                             AccAltKeyNum = 296L,
                             AccApWkend = 101113,
                             AccCalPeriod = 11,
@@ -9777,11 +9777,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 44,
-                            AccWkend2N = 20101106L
+                            WeekDate = 20101106
                         },
                         new
                         {
-                            AccWkendN = 101113,
+                            WeekEndingDate = 101113,
                             AccAltKeyNum = 297L,
                             AccApWkend = 101120,
                             AccCalPeriod = 11,
@@ -9796,11 +9796,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 45,
-                            AccWkend2N = 20101113L
+                            WeekDate = 20101113
                         },
                         new
                         {
-                            AccWkendN = 101120,
+                            WeekEndingDate = 101120,
                             AccAltKeyNum = 298L,
                             AccApWkend = 101127,
                             AccCalPeriod = 11,
@@ -9815,11 +9815,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 46,
-                            AccWkend2N = 20101120L
+                            WeekDate = 20101120
                         },
                         new
                         {
-                            AccWkendN = 101127,
+                            WeekEndingDate = 101127,
                             AccAltKeyNum = 299L,
                             AccApWkend = 101204,
                             AccCalPeriod = 11,
@@ -9834,11 +9834,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 47,
-                            AccWkend2N = 20101127L
+                            WeekDate = 20101127
                         },
                         new
                         {
-                            AccWkendN = 101204,
+                            WeekEndingDate = 101204,
                             AccAltKeyNum = 300L,
                             AccApWkend = 101211,
                             AccCalPeriod = 12,
@@ -9853,11 +9853,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 48,
-                            AccWkend2N = 20101204L
+                            WeekDate = 20101204
                         },
                         new
                         {
-                            AccWkendN = 101211,
+                            WeekEndingDate = 101211,
                             AccAltKeyNum = 301L,
                             AccApWkend = 101218,
                             AccCalPeriod = 12,
@@ -9872,11 +9872,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 49,
-                            AccWkend2N = 20101211L
+                            WeekDate = 20101211
                         },
                         new
                         {
-                            AccWkendN = 101218,
+                            WeekEndingDate = 101218,
                             AccAltKeyNum = 302L,
                             AccApWkend = 101225,
                             AccCalPeriod = 12,
@@ -9891,11 +9891,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 50,
-                            AccWkend2N = 20101218L
+                            WeekDate = 20101218
                         },
                         new
                         {
-                            AccWkendN = 101225,
+                            WeekEndingDate = 101225,
                             AccAltKeyNum = 303L,
                             AccApWkend = 110101,
                             AccCalPeriod = 12,
@@ -9910,11 +9910,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 51,
-                            AccWkend2N = 20101225L
+                            WeekDate = 20101225
                         },
                         new
                         {
-                            AccWkendN = 110101,
+                            WeekEndingDate = 110101,
                             AccAltKeyNum = 304L,
                             AccApWkend = 110108,
                             AccCalPeriod = 12,
@@ -9929,11 +9929,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 1,
                             AccWeekN = 52,
-                            AccWkend2N = 20110101L
+                            WeekDate = 20110101
                         },
                         new
                         {
-                            AccWkendN = 110108,
+                            WeekEndingDate = 110108,
                             AccAltKeyNum = 313L,
                             AccApWkend = 110115,
                             AccCalPeriod = 1,
@@ -9948,11 +9948,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 1,
-                            AccWkend2N = 20110108L
+                            WeekDate = 20110108
                         },
                         new
                         {
-                            AccWkendN = 110115,
+                            WeekEndingDate = 110115,
                             AccAltKeyNum = 314L,
                             AccApWkend = 110122,
                             AccCalPeriod = 1,
@@ -9967,11 +9967,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 2,
-                            AccWkend2N = 20110115L
+                            WeekDate = 20110115
                         },
                         new
                         {
-                            AccWkendN = 110122,
+                            WeekEndingDate = 110122,
                             AccAltKeyNum = 315L,
                             AccApWkend = 110129,
                             AccCalPeriod = 1,
@@ -9986,11 +9986,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 3,
-                            AccWkend2N = 20110122L
+                            WeekDate = 20110122
                         },
                         new
                         {
-                            AccWkendN = 110129,
+                            WeekEndingDate = 110129,
                             AccAltKeyNum = 316L,
                             AccApWkend = 110205,
                             AccCalPeriod = 1,
@@ -10005,11 +10005,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 4,
-                            AccWkend2N = 20110129L
+                            WeekDate = 20110129
                         },
                         new
                         {
-                            AccWkendN = 110205,
+                            WeekEndingDate = 110205,
                             AccAltKeyNum = 317L,
                             AccApWkend = 110212,
                             AccCalPeriod = 2,
@@ -10024,11 +10024,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 5,
-                            AccWkend2N = 20110205L
+                            WeekDate = 20110205
                         },
                         new
                         {
-                            AccWkendN = 110212,
+                            WeekEndingDate = 110212,
                             AccAltKeyNum = 318L,
                             AccApWkend = 110219,
                             AccCalPeriod = 2,
@@ -10043,11 +10043,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 6,
-                            AccWkend2N = 20110212L
+                            WeekDate = 20110212
                         },
                         new
                         {
-                            AccWkendN = 110219,
+                            WeekEndingDate = 110219,
                             AccAltKeyNum = 319L,
                             AccApWkend = 110226,
                             AccCalPeriod = 2,
@@ -10062,11 +10062,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 7,
-                            AccWkend2N = 20110219L
+                            WeekDate = 20110219
                         },
                         new
                         {
-                            AccWkendN = 110226,
+                            WeekEndingDate = 110226,
                             AccAltKeyNum = 320L,
                             AccApWkend = 110305,
                             AccCalPeriod = 2,
@@ -10081,11 +10081,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 8,
-                            AccWkend2N = 20110226L
+                            WeekDate = 20110226
                         },
                         new
                         {
-                            AccWkendN = 110305,
+                            WeekEndingDate = 110305,
                             AccAltKeyNum = 321L,
                             AccApWkend = 110312,
                             AccCalPeriod = 3,
@@ -10100,11 +10100,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 9,
-                            AccWkend2N = 20110305L
+                            WeekDate = 20110305
                         },
                         new
                         {
-                            AccWkendN = 110312,
+                            WeekEndingDate = 110312,
                             AccAltKeyNum = 322L,
                             AccApWkend = 110319,
                             AccCalPeriod = 3,
@@ -10119,11 +10119,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 10,
-                            AccWkend2N = 20110312L
+                            WeekDate = 20110312
                         },
                         new
                         {
-                            AccWkendN = 110319,
+                            WeekEndingDate = 110319,
                             AccAltKeyNum = 323L,
                             AccApWkend = 110326,
                             AccCalPeriod = 3,
@@ -10138,11 +10138,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 11,
-                            AccWkend2N = 20110319L
+                            WeekDate = 20110319
                         },
                         new
                         {
-                            AccWkendN = 110326,
+                            WeekEndingDate = 110326,
                             AccAltKeyNum = 324L,
                             AccApWkend = 110402,
                             AccCalPeriod = 3,
@@ -10157,11 +10157,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 12,
-                            AccWkend2N = 20110326L
+                            WeekDate = 20110326
                         },
                         new
                         {
-                            AccWkendN = 110402,
+                            WeekEndingDate = 110402,
                             AccAltKeyNum = 325L,
                             AccApWkend = 110409,
                             AccCalPeriod = 3,
@@ -10176,11 +10176,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 2,
                             AccWeekN = 13,
-                            AccWkend2N = 20110402L
+                            WeekDate = 20110402
                         },
                         new
                         {
-                            AccWkendN = 110409,
+                            WeekEndingDate = 110409,
                             AccAltKeyNum = 326L,
                             AccApWkend = 110416,
                             AccCalPeriod = 4,
@@ -10195,11 +10195,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 14,
-                            AccWkend2N = 20110409L
+                            WeekDate = 20110409
                         },
                         new
                         {
-                            AccWkendN = 110416,
+                            WeekEndingDate = 110416,
                             AccAltKeyNum = 327L,
                             AccApWkend = 110423,
                             AccCalPeriod = 4,
@@ -10214,11 +10214,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 15,
-                            AccWkend2N = 20110416L
+                            WeekDate = 20110416
                         },
                         new
                         {
-                            AccWkendN = 110423,
+                            WeekEndingDate = 110423,
                             AccAltKeyNum = 328L,
                             AccApWkend = 110430,
                             AccCalPeriod = 4,
@@ -10233,11 +10233,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 16,
-                            AccWkend2N = 20110423L
+                            WeekDate = 20110423
                         },
                         new
                         {
-                            AccWkendN = 110430,
+                            WeekEndingDate = 110430,
                             AccAltKeyNum = 329L,
                             AccApWkend = 110507,
                             AccCalPeriod = 4,
@@ -10252,11 +10252,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 17,
-                            AccWkend2N = 20110430L
+                            WeekDate = 20110430
                         },
                         new
                         {
-                            AccWkendN = 110507,
+                            WeekEndingDate = 110507,
                             AccAltKeyNum = 330L,
                             AccApWkend = 110514,
                             AccCalPeriod = 5,
@@ -10271,11 +10271,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 18,
-                            AccWkend2N = 20110507L
+                            WeekDate = 20110507
                         },
                         new
                         {
-                            AccWkendN = 110514,
+                            WeekEndingDate = 110514,
                             AccAltKeyNum = 331L,
                             AccApWkend = 110521,
                             AccCalPeriod = 5,
@@ -10290,11 +10290,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 19,
-                            AccWkend2N = 20110514L
+                            WeekDate = 20110514
                         },
                         new
                         {
-                            AccWkendN = 110521,
+                            WeekEndingDate = 110521,
                             AccAltKeyNum = 332L,
                             AccApWkend = 110528,
                             AccCalPeriod = 5,
@@ -10309,11 +10309,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 20,
-                            AccWkend2N = 20110521L
+                            WeekDate = 20110521
                         },
                         new
                         {
-                            AccWkendN = 110528,
+                            WeekEndingDate = 110528,
                             AccAltKeyNum = 333L,
                             AccApWkend = 110604,
                             AccCalPeriod = 5,
@@ -10328,11 +10328,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 21,
-                            AccWkend2N = 20110528L
+                            WeekDate = 20110528
                         },
                         new
                         {
-                            AccWkendN = 110604,
+                            WeekEndingDate = 110604,
                             AccAltKeyNum = 334L,
                             AccApWkend = 110611,
                             AccCalPeriod = 6,
@@ -10347,11 +10347,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 22,
-                            AccWkend2N = 20110604L
+                            WeekDate = 20110604
                         },
                         new
                         {
-                            AccWkendN = 110611,
+                            WeekEndingDate = 110611,
                             AccAltKeyNum = 335L,
                             AccApWkend = 110618,
                             AccCalPeriod = 6,
@@ -10366,11 +10366,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 23,
-                            AccWkend2N = 20110611L
+                            WeekDate = 20110611
                         },
                         new
                         {
-                            AccWkendN = 110618,
+                            WeekEndingDate = 110618,
                             AccAltKeyNum = 336L,
                             AccApWkend = 110625,
                             AccCalPeriod = 6,
@@ -10385,11 +10385,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 24,
-                            AccWkend2N = 20110618L
+                            WeekDate = 20110618
                         },
                         new
                         {
-                            AccWkendN = 110625,
+                            WeekEndingDate = 110625,
                             AccAltKeyNum = 337L,
                             AccApWkend = 110702,
                             AccCalPeriod = 6,
@@ -10404,11 +10404,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 25,
-                            AccWkend2N = 20110625L
+                            WeekDate = 20110625
                         },
                         new
                         {
-                            AccWkendN = 110702,
+                            WeekEndingDate = 110702,
                             AccAltKeyNum = 338L,
                             AccApWkend = 110709,
                             AccCalPeriod = 6,
@@ -10423,11 +10423,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 3,
                             AccWeekN = 26,
-                            AccWkend2N = 20110702L
+                            WeekDate = 20110702
                         },
                         new
                         {
-                            AccWkendN = 110709,
+                            WeekEndingDate = 110709,
                             AccAltKeyNum = 339L,
                             AccApWkend = 110716,
                             AccCalPeriod = 7,
@@ -10442,11 +10442,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 27,
-                            AccWkend2N = 20110709L
+                            WeekDate = 20110709
                         },
                         new
                         {
-                            AccWkendN = 110716,
+                            WeekEndingDate = 110716,
                             AccAltKeyNum = 340L,
                             AccApWkend = 110723,
                             AccCalPeriod = 7,
@@ -10461,11 +10461,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 28,
-                            AccWkend2N = 20110716L
+                            WeekDate = 20110716
                         },
                         new
                         {
-                            AccWkendN = 110723,
+                            WeekEndingDate = 110723,
                             AccAltKeyNum = 341L,
                             AccApWkend = 110730,
                             AccCalPeriod = 7,
@@ -10480,11 +10480,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 29,
-                            AccWkend2N = 20110723L
+                            WeekDate = 20110723
                         },
                         new
                         {
-                            AccWkendN = 110730,
+                            WeekEndingDate = 110730,
                             AccAltKeyNum = 342L,
                             AccApWkend = 110806,
                             AccCalPeriod = 7,
@@ -10499,11 +10499,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 30,
-                            AccWkend2N = 20110730L
+                            WeekDate = 20110730
                         },
                         new
                         {
-                            AccWkendN = 110806,
+                            WeekEndingDate = 110806,
                             AccAltKeyNum = 343L,
                             AccApWkend = 110813,
                             AccCalPeriod = 8,
@@ -10518,11 +10518,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 31,
-                            AccWkend2N = 20110806L
+                            WeekDate = 20110806
                         },
                         new
                         {
-                            AccWkendN = 110813,
+                            WeekEndingDate = 110813,
                             AccAltKeyNum = 344L,
                             AccApWkend = 110820,
                             AccCalPeriod = 8,
@@ -10537,11 +10537,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 32,
-                            AccWkend2N = 20110813L
+                            WeekDate = 20110813
                         },
                         new
                         {
-                            AccWkendN = 110820,
+                            WeekEndingDate = 110820,
                             AccAltKeyNum = 345L,
                             AccApWkend = 110827,
                             AccCalPeriod = 8,
@@ -10556,11 +10556,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 33,
-                            AccWkend2N = 20110820L
+                            WeekDate = 20110820
                         },
                         new
                         {
-                            AccWkendN = 110827,
+                            WeekEndingDate = 110827,
                             AccAltKeyNum = 346L,
                             AccApWkend = 110903,
                             AccCalPeriod = 8,
@@ -10575,11 +10575,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 34,
-                            AccWkend2N = 20110827L
+                            WeekDate = 20110827
                         },
                         new
                         {
-                            AccWkendN = 110903,
+                            WeekEndingDate = 110903,
                             AccAltKeyNum = 347L,
                             AccApWkend = 110910,
                             AccCalPeriod = 8,
@@ -10594,11 +10594,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 35,
-                            AccWkend2N = 20110903L
+                            WeekDate = 20110903
                         },
                         new
                         {
-                            AccWkendN = 110910,
+                            WeekEndingDate = 110910,
                             AccAltKeyNum = 348L,
                             AccApWkend = 110917,
                             AccCalPeriod = 9,
@@ -10613,11 +10613,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 36,
-                            AccWkend2N = 20110910L
+                            WeekDate = 20110910
                         },
                         new
                         {
-                            AccWkendN = 110917,
+                            WeekEndingDate = 110917,
                             AccAltKeyNum = 349L,
                             AccApWkend = 110924,
                             AccCalPeriod = 9,
@@ -10632,11 +10632,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 37,
-                            AccWkend2N = 20110917L
+                            WeekDate = 20110917
                         },
                         new
                         {
-                            AccWkendN = 110924,
+                            WeekEndingDate = 110924,
                             AccAltKeyNum = 350L,
                             AccApWkend = 111001,
                             AccCalPeriod = 9,
@@ -10651,11 +10651,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 38,
-                            AccWkend2N = 20110924L
+                            WeekDate = 20110924
                         },
                         new
                         {
-                            AccWkendN = 111001,
+                            WeekEndingDate = 111001,
                             AccAltKeyNum = 351L,
                             AccApWkend = 111008,
                             AccCalPeriod = 9,
@@ -10670,11 +10670,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 4,
                             AccWeekN = 39,
-                            AccWkend2N = 20111001L
+                            WeekDate = 20111001
                         },
                         new
                         {
-                            AccWkendN = 111008,
+                            WeekEndingDate = 111008,
                             AccAltKeyNum = 352L,
                             AccApWkend = 111015,
                             AccCalPeriod = 10,
@@ -10689,11 +10689,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 40,
-                            AccWkend2N = 20111008L
+                            WeekDate = 20111008
                         },
                         new
                         {
-                            AccWkendN = 111015,
+                            WeekEndingDate = 111015,
                             AccAltKeyNum = 353L,
                             AccApWkend = 111022,
                             AccCalPeriod = 10,
@@ -10708,11 +10708,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 41,
-                            AccWkend2N = 20111015L
+                            WeekDate = 20111015
                         },
                         new
                         {
-                            AccWkendN = 111022,
+                            WeekEndingDate = 111022,
                             AccAltKeyNum = 354L,
                             AccApWkend = 111029,
                             AccCalPeriod = 10,
@@ -10727,11 +10727,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 42,
-                            AccWkend2N = 20111022L
+                            WeekDate = 20111022
                         },
                         new
                         {
-                            AccWkendN = 111029,
+                            WeekEndingDate = 111029,
                             AccAltKeyNum = 355L,
                             AccApWkend = 111105,
                             AccCalPeriod = 10,
@@ -10746,11 +10746,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 43,
-                            AccWkend2N = 20111029L
+                            WeekDate = 20111029
                         },
                         new
                         {
-                            AccWkendN = 111105,
+                            WeekEndingDate = 111105,
                             AccAltKeyNum = 356L,
                             AccApWkend = 111112,
                             AccCalPeriod = 11,
@@ -10765,11 +10765,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 44,
-                            AccWkend2N = 20111105L
+                            WeekDate = 20111105
                         },
                         new
                         {
-                            AccWkendN = 111112,
+                            WeekEndingDate = 111112,
                             AccAltKeyNum = 357L,
                             AccApWkend = 111119,
                             AccCalPeriod = 11,
@@ -10784,11 +10784,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 45,
-                            AccWkend2N = 20111112L
+                            WeekDate = 20111112
                         },
                         new
                         {
-                            AccWkendN = 111119,
+                            WeekEndingDate = 111119,
                             AccAltKeyNum = 358L,
                             AccApWkend = 111126,
                             AccCalPeriod = 11,
@@ -10803,11 +10803,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 46,
-                            AccWkend2N = 20111119L
+                            WeekDate = 20111119
                         },
                         new
                         {
-                            AccWkendN = 111126,
+                            WeekEndingDate = 111126,
                             AccAltKeyNum = 359L,
                             AccApWkend = 111203,
                             AccCalPeriod = 11,
@@ -10822,11 +10822,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 47,
-                            AccWkend2N = 20111126L
+                            WeekDate = 20111126
                         },
                         new
                         {
-                            AccWkendN = 111203,
+                            WeekEndingDate = 111203,
                             AccAltKeyNum = 360L,
                             AccApWkend = 111210,
                             AccCalPeriod = 11,
@@ -10841,11 +10841,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 48,
-                            AccWkend2N = 20111203L
+                            WeekDate = 20111203
                         },
                         new
                         {
-                            AccWkendN = 111210,
+                            WeekEndingDate = 111210,
                             AccAltKeyNum = 361L,
                             AccApWkend = 111217,
                             AccCalPeriod = 12,
@@ -10860,11 +10860,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 49,
-                            AccWkend2N = 20111210L
+                            WeekDate = 20111210
                         },
                         new
                         {
-                            AccWkendN = 111217,
+                            WeekEndingDate = 111217,
                             AccAltKeyNum = 362L,
                             AccApWkend = 111224,
                             AccCalPeriod = 12,
@@ -10879,11 +10879,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 50,
-                            AccWkend2N = 20111217L
+                            WeekDate = 20111217
                         },
                         new
                         {
-                            AccWkendN = 111224,
+                            WeekEndingDate = 111224,
                             AccAltKeyNum = 363L,
                             AccApWkend = 111231,
                             AccCalPeriod = 12,
@@ -10898,11 +10898,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 51,
-                            AccWkend2N = 20111224L
+                            WeekDate = 20111224
                         },
                         new
                         {
-                            AccWkendN = 111231,
+                            WeekEndingDate = 111231,
                             AccAltKeyNum = 364L,
                             AccApWkend = 120107,
                             AccCalPeriod = 12,
@@ -10917,11 +10917,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 1,
                             AccWeekN = 52,
-                            AccWkend2N = 20111231L
+                            WeekDate = 20111231
                         },
                         new
                         {
-                            AccWkendN = 120107,
+                            WeekEndingDate = 120107,
                             AccAltKeyNum = 373L,
                             AccApWkend = 120114,
                             AccCalPeriod = 1,
@@ -10936,11 +10936,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 1,
-                            AccWkend2N = 20120107L
+                            WeekDate = 20120107
                         },
                         new
                         {
-                            AccWkendN = 120114,
+                            WeekEndingDate = 120114,
                             AccAltKeyNum = 374L,
                             AccApWkend = 120121,
                             AccCalPeriod = 1,
@@ -10955,11 +10955,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 2,
-                            AccWkend2N = 20120114L
+                            WeekDate = 20120114
                         },
                         new
                         {
-                            AccWkendN = 120121,
+                            WeekEndingDate = 120121,
                             AccAltKeyNum = 375L,
                             AccApWkend = 120128,
                             AccCalPeriod = 1,
@@ -10974,11 +10974,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 3,
-                            AccWkend2N = 20120121L
+                            WeekDate = 20120121
                         },
                         new
                         {
-                            AccWkendN = 120128,
+                            WeekEndingDate = 120128,
                             AccAltKeyNum = 376L,
                             AccApWkend = 120204,
                             AccCalPeriod = 1,
@@ -10993,11 +10993,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 4,
-                            AccWkend2N = 20120128L
+                            WeekDate = 20120128
                         },
                         new
                         {
-                            AccWkendN = 120204,
+                            WeekEndingDate = 120204,
                             AccAltKeyNum = 377L,
                             AccApWkend = 120211,
                             AccCalPeriod = 2,
@@ -11012,11 +11012,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 5,
-                            AccWkend2N = 20120204L
+                            WeekDate = 20120204
                         },
                         new
                         {
-                            AccWkendN = 120211,
+                            WeekEndingDate = 120211,
                             AccAltKeyNum = 378L,
                             AccApWkend = 120218,
                             AccCalPeriod = 2,
@@ -11031,11 +11031,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 6,
-                            AccWkend2N = 20120211L
+                            WeekDate = 20120211
                         },
                         new
                         {
-                            AccWkendN = 120218,
+                            WeekEndingDate = 120218,
                             AccAltKeyNum = 379L,
                             AccApWkend = 120225,
                             AccCalPeriod = 2,
@@ -11050,11 +11050,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 7,
-                            AccWkend2N = 20120218L
+                            WeekDate = 20120218
                         },
                         new
                         {
-                            AccWkendN = 120225,
+                            WeekEndingDate = 120225,
                             AccAltKeyNum = 380L,
                             AccApWkend = 120303,
                             AccCalPeriod = 2,
@@ -11069,11 +11069,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 8,
-                            AccWkend2N = 20120225L
+                            WeekDate = 20120225
                         },
                         new
                         {
-                            AccWkendN = 120303,
+                            WeekEndingDate = 120303,
                             AccAltKeyNum = 381L,
                             AccApWkend = 120310,
                             AccCalPeriod = 2,
@@ -11088,11 +11088,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 9,
-                            AccWkend2N = 20120303L
+                            WeekDate = 20120303
                         },
                         new
                         {
-                            AccWkendN = 120310,
+                            WeekEndingDate = 120310,
                             AccAltKeyNum = 382L,
                             AccApWkend = 120317,
                             AccCalPeriod = 3,
@@ -11107,11 +11107,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 10,
-                            AccWkend2N = 20120310L
+                            WeekDate = 20120310
                         },
                         new
                         {
-                            AccWkendN = 120317,
+                            WeekEndingDate = 120317,
                             AccAltKeyNum = 383L,
                             AccApWkend = 120324,
                             AccCalPeriod = 3,
@@ -11126,11 +11126,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 11,
-                            AccWkend2N = 20120317L
+                            WeekDate = 20120317
                         },
                         new
                         {
-                            AccWkendN = 120324,
+                            WeekEndingDate = 120324,
                             AccAltKeyNum = 384L,
                             AccApWkend = 120331,
                             AccCalPeriod = 3,
@@ -11145,11 +11145,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 12,
-                            AccWkend2N = 20120324L
+                            WeekDate = 20120324
                         },
                         new
                         {
-                            AccWkendN = 120331,
+                            WeekEndingDate = 120331,
                             AccAltKeyNum = 385L,
                             AccApWkend = 120407,
                             AccCalPeriod = 3,
@@ -11164,11 +11164,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 2,
                             AccWeekN = 13,
-                            AccWkend2N = 20120331L
+                            WeekDate = 20120331
                         },
                         new
                         {
-                            AccWkendN = 120407,
+                            WeekEndingDate = 120407,
                             AccAltKeyNum = 386L,
                             AccApWkend = 120414,
                             AccCalPeriod = 4,
@@ -11183,11 +11183,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 14,
-                            AccWkend2N = 20120407L
+                            WeekDate = 20120407
                         },
                         new
                         {
-                            AccWkendN = 120414,
+                            WeekEndingDate = 120414,
                             AccAltKeyNum = 387L,
                             AccApWkend = 120421,
                             AccCalPeriod = 4,
@@ -11202,11 +11202,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 15,
-                            AccWkend2N = 20120414L
+                            WeekDate = 20120414
                         },
                         new
                         {
-                            AccWkendN = 120421,
+                            WeekEndingDate = 120421,
                             AccAltKeyNum = 388L,
                             AccApWkend = 120428,
                             AccCalPeriod = 4,
@@ -11221,11 +11221,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 16,
-                            AccWkend2N = 20120421L
+                            WeekDate = 20120421
                         },
                         new
                         {
-                            AccWkendN = 120428,
+                            WeekEndingDate = 120428,
                             AccAltKeyNum = 389L,
                             AccApWkend = 120505,
                             AccCalPeriod = 4,
@@ -11240,11 +11240,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 17,
-                            AccWkend2N = 20120428L
+                            WeekDate = 20120428
                         },
                         new
                         {
-                            AccWkendN = 120505,
+                            WeekEndingDate = 120505,
                             AccAltKeyNum = 390L,
                             AccApWkend = 120512,
                             AccCalPeriod = 5,
@@ -11259,11 +11259,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 18,
-                            AccWkend2N = 20120505L
+                            WeekDate = 20120505
                         },
                         new
                         {
-                            AccWkendN = 120512,
+                            WeekEndingDate = 120512,
                             AccAltKeyNum = 391L,
                             AccApWkend = 120519,
                             AccCalPeriod = 5,
@@ -11278,11 +11278,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 19,
-                            AccWkend2N = 20120512L
+                            WeekDate = 20120512
                         },
                         new
                         {
-                            AccWkendN = 120519,
+                            WeekEndingDate = 120519,
                             AccAltKeyNum = 392L,
                             AccApWkend = 120526,
                             AccCalPeriod = 5,
@@ -11297,11 +11297,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 20,
-                            AccWkend2N = 20120519L
+                            WeekDate = 20120519
                         },
                         new
                         {
-                            AccWkendN = 120526,
+                            WeekEndingDate = 120526,
                             AccAltKeyNum = 393L,
                             AccApWkend = 120602,
                             AccCalPeriod = 5,
@@ -11316,11 +11316,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 21,
-                            AccWkend2N = 20120526L
+                            WeekDate = 20120526
                         },
                         new
                         {
-                            AccWkendN = 120602,
+                            WeekEndingDate = 120602,
                             AccAltKeyNum = 394L,
                             AccApWkend = 120609,
                             AccCalPeriod = 5,
@@ -11335,11 +11335,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 22,
-                            AccWkend2N = 20120602L
+                            WeekDate = 20120602
                         },
                         new
                         {
-                            AccWkendN = 120609,
+                            WeekEndingDate = 120609,
                             AccAltKeyNum = 395L,
                             AccApWkend = 120616,
                             AccCalPeriod = 6,
@@ -11354,11 +11354,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 23,
-                            AccWkend2N = 20120609L
+                            WeekDate = 20120609
                         },
                         new
                         {
-                            AccWkendN = 120616,
+                            WeekEndingDate = 120616,
                             AccAltKeyNum = 396L,
                             AccApWkend = 120623,
                             AccCalPeriod = 6,
@@ -11373,11 +11373,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 24,
-                            AccWkend2N = 20120616L
+                            WeekDate = 20120616
                         },
                         new
                         {
-                            AccWkendN = 120623,
+                            WeekEndingDate = 120623,
                             AccAltKeyNum = 397L,
                             AccApWkend = 120630,
                             AccCalPeriod = 6,
@@ -11392,11 +11392,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 25,
-                            AccWkend2N = 20120623L
+                            WeekDate = 20120623
                         },
                         new
                         {
-                            AccWkendN = 120630,
+                            WeekEndingDate = 120630,
                             AccAltKeyNum = 398L,
                             AccApWkend = 120707,
                             AccCalPeriod = 6,
@@ -11411,11 +11411,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 3,
                             AccWeekN = 26,
-                            AccWkend2N = 20120630L
+                            WeekDate = 20120630
                         },
                         new
                         {
-                            AccWkendN = 120707,
+                            WeekEndingDate = 120707,
                             AccAltKeyNum = 399L,
                             AccApWkend = 120714,
                             AccCalPeriod = 7,
@@ -11430,11 +11430,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 27,
-                            AccWkend2N = 20120707L
+                            WeekDate = 20120707
                         },
                         new
                         {
-                            AccWkendN = 120714,
+                            WeekEndingDate = 120714,
                             AccAltKeyNum = 400L,
                             AccApWkend = 120721,
                             AccCalPeriod = 7,
@@ -11449,11 +11449,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 28,
-                            AccWkend2N = 20120714L
+                            WeekDate = 20120714
                         },
                         new
                         {
-                            AccWkendN = 120721,
+                            WeekEndingDate = 120721,
                             AccAltKeyNum = 401L,
                             AccApWkend = 120728,
                             AccCalPeriod = 7,
@@ -11468,11 +11468,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 29,
-                            AccWkend2N = 20120721L
+                            WeekDate = 20120721
                         },
                         new
                         {
-                            AccWkendN = 120728,
+                            WeekEndingDate = 120728,
                             AccAltKeyNum = 402L,
                             AccApWkend = 120804,
                             AccCalPeriod = 7,
@@ -11487,11 +11487,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 30,
-                            AccWkend2N = 20120728L
+                            WeekDate = 20120728
                         },
                         new
                         {
-                            AccWkendN = 120804,
+                            WeekEndingDate = 120804,
                             AccAltKeyNum = 403L,
                             AccApWkend = 120811,
                             AccCalPeriod = 8,
@@ -11506,11 +11506,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 31,
-                            AccWkend2N = 20120804L
+                            WeekDate = 20120804
                         },
                         new
                         {
-                            AccWkendN = 120811,
+                            WeekEndingDate = 120811,
                             AccAltKeyNum = 404L,
                             AccApWkend = 120818,
                             AccCalPeriod = 8,
@@ -11525,11 +11525,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 32,
-                            AccWkend2N = 20120811L
+                            WeekDate = 20120811
                         },
                         new
                         {
-                            AccWkendN = 120818,
+                            WeekEndingDate = 120818,
                             AccAltKeyNum = 405L,
                             AccApWkend = 120825,
                             AccCalPeriod = 8,
@@ -11544,11 +11544,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 33,
-                            AccWkend2N = 20120818L
+                            WeekDate = 20120818
                         },
                         new
                         {
-                            AccWkendN = 120825,
+                            WeekEndingDate = 120825,
                             AccAltKeyNum = 406L,
                             AccApWkend = 120901,
                             AccCalPeriod = 8,
@@ -11563,11 +11563,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 34,
-                            AccWkend2N = 20120825L
+                            WeekDate = 20120825
                         },
                         new
                         {
-                            AccWkendN = 120901,
+                            WeekEndingDate = 120901,
                             AccAltKeyNum = 407L,
                             AccApWkend = 120908,
                             AccCalPeriod = 8,
@@ -11582,11 +11582,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 35,
-                            AccWkend2N = 20120901L
+                            WeekDate = 20120901
                         },
                         new
                         {
-                            AccWkendN = 120908,
+                            WeekEndingDate = 120908,
                             AccAltKeyNum = 408L,
                             AccApWkend = 120915,
                             AccCalPeriod = 9,
@@ -11601,11 +11601,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 36,
-                            AccWkend2N = 20120908L
+                            WeekDate = 20120908
                         },
                         new
                         {
-                            AccWkendN = 120915,
+                            WeekEndingDate = 120915,
                             AccAltKeyNum = 409L,
                             AccApWkend = 120922,
                             AccCalPeriod = 9,
@@ -11620,11 +11620,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 37,
-                            AccWkend2N = 20120915L
+                            WeekDate = 20120915
                         },
                         new
                         {
-                            AccWkendN = 120922,
+                            WeekEndingDate = 120922,
                             AccAltKeyNum = 410L,
                             AccApWkend = 120929,
                             AccCalPeriod = 9,
@@ -11639,11 +11639,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 38,
-                            AccWkend2N = 20120922L
+                            WeekDate = 20120922
                         },
                         new
                         {
-                            AccWkendN = 120929,
+                            WeekEndingDate = 120929,
                             AccAltKeyNum = 411L,
                             AccApWkend = 121006,
                             AccCalPeriod = 9,
@@ -11658,11 +11658,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 4,
                             AccWeekN = 39,
-                            AccWkend2N = 20120929L
+                            WeekDate = 20120929
                         },
                         new
                         {
-                            AccWkendN = 121006,
+                            WeekEndingDate = 121006,
                             AccAltKeyNum = 412L,
                             AccApWkend = 121013,
                             AccCalPeriod = 10,
@@ -11677,11 +11677,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 40,
-                            AccWkend2N = 20121006L
+                            WeekDate = 20121006
                         },
                         new
                         {
-                            AccWkendN = 121013,
+                            WeekEndingDate = 121013,
                             AccAltKeyNum = 413L,
                             AccApWkend = 121020,
                             AccCalPeriod = 10,
@@ -11696,11 +11696,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 41,
-                            AccWkend2N = 20121013L
+                            WeekDate = 20121013
                         },
                         new
                         {
-                            AccWkendN = 121020,
+                            WeekEndingDate = 121020,
                             AccAltKeyNum = 414L,
                             AccApWkend = 121027,
                             AccCalPeriod = 10,
@@ -11715,11 +11715,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 42,
-                            AccWkend2N = 20121020L
+                            WeekDate = 20121020
                         },
                         new
                         {
-                            AccWkendN = 121027,
+                            WeekEndingDate = 121027,
                             AccAltKeyNum = 415L,
                             AccApWkend = 121103,
                             AccCalPeriod = 10,
@@ -11734,11 +11734,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 43,
-                            AccWkend2N = 20121027L
+                            WeekDate = 20121027
                         },
                         new
                         {
-                            AccWkendN = 121103,
+                            WeekEndingDate = 121103,
                             AccAltKeyNum = 416L,
                             AccApWkend = 121110,
                             AccCalPeriod = 10,
@@ -11753,11 +11753,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 44,
-                            AccWkend2N = 20121103L
+                            WeekDate = 20121103
                         },
                         new
                         {
-                            AccWkendN = 121110,
+                            WeekEndingDate = 121110,
                             AccAltKeyNum = 417L,
                             AccApWkend = 121117,
                             AccCalPeriod = 11,
@@ -11772,11 +11772,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 45,
-                            AccWkend2N = 20121110L
+                            WeekDate = 20121110
                         },
                         new
                         {
-                            AccWkendN = 121117,
+                            WeekEndingDate = 121117,
                             AccAltKeyNum = 418L,
                             AccApWkend = 121124,
                             AccCalPeriod = 11,
@@ -11791,11 +11791,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 46,
-                            AccWkend2N = 20121117L
+                            WeekDate = 20121117
                         },
                         new
                         {
-                            AccWkendN = 121124,
+                            WeekEndingDate = 121124,
                             AccAltKeyNum = 419L,
                             AccApWkend = 121201,
                             AccCalPeriod = 11,
@@ -11810,11 +11810,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 47,
-                            AccWkend2N = 20121124L
+                            WeekDate = 20121124
                         },
                         new
                         {
-                            AccWkendN = 121201,
+                            WeekEndingDate = 121201,
                             AccAltKeyNum = 420L,
                             AccApWkend = 121208,
                             AccCalPeriod = 11,
@@ -11829,11 +11829,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 48,
-                            AccWkend2N = 20121201L
+                            WeekDate = 20121201
                         },
                         new
                         {
-                            AccWkendN = 121208,
+                            WeekEndingDate = 121208,
                             AccAltKeyNum = 421L,
                             AccApWkend = 121215,
                             AccCalPeriod = 12,
@@ -11848,11 +11848,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 49,
-                            AccWkend2N = 20121208L
+                            WeekDate = 20121208
                         },
                         new
                         {
-                            AccWkendN = 121215,
+                            WeekEndingDate = 121215,
                             AccAltKeyNum = 422L,
                             AccApWkend = 121222,
                             AccCalPeriod = 12,
@@ -11867,11 +11867,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 50,
-                            AccWkend2N = 20121215L
+                            WeekDate = 20121215
                         },
                         new
                         {
-                            AccWkendN = 121222,
+                            WeekEndingDate = 121222,
                             AccAltKeyNum = 423L,
                             AccApWkend = 121229,
                             AccCalPeriod = 12,
@@ -11886,11 +11886,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 51,
-                            AccWkend2N = 20121222L
+                            WeekDate = 20121222
                         },
                         new
                         {
-                            AccWkendN = 121229,
+                            WeekEndingDate = 121229,
                             AccAltKeyNum = 424L,
                             AccApWkend = 130105,
                             AccCalPeriod = 12,
@@ -11905,11 +11905,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 1,
                             AccWeekN = 52,
-                            AccWkend2N = 20121229L
+                            WeekDate = 20121229
                         },
                         new
                         {
-                            AccWkendN = 130105,
+                            WeekEndingDate = 130105,
                             AccAltKeyNum = 433L,
                             AccApWkend = 130112,
                             AccCalPeriod = 1,
@@ -11924,11 +11924,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 1,
-                            AccWkend2N = 20130105L
+                            WeekDate = 20130105
                         },
                         new
                         {
-                            AccWkendN = 130112,
+                            WeekEndingDate = 130112,
                             AccAltKeyNum = 434L,
                             AccApWkend = 130119,
                             AccCalPeriod = 1,
@@ -11943,11 +11943,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 2,
-                            AccWkend2N = 20130112L
+                            WeekDate = 20130112
                         },
                         new
                         {
-                            AccWkendN = 130119,
+                            WeekEndingDate = 130119,
                             AccAltKeyNum = 435L,
                             AccApWkend = 130126,
                             AccCalPeriod = 1,
@@ -11962,11 +11962,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 3,
-                            AccWkend2N = 20130119L
+                            WeekDate = 20130119
                         },
                         new
                         {
-                            AccWkendN = 130126,
+                            WeekEndingDate = 130126,
                             AccAltKeyNum = 436L,
                             AccApWkend = 130202,
                             AccCalPeriod = 1,
@@ -11981,11 +11981,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 4,
-                            AccWkend2N = 20130126L
+                            WeekDate = 20130126
                         },
                         new
                         {
-                            AccWkendN = 130202,
+                            WeekEndingDate = 130202,
                             AccAltKeyNum = 437L,
                             AccApWkend = 130209,
                             AccCalPeriod = 1,
@@ -12000,11 +12000,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 5,
-                            AccWkend2N = 20130202L
+                            WeekDate = 20130202
                         },
                         new
                         {
-                            AccWkendN = 130209,
+                            WeekEndingDate = 130209,
                             AccAltKeyNum = 438L,
                             AccApWkend = 130216,
                             AccCalPeriod = 2,
@@ -12019,11 +12019,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 6,
-                            AccWkend2N = 20130209L
+                            WeekDate = 20130209
                         },
                         new
                         {
-                            AccWkendN = 130216,
+                            WeekEndingDate = 130216,
                             AccAltKeyNum = 439L,
                             AccApWkend = 130223,
                             AccCalPeriod = 2,
@@ -12038,11 +12038,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 7,
-                            AccWkend2N = 20130216L
+                            WeekDate = 20130216
                         },
                         new
                         {
-                            AccWkendN = 130223,
+                            WeekEndingDate = 130223,
                             AccAltKeyNum = 440L,
                             AccApWkend = 130302,
                             AccCalPeriod = 2,
@@ -12057,11 +12057,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 8,
-                            AccWkend2N = 20130223L
+                            WeekDate = 20130223
                         },
                         new
                         {
-                            AccWkendN = 130302,
+                            WeekEndingDate = 130302,
                             AccAltKeyNum = 441L,
                             AccApWkend = 130309,
                             AccCalPeriod = 2,
@@ -12076,11 +12076,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 9,
-                            AccWkend2N = 20130302L
+                            WeekDate = 20130302
                         },
                         new
                         {
-                            AccWkendN = 130309,
+                            WeekEndingDate = 130309,
                             AccAltKeyNum = 442L,
                             AccApWkend = 130316,
                             AccCalPeriod = 3,
@@ -12095,11 +12095,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 10,
-                            AccWkend2N = 20130309L
+                            WeekDate = 20130309
                         },
                         new
                         {
-                            AccWkendN = 130316,
+                            WeekEndingDate = 130316,
                             AccAltKeyNum = 443L,
                             AccApWkend = 130323,
                             AccCalPeriod = 3,
@@ -12114,11 +12114,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 11,
-                            AccWkend2N = 20130316L
+                            WeekDate = 20130316
                         },
                         new
                         {
-                            AccWkendN = 130323,
+                            WeekEndingDate = 130323,
                             AccAltKeyNum = 444L,
                             AccApWkend = 130330,
                             AccCalPeriod = 3,
@@ -12133,11 +12133,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 12,
-                            AccWkend2N = 20130323L
+                            WeekDate = 20130323
                         },
                         new
                         {
-                            AccWkendN = 130330,
+                            WeekEndingDate = 130330,
                             AccAltKeyNum = 445L,
                             AccApWkend = 130406,
                             AccCalPeriod = 3,
@@ -12152,11 +12152,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 2,
                             AccWeekN = 13,
-                            AccWkend2N = 20130330L
+                            WeekDate = 20130330
                         },
                         new
                         {
-                            AccWkendN = 130406,
+                            WeekEndingDate = 130406,
                             AccAltKeyNum = 446L,
                             AccApWkend = 130413,
                             AccCalPeriod = 4,
@@ -12171,11 +12171,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 14,
-                            AccWkend2N = 20130406L
+                            WeekDate = 20130406
                         },
                         new
                         {
-                            AccWkendN = 130413,
+                            WeekEndingDate = 130413,
                             AccAltKeyNum = 447L,
                             AccApWkend = 130420,
                             AccCalPeriod = 4,
@@ -12190,11 +12190,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 15,
-                            AccWkend2N = 20130413L
+                            WeekDate = 20130413
                         },
                         new
                         {
-                            AccWkendN = 130420,
+                            WeekEndingDate = 130420,
                             AccAltKeyNum = 448L,
                             AccApWkend = 130427,
                             AccCalPeriod = 4,
@@ -12209,11 +12209,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 16,
-                            AccWkend2N = 20130420L
+                            WeekDate = 20130420
                         },
                         new
                         {
-                            AccWkendN = 130427,
+                            WeekEndingDate = 130427,
                             AccAltKeyNum = 449L,
                             AccApWkend = 130504,
                             AccCalPeriod = 4,
@@ -12228,11 +12228,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 17,
-                            AccWkend2N = 20130427L
+                            WeekDate = 20130427
                         },
                         new
                         {
-                            AccWkendN = 130504,
+                            WeekEndingDate = 130504,
                             AccAltKeyNum = 450L,
                             AccApWkend = 130511,
                             AccCalPeriod = 5,
@@ -12247,11 +12247,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 18,
-                            AccWkend2N = 20130504L
+                            WeekDate = 20130504
                         },
                         new
                         {
-                            AccWkendN = 130511,
+                            WeekEndingDate = 130511,
                             AccAltKeyNum = 451L,
                             AccApWkend = 130518,
                             AccCalPeriod = 5,
@@ -12266,11 +12266,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 19,
-                            AccWkend2N = 20130511L
+                            WeekDate = 20130511
                         },
                         new
                         {
-                            AccWkendN = 130518,
+                            WeekEndingDate = 130518,
                             AccAltKeyNum = 452L,
                             AccApWkend = 130525,
                             AccCalPeriod = 5,
@@ -12285,11 +12285,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 20,
-                            AccWkend2N = 20130518L
+                            WeekDate = 20130518
                         },
                         new
                         {
-                            AccWkendN = 130525,
+                            WeekEndingDate = 130525,
                             AccAltKeyNum = 453L,
                             AccApWkend = 130601,
                             AccCalPeriod = 5,
@@ -12304,11 +12304,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 21,
-                            AccWkend2N = 20130525L
+                            WeekDate = 20130525
                         },
                         new
                         {
-                            AccWkendN = 130601,
+                            WeekEndingDate = 130601,
                             AccAltKeyNum = 454L,
                             AccApWkend = 130608,
                             AccCalPeriod = 5,
@@ -12323,11 +12323,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 22,
-                            AccWkend2N = 20130601L
+                            WeekDate = 20130601
                         },
                         new
                         {
-                            AccWkendN = 130608,
+                            WeekEndingDate = 130608,
                             AccAltKeyNum = 455L,
                             AccApWkend = 130615,
                             AccCalPeriod = 6,
@@ -12342,11 +12342,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 23,
-                            AccWkend2N = 20130608L
+                            WeekDate = 20130608
                         },
                         new
                         {
-                            AccWkendN = 130615,
+                            WeekEndingDate = 130615,
                             AccAltKeyNum = 456L,
                             AccApWkend = 130622,
                             AccCalPeriod = 6,
@@ -12361,11 +12361,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 24,
-                            AccWkend2N = 20130615L
+                            WeekDate = 20130615
                         },
                         new
                         {
-                            AccWkendN = 130622,
+                            WeekEndingDate = 130622,
                             AccAltKeyNum = 457L,
                             AccApWkend = 130629,
                             AccCalPeriod = 6,
@@ -12380,11 +12380,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 25,
-                            AccWkend2N = 20130622L
+                            WeekDate = 20130622
                         },
                         new
                         {
-                            AccWkendN = 130629,
+                            WeekEndingDate = 130629,
                             AccAltKeyNum = 458L,
                             AccApWkend = 130706,
                             AccCalPeriod = 6,
@@ -12399,11 +12399,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 3,
                             AccWeekN = 26,
-                            AccWkend2N = 20130629L
+                            WeekDate = 20130629
                         },
                         new
                         {
-                            AccWkendN = 130706,
+                            WeekEndingDate = 130706,
                             AccAltKeyNum = 459L,
                             AccApWkend = 130713,
                             AccCalPeriod = 7,
@@ -12418,11 +12418,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 27,
-                            AccWkend2N = 20130706L
+                            WeekDate = 20130706
                         },
                         new
                         {
-                            AccWkendN = 130713,
+                            WeekEndingDate = 130713,
                             AccAltKeyNum = 460L,
                             AccApWkend = 130720,
                             AccCalPeriod = 7,
@@ -12437,11 +12437,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 28,
-                            AccWkend2N = 20130713L
+                            WeekDate = 20130713
                         },
                         new
                         {
-                            AccWkendN = 130720,
+                            WeekEndingDate = 130720,
                             AccAltKeyNum = 461L,
                             AccApWkend = 130727,
                             AccCalPeriod = 7,
@@ -12456,11 +12456,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 29,
-                            AccWkend2N = 20130720L
+                            WeekDate = 20130720
                         },
                         new
                         {
-                            AccWkendN = 130727,
+                            WeekEndingDate = 130727,
                             AccAltKeyNum = 462L,
                             AccApWkend = 130803,
                             AccCalPeriod = 7,
@@ -12475,11 +12475,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 30,
-                            AccWkend2N = 20130727L
+                            WeekDate = 20130727
                         },
                         new
                         {
-                            AccWkendN = 130803,
+                            WeekEndingDate = 130803,
                             AccAltKeyNum = 463L,
                             AccApWkend = 130810,
                             AccCalPeriod = 7,
@@ -12494,11 +12494,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 31,
-                            AccWkend2N = 20130803L
+                            WeekDate = 20130803
                         },
                         new
                         {
-                            AccWkendN = 130810,
+                            WeekEndingDate = 130810,
                             AccAltKeyNum = 464L,
                             AccApWkend = 130817,
                             AccCalPeriod = 8,
@@ -12513,11 +12513,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 32,
-                            AccWkend2N = 20130810L
+                            WeekDate = 20130810
                         },
                         new
                         {
-                            AccWkendN = 130817,
+                            WeekEndingDate = 130817,
                             AccAltKeyNum = 465L,
                             AccApWkend = 130824,
                             AccCalPeriod = 8,
@@ -12532,11 +12532,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 33,
-                            AccWkend2N = 20130817L
+                            WeekDate = 20130817
                         },
                         new
                         {
-                            AccWkendN = 130824,
+                            WeekEndingDate = 130824,
                             AccAltKeyNum = 466L,
                             AccApWkend = 130831,
                             AccCalPeriod = 8,
@@ -12551,11 +12551,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 34,
-                            AccWkend2N = 20130824L
+                            WeekDate = 20130824
                         },
                         new
                         {
-                            AccWkendN = 130831,
+                            WeekEndingDate = 130831,
                             AccAltKeyNum = 467L,
                             AccApWkend = 130907,
                             AccCalPeriod = 8,
@@ -12570,11 +12570,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 35,
-                            AccWkend2N = 20130831L
+                            WeekDate = 20130831
                         },
                         new
                         {
-                            AccWkendN = 130907,
+                            WeekEndingDate = 130907,
                             AccAltKeyNum = 468L,
                             AccApWkend = 130914,
                             AccCalPeriod = 9,
@@ -12589,11 +12589,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 36,
-                            AccWkend2N = 20130907L
+                            WeekDate = 20130907
                         },
                         new
                         {
-                            AccWkendN = 130914,
+                            WeekEndingDate = 130914,
                             AccAltKeyNum = 469L,
                             AccApWkend = 130921,
                             AccCalPeriod = 9,
@@ -12608,11 +12608,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 37,
-                            AccWkend2N = 20130914L
+                            WeekDate = 20130914
                         },
                         new
                         {
-                            AccWkendN = 130921,
+                            WeekEndingDate = 130921,
                             AccAltKeyNum = 470L,
                             AccApWkend = 130928,
                             AccCalPeriod = 9,
@@ -12627,11 +12627,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 38,
-                            AccWkend2N = 20130921L
+                            WeekDate = 20130921
                         },
                         new
                         {
-                            AccWkendN = 130928,
+                            WeekEndingDate = 130928,
                             AccAltKeyNum = 471L,
                             AccApWkend = 131005,
                             AccCalPeriod = 9,
@@ -12646,11 +12646,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 4,
                             AccWeekN = 39,
-                            AccWkend2N = 20130928L
+                            WeekDate = 20130928
                         },
                         new
                         {
-                            AccWkendN = 131005,
+                            WeekEndingDate = 131005,
                             AccAltKeyNum = 472L,
                             AccApWkend = 131012,
                             AccCalPeriod = 10,
@@ -12665,11 +12665,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 40,
-                            AccWkend2N = 20131005L
+                            WeekDate = 20131005
                         },
                         new
                         {
-                            AccWkendN = 131012,
+                            WeekEndingDate = 131012,
                             AccAltKeyNum = 473L,
                             AccApWkend = 131019,
                             AccCalPeriod = 10,
@@ -12684,11 +12684,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 41,
-                            AccWkend2N = 20131012L
+                            WeekDate = 20131012
                         },
                         new
                         {
-                            AccWkendN = 131019,
+                            WeekEndingDate = 131019,
                             AccAltKeyNum = 474L,
                             AccApWkend = 131026,
                             AccCalPeriod = 10,
@@ -12703,11 +12703,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 42,
-                            AccWkend2N = 20131019L
+                            WeekDate = 20131019
                         },
                         new
                         {
-                            AccWkendN = 131026,
+                            WeekEndingDate = 131026,
                             AccAltKeyNum = 475L,
                             AccApWkend = 131102,
                             AccCalPeriod = 10,
@@ -12722,11 +12722,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 43,
-                            AccWkend2N = 20131026L
+                            WeekDate = 20131026
                         },
                         new
                         {
-                            AccWkendN = 131102,
+                            WeekEndingDate = 131102,
                             AccAltKeyNum = 476L,
                             AccApWkend = 131109,
                             AccCalPeriod = 10,
@@ -12741,11 +12741,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 44,
-                            AccWkend2N = 20131102L
+                            WeekDate = 20131102
                         },
                         new
                         {
-                            AccWkendN = 131109,
+                            WeekEndingDate = 131109,
                             AccAltKeyNum = 477L,
                             AccApWkend = 131116,
                             AccCalPeriod = 11,
@@ -12760,11 +12760,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 45,
-                            AccWkend2N = 20131109L
+                            WeekDate = 20131109
                         },
                         new
                         {
-                            AccWkendN = 131116,
+                            WeekEndingDate = 131116,
                             AccAltKeyNum = 478L,
                             AccApWkend = 131123,
                             AccCalPeriod = 11,
@@ -12779,11 +12779,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 46,
-                            AccWkend2N = 20131116L
+                            WeekDate = 20131116
                         },
                         new
                         {
-                            AccWkendN = 131123,
+                            WeekEndingDate = 131123,
                             AccAltKeyNum = 479L,
                             AccApWkend = 131130,
                             AccCalPeriod = 11,
@@ -12798,11 +12798,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 47,
-                            AccWkend2N = 20131123L
+                            WeekDate = 20131123
                         },
                         new
                         {
-                            AccWkendN = 131130,
+                            WeekEndingDate = 131130,
                             AccAltKeyNum = 480L,
                             AccApWkend = 131207,
                             AccCalPeriod = 11,
@@ -12817,11 +12817,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 48,
-                            AccWkend2N = 20131130L
+                            WeekDate = 20131130
                         },
                         new
                         {
-                            AccWkendN = 131207,
+                            WeekEndingDate = 131207,
                             AccAltKeyNum = 481L,
                             AccApWkend = 131214,
                             AccCalPeriod = 12,
@@ -12836,11 +12836,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 49,
-                            AccWkend2N = 20131207L
+                            WeekDate = 20131207
                         },
                         new
                         {
-                            AccWkendN = 131214,
+                            WeekEndingDate = 131214,
                             AccAltKeyNum = 482L,
                             AccApWkend = 131221,
                             AccCalPeriod = 12,
@@ -12855,11 +12855,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 50,
-                            AccWkend2N = 20131214L
+                            WeekDate = 20131214
                         },
                         new
                         {
-                            AccWkendN = 131221,
+                            WeekEndingDate = 131221,
                             AccAltKeyNum = 483L,
                             AccApWkend = 131228,
                             AccCalPeriod = 12,
@@ -12874,11 +12874,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 51,
-                            AccWkend2N = 20131221L
+                            WeekDate = 20131221
                         },
                         new
                         {
-                            AccWkendN = 131228,
+                            WeekEndingDate = 131228,
                             AccAltKeyNum = 484L,
                             AccApWkend = 140104,
                             AccCalPeriod = 12,
@@ -12893,11 +12893,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 1,
                             AccWeekN = 52,
-                            AccWkend2N = 20131228L
+                            WeekDate = 20131228
                         },
                         new
                         {
-                            AccWkendN = 140104,
+                            WeekEndingDate = 140104,
                             AccAltKeyNum = 493L,
                             AccApWkend = 140111,
                             AccCalPeriod = 1,
@@ -12912,11 +12912,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 1,
-                            AccWkend2N = 20140104L
+                            WeekDate = 20140104
                         },
                         new
                         {
-                            AccWkendN = 140111,
+                            WeekEndingDate = 140111,
                             AccAltKeyNum = 494L,
                             AccApWkend = 140118,
                             AccCalPeriod = 1,
@@ -12931,11 +12931,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 2,
-                            AccWkend2N = 20140111L
+                            WeekDate = 20140111
                         },
                         new
                         {
-                            AccWkendN = 140118,
+                            WeekEndingDate = 140118,
                             AccAltKeyNum = 495L,
                             AccApWkend = 140125,
                             AccCalPeriod = 1,
@@ -12950,11 +12950,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 3,
-                            AccWkend2N = 20140118L
+                            WeekDate = 20140118
                         },
                         new
                         {
-                            AccWkendN = 140125,
+                            WeekEndingDate = 140125,
                             AccAltKeyNum = 496L,
                             AccApWkend = 140201,
                             AccCalPeriod = 1,
@@ -12969,11 +12969,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 4,
-                            AccWkend2N = 20140125L
+                            WeekDate = 20140125
                         },
                         new
                         {
-                            AccWkendN = 140201,
+                            WeekEndingDate = 140201,
                             AccAltKeyNum = 497L,
                             AccApWkend = 140208,
                             AccCalPeriod = 1,
@@ -12988,11 +12988,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 5,
-                            AccWkend2N = 20140201L
+                            WeekDate = 20140201
                         },
                         new
                         {
-                            AccWkendN = 140208,
+                            WeekEndingDate = 140208,
                             AccAltKeyNum = 498L,
                             AccApWkend = 140215,
                             AccCalPeriod = 2,
@@ -13007,11 +13007,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 6,
-                            AccWkend2N = 20140208L
+                            WeekDate = 20140208
                         },
                         new
                         {
-                            AccWkendN = 140215,
+                            WeekEndingDate = 140215,
                             AccAltKeyNum = 499L,
                             AccApWkend = 140222,
                             AccCalPeriod = 2,
@@ -13026,11 +13026,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 7,
-                            AccWkend2N = 20140215L
+                            WeekDate = 20140215
                         },
                         new
                         {
-                            AccWkendN = 140222,
+                            WeekEndingDate = 140222,
                             AccAltKeyNum = 500L,
                             AccApWkend = 140301,
                             AccCalPeriod = 2,
@@ -13045,11 +13045,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 8,
-                            AccWkend2N = 20140222L
+                            WeekDate = 20140222
                         },
                         new
                         {
-                            AccWkendN = 140301,
+                            WeekEndingDate = 140301,
                             AccAltKeyNum = 501L,
                             AccApWkend = 140308,
                             AccCalPeriod = 2,
@@ -13064,11 +13064,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 9,
-                            AccWkend2N = 20140301L
+                            WeekDate = 20140301
                         },
                         new
                         {
-                            AccWkendN = 140308,
+                            WeekEndingDate = 140308,
                             AccAltKeyNum = 502L,
                             AccApWkend = 140315,
                             AccCalPeriod = 3,
@@ -13083,11 +13083,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 10,
-                            AccWkend2N = 20140308L
+                            WeekDate = 20140308
                         },
                         new
                         {
-                            AccWkendN = 140315,
+                            WeekEndingDate = 140315,
                             AccAltKeyNum = 503L,
                             AccApWkend = 140322,
                             AccCalPeriod = 3,
@@ -13102,11 +13102,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 11,
-                            AccWkend2N = 20140315L
+                            WeekDate = 20140315
                         },
                         new
                         {
-                            AccWkendN = 140322,
+                            WeekEndingDate = 140322,
                             AccAltKeyNum = 504L,
                             AccApWkend = 140329,
                             AccCalPeriod = 3,
@@ -13121,11 +13121,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 12,
-                            AccWkend2N = 20140322L
+                            WeekDate = 20140322
                         },
                         new
                         {
-                            AccWkendN = 140329,
+                            WeekEndingDate = 140329,
                             AccAltKeyNum = 505L,
                             AccApWkend = 140405,
                             AccCalPeriod = 3,
@@ -13140,11 +13140,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 2,
                             AccWeekN = 13,
-                            AccWkend2N = 20140329L
+                            WeekDate = 20140329
                         },
                         new
                         {
-                            AccWkendN = 140405,
+                            WeekEndingDate = 140405,
                             AccAltKeyNum = 506L,
                             AccApWkend = 140412,
                             AccCalPeriod = 4,
@@ -13159,11 +13159,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 14,
-                            AccWkend2N = 20140405L
+                            WeekDate = 20140405
                         },
                         new
                         {
-                            AccWkendN = 140412,
+                            WeekEndingDate = 140412,
                             AccAltKeyNum = 507L,
                             AccApWkend = 140419,
                             AccCalPeriod = 4,
@@ -13178,11 +13178,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 15,
-                            AccWkend2N = 20140412L
+                            WeekDate = 20140412
                         },
                         new
                         {
-                            AccWkendN = 140419,
+                            WeekEndingDate = 140419,
                             AccAltKeyNum = 508L,
                             AccApWkend = 140426,
                             AccCalPeriod = 4,
@@ -13197,11 +13197,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 16,
-                            AccWkend2N = 20140419L
+                            WeekDate = 20140419
                         },
                         new
                         {
-                            AccWkendN = 140426,
+                            WeekEndingDate = 140426,
                             AccAltKeyNum = 509L,
                             AccApWkend = 140503,
                             AccCalPeriod = 4,
@@ -13216,11 +13216,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 17,
-                            AccWkend2N = 20140426L
+                            WeekDate = 20140426
                         },
                         new
                         {
-                            AccWkendN = 140503,
+                            WeekEndingDate = 140503,
                             AccAltKeyNum = 510L,
                             AccApWkend = 140510,
                             AccCalPeriod = 4,
@@ -13235,11 +13235,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 18,
-                            AccWkend2N = 20140503L
+                            WeekDate = 20140503
                         },
                         new
                         {
-                            AccWkendN = 140510,
+                            WeekEndingDate = 140510,
                             AccAltKeyNum = 511L,
                             AccApWkend = 140517,
                             AccCalPeriod = 5,
@@ -13254,11 +13254,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 19,
-                            AccWkend2N = 20140510L
+                            WeekDate = 20140510
                         },
                         new
                         {
-                            AccWkendN = 140517,
+                            WeekEndingDate = 140517,
                             AccAltKeyNum = 512L,
                             AccApWkend = 140524,
                             AccCalPeriod = 5,
@@ -13273,11 +13273,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 20,
-                            AccWkend2N = 20140517L
+                            WeekDate = 20140517
                         },
                         new
                         {
-                            AccWkendN = 140524,
+                            WeekEndingDate = 140524,
                             AccAltKeyNum = 513L,
                             AccApWkend = 140531,
                             AccCalPeriod = 5,
@@ -13292,11 +13292,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 21,
-                            AccWkend2N = 20140524L
+                            WeekDate = 20140524
                         },
                         new
                         {
-                            AccWkendN = 140531,
+                            WeekEndingDate = 140531,
                             AccAltKeyNum = 514L,
                             AccApWkend = 140607,
                             AccCalPeriod = 5,
@@ -13311,11 +13311,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 22,
-                            AccWkend2N = 20140531L
+                            WeekDate = 20140531
                         },
                         new
                         {
-                            AccWkendN = 140607,
+                            WeekEndingDate = 140607,
                             AccAltKeyNum = 515L,
                             AccApWkend = 140614,
                             AccCalPeriod = 6,
@@ -13330,11 +13330,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 23,
-                            AccWkend2N = 20140607L
+                            WeekDate = 20140607
                         },
                         new
                         {
-                            AccWkendN = 140614,
+                            WeekEndingDate = 140614,
                             AccAltKeyNum = 516L,
                             AccApWkend = 140621,
                             AccCalPeriod = 6,
@@ -13349,11 +13349,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 24,
-                            AccWkend2N = 20140614L
+                            WeekDate = 20140614
                         },
                         new
                         {
-                            AccWkendN = 140621,
+                            WeekEndingDate = 140621,
                             AccAltKeyNum = 517L,
                             AccApWkend = 140628,
                             AccCalPeriod = 6,
@@ -13368,11 +13368,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 25,
-                            AccWkend2N = 20140621L
+                            WeekDate = 20140621
                         },
                         new
                         {
-                            AccWkendN = 140628,
+                            WeekEndingDate = 140628,
                             AccAltKeyNum = 518L,
                             AccApWkend = 140705,
                             AccCalPeriod = 6,
@@ -13387,11 +13387,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 3,
                             AccWeekN = 26,
-                            AccWkend2N = 20140628L
+                            WeekDate = 20140628
                         },
                         new
                         {
-                            AccWkendN = 140705,
+                            WeekEndingDate = 140705,
                             AccAltKeyNum = 519L,
                             AccApWkend = 140712,
                             AccCalPeriod = 7,
@@ -13406,11 +13406,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 27,
-                            AccWkend2N = 20140705L
+                            WeekDate = 20140705
                         },
                         new
                         {
-                            AccWkendN = 140712,
+                            WeekEndingDate = 140712,
                             AccAltKeyNum = 520L,
                             AccApWkend = 140719,
                             AccCalPeriod = 7,
@@ -13425,11 +13425,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 28,
-                            AccWkend2N = 20140712L
+                            WeekDate = 20140712
                         },
                         new
                         {
-                            AccWkendN = 140719,
+                            WeekEndingDate = 140719,
                             AccAltKeyNum = 521L,
                             AccApWkend = 140726,
                             AccCalPeriod = 7,
@@ -13444,11 +13444,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 29,
-                            AccWkend2N = 20140719L
+                            WeekDate = 20140719
                         },
                         new
                         {
-                            AccWkendN = 140726,
+                            WeekEndingDate = 140726,
                             AccAltKeyNum = 522L,
                             AccApWkend = 140802,
                             AccCalPeriod = 7,
@@ -13463,11 +13463,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 30,
-                            AccWkend2N = 20140726L
+                            WeekDate = 20140726
                         },
                         new
                         {
-                            AccWkendN = 140802,
+                            WeekEndingDate = 140802,
                             AccAltKeyNum = 523L,
                             AccApWkend = 140809,
                             AccCalPeriod = 7,
@@ -13482,11 +13482,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 31,
-                            AccWkend2N = 20140802L
+                            WeekDate = 20140802
                         },
                         new
                         {
-                            AccWkendN = 140809,
+                            WeekEndingDate = 140809,
                             AccAltKeyNum = 524L,
                             AccApWkend = 140816,
                             AccCalPeriod = 8,
@@ -13501,11 +13501,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 32,
-                            AccWkend2N = 20140809L
+                            WeekDate = 20140809
                         },
                         new
                         {
-                            AccWkendN = 140816,
+                            WeekEndingDate = 140816,
                             AccAltKeyNum = 525L,
                             AccApWkend = 140823,
                             AccCalPeriod = 8,
@@ -13520,11 +13520,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 33,
-                            AccWkend2N = 20140816L
+                            WeekDate = 20140816
                         },
                         new
                         {
-                            AccWkendN = 140823,
+                            WeekEndingDate = 140823,
                             AccAltKeyNum = 526L,
                             AccApWkend = 140830,
                             AccCalPeriod = 8,
@@ -13539,11 +13539,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 34,
-                            AccWkend2N = 20140823L
+                            WeekDate = 20140823
                         },
                         new
                         {
-                            AccWkendN = 140830,
+                            WeekEndingDate = 140830,
                             AccAltKeyNum = 527L,
                             AccApWkend = 140906,
                             AccCalPeriod = 8,
@@ -13558,11 +13558,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 35,
-                            AccWkend2N = 20140830L
+                            WeekDate = 20140830
                         },
                         new
                         {
-                            AccWkendN = 140906,
+                            WeekEndingDate = 140906,
                             AccAltKeyNum = 528L,
                             AccApWkend = 140913,
                             AccCalPeriod = 9,
@@ -13577,11 +13577,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 36,
-                            AccWkend2N = 20140906L
+                            WeekDate = 20140906
                         },
                         new
                         {
-                            AccWkendN = 140913,
+                            WeekEndingDate = 140913,
                             AccAltKeyNum = 529L,
                             AccApWkend = 140920,
                             AccCalPeriod = 9,
@@ -13596,11 +13596,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 37,
-                            AccWkend2N = 20140913L
+                            WeekDate = 20140913
                         },
                         new
                         {
-                            AccWkendN = 140920,
+                            WeekEndingDate = 140920,
                             AccAltKeyNum = 530L,
                             AccApWkend = 140927,
                             AccCalPeriod = 9,
@@ -13615,11 +13615,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 38,
-                            AccWkend2N = 20140920L
+                            WeekDate = 20140920
                         },
                         new
                         {
-                            AccWkendN = 140927,
+                            WeekEndingDate = 140927,
                             AccAltKeyNum = 531L,
                             AccApWkend = 141004,
                             AccCalPeriod = 9,
@@ -13634,11 +13634,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 4,
                             AccWeekN = 39,
-                            AccWkend2N = 20140927L
+                            WeekDate = 20140927
                         },
                         new
                         {
-                            AccWkendN = 141004,
+                            WeekEndingDate = 141004,
                             AccAltKeyNum = 532L,
                             AccApWkend = 141011,
                             AccCalPeriod = 10,
@@ -13653,11 +13653,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 40,
-                            AccWkend2N = 20141004L
+                            WeekDate = 20141004
                         },
                         new
                         {
-                            AccWkendN = 141011,
+                            WeekEndingDate = 141011,
                             AccAltKeyNum = 533L,
                             AccApWkend = 141018,
                             AccCalPeriod = 10,
@@ -13672,11 +13672,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 41,
-                            AccWkend2N = 20141011L
+                            WeekDate = 20141011
                         },
                         new
                         {
-                            AccWkendN = 141018,
+                            WeekEndingDate = 141018,
                             AccAltKeyNum = 534L,
                             AccApWkend = 141025,
                             AccCalPeriod = 10,
@@ -13691,11 +13691,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 42,
-                            AccWkend2N = 20141018L
+                            WeekDate = 20141018
                         },
                         new
                         {
-                            AccWkendN = 141025,
+                            WeekEndingDate = 141025,
                             AccAltKeyNum = 535L,
                             AccApWkend = 141101,
                             AccCalPeriod = 10,
@@ -13710,11 +13710,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 43,
-                            AccWkend2N = 20141025L
+                            WeekDate = 20141025
                         },
                         new
                         {
-                            AccWkendN = 141101,
+                            WeekEndingDate = 141101,
                             AccAltKeyNum = 536L,
                             AccApWkend = 141108,
                             AccCalPeriod = 10,
@@ -13729,11 +13729,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 44,
-                            AccWkend2N = 20141101L
+                            WeekDate = 20141101
                         },
                         new
                         {
-                            AccWkendN = 141108,
+                            WeekEndingDate = 141108,
                             AccAltKeyNum = 537L,
                             AccApWkend = 141115,
                             AccCalPeriod = 11,
@@ -13748,11 +13748,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 45,
-                            AccWkend2N = 20141108L
+                            WeekDate = 20141108
                         },
                         new
                         {
-                            AccWkendN = 141115,
+                            WeekEndingDate = 141115,
                             AccAltKeyNum = 538L,
                             AccApWkend = 141122,
                             AccCalPeriod = 11,
@@ -13767,11 +13767,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 46,
-                            AccWkend2N = 20141115L
+                            WeekDate = 20141115
                         },
                         new
                         {
-                            AccWkendN = 141122,
+                            WeekEndingDate = 141122,
                             AccAltKeyNum = 539L,
                             AccApWkend = 141129,
                             AccCalPeriod = 11,
@@ -13786,11 +13786,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 47,
-                            AccWkend2N = 20141122L
+                            WeekDate = 20141122
                         },
                         new
                         {
-                            AccWkendN = 141129,
+                            WeekEndingDate = 141129,
                             AccAltKeyNum = 540L,
                             AccApWkend = 141206,
                             AccCalPeriod = 11,
@@ -13805,11 +13805,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 48,
-                            AccWkend2N = 20141129L
+                            WeekDate = 20141129
                         },
                         new
                         {
-                            AccWkendN = 141206,
+                            WeekEndingDate = 141206,
                             AccAltKeyNum = 541L,
                             AccApWkend = 141213,
                             AccCalPeriod = 12,
@@ -13824,11 +13824,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 49,
-                            AccWkend2N = 20141206L
+                            WeekDate = 20141206
                         },
                         new
                         {
-                            AccWkendN = 141213,
+                            WeekEndingDate = 141213,
                             AccAltKeyNum = 542L,
                             AccApWkend = 141220,
                             AccCalPeriod = 12,
@@ -13843,11 +13843,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 50,
-                            AccWkend2N = 20141213L
+                            WeekDate = 20141213
                         },
                         new
                         {
-                            AccWkendN = 141220,
+                            WeekEndingDate = 141220,
                             AccAltKeyNum = 543L,
                             AccApWkend = 141227,
                             AccCalPeriod = 12,
@@ -13862,11 +13862,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 51,
-                            AccWkend2N = 20141220L
+                            WeekDate = 20141220
                         },
                         new
                         {
-                            AccWkendN = 141227,
+                            WeekEndingDate = 141227,
                             AccAltKeyNum = 544L,
                             AccApWkend = 150103,
                             AccCalPeriod = 12,
@@ -13881,11 +13881,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 1,
                             AccWeekN = 52,
-                            AccWkend2N = 20141227L
+                            WeekDate = 20141227
                         },
                         new
                         {
-                            AccWkendN = 150103,
+                            WeekEndingDate = 150103,
                             AccAltKeyNum = 545L,
                             AccApWkend = 150110,
                             AccCalPeriod = 12,
@@ -13900,11 +13900,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 1,
                             AccWeekN = 53,
-                            AccWkend2N = 20150103L
+                            WeekDate = 20150103
                         },
                         new
                         {
-                            AccWkendN = 150110,
+                            WeekEndingDate = 150110,
                             AccAltKeyNum = 553L,
                             AccApWkend = 150117,
                             AccCalPeriod = 1,
@@ -13919,11 +13919,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 1,
-                            AccWkend2N = 20150110L
+                            WeekDate = 20150110
                         },
                         new
                         {
-                            AccWkendN = 150117,
+                            WeekEndingDate = 150117,
                             AccAltKeyNum = 554L,
                             AccApWkend = 150124,
                             AccCalPeriod = 1,
@@ -13938,11 +13938,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 2,
-                            AccWkend2N = 20150117L
+                            WeekDate = 20150117
                         },
                         new
                         {
-                            AccWkendN = 150124,
+                            WeekEndingDate = 150124,
                             AccAltKeyNum = 555L,
                             AccApWkend = 150131,
                             AccCalPeriod = 1,
@@ -13957,11 +13957,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 3,
-                            AccWkend2N = 20150124L
+                            WeekDate = 20150124
                         },
                         new
                         {
-                            AccWkendN = 150131,
+                            WeekEndingDate = 150131,
                             AccAltKeyNum = 556L,
                             AccApWkend = 150207,
                             AccCalPeriod = 1,
@@ -13976,11 +13976,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 4,
-                            AccWkend2N = 20150131L
+                            WeekDate = 20150131
                         },
                         new
                         {
-                            AccWkendN = 150207,
+                            WeekEndingDate = 150207,
                             AccAltKeyNum = 557L,
                             AccApWkend = 150214,
                             AccCalPeriod = 2,
@@ -13995,11 +13995,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 5,
-                            AccWkend2N = 20150207L
+                            WeekDate = 20150207
                         },
                         new
                         {
-                            AccWkendN = 150214,
+                            WeekEndingDate = 150214,
                             AccAltKeyNum = 558L,
                             AccApWkend = 150221,
                             AccCalPeriod = 2,
@@ -14014,11 +14014,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 6,
-                            AccWkend2N = 20150214L
+                            WeekDate = 20150214
                         },
                         new
                         {
-                            AccWkendN = 150221,
+                            WeekEndingDate = 150221,
                             AccAltKeyNum = 559L,
                             AccApWkend = 150228,
                             AccCalPeriod = 2,
@@ -14033,11 +14033,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 7,
-                            AccWkend2N = 20150221L
+                            WeekDate = 20150221
                         },
                         new
                         {
-                            AccWkendN = 150228,
+                            WeekEndingDate = 150228,
                             AccAltKeyNum = 560L,
                             AccApWkend = 150307,
                             AccCalPeriod = 2,
@@ -14052,11 +14052,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 8,
-                            AccWkend2N = 20150228L
+                            WeekDate = 20150228
                         },
                         new
                         {
-                            AccWkendN = 150307,
+                            WeekEndingDate = 150307,
                             AccAltKeyNum = 561L,
                             AccApWkend = 150314,
                             AccCalPeriod = 3,
@@ -14071,11 +14071,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 9,
-                            AccWkend2N = 20150307L
+                            WeekDate = 20150307
                         },
                         new
                         {
-                            AccWkendN = 150314,
+                            WeekEndingDate = 150314,
                             AccAltKeyNum = 562L,
                             AccApWkend = 150321,
                             AccCalPeriod = 3,
@@ -14090,11 +14090,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 10,
-                            AccWkend2N = 20150314L
+                            WeekDate = 20150314
                         },
                         new
                         {
-                            AccWkendN = 150321,
+                            WeekEndingDate = 150321,
                             AccAltKeyNum = 563L,
                             AccApWkend = 150328,
                             AccCalPeriod = 3,
@@ -14109,11 +14109,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 11,
-                            AccWkend2N = 20150321L
+                            WeekDate = 20150321
                         },
                         new
                         {
-                            AccWkendN = 150328,
+                            WeekEndingDate = 150328,
                             AccAltKeyNum = 564L,
                             AccApWkend = 150404,
                             AccCalPeriod = 3,
@@ -14128,11 +14128,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 2,
                             AccWeekN = 12,
-                            AccWkend2N = 20150328L
+                            WeekDate = 20150328
                         },
                         new
                         {
-                            AccWkendN = 150404,
+                            WeekEndingDate = 150404,
                             AccAltKeyNum = 565L,
                             AccApWkend = 150411,
                             AccCalPeriod = 4,
@@ -14147,11 +14147,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 13,
-                            AccWkend2N = 20150404L
+                            WeekDate = 20150404
                         },
                         new
                         {
-                            AccWkendN = 150411,
+                            WeekEndingDate = 150411,
                             AccAltKeyNum = 566L,
                             AccApWkend = 150418,
                             AccCalPeriod = 4,
@@ -14166,11 +14166,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 14,
-                            AccWkend2N = 20150411L
+                            WeekDate = 20150411
                         },
                         new
                         {
-                            AccWkendN = 150418,
+                            WeekEndingDate = 150418,
                             AccAltKeyNum = 567L,
                             AccApWkend = 150425,
                             AccCalPeriod = 4,
@@ -14185,11 +14185,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 15,
-                            AccWkend2N = 20150418L
+                            WeekDate = 20150418
                         },
                         new
                         {
-                            AccWkendN = 150425,
+                            WeekEndingDate = 150425,
                             AccAltKeyNum = 568L,
                             AccApWkend = 150502,
                             AccCalPeriod = 4,
@@ -14204,11 +14204,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 16,
-                            AccWkend2N = 20150425L
+                            WeekDate = 20150425
                         },
                         new
                         {
-                            AccWkendN = 150502,
+                            WeekEndingDate = 150502,
                             AccAltKeyNum = 569L,
                             AccApWkend = 150509,
                             AccCalPeriod = 4,
@@ -14223,11 +14223,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 17,
-                            AccWkend2N = 20150502L
+                            WeekDate = 20150502
                         },
                         new
                         {
-                            AccWkendN = 150509,
+                            WeekEndingDate = 150509,
                             AccAltKeyNum = 570L,
                             AccApWkend = 150516,
                             AccCalPeriod = 5,
@@ -14242,11 +14242,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 18,
-                            AccWkend2N = 20150509L
+                            WeekDate = 20150509
                         },
                         new
                         {
-                            AccWkendN = 150516,
+                            WeekEndingDate = 150516,
                             AccAltKeyNum = 571L,
                             AccApWkend = 150523,
                             AccCalPeriod = 5,
@@ -14261,11 +14261,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 19,
-                            AccWkend2N = 20150516L
+                            WeekDate = 20150516
                         },
                         new
                         {
-                            AccWkendN = 150523,
+                            WeekEndingDate = 150523,
                             AccAltKeyNum = 572L,
                             AccApWkend = 150530,
                             AccCalPeriod = 5,
@@ -14280,11 +14280,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 20,
-                            AccWkend2N = 20150523L
+                            WeekDate = 20150523
                         },
                         new
                         {
-                            AccWkendN = 150530,
+                            WeekEndingDate = 150530,
                             AccAltKeyNum = 573L,
                             AccApWkend = 150606,
                             AccCalPeriod = 5,
@@ -14299,11 +14299,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 21,
-                            AccWkend2N = 20150530L
+                            WeekDate = 20150530
                         },
                         new
                         {
-                            AccWkendN = 150606,
+                            WeekEndingDate = 150606,
                             AccAltKeyNum = 574L,
                             AccApWkend = 150613,
                             AccCalPeriod = 6,
@@ -14318,11 +14318,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 22,
-                            AccWkend2N = 20150606L
+                            WeekDate = 20150606
                         },
                         new
                         {
-                            AccWkendN = 150613,
+                            WeekEndingDate = 150613,
                             AccAltKeyNum = 575L,
                             AccApWkend = 150620,
                             AccCalPeriod = 6,
@@ -14337,11 +14337,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 23,
-                            AccWkend2N = 20150613L
+                            WeekDate = 20150613
                         },
                         new
                         {
-                            AccWkendN = 150620,
+                            WeekEndingDate = 150620,
                             AccAltKeyNum = 576L,
                             AccApWkend = 150627,
                             AccCalPeriod = 6,
@@ -14356,11 +14356,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 24,
-                            AccWkend2N = 20150620L
+                            WeekDate = 20150620
                         },
                         new
                         {
-                            AccWkendN = 150627,
+                            WeekEndingDate = 150627,
                             AccAltKeyNum = 577L,
                             AccApWkend = 150704,
                             AccCalPeriod = 6,
@@ -14375,11 +14375,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 3,
                             AccWeekN = 25,
-                            AccWkend2N = 20150627L
+                            WeekDate = 20150627
                         },
                         new
                         {
-                            AccWkendN = 150704,
+                            WeekEndingDate = 150704,
                             AccAltKeyNum = 578L,
                             AccApWkend = 150711,
                             AccCalPeriod = 7,
@@ -14394,11 +14394,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 26,
-                            AccWkend2N = 20150704L
+                            WeekDate = 20150704
                         },
                         new
                         {
-                            AccWkendN = 150711,
+                            WeekEndingDate = 150711,
                             AccAltKeyNum = 579L,
                             AccApWkend = 150718,
                             AccCalPeriod = 7,
@@ -14413,11 +14413,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 27,
-                            AccWkend2N = 20150711L
+                            WeekDate = 20150711
                         },
                         new
                         {
-                            AccWkendN = 150718,
+                            WeekEndingDate = 150718,
                             AccAltKeyNum = 580L,
                             AccApWkend = 150725,
                             AccCalPeriod = 7,
@@ -14432,11 +14432,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 28,
-                            AccWkend2N = 20150718L
+                            WeekDate = 20150718
                         },
                         new
                         {
-                            AccWkendN = 150725,
+                            WeekEndingDate = 150725,
                             AccAltKeyNum = 581L,
                             AccApWkend = 150801,
                             AccCalPeriod = 7,
@@ -14451,11 +14451,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 29,
-                            AccWkend2N = 20150725L
+                            WeekDate = 20150725
                         },
                         new
                         {
-                            AccWkendN = 150801,
+                            WeekEndingDate = 150801,
                             AccAltKeyNum = 582L,
                             AccApWkend = 150808,
                             AccCalPeriod = 7,
@@ -14470,11 +14470,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 30,
-                            AccWkend2N = 20150801L
+                            WeekDate = 20150801
                         },
                         new
                         {
-                            AccWkendN = 150808,
+                            WeekEndingDate = 150808,
                             AccAltKeyNum = 583L,
                             AccApWkend = 150815,
                             AccCalPeriod = 8,
@@ -14489,11 +14489,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 31,
-                            AccWkend2N = 20150808L
+                            WeekDate = 20150808
                         },
                         new
                         {
-                            AccWkendN = 150815,
+                            WeekEndingDate = 150815,
                             AccAltKeyNum = 584L,
                             AccApWkend = 150822,
                             AccCalPeriod = 8,
@@ -14508,11 +14508,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 32,
-                            AccWkend2N = 20150815L
+                            WeekDate = 20150815
                         },
                         new
                         {
-                            AccWkendN = 150822,
+                            WeekEndingDate = 150822,
                             AccAltKeyNum = 585L,
                             AccApWkend = 150829,
                             AccCalPeriod = 8,
@@ -14527,11 +14527,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 33,
-                            AccWkend2N = 20150822L
+                            WeekDate = 20150822
                         },
                         new
                         {
-                            AccWkendN = 150829,
+                            WeekEndingDate = 150829,
                             AccAltKeyNum = 586L,
                             AccApWkend = 150905,
                             AccCalPeriod = 8,
@@ -14546,11 +14546,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 34,
-                            AccWkend2N = 20150829L
+                            WeekDate = 20150829
                         },
                         new
                         {
-                            AccWkendN = 150905,
+                            WeekEndingDate = 150905,
                             AccAltKeyNum = 587L,
                             AccApWkend = 150912,
                             AccCalPeriod = 9,
@@ -14565,11 +14565,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 35,
-                            AccWkend2N = 20150905L
+                            WeekDate = 20150905
                         },
                         new
                         {
-                            AccWkendN = 150912,
+                            WeekEndingDate = 150912,
                             AccAltKeyNum = 588L,
                             AccApWkend = 150919,
                             AccCalPeriod = 9,
@@ -14584,11 +14584,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 36,
-                            AccWkend2N = 20150912L
+                            WeekDate = 20150912
                         },
                         new
                         {
-                            AccWkendN = 150919,
+                            WeekEndingDate = 150919,
                             AccAltKeyNum = 589L,
                             AccApWkend = 150926,
                             AccCalPeriod = 9,
@@ -14603,11 +14603,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 37,
-                            AccWkend2N = 20150919L
+                            WeekDate = 20150919
                         },
                         new
                         {
-                            AccWkendN = 150926,
+                            WeekEndingDate = 150926,
                             AccAltKeyNum = 590L,
                             AccApWkend = 151003,
                             AccCalPeriod = 9,
@@ -14622,11 +14622,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 4,
                             AccWeekN = 38,
-                            AccWkend2N = 20150926L
+                            WeekDate = 20150926
                         },
                         new
                         {
-                            AccWkendN = 151003,
+                            WeekEndingDate = 151003,
                             AccAltKeyNum = 591L,
                             AccApWkend = 151010,
                             AccCalPeriod = 9,
@@ -14641,11 +14641,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 4,
                             AccWeekN = 39,
-                            AccWkend2N = 20151003L
+                            WeekDate = 20151003
                         },
                         new
                         {
-                            AccWkendN = 151010,
+                            WeekEndingDate = 151010,
                             AccAltKeyNum = 592L,
                             AccApWkend = 151017,
                             AccCalPeriod = 10,
@@ -14660,11 +14660,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 40,
-                            AccWkend2N = 20151010L
+                            WeekDate = 20151010
                         },
                         new
                         {
-                            AccWkendN = 151017,
+                            WeekEndingDate = 151017,
                             AccAltKeyNum = 593L,
                             AccApWkend = 151024,
                             AccCalPeriod = 10,
@@ -14679,11 +14679,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 41,
-                            AccWkend2N = 20151017L
+                            WeekDate = 20151017
                         },
                         new
                         {
-                            AccWkendN = 151024,
+                            WeekEndingDate = 151024,
                             AccAltKeyNum = 594L,
                             AccApWkend = 151031,
                             AccCalPeriod = 10,
@@ -14698,11 +14698,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 42,
-                            AccWkend2N = 20151024L
+                            WeekDate = 20151024
                         },
                         new
                         {
-                            AccWkendN = 151031,
+                            WeekEndingDate = 151031,
                             AccAltKeyNum = 595L,
                             AccApWkend = 151107,
                             AccCalPeriod = 10,
@@ -14717,11 +14717,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 43,
-                            AccWkend2N = 20151031L
+                            WeekDate = 20151031
                         },
                         new
                         {
-                            AccWkendN = 151107,
+                            WeekEndingDate = 151107,
                             AccAltKeyNum = 596L,
                             AccApWkend = 151114,
                             AccCalPeriod = 11,
@@ -14736,11 +14736,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 44,
-                            AccWkend2N = 20151107L
+                            WeekDate = 20151107
                         },
                         new
                         {
-                            AccWkendN = 151114,
+                            WeekEndingDate = 151114,
                             AccAltKeyNum = 597L,
                             AccApWkend = 151121,
                             AccCalPeriod = 11,
@@ -14755,11 +14755,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 45,
-                            AccWkend2N = 20151114L
+                            WeekDate = 20151114
                         },
                         new
                         {
-                            AccWkendN = 151121,
+                            WeekEndingDate = 151121,
                             AccAltKeyNum = 598L,
                             AccApWkend = 151128,
                             AccCalPeriod = 11,
@@ -14774,11 +14774,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 46,
-                            AccWkend2N = 20151121L
+                            WeekDate = 20151121
                         },
                         new
                         {
-                            AccWkendN = 151128,
+                            WeekEndingDate = 151128,
                             AccAltKeyNum = 599L,
                             AccApWkend = 151205,
                             AccCalPeriod = 11,
@@ -14793,11 +14793,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 47,
-                            AccWkend2N = 20151128L
+                            WeekDate = 20151128
                         },
                         new
                         {
-                            AccWkendN = 151205,
+                            WeekEndingDate = 151205,
                             AccAltKeyNum = 600L,
                             AccApWkend = 151212,
                             AccCalPeriod = 12,
@@ -14812,11 +14812,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 48,
-                            AccWkend2N = 20151205L
+                            WeekDate = 20151205
                         },
                         new
                         {
-                            AccWkendN = 151212,
+                            WeekEndingDate = 151212,
                             AccAltKeyNum = 601L,
                             AccApWkend = 151219,
                             AccCalPeriod = 12,
@@ -14831,11 +14831,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 49,
-                            AccWkend2N = 20151212L
+                            WeekDate = 20151212
                         },
                         new
                         {
-                            AccWkendN = 151219,
+                            WeekEndingDate = 151219,
                             AccAltKeyNum = 602L,
                             AccApWkend = 151226,
                             AccCalPeriod = 12,
@@ -14850,11 +14850,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 50,
-                            AccWkend2N = 20151219L
+                            WeekDate = 20151219
                         },
                         new
                         {
-                            AccWkendN = 151226,
+                            WeekEndingDate = 151226,
                             AccAltKeyNum = 603L,
                             AccApWkend = 160102,
                             AccCalPeriod = 12,
@@ -14869,11 +14869,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 51,
-                            AccWkend2N = 20151226L
+                            WeekDate = 20151226
                         },
                         new
                         {
-                            AccWkendN = 160102,
+                            WeekEndingDate = 160102,
                             AccAltKeyNum = 604L,
                             AccApWkend = 160109,
                             AccCalPeriod = 12,
@@ -14888,11 +14888,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 1,
                             AccWeekN = 52,
-                            AccWkend2N = 20160102L
+                            WeekDate = 20160102
                         },
                         new
                         {
-                            AccWkendN = 180106,
+                            WeekEndingDate = 180106,
                             AccAltKeyNum = 733L,
                             AccApWkend = 180113,
                             AccCalPeriod = 1,
@@ -14907,11 +14907,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 1,
-                            AccWkend2N = 20180106L
+                            WeekDate = 20180106
                         },
                         new
                         {
-                            AccWkendN = 180113,
+                            WeekEndingDate = 180113,
                             AccAltKeyNum = 734L,
                             AccApWkend = 180120,
                             AccCalPeriod = 1,
@@ -14926,11 +14926,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 2,
-                            AccWkend2N = 20180113L
+                            WeekDate = 20180113
                         },
                         new
                         {
-                            AccWkendN = 180120,
+                            WeekEndingDate = 180120,
                             AccAltKeyNum = 735L,
                             AccApWkend = 180127,
                             AccCalPeriod = 1,
@@ -14945,11 +14945,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 3,
-                            AccWkend2N = 20180120L
+                            WeekDate = 20180120
                         },
                         new
                         {
-                            AccWkendN = 180127,
+                            WeekEndingDate = 180127,
                             AccAltKeyNum = 736L,
                             AccApWkend = 180203,
                             AccCalPeriod = 1,
@@ -14964,11 +14964,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 4,
-                            AccWkend2N = 20180127L
+                            WeekDate = 20180127
                         },
                         new
                         {
-                            AccWkendN = 180203,
+                            WeekEndingDate = 180203,
                             AccAltKeyNum = 737L,
                             AccApWkend = 180210,
                             AccCalPeriod = 1,
@@ -14983,11 +14983,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 5,
-                            AccWkend2N = 20180203L
+                            WeekDate = 20180203
                         },
                         new
                         {
-                            AccWkendN = 180210,
+                            WeekEndingDate = 180210,
                             AccAltKeyNum = 738L,
                             AccApWkend = 180217,
                             AccCalPeriod = 2,
@@ -15002,11 +15002,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 6,
-                            AccWkend2N = 20180210L
+                            WeekDate = 20180210
                         },
                         new
                         {
-                            AccWkendN = 180217,
+                            WeekEndingDate = 180217,
                             AccAltKeyNum = 739L,
                             AccApWkend = 180224,
                             AccCalPeriod = 2,
@@ -15021,11 +15021,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 7,
-                            AccWkend2N = 20180217L
+                            WeekDate = 20180217
                         },
                         new
                         {
-                            AccWkendN = 180224,
+                            WeekEndingDate = 180224,
                             AccAltKeyNum = 740L,
                             AccApWkend = 180303,
                             AccCalPeriod = 2,
@@ -15040,11 +15040,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 8,
-                            AccWkend2N = 20180224L
+                            WeekDate = 20180224
                         },
                         new
                         {
-                            AccWkendN = 180303,
+                            WeekEndingDate = 180303,
                             AccAltKeyNum = 741L,
                             AccApWkend = 180310,
                             AccCalPeriod = 2,
@@ -15059,11 +15059,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 9,
-                            AccWkend2N = 20180303L
+                            WeekDate = 20180303
                         },
                         new
                         {
-                            AccWkendN = 180310,
+                            WeekEndingDate = 180310,
                             AccAltKeyNum = 742L,
                             AccApWkend = 180317,
                             AccCalPeriod = 3,
@@ -15078,11 +15078,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 10,
-                            AccWkend2N = 20180310L
+                            WeekDate = 20180310
                         },
                         new
                         {
-                            AccWkendN = 180317,
+                            WeekEndingDate = 180317,
                             AccAltKeyNum = 743L,
                             AccApWkend = 180324,
                             AccCalPeriod = 3,
@@ -15097,11 +15097,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 11,
-                            AccWkend2N = 20180317L
+                            WeekDate = 20180317
                         },
                         new
                         {
-                            AccWkendN = 180324,
+                            WeekEndingDate = 180324,
                             AccAltKeyNum = 744L,
                             AccApWkend = 180331,
                             AccCalPeriod = 3,
@@ -15116,11 +15116,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 12,
-                            AccWkend2N = 20180324L
+                            WeekDate = 20180324
                         },
                         new
                         {
-                            AccWkendN = 180331,
+                            WeekEndingDate = 180331,
                             AccAltKeyNum = 745L,
                             AccApWkend = 180407,
                             AccCalPeriod = 3,
@@ -15135,11 +15135,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 2,
                             AccWeekN = 13,
-                            AccWkend2N = 20180331L
+                            WeekDate = 20180331
                         },
                         new
                         {
-                            AccWkendN = 180407,
+                            WeekEndingDate = 180407,
                             AccAltKeyNum = 746L,
                             AccApWkend = 180414,
                             AccCalPeriod = 4,
@@ -15154,11 +15154,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 14,
-                            AccWkend2N = 20180407L
+                            WeekDate = 20180407
                         },
                         new
                         {
-                            AccWkendN = 180414,
+                            WeekEndingDate = 180414,
                             AccAltKeyNum = 747L,
                             AccApWkend = 180421,
                             AccCalPeriod = 4,
@@ -15173,11 +15173,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 15,
-                            AccWkend2N = 20180414L
+                            WeekDate = 20180414
                         },
                         new
                         {
-                            AccWkendN = 180421,
+                            WeekEndingDate = 180421,
                             AccAltKeyNum = 748L,
                             AccApWkend = 180428,
                             AccCalPeriod = 4,
@@ -15192,11 +15192,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 16,
-                            AccWkend2N = 20180421L
+                            WeekDate = 20180421
                         },
                         new
                         {
-                            AccWkendN = 180428,
+                            WeekEndingDate = 180428,
                             AccAltKeyNum = 749L,
                             AccApWkend = 180505,
                             AccCalPeriod = 4,
@@ -15211,11 +15211,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 17,
-                            AccWkend2N = 20180428L
+                            WeekDate = 20180428
                         },
                         new
                         {
-                            AccWkendN = 180505,
+                            WeekEndingDate = 180505,
                             AccAltKeyNum = 750L,
                             AccApWkend = 180512,
                             AccCalPeriod = 5,
@@ -15230,11 +15230,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 18,
-                            AccWkend2N = 20180505L
+                            WeekDate = 20180505
                         },
                         new
                         {
-                            AccWkendN = 180512,
+                            WeekEndingDate = 180512,
                             AccAltKeyNum = 751L,
                             AccApWkend = 180519,
                             AccCalPeriod = 5,
@@ -15249,11 +15249,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 19,
-                            AccWkend2N = 20180512L
+                            WeekDate = 20180512
                         },
                         new
                         {
-                            AccWkendN = 180519,
+                            WeekEndingDate = 180519,
                             AccAltKeyNum = 752L,
                             AccApWkend = 180526,
                             AccCalPeriod = 5,
@@ -15268,11 +15268,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 20,
-                            AccWkend2N = 20180519L
+                            WeekDate = 20180519
                         },
                         new
                         {
-                            AccWkendN = 180526,
+                            WeekEndingDate = 180526,
                             AccAltKeyNum = 753L,
                             AccApWkend = 180602,
                             AccCalPeriod = 5,
@@ -15287,11 +15287,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 21,
-                            AccWkend2N = 20180526L
+                            WeekDate = 20180526
                         },
                         new
                         {
-                            AccWkendN = 180602,
+                            WeekEndingDate = 180602,
                             AccAltKeyNum = 754L,
                             AccApWkend = 180609,
                             AccCalPeriod = 5,
@@ -15306,11 +15306,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 22,
-                            AccWkend2N = 20180602L
+                            WeekDate = 20180602
                         },
                         new
                         {
-                            AccWkendN = 180609,
+                            WeekEndingDate = 180609,
                             AccAltKeyNum = 755L,
                             AccApWkend = 180616,
                             AccCalPeriod = 6,
@@ -15325,11 +15325,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 23,
-                            AccWkend2N = 20180609L
+                            WeekDate = 20180609
                         },
                         new
                         {
-                            AccWkendN = 180616,
+                            WeekEndingDate = 180616,
                             AccAltKeyNum = 756L,
                             AccApWkend = 180623,
                             AccCalPeriod = 6,
@@ -15344,11 +15344,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 24,
-                            AccWkend2N = 20180616L
+                            WeekDate = 20180616
                         },
                         new
                         {
-                            AccWkendN = 180623,
+                            WeekEndingDate = 180623,
                             AccAltKeyNum = 757L,
                             AccApWkend = 180630,
                             AccCalPeriod = 6,
@@ -15363,11 +15363,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 25,
-                            AccWkend2N = 20180623L
+                            WeekDate = 20180623
                         },
                         new
                         {
-                            AccWkendN = 180630,
+                            WeekEndingDate = 180630,
                             AccAltKeyNum = 758L,
                             AccApWkend = 180707,
                             AccCalPeriod = 6,
@@ -15382,11 +15382,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 3,
                             AccWeekN = 26,
-                            AccWkend2N = 20180630L
+                            WeekDate = 20180630
                         },
                         new
                         {
-                            AccWkendN = 180707,
+                            WeekEndingDate = 180707,
                             AccAltKeyNum = 759L,
                             AccApWkend = 180714,
                             AccCalPeriod = 7,
@@ -15401,11 +15401,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 27,
-                            AccWkend2N = 20180707L
+                            WeekDate = 20180707
                         },
                         new
                         {
-                            AccWkendN = 180714,
+                            WeekEndingDate = 180714,
                             AccAltKeyNum = 760L,
                             AccApWkend = 180721,
                             AccCalPeriod = 7,
@@ -15420,11 +15420,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 28,
-                            AccWkend2N = 20180714L
+                            WeekDate = 20180714
                         },
                         new
                         {
-                            AccWkendN = 180721,
+                            WeekEndingDate = 180721,
                             AccAltKeyNum = 761L,
                             AccApWkend = 180728,
                             AccCalPeriod = 7,
@@ -15439,11 +15439,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 29,
-                            AccWkend2N = 20180721L
+                            WeekDate = 20180721
                         },
                         new
                         {
-                            AccWkendN = 180728,
+                            WeekEndingDate = 180728,
                             AccAltKeyNum = 762L,
                             AccApWkend = 180804,
                             AccCalPeriod = 7,
@@ -15458,11 +15458,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 30,
-                            AccWkend2N = 20180728L
+                            WeekDate = 20180728
                         },
                         new
                         {
-                            AccWkendN = 180804,
+                            WeekEndingDate = 180804,
                             AccAltKeyNum = 763L,
                             AccApWkend = 180811,
                             AccCalPeriod = 8,
@@ -15477,11 +15477,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 31,
-                            AccWkend2N = 20180804L
+                            WeekDate = 20180804
                         },
                         new
                         {
-                            AccWkendN = 180811,
+                            WeekEndingDate = 180811,
                             AccAltKeyNum = 764L,
                             AccApWkend = 180818,
                             AccCalPeriod = 8,
@@ -15496,11 +15496,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 32,
-                            AccWkend2N = 20180811L
+                            WeekDate = 20180811
                         },
                         new
                         {
-                            AccWkendN = 180818,
+                            WeekEndingDate = 180818,
                             AccAltKeyNum = 765L,
                             AccApWkend = 180825,
                             AccCalPeriod = 8,
@@ -15515,11 +15515,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 33,
-                            AccWkend2N = 20180818L
+                            WeekDate = 20180818
                         },
                         new
                         {
-                            AccWkendN = 180825,
+                            WeekEndingDate = 180825,
                             AccAltKeyNum = 766L,
                             AccApWkend = 180901,
                             AccCalPeriod = 8,
@@ -15534,11 +15534,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 34,
-                            AccWkend2N = 20180825L
+                            WeekDate = 20180825
                         },
                         new
                         {
-                            AccWkendN = 180901,
+                            WeekEndingDate = 180901,
                             AccAltKeyNum = 767L,
                             AccApWkend = 180908,
                             AccCalPeriod = 8,
@@ -15553,11 +15553,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 35,
-                            AccWkend2N = 20180901L
+                            WeekDate = 20180901
                         },
                         new
                         {
-                            AccWkendN = 180908,
+                            WeekEndingDate = 180908,
                             AccAltKeyNum = 768L,
                             AccApWkend = 180915,
                             AccCalPeriod = 9,
@@ -15572,11 +15572,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 36,
-                            AccWkend2N = 20180908L
+                            WeekDate = 20180908
                         },
                         new
                         {
-                            AccWkendN = 180915,
+                            WeekEndingDate = 180915,
                             AccAltKeyNum = 769L,
                             AccApWkend = 180922,
                             AccCalPeriod = 9,
@@ -15591,11 +15591,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 37,
-                            AccWkend2N = 20180915L
+                            WeekDate = 20180915
                         },
                         new
                         {
-                            AccWkendN = 180922,
+                            WeekEndingDate = 180922,
                             AccAltKeyNum = 770L,
                             AccApWkend = 180929,
                             AccCalPeriod = 9,
@@ -15610,11 +15610,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 38,
-                            AccWkend2N = 20180922L
+                            WeekDate = 20180922
                         },
                         new
                         {
-                            AccWkendN = 180929,
+                            WeekEndingDate = 180929,
                             AccAltKeyNum = 771L,
                             AccApWkend = 181006,
                             AccCalPeriod = 9,
@@ -15629,11 +15629,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 4,
                             AccWeekN = 39,
-                            AccWkend2N = 20180929L
+                            WeekDate = 20180929
                         },
                         new
                         {
-                            AccWkendN = 181006,
+                            WeekEndingDate = 181006,
                             AccAltKeyNum = 772L,
                             AccApWkend = 181013,
                             AccCalPeriod = 10,
@@ -15648,11 +15648,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 40,
-                            AccWkend2N = 20181006L
+                            WeekDate = 20181006
                         },
                         new
                         {
-                            AccWkendN = 181013,
+                            WeekEndingDate = 181013,
                             AccAltKeyNum = 773L,
                             AccApWkend = 181020,
                             AccCalPeriod = 10,
@@ -15667,11 +15667,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 41,
-                            AccWkend2N = 20181013L
+                            WeekDate = 20181013
                         },
                         new
                         {
-                            AccWkendN = 181020,
+                            WeekEndingDate = 181020,
                             AccAltKeyNum = 774L,
                             AccApWkend = 181027,
                             AccCalPeriod = 10,
@@ -15686,11 +15686,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 42,
-                            AccWkend2N = 20181020L
+                            WeekDate = 20181020
                         },
                         new
                         {
-                            AccWkendN = 181027,
+                            WeekEndingDate = 181027,
                             AccAltKeyNum = 775L,
                             AccApWkend = 181103,
                             AccCalPeriod = 10,
@@ -15705,11 +15705,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 43,
-                            AccWkend2N = 20181027L
+                            WeekDate = 20181027
                         },
                         new
                         {
-                            AccWkendN = 181103,
+                            WeekEndingDate = 181103,
                             AccAltKeyNum = 776L,
                             AccApWkend = 181110,
                             AccCalPeriod = 10,
@@ -15724,11 +15724,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 44,
-                            AccWkend2N = 20181103L
+                            WeekDate = 20181103
                         },
                         new
                         {
-                            AccWkendN = 181110,
+                            WeekEndingDate = 181110,
                             AccAltKeyNum = 777L,
                             AccApWkend = 181117,
                             AccCalPeriod = 11,
@@ -15743,11 +15743,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 45,
-                            AccWkend2N = 20181110L
+                            WeekDate = 20181110
                         },
                         new
                         {
-                            AccWkendN = 181117,
+                            WeekEndingDate = 181117,
                             AccAltKeyNum = 778L,
                             AccApWkend = 181124,
                             AccCalPeriod = 11,
@@ -15762,11 +15762,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 46,
-                            AccWkend2N = 20181117L
+                            WeekDate = 20181117
                         },
                         new
                         {
-                            AccWkendN = 181124,
+                            WeekEndingDate = 181124,
                             AccAltKeyNum = 779L,
                             AccApWkend = 181201,
                             AccCalPeriod = 11,
@@ -15781,11 +15781,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 47,
-                            AccWkend2N = 20181124L
+                            WeekDate = 20181124
                         },
                         new
                         {
-                            AccWkendN = 181201,
+                            WeekEndingDate = 181201,
                             AccAltKeyNum = 780L,
                             AccApWkend = 181208,
                             AccCalPeriod = 11,
@@ -15800,11 +15800,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 48,
-                            AccWkend2N = 20181201L
+                            WeekDate = 20181201
                         },
                         new
                         {
-                            AccWkendN = 181208,
+                            WeekEndingDate = 181208,
                             AccAltKeyNum = 781L,
                             AccApWkend = 181215,
                             AccCalPeriod = 12,
@@ -15819,11 +15819,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 49,
-                            AccWkend2N = 20181208L
+                            WeekDate = 20181208
                         },
                         new
                         {
-                            AccWkendN = 181215,
+                            WeekEndingDate = 181215,
                             AccAltKeyNum = 782L,
                             AccApWkend = 181222,
                             AccCalPeriod = 12,
@@ -15838,11 +15838,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 50,
-                            AccWkend2N = 20181215L
+                            WeekDate = 20181215
                         },
                         new
                         {
-                            AccWkendN = 181222,
+                            WeekEndingDate = 181222,
                             AccAltKeyNum = 783L,
                             AccApWkend = 181229,
                             AccCalPeriod = 12,
@@ -15857,11 +15857,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 51,
-                            AccWkend2N = 20181222L
+                            WeekDate = 20181222
                         },
                         new
                         {
-                            AccWkendN = 181229,
+                            WeekEndingDate = 181229,
                             AccAltKeyNum = 784L,
                             AccApWkend = 190105,
                             AccCalPeriod = 12,
@@ -15876,11 +15876,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 1,
                             AccWeekN = 52,
-                            AccWkend2N = 20181229L
+                            WeekDate = 20181229
                         },
                         new
                         {
-                            AccWkendN = 190105,
+                            WeekEndingDate = 190105,
                             AccAltKeyNum = 793L,
                             AccApWkend = 190112,
                             AccCalPeriod = 1,
@@ -15895,11 +15895,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 1,
-                            AccWkend2N = 20190105L
+                            WeekDate = 20190105
                         },
                         new
                         {
-                            AccWkendN = 190112,
+                            WeekEndingDate = 190112,
                             AccAltKeyNum = 794L,
                             AccApWkend = 190119,
                             AccCalPeriod = 1,
@@ -15914,11 +15914,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 2,
-                            AccWkend2N = 20190112L
+                            WeekDate = 20190112
                         },
                         new
                         {
-                            AccWkendN = 190119,
+                            WeekEndingDate = 190119,
                             AccAltKeyNum = 795L,
                             AccApWkend = 190126,
                             AccCalPeriod = 1,
@@ -15933,11 +15933,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 3,
-                            AccWkend2N = 20190119L
+                            WeekDate = 20190119
                         },
                         new
                         {
-                            AccWkendN = 190126,
+                            WeekEndingDate = 190126,
                             AccAltKeyNum = 796L,
                             AccApWkend = 190202,
                             AccCalPeriod = 1,
@@ -15952,11 +15952,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 4,
-                            AccWkend2N = 20190126L
+                            WeekDate = 20190126
                         },
                         new
                         {
-                            AccWkendN = 190202,
+                            WeekEndingDate = 190202,
                             AccAltKeyNum = 797L,
                             AccApWkend = 190209,
                             AccCalPeriod = 1,
@@ -15971,11 +15971,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 5,
-                            AccWkend2N = 20190202L
+                            WeekDate = 20190202
                         },
                         new
                         {
-                            AccWkendN = 190209,
+                            WeekEndingDate = 190209,
                             AccAltKeyNum = 798L,
                             AccApWkend = 190216,
                             AccCalPeriod = 2,
@@ -15990,11 +15990,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 6,
-                            AccWkend2N = 20190209L
+                            WeekDate = 20190209
                         },
                         new
                         {
-                            AccWkendN = 190216,
+                            WeekEndingDate = 190216,
                             AccAltKeyNum = 799L,
                             AccApWkend = 190223,
                             AccCalPeriod = 2,
@@ -16009,11 +16009,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 7,
-                            AccWkend2N = 20190216L
+                            WeekDate = 20190216
                         },
                         new
                         {
-                            AccWkendN = 190223,
+                            WeekEndingDate = 190223,
                             AccAltKeyNum = 800L,
                             AccApWkend = 190302,
                             AccCalPeriod = 2,
@@ -16028,11 +16028,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 8,
-                            AccWkend2N = 20190223L
+                            WeekDate = 20190223
                         },
                         new
                         {
-                            AccWkendN = 190302,
+                            WeekEndingDate = 190302,
                             AccAltKeyNum = 801L,
                             AccApWkend = 190309,
                             AccCalPeriod = 2,
@@ -16047,11 +16047,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 9,
-                            AccWkend2N = 20190302L
+                            WeekDate = 20190302
                         },
                         new
                         {
-                            AccWkendN = 190309,
+                            WeekEndingDate = 190309,
                             AccAltKeyNum = 802L,
                             AccApWkend = 190316,
                             AccCalPeriod = 3,
@@ -16066,11 +16066,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 10,
-                            AccWkend2N = 20190309L
+                            WeekDate = 20190309
                         },
                         new
                         {
-                            AccWkendN = 190316,
+                            WeekEndingDate = 190316,
                             AccAltKeyNum = 803L,
                             AccApWkend = 190323,
                             AccCalPeriod = 3,
@@ -16085,11 +16085,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 11,
-                            AccWkend2N = 20190316L
+                            WeekDate = 20190316
                         },
                         new
                         {
-                            AccWkendN = 190323,
+                            WeekEndingDate = 190323,
                             AccAltKeyNum = 804L,
                             AccApWkend = 190330,
                             AccCalPeriod = 3,
@@ -16104,11 +16104,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 12,
-                            AccWkend2N = 20190323L
+                            WeekDate = 20190323
                         },
                         new
                         {
-                            AccWkendN = 190330,
+                            WeekEndingDate = 190330,
                             AccAltKeyNum = 805L,
                             AccApWkend = 190406,
                             AccCalPeriod = 3,
@@ -16123,11 +16123,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 2,
                             AccWeekN = 13,
-                            AccWkend2N = 20190330L
+                            WeekDate = 20190330
                         },
                         new
                         {
-                            AccWkendN = 190406,
+                            WeekEndingDate = 190406,
                             AccAltKeyNum = 806L,
                             AccApWkend = 190413,
                             AccCalPeriod = 4,
@@ -16142,11 +16142,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 14,
-                            AccWkend2N = 20190406L
+                            WeekDate = 20190406
                         },
                         new
                         {
-                            AccWkendN = 190413,
+                            WeekEndingDate = 190413,
                             AccAltKeyNum = 807L,
                             AccApWkend = 190420,
                             AccCalPeriod = 4,
@@ -16161,11 +16161,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 15,
-                            AccWkend2N = 20190413L
+                            WeekDate = 20190413
                         },
                         new
                         {
-                            AccWkendN = 190420,
+                            WeekEndingDate = 190420,
                             AccAltKeyNum = 808L,
                             AccApWkend = 190427,
                             AccCalPeriod = 4,
@@ -16180,11 +16180,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 16,
-                            AccWkend2N = 20190420L
+                            WeekDate = 20190420
                         },
                         new
                         {
-                            AccWkendN = 190427,
+                            WeekEndingDate = 190427,
                             AccAltKeyNum = 809L,
                             AccApWkend = 190504,
                             AccCalPeriod = 4,
@@ -16199,11 +16199,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 17,
-                            AccWkend2N = 20190427L
+                            WeekDate = 20190427
                         },
                         new
                         {
-                            AccWkendN = 190504,
+                            WeekEndingDate = 190504,
                             AccAltKeyNum = 810L,
                             AccApWkend = 190511,
                             AccCalPeriod = 5,
@@ -16218,11 +16218,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 18,
-                            AccWkend2N = 20190504L
+                            WeekDate = 20190504
                         },
                         new
                         {
-                            AccWkendN = 190511,
+                            WeekEndingDate = 190511,
                             AccAltKeyNum = 811L,
                             AccApWkend = 190518,
                             AccCalPeriod = 5,
@@ -16237,11 +16237,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 19,
-                            AccWkend2N = 20190511L
+                            WeekDate = 20190511
                         },
                         new
                         {
-                            AccWkendN = 190518,
+                            WeekEndingDate = 190518,
                             AccAltKeyNum = 812L,
                             AccApWkend = 190525,
                             AccCalPeriod = 5,
@@ -16256,11 +16256,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 20,
-                            AccWkend2N = 20190518L
+                            WeekDate = 20190518
                         },
                         new
                         {
-                            AccWkendN = 190525,
+                            WeekEndingDate = 190525,
                             AccAltKeyNum = 813L,
                             AccApWkend = 190601,
                             AccCalPeriod = 5,
@@ -16275,11 +16275,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 21,
-                            AccWkend2N = 20190525L
+                            WeekDate = 20190525
                         },
                         new
                         {
-                            AccWkendN = 190601,
+                            WeekEndingDate = 190601,
                             AccAltKeyNum = 814L,
                             AccApWkend = 190608,
                             AccCalPeriod = 5,
@@ -16294,11 +16294,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 22,
-                            AccWkend2N = 20190601L
+                            WeekDate = 20190601
                         },
                         new
                         {
-                            AccWkendN = 190608,
+                            WeekEndingDate = 190608,
                             AccAltKeyNum = 815L,
                             AccApWkend = 190615,
                             AccCalPeriod = 6,
@@ -16313,11 +16313,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 23,
-                            AccWkend2N = 20190608L
+                            WeekDate = 20190608
                         },
                         new
                         {
-                            AccWkendN = 190615,
+                            WeekEndingDate = 190615,
                             AccAltKeyNum = 816L,
                             AccApWkend = 190622,
                             AccCalPeriod = 6,
@@ -16332,11 +16332,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 24,
-                            AccWkend2N = 20190615L
+                            WeekDate = 20190615
                         },
                         new
                         {
-                            AccWkendN = 190622,
+                            WeekEndingDate = 190622,
                             AccAltKeyNum = 817L,
                             AccApWkend = 190629,
                             AccCalPeriod = 6,
@@ -16351,11 +16351,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 25,
-                            AccWkend2N = 20190622L
+                            WeekDate = 20190622
                         },
                         new
                         {
-                            AccWkendN = 190629,
+                            WeekEndingDate = 190629,
                             AccAltKeyNum = 818L,
                             AccApWkend = 190706,
                             AccCalPeriod = 6,
@@ -16370,11 +16370,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 3,
                             AccWeekN = 26,
-                            AccWkend2N = 20190629L
+                            WeekDate = 20190629
                         },
                         new
                         {
-                            AccWkendN = 190706,
+                            WeekEndingDate = 190706,
                             AccAltKeyNum = 819L,
                             AccApWkend = 190713,
                             AccCalPeriod = 7,
@@ -16389,11 +16389,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 27,
-                            AccWkend2N = 20190706L
+                            WeekDate = 20190706
                         },
                         new
                         {
-                            AccWkendN = 190713,
+                            WeekEndingDate = 190713,
                             AccAltKeyNum = 820L,
                             AccApWkend = 190720,
                             AccCalPeriod = 7,
@@ -16408,11 +16408,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 28,
-                            AccWkend2N = 20190713L
+                            WeekDate = 20190713
                         },
                         new
                         {
-                            AccWkendN = 190720,
+                            WeekEndingDate = 190720,
                             AccAltKeyNum = 821L,
                             AccApWkend = 190727,
                             AccCalPeriod = 7,
@@ -16427,11 +16427,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 29,
-                            AccWkend2N = 20190720L
+                            WeekDate = 20190720
                         },
                         new
                         {
-                            AccWkendN = 190727,
+                            WeekEndingDate = 190727,
                             AccAltKeyNum = 822L,
                             AccApWkend = 190803,
                             AccCalPeriod = 7,
@@ -16446,11 +16446,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 30,
-                            AccWkend2N = 20190727L
+                            WeekDate = 20190727
                         },
                         new
                         {
-                            AccWkendN = 190803,
+                            WeekEndingDate = 190803,
                             AccAltKeyNum = 823L,
                             AccApWkend = 190810,
                             AccCalPeriod = 7,
@@ -16465,11 +16465,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 31,
-                            AccWkend2N = 20190803L
+                            WeekDate = 20190803
                         },
                         new
                         {
-                            AccWkendN = 190810,
+                            WeekEndingDate = 190810,
                             AccAltKeyNum = 824L,
                             AccApWkend = 190817,
                             AccCalPeriod = 8,
@@ -16484,11 +16484,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 32,
-                            AccWkend2N = 20190810L
+                            WeekDate = 20190810
                         },
                         new
                         {
-                            AccWkendN = 190817,
+                            WeekEndingDate = 190817,
                             AccAltKeyNum = 825L,
                             AccApWkend = 190824,
                             AccCalPeriod = 8,
@@ -16503,11 +16503,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 33,
-                            AccWkend2N = 20190817L
+                            WeekDate = 20190817
                         },
                         new
                         {
-                            AccWkendN = 190824,
+                            WeekEndingDate = 190824,
                             AccAltKeyNum = 826L,
                             AccApWkend = 190831,
                             AccCalPeriod = 8,
@@ -16522,11 +16522,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 34,
-                            AccWkend2N = 20190824L
+                            WeekDate = 20190824
                         },
                         new
                         {
-                            AccWkendN = 190831,
+                            WeekEndingDate = 190831,
                             AccAltKeyNum = 827L,
                             AccApWkend = 190907,
                             AccCalPeriod = 8,
@@ -16541,11 +16541,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 35,
-                            AccWkend2N = 20190831L
+                            WeekDate = 20190831
                         },
                         new
                         {
-                            AccWkendN = 190907,
+                            WeekEndingDate = 190907,
                             AccAltKeyNum = 828L,
                             AccApWkend = 190914,
                             AccCalPeriod = 9,
@@ -16560,11 +16560,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 36,
-                            AccWkend2N = 20190907L
+                            WeekDate = 20190907
                         },
                         new
                         {
-                            AccWkendN = 190914,
+                            WeekEndingDate = 190914,
                             AccAltKeyNum = 829L,
                             AccApWkend = 190921,
                             AccCalPeriod = 9,
@@ -16579,11 +16579,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 37,
-                            AccWkend2N = 20190914L
+                            WeekDate = 20190914
                         },
                         new
                         {
-                            AccWkendN = 190921,
+                            WeekEndingDate = 190921,
                             AccAltKeyNum = 830L,
                             AccApWkend = 190928,
                             AccCalPeriod = 9,
@@ -16598,11 +16598,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 38,
-                            AccWkend2N = 20190921L
+                            WeekDate = 20190921
                         },
                         new
                         {
-                            AccWkendN = 190928,
+                            WeekEndingDate = 190928,
                             AccAltKeyNum = 831L,
                             AccApWkend = 191005,
                             AccCalPeriod = 9,
@@ -16617,11 +16617,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 4,
                             AccWeekN = 39,
-                            AccWkend2N = 20190928L
+                            WeekDate = 20190928
                         },
                         new
                         {
-                            AccWkendN = 191005,
+                            WeekEndingDate = 191005,
                             AccAltKeyNum = 832L,
                             AccApWkend = 191012,
                             AccCalPeriod = 10,
@@ -16636,11 +16636,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 40,
-                            AccWkend2N = 20191005L
+                            WeekDate = 20191005
                         },
                         new
                         {
-                            AccWkendN = 191012,
+                            WeekEndingDate = 191012,
                             AccAltKeyNum = 833L,
                             AccApWkend = 191019,
                             AccCalPeriod = 10,
@@ -16655,11 +16655,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 41,
-                            AccWkend2N = 20191012L
+                            WeekDate = 20191012
                         },
                         new
                         {
-                            AccWkendN = 191019,
+                            WeekEndingDate = 191019,
                             AccAltKeyNum = 834L,
                             AccApWkend = 191026,
                             AccCalPeriod = 10,
@@ -16674,11 +16674,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 42,
-                            AccWkend2N = 20191019L
+                            WeekDate = 20191019
                         },
                         new
                         {
-                            AccWkendN = 191026,
+                            WeekEndingDate = 191026,
                             AccAltKeyNum = 835L,
                             AccApWkend = 191102,
                             AccCalPeriod = 10,
@@ -16693,11 +16693,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 43,
-                            AccWkend2N = 20191026L
+                            WeekDate = 20191026
                         },
                         new
                         {
-                            AccWkendN = 191102,
+                            WeekEndingDate = 191102,
                             AccAltKeyNum = 836L,
                             AccApWkend = 191109,
                             AccCalPeriod = 10,
@@ -16712,11 +16712,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 44,
-                            AccWkend2N = 20191102L
+                            WeekDate = 20191102
                         },
                         new
                         {
-                            AccWkendN = 191109,
+                            WeekEndingDate = 191109,
                             AccAltKeyNum = 837L,
                             AccApWkend = 191116,
                             AccCalPeriod = 11,
@@ -16731,11 +16731,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 45,
-                            AccWkend2N = 20191109L
+                            WeekDate = 20191109
                         },
                         new
                         {
-                            AccWkendN = 191116,
+                            WeekEndingDate = 191116,
                             AccAltKeyNum = 838L,
                             AccApWkend = 191123,
                             AccCalPeriod = 11,
@@ -16750,11 +16750,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 46,
-                            AccWkend2N = 20191116L
+                            WeekDate = 20191116
                         },
                         new
                         {
-                            AccWkendN = 191123,
+                            WeekEndingDate = 191123,
                             AccAltKeyNum = 839L,
                             AccApWkend = 191130,
                             AccCalPeriod = 11,
@@ -16769,11 +16769,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 47,
-                            AccWkend2N = 20191123L
+                            WeekDate = 20191123
                         },
                         new
                         {
-                            AccWkendN = 191130,
+                            WeekEndingDate = 191130,
                             AccAltKeyNum = 840L,
                             AccApWkend = 191207,
                             AccCalPeriod = 11,
@@ -16788,11 +16788,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 48,
-                            AccWkend2N = 20191130L
+                            WeekDate = 20191130
                         },
                         new
                         {
-                            AccWkendN = 191207,
+                            WeekEndingDate = 191207,
                             AccAltKeyNum = 841L,
                             AccApWkend = 191214,
                             AccCalPeriod = 12,
@@ -16807,11 +16807,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 49,
-                            AccWkend2N = 20191207L
+                            WeekDate = 20191207
                         },
                         new
                         {
-                            AccWkendN = 191214,
+                            WeekEndingDate = 191214,
                             AccAltKeyNum = 842L,
                             AccApWkend = 191221,
                             AccCalPeriod = 12,
@@ -16826,11 +16826,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 50,
-                            AccWkend2N = 20191214L
+                            WeekDate = 20191214
                         },
                         new
                         {
-                            AccWkendN = 191221,
+                            WeekEndingDate = 191221,
                             AccAltKeyNum = 843L,
                             AccApWkend = 191228,
                             AccCalPeriod = 12,
@@ -16845,11 +16845,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 51,
-                            AccWkend2N = 20191221L
+                            WeekDate = 20191221
                         },
                         new
                         {
-                            AccWkendN = 191228,
+                            WeekEndingDate = 191228,
                             AccAltKeyNum = 844L,
                             AccApWkend = 200104,
                             AccCalPeriod = 12,
@@ -16864,11 +16864,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 1,
                             AccWeekN = 52,
-                            AccWkend2N = 20191228L
+                            WeekDate = 20191228
                         },
                         new
                         {
-                            AccWkendN = 200104,
+                            WeekEndingDate = 200104,
                             AccAltKeyNum = 853L,
                             AccApWkend = 200111,
                             AccCalPeriod = 1,
@@ -16883,11 +16883,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 1,
-                            AccWkend2N = 20200104L
+                            WeekDate = 20200104
                         },
                         new
                         {
-                            AccWkendN = 200111,
+                            WeekEndingDate = 200111,
                             AccAltKeyNum = 854L,
                             AccApWkend = 200118,
                             AccCalPeriod = 1,
@@ -16902,11 +16902,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 2,
-                            AccWkend2N = 20200111L
+                            WeekDate = 20200111
                         },
                         new
                         {
-                            AccWkendN = 200118,
+                            WeekEndingDate = 200118,
                             AccAltKeyNum = 855L,
                             AccApWkend = 200125,
                             AccCalPeriod = 1,
@@ -16921,11 +16921,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 3,
-                            AccWkend2N = 20200118L
+                            WeekDate = 20200118
                         },
                         new
                         {
-                            AccWkendN = 200125,
+                            WeekEndingDate = 200125,
                             AccAltKeyNum = 856L,
                             AccApWkend = 200201,
                             AccCalPeriod = 1,
@@ -16940,11 +16940,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 4,
-                            AccWkend2N = 20200125L
+                            WeekDate = 20200125
                         },
                         new
                         {
-                            AccWkendN = 200201,
+                            WeekEndingDate = 200201,
                             AccAltKeyNum = 857L,
                             AccApWkend = 200208,
                             AccCalPeriod = 1,
@@ -16959,11 +16959,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 5,
-                            AccWkend2N = 20200201L
+                            WeekDate = 20200201
                         },
                         new
                         {
-                            AccWkendN = 200208,
+                            WeekEndingDate = 200208,
                             AccAltKeyNum = 858L,
                             AccApWkend = 200215,
                             AccCalPeriod = 2,
@@ -16978,11 +16978,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 6,
-                            AccWkend2N = 20200208L
+                            WeekDate = 20200208
                         },
                         new
                         {
-                            AccWkendN = 200215,
+                            WeekEndingDate = 200215,
                             AccAltKeyNum = 859L,
                             AccApWkend = 200222,
                             AccCalPeriod = 2,
@@ -16997,11 +16997,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 7,
-                            AccWkend2N = 20200215L
+                            WeekDate = 20200215
                         },
                         new
                         {
-                            AccWkendN = 200222,
+                            WeekEndingDate = 200222,
                             AccAltKeyNum = 860L,
                             AccApWkend = 200229,
                             AccCalPeriod = 2,
@@ -17016,11 +17016,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 8,
-                            AccWkend2N = 20200222L
+                            WeekDate = 20200222
                         },
                         new
                         {
-                            AccWkendN = 200229,
+                            WeekEndingDate = 200229,
                             AccAltKeyNum = 861L,
                             AccApWkend = 200307,
                             AccCalPeriod = 2,
@@ -17035,11 +17035,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 9,
-                            AccWkend2N = 20200229L
+                            WeekDate = 20200229
                         },
                         new
                         {
-                            AccWkendN = 200307,
+                            WeekEndingDate = 200307,
                             AccAltKeyNum = 862L,
                             AccApWkend = 200314,
                             AccCalPeriod = 3,
@@ -17054,11 +17054,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 10,
-                            AccWkend2N = 20200307L
+                            WeekDate = 20200307
                         },
                         new
                         {
-                            AccWkendN = 200314,
+                            WeekEndingDate = 200314,
                             AccAltKeyNum = 863L,
                             AccApWkend = 200321,
                             AccCalPeriod = 3,
@@ -17073,11 +17073,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 11,
-                            AccWkend2N = 20200314L
+                            WeekDate = 20200314
                         },
                         new
                         {
-                            AccWkendN = 200321,
+                            WeekEndingDate = 200321,
                             AccAltKeyNum = 864L,
                             AccApWkend = 200328,
                             AccCalPeriod = 3,
@@ -17092,11 +17092,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 12,
-                            AccWkend2N = 20200321L
+                            WeekDate = 20200321
                         },
                         new
                         {
-                            AccWkendN = 200328,
+                            WeekEndingDate = 200328,
                             AccAltKeyNum = 865L,
                             AccApWkend = 200404,
                             AccCalPeriod = 3,
@@ -17111,11 +17111,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 2,
                             AccWeekN = 13,
-                            AccWkend2N = 20200328L
+                            WeekDate = 20200328
                         },
                         new
                         {
-                            AccWkendN = 200404,
+                            WeekEndingDate = 200404,
                             AccAltKeyNum = 866L,
                             AccApWkend = 200411,
                             AccCalPeriod = 4,
@@ -17130,11 +17130,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 14,
-                            AccWkend2N = 20200404L
+                            WeekDate = 20200404
                         },
                         new
                         {
-                            AccWkendN = 200411,
+                            WeekEndingDate = 200411,
                             AccAltKeyNum = 867L,
                             AccApWkend = 200418,
                             AccCalPeriod = 4,
@@ -17149,11 +17149,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 15,
-                            AccWkend2N = 20200411L
+                            WeekDate = 20200411
                         },
                         new
                         {
-                            AccWkendN = 200418,
+                            WeekEndingDate = 200418,
                             AccAltKeyNum = 868L,
                             AccApWkend = 200425,
                             AccCalPeriod = 4,
@@ -17168,11 +17168,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 16,
-                            AccWkend2N = 20200418L
+                            WeekDate = 20200418
                         },
                         new
                         {
-                            AccWkendN = 200425,
+                            WeekEndingDate = 200425,
                             AccAltKeyNum = 869L,
                             AccApWkend = 200502,
                             AccCalPeriod = 4,
@@ -17187,11 +17187,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 17,
-                            AccWkend2N = 20200425L
+                            WeekDate = 20200425
                         },
                         new
                         {
-                            AccWkendN = 200502,
+                            WeekEndingDate = 200502,
                             AccAltKeyNum = 870L,
                             AccApWkend = 200509,
                             AccCalPeriod = 4,
@@ -17206,11 +17206,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 18,
-                            AccWkend2N = 20200502L
+                            WeekDate = 20200502
                         },
                         new
                         {
-                            AccWkendN = 200509,
+                            WeekEndingDate = 200509,
                             AccAltKeyNum = 871L,
                             AccApWkend = 200516,
                             AccCalPeriod = 5,
@@ -17225,11 +17225,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 19,
-                            AccWkend2N = 20200509L
+                            WeekDate = 20200509
                         },
                         new
                         {
-                            AccWkendN = 200516,
+                            WeekEndingDate = 200516,
                             AccAltKeyNum = 872L,
                             AccApWkend = 200523,
                             AccCalPeriod = 5,
@@ -17244,11 +17244,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 20,
-                            AccWkend2N = 20200516L
+                            WeekDate = 20200516
                         },
                         new
                         {
-                            AccWkendN = 200523,
+                            WeekEndingDate = 200523,
                             AccAltKeyNum = 873L,
                             AccApWkend = 200530,
                             AccCalPeriod = 5,
@@ -17263,11 +17263,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 21,
-                            AccWkend2N = 20200523L
+                            WeekDate = 20200523
                         },
                         new
                         {
-                            AccWkendN = 200530,
+                            WeekEndingDate = 200530,
                             AccAltKeyNum = 874L,
                             AccApWkend = 200606,
                             AccCalPeriod = 5,
@@ -17282,11 +17282,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 22,
-                            AccWkend2N = 20200530L
+                            WeekDate = 20200530
                         },
                         new
                         {
-                            AccWkendN = 200606,
+                            WeekEndingDate = 200606,
                             AccAltKeyNum = 875L,
                             AccApWkend = 200613,
                             AccCalPeriod = 6,
@@ -17301,11 +17301,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 23,
-                            AccWkend2N = 20200606L
+                            WeekDate = 20200606
                         },
                         new
                         {
-                            AccWkendN = 200613,
+                            WeekEndingDate = 200613,
                             AccAltKeyNum = 876L,
                             AccApWkend = 200620,
                             AccCalPeriod = 6,
@@ -17320,11 +17320,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 24,
-                            AccWkend2N = 20200613L
+                            WeekDate = 20200613
                         },
                         new
                         {
-                            AccWkendN = 200620,
+                            WeekEndingDate = 200620,
                             AccAltKeyNum = 877L,
                             AccApWkend = 200627,
                             AccCalPeriod = 6,
@@ -17339,11 +17339,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 25,
-                            AccWkend2N = 20200620L
+                            WeekDate = 20200620
                         },
                         new
                         {
-                            AccWkendN = 200627,
+                            WeekEndingDate = 200627,
                             AccAltKeyNum = 878L,
                             AccApWkend = 200704,
                             AccCalPeriod = 6,
@@ -17358,11 +17358,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 3,
                             AccWeekN = 26,
-                            AccWkend2N = 20200627L
+                            WeekDate = 20200627
                         },
                         new
                         {
-                            AccWkendN = 200704,
+                            WeekEndingDate = 200704,
                             AccAltKeyNum = 879L,
                             AccApWkend = 200711,
                             AccCalPeriod = 7,
@@ -17377,11 +17377,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 27,
-                            AccWkend2N = 20200704L
+                            WeekDate = 20200704
                         },
                         new
                         {
-                            AccWkendN = 200711,
+                            WeekEndingDate = 200711,
                             AccAltKeyNum = 880L,
                             AccApWkend = 200718,
                             AccCalPeriod = 7,
@@ -17396,11 +17396,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 28,
-                            AccWkend2N = 20200711L
+                            WeekDate = 20200711
                         },
                         new
                         {
-                            AccWkendN = 200718,
+                            WeekEndingDate = 200718,
                             AccAltKeyNum = 881L,
                             AccApWkend = 200725,
                             AccCalPeriod = 7,
@@ -17415,11 +17415,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 29,
-                            AccWkend2N = 20200718L
+                            WeekDate = 20200718
                         },
                         new
                         {
-                            AccWkendN = 200725,
+                            WeekEndingDate = 200725,
                             AccAltKeyNum = 882L,
                             AccApWkend = 200801,
                             AccCalPeriod = 7,
@@ -17434,11 +17434,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 30,
-                            AccWkend2N = 20200725L
+                            WeekDate = 20200725
                         },
                         new
                         {
-                            AccWkendN = 200801,
+                            WeekEndingDate = 200801,
                             AccAltKeyNum = 883L,
                             AccApWkend = 200808,
                             AccCalPeriod = 7,
@@ -17453,11 +17453,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 31,
-                            AccWkend2N = 20200801L
+                            WeekDate = 20200801
                         },
                         new
                         {
-                            AccWkendN = 200808,
+                            WeekEndingDate = 200808,
                             AccAltKeyNum = 884L,
                             AccApWkend = 200815,
                             AccCalPeriod = 8,
@@ -17472,11 +17472,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 32,
-                            AccWkend2N = 20200808L
+                            WeekDate = 20200808
                         },
                         new
                         {
-                            AccWkendN = 200815,
+                            WeekEndingDate = 200815,
                             AccAltKeyNum = 885L,
                             AccApWkend = 200822,
                             AccCalPeriod = 8,
@@ -17491,11 +17491,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 33,
-                            AccWkend2N = 20200815L
+                            WeekDate = 20200815
                         },
                         new
                         {
-                            AccWkendN = 200822,
+                            WeekEndingDate = 200822,
                             AccAltKeyNum = 886L,
                             AccApWkend = 200829,
                             AccCalPeriod = 8,
@@ -17510,11 +17510,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 34,
-                            AccWkend2N = 20200822L
+                            WeekDate = 20200822
                         },
                         new
                         {
-                            AccWkendN = 200829,
+                            WeekEndingDate = 200829,
                             AccAltKeyNum = 887L,
                             AccApWkend = 200905,
                             AccCalPeriod = 8,
@@ -17529,11 +17529,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 35,
-                            AccWkend2N = 20200829L
+                            WeekDate = 20200829
                         },
                         new
                         {
-                            AccWkendN = 200905,
+                            WeekEndingDate = 200905,
                             AccAltKeyNum = 888L,
                             AccApWkend = 200912,
                             AccCalPeriod = 9,
@@ -17548,11 +17548,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 36,
-                            AccWkend2N = 20200905L
+                            WeekDate = 20200905
                         },
                         new
                         {
-                            AccWkendN = 200912,
+                            WeekEndingDate = 200912,
                             AccAltKeyNum = 889L,
                             AccApWkend = 200919,
                             AccCalPeriod = 9,
@@ -17567,11 +17567,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 37,
-                            AccWkend2N = 20200912L
+                            WeekDate = 20200912
                         },
                         new
                         {
-                            AccWkendN = 200919,
+                            WeekEndingDate = 200919,
                             AccAltKeyNum = 890L,
                             AccApWkend = 200926,
                             AccCalPeriod = 9,
@@ -17586,11 +17586,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 38,
-                            AccWkend2N = 20200919L
+                            WeekDate = 20200919
                         },
                         new
                         {
-                            AccWkendN = 200926,
+                            WeekEndingDate = 200926,
                             AccAltKeyNum = 891L,
                             AccApWkend = 201003,
                             AccCalPeriod = 9,
@@ -17605,11 +17605,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 4,
                             AccWeekN = 39,
-                            AccWkend2N = 20200926L
+                            WeekDate = 20200926
                         },
                         new
                         {
-                            AccWkendN = 201003,
+                            WeekEndingDate = 201003,
                             AccAltKeyNum = 892L,
                             AccApWkend = 201010,
                             AccCalPeriod = 9,
@@ -17624,11 +17624,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 4,
                             AccWeekN = 40,
-                            AccWkend2N = 20201003L
+                            WeekDate = 20201003
                         },
                         new
                         {
-                            AccWkendN = 201010,
+                            WeekEndingDate = 201010,
                             AccAltKeyNum = 893L,
                             AccApWkend = 201017,
                             AccCalPeriod = 10,
@@ -17643,11 +17643,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 41,
-                            AccWkend2N = 20201010L
+                            WeekDate = 20201010
                         },
                         new
                         {
-                            AccWkendN = 201017,
+                            WeekEndingDate = 201017,
                             AccAltKeyNum = 894L,
                             AccApWkend = 201024,
                             AccCalPeriod = 10,
@@ -17662,11 +17662,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 42,
-                            AccWkend2N = 20201017L
+                            WeekDate = 20201017
                         },
                         new
                         {
-                            AccWkendN = 201024,
+                            WeekEndingDate = 201024,
                             AccAltKeyNum = 895L,
                             AccApWkend = 201031,
                             AccCalPeriod = 10,
@@ -17681,11 +17681,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 43,
-                            AccWkend2N = 20201024L
+                            WeekDate = 20201024
                         },
                         new
                         {
-                            AccWkendN = 201031,
+                            WeekEndingDate = 201031,
                             AccAltKeyNum = 896L,
                             AccApWkend = 201107,
                             AccCalPeriod = 10,
@@ -17700,11 +17700,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 44,
-                            AccWkend2N = 20201031L
+                            WeekDate = 20201031
                         },
                         new
                         {
-                            AccWkendN = 201107,
+                            WeekEndingDate = 201107,
                             AccAltKeyNum = 897L,
                             AccApWkend = 201114,
                             AccCalPeriod = 11,
@@ -17719,11 +17719,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 45,
-                            AccWkend2N = 20201107L
+                            WeekDate = 20201107
                         },
                         new
                         {
-                            AccWkendN = 201114,
+                            WeekEndingDate = 201114,
                             AccAltKeyNum = 898L,
                             AccApWkend = 201121,
                             AccCalPeriod = 11,
@@ -17738,11 +17738,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 46,
-                            AccWkend2N = 20201114L
+                            WeekDate = 20201114
                         },
                         new
                         {
-                            AccWkendN = 201121,
+                            WeekEndingDate = 201121,
                             AccAltKeyNum = 899L,
                             AccApWkend = 201128,
                             AccCalPeriod = 11,
@@ -17757,11 +17757,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 47,
-                            AccWkend2N = 20201121L
+                            WeekDate = 20201121
                         },
                         new
                         {
-                            AccWkendN = 201128,
+                            WeekEndingDate = 201128,
                             AccAltKeyNum = 900L,
                             AccApWkend = 201205,
                             AccCalPeriod = 11,
@@ -17776,11 +17776,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 48,
-                            AccWkend2N = 20201128L
+                            WeekDate = 20201128
                         },
                         new
                         {
-                            AccWkendN = 201205,
+                            WeekEndingDate = 201205,
                             AccAltKeyNum = 901L,
                             AccApWkend = 201212,
                             AccCalPeriod = 12,
@@ -17795,11 +17795,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 49,
-                            AccWkend2N = 20201205L
+                            WeekDate = 20201205
                         },
                         new
                         {
-                            AccWkendN = 201212,
+                            WeekEndingDate = 201212,
                             AccAltKeyNum = 902L,
                             AccApWkend = 201219,
                             AccCalPeriod = 12,
@@ -17814,11 +17814,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 50,
-                            AccWkend2N = 20201212L
+                            WeekDate = 20201212
                         },
                         new
                         {
-                            AccWkendN = 201219,
+                            WeekEndingDate = 201219,
                             AccAltKeyNum = 903L,
                             AccApWkend = 201226,
                             AccCalPeriod = 12,
@@ -17833,11 +17833,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 51,
-                            AccWkend2N = 20201219L
+                            WeekDate = 20201219
                         },
                         new
                         {
-                            AccWkendN = 201226,
+                            WeekEndingDate = 201226,
                             AccAltKeyNum = 904L,
                             AccApWkend = 210102,
                             AccCalPeriod = 12,
@@ -17852,11 +17852,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 52,
-                            AccWkend2N = 20201226L
+                            WeekDate = 20201226
                         },
                         new
                         {
-                            AccWkendN = 210102,
+                            WeekEndingDate = 210102,
                             AccAltKeyNum = 905L,
                             AccApWkend = 210109,
                             AccCalPeriod = 12,
@@ -17871,11 +17871,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 1,
                             AccWeekN = 53,
-                            AccWkend2N = 20210102L
+                            WeekDate = 20210102
                         },
                         new
                         {
-                            AccWkendN = 160109,
+                            WeekEndingDate = 160109,
                             AccAltKeyNum = 613L,
                             AccApWkend = 160116,
                             AccCalPeriod = 1,
@@ -17890,11 +17890,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 1,
-                            AccWkend2N = 20160109L
+                            WeekDate = 20160109
                         },
                         new
                         {
-                            AccWkendN = 160116,
+                            WeekEndingDate = 160116,
                             AccAltKeyNum = 614L,
                             AccApWkend = 160123,
                             AccCalPeriod = 1,
@@ -17909,11 +17909,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 2,
-                            AccWkend2N = 20160116L
+                            WeekDate = 20160116
                         },
                         new
                         {
-                            AccWkendN = 160123,
+                            WeekEndingDate = 160123,
                             AccAltKeyNum = 615L,
                             AccApWkend = 160130,
                             AccCalPeriod = 1,
@@ -17928,11 +17928,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 3,
-                            AccWkend2N = 20160123L
+                            WeekDate = 20160123
                         },
                         new
                         {
-                            AccWkendN = 160130,
+                            WeekEndingDate = 160130,
                             AccAltKeyNum = 616L,
                             AccApWkend = 160206,
                             AccCalPeriod = 1,
@@ -17947,11 +17947,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 4,
-                            AccWkend2N = 20160130L
+                            WeekDate = 20160130
                         },
                         new
                         {
-                            AccWkendN = 160206,
+                            WeekEndingDate = 160206,
                             AccAltKeyNum = 617L,
                             AccApWkend = 160213,
                             AccCalPeriod = 2,
@@ -17966,11 +17966,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 5,
-                            AccWkend2N = 20160206L
+                            WeekDate = 20160206
                         },
                         new
                         {
-                            AccWkendN = 160213,
+                            WeekEndingDate = 160213,
                             AccAltKeyNum = 618L,
                             AccApWkend = 160220,
                             AccCalPeriod = 2,
@@ -17985,11 +17985,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 6,
-                            AccWkend2N = 20160213L
+                            WeekDate = 20160213
                         },
                         new
                         {
-                            AccWkendN = 160220,
+                            WeekEndingDate = 160220,
                             AccAltKeyNum = 619L,
                             AccApWkend = 160227,
                             AccCalPeriod = 2,
@@ -18004,11 +18004,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 7,
-                            AccWkend2N = 20160220L
+                            WeekDate = 20160220
                         },
                         new
                         {
-                            AccWkendN = 160227,
+                            WeekEndingDate = 160227,
                             AccAltKeyNum = 620L,
                             AccApWkend = 160305,
                             AccCalPeriod = 2,
@@ -18023,11 +18023,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 8,
-                            AccWkend2N = 20160227L
+                            WeekDate = 20160227
                         },
                         new
                         {
-                            AccWkendN = 160305,
+                            WeekEndingDate = 160305,
                             AccAltKeyNum = 621L,
                             AccApWkend = 160312,
                             AccCalPeriod = 3,
@@ -18042,11 +18042,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 9,
-                            AccWkend2N = 20160305L
+                            WeekDate = 20160305
                         },
                         new
                         {
-                            AccWkendN = 160312,
+                            WeekEndingDate = 160312,
                             AccAltKeyNum = 622L,
                             AccApWkend = 160319,
                             AccCalPeriod = 3,
@@ -18061,11 +18061,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 10,
-                            AccWkend2N = 20160312L
+                            WeekDate = 20160312
                         },
                         new
                         {
-                            AccWkendN = 160319,
+                            WeekEndingDate = 160319,
                             AccAltKeyNum = 623L,
                             AccApWkend = 160326,
                             AccCalPeriod = 3,
@@ -18080,11 +18080,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 11,
-                            AccWkend2N = 20160319L
+                            WeekDate = 20160319
                         },
                         new
                         {
-                            AccWkendN = 160326,
+                            WeekEndingDate = 160326,
                             AccAltKeyNum = 624L,
                             AccApWkend = 160402,
                             AccCalPeriod = 3,
@@ -18099,11 +18099,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 12,
-                            AccWkend2N = 20160326L
+                            WeekDate = 20160326
                         },
                         new
                         {
-                            AccWkendN = 160402,
+                            WeekEndingDate = 160402,
                             AccAltKeyNum = 625L,
                             AccApWkend = 160409,
                             AccCalPeriod = 3,
@@ -18118,11 +18118,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 2,
                             AccWeekN = 13,
-                            AccWkend2N = 20160402L
+                            WeekDate = 20160402
                         },
                         new
                         {
-                            AccWkendN = 160409,
+                            WeekEndingDate = 160409,
                             AccAltKeyNum = 626L,
                             AccApWkend = 160416,
                             AccCalPeriod = 4,
@@ -18137,11 +18137,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 14,
-                            AccWkend2N = 20160409L
+                            WeekDate = 20160409
                         },
                         new
                         {
-                            AccWkendN = 160416,
+                            WeekEndingDate = 160416,
                             AccAltKeyNum = 627L,
                             AccApWkend = 160423,
                             AccCalPeriod = 4,
@@ -18156,11 +18156,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 15,
-                            AccWkend2N = 20160416L
+                            WeekDate = 20160416
                         },
                         new
                         {
-                            AccWkendN = 160423,
+                            WeekEndingDate = 160423,
                             AccAltKeyNum = 628L,
                             AccApWkend = 160430,
                             AccCalPeriod = 4,
@@ -18175,11 +18175,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 16,
-                            AccWkend2N = 20160423L
+                            WeekDate = 20160423
                         },
                         new
                         {
-                            AccWkendN = 160430,
+                            WeekEndingDate = 160430,
                             AccAltKeyNum = 629L,
                             AccApWkend = 160507,
                             AccCalPeriod = 4,
@@ -18194,11 +18194,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 17,
-                            AccWkend2N = 20160430L
+                            WeekDate = 20160430
                         },
                         new
                         {
-                            AccWkendN = 160507,
+                            WeekEndingDate = 160507,
                             AccAltKeyNum = 630L,
                             AccApWkend = 160514,
                             AccCalPeriod = 5,
@@ -18213,11 +18213,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 18,
-                            AccWkend2N = 20160507L
+                            WeekDate = 20160507
                         },
                         new
                         {
-                            AccWkendN = 160514,
+                            WeekEndingDate = 160514,
                             AccAltKeyNum = 631L,
                             AccApWkend = 160521,
                             AccCalPeriod = 5,
@@ -18232,11 +18232,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 19,
-                            AccWkend2N = 20160514L
+                            WeekDate = 20160514
                         },
                         new
                         {
-                            AccWkendN = 160521,
+                            WeekEndingDate = 160521,
                             AccAltKeyNum = 632L,
                             AccApWkend = 160528,
                             AccCalPeriod = 5,
@@ -18251,11 +18251,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 20,
-                            AccWkend2N = 20160521L
+                            WeekDate = 20160521
                         },
                         new
                         {
-                            AccWkendN = 160528,
+                            WeekEndingDate = 160528,
                             AccAltKeyNum = 633L,
                             AccApWkend = 160604,
                             AccCalPeriod = 5,
@@ -18270,11 +18270,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 21,
-                            AccWkend2N = 20160528L
+                            WeekDate = 20160528
                         },
                         new
                         {
-                            AccWkendN = 160604,
+                            WeekEndingDate = 160604,
                             AccAltKeyNum = 634L,
                             AccApWkend = 160611,
                             AccCalPeriod = 6,
@@ -18289,11 +18289,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 22,
-                            AccWkend2N = 20160604L
+                            WeekDate = 20160604
                         },
                         new
                         {
-                            AccWkendN = 160611,
+                            WeekEndingDate = 160611,
                             AccAltKeyNum = 635L,
                             AccApWkend = 160618,
                             AccCalPeriod = 6,
@@ -18308,11 +18308,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 23,
-                            AccWkend2N = 20160611L
+                            WeekDate = 20160611
                         },
                         new
                         {
-                            AccWkendN = 160618,
+                            WeekEndingDate = 160618,
                             AccAltKeyNum = 636L,
                             AccApWkend = 160625,
                             AccCalPeriod = 6,
@@ -18327,11 +18327,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 24,
-                            AccWkend2N = 20160618L
+                            WeekDate = 20160618
                         },
                         new
                         {
-                            AccWkendN = 160625,
+                            WeekEndingDate = 160625,
                             AccAltKeyNum = 637L,
                             AccApWkend = 160702,
                             AccCalPeriod = 6,
@@ -18346,11 +18346,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 25,
-                            AccWkend2N = 20160625L
+                            WeekDate = 20160625
                         },
                         new
                         {
-                            AccWkendN = 160702,
+                            WeekEndingDate = 160702,
                             AccAltKeyNum = 638L,
                             AccApWkend = 160709,
                             AccCalPeriod = 6,
@@ -18365,11 +18365,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 3,
                             AccWeekN = 26,
-                            AccWkend2N = 20160702L
+                            WeekDate = 20160702
                         },
                         new
                         {
-                            AccWkendN = 160709,
+                            WeekEndingDate = 160709,
                             AccAltKeyNum = 639L,
                             AccApWkend = 160716,
                             AccCalPeriod = 7,
@@ -18384,11 +18384,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 27,
-                            AccWkend2N = 20160709L
+                            WeekDate = 20160709
                         },
                         new
                         {
-                            AccWkendN = 160716,
+                            WeekEndingDate = 160716,
                             AccAltKeyNum = 640L,
                             AccApWkend = 160723,
                             AccCalPeriod = 7,
@@ -18403,11 +18403,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 28,
-                            AccWkend2N = 20160716L
+                            WeekDate = 20160716
                         },
                         new
                         {
-                            AccWkendN = 160723,
+                            WeekEndingDate = 160723,
                             AccAltKeyNum = 641L,
                             AccApWkend = 160730,
                             AccCalPeriod = 7,
@@ -18422,11 +18422,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 29,
-                            AccWkend2N = 20160723L
+                            WeekDate = 20160723
                         },
                         new
                         {
-                            AccWkendN = 160730,
+                            WeekEndingDate = 160730,
                             AccAltKeyNum = 642L,
                             AccApWkend = 160806,
                             AccCalPeriod = 7,
@@ -18441,11 +18441,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 30,
-                            AccWkend2N = 20160730L
+                            WeekDate = 20160730
                         },
                         new
                         {
-                            AccWkendN = 160806,
+                            WeekEndingDate = 160806,
                             AccAltKeyNum = 643L,
                             AccApWkend = 160813,
                             AccCalPeriod = 8,
@@ -18460,11 +18460,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 31,
-                            AccWkend2N = 20160806L
+                            WeekDate = 20160806
                         },
                         new
                         {
-                            AccWkendN = 160813,
+                            WeekEndingDate = 160813,
                             AccAltKeyNum = 644L,
                             AccApWkend = 160820,
                             AccCalPeriod = 8,
@@ -18479,11 +18479,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 32,
-                            AccWkend2N = 20160813L
+                            WeekDate = 20160813
                         },
                         new
                         {
-                            AccWkendN = 160820,
+                            WeekEndingDate = 160820,
                             AccAltKeyNum = 645L,
                             AccApWkend = 160827,
                             AccCalPeriod = 8,
@@ -18498,11 +18498,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 33,
-                            AccWkend2N = 20160820L
+                            WeekDate = 20160820
                         },
                         new
                         {
-                            AccWkendN = 160827,
+                            WeekEndingDate = 160827,
                             AccAltKeyNum = 646L,
                             AccApWkend = 160903,
                             AccCalPeriod = 8,
@@ -18517,11 +18517,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 34,
-                            AccWkend2N = 20160827L
+                            WeekDate = 20160827
                         },
                         new
                         {
-                            AccWkendN = 160903,
+                            WeekEndingDate = 160903,
                             AccAltKeyNum = 647L,
                             AccApWkend = 160910,
                             AccCalPeriod = 8,
@@ -18536,11 +18536,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 35,
-                            AccWkend2N = 20160903L
+                            WeekDate = 20160903
                         },
                         new
                         {
-                            AccWkendN = 160910,
+                            WeekEndingDate = 160910,
                             AccAltKeyNum = 648L,
                             AccApWkend = 160917,
                             AccCalPeriod = 9,
@@ -18555,11 +18555,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 36,
-                            AccWkend2N = 20160910L
+                            WeekDate = 20160910
                         },
                         new
                         {
-                            AccWkendN = 160917,
+                            WeekEndingDate = 160917,
                             AccAltKeyNum = 649L,
                             AccApWkend = 160924,
                             AccCalPeriod = 9,
@@ -18574,11 +18574,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 37,
-                            AccWkend2N = 20160917L
+                            WeekDate = 20160917
                         },
                         new
                         {
-                            AccWkendN = 160924,
+                            WeekEndingDate = 160924,
                             AccAltKeyNum = 650L,
                             AccApWkend = 161001,
                             AccCalPeriod = 9,
@@ -18593,11 +18593,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 38,
-                            AccWkend2N = 20160924L
+                            WeekDate = 20160924
                         },
                         new
                         {
-                            AccWkendN = 161001,
+                            WeekEndingDate = 161001,
                             AccAltKeyNum = 651L,
                             AccApWkend = 161008,
                             AccCalPeriod = 9,
@@ -18612,11 +18612,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 4,
                             AccWeekN = 39,
-                            AccWkend2N = 20161001L
+                            WeekDate = 20161001
                         },
                         new
                         {
-                            AccWkendN = 161008,
+                            WeekEndingDate = 161008,
                             AccAltKeyNum = 652L,
                             AccApWkend = 161015,
                             AccCalPeriod = 10,
@@ -18631,11 +18631,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 40,
-                            AccWkend2N = 20161008L
+                            WeekDate = 20161008
                         },
                         new
                         {
-                            AccWkendN = 161015,
+                            WeekEndingDate = 161015,
                             AccAltKeyNum = 653L,
                             AccApWkend = 161022,
                             AccCalPeriod = 10,
@@ -18650,11 +18650,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 41,
-                            AccWkend2N = 20161015L
+                            WeekDate = 20161015
                         },
                         new
                         {
-                            AccWkendN = 161022,
+                            WeekEndingDate = 161022,
                             AccAltKeyNum = 654L,
                             AccApWkend = 161029,
                             AccCalPeriod = 10,
@@ -18669,11 +18669,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 42,
-                            AccWkend2N = 20161022L
+                            WeekDate = 20161022
                         },
                         new
                         {
-                            AccWkendN = 161029,
+                            WeekEndingDate = 161029,
                             AccAltKeyNum = 655L,
                             AccApWkend = 161105,
                             AccCalPeriod = 10,
@@ -18688,11 +18688,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 43,
-                            AccWkend2N = 20161029L
+                            WeekDate = 20161029
                         },
                         new
                         {
-                            AccWkendN = 161105,
+                            WeekEndingDate = 161105,
                             AccAltKeyNum = 656L,
                             AccApWkend = 161112,
                             AccCalPeriod = 11,
@@ -18707,11 +18707,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 44,
-                            AccWkend2N = 20161105L
+                            WeekDate = 20161105
                         },
                         new
                         {
-                            AccWkendN = 161112,
+                            WeekEndingDate = 161112,
                             AccAltKeyNum = 657L,
                             AccApWkend = 161119,
                             AccCalPeriod = 11,
@@ -18726,11 +18726,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 45,
-                            AccWkend2N = 20161112L
+                            WeekDate = 20161112
                         },
                         new
                         {
-                            AccWkendN = 161119,
+                            WeekEndingDate = 161119,
                             AccAltKeyNum = 658L,
                             AccApWkend = 161126,
                             AccCalPeriod = 11,
@@ -18745,11 +18745,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 46,
-                            AccWkend2N = 20161119L
+                            WeekDate = 20161119
                         },
                         new
                         {
-                            AccWkendN = 161126,
+                            WeekEndingDate = 161126,
                             AccAltKeyNum = 659L,
                             AccApWkend = 161203,
                             AccCalPeriod = 11,
@@ -18764,11 +18764,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 47,
-                            AccWkend2N = 20161126L
+                            WeekDate = 20161126
                         },
                         new
                         {
-                            AccWkendN = 161203,
+                            WeekEndingDate = 161203,
                             AccAltKeyNum = 660L,
                             AccApWkend = 161210,
                             AccCalPeriod = 11,
@@ -18783,11 +18783,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 48,
-                            AccWkend2N = 20161203L
+                            WeekDate = 20161203
                         },
                         new
                         {
-                            AccWkendN = 161210,
+                            WeekEndingDate = 161210,
                             AccAltKeyNum = 661L,
                             AccApWkend = 161217,
                             AccCalPeriod = 12,
@@ -18802,11 +18802,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 49,
-                            AccWkend2N = 20161210L
+                            WeekDate = 20161210
                         },
                         new
                         {
-                            AccWkendN = 161217,
+                            WeekEndingDate = 161217,
                             AccAltKeyNum = 662L,
                             AccApWkend = 161224,
                             AccCalPeriod = 12,
@@ -18821,11 +18821,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 50,
-                            AccWkend2N = 20161217L
+                            WeekDate = 20161217
                         },
                         new
                         {
-                            AccWkendN = 161224,
+                            WeekEndingDate = 161224,
                             AccAltKeyNum = 663L,
                             AccApWkend = 161231,
                             AccCalPeriod = 12,
@@ -18840,11 +18840,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 51,
-                            AccWkend2N = 20161224L
+                            WeekDate = 20161224
                         },
                         new
                         {
-                            AccWkendN = 161231,
+                            WeekEndingDate = 161231,
                             AccAltKeyNum = 664L,
                             AccApWkend = 170107,
                             AccCalPeriod = 12,
@@ -18859,11 +18859,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 1,
                             AccWeekN = 52,
-                            AccWkend2N = 20161231L
+                            WeekDate = 20161231
                         },
                         new
                         {
-                            AccWkendN = 170107,
+                            WeekEndingDate = 170107,
                             AccAltKeyNum = 673L,
                             AccApWkend = 170114,
                             AccCalPeriod = 1,
@@ -18878,11 +18878,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 1,
-                            AccWkend2N = 20170107L
+                            WeekDate = 20170107
                         },
                         new
                         {
-                            AccWkendN = 170114,
+                            WeekEndingDate = 170114,
                             AccAltKeyNum = 674L,
                             AccApWkend = 170121,
                             AccCalPeriod = 1,
@@ -18897,11 +18897,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 2,
-                            AccWkend2N = 20170114L
+                            WeekDate = 20170114
                         },
                         new
                         {
-                            AccWkendN = 170121,
+                            WeekEndingDate = 170121,
                             AccAltKeyNum = 675L,
                             AccApWkend = 170128,
                             AccCalPeriod = 1,
@@ -18916,11 +18916,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 3,
-                            AccWkend2N = 20170121L
+                            WeekDate = 20170121
                         },
                         new
                         {
-                            AccWkendN = 170128,
+                            WeekEndingDate = 170128,
                             AccAltKeyNum = 676L,
                             AccApWkend = 170204,
                             AccCalPeriod = 1,
@@ -18935,11 +18935,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 4,
-                            AccWkend2N = 20170128L
+                            WeekDate = 20170128
                         },
                         new
                         {
-                            AccWkendN = 170204,
+                            WeekEndingDate = 170204,
                             AccAltKeyNum = 677L,
                             AccApWkend = 170211,
                             AccCalPeriod = 2,
@@ -18954,11 +18954,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 5,
-                            AccWkend2N = 20170204L
+                            WeekDate = 20170204
                         },
                         new
                         {
-                            AccWkendN = 170211,
+                            WeekEndingDate = 170211,
                             AccAltKeyNum = 678L,
                             AccApWkend = 170218,
                             AccCalPeriod = 2,
@@ -18973,11 +18973,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 6,
-                            AccWkend2N = 20170211L
+                            WeekDate = 20170211
                         },
                         new
                         {
-                            AccWkendN = 170218,
+                            WeekEndingDate = 170218,
                             AccAltKeyNum = 679L,
                             AccApWkend = 170225,
                             AccCalPeriod = 2,
@@ -18992,11 +18992,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 7,
-                            AccWkend2N = 20170218L
+                            WeekDate = 20170218
                         },
                         new
                         {
-                            AccWkendN = 170225,
+                            WeekEndingDate = 170225,
                             AccAltKeyNum = 680L,
                             AccApWkend = 170304,
                             AccCalPeriod = 2,
@@ -19011,11 +19011,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 8,
-                            AccWkend2N = 20170225L
+                            WeekDate = 20170225
                         },
                         new
                         {
-                            AccWkendN = 170304,
+                            WeekEndingDate = 170304,
                             AccAltKeyNum = 681L,
                             AccApWkend = 170311,
                             AccCalPeriod = 3,
@@ -19030,11 +19030,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 9,
-                            AccWkend2N = 20170304L
+                            WeekDate = 20170304
                         },
                         new
                         {
-                            AccWkendN = 170311,
+                            WeekEndingDate = 170311,
                             AccAltKeyNum = 682L,
                             AccApWkend = 170318,
                             AccCalPeriod = 3,
@@ -19049,11 +19049,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 10,
-                            AccWkend2N = 20170311L
+                            WeekDate = 20170311
                         },
                         new
                         {
-                            AccWkendN = 170318,
+                            WeekEndingDate = 170318,
                             AccAltKeyNum = 683L,
                             AccApWkend = 170325,
                             AccCalPeriod = 3,
@@ -19068,11 +19068,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 11,
-                            AccWkend2N = 20170318L
+                            WeekDate = 20170318
                         },
                         new
                         {
-                            AccWkendN = 170325,
+                            WeekEndingDate = 170325,
                             AccAltKeyNum = 684L,
                             AccApWkend = 170401,
                             AccCalPeriod = 3,
@@ -19087,11 +19087,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 12,
-                            AccWkend2N = 20170325L
+                            WeekDate = 20170325
                         },
                         new
                         {
-                            AccWkendN = 170401,
+                            WeekEndingDate = 170401,
                             AccAltKeyNum = 685L,
                             AccApWkend = 170408,
                             AccCalPeriod = 3,
@@ -19106,11 +19106,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 2,
                             AccWeekN = 13,
-                            AccWkend2N = 20170401L
+                            WeekDate = 20170401
                         },
                         new
                         {
-                            AccWkendN = 170408,
+                            WeekEndingDate = 170408,
                             AccAltKeyNum = 686L,
                             AccApWkend = 170415,
                             AccCalPeriod = 4,
@@ -19125,11 +19125,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 14,
-                            AccWkend2N = 20170408L
+                            WeekDate = 20170408
                         },
                         new
                         {
-                            AccWkendN = 170415,
+                            WeekEndingDate = 170415,
                             AccAltKeyNum = 687L,
                             AccApWkend = 170422,
                             AccCalPeriod = 4,
@@ -19144,11 +19144,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 15,
-                            AccWkend2N = 20170415L
+                            WeekDate = 20170415
                         },
                         new
                         {
-                            AccWkendN = 170422,
+                            WeekEndingDate = 170422,
                             AccAltKeyNum = 688L,
                             AccApWkend = 170429,
                             AccCalPeriod = 4,
@@ -19163,11 +19163,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 16,
-                            AccWkend2N = 20170422L
+                            WeekDate = 20170422
                         },
                         new
                         {
-                            AccWkendN = 170429,
+                            WeekEndingDate = 170429,
                             AccAltKeyNum = 689L,
                             AccApWkend = 170506,
                             AccCalPeriod = 4,
@@ -19182,11 +19182,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 17,
-                            AccWkend2N = 20170429L
+                            WeekDate = 20170429
                         },
                         new
                         {
-                            AccWkendN = 170506,
+                            WeekEndingDate = 170506,
                             AccAltKeyNum = 690L,
                             AccApWkend = 170513,
                             AccCalPeriod = 5,
@@ -19201,11 +19201,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 18,
-                            AccWkend2N = 20170506L
+                            WeekDate = 20170506
                         },
                         new
                         {
-                            AccWkendN = 170513,
+                            WeekEndingDate = 170513,
                             AccAltKeyNum = 691L,
                             AccApWkend = 170520,
                             AccCalPeriod = 5,
@@ -19220,11 +19220,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 19,
-                            AccWkend2N = 20170513L
+                            WeekDate = 20170513
                         },
                         new
                         {
-                            AccWkendN = 170520,
+                            WeekEndingDate = 170520,
                             AccAltKeyNum = 692L,
                             AccApWkend = 170527,
                             AccCalPeriod = 5,
@@ -19239,11 +19239,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 20,
-                            AccWkend2N = 20170520L
+                            WeekDate = 20170520
                         },
                         new
                         {
-                            AccWkendN = 170527,
+                            WeekEndingDate = 170527,
                             AccAltKeyNum = 693L,
                             AccApWkend = 170603,
                             AccCalPeriod = 5,
@@ -19258,11 +19258,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 21,
-                            AccWkend2N = 20170527L
+                            WeekDate = 20170527
                         },
                         new
                         {
-                            AccWkendN = 170603,
+                            WeekEndingDate = 170603,
                             AccAltKeyNum = 694L,
                             AccApWkend = 170610,
                             AccCalPeriod = 5,
@@ -19277,11 +19277,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 22,
-                            AccWkend2N = 20170603L
+                            WeekDate = 20170603
                         },
                         new
                         {
-                            AccWkendN = 170610,
+                            WeekEndingDate = 170610,
                             AccAltKeyNum = 695L,
                             AccApWkend = 170617,
                             AccCalPeriod = 6,
@@ -19296,11 +19296,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 23,
-                            AccWkend2N = 20170610L
+                            WeekDate = 20170610
                         },
                         new
                         {
-                            AccWkendN = 170617,
+                            WeekEndingDate = 170617,
                             AccAltKeyNum = 696L,
                             AccApWkend = 170624,
                             AccCalPeriod = 6,
@@ -19315,11 +19315,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 24,
-                            AccWkend2N = 20170617L
+                            WeekDate = 20170617
                         },
                         new
                         {
-                            AccWkendN = 170624,
+                            WeekEndingDate = 170624,
                             AccAltKeyNum = 697L,
                             AccApWkend = 170701,
                             AccCalPeriod = 6,
@@ -19334,11 +19334,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 25,
-                            AccWkend2N = 20170624L
+                            WeekDate = 20170624
                         },
                         new
                         {
-                            AccWkendN = 170701,
+                            WeekEndingDate = 170701,
                             AccAltKeyNum = 698L,
                             AccApWkend = 170708,
                             AccCalPeriod = 6,
@@ -19353,11 +19353,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 3,
                             AccWeekN = 26,
-                            AccWkend2N = 20170701L
+                            WeekDate = 20170701
                         },
                         new
                         {
-                            AccWkendN = 170708,
+                            WeekEndingDate = 170708,
                             AccAltKeyNum = 699L,
                             AccApWkend = 170715,
                             AccCalPeriod = 7,
@@ -19372,11 +19372,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 27,
-                            AccWkend2N = 20170708L
+                            WeekDate = 20170708
                         },
                         new
                         {
-                            AccWkendN = 170715,
+                            WeekEndingDate = 170715,
                             AccAltKeyNum = 700L,
                             AccApWkend = 170722,
                             AccCalPeriod = 7,
@@ -19391,11 +19391,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 28,
-                            AccWkend2N = 20170715L
+                            WeekDate = 20170715
                         },
                         new
                         {
-                            AccWkendN = 170722,
+                            WeekEndingDate = 170722,
                             AccAltKeyNum = 701L,
                             AccApWkend = 170729,
                             AccCalPeriod = 7,
@@ -19410,11 +19410,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 29,
-                            AccWkend2N = 20170722L
+                            WeekDate = 20170722
                         },
                         new
                         {
-                            AccWkendN = 170729,
+                            WeekEndingDate = 170729,
                             AccAltKeyNum = 702L,
                             AccApWkend = 170805,
                             AccCalPeriod = 7,
@@ -19429,11 +19429,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 30,
-                            AccWkend2N = 20170729L
+                            WeekDate = 20170729
                         },
                         new
                         {
-                            AccWkendN = 170805,
+                            WeekEndingDate = 170805,
                             AccAltKeyNum = 703L,
                             AccApWkend = 170812,
                             AccCalPeriod = 8,
@@ -19448,11 +19448,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 31,
-                            AccWkend2N = 20170805L
+                            WeekDate = 20170805
                         },
                         new
                         {
-                            AccWkendN = 170812,
+                            WeekEndingDate = 170812,
                             AccAltKeyNum = 704L,
                             AccApWkend = 170819,
                             AccCalPeriod = 8,
@@ -19467,11 +19467,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 32,
-                            AccWkend2N = 20170812L
+                            WeekDate = 20170812
                         },
                         new
                         {
-                            AccWkendN = 170819,
+                            WeekEndingDate = 170819,
                             AccAltKeyNum = 705L,
                             AccApWkend = 170826,
                             AccCalPeriod = 8,
@@ -19486,11 +19486,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 33,
-                            AccWkend2N = 20170819L
+                            WeekDate = 20170819
                         },
                         new
                         {
-                            AccWkendN = 170826,
+                            WeekEndingDate = 170826,
                             AccAltKeyNum = 706L,
                             AccApWkend = 170902,
                             AccCalPeriod = 8,
@@ -19505,11 +19505,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 34,
-                            AccWkend2N = 20170826L
+                            WeekDate = 20170826
                         },
                         new
                         {
-                            AccWkendN = 170902,
+                            WeekEndingDate = 170902,
                             AccAltKeyNum = 707L,
                             AccApWkend = 170909,
                             AccCalPeriod = 8,
@@ -19524,11 +19524,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 35,
-                            AccWkend2N = 20170902L
+                            WeekDate = 20170902
                         },
                         new
                         {
-                            AccWkendN = 170909,
+                            WeekEndingDate = 170909,
                             AccAltKeyNum = 708L,
                             AccApWkend = 170916,
                             AccCalPeriod = 9,
@@ -19543,11 +19543,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 36,
-                            AccWkend2N = 20170909L
+                            WeekDate = 20170909
                         },
                         new
                         {
-                            AccWkendN = 170916,
+                            WeekEndingDate = 170916,
                             AccAltKeyNum = 709L,
                             AccApWkend = 170923,
                             AccCalPeriod = 9,
@@ -19562,11 +19562,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 37,
-                            AccWkend2N = 20170916L
+                            WeekDate = 20170916
                         },
                         new
                         {
-                            AccWkendN = 170923,
+                            WeekEndingDate = 170923,
                             AccAltKeyNum = 710L,
                             AccApWkend = 170930,
                             AccCalPeriod = 9,
@@ -19581,11 +19581,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 38,
-                            AccWkend2N = 20170923L
+                            WeekDate = 20170923
                         },
                         new
                         {
-                            AccWkendN = 170930,
+                            WeekEndingDate = 170930,
                             AccAltKeyNum = 711L,
                             AccApWkend = 171007,
                             AccCalPeriod = 9,
@@ -19600,11 +19600,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 4,
                             AccWeekN = 39,
-                            AccWkend2N = 20170930L
+                            WeekDate = 20170930
                         },
                         new
                         {
-                            AccWkendN = 171007,
+                            WeekEndingDate = 171007,
                             AccAltKeyNum = 712L,
                             AccApWkend = 171014,
                             AccCalPeriod = 10,
@@ -19619,11 +19619,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 40,
-                            AccWkend2N = 20171007L
+                            WeekDate = 20171007
                         },
                         new
                         {
-                            AccWkendN = 171014,
+                            WeekEndingDate = 171014,
                             AccAltKeyNum = 713L,
                             AccApWkend = 171021,
                             AccCalPeriod = 10,
@@ -19638,11 +19638,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 41,
-                            AccWkend2N = 20171014L
+                            WeekDate = 20171014
                         },
                         new
                         {
-                            AccWkendN = 171021,
+                            WeekEndingDate = 171021,
                             AccAltKeyNum = 714L,
                             AccApWkend = 171028,
                             AccCalPeriod = 10,
@@ -19657,11 +19657,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 42,
-                            AccWkend2N = 20171021L
+                            WeekDate = 20171021
                         },
                         new
                         {
-                            AccWkendN = 171028,
+                            WeekEndingDate = 171028,
                             AccAltKeyNum = 715L,
                             AccApWkend = 171104,
                             AccCalPeriod = 10,
@@ -19676,11 +19676,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 43,
-                            AccWkend2N = 20171028L
+                            WeekDate = 20171028
                         },
                         new
                         {
-                            AccWkendN = 171104,
+                            WeekEndingDate = 171104,
                             AccAltKeyNum = 716L,
                             AccApWkend = 171111,
                             AccCalPeriod = 11,
@@ -19695,11 +19695,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 44,
-                            AccWkend2N = 20171104L
+                            WeekDate = 20171104
                         },
                         new
                         {
-                            AccWkendN = 171111,
+                            WeekEndingDate = 171111,
                             AccAltKeyNum = 717L,
                             AccApWkend = 171118,
                             AccCalPeriod = 11,
@@ -19714,11 +19714,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 45,
-                            AccWkend2N = 20171111L
+                            WeekDate = 20171111
                         },
                         new
                         {
-                            AccWkendN = 171118,
+                            WeekEndingDate = 171118,
                             AccAltKeyNum = 718L,
                             AccApWkend = 171125,
                             AccCalPeriod = 11,
@@ -19733,11 +19733,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 46,
-                            AccWkend2N = 20171118L
+                            WeekDate = 20171118
                         },
                         new
                         {
-                            AccWkendN = 171125,
+                            WeekEndingDate = 171125,
                             AccAltKeyNum = 719L,
                             AccApWkend = 171202,
                             AccCalPeriod = 11,
@@ -19752,11 +19752,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 47,
-                            AccWkend2N = 20171125L
+                            WeekDate = 20171125
                         },
                         new
                         {
-                            AccWkendN = 171202,
+                            WeekEndingDate = 171202,
                             AccAltKeyNum = 720L,
                             AccApWkend = 171209,
                             AccCalPeriod = 11,
@@ -19771,11 +19771,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 48,
-                            AccWkend2N = 20171202L
+                            WeekDate = 20171202
                         },
                         new
                         {
-                            AccWkendN = 171209,
+                            WeekEndingDate = 171209,
                             AccAltKeyNum = 721L,
                             AccApWkend = 171216,
                             AccCalPeriod = 12,
@@ -19790,11 +19790,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 49,
-                            AccWkend2N = 20171209L
+                            WeekDate = 20171209
                         },
                         new
                         {
-                            AccWkendN = 171216,
+                            WeekEndingDate = 171216,
                             AccAltKeyNum = 722L,
                             AccApWkend = 171223,
                             AccCalPeriod = 12,
@@ -19809,11 +19809,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 50,
-                            AccWkend2N = 20171216L
+                            WeekDate = 20171216
                         },
                         new
                         {
-                            AccWkendN = 171223,
+                            WeekEndingDate = 171223,
                             AccAltKeyNum = 723L,
                             AccApWkend = 171230,
                             AccCalPeriod = 12,
@@ -19828,11 +19828,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 51,
-                            AccWkend2N = 20171223L
+                            WeekDate = 20171223
                         },
                         new
                         {
-                            AccWkendN = 171230,
+                            WeekEndingDate = 171230,
                             AccAltKeyNum = 724L,
                             AccApWkend = 180106,
                             AccCalPeriod = 12,
@@ -19847,11 +19847,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 1,
                             AccWeekN = 52,
-                            AccWkend2N = 20171230L
+                            WeekDate = 20171230
                         },
                         new
                         {
-                            AccWkendN = 10120,
+                            WeekEndingDate = 10120,
                             AccAltKeyNum = -285L,
                             AccApWkend = 10127,
                             AccCalPeriod = 1,
@@ -19866,11 +19866,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 3,
-                            AccWkend2N = 20010120L
+                            WeekDate = 20010120
                         },
                         new
                         {
-                            AccWkendN = 10127,
+                            WeekEndingDate = 10127,
                             AccAltKeyNum = -284L,
                             AccApWkend = 10203,
                             AccCalPeriod = 1,
@@ -19885,11 +19885,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 4,
-                            AccWkend2N = 20010127L
+                            WeekDate = 20010127
                         },
                         new
                         {
-                            AccWkendN = 10203,
+                            WeekEndingDate = 10203,
                             AccAltKeyNum = -283L,
                             AccApWkend = 10210,
                             AccCalPeriod = 1,
@@ -19904,11 +19904,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 5,
-                            AccWkend2N = 20010203L
+                            WeekDate = 20010203
                         },
                         new
                         {
-                            AccWkendN = 10210,
+                            WeekEndingDate = 10210,
                             AccAltKeyNum = -282L,
                             AccApWkend = 10217,
                             AccCalPeriod = 2,
@@ -19923,11 +19923,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 6,
-                            AccWkend2N = 20010210L
+                            WeekDate = 20010210
                         },
                         new
                         {
-                            AccWkendN = 10224,
+                            WeekEndingDate = 10224,
                             AccAltKeyNum = -280L,
                             AccApWkend = 10303,
                             AccCalPeriod = 2,
@@ -19942,11 +19942,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 8,
-                            AccWkend2N = 20010224L
+                            WeekDate = 20010224
                         },
                         new
                         {
-                            AccWkendN = 10303,
+                            WeekEndingDate = 10303,
                             AccAltKeyNum = -279L,
                             AccApWkend = 10310,
                             AccCalPeriod = 2,
@@ -19961,11 +19961,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 9,
-                            AccWkend2N = 20010303L
+                            WeekDate = 20010303
                         },
                         new
                         {
-                            AccWkendN = 10310,
+                            WeekEndingDate = 10310,
                             AccAltKeyNum = -278L,
                             AccApWkend = 10317,
                             AccCalPeriod = 3,
@@ -19980,11 +19980,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 10,
-                            AccWkend2N = 20010310L
+                            WeekDate = 20010310
                         },
                         new
                         {
-                            AccWkendN = 10317,
+                            WeekEndingDate = 10317,
                             AccAltKeyNum = -277L,
                             AccApWkend = 10324,
                             AccCalPeriod = 3,
@@ -19999,11 +19999,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 11,
-                            AccWkend2N = 20010317L
+                            WeekDate = 20010317
                         },
                         new
                         {
-                            AccWkendN = 10331,
+                            WeekEndingDate = 10331,
                             AccAltKeyNum = -275L,
                             AccApWkend = 10407,
                             AccCalPeriod = 3,
@@ -20018,11 +20018,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 2,
                             AccWeekN = 13,
-                            AccWkend2N = 20010331L
+                            WeekDate = 20010331
                         },
                         new
                         {
-                            AccWkendN = 10407,
+                            WeekEndingDate = 10407,
                             AccAltKeyNum = -274L,
                             AccApWkend = 10414,
                             AccCalPeriod = 4,
@@ -20037,11 +20037,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 14,
-                            AccWkend2N = 20010407L
+                            WeekDate = 20010407
                         },
                         new
                         {
-                            AccWkendN = 10414,
+                            WeekEndingDate = 10414,
                             AccAltKeyNum = -273L,
                             AccApWkend = 10421,
                             AccCalPeriod = 4,
@@ -20056,11 +20056,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 15,
-                            AccWkend2N = 20010414L
+                            WeekDate = 20010414
                         },
                         new
                         {
-                            AccWkendN = 10421,
+                            WeekEndingDate = 10421,
                             AccAltKeyNum = -272L,
                             AccApWkend = 10428,
                             AccCalPeriod = 4,
@@ -20075,11 +20075,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 16,
-                            AccWkend2N = 20010421L
+                            WeekDate = 20010421
                         },
                         new
                         {
-                            AccWkendN = 10428,
+                            WeekEndingDate = 10428,
                             AccAltKeyNum = -271L,
                             AccApWkend = 10505,
                             AccCalPeriod = 4,
@@ -20094,11 +20094,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 17,
-                            AccWkend2N = 20010428L
+                            WeekDate = 20010428
                         },
                         new
                         {
-                            AccWkendN = 10505,
+                            WeekEndingDate = 10505,
                             AccAltKeyNum = -270L,
                             AccApWkend = 10512,
                             AccCalPeriod = 5,
@@ -20113,11 +20113,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 18,
-                            AccWkend2N = 20010505L
+                            WeekDate = 20010505
                         },
                         new
                         {
-                            AccWkendN = 10512,
+                            WeekEndingDate = 10512,
                             AccAltKeyNum = -269L,
                             AccApWkend = 10519,
                             AccCalPeriod = 5,
@@ -20132,11 +20132,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 19,
-                            AccWkend2N = 20010512L
+                            WeekDate = 20010512
                         },
                         new
                         {
-                            AccWkendN = 10519,
+                            WeekEndingDate = 10519,
                             AccAltKeyNum = -268L,
                             AccApWkend = 10526,
                             AccCalPeriod = 5,
@@ -20151,11 +20151,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 20,
-                            AccWkend2N = 20010519L
+                            WeekDate = 20010519
                         },
                         new
                         {
-                            AccWkendN = 10602,
+                            WeekEndingDate = 10602,
                             AccAltKeyNum = -266L,
                             AccApWkend = 10609,
                             AccCalPeriod = 5,
@@ -20170,11 +20170,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 22,
-                            AccWkend2N = 20010602L
+                            WeekDate = 20010602
                         },
                         new
                         {
-                            AccWkendN = 10609,
+                            WeekEndingDate = 10609,
                             AccAltKeyNum = -265L,
                             AccApWkend = 10616,
                             AccCalPeriod = 6,
@@ -20189,11 +20189,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 23,
-                            AccWkend2N = 20010609L
+                            WeekDate = 20010609
                         },
                         new
                         {
-                            AccWkendN = 10616,
+                            WeekEndingDate = 10616,
                             AccAltKeyNum = -264L,
                             AccApWkend = 10623,
                             AccCalPeriod = 6,
@@ -20208,11 +20208,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 24,
-                            AccWkend2N = 20010616L
+                            WeekDate = 20010616
                         },
                         new
                         {
-                            AccWkendN = 10630,
+                            WeekEndingDate = 10630,
                             AccAltKeyNum = -262L,
                             AccApWkend = 10707,
                             AccCalPeriod = 6,
@@ -20227,11 +20227,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 3,
                             AccWeekN = 26,
-                            AccWkend2N = 20010630L
+                            WeekDate = 20010630
                         },
                         new
                         {
-                            AccWkendN = 10707,
+                            WeekEndingDate = 10707,
                             AccAltKeyNum = -261L,
                             AccApWkend = 10714,
                             AccCalPeriod = 7,
@@ -20246,11 +20246,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 27,
-                            AccWkend2N = 20010707L
+                            WeekDate = 20010707
                         },
                         new
                         {
-                            AccWkendN = 10714,
+                            WeekEndingDate = 10714,
                             AccAltKeyNum = -260L,
                             AccApWkend = 10721,
                             AccCalPeriod = 7,
@@ -20265,11 +20265,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 28,
-                            AccWkend2N = 20010714L
+                            WeekDate = 20010714
                         },
                         new
                         {
-                            AccWkendN = 10721,
+                            WeekEndingDate = 10721,
                             AccAltKeyNum = -259L,
                             AccApWkend = 10728,
                             AccCalPeriod = 7,
@@ -20284,11 +20284,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 29,
-                            AccWkend2N = 20010721L
+                            WeekDate = 20010721
                         },
                         new
                         {
-                            AccWkendN = 10728,
+                            WeekEndingDate = 10728,
                             AccAltKeyNum = -258L,
                             AccApWkend = 10804,
                             AccCalPeriod = 7,
@@ -20303,11 +20303,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 30,
-                            AccWkend2N = 20010728L
+                            WeekDate = 20010728
                         },
                         new
                         {
-                            AccWkendN = 10811,
+                            WeekEndingDate = 10811,
                             AccAltKeyNum = -256L,
                             AccApWkend = 10818,
                             AccCalPeriod = 8,
@@ -20322,11 +20322,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 32,
-                            AccWkend2N = 20010811L
+                            WeekDate = 20010811
                         },
                         new
                         {
-                            AccWkendN = 10818,
+                            WeekEndingDate = 10818,
                             AccAltKeyNum = -255L,
                             AccApWkend = 10825,
                             AccCalPeriod = 8,
@@ -20341,11 +20341,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 33,
-                            AccWkend2N = 20010818L
+                            WeekDate = 20010818
                         },
                         new
                         {
-                            AccWkendN = 10825,
+                            WeekEndingDate = 10825,
                             AccAltKeyNum = -254L,
                             AccApWkend = 10901,
                             AccCalPeriod = 8,
@@ -20360,11 +20360,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 34,
-                            AccWkend2N = 20010825L
+                            WeekDate = 20010825
                         },
                         new
                         {
-                            AccWkendN = 10901,
+                            WeekEndingDate = 10901,
                             AccAltKeyNum = -253L,
                             AccApWkend = 10908,
                             AccCalPeriod = 8,
@@ -20379,11 +20379,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 35,
-                            AccWkend2N = 20010901L
+                            WeekDate = 20010901
                         },
                         new
                         {
-                            AccWkendN = 10922,
+                            WeekEndingDate = 10922,
                             AccAltKeyNum = -250L,
                             AccApWkend = 10929,
                             AccCalPeriod = 9,
@@ -20398,11 +20398,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 38,
-                            AccWkend2N = 20010922L
+                            WeekDate = 20010922
                         },
                         new
                         {
-                            AccWkendN = 10929,
+                            WeekEndingDate = 10929,
                             AccAltKeyNum = -249L,
                             AccApWkend = 11006,
                             AccCalPeriod = 9,
@@ -20417,11 +20417,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 4,
                             AccWeekN = 39,
-                            AccWkend2N = 20010929L
+                            WeekDate = 20010929
                         },
                         new
                         {
-                            AccWkendN = 11006,
+                            WeekEndingDate = 11006,
                             AccAltKeyNum = -248L,
                             AccApWkend = 11013,
                             AccCalPeriod = 10,
@@ -20436,11 +20436,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 40,
-                            AccWkend2N = 20011006L
+                            WeekDate = 20011006
                         },
                         new
                         {
-                            AccWkendN = 11013,
+                            WeekEndingDate = 11013,
                             AccAltKeyNum = -247L,
                             AccApWkend = 11020,
                             AccCalPeriod = 10,
@@ -20455,11 +20455,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 41,
-                            AccWkend2N = 20011013L
+                            WeekDate = 20011013
                         },
                         new
                         {
-                            AccWkendN = 11027,
+                            WeekEndingDate = 11027,
                             AccAltKeyNum = -245L,
                             AccApWkend = 11103,
                             AccCalPeriod = 10,
@@ -20474,11 +20474,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 43,
-                            AccWkend2N = 20011027L
+                            WeekDate = 20011027
                         },
                         new
                         {
-                            AccWkendN = 11110,
+                            WeekEndingDate = 11110,
                             AccAltKeyNum = -243L,
                             AccApWkend = 11117,
                             AccCalPeriod = 11,
@@ -20493,11 +20493,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 45,
-                            AccWkend2N = 20011110L
+                            WeekDate = 20011110
                         },
                         new
                         {
-                            AccWkendN = 11117,
+                            WeekEndingDate = 11117,
                             AccAltKeyNum = -242L,
                             AccApWkend = 11124,
                             AccCalPeriod = 11,
@@ -20512,11 +20512,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 46,
-                            AccWkend2N = 20011117L
+                            WeekDate = 20011117
                         },
                         new
                         {
-                            AccWkendN = 11201,
+                            WeekEndingDate = 11201,
                             AccAltKeyNum = -240L,
                             AccApWkend = 11208,
                             AccCalPeriod = 11,
@@ -20531,11 +20531,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 48,
-                            AccWkend2N = 20011201L
+                            WeekDate = 20011201
                         },
                         new
                         {
-                            AccWkendN = 11208,
+                            WeekEndingDate = 11208,
                             AccAltKeyNum = -239L,
                             AccApWkend = 11215,
                             AccCalPeriod = 12,
@@ -20550,11 +20550,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 49,
-                            AccWkend2N = 20011208L
+                            WeekDate = 20011208
                         },
                         new
                         {
-                            AccWkendN = 11222,
+                            WeekEndingDate = 11222,
                             AccAltKeyNum = -237L,
                             AccApWkend = 11229,
                             AccCalPeriod = 12,
@@ -20569,11 +20569,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 51,
-                            AccWkend2N = 20011222L
+                            WeekDate = 20011222
                         },
                         new
                         {
-                            AccWkendN = 11229,
+                            WeekEndingDate = 11229,
                             AccAltKeyNum = -236L,
                             AccApWkend = 20105,
                             AccCalPeriod = 12,
@@ -20588,11 +20588,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 1,
                             AccWeekN = 52,
-                            AccWkend2N = 20011229L
+                            WeekDate = 20011229
                         },
                         new
                         {
-                            AccWkendN = 20105,
+                            WeekEndingDate = 20105,
                             AccAltKeyNum = -227L,
                             AccApWkend = 20112,
                             AccCalPeriod = 1,
@@ -20607,11 +20607,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 1,
-                            AccWkend2N = 20020105L
+                            WeekDate = 20020105
                         },
                         new
                         {
-                            AccWkendN = 20112,
+                            WeekEndingDate = 20112,
                             AccAltKeyNum = -226L,
                             AccApWkend = 20119,
                             AccCalPeriod = 1,
@@ -20626,11 +20626,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 2,
-                            AccWkend2N = 20020112L
+                            WeekDate = 20020112
                         },
                         new
                         {
-                            AccWkendN = 20119,
+                            WeekEndingDate = 20119,
                             AccAltKeyNum = -225L,
                             AccApWkend = 20126,
                             AccCalPeriod = 1,
@@ -20645,11 +20645,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 3,
-                            AccWkend2N = 20020119L
+                            WeekDate = 20020119
                         },
                         new
                         {
-                            AccWkendN = 20126,
+                            WeekEndingDate = 20126,
                             AccAltKeyNum = -224L,
                             AccApWkend = 20202,
                             AccCalPeriod = 1,
@@ -20664,11 +20664,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 4,
-                            AccWkend2N = 20020126L
+                            WeekDate = 20020126
                         },
                         new
                         {
-                            AccWkendN = 20202,
+                            WeekEndingDate = 20202,
                             AccAltKeyNum = -223L,
                             AccApWkend = 20209,
                             AccCalPeriod = 1,
@@ -20683,11 +20683,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 5,
-                            AccWkend2N = 20020202L
+                            WeekDate = 20020202
                         },
                         new
                         {
-                            AccWkendN = 20209,
+                            WeekEndingDate = 20209,
                             AccAltKeyNum = -222L,
                             AccApWkend = 20216,
                             AccCalPeriod = 2,
@@ -20702,11 +20702,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 6,
-                            AccWkend2N = 20020209L
+                            WeekDate = 20020209
                         },
                         new
                         {
-                            AccWkendN = 20302,
+                            WeekEndingDate = 20302,
                             AccAltKeyNum = -219L,
                             AccApWkend = 20309,
                             AccCalPeriod = 2,
@@ -20721,11 +20721,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 9,
-                            AccWkend2N = 20020302L
+                            WeekDate = 20020302
                         },
                         new
                         {
-                            AccWkendN = 20316,
+                            WeekEndingDate = 20316,
                             AccAltKeyNum = -217L,
                             AccApWkend = 20323,
                             AccCalPeriod = 3,
@@ -20740,11 +20740,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 11,
-                            AccWkend2N = 20020316L
+                            WeekDate = 20020316
                         },
                         new
                         {
-                            AccWkendN = 20413,
+                            WeekEndingDate = 20413,
                             AccAltKeyNum = -213L,
                             AccApWkend = 20420,
                             AccCalPeriod = 4,
@@ -20759,11 +20759,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 15,
-                            AccWkend2N = 20020413L
+                            WeekDate = 20020413
                         },
                         new
                         {
-                            AccWkendN = 20504,
+                            WeekEndingDate = 20504,
                             AccAltKeyNum = -210L,
                             AccApWkend = 20511,
                             AccCalPeriod = 5,
@@ -20778,11 +20778,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 18,
-                            AccWkend2N = 20020504L
+                            WeekDate = 20020504
                         },
                         new
                         {
-                            AccWkendN = 20518,
+                            WeekEndingDate = 20518,
                             AccAltKeyNum = -208L,
                             AccApWkend = 20525,
                             AccCalPeriod = 5,
@@ -20797,11 +20797,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 20,
-                            AccWkend2N = 20020518L
+                            WeekDate = 20020518
                         },
                         new
                         {
-                            AccWkendN = 20525,
+                            WeekEndingDate = 20525,
                             AccAltKeyNum = -207L,
                             AccApWkend = 20601,
                             AccCalPeriod = 5,
@@ -20816,11 +20816,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 21,
-                            AccWkend2N = 20020525L
+                            WeekDate = 20020525
                         },
                         new
                         {
-                            AccWkendN = 20608,
+                            WeekEndingDate = 20608,
                             AccAltKeyNum = -205L,
                             AccApWkend = 20615,
                             AccCalPeriod = 6,
@@ -20835,11 +20835,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 23,
-                            AccWkend2N = 20020608L
+                            WeekDate = 20020608
                         },
                         new
                         {
-                            AccWkendN = 20622,
+                            WeekEndingDate = 20622,
                             AccAltKeyNum = -203L,
                             AccApWkend = 20629,
                             AccCalPeriod = 6,
@@ -20854,11 +20854,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 25,
-                            AccWkend2N = 20020622L
+                            WeekDate = 20020622
                         },
                         new
                         {
-                            AccWkendN = 20629,
+                            WeekEndingDate = 20629,
                             AccAltKeyNum = -202L,
                             AccApWkend = 20706,
                             AccCalPeriod = 6,
@@ -20873,11 +20873,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 3,
                             AccWeekN = 26,
-                            AccWkend2N = 20020629L
+                            WeekDate = 20020629
                         },
                         new
                         {
-                            AccWkendN = 20713,
+                            WeekEndingDate = 20713,
                             AccAltKeyNum = -200L,
                             AccApWkend = 20720,
                             AccCalPeriod = 7,
@@ -20892,11 +20892,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 28,
-                            AccWkend2N = 20020713L
+                            WeekDate = 20020713
                         },
                         new
                         {
-                            AccWkendN = 20720,
+                            WeekEndingDate = 20720,
                             AccAltKeyNum = -199L,
                             AccApWkend = 20727,
                             AccCalPeriod = 7,
@@ -20911,11 +20911,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 29,
-                            AccWkend2N = 20020720L
+                            WeekDate = 20020720
                         },
                         new
                         {
-                            AccWkendN = 20727,
+                            WeekEndingDate = 20727,
                             AccAltKeyNum = -198L,
                             AccApWkend = 20803,
                             AccCalPeriod = 7,
@@ -20930,11 +20930,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 30,
-                            AccWkend2N = 20020727L
+                            WeekDate = 20020727
                         },
                         new
                         {
-                            AccWkendN = 20803,
+                            WeekEndingDate = 20803,
                             AccAltKeyNum = -197L,
                             AccApWkend = 20810,
                             AccCalPeriod = 8,
@@ -20949,11 +20949,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 31,
-                            AccWkend2N = 20020803L
+                            WeekDate = 20020803
                         },
                         new
                         {
-                            AccWkendN = 20810,
+                            WeekEndingDate = 20810,
                             AccAltKeyNum = -196L,
                             AccApWkend = 20817,
                             AccCalPeriod = 8,
@@ -20968,11 +20968,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 32,
-                            AccWkend2N = 20020810L
+                            WeekDate = 20020810
                         },
                         new
                         {
-                            AccWkendN = 20817,
+                            WeekEndingDate = 20817,
                             AccAltKeyNum = -195L,
                             AccApWkend = 20824,
                             AccCalPeriod = 8,
@@ -20987,11 +20987,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 33,
-                            AccWkend2N = 20020817L
+                            WeekDate = 20020817
                         },
                         new
                         {
-                            AccWkendN = 20907,
+                            WeekEndingDate = 20907,
                             AccAltKeyNum = -192L,
                             AccApWkend = 20914,
                             AccCalPeriod = 9,
@@ -21006,11 +21006,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 36,
-                            AccWkend2N = 20020907L
+                            WeekDate = 20020907
                         },
                         new
                         {
-                            AccWkendN = 20914,
+                            WeekEndingDate = 20914,
                             AccAltKeyNum = -191L,
                             AccApWkend = 20921,
                             AccCalPeriod = 9,
@@ -21025,11 +21025,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 37,
-                            AccWkend2N = 20020914L
+                            WeekDate = 20020914
                         },
                         new
                         {
-                            AccWkendN = 20921,
+                            WeekEndingDate = 20921,
                             AccAltKeyNum = -190L,
                             AccApWkend = 20928,
                             AccCalPeriod = 9,
@@ -21044,11 +21044,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 38,
-                            AccWkend2N = 20020921L
+                            WeekDate = 20020921
                         },
                         new
                         {
-                            AccWkendN = 21005,
+                            WeekEndingDate = 21005,
                             AccAltKeyNum = -188L,
                             AccApWkend = 21012,
                             AccCalPeriod = 10,
@@ -21063,11 +21063,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 40,
-                            AccWkend2N = 20021005L
+                            WeekDate = 20021005
                         },
                         new
                         {
-                            AccWkendN = 21012,
+                            WeekEndingDate = 21012,
                             AccAltKeyNum = -187L,
                             AccApWkend = 21019,
                             AccCalPeriod = 10,
@@ -21082,11 +21082,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 41,
-                            AccWkend2N = 20021012L
+                            WeekDate = 20021012
                         },
                         new
                         {
-                            AccWkendN = 21026,
+                            WeekEndingDate = 21026,
                             AccAltKeyNum = -185L,
                             AccApWkend = 21102,
                             AccCalPeriod = 10,
@@ -21101,11 +21101,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 43,
-                            AccWkend2N = 20021026L
+                            WeekDate = 20021026
                         },
                         new
                         {
-                            AccWkendN = 21109,
+                            WeekEndingDate = 21109,
                             AccAltKeyNum = -183L,
                             AccApWkend = 21116,
                             AccCalPeriod = 11,
@@ -21120,11 +21120,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 45,
-                            AccWkend2N = 20021109L
+                            WeekDate = 20021109
                         },
                         new
                         {
-                            AccWkendN = 21116,
+                            WeekEndingDate = 21116,
                             AccAltKeyNum = -182L,
                             AccApWkend = 21123,
                             AccCalPeriod = 11,
@@ -21139,11 +21139,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 46,
-                            AccWkend2N = 20021116L
+                            WeekDate = 20021116
                         },
                         new
                         {
-                            AccWkendN = 21130,
+                            WeekEndingDate = 21130,
                             AccAltKeyNum = -180L,
                             AccApWkend = 21207,
                             AccCalPeriod = 11,
@@ -21158,11 +21158,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 48,
-                            AccWkend2N = 20021130L
+                            WeekDate = 20021130
                         },
                         new
                         {
-                            AccWkendN = 21214,
+                            WeekEndingDate = 21214,
                             AccAltKeyNum = -178L,
                             AccApWkend = 21221,
                             AccCalPeriod = 12,
@@ -21177,11 +21177,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 50,
-                            AccWkend2N = 20021214L
+                            WeekDate = 20021214
                         },
                         new
                         {
-                            AccWkendN = 21221,
+                            WeekEndingDate = 21221,
                             AccAltKeyNum = -177L,
                             AccApWkend = 21228,
                             AccCalPeriod = 12,
@@ -21196,11 +21196,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 51,
-                            AccWkend2N = 20021221L
+                            WeekDate = 20021221
                         },
                         new
                         {
-                            AccWkendN = 21228,
+                            WeekEndingDate = 21228,
                             AccAltKeyNum = -176L,
                             AccApWkend = 30104,
                             AccCalPeriod = 12,
@@ -21215,11 +21215,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 1,
                             AccWeekN = 52,
-                            AccWkend2N = 20021228L
+                            WeekDate = 20021228
                         },
                         new
                         {
-                            AccWkendN = 30111,
+                            WeekEndingDate = 30111,
                             AccAltKeyNum = -166L,
                             AccApWkend = 30118,
                             AccCalPeriod = 1,
@@ -21234,11 +21234,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 2,
-                            AccWkend2N = 20030111L
+                            WeekDate = 20030111
                         },
                         new
                         {
-                            AccWkendN = 30125,
+                            WeekEndingDate = 30125,
                             AccAltKeyNum = -164L,
                             AccApWkend = 30201,
                             AccCalPeriod = 1,
@@ -21253,11 +21253,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 4,
-                            AccWkend2N = 20030125L
+                            WeekDate = 20030125
                         },
                         new
                         {
-                            AccWkendN = 30201,
+                            WeekEndingDate = 30201,
                             AccAltKeyNum = -163L,
                             AccApWkend = 30208,
                             AccCalPeriod = 1,
@@ -21272,11 +21272,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 5,
-                            AccWkend2N = 20030201L
+                            WeekDate = 20030201
                         },
                         new
                         {
-                            AccWkendN = 30301,
+                            WeekEndingDate = 30301,
                             AccAltKeyNum = -159L,
                             AccApWkend = 30308,
                             AccCalPeriod = 2,
@@ -21291,11 +21291,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 9,
-                            AccWkend2N = 20030301L
+                            WeekDate = 20030301
                         },
                         new
                         {
-                            AccWkendN = 30308,
+                            WeekEndingDate = 30308,
                             AccAltKeyNum = -158L,
                             AccApWkend = 30315,
                             AccCalPeriod = 3,
@@ -21310,11 +21310,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 10,
-                            AccWkend2N = 20030308L
+                            WeekDate = 20030308
                         },
                         new
                         {
-                            AccWkendN = 30322,
+                            WeekEndingDate = 30322,
                             AccAltKeyNum = -156L,
                             AccApWkend = 30329,
                             AccCalPeriod = 3,
@@ -21329,11 +21329,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 12,
-                            AccWkend2N = 20030322L
+                            WeekDate = 20030322
                         },
                         new
                         {
-                            AccWkendN = 30329,
+                            WeekEndingDate = 30329,
                             AccAltKeyNum = -155L,
                             AccApWkend = 30405,
                             AccCalPeriod = 3,
@@ -21348,11 +21348,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 2,
                             AccWeekN = 13,
-                            AccWkend2N = 20030329L
+                            WeekDate = 20030329
                         },
                         new
                         {
-                            AccWkendN = 30405,
+                            WeekEndingDate = 30405,
                             AccAltKeyNum = -154L,
                             AccApWkend = 30412,
                             AccCalPeriod = 4,
@@ -21367,11 +21367,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 14,
-                            AccWkend2N = 20030405L
+                            WeekDate = 20030405
                         },
                         new
                         {
-                            AccWkendN = 30412,
+                            WeekEndingDate = 30412,
                             AccAltKeyNum = -153L,
                             AccApWkend = 30419,
                             AccCalPeriod = 4,
@@ -21386,11 +21386,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 15,
-                            AccWkend2N = 20030412L
+                            WeekDate = 20030412
                         },
                         new
                         {
-                            AccWkendN = 30419,
+                            WeekEndingDate = 30419,
                             AccAltKeyNum = -152L,
                             AccApWkend = 30426,
                             AccCalPeriod = 4,
@@ -21405,11 +21405,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 16,
-                            AccWkend2N = 20030419L
+                            WeekDate = 20030419
                         },
                         new
                         {
-                            AccWkendN = 30503,
+                            WeekEndingDate = 30503,
                             AccAltKeyNum = -150L,
                             AccApWkend = 30510,
                             AccCalPeriod = 4,
@@ -21424,11 +21424,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 18,
-                            AccWkend2N = 20030503L
+                            WeekDate = 20030503
                         },
                         new
                         {
-                            AccWkendN = 30510,
+                            WeekEndingDate = 30510,
                             AccAltKeyNum = -149L,
                             AccApWkend = 30517,
                             AccCalPeriod = 5,
@@ -21443,11 +21443,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 19,
-                            AccWkend2N = 20030510L
+                            WeekDate = 20030510
                         },
                         new
                         {
-                            AccWkendN = 30517,
+                            WeekEndingDate = 30517,
                             AccAltKeyNum = -148L,
                             AccApWkend = 30524,
                             AccCalPeriod = 5,
@@ -21462,11 +21462,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 20,
-                            AccWkend2N = 20030517L
+                            WeekDate = 20030517
                         },
                         new
                         {
-                            AccWkendN = 30524,
+                            WeekEndingDate = 30524,
                             AccAltKeyNum = -147L,
                             AccApWkend = 30531,
                             AccCalPeriod = 5,
@@ -21481,11 +21481,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 21,
-                            AccWkend2N = 20030524L
+                            WeekDate = 20030524
                         },
                         new
                         {
-                            AccWkendN = 30607,
+                            WeekEndingDate = 30607,
                             AccAltKeyNum = -145L,
                             AccApWkend = 30614,
                             AccCalPeriod = 6,
@@ -21500,11 +21500,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 23,
-                            AccWkend2N = 20030607L
+                            WeekDate = 20030607
                         },
                         new
                         {
-                            AccWkendN = 30614,
+                            WeekEndingDate = 30614,
                             AccAltKeyNum = -144L,
                             AccApWkend = 30621,
                             AccCalPeriod = 6,
@@ -21519,11 +21519,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 24,
-                            AccWkend2N = 20030614L
+                            WeekDate = 20030614
                         },
                         new
                         {
-                            AccWkendN = 30621,
+                            WeekEndingDate = 30621,
                             AccAltKeyNum = -143L,
                             AccApWkend = 30628,
                             AccCalPeriod = 6,
@@ -21538,11 +21538,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 25,
-                            AccWkend2N = 20030621L
+                            WeekDate = 20030621
                         },
                         new
                         {
-                            AccWkendN = 30712,
+                            WeekEndingDate = 30712,
                             AccAltKeyNum = -140L,
                             AccApWkend = 30719,
                             AccCalPeriod = 7,
@@ -21557,11 +21557,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 28,
-                            AccWkend2N = 20030712L
+                            WeekDate = 20030712
                         },
                         new
                         {
-                            AccWkendN = 30719,
+                            WeekEndingDate = 30719,
                             AccAltKeyNum = -139L,
                             AccApWkend = 30726,
                             AccCalPeriod = 7,
@@ -21576,11 +21576,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 29,
-                            AccWkend2N = 20030719L
+                            WeekDate = 20030719
                         },
                         new
                         {
-                            AccWkendN = 30802,
+                            WeekEndingDate = 30802,
                             AccAltKeyNum = -137L,
                             AccApWkend = 30809,
                             AccCalPeriod = 7,
@@ -21595,11 +21595,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 31,
-                            AccWkend2N = 20030802L
+                            WeekDate = 20030802
                         },
                         new
                         {
-                            AccWkendN = 30816,
+                            WeekEndingDate = 30816,
                             AccAltKeyNum = -135L,
                             AccApWkend = 30823,
                             AccCalPeriod = 8,
@@ -21614,11 +21614,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 33,
-                            AccWkend2N = 20030816L
+                            WeekDate = 20030816
                         },
                         new
                         {
-                            AccWkendN = 30906,
+                            WeekEndingDate = 30906,
                             AccAltKeyNum = -132L,
                             AccApWkend = 30913,
                             AccCalPeriod = 9,
@@ -21633,11 +21633,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 36,
-                            AccWkend2N = 20030906L
+                            WeekDate = 20030906
                         },
                         new
                         {
-                            AccWkendN = 30913,
+                            WeekEndingDate = 30913,
                             AccAltKeyNum = -131L,
                             AccApWkend = 30920,
                             AccCalPeriod = 9,
@@ -21652,11 +21652,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 37,
-                            AccWkend2N = 20030913L
+                            WeekDate = 20030913
                         },
                         new
                         {
-                            AccWkendN = 30920,
+                            WeekEndingDate = 30920,
                             AccAltKeyNum = -130L,
                             AccApWkend = 30927,
                             AccCalPeriod = 9,
@@ -21671,11 +21671,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 38,
-                            AccWkend2N = 20030920L
+                            WeekDate = 20030920
                         },
                         new
                         {
-                            AccWkendN = 30927,
+                            WeekEndingDate = 30927,
                             AccAltKeyNum = -129L,
                             AccApWkend = 31004,
                             AccCalPeriod = 9,
@@ -21690,11 +21690,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 4,
                             AccWeekN = 39,
-                            AccWkend2N = 20030927L
+                            WeekDate = 20030927
                         },
                         new
                         {
-                            AccWkendN = 31004,
+                            WeekEndingDate = 31004,
                             AccAltKeyNum = -128L,
                             AccApWkend = 31011,
                             AccCalPeriod = 10,
@@ -21709,11 +21709,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 40,
-                            AccWkend2N = 20031004L
+                            WeekDate = 20031004
                         },
                         new
                         {
-                            AccWkendN = 31011,
+                            WeekEndingDate = 31011,
                             AccAltKeyNum = -127L,
                             AccApWkend = 31018,
                             AccCalPeriod = 10,
@@ -21728,11 +21728,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 41,
-                            AccWkend2N = 20031011L
+                            WeekDate = 20031011
                         },
                         new
                         {
-                            AccWkendN = 31025,
+                            WeekEndingDate = 31025,
                             AccAltKeyNum = -125L,
                             AccApWkend = 31101,
                             AccCalPeriod = 10,
@@ -21747,11 +21747,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 43,
-                            AccWkend2N = 20031025L
+                            WeekDate = 20031025
                         },
                         new
                         {
-                            AccWkendN = 31101,
+                            WeekEndingDate = 31101,
                             AccAltKeyNum = -124L,
                             AccApWkend = 31108,
                             AccCalPeriod = 10,
@@ -21766,11 +21766,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 44,
-                            AccWkend2N = 20031101L
+                            WeekDate = 20031101
                         },
                         new
                         {
-                            AccWkendN = 31115,
+                            WeekEndingDate = 31115,
                             AccAltKeyNum = -122L,
                             AccApWkend = 31122,
                             AccCalPeriod = 11,
@@ -21785,11 +21785,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 46,
-                            AccWkend2N = 20031115L
+                            WeekDate = 20031115
                         },
                         new
                         {
-                            AccWkendN = 31122,
+                            WeekEndingDate = 31122,
                             AccAltKeyNum = -121L,
                             AccApWkend = 31129,
                             AccCalPeriod = 11,
@@ -21804,11 +21804,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 47,
-                            AccWkend2N = 20031122L
+                            WeekDate = 20031122
                         },
                         new
                         {
-                            AccWkendN = 31129,
+                            WeekEndingDate = 31129,
                             AccAltKeyNum = -120L,
                             AccApWkend = 31206,
                             AccCalPeriod = 11,
@@ -21823,11 +21823,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 48,
-                            AccWkend2N = 20031129L
+                            WeekDate = 20031129
                         },
                         new
                         {
-                            AccWkendN = 31206,
+                            WeekEndingDate = 31206,
                             AccAltKeyNum = -119L,
                             AccApWkend = 31213,
                             AccCalPeriod = 12,
@@ -21842,11 +21842,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 49,
-                            AccWkend2N = 20031206L
+                            WeekDate = 20031206
                         },
                         new
                         {
-                            AccWkendN = 31227,
+                            WeekEndingDate = 31227,
                             AccAltKeyNum = -116L,
                             AccApWkend = 40103,
                             AccCalPeriod = 12,
@@ -21861,11 +21861,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 1,
                             AccWeekN = 52,
-                            AccWkend2N = 20031227L
+                            WeekDate = 20031227
                         },
                         new
                         {
-                            AccWkendN = 40103,
+                            WeekEndingDate = 40103,
                             AccAltKeyNum = -115L,
                             AccApWkend = 40110,
                             AccCalPeriod = 12,
@@ -21880,11 +21880,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 1,
                             AccWeekN = 53,
-                            AccWkend2N = 20040103L
+                            WeekDate = 20040103
                         },
                         new
                         {
-                            AccWkendN = 40110,
+                            WeekEndingDate = 40110,
                             AccAltKeyNum = -107L,
                             AccApWkend = 40117,
                             AccCalPeriod = 1,
@@ -21899,11 +21899,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 1,
-                            AccWkend2N = 20040110L
+                            WeekDate = 20040110
                         },
                         new
                         {
-                            AccWkendN = 40124,
+                            WeekEndingDate = 40124,
                             AccAltKeyNum = -105L,
                             AccApWkend = 40131,
                             AccCalPeriod = 1,
@@ -21918,11 +21918,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 3,
-                            AccWkend2N = 20040124L
+                            WeekDate = 20040124
                         },
                         new
                         {
-                            AccWkendN = 40221,
+                            WeekEndingDate = 40221,
                             AccAltKeyNum = -101L,
                             AccApWkend = 40228,
                             AccCalPeriod = 2,
@@ -21937,11 +21937,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 7,
-                            AccWkend2N = 20040221L
+                            WeekDate = 20040221
                         },
                         new
                         {
-                            AccWkendN = 40228,
+                            WeekEndingDate = 40228,
                             AccAltKeyNum = -100L,
                             AccApWkend = 40306,
                             AccCalPeriod = 2,
@@ -21956,11 +21956,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 8,
-                            AccWkend2N = 20040228L
+                            WeekDate = 20040228
                         },
                         new
                         {
-                            AccWkendN = 40327,
+                            WeekEndingDate = 40327,
                             AccAltKeyNum = -96L,
                             AccApWkend = 40403,
                             AccCalPeriod = 3,
@@ -21975,11 +21975,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 2,
                             AccWeekN = 12,
-                            AccWkend2N = 20040327L
+                            WeekDate = 20040327
                         },
                         new
                         {
-                            AccWkendN = 40403,
+                            WeekEndingDate = 40403,
                             AccAltKeyNum = -95L,
                             AccApWkend = 40410,
                             AccCalPeriod = 3,
@@ -21994,11 +21994,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 2,
                             AccWeekN = 13,
-                            AccWkend2N = 20040403L
+                            WeekDate = 20040403
                         },
                         new
                         {
-                            AccWkendN = 40410,
+                            WeekEndingDate = 40410,
                             AccAltKeyNum = -94L,
                             AccApWkend = 40417,
                             AccCalPeriod = 4,
@@ -22013,11 +22013,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 14,
-                            AccWkend2N = 20040410L
+                            WeekDate = 20040410
                         },
                         new
                         {
-                            AccWkendN = 40417,
+                            WeekEndingDate = 40417,
                             AccAltKeyNum = -93L,
                             AccApWkend = 40424,
                             AccCalPeriod = 4,
@@ -22032,11 +22032,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 15,
-                            AccWkend2N = 20040417L
+                            WeekDate = 20040417
                         },
                         new
                         {
-                            AccWkendN = 40424,
+                            WeekEndingDate = 40424,
                             AccAltKeyNum = -92L,
                             AccApWkend = 40501,
                             AccCalPeriod = 4,
@@ -22051,11 +22051,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 16,
-                            AccWkend2N = 20040424L
+                            WeekDate = 20040424
                         },
                         new
                         {
-                            AccWkendN = 40501,
+                            WeekEndingDate = 40501,
                             AccAltKeyNum = -91L,
                             AccApWkend = 40508,
                             AccCalPeriod = 4,
@@ -22070,11 +22070,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 17,
-                            AccWkend2N = 20040501L
+                            WeekDate = 20040501
                         },
                         new
                         {
-                            AccWkendN = 40508,
+                            WeekEndingDate = 40508,
                             AccAltKeyNum = -90L,
                             AccApWkend = 40515,
                             AccCalPeriod = 5,
@@ -22089,11 +22089,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 18,
-                            AccWkend2N = 20040508L
+                            WeekDate = 20040508
                         },
                         new
                         {
-                            AccWkendN = 40522,
+                            WeekEndingDate = 40522,
                             AccAltKeyNum = -88L,
                             AccApWkend = 40529,
                             AccCalPeriod = 5,
@@ -22108,11 +22108,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 20,
-                            AccWkend2N = 20040522L
+                            WeekDate = 20040522
                         },
                         new
                         {
-                            AccWkendN = 40612,
+                            WeekEndingDate = 40612,
                             AccAltKeyNum = -85L,
                             AccApWkend = 40619,
                             AccCalPeriod = 6,
@@ -22127,11 +22127,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 23,
-                            AccWkend2N = 20040612L
+                            WeekDate = 20040612
                         },
                         new
                         {
-                            AccWkendN = 40619,
+                            WeekEndingDate = 40619,
                             AccAltKeyNum = -84L,
                             AccApWkend = 40626,
                             AccCalPeriod = 6,
@@ -22146,11 +22146,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 24,
-                            AccWkend2N = 20040619L
+                            WeekDate = 20040619
                         },
                         new
                         {
-                            AccWkendN = 40626,
+                            WeekEndingDate = 40626,
                             AccAltKeyNum = -83L,
                             AccApWkend = 40703,
                             AccCalPeriod = 6,
@@ -22165,11 +22165,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 3,
                             AccWeekN = 25,
-                            AccWkend2N = 20040626L
+                            WeekDate = 20040626
                         },
                         new
                         {
-                            AccWkendN = 40710,
+                            WeekEndingDate = 40710,
                             AccAltKeyNum = -81L,
                             AccApWkend = 40717,
                             AccCalPeriod = 7,
@@ -22184,11 +22184,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 27,
-                            AccWkend2N = 20040710L
+                            WeekDate = 20040710
                         },
                         new
                         {
-                            AccWkendN = 40731,
+                            WeekEndingDate = 40731,
                             AccAltKeyNum = -78L,
                             AccApWkend = 40807,
                             AccCalPeriod = 7,
@@ -22203,11 +22203,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 30,
-                            AccWkend2N = 20040731L
+                            WeekDate = 20040731
                         },
                         new
                         {
-                            AccWkendN = 40828,
+                            WeekEndingDate = 40828,
                             AccAltKeyNum = -74L,
                             AccApWkend = 40904,
                             AccCalPeriod = 8,
@@ -22222,11 +22222,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 34,
-                            AccWkend2N = 20040828L
+                            WeekDate = 20040828
                         },
                         new
                         {
-                            AccWkendN = 40904,
+                            WeekEndingDate = 40904,
                             AccAltKeyNum = -73L,
                             AccApWkend = 40911,
                             AccCalPeriod = 9,
@@ -22241,11 +22241,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 35,
-                            AccWkend2N = 20040904L
+                            WeekDate = 20040904
                         },
                         new
                         {
-                            AccWkendN = 40911,
+                            WeekEndingDate = 40911,
                             AccAltKeyNum = -72L,
                             AccApWkend = 40918,
                             AccCalPeriod = 9,
@@ -22260,11 +22260,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 36,
-                            AccWkend2N = 20040911L
+                            WeekDate = 20040911
                         },
                         new
                         {
-                            AccWkendN = 40918,
+                            WeekEndingDate = 40918,
                             AccAltKeyNum = -71L,
                             AccApWkend = 40925,
                             AccCalPeriod = 9,
@@ -22279,11 +22279,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 37,
-                            AccWkend2N = 20040918L
+                            WeekDate = 20040918
                         },
                         new
                         {
-                            AccWkendN = 41002,
+                            WeekEndingDate = 41002,
                             AccAltKeyNum = -69L,
                             AccApWkend = 41009,
                             AccCalPeriod = 9,
@@ -22298,11 +22298,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 4,
                             AccWeekN = 39,
-                            AccWkend2N = 20041002L
+                            WeekDate = 20041002
                         },
                         new
                         {
-                            AccWkendN = 41009,
+                            WeekEndingDate = 41009,
                             AccAltKeyNum = -68L,
                             AccApWkend = 41016,
                             AccCalPeriod = 10,
@@ -22317,11 +22317,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 40,
-                            AccWkend2N = 20041009L
+                            WeekDate = 20041009
                         },
                         new
                         {
-                            AccWkendN = 41016,
+                            WeekEndingDate = 41016,
                             AccAltKeyNum = -67L,
                             AccApWkend = 41023,
                             AccCalPeriod = 10,
@@ -22336,11 +22336,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 41,
-                            AccWkend2N = 20041016L
+                            WeekDate = 20041016
                         },
                         new
                         {
-                            AccWkendN = 220108,
+                            WeekEndingDate = 220108,
                             AccAltKeyNum = 973L,
                             AccApWkend = 220115,
                             AccCalPeriod = 1,
@@ -22355,11 +22355,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 1,
-                            AccWkend2N = 20220108L
+                            WeekDate = 20220108
                         },
                         new
                         {
-                            AccWkendN = 220115,
+                            WeekEndingDate = 220115,
                             AccAltKeyNum = 974L,
                             AccApWkend = 220122,
                             AccCalPeriod = 1,
@@ -22374,11 +22374,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 2,
-                            AccWkend2N = 20220115L
+                            WeekDate = 20220115
                         },
                         new
                         {
-                            AccWkendN = 220122,
+                            WeekEndingDate = 220122,
                             AccAltKeyNum = 975L,
                             AccApWkend = 220129,
                             AccCalPeriod = 1,
@@ -22393,11 +22393,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 3,
-                            AccWkend2N = 20220122L
+                            WeekDate = 20220122
                         },
                         new
                         {
-                            AccWkendN = 220129,
+                            WeekEndingDate = 220129,
                             AccAltKeyNum = 976L,
                             AccApWkend = 220205,
                             AccCalPeriod = 1,
@@ -22412,11 +22412,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 4,
-                            AccWkend2N = 20220129L
+                            WeekDate = 20220129
                         },
                         new
                         {
-                            AccWkendN = 220205,
+                            WeekEndingDate = 220205,
                             AccAltKeyNum = 977L,
                             AccApWkend = 220212,
                             AccCalPeriod = 2,
@@ -22431,11 +22431,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 5,
-                            AccWkend2N = 20220205L
+                            WeekDate = 20220205
                         },
                         new
                         {
-                            AccWkendN = 220212,
+                            WeekEndingDate = 220212,
                             AccAltKeyNum = 978L,
                             AccApWkend = 220219,
                             AccCalPeriod = 2,
@@ -22450,11 +22450,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 6,
-                            AccWkend2N = 20220212L
+                            WeekDate = 20220212
                         },
                         new
                         {
-                            AccWkendN = 220402,
+                            WeekEndingDate = 220402,
                             AccAltKeyNum = 985L,
                             AccApWkend = 220409,
                             AccCalPeriod = 3,
@@ -22469,11 +22469,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 2,
                             AccWeekN = 13,
-                            AccWkend2N = 20220402L
+                            WeekDate = 20220402
                         },
                         new
                         {
-                            AccWkendN = 220409,
+                            WeekEndingDate = 220409,
                             AccAltKeyNum = 986L,
                             AccApWkend = 220416,
                             AccCalPeriod = 4,
@@ -22488,11 +22488,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 14,
-                            AccWkend2N = 20220409L
+                            WeekDate = 20220409
                         },
                         new
                         {
-                            AccWkendN = 220416,
+                            WeekEndingDate = 220416,
                             AccAltKeyNum = 987L,
                             AccApWkend = 220423,
                             AccCalPeriod = 4,
@@ -22507,11 +22507,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 15,
-                            AccWkend2N = 20220416L
+                            WeekDate = 20220416
                         },
                         new
                         {
-                            AccWkendN = 220514,
+                            WeekEndingDate = 220514,
                             AccAltKeyNum = 991L,
                             AccApWkend = 220521,
                             AccCalPeriod = 5,
@@ -22526,11 +22526,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 19,
-                            AccWkend2N = 20220514L
+                            WeekDate = 20220514
                         },
                         new
                         {
-                            AccWkendN = 220521,
+                            WeekEndingDate = 220521,
                             AccAltKeyNum = 992L,
                             AccApWkend = 220528,
                             AccCalPeriod = 5,
@@ -22545,11 +22545,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 20,
-                            AccWkend2N = 20220521L
+                            WeekDate = 20220521
                         },
                         new
                         {
-                            AccWkendN = 220528,
+                            WeekEndingDate = 220528,
                             AccAltKeyNum = 993L,
                             AccApWkend = 220604,
                             AccCalPeriod = 5,
@@ -22564,11 +22564,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 21,
-                            AccWkend2N = 20220528L
+                            WeekDate = 20220528
                         },
                         new
                         {
-                            AccWkendN = 220604,
+                            WeekEndingDate = 220604,
                             AccAltKeyNum = 994L,
                             AccApWkend = 220611,
                             AccCalPeriod = 6,
@@ -22583,11 +22583,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 22,
-                            AccWkend2N = 20220604L
+                            WeekDate = 20220604
                         },
                         new
                         {
-                            AccWkendN = 220611,
+                            WeekEndingDate = 220611,
                             AccAltKeyNum = 995L,
                             AccApWkend = 220618,
                             AccCalPeriod = 6,
@@ -22602,11 +22602,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 23,
-                            AccWkend2N = 20220611L
+                            WeekDate = 20220611
                         },
                         new
                         {
-                            AccWkendN = 220618,
+                            WeekEndingDate = 220618,
                             AccAltKeyNum = 996L,
                             AccApWkend = 220625,
                             AccCalPeriod = 6,
@@ -22621,11 +22621,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 24,
-                            AccWkend2N = 20220618L
+                            WeekDate = 20220618
                         },
                         new
                         {
-                            AccWkendN = 220625,
+                            WeekEndingDate = 220625,
                             AccAltKeyNum = 997L,
                             AccApWkend = 220702,
                             AccCalPeriod = 6,
@@ -22640,11 +22640,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 25,
-                            AccWkend2N = 20220625L
+                            WeekDate = 20220625
                         },
                         new
                         {
-                            AccWkendN = 220702,
+                            WeekEndingDate = 220702,
                             AccAltKeyNum = 998L,
                             AccApWkend = 220709,
                             AccCalPeriod = 6,
@@ -22659,11 +22659,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 3,
                             AccWeekN = 26,
-                            AccWkend2N = 20220702L
+                            WeekDate = 20220702
                         },
                         new
                         {
-                            AccWkendN = 220709,
+                            WeekEndingDate = 220709,
                             AccAltKeyNum = 999L,
                             AccApWkend = 220716,
                             AccCalPeriod = 7,
@@ -22678,11 +22678,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 27,
-                            AccWkend2N = 20220709L
+                            WeekDate = 20220709
                         },
                         new
                         {
-                            AccWkendN = 220716,
+                            WeekEndingDate = 220716,
                             AccAltKeyNum = 1000L,
                             AccApWkend = 220723,
                             AccCalPeriod = 7,
@@ -22697,11 +22697,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 28,
-                            AccWkend2N = 20220716L
+                            WeekDate = 20220716
                         },
                         new
                         {
-                            AccWkendN = 220723,
+                            WeekEndingDate = 220723,
                             AccAltKeyNum = 1001L,
                             AccApWkend = 220730,
                             AccCalPeriod = 7,
@@ -22716,11 +22716,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 29,
-                            AccWkend2N = 20220723L
+                            WeekDate = 20220723
                         },
                         new
                         {
-                            AccWkendN = 220730,
+                            WeekEndingDate = 220730,
                             AccAltKeyNum = 1002L,
                             AccApWkend = 220806,
                             AccCalPeriod = 7,
@@ -22735,11 +22735,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 30,
-                            AccWkend2N = 20220730L
+                            WeekDate = 20220730
                         },
                         new
                         {
-                            AccWkendN = 220806,
+                            WeekEndingDate = 220806,
                             AccAltKeyNum = 1003L,
                             AccApWkend = 220813,
                             AccCalPeriod = 8,
@@ -22754,11 +22754,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 31,
-                            AccWkend2N = 20220806L
+                            WeekDate = 20220806
                         },
                         new
                         {
-                            AccWkendN = 220813,
+                            WeekEndingDate = 220813,
                             AccAltKeyNum = 1004L,
                             AccApWkend = 220820,
                             AccCalPeriod = 8,
@@ -22773,11 +22773,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 32,
-                            AccWkend2N = 20220813L
+                            WeekDate = 20220813
                         },
                         new
                         {
-                            AccWkendN = 220820,
+                            WeekEndingDate = 220820,
                             AccAltKeyNum = 1005L,
                             AccApWkend = 220827,
                             AccCalPeriod = 8,
@@ -22792,11 +22792,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 33,
-                            AccWkend2N = 20220820L
+                            WeekDate = 20220820
                         },
                         new
                         {
-                            AccWkendN = 220827,
+                            WeekEndingDate = 220827,
                             AccAltKeyNum = 1006L,
                             AccApWkend = 220903,
                             AccCalPeriod = 8,
@@ -22811,11 +22811,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 34,
-                            AccWkend2N = 20220827L
+                            WeekDate = 20220827
                         },
                         new
                         {
-                            AccWkendN = 220903,
+                            WeekEndingDate = 220903,
                             AccAltKeyNum = 1007L,
                             AccApWkend = 220910,
                             AccCalPeriod = 8,
@@ -22830,11 +22830,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 35,
-                            AccWkend2N = 20220903L
+                            WeekDate = 20220903
                         },
                         new
                         {
-                            AccWkendN = 220910,
+                            WeekEndingDate = 220910,
                             AccAltKeyNum = 1008L,
                             AccApWkend = 220917,
                             AccCalPeriod = 9,
@@ -22849,11 +22849,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 36,
-                            AccWkend2N = 20220910L
+                            WeekDate = 20220910
                         },
                         new
                         {
-                            AccWkendN = 221008,
+                            WeekEndingDate = 221008,
                             AccAltKeyNum = 1012L,
                             AccApWkend = 221015,
                             AccCalPeriod = 10,
@@ -22868,11 +22868,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 40,
-                            AccWkend2N = 20221008L
+                            WeekDate = 20221008
                         },
                         new
                         {
-                            AccWkendN = 221015,
+                            WeekEndingDate = 221015,
                             AccAltKeyNum = 1013L,
                             AccApWkend = 221022,
                             AccCalPeriod = 10,
@@ -22887,11 +22887,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 41,
-                            AccWkend2N = 20221015L
+                            WeekDate = 20221015
                         },
                         new
                         {
-                            AccWkendN = 221022,
+                            WeekEndingDate = 221022,
                             AccAltKeyNum = 1014L,
                             AccApWkend = 221029,
                             AccCalPeriod = 10,
@@ -22906,11 +22906,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 42,
-                            AccWkend2N = 20221022L
+                            WeekDate = 20221022
                         },
                         new
                         {
-                            AccWkendN = 221029,
+                            WeekEndingDate = 221029,
                             AccAltKeyNum = 1015L,
                             AccApWkend = 221105,
                             AccCalPeriod = 10,
@@ -22925,11 +22925,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 43,
-                            AccWkend2N = 20221029L
+                            WeekDate = 20221029
                         },
                         new
                         {
-                            AccWkendN = 221105,
+                            WeekEndingDate = 221105,
                             AccAltKeyNum = 1016L,
                             AccApWkend = 221112,
                             AccCalPeriod = 11,
@@ -22944,11 +22944,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 44,
-                            AccWkend2N = 20221105L
+                            WeekDate = 20221105
                         },
                         new
                         {
-                            AccWkendN = 221112,
+                            WeekEndingDate = 221112,
                             AccAltKeyNum = 1017L,
                             AccApWkend = 221119,
                             AccCalPeriod = 11,
@@ -22963,11 +22963,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 45,
-                            AccWkend2N = 20221112L
+                            WeekDate = 20221112
                         },
                         new
                         {
-                            AccWkendN = 221119,
+                            WeekEndingDate = 221119,
                             AccAltKeyNum = 1018L,
                             AccApWkend = 221126,
                             AccCalPeriod = 11,
@@ -22982,11 +22982,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 46,
-                            AccWkend2N = 20221119L
+                            WeekDate = 20221119
                         },
                         new
                         {
-                            AccWkendN = 221126,
+                            WeekEndingDate = 221126,
                             AccAltKeyNum = 1019L,
                             AccApWkend = 221203,
                             AccCalPeriod = 11,
@@ -23001,11 +23001,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 47,
-                            AccWkend2N = 20221126L
+                            WeekDate = 20221126
                         },
                         new
                         {
-                            AccWkendN = 221203,
+                            WeekEndingDate = 221203,
                             AccAltKeyNum = 1020L,
                             AccApWkend = 221210,
                             AccCalPeriod = 11,
@@ -23020,11 +23020,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 48,
-                            AccWkend2N = 20221203L
+                            WeekDate = 20221203
                         },
                         new
                         {
-                            AccWkendN = 221210,
+                            WeekEndingDate = 221210,
                             AccAltKeyNum = 1021L,
                             AccApWkend = 221217,
                             AccCalPeriod = 12,
@@ -23039,11 +23039,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 49,
-                            AccWkend2N = 20221210L
+                            WeekDate = 20221210
                         },
                         new
                         {
-                            AccWkendN = 221217,
+                            WeekEndingDate = 221217,
                             AccAltKeyNum = 1022L,
                             AccApWkend = 221224,
                             AccCalPeriod = 12,
@@ -23058,11 +23058,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 50,
-                            AccWkend2N = 20221217L
+                            WeekDate = 20221217
                         },
                         new
                         {
-                            AccWkendN = 221224,
+                            WeekEndingDate = 221224,
                             AccAltKeyNum = 1023L,
                             AccApWkend = 221231,
                             AccCalPeriod = 12,
@@ -23077,11 +23077,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 51,
-                            AccWkend2N = 20221224L
+                            WeekDate = 20221224
                         },
                         new
                         {
-                            AccWkendN = 210313,
+                            WeekEndingDate = 210313,
                             AccAltKeyNum = 922L,
                             AccApWkend = 210320,
                             AccCalPeriod = 3,
@@ -23096,11 +23096,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 10,
-                            AccWkend2N = 20210313L
+                            WeekDate = 20210313
                         },
                         new
                         {
-                            AccWkendN = 210320,
+                            WeekEndingDate = 210320,
                             AccAltKeyNum = 923L,
                             AccApWkend = 210327,
                             AccCalPeriod = 3,
@@ -23115,11 +23115,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 11,
-                            AccWkend2N = 20210320L
+                            WeekDate = 20210320
                         },
                         new
                         {
-                            AccWkendN = 210327,
+                            WeekEndingDate = 210327,
                             AccAltKeyNum = 924L,
                             AccApWkend = 210403,
                             AccCalPeriod = 3,
@@ -23134,11 +23134,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 2,
                             AccWeekN = 12,
-                            AccWkend2N = 20210327L
+                            WeekDate = 20210327
                         },
                         new
                         {
-                            AccWkendN = 210403,
+                            WeekEndingDate = 210403,
                             AccAltKeyNum = 925L,
                             AccApWkend = 210410,
                             AccCalPeriod = 3,
@@ -23153,11 +23153,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 2,
                             AccWeekN = 13,
-                            AccWkend2N = 20210403L
+                            WeekDate = 20210403
                         },
                         new
                         {
-                            AccWkendN = 210410,
+                            WeekEndingDate = 210410,
                             AccAltKeyNum = 926L,
                             AccApWkend = 210417,
                             AccCalPeriod = 4,
@@ -23172,11 +23172,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 14,
-                            AccWkend2N = 20210410L
+                            WeekDate = 20210410
                         },
                         new
                         {
-                            AccWkendN = 210417,
+                            WeekEndingDate = 210417,
                             AccAltKeyNum = 927L,
                             AccApWkend = 210424,
                             AccCalPeriod = 4,
@@ -23191,11 +23191,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 15,
-                            AccWkend2N = 20210417L
+                            WeekDate = 20210417
                         },
                         new
                         {
-                            AccWkendN = 210515,
+                            WeekEndingDate = 210515,
                             AccAltKeyNum = 931L,
                             AccApWkend = 210522,
                             AccCalPeriod = 5,
@@ -23210,11 +23210,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 19,
-                            AccWkend2N = 20210515L
+                            WeekDate = 20210515
                         },
                         new
                         {
-                            AccWkendN = 210522,
+                            WeekEndingDate = 210522,
                             AccAltKeyNum = 932L,
                             AccApWkend = 210529,
                             AccCalPeriod = 5,
@@ -23229,11 +23229,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 20,
-                            AccWkend2N = 20210522L
+                            WeekDate = 20210522
                         },
                         new
                         {
-                            AccWkendN = 210529,
+                            WeekEndingDate = 210529,
                             AccAltKeyNum = 933L,
                             AccApWkend = 210605,
                             AccCalPeriod = 5,
@@ -23248,11 +23248,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 21,
-                            AccWkend2N = 20210529L
+                            WeekDate = 20210529
                         },
                         new
                         {
-                            AccWkendN = 210717,
+                            WeekEndingDate = 210717,
                             AccAltKeyNum = 940L,
                             AccApWkend = 210724,
                             AccCalPeriod = 7,
@@ -23267,11 +23267,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 28,
-                            AccWkend2N = 20210717L
+                            WeekDate = 20210717
                         },
                         new
                         {
-                            AccWkendN = 210724,
+                            WeekEndingDate = 210724,
                             AccAltKeyNum = 941L,
                             AccApWkend = 210731,
                             AccCalPeriod = 7,
@@ -23286,11 +23286,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 29,
-                            AccWkend2N = 20210724L
+                            WeekDate = 20210724
                         },
                         new
                         {
-                            AccWkendN = 210731,
+                            WeekEndingDate = 210731,
                             AccAltKeyNum = 942L,
                             AccApWkend = 210807,
                             AccCalPeriod = 7,
@@ -23305,11 +23305,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 30,
-                            AccWkend2N = 20210731L
+                            WeekDate = 20210731
                         },
                         new
                         {
-                            AccWkendN = 210918,
+                            WeekEndingDate = 210918,
                             AccAltKeyNum = 949L,
                             AccApWkend = 210925,
                             AccCalPeriod = 9,
@@ -23324,11 +23324,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 37,
-                            AccWkend2N = 20210918L
+                            WeekDate = 20210918
                         },
                         new
                         {
-                            AccWkendN = 210925,
+                            WeekEndingDate = 210925,
                             AccAltKeyNum = 950L,
                             AccApWkend = 211002,
                             AccCalPeriod = 9,
@@ -23343,11 +23343,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 38,
-                            AccWkend2N = 20210925L
+                            WeekDate = 20210925
                         },
                         new
                         {
-                            AccWkendN = 211002,
+                            WeekEndingDate = 211002,
                             AccAltKeyNum = 951L,
                             AccApWkend = 211009,
                             AccCalPeriod = 9,
@@ -23362,11 +23362,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 4,
                             AccWeekN = 39,
-                            AccWkend2N = 20211002L
+                            WeekDate = 20211002
                         },
                         new
                         {
-                            AccWkendN = 211030,
+                            WeekEndingDate = 211030,
                             AccAltKeyNum = 955L,
                             AccApWkend = 211106,
                             AccCalPeriod = 10,
@@ -23381,11 +23381,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 43,
-                            AccWkend2N = 20211030L
+                            WeekDate = 20211030
                         },
                         new
                         {
-                            AccWkendN = 211106,
+                            WeekEndingDate = 211106,
                             AccAltKeyNum = 956L,
                             AccApWkend = 211113,
                             AccCalPeriod = 11,
@@ -23400,11 +23400,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 44,
-                            AccWkend2N = 20211106L
+                            WeekDate = 20211106
                         },
                         new
                         {
-                            AccWkendN = 211113,
+                            WeekEndingDate = 211113,
                             AccAltKeyNum = 957L,
                             AccApWkend = 211120,
                             AccCalPeriod = 11,
@@ -23419,11 +23419,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 45,
-                            AccWkend2N = 20211113L
+                            WeekDate = 20211113
                         },
                         new
                         {
-                            AccWkendN = 211120,
+                            WeekEndingDate = 211120,
                             AccAltKeyNum = 958L,
                             AccApWkend = 211127,
                             AccCalPeriod = 11,
@@ -23438,11 +23438,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 46,
-                            AccWkend2N = 20211120L
+                            WeekDate = 20211120
                         },
                         new
                         {
-                            AccWkendN = 211127,
+                            WeekEndingDate = 211127,
                             AccAltKeyNum = 959L,
                             AccApWkend = 211204,
                             AccCalPeriod = 11,
@@ -23457,11 +23457,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 47,
-                            AccWkend2N = 20211127L
+                            WeekDate = 20211127
                         },
                         new
                         {
-                            AccWkendN = 211204,
+                            WeekEndingDate = 211204,
                             AccAltKeyNum = 960L,
                             AccApWkend = 211211,
                             AccCalPeriod = 12,
@@ -23476,11 +23476,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 48,
-                            AccWkend2N = 20211204L
+                            WeekDate = 20211204
                         },
                         new
                         {
-                            AccWkendN = 220101,
+                            WeekEndingDate = 220101,
                             AccAltKeyNum = 964L,
                             AccApWkend = 220108,
                             AccCalPeriod = 12,
@@ -23495,11 +23495,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 1,
                             AccWeekN = 52,
-                            AccWkend2N = 20220101L
+                            WeekDate = 20220101
                         },
                         new
                         {
-                            AccWkendN = 220219,
+                            WeekEndingDate = 220219,
                             AccAltKeyNum = 979L,
                             AccApWkend = 220226,
                             AccCalPeriod = 2,
@@ -23514,11 +23514,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 7,
-                            AccWkend2N = 20220219L
+                            WeekDate = 20220219
                         },
                         new
                         {
-                            AccWkendN = 220226,
+                            WeekEndingDate = 220226,
                             AccAltKeyNum = 980L,
                             AccApWkend = 220305,
                             AccCalPeriod = 2,
@@ -23533,11 +23533,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 8,
-                            AccWkend2N = 20220226L
+                            WeekDate = 20220226
                         },
                         new
                         {
-                            AccWkendN = 220305,
+                            WeekEndingDate = 220305,
                             AccAltKeyNum = 981L,
                             AccApWkend = 220312,
                             AccCalPeriod = 3,
@@ -23552,11 +23552,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 9,
-                            AccWkend2N = 20220305L
+                            WeekDate = 20220305
                         },
                         new
                         {
-                            AccWkendN = 220312,
+                            WeekEndingDate = 220312,
                             AccAltKeyNum = 982L,
                             AccApWkend = 220319,
                             AccCalPeriod = 3,
@@ -23571,11 +23571,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 10,
-                            AccWkend2N = 20220312L
+                            WeekDate = 20220312
                         },
                         new
                         {
-                            AccWkendN = 220319,
+                            WeekEndingDate = 220319,
                             AccAltKeyNum = 983L,
                             AccApWkend = 220326,
                             AccCalPeriod = 3,
@@ -23590,11 +23590,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 11,
-                            AccWkend2N = 20220319L
+                            WeekDate = 20220319
                         },
                         new
                         {
-                            AccWkendN = 220326,
+                            WeekEndingDate = 220326,
                             AccAltKeyNum = 984L,
                             AccApWkend = 220402,
                             AccCalPeriod = 3,
@@ -23609,11 +23609,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 12,
-                            AccWkend2N = 20220326L
+                            WeekDate = 20220326
                         },
                         new
                         {
-                            AccWkendN = 220423,
+                            WeekEndingDate = 220423,
                             AccAltKeyNum = 988L,
                             AccApWkend = 220430,
                             AccCalPeriod = 4,
@@ -23628,11 +23628,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 16,
-                            AccWkend2N = 20220423L
+                            WeekDate = 20220423
                         },
                         new
                         {
-                            AccWkendN = 220430,
+                            WeekEndingDate = 220430,
                             AccAltKeyNum = 989L,
                             AccApWkend = 220507,
                             AccCalPeriod = 4,
@@ -23647,11 +23647,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 17,
-                            AccWkend2N = 20220430L
+                            WeekDate = 20220430
                         },
                         new
                         {
-                            AccWkendN = 220507,
+                            WeekEndingDate = 220507,
                             AccAltKeyNum = 990L,
                             AccApWkend = 220514,
                             AccCalPeriod = 5,
@@ -23666,11 +23666,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 18,
-                            AccWkend2N = 20220507L
+                            WeekDate = 20220507
                         },
                         new
                         {
-                            AccWkendN = 220917,
+                            WeekEndingDate = 220917,
                             AccAltKeyNum = 1009L,
                             AccApWkend = 220924,
                             AccCalPeriod = 9,
@@ -23685,11 +23685,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 37,
-                            AccWkend2N = 20220917L
+                            WeekDate = 20220917
                         },
                         new
                         {
-                            AccWkendN = 220924,
+                            WeekEndingDate = 220924,
                             AccAltKeyNum = 1010L,
                             AccApWkend = 221001,
                             AccCalPeriod = 9,
@@ -23704,11 +23704,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 38,
-                            AccWkend2N = 20220924L
+                            WeekDate = 20220924
                         },
                         new
                         {
-                            AccWkendN = 221001,
+                            WeekEndingDate = 221001,
                             AccAltKeyNum = 1011L,
                             AccApWkend = 221008,
                             AccCalPeriod = 9,
@@ -23723,11 +23723,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 4,
                             AccWeekN = 39,
-                            AccWkend2N = 20221001L
+                            WeekDate = 20221001
                         },
                         new
                         {
-                            AccWkendN = 221231,
+                            WeekEndingDate = 221231,
                             AccAltKeyNum = 1024L,
                             AccApWkend = 230107,
                             AccCalPeriod = 12,
@@ -23742,11 +23742,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 1,
                             AccWeekN = 52,
-                            AccWkend2N = 20221231L
+                            WeekDate = 20221231
                         },
                         new
                         {
-                            AccWkendN = 210130,
+                            WeekEndingDate = 210130,
                             AccAltKeyNum = 916L,
                             AccApWkend = 210206,
                             AccCalPeriod = 1,
@@ -23761,11 +23761,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 4,
-                            AccWkend2N = 20210130L
+                            WeekDate = 20210130
                         },
                         new
                         {
-                            AccWkendN = 210206,
+                            WeekEndingDate = 210206,
                             AccAltKeyNum = 917L,
                             AccApWkend = 210213,
                             AccCalPeriod = 2,
@@ -23780,11 +23780,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 5,
-                            AccWkend2N = 20210206L
+                            WeekDate = 20210206
                         },
                         new
                         {
-                            AccWkendN = 210213,
+                            WeekEndingDate = 210213,
                             AccAltKeyNum = 918L,
                             AccApWkend = 210220,
                             AccCalPeriod = 2,
@@ -23799,11 +23799,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 6,
-                            AccWkend2N = 20210213L
+                            WeekDate = 20210213
                         },
                         new
                         {
-                            AccWkendN = 210424,
+                            WeekEndingDate = 210424,
                             AccAltKeyNum = 928L,
                             AccApWkend = 210501,
                             AccCalPeriod = 4,
@@ -23818,11 +23818,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 16,
-                            AccWkend2N = 20210424L
+                            WeekDate = 20210424
                         },
                         new
                         {
-                            AccWkendN = 210501,
+                            WeekEndingDate = 210501,
                             AccAltKeyNum = 929L,
                             AccApWkend = 210508,
                             AccCalPeriod = 4,
@@ -23837,11 +23837,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 17,
-                            AccWkend2N = 20210501L
+                            WeekDate = 20210501
                         },
                         new
                         {
-                            AccWkendN = 210508,
+                            WeekEndingDate = 210508,
                             AccAltKeyNum = 930L,
                             AccApWkend = 210515,
                             AccCalPeriod = 5,
@@ -23856,11 +23856,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 18,
-                            AccWkend2N = 20210508L
+                            WeekDate = 20210508
                         },
                         new
                         {
-                            AccWkendN = 210605,
+                            WeekEndingDate = 210605,
                             AccAltKeyNum = 934L,
                             AccApWkend = 210612,
                             AccCalPeriod = 6,
@@ -23875,11 +23875,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 22,
-                            AccWkend2N = 20210605L
+                            WeekDate = 20210605
                         },
                         new
                         {
-                            AccWkendN = 210612,
+                            WeekEndingDate = 210612,
                             AccAltKeyNum = 935L,
                             AccApWkend = 210619,
                             AccCalPeriod = 6,
@@ -23894,11 +23894,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 23,
-                            AccWkend2N = 20210612L
+                            WeekDate = 20210612
                         },
                         new
                         {
-                            AccWkendN = 210619,
+                            WeekEndingDate = 210619,
                             AccAltKeyNum = 936L,
                             AccApWkend = 210626,
                             AccCalPeriod = 6,
@@ -23913,11 +23913,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 24,
-                            AccWkend2N = 20210619L
+                            WeekDate = 20210619
                         },
                         new
                         {
-                            AccWkendN = 210626,
+                            WeekEndingDate = 210626,
                             AccAltKeyNum = 937L,
                             AccApWkend = 210703,
                             AccCalPeriod = 6,
@@ -23932,11 +23932,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 3,
                             AccWeekN = 25,
-                            AccWkend2N = 20210626L
+                            WeekDate = 20210626
                         },
                         new
                         {
-                            AccWkendN = 210703,
+                            WeekEndingDate = 210703,
                             AccAltKeyNum = 938L,
                             AccApWkend = 210710,
                             AccCalPeriod = 6,
@@ -23951,11 +23951,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 3,
                             AccWeekN = 26,
-                            AccWkend2N = 20210703L
+                            WeekDate = 20210703
                         },
                         new
                         {
-                            AccWkendN = 210710,
+                            WeekEndingDate = 210710,
                             AccAltKeyNum = 939L,
                             AccApWkend = 210717,
                             AccCalPeriod = 7,
@@ -23970,11 +23970,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 27,
-                            AccWkend2N = 20210710L
+                            WeekDate = 20210710
                         },
                         new
                         {
-                            AccWkendN = 210807,
+                            WeekEndingDate = 210807,
                             AccAltKeyNum = 943L,
                             AccApWkend = 210814,
                             AccCalPeriod = 8,
@@ -23989,11 +23989,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 31,
-                            AccWkend2N = 20210807L
+                            WeekDate = 20210807
                         },
                         new
                         {
-                            AccWkendN = 210814,
+                            WeekEndingDate = 210814,
                             AccAltKeyNum = 944L,
                             AccApWkend = 210821,
                             AccCalPeriod = 8,
@@ -24008,11 +24008,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 32,
-                            AccWkend2N = 20210814L
+                            WeekDate = 20210814
                         },
                         new
                         {
-                            AccWkendN = 210821,
+                            WeekEndingDate = 210821,
                             AccAltKeyNum = 945L,
                             AccApWkend = 210828,
                             AccCalPeriod = 8,
@@ -24027,11 +24027,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 33,
-                            AccWkend2N = 20210821L
+                            WeekDate = 20210821
                         },
                         new
                         {
-                            AccWkendN = 210828,
+                            WeekEndingDate = 210828,
                             AccAltKeyNum = 946L,
                             AccApWkend = 210904,
                             AccCalPeriod = 8,
@@ -24046,11 +24046,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 34,
-                            AccWkend2N = 20210828L
+                            WeekDate = 20210828
                         },
                         new
                         {
-                            AccWkendN = 210904,
+                            WeekEndingDate = 210904,
                             AccAltKeyNum = 947L,
                             AccApWkend = 210911,
                             AccCalPeriod = 9,
@@ -24065,11 +24065,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 35,
-                            AccWkend2N = 20210904L
+                            WeekDate = 20210904
                         },
                         new
                         {
-                            AccWkendN = 210911,
+                            WeekEndingDate = 210911,
                             AccAltKeyNum = 948L,
                             AccApWkend = 210918,
                             AccCalPeriod = 9,
@@ -24084,11 +24084,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 36,
-                            AccWkend2N = 20210911L
+                            WeekDate = 20210911
                         },
                         new
                         {
-                            AccWkendN = 211009,
+                            WeekEndingDate = 211009,
                             AccAltKeyNum = 952L,
                             AccApWkend = 211016,
                             AccCalPeriod = 10,
@@ -24103,11 +24103,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 40,
-                            AccWkend2N = 20211009L
+                            WeekDate = 20211009
                         },
                         new
                         {
-                            AccWkendN = 211016,
+                            WeekEndingDate = 211016,
                             AccAltKeyNum = 953L,
                             AccApWkend = 211023,
                             AccCalPeriod = 10,
@@ -24122,11 +24122,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 41,
-                            AccWkend2N = 20211016L
+                            WeekDate = 20211016
                         },
                         new
                         {
-                            AccWkendN = 211023,
+                            WeekEndingDate = 211023,
                             AccAltKeyNum = 954L,
                             AccApWkend = 211030,
                             AccCalPeriod = 10,
@@ -24141,11 +24141,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 42,
-                            AccWkend2N = 20211023L
+                            WeekDate = 20211023
                         },
                         new
                         {
-                            AccWkendN = 211211,
+                            WeekEndingDate = 211211,
                             AccAltKeyNum = 961L,
                             AccApWkend = 211218,
                             AccCalPeriod = 12,
@@ -24160,11 +24160,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 49,
-                            AccWkend2N = 20211211L
+                            WeekDate = 20211211
                         },
                         new
                         {
-                            AccWkendN = 211218,
+                            WeekEndingDate = 211218,
                             AccAltKeyNum = 962L,
                             AccApWkend = 211225,
                             AccCalPeriod = 12,
@@ -24179,11 +24179,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 50,
-                            AccWkend2N = 20211218L
+                            WeekDate = 20211218
                         },
                         new
                         {
-                            AccWkendN = 211225,
+                            WeekEndingDate = 211225,
                             AccAltKeyNum = 963L,
                             AccApWkend = 220101,
                             AccCalPeriod = 12,
@@ -24198,11 +24198,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 51,
-                            AccWkend2N = 20211225L
+                            WeekDate = 20211225
                         },
                         new
                         {
-                            AccWkendN = 210109,
+                            WeekEndingDate = 210109,
                             AccAltKeyNum = 913L,
                             AccApWkend = 210116,
                             AccCalPeriod = 1,
@@ -24217,11 +24217,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 1,
-                            AccWkend2N = 20210109L
+                            WeekDate = 20210109
                         },
                         new
                         {
-                            AccWkendN = 210116,
+                            WeekEndingDate = 210116,
                             AccAltKeyNum = 914L,
                             AccApWkend = 210123,
                             AccCalPeriod = 1,
@@ -24236,11 +24236,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 2,
-                            AccWkend2N = 20210116L
+                            WeekDate = 20210116
                         },
                         new
                         {
-                            AccWkendN = 210123,
+                            WeekEndingDate = 210123,
                             AccAltKeyNum = 915L,
                             AccApWkend = 210130,
                             AccCalPeriod = 1,
@@ -24255,11 +24255,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 3,
-                            AccWkend2N = 20210123L
+                            WeekDate = 20210123
                         },
                         new
                         {
-                            AccWkendN = 210220,
+                            WeekEndingDate = 210220,
                             AccAltKeyNum = 919L,
                             AccApWkend = 210227,
                             AccCalPeriod = 2,
@@ -24274,11 +24274,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 7,
-                            AccWkend2N = 20210220L
+                            WeekDate = 20210220
                         },
                         new
                         {
-                            AccWkendN = 210227,
+                            WeekEndingDate = 210227,
                             AccAltKeyNum = 920L,
                             AccApWkend = 210306,
                             AccCalPeriod = 2,
@@ -24293,11 +24293,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 8,
-                            AccWkend2N = 20210227L
+                            WeekDate = 20210227
                         },
                         new
                         {
-                            AccWkendN = 210306,
+                            WeekEndingDate = 210306,
                             AccAltKeyNum = 921L,
                             AccApWkend = 210313,
                             AccCalPeriod = 3,
@@ -24312,11 +24312,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 9,
-                            AccWkend2N = 20210306L
+                            WeekDate = 20210306
                         },
                         new
                         {
-                            AccWkendN = 230422,
+                            WeekEndingDate = 230422,
                             AccAltKeyNum = 1048L,
                             AccApWkend = 230429,
                             AccCalPeriod = 4,
@@ -24331,11 +24331,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 16,
-                            AccWkend2N = 20230422L
+                            WeekDate = 20230422
                         },
                         new
                         {
-                            AccWkendN = 230429,
+                            WeekEndingDate = 230429,
                             AccAltKeyNum = 1049L,
                             AccApWkend = 230506,
                             AccCalPeriod = 4,
@@ -24350,11 +24350,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 17,
-                            AccWkend2N = 20230429L
+                            WeekDate = 20230429
                         },
                         new
                         {
-                            AccWkendN = 230506,
+                            WeekEndingDate = 230506,
                             AccAltKeyNum = 1050L,
                             AccApWkend = 230513,
                             AccCalPeriod = 5,
@@ -24369,11 +24369,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 18,
-                            AccWkend2N = 20230506L
+                            WeekDate = 20230506
                         },
                         new
                         {
-                            AccWkendN = 230916,
+                            WeekEndingDate = 230916,
                             AccAltKeyNum = 1069L,
                             AccApWkend = 230923,
                             AccCalPeriod = 9,
@@ -24388,11 +24388,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 37,
-                            AccWkend2N = 20230916L
+                            WeekDate = 20230916
                         },
                         new
                         {
-                            AccWkendN = 230923,
+                            WeekEndingDate = 230923,
                             AccAltKeyNum = 1070L,
                             AccApWkend = 230930,
                             AccCalPeriod = 9,
@@ -24407,11 +24407,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 38,
-                            AccWkend2N = 20230923L
+                            WeekDate = 20230923
                         },
                         new
                         {
-                            AccWkendN = 230930,
+                            WeekEndingDate = 230930,
                             AccAltKeyNum = 1071L,
                             AccApWkend = 231007,
                             AccCalPeriod = 9,
@@ -24426,11 +24426,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 4,
                             AccWeekN = 39,
-                            AccWkend2N = 20230930L
+                            WeekDate = 20230930
                         },
                         new
                         {
-                            AccWkendN = 231028,
+                            WeekEndingDate = 231028,
                             AccAltKeyNum = 1075L,
                             AccApWkend = 231104,
                             AccCalPeriod = 10,
@@ -24445,11 +24445,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 43,
-                            AccWkend2N = 20231028L
+                            WeekDate = 20231028
                         },
                         new
                         {
-                            AccWkendN = 231104,
+                            WeekEndingDate = 231104,
                             AccAltKeyNum = 1076L,
                             AccApWkend = 231111,
                             AccCalPeriod = 11,
@@ -24464,11 +24464,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 44,
-                            AccWkend2N = 20231104L
+                            WeekDate = 20231104
                         },
                         new
                         {
-                            AccWkendN = 231111,
+                            WeekEndingDate = 231111,
                             AccAltKeyNum = 1077L,
                             AccApWkend = 231118,
                             AccCalPeriod = 11,
@@ -24483,11 +24483,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 45,
-                            AccWkend2N = 20231111L
+                            WeekDate = 20231111
                         },
                         new
                         {
-                            AccWkendN = 231118,
+                            WeekEndingDate = 231118,
                             AccAltKeyNum = 1078L,
                             AccApWkend = 231125,
                             AccCalPeriod = 11,
@@ -24502,11 +24502,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 46,
-                            AccWkend2N = 20231118L
+                            WeekDate = 20231118
                         },
                         new
                         {
-                            AccWkendN = 231125,
+                            WeekEndingDate = 231125,
                             AccAltKeyNum = 1079L,
                             AccApWkend = 231202,
                             AccCalPeriod = 11,
@@ -24521,11 +24521,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 47,
-                            AccWkend2N = 20231125L
+                            WeekDate = 20231125
                         },
                         new
                         {
-                            AccWkendN = 231202,
+                            WeekEndingDate = 231202,
                             AccAltKeyNum = 1080L,
                             AccApWkend = 231209,
                             AccCalPeriod = 11,
@@ -24540,11 +24540,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 48,
-                            AccWkend2N = 20231202L
+                            WeekDate = 20231202
                         },
                         new
                         {
-                            AccWkendN = 230107,
+                            WeekEndingDate = 230107,
                             AccAltKeyNum = 1033L,
                             AccApWkend = 230114,
                             AccCalPeriod = 1,
@@ -24559,11 +24559,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 1,
-                            AccWkend2N = 20230107L
+                            WeekDate = 20230107
                         },
                         new
                         {
-                            AccWkendN = 230114,
+                            WeekEndingDate = 230114,
                             AccAltKeyNum = 1034L,
                             AccApWkend = 230121,
                             AccCalPeriod = 1,
@@ -24578,11 +24578,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 2,
-                            AccWkend2N = 20230114L
+                            WeekDate = 20230114
                         },
                         new
                         {
-                            AccWkendN = 230121,
+                            WeekEndingDate = 230121,
                             AccAltKeyNum = 1035L,
                             AccApWkend = 230128,
                             AccCalPeriod = 1,
@@ -24597,11 +24597,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 3,
-                            AccWkend2N = 20230121L
+                            WeekDate = 20230121
                         },
                         new
                         {
-                            AccWkendN = 115,
+                            WeekEndingDate = 115,
                             AccAltKeyNum = -346L,
                             AccApWkend = 122,
                             AccCalPeriod = 1,
@@ -24616,11 +24616,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 2,
-                            AccWkend2N = 20000115L
+                            WeekDate = 20000115
                         },
                         new
                         {
-                            AccWkendN = 122,
+                            WeekEndingDate = 122,
                             AccAltKeyNum = -345L,
                             AccApWkend = 129,
                             AccCalPeriod = 1,
@@ -24635,11 +24635,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 3,
-                            AccWkend2N = 20000122L
+                            WeekDate = 20000122
                         },
                         new
                         {
-                            AccWkendN = 129,
+                            WeekEndingDate = 129,
                             AccAltKeyNum = -344L,
                             AccApWkend = 205,
                             AccCalPeriod = 1,
@@ -24654,11 +24654,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 4,
-                            AccWkend2N = 20000129L
+                            WeekDate = 20000129
                         },
                         new
                         {
-                            AccWkendN = 212,
+                            WeekEndingDate = 212,
                             AccAltKeyNum = -342L,
                             AccApWkend = 219,
                             AccCalPeriod = 2,
@@ -24673,11 +24673,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 6,
-                            AccWkend2N = 20000212L
+                            WeekDate = 20000212
                         },
                         new
                         {
-                            AccWkendN = 226,
+                            WeekEndingDate = 226,
                             AccAltKeyNum = -340L,
                             AccApWkend = 304,
                             AccCalPeriod = 2,
@@ -24692,11 +24692,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 8,
-                            AccWkend2N = 20000226L
+                            WeekDate = 20000226
                         },
                         new
                         {
-                            AccWkendN = 311,
+                            WeekEndingDate = 311,
                             AccAltKeyNum = -338L,
                             AccApWkend = 318,
                             AccCalPeriod = 3,
@@ -24711,11 +24711,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 10,
-                            AccWkend2N = 20000311L
+                            WeekDate = 20000311
                         },
                         new
                         {
-                            AccWkendN = 318,
+                            WeekEndingDate = 318,
                             AccAltKeyNum = -337L,
                             AccApWkend = 325,
                             AccCalPeriod = 3,
@@ -24730,11 +24730,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 11,
-                            AccWkend2N = 20000318L
+                            WeekDate = 20000318
                         },
                         new
                         {
-                            AccWkendN = 325,
+                            WeekEndingDate = 325,
                             AccAltKeyNum = -336L,
                             AccApWkend = 401,
                             AccCalPeriod = 3,
@@ -24749,11 +24749,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 12,
-                            AccWkend2N = 20000325L
+                            WeekDate = 20000325
                         },
                         new
                         {
-                            AccWkendN = 401,
+                            WeekEndingDate = 401,
                             AccAltKeyNum = -335L,
                             AccApWkend = 408,
                             AccCalPeriod = 3,
@@ -24768,11 +24768,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 2,
                             AccWeekN = 13,
-                            AccWkend2N = 20000401L
+                            WeekDate = 20000401
                         },
                         new
                         {
-                            AccWkendN = 408,
+                            WeekEndingDate = 408,
                             AccAltKeyNum = -334L,
                             AccApWkend = 415,
                             AccCalPeriod = 4,
@@ -24787,11 +24787,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 14,
-                            AccWkend2N = 20000408L
+                            WeekDate = 20000408
                         },
                         new
                         {
-                            AccWkendN = 415,
+                            WeekEndingDate = 415,
                             AccAltKeyNum = -333L,
                             AccApWkend = 422,
                             AccCalPeriod = 4,
@@ -24806,11 +24806,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 15,
-                            AccWkend2N = 20000415L
+                            WeekDate = 20000415
                         },
                         new
                         {
-                            AccWkendN = 422,
+                            WeekEndingDate = 422,
                             AccAltKeyNum = -332L,
                             AccApWkend = 429,
                             AccCalPeriod = 4,
@@ -24825,11 +24825,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 16,
-                            AccWkend2N = 20000422L
+                            WeekDate = 20000422
                         },
                         new
                         {
-                            AccWkendN = 506,
+                            WeekEndingDate = 506,
                             AccAltKeyNum = -330L,
                             AccApWkend = 513,
                             AccCalPeriod = 5,
@@ -24844,11 +24844,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 18,
-                            AccWkend2N = 20000506L
+                            WeekDate = 20000506
                         },
                         new
                         {
-                            AccWkendN = 527,
+                            WeekEndingDate = 527,
                             AccAltKeyNum = -327L,
                             AccApWkend = 603,
                             AccCalPeriod = 5,
@@ -24863,11 +24863,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 21,
-                            AccWkend2N = 20000527L
+                            WeekDate = 20000527
                         },
                         new
                         {
-                            AccWkendN = 610,
+                            WeekEndingDate = 610,
                             AccAltKeyNum = -325L,
                             AccApWkend = 617,
                             AccCalPeriod = 6,
@@ -24882,11 +24882,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 23,
-                            AccWkend2N = 20000610L
+                            WeekDate = 20000610
                         },
                         new
                         {
-                            AccWkendN = 624,
+                            WeekEndingDate = 624,
                             AccAltKeyNum = -323L,
                             AccApWkend = 701,
                             AccCalPeriod = 6,
@@ -24901,11 +24901,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 25,
-                            AccWkend2N = 20000624L
+                            WeekDate = 20000624
                         },
                         new
                         {
-                            AccWkendN = 708,
+                            WeekEndingDate = 708,
                             AccAltKeyNum = -321L,
                             AccApWkend = 715,
                             AccCalPeriod = 7,
@@ -24920,11 +24920,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 27,
-                            AccWkend2N = 20000708L
+                            WeekDate = 20000708
                         },
                         new
                         {
-                            AccWkendN = 715,
+                            WeekEndingDate = 715,
                             AccAltKeyNum = -320L,
                             AccApWkend = 722,
                             AccCalPeriod = 7,
@@ -24939,11 +24939,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 28,
-                            AccWkend2N = 20000715L
+                            WeekDate = 20000715
                         },
                         new
                         {
-                            AccWkendN = 722,
+                            WeekEndingDate = 722,
                             AccAltKeyNum = -319L,
                             AccApWkend = 729,
                             AccCalPeriod = 7,
@@ -24958,11 +24958,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 29,
-                            AccWkend2N = 20000722L
+                            WeekDate = 20000722
                         },
                         new
                         {
-                            AccWkendN = 805,
+                            WeekEndingDate = 805,
                             AccAltKeyNum = -317L,
                             AccApWkend = 812,
                             AccCalPeriod = 8,
@@ -24977,11 +24977,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 31,
-                            AccWkend2N = 20000805L
+                            WeekDate = 20000805
                         },
                         new
                         {
-                            AccWkendN = 812,
+                            WeekEndingDate = 812,
                             AccAltKeyNum = -316L,
                             AccApWkend = 819,
                             AccCalPeriod = 8,
@@ -24996,11 +24996,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 32,
-                            AccWkend2N = 20000812L
+                            WeekDate = 20000812
                         },
                         new
                         {
-                            AccWkendN = 819,
+                            WeekEndingDate = 819,
                             AccAltKeyNum = -315L,
                             AccApWkend = 826,
                             AccCalPeriod = 8,
@@ -25015,11 +25015,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 33,
-                            AccWkend2N = 20000819L
+                            WeekDate = 20000819
                         },
                         new
                         {
-                            AccWkendN = 826,
+                            WeekEndingDate = 826,
                             AccAltKeyNum = -314L,
                             AccApWkend = 902,
                             AccCalPeriod = 8,
@@ -25034,11 +25034,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 34,
-                            AccWkend2N = 20000826L
+                            WeekDate = 20000826
                         },
                         new
                         {
-                            AccWkendN = 902,
+                            WeekEndingDate = 902,
                             AccAltKeyNum = -313L,
                             AccApWkend = 909,
                             AccCalPeriod = 8,
@@ -25053,11 +25053,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 35,
-                            AccWkend2N = 20000902L
+                            WeekDate = 20000902
                         },
                         new
                         {
-                            AccWkendN = 916,
+                            WeekEndingDate = 916,
                             AccAltKeyNum = -311L,
                             AccApWkend = 923,
                             AccCalPeriod = 9,
@@ -25072,11 +25072,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 37,
-                            AccWkend2N = 20000916L
+                            WeekDate = 20000916
                         },
                         new
                         {
-                            AccWkendN = 923,
+                            WeekEndingDate = 923,
                             AccAltKeyNum = -310L,
                             AccApWkend = 930,
                             AccCalPeriod = 9,
@@ -25091,11 +25091,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 38,
-                            AccWkend2N = 20000923L
+                            WeekDate = 20000923
                         },
                         new
                         {
-                            AccWkendN = 930,
+                            WeekEndingDate = 930,
                             AccAltKeyNum = -309L,
                             AccApWkend = 1007,
                             AccCalPeriod = 9,
@@ -25110,11 +25110,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 4,
                             AccWeekN = 39,
-                            AccWkend2N = 20000930L
+                            WeekDate = 20000930
                         },
                         new
                         {
-                            AccWkendN = 1007,
+                            WeekEndingDate = 1007,
                             AccAltKeyNum = -308L,
                             AccApWkend = 1014,
                             AccCalPeriod = 10,
@@ -25129,11 +25129,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 40,
-                            AccWkend2N = 20001007L
+                            WeekDate = 20001007
                         },
                         new
                         {
-                            AccWkendN = 1021,
+                            WeekEndingDate = 1021,
                             AccAltKeyNum = -306L,
                             AccApWkend = 1028,
                             AccCalPeriod = 10,
@@ -25148,11 +25148,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 42,
-                            AccWkend2N = 20001021L
+                            WeekDate = 20001021
                         },
                         new
                         {
-                            AccWkendN = 1104,
+                            WeekEndingDate = 1104,
                             AccAltKeyNum = -304L,
                             AccApWkend = 1111,
                             AccCalPeriod = 11,
@@ -25167,11 +25167,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 44,
-                            AccWkend2N = 20001104L
+                            WeekDate = 20001104
                         },
                         new
                         {
-                            AccWkendN = 1111,
+                            WeekEndingDate = 1111,
                             AccAltKeyNum = -303L,
                             AccApWkend = 1118,
                             AccCalPeriod = 11,
@@ -25186,11 +25186,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 45,
-                            AccWkend2N = 20001111L
+                            WeekDate = 20001111
                         },
                         new
                         {
-                            AccWkendN = 1118,
+                            WeekEndingDate = 1118,
                             AccAltKeyNum = -302L,
                             AccApWkend = 1125,
                             AccCalPeriod = 11,
@@ -25205,11 +25205,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 46,
-                            AccWkend2N = 20001118L
+                            WeekDate = 20001118
                         },
                         new
                         {
-                            AccWkendN = 1125,
+                            WeekEndingDate = 1125,
                             AccAltKeyNum = -301L,
                             AccApWkend = 1202,
                             AccCalPeriod = 11,
@@ -25224,11 +25224,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 47,
-                            AccWkend2N = 20001125L
+                            WeekDate = 20001125
                         },
                         new
                         {
-                            AccWkendN = 1209,
+                            WeekEndingDate = 1209,
                             AccAltKeyNum = -299L,
                             AccApWkend = 1216,
                             AccCalPeriod = 12,
@@ -25243,11 +25243,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 49,
-                            AccWkend2N = 20001209L
+                            WeekDate = 20001209
                         },
                         new
                         {
-                            AccWkendN = 1223,
+                            WeekEndingDate = 1223,
                             AccAltKeyNum = -297L,
                             AccApWkend = 1230,
                             AccCalPeriod = 12,
@@ -25262,11 +25262,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 51,
-                            AccWkend2N = 20001223L
+                            WeekDate = 20001223
                         },
                         new
                         {
-                            AccWkendN = 1230,
+                            WeekEndingDate = 1230,
                             AccAltKeyNum = -296L,
                             AccApWkend = 10106,
                             AccCalPeriod = 12,
@@ -25281,11 +25281,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 1,
                             AccWeekN = 52,
-                            AccWkend2N = 20001230L
+                            WeekDate = 20001230
                         },
                         new
                         {
-                            AccWkendN = 729,
+                            WeekEndingDate = 729,
                             AccAltKeyNum = -318L,
                             AccApWkend = 805,
                             AccCalPeriod = 7,
@@ -25300,11 +25300,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 30,
-                            AccWkend2N = 20000729L
+                            WeekDate = 20000729
                         },
                         new
                         {
-                            AccWkendN = 909,
+                            WeekEndingDate = 909,
                             AccAltKeyNum = -312L,
                             AccApWkend = 916,
                             AccCalPeriod = 9,
@@ -25319,11 +25319,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 36,
-                            AccWkend2N = 20000909L
+                            WeekDate = 20000909
                         },
                         new
                         {
-                            AccWkendN = 1014,
+                            WeekEndingDate = 1014,
                             AccAltKeyNum = -307L,
                             AccApWkend = 1021,
                             AccCalPeriod = 10,
@@ -25338,11 +25338,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 41,
-                            AccWkend2N = 20001014L
+                            WeekDate = 20001014
                         },
                         new
                         {
-                            AccWkendN = 1028,
+                            WeekEndingDate = 1028,
                             AccAltKeyNum = -305L,
                             AccApWkend = 1104,
                             AccCalPeriod = 10,
@@ -25357,11 +25357,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 43,
-                            AccWkend2N = 20001028L
+                            WeekDate = 20001028
                         },
                         new
                         {
-                            AccWkendN = 1202,
+                            WeekEndingDate = 1202,
                             AccAltKeyNum = -300L,
                             AccApWkend = 1209,
                             AccCalPeriod = 11,
@@ -25376,11 +25376,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 48,
-                            AccWkend2N = 20001202L
+                            WeekDate = 20001202
                         },
                         new
                         {
-                            AccWkendN = 1216,
+                            WeekEndingDate = 1216,
                             AccAltKeyNum = -298L,
                             AccApWkend = 1223,
                             AccCalPeriod = 12,
@@ -25395,11 +25395,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 50,
-                            AccWkend2N = 20001216L
+                            WeekDate = 20001216
                         },
                         new
                         {
-                            AccWkendN = 108,
+                            WeekEndingDate = 108,
                             AccAltKeyNum = -347L,
                             AccApWkend = 115,
                             AccCalPeriod = 1,
@@ -25414,11 +25414,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 1,
-                            AccWkend2N = 20000108L
+                            WeekDate = 20000108
                         },
                         new
                         {
-                            AccWkendN = 205,
+                            WeekEndingDate = 205,
                             AccAltKeyNum = -343L,
                             AccApWkend = 212,
                             AccCalPeriod = 2,
@@ -25433,11 +25433,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 5,
-                            AccWkend2N = 20000205L
+                            WeekDate = 20000205
                         },
                         new
                         {
-                            AccWkendN = 219,
+                            WeekEndingDate = 219,
                             AccAltKeyNum = -341L,
                             AccApWkend = 226,
                             AccCalPeriod = 2,
@@ -25452,11 +25452,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 7,
-                            AccWkend2N = 20000219L
+                            WeekDate = 20000219
                         },
                         new
                         {
-                            AccWkendN = 304,
+                            WeekEndingDate = 304,
                             AccAltKeyNum = -339L,
                             AccApWkend = 311,
                             AccCalPeriod = 3,
@@ -25471,11 +25471,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 9,
-                            AccWkend2N = 20000304L
+                            WeekDate = 20000304
                         },
                         new
                         {
-                            AccWkendN = 429,
+                            WeekEndingDate = 429,
                             AccAltKeyNum = -331L,
                             AccApWkend = 506,
                             AccCalPeriod = 4,
@@ -25490,11 +25490,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 17,
-                            AccWkend2N = 20000429L
+                            WeekDate = 20000429
                         },
                         new
                         {
-                            AccWkendN = 513,
+                            WeekEndingDate = 513,
                             AccAltKeyNum = -329L,
                             AccApWkend = 520,
                             AccCalPeriod = 5,
@@ -25509,11 +25509,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 19,
-                            AccWkend2N = 20000513L
+                            WeekDate = 20000513
                         },
                         new
                         {
-                            AccWkendN = 520,
+                            WeekEndingDate = 520,
                             AccAltKeyNum = -328L,
                             AccApWkend = 527,
                             AccCalPeriod = 5,
@@ -25528,11 +25528,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 20,
-                            AccWkend2N = 20000520L
+                            WeekDate = 20000520
                         },
                         new
                         {
-                            AccWkendN = 603,
+                            WeekEndingDate = 603,
                             AccAltKeyNum = -326L,
                             AccApWkend = 610,
                             AccCalPeriod = 5,
@@ -25547,11 +25547,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 22,
-                            AccWkend2N = 20000603L
+                            WeekDate = 20000603
                         },
                         new
                         {
-                            AccWkendN = 617,
+                            WeekEndingDate = 617,
                             AccAltKeyNum = -324L,
                             AccApWkend = 624,
                             AccCalPeriod = 6,
@@ -25566,11 +25566,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 24,
-                            AccWkend2N = 20000617L
+                            WeekDate = 20000617
                         },
                         new
                         {
-                            AccWkendN = 701,
+                            WeekEndingDate = 701,
                             AccAltKeyNum = -322L,
                             AccApWkend = 708,
                             AccCalPeriod = 6,
@@ -25585,11 +25585,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 3,
                             AccWeekN = 26,
-                            AccWkend2N = 20000701L
+                            WeekDate = 20000701
                         },
                         new
                         {
-                            AccWkendN = 230128,
+                            WeekEndingDate = 230128,
                             AccAltKeyNum = 1036L,
                             AccApWkend = 230204,
                             AccCalPeriod = 1,
@@ -25604,11 +25604,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 4,
-                            AccWkend2N = 20230128L
+                            WeekDate = 20230128
                         },
                         new
                         {
-                            AccWkendN = 230204,
+                            WeekEndingDate = 230204,
                             AccAltKeyNum = 1037L,
                             AccApWkend = 230211,
                             AccCalPeriod = 2,
@@ -25623,11 +25623,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 5,
-                            AccWkend2N = 20230204L
+                            WeekDate = 20230204
                         },
                         new
                         {
-                            AccWkendN = 230211,
+                            WeekEndingDate = 230211,
                             AccAltKeyNum = 1038L,
                             AccApWkend = 230218,
                             AccCalPeriod = 2,
@@ -25642,11 +25642,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 6,
-                            AccWkend2N = 20230211L
+                            WeekDate = 20230211
                         },
                         new
                         {
-                            AccWkendN = 230218,
+                            WeekEndingDate = 230218,
                             AccAltKeyNum = 1039L,
                             AccApWkend = 230225,
                             AccCalPeriod = 2,
@@ -25661,11 +25661,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 7,
-                            AccWkend2N = 20230218L
+                            WeekDate = 20230218
                         },
                         new
                         {
-                            AccWkendN = 230225,
+                            WeekEndingDate = 230225,
                             AccAltKeyNum = 1040L,
                             AccApWkend = 230304,
                             AccCalPeriod = 2,
@@ -25680,11 +25680,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 8,
-                            AccWkend2N = 20230225L
+                            WeekDate = 20230225
                         },
                         new
                         {
-                            AccWkendN = 230304,
+                            WeekEndingDate = 230304,
                             AccAltKeyNum = 1041L,
                             AccApWkend = 230311,
                             AccCalPeriod = 3,
@@ -25699,11 +25699,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 9,
-                            AccWkend2N = 20230304L
+                            WeekDate = 20230304
                         },
                         new
                         {
-                            AccWkendN = 230311,
+                            WeekEndingDate = 230311,
                             AccAltKeyNum = 1042L,
                             AccApWkend = 230318,
                             AccCalPeriod = 3,
@@ -25718,11 +25718,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 10,
-                            AccWkend2N = 20230311L
+                            WeekDate = 20230311
                         },
                         new
                         {
-                            AccWkendN = 230318,
+                            WeekEndingDate = 230318,
                             AccAltKeyNum = 1043L,
                             AccApWkend = 230325,
                             AccCalPeriod = 3,
@@ -25737,11 +25737,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 11,
-                            AccWkend2N = 20230318L
+                            WeekDate = 20230318
                         },
                         new
                         {
-                            AccWkendN = 230325,
+                            WeekEndingDate = 230325,
                             AccAltKeyNum = 1044L,
                             AccApWkend = 230401,
                             AccCalPeriod = 3,
@@ -25756,11 +25756,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 12,
-                            AccWkend2N = 20230325L
+                            WeekDate = 20230325
                         },
                         new
                         {
-                            AccWkendN = 230401,
+                            WeekEndingDate = 230401,
                             AccAltKeyNum = 1045L,
                             AccApWkend = 230408,
                             AccCalPeriod = 3,
@@ -25775,11 +25775,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 2,
                             AccWeekN = 13,
-                            AccWkend2N = 20230401L
+                            WeekDate = 20230401
                         },
                         new
                         {
-                            AccWkendN = 230408,
+                            WeekEndingDate = 230408,
                             AccAltKeyNum = 1046L,
                             AccApWkend = 230415,
                             AccCalPeriod = 4,
@@ -25794,11 +25794,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 14,
-                            AccWkend2N = 20230408L
+                            WeekDate = 20230408
                         },
                         new
                         {
-                            AccWkendN = 230415,
+                            WeekEndingDate = 230415,
                             AccAltKeyNum = 1047L,
                             AccApWkend = 230422,
                             AccCalPeriod = 4,
@@ -25813,11 +25813,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 15,
-                            AccWkend2N = 20230415L
+                            WeekDate = 20230415
                         },
                         new
                         {
-                            AccWkendN = 230513,
+                            WeekEndingDate = 230513,
                             AccAltKeyNum = 1051L,
                             AccApWkend = 230520,
                             AccCalPeriod = 5,
@@ -25832,11 +25832,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 19,
-                            AccWkend2N = 20230513L
+                            WeekDate = 20230513
                         },
                         new
                         {
-                            AccWkendN = 230520,
+                            WeekEndingDate = 230520,
                             AccAltKeyNum = 1052L,
                             AccApWkend = 230527,
                             AccCalPeriod = 5,
@@ -25851,11 +25851,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 20,
-                            AccWkend2N = 20230520L
+                            WeekDate = 20230520
                         },
                         new
                         {
-                            AccWkendN = 230527,
+                            WeekEndingDate = 230527,
                             AccAltKeyNum = 1053L,
                             AccApWkend = 230603,
                             AccCalPeriod = 5,
@@ -25870,11 +25870,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 21,
-                            AccWkend2N = 20230527L
+                            WeekDate = 20230527
                         },
                         new
                         {
-                            AccWkendN = 230603,
+                            WeekEndingDate = 230603,
                             AccAltKeyNum = 1054L,
                             AccApWkend = 230610,
                             AccCalPeriod = 5,
@@ -25889,11 +25889,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 22,
-                            AccWkend2N = 20230603L
+                            WeekDate = 20230603
                         },
                         new
                         {
-                            AccWkendN = 230610,
+                            WeekEndingDate = 230610,
                             AccAltKeyNum = 1055L,
                             AccApWkend = 230617,
                             AccCalPeriod = 6,
@@ -25908,11 +25908,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 23,
-                            AccWkend2N = 20230610L
+                            WeekDate = 20230610
                         },
                         new
                         {
-                            AccWkendN = 230617,
+                            WeekEndingDate = 230617,
                             AccAltKeyNum = 1056L,
                             AccApWkend = 230624,
                             AccCalPeriod = 6,
@@ -25927,11 +25927,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 24,
-                            AccWkend2N = 20230617L
+                            WeekDate = 20230617
                         },
                         new
                         {
-                            AccWkendN = 230624,
+                            WeekEndingDate = 230624,
                             AccAltKeyNum = 1057L,
                             AccApWkend = 230701,
                             AccCalPeriod = 6,
@@ -25946,11 +25946,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 25,
-                            AccWkend2N = 20230624L
+                            WeekDate = 20230624
                         },
                         new
                         {
-                            AccWkendN = 230701,
+                            WeekEndingDate = 230701,
                             AccAltKeyNum = 1058L,
                             AccApWkend = 230708,
                             AccCalPeriod = 6,
@@ -25965,11 +25965,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 3,
                             AccWeekN = 26,
-                            AccWkend2N = 20230701L
+                            WeekDate = 20230701
                         },
                         new
                         {
-                            AccWkendN = 230708,
+                            WeekEndingDate = 230708,
                             AccAltKeyNum = 1059L,
                             AccApWkend = 230715,
                             AccCalPeriod = 7,
@@ -25984,11 +25984,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 27,
-                            AccWkend2N = 20230708L
+                            WeekDate = 20230708
                         },
                         new
                         {
-                            AccWkendN = 230715,
+                            WeekEndingDate = 230715,
                             AccAltKeyNum = 1060L,
                             AccApWkend = 230722,
                             AccCalPeriod = 7,
@@ -26003,11 +26003,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 28,
-                            AccWkend2N = 20230715L
+                            WeekDate = 20230715
                         },
                         new
                         {
-                            AccWkendN = 230722,
+                            WeekEndingDate = 230722,
                             AccAltKeyNum = 1061L,
                             AccApWkend = 230729,
                             AccCalPeriod = 7,
@@ -26022,11 +26022,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 29,
-                            AccWkend2N = 20230722L
+                            WeekDate = 20230722
                         },
                         new
                         {
-                            AccWkendN = 230729,
+                            WeekEndingDate = 230729,
                             AccAltKeyNum = 1062L,
                             AccApWkend = 230805,
                             AccCalPeriod = 7,
@@ -26041,11 +26041,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 30,
-                            AccWkend2N = 20230729L
+                            WeekDate = 20230729
                         },
                         new
                         {
-                            AccWkendN = 230805,
+                            WeekEndingDate = 230805,
                             AccAltKeyNum = 1063L,
                             AccApWkend = 230812,
                             AccCalPeriod = 8,
@@ -26060,11 +26060,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 31,
-                            AccWkend2N = 20230805L
+                            WeekDate = 20230805
                         },
                         new
                         {
-                            AccWkendN = 230812,
+                            WeekEndingDate = 230812,
                             AccAltKeyNum = 1064L,
                             AccApWkend = 230819,
                             AccCalPeriod = 8,
@@ -26079,11 +26079,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 32,
-                            AccWkend2N = 20230812L
+                            WeekDate = 20230812
                         },
                         new
                         {
-                            AccWkendN = 230819,
+                            WeekEndingDate = 230819,
                             AccAltKeyNum = 1065L,
                             AccApWkend = 230826,
                             AccCalPeriod = 8,
@@ -26098,11 +26098,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 33,
-                            AccWkend2N = 20230819L
+                            WeekDate = 20230819
                         },
                         new
                         {
-                            AccWkendN = 230826,
+                            WeekEndingDate = 230826,
                             AccAltKeyNum = 1066L,
                             AccApWkend = 230902,
                             AccCalPeriod = 8,
@@ -26117,11 +26117,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 34,
-                            AccWkend2N = 20230826L
+                            WeekDate = 20230826
                         },
                         new
                         {
-                            AccWkendN = 230902,
+                            WeekEndingDate = 230902,
                             AccAltKeyNum = 1067L,
                             AccApWkend = 230909,
                             AccCalPeriod = 8,
@@ -26136,11 +26136,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 35,
-                            AccWkend2N = 20230902L
+                            WeekDate = 20230902
                         },
                         new
                         {
-                            AccWkendN = 230909,
+                            WeekEndingDate = 230909,
                             AccAltKeyNum = 1068L,
                             AccApWkend = 230916,
                             AccCalPeriod = 9,
@@ -26155,11 +26155,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 36,
-                            AccWkend2N = 20230909L
+                            WeekDate = 20230909
                         },
                         new
                         {
-                            AccWkendN = 231007,
+                            WeekEndingDate = 231007,
                             AccAltKeyNum = 1072L,
                             AccApWkend = 231014,
                             AccCalPeriod = 10,
@@ -26174,11 +26174,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 40,
-                            AccWkend2N = 20231007L
+                            WeekDate = 20231007
                         },
                         new
                         {
-                            AccWkendN = 231014,
+                            WeekEndingDate = 231014,
                             AccAltKeyNum = 1073L,
                             AccApWkend = 231021,
                             AccCalPeriod = 10,
@@ -26193,11 +26193,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 41,
-                            AccWkend2N = 20231014L
+                            WeekDate = 20231014
                         },
                         new
                         {
-                            AccWkendN = 231021,
+                            WeekEndingDate = 231021,
                             AccAltKeyNum = 1074L,
                             AccApWkend = 231028,
                             AccCalPeriod = 10,
@@ -26212,11 +26212,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 42,
-                            AccWkend2N = 20231021L
+                            WeekDate = 20231021
                         },
                         new
                         {
-                            AccWkendN = 231209,
+                            WeekEndingDate = 231209,
                             AccAltKeyNum = 1081L,
                             AccApWkend = 231216,
                             AccCalPeriod = 12,
@@ -26231,11 +26231,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 49,
-                            AccWkend2N = 20231209L
+                            WeekDate = 20231209
                         },
                         new
                         {
-                            AccWkendN = 231216,
+                            WeekEndingDate = 231216,
                             AccAltKeyNum = 1082L,
                             AccApWkend = 231223,
                             AccCalPeriod = 12,
@@ -26250,11 +26250,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 50,
-                            AccWkend2N = 20231216L
+                            WeekDate = 20231216
                         },
                         new
                         {
-                            AccWkendN = 231223,
+                            WeekEndingDate = 231223,
                             AccAltKeyNum = 1083L,
                             AccApWkend = 231230,
                             AccCalPeriod = 12,
@@ -26269,11 +26269,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 51,
-                            AccWkend2N = 20231223L
+                            WeekDate = 20231223
                         },
                         new
                         {
-                            AccWkendN = 231230,
+                            WeekEndingDate = 231230,
                             AccAltKeyNum = 1084L,
                             AccApWkend = 240106,
                             AccCalPeriod = 12,
@@ -26288,11 +26288,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 1,
                             AccWeekN = 52,
-                            AccWkend2N = 20231230L
+                            WeekDate = 20231230
                         },
                         new
                         {
-                            AccWkendN = 240217,
+                            WeekEndingDate = 240217,
                             AccAltKeyNum = 1099L,
                             AccApWkend = 240224,
                             AccCalPeriod = 2,
@@ -26307,11 +26307,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 7,
-                            AccWkend2N = 20240217L
+                            WeekDate = 20240217
                         },
                         new
                         {
-                            AccWkendN = 240224,
+                            WeekEndingDate = 240224,
                             AccAltKeyNum = 1100L,
                             AccApWkend = 240302,
                             AccCalPeriod = 2,
@@ -26326,11 +26326,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 8,
-                            AccWkend2N = 20240224L
+                            WeekDate = 20240224
                         },
                         new
                         {
-                            AccWkendN = 240302,
+                            WeekEndingDate = 240302,
                             AccAltKeyNum = 1101L,
                             AccApWkend = 240309,
                             AccCalPeriod = 2,
@@ -26345,11 +26345,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 9,
-                            AccWkend2N = 20240302L
+                            WeekDate = 20240302
                         },
                         new
                         {
-                            AccWkendN = 240309,
+                            WeekEndingDate = 240309,
                             AccAltKeyNum = 1102L,
                             AccApWkend = 240316,
                             AccCalPeriod = 3,
@@ -26364,11 +26364,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 10,
-                            AccWkend2N = 20240309L
+                            WeekDate = 20240309
                         },
                         new
                         {
-                            AccWkendN = 240316,
+                            WeekEndingDate = 240316,
                             AccAltKeyNum = 1103L,
                             AccApWkend = 240323,
                             AccCalPeriod = 3,
@@ -26383,11 +26383,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 11,
-                            AccWkend2N = 20240316L
+                            WeekDate = 20240316
                         },
                         new
                         {
-                            AccWkendN = 240323,
+                            WeekEndingDate = 240323,
                             AccAltKeyNum = 1104L,
                             AccApWkend = 240330,
                             AccCalPeriod = 3,
@@ -26402,11 +26402,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 12,
-                            AccWkend2N = 20240323L
+                            WeekDate = 20240323
                         },
                         new
                         {
-                            AccWkendN = 240330,
+                            WeekEndingDate = 240330,
                             AccAltKeyNum = 1105L,
                             AccApWkend = 240406,
                             AccCalPeriod = 3,
@@ -26421,11 +26421,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 2,
                             AccWeekN = 13,
-                            AccWkend2N = 20240330L
+                            WeekDate = 20240330
                         },
                         new
                         {
-                            AccWkendN = 240406,
+                            WeekEndingDate = 240406,
                             AccAltKeyNum = 1106L,
                             AccApWkend = 240413,
                             AccCalPeriod = 4,
@@ -26440,11 +26440,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 14,
-                            AccWkend2N = 20240406L
+                            WeekDate = 20240406
                         },
                         new
                         {
-                            AccWkendN = 240413,
+                            WeekEndingDate = 240413,
                             AccAltKeyNum = 1107L,
                             AccApWkend = 240420,
                             AccCalPeriod = 4,
@@ -26459,11 +26459,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 15,
-                            AccWkend2N = 20240413L
+                            WeekDate = 20240413
                         },
                         new
                         {
-                            AccWkendN = 240420,
+                            WeekEndingDate = 240420,
                             AccAltKeyNum = 1108L,
                             AccApWkend = 240427,
                             AccCalPeriod = 4,
@@ -26478,11 +26478,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 16,
-                            AccWkend2N = 20240420L
+                            WeekDate = 20240420
                         },
                         new
                         {
-                            AccWkendN = 240427,
+                            WeekEndingDate = 240427,
                             AccAltKeyNum = 1109L,
                             AccApWkend = 240504,
                             AccCalPeriod = 4,
@@ -26497,11 +26497,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 17,
-                            AccWkend2N = 20240427L
+                            WeekDate = 20240427
                         },
                         new
                         {
-                            AccWkendN = 240504,
+                            WeekEndingDate = 240504,
                             AccAltKeyNum = 1110L,
                             AccApWkend = 240511,
                             AccCalPeriod = 5,
@@ -26516,11 +26516,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 18,
-                            AccWkend2N = 20240504L
+                            WeekDate = 20240504
                         },
                         new
                         {
-                            AccWkendN = 240511,
+                            WeekEndingDate = 240511,
                             AccAltKeyNum = 1111L,
                             AccApWkend = 240518,
                             AccCalPeriod = 5,
@@ -26535,11 +26535,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 19,
-                            AccWkend2N = 20240511L
+                            WeekDate = 20240511
                         },
                         new
                         {
-                            AccWkendN = 240518,
+                            WeekEndingDate = 240518,
                             AccAltKeyNum = 1112L,
                             AccApWkend = 240525,
                             AccCalPeriod = 5,
@@ -26554,11 +26554,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 20,
-                            AccWkend2N = 20240518L
+                            WeekDate = 20240518
                         },
                         new
                         {
-                            AccWkendN = 240525,
+                            WeekEndingDate = 240525,
                             AccAltKeyNum = 1113L,
                             AccApWkend = 240601,
                             AccCalPeriod = 5,
@@ -26573,11 +26573,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 21,
-                            AccWkend2N = 20240525L
+                            WeekDate = 20240525
                         },
                         new
                         {
-                            AccWkendN = 240803,
+                            WeekEndingDate = 240803,
                             AccAltKeyNum = 1123L,
                             AccApWkend = 240810,
                             AccCalPeriod = 7,
@@ -26592,11 +26592,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 31,
-                            AccWkend2N = 20240803L
+                            WeekDate = 20240803
                         },
                         new
                         {
-                            AccWkendN = 240810,
+                            WeekEndingDate = 240810,
                             AccAltKeyNum = 1124L,
                             AccApWkend = 240817,
                             AccCalPeriod = 8,
@@ -26611,11 +26611,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 32,
-                            AccWkend2N = 20240810L
+                            WeekDate = 20240810
                         },
                         new
                         {
-                            AccWkendN = 240817,
+                            WeekEndingDate = 240817,
                             AccAltKeyNum = 1125L,
                             AccApWkend = 240824,
                             AccCalPeriod = 8,
@@ -26630,11 +26630,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 33,
-                            AccWkend2N = 20240817L
+                            WeekDate = 20240817
                         },
                         new
                         {
-                            AccWkendN = 241005,
+                            WeekEndingDate = 241005,
                             AccAltKeyNum = 1132L,
                             AccApWkend = 241012,
                             AccCalPeriod = 10,
@@ -26649,11 +26649,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 40,
-                            AccWkend2N = 20241005L
+                            WeekDate = 20241005
                         },
                         new
                         {
-                            AccWkendN = 241012,
+                            WeekEndingDate = 241012,
                             AccAltKeyNum = 1133L,
                             AccApWkend = 241019,
                             AccCalPeriod = 10,
@@ -26668,11 +26668,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 41,
-                            AccWkend2N = 20241012L
+                            WeekDate = 20241012
                         },
                         new
                         {
-                            AccWkendN = 241019,
+                            WeekEndingDate = 241019,
                             AccAltKeyNum = 1134L,
                             AccApWkend = 241026,
                             AccCalPeriod = 10,
@@ -26687,11 +26687,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 42,
-                            AccWkend2N = 20241019L
+                            WeekDate = 20241019
                         },
                         new
                         {
-                            AccWkendN = 241207,
+                            WeekEndingDate = 241207,
                             AccAltKeyNum = 1141L,
                             AccApWkend = 241214,
                             AccCalPeriod = 12,
@@ -26706,11 +26706,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 49,
-                            AccWkend2N = 20241207L
+                            WeekDate = 20241207
                         },
                         new
                         {
-                            AccWkendN = 241214,
+                            WeekEndingDate = 241214,
                             AccAltKeyNum = 1142L,
                             AccApWkend = 241221,
                             AccCalPeriod = 12,
@@ -26725,11 +26725,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 50,
-                            AccWkend2N = 20241214L
+                            WeekDate = 20241214
                         },
                         new
                         {
-                            AccWkendN = 241221,
+                            WeekEndingDate = 241221,
                             AccAltKeyNum = 1143L,
                             AccApWkend = 241228,
                             AccCalPeriod = 12,
@@ -26744,11 +26744,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 51,
-                            AccWkend2N = 20241221L
+                            WeekDate = 20241221
                         },
                         new
                         {
-                            AccWkendN = 240106,
+                            WeekEndingDate = 240106,
                             AccAltKeyNum = 1093L,
                             AccApWkend = 240113,
                             AccCalPeriod = 1,
@@ -26763,11 +26763,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 1,
-                            AccWkend2N = 20240106L
+                            WeekDate = 20240106
                         },
                         new
                         {
-                            AccWkendN = 240113,
+                            WeekEndingDate = 240113,
                             AccAltKeyNum = 1094L,
                             AccApWkend = 240120,
                             AccCalPeriod = 1,
@@ -26782,11 +26782,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 2,
-                            AccWkend2N = 20240113L
+                            WeekDate = 20240113
                         },
                         new
                         {
-                            AccWkendN = 240120,
+                            WeekEndingDate = 240120,
                             AccAltKeyNum = 1095L,
                             AccApWkend = 240127,
                             AccCalPeriod = 1,
@@ -26801,11 +26801,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 3,
-                            AccWkend2N = 20240120L
+                            WeekDate = 20240120
                         },
                         new
                         {
-                            AccWkendN = 240127,
+                            WeekEndingDate = 240127,
                             AccAltKeyNum = 1096L,
                             AccApWkend = 240203,
                             AccCalPeriod = 1,
@@ -26820,11 +26820,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 4,
-                            AccWkend2N = 20240127L
+                            WeekDate = 20240127
                         },
                         new
                         {
-                            AccWkendN = 240203,
+                            WeekEndingDate = 240203,
                             AccAltKeyNum = 1097L,
                             AccApWkend = 240210,
                             AccCalPeriod = 1,
@@ -26839,11 +26839,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 5,
-                            AccWkend2N = 20240203L
+                            WeekDate = 20240203
                         },
                         new
                         {
-                            AccWkendN = 240210,
+                            WeekEndingDate = 240210,
                             AccAltKeyNum = 1098L,
                             AccApWkend = 240217,
                             AccCalPeriod = 2,
@@ -26858,11 +26858,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 6,
-                            AccWkend2N = 20240210L
+                            WeekDate = 20240210
                         },
                         new
                         {
-                            AccWkendN = 240601,
+                            WeekEndingDate = 240601,
                             AccAltKeyNum = 1114L,
                             AccApWkend = 240608,
                             AccCalPeriod = 5,
@@ -26877,11 +26877,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 22,
-                            AccWkend2N = 20240601L
+                            WeekDate = 20240601
                         },
                         new
                         {
-                            AccWkendN = 240608,
+                            WeekEndingDate = 240608,
                             AccAltKeyNum = 1115L,
                             AccApWkend = 240615,
                             AccCalPeriod = 6,
@@ -26896,11 +26896,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 23,
-                            AccWkend2N = 20240608L
+                            WeekDate = 20240608
                         },
                         new
                         {
-                            AccWkendN = 240615,
+                            WeekEndingDate = 240615,
                             AccAltKeyNum = 1116L,
                             AccApWkend = 240622,
                             AccCalPeriod = 6,
@@ -26915,11 +26915,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 24,
-                            AccWkend2N = 20240615L
+                            WeekDate = 20240615
                         },
                         new
                         {
-                            AccWkendN = 240622,
+                            WeekEndingDate = 240622,
                             AccAltKeyNum = 1117L,
                             AccApWkend = 240629,
                             AccCalPeriod = 6,
@@ -26934,11 +26934,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 25,
-                            AccWkend2N = 20240622L
+                            WeekDate = 20240622
                         },
                         new
                         {
-                            AccWkendN = 240706,
+                            WeekEndingDate = 240706,
                             AccAltKeyNum = 1119L,
                             AccApWkend = 240713,
                             AccCalPeriod = 7,
@@ -26953,11 +26953,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 27,
-                            AccWkend2N = 20240706L
+                            WeekDate = 20240706
                         },
                         new
                         {
-                            AccWkendN = 240713,
+                            WeekEndingDate = 240713,
                             AccAltKeyNum = 1120L,
                             AccApWkend = 240720,
                             AccCalPeriod = 7,
@@ -26972,11 +26972,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 28,
-                            AccWkend2N = 20240713L
+                            WeekDate = 20240713
                         },
                         new
                         {
-                            AccWkendN = 240720,
+                            WeekEndingDate = 240720,
                             AccAltKeyNum = 1121L,
                             AccApWkend = 240727,
                             AccCalPeriod = 7,
@@ -26991,11 +26991,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 29,
-                            AccWkend2N = 20240720L
+                            WeekDate = 20240720
                         },
                         new
                         {
-                            AccWkendN = 240727,
+                            WeekEndingDate = 240727,
                             AccAltKeyNum = 1122L,
                             AccApWkend = 240803,
                             AccCalPeriod = 7,
@@ -27010,11 +27010,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 30,
-                            AccWkend2N = 20240727L
+                            WeekDate = 20240727
                         },
                         new
                         {
-                            AccWkendN = 240824,
+                            WeekEndingDate = 240824,
                             AccAltKeyNum = 1126L,
                             AccApWkend = 240831,
                             AccCalPeriod = 8,
@@ -27029,11 +27029,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 34,
-                            AccWkend2N = 20240824L
+                            WeekDate = 20240824
                         },
                         new
                         {
-                            AccWkendN = 240831,
+                            WeekEndingDate = 240831,
                             AccAltKeyNum = 1127L,
                             AccApWkend = 240907,
                             AccCalPeriod = 8,
@@ -27048,11 +27048,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 35,
-                            AccWkend2N = 20240831L
+                            WeekDate = 20240831
                         },
                         new
                         {
-                            AccWkendN = 240907,
+                            WeekEndingDate = 240907,
                             AccAltKeyNum = 1128L,
                             AccApWkend = 240914,
                             AccCalPeriod = 9,
@@ -27067,11 +27067,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 36,
-                            AccWkend2N = 20240907L
+                            WeekDate = 20240907
                         },
                         new
                         {
-                            AccWkendN = 240914,
+                            WeekEndingDate = 240914,
                             AccAltKeyNum = 1129L,
                             AccApWkend = 240921,
                             AccCalPeriod = 9,
@@ -27086,11 +27086,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 37,
-                            AccWkend2N = 20240914L
+                            WeekDate = 20240914
                         },
                         new
                         {
-                            AccWkendN = 240921,
+                            WeekEndingDate = 240921,
                             AccAltKeyNum = 1130L,
                             AccApWkend = 240928,
                             AccCalPeriod = 9,
@@ -27105,11 +27105,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 38,
-                            AccWkend2N = 20240921L
+                            WeekDate = 20240921
                         },
                         new
                         {
-                            AccWkendN = 240928,
+                            WeekEndingDate = 240928,
                             AccAltKeyNum = 1131L,
                             AccApWkend = 241005,
                             AccCalPeriod = 9,
@@ -27124,11 +27124,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 4,
                             AccWeekN = 39,
-                            AccWkend2N = 20240928L
+                            WeekDate = 20240928
                         },
                         new
                         {
-                            AccWkendN = 241026,
+                            WeekEndingDate = 241026,
                             AccAltKeyNum = 1135L,
                             AccApWkend = 241102,
                             AccCalPeriod = 10,
@@ -27143,11 +27143,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 43,
-                            AccWkend2N = 20241026L
+                            WeekDate = 20241026
                         },
                         new
                         {
-                            AccWkendN = 241102,
+                            WeekEndingDate = 241102,
                             AccAltKeyNum = 1136L,
                             AccApWkend = 241109,
                             AccCalPeriod = 10,
@@ -27162,11 +27162,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 44,
-                            AccWkend2N = 20241102L
+                            WeekDate = 20241102
                         },
                         new
                         {
-                            AccWkendN = 241109,
+                            WeekEndingDate = 241109,
                             AccAltKeyNum = 1137L,
                             AccApWkend = 241116,
                             AccCalPeriod = 11,
@@ -27181,11 +27181,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 45,
-                            AccWkend2N = 20241109L
+                            WeekDate = 20241109
                         },
                         new
                         {
-                            AccWkendN = 241116,
+                            WeekEndingDate = 241116,
                             AccAltKeyNum = 1138L,
                             AccApWkend = 241123,
                             AccCalPeriod = 11,
@@ -27200,11 +27200,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 46,
-                            AccWkend2N = 20241116L
+                            WeekDate = 20241116
                         },
                         new
                         {
-                            AccWkendN = 241123,
+                            WeekEndingDate = 241123,
                             AccAltKeyNum = 1139L,
                             AccApWkend = 241130,
                             AccCalPeriod = 11,
@@ -27219,11 +27219,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 47,
-                            AccWkend2N = 20241123L
+                            WeekDate = 20241123
                         },
                         new
                         {
-                            AccWkendN = 241130,
+                            WeekEndingDate = 241130,
                             AccAltKeyNum = 1140L,
                             AccApWkend = 241207,
                             AccCalPeriod = 11,
@@ -27238,11 +27238,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 48,
-                            AccWkend2N = 20241130L
+                            WeekDate = 20241130
                         },
                         new
                         {
-                            AccWkendN = 241228,
+                            WeekEndingDate = 241228,
                             AccAltKeyNum = 1144L,
                             AccApWkend = 250104,
                             AccCalPeriod = 12,
@@ -27257,11 +27257,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 1,
                             AccWeekN = 52,
-                            AccWkend2N = 20241228L
+                            WeekDate = 20241228
                         },
                         new
                         {
-                            AccWkendN = 240629,
+                            WeekEndingDate = 240629,
                             AccAltKeyNum = 1145L,
                             AccApWkend = 240706,
                             AccCalPeriod = 6,
@@ -27276,11 +27276,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 3,
                             AccWeekN = 26,
-                            AccWkend2N = 20240629L
+                            WeekDate = 20240629
                         },
                         new
                         {
-                            AccWkendN = 990116,
+                            WeekEndingDate = 990116,
                             AccAltKeyNum = -406L,
                             AccApWkend = 990123,
                             AccCalPeriod = 1,
@@ -27295,11 +27295,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 2,
-                            AccWkend2N = 19990116L
+                            WeekDate = 19990116
                         },
                         new
                         {
-                            AccWkendN = 990123,
+                            WeekEndingDate = 990123,
                             AccAltKeyNum = -405L,
                             AccApWkend = 990130,
                             AccCalPeriod = 1,
@@ -27314,11 +27314,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 3,
-                            AccWkend2N = 19990123L
+                            WeekDate = 19990123
                         },
                         new
                         {
-                            AccWkendN = 990206,
+                            WeekEndingDate = 990206,
                             AccAltKeyNum = -403L,
                             AccApWkend = 990213,
                             AccCalPeriod = 2,
@@ -27333,11 +27333,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 5,
-                            AccWkend2N = 19990206L
+                            WeekDate = 19990206
                         },
                         new
                         {
-                            AccWkendN = 990213,
+                            WeekEndingDate = 990213,
                             AccAltKeyNum = -402L,
                             AccApWkend = 990220,
                             AccCalPeriod = 2,
@@ -27352,11 +27352,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 6,
-                            AccWkend2N = 19990213L
+                            WeekDate = 19990213
                         },
                         new
                         {
-                            AccWkendN = 990220,
+                            WeekEndingDate = 990220,
                             AccAltKeyNum = -401L,
                             AccApWkend = 990227,
                             AccCalPeriod = 2,
@@ -27371,11 +27371,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 7,
-                            AccWkend2N = 19990220L
+                            WeekDate = 19990220
                         },
                         new
                         {
-                            AccWkendN = 990306,
+                            WeekEndingDate = 990306,
                             AccAltKeyNum = -399L,
                             AccApWkend = 990313,
                             AccCalPeriod = 3,
@@ -27390,11 +27390,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 9,
-                            AccWkend2N = 19990306L
+                            WeekDate = 19990306
                         },
                         new
                         {
-                            AccWkendN = 990320,
+                            WeekEndingDate = 990320,
                             AccAltKeyNum = -397L,
                             AccApWkend = 990327,
                             AccCalPeriod = 3,
@@ -27409,11 +27409,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 11,
-                            AccWkend2N = 19990320L
+                            WeekDate = 19990320
                         },
                         new
                         {
-                            AccWkendN = 990410,
+                            WeekEndingDate = 990410,
                             AccAltKeyNum = -394L,
                             AccApWkend = 990417,
                             AccCalPeriod = 4,
@@ -27428,11 +27428,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 14,
-                            AccWkend2N = 19990410L
+                            WeekDate = 19990410
                         },
                         new
                         {
-                            AccWkendN = 990417,
+                            WeekEndingDate = 990417,
                             AccAltKeyNum = -393L,
                             AccApWkend = 990424,
                             AccCalPeriod = 4,
@@ -27447,11 +27447,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 15,
-                            AccWkend2N = 19990417L
+                            WeekDate = 19990417
                         },
                         new
                         {
-                            AccWkendN = 990424,
+                            WeekEndingDate = 990424,
                             AccAltKeyNum = -392L,
                             AccApWkend = 990501,
                             AccCalPeriod = 4,
@@ -27466,11 +27466,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 16,
-                            AccWkend2N = 19990424L
+                            WeekDate = 19990424
                         },
                         new
                         {
-                            AccWkendN = 990501,
+                            WeekEndingDate = 990501,
                             AccAltKeyNum = -391L,
                             AccApWkend = 990508,
                             AccCalPeriod = 4,
@@ -27485,11 +27485,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 17,
-                            AccWkend2N = 19990501L
+                            WeekDate = 19990501
                         },
                         new
                         {
-                            AccWkendN = 990522,
+                            WeekEndingDate = 990522,
                             AccAltKeyNum = -388L,
                             AccApWkend = 990529,
                             AccCalPeriod = 5,
@@ -27504,11 +27504,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 20,
-                            AccWkend2N = 19990522L
+                            WeekDate = 19990522
                         },
                         new
                         {
-                            AccWkendN = 990529,
+                            WeekEndingDate = 990529,
                             AccAltKeyNum = -387L,
                             AccApWkend = 990605,
                             AccCalPeriod = 5,
@@ -27523,11 +27523,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 21,
-                            AccWkend2N = 19990529L
+                            WeekDate = 19990529
                         },
                         new
                         {
-                            AccWkendN = 990612,
+                            WeekEndingDate = 990612,
                             AccAltKeyNum = -385L,
                             AccApWkend = 990619,
                             AccCalPeriod = 6,
@@ -27542,11 +27542,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 23,
-                            AccWkend2N = 19990612L
+                            WeekDate = 19990612
                         },
                         new
                         {
-                            AccWkendN = 990619,
+                            WeekEndingDate = 990619,
                             AccAltKeyNum = -384L,
                             AccApWkend = 990626,
                             AccCalPeriod = 6,
@@ -27561,11 +27561,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 24,
-                            AccWkend2N = 19990619L
+                            WeekDate = 19990619
                         },
                         new
                         {
-                            AccWkendN = 990626,
+                            WeekEndingDate = 990626,
                             AccAltKeyNum = -383L,
                             AccApWkend = 990703,
                             AccCalPeriod = 6,
@@ -27580,11 +27580,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 3,
                             AccWeekN = 25,
-                            AccWkend2N = 19990626L
+                            WeekDate = 19990626
                         },
                         new
                         {
-                            AccWkendN = 990717,
+                            WeekEndingDate = 990717,
                             AccAltKeyNum = -380L,
                             AccApWkend = 990724,
                             AccCalPeriod = 7,
@@ -27599,11 +27599,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 28,
-                            AccWkend2N = 19990717L
+                            WeekDate = 19990717
                         },
                         new
                         {
-                            AccWkendN = 990724,
+                            WeekEndingDate = 990724,
                             AccAltKeyNum = -379L,
                             AccApWkend = 990731,
                             AccCalPeriod = 7,
@@ -27618,11 +27618,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 29,
-                            AccWkend2N = 19990724L
+                            WeekDate = 19990724
                         },
                         new
                         {
-                            AccWkendN = 990731,
+                            WeekEndingDate = 990731,
                             AccAltKeyNum = -378L,
                             AccApWkend = 990807,
                             AccCalPeriod = 7,
@@ -27637,11 +27637,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 30,
-                            AccWkend2N = 19990731L
+                            WeekDate = 19990731
                         },
                         new
                         {
-                            AccWkendN = 990814,
+                            WeekEndingDate = 990814,
                             AccAltKeyNum = -376L,
                             AccApWkend = 990821,
                             AccCalPeriod = 8,
@@ -27656,11 +27656,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 32,
-                            AccWkend2N = 19990814L
+                            WeekDate = 19990814
                         },
                         new
                         {
-                            AccWkendN = 990821,
+                            WeekEndingDate = 990821,
                             AccAltKeyNum = -375L,
                             AccApWkend = 990828,
                             AccCalPeriod = 8,
@@ -27675,11 +27675,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 33,
-                            AccWkend2N = 19990821L
+                            WeekDate = 19990821
                         },
                         new
                         {
-                            AccWkendN = 990904,
+                            WeekEndingDate = 990904,
                             AccAltKeyNum = -373L,
                             AccApWkend = 990911,
                             AccCalPeriod = 9,
@@ -27694,11 +27694,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 35,
-                            AccWkend2N = 19990904L
+                            WeekDate = 19990904
                         },
                         new
                         {
-                            AccWkendN = 990918,
+                            WeekEndingDate = 990918,
                             AccAltKeyNum = -371L,
                             AccApWkend = 990925,
                             AccCalPeriod = 9,
@@ -27713,11 +27713,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 37,
-                            AccWkend2N = 19990918L
+                            WeekDate = 19990918
                         },
                         new
                         {
-                            AccWkendN = 991009,
+                            WeekEndingDate = 991009,
                             AccAltKeyNum = -368L,
                             AccApWkend = 991016,
                             AccCalPeriod = 10,
@@ -27732,11 +27732,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 40,
-                            AccWkend2N = 19991009L
+                            WeekDate = 19991009
                         },
                         new
                         {
-                            AccWkendN = 991023,
+                            WeekEndingDate = 991023,
                             AccAltKeyNum = -366L,
                             AccApWkend = 991030,
                             AccCalPeriod = 10,
@@ -27751,11 +27751,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 42,
-                            AccWkend2N = 19991023L
+                            WeekDate = 19991023
                         },
                         new
                         {
-                            AccWkendN = 991030,
+                            WeekEndingDate = 991030,
                             AccAltKeyNum = -365L,
                             AccApWkend = 991106,
                             AccCalPeriod = 10,
@@ -27770,11 +27770,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 43,
-                            AccWkend2N = 19991030L
+                            WeekDate = 19991030
                         },
                         new
                         {
-                            AccWkendN = 991127,
+                            WeekEndingDate = 991127,
                             AccAltKeyNum = -361L,
                             AccApWkend = 991204,
                             AccCalPeriod = 11,
@@ -27789,11 +27789,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 47,
-                            AccWkend2N = 19991127L
+                            WeekDate = 19991127
                         },
                         new
                         {
-                            AccWkendN = 991204,
+                            WeekEndingDate = 991204,
                             AccAltKeyNum = -360L,
                             AccApWkend = 991211,
                             AccCalPeriod = 12,
@@ -27808,11 +27808,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 48,
-                            AccWkend2N = 19991204L
+                            WeekDate = 19991204
                         },
                         new
                         {
-                            AccWkendN = 991225,
+                            WeekEndingDate = 991225,
                             AccAltKeyNum = -357L,
                             AccApWkend = 101,
                             AccCalPeriod = 12,
@@ -27827,11 +27827,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 51,
-                            AccWkend2N = 19991225L
+                            WeekDate = 19991225
                         },
                         new
                         {
-                            AccWkendN = 101,
+                            WeekEndingDate = 101,
                             AccAltKeyNum = -356L,
                             AccApWkend = 108,
                             AccCalPeriod = 12,
@@ -27846,11 +27846,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 1,
                             AccWeekN = 52,
-                            AccWkend2N = 20000101L
+                            WeekDate = 20000101
                         },
                         new
                         {
-                            AccWkendN = 990710,
+                            WeekEndingDate = 990710,
                             AccAltKeyNum = -381L,
                             AccApWkend = 990717,
                             AccCalPeriod = 7,
@@ -27865,11 +27865,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 7,
                             AccQuarter = 3,
                             AccWeekN = 27,
-                            AccWkend2N = 19990710L
+                            WeekDate = 19990710
                         },
                         new
                         {
-                            AccWkendN = 990807,
+                            WeekEndingDate = 990807,
                             AccAltKeyNum = -377L,
                             AccApWkend = 990814,
                             AccCalPeriod = 8,
@@ -27884,11 +27884,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 31,
-                            AccWkend2N = 19990807L
+                            WeekDate = 19990807
                         },
                         new
                         {
-                            AccWkendN = 990828,
+                            WeekEndingDate = 990828,
                             AccAltKeyNum = -374L,
                             AccApWkend = 990904,
                             AccCalPeriod = 8,
@@ -27903,11 +27903,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 8,
                             AccQuarter = 3,
                             AccWeekN = 34,
-                            AccWkend2N = 19990828L
+                            WeekDate = 19990828
                         },
                         new
                         {
-                            AccWkendN = 990911,
+                            WeekEndingDate = 990911,
                             AccAltKeyNum = -372L,
                             AccApWkend = 990918,
                             AccCalPeriod = 9,
@@ -27922,11 +27922,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 36,
-                            AccWkend2N = 19990911L
+                            WeekDate = 19990911
                         },
                         new
                         {
-                            AccWkendN = 990925,
+                            WeekEndingDate = 990925,
                             AccAltKeyNum = -370L,
                             AccApWkend = 991002,
                             AccCalPeriod = 9,
@@ -27941,11 +27941,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 3,
                             AccWeekN = 38,
-                            AccWkend2N = 19990925L
+                            WeekDate = 19990925
                         },
                         new
                         {
-                            AccWkendN = 991002,
+                            WeekEndingDate = 991002,
                             AccAltKeyNum = -369L,
                             AccApWkend = 991009,
                             AccCalPeriod = 9,
@@ -27960,11 +27960,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 9,
                             AccQuarter = 4,
                             AccWeekN = 39,
-                            AccWkend2N = 19991002L
+                            WeekDate = 19991002
                         },
                         new
                         {
-                            AccWkendN = 991016,
+                            WeekEndingDate = 991016,
                             AccAltKeyNum = -367L,
                             AccApWkend = 991023,
                             AccCalPeriod = 10,
@@ -27979,11 +27979,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 10,
                             AccQuarter = 4,
                             AccWeekN = 41,
-                            AccWkend2N = 19991016L
+                            WeekDate = 19991016
                         },
                         new
                         {
-                            AccWkendN = 991106,
+                            WeekEndingDate = 991106,
                             AccAltKeyNum = -364L,
                             AccApWkend = 991113,
                             AccCalPeriod = 11,
@@ -27998,11 +27998,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 44,
-                            AccWkend2N = 19991106L
+                            WeekDate = 19991106
                         },
                         new
                         {
-                            AccWkendN = 991113,
+                            WeekEndingDate = 991113,
                             AccAltKeyNum = -363L,
                             AccApWkend = 991120,
                             AccCalPeriod = 11,
@@ -28017,11 +28017,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 45,
-                            AccWkend2N = 19991113L
+                            WeekDate = 19991113
                         },
                         new
                         {
-                            AccWkendN = 991120,
+                            WeekEndingDate = 991120,
                             AccAltKeyNum = -362L,
                             AccApWkend = 991127,
                             AccCalPeriod = 11,
@@ -28036,11 +28036,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 11,
                             AccQuarter = 4,
                             AccWeekN = 46,
-                            AccWkend2N = 19991120L
+                            WeekDate = 19991120
                         },
                         new
                         {
-                            AccWkendN = 991211,
+                            WeekEndingDate = 991211,
                             AccAltKeyNum = -359L,
                             AccApWkend = 991218,
                             AccCalPeriod = 12,
@@ -28055,11 +28055,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 49,
-                            AccWkend2N = 19991211L
+                            WeekDate = 19991211
                         },
                         new
                         {
-                            AccWkendN = 991218,
+                            WeekEndingDate = 991218,
                             AccAltKeyNum = -358L,
                             AccApWkend = 991225,
                             AccCalPeriod = 12,
@@ -28074,11 +28074,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 12,
                             AccQuarter = 4,
                             AccWeekN = 50,
-                            AccWkend2N = 19991218L
+                            WeekDate = 19991218
                         },
                         new
                         {
-                            AccWkendN = 990109,
+                            WeekEndingDate = 990109,
                             AccAltKeyNum = -407L,
                             AccApWkend = 990116,
                             AccCalPeriod = 1,
@@ -28093,11 +28093,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 1,
-                            AccWkend2N = 19990109L
+                            WeekDate = 19990109
                         },
                         new
                         {
-                            AccWkendN = 990130,
+                            WeekEndingDate = 990130,
                             AccAltKeyNum = -404L,
                             AccApWkend = 990206,
                             AccCalPeriod = 1,
@@ -28112,11 +28112,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 1,
                             AccQuarter = 1,
                             AccWeekN = 4,
-                            AccWkend2N = 19990130L
+                            WeekDate = 19990130
                         },
                         new
                         {
-                            AccWkendN = 990227,
+                            WeekEndingDate = 990227,
                             AccAltKeyNum = -400L,
                             AccApWkend = 990306,
                             AccCalPeriod = 2,
@@ -28131,11 +28131,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 2,
                             AccQuarter = 1,
                             AccWeekN = 8,
-                            AccWkend2N = 19990227L
+                            WeekDate = 19990227
                         },
                         new
                         {
-                            AccWkendN = 990313,
+                            WeekEndingDate = 990313,
                             AccAltKeyNum = -398L,
                             AccApWkend = 990320,
                             AccCalPeriod = 3,
@@ -28150,11 +28150,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 1,
                             AccWeekN = 10,
-                            AccWkend2N = 19990313L
+                            WeekDate = 19990313
                         },
                         new
                         {
-                            AccWkendN = 990327,
+                            WeekEndingDate = 990327,
                             AccAltKeyNum = -396L,
                             AccApWkend = 990403,
                             AccCalPeriod = 3,
@@ -28169,11 +28169,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 3,
                             AccQuarter = 2,
                             AccWeekN = 12,
-                            AccWkend2N = 19990327L
+                            WeekDate = 19990327
                         },
                         new
                         {
-                            AccWkendN = 990403,
+                            WeekEndingDate = 990403,
                             AccAltKeyNum = -395L,
                             AccApWkend = 990410,
                             AccCalPeriod = 4,
@@ -28188,11 +28188,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 4,
                             AccQuarter = 2,
                             AccWeekN = 13,
-                            AccWkend2N = 19990403L
+                            WeekDate = 19990403
                         },
                         new
                         {
-                            AccWkendN = 990508,
+                            WeekEndingDate = 990508,
                             AccAltKeyNum = -390L,
                             AccApWkend = 990515,
                             AccCalPeriod = 5,
@@ -28207,11 +28207,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 18,
-                            AccWkend2N = 19990508L
+                            WeekDate = 19990508
                         },
                         new
                         {
-                            AccWkendN = 990515,
+                            WeekEndingDate = 990515,
                             AccAltKeyNum = -389L,
                             AccApWkend = 990522,
                             AccCalPeriod = 5,
@@ -28226,11 +28226,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 5,
                             AccQuarter = 2,
                             AccWeekN = 19,
-                            AccWkend2N = 19990515L
+                            WeekDate = 19990515
                         },
                         new
                         {
-                            AccWkendN = 990605,
+                            WeekEndingDate = 990605,
                             AccAltKeyNum = -386L,
                             AccApWkend = 990612,
                             AccCalPeriod = 6,
@@ -28245,11 +28245,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 2,
                             AccWeekN = 22,
-                            AccWkend2N = 19990605L
+                            WeekDate = 19990605
                         },
                         new
                         {
-                            AccWkendN = 990703,
+                            WeekEndingDate = 990703,
                             AccAltKeyNum = -382L,
                             AccApWkend = 990710,
                             AccCalPeriod = 6,
@@ -28264,7 +28264,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccPeriod = 6,
                             AccQuarter = 3,
                             AccWeekN = 26,
-                            AccWkend2N = 19990703L
+                            WeekDate = 19990703
                         });
                 });
 
@@ -28818,7 +28818,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DECIMAL(6,2)")
                         .HasColumnName("HOURS_CURRENT_YEAR");
 
-                    b.Property<decimal>("HoursExective")
+                    b.Property<decimal>("HoursExecutive")
                         .HasPrecision(6, 2)
                         .HasColumnType("DECIMAL(6,2)")
                         .HasColumnName("HOURS_EXECUTIVE");
@@ -28917,15 +28917,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.ProfitCode", b =>
                 {
-                    b.Property<short>("Code")
-                        .HasColumnType("NUMBER(5)")
-                        .HasColumnName("CODE");
-
-                    b.Property<string>("Definition")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("NVARCHAR2(128)")
-                        .HasColumnName("DEFINITION");
+                    b.Property<byte>("Id")
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("ID");
 
                     b.Property<string>("Frequency")
                         .IsRequired()
@@ -28933,7 +28927,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NVARCHAR2(128)")
                         .HasColumnName("FREQUENCY");
 
-                    b.HasKey("Code")
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("NVARCHAR2(128)")
+                        .HasColumnName("NAME");
+
+                    b.HasKey("Id")
                         .HasName("PK_PROFIT_CODE");
 
                     b.ToTable("PROFIT_CODE", (string)null);
@@ -28941,51 +28941,51 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Code = (short)0,
-                            Definition = "Incoming contributions, forfeitures, earnings",
-                            Frequency = "Year-end only"
+                            Id = (byte)0,
+                            Frequency = "Year-end only",
+                            Name = "Incoming contributions, forfeitures, earnings"
                         },
                         new
                         {
-                            Code = (short)1,
-                            Definition = "Outgoing payments (not rollovers or direct payments) - Partial withdrawal",
-                            Frequency = "Multiple Times"
+                            Id = (byte)1,
+                            Frequency = "Multiple Times",
+                            Name = "Outgoing payments (not rollovers or direct payments) - Partial withdrawal"
                         },
                         new
                         {
-                            Code = (short)2,
-                            Definition = "Outgoing forfeitures",
-                            Frequency = "Multiple Times"
+                            Id = (byte)2,
+                            Frequency = "Multiple Times",
+                            Name = "Outgoing forfeitures"
                         },
                         new
                         {
-                            Code = (short)3,
-                            Definition = "Outgoing direct payments / rollover payments",
-                            Frequency = "Multiple Times"
+                            Id = (byte)3,
+                            Frequency = "Multiple Times",
+                            Name = "Outgoing direct payments / rollover payments"
                         },
                         new
                         {
-                            Code = (short)5,
-                            Definition = "Outgoing XFER beneficiary / QDRO allocation (beneficiary payment)",
-                            Frequency = "Once"
+                            Id = (byte)5,
+                            Frequency = "Once",
+                            Name = "Outgoing XFER beneficiary / QDRO allocation (beneficiary payment)"
                         },
                         new
                         {
-                            Code = (short)6,
-                            Definition = "Incoming QDRO beneficiary allocation  (beneficiary receipt)",
-                            Frequency = "Once"
+                            Id = (byte)6,
+                            Frequency = "Once",
+                            Name = "Incoming QDRO beneficiary allocation (beneficiary receipt)"
                         },
                         new
                         {
-                            Code = (short)8,
-                            Definition = "Incoming \"100% vested\" earnings",
-                            Frequency = "Usually year-end, unless there is special processing – i.e. Class Action settlement.  Earnings are 100% vested."
+                            Id = (byte)8,
+                            Frequency = "Usually year-end, unless there is special processing – i.e. Class Action settlement. Earnings are 100% vested.",
+                            Name = "Incoming \"100% vested\" earnings"
                         },
                         new
                         {
-                            Code = (short)9,
-                            Definition = "Outgoing payment from 100% vesting amount (payment of ETVA funds)",
-                            Frequency = "Multiple Times"
+                            Id = (byte)9,
+                            Frequency = "Multiple Times",
+                            Name = "Outgoing payment from 100% vesting amount (payment of ETVA funds)"
                         });
                 });
 
@@ -29027,8 +29027,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(2,0)")
                         .HasColumnName("MONTH_TO_DATE");
 
-                    b.Property<short>("ProfitCodeId")
-                        .HasColumnType("NUMBER(5)")
+                    b.Property<byte>("ProfitCodeId")
+                        .HasColumnType("NUMBER(3)")
                         .HasColumnName("PROFIT_CODE_ID");
 
                     b.Property<short>("ProfitYear")
@@ -29071,7 +29071,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasName("PK_PROFIT_DETAIL");
 
                     b.HasIndex("ProfitCodeId")
-                        .HasDatabaseName("IX_PROFIT_DETAIL_PROFIT_CODE_ID");
+                        .HasDatabaseName("IX_PROFIT_DETAIL_PROFITCODEID");
 
                     b.HasIndex("TaxCodeId")
                         .HasDatabaseName("IX_PROFIT_DETAIL_TAXCODEID");
@@ -30003,7 +30003,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasForeignKey("ProfitCodeId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
-                        .HasConstraintName("FK_PROFIT_DETAIL_PROFITCODES_PROFIT_CODE_ID");
+                        .HasConstraintName("FK_PROFIT_DETAIL_PROFITCODES_PROFITCODEID");
 
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.TaxCode", "TaxCode")
                         .WithMany()

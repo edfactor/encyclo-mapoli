@@ -92,6 +92,14 @@ public sealed record HttpRequestFields
         "PrimaryFlag",
     ];
 
+    // ReSharper disable once InconsistentNaming
+    public HashSet<string> legislativeInfo { get; } =
+    [
+        "Gender",
+        "MaritalStatus",
+        "LastUpdateDate",
+    ];
+
     public static string ToFormattedString()
     {
         var request = new HttpRequestFields();
@@ -103,7 +111,8 @@ public sealed record HttpRequestFields
             { "workRelationships.assignments", request.workRelationships_assignments },
             { "emails", request.emails },
             { "names", request.names },
-            { "nationalIdentifiers", request.nationalIdentifiers }
+            { "nationalIdentifiers", request.nationalIdentifiers },
+            { "legislativeInfo", request.legislativeInfo }
         };
 
         StringBuilder sb = new StringBuilder();
