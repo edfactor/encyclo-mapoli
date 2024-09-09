@@ -10,7 +10,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Jobs;
 
-public sealed class OracleHcmSynchronizationService : IOracleHcmSynchronizationService
+internal sealed class OracleHcmSynchronizationService : IOracleHcmSynchronizationService
 {
     private readonly IBus _bus;
     private readonly IHostEnvironment _hostEnvironment;
