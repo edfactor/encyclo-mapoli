@@ -105,7 +105,7 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
                         profitDetail.ProfitCodeId
                     }
                 )
-                .Where(pd => pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures)
+                .Where(pd => pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id)
                 .OrderBy(m => m.BadgeNumber)
                 .GroupBy(m => new
                 {
@@ -128,7 +128,7 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
                         Details = group.Select(pd => new MilitaryRehireProfitSharingDetailResponse
                         {
                             Forfeiture = pd.Forfeiture, Remark = pd.Remark, ProfitYear = pd.ProfitYear
-                        }).ToList()
+                        })
                     });
             
             return query.ToPaginationResultsAsync(req, cancellationToken);
