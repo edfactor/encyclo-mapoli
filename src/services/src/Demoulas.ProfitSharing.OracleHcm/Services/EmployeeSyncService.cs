@@ -99,7 +99,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
                 FirstName = employee.Name.FirstName,
                 MiddleName = employee.Name.MiddleNames,
                 LastName = employee.Name.LastName,
-                FullName = employee.Name.DisplayName,
+                FullName = $"{employee.Name.LastName}, {employee.Name.FirstName}",
                 HireDate = employee.WorkRelationship?.StartDate ?? SqlDateTime.MinValue.Value.ToDateOnly(),
                 TerminationDate = employee.WorkRelationship?.TerminationDate,
                 Ssn = (employee.NationalIdentifier?.NationalIdentifierNumber ?? faker.Person.Ssn()).ConvertSsnToLong() ?? 0,
