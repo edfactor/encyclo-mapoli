@@ -12,7 +12,7 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    [Migration("20240909153155_initialMigration")]
+    [Migration("20240910201556_initialMigration")]
     partial class initialMigration
     {
         /// <inheritdoc />
@@ -1701,6 +1701,15 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasIndex("TerminationCodeId")
                         .HasDatabaseName("IX_DEMOGRAPHIC_TERMINATIONCODEID");
 
+                    b.HasIndex(new[] { "BadgeNumber" }, "IX_BadgeNumber")
+                        .HasDatabaseName("IX_DEMOGRAPHIC_BADGENUMBER");
+
+                    b.HasIndex(new[] { "Ssn" }, "IX_SSN")
+                        .HasDatabaseName("IX_DEMOGRAPHIC_SSN");
+
+                    b.HasIndex(new[] { "Ssn", "OracleHcmId" }, "IX_Ssn_OracleHcmId")
+                        .HasDatabaseName("IX_DEMOGRAPHIC_SSN_ORACLEHCMID");
+
                     b.ToTable("DEMOGRAPHIC", (string)null);
                 });
 
@@ -2252,7 +2261,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         new
                         {
                             Id = "X",
-                            Name = "Other"
+                            Name = "Nonbinary"
                         },
                         new
                         {

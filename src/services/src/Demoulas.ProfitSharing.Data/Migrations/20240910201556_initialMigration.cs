@@ -2580,6 +2580,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_DEMOGRAPHIC_BADGENUMBER",
+                table: "DEMOGRAPHIC",
+                column: "BADGE_NUMBER");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_DEMOGRAPHIC_COUNTRY_ISO",
                 table: "DEMOGRAPHIC",
                 column: "COUNTRY_ISO");
@@ -2613,6 +2618,16 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "IX_DEMOGRAPHIC_PAYFREQUENCYID",
                 table: "DEMOGRAPHIC",
                 column: "PAY_FREQUENCY_ID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DEMOGRAPHIC_SSN",
+                table: "DEMOGRAPHIC",
+                column: "SSN");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DEMOGRAPHIC_SSN_ORACLEHCMID",
+                table: "DEMOGRAPHIC",
+                columns: new[] { "SSN", "ORACLE_HCM_ID" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_DEMOGRAPHIC_TERMINATIONCODEID",

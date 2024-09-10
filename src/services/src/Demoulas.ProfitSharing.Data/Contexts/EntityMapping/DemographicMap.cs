@@ -16,12 +16,15 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
         _ = builder.ToTable("DEMOGRAPHIC");
         _ = builder.HasKey(e => e.OracleHcmId);
 
+        _ = builder.HasIndex(e => e.Ssn, "IX_SSN");
+        _ = builder.HasIndex(e => new {e.Ssn, e.OracleHcmId}, "IX_Ssn_OracleHcmId");
         _ = builder.Property(e => e.Ssn)
             .HasPrecision(9)
             .IsRequired()
             .ValueGeneratedNever()
             .HasColumnName("SSN");
 
+        _ = builder.HasIndex(e => e.BadgeNumber, "IX_BadgeNumber");
         _ = builder.Property(e => e.BadgeNumber)
             .HasPrecision(7)
             .HasColumnName("BADGE_NUMBER");

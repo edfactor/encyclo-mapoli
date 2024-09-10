@@ -12,6 +12,8 @@ using Demoulas.ProfitSharing.Services.Mappers;
 using Microsoft.EntityFrameworkCore;
 using MassTransit;
 using System.Linq;
+using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.ProfitSharing.Data.Extensions;
 
 namespace Demoulas.ProfitSharing.Services;
 
@@ -49,14 +51,14 @@ public class DemographicsService : IDemographicsServiceInternal
 
             if (batch.Count >= batchSize)
             {
-                _ = await UpsertDemographicsAsync(batch, cancellationToken);
+                await UpsertDemographicsAsync(batch, cancellationToken);
                 batch.Clear();
             }
         }
 
         if (batch.Count > 0)
         {
-            _ = await UpsertDemographicsAsync(batch, cancellationToken);
+            await UpsertDemographicsAsync(batch, cancellationToken);
         }
     }
 
@@ -70,21 +72,22 @@ public class DemographicsService : IDemographicsServiceInternal
         });
     }
 
-    /// <summary>
-    /// Inserts or updates a collection of demographic records asynchronously.
-    /// </summary>
-    /// <param name="demographicsRequests">The collection of demographic requests to be upserted.</param>
-    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <returns>A task that represents the asynchronous operation. The task result contains a set of demographic response DTOs.</returns>
-    /// <remarks>
-    /// This method performs an upsert operation, meaning it will insert new records and update existing ones based on the provided demographic requests.
-    /// </remarks>
-    private async Task<ISet<DemographicResponseDto>?> UpsertDemographicsAsync(IEnumerable<DemographicsRequest> demographicsRequests, CancellationToken cancellationToken)
+   /// <summary>
+   /// Asynchronously inserts or updates a collection of demographic records in the database.
+   /// </summary>
+   /// <param name="demographicsRequests">A collection of <see cref="DemographicsRequest"/> objects representing the demographic data to be upserted.</param>
+   /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete. This token can be used to cancel the operation.</param>
+   /// <returns>A <see cref="Task"/> representing the asynchronous upsert operation.</returns>
+   /// <remarks>
+   /// This method ensures that demographic records are either inserted as new entries or updated if they already exist in the database.
+   /// The operation is performed within a writable database context to maintain data integrity.
+   /// </remarks>
+    private async Task UpsertDemographicsAsync(IEnumerable<DemographicsRequest> demographicsRequests, CancellationToken cancellationToken)
     {
         DateTime currentModificationDate = DateTime.Now;
 
-        // Use writable context for upsert operation
-        List<Demographic> updatedEntities = await _dataContextFactory.UseWritableContext(async context =>
+        // Use writable context for the upsert operation
+        await _dataContextFactory.UseWritableContext(async context =>
         {
             // Map incoming demographic requests to entity models
             List<Demographic> demographicsEntities = _mapper.Map(demographicsRequests).ToList();
@@ -92,43 +95,83 @@ public class DemographicsService : IDemographicsServiceInternal
             // Update LastModifiedDate for all entities
             demographicsEntities.ForEach(entity => entity.LastModifiedDate = currentModificationDate);
 
-            // Create a lookup dictionary for fast access by OracleHcmId
-            var demographicLookup = demographicsEntities.ToDictionary(entity => entity.OracleHcmId);
+            // Create lookup dictionaries for both OracleHcmId and SSN
+            var demographicOracleHcmIdLookup = demographicsEntities.ToDictionary(entity => entity.OracleHcmId);
+            var demographicSsnLookup = demographicsEntities.ToDictionary(entity => entity.Ssn);
 
-            // Fetch existing entities from the database that match the incoming OracleHcmIds
+            // Fetch existing entities from the database using both OracleHcmId and SSN
             var existingEntities = await context.Demographics
-                                                .Where(dbEntity => demographicLookup.Keys.Contains(dbEntity.OracleHcmId))
+                                                .Where(dbEntity => demographicOracleHcmIdLookup.Keys.Contains(dbEntity.OracleHcmId) ||
+                                                                   demographicSsnLookup.Keys.Contains(dbEntity.Ssn))
                                                 .ToListAsync(cancellationToken);
 
-            // Extract existing OracleHcmIds from database entities
+            // Handle potential duplicates in the existing database (SSN duplicates)
+            var duplicateSsnEntities = existingEntities.GroupBy(e => e.Ssn)
+                                                       .Where(g => g.Count() > 1)
+                                                       .SelectMany(g => g)
+                                                       .ToList();
+
+            if (duplicateSsnEntities.Any())
+            {
+                // Log duplicate SSN entries to the audit table
+                var audit = duplicateSsnEntities.Select(d => new DemographicSyncAudit
+                {
+                    BadgeNumber = d.BadgeNumber,
+                    InvalidValue = d.Ssn.MaskSsn(),
+                    Message = "Duplicate SSNs found in the database.",
+                    UserName = "System",
+                    PropertyName = "SSN"
+                }).ToList();
+
+                context.DemographicSyncAudit.AddRange(audit);
+            }
+
+            // Handle inserts for entities that do not exist in the database by OracleHcmId or SSN
             var existingOracleHcmIds = existingEntities.Select(dbEntity => dbEntity.OracleHcmId).ToHashSet();
+            var existingSsns = existingEntities.Select(dbEntity => dbEntity.Ssn).ToHashSet();
 
-            // Determine which entities are new (i.e., need to be inserted)
-            var newOracleHcmIds = demographicLookup.Keys.Except(existingOracleHcmIds).ToHashSet();
+            var newEntities = demographicsEntities
+                .Where(entity => !existingOracleHcmIds.Contains(entity.OracleHcmId) && !existingSsns.Contains(entity.Ssn))
+                .ToList();
 
-            if (newOracleHcmIds.Any())
+            if (newEntities.Any())
             {
                 // Bulk insert new entities
-                var newEntities = demographicsEntities.Where(entity => newOracleHcmIds.Contains(entity.OracleHcmId)).ToList();
                 context.Demographics.AddRange(newEntities);
             }
 
-            // Update existing entities with new values
+            // Update existing entities based on either OracleHcmId or SSN
             foreach (var existingEntity in existingEntities)
             {
-                if (demographicLookup.TryGetValue(existingEntity.OracleHcmId, out var incomingEntity))
+                Demographic? incomingEntity = null;
+
+                // Prioritize matching by OracleHcmId, but fallback to SSN if OracleHcmId is missing (legacy case)
+                if (demographicOracleHcmIdLookup.TryGetValue(existingEntity.OracleHcmId, out var entityByOracleHcmId))
                 {
+                    incomingEntity = entityByOracleHcmId;
+                }
+                else if (demographicSsnLookup.TryGetValue(existingEntity.Ssn, out var entityBySsn))
+                {
+                    incomingEntity = entityBySsn;
+                }
+
+                // If we have a match, update the existing entity with new values
+                if (incomingEntity != null)
+                {
+                    // Correct OracleHcmId if it's missing or incorrect (for legacy records)
+                    if (existingEntity.OracleHcmId != incomingEntity.OracleHcmId)
+                    {
+                        existingEntity.OracleHcmId = incomingEntity.OracleHcmId;
+                    }
+
+                    // Update the rest of the entity's fields
                     UpdateEntityValues(existingEntity, incomingEntity, currentModificationDate);
                 }
             }
 
-            // Save all changes
+            // Save all changes to the database
             await context.SaveChangesAsync(cancellationToken);
-            return demographicsEntities;
         }, cancellationToken);
-
-        // Map updated entities to response DTOs and return as a frozen set
-        return _mapper.Map(updatedEntities).ToHashSet();
     }
 
     // Helper method to update entity fields

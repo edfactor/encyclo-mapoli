@@ -1698,6 +1698,15 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasIndex("TerminationCodeId")
                         .HasDatabaseName("IX_DEMOGRAPHIC_TERMINATIONCODEID");
 
+                    b.HasIndex(new[] { "BadgeNumber" }, "IX_BadgeNumber")
+                        .HasDatabaseName("IX_DEMOGRAPHIC_BADGENUMBER");
+
+                    b.HasIndex(new[] { "Ssn" }, "IX_SSN")
+                        .HasDatabaseName("IX_DEMOGRAPHIC_SSN");
+
+                    b.HasIndex(new[] { "Ssn", "OracleHcmId" }, "IX_Ssn_OracleHcmId")
+                        .HasDatabaseName("IX_DEMOGRAPHIC_SSN_ORACLEHCMID");
+
                     b.ToTable("DEMOGRAPHIC", (string)null);
                 });
 
