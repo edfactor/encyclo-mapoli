@@ -10,7 +10,7 @@ public sealed record MilitaryAndRehireForfeituresResponse
     public required DateOnly ReHiredDate { get; set; }
     public required byte CompanyContributionYears { get; set; }
     public required decimal HoursCurrentYear { get; set; }
-    public required List<MilitaryRehireProfitSharingDetailResponse> Details { get; set; }
+    public required IEnumerable<MilitaryRehireProfitSharingDetailResponse> Details { get; set; }
 
 
     public static MilitaryAndRehireForfeituresResponse ResponseExample()
