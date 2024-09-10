@@ -23,7 +23,7 @@ public class DemographicsService : IDemographicsServiceInternal
     private readonly IWebHostEnvironment _environment;
     private readonly ILogger<DemographicsService> _logger;
 
-    public DemographicsService(IProfitSharingDataContextFactory dataContextFactory, 
+    public DemographicsService(IProfitSharingDataContextFactory dataContextFactory,
         DemographicMapper mapper,
         IWebHostEnvironment environment,
         ILogger<DemographicsService> logger)
@@ -48,22 +48,9 @@ public class DemographicsService : IDemographicsServiceInternal
         CancellationToken cancellationToken = default)
     {
         using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(AddDemographicsStream), ActivityKind.Internal);
-        var batch = new List<DemographicsRequest>();
-
         await foreach (var employee in employees.WithCancellation(cancellationToken))
         {
-            batch.Add(employee);
-
-            if (batch.Count >= batchSize)
-            {
-                _ = await AddDemographics(batch, cancellationToken);
-                batch.Clear();
-            }
-        }
-
-        if (batch.Count > 0)
-        {
-            _ = await AddDemographics(batch, cancellationToken);
+            _ = await AddDemographic(employee, cancellationToken);
         }
     }
 
@@ -80,7 +67,7 @@ public class DemographicsService : IDemographicsServiceInternal
     /// <summary>
     /// Adds a collection of demographic records to the database.
     /// </summary>
-    /// <param name="demographics">The collection of demographic requests to be added.</param>
+    /// <param name="demographic">The collection of demographic requests to be added.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A set of demographic response DTOs if the operation is successful; otherwise, null.</returns>
     /// <exception cref="NotSupportedException">Thrown when the method is called in a production environment.</exception>
@@ -88,31 +75,66 @@ public class DemographicsService : IDemographicsServiceInternal
     /// <remarks>
     /// This method is not supported in a production environment.
     /// </remarks>
-    public async Task<ISet<DemographicResponseDto>?> AddDemographics(IEnumerable<DemographicsRequest> demographics, CancellationToken cancellationToken)
+    private async Task<DemographicResponseDto> AddDemographic(DemographicsRequest demographic, CancellationToken cancellationToken)
     {
         if (_environment.IsProduction())
         {
             throw new NotSupportedException("This functionality is not supported in this environment.");
         }
-        
-        using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(AddDemographics), ActivityKind.Internal);
+
         try
         {
             DateTime lastModificationDate = DateTime.Now;
-            List<Demographic> entities = await _dataContextFactory.UseWritableContext(async context =>
+            Demographic result = await _dataContextFactory.UseWritableContext(async context =>
             {
-                List<Demographic> entities = _mapper.Map(demographics).ToList();
-                entities.ForEach(e=> e.LastModifiedDate = lastModificationDate);
-                context.Demographics.AddRange(entities);
+
+                Demographic entity = _mapper.Map(demographic);
+
+#pragma warning disable S1854
+                // need to load the object so we can save change back to the db.
+                var db = await context.Demographics.FirstOrDefaultAsync(d => d.OracleHcmId == entity.OracleHcmId, cancellationToken: cancellationToken);
+#pragma warning restore S1854
+
+                if (db == null)
+                {
+                    db = context.Demographics.Add(entity).Entity;
+                }
+                else
+                {
+                    db.Ssn = entity.Ssn;
+                    db.BadgeNumber = entity.BadgeNumber;
+                    db.FullName = entity.FullName ?? $"{entity.LastName}, {entity.FirstName}";
+                    db.LastName = entity.LastName;
+                    db.FirstName = entity.FirstName;
+                    db.MiddleName = entity.MiddleName;
+                    db.StoreNumber = entity.StoreNumber;
+                    db.DepartmentId = entity.DepartmentId;
+                    db.PayClassificationId = entity.PayClassificationId;
+                    db.ContactInfo = entity.ContactInfo;
+                    db.Address = entity.Address;
+                    db.DateOfBirth = entity.DateOfBirth;
+                    db.FullTimeDate = entity.FullTimeDate;
+                    db.HireDate = entity.HireDate;
+                    db.ReHireDate = entity.ReHireDate;
+                    db.TerminationCodeId = entity.TerminationCodeId;
+                    db.TerminationDate = entity.TerminationDate;
+                    db.EmploymentTypeId = entity.EmploymentTypeId;
+                    db.PayFrequencyId = entity.PayFrequencyId;
+                    db.GenderId = entity.GenderId;
+                    db.EmploymentStatusId = entity.EmploymentStatusId;
+                    db.LastModifiedDate = lastModificationDate;
+                }
+
+
                 await context.SaveChangesAsync(cancellationToken);
-                return entities;
+                return db;
             }, cancellationToken);
 
-            return _mapper.Map(entities).ToFrozenSet();
+            return _mapper.Map(result)!;
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Unable to add to the {Demographics} table: {Message}.", nameof(Demographic), e.Message);
+            _logger.LogError(e, "Unable to add to the {Demographic} table: {Message}.", nameof(Demographic), e.Message);
             throw new DemographicException("Unable to add new Demographic object");
         }
     }
