@@ -1,6 +1,7 @@
 ﻿using System.Collections.Frozen;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using System.Diagnostics;
+using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -9,10 +10,8 @@ using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Mappers;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Demoulas.ProfitSharing.Common.Exceptions;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
+using MassTransit;
+using System.Linq;
 
 namespace Demoulas.ProfitSharing.Services;
 
@@ -20,18 +19,12 @@ public class DemographicsService : IDemographicsServiceInternal
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly DemographicMapper _mapper;
-    private readonly IWebHostEnvironment _environment;
-    private readonly ILogger<DemographicsService> _logger;
 
     public DemographicsService(IProfitSharingDataContextFactory dataContextFactory,
-        DemographicMapper mapper,
-        IWebHostEnvironment environment,
-        ILogger<DemographicsService> logger)
+        DemographicMapper mapper)
     {
         _dataContextFactory = dataContextFactory;
         _mapper = mapper;
-        _environment = environment;
-        _logger = logger;
     }
 
     /// <summary>
@@ -48,9 +41,22 @@ public class DemographicsService : IDemographicsServiceInternal
         CancellationToken cancellationToken = default)
     {
         using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(AddDemographicsStream), ActivityKind.Internal);
+        var batch = new List<DemographicsRequest>();
+
         await foreach (var employee in employees.WithCancellation(cancellationToken))
         {
-            _ = await AddDemographic(employee, cancellationToken);
+            batch.Add(employee);
+
+            if (batch.Count >= batchSize)
+            {
+                _ = await UpsertDemographicsAsync(batch, cancellationToken);
+                batch.Clear();
+            }
+        }
+
+        if (batch.Count > 0)
+        {
+            _ = await UpsertDemographicsAsync(batch, cancellationToken);
         }
     }
 
@@ -65,77 +71,90 @@ public class DemographicsService : IDemographicsServiceInternal
     }
 
     /// <summary>
-    /// Adds a collection of demographic records to the database.
+    /// Inserts or updates a collection of demographic records asynchronously.
     /// </summary>
-    /// <param name="demographic">The collection of demographic requests to be added.</param>
+    /// <param name="demographicsRequests">The collection of demographic requests to be upserted.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <returns>A set of demographic response DTOs if the operation is successful; otherwise, null.</returns>
-    /// <exception cref="NotSupportedException">Thrown when the method is called in a production environment.</exception>
-    /// <exception cref="DemographicException">Thrown when there is an error adding the demographic records to the database.</exception>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a set of demographic response DTOs.</returns>
     /// <remarks>
-    /// This method is not supported in a production environment.
+    /// This method performs an upsert operation, meaning it will insert new records and update existing ones based on the provided demographic requests.
     /// </remarks>
-    private async Task<DemographicResponseDto> AddDemographic(DemographicsRequest demographic, CancellationToken cancellationToken)
+    private async Task<ISet<DemographicResponseDto>?> UpsertDemographicsAsync(IEnumerable<DemographicsRequest> demographicsRequests, CancellationToken cancellationToken)
     {
-        if (_environment.IsProduction())
-        {
-            throw new NotSupportedException("This functionality is not supported in this environment.");
-        }
+        DateTime currentModificationDate = DateTime.Now;
 
-        try
+        // Use writable context for upsert operation
+        List<Demographic> updatedEntities = await _dataContextFactory.UseWritableContext(async context =>
         {
-            DateTime lastModificationDate = DateTime.Now;
-            Demographic result = await _dataContextFactory.UseWritableContext(async context =>
+            // Map incoming demographic requests to entity models
+            List<Demographic> demographicsEntities = _mapper.Map(demographicsRequests).ToList();
+
+            // Update LastModifiedDate for all entities
+            demographicsEntities.ForEach(entity => entity.LastModifiedDate = currentModificationDate);
+
+            // Create a lookup dictionary for fast access by OracleHcmId
+            var demographicLookup = demographicsEntities.ToDictionary(entity => entity.OracleHcmId);
+
+            // Fetch existing entities from the database that match the incoming OracleHcmIds
+            var existingEntities = await context.Demographics
+                                                .Where(dbEntity => demographicLookup.Keys.Contains(dbEntity.OracleHcmId))
+                                                .ToListAsync(cancellationToken);
+
+            // Extract existing OracleHcmIds from database entities
+            var existingOracleHcmIds = existingEntities.Select(dbEntity => dbEntity.OracleHcmId).ToHashSet();
+
+            // Determine which entities are new (i.e., need to be inserted)
+            var newOracleHcmIds = demographicLookup.Keys.Except(existingOracleHcmIds).ToHashSet();
+
+            if (newOracleHcmIds.Any())
             {
+                // Bulk insert new entities
+                var newEntities = demographicsEntities.Where(entity => newOracleHcmIds.Contains(entity.OracleHcmId)).ToList();
+                context.Demographics.AddRange(newEntities);
+            }
 
-                Demographic entity = _mapper.Map(demographic);
-
-#pragma warning disable S1854
-                // need to load the object so we can save change back to the db.
-                var db = await context.Demographics.FirstOrDefaultAsync(d => d.OracleHcmId == entity.OracleHcmId, cancellationToken: cancellationToken);
-#pragma warning restore S1854
-
-                if (db == null)
+            // Update existing entities with new values
+            foreach (var existingEntity in existingEntities)
+            {
+                if (demographicLookup.TryGetValue(existingEntity.OracleHcmId, out var incomingEntity))
                 {
-                    db = context.Demographics.Add(entity).Entity;
+                    UpdateEntityValues(existingEntity, incomingEntity, currentModificationDate);
                 }
-                else
-                {
-                    db.Ssn = entity.Ssn;
-                    db.BadgeNumber = entity.BadgeNumber;
-                    db.FullName = entity.FullName ?? $"{entity.LastName}, {entity.FirstName}";
-                    db.LastName = entity.LastName;
-                    db.FirstName = entity.FirstName;
-                    db.MiddleName = entity.MiddleName;
-                    db.StoreNumber = entity.StoreNumber;
-                    db.DepartmentId = entity.DepartmentId;
-                    db.PayClassificationId = entity.PayClassificationId;
-                    db.ContactInfo = entity.ContactInfo;
-                    db.Address = entity.Address;
-                    db.DateOfBirth = entity.DateOfBirth;
-                    db.FullTimeDate = entity.FullTimeDate;
-                    db.HireDate = entity.HireDate;
-                    db.ReHireDate = entity.ReHireDate;
-                    db.TerminationCodeId = entity.TerminationCodeId;
-                    db.TerminationDate = entity.TerminationDate;
-                    db.EmploymentTypeId = entity.EmploymentTypeId;
-                    db.PayFrequencyId = entity.PayFrequencyId;
-                    db.GenderId = entity.GenderId;
-                    db.EmploymentStatusId = entity.EmploymentStatusId;
-                    db.LastModifiedDate = lastModificationDate;
-                }
+            }
 
+            // Save all changes
+            await context.SaveChangesAsync(cancellationToken);
+            return demographicsEntities;
+        }, cancellationToken);
 
-                await context.SaveChangesAsync(cancellationToken);
-                return db;
-            }, cancellationToken);
+        // Map updated entities to response DTOs and return as a frozen set
+        return _mapper.Map(updatedEntities).ToHashSet();
+    }
 
-            return _mapper.Map(result)!;
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Unable to add to the {Demographic} table: {Message}.", nameof(Demographic), e.Message);
-            throw new DemographicException("Unable to add new Demographic object");
-        }
+    // Helper method to update entity fields
+    private static void UpdateEntityValues(Demographic existingEntity, Demographic incomingEntity, DateTime modificationDate)
+    {
+        existingEntity.Ssn = incomingEntity.Ssn;
+        existingEntity.BadgeNumber = incomingEntity.BadgeNumber;
+        existingEntity.FullName = incomingEntity.FullName ?? $"{incomingEntity.LastName}, {incomingEntity.FirstName}";
+        existingEntity.LastName = incomingEntity.LastName;
+        existingEntity.FirstName = incomingEntity.FirstName;
+        existingEntity.MiddleName = incomingEntity.MiddleName;
+        existingEntity.StoreNumber = incomingEntity.StoreNumber;
+        existingEntity.DepartmentId = incomingEntity.DepartmentId;
+        existingEntity.PayClassificationId = incomingEntity.PayClassificationId;
+        existingEntity.ContactInfo = incomingEntity.ContactInfo;
+        existingEntity.Address = incomingEntity.Address;
+        existingEntity.DateOfBirth = incomingEntity.DateOfBirth;
+        existingEntity.FullTimeDate = incomingEntity.FullTimeDate;
+        existingEntity.HireDate = incomingEntity.HireDate;
+        existingEntity.ReHireDate = incomingEntity.ReHireDate;
+        existingEntity.TerminationCodeId = incomingEntity.TerminationCodeId;
+        existingEntity.TerminationDate = incomingEntity.TerminationDate;
+        existingEntity.EmploymentTypeId = incomingEntity.EmploymentTypeId;
+        existingEntity.PayFrequencyId = incomingEntity.PayFrequencyId;
+        existingEntity.GenderId = incomingEntity.GenderId;
+        existingEntity.EmploymentStatusId = incomingEntity.EmploymentStatusId;
+        existingEntity.LastModifiedDate = modificationDate;
     }
 }
