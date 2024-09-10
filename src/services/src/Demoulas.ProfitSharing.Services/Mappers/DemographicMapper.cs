@@ -66,7 +66,7 @@ public partial class DemographicMapper
         return target;
     }
 
-    public partial IEnumerable<DemographicResponseDto> Map(IEnumerable<Demographic> sources);
+    public partial ISet<DemographicResponseDto> Map(IEnumerable<Demographic> sources);
 
     public DemographicResponseDto? Map(Demographic? source)
     {

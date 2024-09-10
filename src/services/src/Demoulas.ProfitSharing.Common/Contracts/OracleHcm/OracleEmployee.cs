@@ -17,6 +17,7 @@ public record OracleEmployee(
     [property: JsonPropertyName("phones")] Phones? Phones,
     [property: JsonPropertyName("workRelationships")] WorkRelationships? WorkRelationships,
     [property: JsonPropertyName("nationalIdentifiers")] NationalIdentifiers? NationalIdentifiers,
+    [property: JsonPropertyName("legislativeInfo")] LegislativeInfo? LegislativeInfo,
     [property: JsonPropertyName("@context")]
     Context Context
 )
@@ -39,6 +40,8 @@ public record OracleEmployee(
     [JsonIgnore]
     public WorkRelationship? WorkRelationship => WorkRelationships?.Items.FirstOrDefault(a => a.PrimaryFlag ?? false);
 
+    [JsonIgnore]
+    public LegislativeInfoItem? LegislativeInfoItem => LegislativeInfo?.Items.FirstOrDefault();
 }
 
 

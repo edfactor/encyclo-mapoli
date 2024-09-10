@@ -10,7 +10,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Jobs;
 
-public sealed class OracleHcmSynchronizationService : IOracleHcmSynchronizationService
+internal sealed class OracleHcmSynchronizationService : IOracleHcmSynchronizationService
 {
     private readonly IBus _bus;
     private readonly IHostEnvironment _hostEnvironment;
@@ -23,6 +23,15 @@ public sealed class OracleHcmSynchronizationService : IOracleHcmSynchronizationS
         _dataContextFactory = dataContextFactory;
     }
 
+    /// <summary>
+    /// Sends a synchronization request to the Oracle HCM system.
+    /// </summary>
+    /// <param name="request">The request containing the job details to be synchronized.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>
+    /// A task that represents the asynchronous operation. The task result contains a boolean value indicating whether the synchronization request was successfully sent.
+    /// The job will be allowed to run if there are no other jobs of the same type currently running within the last 18 hours.
+    /// </returns>
     public async Task<bool> SendSynchronizationRequest(OracleHcmJobRequest request, CancellationToken cancellationToken = default)
     {
         var message = new MessageRequest<OracleHcmJobRequest> { ApplicationName = _hostEnvironment.ApplicationName, Body = request };
@@ -31,7 +40,7 @@ public sealed class OracleHcmSynchronizationService : IOracleHcmSynchronizationS
             {
                 return c.Jobs.AnyAsync(j => j.JobTypeId == request.JobType 
                                             && j.JobStatusId == JobStatus.Constants.Running
-                                            && j.Started > DateTime.Now.AddDays(-1),
+                                            && j.Started > DateTime.Now.AddHours(-18),
                     cancellationToken: cancellationToken);
             }
         );

@@ -17,14 +17,16 @@
     <PackageReference Include="Demoulas.Common.Caching" />
     <PackageReference Include="Quartz" />
     <PackageReference Include="MassTransit" />
-    <PackageReference Include="MassTransit.Analyzers">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="Quartz.Extensions.Hosting" />
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Update="Microsoft.CodeAnalysis">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="MassTransit.Analyzers">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

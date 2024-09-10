@@ -5,12 +5,12 @@
   <ItemGroup>
     <PackageVersion Include="Aspire.Hosting.AppHost" Version="8.2.0" />
     <PackageVersion Include="Aspire.Oracle.EntityFrameworkCore" Version="8.2.0" />
-    <PackageVersion Include="Demoulas.Util" Version="2.3.1" />
+    <PackageVersion Include="Demoulas.Util" Version="2.3.2" />
     <PackageVersion Include="FastEndpoints.Testing" Version="5.29.0" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="8.2.0" />
     <PackageVersion Include="CsvHelper" Version="33.0.1" />
-    <PackageVersion Include="Demoulas.Common.Api" Version="1.2.3" />
-    <PackageVersion Include="Demoulas.Common.Data.Contexts" Version="2.1.5" />
+    <PackageVersion Include="Demoulas.Common.Api" Version="1.2.9" />
+    <PackageVersion Include="Demoulas.Common.Data.Contexts" Version="2.1.6" />
     <PackageVersion Include="Demoulas.Common.Data.Services" Version="3.1.1" />
     <PackageVersion Include="Demoulas.Security" Version="3.3.2" />
     <PackageVersion Include="EFCore.NamingConventions" Version="8.0.3" />
@@ -20,9 +20,9 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="8.0.7" />
     <PackageVersion Include="Microsoft.Extensions.Compliance.Redaction" Version="8.7.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="8.8.0" />
+    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="8.9.1" />
     <PackageVersion Include="Demoulas.Common.Caching" Version="2.0.2" />
-    <PackageVersion Include="Demoulas.Common.Contracts" Version="2.2.3" />
+    <PackageVersion Include="Demoulas.Common.Contracts" Version="2.2.4" />
     <PackageVersion Include="Demoulas.StoreInfo" Version="1.7.2" />
     <PackageVersion Include="FluentAssertions.Analyzers" Version="0.33.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.8" />
@@ -49,7 +49,7 @@
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.2" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.11.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
     <PackageVersion Include="NSwag.Core" Version="14.1.0" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.9.0" />
@@ -60,6 +60,7 @@
     <PackageVersion Include="Oracle.EntityFrameworkCore" Version="8.23.50" />
     <PackageVersion Include="Oracle.ManagedDataAccess.OpenTelemetry" Version="23.5.0" />
     <PackageVersion Include="Quartz" Version="3.13.0" />
+    <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.13.0" />
     <PackageVersion Include="Riok.Mapperly" Version="3.6.0" />
     <PackageVersion Include="Serilog.AspNetCore" Version="8.0.2" />
     <PackageVersion Include="Serilog.Enrichers.Environment" Version="3.0.1" />

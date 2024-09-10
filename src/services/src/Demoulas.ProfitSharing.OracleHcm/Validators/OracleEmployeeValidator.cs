@@ -6,7 +6,7 @@ using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Validators;
-public class OracleEmployeeValidator : Validator<OracleEmployee>
+public sealed class OracleEmployeeValidator : Validator<OracleEmployee>
 {
     private readonly IBaseCacheService<LookupTableCache<byte>> _accountCache;
     private readonly IBaseCacheService<LookupTableCache<byte>> _depCache;

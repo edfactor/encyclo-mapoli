@@ -15,29 +15,24 @@ namespace Demoulas.ProfitSharing.UnitTests;
 public class EmployeeSyncServiceTests : IClassFixture<ApiTestBase<Program>>
 {
     private readonly Mock<IDemographicsServiceInternal> _mockDemographicsService;
-    private readonly Mock<IProfitSharingDataContextFactory> _mockDataContextFactory;
-    private readonly OracleHcmConfig _oracleHcmConfig;
-    private readonly Mock<IBaseCacheService<LookupTableCache<byte>>>  _mockAccountCache;
-    private readonly Mock<IBaseCacheService<LookupTableCache<byte>>> _mockDepCache;
-    private readonly Mock<HttpClient> _mockHttpClient;
-    private readonly EmployeeSyncService _employeeSyncService;
-    private readonly OracleEmployeeValidator _employeeValidator;
+    private readonly IEmployeeSyncService _employeeSyncService;
 
     public EmployeeSyncServiceTests()
     {
         _mockDemographicsService = new Mock<IDemographicsServiceInternal>();
-        _mockDataContextFactory = new Mock<IProfitSharingDataContextFactory>();
-        _mockAccountCache = new Mock<IBaseCacheService<LookupTableCache<byte>>>();
-        _mockDepCache = new Mock<IBaseCacheService<LookupTableCache<byte>>>();
-        _oracleHcmConfig = new OracleHcmConfig {Url = "localhost"};
-        _employeeValidator = new OracleEmployeeValidator(_mockAccountCache.Object, _mockDepCache.Object);
-        _mockHttpClient = new Mock<HttpClient>();
+        Mock<IProfitSharingDataContextFactory> mockDataContextFactory = new Mock<IProfitSharingDataContextFactory>();
+        Mock<IBaseCacheService<LookupTableCache<byte>>> mockAccountCache = new Mock<IBaseCacheService<LookupTableCache<byte>>>();
+        Mock<IBaseCacheService<LookupTableCache<byte>>> mockDepCache = new Mock<IBaseCacheService<LookupTableCache<byte>>>();
+        OracleHcmConfig oracleHcmConfig = new OracleHcmConfig {Url = "localhost"};
+        OracleEmployeeValidator employeeValidator = new OracleEmployeeValidator(mockAccountCache.Object, mockDepCache.Object);
+        Mock<HttpClient> mockHttpClient = new Mock<HttpClient>();
+        
         _employeeSyncService = new EmployeeSyncService(
-            _mockHttpClient.Object,
+            mockHttpClient.Object,
             _mockDemographicsService.Object,
-            _mockDataContextFactory.Object,
-            _oracleHcmConfig,
-            _employeeValidator
+            mockDataContextFactory.Object,
+            oracleHcmConfig,
+            employeeValidator
         );
     }
 

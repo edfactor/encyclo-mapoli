@@ -13,7 +13,7 @@ public record PhoneItem(
     string CreatedBy,
     DateTime CreationDate,
     string LastUpdatedBy,
-    DateTime LastUpdateDate,
+    DateTimeOffset LastUpdateDate,
     bool? PrimaryFlag,
     Context Context
 );
