@@ -36,7 +36,7 @@ public abstract class EndpointWithCsvBase<ReqType, RespType, MapType> : Endpoint
         Description(b => 
             b.Produces<ReportResponseBase<RespType>>(200, "application/json", "text/csv"));
     }
-
+    
     /// <summary>
     /// Use to provide a simple example request when no more complex than a simple Pagination Request is needed
     /// </summary>
@@ -79,12 +79,18 @@ public abstract class EndpointWithCsvBase<ReqType, RespType, MapType> : Endpoint
             streamWriter.WriteLine($"{report.ReportDate:MMM dd yyyy HH:mm}");
             streamWriter.WriteLine(report.ReportName);
 
-            csvWriter.Context.RegisterClassMap<MapType>();
-            csvWriter.WriteRecords(report.Response.Results);
+            GenerateCsvContent(csvWriter, report);
+            
             streamWriter.Flush();
         }
 
         memoryStream.Position = 0; // Reset the stream position to the beginning
         return memoryStream;
+    }
+
+    protected internal virtual void GenerateCsvContent(CsvWriter csvWriter, ReportResponseBase<RespType> report)
+    {
+        csvWriter.Context.RegisterClassMap<MapType>();
+        csvWriter.WriteRecords(report.Response.Results);
     }
 }

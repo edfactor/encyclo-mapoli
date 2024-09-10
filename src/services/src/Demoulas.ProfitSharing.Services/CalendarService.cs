@@ -27,7 +27,9 @@ public sealed class CalendarService
     public Task<DateOnly> FindWeekendingDateFromDate(DateOnly dateTime, CancellationToken cancellationToken = default)
     {
         // Validate the input date
+#pragma warning disable S6562
         if (dateTime < DateOnly.FromDateTime(new DateTime(2000, 1, 1)) || dateTime > DateOnly.FromDateTime(DateTime.Today.AddYears(5)))
+#pragma warning restore S6562
         {
             throw new ArgumentOutOfRangeException(nameof(dateTime), InvalidDateError);
         }

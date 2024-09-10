@@ -1,6 +1,4 @@
-﻿using CsvHelper;
-using CsvHelper.Configuration;
-using CsvHelper.TypeConversion;
+﻿using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -8,12 +6,12 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Endpoints.TypeConverters;
 using Demoulas.ProfitSharing.Security;
-using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.MilitaryAndRehireEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 
-public class MilitaryAndRehireEndpoint : EndpointWithCsvBase<PaginationRequestDto, MilitaryAndRehireReportResponse, MilitaryAndRehireReportResponseMap>
+public class MilitaryAndRehireEndpoint : EndpointWithCsvBase<PaginationRequestDto, MilitaryAndRehireReportResponse, MilitaryAndRehireEndpoint.MilitaryAndRehireReportResponseMap>
 {
     private readonly IMilitaryAndRehireService _reportService;
 
@@ -60,19 +58,7 @@ public class MilitaryAndRehireEndpoint : EndpointWithCsvBase<PaginationRequestDt
         return await _reportService.GetMilitaryAndRehireReport(req, ct);
     }
 
-    public sealed class YearMonthDayTypeConverter : DefaultTypeConverter
-    {
-        public override string? ConvertToString(object? value, IWriterRow row, MemberMapData memberMapData)
-        {
-            if (value == null)
-            {
-                return null;
-            }
-
-            var d = (DateOnly)value;
-            return d.ToString("d");
-        }
-    }
+ 
 
     public sealed class MilitaryAndRehireReportResponseMap : ClassMap<MilitaryAndRehireReportResponse>
     {

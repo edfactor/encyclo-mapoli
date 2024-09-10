@@ -9,6 +9,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Endpoints.TypeConverters;
 using Demoulas.ProfitSharing.Security;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -79,20 +80,6 @@ public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithCsvBase<Pagin
     public override async Task<ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto>> GetResponse(PaginationRequestDto req, CancellationToken ct)
     {
         return await _reportService.GetPayrollDuplicateSsnsOnPayprofit(req, ct);
-    }
-
-    public sealed class YearMonthDayTypeConverter : DefaultTypeConverter
-    {
-        public override string? ConvertToString(object? value, IWriterRow row, MemberMapData memberMapData)
-        {
-            if (value == null)
-            {
-                return null;
-            }
-
-            var d = (DateOnly)value;
-            return d.ToString("YYYYMMDD");
-        }
     }
 
     public sealed class PayrollDuplicateSsnsOnPayprofitResponseMap : ClassMap<PayrollDuplicateSsnsOnPayprofitResponseDto>

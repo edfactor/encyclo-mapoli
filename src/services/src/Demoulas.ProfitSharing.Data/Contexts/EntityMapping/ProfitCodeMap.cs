@@ -7,29 +7,30 @@ internal sealed class ProfitCodeMap : IEntityTypeConfiguration<ProfitCode>
 {
     public void Configure(EntityTypeBuilder<ProfitCode> builder)
     {
-        builder.HasKey(x => x.Code);
+        builder.HasKey(x => x.Id);
         builder.ToTable("PROFIT_CODE");
 
-        builder.Property(x => x.Code).IsRequired().ValueGeneratedNever().HasColumnName("CODE");
-        builder.Property(x => x.Definition).IsRequired().HasMaxLength(128).HasColumnName("DEFINITION");
+        builder.Property(x => x.Id).IsRequired().ValueGeneratedNever().HasColumnName("ID");
+        builder.Property(x => x.Name).IsRequired().HasMaxLength(128).HasColumnName("NAME");
         builder.Property(x => x.Frequency).IsRequired().HasMaxLength(128).HasColumnName("FREQUENCY");
 
         builder.HasData(GetPredefinedProfitCodes());
     }
 
     //See https://demoulas.atlassian.net/wiki/spaces/NGDS/pages/39944312/Quick+Guide+to+Profit+Sharing+Tables
-    private List<ProfitCode> GetPredefinedProfitCodes()
+    private static List<ProfitCode> GetPredefinedProfitCodes()
     {
         return
         [
-            new ProfitCode() {Code=0,Definition="Incoming contributions, forfeitures, earnings", Frequency="Year-end only"},
-            new ProfitCode() {Code=1,Definition="Outgoing payments (not rollovers or direct payments) - Partial withdrawal", Frequency="Multiple Times"},
-            new ProfitCode() {Code=2,Definition="Outgoing forfeitures", Frequency="Multiple Times"},
-            new ProfitCode() {Code=3,Definition="Outgoing direct payments / rollover payments", Frequency="Multiple Times"},
-            new ProfitCode() {Code=5,Definition="Outgoing XFER beneficiary / QDRO allocation (beneficiary payment)", Frequency="Once"},
-            new ProfitCode() {Code=6,Definition="Incoming QDRO beneficiary allocation  (beneficiary receipt)", Frequency="Once"},
-            new ProfitCode() {Code=8,Definition="Incoming \"100% vested\" earnings", Frequency="Usually year-end, unless there is special processing – i.e. Class Action settlement.  Earnings are 100% vested."},
-            new ProfitCode() {Code=9,Definition="Outgoing payment from 100% vesting amount (payment of ETVA funds)", Frequency="Multiple Times"}
+            ProfitCode.Constants.IncomingContributions,
+            ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal,
+            ProfitCode.Constants.OutgoingForfeitures,
+            ProfitCode.Constants.OutgoingDirectPayments,
+            ProfitCode.Constants.OutgoingXferBeneficiary,
+            ProfitCode.Constants.IncomingQdroBeneficiary,
+            ProfitCode.Constants.Incoming100PercentVestedEarnings,
+            ProfitCode.Constants.Outgoing100PercentVestedPayment
         ];
     }
+
 }

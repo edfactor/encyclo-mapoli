@@ -15,6 +15,7 @@ public sealed class YearEndGroup : Group
         {
             ep.Description(x => x
                 .ProducesProblemFE<Microsoft.AspNetCore.Mvc.ProblemDetails>()
+                .ProducesProblemFE<Microsoft.AspNetCore.Mvc.ProblemDetails>(403)
                 .ProducesProblemFE<Microsoft.AspNetCore.Mvc.ProblemDetails>(500)
                 .WithRequestTimeout(TimeSpan.FromMinutes(1))
                 .WithTags(RouteName));
