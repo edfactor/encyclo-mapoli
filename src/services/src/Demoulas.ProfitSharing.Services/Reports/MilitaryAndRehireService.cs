@@ -105,7 +105,7 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
                         profitDetail.ProfitCodeId
                     }
                 )
-                .Where(pd => pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id)
+                .Where(pd => pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures)
                 .OrderBy(m => m.BadgeNumber)
                 .GroupBy(m => new
                 {

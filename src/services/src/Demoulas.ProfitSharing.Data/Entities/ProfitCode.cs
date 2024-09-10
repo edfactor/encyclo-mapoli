@@ -49,5 +49,38 @@ public class ProfitCode : ILookupTable<byte>
     public required byte Id { get; set; }
     public required string Name { get; set; }
     public required string Frequency { get; init; }
-}
 
+    
+    // Override Equals method for correct comparison
+    public override bool Equals(object? obj)
+    {
+        if (obj is ProfitCode otherProfitCode)
+        {
+            return Id == otherProfitCode.Id;
+        }
+        return false;
+    }
+
+    // Override GetHashCode to be consistent with Equals
+    public override int GetHashCode()
+    {
+        return Id.GetHashCode();
+    }
+    
+#pragma warning disable S3875
+    public static bool operator ==(byte? left, ProfitCode? right)
+    {
+        if (left is null)
+        {
+            return right is null;
+        }
+
+        return left.Equals(right?.Id);
+    }
+
+    public static bool operator !=(byte? left, ProfitCode right)
+    {
+        return !(left == right);
+    }
+#pragma warning restore S3875
+}
