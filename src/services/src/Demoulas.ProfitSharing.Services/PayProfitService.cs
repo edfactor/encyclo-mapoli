@@ -16,22 +16,11 @@ public class PayProfitService : IPayProfitService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly PayProfitMapper _mapper;
-    private readonly ILogger _logger;
 
-    public PayProfitService(IProfitSharingDataContextFactory dataContextFactory, PayProfitMapper mapper, ILoggerFactory factory)
+    public PayProfitService(IProfitSharingDataContextFactory dataContextFactory, PayProfitMapper mapper)
     {
         _dataContextFactory = dataContextFactory;
         _mapper = mapper;
-        _logger = factory.CreateLogger<PayProfitService>();
-    }
-
-    public async Task<PaginatedResponseDto<PayProfitResponseDto>?> GetAllProfits(PaginationRequestDto req, CancellationToken cancellationToken = default)
-    {
-        using (_logger.BeginScope("Request all Pay Profit records"))
-        {
-            return await _dataContextFactory.UseReadOnlyContext(async c =>
-                await c.PayProfits.Select(d => _mapper.Map(d)).ToPaginationResultsAsync(req, cancellationToken: cancellationToken));
-        }
     }
 
     public async Task<ISet<PayProfitResponseDto>?> AddProfit(IEnumerable<PayProfitRequestDto> profitRequest, CancellationToken cancellationToken)
