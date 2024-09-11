@@ -7,6 +7,5 @@ namespace Demoulas.ProfitSharing.Common.Interfaces;
 
 public interface IPayProfitService
 {
-    Task<PaginatedResponseDto<PayProfitResponseDto>?> GetAllProfits(PaginationRequestDto req, CancellationToken cancellationToken = default);
     Task<ISet<PayProfitResponseDto>?> AddProfit(IEnumerable<PayProfitRequestDto> profitRequest, CancellationToken cancellationToken);
 }
