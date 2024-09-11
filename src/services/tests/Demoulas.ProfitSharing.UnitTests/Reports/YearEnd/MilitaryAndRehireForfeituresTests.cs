@@ -17,6 +17,9 @@ using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.Util.Extensions;
+using CsvHelper.Configuration;
+using CsvHelper;
+using System.Globalization;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -75,8 +78,41 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
 
             string result = await response.Response.Content.ReadAsStringAsync();
             result.Should().NotBeNullOrEmpty();
+
+            // Assert CSV format
+            using var reader = new StringReader(result);
+            using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture));
+
+            // Read the first two rows (date and report name)
+            await csv.ReadAsync();  // First row is the date
+            string? dateLine = csv.GetField(0);
+            dateLine.Should().NotBeNullOrEmpty();
+
+            await csv.ReadAsync();  // Second row is the report name
+            string? reportNameLine = csv.GetField(0);
+            reportNameLine.Should().NotBeNullOrEmpty();
+
+            // Start reading the actual CSV content from row 2 (0-based index)
+            await csv.ReadAsync();  // Read the header row (starting at column 2)
+            csv.ReadHeader();
+
+            // Validate the headers
+            var headers = csv.HeaderRecord;
+            headers.Should().NotBeNull();
+            headers.Should().ContainInOrder("", "", "BADGE", "EMPLOYEE NAME", "SSN", "REHIRED", "PY-YRS", "YTD HOURS", "EC");
+
+            await csv.ReadAsync();  // Read the header row (starting at column 2)
+            csv.ReadHeader();
+
+            // Validate the second row of headers
+            var headers2 = csv.HeaderRecord;
+            headers2.Should().NotBeNull();
+            headers2.Should().ContainInOrder("", "", "", "", "", "YEAR", "FORFEITURES", "COMMENT");
         });
     }
+
+
+
 
     [Fact(DisplayName = "PS-156: Check to ensure unauthorized")]
     public async Task Unauthorized()
