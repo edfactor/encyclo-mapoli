@@ -61,10 +61,29 @@ public class MilitaryAndRehireForfeituresEndpoint :
         return await _reportService.FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYears(req, ct);
     }
 
-    protected internal override void GenerateCsvContent(CsvWriter csvWriter, ReportResponseBase<MilitaryAndRehireForfeituresResponse> report)
+    protected internal override Task GenerateCsvContent(CsvWriter csvWriter, ReportResponseBase<MilitaryAndRehireForfeituresResponse> report, CancellationToken cancellationToken)
     {
+        // Register the class map for the main member data
         csvWriter.Context.RegisterClassMap<MilitaryRehireProfitSharingResponseMap>();
 
+        // Write the headers using the registered class map
+        csvWriter.WriteHeader<MilitaryAndRehireForfeituresResponse>();
+
+        // Add additional headers for the details section (Profit Year, Forfeitures, Comment)
+        csvWriter.NextRecord();
+        csvWriter.WriteField(string.Empty);
+        csvWriter.WriteField(string.Empty);
+        csvWriter.WriteField(string.Empty);
+        csvWriter.WriteField(string.Empty);
+        csvWriter.WriteField(string.Empty);
+        csvWriter.WriteField("YEAR");
+        csvWriter.WriteField("FORFEITURES");
+        csvWriter.WriteField("COMMENT");
+
+        // Move to the next record to separate the headers from the data
+        csvWriter.NextRecord();
+
+        // Write the records (member + details)
         foreach (var member in report.Response.Results)
         {
             // Write the member details once
@@ -74,6 +93,7 @@ public class MilitaryAndRehireForfeituresEndpoint :
             // Write each profit-detail record under the employee details
             foreach (var record in member.Details)
             {
+                // These fields correspond to the empty fields for the member data
                 csvWriter.WriteField(string.Empty); // Empty field for BadgeNumber
                 csvWriter.WriteField(string.Empty); // Empty field for EmployeeName
                 csvWriter.WriteField(string.Empty); // Empty field for SSN
@@ -81,12 +101,13 @@ public class MilitaryAndRehireForfeituresEndpoint :
                 csvWriter.WriteField(string.Empty); // Empty field for PY-YRS
                 csvWriter.WriteField(string.Empty); // Empty field for YTD HOURS
                 csvWriter.WriteField(string.Empty); // Empty field for EC
-                csvWriter.WriteField(record.ProfitYear); // YEAR
-                csvWriter.WriteField(record.Forfeiture); // FORFEITURES
-                csvWriter.WriteField(record.Remark); // COMMENT
+                csvWriter.WriteField(record.ProfitYear);   // YEAR
+                csvWriter.WriteField(record.Forfeiture);   // FORFEITURES
+                csvWriter.WriteField(record.Remark);       // COMMENT
                 csvWriter.NextRecord();
             }
         }
+        return Task.CompletedTask;
     }
 
     public sealed class MilitaryRehireProfitSharingResponseMap : ClassMap<MilitaryAndRehireForfeituresResponse>
