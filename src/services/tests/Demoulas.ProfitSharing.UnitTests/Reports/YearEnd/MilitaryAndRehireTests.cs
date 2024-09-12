@@ -15,6 +15,7 @@ using Demoulas.ProfitSharing.UnitTests.Extensions;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using Demoulas.ProfitSharing.Data.Contexts;
+using Demoulas.ProfitSharing.Services;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -25,7 +26,7 @@ public class MilitaryAndRehireTests : ApiTestBase<Api.Program>
 
     public MilitaryAndRehireTests()
     {
-        MilitaryAndRehireService mockService = new MilitaryAndRehireService(MockDbContextFactory);
+        MilitaryAndRehireService mockService = new MilitaryAndRehireService(MockDbContextFactory, new CalendarService(MockDbContextFactory));
         _endpoint = new MilitaryAndRehireEndpoint(mockService);
     }
 

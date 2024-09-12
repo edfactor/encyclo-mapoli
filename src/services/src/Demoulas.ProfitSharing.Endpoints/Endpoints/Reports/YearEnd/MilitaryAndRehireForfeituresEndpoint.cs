@@ -2,6 +2,7 @@
 using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -13,7 +14,7 @@ using Demoulas.ProfitSharing.Security;
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 
 public class MilitaryAndRehireForfeituresEndpoint :
-    EndpointWithCsvBase<PaginationRequestDto, MilitaryAndRehireForfeituresResponse, MilitaryAndRehireForfeituresEndpoint.MilitaryRehireProfitSharingResponseMap>
+    EndpointWithCsvBase<MilitaryAndRehireRequest, MilitaryAndRehireForfeituresResponse, MilitaryAndRehireForfeituresEndpoint.MilitaryRehireProfitSharingResponseMap>
 {
     private readonly IMilitaryAndRehireService _reportService;
 
@@ -24,7 +25,7 @@ public class MilitaryAndRehireForfeituresEndpoint :
 
     public override void Configure()
     {
-        Get("military-and-rehire-forfeitures");
+        Get("military-and-rehire-forfeitures/{reportingYear}");
         Summary(s =>
         {
             s.Summary = "Military and Rehire Profit Sharing Data Report Endpoint";
@@ -55,7 +56,7 @@ public class MilitaryAndRehireForfeituresEndpoint :
 
     public override string ReportFileName => "REHIRE'S PROFIT SHARING DATA";
 
-    public override async Task<ReportResponseBase<MilitaryAndRehireForfeituresResponse>> GetResponse(PaginationRequestDto req, CancellationToken ct)
+    public override async Task<ReportResponseBase<MilitaryAndRehireForfeituresResponse>> GetResponse(MilitaryAndRehireRequest req, CancellationToken ct)
     {
         return await _reportService.FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYears(req, ct);
     }

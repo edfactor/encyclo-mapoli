@@ -20,6 +20,8 @@ using Demoulas.Util.Extensions;
 using CsvHelper.Configuration;
 using CsvHelper;
 using System.Globalization;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Services;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -30,7 +32,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
 
     public MilitaryAndRehireForfeituresTests()
     {
-        MilitaryAndRehireService mockService = new MilitaryAndRehireService(MockDbContextFactory);
+        MilitaryAndRehireService mockService = new MilitaryAndRehireService(MockDbContextFactory, new CalendarService(MockDbContextFactory));
         _endpoint = new MilitaryAndRehireForfeituresEndpoint(mockService);
     }
 
@@ -132,7 +134,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
     public async Task GetResponse_Should_HandleEmptyResults()
     {
         // Arrange
-        var request = new PaginationRequestDto { Skip = 0, Take = 10 };
+        var request = new MilitaryAndRehireRequest { Skip = 0, Take = 10, ReportingYear = (short)DateTime.Today.Year };
         var cancellationToken = CancellationToken.None;
         var expectedResponse = new ReportResponseBase<MilitaryAndRehireForfeituresResponse>
         {
@@ -153,7 +155,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
     public async Task GetResponse_Should_HandleNullResults()
     {
         // Arrange
-        var request = new PaginationRequestDto { Skip = 0, Take = 10 };
+        var request = new MilitaryAndRehireRequest { Skip = 0, Take = 10, ReportingYear = (short)DateTime.Today.Year };
         var cancellationToken = CancellationToken.None;
         var expectedResponse = new ReportResponseBase<MilitaryAndRehireForfeituresResponse>
         {
@@ -180,7 +182,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
         reportFileName.Should().Be("REHIRE'S PROFIT SHARING DATA");
     }
 
-    private static async Task<(PaginationRequestDto Request, MilitaryAndRehireForfeituresResponse ExpectedResponse)> SetupTestEmployee(ProfitSharingDbContext c)
+    private static async Task<(MilitaryAndRehireRequest Request, MilitaryAndRehireForfeituresResponse ExpectedResponse)> SetupTestEmployee(ProfitSharingDbContext c)
     {
         // Setup
         MilitaryAndRehireForfeituresResponse example = MilitaryAndRehireForfeituresResponse.ResponseExample();
@@ -218,6 +220,6 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
         }).ToList();
 
 
-        return (new PaginationRequestDto { Skip = 0, Take = 10 }, example);
+        return (new MilitaryAndRehireRequest { Skip = 0, Take = 10, ReportingYear = (short)demo.ReHireDate!.Value.Year}, example);
     }
 }

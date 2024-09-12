@@ -1,6 +1,8 @@
 ﻿using System.Data.SqlTypes;
 using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -14,10 +16,12 @@ namespace Demoulas.ProfitSharing.Services.Reports;
 public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
+    private readonly CalendarService _calendarService;
 
-    public MilitaryAndRehireService(IProfitSharingDataContextFactory dataContextFactory)
+    public MilitaryAndRehireService(IProfitSharingDataContextFactory dataContextFactory, CalendarService calendarService)
     {
         _dataContextFactory = dataContextFactory;
+        _calendarService = calendarService;
     }
 
     /// <summary>
@@ -61,82 +65,113 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
     /// <param name="req">The pagination request containing the necessary parameters for the search.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a report response with the rehire profit sharing data.</returns>
-    public async Task<ReportResponseBase<MilitaryAndRehireForfeituresResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYears(PaginationRequestDto req, CancellationToken cancellationToken)
+    public async Task<ReportResponseBase<MilitaryAndRehireForfeituresResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYears(MilitaryAndRehireRequest req, CancellationToken cancellationToken)
     {
-        var militaryMembers = await _dataContextFactory.UseReadOnlyContext(context =>
+        var flatResponse = await GetMilitaryAndRehireProfitSummaryReport(req, cancellationToken);
+
+        var groupedResponse = flatResponse.Response.Results.GroupBy(m => new
         {
-            var query = context.Demographics
-                .Join(
-                    context.PayProfits, // Table to join with (PayProfit)
-                    demographics => demographics.Ssn, // Primary key selector from Demographics
-                    payProfit => payProfit.Ssn, // Foreign key selector from PayProfit
-                    (demographics, payProfit) => new // Result selector after joining
-                    {
-                        demographics.BadgeNumber,
-                        demographics.FullName,
-                        demographics.Ssn,
-                        demographics.ReHireDate,
-                        payProfit.CompanyContributionYears,
-                        payProfit.EnrollmentId,
-                        payProfit.HoursCurrentYear,
-                        demographics.EmploymentStatusId
-                    }
-                )
-                .Where(m =>
-                    m.EmploymentStatusId == EmploymentStatus.Constants.Active
-                    && m.ReHireDate != null
-                    && m.ReHireDate > new DateOnly(2000, 01, 01))
-                .Join(
-                    context.ProfitDetails, // Table to join with (ProfitDetail)
-                    combined => combined.Ssn, // Key selector from the result of the first join
-                    profitDetail => profitDetail.Ssn, // Foreign key selector from ProfitDetail
-                    (member, profitDetail) => new // Result selector after joining ProfitDetail
-                    {
-                        member.BadgeNumber,
-                        member.FullName,
-                        member.Ssn,
-                        member.ReHireDate,
-                        member.CompanyContributionYears,
-                        member.EnrollmentId,
-                        member.HoursCurrentYear,
-                        profitDetail.Forfeiture,
-                        profitDetail.Remark,
-                        profitDetail.ProfitYear,
-                        profitDetail.ProfitCodeId
-                    }
-                )
-                .Where(pd => pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id)
-                .OrderBy(m => m.BadgeNumber)
-                .GroupBy(m => new
+            m.BadgeNumber,
+            m.FullName,
+            m.Ssn,
+            m.ReHiredDate,
+            m.CompanyContributionYears,
+            m.HoursCurrentYear
+        }).Select(group =>
+            new MilitaryAndRehireForfeituresResponse
+            {
+                BadgeNumber = group.Key.BadgeNumber,
+                Ssn = group.Key.Ssn,
+                FullName = group.Key.FullName,
+                HoursCurrentYear = group.Key.HoursCurrentYear,
+                ReHiredDate = group.Key.ReHiredDate,
+                CompanyContributionYears = group.Key.CompanyContributionYears,
+                Details = group.Select(pd => new MilitaryRehireProfitSharingDetailResponse
                 {
-                    m.BadgeNumber,
-                    m.FullName,
-                    m.Ssn,
-                    m.ReHireDate,
-                    m.CompanyContributionYears,
-                    m.HoursCurrentYear
-                }) // Group by employee details
-                .Select(group =>
-                    new MilitaryAndRehireForfeituresResponse
-                    {
-                        BadgeNumber = group.Key.BadgeNumber,
-                        Ssn = group.Key.Ssn.MaskSsn(),
-                        FullName = group.Key.FullName,
-                        HoursCurrentYear = group.Key.HoursCurrentYear ?? 0,
-                        ReHiredDate = group.Key.ReHireDate ?? SqlDateTime.MinValue.Value.ToDateOnly(),
-                        CompanyContributionYears = group.Key.CompanyContributionYears,
-                        Details = group.Select(pd => new MilitaryRehireProfitSharingDetailResponse
-                        {
-                            Forfeiture = pd.Forfeiture, Remark = pd.Remark, ProfitYear = pd.ProfitYear
-                        })
-                    });
-            
-            return query.ToPaginationResultsAsync(req, cancellationToken);
-        });
+                    Forfeiture = pd.Forfeiture,
+                    Remark = pd.Remark,
+                    ProfitYear = pd.ProfitYear
+                })
+            });
 
         return new ReportResponseBase<MilitaryAndRehireForfeituresResponse>
         {
             ReportName = "REHIRE'S PROFIT SHARING DATA",
+            ReportDate = DateTimeOffset.Now,
+            Response = new PaginatedResponseDto<MilitaryAndRehireForfeituresResponse>(req) { Results = groupedResponse }
+        };
+    }
+
+
+    public async Task<ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>> GetMilitaryAndRehireProfitSummaryReport(MilitaryAndRehireRequest req, CancellationToken cancellationToken)
+    {
+        var bracket = await _calendarService.GetYearStartAndEndAccountingDates(req.ReportingYear, cancellationToken);
+        var militaryMembers = await _dataContextFactory.UseReadOnlyContext(context =>
+        {
+            var query = context.Demographics
+               .Join(
+                   context.PayProfits, // Table to join with (PayProfit)
+                   demographics => demographics.Ssn, // Primary key selector from Demographics
+                   payProfit => payProfit.Ssn, // Foreign key selector from PayProfit
+                   (demographics, payProfit) => new // Result selector after joining
+                   {
+                       demographics.BadgeNumber,
+                       demographics.FullName,
+                       demographics.Ssn,
+                       demographics.ReHireDate,
+                       payProfit.CompanyContributionYears,
+                       payProfit.EnrollmentId,
+                       payProfit.HoursCurrentYear,
+                       demographics.EmploymentStatusId
+                   }
+               )
+               .Where(m =>
+                   m.EmploymentStatusId == EmploymentStatus.Constants.Active
+                   && m.ReHireDate != null
+                   && m.ReHireDate >= bracket.BeginDate
+                   && m.ReHireDate <= bracket.YearEndDate)
+               .Join(
+                   context.ProfitDetails, // Table to join with (ProfitDetail)
+                   combined => combined.Ssn, // Key selector from the result of the first join
+                   profitDetail => profitDetail.Ssn, // Foreign key selector from ProfitDetail
+                   (member, profitDetail) => new // Result selector after joining ProfitDetail
+                   {
+                       member.BadgeNumber,
+                       member.FullName,
+                       member.Ssn,
+                       member.ReHireDate,
+                       member.CompanyContributionYears,
+                       member.EnrollmentId,
+                       member.HoursCurrentYear,
+                       profitDetail.Forfeiture,
+                       profitDetail.Remark,
+                       profitDetail.ProfitYear,
+                       profitDetail.ProfitCodeId
+                   }
+               )
+               .Where(pd => pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures)
+               .OrderBy(m => m.BadgeNumber)
+               .ThenBy(m=> m.FullName)
+               .Select(d => new MilitaryAndRehireProfitSummaryResponse
+               {
+                   BadgeNumber = d.BadgeNumber,
+                   Ssn = d.Ssn.MaskSsn(),
+                   FullName = d.FullName,
+                   HoursCurrentYear = d.HoursCurrentYear ?? 0,
+                   ReHiredDate = d.ReHireDate ?? SqlDateTime.MinValue.Value.ToDateOnly(),
+                   CompanyContributionYears = d.CompanyContributionYears,
+                   Forfeiture = d.Forfeiture,
+                   Remark = d.Remark,
+                   ProfitYear = d.ProfitYear
+               })
+                .ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
+
+            return query;
+        });
+
+        return new ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>
+        {
+            ReportName = "MILITARY TERM-REHIRE",
             ReportDate = DateTimeOffset.Now,
             Response = militaryMembers
         };
