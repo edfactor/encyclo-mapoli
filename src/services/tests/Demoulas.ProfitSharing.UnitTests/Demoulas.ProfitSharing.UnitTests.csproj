@@ -19,6 +19,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="IdGen" />
     <PackageReference Include="JetBrains.Annotations" />
     <PackageReference Include="JunitXml.TestLogger" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
