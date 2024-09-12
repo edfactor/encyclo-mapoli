@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Demoulas.ProfitSharing.Security;
+using System.Net;
 
 namespace Demoulas.ProfitSharing.Endpoints.Groups;
 
@@ -18,7 +19,8 @@ public sealed class YearEndGroup : Group
                 .Produces(403)
                 .Produces(429)
                 .ProducesProblemFE<Microsoft.AspNetCore.Mvc.ProblemDetails>()
-                .ProducesProblemFE<Microsoft.AspNetCore.Mvc.ProblemDetails>(500)
+                .ProducesProblemFE<Microsoft.AspNetCore.Mvc.ProblemDetails>((int)HttpStatusCode.MethodNotAllowed)
+                .ProducesProblemFE<Microsoft.AspNetCore.Mvc.ProblemDetails>((int)HttpStatusCode.InternalServerError)
                 .WithRequestTimeout(TimeSpan.FromMinutes(1))
                 .WithTags(RouteName));
             ep.Policies(Policy.CanViewYearEndReports);

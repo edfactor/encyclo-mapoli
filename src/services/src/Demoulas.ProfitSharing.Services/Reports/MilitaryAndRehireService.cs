@@ -84,7 +84,7 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
                     new MilitaryAndRehireForfeituresResponse
                     {
                         BadgeNumber = group.Key.BadgeNumber,
-                        Ssn = group.Key.Ssn,
+                        Ssn = group.Key.Ssn.MaskSsn(),
                         FullName = group.Key.FullName,
                         HoursCurrentYear = group.Key.HoursCurrentYear,
                         ReHiredDate = group.Key.ReHiredDate,
@@ -109,7 +109,27 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
         var militaryMembers = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
             var query = await GetMilitaryAndRehireProfitQueryBase(context, req, cancellationToken);
-            return await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
+            return await query
+                .Select(d => new MilitaryAndRehireProfitSummaryResponse
+                {
+                    BadgeNumber = d.BadgeNumber,
+                    FullName = d.FullName,
+                    Ssn = d.Ssn.MaskSsn(),
+                    HireDate = d.HireDate,
+                    TerminationDate = d.TerminationDate,
+                    ReHiredDate = d.ReHiredDate,
+                    StoreNumber = d.StoreNumber,
+                    CompanyContributionYears = d.CompanyContributionYears,
+                    EnrollmentId = d.EnrollmentId,
+                    HoursCurrentYear = d.HoursCurrentYear,
+                    NetBalanceLastYear = d.NetBalanceLastYear,
+                    VestedBalanceLastYear = d.VestedBalanceLastYear,
+                    EmploymentStatusId = d.EmploymentStatusId,
+                    Forfeiture = d.Forfeiture,
+                    Remark = d.Remark,
+                    ProfitYear = d.ProfitYear,
+                    ProfitCodeId = d.ProfitCodeId
+                }).ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
         });
 
         return new ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>
@@ -120,7 +140,7 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
         };
     }
 
-    private async Task<IQueryable<MilitaryAndRehireProfitSummaryResponse>> GetMilitaryAndRehireProfitQueryBase(ProfitSharingReadOnlyDbContext context,
+    private async Task<IQueryable<MilitaryAndRehireProfitSummaryQueryResponse>> GetMilitaryAndRehireProfitQueryBase(ProfitSharingReadOnlyDbContext context,
         MilitaryAndRehireRequest req, CancellationToken cancellationToken)
     {
         var bracket = await _calendarService.GetYearStartAndEndAccountingDates(req.ReportingYear, cancellationToken);
@@ -179,11 +199,11 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
             )
             .OrderBy(m => m.BadgeNumber)
             .ThenBy(m => m.FullName)
-            .Select(d => new MilitaryAndRehireProfitSummaryResponse
+            .Select(d => new MilitaryAndRehireProfitSummaryQueryResponse
             {
                 BadgeNumber = d.BadgeNumber,
                 FullName = d.FullName,
-                Ssn = d.Ssn.MaskSsn(),
+                Ssn = d.Ssn,
                 HireDate = d.HireDate,
                 TerminationDate = d.TerminationDate ?? SqlDateTime.MinValue.Value.ToDateOnly(),
                 ReHiredDate = d.ReHireDate ?? SqlDateTime.MinValue.Value.ToDateOnly(),
