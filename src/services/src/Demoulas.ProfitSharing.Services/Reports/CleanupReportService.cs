@@ -9,16 +9,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
-public class YearEndService : IYearEndService
+public class CleanupReportService : IYearEndService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
-    private readonly ILogger<YearEndService> _logger;
+    private readonly ILogger<CleanupReportService> _logger;
 
-    public YearEndService(IProfitSharingDataContextFactory dataContextFactory, 
+    public CleanupReportService(IProfitSharingDataContextFactory dataContextFactory, 
         ILoggerFactory factory)
     {
         _dataContextFactory = dataContextFactory;
-        _logger = factory.CreateLogger<YearEndService>();
+        _logger = factory.CreateLogger<CleanupReportService>();
     }
 
     public async Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsNs(PaginationRequestDto req, CancellationToken ct)
