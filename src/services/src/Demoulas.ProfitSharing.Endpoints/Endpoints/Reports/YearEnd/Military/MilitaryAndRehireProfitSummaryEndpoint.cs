@@ -68,7 +68,10 @@ public class MilitaryAndRehireProfitSummaryEndpoint :
             Map(m => m.BadgeNumber).Index(2).Name("BADGE");
             Map(m => m.Ssn).Index(3).Name("SSN");
             Map(m => m.FullName).Index(4).Name("EMPLOYEE NAME");
-            Map(m => m.ReHiredDate).Index(5).Name("REHIRED").TypeConverter<YearMonthDayTypeConverter>();
+            Map(m => m.StoreNumber).Index(5).Name("STR");
+            Map(m => m.HireDate).Index(6).Name("HIRE DT").TypeConverter<YearMonthDayTypeConverter>();
+            Map(m => m.ReHiredDate).Index(7).Name("REHIRE DT").TypeConverter<YearMonthDayTypeConverter>();
+            Map(m => m.TerminationDate).Index(7).Name("TERM DT").TypeConverter<YearMonthDayTypeConverter>();
             Map(m => m.CompanyContributionYears).Index(6).Name("PY-YRS");
             Map(m => m.HoursCurrentYear).Index(7).Name("YTD HOURS").TypeConverterOption.Format("0.00");
             Map().Index(8).Name("EC"); // Assuming EC is blank, leave an empty column
