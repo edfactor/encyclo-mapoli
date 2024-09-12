@@ -1,6 +1,5 @@
 ﻿using System.Data.SqlTypes;
 using System.Net;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using FluentAssertions;
 using Demoulas.Common.Contracts.Contracts.Request;
@@ -22,6 +21,7 @@ using CsvHelper;
 using System.Globalization;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Services;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 

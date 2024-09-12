@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using FluentAssertions;
 using Demoulas.Common.Contracts.Contracts.Request;
@@ -16,6 +15,7 @@ using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Services;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 

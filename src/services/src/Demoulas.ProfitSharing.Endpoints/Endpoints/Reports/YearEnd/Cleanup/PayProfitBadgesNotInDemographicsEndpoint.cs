@@ -8,8 +8,8 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Security;
 
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
-public class PayProfitBadgesNotInDemographicsEndpoint: EndpointWithCsvBase<PaginationRequestDto, PayProfitBadgesNotInDemographicsResponse, PayProfitBadgesNotInDemographicsEndpoint.PayProfitBadgesNotInDemographicsResponseMap>
+namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
+public class PayProfitBadgesNotInDemographicsEndpoint : EndpointWithCsvBase<PaginationRequestDto, PayProfitBadgesNotInDemographicsResponse, PayProfitBadgesNotInDemographicsEndpoint.PayProfitBadgesNotInDemographicsResponseMap>
 {
     private readonly IYearEndService _yearEndService;
 

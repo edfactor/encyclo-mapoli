@@ -9,7 +9,7 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
+namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
 
 public class NegativeEtvaForSsNsOnPayProfitEndPoint : EndpointWithCsvBase<PaginationRequestDto, NegativeEtvaForSsNsOnPayProfitResponse, NegativeEtvaForSsNsOnPayProfitEndPoint.NegativeEtvaForSsNsOnPayProfitResponseMap>
 {

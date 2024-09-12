@@ -9,7 +9,7 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Endpoints.TypeConverters;
 using Demoulas.ProfitSharing.Security;
 
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
+namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
 
 public class MilitaryAndRehireEndpoint : EndpointWithCsvBase<PaginationRequestDto, MilitaryAndRehireReportResponse, MilitaryAndRehireEndpoint.MilitaryAndRehireReportResponseMap>
 {
@@ -58,7 +58,7 @@ public class MilitaryAndRehireEndpoint : EndpointWithCsvBase<PaginationRequestDt
         return await _reportService.GetMilitaryAndRehireReport(req, ct);
     }
 
- 
+
 
     public sealed class MilitaryAndRehireReportResponseMap : ClassMap<MilitaryAndRehireReportResponse>
     {

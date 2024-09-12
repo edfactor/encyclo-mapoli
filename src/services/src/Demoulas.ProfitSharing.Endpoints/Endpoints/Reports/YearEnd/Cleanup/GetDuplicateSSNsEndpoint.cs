@@ -9,7 +9,7 @@ using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Security;
 
 
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
+namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
 public class GetDuplicateSsNsEndpoint : EndpointWithCsvBase<PaginationRequestDto, PayrollDuplicateSsnResponseDto, GetDuplicateSsNsEndpoint.GetDuplicateSsNsResponseMap>
 {
     private readonly IYearEndService _yearEndService;
@@ -56,7 +56,7 @@ public class GetDuplicateSsNsEndpoint : EndpointWithCsvBase<PaginationRequestDto
     {
         return _yearEndService.GetDuplicateSsNs(req, ct);
     }
-    
+
     public sealed class GetDuplicateSsNsResponseMap : ClassMap<PayrollDuplicateSsnResponseDto>
     {
         public GetDuplicateSsNsResponseMap()

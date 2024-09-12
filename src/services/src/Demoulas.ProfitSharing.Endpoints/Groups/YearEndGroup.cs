@@ -14,12 +14,14 @@ public sealed class YearEndGroup : Group
         Configure(Route.ToLowerInvariant(), ep => //admin is the route prefix for the top level group
         {
             ep.Description(x => x
+                .Produces(401)
+                .Produces(403)
+                .Produces(429)
                 .ProducesProblemFE<Microsoft.AspNetCore.Mvc.ProblemDetails>()
-                .ProducesProblemFE<Microsoft.AspNetCore.Mvc.ProblemDetails>(403)
                 .ProducesProblemFE<Microsoft.AspNetCore.Mvc.ProblemDetails>(500)
                 .WithRequestTimeout(TimeSpan.FromMinutes(1))
                 .WithTags(RouteName));
             ep.Policies(Policy.CanViewYearEndReports);
-        });
+            ep.Throttle(30, 60); });
     }
 }

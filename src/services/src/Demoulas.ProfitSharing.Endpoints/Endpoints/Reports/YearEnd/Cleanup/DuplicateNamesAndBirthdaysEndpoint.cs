@@ -9,8 +9,8 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Endpoints.TypeConverters;
 using Demoulas.ProfitSharing.Security;
 
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
-public class DuplicateNamesAndBirthdaysEndpoint:EndpointWithCsvBase<PaginationRequestDto, DuplicateNamesAndBirthdaysResponse, DuplicateNamesAndBirthdaysEndpoint.DuplicateNamesAndBirthdaysResponseMap>
+namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
+public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<PaginationRequestDto, DuplicateNamesAndBirthdaysResponse, DuplicateNamesAndBirthdaysEndpoint.DuplicateNamesAndBirthdaysResponseMap>
 {
     private readonly IYearEndService _yearEndService;
 
@@ -79,7 +79,7 @@ public class DuplicateNamesAndBirthdaysEndpoint:EndpointWithCsvBase<PaginationRe
         return _yearEndService.GetDuplicateNamesAndBirthdays(req, ct);
     }
 
-    public sealed class DuplicateNamesAndBirthdaysResponseMap:ClassMap<DuplicateNamesAndBirthdaysResponse>
+    public sealed class DuplicateNamesAndBirthdaysResponseMap : ClassMap<DuplicateNamesAndBirthdaysResponse>
     {
         public DuplicateNamesAndBirthdaysResponseMap()
         {
