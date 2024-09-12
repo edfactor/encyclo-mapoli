@@ -54,8 +54,11 @@ public sealed class CalendarService
     {
         var startingDate = await _dataContextFactory.UseReadOnlyContext(context =>
         {
-            return context.CaldarRecords.Where(record => record.AccApWkend.Year == calendarYear)
-                .MinAsync(r => r.AccApWkend, cancellationToken: cancellationToken);
+            return context.CaldarRecords
+                .Where(record => record.AccApWkend >= new DateOnly(calendarYear, 01, 01) &&
+                                 record.AccApWkend <= new DateOnly(calendarYear, 12, 31))
+                .Select(r => r.AccApWkend)
+                .MinAsync(cancellationToken: cancellationToken);
 
         });
         
