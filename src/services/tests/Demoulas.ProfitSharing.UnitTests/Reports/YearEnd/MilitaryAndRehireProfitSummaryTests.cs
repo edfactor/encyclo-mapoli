@@ -25,39 +25,39 @@ using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
-[TestSubject(typeof(MilitaryAndRehireForfeituresEndpoint))]
-public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
+[TestSubject(typeof(MilitaryAndRehireProfitSummaryEndpoint))]
+public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
 {
-    private readonly MilitaryAndRehireForfeituresEndpoint _endpoint;
+    private readonly MilitaryAndRehireProfitSummaryEndpoint _endpoint;
 
-    public MilitaryAndRehireForfeituresTests()
+    public MilitaryAndRehireProfitSummaryTests()
     {
         MilitaryAndRehireService mockService = new MilitaryAndRehireService(MockDbContextFactory, new CalendarService(MockDbContextFactory));
-        _endpoint = new MilitaryAndRehireForfeituresEndpoint(mockService);
+        _endpoint = new MilitaryAndRehireProfitSummaryEndpoint(mockService);
     }
 
     
-    [Fact(DisplayName = "PS-345: Check for Military (JSON)")]
+    [Fact(DisplayName = "PS-346: Check for Military (JSON)")]
     public async Task GetResponse_Should_ReturnReportResponse_WhenCalledWithValidRequest()
     {
         await MockDbContextFactory.UseWritableContext(async c =>
         {
             var setup = await SetupTestEmployee(c);
 
-            var expectedResponse = new ReportResponseBase<MilitaryAndRehireForfeituresResponse>
+            var expectedResponse = new ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>
             {
-                ReportName = "REHIRE'S PROFIT SHARING DATA",
+                ReportName = "MILITARY TERM-REHIRE",
                 ReportDate = DateTimeOffset.Now,
-                Response = new PaginatedResponseDto<MilitaryAndRehireForfeituresResponse>
+                Response = new PaginatedResponseDto<MilitaryAndRehireProfitSummaryResponse>
                 {
-                    Results = new List<MilitaryAndRehireForfeituresResponse> { setup.ExpectedResponse }
+                    Results = new List<MilitaryAndRehireProfitSummaryResponse> { setup.ExpectedResponse }
                 }
             };
 
             // Act
             ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
             var response =
-                await ApiClient.GETAsync<MilitaryAndRehireForfeituresEndpoint, PaginationRequestDto, ReportResponseBase<MilitaryAndRehireForfeituresResponse>>(setup.Request);
+                await ApiClient.GETAsync<MilitaryAndRehireProfitSummaryEndpoint, PaginationRequestDto, ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>>(setup.Request);
 
             // Assert
             response.Result.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
@@ -66,7 +66,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
         });
     }
 
-    [Fact(DisplayName = "PS-345: Check for Military (CSV)")]
+    [Fact(DisplayName = "PS-346: Check for Military (CSV)")]
     public async Task GetResponse_Should_ReturnReportResponse_WhenCalledWithValidRequest_CSV()
     {
         await MockDbContextFactory.UseWritableContext(async c =>
@@ -75,7 +75,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
 
             // Act
             DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-            var response = await DownloadClient.GETAsync<MilitaryAndRehireForfeituresEndpoint, PaginationRequestDto, StreamContent>(setup.Request);
+            var response = await DownloadClient.GETAsync<MilitaryAndRehireProfitSummaryEndpoint, PaginationRequestDto, StreamContent>(setup.Request);
             response.Response.Content.Should().NotBeNull();
 
             string result = await response.Response.Content.ReadAsStringAsync();
@@ -116,7 +116,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
 
 
 
-    [Fact(DisplayName = "PS-345: Check to ensure unauthorized")]
+    [Fact(DisplayName = "PS-346: Check to ensure unauthorized")]
     public async Task Unauthorized()
     {
         await MockDbContextFactory.UseWritableContext(async c =>
@@ -124,23 +124,23 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
             var setup = await SetupTestEmployee(c);
 
             var response =
-                await ApiClient.GETAsync<MilitaryAndRehireForfeituresEndpoint, PaginationRequestDto, ReportResponseBase<MilitaryAndRehireForfeituresResponse>>(setup.Request);
+                await ApiClient.GETAsync<MilitaryAndRehireProfitSummaryEndpoint, PaginationRequestDto, ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>>(setup.Request);
 
             response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
         });
     }
 
-    [Fact(DisplayName = "PS-345: Empty Results")]
+    [Fact(DisplayName = "PS-346: Empty Results")]
     public async Task GetResponse_Should_HandleEmptyResults()
     {
         // Arrange
         var request = new MilitaryAndRehireRequest { Skip = 0, Take = 10, ReportingYear = (short)DateTime.Today.Year };
         var cancellationToken = CancellationToken.None;
-        var expectedResponse = new ReportResponseBase<MilitaryAndRehireForfeituresResponse>
+        var expectedResponse = new ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>
         {
-            ReportName = "REHIRE'S PROFIT SHARING DATA",
+            ReportName = "MILITARY TERM-REHIRE",
             ReportDate = DateTimeOffset.Now,
-            Response = new PaginatedResponseDto<MilitaryAndRehireForfeituresResponse> { Results = new List<MilitaryAndRehireForfeituresResponse>() }
+            Response = new PaginatedResponseDto<MilitaryAndRehireProfitSummaryResponse> { Results = new List<MilitaryAndRehireProfitSummaryResponse>() }
         };
 
         // Act
@@ -151,17 +151,17 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
         response.Response.Results.Should().BeEquivalentTo(expectedResponse.Response.Results);
     }
 
-    [Fact(DisplayName = "PS-345: Null Results")]
+    [Fact(DisplayName = "PS-346: Null Results")]
     public async Task GetResponse_Should_HandleNullResults()
     {
         // Arrange
         var request = new MilitaryAndRehireRequest { Skip = 0, Take = 10, ReportingYear = (short)DateTime.Today.Year };
         var cancellationToken = CancellationToken.None;
-        var expectedResponse = new ReportResponseBase<MilitaryAndRehireForfeituresResponse>
+        var expectedResponse = new ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>
         {
-            ReportName = "REHIRE'S PROFIT SHARING DATA",
+            ReportName = "MILITARY TERM-REHIRE",
             ReportDate = DateTimeOffset.Now,
-            Response = new PaginatedResponseDto<MilitaryAndRehireForfeituresResponse> { Results = [] }
+            Response = new PaginatedResponseDto<MilitaryAndRehireProfitSummaryResponse> { Results = [] }
         };
 
         // Act
@@ -172,20 +172,20 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
         response.Response.Results.Should().BeEquivalentTo(expectedResponse.Response.Results);
     }
 
-    [Fact(DisplayName = "PS-345: Report name is correct")]
+    [Fact(DisplayName = "PS-346: Report name is correct")]
     public void ReportFileName_Should_ReturnCorrectValue()
     {
         // Act
         var reportFileName = _endpoint.ReportFileName;
 
         // Assert
-        reportFileName.Should().Be("REHIRE'S PROFIT SHARING DATA");
+        reportFileName.Should().Be("MILITARY TERM-REHIRE");
     }
 
-    private static async Task<(MilitaryAndRehireRequest Request, MilitaryAndRehireForfeituresResponse ExpectedResponse)> SetupTestEmployee(ProfitSharingDbContext c)
+    private static async Task<(MilitaryAndRehireRequest Request, MilitaryAndRehireProfitSummaryResponse ExpectedResponse)> SetupTestEmployee(ProfitSharingDbContext c)
     {
         // Setup
-        MilitaryAndRehireForfeituresResponse example = MilitaryAndRehireForfeituresResponse.ResponseExample();
+        MilitaryAndRehireProfitSummaryResponse example = MilitaryAndRehireProfitSummaryResponse.ResponseExample();
 
         var demo = await c.Demographics.FirstAsync();
         demo.EmploymentStatusId = EmploymentStatus.Constants.Active;
@@ -214,10 +214,6 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
         example.CompanyContributionYears = payProfit.CompanyContributionYears;
         example.HoursCurrentYear = payProfit.HoursCurrentYear ?? 0;
         example.ReHiredDate = demo.ReHireDate ?? SqlDateTime.MinValue.Value.ToDateOnly();
-        example.Details = details.Select(pd => new MilitaryRehireProfitSharingDetailResponse
-        {
-            Forfeiture = pd.Forfeiture, Remark = pd.Remark, ProfitYear = pd.ProfitYear
-        }).ToList();
 
 
         return (new MilitaryAndRehireRequest { Skip = 0, Take = 10, ReportingYear = (short)demo.ReHireDate!.Value.Year}, example);
