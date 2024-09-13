@@ -9,6 +9,7 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Xunit.Abstractions;
 using System.Net.Http;
+using IdGen;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 public class YearEndServiceTests:ApiTestBase<Program>
@@ -16,12 +17,14 @@ public class YearEndServiceTests:ApiTestBase<Program>
     private readonly YearEndClient _yearEndClient;
     private readonly ITestOutputHelper _testOutputHelper;
     private readonly PaginationRequestDto _paginationRequest = new PaginationRequestDto { Skip = 0, Take = byte.MaxValue };
+    private readonly IdGenerator _generator;
 
 
     public YearEndServiceTests( ITestOutputHelper testOutputHelper)
     {
         _testOutputHelper = testOutputHelper;
         _yearEndClient = new YearEndClient(ApiClient, DownloadClient);
+        _generator = new IdGenerator(0);
     }
 
     
@@ -132,10 +135,11 @@ public class YearEndServiceTests:ApiTestBase<Program>
             _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
 
             byte mismatchedValues = 5;
-
+            
             foreach (var dem in c.Demographics.Take(mismatchedValues))
             {
-                dem.BadgeNumber = dem.BadgeNumber + await c.PayProfits.CountAsync() + 1;
+                long lastSevenDigits = _generator.CreateId() % 10_000_000;
+                dem.BadgeNumber += (int)lastSevenDigits;
             }
 
             await c.SaveChangesAsync();
