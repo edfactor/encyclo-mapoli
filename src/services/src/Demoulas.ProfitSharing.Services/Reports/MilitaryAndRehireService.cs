@@ -205,7 +205,7 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
                 FullName = d.FullName,
                 Ssn = d.Ssn,
                 HireDate = d.HireDate,
-                TerminationDate = d.TerminationDate ?? SqlDateTime.MinValue.Value.ToDateOnly(),
+                TerminationDate = d.TerminationDate,
                 ReHiredDate = d.ReHireDate ?? SqlDateTime.MinValue.Value.ToDateOnly(),
                 StoreNumber = d.StoreNumber,
                 CompanyContributionYears = d.CompanyContributionYears,

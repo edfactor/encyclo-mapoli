@@ -72,9 +72,15 @@ public class MilitaryAndRehireProfitSummaryEndpoint :
             Map(m => m.HireDate).Index(6).Name("HIRE DT").TypeConverter<YearMonthDayTypeConverter>();
             Map(m => m.ReHiredDate).Index(7).Name("REHIRE DT").TypeConverter<YearMonthDayTypeConverter>();
             Map(m => m.TerminationDate).Index(7).Name("TERM DT").TypeConverter<YearMonthDayTypeConverter>();
-            Map(m => m.CompanyContributionYears).Index(6).Name("PY-YRS");
-            Map(m => m.HoursCurrentYear).Index(7).Name("YTD HOURS").TypeConverterOption.Format("0.00");
-            Map().Index(8).Name("EC"); // Assuming EC is blank, leave an empty column
+            Map(m => m.EmploymentStatusId).Index(8).Name("STATUS");
+            Map(m => m.NetBalanceLastYear).Index(9).Name("BEG BAL").TypeConverterOption.Format("0.00");
+            Map(m => m.VestedBalanceLastYear).Index(10).Name("BEG VEST").TypeConverterOption.Format("0.00");
+            Map(m => m.HoursCurrentYear).Index(11).Name("CUR HRS").TypeConverterOption.Format("0.0");
+            Map(m => m.CompanyContributionYears).Index(12).Name("PLAN YEARS");
+            Map(m => m.EnrollmentId).Index(13).Name("ENROLL");
+            Map(m => m.ProfitYear).Index(14).Name("YEAR");
+            Map(m => m.Remark).Index(15).Name("CMNT");
+            Map(m => m.Forfeiture).Index(16).Name("FORT AMT");
         }
     }
 }

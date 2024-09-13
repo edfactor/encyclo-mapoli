@@ -9,7 +9,7 @@ public record MilitaryAndRehireProfitSummaryResponse
     public required string Ssn { get; set; }
     public required short StoreNumber { get; set; }
     public required DateOnly HireDate { get; set; }
-    public required DateOnly TerminationDate { get; set; }
+    public required DateOnly? TerminationDate { get; set; }
     public required DateOnly ReHiredDate { get; set; }
     public required byte CompanyContributionYears { get; set; }
     public required decimal HoursCurrentYear { get; set; }
