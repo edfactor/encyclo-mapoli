@@ -101,15 +101,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
             // Validate the headers
             var headers = csv.HeaderRecord;
             headers.Should().NotBeNull();
-            headers.Should().ContainInOrder("", "", "BADGE", "EMPLOYEE NAME", "SSN", "REHIRED", "PY-YRS", "YTD HOURS", "EC");
-
-            await csv.ReadAsync();  // Read the header row (starting at column 2)
-            csv.ReadHeader();
-
-            // Validate the second row of headers
-            var headers2 = csv.HeaderRecord;
-            headers2.Should().NotBeNull();
-            headers2.Should().ContainInOrder("", "", "", "", "", "YEAR", "FORFEITURES", "COMMENT");
+            headers.Should().ContainInOrder("", "", "BADGE", "SSN", "NAME", "STR", "HIRE DT", "REHIRE DT", "TERM DT", "STATUS", "BEG BAL", "BEG VEST", "CUR HRS", "PLAN YEARS", "ENROLL", "YEAR", "CMNT", "FORT AMT");
         });
     }
 

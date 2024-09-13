@@ -67,20 +67,20 @@ public class MilitaryAndRehireProfitSummaryEndpoint :
             Map().Index(1).Convert(_ => string.Empty);
             Map(m => m.BadgeNumber).Index(2).Name("BADGE");
             Map(m => m.Ssn).Index(3).Name("SSN");
-            Map(m => m.FullName).Index(4).Name("EMPLOYEE NAME");
+            Map(m => m.FullName).Index(4).Name("NAME");
             Map(m => m.StoreNumber).Index(5).Name("STR");
             Map(m => m.HireDate).Index(6).Name("HIRE DT").TypeConverter<YearMonthDayTypeConverter>();
             Map(m => m.ReHiredDate).Index(7).Name("REHIRE DT").TypeConverter<YearMonthDayTypeConverter>();
-            Map(m => m.TerminationDate).Index(7).Name("TERM DT").TypeConverter<YearMonthDayTypeConverter>();
-            Map(m => m.EmploymentStatusId).Index(8).Name("STATUS");
-            Map(m => m.NetBalanceLastYear).Index(9).Name("BEG BAL").TypeConverterOption.Format("0.00");
-            Map(m => m.VestedBalanceLastYear).Index(10).Name("BEG VEST").TypeConverterOption.Format("0.00");
-            Map(m => m.HoursCurrentYear).Index(11).Name("CUR HRS").TypeConverterOption.Format("0.0");
-            Map(m => m.CompanyContributionYears).Index(12).Name("PLAN YEARS");
-            Map(m => m.EnrollmentId).Index(13).Name("ENROLL");
-            Map(m => m.ProfitYear).Index(14).Name("YEAR");
-            Map(m => m.Remark).Index(15).Name("CMNT");
-            Map(m => m.Forfeiture).Index(16).Name("FORT AMT");
+            Map(m => m.TerminationDate).Index(8).Name("TERM DT").TypeConverter<YearMonthDayTypeConverter>();
+            Map(m => m.EmploymentStatusId).Index(9).Name("STATUS");
+            Map(m => m.NetBalanceLastYear).Index(10).Name("BEG BAL").TypeConverterOption.Format("0.00");
+            Map(m => m.VestedBalanceLastYear).Index(11).Name("BEG VEST").TypeConverterOption.Format("0.00");
+            Map(m => m.HoursCurrentYear).Index(12).Name("CUR HRS").TypeConverterOption.Format("0.0");
+            Map(m => m.CompanyContributionYears).Index(13).Name("PLAN YEARS");
+            Map(m => m.EnrollmentId).Index(14).Name("ENROLL");
+            Map(m => m.ProfitYear).Index(15).Name("YEAR");
+            Map(m => m.Remark).Index(16).Name("CMNT");
+            Map(m => m.Forfeiture).Index(17).Name("FORT AMT");
         }
     }
 }
