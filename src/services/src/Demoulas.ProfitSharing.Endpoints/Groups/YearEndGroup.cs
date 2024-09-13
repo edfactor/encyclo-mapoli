@@ -23,7 +23,6 @@ public sealed class YearEndGroup : Group
                 .ProducesProblemFE<Microsoft.AspNetCore.Mvc.ProblemDetails>((int)HttpStatusCode.InternalServerError)
                 .WithRequestTimeout(TimeSpan.FromMinutes(1))
                 .WithTags(RouteName));
-            ep.Policies(Policy.CanViewYearEndReports);
-            ep.Throttle(30, 60); });
+            ep.Policies(Policy.CanViewYearEndReports);});
     }
 }
