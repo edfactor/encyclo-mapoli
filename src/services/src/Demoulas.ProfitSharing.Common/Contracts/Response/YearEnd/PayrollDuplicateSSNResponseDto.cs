@@ -1,5 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Extensions;
-using System.Data.SqlTypes;
+﻿using System.Data.SqlTypes;
 using Demoulas.Util.Extensions;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;

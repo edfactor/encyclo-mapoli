@@ -12,7 +12,7 @@ using System.Net.Http;
 using IdGen;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
-public class YearEndServiceTests:ApiTestBase<Program>
+public class CleanupReportServiceTests:ApiTestBase<Program>
 {
     private readonly YearEndClient _yearEndClient;
     private readonly ITestOutputHelper _testOutputHelper;
@@ -20,7 +20,7 @@ public class YearEndServiceTests:ApiTestBase<Program>
     private readonly IdGenerator _generator;
 
 
-    public YearEndServiceTests( ITestOutputHelper testOutputHelper)
+    public CleanupReportServiceTests( ITestOutputHelper testOutputHelper)
     {
         _testOutputHelper = testOutputHelper;
         _yearEndClient = new YearEndClient(ApiClient, DownloadClient);
@@ -427,7 +427,7 @@ public class YearEndServiceTests:ApiTestBase<Program>
         _testOutputHelper.WriteLine(result);
     }
 
-    [Fact(DisplayName = "YearEndService auth check")]
+    [Fact(DisplayName = "CleanupReportService auth check")]
     public async Task YearEndServiceAuthCheck()
     {
         _yearEndClient.CreateAndAssignTokenForClient(Role.HARDSHIPADMINISTRATOR);

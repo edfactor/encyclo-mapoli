@@ -21,7 +21,7 @@ public static class ServicesExtension
     {
         
         _ = builder.Services.AddScoped<IPayClassificationService, PayClassificationService>();
-        _ = builder.Services.AddScoped<IYearEndService, YearEndService>();
+        _ = builder.Services.AddScoped<IYearEndService, CleanupReportService>();
         _ = builder.Services.AddScoped<IPayProfitService, PayProfitService>();
         _ = builder.Services.AddScoped<IMilitaryAndRehireService, MilitaryAndRehireService>();
 
