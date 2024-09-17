@@ -6,6 +6,19 @@ namespace Demoulas.ProfitSharing.Common.Interfaces;
 
 public interface IWagesService
 {
+    /// <summary>
+    /// Retrieves the wages report for the current year.
+    /// </summary>
+    /// <param name="request">The pagination request details.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the report response for the current year's wages.</returns>
     Task<ReportResponseBase<WagesCurrentYearResponse>> GetWagesCurrentYearReport(PaginationRequestDto request, CancellationToken cancellationToken);
+    
+    /// <summary>
+    /// Retrieves the wages report for the previous year.
+    /// </summary>
+    /// <param name="request">The pagination request details.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the report response for the previous year's wages.</returns>
     Task<ReportResponseBase<WagesPreviousYearResponse>> GetWagesPreviousYearReport(PaginationRequestDto request, CancellationToken cancellationToken);
 }

@@ -8,7 +8,6 @@ using Demoulas.ProfitSharing.UnitTests.Base;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Xunit.Abstractions;
-using System.Net.Http;
 using IdGen;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
