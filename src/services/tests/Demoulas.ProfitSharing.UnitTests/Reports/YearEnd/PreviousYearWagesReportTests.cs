@@ -17,47 +17,47 @@ using System.Globalization;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
-[TestSubject(typeof(CurrentYearWagesEndpoint))]
-public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
+[TestSubject(typeof(PreviousYearWagesEndpoint))]
+public class PreviousYearWagesReportTests : ApiTestBase<Api.Program>
 {
-    private readonly CurrentYearWagesEndpoint _endpoint;
+    private readonly PreviousYearWagesEndpoint _endpoint;
 
-    public CurrentYearWageReportTests()
+    public PreviousYearWagesReportTests()
     {
         WagesService mockService = new WagesService(MockDbContextFactory);
-        _endpoint = new CurrentYearWagesEndpoint(mockService);
+        _endpoint = new PreviousYearWagesEndpoint(mockService);
     }
 
 
-    [Fact(DisplayName = "PS-312: Get current year wages (JSON)")]
+    [Fact(DisplayName = "PS-312: Get previous year wages (JSON)")]
     public async Task GetResponse_Should_ReturnReportResponse_WhenCalledWithValidRequest()
     {
 
-        var expectedResponse = new ReportResponseBase<WagesCurrentYearResponse>
+        var expectedResponse = new ReportResponseBase<WagesPreviousYearResponse>
         {
-            ReportName = "EJR PROF-DOLLAR-EXTRACT YEAR=THIS",
+            ReportName = "EJR PROF-DOLLAR-EXTRACT YEAR=LAST",
             ReportDate = DateTimeOffset.Now,
-            Response = new PaginatedResponseDto<WagesCurrentYearResponse> { Results = new List<WagesCurrentYearResponse> { } }
+            Response = new PaginatedResponseDto<WagesPreviousYearResponse> { Results = new List<WagesPreviousYearResponse> { } }
         };
 
         // Act
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         var response =
-            await ApiClient.GETAsync<CurrentYearWagesEndpoint, PaginationRequestDto, ReportResponseBase<WagesCurrentYearResponse>>(new PaginationRequestDto());
+            await ApiClient.GETAsync<PreviousYearWagesEndpoint, PaginationRequestDto, ReportResponseBase<WagesPreviousYearResponse>>(new PaginationRequestDto());
 
         // Assert
         response.Result.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
-        response.Result.Response.Results.Should().BeAssignableTo<List<WagesCurrentYearResponse>>();
+        response.Result.Response.Results.Should().BeAssignableTo<List<WagesPreviousYearResponse>>();
         response.Result.Response.Results.Should().HaveCountGreaterThan(0);
 
     }
 
-    [Fact(DisplayName = "PS-312: Get current year wages (CSV)")]
+    [Fact(DisplayName = "PS-312: Get previous year wages (CSV)")]
     public async Task GetResponse_Should_ReturnReportResponse_WhenCalledWithValidRequest_CSV()
     {
         // Act
         DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        var response = await DownloadClient.GETAsync<CurrentYearWagesEndpoint, PaginationRequestDto, StreamContent>(new PaginationRequestDto());
+        var response = await DownloadClient.GETAsync<PreviousYearWagesEndpoint, PaginationRequestDto, StreamContent>(new PaginationRequestDto());
         response.Response.Content.Should().NotBeNull();
 
         string result = await response.Response.Content.ReadAsStringAsync();
@@ -83,20 +83,17 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
         // Validate the headers
         var headers = csv.HeaderRecord;
         headers.Should().NotBeNull();
-        headers.Should().ContainInOrder("", "", "BADGE", "HOURS THISYR", "DOLLARS THISYR");
+        headers.Should().ContainInOrder("", "", "BADGE", "HOURS LASTYR", "DOLLARS LASTYR");
 
     }
 
     [Fact(DisplayName = "PS-312: Check to ensure unauthorized")]
     public async Task Unauthorized()
     {
-
-
         var response =
-            await ApiClient.GETAsync<CurrentYearWagesEndpoint, PaginationRequestDto, ReportResponseBase<WagesCurrentYearResponse>>(new PaginationRequestDto());
+            await ApiClient.GETAsync<PreviousYearWagesEndpoint, PaginationRequestDto, ReportResponseBase<WagesPreviousYearResponse>>(new PaginationRequestDto());
 
         response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
-
     }
 
     [Fact(DisplayName = "PS-312: Report name is correct")]
@@ -106,6 +103,6 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
         var reportFileName = _endpoint.ReportFileName;
 
         // Assert
-        reportFileName.Should().Be("EJR PROF-DOLLAR-EXTRACT YEAR=THIS");
+        reportFileName.Should().Be("EJR PROF-DOLLAR-EXTRACT YEAR=LAST");
     }
 }
