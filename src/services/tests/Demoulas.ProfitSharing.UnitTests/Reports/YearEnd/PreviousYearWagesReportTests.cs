@@ -29,7 +29,7 @@ public class PreviousYearWagesReportTests : ApiTestBase<Api.Program>
     }
 
 
-    [Fact(DisplayName = "PS-312: Get previous year wages (JSON)")]
+    [Fact(DisplayName = "PS-351: Get previous year wages (JSON)")]
     public async Task GetResponse_Should_ReturnReportResponse_WhenCalledWithValidRequest()
     {
 
@@ -52,7 +52,7 @@ public class PreviousYearWagesReportTests : ApiTestBase<Api.Program>
 
     }
 
-    [Fact(DisplayName = "PS-312: Get previous year wages (CSV)")]
+    [Fact(DisplayName = "PS-351: Get previous year wages (CSV)")]
     public async Task GetResponse_Should_ReturnReportResponse_WhenCalledWithValidRequest_CSV()
     {
         // Act
@@ -87,7 +87,7 @@ public class PreviousYearWagesReportTests : ApiTestBase<Api.Program>
 
     }
 
-    [Fact(DisplayName = "PS-312: Check to ensure unauthorized")]
+    [Fact(DisplayName = "PS-351: Check to ensure unauthorized")]
     public async Task Unauthorized()
     {
         var response =
@@ -96,7 +96,7 @@ public class PreviousYearWagesReportTests : ApiTestBase<Api.Program>
         response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    [Fact(DisplayName = "PS-312: Report name is correct")]
+    [Fact(DisplayName = "PS-351: Report name is correct")]
     public void ReportFileName_Should_ReturnCorrectValue()
     {
         // Act
