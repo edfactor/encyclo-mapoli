@@ -4,28 +4,21 @@ using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 
-public class TerminatedEmployeeAndBeneficiaryReportService : ITerminatedEmployeeAndBeneficiaryReportService
+public class TerminatedEmployeeAndBeneficiaryReportService(
+    IProfitSharingDataContextFactory dataContextFactory,
+    ILoggerFactory factory)
+    : ITerminatedEmployeeAndBeneficiaryReportService
 {
-    private readonly IProfitSharingDataContextFactory _dataContextFactory;
-    private readonly ILogger<TerminatedEmployeeAndBeneficiaryReportService> _logger;
+    private readonly ILogger<TerminatedEmployeeAndBeneficiaryReportService> _logger = factory.CreateLogger<TerminatedEmployeeAndBeneficiaryReportService>();
 
-    public TerminatedEmployeeAndBeneficiaryReportService(IProfitSharingDataContextFactory dataContextFactory, ILoggerFactory factory)
+    public Task<string> GetReport(DateOnly startDate, DateOnly endDate, decimal profitSharingYear, CancellationToken ct)
     {
-        _dataContextFactory = dataContextFactory;
-        _logger = factory.CreateLogger<TerminatedEmployeeAndBeneficiaryReportService>();
-    }
-    public async Task<string> GetReport(DateOnly startDate, DateOnly endDate, decimal profitSharingYear, CancellationToken ct)
-    {
-
-       return await _dataContextFactory.UseWritableContext(async ctx =>
+        return (Task<string>)dataContextFactory.UseWritableContext(ctx =>
         {
-            // TerminatedEmployeeAndBeneficiaryReport is not async, so we add this into satisfy the method signature.
-            await Task.Delay(1, ct);
-
             TerminatedEmployeeAndBeneficiaryReport terminatedEmployeeAndBeneficiaryReport = new TerminatedEmployeeAndBeneficiaryReport(_logger, ctx);
-            string report = terminatedEmployeeAndBeneficiaryReport.CreateReport( startDate, endDate, profitSharingYear);
-            return report;
+            string report = terminatedEmployeeAndBeneficiaryReport.CreateReport(startDate, endDate, profitSharingYear);
+            return Task.FromResult(report);
         }, ct);
-
     }
+
 }
