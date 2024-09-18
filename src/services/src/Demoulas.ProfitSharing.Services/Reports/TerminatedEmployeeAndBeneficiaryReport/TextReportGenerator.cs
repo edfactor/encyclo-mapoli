@@ -104,7 +104,7 @@ BADGE/PSN # EMPLOYEE NAME           BALANCE  ALLOCATION       AMOUNT       FORFE
         _reportWriter.WriteLine(("AMOUNT IN PROFIT SHARING".PadRight(34) + totalProfitSharing.ToString("#,##0.00 ;#,##0.00-").PadLeft(14)).Trim());
         _reportWriter.WriteLine(("VESTED AMOUNT".PadRight(34) + totalVesting.ToString(" #,##0.00 ;#,##0.00-").PadLeft(14)).Trim());
         _reportWriter.WriteLine(("TOTAL FORFEITURES".PadRight(34) + totalForfeitures.ToString(" #,##0.00 ;#,##0.00-").PadLeft(14)).Trim());
-        // We are holding on to the misspelling of ALLOCTIONS to match the cobol.
+        // holding on to the misspelling of ALLOCTIONS to match the Ready system.
         _reportWriter.WriteLine(("TOTAL BENEFICIARY ALLOCTIONS".PadRight(34) + totalBeneficiaryAllocations.ToString("#,##0.00 ;#,##0.00-").PadLeft(14)).Trim());
     }
 

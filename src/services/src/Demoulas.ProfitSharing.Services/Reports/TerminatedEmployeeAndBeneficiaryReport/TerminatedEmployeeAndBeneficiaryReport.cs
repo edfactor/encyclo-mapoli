@@ -175,7 +175,7 @@ public class TerminatedEmployeeAndBeneficiaryReport(ILogger _logger, ProfitShari
             if (((m.Ssn != ssn && ssn != long.MinValue) ||
                 (ssn == long.MaxValue)) && (m != memberSlices[^1]))
             {
-                DetailSummary ds = RetrieveProfitDetail(ssn);
+                ProfitDetailSummary ds = RetrieveProfitDetail(ssn);
                 distribution += ds.Distribution;
                 forfeiture += ds.Forfeiture;
                 beneficiaryAllocation += ds.BeneficiaryAllocation;
@@ -342,7 +342,7 @@ public class TerminatedEmployeeAndBeneficiaryReport(ILogger _logger, ProfitShari
     }
 
 
-    private DetailSummary RetrieveProfitDetail(long ssn)
+    private ProfitDetailSummary RetrieveProfitDetail(long ssn)
     {
         // This does seem odd, and possibly a bug.   We ask the user for the profit sharing year with a decimal.
         // but then we ignore the decimal part when querying records, but display the full value when printing the report.
@@ -355,7 +355,7 @@ public class TerminatedEmployeeAndBeneficiaryReport(ILogger _logger, ProfitShari
 
         if (profitDetails.Count == 0)
         {
-            return new DetailSummary(0, 0, 0);
+            return new ProfitDetailSummary(0, 0, 0);
         }
 
         decimal distribution = 0;
@@ -394,7 +394,7 @@ public class TerminatedEmployeeAndBeneficiaryReport(ILogger _logger, ProfitShari
                 beneficiaryAllocation = beneficiaryAllocation + profitDetail.Contribution;
             }
         }
-        return new DetailSummary(distribution, forfeiture, beneficiaryAllocation);
+        return new ProfitDetailSummary(distribution, forfeiture, beneficiaryAllocation);
     }
 
     private static string GetFullName(Beneficiary b)
