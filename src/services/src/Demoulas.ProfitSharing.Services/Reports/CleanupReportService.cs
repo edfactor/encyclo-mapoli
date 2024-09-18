@@ -209,7 +209,7 @@ public class CleanupReportService : IYearEndService
                             select new PayrollDuplicateSsnsOnPayprofitResponseDto
                             {
                                 Count = g.Count(),
-                                EmployeeBadge = g.Key.BadgeNumber,
+                                BadgeNumber = g.Key.BadgeNumber,
                                 EmployeeSsn = g.Key.SSN,
                                 Name = g.Key.FullName,
                                 HireDate = g.Key.HireDate,

@@ -47,7 +47,7 @@ public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithCsvBase<Pagin
                             {
                                 new PayrollDuplicateSsnsOnPayprofitResponseDto
                                 {
-                                    EmployeeBadge = 47425,
+                                    BadgeNumber = 47425,
                                     EmployeeSsn = 900047425,
                                     Name = "John",
                                     Status = EmploymentStatus.Constants.Active,
@@ -88,7 +88,7 @@ public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithCsvBase<Pagin
         {
             Map().Index(0).Convert(_ => string.Empty);
             Map().Index(1).Convert(_ => string.Empty);
-            Map(m => m.EmployeeBadge).Index(2).Name("BADGE");
+            Map(m => m.BadgeNumber).Index(2).Name("BADGE");
             Map(m => m.PayProfitSsn).Index(3).Name("SSN");
             Map(m => m.Name).Index(4).Name("NAME");
             Map(m => m.Address.Street).Index(5).Name("ADDR");
