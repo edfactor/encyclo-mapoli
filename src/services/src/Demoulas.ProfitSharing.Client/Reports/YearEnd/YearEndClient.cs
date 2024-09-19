@@ -1,6 +1,7 @@
 ﻿using System.Data.SqlTypes;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Threading;
 using System.Web;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
@@ -142,7 +143,7 @@ public sealed class YearEndClient : ClientBase, IYearEndService
         UriBuilder uriBuilder = BuildPaginatedUrl(new PaginationRequestDto { Skip = 0, Take = int.MaxValue }, endpointRoute);
         return _httpDownloadClient.GetStreamAsync(uriBuilder.Uri, cancellationToken);
     }
-
+    
     private UriBuilder BuildPaginatedUrl(PaginationRequestDto req, string endpointRoute)
     {
         var query = HttpUtility.ParseQueryString(string.Empty);
@@ -164,4 +165,28 @@ public sealed class YearEndClient : ClientBase, IYearEndService
         return uriBuilder;
     }
 
+    public Task<Stream> DownloadTerminatedEmployeeAndBeneficiaryReport(DateOnly? fiscalStart, DateOnly? fiscalEnd, decimal? profitSharingYear, CancellationToken cancellationToken)
+    {
+        var query = HttpUtility.ParseQueryString(string.Empty);
+        if (fiscalStart.HasValue)
+        {
+            query["startDate"] = fiscalStart.ToString();
+        }
+
+        if (fiscalEnd.HasValue)
+        {
+            query["endDate"] = fiscalEnd.ToString();
+        }
+
+        if (profitSharingYear.HasValue)
+        {
+            query["profitSharingYear"] = profitSharingYear.ToString();
+        }
+
+        var uriBuilder = new UriBuilder($"{_httpClient.BaseAddress}{BaseApiPath}/terminated-employee-and-beneficiary-report/")
+        {
+            Query = query.ToString()
+        };
+        return _httpDownloadClient.GetStreamAsync(uriBuilder.Uri, cancellationToken);
+    }
 }

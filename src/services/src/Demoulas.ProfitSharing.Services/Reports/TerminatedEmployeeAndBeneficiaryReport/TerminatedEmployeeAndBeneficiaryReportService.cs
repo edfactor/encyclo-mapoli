@@ -11,14 +11,20 @@ public class TerminatedEmployeeAndBeneficiaryReportService(
 {
     private readonly ILogger<TerminatedEmployeeAndBeneficiaryReportService> _logger = factory.CreateLogger<TerminatedEmployeeAndBeneficiaryReportService>();
 
-    public Task<string> GetReport(DateOnly startDate, DateOnly endDate, decimal profitSharingYear, CancellationToken ct)
+    public async Task<string> GetReport(DateOnly startDate, DateOnly endDate, decimal profitSharingYear, CancellationToken ct)
     {
-        return (Task<string>)dataContextFactory.UseWritableContext(ctx =>
+        string report = "";
+
+        await dataContextFactory.UseWritableContext(ctx =>
         {
-            TerminatedEmployeeAndBeneficiaryReport terminatedEmployeeAndBeneficiaryReport = new TerminatedEmployeeAndBeneficiaryReport(_logger, ctx);
-            string report = terminatedEmployeeAndBeneficiaryReport.CreateReport(startDate, endDate, profitSharingYear);
-            return Task.FromResult(report);
+            TerminatedEmployeeAndBeneficiaryReport reportGenerator = new TerminatedEmployeeAndBeneficiaryReport(_logger, ctx);
+            report = reportGenerator.CreateReport(startDate, endDate, profitSharingYear);
+            return Task.CompletedTask;
         }, ct);
+
+        return report;
     }
+
+
 
 }

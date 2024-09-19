@@ -9,14 +9,14 @@ using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports;
-public class TerminatedEmployeeAndBeneficiaryReportTests
+public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests
 {
 
     [Fact]
     public void EnsureSmartReportMatchesReadyReport()
     {
         // We get a connection to the database.     
-        var configuration = new ConfigurationBuilder().AddUserSecrets<TerminatedEmployeeAndBeneficiaryReportTests>().Build();
+        var configuration = new ConfigurationBuilder().AddUserSecrets<TerminatedEmployeeAndBeneficiaryReportIntegrationTests>().Build();
         string connectionString = configuration["ConnectionStrings:ProfitSharing"]!;
         var options = new DbContextOptionsBuilder<ProfitSharingDbContext>().UseOracle(connectionString).EnableSensitiveDataLogging().Options;
         ProfitSharingDbContext ctx = new ProfitSharingDbContext(options);

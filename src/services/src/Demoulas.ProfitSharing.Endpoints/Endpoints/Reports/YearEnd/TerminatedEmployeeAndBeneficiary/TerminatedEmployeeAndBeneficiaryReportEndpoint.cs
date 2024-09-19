@@ -4,20 +4,29 @@ using System.ComponentModel;
 using Microsoft.AspNetCore.Http;
 using System.Globalization;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
+using CsvHelper.Configuration;
+using CsvHelper;
+using System.Text;
+using System.Threading;
+using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
 
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.TerminatedEmployeeAndBeneficiary;
 
 
-sealed internal class TerminatedEmployeeAndBeneficiaryReportEndpoint(
+public class TerminatedEmployeeAndBeneficiaryReportEndpoint(
     ITerminatedEmployeeAndBeneficiaryReportService terminatedEmployeeAndBeneficiaryReportService)
-    : Endpoint<TerminatedEmployeeAndBeneficiaryReportRequestDto>
+        : Endpoint<TerminatedEmployeeAndBeneficiaryReportRequestDto, string>
 {
     public override void Configure()
     {
         Verbs(Http.GET);
-        Routes("/terminatedEmployeeAndBeneficiaryReport");
+        Routes("/terminated-employee-and-beneficiary-report");
         Summary(s =>
         {
             s.Summary = "Provide the Terminated Employee and Beneficiary Report (QPAY066) report.";
@@ -33,5 +42,6 @@ sealed internal class TerminatedEmployeeAndBeneficiaryReportEndpoint(
         string report = await terminatedEmployeeAndBeneficiaryReportService.GetReport(req.startDate, req.endDate, req.profitShareYear, ct);
         HttpContext.Response.ContentType = "text/plain";
         await HttpContext.Response.WriteAsync(report, ct);
+        await Task.CompletedTask;
     }
 }
