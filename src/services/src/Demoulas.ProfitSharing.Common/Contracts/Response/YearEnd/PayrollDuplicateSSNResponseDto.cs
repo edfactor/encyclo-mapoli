@@ -5,7 +5,7 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 public sealed record PayrollDuplicateSsnResponseDto
 {
     public required int BadgeNumber { get; set; }
-    public required long Ssn { get; set; }
+    public required string Ssn { get; set; }
     public string? Name { get; set; }
     public required AddressResponseDto Address { get; set; }
     public required DateOnly HireDate { get; set; }

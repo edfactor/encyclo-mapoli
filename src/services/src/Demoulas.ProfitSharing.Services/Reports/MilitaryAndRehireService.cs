@@ -65,7 +65,7 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
     /// <param name="req">The pagination request containing the necessary parameters for the search.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a report response with the rehire profit sharing data.</returns>
-    public async Task<ReportResponseBase<MilitaryAndRehireForfeituresResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYears(MilitaryAndRehireRequest req, CancellationToken cancellationToken)
+    public async Task<ReportResponseBase<MilitaryAndRehireForfeituresResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYears(FiscalYearRequest req, CancellationToken cancellationToken)
     {
         var militaryMembers = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
@@ -103,7 +103,7 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
         };
     }
 
-    public async Task<ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>> GetMilitaryAndRehireProfitSummaryReport(MilitaryAndRehireRequest req, CancellationToken cancellationToken)
+    public async Task<ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>> GetMilitaryAndRehireProfitSummaryReport(FiscalYearRequest req, CancellationToken cancellationToken)
     {
         var militaryMembers = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
@@ -140,7 +140,7 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
     }
 
     private async Task<IQueryable<MilitaryAndRehireProfitSummaryQueryResponse>> GetMilitaryAndRehireProfitQueryBase(ProfitSharingReadOnlyDbContext context,
-        MilitaryAndRehireRequest req, CancellationToken cancellationToken)
+        FiscalYearRequest req, CancellationToken cancellationToken)
     {
         var bracket = await _calendarService.GetYearStartAndEndAccountingDates(req.ReportingYear, cancellationToken);
 

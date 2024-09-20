@@ -22,6 +22,29 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
             .ValueGeneratedNever()
             .HasColumnName("FISCAL_YEAR");
 
+        _ = builder.Property(e => e.CurrentHoursYear)
+            .HasPrecision(6, 2)
+            .HasColumnName("CURRENT_HOURS_YEAR")
+            .IsRequired();
+
+        _ = builder.Property(e => e.CurrentIncomeYear)
+            .HasPrecision(9, 2)
+            .HasColumnName("CURRENT_INCOME_YEAR")
+            .IsRequired();
+
+        _ = builder.Property(e => e.EarningsEtvaValue)
+            .HasPrecision(9, 2)
+            .HasColumnName("EARNINGS_ETVA_VALUE")
+            .IsRequired();
+
+        _ = builder.Property(e => e.SecondaryEarnings)
+            .HasColumnName("SECONDARY_EARNINGS")
+            .HasPrecision(9, 2);
+
+        _ = builder.Property(e => e.SecondaryEtvaEarnings)
+            .HasColumnName("SECONDARY_ETVA_EARNINGS")
+            .HasPrecision(9, 2);
+
         _ = builder.Property(e => e.WeeksWorkedYear)
             .HasPrecision(2)
             .HasColumnName("WEEKS_WORKED_YEAR")

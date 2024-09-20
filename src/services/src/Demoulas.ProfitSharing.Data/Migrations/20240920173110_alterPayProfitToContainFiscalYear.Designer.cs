@@ -3,6 +3,7 @@ using System;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 
@@ -11,9 +12,11 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    partial class ProfitSharingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240920173110_alterPayProfitToContainFiscalYear")]
+    partial class alterPayProfitToContainFiscalYear
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28796,17 +28799,25 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("BENEFICIARY_ID");
 
-                    b.Property<decimal?>("CurrentHoursYear")
-                        .IsRequired()
-                        .HasPrecision(6, 2)
-                        .HasColumnType("DECIMAL(6,2)")
-                        .HasColumnName("CURRENT_HOURS_YEAR");
+                    b.Property<decimal?>("CurrentHours")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("CURRENTHOURS");
 
-                    b.Property<decimal?>("CurrentIncomeYear")
-                        .IsRequired()
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("CURRENT_INCOME_YEAR");
+                    b.Property<decimal?>("CurrentIncome")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("CURRENTINCOME");
+
+                    b.Property<decimal>("EarningsAfterApplyingVestingRules")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("EARNINGSAFTERAPPLYINGVESTINGRULES");
+
+                    b.Property<decimal>("EarningsEtvaValue")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("EARNINGSETVAVALUE");
+
+                    b.Property<decimal?>("EarningsPriorEtvaValue")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("EARNINGSPRIORETVAVALUE");
 
                     b.Property<byte>("EmployeeTypeId")
                         .HasColumnType("NUMBER(3)")
@@ -28831,9 +28842,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("PS_CERTIFICATE_ISSUED_DATE");
 
                     b.Property<decimal?>("SecondaryEarnings")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("SECONDARY_EARNINGS");
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("SECONDARYEARNINGS");
+
+                    b.Property<decimal?>("SecondaryEtvaEarnings")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("SECONDARYETVAEARNINGS");
 
                     b.Property<byte>("WeeksWorkedYear")
                         .HasPrecision(2)

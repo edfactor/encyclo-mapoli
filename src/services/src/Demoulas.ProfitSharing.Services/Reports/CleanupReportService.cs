@@ -1,9 +1,11 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -21,58 +23,39 @@ public class CleanupReportService : IYearEndService
         _logger = factory.CreateLogger<CleanupReportService>();
     }
 
-    public async Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsNs(PaginationRequestDto req, CancellationToken ct)
+    public async Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsNs(FiscalYearRequest req, CancellationToken ct)
     {
         return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var dupSsns = await ctx.Demographics.GroupBy(x => x.Ssn).Where(x => x.Count() > 1).Select(x => x.Key).ToListAsync(cancellationToken: ct);
 
-            var rslts = await (from dem in ctx.Demographics
-                    join pdJoin in ctx.ProfitDetails on dem.Ssn equals pdJoin.Ssn into demPdJoin
-                    from pd in demPdJoin.DefaultIfEmpty()
-                    join pp in ctx.PayProfits on dem.Ssn equals pp.Ssn  into DemPdPpJoin
-                    from DemPdPp in DemPdPpJoin.DefaultIfEmpty()
-                    where dupSsns.Contains(dem.Ssn)
-                    group new { dem, DemPdPp }
-                        by new
-                        {
-                            dem.BadgeNumber,
-                            SSN = dem.Ssn,
-                            dem.FullName,
-                            dem.Address.Street,
-                            dem.Address.City,
-                            dem.Address.State,
-                            dem.Address.PostalCode,
-                            dem.HireDate,
-                            dem.TerminationDate,
-                            dem.ReHireDate,
-                            dem.EmploymentStatusId,
-                            dem.StoreNumber,
-                            DemPdPp.HoursCurrentYear,
-                            DemPdPp.IncomeCurrentYear
-                        }
-                    into grp
-                    select new PayrollDuplicateSsnResponseDto
+            
+            
+            var rslts = ctx.Demographics
+                .Include(d => d.PayProfits
+                    .FirstOrDefault(pp => pp.FiscalYear == req.ReportingYear))
+                .Where(d => dupSsns.Contains(d.Ssn))
+                    .Select(d=> new PayrollDuplicateSsnResponseDto
                     {
-                        BadgeNumber = grp.Key.BadgeNumber,
-                        Ssn = grp.Key.SSN,
-                        Name = grp.Key.FullName,
+                        BadgeNumber = d.BadgeNumber,
+                        Ssn = d.Ssn.MaskSsn(),
+                        Name = d.FullName,
                         Address = new AddressResponseDto
                         {
-                            Street = grp.Key.Street,
-                            City = grp.Key.City,
-                            State = grp.Key.State,
-                            PostalCode = grp.Key.PostalCode,
+                            Street = d.Address.Street,
+                            City = d.Address.City,
+                            State = d.Address.State,
+                            PostalCode = d.Address.PostalCode,
                             CountryIso = Country.Constants.Us
                         },
-                        HireDate = grp.Key.HireDate,
-                        TerminationDate = grp.Key.TerminationDate,
-                        RehireDate = grp.Key.ReHireDate,
-                        Status = grp.Key.EmploymentStatusId,
-                        StoreNumber = grp.Key.StoreNumber,
+                        HireDate = d.HireDate,
+                        TerminationDate = d.TerminationDate,
+                        RehireDate = d.ReHireDate,
+                        Status = d.EmploymentStatusId,
+                        StoreNumber = d.StoreNumber,
                         ProfitSharingRecords = grp.Count(),
-                        HoursCurrentYear = grp.Key.HoursCurrentYear ?? 0,
-                        IncomeCurrentYear = grp.Key.IncomeCurrentYear ?? 0,
+                        HoursCurrentYear = d.PayProfits.FirstOrDefault()?.CurrentHoursYear ?? 0,
+                        IncomeCurrentYear = d.PayProfits.FirstOrDefault()?.CurrentIncomeYear ?? 0,
                     }
                 ).ToPaginationResultsAsync(req, forceSingleQuery: true, ct);
 
@@ -83,40 +66,21 @@ public class CleanupReportService : IYearEndService
         });
     }
 
-    public async Task<ReportResponseBase<PayProfitBadgesNotInDemographicsResponse>> GetPayProfitBadgesNotInDemographics(PaginationRequestDto req, CancellationToken ct = default)
-    {
-        var results = await _dataContextFactory.UseReadOnlyContext(ctx =>
-        {
-            return (from pp in ctx.PayProfits
-             join dem in ctx.Demographics on pp.BadgeNumber equals dem.BadgeNumber into demTmp
-             from dem in demTmp.DefaultIfEmpty()
-             where dem == null
-             orderby pp.BadgeNumber, pp.Ssn
-             select new PayProfitBadgesNotInDemographicsResponse { EmployeeBadge = pp.BadgeNumber, EmployeeSsn = pp.Ssn }
-            ).ToPaginationResultsAsync(req, forceSingleQuery: true, ct);
-        });
-
-        return new ReportResponseBase<PayProfitBadgesNotInDemographicsResponse>
-        {
-            ReportName = "Payprofit Badges not in Demographics",
-            ReportDate = DateTimeOffset.Now,
-            Response = results
-        };
-    }
-
     public async Task<ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>> GetNegativeETVAForSSNsOnPayProfitResponse(PaginationRequestDto req, CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("Request NEGATIVE ETVA FOR SSNs ON PAYPROFIT"))
         {
             var results = await _dataContextFactory.UseReadOnlyContext(c =>
             {
-                var ssnUnion = c.Demographics.Select(d => d.Ssn).Union(c.Beneficiaries.Select(b => b.Ssn));
+                var ssnUnion = c.Demographics.Select(d => d.Ssn)
+                    .Union(c.Beneficiaries.Select(b => b.Ssn));
 
                 return c.PayProfits
-                    .Where(p => ssnUnion.Contains(p.Ssn) && p.EarningsEtvaValue < 0)
+                    .Include(p=> p.Demographic)
+                    .Where(p => ssnUnion.Contains(p.Demographic!.Ssn) && p.EarningsEtvaValue < 0)
                     .Select(p => new NegativeEtvaForSsNsOnPayProfitResponse
                     {
-                        EmployeeBadge = p.BadgeNumber, EmployeeSsn = p.Ssn, EtvaValue = p.EarningsEtvaValue
+                        EmployeeBadge = p.Demographic!.BadgeNumber, EmployeeSsn = p.Demographic.Ssn, EtvaValue = p.EarningsEtvaValue
                     })
                     .OrderBy(p => p.EmployeeBadge)
                     .ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken);

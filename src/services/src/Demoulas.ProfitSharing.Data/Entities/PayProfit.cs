@@ -9,21 +9,16 @@ public sealed class PayProfit
     /// <summary>
     /// Hours towards Profit Sharing in the current year (updated weekly)
     /// </summary>
-    public decimal? CurrentHours { get; set; }
+    public decimal? CurrentHoursYear { get; set; }
 
     
     /// <summary>
     /// Income (Wage) accumulated so far in the current year (updated weekly)
     /// </summary>
-    public decimal? CurrentIncome { get; set; }
+    public decimal? CurrentIncomeYear { get; set; }
 
     /// <summary>
-    /// amount after applying vesting rules.This can be updated when new transactions occur.For example, QDRO.
-    /// </summary>
-    public required decimal EarningsAfterApplyingVestingRules { get; set; }
-
-    /// <summary>
-    /// earnings on the ETVA value
+    /// earnings on the ETVA value 
     /// </summary>
     public required decimal EarningsEtvaValue { get; set; }
 
@@ -33,14 +28,9 @@ public sealed class PayProfit
     public decimal? SecondaryEarnings { get; set; }
 
     /// <summary>
-    /// secondary ETVA earnings
+    /// secondary ETVA earnings 
     /// </summary>
     public decimal? SecondaryEtvaEarnings { get; set; }
-
-    /// <summary>
-    /// populated when forfeiture happens 
-    /// </summary>
-    public decimal? EarningsPriorEtvaValue { get; set; }
 
     /// <summary>
     /// Number of weeks worked in the current year

@@ -1,5 +1,8 @@
 ﻿namespace Demoulas.ProfitSharing.Data.Entities;
 
+#pragma warning disable S1133
+[Obsolete("Use PayProfit Entity")]
+#pragma warning restore S1133
 public sealed class PayProfitLegacy
 {
     

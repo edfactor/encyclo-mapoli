@@ -12,7 +12,7 @@ using Demoulas.ProfitSharing.Security;
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
 
 public class MilitaryAndRehireProfitSummaryEndpoint :
-    EndpointWithCsvBase<MilitaryAndRehireRequest, MilitaryAndRehireProfitSummaryResponse, MilitaryAndRehireProfitSummaryEndpoint.MilitaryRehireProfitSharingResponseMap>
+    EndpointWithCsvBase<FiscalYearRequest, MilitaryAndRehireProfitSummaryResponse, MilitaryAndRehireProfitSummaryEndpoint.MilitaryRehireProfitSharingResponseMap>
 {
     private readonly IMilitaryAndRehireService _reportService;
 
@@ -54,7 +54,7 @@ public class MilitaryAndRehireProfitSummaryEndpoint :
 
     public override string ReportFileName => "MILITARY TERM-REHIRE";
 
-    public override async Task<ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>> GetResponse(MilitaryAndRehireRequest req, CancellationToken ct)
+    public override async Task<ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>> GetResponse(FiscalYearRequest req, CancellationToken ct)
     {
         return await _reportService.GetMilitaryAndRehireProfitSummaryReport(req, ct);
     }

@@ -4,10 +4,14 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Demoulas.Common.Data.Contexts.ValueConverters;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
+
+#pragma warning disable CS0618 // Type or member is obsolete
 internal sealed class PayProfitLegacyMap : IEntityTypeConfiguration<PayProfitLegacy>
 {
     public void Configure(EntityTypeBuilder<PayProfitLegacy> builder)
     {
+#pragma warning restore CS0618 // Type or member is obsolete
+        
         _ = builder.ToTable("PAY_PROFIT_LEGACY");
 
         _ = builder.HasKey(e => e.BadgeNumber);
