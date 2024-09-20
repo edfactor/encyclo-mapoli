@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Diagnostics;
+using System.Net;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Client.Reports.YearEnd;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
@@ -30,7 +31,7 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
     [Fact(DisplayName = "Test report with nobody applicable - sanity check")]
     public async Task DownloadTerminatedEmployeeAndBeneficiaryReport()
     {
-        // Arange
+        // Arrange
         _yearEndClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         DateOnly fiscalStart = new DateOnly(2023, 1, 7);
         DateOnly fiscalEnd = new DateOnly(2024, 1, 2);
@@ -120,7 +121,7 @@ TOTAL BENEFICIARY ALLOCTIONS               0.00
             await c.SaveChangesAsync();
 
             // Lock age and todays' date computation when testing. 
-            TerminatedEmployeeAndBeneficiaryReportService.useThisForTodaysDateWhenTesting = new DateOnly(2023, 9, 7);
+            TerminatedEmployeeAndBeneficiaryReportService.useThisForTodaysDateWhenTesting = new DateOnly(2024, 9, 7);
 
             // Act
             DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
@@ -139,11 +140,11 @@ TOTAL BENEFICIARY ALLOCTIONS               0.00
 
             // Assert
             response.Response.Content.Should().NotBeNull();
-            string result = await response.Response.Content.ReadAsStringAsync();
+            string actualText = await response.Response.Content.ReadAsStringAsync();
 
-            _testOutputHelper.WriteLine(result);
+            _testOutputHelper.WriteLine(actualText);
 
-            result.Should().BeEquivalentTo(@"DJDE JDE=LANIQS,JDL=DFLT4,END,;
+            string expectedText = @"DJDE JDE=LANIQS,JDL=DFLT4,END,;
 DON MULLIGAN
 QPAY066    TERMINATION - PROFIT SHARING                    DATE SEP 07, 2024  YEAR:   2023.0                         PAGE:   000001
            FROM 01/07/2023 TO 01/02/2024
@@ -159,7 +160,70 @@ AMOUNT IN PROFIT SHARING                 846.15
 VESTED AMOUNT                            122.24
 TOTAL FORFEITURES                        277.91
 TOTAL BENEFICIARY ALLOCTIONS             222.23
-");
+";
+            expectedText.Should().BeEquivalentTo(actualText);
         });
     }
+
+    [Fact(DisplayName = "Test Single Beneficiary")]
+    public async Task SingleBeneficiary()
+    {
+        await MockDbContextFactory.UseWritableContext(async c =>
+        {
+            // Arrange
+            var bene = await c.Beneficiaries.FirstAsync();
+            bene.Psn = 888888;
+            bene.Amount = 379.44m;
+            bene.FirstName = "Rogue";
+            bene.LastName = "One";
+            bene.MiddleName = "I";
+            bene.DateOfBirth = new DateOnly(1990, 1, 1);
+
+            await c.SaveChangesAsync();
+
+            // Lock age and todays' date computation when testing. 
+            TerminatedEmployeeAndBeneficiaryReportService.useThisForTodaysDateWhenTesting = new DateOnly(2024, 9, 7);
+
+            // Act
+            DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+
+            TerminatedEmployeeAndBeneficiaryReportRequestDto requestDto = new()
+            {
+                startDate = new DateOnly(2023, 1, 7),
+                endDate = new DateOnly(2024, 1, 2),
+                profitShareYear = 2023.0m
+            };
+            var response =
+                await DownloadClient
+                    .GETAsync<TerminatedEmployeeAndBeneficiaryReportEndpoint,
+                        TerminatedEmployeeAndBeneficiaryReportRequestDto, string>(requestDto);
+
+            // Assert
+            response.Response.Content.Should().NotBeNull();
+            string actualText = await response.Response.Content.ReadAsStringAsync();
+
+            _testOutputHelper.WriteLine(actualText);
+
+             string expectedText = @"DJDE JDE=LANIQS,JDL=DFLT4,END,;
+DON MULLIGAN
+QPAY066    TERMINATION - PROFIT SHARING                    DATE SEP 07, 2024  YEAR:   2023.0                         PAGE:   000001
+           FROM 01/07/2023 TO 01/02/2024
+
+                                  BEGINNING  BENEFICIARY   DISTRIBUTION                 ENDING       VESTED    DATE      YTD VST     E
+BADGE/PSN # EMPLOYEE NAME           BALANCE  ALLOCATION       AMOUNT       FORFEIT      BALANCE      BALANCE   TERM   PS HRS PCT AGE C
+
+     888888 One, Rogue I             379.44         0.00         0.00         0.00       379.44       379.44            0.00 100  34
+
+
+TOTALS
+AMOUNT IN PROFIT SHARING                 379.44
+VESTED AMOUNT                            379.44
+TOTAL FORFEITURES                          0.00
+TOTAL BENEFICIARY ALLOCTIONS               0.00
+";
+
+             actualText.Should().BeEquivalentTo(expectedText);
+        });
+    }
+
 }

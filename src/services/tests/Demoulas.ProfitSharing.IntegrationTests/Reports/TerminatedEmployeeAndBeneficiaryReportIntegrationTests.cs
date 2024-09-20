@@ -37,23 +37,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests
         actualText.Should().NotBeNullOrEmpty();
 
         string expectedText = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.terminatedEmployeeAndBeneficiaryReport-correct.txt");
-        expectedText.Should().NotBeNullOrEmpty();
-
-        if (expectedText != actualText && File.Exists(@"c:\Program Files\Meld\Meld.exe"))
-        {
-            // This is for post execution analysis
-            string actualPath = Path.Combine(Path.GetTempPath(), "actual.txt");
-            File.WriteAllText(actualPath, actualText);
-            string expectedPath = Path.Combine(Path.GetTempPath(), "expected.txt");
-            File.WriteAllText(expectedPath, expectedText);
-
-            // see https://meldmerge.org/
-            Process.Start(@"c:\Program Files\Meld\Meld.exe", actualPath + " " + expectedPath);
-        }
-
         expectedText.Should().BeEquivalentTo(actualText);
-        Assert.Equal(expectedText, actualText);
-
     }
 
     public static string ReadEmbeddedResource(string resourceName)
