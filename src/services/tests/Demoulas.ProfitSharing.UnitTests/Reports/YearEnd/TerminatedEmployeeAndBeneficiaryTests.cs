@@ -5,6 +5,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.TerminatedEmployeeAndBeneficiary;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 using Demoulas.ProfitSharing.UnitTests.Base;
 using Demoulas.ProfitSharing.UnitTests.Extensions;
 using FastEndpoints;
@@ -26,7 +27,7 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
     }
 
 
-    [Fact(DisplayName = "Get Terminated Employee And Beneficiary Report")]
+    [Fact(DisplayName = "Test report with nobody applicable - sanity check")]
     public async Task DownloadTerminatedEmployeeAndBeneficiaryReport()
     {
         // Arange
@@ -76,7 +77,7 @@ TOTAL BENEFICIARY ALLOCTIONS               0.00
         response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    [Fact(DisplayName = "terminatedEmployee")]
+    [Fact(DisplayName = "Test Single Terminated Employee")]
     public async Task TerminatedEmployee()
     {
         await MockDbContextFactory.UseWritableContext(async c =>
@@ -97,13 +98,29 @@ TOTAL BENEFICIARY ALLOCTIONS               0.00
             pp.CompanyContributionYears = 10;
 
             var details = await c.ProfitDetails.Where(pd => pd.Ssn == demo.Ssn).ToListAsync();
-            // Here we move these records out of the way.
+            // Here we move these 5 records out of the way.
             foreach (var detail in details)
             {
                 detail.ProfitYear = 2021;
             }
+            details[0].ProfitCodeId = ProfitCode.Constants.IncomingContributions;
+            details[0].ProfitYear = 2023;
+            details[0].Forfeiture = 277.91m;
+
+            details[1].ProfitCodeId = ProfitCode.Constants.IncomingQdroBeneficiary;
+            details[1].ProfitYear = 2023;
+            details[1].Contribution = 222.23m;
+            details[1].Earnings = 0m;
+            details[1].Forfeiture = 0m;
+
+            details[2].ProfitCodeId = ProfitCode.Constants.OutgoingDirectPayments;
+            details[2].ProfitYear = 2023;
+            details[2].Forfeiture = 99.99m;
 
             await c.SaveChangesAsync();
+
+            // Lock age and todays' date computation when testing. 
+            TerminatedEmployeeAndBeneficiaryReportService.useThisForTodaysDateWhenTesting = new DateOnly(2023, 9, 7);
 
             // Act
             DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
@@ -128,20 +145,20 @@ TOTAL BENEFICIARY ALLOCTIONS               0.00
 
             result.Should().BeEquivalentTo(@"DJDE JDE=LANIQS,JDL=DFLT4,END,;
 DON MULLIGAN
-QPAY066    TERMINATION - PROFIT SHARING                    DATE SEP 19, 2024  YEAR:   2023.0                         PAGE:   000001
+QPAY066    TERMINATION - PROFIT SHARING                    DATE SEP 07, 2024  YEAR:   2023.0                         PAGE:   000001
            FROM 01/07/2023 TO 01/02/2024
 
                                   BEGINNING  BENEFICIARY   DISTRIBUTION                 ENDING       VESTED    DATE      YTD VST     E
 BADGE/PSN # EMPLOYEE NAME           BALANCE  ALLOCATION       AMOUNT       FORFEIT      BALANCE      BALANCE   TERM   PS HRS PCT AGE C
 
-       9988 Smith, Nancy K           446.00         0.00         0.00         0.00       446.00         0.00  230601    0.00 100  24
+       9988 Smith, Nancy K           446.00       222.23        99.99-      277.91       846.15       122.24  230601    0.00 100  24
 
 
 TOTALS
-AMOUNT IN PROFIT SHARING                 446.00
-VESTED AMOUNT                              0.00
-TOTAL FORFEITURES                          0.00
-TOTAL BENEFICIARY ALLOCTIONS               0.00
+AMOUNT IN PROFIT SHARING                 846.15
+VESTED AMOUNT                            122.24
+TOTAL FORFEITURES                        277.91
+TOTAL BENEFICIARY ALLOCTIONS             222.23
 ");
         });
     }
