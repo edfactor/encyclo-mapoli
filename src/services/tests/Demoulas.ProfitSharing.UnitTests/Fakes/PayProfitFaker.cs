@@ -2,7 +2,7 @@
 using Demoulas.ProfitSharing.Data.Entities;
 
 namespace Demoulas.ProfitSharing.UnitTests.Fakes;
-internal sealed class PayProfitFaker : Faker<PayProfit>
+internal sealed class PayProfitFaker : Faker<PayProfitLegacy>
 {
     internal PayProfitFaker(IList<Demographic> demographicFakes)
     {

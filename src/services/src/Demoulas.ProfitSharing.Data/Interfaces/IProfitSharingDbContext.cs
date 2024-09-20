@@ -11,7 +11,7 @@ public interface IProfitSharingDbContext
     DbSet<PayClassification> PayClassifications { get; set; }
 
     DbSet<Beneficiary> Beneficiaries { get; set; }
-    DbSet<PayProfit> PayProfits { get; set; }
+    DbSet<PayProfitLegacy> PayProfits { get; set; }
 
     DbSet<Job> Jobs { get; set; }
 }

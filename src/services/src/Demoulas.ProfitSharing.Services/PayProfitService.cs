@@ -25,9 +25,9 @@ public class PayProfitService : IPayProfitService
 
     public async Task<ISet<PayProfitResponseDto>?> AddProfit(IEnumerable<PayProfitRequestDto> profitRequest, CancellationToken cancellationToken)
     {
-        List<PayProfit> entities = await _dataContextFactory.UseWritableContext(async context =>
+        List<PayProfitLegacy> entities = await _dataContextFactory.UseWritableContext(async context =>
         {
-            List<PayProfit> entities = _mapper.Map(profitRequest).ToList();
+            List<PayProfitLegacy> entities = _mapper.Map(profitRequest).ToList();
             context.PayProfits.AddRange(entities);
             await context.SaveChangesAsync(cancellationToken);
             return entities;

@@ -12,10 +12,10 @@ namespace Demoulas.ProfitSharing.Services.Mappers;
 [UseStaticMapper<ZeroContributionReasonMapper>]
 public partial class PayProfitMapper
 {
-    public partial PayProfitResponseDto Map(PayProfit source);
+    public partial PayProfitResponseDto Map(PayProfitLegacy source);
 
-    public partial IEnumerable<PayProfit> Map(IEnumerable<PayProfitRequestDto> source);
+    public partial IEnumerable<PayProfitLegacy> Map(IEnumerable<PayProfitRequestDto> source);
 
-    public partial IEnumerable<PayProfitResponseDto> Map(IEnumerable<PayProfit> source);
-    public partial PayProfit Map(PayProfitRequestDto source);
+    public partial IEnumerable<PayProfitResponseDto> Map(IEnumerable<PayProfitLegacy> source);
+    public partial PayProfitLegacy Map(PayProfitRequestDto source);
 }
