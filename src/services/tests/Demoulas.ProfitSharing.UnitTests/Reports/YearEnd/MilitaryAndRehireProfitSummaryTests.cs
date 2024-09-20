@@ -185,7 +185,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
 
         var payProfit = await c.PayProfits.FirstAsync(pp => pp.Ssn == demo.Ssn);
         payProfit.EnrollmentId = Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
-        payProfit.CompanyContributionYears = 3;
+        payProfit.CompanyContributionYears = 10;
         payProfit.HoursCurrentYear = 2358;
 
         var details = await c.ProfitDetails.Where(pd => pd.Ssn == demo.Ssn).ToListAsync();
