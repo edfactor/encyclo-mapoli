@@ -29,34 +29,53 @@ public class CleanupReportService : IYearEndService
         {
             var dupSsns = await ctx.Demographics.GroupBy(x => x.Ssn).Where(x => x.Count() > 1).Select(x => x.Key).ToListAsync(cancellationToken: ct);
 
-            
-            
-            var rslts = ctx.Demographics
-                .Include(d => d.PayProfits
-                    .FirstOrDefault(pp => pp.FiscalYear == req.ReportingYear))
-                .Where(d => dupSsns.Contains(d.Ssn))
-                    .Select(d=> new PayrollDuplicateSsnResponseDto
-                    {
-                        BadgeNumber = d.BadgeNumber,
-                        Ssn = d.Ssn.MaskSsn(),
-                        Name = d.FullName,
-                        Address = new AddressResponseDto
-                        {
-                            Street = d.Address.Street,
-                            City = d.Address.City,
-                            State = d.Address.State,
-                            PostalCode = d.Address.PostalCode,
-                            CountryIso = Country.Constants.Us
-                        },
-                        HireDate = d.HireDate,
-                        TerminationDate = d.TerminationDate,
-                        RehireDate = d.ReHireDate,
-                        Status = d.EmploymentStatusId,
-                        StoreNumber = d.StoreNumber,
-                        ProfitSharingRecords = grp.Count(),
-                        HoursCurrentYear = d.PayProfits.FirstOrDefault()?.CurrentHoursYear ?? 0,
-                        IncomeCurrentYear = d.PayProfits.FirstOrDefault()?.CurrentIncomeYear ?? 0,
-                    }
+            var rslts = await (from dem in ctx.Demographics
+                               join pdJoin in ctx.ProfitDetails on dem.Ssn equals pdJoin.Ssn into demPdJoin
+                               from pd in demPdJoin.DefaultIfEmpty()
+                               join pp in ctx.PayProfits on dem.OracleHcmId equals pp.OracleHcmId into DemPdPpJoin
+                               from DemPdPp in DemPdPpJoin.DefaultIfEmpty()
+                               where dupSsns.Contains(dem.Ssn)
+                               group new { dem, DemPdPp }
+                                   by new
+                                   {
+                                       dem.BadgeNumber,
+                                       SSN = dem.Ssn,
+                                       dem.FullName,
+                                       dem.Address.Street,
+                                       dem.Address.City,
+                                       dem.Address.State,
+                                       dem.Address.PostalCode,
+                                       dem.HireDate,
+                                       dem.TerminationDate,
+                                       dem.ReHireDate,
+                                       dem.EmploymentStatusId,
+                                       dem.StoreNumber,
+                                       DemPdPp.CurrentHoursYear,
+                                       DemPdPp.CurrentIncomeYear
+                                   }
+                   into grp
+                               select new PayrollDuplicateSsnResponseDto
+                               {
+                                   BadgeNumber = grp.Key.BadgeNumber,
+                                   Ssn = grp.Key.SSN.MaskSsn(),
+                                   Name = grp.Key.FullName,
+                                   Address = new AddressResponseDto
+                                   {
+                                       Street = grp.Key.Street,
+                                       City = grp.Key.City,
+                                       State = grp.Key.State,
+                                       PostalCode = grp.Key.PostalCode,
+                                       CountryIso = Country.Constants.Us
+                                   },
+                                   HireDate = grp.Key.HireDate,
+                                   TerminationDate = grp.Key.TerminationDate,
+                                   RehireDate = grp.Key.ReHireDate,
+                                   Status = grp.Key.EmploymentStatusId,
+                                   StoreNumber = grp.Key.StoreNumber,
+                                   ProfitSharingRecords = grp.Count(),
+                                   HoursCurrentYear = grp.Key.CurrentHoursYear ?? 0,
+                                   IncomeCurrentYear = grp.Key.CurrentIncomeYear ?? 0,
+                               }
                 ).ToPaginationResultsAsync(req, forceSingleQuery: true, ct);
 
             return new ReportResponseBase<PayrollDuplicateSsnResponseDto>
