@@ -95,124 +95,6 @@ public class CleanupReportService : IYearEndService
         }
     }
 
-    public async Task<ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>> GetMismatchedSsnsPayprofitAndDemographicsOnSameBadge(PaginationRequestDto req, CancellationToken cancellationToken = default)
-    {
-        using (_logger.BeginScope("Request MISMATCHED SSNs PAYPROFIT AND DEMO ON SAME BADGE"))
-        {
-            var results = await _dataContextFactory.UseReadOnlyContext(c =>
-            {
-                var query = from demographic in c.Demographics
-                    join payProfit in c.PayProfits
-                        on demographic.BadgeNumber equals payProfit.BadgeNumber
-                            where payProfit.Ssn != demographic.Ssn
-                    orderby demographic.BadgeNumber, demographic.Ssn, payProfit.Ssn
-                    select new MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto
-                    {
-                        Name = demographic.FullName ?? $"{demographic.FirstName} {demographic.LastName}",
-                        EmployeeBadge = demographic.BadgeNumber,
-                        EmployeeSsn = demographic.Ssn,
-                        PayProfitSsn = payProfit.Ssn,
-                       Store = demographic.StoreNumber,
-                       Status = demographic.EmploymentStatusId
-                    };
-
-                return query.ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken);
-            });
-
-            _logger.LogWarning("Returned {Results} records", results.Results.Count());
-
-            return new ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>
-            {
-                ReportName = "MISMATCHED SSNs PAYPROFIT AND DEMO ON SAME BADGE",
-                ReportDate = DateTimeOffset.Now,
-                Response = results
-            };
-        }
-    }
-
-    public async Task<ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto>> GetPayrollDuplicateSsnsOnPayprofit(PaginationRequestDto req, CancellationToken cancellationToken = default)
-    {
-        using (_logger.BeginScope("Request PAYROLL DUPLICATE SSNs ON PAYPROFIT"))
-        {
-            var results = await _dataContextFactory.UseReadOnlyContext(context =>
-            {
-                var query = from payProfit in context.PayProfits
-                            join demographics in context.Demographics
-                                on payProfit.BadgeNumber equals demographics.BadgeNumber into demGroup
-                            from demographics in demGroup.DefaultIfEmpty()
-                            join profitDetail in context.ProfitDetails
-                                on payProfit.Ssn equals profitDetail.Ssn into detGroup
-                            from profitDetail in detGroup.DefaultIfEmpty()
-                            where context.PayProfits
-                                .GroupBy(p => p.Ssn)
-                                .Where(g => g.Count() > 1)
-                                .Select(g => g.Key)
-                                .Contains(payProfit.Ssn)
-                            group new { payProfit, demographics, profitDetail } by new
-                            {
-                                BadgeNumber=payProfit.BadgeNumber,
-                                SSN = payProfit.Ssn,
-                                demographics.FullName,
-                                demographics.HireDate,
-                                demographics.TerminationDate,
-                                demographics.ReHireDate,
-                                demographics.EmploymentStatusId,
-                                demographics.StoreNumber,
-                                demographics.Address.Street,
-                                demographics.Address.Street2,
-                                demographics.Address.City,
-                                demographics.Address.State,
-                                demographics.Address.PostalCode,
-                                CountryISO = demographics.Address.CountryIso,
-                                demographics.ContactInfo.EmailAddress,
-                                demographics.ContactInfo.PhoneNumber,
-                                demographics.ContactInfo.MobileNumber,
-                                payProfit.IncomeCurrentYear
-                            } into g
-                            orderby g.Key.SSN, g.Key.BadgeNumber
-                            select new PayrollDuplicateSsnsOnPayprofitResponseDto
-                            {
-                                Count = g.Count(),
-                                BadgeNumber = g.Key.BadgeNumber,
-                                EmployeeSsn = g.Key.SSN,
-                                Name = g.Key.FullName,
-                                HireDate = g.Key.HireDate,
-                                TermDate = g.Key.TerminationDate,
-                                RehireDate = g.Key.ReHireDate,
-                                Status = g.Key.EmploymentStatusId,
-                                Store = g.Key.StoreNumber,
-                                IncomeCurrentYear = g.Key.IncomeCurrentYear ?? 0,
-                                ContactInfo = new ContactInfoResponseDto
-                                {
-                                    EmailAddress = g.Key.EmailAddress,
-                                    MobileNumber = g.Key.MobileNumber,
-                                    PhoneNumber = g.Key.PhoneNumber
-                                },
-                                Address = new AddressResponseDto
-                                {
-                                    Street = g.Key.Street,
-                                    Street2 = g.Key.Street2,
-                                    City = g.Key.City,
-                                    State = g.Key.State,
-                                    PostalCode = g.Key.PostalCode,
-                                    CountryIso = g.Key.CountryISO
-                                }
-                            };
-
-                return query.ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken: cancellationToken);
-            });
-
-            _logger.LogWarning("Returned {Results} records", results.Results.Count());
-
-            return new ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto>
-            {
-                ReportName = "PAYROLL DUPLICATE SSNs ON PAYPROFIT",
-                ReportDate = DateTimeOffset.Now,
-                Response = results
-            };
-        }
-    }
-
     public async Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfit(PaginationRequestDto req, CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("Request BEGIN DEMOGRAPHIC BADGES NOT IN PAY PROFIT"))
@@ -220,7 +102,7 @@ public class CleanupReportService : IYearEndService
             var results = await _dataContextFactory.UseReadOnlyContext(ctx =>
             {
                 var query = from dem in ctx.Demographics
-                            where !(from pp in ctx.PayProfits select pp.BadgeNumber).Contains(dem.BadgeNumber)
+                            where !(from pp in ctx.PayProfits select pp.OracleHcmId).Contains(dem.OracleHcmId)
                             select new DemographicBadgesNotInPayProfitResponse
                             {
                                 EmployeeBadge = dem.BadgeNumber,
@@ -250,8 +132,10 @@ public class CleanupReportService : IYearEndService
             var results = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
                 var query = from dem in ctx.Demographics
-                            where dem.FullName == null || !dem.FullName.Contains(",")
-                            select new NamesMissingCommaResponse
+#pragma warning disable CA1847
+                    where dem.FullName == null || !dem.FullName.Contains(",")
+#pragma warning restore CA1847
+                    select new NamesMissingCommaResponse
                             {
                                 EmployeeBadge = dem.BadgeNumber,
                                 EmployeeSsn = dem.Ssn,
@@ -283,7 +167,7 @@ public class CleanupReportService : IYearEndService
                                                  select g.Key.FullName).ToListAsync(cancellationToken: cancellationToken);
 
                 var query = from dem in ctx.Demographics
-                            join ppLj in ctx.PayProfits on dem.BadgeNumber equals ppLj.BadgeNumber into tmpPayProfit
+                            join ppLj in ctx.PayProfits on dem.OracleHcmId equals ppLj.OracleHcmId into tmpPayProfit
                             from pp in tmpPayProfit.DefaultIfEmpty()
                             join pdLj in ctx.ProfitDetails on dem.Ssn equals pdLj.Ssn into tmpProfitDetails
                             from pd in tmpProfitDetails.DefaultIfEmpty()
@@ -304,16 +188,16 @@ public class CleanupReportService : IYearEndService
                                 dem.TerminationDate,
                                 dem.EmploymentStatusId,
                                 dem.StoreNumber,
-                                PdSsn = (long?)(pd != null ? pd.Ssn : null),
+                                PdSsn = pd?.Ssn,
                                 pp.NetBalanceLastYear,
-                                pp.HoursCurrentYear,
-                                pp.IncomeCurrentYear
+                                pp.CurrentHoursYear,
+                                pp.CurrentIncomeYear
                             } into g
                             orderby g.Key.FullName, g.Key.DateOfBirth, g.Key.SSN, g.Key.BadgeNumber
                             select new DuplicateNamesAndBirthdaysResponse
                             {
                                 BadgeNumber = g.Key.BadgeNumber,
-                                Ssn = g.Key.SSN,
+                                Ssn = g.Key.SSN.MaskSsn(),
                                 Name = g.Key.FullName,
                                 DateOfBirth = g.Key.DateOfBirth,
                                 Address = new AddressResponseDto()
