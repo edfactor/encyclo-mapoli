@@ -32,7 +32,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests
         DateOnly effectiveDateOfTestData = new DateOnly(2024, 9, 17);
 
         TerminatedEmployeeAndBeneficiaryReport terminatedEmployeeAndBeneficiaryReport = new TerminatedEmployeeAndBeneficiaryReport(ilogger.Object!, ctx, effectiveDateOfTestData);
-        string actualText = terminatedEmployeeAndBeneficiaryReport.CreateReport(startDate, endDate, profitSharingYear);
+        string actualText = terminatedEmployeeAndBeneficiaryReport.CreateTextReport(startDate, endDate, profitSharingYear);
 
         actualText.Should().NotBeNullOrEmpty();
 

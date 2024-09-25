@@ -26,7 +26,7 @@ public class TerminatedEmployeeAndBeneficiaryReport(ILogger _logger, ProfitShari
     private DateOnly _effectiveRunDate;
 
 
-    public string CreateReport(DateOnly startDate, DateOnly endDate, decimal profitSharingYear)
+    public string CreateTextReport(DateOnly startDate, DateOnly endDate, decimal profitSharingYear)
     {
         this._startDate = startDate;
         this._endDate = endDate;
@@ -44,6 +44,26 @@ public class TerminatedEmployeeAndBeneficiaryReport(ILogger _logger, ProfitShari
         string report = CreateReport(members);
         return report;
     }
+
+    public TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto> CreateData(
+        DateOnly startDate, DateOnly endDate, decimal profitSharingYear)
+    {
+        this._startDate = startDate;
+        this._endDate = endDate;
+        this._profitSharingYearWithIteration = profitSharingYear;
+        this._effectiveRunDate = effectiveRunDate ?? DateOnly.FromDateTime(DateTime.Now);
+
+        // If the user supplies 9999.9, then figure out which profit sharing year based on today's date (_effectiveRunDate)
+        if (_profitSharingYearWithIteration == 9999.9m)
+        {
+            _profitSharingYearWithIteration = (_effectiveRunDate.Month < 4) ? _effectiveRunDate.Year - 1 : _effectiveRunDate.Year;
+        }
+
+        List<MemberSlice> memberSlices = RetrieveMemberSlices();
+        List<Member> members = MergeMemberSlicesToMembers(memberSlices);
+        return CreateDataset(members);
+    }
+
 
     private List<MemberSlice> RetrieveMemberSlices()
     {
@@ -241,7 +261,7 @@ public class TerminatedEmployeeAndBeneficiaryReport(ILogger _logger, ProfitShari
 
     private string CreateReport(List<Member> members)
     {
-        TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto> reportData = CreateData(members);
+        TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto> reportData = CreateDataset(members);
 
         TextReportGenerator textReportGenerator = new TextReportGenerator(_effectiveRunDate, _startDate, _endDate, _profitSharingYearWithIteration);
 
@@ -258,7 +278,7 @@ public class TerminatedEmployeeAndBeneficiaryReport(ILogger _logger, ProfitShari
 
     }
 
-    private TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto> CreateData(List<Member> members)
+    private TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto> CreateDataset(List<Member> members)
     {
         decimal totalVested = 0;
         decimal totalForfeit = 0;

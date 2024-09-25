@@ -27,7 +27,7 @@ public class TerminatedEmployeeAndBeneficiaryReportService(
         await _dataContextFactory.UseWritableContext(ctx =>
         {
             TerminatedEmployeeAndBeneficiaryReport reportGenerator = new TerminatedEmployeeAndBeneficiaryReport(_logger, ctx, useThisForTodaysDateWhenTesting);
-            report = reportGenerator.CreateReport(startDate, endDate, profitSharingYear);
+            report = reportGenerator.CreateTextReport(startDate, endDate, profitSharingYear);
             return Task.CompletedTask;
         }, ct);
 
