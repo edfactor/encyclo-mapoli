@@ -266,27 +266,29 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
             await c.PayProfits.Take(negativeValues).ForEachAsync(pp =>
             {
                 pp.EarningsEtvaValue *= -1;
+                pp.ProfitYear = _paginationRequest.ProfitYear;
             });
 
 
             await c.SaveChangesAsync();
+
+
+
+            var response = await _cleanupReportClient.GetNegativeETVAForSSNsOnPayProfitResponse(_paginationRequest, CancellationToken.None);
+
+            response.Should().NotBeNull();
+            response.ReportName.Should().BeEquivalentTo("Negative ETVA for SSNs on PayProfit");
+            response.Response.Results.Should().HaveCount(negativeValues);
+
+            _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+
+            var oneRecord = new ProfitYearRequest { ProfitYear = _paginationRequest.ProfitYear, Skip = 0, Take = 1 };
+            response = await _cleanupReportClient.GetNegativeETVAForSSNsOnPayProfitResponse(oneRecord, CancellationToken.None);
+            response.Should().NotBeNull();
+            response.Response.Results.Should().HaveCount(1);
+
+            _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
         });
-
-
-        var response = await _cleanupReportClient.GetNegativeETVAForSSNsOnPayProfitResponse(_paginationRequest, CancellationToken.None);
-
-        response.Should().NotBeNull();
-        response.ReportName.Should().BeEquivalentTo("Negative ETVA for SSNs on PayProfit");
-        response.Response.Results.Should().HaveCount(negativeValues);
-
-        _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
-
-        var oneRecord = new ProfitYearRequest {ProfitYear = _paginationRequest.ProfitYear, Skip = 0, Take = 1 };
-        response = await _cleanupReportClient.GetNegativeETVAForSSNsOnPayProfitResponse(oneRecord, CancellationToken.None);
-        response.Should().NotBeNull();
-        response.Response.Results.Should().HaveCount(1);
-
-        _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
     }
 
     [Fact(DisplayName = "PS-145 : Negative ETVA for SSNs on PayProfit (CSV)")]

@@ -36,7 +36,7 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
 
     public Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsNs(ProfitYearRequest req, CancellationToken ct)
     {
-        return CallReportEndpoint<PayrollDuplicateSsnResponseDto>(req, "duplicate-ssns", ct);
+        return CallReportEndpoint<PayrollDuplicateSsnResponseDto, ProfitYearRequest>(req, "duplicate-ssns", ct);
     }
 
     public Task<Stream> DownloadDuplicateSsNs(short profitYear, CancellationToken cancellationToken)
@@ -46,7 +46,7 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
 
     public Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfit(PaginationRequestDto req, CancellationToken cancellationToken = default)
     {
-        return CallReportEndpoint<DemographicBadgesNotInPayProfitResponse>(req, "demographic-badges-not-in-payprofit", cancellationToken);
+        return CallReportEndpoint<DemographicBadgesNotInPayProfitResponse, PaginationRequestDto>(req, "demographic-badges-not-in-payprofit", cancellationToken);
     }
 
     public Task<Stream> DownloadDemographicBadgesNotInPayProfit(CancellationToken ct = default)
@@ -58,7 +58,7 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
 
     public Task<ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>> GetNegativeETVAForSSNsOnPayProfitResponse(ProfitYearRequest req, CancellationToken cancellationToken = default)
     {
-        return CallReportEndpoint<NegativeEtvaForSsNsOnPayProfitResponse>(req, "negative-evta-ssn", cancellationToken);
+        return CallReportEndpoint<NegativeEtvaForSsNsOnPayProfitResponse, ProfitYearRequest>(req, "negative-evta-ssn", cancellationToken);
     }
 
     public Task<Stream> DownloadNegativeETVAForSSNsOnPayProfitResponse(short profitYear, CancellationToken cancellationToken = default)
@@ -71,7 +71,7 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
     #region Mismatched Ssns Payprofit And Demographics On Same Badge
     public Task<ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>> GetMismatchedSsnsPayprofitAndDemographicsOnSameBadge(ProfitYearRequest req, CancellationToken cancellationToken = default)
     {
-        return CallReportEndpoint<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>(req, "mismatched-ssns-payprofit-and-demo-on-same-badge", cancellationToken);
+        return CallReportEndpoint<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto, ProfitYearRequest>(req, "mismatched-ssns-payprofit-and-demo-on-same-badge", cancellationToken);
     }
 
     public Task<Stream> DownloadMismatchedSsnsPayprofitAndDemographicsOnSameBadge(short profitYear, CancellationToken cancellationToken = default)
@@ -81,7 +81,7 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
 
     public Task<ReportResponseBase<PayProfitBadgesNotInDemographicsResponse>> GetPayProfitBadgesNotInDemographics(PaginationRequestDto req, CancellationToken ct = default)
     {
-        return CallReportEndpoint<PayProfitBadgesNotInDemographicsResponse>(req, "payprofit-badges-without-demographics", ct);
+        return CallReportEndpoint<PayProfitBadgesNotInDemographicsResponse, PaginationRequestDto>(req, "payprofit-badges-without-demographics", ct);
     }
 
     public Task<Stream> DownloadPayProfitBadgesNotInDemographics(CancellationToken cancellationToken = default)
@@ -94,7 +94,7 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
     #region Get Payroll Duplicate Ssns On Payprofit
     public Task<ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto>> GetPayrollDuplicateSsnsOnPayprofit(PaginationRequestDto req, CancellationToken cancellationToken = default)
     {
-        return CallReportEndpoint<PayrollDuplicateSsnsOnPayprofitResponseDto>(req, "payroll-duplicate-ssns-on-payprofit", cancellationToken);
+        return CallReportEndpoint<PayrollDuplicateSsnsOnPayprofitResponseDto, PaginationRequestDto>(req, "payroll-duplicate-ssns-on-payprofit", cancellationToken);
     }
 
     public Task<Stream> DownloadPayrollDuplicateSsnsOnPayprofit(CancellationToken cancellationToken = default)
@@ -106,7 +106,7 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
 
     public Task<ReportResponseBase<NamesMissingCommaResponse>> GetNamesMissingComma(PaginationRequestDto req, CancellationToken cancellationToken = default)
     {
-        return CallReportEndpoint<NamesMissingCommaResponse>(req, "names-missing-commas", cancellationToken);
+        return CallReportEndpoint<NamesMissingCommaResponse, PaginationRequestDto>(req, "names-missing-commas", cancellationToken);
     }
 
     public Task<Stream> DownloadNamesMissingComma(CancellationToken cancellationToken = default)
@@ -116,7 +116,7 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
 
     public Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetDuplicateNamesAndBirthdays(ProfitYearRequest req, CancellationToken cancellationToken = default)
     {
-        return CallReportEndpoint<DuplicateNamesAndBirthdaysResponse>(req, "duplicate-names-and-birthdays", cancellationToken);
+        return CallReportEndpoint<DuplicateNamesAndBirthdaysResponse, ProfitYearRequest>(req, "duplicate-names-and-birthdays", cancellationToken);
     }
 
     public Task<Stream> DownloadDuplicateNamesAndBirthdays(short profitYear, CancellationToken cancellationToken = default)
@@ -124,7 +124,7 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
         return DownloadCsvReport(profitYear, "duplicate-names-and-birthdays", cancellationToken);
     }
 
-    private async Task<ReportResponseBase<TResponseDto>> CallReportEndpoint<TResponseDto>(PaginationRequestDto req, string endpointRoute, CancellationToken cancellationToken) where TResponseDto : class
+    private async Task<ReportResponseBase<TResponseDto>> CallReportEndpoint<TResponseDto, TPaginatedRequest>(TPaginatedRequest req, string endpointRoute, CancellationToken cancellationToken) where TResponseDto : class where TPaginatedRequest : PaginationRequestDto
     {
         UriBuilder uriBuilder = BuildPaginatedUrl(req, endpointRoute);
         var response = await _httpClient.GetAsync(uriBuilder.Uri, cancellationToken);
@@ -144,7 +144,7 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
         return _httpDownloadClient.GetStreamAsync(uriBuilder.Uri, cancellationToken);
     }
 
-    private UriBuilder BuildPaginatedUrl(PaginationRequestDto req, string endpointRoute)
+    private UriBuilder BuildPaginatedUrl<TPaginatedRequest>(TPaginatedRequest req, string endpointRoute) where TPaginatedRequest : PaginationRequestDto
     {
         var query = HttpUtility.ParseQueryString(string.Empty);
 
@@ -156,6 +156,11 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
         if (req.Take.HasValue)
         {
             query["take"] = req.Take.Value.ToString();
+        }
+
+        if (req is ProfitYearRequest preq)
+        {
+            query[nameof(ProfitYearRequest.ProfitYear)] = preq.ProfitYear.ToString();
         }
 
         var uriBuilder = new UriBuilder($"{_httpClient.BaseAddress}{BaseApiPath}/{endpointRoute}/")
