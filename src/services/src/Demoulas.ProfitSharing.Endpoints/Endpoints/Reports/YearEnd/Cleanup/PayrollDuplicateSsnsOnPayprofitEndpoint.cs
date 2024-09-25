@@ -17,9 +17,9 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
 
 public class PayrollDuplicateSsnsOnPayprofitEndpoint : EndpointWithCsvBase<PaginationRequestDto, PayrollDuplicateSsnsOnPayprofitResponseDto, PayrollDuplicateSsnsOnPayprofitEndpoint.PayrollDuplicateSsnsOnPayprofitResponseMap>
 {
-    private readonly IYearEndService _reportService;
+    private readonly ICleanupReportService _reportService;
 
-    public PayrollDuplicateSsnsOnPayprofitEndpoint(IYearEndService reportService)
+    public PayrollDuplicateSsnsOnPayprofitEndpoint(ICleanupReportService reportService)
     {
         _reportService = reportService;
     }

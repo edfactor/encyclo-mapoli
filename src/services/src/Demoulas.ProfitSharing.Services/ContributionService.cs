@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.InternalDto;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services;
@@ -18,7 +19,7 @@ public sealed class ContributionService
     }
 
 
-    public Task<Dictionary<int, int>> GetContributionYears(ISet<int> badgeNumber)
+    internal Task<Dictionary<int, int>> GetContributionYears(ISet<int> badgeNumber)
     {
         return _dataContextFactory.UseReadOnlyContext(context =>
         {
@@ -31,16 +32,25 @@ public sealed class ContributionService
         });
     }
 
-    public Task<Dictionary<int, decimal>> GetNetBalance(short fiscalYear)
+    internal Task<Dictionary<int, InternalProfitDetailDto>> GetNetBalance(short profitYear, ISet<int> badgeNumber, CancellationToken cancellationToken)
     {
-        return _dataContextFactory.UseReadOnlyContext(async ctx =>
+        return _dataContextFactory.UseReadOnlyContext(ctx =>
         {
-            var query = from pd in ctx.ProfitDetails
-                join dem in ctx.Demographics on pd.Ssn equals dem.Ssn into tmpPayProfit
-                //from pp in tmpPayProfit.DefaultIfEmpty()
-                //join pdLj in ctx.ProfitDetails on dem.Ssn equals pdLj.Ssn into tmpProfitDetails
-                //from pd in tmpProfitDetails.DefaultIfEmpty()
-                //where pp.FiscalYear == req.ReportingYear && dupNameSlashDateOfBirth.Contains(dem.FullName)
+            var query = from dem in ctx.Demographics
+                join pd in ctx.ProfitDetails on dem.Ssn equals pd.Ssn into tmpPd
+                where badgeNumber.Contains(dem.BadgeNumber)
+                group new { dem, tmpPd }
+                    by new InternalProfitDetailDto
+                    {
+                      OracleHcmId  = dem.OracleHcmId,
+                      BadgeNumber = dem.BadgeNumber,
+                      NetBalance = tmpPd.Where(t => t.ProfitYear <= profitYear)
+                          .Sum(t => t.Earnings + t.Contribution),
+                    }
+                into grp
+                select new InternalProfitDetailDto { BadgeNumber = grp.Key.BadgeNumber, NetBalance = grp.Key.NetBalance };
+
+            return query.ToDictionaryAsync(d=> d.BadgeNumber, cancellationToken);
         });
     }
 }

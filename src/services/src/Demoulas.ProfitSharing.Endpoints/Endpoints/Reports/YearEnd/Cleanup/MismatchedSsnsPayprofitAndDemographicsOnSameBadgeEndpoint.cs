@@ -1,6 +1,7 @@
 ﻿using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -13,11 +14,11 @@ using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup.
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
 
-public class MismatchedSsnsPayprofitAndDemographicsOnSameBadgeEndpoint : EndpointWithCsvBase<PaginationRequestDto, MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto, MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseMap>
+public class MismatchedSsnsPayprofitAndDemographicsOnSameBadgeEndpoint : EndpointWithCsvBase<ProfitYearRequest, MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto, MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseMap>
 {
-    private readonly IYearEndService _reportService;
+    private readonly ICleanupReportService _reportService;
 
-    public MismatchedSsnsPayprofitAndDemographicsOnSameBadgeEndpoint(IYearEndService reportService)
+    public MismatchedSsnsPayprofitAndDemographicsOnSameBadgeEndpoint(ICleanupReportService reportService)
     {
         _reportService = reportService;
     }
@@ -77,7 +78,7 @@ public class MismatchedSsnsPayprofitAndDemographicsOnSameBadgeEndpoint : Endpoin
 
     public override string ReportFileName => "MISMATCHED-PAYPROF-DEM-SSNS";
 
-    public override Task<ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>> GetResponse(PaginationRequestDto req, CancellationToken ct)
+    public override Task<ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
         return _reportService.GetMismatchedSsnsPayprofitAndDemographicsOnSameBadge(req, ct);
     }

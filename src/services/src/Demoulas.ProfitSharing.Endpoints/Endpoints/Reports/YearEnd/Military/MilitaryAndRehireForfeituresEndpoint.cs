@@ -14,7 +14,7 @@ using Demoulas.ProfitSharing.Security;
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
 
 public class MilitaryAndRehireForfeituresEndpoint :
-    EndpointWithCsvBase<FiscalYearRequest, MilitaryAndRehireForfeituresResponse, MilitaryAndRehireForfeituresEndpoint.MilitaryRehireProfitSharingResponseMap>
+    EndpointWithCsvBase<ProfitYearRequest, MilitaryAndRehireForfeituresResponse, MilitaryAndRehireForfeituresEndpoint.MilitaryRehireProfitSharingResponseMap>
 {
     private readonly IMilitaryAndRehireService _reportService;
 
@@ -56,7 +56,7 @@ public class MilitaryAndRehireForfeituresEndpoint :
 
     public override string ReportFileName => "REHIRE'S PROFIT SHARING DATA";
 
-    public override async Task<ReportResponseBase<MilitaryAndRehireForfeituresResponse>> GetResponse(FiscalYearRequest req, CancellationToken ct)
+    public override async Task<ReportResponseBase<MilitaryAndRehireForfeituresResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
         return await _reportService.FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYears(req, ct);
     }

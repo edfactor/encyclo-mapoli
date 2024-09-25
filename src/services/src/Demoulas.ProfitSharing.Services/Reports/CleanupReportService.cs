@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
-public class CleanupReportService : IYearEndService
+public class CleanupReportService : ICleanupReportService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ContributionService _contributionService;
@@ -26,7 +26,7 @@ public class CleanupReportService : IYearEndService
         _logger = factory.CreateLogger<CleanupReportService>();
     }
 
-    public async Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsNs(FiscalYearRequest req, CancellationToken ct)
+    public async Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsNs(ProfitYearRequest req, CancellationToken ct)
     {
         return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
@@ -37,7 +37,7 @@ public class CleanupReportService : IYearEndService
                                from pd in demPdJoin.DefaultIfEmpty()
                                join pp in ctx.PayProfits on dem.OracleHcmId equals pp.OracleHcmId into DemPdPpJoin
                                from DemPdPp in DemPdPpJoin.DefaultIfEmpty()
-                               where DemPdPp.FiscalYear == req.ReportingYear &&  dupSsns.Contains(dem.Ssn)
+                               where DemPdPp.ProfitYear == req.ProfitYear &&  dupSsns.Contains(dem.Ssn)
                                group new { dem, DemPdPp }
                                    by new
                                    {
@@ -88,7 +88,7 @@ public class CleanupReportService : IYearEndService
         });
     }
 
-    public async Task<ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>> GetNegativeETVAForSSNsOnPayProfitResponse(PaginationRequestDto req, CancellationToken cancellationToken = default)
+    public async Task<ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>> GetNegativeETVAForSSNsOnPayProfitResponse(ProfitYearRequest req, CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("Request NEGATIVE ETVA FOR SSNs ON PAYPROFIT"))
         {
@@ -99,7 +99,9 @@ public class CleanupReportService : IYearEndService
 
                 return c.PayProfits
                     .Include(p=> p.Demographic)
-                    .Where(p => ssnUnion.Contains(p.Demographic!.Ssn) && p.EarningsEtvaValue < 0)
+                    .Where(p => p.ProfitYear == req.ProfitYear 
+                                && ssnUnion.Contains(p.Demographic!.Ssn) 
+                                && p.EarningsEtvaValue < 0)
                     .Select(p => new NegativeEtvaForSsNsOnPayProfitResponse
                     {
                         EmployeeBadge = p.Demographic!.BadgeNumber, EmployeeSsn = p.Demographic.Ssn, EtvaValue = p.EarningsEtvaValue
@@ -115,6 +117,16 @@ public class CleanupReportService : IYearEndService
                 ReportName = "NEGATIVE ETVA FOR SSNs ON PAYPROFIT", ReportDate = DateTimeOffset.Now, Response = results
             };
         }
+    }
+
+    public Task<ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>> GetMismatchedSsnsPayprofitAndDemographicsOnSameBadge(ProfitYearRequest req, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto>> GetPayrollDuplicateSsnsOnPayprofit(PaginationRequestDto req, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
     }
 
     public async Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfit(PaginationRequestDto req, CancellationToken cancellationToken = default)
@@ -177,7 +189,7 @@ public class CleanupReportService : IYearEndService
         }
     }
 
-    public async Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetDuplicateNamesAndBirthdays(FiscalYearRequest req, CancellationToken cancellationToken = default)
+    public async Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetDuplicateNamesAndBirthdays(ProfitYearRequest req, CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("Request BEGIN DUPLICATE NAMES AND BIRTHDAYS"))
         {
@@ -193,7 +205,7 @@ public class CleanupReportService : IYearEndService
                             from pp in tmpPayProfit.DefaultIfEmpty()
                             join pdLj in ctx.ProfitDetails on dem.Ssn equals pdLj.Ssn into tmpProfitDetails
                             from pd in tmpProfitDetails.DefaultIfEmpty()
-                            where pp.FiscalYear == req.ReportingYear && dupNameSlashDateOfBirth.Contains(dem.FullName)
+                            where pp.ProfitYear == req.ProfitYear && dupNameSlashDateOfBirth.Contains(dem.FullName)
                             group new { dem, pp, pd } by new
                             {
                                 dem.BadgeNumber,
@@ -209,7 +221,7 @@ public class CleanupReportService : IYearEndService
                                 dem.TerminationDate,
                                 dem.EmploymentStatusId,
                                 dem.StoreNumber,
-                                PdSsn = pd?.Ssn,
+                                PdSsn = pd.Ssn,
                                // pp.NetBalanceLastYear,
                                 pp.CurrentHoursYear,
                                 pp.CurrentIncomeYear
@@ -246,11 +258,16 @@ public class CleanupReportService : IYearEndService
 
             ISet<int> badgeNumbers = results.Results.Select(r => r.BadgeNumber).ToHashSet();
             var dict = await _contributionService.GetContributionYears(badgeNumbers);
-            
+            var balanceDict = await _contributionService.GetNetBalance(req.ProfitYear, badgeNumbers, cancellationToken);
+           
+
             foreach (DuplicateNamesAndBirthdaysResponse dup in results.Results)
             {
                  _ = dict.TryGetValue(dup.BadgeNumber, out int years);
                  dup.Years = (short)years;
+
+                 balanceDict.TryGetValue(dup.BadgeNumber, out var balance);
+                 dup.NetBalance = balance?.NetBalance ?? 0;
             }
 
             return new ReportResponseBase<DuplicateNamesAndBirthdaysResponse>()

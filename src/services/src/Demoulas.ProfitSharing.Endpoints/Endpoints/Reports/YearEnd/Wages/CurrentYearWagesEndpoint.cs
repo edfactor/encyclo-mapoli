@@ -1,6 +1,7 @@
 ﻿using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -10,7 +11,7 @@ using Demoulas.ProfitSharing.Security;
 using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Wages.CurrentYearWagesEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Wages;
-public class CurrentYearWagesEndpoint : EndpointWithCsvBase<PaginationRequestDto, WagesCurrentYearResponse, WagesCurrentYearResponseMap>
+public class CurrentYearWagesEndpoint : EndpointWithCsvBase<ProfitYearRequest, WagesCurrentYearResponse, WagesCurrentYearResponseMap>
 {
     private readonly IWagesService _reportService;
 
@@ -24,9 +25,9 @@ public class CurrentYearWagesEndpoint : EndpointWithCsvBase<PaginationRequestDto
         Get("wages-current-year");
         Summary(s =>
         {
-            s.Summary = "Wages for the current year";
+            s.Summary = "Wages for the specified year";
             s.Description =
-                "Provides a report on employees' wages for the current year. This report helps identify potential issues that need to be addressed before running profit sharing. The endpoint can be executed multiple times.";
+                "Provides a report on employees' wages for the specified year. This report helps identify potential issues that need to be addressed before running profit sharing. The endpoint can be executed multiple times.";
 
             s.ExampleRequest = SimpleExampleRequest;
             s.ResponseExamples = new Dictionary<int, object>
@@ -52,9 +53,9 @@ public class CurrentYearWagesEndpoint : EndpointWithCsvBase<PaginationRequestDto
 
     public override string ReportFileName => "EJR PROF-DOLLAR-EXTRACT YEAR=THIS";
 
-    public override async Task<ReportResponseBase<WagesCurrentYearResponse>> GetResponse(PaginationRequestDto req, CancellationToken ct)
+    public override async Task<ReportResponseBase<WagesCurrentYearResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
-        return await _reportService.GetWagesCurrentYearReport(req, ct);
+        return await _reportService.GetWagesReport(req, ct);
     }
 
 
@@ -66,8 +67,8 @@ public class CurrentYearWagesEndpoint : EndpointWithCsvBase<PaginationRequestDto
             Map().Index(0).Convert(_ => string.Empty);
             Map().Index(1).Convert(_ => string.Empty);
             Map(m => m.BadgeNumber).Index(2).Name("BADGE");
-            Map(m => m.HoursCurrentYear).Index(3).Name("HOURS THISYR");
-            Map(m => m.IncomeCurrentYear).Index(4).Name("DOLLARS THISYR");
+            Map(m => m.HoursCurrentYear).Index(3).Name("HOURS YR");
+            Map(m => m.IncomeCurrentYear).Index(4).Name("DOLLARS YR");
         }
     }
 }

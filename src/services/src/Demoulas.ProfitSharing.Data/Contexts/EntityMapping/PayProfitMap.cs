@@ -10,17 +10,17 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
     {
         _ = builder.ToTable("PAY_PROFIT");
 
-        _ = builder.HasKey(e => new {e.OracleHcmId, e.FiscalYear});
+        _ = builder.HasKey(e => new {e.OracleHcmId, e.ProfitYear});
 
         _ = builder.Property(e => e.OracleHcmId)
             .HasPrecision(15)
             .ValueGeneratedNever()
             .HasColumnName("ORACLE_HCM_ID");
 
-        _ = builder.Property(e => e.FiscalYear)
+        _ = builder.Property(e => e.ProfitYear)
             .HasPrecision(4)
             .ValueGeneratedNever()
-            .HasColumnName("FISCAL_YEAR");
+            .HasColumnName("PROFIT_YEAR");
 
         _ = builder.Property(e => e.CurrentHoursYear)
             .HasPrecision(6, 2)

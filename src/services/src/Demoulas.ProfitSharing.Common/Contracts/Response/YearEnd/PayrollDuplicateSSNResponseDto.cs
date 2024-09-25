@@ -23,7 +23,7 @@ public sealed record PayrollDuplicateSsnResponseDto
         return new PayrollDuplicateSsnResponseDto
         {
             BadgeNumber = 123,
-            Ssn = 123_45_6789,
+            Ssn = "XXX-XX-6789",
             Name = "John Doe",
             Address = AddressResponseDto.ResponseExample(),
             HireDate = SqlDateTime.MinValue.Value.ToDateOnly(),

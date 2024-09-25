@@ -4,7 +4,7 @@ public sealed class PayProfit
 {
     public required long OracleHcmId { get; set; }
 
-    public short FiscalYear { get; set; }
+    public short ProfitYear { get; set; }
 
     /// <summary>
     /// Hours towards Profit Sharing in the current year (updated weekly)

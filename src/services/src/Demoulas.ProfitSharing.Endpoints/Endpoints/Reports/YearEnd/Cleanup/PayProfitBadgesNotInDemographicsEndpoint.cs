@@ -7,15 +7,18 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
-public class PayProfitBadgesNotInDemographicsEndpoint : EndpointWithCsvBase<PaginationRequestDto, PayProfitBadgesNotInDemographicsResponse, PayProfitBadgesNotInDemographicsEndpoint.PayProfitBadgesNotInDemographicsResponseMap>
-{
-    private readonly IYearEndService _yearEndService;
 
-    public PayProfitBadgesNotInDemographicsEndpoint(IYearEndService yearEndService)
+#pragma warning disable S1133
+[Obsolete("Not possible in new schema")]
+#pragma warning restore S1133
+public class PayProfitBadgesNotInDemographicsEndpoint : EndpointWithCsvBase<ProfitYearRequest, PayProfitBadgesNotInDemographicsResponse, PayProfitBadgesNotInDemographicsEndpoint.PayProfitBadgesNotInDemographicsResponseMap>
+{
+    public PayProfitBadgesNotInDemographicsEndpoint()
     {
-        _yearEndService = yearEndService;
+    
     }
 
     public override void Configure()
@@ -51,9 +54,9 @@ public class PayProfitBadgesNotInDemographicsEndpoint : EndpointWithCsvBase<Pagi
 
     public override string ReportFileName => "PAYPROFIT-WITOUT-DEMOGRAPHICS";
 
-    public override async Task<ReportResponseBase<PayProfitBadgesNotInDemographicsResponse>> GetResponse(PaginationRequestDto req, CancellationToken ct)
+    public override Task<ReportResponseBase<PayProfitBadgesNotInDemographicsResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
-        return await _yearEndService.GetPayProfitBadgesNotInDemographics(req, ct);
+        throw new NotImplementedException();
     }
 
     public sealed class PayProfitBadgesNotInDemographicsResponseMap : ClassMap<PayProfitBadgesNotInDemographicsResponse>

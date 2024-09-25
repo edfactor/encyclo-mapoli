@@ -125,7 +125,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
     public async Task GetResponse_Should_HandleEmptyResults()
     {
         // Arrange
-        var request = new FiscalYearRequest { Skip = 0, Take = 10, ReportingYear = (short)DateTime.Today.Year };
+        var request = new ProfitYearRequest { Skip = 0, Take = 10, ProfitYear = (short)DateTime.Today.Year };
         var cancellationToken = CancellationToken.None;
         var expectedResponse = new ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>
         {
@@ -146,7 +146,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
     public async Task GetResponse_Should_HandleNullResults()
     {
         // Arrange
-        var request = new FiscalYearRequest { Skip = 0, Take = 10, ReportingYear = (short)DateTime.Today.Year };
+        var request = new ProfitYearRequest { Skip = 0, Take = 10, ProfitYear = (short)DateTime.Today.Year };
         var cancellationToken = CancellationToken.None;
         var expectedResponse = new ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>
         {
@@ -173,7 +173,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
         reportFileName.Should().Be("MILITARY TERM-REHIRE");
     }
 
-    private static async Task<(FiscalYearRequest Request, MilitaryAndRehireProfitSummaryResponse ExpectedResponse)> SetupTestEmployee(ProfitSharingDbContext c)
+    private static async Task<(ProfitYearRequest Request, MilitaryAndRehireProfitSummaryResponse ExpectedResponse)> SetupTestEmployee(ProfitSharingDbContext c)
     {
         // Setup
         MilitaryAndRehireProfitSummaryResponse example = MilitaryAndRehireProfitSummaryResponse.ResponseExample();
@@ -207,6 +207,6 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
         example.ReHiredDate = demo.ReHireDate ?? SqlDateTime.MinValue.Value.ToDateOnly();
 
 
-        return (new FiscalYearRequest { Skip = 0, Take = 10, ReportingYear = (short)demo.ReHireDate!.Value.Year}, example);
+        return (new ProfitYearRequest { Skip = 0, Take = 10, ProfitYear = (short)demo.ReHireDate!.Value.Year}, example);
     }
 }

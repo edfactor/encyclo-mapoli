@@ -5,12 +5,13 @@ using System.Web;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Client.Common;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Client.Reports.YearEnd;
-public sealed class YearEndClient : ClientBase, IYearEndService
+public sealed class CleanupReportClient : ClientBase, ICleanupReportService
 {
     private const string BaseApiPath = "api/yearend";
 
@@ -18,13 +19,13 @@ public sealed class YearEndClient : ClientBase, IYearEndService
     private readonly HttpClient _httpDownloadClient;
     private readonly JsonSerializerOptions _options;
 
-    public YearEndClient(IHttpClientFactory httpClientFactory) : 
+    public CleanupReportClient(IHttpClientFactory httpClientFactory) :
         this(httpClientFactory.CreateClient(Constants.Http.ReportsHttpClient),
             httpClientFactory.CreateClient(Constants.Http.ReportsDownloadClient))
     {
         
     }
-    public YearEndClient(HttpClient? jsonClient, HttpClient? fileDownloadClient) : base(jsonClient, fileDownloadClient)
+    public CleanupReportClient(HttpClient? jsonClient, HttpClient? fileDownloadClient) : base(jsonClient, fileDownloadClient)
     {
         ArgumentNullException.ThrowIfNull(jsonClient);
         ArgumentNullException.ThrowIfNull(fileDownloadClient);
@@ -33,14 +34,14 @@ public sealed class YearEndClient : ClientBase, IYearEndService
         _options = Constants.GetJsonSerializerOptions();
     }
 
-    public Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsNs(PaginationRequestDto req, CancellationToken ct)
+    public Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsNs(ProfitYearRequest req, CancellationToken ct)
     {
         return CallReportEndpoint<PayrollDuplicateSsnResponseDto>(req, "duplicate-ssns", ct);
     }
 
-    public Task<Stream> DownloadDuplicateSsNs(CancellationToken cancellationToken)
+    public Task<Stream> DownloadDuplicateSsNs(short profitYear, CancellationToken cancellationToken)
     {
-        return DownloadCsvReport("duplicate-ssns", cancellationToken);
+        return DownloadCsvReport(profitYear,"duplicate-ssns", cancellationToken);
     }
 
     public Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfit(PaginationRequestDto req, CancellationToken cancellationToken = default)
@@ -50,32 +51,32 @@ public sealed class YearEndClient : ClientBase, IYearEndService
 
     public Task<Stream> DownloadDemographicBadgesNotInPayProfit(CancellationToken ct = default)
     {
-        return DownloadCsvReport("demographic-badges-not-in-payprofit", ct);
+        return DownloadCsvReport(0, "demographic-badges-not-in-payprofit", ct);
     }
 
     #region Negative ETVA For SSNs On PayProfit
 
-    public Task<ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>> GetNegativeETVAForSSNsOnPayProfitResponse(PaginationRequestDto req, CancellationToken cancellationToken = default)
+    public Task<ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>> GetNegativeETVAForSSNsOnPayProfitResponse(ProfitYearRequest req, CancellationToken cancellationToken = default)
     {
         return CallReportEndpoint<NegativeEtvaForSsNsOnPayProfitResponse>(req, "negative-evta-ssn", cancellationToken);
     }
 
-    public Task<Stream> DownloadNegativeETVAForSSNsOnPayProfitResponse(CancellationToken cancellationToken = default)
+    public Task<Stream> DownloadNegativeETVAForSSNsOnPayProfitResponse(short profitYear, CancellationToken cancellationToken = default)
     {
-        return DownloadCsvReport("negative-evta-ssn", cancellationToken);
+        return DownloadCsvReport(profitYear,"negative-evta-ssn", cancellationToken);
     }
 
     #endregion
 
     #region Mismatched Ssns Payprofit And Demographics On Same Badge
-    public Task<ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>> GetMismatchedSsnsPayprofitAndDemographicsOnSameBadge(PaginationRequestDto req, CancellationToken cancellationToken = default)
+    public Task<ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>> GetMismatchedSsnsPayprofitAndDemographicsOnSameBadge(ProfitYearRequest req, CancellationToken cancellationToken = default)
     {
         return CallReportEndpoint<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>(req, "mismatched-ssns-payprofit-and-demo-on-same-badge", cancellationToken);
     }
 
-    public Task<Stream> DownloadMismatchedSsnsPayprofitAndDemographicsOnSameBadge(CancellationToken cancellationToken = default)
+    public Task<Stream> DownloadMismatchedSsnsPayprofitAndDemographicsOnSameBadge(short profitYear, CancellationToken cancellationToken = default)
     {
-        return DownloadCsvReport("mismatched-ssns-payprofit-and-demo-on-same-badge", cancellationToken);
+        return DownloadCsvReport(profitYear,"mismatched-ssns-payprofit-and-demo-on-same-badge", cancellationToken);
     }
 
     public Task<ReportResponseBase<PayProfitBadgesNotInDemographicsResponse>> GetPayProfitBadgesNotInDemographics(PaginationRequestDto req, CancellationToken ct = default)
@@ -85,7 +86,7 @@ public sealed class YearEndClient : ClientBase, IYearEndService
 
     public Task<Stream> DownloadPayProfitBadgesNotInDemographics(CancellationToken cancellationToken = default)
     {
-        return DownloadCsvReport("payprofit-badges-without-demographics", cancellationToken);
+        return DownloadCsvReport(0,"payprofit-badges-without-demographics", cancellationToken);
     }
 
     #endregion
@@ -98,7 +99,7 @@ public sealed class YearEndClient : ClientBase, IYearEndService
 
     public Task<Stream> DownloadPayrollDuplicateSsnsOnPayprofit(CancellationToken cancellationToken = default)
     {
-        return DownloadCsvReport("payroll-duplicate-ssns-on-payprofit", cancellationToken);
+        return DownloadCsvReport(0,"payroll-duplicate-ssns-on-payprofit", cancellationToken);
     }
 
     #endregion
@@ -110,17 +111,17 @@ public sealed class YearEndClient : ClientBase, IYearEndService
 
     public Task<Stream> DownloadNamesMissingComma(CancellationToken cancellationToken = default)
     {
-        return DownloadCsvReport("names-missing-commas", cancellationToken);
+        return DownloadCsvReport(0, "names-missing-commas", cancellationToken);
     }
 
-    public Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetDuplicateNamesAndBirthdays(PaginationRequestDto req, CancellationToken cancellationToken = default)
+    public Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetDuplicateNamesAndBirthdays(ProfitYearRequest req, CancellationToken cancellationToken = default)
     {
         return CallReportEndpoint<DuplicateNamesAndBirthdaysResponse>(req, "duplicate-names-and-birthdays", cancellationToken);
     }
 
-    public Task<Stream> DownloadDuplicateNamesAndBirthdays(CancellationToken cancellationToken = default)
+    public Task<Stream> DownloadDuplicateNamesAndBirthdays(short profitYear, CancellationToken cancellationToken = default)
     {
-        return DownloadCsvReport("duplicate-names-and-birthdays", cancellationToken);
+        return DownloadCsvReport(profitYear, "duplicate-names-and-birthdays", cancellationToken);
     }
 
     private async Task<ReportResponseBase<TResponseDto>> CallReportEndpoint<TResponseDto>(PaginationRequestDto req, string endpointRoute, CancellationToken cancellationToken) where TResponseDto : class
@@ -137,9 +138,9 @@ public sealed class YearEndClient : ClientBase, IYearEndService
             Response = new PaginatedResponseDto<TResponseDto>()
         };
     }
-    private Task<Stream> DownloadCsvReport(string endpointRoute, CancellationToken cancellationToken)
+    private Task<Stream> DownloadCsvReport(short profitYear, string endpointRoute, CancellationToken cancellationToken)
     {
-        UriBuilder uriBuilder = BuildPaginatedUrl(new PaginationRequestDto { Skip = 0, Take = int.MaxValue }, endpointRoute);
+        UriBuilder uriBuilder = BuildPaginatedUrl(new ProfitYearRequest {ProfitYear = profitYear, Skip = 0, Take = int.MaxValue }, endpointRoute);
         return _httpDownloadClient.GetStreamAsync(uriBuilder.Uri, cancellationToken);
     }
 

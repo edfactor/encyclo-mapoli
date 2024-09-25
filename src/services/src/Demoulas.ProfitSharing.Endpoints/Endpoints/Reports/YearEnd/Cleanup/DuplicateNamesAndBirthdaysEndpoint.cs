@@ -1,6 +1,7 @@
 ﻿using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -10,13 +11,13 @@ using Demoulas.ProfitSharing.Endpoints.TypeConverters;
 using Demoulas.ProfitSharing.Security;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
-public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<PaginationRequestDto, DuplicateNamesAndBirthdaysResponse, DuplicateNamesAndBirthdaysEndpoint.DuplicateNamesAndBirthdaysResponseMap>
+public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYearRequest, DuplicateNamesAndBirthdaysResponse, DuplicateNamesAndBirthdaysEndpoint.DuplicateNamesAndBirthdaysResponseMap>
 {
-    private readonly IYearEndService _yearEndService;
+    private readonly ICleanupReportService _cleanupReportService;
 
-    public DuplicateNamesAndBirthdaysEndpoint(IYearEndService yearEndService)
+    public DuplicateNamesAndBirthdaysEndpoint(ICleanupReportService cleanupReportService)
     {
-        _yearEndService = yearEndService;
+        _cleanupReportService = cleanupReportService;
     }
 
     public override void Configure()
@@ -56,7 +57,7 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<Pagination
                                     HoursCurrentYear = 1524,
                                     Name = "Henry Rollins",
                                     NetBalance = 52500,
-                                    Ssn = 99999999,
+                                    Ssn = "XXX-XX-1234",
                                     Status = 'A',
                                     StoreNumber = 22,
                                     Years = 3
@@ -74,9 +75,9 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<Pagination
 
     public override string ReportFileName => "duplicate-names-and-birthdays";
 
-    public override Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetResponse(PaginationRequestDto req, CancellationToken ct)
+    public override Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
-        return _yearEndService.GetDuplicateNamesAndBirthdays(req, ct);
+        return _cleanupReportService.GetDuplicateNamesAndBirthdays(req, ct);
     }
 
     public sealed class DuplicateNamesAndBirthdaysResponseMap : ClassMap<DuplicateNamesAndBirthdaysResponse>
