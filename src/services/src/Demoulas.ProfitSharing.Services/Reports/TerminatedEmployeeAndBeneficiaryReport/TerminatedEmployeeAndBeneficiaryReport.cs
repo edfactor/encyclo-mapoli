@@ -45,25 +45,6 @@ public class TerminatedEmployeeAndBeneficiaryReport(ILogger _logger, ProfitShari
         return report;
     }
 
-    public TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto> CreateData(DateOnly startDate, DateOnly endDate, decimal profitSharingYear)
-    {
-        this._startDate = startDate;
-        this._endDate = endDate;
-        this._profitSharingYearWithIteration = profitSharingYear;
-        this._effectiveRunDate = effectiveRunDate ?? DateOnly.FromDateTime(DateTime.Now);
-
-        // If the user supplies 9999.9, then figure out which profit sharing year based on today's date (_effectiveRunDate)
-        if (_profitSharingYearWithIteration == 9999.9m)
-        {
-            _profitSharingYearWithIteration = (_effectiveRunDate.Month < 4) ? _effectiveRunDate.Year - 1 : _effectiveRunDate.Year;
-        }
-
-        List<MemberSlice> memberSlices = RetrieveMemberSlices();
-        List<Member> members = MergeMemberSlicesToMembers(memberSlices);
-
-        return CreateData(members);
-    }
-
     private List<MemberSlice> RetrieveMemberSlices()
     {
         // slices of member information (aka employee or beneficiary information)
