@@ -51,6 +51,7 @@ public sealed class ZeroContributionReason : ILookupTable<byte>
         /// <summary>
         /// "Half the battle for DSM is remembering why 8 was used in 2007 so we can identify them even if never used again" -- Kevin Bouchard
         /// </summary>
+        [Obsolete("Carried over from COBOL. No longer used.")]
         public const byte Unknown = 8;
     }
 #pragma warning restore S1133

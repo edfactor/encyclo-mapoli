@@ -25,7 +25,21 @@ internal sealed class PayProfitFaker : Faker<PayProfit>
             .RuleFor(pc => pc.HoursExecutive, f => f.Random.Int(min: 0, max: 1000))
             .RuleFor(pc => pc.WeeksWorkedYear, f => f.Random.Byte(min: 0, max: 53))
             .RuleFor(pc => pc.CurrentIncomeYear, f => f.Finance.Amount(min: 100, max: 1_200_000, decimals: 2))
-            .RuleFor(pc => pc.SecondaryEarnings, f => f.Finance.Amount(min: 100, max: 1_200_000, decimals: 2));
+            .RuleFor(pc => pc.SecondaryEarnings, f => f.Finance.Amount(min: 100, max: 1_200_000, decimals: 2))
+            .RuleFor(pc => pc.EnrollmentId, f => f.PickRandom(Enrollment.Constants.NotEnrolled,
+                Enrollment.Constants.NewVestingPlanHasContributions,
+                Enrollment.Constants.NewVestingPlanHasForfeitureRecords,
+                Enrollment.Constants.OldVestingPlanHasContributions,
+                Enrollment.Constants.OldVestingPlanHasForfeitureRecords))
+            .RuleFor(pc => pc.BeneficiaryTypeId, f => f.PickRandom(BeneficiaryType.Constants.Beneficiary,
+                BeneficiaryType.Constants.Employee))
+            .RuleFor(pc => pc.EmployeeTypeId, f => f.PickRandom(EmployeeType.Constants.NewLastYear,
+                EmployeeType.Constants.NotNewLastYear))
+            .RuleFor(pc => pc.ZeroContributionReasonId, f => f.PickRandom(ZeroContributionReason.Constants.Normal,
+                ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested,
+                ZeroContributionReason.Constants.TerminatedEmployeeOver1000HoursWorkedGetsYearVested,
+                ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay,
+                ZeroContributionReason.Constants.Under21WithOver1Khours));
 
     }
 }
