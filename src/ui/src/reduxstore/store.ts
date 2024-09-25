@@ -2,17 +2,19 @@ import { configureStore } from "@reduxjs/toolkit";
 import generalSlice from "./slices/generalSlice";
 import securitySlice from "./slices/securitySlice";
 import { SecurityApi } from "./api/SecurityApi";
+import { YearsEndApi } from "./api/YearsEndApi";
 
 export const store = configureStore({
   reducer: {
     general: generalSlice,
     security: securitySlice,
 
-    [SecurityApi.reducerPath]: SecurityApi.reducer
+    [SecurityApi.reducerPath]: SecurityApi.reducer,
+    [YearsEndApi.reducerPath]: YearsEndApi.reducer
   },
 
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({ serializableCheck: false }).concat(SecurityApi.middleware)
+    getDefaultMiddleware({ serializableCheck: false }).concat(SecurityApi.middleware).concat(YearsEndApi.middleware)
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
