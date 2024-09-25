@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.SqlTypes;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using MassTransit.Initializers;
 using Microsoft.EntityFrameworkCore;
@@ -52,6 +53,11 @@ public sealed class CalendarService
     /// <returns>A task that represents the asynchronous operation. The task result contains a tuple with the start and end accounting dates.</returns>
     public async Task<(DateOnly BeginDate, DateOnly YearEndDate)> GetYearStartAndEndAccountingDates(short calendarYear, CancellationToken cancellationToken = default)
     {
+        if (calendarYear < SqlDateTime.MinValue.Value.Year || calendarYear > SqlDateTime.MaxValue.Value.Year)
+        {
+            throw new ArgumentOutOfRangeException(nameof(calendarYear), $"Calendar Year value must be between {SqlDateTime.MinValue.Value.Year} and {SqlDateTime.MaxValue.Value.Year}");
+        }
+
         var startingDate = await _dataContextFactory.UseReadOnlyContext(context =>
         {
             return context.CaldarRecords
