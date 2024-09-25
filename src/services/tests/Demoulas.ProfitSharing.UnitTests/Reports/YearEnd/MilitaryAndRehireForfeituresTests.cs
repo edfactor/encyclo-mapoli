@@ -190,17 +190,21 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
         var demo = await c.Demographics.FirstAsync();
         demo.EmploymentStatusId = EmploymentStatus.Constants.Active;
         demo.ReHireDate = DateTime.Today.ToDateOnly();
-        
+
+        var profitYear = (short)demo.ReHireDate!.Value.Year;
+
+
 
         var payProfit = await c.PayProfits.FirstAsync(pp => pp.OracleHcmId == demo.OracleHcmId);
         payProfit.EnrollmentId = Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
         payProfit.CurrentHoursYear = 2358;
+        payProfit.ProfitYear = profitYear;
 
         var details = await c.ProfitDetails.Where(pd => pd.Ssn == demo.Ssn).ToListAsync();
         foreach (var detail in details)
         {
             detail.Forfeiture = short.MaxValue;
-            detail.ProfitYear = 2021;
+            detail.ProfitYear = profitYear;
             detail.Remark = "Test remarks";
             detail.ProfitCodeId = ProfitCode.Constants.OutgoingForfeitures.Id;
         }
@@ -219,6 +223,6 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
         }).ToList();
 
 
-        return (new ProfitYearRequest { Skip = 0, Take = 10, ProfitYear = (short)demo.ReHireDate!.Value.Year}, example);
+        return (new ProfitYearRequest { Skip = 0, Take = 10, ProfitYear = profitYear }, example);
     }
 }
