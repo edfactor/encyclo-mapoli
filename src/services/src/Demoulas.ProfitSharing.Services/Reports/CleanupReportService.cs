@@ -14,12 +14,15 @@ namespace Demoulas.ProfitSharing.Services.Reports;
 public class CleanupReportService : IYearEndService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
+    private readonly ContributionService _contributionService;
     private readonly ILogger<CleanupReportService> _logger;
 
     public CleanupReportService(IProfitSharingDataContextFactory dataContextFactory, 
+        ContributionService contributionService,
         ILoggerFactory factory)
     {
         _dataContextFactory = dataContextFactory;
+        _contributionService = contributionService;
         _logger = factory.CreateLogger<CleanupReportService>();
     }
 
@@ -34,7 +37,7 @@ public class CleanupReportService : IYearEndService
                                from pd in demPdJoin.DefaultIfEmpty()
                                join pp in ctx.PayProfits on dem.OracleHcmId equals pp.OracleHcmId into DemPdPpJoin
                                from DemPdPp in DemPdPpJoin.DefaultIfEmpty()
-                               where dupSsns.Contains(dem.Ssn)
+                               where DemPdPp.FiscalYear == req.ReportingYear &&  dupSsns.Contains(dem.Ssn)
                                group new { dem, DemPdPp }
                                    by new
                                    {
@@ -174,7 +177,7 @@ public class CleanupReportService : IYearEndService
         }
     }
 
-    public async Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetDuplicateNamesAndBirthdays(PaginationRequestDto req, CancellationToken cancellationToken = default)
+    public async Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetDuplicateNamesAndBirthdays(FiscalYearRequest req, CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("Request BEGIN DUPLICATE NAMES AND BIRTHDAYS"))
         {
@@ -190,7 +193,7 @@ public class CleanupReportService : IYearEndService
                             from pp in tmpPayProfit.DefaultIfEmpty()
                             join pdLj in ctx.ProfitDetails on dem.Ssn equals pdLj.Ssn into tmpProfitDetails
                             from pd in tmpProfitDetails.DefaultIfEmpty()
-                            where dupNameSlashDateOfBirth.Contains(dem.FullName)
+                            where pp.FiscalYear == req.ReportingYear && dupNameSlashDateOfBirth.Contains(dem.FullName)
                             group new { dem, pp, pd } by new
                             {
                                 dem.BadgeNumber,
@@ -202,13 +205,12 @@ public class CleanupReportService : IYearEndService
                                 dem.Address.State,
                                 dem.Address.PostalCode,
                                 CountryISO = dem.Address.CountryIso,
-                                pp.CompanyContributionYears,
                                 dem.HireDate,
                                 dem.TerminationDate,
                                 dem.EmploymentStatusId,
                                 dem.StoreNumber,
                                 PdSsn = pd?.Ssn,
-                                pp.NetBalanceLastYear,
+                               // pp.NetBalanceLastYear,
                                 pp.CurrentHoursYear,
                                 pp.CurrentIncomeYear
                             } into g
@@ -227,21 +229,29 @@ public class CleanupReportService : IYearEndService
                                     CountryIso = g.Key.CountryISO,
                                     PostalCode = g.Key.PostalCode,
                                 },
-                                Years = g.Key.CompanyContributionYears,
                                 HireDate = g.Key.HireDate,
                                 TerminationDate = g.Key.TerminationDate,
                                 Status = g.Key.EmploymentStatusId,
                                 StoreNumber = g.Key.StoreNumber,
                                 Count = g.Count(),
-                                NetBalance = g.Key.NetBalanceLastYear,
-                                HoursCurrentYear = g.Key.HoursCurrentYear,
-                                IncomeCurrentYear = g.Key.IncomeCurrentYear
+                                //NetBalance = g.Key.NetBalanceLastYear,
+                                HoursCurrentYear = g.Key.CurrentHoursYear,
+                                IncomeCurrentYear = g.Key.CurrentIncomeYear
                             };
 
                 return await query.ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken: cancellationToken);
             });
 
             _logger.LogInformation("Returned {Results} records", results.Results.Count());
+
+            ISet<int> badgeNumbers = results.Results.Select(r => r.BadgeNumber).ToHashSet();
+            var dict = await _contributionService.GetContributionYears(badgeNumbers);
+            
+            foreach (DuplicateNamesAndBirthdaysResponse dup in results.Results)
+            {
+                 _ = dict.TryGetValue(dup.BadgeNumber, out int years);
+                 dup.Years = (short)years;
+            }
 
             return new ReportResponseBase<DuplicateNamesAndBirthdaysResponse>()
             {
