@@ -139,7 +139,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
             foreach (var dem in c.Demographics.Take(mismatchedValues))
             {
                 long lastSevenDigits = _generator.CreateId() % 10_000_000;
-                dem.BadgeNumber += (int)lastSevenDigits;
+                dem.OracleHcmId += (int)lastSevenDigits;
             }
 
             await c.SaveChangesAsync();
@@ -165,13 +165,16 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         await MockDbContextFactory.UseWritableContext(async c =>
         {
-            
+
             byte mismatchedValues = 5;
 
-            await c.Demographics.Take(mismatchedValues).ForEachAsync(dem =>
+            foreach (var dem in c.Demographics.Take(mismatchedValues))
             {
-                dem.BadgeNumber = dem.BadgeNumber + c.PayProfits.Count() + 1;
-            });
+                long lastSevenDigits = _generator.CreateId() % 10_000_000;
+                dem.OracleHcmId += (int)lastSevenDigits;
+            }
+
+            await c.SaveChangesAsync();
 
             await c.SaveChangesAsync();
 
