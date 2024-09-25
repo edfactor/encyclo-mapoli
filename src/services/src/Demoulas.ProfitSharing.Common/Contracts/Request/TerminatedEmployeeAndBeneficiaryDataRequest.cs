@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
+using Demoulas.Common.Contracts.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 
-// Note that the text endpoint does not support paging, so we do not extend the PaginationRequestDto
-public class TerminatedEmployeeAndBeneficiaryReportRequestDto
+public sealed record TerminatedEmployeeAndBeneficiaryDataRequest : PaginationRequestDto
 {
     [DefaultValue("01/07/2023")]
     public required DateOnly StartDate { get; set; }

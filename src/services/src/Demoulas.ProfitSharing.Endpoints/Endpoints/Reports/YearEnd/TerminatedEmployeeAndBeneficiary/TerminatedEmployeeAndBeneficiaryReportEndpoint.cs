@@ -25,8 +25,7 @@ public class TerminatedEmployeeAndBeneficiaryReportEndpoint(
 {
     public override void Configure()
     {
-        Verbs(Http.GET);
-        Routes("/terminated-employee-and-beneficiary-report");
+        Get("/terminated-employee-and-beneficiary-report/");
         Summary(s =>
         {
             s.Summary = "Provide the Terminated Employee and Beneficiary Report (QPAY066) report.";
@@ -39,7 +38,7 @@ public class TerminatedEmployeeAndBeneficiaryReportEndpoint(
 
     public override async Task HandleAsync(TerminatedEmployeeAndBeneficiaryReportRequestDto req, CancellationToken ct)
     {
-        string report = await terminatedEmployeeAndBeneficiaryReportService.GetReport(req.startDate, req.endDate, req.profitShareYear, ct);
+        string report = await terminatedEmployeeAndBeneficiaryReportService.GetReport(req.StartDate, req.EndDate, req.ProfitShareYear, ct);
         HttpContext.Response.ContentType = "text/plain";
         await HttpContext.Response.WriteAsync(report, ct);
         await Task.CompletedTask;

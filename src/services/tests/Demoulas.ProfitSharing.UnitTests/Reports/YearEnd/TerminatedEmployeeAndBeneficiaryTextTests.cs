@@ -2,7 +2,6 @@
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Client.Reports.YearEnd;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.TerminatedEmployeeAndBeneficiary;
 using Demoulas.ProfitSharing.Security;
@@ -16,13 +15,14 @@ using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
-public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
+public class TerminatedEmployeeAndBeneficiaryTextTests : ApiTestBase<Program>
 {
     private readonly YearEndClient _yearEndClient;
-    
-    public TerminatedEmployeeAndBeneficiaryTests()
+    private readonly ITestOutputHelper _testOutputHelper;
+
+    public TerminatedEmployeeAndBeneficiaryTextTests(ITestOutputHelper testOutputHelper)
     {
-      
+        _testOutputHelper = testOutputHelper;
         _yearEndClient = new YearEndClient(ApiClient, DownloadClient);
     }
 
@@ -33,6 +33,7 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
         ProfitShareYear = 2023.0m
     };
 
+
     [Fact(DisplayName = "Test report with nobody applicable - sanity check")]
     public async Task DownloadTerminatedEmployeeAndBeneficiaryReport()
     {
@@ -41,22 +42,24 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
 
         // Act
         var response =
-            await ApiClient
-                .GETAsync<TerminatedEmployeeAndBeneficiaryDataEndpoint,
-                    TerminatedEmployeeAndBeneficiaryReportRequestDto, TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto>> (requestDto);
+            await DownloadClient
+                .GETAsync<TerminatedEmployeeAndBeneficiaryReportEndpoint,
+                    TerminatedEmployeeAndBeneficiaryReportRequestDto, string>(requestDto);
+        response.Response.Content.Should().NotBeNull();
+        string actualText = await response.Response.Content.ReadAsStringAsync();
 
         // Assert
-        response.Response.Content.Should().NotBeNull();
-        response.Result.ReportName.Should().BeEquivalentTo("Terminated Employee and Beneficiary Report");
+        actualText.Should().BeEquivalentTo(@"
 
-        response.Result.Response.Total.ShouldBeEquivalentTo(0);
-        response.Result.Response.Results.Count().ShouldBeEquivalentTo(0);
+TOTALS
+AMOUNT IN PROFIT SHARING                   0.00
+VESTED AMOUNT                              0.00
+TOTAL FORFEITURES                          0.00
+TOTAL BENEFICIARY ALLOCTIONS               0.00
+");
 
-        response.Result.TotalEndingBalance.ShouldBeEquivalentTo(0m);
-        response.Result.TotalVested.ShouldBeEquivalentTo(0m);
-        response.Result.TotalForfeit.ShouldBeEquivalentTo(0m);
-        response.Result.TotalBeneficiaryAllocation.ShouldBeEquivalentTo(0m);
-        
+        _testOutputHelper.WriteLine(actualText);
+
     }
 
 
@@ -65,9 +68,9 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
     {
         // Act
         var response =
-            await ApiClient
-                .GETAsync<TerminatedEmployeeAndBeneficiaryDataEndpoint,
-                    TerminatedEmployeeAndBeneficiaryReportRequestDto, TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto>>(requestDto);
+            await DownloadClient
+                .GETAsync<TerminatedEmployeeAndBeneficiaryReportEndpoint,
+                    TerminatedEmployeeAndBeneficiaryReportRequestDto, string>(requestDto);
 
         // Assert
         response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -118,44 +121,39 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
             // Lock age and todays' date computation when testing. 
             TerminatedEmployeeAndBeneficiaryReportService.useThisForTodaysDateWhenTesting = new DateOnly(2024, 9, 7);
 
-            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-
             // Act
+            DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+
             var response =
-                await ApiClient
-                    .GETAsync<TerminatedEmployeeAndBeneficiaryDataEndpoint,
-                        TerminatedEmployeeAndBeneficiaryReportRequestDto, TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto>>(requestDto);
+                await DownloadClient
+                    .GETAsync<TerminatedEmployeeAndBeneficiaryReportEndpoint,
+                        TerminatedEmployeeAndBeneficiaryReportRequestDto, string>(requestDto);
+
 
             // Assert
             response.Response.Content.Should().NotBeNull();
-            response.Result.ReportName.Should().BeEquivalentTo("Terminated Employee and Beneficiary Report");
+            string actualText = await response.Response.Content.ReadAsStringAsync();
 
-            response.Result.Response.Total.ShouldBeEquivalentTo(1);
-            response.Result.Response.Results.Count().ShouldBeEquivalentTo(1);
+            _testOutputHelper.WriteLine(actualText);
 
-            response.Result.TotalEndingBalance.ShouldBeEquivalentTo(846.15m);
-            response.Result.TotalVested.ShouldBeEquivalentTo(122.24m);
-            response.Result.TotalForfeit.ShouldBeEquivalentTo(277.91m);
-            response.Result.TotalBeneficiaryAllocation.ShouldBeEquivalentTo(222.23m);
+            string expectedText = @"DJDE JDE=LANIQS,JDL=DFLT4,END,;
+DON MULLIGAN
+QPAY066    TERMINATION - PROFIT SHARING                    DATE SEP 07, 2024  YEAR:   2023.0                         PAGE:   000001
+           FROM 01/07/2023 TO 01/02/2024
 
-            TerminatedEmployeeAndBeneficiaryDataResponseDto member = response.Result.Response.Results.First();
-            member.Should().ShouldBeEquivalentTo(new TerminatedEmployeeAndBeneficiaryDataResponseDto()
-            {
-                Name = "Smith, Nancy K",
-                BadgePSn = "9988",
-                BeginningBalance = 446m,
-                BeneficiaryAllocation = 222.23m,
-                DistributionAmount = -99.99m,
-                Forfeit = 846.15m,
-                EndingBalance = 846.15m,
-                VestedBalance = 122.24m,
-                DateTerm = new DateOnly(2023, 6, 1),
-                YtdPsHours = 0m,
-                VestedPercent = 100,
-                Age = 24,
-                EnrollmentCode = null
-            });
-            
+                                  BEGINNING  BENEFICIARY   DISTRIBUTION                 ENDING       VESTED    DATE      YTD VST     E
+BADGE/PSN # EMPLOYEE NAME           BALANCE  ALLOCATION       AMOUNT       FORFEIT      BALANCE      BALANCE   TERM   PS HRS PCT AGE C
+
+       9988 Smith, Nancy K           446.00       222.23        99.99-      277.91       846.15       122.24  230601    0.00 100  24
+
+
+TOTALS
+AMOUNT IN PROFIT SHARING                 846.15
+VESTED AMOUNT                            122.24
+TOTAL FORFEITURES                        277.91
+TOTAL BENEFICIARY ALLOCTIONS             222.23
+";
+            expectedText.Should().BeEquivalentTo(actualText);
         });
     }
 
@@ -183,39 +181,34 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
 
             var response =
                 await DownloadClient
-                    .GETAsync<TerminatedEmployeeAndBeneficiaryDataEndpoint,
-                        TerminatedEmployeeAndBeneficiaryReportRequestDto, TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto>>(requestDto);
+                    .GETAsync<TerminatedEmployeeAndBeneficiaryReportEndpoint,
+                        TerminatedEmployeeAndBeneficiaryReportRequestDto, string>(requestDto);
 
             // Assert
             response.Response.Content.Should().NotBeNull();
-            response.Result.ReportName.Should().BeEquivalentTo("Terminated Employee and Beneficiary Report");
+            string actualText = await response.Response.Content.ReadAsStringAsync();
 
-            response.Result.Response.Total.ShouldBeEquivalentTo(1);
-            response.Result.Response.Results.Count().ShouldBeEquivalentTo(1);
+            _testOutputHelper.WriteLine(actualText);
 
-            response.Result.TotalEndingBalance.ShouldBeEquivalentTo(379.44);
-            response.Result.TotalVested.ShouldBeEquivalentTo(379.44);
-            response.Result.TotalForfeit.ShouldBeEquivalentTo(0m);
-            response.Result.TotalBeneficiaryAllocation.ShouldBeEquivalentTo(0m);
+             string expectedText = @"DJDE JDE=LANIQS,JDL=DFLT4,END,;
+DON MULLIGAN
+QPAY066    TERMINATION - PROFIT SHARING                    DATE SEP 07, 2024  YEAR:   2023.0                         PAGE:   000001
+           FROM 01/07/2023 TO 01/02/2024
 
-            TerminatedEmployeeAndBeneficiaryDataResponseDto member = response.Result.Response.Results.First();
-            member.Should().ShouldBeEquivalentTo(new TerminatedEmployeeAndBeneficiaryDataResponseDto()
-            {
-                Name = "One, Rogue I",
-                BadgePSn = "888888",
-                BeginningBalance = 379.44m,
-                BeneficiaryAllocation = 0m,
-                DistributionAmount = 0m,
-                Forfeit = 0m,
-                EndingBalance = 379.44m,
-                VestedBalance = 379.44m,
-                DateTerm = null,
-                YtdPsHours = 0m,
-                VestedPercent = 100,
-                Age = 34,
-                EnrollmentCode = null
-            });
+                                  BEGINNING  BENEFICIARY   DISTRIBUTION                 ENDING       VESTED    DATE      YTD VST     E
+BADGE/PSN # EMPLOYEE NAME           BALANCE  ALLOCATION       AMOUNT       FORFEIT      BALANCE      BALANCE   TERM   PS HRS PCT AGE C
 
+     888888 One, Rogue I             379.44         0.00         0.00         0.00       379.44       379.44            0.00 100  34
+
+
+TOTALS
+AMOUNT IN PROFIT SHARING                 379.44
+VESTED AMOUNT                            379.44
+TOTAL FORFEITURES                          0.00
+TOTAL BENEFICIARY ALLOCTIONS               0.00
+";
+
+             actualText.Should().BeEquivalentTo(expectedText);
         });
     }
 
