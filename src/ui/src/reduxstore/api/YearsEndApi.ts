@@ -15,7 +15,7 @@ export const YearsEndApi = createApi({
       return headers;
     }
   }),
-  reducerPath: "securityApi",
+  reducerPath: "yearsEndApi",
   endpoints: (builder) => ({
     getDuplicateSSNs: builder.query({
       query: () => "yearend/duplicate-ssns"
