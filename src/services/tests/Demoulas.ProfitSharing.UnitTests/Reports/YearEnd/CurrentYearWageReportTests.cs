@@ -36,7 +36,7 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
 
         var expectedResponse = new ReportResponseBase<WagesCurrentYearResponse>
         {
-            ReportName = "EJR PROF-DOLLAR-EXTRACT YEAR=THIS",
+            ReportName = $"EJR PROF-DOLLAR-EXTRACT YEAR={2023}",
             ReportDate = DateTimeOffset.Now,
             Response = new PaginatedResponseDto<WagesCurrentYearResponse> { Results = new List<WagesCurrentYearResponse> { } }
         };
@@ -84,7 +84,7 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
         // Validate the headers
         var headers = csv.HeaderRecord;
         headers.Should().NotBeNull();
-        headers.Should().ContainInOrder("", "", "BADGE", "HOURS THISYR", "DOLLARS THISYR");
+        headers.Should().ContainInOrder("", "", "BADGE", "HOURS YR", "DOLLARS YR");
 
     }
 

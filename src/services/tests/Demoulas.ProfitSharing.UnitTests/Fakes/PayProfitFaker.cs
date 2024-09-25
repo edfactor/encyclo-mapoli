@@ -21,6 +21,7 @@ internal sealed class PayProfitFaker : Faker<PayProfit>
 
                 return currentDemographic;
             })
+            .RuleFor(pc => pc.ProfitYear, f => f.PickRandom<short>(2020, 2021, 2022, 2023))
             .RuleFor(pc => pc.CurrentHoursYear, f => f.Random.Int(min: 0, max: 3000))
             .RuleFor(pc => pc.HoursExecutive, f => f.Random.Int(min: 0, max: 1000))
             .RuleFor(pc => pc.WeeksWorkedYear, f => f.Random.Byte(min: 0, max: 53))
