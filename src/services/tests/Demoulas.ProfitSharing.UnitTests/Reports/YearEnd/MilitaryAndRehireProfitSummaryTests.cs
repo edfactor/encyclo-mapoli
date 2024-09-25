@@ -183,10 +183,9 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
         demo.ReHireDate = DateTime.Today.ToDateOnly();
         
 
-        var payProfit = await c.PayProfits.FirstAsync(pp => pp.Ssn == demo.Ssn);
+        var payProfit = await c.PayProfits.FirstAsync(pp => pp.OracleHcmId == demo.OracleHcmId);
         payProfit.EnrollmentId = Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
-        payProfit.CompanyContributionYears = 3;
-        payProfit.HoursCurrentYear = 2358;
+        payProfit.CurrentHoursYear = 2358;
 
         var details = await c.ProfitDetails.Where(pd => pd.Ssn == demo.Ssn).ToListAsync();
         foreach (var detail in details)
@@ -202,8 +201,8 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
         example.BadgeNumber = demo.BadgeNumber;
         example.Ssn = demo.Ssn.MaskSsn();
         example.FullName = demo.FullName;
-        example.CompanyContributionYears = payProfit.CompanyContributionYears;
-        example.HoursCurrentYear = payProfit.HoursCurrentYear ?? 0;
+        example.CompanyContributionYears = 0;
+        example.HoursCurrentYear = payProfit.CurrentHoursYear ?? 0;
         example.ReHiredDate = demo.ReHireDate ?? SqlDateTime.MinValue.Value.ToDateOnly();
 
 
