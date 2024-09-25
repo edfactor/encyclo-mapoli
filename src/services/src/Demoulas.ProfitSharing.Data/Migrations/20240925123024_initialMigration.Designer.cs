@@ -12,8 +12,8 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    [Migration("20240920173723_alterPayProfitToContainFiscalYear2")]
-    partial class alterPayProfitToContainFiscalYear2
+    [Migration("20240925123024_initialMigration")]
+    partial class initialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27270,25 +27270,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         },
                         new
                         {
-                            WeekEndingDate = 241231,
-                            AccAltKeyNum = 1144L,
-                            AccApWkend = 250104,
-                            AccCalPeriod = 12,
-                            AccCln60Period = 12,
-                            AccCln60Week = 52,
-                            AccCln61Period = 12,
-                            AccCln61Week = 52,
-                            AccCln6XPeriod = 12,
-                            AccCln6XWeek = 52,
-                            AccCln7XPeriod = 12,
-                            AccCln7XWeek = 51,
-                            AccPeriod = 12,
-                            AccQuarter = 1,
-                            AccWeekN = 1,
-                            WeekDate = 20250104
-                        },
-                        new
-                        {
                             WeekEndingDate = 240629,
                             AccAltKeyNum = 1145L,
                             AccApWkend = 240706,
@@ -28790,10 +28771,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(15)")
                         .HasColumnName("ORACLE_HCM_ID");
 
-                    b.Property<short>("FiscalYear")
+                    b.Property<short>("ProfitYear")
                         .HasPrecision(4)
                         .HasColumnType("NUMBER(4)")
-                        .HasColumnName("FISCAL_YEAR");
+                        .HasColumnName("PROFIT_YEAR");
 
                     b.Property<byte>("BeneficiaryTypeId")
                         .HasColumnType("NUMBER(3)")
@@ -28810,6 +28791,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasPrecision(9, 2)
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("CURRENT_INCOME_YEAR");
+
+                    b.Property<decimal>("EarningsEtvaValue")
+                        .HasPrecision(9, 2)
+                        .HasColumnType("DECIMAL(9,2)")
+                        .HasColumnName("EARNINGS_ETVA_VALUE");
 
                     b.Property<byte>("EmployeeTypeId")
                         .HasColumnType("NUMBER(3)")
@@ -28838,6 +28824,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("SECONDARY_EARNINGS");
 
+                    b.Property<decimal?>("SecondaryEtvaEarnings")
+                        .HasPrecision(9, 2)
+                        .HasColumnType("DECIMAL(9,2)")
+                        .HasColumnName("SECONDARY_ETVA_EARNINGS");
+
                     b.Property<byte>("WeeksWorkedYear")
                         .HasPrecision(2)
                         .HasColumnType("NUMBER(2)")
@@ -28847,7 +28838,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("ZERO_CONTRIBUTION_REASON_ID");
 
-                    b.HasKey("OracleHcmId", "FiscalYear")
+                    b.HasKey("OracleHcmId", "ProfitYear")
                         .HasName("PK_PAY_PROFIT");
 
                     b.HasIndex("BeneficiaryTypeId")

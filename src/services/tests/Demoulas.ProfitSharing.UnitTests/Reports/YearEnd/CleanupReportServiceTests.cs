@@ -3,6 +3,7 @@ using System.Text.Json;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Client.Reports.YearEnd;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Base;
 using FluentAssertions;
@@ -15,7 +16,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
 {
     private readonly CleanupReportClient _cleanupReportClient;
     private readonly ITestOutputHelper _testOutputHelper;
-    private readonly PaginationRequestDto _paginationRequest = new PaginationRequestDto { Skip = 0, Take = byte.MaxValue };
+    private readonly ProfitYearRequest _paginationRequest = new ProfitYearRequest { Skip = 0, Take = byte.MaxValue };
     private readonly IdGenerator _generator;
 
 

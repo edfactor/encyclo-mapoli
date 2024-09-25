@@ -12,8 +12,8 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    [Migration("20240910201556_initialMigration")]
-    partial class initialMigration
+    [Migration("20240925130024_dropLegacyTable")]
+    partial class dropLegacyTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -28766,47 +28766,36 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.PayProfit", b =>
                 {
-                    b.Property<int>("BadgeNumber")
-                        .HasPrecision(7)
-                        .HasColumnType("NUMBER(7)")
-                        .HasColumnName("BADGE_NUMBER");
+                    b.Property<long>("OracleHcmId")
+                        .HasPrecision(15)
+                        .HasColumnType("NUMBER(15)")
+                        .HasColumnName("ORACLE_HCM_ID");
+
+                    b.Property<short>("ProfitYear")
+                        .HasPrecision(4)
+                        .HasColumnType("NUMBER(4)")
+                        .HasColumnName("PROFIT_YEAR");
 
                     b.Property<byte>("BeneficiaryTypeId")
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("BENEFICIARY_ID");
 
-                    b.Property<bool>("CertificateIssuedLastYear")
-                        .HasColumnType("NUMBER(1)")
-                        .HasColumnName("CERTIFICATE_ISSUED_LAST_YEAR");
+                    b.Property<decimal?>("CurrentHoursYear")
+                        .IsRequired()
+                        .HasPrecision(6, 2)
+                        .HasColumnType("DECIMAL(6,2)")
+                        .HasColumnName("CURRENT_HOURS_YEAR");
 
-                    b.Property<byte>("CompanyContributionYears")
-                        .HasColumnType("NUMBER(3)")
-                        .HasColumnName("COMPANY_CONTRIBUTION_YEARS");
-
-                    b.Property<decimal>("ContributionAmountLastYear")
+                    b.Property<decimal?>("CurrentIncomeYear")
+                        .IsRequired()
                         .HasPrecision(9, 2)
                         .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("CONTRIBUTION_AMOUNT_LAST_YEAR");
-
-                    b.Property<decimal>("EarningLastYear")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("EARNINGS_LAST_YEAR");
-
-                    b.Property<decimal>("EarningsAfterApplyingVestingRules")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("EARNINGS_AFTER_APPLYING_VESTING_RULES");
+                        .HasColumnName("CURRENT_INCOME_YEAR");
 
                     b.Property<decimal>("EarningsEtvaValue")
                         .HasPrecision(9, 2)
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("EARNINGS_ETVA_VALUE");
-
-                    b.Property<decimal?>("EarningsPriorEtvaValue")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("EARNINGS_PRIOR_ETVA_VALUE");
 
                     b.Property<byte>("EmployeeTypeId")
                         .HasColumnType("NUMBER(3)")
@@ -28816,57 +28805,15 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("ENROLLMENT_ID");
 
-                    b.Property<decimal>("ForfeitureAmountLastYear")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("FORFEITURE_AMOUNT_LAST_YEAR");
-
-                    b.Property<decimal?>("HoursCurrentYear")
-                        .IsRequired()
-                        .HasPrecision(6, 2)
-                        .HasColumnType("DECIMAL(6,2)")
-                        .HasColumnName("HOURS_CURRENT_YEAR");
-
                     b.Property<decimal>("HoursExecutive")
                         .HasPrecision(6, 2)
                         .HasColumnType("DECIMAL(6,2)")
                         .HasColumnName("HOURS_EXECUTIVE");
 
-                    b.Property<decimal>("HoursLastYear")
-                        .HasPrecision(6, 2)
-                        .HasColumnType("DECIMAL(6,2)")
-                        .HasColumnName("HOURS_LAST_YEAR");
-
-                    b.Property<decimal?>("IncomeCurrentYear")
-                        .IsRequired()
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("INCOME_CURRENT_YEAR");
-
                     b.Property<decimal>("IncomeExecutive")
                         .HasPrecision(9, 2)
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("INCOME_EXECUTIVE");
-
-                    b.Property<decimal>("IncomeLastYear")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("INCOME_LAST_YEAR");
-
-                    b.Property<short>("InitialContributionYear")
-                        .HasPrecision(4)
-                        .HasColumnType("NUMBER(4)")
-                        .HasColumnName("INITIAL_CONTRIBUTION_YEAR");
-
-                    b.Property<decimal>("NetBalanceLastYear")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("NET_BALANCE_LAST_YEAR");
-
-                    b.Property<int>("PointsEarnedLastYear")
-                        .HasPrecision(5)
-                        .HasColumnType("NUMBER(5)")
-                        .HasColumnName("POINTS_EARNED_LAST_YEAR");
 
                     b.Property<DateTime?>("PsCertificateIssuedDate")
                         .HasColumnType("DATE")
@@ -28882,21 +28829,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("SECONDARY_ETVA_EARNINGS");
 
-                    b.Property<long>("Ssn")
-                        .HasPrecision(9)
-                        .HasColumnType("NUMBER(9)")
-                        .HasColumnName("SSN");
-
-                    b.Property<decimal>("VestedBalanceLastYear")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("VESTED_BALANCE_LAST_YEAR");
-
-                    b.Property<byte>("WeeksWorkedLastYear")
-                        .HasPrecision(2)
-                        .HasColumnType("NUMBER(2)")
-                        .HasColumnName("WEEKS_WORKED_LAST_YEAR");
-
                     b.Property<byte>("WeeksWorkedYear")
                         .HasPrecision(2)
                         .HasColumnType("NUMBER(2)")
@@ -28906,7 +28838,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("ZERO_CONTRIBUTION_REASON_ID");
 
-                    b.HasKey("BadgeNumber")
+                    b.HasKey("OracleHcmId", "ProfitYear")
                         .HasName("PK_PAY_PROFIT");
 
                     b.HasIndex("BeneficiaryTypeId")
@@ -29990,6 +29922,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_PAY_PROFIT_ENROLLMENT_ENROLLMENTID");
 
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Demographic", "Demographic")
+                        .WithMany("PayProfits")
+                        .HasForeignKey("OracleHcmId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_PAY_PROFIT_DEMOGRAPHIC_ORACLE_HCM_ID");
+
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.ZeroContributionReason", "ZeroContributionReason")
                         .WithMany("Profits")
                         .HasForeignKey("ZeroContributionReasonId")
@@ -29997,6 +29936,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasConstraintName("FK_PAY_PROFIT_ZEROCONTRIBUTIONREASON_ZEROCONTRIBUTIONREASONID");
 
                     b.Navigation("BeneficiaryType");
+
+                    b.Navigation("Demographic");
 
                     b.Navigation("EmployeeType");
 
@@ -30041,6 +29982,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BeneficiaryType", b =>
                 {
                     b.Navigation("Profits");
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Demographic", b =>
+                {
+                    b.Navigation("PayProfits");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Department", b =>

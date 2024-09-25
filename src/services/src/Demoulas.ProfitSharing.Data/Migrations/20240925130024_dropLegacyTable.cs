@@ -1,72 +1,18 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class alterPayProfitToContainFiscalYear2 : Migration
+    public partial class dropLegacyTable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "CURRENTHOURS",
-                table: "PAY_PROFIT");
-
-            migrationBuilder.DropColumn(
-                name: "CURRENTINCOME",
-                table: "PAY_PROFIT");
-
-            migrationBuilder.DropColumn(
-                name: "EARNINGSAFTERAPPLYINGVESTINGRULES",
-                table: "PAY_PROFIT");
-
-            migrationBuilder.DropColumn(
-                name: "EARNINGSETVAVALUE",
-                table: "PAY_PROFIT");
-
-            migrationBuilder.DropColumn(
-                name: "EARNINGSPRIORETVAVALUE",
-                table: "PAY_PROFIT");
-
-            migrationBuilder.DropColumn(
-                name: "SECONDARYETVAEARNINGS",
-                table: "PAY_PROFIT");
-
-            migrationBuilder.RenameColumn(
-                name: "SECONDARYEARNINGS",
-                table: "PAY_PROFIT",
-                newName: "SECONDARY_EARNINGS");
-
-            migrationBuilder.AlterColumn<decimal>(
-                name: "SECONDARY_EARNINGS",
-                table: "PAY_PROFIT",
-                type: "DECIMAL(9,2)",
-                precision: 9,
-                scale: 2,
-                nullable: true,
-                oldClrType: typeof(decimal),
-                oldType: "DECIMAL(18,2)",
-                oldNullable: true);
-
-            migrationBuilder.AddColumn<decimal>(
-                name: "CURRENT_HOURS_YEAR",
-                table: "PAY_PROFIT",
-                type: "DECIMAL(6,2)",
-                precision: 6,
-                scale: 2,
-                nullable: false,
-                defaultValue: 0m);
-
-            migrationBuilder.AddColumn<decimal>(
-                name: "CURRENT_INCOME_YEAR",
-                table: "PAY_PROFIT",
-                type: "DECIMAL(9,2)",
-                precision: 9,
-                scale: 2,
-                nullable: false,
-                defaultValue: 0m);
+            migrationBuilder.DropTable(
+                name: "PAY_PROFIT_LEGACY");
 
             migrationBuilder.UpdateData(
                 table: "COUNTRY",
@@ -1430,67 +1376,64 @@ namespace Demoulas.ProfitSharing.Data.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "CURRENT_HOURS_YEAR",
-                table: "PAY_PROFIT");
-
-            migrationBuilder.DropColumn(
-                name: "CURRENT_INCOME_YEAR",
-                table: "PAY_PROFIT");
-
-            migrationBuilder.RenameColumn(
-                name: "SECONDARY_EARNINGS",
-                table: "PAY_PROFIT",
-                newName: "SECONDARYEARNINGS");
-
-            migrationBuilder.AlterColumn<decimal>(
-                name: "SECONDARYEARNINGS",
-                table: "PAY_PROFIT",
-                type: "DECIMAL(18,2)",
-                nullable: true,
-                oldClrType: typeof(decimal),
-                oldType: "DECIMAL(9,2)",
-                oldPrecision: 9,
-                oldScale: 2,
-                oldNullable: true);
-
-            migrationBuilder.AddColumn<decimal>(
-                name: "CURRENTHOURS",
-                table: "PAY_PROFIT",
-                type: "DECIMAL(18,2)",
-                nullable: true);
-
-            migrationBuilder.AddColumn<decimal>(
-                name: "CURRENTINCOME",
-                table: "PAY_PROFIT",
-                type: "DECIMAL(18,2)",
-                nullable: true);
-
-            migrationBuilder.AddColumn<decimal>(
-                name: "EARNINGSAFTERAPPLYINGVESTINGRULES",
-                table: "PAY_PROFIT",
-                type: "DECIMAL(18,2)",
-                nullable: false,
-                defaultValue: 0m);
-
-            migrationBuilder.AddColumn<decimal>(
-                name: "EARNINGSETVAVALUE",
-                table: "PAY_PROFIT",
-                type: "DECIMAL(18,2)",
-                nullable: false,
-                defaultValue: 0m);
-
-            migrationBuilder.AddColumn<decimal>(
-                name: "EARNINGSPRIORETVAVALUE",
-                table: "PAY_PROFIT",
-                type: "DECIMAL(18,2)",
-                nullable: true);
-
-            migrationBuilder.AddColumn<decimal>(
-                name: "SECONDARYETVAEARNINGS",
-                table: "PAY_PROFIT",
-                type: "DECIMAL(18,2)",
-                nullable: true);
+            migrationBuilder.CreateTable(
+                name: "PAY_PROFIT_LEGACY",
+                columns: table => new
+                {
+                    BADGE_NUMBER = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false),
+                    BENEFICIARY_ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    EMPLOYEE_TYPE_ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    ENROLLMENT_ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    ZERO_CONTRIBUTION_REASON_ID = table.Column<byte>(type: "NUMBER(3)", nullable: true),
+                    CERTIFICATE_ISSUED_LAST_YEAR = table.Column<bool>(type: "NUMBER(1)", nullable: false),
+                    COMPANY_CONTRIBUTION_YEARS = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    CONTRIBUTION_AMOUNT_LAST_YEAR = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    EARNINGS_LAST_YEAR = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    EARNINGS_AFTER_APPLYING_VESTING_RULES = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    EARNINGS_ETVA_VALUE = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    EARNINGS_PRIOR_ETVA_VALUE = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: true),
+                    FORFEITURE_AMOUNT_LAST_YEAR = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    HOURS_CURRENT_YEAR = table.Column<decimal>(type: "DECIMAL(6,2)", precision: 6, scale: 2, nullable: false),
+                    HOURS_EXECUTIVE = table.Column<decimal>(type: "DECIMAL(6,2)", precision: 6, scale: 2, nullable: false),
+                    HOURS_LAST_YEAR = table.Column<decimal>(type: "DECIMAL(6,2)", precision: 6, scale: 2, nullable: false),
+                    INCOME_CURRENT_YEAR = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    INCOME_EXECUTIVE = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    INCOME_LAST_YEAR = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    INITIAL_CONTRIBUTION_YEAR = table.Column<byte>(type: "NUMBER(4)", precision: 4, nullable: false),
+                    NET_BALANCE_LAST_YEAR = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    POINTS_EARNED_LAST_YEAR = table.Column<short>(type: "NUMBER(5)", precision: 5, nullable: false),
+                    PS_CERTIFICATE_ISSUED_DATE = table.Column<DateTime>(type: "DATE", nullable: true),
+                    SECONDARY_EARNINGS = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: true),
+                    SECONDARY_ETVA_EARNINGS = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: true),
+                    SSN = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false),
+                    VESTED_BALANCE_LAST_YEAR = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    WEEKS_WORKED_LAST_YEAR = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false),
+                    WEEKS_WORKED_YEAR = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PAY_PROFIT_LEGACY", x => x.BADGE_NUMBER);
+                    table.ForeignKey(
+                        name: "FK_PAY_PROFIT_LEGACY_BENEFICIARYTYPES_BENEFICIARYTYPEID",
+                        column: x => x.BENEFICIARY_ID,
+                        principalTable: "BENEFICIARY_TYPE",
+                        principalColumn: "ID");
+                    table.ForeignKey(
+                        name: "FK_PAY_PROFIT_LEGACY_EMPLOYEETYPES_EMPLOYEETYPEID",
+                        column: x => x.EMPLOYEE_TYPE_ID,
+                        principalTable: "EMPLOYEE_TYPE",
+                        principalColumn: "ID");
+                    table.ForeignKey(
+                        name: "FK_PAY_PROFIT_LEGACY_ENROLLMENT_ENROLLMENTID",
+                        column: x => x.ENROLLMENT_ID,
+                        principalTable: "ENROLLMENT",
+                        principalColumn: "ID");
+                    table.ForeignKey(
+                        name: "FK_PAY_PROFIT_LEGACY_ZEROCONTRIBUTIONREASON_ZEROCONTRIBUTIONREASONID",
+                        column: x => x.ZERO_CONTRIBUTION_REASON_ID,
+                        principalTable: "ZERO_CONTRIBUTION_REASON",
+                        principalColumn: "ID");
+                });
 
             migrationBuilder.UpdateData(
                 table: "COUNTRY",
@@ -2849,6 +2792,26 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 keyValue: "ZW",
                 column: "ID",
                 value: (byte)194);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PAY_PROFIT_LEGACY_BENEFICIARYTYPEID",
+                table: "PAY_PROFIT_LEGACY",
+                column: "BENEFICIARY_ID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PAY_PROFIT_LEGACY_EMPLOYEETYPEID",
+                table: "PAY_PROFIT_LEGACY",
+                column: "EMPLOYEE_TYPE_ID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PAY_PROFIT_LEGACY_ENROLLMENTID",
+                table: "PAY_PROFIT_LEGACY",
+                column: "ENROLLMENT_ID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PAY_PROFIT_LEGACY_ZEROCONTRIBUTIONREASONID",
+                table: "PAY_PROFIT_LEGACY",
+                column: "ZERO_CONTRIBUTION_REASON_ID");
         }
     }
 }
