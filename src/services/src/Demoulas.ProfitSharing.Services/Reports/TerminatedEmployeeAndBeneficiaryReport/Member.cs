@@ -3,7 +3,7 @@
 /// <summary>
 /// A member in the profit sharing system.   Can be an employee a beneficiary or both.
 /// </summary>
-sealed internal record Member 
+internal sealed record Member 
    (
     long Psn,
     string FullName,
@@ -22,9 +22,9 @@ sealed internal record Member
     decimal ForfeitAmount,
     decimal EndingBalance,
     long YearsInPlan,
-    decimal vestedBalance,
+    decimal VestedBalance,
     byte? ZeroCont,
-    long Enrolled,
+    byte Enrolled,
     decimal Evta,
     decimal BeneficiaryAllocation
 );

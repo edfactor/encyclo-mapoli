@@ -165,7 +165,7 @@ public sealed class YearEndClient : ClientBase, IYearEndService
         return uriBuilder;
     }
 
-    public Task<Stream> DownloadTerminatedEmployeeAndBeneficiaryReport(DateOnly? fiscalStart, DateOnly? fiscalEnd, decimal? profitSharingYear, CancellationToken cancellationToken)
+    public Task<Stream> DownloadTerminatedEmployeeAndBeneficiaryReport(string endpointRoute, DateOnly? fiscalStart, DateOnly? fiscalEnd, decimal? profitSharingYear, CancellationToken cancellationToken)
     {
         var query = HttpUtility.ParseQueryString(string.Empty);
         if (fiscalStart.HasValue)
@@ -183,7 +183,7 @@ public sealed class YearEndClient : ClientBase, IYearEndService
             query["profitSharingYear"] = profitSharingYear.ToString();
         }
 
-        var uriBuilder = new UriBuilder($"{_httpClient.BaseAddress}{BaseApiPath}/terminated-employee-and-beneficiary-report/")
+        var uriBuilder = new UriBuilder($"{_httpClient.BaseAddress}{BaseApiPath}/${endpointRoute}/")
         {
             Query = query.ToString()
         };
