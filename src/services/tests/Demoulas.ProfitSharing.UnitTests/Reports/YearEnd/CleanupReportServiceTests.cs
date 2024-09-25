@@ -16,7 +16,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
 {
     private readonly CleanupReportClient _cleanupReportClient;
     private readonly ITestOutputHelper _testOutputHelper;
-    private readonly ProfitYearRequest _paginationRequest = new ProfitYearRequest { Skip = 0, Take = byte.MaxValue };
+    private readonly ProfitYearRequest _paginationRequest = new ProfitYearRequest {ProfitYear = 2023, Skip = 0, Take = byte.MaxValue };
     private readonly IdGenerator _generator;
 
 
@@ -42,7 +42,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
     public async Task GetDuplicateSsNsTestCsv()
     {
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        var stream = await _cleanupReportClient.DownloadDuplicateSsNs(CancellationToken.None);
+        var stream = await _cleanupReportClient.DownloadDuplicateSsNs(_paginationRequest.ProfitYear, CancellationToken.None);
         stream.Should().NotBeNull();
 
         using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
@@ -68,9 +68,9 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
 
             await Parallel.ForEachAsync(c.PayProfits.Take(mismatchedValues), async (pp, token) =>
             {
-                var demographic = await c.Demographics.FirstAsync(x => x.BadgeNumber == pp.BadgeNumber && x.Ssn == pp.Ssn, cancellationToken: token);
+                var demographic = await c.Demographics.FirstAsync(x => x.OracleHcmId == pp.OracleHcmId, cancellationToken: token);
 
-                demographic.BadgeNumber = pp.BadgeNumber + await c.Demographics.CountAsync(token) + 1;
+                demographic.BadgeNumber += await c.Demographics.CountAsync(token) + 1;
             });
 
             await c.SaveChangesAsync();
@@ -100,9 +100,9 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
 
             await c.PayProfits.Take(mismatchedValues).ForEachAsync(async pp =>
             {
-                var demographic = await c.Demographics.FirstAsync(x => x.BadgeNumber == pp.BadgeNumber && x.Ssn == pp.Ssn);
+                var demographic = await c.Demographics.FirstAsync(x => x.OracleHcmId == pp.OracleHcmId);
 
-                demographic.BadgeNumber = pp.BadgeNumber + await c.Demographics.CountAsync() + 1;
+                demographic.BadgeNumber += await c.Demographics.CountAsync() + 1;
             });
 
             await c.SaveChangesAsync();
@@ -278,7 +278,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
 
         _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
 
-        var oneRecord = new PaginationRequestDto { Skip = 0, Take = 1 };
+        var oneRecord = new ProfitYearRequest {ProfitYear = _paginationRequest.ProfitYear, Skip = 0, Take = 1 };
         response = await _cleanupReportClient.GetNegativeETVAForSSNsOnPayProfitResponse(oneRecord, CancellationToken.None);
         response.Should().NotBeNull();
         response.Response.Results.Should().HaveCount(1);
@@ -290,7 +290,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
     public async Task GetNegativeEtvaReportCsv()
     {
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        var stream = await _cleanupReportClient.DownloadNegativeETVAForSSNsOnPayProfitResponse(CancellationToken.None);
+        var stream = await _cleanupReportClient.DownloadNegativeETVAForSSNsOnPayProfitResponse(_paginationRequest.ProfitYear, CancellationToken.None);
         stream.Should().NotBeNull();
 
         using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
@@ -316,7 +316,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
     public async Task GetMismatchedSsnsPayprofitAndDemographicsOnSameBadgeCsv()
     {
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        var stream = await _cleanupReportClient.DownloadMismatchedSsnsPayprofitAndDemographicsOnSameBadge(CancellationToken.None);
+        var stream = await _cleanupReportClient.DownloadMismatchedSsnsPayprofitAndDemographicsOnSameBadge(_paginationRequest.ProfitYear, CancellationToken.None);
         stream.Should().NotBeNull();
 
         using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
@@ -330,7 +330,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
     public async Task GetDuplicateNamesAndBirthdays()
     {
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        var request = new PaginationRequestDto { Take = 1000, Skip = 0 };
+        var request = new ProfitYearRequest {ProfitYear = _paginationRequest.ProfitYear, Take = 1000, Skip = 0 };
         var response = await _cleanupReportClient.GetDuplicateNamesAndBirthdays(request, CancellationToken.None);
         response.Should().NotBeNull();
         response.Response.Results.Count().Should().Be(0);
@@ -359,7 +359,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
 
         _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
 
-        var oneRecord = new PaginationRequestDto { Skip = 0, Take = 1 };
+        var oneRecord = new ProfitYearRequest { ProfitYear = _paginationRequest.ProfitYear, Skip = 0, Take = 1 };
         response = await _cleanupReportClient.GetDuplicateNamesAndBirthdays(oneRecord, CancellationToken.None);
         response.Should().NotBeNull();
         response.Response.Results.Should().HaveCount(1);
@@ -387,7 +387,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
             await c.SaveChangesAsync();
         });
 
-        var stream = await _cleanupReportClient.DownloadDuplicateNamesAndBirthdays(CancellationToken.None);
+        var stream = await _cleanupReportClient.DownloadDuplicateNamesAndBirthdays(_paginationRequest.ProfitYear, CancellationToken.None);
         stream.Should().NotBeNull();
 
         using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
