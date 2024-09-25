@@ -62,7 +62,7 @@ public abstract class EndpointWithCsvBase<ReqType, RespType, MapType> : Endpoint
 
         if (acceptHeader.Contains("text/csv"))
         {
-            await using MemoryStream csvData = GenerateCsvStream(response);
+            await using MemoryStream csvData = await GenerateCsvStreamAsync(response, ct);
             await SendStreamAsync(csvData, $"{ReportFileName}.csv", contentType: "text/csv", cancellation: ct);
             return;
         }
@@ -70,27 +70,27 @@ public abstract class EndpointWithCsvBase<ReqType, RespType, MapType> : Endpoint
         await SendOkAsync(response, ct);
     }
 
-    private MemoryStream GenerateCsvStream(ReportResponseBase<RespType> report)
+    private async Task<MemoryStream> GenerateCsvStreamAsync(ReportResponseBase<RespType> report, CancellationToken cancellationToken)
     {
         MemoryStream memoryStream = new MemoryStream();
-        using (StreamWriter streamWriter = new StreamWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
-        using (CsvWriter csvWriter = new CsvWriter(streamWriter, new CsvConfiguration(CultureInfo.InvariantCulture) { Delimiter = "," }))
+        await using (StreamWriter streamWriter = new StreamWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
+        await using (CsvWriter csvWriter = new CsvWriter(streamWriter, new CsvConfiguration(CultureInfo.InvariantCulture) { Delimiter = "," }))
         {
-            streamWriter.WriteLine($"{report.ReportDate:MMM dd yyyy HH:mm}");
-            streamWriter.WriteLine(report.ReportName);
+            await streamWriter.WriteLineAsync($"{report.ReportDate:MMM dd yyyy HH:mm}".AsMemory(), cancellationToken);
+            await streamWriter.WriteLineAsync(report.ReportName.AsMemory(), cancellationToken);
 
-            GenerateCsvContent(csvWriter, report);
-            
-            streamWriter.Flush();
+            await GenerateCsvContent(csvWriter, report, cancellationToken);
+
+            await streamWriter.FlushAsync(cancellationToken);
         }
 
         memoryStream.Position = 0; // Reset the stream position to the beginning
         return memoryStream;
     }
 
-    protected internal virtual void GenerateCsvContent(CsvWriter csvWriter, ReportResponseBase<RespType> report)
+    protected internal virtual async Task GenerateCsvContent(CsvWriter csvWriter, ReportResponseBase<RespType> report, CancellationToken cancellationToken)
     {
         csvWriter.Context.RegisterClassMap<MapType>();
-        csvWriter.WriteRecords(report.Response.Results);
+        await csvWriter.WriteRecordsAsync(report.Response.Results, cancellationToken);
     }
 }

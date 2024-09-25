@@ -1,6 +1,5 @@
 ﻿using System.Data.SqlTypes;
 using System.Net;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using FluentAssertions;
 using Demoulas.Common.Contracts.Contracts.Request;
@@ -17,6 +16,12 @@ using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.Util.Extensions;
+using CsvHelper.Configuration;
+using CsvHelper;
+using System.Globalization;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Services;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -27,7 +32,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
 
     public MilitaryAndRehireForfeituresTests()
     {
-        MilitaryAndRehireService mockService = new MilitaryAndRehireService(MockDbContextFactory);
+        MilitaryAndRehireService mockService = new MilitaryAndRehireService(MockDbContextFactory, new CalendarService(MockDbContextFactory));
         _endpoint = new MilitaryAndRehireForfeituresEndpoint(mockService);
     }
 
@@ -75,10 +80,43 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
 
             string result = await response.Response.Content.ReadAsStringAsync();
             result.Should().NotBeNullOrEmpty();
+
+            // Assert CSV format
+            using var reader = new StringReader(result);
+            using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture));
+
+            // Read the first two rows (date and report name)
+            await csv.ReadAsync();  // First row is the date
+            string? dateLine = csv.GetField(0);
+            dateLine.Should().NotBeNullOrEmpty();
+
+            await csv.ReadAsync();  // Second row is the report name
+            string? reportNameLine = csv.GetField(0);
+            reportNameLine.Should().NotBeNullOrEmpty();
+
+            // Start reading the actual CSV content from row 2 (0-based index)
+            await csv.ReadAsync();  // Read the header row (starting at column 2)
+            csv.ReadHeader();
+
+            // Validate the headers
+            var headers = csv.HeaderRecord;
+            headers.Should().NotBeNull();
+            headers.Should().ContainInOrder("", "", "BADGE", "EMPLOYEE NAME", "SSN", "REHIRED", "PY-YRS", "YTD HOURS", "EC");
+
+            await csv.ReadAsync();  // Read the header row (starting at column 2)
+            csv.ReadHeader();
+
+            // Validate the second row of headers
+            var headers2 = csv.HeaderRecord;
+            headers2.Should().NotBeNull();
+            headers2.Should().ContainInOrder("", "", "", "", "", "YEAR", "FORFEITURES", "COMMENT");
         });
     }
 
-    [Fact(DisplayName = "PS-156: Check to ensure unauthorized")]
+
+
+
+    [Fact(DisplayName = "PS-345: Check to ensure unauthorized")]
     public async Task Unauthorized()
     {
         await MockDbContextFactory.UseWritableContext(async c =>
@@ -92,11 +130,11 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
         });
     }
 
-    [Fact(DisplayName = "PS-156: Empty Results")]
+    [Fact(DisplayName = "PS-345: Empty Results")]
     public async Task GetResponse_Should_HandleEmptyResults()
     {
         // Arrange
-        var request = new PaginationRequestDto { Skip = 0, Take = 10 };
+        var request = new MilitaryAndRehireRequest { Skip = 0, Take = 10, ReportingYear = (short)DateTime.Today.Year };
         var cancellationToken = CancellationToken.None;
         var expectedResponse = new ReportResponseBase<MilitaryAndRehireForfeituresResponse>
         {
@@ -113,11 +151,11 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
         response.Response.Results.Should().BeEquivalentTo(expectedResponse.Response.Results);
     }
 
-    [Fact(DisplayName = "PS-156: Null Results")]
+    [Fact(DisplayName = "PS-345: Null Results")]
     public async Task GetResponse_Should_HandleNullResults()
     {
         // Arrange
-        var request = new PaginationRequestDto { Skip = 0, Take = 10 };
+        var request = new MilitaryAndRehireRequest { Skip = 0, Take = 10, ReportingYear = (short)DateTime.Today.Year };
         var cancellationToken = CancellationToken.None;
         var expectedResponse = new ReportResponseBase<MilitaryAndRehireForfeituresResponse>
         {
@@ -134,7 +172,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
         response.Response.Results.Should().BeEquivalentTo(expectedResponse.Response.Results);
     }
 
-    [Fact(DisplayName = "PS-156: Report name is correct")]
+    [Fact(DisplayName = "PS-345: Report name is correct")]
     public void ReportFileName_Should_ReturnCorrectValue()
     {
         // Act
@@ -144,7 +182,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
         reportFileName.Should().Be("REHIRE'S PROFIT SHARING DATA");
     }
 
-    private static async Task<(PaginationRequestDto Request, MilitaryAndRehireForfeituresResponse ExpectedResponse)> SetupTestEmployee(ProfitSharingDbContext c)
+    private static async Task<(MilitaryAndRehireRequest Request, MilitaryAndRehireForfeituresResponse ExpectedResponse)> SetupTestEmployee(ProfitSharingDbContext c)
     {
         // Setup
         MilitaryAndRehireForfeituresResponse example = MilitaryAndRehireForfeituresResponse.ResponseExample();
@@ -182,6 +220,6 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
         }).ToList();
 
 
-        return (new PaginationRequestDto { Skip = 0, Take = 10 }, example);
+        return (new MilitaryAndRehireRequest { Skip = 0, Take = 10, ReportingYear = (short)demo.ReHireDate!.Value.Year}, example);
     }
 }

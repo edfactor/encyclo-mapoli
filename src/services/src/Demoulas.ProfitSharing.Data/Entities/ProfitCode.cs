@@ -66,21 +66,10 @@ public class ProfitCode : ILookupTable<byte>
     {
         return Id.GetHashCode();
     }
-    
-#pragma warning disable S3875
-    public static bool operator ==(byte? left, ProfitCode? right)
-    {
-        if (left is null)
-        {
-            return right is null;
-        }
 
-        return left.Equals(right?.Id);
-    }
-
-    public static bool operator !=(byte? left, ProfitCode right)
+    public static implicit operator byte(ProfitCode profitCode)
     {
-        return !(left == right);
+        return profitCode.Id;
     }
 #pragma warning restore S3875
 }

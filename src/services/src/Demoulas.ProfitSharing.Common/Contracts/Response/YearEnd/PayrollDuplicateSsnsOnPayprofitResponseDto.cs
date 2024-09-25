@@ -2,7 +2,7 @@
 public sealed record PayrollDuplicateSsnsOnPayprofitResponseDto
 {
     public int Count { get; set; }
-    public long EmployeeBadge { get; set; }
+    public int BadgeNumber { get; set; }
     public long PayProfitSsn { get; set; }
     public long EmployeeSsn { get; set; }
     public required string Name { get; set; }
