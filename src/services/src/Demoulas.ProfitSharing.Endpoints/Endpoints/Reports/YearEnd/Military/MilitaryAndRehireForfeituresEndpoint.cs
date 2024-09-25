@@ -100,7 +100,6 @@ public class MilitaryAndRehireForfeituresEndpoint :
                 csvWriter.WriteField(string.Empty); // Empty field for ReHireDate
                 csvWriter.WriteField(string.Empty); // Empty field for PY-YRS
                 csvWriter.WriteField(string.Empty); // Empty field for YTD HOURS
-                csvWriter.WriteField(string.Empty); // Empty field for EC
                 csvWriter.WriteField(record.ProfitYear);   // YEAR
                 csvWriter.WriteField(record.Forfeiture);   // FORFEITURES
                 csvWriter.WriteField(record.Remark);       // COMMENT
