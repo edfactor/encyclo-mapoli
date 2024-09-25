@@ -35,4 +35,6 @@ public sealed class Distribution
     public bool QualifiedDomesticRelationsOrder { get; set; }
     public string? Memo { get; set; }
     public bool RothIra { get; set; }
+    
+    public IEnumerable<ProfitDetail> ProfitDetails { get; set; } = Enumerable.Empty<ProfitDetail>();
 }

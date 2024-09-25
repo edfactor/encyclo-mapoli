@@ -21,4 +21,6 @@ public class ProfitDetail
     public char? TaxCodeId { get; set; }
     public long Ssn { get; set; }
     public int DistributionSequence { get; set; }
+    
+    public Distribution? Distribution { get; set; }
 }
