@@ -185,10 +185,9 @@ public class TerminatedEmployeeAndBeneficiaryReport(ILogger _logger, ProfitShari
         memberSlices.Sort((a, b) => StringComparer.Ordinal.Compare(a.FullName, b.FullName));
         long ssn = long.MinValue;
 
+        // These values are merged 
         decimal netBalanceLastYear = 0;
         decimal vestedBalanceLastYear = 0;
-        decimal forfeiture = 0;
-        decimal distribution = 0;
         decimal beneficiaryAllocation = 0;
 
         List<Member> members = [];
@@ -196,32 +195,34 @@ public class TerminatedEmployeeAndBeneficiaryReport(ILogger _logger, ProfitShari
 
         foreach (var m in memberSlices)
         {
+            // if the ssn has changed,
             if (((m.Ssn != ssn && ssn != long.MinValue) ||
                 (ssn == long.MaxValue)) && (m != memberSlices[^1]))
             {
+                // then merge the slices together
+
+                // Get this year's transactions and merge in those amounts
                 ProfitDetailSummary ds = RetrieveProfitDetail(ssn);
-                distribution += ds.Distribution;
-                forfeiture += ds.Forfeiture;
                 beneficiaryAllocation += ds.BeneficiaryAllocation;
 
-                if (netBalanceLastYear != 0 || ds.BeneficiaryAllocation != 0 || ds.Distribution != 0 || forfeiture != 0)
+                // If member has money (otherwise we skip them)
+                if (netBalanceLastYear != 0 || ds.BeneficiaryAllocation != 0 || ds.Distribution != 0 || ds.Forfeiture != 0)
                 {
                     ms = ms! with
                     {
-                        EndingBalance = netBalanceLastYear + forfeiture + ds.Distribution + beneficiaryAllocation,
-                        DistributionAmount = distribution,
-                        ForfeitAmount = forfeiture,
-                        VestedBalance = vestedBalanceLastYear + distribution + beneficiaryAllocation,
+                        EndingBalance = netBalanceLastYear + ds.Forfeiture + ds.Distribution + beneficiaryAllocation,
+                        DistributionAmount = ds.Distribution,
+                        ForfeitAmount = ds.Forfeiture,
+                        VestedBalance = vestedBalanceLastYear + ds.Distribution + beneficiaryAllocation,
                         BeneficiaryAllocation = beneficiaryAllocation
                     };
                     members.Add(ms);
                 }
-                vestedBalanceLastYear = 0;
-                forfeiture = 0;
-                distribution = 0;
                 netBalanceLastYear = 0;
+                vestedBalanceLastYear = 0;
                 beneficiaryAllocation = 0;
             }
+            // This indicates we have processed the last record.
             if (ssn == long.MaxValue)
             {
                 break;
