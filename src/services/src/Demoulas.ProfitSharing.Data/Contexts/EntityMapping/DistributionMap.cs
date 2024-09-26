@@ -10,7 +10,7 @@ internal sealed class DistributionMap : IEntityTypeConfiguration<Distribution>
     {
         builder.ToTable("DISTRIBUTION");
         builder.HasKey(d => new { SSN = d.Ssn, d.SequenceNumber });
-        
+
         builder.Property(d => d.Ssn).HasColumnName("SSN").HasPrecision(9);
         builder.Property(d => d.SequenceNumber).HasColumnName("SEQUENCE_NUMBER");
         builder.Property(d => d.EmployeeName).HasMaxLength(25).HasColumnName("EMPLOYEE_NAME");
@@ -75,6 +75,8 @@ internal sealed class DistributionMap : IEntityTypeConfiguration<Distribution>
         builder.HasOne(d => d.Status).WithMany().HasForeignKey(d => d.StatusId);
         builder.HasOne(x => x.TaxCode).WithMany().HasForeignKey(t => t.TaxCodeId);
 
-        builder.HasMany(x => x.ProfitDetails).WithOne(x=> x.Distribution).HasForeignKey(t => new {t.Ssn, t.DistributionSequence});
+        builder.HasMany(x => x.ProfitDetails)
+            .WithOne(x => x.Distribution)
+            .HasForeignKey(t => new { t.Ssn, t.DistributionSequence });
     }
 }
