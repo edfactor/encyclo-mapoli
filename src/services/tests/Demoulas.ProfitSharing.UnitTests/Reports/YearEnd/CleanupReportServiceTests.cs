@@ -305,31 +305,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
         _testOutputHelper.WriteLine(result);
     }
 
-    [Fact(DisplayName = "PS-149 : Mismatched Ssns Payprofit and Demographics On Same Badge (JSON)")]
-    public async Task GetMismatchedSsnsPayprofitAndDemographicsOnSameBadgeJson()
-    {
-        _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        var response = await _cleanupReportClient.GetMismatchedSsnsPayprofitAndDemographicsOnSameBadge(_paginationRequest, CancellationToken.None);
-
-        response.Should().NotBeNull();
-        response.ReportName.Should().BeEquivalentTo("MISMATCHED SSNs PAYPROFIT AND DEMO ON SAME BADGE");
-
-        _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
-    }
-
-    [Fact(DisplayName = "PS-149 : Mismatched Ssns Payprofit and Demographics On Same Badge (CSV)")]
-    public async Task GetMismatchedSsnsPayprofitAndDemographicsOnSameBadgeCsv()
-    {
-        _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        var stream = await _cleanupReportClient.DownloadMismatchedSsnsPayprofitAndDemographicsOnSameBadge(_paginationRequest.ProfitYear, CancellationToken.None);
-        stream.Should().NotBeNull();
-
-        using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
-        string result = await reader.ReadToEndAsync();
-        result.Should().NotBeNullOrEmpty();
-
-        _testOutputHelper.WriteLine(result);
-    }
+   
 
     [Fact(DisplayName = "PS-152 : Duplicate names and Birthdays (JSON)")]
     public async Task GetDuplicateNamesAndBirthdays()
@@ -404,38 +380,5 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
 
         _testOutputHelper.WriteLine(result);
 
-    }
-
-    [Fact(DisplayName = "PS-148 : Payroll Duplicate Ssns On Payprofit (JSON)")]
-    public async Task GetPayrollDuplicateSsnsOnPayprofitJson()
-    {
-        _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        var response = await _cleanupReportClient.GetPayrollDuplicateSsnsOnPayprofit(_paginationRequest, CancellationToken.None);
-
-        response.Should().NotBeNull();
-        response.ReportName.Should().BeEquivalentTo("PAYROLL DUPLICATE SSNs ON PAYPROFIT");
-
-        _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
-    }
-
-    [Fact(DisplayName = "PS-148 : Payroll Duplicate Ssns On Payprofit (CSV)")]
-    public async Task GetPayrollDuplicateSsnsOnPayprofitCsv()
-    {
-        _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        var stream = await _cleanupReportClient.DownloadPayrollDuplicateSsnsOnPayprofit(CancellationToken.None);
-        stream.Should().NotBeNull();
-
-        using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
-        string result = await reader.ReadToEndAsync();
-        result.Should().NotBeNullOrEmpty();
-
-        _testOutputHelper.WriteLine(result);
-    }
-
-    [Fact(DisplayName = "CleanupReportService auth check")]
-    public async Task YearEndServiceAuthCheck()
-    {
-        _cleanupReportClient.CreateAndAssignTokenForClient(Role.HARDSHIPADMINISTRATOR);
-        await Assert.ThrowsAsync<HttpRequestException>(async () => { _ = await _cleanupReportClient.GetPayrollDuplicateSsnsOnPayprofit(_paginationRequest, CancellationToken.None); });
     }
 }

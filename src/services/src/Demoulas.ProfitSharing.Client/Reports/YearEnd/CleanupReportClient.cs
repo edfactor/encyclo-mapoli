@@ -69,15 +69,7 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
     #endregion
 
     #region Mismatched Ssns Payprofit And Demographics On Same Badge
-    public Task<ReportResponseBase<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto>> GetMismatchedSsnsPayprofitAndDemographicsOnSameBadge(ProfitYearRequest req, CancellationToken cancellationToken = default)
-    {
-        return CallReportEndpoint<MismatchedSsnsPayprofitAndDemographicsOnSameBadgeResponseDto, ProfitYearRequest>(req, "mismatched-ssns-payprofit-and-demo-on-same-badge", cancellationToken);
-    }
-
-    public Task<Stream> DownloadMismatchedSsnsPayprofitAndDemographicsOnSameBadge(short profitYear, CancellationToken cancellationToken = default)
-    {
-        return DownloadCsvReport(profitYear,"mismatched-ssns-payprofit-and-demo-on-same-badge", cancellationToken);
-    }
+   
 
     public Task<ReportResponseBase<PayProfitBadgesNotInDemographicsResponse>> GetPayProfitBadgesNotInDemographics(PaginationRequestDto req, CancellationToken ct = default)
     {
@@ -87,19 +79,6 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
     public Task<Stream> DownloadPayProfitBadgesNotInDemographics(CancellationToken cancellationToken = default)
     {
         return DownloadCsvReport(0,"payprofit-badges-without-demographics", cancellationToken);
-    }
-
-    #endregion
-
-    #region Get Payroll Duplicate Ssns On Payprofit
-    public Task<ReportResponseBase<PayrollDuplicateSsnsOnPayprofitResponseDto>> GetPayrollDuplicateSsnsOnPayprofit(PaginationRequestDto req, CancellationToken cancellationToken = default)
-    {
-        return CallReportEndpoint<PayrollDuplicateSsnsOnPayprofitResponseDto, PaginationRequestDto>(req, "payroll-duplicate-ssns-on-payprofit", cancellationToken);
-    }
-
-    public Task<Stream> DownloadPayrollDuplicateSsnsOnPayprofit(CancellationToken cancellationToken = default)
-    {
-        return DownloadCsvReport(0,"payroll-duplicate-ssns-on-payprofit", cancellationToken);
     }
 
     #endregion
