@@ -25,7 +25,7 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYear
         Get("duplicate-names-and-birthdays");
         Summary(s =>
         {
-            s.Summary = "List of duplicate names, and Birthdays in the demographics area";
+            s.Summary = "List of duplicate names, and birthdays in the demographics area";
             s.ExampleRequest = SimpleExampleRequest;
             s.ResponseExamples = new Dictionary<int, object>
             {

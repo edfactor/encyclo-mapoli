@@ -183,12 +183,12 @@ public class CleanupReportService : ICleanupReportService
     {
         using (_logger.BeginScope("Request BEGIN DUPLICATE NAMES AND BIRTHDAYS"))
         {
-            var results = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+            var results = await _dataContextFactory.UseReadOnlyContext(ctx =>
             {
-                var dupNameSlashDateOfBirth = await (from dem in ctx.Demographics
+                var dupNameSlashDateOfBirth = (from dem in ctx.Demographics
                                                  group dem by new { dem.FullName, dem.DateOfBirth } into g
                                                  where g.Count() > 1
-                                                 select g.Key.FullName).ToListAsync(cancellationToken: cancellationToken);
+                                                 select g.Key.FullName);
 
                 var query = from dem in ctx.Demographics
                             join ppLj in ctx.PayProfits on dem.OracleHcmId equals ppLj.OracleHcmId into tmpPayProfit
@@ -241,10 +241,8 @@ public class CleanupReportService : ICleanupReportService
                                 IncomeCurrentYear = g.Key.CurrentIncomeYear
                             };
 
-                return await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
+                return query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
             });
-
-            _logger.LogInformation("Returned {Results} records", results.Results.Count());
 
             ISet<int> badgeNumbers = results.Results.Select(r => r.BadgeNumber).ToHashSet();
             var dict = await _contributionService.GetContributionYears(badgeNumbers);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.InternalDto;
 using Microsoft.EntityFrameworkCore;
@@ -32,7 +33,7 @@ public sealed class ContributionService
         });
     }
 
-    internal Task<Dictionary<int, InternalProfitDetailDto>> GetNetBalance(short profitYear, ISet<int> badgeNumber, CancellationToken cancellationToken)
+    internal Task<Dictionary<int, InternalProfitDetailDto>> GetNetBalance(short profitYear, ISet<int> badgeNumbers, CancellationToken cancellationToken)
     {
         return _dataContextFactory.UseReadOnlyContext(ctx =>
         {
@@ -44,8 +45,8 @@ public sealed class ContributionService
                     Ssn = g.Key,
                     TotalContributions = g.Sum(x => x.Contribution),
                     TotalEarnings = g.Sum(x => x.Earnings),
-                    TotalForfeitures = g.Sum(x => x.ProfitCode.Id == 0 ? x.Forfeiture : 0),
-                    TotalPayments = g.Sum(x => x.ProfitCode.Id != 0 ? x.Forfeiture : 0),
+                    TotalForfeitures = g.Sum(x => x.ProfitCodeId == ProfitCode.Constants.IncomingContributions ? x.Forfeiture : 0),
+                    TotalPayments = g.Sum(x => x.ProfitCodeId != ProfitCode.Constants.IncomingContributions ? x.Forfeiture : 0),
                     TotalFedTaxes = g.Sum(x => x.FederalTaxes),
                     TotalStateTaxes = g.Sum(x => x.StateTaxes)
                 });
@@ -53,7 +54,7 @@ public sealed class ContributionService
 
 
             var demoQuery = ctx.Demographics
-                .Where(d => badgeNumber.Contains(d.BadgeNumber))
+                .Where(d => badgeNumbers.Contains(d.BadgeNumber))
                 .Select(d => new { d.OracleHcmId, d.BadgeNumber, d.Ssn });
             
             var query = from d in demoQuery
