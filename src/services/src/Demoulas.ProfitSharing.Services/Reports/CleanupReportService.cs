@@ -241,7 +241,7 @@ public class CleanupReportService : ICleanupReportService
                                 IncomeCurrentYear = g.Key.CurrentIncomeYear
                             };
 
-                return await query.ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken: cancellationToken);
+                return await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
             });
 
             _logger.LogInformation("Returned {Results} records", results.Results.Count());
@@ -257,7 +257,7 @@ public class CleanupReportService : ICleanupReportService
                  dup.Years = (short)years;
 
                  balanceDict.TryGetValue(dup.BadgeNumber, out var balance);
-                 dup.NetBalance = balance?.NetBalance ?? 0;
+                 dup.NetBalance = balance?.TotalEarnings ?? 0;
             }
 
             return new ReportResponseBase<DuplicateNamesAndBirthdaysResponse>()
