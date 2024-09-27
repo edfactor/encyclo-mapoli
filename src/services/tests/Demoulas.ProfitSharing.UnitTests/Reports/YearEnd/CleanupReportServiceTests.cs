@@ -50,7 +50,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
         result.Should().NotBeNullOrEmpty();
 
         _testOutputHelper.WriteLine(result);
-    }
+    }   
 
     [Fact(DisplayName = "PS-151: Demographic badges without payprofit (JSON)")]
     public async Task GetDemographicBadgesWithoutPayProfitTests()
@@ -253,20 +253,21 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
         {
             var modelDemographic = await c.Demographics.FirstAsync();
 
-            foreach (var dem in c.Demographics.Skip(1).Take(duplicateRows))
+            foreach (var dem in c.Demographics.Take(duplicateRows))
             {
                 dem.DateOfBirth = modelDemographic.DateOfBirth;
                 dem.FirstName = modelDemographic.FirstName;
                 dem.LastName = modelDemographic.LastName;
                 dem.FullName = modelDemographic.FullName;
+                dem.PayProfits[0]!.ProfitYear = _paginationRequest.ProfitYear;
             }
-
+            
             await c.SaveChangesAsync();
         });
 
         response = await _cleanupReportClient.GetDuplicateNamesAndBirthdays(request, CancellationToken.None);
         response.Should().NotBeNull();
-        response.Response.Results.Count().Should().Be(duplicateRows + 1);
+        response.Response.Results.Count().Should().Be(duplicateRows);
 
         _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
 
@@ -287,13 +288,14 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
         {
             var modelDemographic = await c.Demographics.FirstAsync();
 
-            await c.Demographics.Skip(1).Take(duplicateRows).ForEachAsync(dem =>
+            foreach (var dem in c.Demographics.Take(duplicateRows))
             {
                 dem.DateOfBirth = modelDemographic.DateOfBirth;
                 dem.FirstName = modelDemographic.FirstName;
                 dem.LastName = modelDemographic.LastName;
                 dem.FullName = modelDemographic.FullName;
-            });
+                dem.PayProfits[0]!.ProfitYear = _paginationRequest.ProfitYear;
+            }
 
             await c.SaveChangesAsync();
         });
@@ -306,7 +308,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
         result.Should().NotBeNullOrEmpty();
 
         var lines = result.Split(Environment.NewLine);
-        lines.Count().Should().Be(duplicateRows + 4 + 1); //Includes initial row that was used as the template to create duplicates
+        lines.Count().Should().Be(duplicateRows + 4); //Includes initial row that was used as the template to create duplicates
 
         _testOutputHelper.WriteLine(result);
 
