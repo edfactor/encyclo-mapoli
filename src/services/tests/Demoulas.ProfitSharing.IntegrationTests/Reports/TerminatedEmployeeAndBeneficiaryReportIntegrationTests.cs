@@ -1,25 +1,34 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
+using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Data.Contexts;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.TerminatedEmployeeAndBeneficiary;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports;
 public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests
 {
+    private readonly ITestOutputHelper _testOutputHelper;
+
+    public TerminatedEmployeeAndBeneficiaryReportIntegrationTests(ITestOutputHelper testOutputHelper)
+    {
+        _testOutputHelper = testOutputHelper;
+    }
 
     [Fact]
-    public void EnsureSmartReportMatchesReadyReport()
+    public async Task EnsureSmartReportMatchesReadyReport()
     {
         // We get a connection to the database.     
         var configuration = new ConfigurationBuilder().AddUserSecrets<TerminatedEmployeeAndBeneficiaryReportIntegrationTests>().Build();
-        string connectionString = configuration["ConnectionStrings:ProfitSharing"]!;
-        var options = new DbContextOptionsBuilder<ProfitSharingDbContext>().UseOracle(connectionString).EnableSensitiveDataLogging().Options;
-        ProfitSharingDbContext ctx = new ProfitSharingDbContext(options);
+        string connectionString = configuration["ConnectionStrings:ProfitSharing-ObfuscatedPristine"]!;
+        var options = new DbContextOptionsBuilder<ProfitSharingReadOnlyDbContext>().UseOracle(connectionString).EnableSensitiveDataLogging().Options;
+        ProfitSharingReadOnlyDbContext ctx = new ProfitSharingReadOnlyDbContext(options);
 
         // These are arguments to the program/rest endpoint
         // Plan admin may choose a range of dates (ie. Q2 ?)
@@ -30,9 +39,13 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests
         Mock<ILogger> ilogger = new Mock<ILogger>();
 
         DateOnly effectiveDateOfTestData = new DateOnly(2024, 9, 17);
-
         TerminatedEmployeeAndBeneficiaryReport terminatedEmployeeAndBeneficiaryReport = new TerminatedEmployeeAndBeneficiaryReport(ilogger.Object!, ctx, effectiveDateOfTestData);
-        string actualText = terminatedEmployeeAndBeneficiaryReport.CreateTextReport(startDate, endDate, profitSharingYear);
+        Stopwatch stopwatch = Stopwatch.StartNew();
+        stopwatch.Start();
+        TerminatedEmployeeAndBeneficiaryDataResponse <TerminatedEmployeeAndBeneficiaryDataResponseDto> data = await terminatedEmployeeAndBeneficiaryReport.CreateData(startDate, endDate, profitSharingYear);
+        string actualText = CreateTextReport(effectiveDateOfTestData, startDate, endDate, profitSharingYear, data);
+        stopwatch.Stop();
+        _testOutputHelper.WriteLine("Took: "+stopwatch.ElapsedMilliseconds);
 
         actualText.Should().NotBeNullOrEmpty();
 
@@ -47,5 +60,25 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests
         {
             return reader.ReadToEnd();
         }
+    }
+
+
+    private static string CreateTextReport(DateOnly effectiveDateOfTestData, DateOnly startDate, DateOnly endDate, decimal profitSharingYearWithIteration,
+        TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto> reportData)
+    {
+
+        TextReportGenerator textReportGenerator = new TextReportGenerator(effectiveDateOfTestData, startDate, endDate, profitSharingYearWithIteration);
+
+        foreach (var ms in reportData.Response.Results)
+        {
+
+            textReportGenerator.PrintDetails(ms.BadgePSn, ms.Name, ms.BeginningBalance,
+                ms.BeneficiaryAllocation, ms.DistributionAmount, ms.Forfeit,
+                ms.EndingBalance, ms.VestedBalance, ms.DateTerm, ms.YtdPsHours, ms.VestedPercent, ms.Age,
+                ms.EnrollmentCode ?? 0);
+        }
+        textReportGenerator.PrintTotals(reportData.TotalEndingBalance, reportData.TotalVested, reportData.TotalForfeit, reportData.TotalBeneficiaryAllocation);
+        return textReportGenerator.GetReport();
+
     }
 }

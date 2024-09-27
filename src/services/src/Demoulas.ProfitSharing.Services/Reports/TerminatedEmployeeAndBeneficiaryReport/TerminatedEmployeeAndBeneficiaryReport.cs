@@ -1,84 +1,62 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.TerminatedEmployeeAndBeneficiary;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 
 /// <summary>
-/// Reports on both employees which where terminated in the time range specified (but not retired.), and all beneficiaries.   
+/// Reports on both employees which where terminated in the time range specified (but not retired.), and all beneficiaries.
 /// </summary>
-public class TerminatedEmployeeAndBeneficiaryReport(ILogger _logger, ProfitSharingDbContext _ctx, DateOnly? effectiveRunDate = null)
+public class TerminatedEmployeeAndBeneficiaryReport
 {
-    // These should move to a Reference Location.
-    // Vesting Schedule Percent by year
-    private static readonly List<int> _olderVestingSchedule = [0, 0, 20, 40, 60, 80, 100];
-    private static readonly List<int> _newerVestingSchedule = [0, 20, 40, 60, 80, 100];
-
-    // input parameters
-    private DateOnly _startDate;
-    private DateOnly _endDate;
-    private decimal _profitSharingYearWithIteration;
+    private readonly ILogger _logger;
+    private readonly ProfitSharingReadOnlyDbContext _ctx;
 
     // This is usually Today's date, however when tests are running, a specific date can be used.
-    private DateOnly _effectiveRunDate;
+    private readonly DateOnly _todaysDate;
 
-
-    public string CreateTextReport(DateOnly startDate, DateOnly endDate, decimal profitSharingYear)
+    public TerminatedEmployeeAndBeneficiaryReport(ILogger logger, ProfitSharingReadOnlyDbContext ctx, DateOnly todaysDate)
     {
-        this._startDate = startDate;
-        this._endDate = endDate;
-        this._profitSharingYearWithIteration = profitSharingYear;
-        this._effectiveRunDate = effectiveRunDate ?? DateOnly.FromDateTime(DateTime.Now);
-
-        // If the user supplies 9999.9, then figure out which profit sharing year based on today's date (_effectiveRunDate)
-        if (_profitSharingYearWithIteration == 9999.9m)
-        {
-            _profitSharingYearWithIteration = (_effectiveRunDate.Month < 4) ? _effectiveRunDate.Year - 1 : _effectiveRunDate.Year;
-        }
-
-        List<MemberSlice> memberSlices = RetrieveMemberSlices();
-        List<Member> members = MergeMemberSlicesToMembers(memberSlices);
-        string report = CreateReport(members);
-        return report;
+        _logger = logger;
+        _ctx = ctx;
+        _todaysDate = todaysDate;
     }
 
-    public TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto> CreateData(
+    public async Task<TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto>> CreateData(
         DateOnly startDate, DateOnly endDate, decimal profitSharingYear)
     {
-        this._startDate = startDate;
-        this._endDate = endDate;
-        this._profitSharingYearWithIteration = profitSharingYear;
-        this._effectiveRunDate = effectiveRunDate ?? DateOnly.FromDateTime(DateTime.Now);
-
-        // If the user supplies 9999.9, then figure out which profit sharing year based on today's date (_effectiveRunDate)
-        if (_profitSharingYearWithIteration == 9999.9m)
+        // If the used the AutoSelectYear option
+        if (profitSharingYear == ReferenceData.AutoSelectYear)
         {
-            _profitSharingYearWithIteration = (_effectiveRunDate.Month < 4) ? _effectiveRunDate.Year - 1 : _effectiveRunDate.Year;
+            // Then if it is 
+            profitSharingYear = (_todaysDate.Month < 4) ? _todaysDate.Year - 1 : _todaysDate.Year;
         }
 
-        List<MemberSlice> memberSlices = RetrieveMemberSlices();
-        List<Member> members = MergeMemberSlicesToMembers(memberSlices);
+        List<MemberSlice> memberSlices = await RetrieveMemberSlices(startDate, endDate);
+        List<Member> members = await MergeMemberSlicesToMembers(memberSlices, profitSharingYear);
         return CreateDataset(members);
     }
 
 
-    private List<MemberSlice> RetrieveMemberSlices()
+    private async Task<List<MemberSlice>> RetrieveMemberSlices(DateOnly startDate, DateOnly endDate)
     {
         // slices of member information (aka employee or beneficiary information)
         List<MemberSlice> memberSlices = new();
 
-        var employees = _ctx!.Demographics.Where(d =>
+        var employees = await _ctx.Demographics.Where(d =>
                 d.EmploymentStatusId == EmploymentStatus.Constants.Terminated &&
                 d.TerminationCodeId != TerminationCode.Constants.RetiredReceivingPension &&
-                d.TerminationDate >= _startDate && d.TerminationDate <= _endDate
+                d.TerminationDate >= startDate && d.TerminationDate <= endDate
                 )
-            .ToList();
+            .ToListAsync();
         foreach (var employee in employees)
         {
-            List<PayProfit> payProfits = _ctx.PayProfits.Where(pp => pp.BadgeNumber == employee.BadgeNumber).ToList();
+            List<PayProfit> payProfits = await _ctx.PayProfits.Where(pp => pp.BadgeNumber == employee.BadgeNumber).ToListAsync();
             if (payProfits.Count != 1)
             {
                 _logger.LogError("Employee {BadgeNumber} does not have a single pay_profit row.", employee.BadgeNumber);
@@ -90,32 +68,34 @@ public class TerminatedEmployeeAndBeneficiaryReport(ILogger _logger, ProfitShari
                 ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested // 6
             : pp.ZeroContributionReasonId ?? 0;
 
-            MemberSlice memberSlice = new MemberSlice(
-                Psn: employee.BadgeNumber,
-                Ssn: employee.Ssn,
-                BirthDate: employee.DateOfBirth,
-                HoursCurrentYear: 0, // hours
-                NetBalanceLastYear: pp.NetBalanceLastYear,
-                VestedBalanceLastYear: pp.VestedBalanceLastYear,
-                EmploymentStatusCode: employee.EmploymentStatusId,
-                FullName: employee.FullName!,
-                FirstName: employee.FirstName,
-                MiddleInitial: employee.MiddleName?.Substring(0, 1) ?? "",
-                LastName: employee.LastName,
-                YearsInPs: pp.CompanyContributionYears,
-                TerminationDate: employee.TerminationDate,
-                IncomeRegAndExecCurrentYear: (pp.IncomeCurrentYear ?? 0) + pp.IncomeExecutive,
-                TerminationCode: employee.TerminationCodeId,
-                ZeroCont: zeroCont,
-                Enrolled: pp.EnrollmentId,
-                Etva: pp.EarningsEtvaValue,
-                BeneficiaryAllocation: 0);
+            MemberSlice memberSlice = new MemberSlice
+            {
+                Psn = employee.BadgeNumber,
+                Ssn = employee.Ssn,
+                BirthDate = employee.DateOfBirth,
+                HoursCurrentYear = 0, // hours
+                NetBalanceLastYear = pp.NetBalanceLastYear,
+                VestedBalanceLastYear = pp.VestedBalanceLastYear,
+                EmploymentStatusCode = employee.EmploymentStatusId,
+                FullName = employee.FullName!,
+                FirstName = employee.FirstName,
+                MiddleInitial = employee.MiddleName?.Substring(0, 1) ?? "",
+                LastName = employee.LastName,
+                YearsInPs = pp.CompanyContributionYears,
+                TerminationDate = employee.TerminationDate,
+                IncomeRegAndExecCurrentYear = (pp.IncomeCurrentYear ?? 0) + pp.IncomeExecutive,
+                TerminationCode = employee.TerminationCodeId,
+                ZeroCont = zeroCont,
+                Enrolled = pp.EnrollmentId,
+                Etva = pp.EarningsEtvaValue,
+                BeneficiaryAllocation = 0
+            };
 
             memberSlices.Add(memberSlice);
 
         }
 
-        foreach (var beneficiary in _ctx.Beneficiaries.ToList())
+        foreach (var beneficiary in await _ctx.Beneficiaries.ToListAsync())
         {
             char statusCode = 'T';
             DateOnly? terminationDate = null;
@@ -123,7 +103,7 @@ public class TerminatedEmployeeAndBeneficiaryReport(ILogger _logger, ProfitShari
             long psn = beneficiary.Psn;
 
             // See if beneficiary is also an employee.
-            var results = _ctx.Demographics.Where(demographic => demographic.Ssn == beneficiary.Ssn)
+            var results = await _ctx.Demographics.Where(demographic => demographic.Ssn == beneficiary.Ssn)
                                 .GroupJoin(
                                     _ctx.PayProfits,
                                     demographic => demographic.Ssn,
@@ -136,12 +116,12 @@ public class TerminatedEmployeeAndBeneficiaryReport(ILogger _logger, ProfitShari
                                         Demographic = x.demographic,
                                         PayProfit = payProfit
                                     })
-                                .ToList();
+                                .ToListAsync();
             if (results.Count == 1)
             {
                 var result = results[0];
                 terminationDate = result.Demographic.TerminationDate;
-                if (terminationDate >= _startDate && terminationDate <= _endDate)
+                if (terminationDate >= startDate && terminationDate <= endDate)
                 {
                     // if the termination date is out of range
                     continue;
@@ -154,34 +134,37 @@ public class TerminatedEmployeeAndBeneficiaryReport(ILogger _logger, ProfitShari
                 terminationDate = result.Demographic.TerminationDate;
                 statusCode = result.Demographic.EmploymentStatusId;
             }
-            MemberSlice memberSlice = new MemberSlice(
-                Psn: psn,
-                Ssn: beneficiary.Ssn,
-                BirthDate: beneficiary.DateOfBirth,
-                HoursCurrentYear: 0,
-                NetBalanceLastYear: amount,
-                VestedBalanceLastYear: amount,
-                EmploymentStatusCode: statusCode,
-                FullName: GetFullName(beneficiary),
-                FirstName: beneficiary.FirstName,
-                MiddleInitial: beneficiary.MiddleName!,
-                LastName: beneficiary.LastName,
-                YearsInPs: 10,
-                TerminationDate: terminationDate,
-                IncomeRegAndExecCurrentYear: 0,
-                TerminationCode: null,
-                ZeroCont: 6,
-                Enrolled: 0,
-                Etva: amount,
-                BeneficiaryAllocation: 0);
+            MemberSlice memberSlice = new MemberSlice
+            {
+                Psn = psn,
+                Ssn = beneficiary.Ssn,
+                BirthDate = beneficiary.DateOfBirth,
+                HoursCurrentYear = 0,
+                NetBalanceLastYear = amount,
+                VestedBalanceLastYear = amount,
+                EmploymentStatusCode = statusCode,
+                FullName = GetFullName(beneficiary),
+                FirstName = beneficiary.FirstName,
+                MiddleInitial = beneficiary.MiddleName!,
+                LastName = beneficiary.LastName,
+                YearsInPs = 10,
+                TerminationDate = terminationDate,
+                IncomeRegAndExecCurrentYear = 0,
+                TerminationCode = null,
+                ZeroCont = ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested,
+                Enrolled = 0,
+                Etva = amount,
+                BeneficiaryAllocation = 0
+            };
             memberSlices.Add(memberSlice);
         }
 
         return memberSlices;
     }
 
-    private List<Member> MergeMemberSlicesToMembers(List<MemberSlice> memberSlices)
+    private async Task<List<Member>> MergeMemberSlicesToMembers(List<MemberSlice> memberSlices, decimal profitSharingYearWithIteration)
     {
+        // Order records by FullName
         memberSlices.Sort((a, b) => StringComparer.Ordinal.Compare(a.FullName, b.FullName));
         long ssn = long.MinValue;
 
@@ -202,7 +185,7 @@ public class TerminatedEmployeeAndBeneficiaryReport(ILogger _logger, ProfitShari
                 // then merge the slices together
 
                 // Get this year's transactions and merge in those amounts
-                ProfitDetailSummary ds = RetrieveProfitDetail(ssn);
+                ProfitDetailSummary ds = await RetrieveProfitDetail(ssn, profitSharingYearWithIteration);
                 beneficiaryAllocation += ds.BeneficiaryAllocation;
 
                 // If member has money (otherwise we skip them)
@@ -232,51 +215,34 @@ public class TerminatedEmployeeAndBeneficiaryReport(ILogger _logger, ProfitShari
             beneficiaryAllocation += m.BeneficiaryAllocation;
             ssn = m.Ssn;
 
-            ms = new Member(
-                Psn: m.Psn,
-                FullName: m.FullName,
-                FirstName: m.FirstName,
-                LastName: m.LastName,
-                MiddleInitial: m.MiddleInitial,
-                Birthday: m.BirthDate,
-                HoursCurrentYear: m.HoursCurrentYear,
-                EarningsCurrentYear: m.IncomeRegAndExecCurrentYear,
-                Ssn: m.Ssn,
-                TerminationDate: m.TerminationDate,
-                TerminationCode: m.TerminationCode,
-                BeginningAmount: netBalanceLastYear,
-                CurrentVestedAmount: vestedBalanceLastYear,
-                YearsInPlan: m.YearsInPs,
-                ZeroCont: m.ZeroCont,
-                Enrolled: m.Enrolled,
-                Evta: m.Etva,
-                BeneficiaryAllocation: beneficiaryAllocation,
-                DistributionAmount: 0,
-                ForfeitAmount: 0,
-                EndingBalance: 0,
-                VestedBalance: 0);
+            ms = new Member
+            {
+                Psn = m.Psn,
+                FullName = m.FullName,
+                FirstName = m.FirstName,
+                LastName = m.LastName,
+                MiddleInitial = m.MiddleInitial,
+                Birthday = m.BirthDate,
+                HoursCurrentYear = m.HoursCurrentYear,
+                EarningsCurrentYear = m.IncomeRegAndExecCurrentYear,
+                Ssn = m.Ssn,
+                TerminationDate = m.TerminationDate,
+                TerminationCode = m.TerminationCode,
+                BeginningAmount = netBalanceLastYear,
+                CurrentVestedAmount = vestedBalanceLastYear,
+                YearsInPlan = m.YearsInPs,
+                ZeroCont = m.ZeroCont,
+                Enrolled = m.Enrolled,
+                Evta = m.Etva,
+                BeneficiaryAllocation = beneficiaryAllocation,
+                DistributionAmount = 0,
+                ForfeitAmount = 0,
+                EndingBalance = 0,
+                VestedBalance = 0
+            };
         }
 
         return members;
-    }
-
-    private string CreateReport(List<Member> members)
-    {
-        TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto> reportData = CreateDataset(members);
-
-        TextReportGenerator textReportGenerator = new TextReportGenerator(_effectiveRunDate, _startDate, _endDate, _profitSharingYearWithIteration);
-
-        foreach (var ms in reportData.Response.Results)
-        {
-
-            textReportGenerator.PrintDetails(ms.BadgePSn, ms.Name, ms.BeginningBalance,
-                ms.BeneficiaryAllocation, ms.DistributionAmount, ms.Forfeit,
-                ms.EndingBalance, ms.VestedBalance, ms.DateTerm, ms.YtdPsHours, ms.VestedPercent, ms.Age,
-                ms.EnrollmentCode ?? 0);
-        }
-        textReportGenerator.PrintTotals(reportData.TotalEndingBalance, reportData.TotalVested, reportData.TotalForfeit, reportData.TotalBeneficiaryAllocation);
-        return textReportGenerator.GetReport();
-
     }
 
     private TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto> CreateDataset(List<Member> members)
@@ -290,53 +256,7 @@ public class TerminatedEmployeeAndBeneficiaryReport(ILogger _logger, ProfitShari
 
         foreach (var ms in members)
         {
-            int vestingPercent;
-            if (ms.Enrolled > 2 || ms.ZeroCont == 6)
-            {
-                vestingPercent = 100;
-            }
-            else
-            {
-                int vestingYearIndex;
-                if (ms.Enrolled < 2)
-                {
-                    if (ms.YearsInPlan <= 1)
-                    {
-                        vestingYearIndex = 1;
-                    }
-                    else
-                    {
-                        if (ms.YearsInPlan > 6)
-                        {
-                            vestingYearIndex = 7;
-                        }
-                        else
-                        {
-                            vestingYearIndex = (int)ms.YearsInPlan;
-                        }
-                    }
-                    vestingPercent = _olderVestingSchedule[vestingYearIndex - 1];
-                }
-                else
-                {
-                    if (ms.YearsInPlan <= 1)
-                    {
-                        vestingYearIndex = 1;
-                    }
-                    else
-                    {
-                        if (ms.YearsInPlan > 5)
-                        {
-                            vestingYearIndex = 6;
-                        }
-                        else
-                        {
-                            vestingYearIndex = (int)ms.YearsInPlan;
-                        }
-                    }
-                    vestingPercent = _newerVestingSchedule[vestingYearIndex - 1];
-                }
-            }
+            int vestingPercent = LookupVestingPercent(ms.Enrolled, ms.ZeroCont, ms.YearsInPlan);
 
             byte enrolled = ms.Enrolled == 2 ? (byte)0 : ms.Enrolled;
 
@@ -356,20 +276,23 @@ public class TerminatedEmployeeAndBeneficiaryReport(ILogger _logger, ProfitShari
                 int birthYear = ms.Birthday.Value.Year;
                 int birthMonth = ms.Birthday.Value.Month;
                 int birthDay = ms.Birthday.Value.Day;
-                age = _effectiveRunDate.Year - birthYear;
-                if (birthMonth > _effectiveRunDate.Month)
+                age = _todaysDate.Year - birthYear;
+                if (birthMonth > _todaysDate.Month)
                 {
                     age--;
                 }
-                if (birthMonth == _effectiveRunDate.Month && birthDay > _effectiveRunDate.Day)
+                if (birthMonth == _todaysDate.Month && birthDay > _todaysDate.Day)
                 {
                     age--;
                 }
             }
 
+            // If they have a contribution the plan and are past the 1st/2nd year for the old/new plan 
+            // or have a beneficiary allocation then add them in.
             if (
-                ((ms.Enrolled == 0 || ms.Enrolled == 1 || ms.Enrolled == 3) && ms.YearsInPlan > 2 && ms.BeginningAmount != 0)
-                || ((ms.Enrolled == 2 || ms.Enrolled == 4) && ms.YearsInPlan > 1 && ms.BeginningAmount != 0)
+                ((ms.Enrolled == Enrollment.Constants.NotEnrolled || ms.Enrolled == Enrollment.Constants.OldVestingPlanHasContributions || ms.Enrolled == Enrollment.Constants.OldVestingPlanHasForfeitureRecords)
+                 && ms.YearsInPlan > 2 && ms.BeginningAmount != 0)
+                || ((ms.Enrolled == Enrollment.Constants.NewVestingPlanHasContributions || ms.Enrolled == Enrollment.Constants.NewVestingPlanHasForfeitureRecords) && ms.YearsInPlan > 1 && ms.BeginningAmount != 0)
                 || (ms.BeneficiaryAllocation != 0)
             )
             {
@@ -398,7 +321,6 @@ public class TerminatedEmployeeAndBeneficiaryReport(ILogger _logger, ProfitShari
 
         return new TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto>
         {
-            ReportName = "Terminated Employee and Beneficiary Report",
             ReportDate = DateTimeOffset.Now,
             TotalVested = totalVested,
             TotalForfeit = totalForfeit,
@@ -413,17 +335,62 @@ public class TerminatedEmployeeAndBeneficiaryReport(ILogger _logger, ProfitShari
 
     }
 
-
-    private ProfitDetailSummary RetrieveProfitDetail(long ssn)
+    private static int LookupVestingPercent(byte enrolled, byte? zeroCont, int yearsInPlan)
     {
-        // This does seem odd, and possibly a bug.   We ask the user for the profit sharing year with a decimal.
+        if (enrolled > Enrollment.Constants.NewVestingPlanHasContributions || zeroCont == ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested)
+        {
+            return 100;
+        }
+        int vestingYearIndex;
+        if (enrolled < Enrollment.Constants.NewVestingPlanHasContributions)
+        {
+            if (yearsInPlan <= 1)
+            {
+                vestingYearIndex = 1;
+            }
+            else
+            {
+                if (yearsInPlan > 6)
+                {
+                    vestingYearIndex = 7;
+                }
+                else
+                {
+                    vestingYearIndex = yearsInPlan;
+                }
+            }
+            return ReferenceData.OlderVestingSchedule[vestingYearIndex - 1];
+        }
+        if (yearsInPlan <= 1)
+        {
+            vestingYearIndex = 1;
+        }
+        else
+        {
+            if (yearsInPlan > 5)
+            {
+                vestingYearIndex = 6;
+            }
+            else
+            {
+                vestingYearIndex = yearsInPlan;
+            }
+        }
+        return ReferenceData.NewerVestingSchedule[vestingYearIndex - 1];
+
+    }
+
+
+    private async Task<ProfitDetailSummary> RetrieveProfitDetail(long ssn, decimal profitSharingYearWithIteration)
+    {
+        // This does seem odd, and possibly a bug?   We ask the user for the profit sharing year with a decimal.
         // but then we ignore the decimal part when querying records, but display the full value when printing the report.
-        long profitSharingYearOnly = (long)Math.Truncate(_profitSharingYearWithIteration);
+        long profitSharingYearOnly = (long)Math.Truncate(profitSharingYearWithIteration);
 
         // Note that pd.profitYear is a decimal, aka 2021.2 - and we constrain on only the year portion
-        List<ProfitDetail> profitDetails = _ctx.ProfitDetails
+        List<ProfitDetail> profitDetails = await _ctx.ProfitDetails
                 .Where(pd => pd.ProfitYear >= profitSharingYearOnly && pd.ProfitYear < (profitSharingYearOnly + 1) && pd.Ssn == ssn)
-                .ToList();
+                .ToListAsync();
 
         if (profitDetails.Count == 0)
         {
@@ -436,32 +403,32 @@ public class TerminatedEmployeeAndBeneficiaryReport(ILogger _logger, ProfitShari
 
         foreach (var profitDetail in profitDetails)
         {
-            if (profitDetail.ProfitCodeId == 1 || profitDetail.ProfitCodeId == 3)
+            if (profitDetail.ProfitCodeId == ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal || profitDetail.ProfitCodeId == ProfitCode.Constants.OutgoingDirectPayments)
             {
                 distribution = distribution - profitDetail.Forfeiture;
             }
 
-            if (profitDetail.ProfitCodeId == 2)
+            if (profitDetail.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures)
             {
                 forfeiture = forfeiture - profitDetail.Forfeiture;
             }
 
-            if (profitDetail.ProfitCodeId == 0)
+            if (profitDetail.ProfitCodeId == ProfitCode.Constants.IncomingContributions)
             {
                 forfeiture = forfeiture + profitDetail.Forfeiture;
             }
 
-            if (profitDetail.ProfitCodeId == 9)
+            if (profitDetail.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment)
             {
                 distribution = distribution - profitDetail.Forfeiture;
             }
 
-            if (profitDetail.ProfitCodeId == 5)
+            if (profitDetail.ProfitCodeId == ProfitCode.Constants.OutgoingXferBeneficiary)
             {
                 beneficiaryAllocation = beneficiaryAllocation - profitDetail.Forfeiture;
             }
 
-            if (profitDetail.ProfitCodeId == 6)
+            if (profitDetail.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary)
             {
                 beneficiaryAllocation = beneficiaryAllocation + profitDetail.Contribution;
             }

@@ -5,46 +5,41 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.TerminatedEmployeeAndBeneficiary;
+using FastEndpoints;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 
-public class TerminatedEmployeeAndBeneficiaryReportService(
-    IProfitSharingDataContextFactory _dataContextFactory,
-    ILoggerFactory factory)
-    : ITerminatedEmployeeAndBeneficiaryReportService
+public class TerminatedEmployeeAndBeneficiaryReportService : ITerminatedEmployeeAndBeneficiaryReportService
 {
-    private readonly ILogger<TerminatedEmployeeAndBeneficiaryReportService> _logger = factory.CreateLogger<TerminatedEmployeeAndBeneficiaryReportService>();
+    private readonly IProfitSharingDataContextFactory _dataContextFactory;
+    private readonly ILogger<TerminatedEmployeeAndBeneficiaryReportService> _logger;
+    private static DateOnly? _todaysDate;
 
-    public static DateOnly? useThisForTodaysDateWhenTesting { get; set; }
-
-    public async Task<string> GetReport(DateOnly startDate, DateOnly endDate, decimal profitSharingYear, CancellationToken ct)
+    public TerminatedEmployeeAndBeneficiaryReportService(IProfitSharingDataContextFactory dataContextFactory, ILoggerFactory loggerFactory)
     {
-        string report = "";
+        _dataContextFactory = dataContextFactory;
+        _logger = loggerFactory.CreateLogger<TerminatedEmployeeAndBeneficiaryReportService>();
+    }
+    
 
-        await _dataContextFactory.UseWritableContext(ctx =>
-        {
-            TerminatedEmployeeAndBeneficiaryReport reportGenerator = new TerminatedEmployeeAndBeneficiaryReport(_logger, ctx, useThisForTodaysDateWhenTesting);
-            report = reportGenerator.CreateTextReport(startDate, endDate, profitSharingYear);
-            return Task.CompletedTask;
-        }, ct);
-
-        return report;
+    public  Task<TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto>>
+        GetReport(TerminatedEmployeeAndBeneficiaryDataRequest req, CancellationToken ct)
+    {
+        return _dataContextFactory
+            .UseReadOnlyContext<TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto>>(ctx =>
+            {
+                TerminatedEmployeeAndBeneficiaryReport reportGenerator = new TerminatedEmployeeAndBeneficiaryReport(_logger, ctx, _todaysDate ?? DateOnly.FromDateTime(DateTime.Today));
+                return  reportGenerator.CreateData(req.StartDate, req.EndDate, req.ProfitShareYear);
+            });
     }
 
-    public Task<TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto>> GetReport(TerminatedEmployeeAndBeneficiaryDataRequest req, CancellationToken ct)
+    // Used only when testing to fix the Age of members
+    public static void SetTodayDateForTestingOnly(DateOnly todaysDate)
     {
-        TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto>? data = null;
-        
-        _dataContextFactory.UseWritableContext(ctx =>
-        {
-           TerminatedEmployeeAndBeneficiaryReport reportGenerator = new TerminatedEmployeeAndBeneficiaryReport(_logger, ctx, useThisForTodaysDateWhenTesting);
-           data = reportGenerator.CreateData(req.StartDate, req.EndDate, req.ProfitShareYear);
-           return Task.CompletedTask;
-        }, ct);
-
-        return Task.FromResult(data!);
+        _todaysDate = todaysDate;
     }
 }

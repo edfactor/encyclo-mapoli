@@ -58,7 +58,6 @@ public class CurrentYearWagesEndpoint : EndpointWithCsvBase<PaginationRequestDto
     }
 
 
-
     public sealed class WagesCurrentYearResponseMap : ClassMap<WagesCurrentYearResponse>
     {
         public WagesCurrentYearResponseMap()

@@ -4,7 +4,7 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.TerminatedE
 
 public sealed record TerminatedEmployeeAndBeneficiaryDataResponse<TResponse> where TResponse : class
 {
-    public required string ReportName { get; set; }
+    public string ReportName { get; set; } = "Terminated Employee and Beneficiary Report";
     public required DateTimeOffset ReportDate { get; set; }
 
     public required decimal TotalVested { get; set; }

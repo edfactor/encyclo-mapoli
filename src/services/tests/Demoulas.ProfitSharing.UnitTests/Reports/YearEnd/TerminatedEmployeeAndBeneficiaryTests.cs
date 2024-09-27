@@ -22,7 +22,6 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
     
     public TerminatedEmployeeAndBeneficiaryTests()
     {
-      
         _yearEndClient = new YearEndClient(ApiClient, DownloadClient);
     }
 
@@ -116,7 +115,7 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
             await c.SaveChangesAsync();
 
             // Lock age and todays' date computation when testing. 
-            TerminatedEmployeeAndBeneficiaryReportService.useThisForTodaysDateWhenTesting = new DateOnly(2024, 9, 7);
+            TerminatedEmployeeAndBeneficiaryReportService.SetTodayDateForTestingOnly(new DateOnly(2024, 9, 7));
 
             ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
@@ -176,7 +175,7 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
             await c.SaveChangesAsync();
 
             // Lock age and todays' date computation when testing. 
-            TerminatedEmployeeAndBeneficiaryReportService.useThisForTodaysDateWhenTesting = new DateOnly(2024, 9, 7);
+            TerminatedEmployeeAndBeneficiaryReportService.SetTodayDateForTestingOnly(new DateOnly(2024, 9, 7));
 
             // Act
             DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
