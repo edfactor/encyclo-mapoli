@@ -2320,8 +2320,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("NVARCHAR2(64)")
+                        .HasMaxLength(84)
+                        .HasColumnType("NVARCHAR2(84)")
                         .HasColumnName("NAME");
 
                     b.HasKey("Id")
@@ -2354,6 +2354,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         {
                             Id = (byte)4,
                             Name = "New vesting plan has Forfeiture records"
+                        },
+                        new
+                        {
+                            Id = (byte)9,
+                            Name = "Previous years enrollment is unknown. (History not previously tracked)"
                         });
                 });
 
@@ -30136,15 +30141,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("FK_PROFIT_DETAIL_ZEROCONTRIBUTIONREASON_ZEROCONTRIBUTIONREASONID");
 
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Distribution", "Distribution")
-                        .WithMany("ProfitDetails")
-                        .HasForeignKey("Ssn", "DistributionSequence")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_PROFIT_DETAIL_DISTRIBUTION_SSN_DISTRIBUTION_SEQUENCE");
-
-                    b.Navigation("Distribution");
-
                     b.Navigation("ProfitCode");
 
                     b.Navigation("TaxCode");
@@ -30170,11 +30166,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Department", b =>
                 {
                     b.Navigation("Demographics");
-                });
-
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Distribution", b =>
-                {
-                    b.Navigation("ProfitDetails");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.EmployeeType", b =>

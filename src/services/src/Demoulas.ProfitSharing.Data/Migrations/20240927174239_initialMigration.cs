@@ -132,6 +132,42 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "DISTRIBUTIONREQUESTREASON",
+                columns: table => new
+                {
+                    ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    NAME = table.Column<string>(type: "NVARCHAR2(2000)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DISTRIBUTIONREQUESTREASON", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DISTRIBUTIONREQUESTSTATUS",
+                columns: table => new
+                {
+                    ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
+                    NAME = table.Column<string>(type: "NVARCHAR2(2000)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DISTRIBUTIONREQUESTSTATUS", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DISTRIBUTIONREQUESTTYPE",
+                columns: table => new
+                {
+                    ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    NAME = table.Column<string>(type: "NVARCHAR2(2000)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DISTRIBUTIONREQUESTTYPE", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "EMPLOYEE_TYPE",
                 columns: table => new
                 {
@@ -172,7 +208,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 columns: table => new
                 {
                     ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
-                    NAME = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: false)
+                    NAME = table.Column<string>(type: "NVARCHAR2(84)", maxLength: 84, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -474,6 +510,49 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "DISTRIBUTION_REQUEST",
+                columns: table => new
+                {
+                    ID = table.Column<long>(type: "NUMBER(19)", nullable: false)
+                        .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
+                    PSN = table.Column<long>(type: "NUMBER(11)", precision: 11, nullable: false),
+                    REASON_ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    STATUS_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
+                    TYPE_ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    REASON_TEXT = table.Column<string>(type: "NVARCHAR2(250)", maxLength: 250, nullable: true),
+                    REASON_OTHER = table.Column<string>(type: "NVARCHAR2(500)", maxLength: 500, nullable: true),
+                    AMOUNT_REQUESTED = table.Column<decimal>(type: "DECIMAL(10,2)", precision: 10, scale: 2, nullable: false),
+                    AMOUNT_AUTHORIZED = table.Column<decimal>(type: "DECIMAL(10,2)", precision: 10, scale: 2, nullable: true),
+                    DATE_REQUESTED = table.Column<DateTime>(type: "Date", nullable: false),
+                    DATE_DECIDED = table.Column<DateTime>(type: "Date", nullable: true),
+                    TAXCODECODE = table.Column<string>(type: "NVARCHAR2(1)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DISTRIBUTION_REQUEST", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_DISTRIBUTION_REQUEST_DISTRIBUTIONREQUESTREASON_REASONID",
+                        column: x => x.REASON_ID,
+                        principalTable: "DISTRIBUTIONREQUESTREASON",
+                        principalColumn: "ID");
+                    table.ForeignKey(
+                        name: "FK_DISTRIBUTION_REQUEST_DISTRIBUTIONREQUESTSTATUS_STATUSID",
+                        column: x => x.STATUS_ID,
+                        principalTable: "DISTRIBUTIONREQUESTSTATUS",
+                        principalColumn: "ID");
+                    table.ForeignKey(
+                        name: "FK_DISTRIBUTION_REQUEST_DISTRIBUTIONREQUESTTYPE_TYPEID",
+                        column: x => x.TYPE_ID,
+                        principalTable: "DISTRIBUTIONREQUESTTYPE",
+                        principalColumn: "ID");
+                    table.ForeignKey(
+                        name: "FK_DISTRIBUTION_REQUEST_TAX_CODE_TAXCODECODE",
+                        column: x => x.TAXCODECODE,
+                        principalTable: "TAX_CODE",
+                        principalColumn: "CODE");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "DEMOGRAPHIC",
                 columns: table => new
                 {
@@ -552,65 +631,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         name: "FK_DEMOGRAPHIC_TERMINATIONCODE_TERMINATIONCODEID",
                         column: x => x.TERMINATION_CODE_ID,
                         principalTable: "TERMINATION_CODE",
-                        principalColumn: "ID");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "PAY_PROFIT_LEGACY",
-                columns: table => new
-                {
-                    BADGE_NUMBER = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false),
-                    SSN = table.Column<long>(type: "NUMBER(9)", precision: 9, nullable: false),
-                    HOURS_CURRENT_YEAR = table.Column<decimal>(type: "DECIMAL(6,2)", precision: 6, scale: 2, nullable: false),
-                    HOURS_LAST_YEAR = table.Column<decimal>(type: "DECIMAL(6,2)", precision: 6, scale: 2, nullable: false),
-                    INCOME_CURRENT_YEAR = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
-                    INCOME_LAST_YEAR = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
-                    EARNINGS_AFTER_APPLYING_VESTING_RULES = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
-                    EARNINGS_ETVA_VALUE = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
-                    SECONDARY_EARNINGS = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: true),
-                    SECONDARY_ETVA_EARNINGS = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: true),
-                    EARNINGS_PRIOR_ETVA_VALUE = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: true),
-                    WEEKS_WORKED_YEAR = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false),
-                    WEEKS_WORKED_LAST_YEAR = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false),
-                    COMPANY_CONTRIBUTION_YEARS = table.Column<byte>(type: "NUMBER(3)", nullable: false),
-                    CERTIFICATE_ISSUED_LAST_YEAR = table.Column<bool>(type: "NUMBER(1)", nullable: false),
-                    PS_CERTIFICATE_ISSUED_DATE = table.Column<DateTime>(type: "DATE", nullable: true),
-                    INITIAL_CONTRIBUTION_YEAR = table.Column<short>(type: "NUMBER(4)", precision: 4, nullable: false),
-                    NET_BALANCE_LAST_YEAR = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
-                    EARNINGS_LAST_YEAR = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
-                    POINTS_EARNED_LAST_YEAR = table.Column<int>(type: "NUMBER(5)", precision: 5, nullable: false),
-                    VESTED_BALANCE_LAST_YEAR = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
-                    CONTRIBUTION_AMOUNT_LAST_YEAR = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
-                    FORFEITURE_AMOUNT_LAST_YEAR = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
-                    ENROLLMENT_ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
-                    BENEFICIARY_ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
-                    EMPLOYEE_TYPE_ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
-                    ZERO_CONTRIBUTION_REASON_ID = table.Column<byte>(type: "NUMBER(3)", nullable: true),
-                    HOURS_EXECUTIVE = table.Column<decimal>(type: "DECIMAL(6,2)", precision: 6, scale: 2, nullable: false),
-                    INCOME_EXECUTIVE = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PAY_PROFIT_LEGACY", x => x.BADGE_NUMBER);
-                    table.ForeignKey(
-                        name: "FK_PAY_PROFIT_LEGACY_BENEFICIARYTYPES_BENEFICIARYTYPEID",
-                        column: x => x.BENEFICIARY_ID,
-                        principalTable: "BENEFICIARY_TYPE",
-                        principalColumn: "ID");
-                    table.ForeignKey(
-                        name: "FK_PAY_PROFIT_LEGACY_EMPLOYEETYPES_EMPLOYEETYPEID",
-                        column: x => x.EMPLOYEE_TYPE_ID,
-                        principalTable: "EMPLOYEE_TYPE",
-                        principalColumn: "ID");
-                    table.ForeignKey(
-                        name: "FK_PAY_PROFIT_LEGACY_ENROLLMENT_ENROLLMENTID",
-                        column: x => x.ENROLLMENT_ID,
-                        principalTable: "ENROLLMENT",
-                        principalColumn: "ID");
-                    table.ForeignKey(
-                        name: "FK_PAY_PROFIT_LEGACY_ZEROCONTRIBUTIONREASON_ZEROCONTRIBUTIONREASONID",
-                        column: x => x.ZERO_CONTRIBUTION_REASON_ID,
-                        principalTable: "ZERO_CONTRIBUTION_REASON",
                         principalColumn: "ID");
                 });
 
@@ -2370,7 +2390,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     { (byte)1, "Old vesting plan has Contributions (7 years to full vesting)" },
                     { (byte)2, "New vesting plan has Contributions (6 years to full vesting)" },
                     { (byte)3, "Old vesting plan has Forfeiture records" },
-                    { (byte)4, "New vesting plan has Forfeiture records" }
+                    { (byte)4, "New vesting plan has Forfeiture records" },
+                    { (byte)9, "Previous years enrollment is unknown. (History not previously tracked)" }
                 });
 
             migrationBuilder.InsertData(
@@ -2720,6 +2741,26 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 column: "THIRD_PARTY_COUNTRY_ISO");
 
             migrationBuilder.CreateIndex(
+                name: "IX_DISTRIBUTION_REQUEST_REASONID",
+                table: "DISTRIBUTION_REQUEST",
+                column: "REASON_ID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DISTRIBUTION_REQUEST_STATUSID",
+                table: "DISTRIBUTION_REQUEST",
+                column: "STATUS_ID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DISTRIBUTION_REQUEST_TAXCODECODE",
+                table: "DISTRIBUTION_REQUEST",
+                column: "TAXCODECODE");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DISTRIBUTION_REQUEST_TYPEID",
+                table: "DISTRIBUTION_REQUEST",
+                column: "TYPE_ID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_JOB_JOBSTATUSID",
                 table: "JOB",
                 column: "JOBSTATUSID");
@@ -2755,29 +2796,14 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 column: "ZERO_CONTRIBUTION_REASON_ID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PAY_PROFIT_LEGACY_BENEFICIARYTYPEID",
-                table: "PAY_PROFIT_LEGACY",
-                column: "BENEFICIARY_ID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PAY_PROFIT_LEGACY_EMPLOYEETYPEID",
-                table: "PAY_PROFIT_LEGACY",
-                column: "EMPLOYEE_TYPE_ID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PAY_PROFIT_LEGACY_ENROLLMENTID",
-                table: "PAY_PROFIT_LEGACY",
-                column: "ENROLLMENT_ID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PAY_PROFIT_LEGACY_ZEROCONTRIBUTIONREASONID",
-                table: "PAY_PROFIT_LEGACY",
-                column: "ZERO_CONTRIBUTION_REASON_ID");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_PROFIT_DETAIL_PROFITCODEID",
                 table: "PROFIT_DETAIL",
                 column: "PROFIT_CODE_ID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PROFIT_DETAIL_SSN_DISTRIBUTIONSEQUENCE_PROFITYEAR",
+                table: "PROFIT_DETAIL",
+                columns: new[] { "SSN", "DISTRIBUTION_SEQUENCE", "PROFIT_YEAR" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_PROFIT_DETAIL_TAXCODEID",
@@ -2806,13 +2832,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "DISTRIBUTION");
 
             migrationBuilder.DropTable(
+                name: "DISTRIBUTION_REQUEST");
+
+            migrationBuilder.DropTable(
                 name: "JOB");
 
             migrationBuilder.DropTable(
                 name: "PAY_PROFIT");
-
-            migrationBuilder.DropTable(
-                name: "PAY_PROFIT_LEGACY");
 
             migrationBuilder.DropTable(
                 name: "PROFIT_DETAIL");
@@ -2830,6 +2856,15 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "DISTRIBUTION_STATUS");
 
             migrationBuilder.DropTable(
+                name: "DISTRIBUTIONREQUESTREASON");
+
+            migrationBuilder.DropTable(
+                name: "DISTRIBUTIONREQUESTSTATUS");
+
+            migrationBuilder.DropTable(
+                name: "DISTRIBUTIONREQUESTTYPE");
+
+            migrationBuilder.DropTable(
                 name: "JOBSTARTMETHOD");
 
             migrationBuilder.DropTable(
@@ -2839,10 +2874,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "JOBTYPE");
 
             migrationBuilder.DropTable(
-                name: "DEMOGRAPHIC");
+                name: "BENEFICIARY_TYPE");
 
             migrationBuilder.DropTable(
-                name: "BENEFICIARY_TYPE");
+                name: "DEMOGRAPHIC");
 
             migrationBuilder.DropTable(
                 name: "EMPLOYEE_TYPE");

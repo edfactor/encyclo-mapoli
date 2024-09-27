@@ -22,5 +22,4 @@ public class ProfitDetail
     public long Ssn { get; set; }
     public int DistributionSequence { get; set; }
     
-    public Distribution? Distribution { get; set; }
 }

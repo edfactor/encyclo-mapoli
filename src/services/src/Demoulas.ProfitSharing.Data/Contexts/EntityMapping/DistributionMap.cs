@@ -74,9 +74,5 @@ internal sealed class DistributionMap : IEntityTypeConfiguration<Distribution>
         builder.HasOne(d => d.Frequency).WithMany().HasForeignKey(d => d.FrequencyId);
         builder.HasOne(d => d.Status).WithMany().HasForeignKey(d => d.StatusId);
         builder.HasOne(x => x.TaxCode).WithMany().HasForeignKey(t => t.TaxCodeId);
-
-        builder.HasMany(x => x.ProfitDetails)
-            .WithOne(x => x.Distribution)
-            .HasForeignKey(t => new { t.Ssn, t.DistributionSequence });
     }
 }
