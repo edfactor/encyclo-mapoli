@@ -48,23 +48,33 @@ public class TerminatedEmployeeAndBeneficiaryReport
         // slices of member information (aka employee or beneficiary information)
         List<MemberSlice> memberSlices = new();
 
-        var employees = await _ctx.Demographics.Where(d =>
-                d.EmploymentStatusId == EmploymentStatus.Constants.Terminated &&
-                d.TerminationCodeId != TerminationCode.Constants.RetiredReceivingPension &&
-                d.TerminationDate >= startDate && d.TerminationDate <= endDate
-                )
+        var employeesWithPayProfits = await _ctx.Demographics
+            .Where(d => d.EmploymentStatusId == EmploymentStatus.Constants.Terminated &&
+                        d.TerminationCodeId != TerminationCode.Constants.RetiredReceivingPension &&
+                        d.TerminationDate >= startDate && d.TerminationDate <= endDate)
+            .GroupJoin(
+                _ctx.PayProfits,
+                demographic => demographic.BadgeNumber,
+                payProfit => payProfit.BadgeNumber,
+                (demographic, payProfits) => new
+                {
+                    Demographic = demographic,
+                    PayProfits = payProfits
+                })
             .ToListAsync();
-        foreach (var employee in employees)
+
+        foreach (var employeeWithPahProfits in employeesWithPayProfits)
         {
-            List<PayProfit> payProfits = await _ctx.PayProfits.Where(pp => pp.BadgeNumber == employee.BadgeNumber).ToListAsync();
-            if (payProfits.Count != 1)
+            var employee = employeeWithPahProfits.Demographic;
+            IEnumerable<PayProfit> payProfits = employeeWithPahProfits.PayProfits;
+            if (payProfits.Count() != 1)
             {
                 _logger.LogError("Employee {BadgeNumber} does not have a single pay_profit row.", employee.BadgeNumber);
                 continue;
             }
-            PayProfit pp = payProfits[0];
+            PayProfit pp = payProfits.First();
 
-            byte zeroCont = (employee.TerminationCodeId == 'Z') ?
+            byte zeroCont = (employee.TerminationCodeId == TerminationCode.Constants.Deceased) ?
                 ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested // 6
             : pp.ZeroContributionReasonId ?? 0;
 
