@@ -32,38 +32,29 @@ public sealed class ContributionService
         });
     }
 
-    internal async Task<Dictionary<int, InternalProfitDetailDto>> GetNetBalance(short profitYear, ISet<int> badgeNumber, CancellationToken cancellationToken)
+    internal Task<Dictionary<int, InternalProfitDetailDto>> GetNetBalance(short profitYear, ISet<int> badgeNumber, CancellationToken cancellationToken)
     {
-        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        return _dataContextFactory.UseReadOnlyContext(ctx =>
         {
-            var pdQuery = await ctx.ProfitDetails
+            var pdQuery = ctx.ProfitDetails
                 .Where(details => details.ProfitYear <= profitYear)
-                .Select(details => new 
-                {
-                    details.Ssn,
-                    details.Contribution,
-                    details.Earnings,
-                    ProfitFort = details.ProfitCode == 0 ? details.Forfeiture : 0,
-                    ProfitPymt = details.ProfitCode != 0 ? details.Forfeiture : 0,
-                    details.FederalTaxes,
-                    details.StateTaxes
-                })
-                .GroupBy(d => d.Ssn)
+                .GroupBy(details => details.Ssn)
                 .Select(g => new
                 {
                     Ssn = g.Key,
                     TotalContributions = g.Sum(x => x.Contribution),
                     TotalEarnings = g.Sum(x => x.Earnings),
-                    TotalForfeitures = g.Sum(x => x.ProfitFort),
-                    TotalPayments = g.Sum(x => x.ProfitPymt),
+                    TotalForfeitures = g.Sum(x => x.ProfitCode.Id == 0 ? x.Forfeiture : 0),
+                    TotalPayments = g.Sum(x => x.ProfitCode.Id != 0 ? x.Forfeiture : 0),
                     TotalFedTaxes = g.Sum(x => x.FederalTaxes),
                     TotalStateTaxes = g.Sum(x => x.StateTaxes)
-                }).ToListAsync(cancellationToken);
+                });
 
-            var demoQuery = await ctx.Demographics
+
+
+            var demoQuery = ctx.Demographics
                 .Where(d => badgeNumber.Contains(d.BadgeNumber))
-                .Select(d => new { d.OracleHcmId, d.BadgeNumber, d.Ssn })
-                .ToListAsync(cancellationToken);
+                .Select(d => new { d.OracleHcmId, d.BadgeNumber, d.Ssn });
             
             var query = from d in demoQuery
                 join r in pdQuery on d.Ssn equals r.Ssn
@@ -79,7 +70,7 @@ public sealed class ContributionService
                     TotalStateTaxes = r.TotalStateTaxes
                 };
 
-            return query.ToDictionary(d=> d.BadgeNumber);
+            return query.ToDictionaryAsync(d=> d.BadgeNumber, cancellationToken);
         });
     }
 }
