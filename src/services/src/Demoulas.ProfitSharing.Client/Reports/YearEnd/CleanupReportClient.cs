@@ -67,21 +67,7 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
     }
 
     #endregion
-
-    #region Mismatched Ssns Payprofit And Demographics On Same Badge
-   
-
-    public Task<ReportResponseBase<PayProfitBadgesNotInDemographicsResponse>> GetPayProfitBadgesNotInDemographics(PaginationRequestDto req, CancellationToken ct = default)
-    {
-        return CallReportEndpoint<PayProfitBadgesNotInDemographicsResponse, PaginationRequestDto>(req, "payprofit-badges-without-demographics", ct);
-    }
-
-    public Task<Stream> DownloadPayProfitBadgesNotInDemographics(CancellationToken cancellationToken = default)
-    {
-        return DownloadCsvReport(0,"payprofit-badges-without-demographics", cancellationToken);
-    }
-
-    #endregion
+    
 
     public Task<ReportResponseBase<NamesMissingCommaResponse>> GetNamesMissingComma(PaginationRequestDto req, CancellationToken cancellationToken = default)
     {
