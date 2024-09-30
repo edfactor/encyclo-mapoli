@@ -1,5 +1,6 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -27,19 +28,19 @@ public class TerminatedEmployeeAndBeneficiaryReport
         _todaysDate = todaysDate;
     }
 
-    public async Task<TerminatedEmployeeAndBeneficiaryResponse> CreateData(
-        DateOnly startDate, DateOnly endDate, decimal profitSharingYear)
+    public async Task<TerminatedEmployeeAndBeneficiaryResponse> CreateData(TerminatedEmployeeAndBeneficiaryDataRequest req)
     {
         // If the used the AutoSelectYear option
-        if (profitSharingYear == ReferenceData.AutoSelectYear)
+        if (req.ProfitShareYear == ReferenceData.AutoSelectYear)
         {
             // Then if it is 
-            profitSharingYear = (_todaysDate.Month < 4) ? _todaysDate.Year - 1 : _todaysDate.Year;
+            req.ProfitShareYear = (_todaysDate.Month < 4) ? _todaysDate.Year - 1 : _todaysDate.Year;
         }
 
-        List<MemberSlice> memberSlices = await RetrieveMemberSlices(startDate, endDate);
-        List<Member> members = await MergeMemberSlicesToMembers(memberSlices, profitSharingYear);
-        return CreateDataset(members);
+        List<MemberSlice> memberSlices = await RetrieveMemberSlices(req.StartDate, req.EndDate);
+        List<Member> members = await MergeMemberSlicesToMembers(memberSlices, req.ProfitShareYear);
+        TerminatedEmployeeAndBeneficiaryResponse fullResponse =  CreateDataset(members, req);
+        return fullResponse;
     }
 
 
@@ -290,7 +291,7 @@ public class TerminatedEmployeeAndBeneficiaryReport
         return members;
     }
 
-    private TerminatedEmployeeAndBeneficiaryResponse CreateDataset(List<Member> members)
+    private TerminatedEmployeeAndBeneficiaryResponse CreateDataset(List<Member> members, TerminatedEmployeeAndBeneficiaryDataRequest req)
     {
         decimal totalVested = 0;
         decimal totalForfeit = 0;
@@ -364,6 +365,16 @@ public class TerminatedEmployeeAndBeneficiaryReport
             }
         }
 
+        if (req.Skip.HasValue)
+        {
+            membersSummary = membersSummary.Skip(req.Skip.Value).ToList();
+        }
+
+        if (req.Take.HasValue)
+        {
+            membersSummary = membersSummary.Take(req.Take.Value).ToList();
+        }
+
         return new TerminatedEmployeeAndBeneficiaryResponse
         {
             ReportName = "Terminated Employee and Beneficiary Report",
@@ -372,7 +383,7 @@ public class TerminatedEmployeeAndBeneficiaryReport
             TotalForfeit = totalForfeit,
             TotalEndingBalance = totalEndingBalance,
             TotalBeneficiaryAllocation = totalBeneficiaryAllocation,
-            Response = new PaginatedResponseDto<TerminatedEmployeeAndBeneficiaryDataResponseDto>()
+            Response = new PaginatedResponseDto<TerminatedEmployeeAndBeneficiaryDataResponseDto>(req)
             {
                 Results = membersSummary,
                 Total = membersSummary.Count

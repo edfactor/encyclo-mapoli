@@ -33,7 +33,7 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
     };
 
     [Fact(DisplayName = "Test report with nobody applicable - sanity check")]
-    public async Task DownloadTerminatedEmployeeAndBeneficiaryReport()
+    public async Task TestEmptyReport()
     {
         // Arrange
         _yearEndClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);

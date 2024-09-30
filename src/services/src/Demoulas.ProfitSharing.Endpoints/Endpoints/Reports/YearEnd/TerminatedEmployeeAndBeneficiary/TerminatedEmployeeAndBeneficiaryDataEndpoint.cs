@@ -35,7 +35,7 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
 
     public override void Configure()
     {
-        Get("/terminated-employee-and-beneficiary/");
+        Get("/terminated-employee-and-beneficiary");
         Summary(s =>
         {
             s.Summary = "Provide the Terminated Employee and Beneficiary Report (QPAY066) report.";

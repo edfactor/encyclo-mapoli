@@ -33,7 +33,7 @@ public class TerminatedEmployeeAndBeneficiaryReportService : ITerminatedEmployee
             .UseReadOnlyContext<TerminatedEmployeeAndBeneficiaryResponse>(ctx =>
             {
                 TerminatedEmployeeAndBeneficiaryReport reportGenerator = new TerminatedEmployeeAndBeneficiaryReport(_logger, ctx, _todaysDate ?? DateOnly.FromDateTime(DateTime.Today));
-                return  reportGenerator.CreateData(req.StartDate, req.EndDate, req.ProfitShareYear);
+                return  reportGenerator.CreateData(req);
             });
     }
 
