@@ -30,6 +30,9 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests
         var options = new DbContextOptionsBuilder<ProfitSharingReadOnlyDbContext>().UseOracle(connectionString).EnableSensitiveDataLogging().Options;
         ProfitSharingReadOnlyDbContext ctx = new ProfitSharingReadOnlyDbContext(options);
 
+        // This is to warm up the connection, so the timing below is correct.
+        _ = await ctx.Demographics.Where(d => d.Ssn == 123456789012345).ToListAsync();
+
         // These are arguments to the program/rest endpoint
         // Plan admin may choose a range of dates (ie. Q2 ?)
         DateOnly startDate = new DateOnly(2023, 01, 07);
@@ -42,7 +45,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests
         TerminatedEmployeeAndBeneficiaryReport terminatedEmployeeAndBeneficiaryReport = new TerminatedEmployeeAndBeneficiaryReport(ilogger.Object!, ctx, effectiveDateOfTestData);
         Stopwatch stopwatch = Stopwatch.StartNew();
         stopwatch.Start();
-        TerminatedEmployeeAndBeneficiaryDataResponse <TerminatedEmployeeAndBeneficiaryDataResponseDto> data = await terminatedEmployeeAndBeneficiaryReport.CreateData(startDate, endDate, profitSharingYear);
+        TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto> data = await terminatedEmployeeAndBeneficiaryReport.CreateData(startDate, endDate, profitSharingYear);
         string actualText = CreateTextReport(effectiveDateOfTestData, startDate, endDate, profitSharingYear, data);
         stopwatch.Stop();
         _testOutputHelper.WriteLine("Took: "+stopwatch.ElapsedMilliseconds);

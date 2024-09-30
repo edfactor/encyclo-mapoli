@@ -63,10 +63,10 @@ public class TerminatedEmployeeAndBeneficiaryReport
                 })
             .ToListAsync();
 
-        foreach (var employeeWithPahProfits in employeesWithPayProfits)
+        foreach (var employeeWithPayProfits in employeesWithPayProfits)
         {
-            var employee = employeeWithPahProfits.Demographic;
-            IEnumerable<PayProfit> payProfits = employeeWithPahProfits.PayProfits;
+            var employee = employeeWithPayProfits.Demographic;
+            IEnumerable<PayProfit> payProfits = employeeWithPayProfits.PayProfits;
             if (payProfits.Count() != 1)
             {
                 _logger.LogError("Employee {BadgeNumber} does not have a single pay_profit row.", employee.BadgeNumber);
@@ -105,32 +105,55 @@ public class TerminatedEmployeeAndBeneficiaryReport
 
         }
 
-        foreach (var beneficiary in await _ctx.Beneficiaries.ToListAsync())
+        var beneficiariesWithPossibleEmployee = await (from beneficiary in _ctx.Beneficiaries
+                join demographic in _ctx.Demographics
+                    on beneficiary.Ssn equals demographic.Ssn into demographicsGroup
+                from demographic in demographicsGroup.DefaultIfEmpty()
+
+                join payProfit in _ctx.PayProfits
+                    on demographic.BadgeNumber equals payProfit.BadgeNumber into payProfitsGroup
+                from payProfit in payProfitsGroup.DefaultIfEmpty()
+
+                group new { beneficiary, demographic, payProfit } by beneficiary into grouped
+                select new
+                {
+                    Beneficiary = grouped.Key,
+                    DemographicsWithPayProfits = grouped
+                        .GroupBy(x => x.demographic)
+                        .Select(g => new
+                        {
+                            Demographic = g.Key,
+                            PayProfits = g.Select(x => x.payProfit).Where(p => p != null).ToList()
+                        })
+                        .Where(d => d.Demographic != null)
+                        .ToList()
+                })
+            .ToListAsync();
+
+        foreach(var beneWithEmp in beneficiariesWithPossibleEmployee)
         {
+            var beneficiary = beneWithEmp.Beneficiary;
             char statusCode = 'T';
             DateOnly? terminationDate = null;
             decimal amount = beneficiary.Amount;
             long psn = beneficiary.Psn;
 
-            // See if beneficiary is also an employee.
-            var results = await _ctx.Demographics.Where(demographic => demographic.Ssn == beneficiary.Ssn)
-                                .GroupJoin(
-                                    _ctx.PayProfits,
-                                    demographic => demographic.Ssn,
-                                    payProfit => payProfit.Ssn,
-                                    (demographic, payProfits) => new { demographic, payProfits })
-                                .SelectMany(
-                                    x => x.payProfits.DefaultIfEmpty(),
-                                    (x, payProfit) => new
-                                    {
-                                        Demographic = x.demographic,
-                                        PayProfit = payProfit
-                                    })
-                                .ToListAsync();
+            var results = beneWithEmp.DemographicsWithPayProfits;
+            if (results.Count > 1)
+            {
+                _logger.LogError("beneficiary matched multiple employees by ssn.");
+                continue;
+            }
             if (results.Count == 1)
             {
-                var result = results[0];
-                terminationDate = result.Demographic.TerminationDate;
+                var demographic = results[0].Demographic;
+                var payProfits = results[0].PayProfits;
+                if (payProfits.Count != 1)
+                {
+                    _logger.LogError("Employee {BadgeNumber} does not have a single pay_profit row.", demographic.BadgeNumber);
+                    continue;
+                }
+                terminationDate = demographic.TerminationDate;
                 if (terminationDate >= startDate && terminationDate <= endDate)
                 {
                     // if the termination date is out of range
@@ -138,11 +161,11 @@ public class TerminatedEmployeeAndBeneficiaryReport
                 }
                 if (amount == 0)
                 {
-                    amount = result.PayProfit?.NetBalanceLastYear ?? 0;
+                    amount = payProfits[0]?.NetBalanceLastYear ?? 0;
                 }
-                psn = result.Demographic.BadgeNumber;
-                terminationDate = result.Demographic.TerminationDate;
-                statusCode = result.Demographic.EmploymentStatusId;
+                psn = demographic.BadgeNumber;
+                terminationDate =demographic.TerminationDate;
+                statusCode =demographic.EmploymentStatusId;
             }
             MemberSlice memberSlice = new MemberSlice
             {
@@ -186,6 +209,15 @@ public class TerminatedEmployeeAndBeneficiaryReport
         List<Member> members = [];
         Member? ms = null;
 
+        // This does seem odd, and possibly a bug?   We ask the user for the profit sharing year with a decimal.
+        // but then we ignore the decimal part when querying records, but display the full value when printing the report.
+        long profitSharingYearOnly = (long)Math.Truncate(profitSharingYearWithIteration);
+
+        var memberSsns = memberSlices.Select(ms => ms.Ssn).Distinct().ToList();
+        var profitDetails = await _ctx.ProfitDetails.Where(pd => memberSsns.Contains(pd.Ssn) &&
+                                                                 pd.ProfitYear >= profitSharingYearOnly &&
+                                                                 pd.ProfitYear < (profitSharingYearOnly + 1)).ToListAsync();
+
         foreach (var m in memberSlices)
         {
             // if the ssn has changed,
@@ -195,7 +227,7 @@ public class TerminatedEmployeeAndBeneficiaryReport
                 // then merge the slices together
 
                 // Get this year's transactions and merge in those amounts
-                ProfitDetailSummary ds = await RetrieveProfitDetail(ssn, profitSharingYearWithIteration);
+                ProfitDetailSummary ds = RetrieveProfitDetail(profitDetails, ssn);
                 beneficiaryAllocation += ds.BeneficiaryAllocation;
 
                 // If member has money (otherwise we skip them)
@@ -391,16 +423,11 @@ public class TerminatedEmployeeAndBeneficiaryReport
     }
 
 
-    private async Task<ProfitDetailSummary> RetrieveProfitDetail(long ssn, decimal profitSharingYearWithIteration)
+    private static ProfitDetailSummary RetrieveProfitDetail(List<ProfitDetail> profitDetailsForAll, long ssn)
     {
-        // This does seem odd, and possibly a bug?   We ask the user for the profit sharing year with a decimal.
-        // but then we ignore the decimal part when querying records, but display the full value when printing the report.
-        long profitSharingYearOnly = (long)Math.Truncate(profitSharingYearWithIteration);
 
         // Note that pd.profitYear is a decimal, aka 2021.2 - and we constrain on only the year portion
-        List<ProfitDetail> profitDetails = await _ctx.ProfitDetails
-                .Where(pd => pd.ProfitYear >= profitSharingYearOnly && pd.ProfitYear < (profitSharingYearOnly + 1) && pd.Ssn == ssn)
-                .ToListAsync();
+        List<ProfitDetail> profitDetails = profitDetailsForAll.Where(pd => pd.Ssn == ssn).ToList();
 
         if (profitDetails.Count == 0)
         {
