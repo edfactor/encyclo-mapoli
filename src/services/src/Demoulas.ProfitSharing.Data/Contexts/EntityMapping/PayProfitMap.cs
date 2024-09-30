@@ -71,7 +71,7 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
             .HasColumnName("ENROLLMENT_ID");
 
         _ = builder.Property(e => e.BeneficiaryTypeId)
-            .HasColumnName("BENEFICIARY_ID");
+            .HasColumnName("BENEFICIARY_TYPE_ID");
 
         _ = builder.Property(e => e.EmployeeTypeId)
             .HasColumnName("EMPLOYEE_TYPE_ID");
