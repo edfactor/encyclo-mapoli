@@ -1,4 +1,6 @@
-﻿using Demoulas.Common.Data.Services.Entities.Contexts;
+﻿using System.Reflection;
+using System.Threading;
+using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.NotOwned;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -93,17 +95,43 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
     /// </summary>
     public async Task UseWritableContext(Func<ProfitSharingDbContext, Task> func, CancellationToken cancellationToken = default)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        await func.Invoke(_profitSharingDbContext.Object);
+        try
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            await func.Invoke(_profitSharingDbContext.Object);
+        }
+        catch (TargetInvocationException ex)
+        {
+            switch (ex.InnerException)
+            {
+                case null:
+                    throw;
+                default:
+                    throw ex.InnerException;
+            }
+        }
     }
 
     /// <summary>
     /// For Read/Write workloads where all operations will execute inside a single transaction
     /// </summary>
-    public Task<T> UseWritableContext<T>(Func<ProfitSharingDbContext, Task<T>> func, CancellationToken cancellationToken = default)
+    public async Task<T> UseWritableContext<T>(Func<ProfitSharingDbContext, Task<T>> func, CancellationToken cancellationToken = default)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        return func.Invoke(_profitSharingDbContext.Object);
+        try
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return await func.Invoke(_profitSharingDbContext.Object);
+        }
+        catch (TargetInvocationException ex)
+        {
+            switch (ex.InnerException)
+            {
+                case null:
+                    throw;
+                default:
+                    throw ex.InnerException;
+            }
+        }
     }
 
     /// <summary>
@@ -111,14 +139,40 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
     /// practice.
     /// More information can be found here: https://docs.microsoft.com/en-us/azure/azure-sql/database/read-scale-out
     /// </summary>
-    public Task<T> UseReadOnlyContext<T>(Func<ProfitSharingReadOnlyDbContext, Task<T>> func)
+    public async Task<T> UseReadOnlyContext<T>(Func<ProfitSharingReadOnlyDbContext, Task<T>> func)
     {
-        return func.Invoke(_profitSharingReadOnlyDbContext.Object);
+        try
+        {
+            return await func.Invoke(_profitSharingReadOnlyDbContext.Object);
+        }
+        catch (TargetInvocationException ex)
+        {
+            switch (ex.InnerException)
+            {
+                case null:
+                    throw;
+                default:
+                    throw ex.InnerException;
+            }
+        }
     }
 
 
-    public Task<T> UseStoreInfoContext<T>(Func<DemoulasCommonDataContext, Task<T>> func)
+    public async Task<T> UseStoreInfoContext<T>(Func<DemoulasCommonDataContext, Task<T>> func)
     {
-        return func.Invoke(_storeInfoDbContext.Object);
+        try
+        {
+            return await func.Invoke(_storeInfoDbContext.Object);
+        }
+        catch (TargetInvocationException ex)
+        {
+            switch (ex.InnerException)
+            {
+                case null:
+                    throw;
+                default:
+                    throw ex.InnerException;
+            }
+        }
     }
 }

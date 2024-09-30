@@ -1,7 +1,5 @@
 ﻿
 using Demoulas.Util.Extensions;
-using System.Data.SqlTypes;
-using Demoulas.Common.Contracts.Contracts.Response;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 public sealed record MilitaryAndRehireReportResponse
