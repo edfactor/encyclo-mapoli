@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.TerminatedEmployeeAndBeneficiary;
@@ -43,9 +44,13 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests
 
         DateOnly effectiveDateOfTestData = new DateOnly(2024, 9, 17);
         TerminatedEmployeeAndBeneficiaryReport terminatedEmployeeAndBeneficiaryReport = new TerminatedEmployeeAndBeneficiaryReport(ilogger.Object!, ctx, effectiveDateOfTestData);
+        TerminatedEmployeeAndBeneficiaryDataRequest req = new()
+        {
+            EndDate = endDate, ProfitShareYear = profitSharingYear, StartDate = startDate
+        };
         Stopwatch stopwatch = Stopwatch.StartNew();
         stopwatch.Start();
-        TerminatedEmployeeAndBeneficiaryResponse data = await terminatedEmployeeAndBeneficiaryReport.CreateData(startDate, endDate, profitSharingYear);
+        TerminatedEmployeeAndBeneficiaryResponse data = await terminatedEmployeeAndBeneficiaryReport.CreateData(req);
         string actualText = CreateTextReport(effectiveDateOfTestData, startDate, endDate, profitSharingYear, data);
         stopwatch.Stop();
         _testOutputHelper.WriteLine("Took: "+stopwatch.ElapsedMilliseconds);
