@@ -8,7 +8,7 @@ internal sealed class DistributionThirdPartyPayeeMap : IEntityTypeConfiguration<
 {
     public void Configure(EntityTypeBuilder<DistributionThirdPartyPayee> builder)
     {
-        builder.ToTable("DISTRIBUTION_PAYEE");
+        builder.ToTable("DISTRIBUTION_THIRDPARTY_PAYEE");
         builder.HasKey(d => d.Id);
         
         builder.HasIndex(d => d.Ssn, "IX_SSN");
