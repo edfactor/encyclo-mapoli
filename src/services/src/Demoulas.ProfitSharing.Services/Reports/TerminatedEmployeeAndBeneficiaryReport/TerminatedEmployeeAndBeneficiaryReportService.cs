@@ -26,11 +26,11 @@ public class TerminatedEmployeeAndBeneficiaryReportService : ITerminatedEmployee
     }
     
 
-    public  Task<TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto>>
+    public  Task<TerminatedEmployeeAndBeneficiaryResponse>
         GetReport(TerminatedEmployeeAndBeneficiaryDataRequest req, CancellationToken ct)
     {
         return _dataContextFactory
-            .UseReadOnlyContext<TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto>>(ctx =>
+            .UseReadOnlyContext<TerminatedEmployeeAndBeneficiaryResponse>(ctx =>
             {
                 TerminatedEmployeeAndBeneficiaryReport reportGenerator = new TerminatedEmployeeAndBeneficiaryReport(_logger, ctx, _todaysDate ?? DateOnly.FromDateTime(DateTime.Today));
                 return  reportGenerator.CreateData(req.StartDate, req.EndDate, req.ProfitShareYear);

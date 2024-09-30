@@ -42,7 +42,7 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
         var response =
             await ApiClient
                 .GETAsync<TerminatedEmployeeAndBeneficiaryDataEndpoint,
-                    TerminatedEmployeeAndBeneficiaryReportRequestDto, TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto>> (requestDto);
+                    TerminatedEmployeeAndBeneficiaryReportRequestDto, TerminatedEmployeeAndBeneficiaryResponse> (requestDto);
 
         // Assert
         response.Response.Content.Should().NotBeNull();
@@ -66,7 +66,7 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
         var response =
             await ApiClient
                 .GETAsync<TerminatedEmployeeAndBeneficiaryDataEndpoint,
-                    TerminatedEmployeeAndBeneficiaryReportRequestDto, TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto>>(requestDto);
+                    TerminatedEmployeeAndBeneficiaryReportRequestDto, TerminatedEmployeeAndBeneficiaryResponse>(requestDto);
 
         // Assert
         response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -123,7 +123,7 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
             var response =
                 await ApiClient
                     .GETAsync<TerminatedEmployeeAndBeneficiaryDataEndpoint,
-                        TerminatedEmployeeAndBeneficiaryReportRequestDto, TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto>>(requestDto);
+                        TerminatedEmployeeAndBeneficiaryReportRequestDto, TerminatedEmployeeAndBeneficiaryResponse>(requestDto);
 
             // Assert
             response.Response.Content.Should().NotBeNull();
@@ -178,12 +178,12 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
             TerminatedEmployeeAndBeneficiaryReportService.SetTodayDateForTestingOnly(new DateOnly(2024, 9, 7));
 
             // Act
-            DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
             var response =
-                await DownloadClient
+                await ApiClient
                     .GETAsync<TerminatedEmployeeAndBeneficiaryDataEndpoint,
-                        TerminatedEmployeeAndBeneficiaryReportRequestDto, TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto>>(requestDto);
+                        TerminatedEmployeeAndBeneficiaryReportRequestDto, TerminatedEmployeeAndBeneficiaryResponse>(requestDto);
 
             // Assert
             response.Response.Content.Should().NotBeNull();

@@ -45,7 +45,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests
         TerminatedEmployeeAndBeneficiaryReport terminatedEmployeeAndBeneficiaryReport = new TerminatedEmployeeAndBeneficiaryReport(ilogger.Object!, ctx, effectiveDateOfTestData);
         Stopwatch stopwatch = Stopwatch.StartNew();
         stopwatch.Start();
-        TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto> data = await terminatedEmployeeAndBeneficiaryReport.CreateData(startDate, endDate, profitSharingYear);
+        TerminatedEmployeeAndBeneficiaryResponse data = await terminatedEmployeeAndBeneficiaryReport.CreateData(startDate, endDate, profitSharingYear);
         string actualText = CreateTextReport(effectiveDateOfTestData, startDate, endDate, profitSharingYear, data);
         stopwatch.Stop();
         _testOutputHelper.WriteLine("Took: "+stopwatch.ElapsedMilliseconds);
@@ -67,12 +67,12 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests
 
 
     private static string CreateTextReport(DateOnly effectiveDateOfTestData, DateOnly startDate, DateOnly endDate, decimal profitSharingYearWithIteration,
-        TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto> reportData)
+        TerminatedEmployeeAndBeneficiaryResponse report)
     {
 
         TextReportGenerator textReportGenerator = new TextReportGenerator(effectiveDateOfTestData, startDate, endDate, profitSharingYearWithIteration);
 
-        foreach (var ms in reportData.Response.Results)
+        foreach (var ms in report.Response.Results)
         {
 
             textReportGenerator.PrintDetails(ms.BadgePSn, ms.Name, ms.BeginningBalance,
@@ -80,7 +80,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests
                 ms.EndingBalance, ms.VestedBalance, ms.DateTerm, ms.YtdPsHours, ms.VestedPercent, ms.Age,
                 ms.EnrollmentCode ?? 0);
         }
-        textReportGenerator.PrintTotals(reportData.TotalEndingBalance, reportData.TotalVested, reportData.TotalForfeit, reportData.TotalBeneficiaryAllocation);
+        textReportGenerator.PrintTotals(report.TotalEndingBalance, report.TotalVested, report.TotalForfeit, report.TotalBeneficiaryAllocation);
         return textReportGenerator.GetReport();
 
     }

@@ -11,6 +11,6 @@ public interface ITerminatedEmployeeAndBeneficiaryReportService
     /// <param name="req">The request details including pagination and reporting year.</param>
     /// <param name="ct">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the report response with details of employees on military leave and rehired.</returns>
-    Task<TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto>> GetReport(TerminatedEmployeeAndBeneficiaryDataRequest req, CancellationToken ct);
+    Task<TerminatedEmployeeAndBeneficiaryResponse> GetReport(TerminatedEmployeeAndBeneficiaryDataRequest req, CancellationToken ct);
 
 }

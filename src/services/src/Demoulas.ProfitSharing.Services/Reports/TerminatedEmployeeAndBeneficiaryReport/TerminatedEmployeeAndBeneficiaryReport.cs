@@ -27,7 +27,7 @@ public class TerminatedEmployeeAndBeneficiaryReport
         _todaysDate = todaysDate;
     }
 
-    public async Task<TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto>> CreateData(
+    public async Task<TerminatedEmployeeAndBeneficiaryResponse> CreateData(
         DateOnly startDate, DateOnly endDate, decimal profitSharingYear)
     {
         // If the used the AutoSelectYear option
@@ -290,7 +290,7 @@ public class TerminatedEmployeeAndBeneficiaryReport
         return members;
     }
 
-    private TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto> CreateDataset(List<Member> members)
+    private TerminatedEmployeeAndBeneficiaryResponse CreateDataset(List<Member> members)
     {
         decimal totalVested = 0;
         decimal totalForfeit = 0;
@@ -364,8 +364,9 @@ public class TerminatedEmployeeAndBeneficiaryReport
             }
         }
 
-        return new TerminatedEmployeeAndBeneficiaryDataResponse<TerminatedEmployeeAndBeneficiaryDataResponseDto>
+        return new TerminatedEmployeeAndBeneficiaryResponse
         {
+            ReportName = "Terminated Employee and Beneficiary Report",
             ReportDate = DateTimeOffset.Now,
             TotalVested = totalVested,
             TotalForfeit = totalForfeit,
