@@ -111,26 +111,29 @@ public class TerminatedEmployeeAndBeneficiaryReport
                 from demographic in demographicsGroup.DefaultIfEmpty()
 
                 join payProfit in _ctx.PayProfits
-                    on demographic.BadgeNumber equals payProfit.BadgeNumber into payProfitsGroup
+                    on demographic != null ? demographic.BadgeNumber : 0 equals payProfit.BadgeNumber into payProfitsGroup
                 from payProfit in payProfitsGroup.DefaultIfEmpty()
 
-                group new { beneficiary, demographic, payProfit } by beneficiary into grouped
+                group new { demographic, payProfit } by beneficiary into grouped
                 select new
                 {
                     Beneficiary = grouped.Key,
                     DemographicsWithPayProfits = grouped
+                        .Where(x => x.demographic != null) // Ensure demographic is not null
                         .GroupBy(x => x.demographic)
                         .Select(g => new
                         {
                             Demographic = g.Key,
-                            PayProfits = g.Select(x => x.payProfit).Where(p => p != null).ToList()
+                            PayProfits = g.Select(x => x.payProfit)
+                                .Where(p => p != null) // Ensure payProfit is not null
+                                .ToList()
                         })
-                        .Where(d => d.Demographic != null)
                         .ToList()
                 })
             .ToListAsync();
 
-        foreach(var beneWithEmp in beneficiariesWithPossibleEmployee)
+
+        foreach (var beneWithEmp in beneficiariesWithPossibleEmployee)
         {
             var beneficiary = beneWithEmp.Beneficiary;
             char statusCode = 'T';
