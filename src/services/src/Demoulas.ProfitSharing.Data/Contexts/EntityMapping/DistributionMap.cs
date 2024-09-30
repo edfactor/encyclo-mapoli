@@ -11,7 +11,7 @@ internal sealed class DistributionMap : IEntityTypeConfiguration<Distribution>
         builder.ToTable("DISTRIBUTION");
         builder.HasKey(d => d.Id);
         
-        builder.HasIndex(d => new { SSN = d.Ssn, SequenceNumber = d.PaymentSequence }, "IX_SSN_PAYMENT_SEQUENCE").IsUnique();
+        builder.HasIndex(d => new {d.Ssn, d.PaymentSequence }, "IX_SSN_PAYMENT_SEQUENCE").IsUnique();
 
         builder.Property(d => d.Id).ValueGeneratedOnAdd();
         builder.Property(d => d.Ssn).HasColumnName("SSN").HasPrecision(9);

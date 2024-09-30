@@ -1,6 +1,10 @@
 ﻿
+using System.Diagnostics;
+
 namespace Demoulas.ProfitSharing.Data.Entities;
 
+
+[DebuggerDisplay("Id={Id} EmployeeName={EmployeeName} CheckAmount={CheckAmount}")]
 public sealed class Distribution
 {
     public long Id { get; set; } 
@@ -15,10 +19,10 @@ public sealed class Distribution
     public required DistributionStatus Status { get; set; }
     
     public DistributionPayee? Payee { get; set; }
-    public required int PayeeId { get; set; }
+    public int? PayeeId { get; set; }
 
     public DistributionThirdPartyPayee? ThirdPartyPayee { get; set; }
-    public required int ThirdPartyPayeeId { get; set; }
+    public int? ThirdPartyPayeeId { get; set; }
 
     public string? ForTheBenefitOfPayee { get; set; }
     public string? ForTheBenefitOfAccountType { get; set; }
