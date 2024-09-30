@@ -16,11 +16,10 @@ public sealed class Distribution
     
     public DistributionPayee? Payee { get; set; }
     public required int PayeeId { get; set; }
-    
-    public string? ThirdPartyPayee { get; set; }
-    public string? ThirdPartyName { get; set; }
-    public string? ThirdPartyAccount { get; internal set; }
-    public required Address ThirdPartyAddress { get; set; }
+
+    public DistributionThirdPartyPayee? ThirdPartyPayee { get; set; }
+    public required int ThirdPartyPayeeId { get; set; }
+
     public string? ForTheBenefitOfPayee { get; set; }
     public string? ForTheBenefitOfAccountType { get; set; }
     public bool Tax1099ForEmployee { get; set; }

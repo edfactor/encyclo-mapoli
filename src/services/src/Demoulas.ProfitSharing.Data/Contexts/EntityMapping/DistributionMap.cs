@@ -20,25 +20,8 @@ internal sealed class DistributionMap : IEntityTypeConfiguration<Distribution>
         builder.Property(d => d.FrequencyId).HasColumnName("FREQUENCY_ID");
         builder.Property(d => d.StatusId).HasColumnName("STATUS_ID");
         builder.Property(d => d.PayeeId).HasColumnName("PAYEE_ID");
-        
-        builder.Property(d => d.ThirdPartyPayee).HasMaxLength(30).HasColumnName("THIRD_PARTY_PAYEE");
-        builder.Property(d => d.ThirdPartyName).HasMaxLength(30).HasColumnName("THIRD_PARTY_NAME");
-        builder.Property(d => d.ThirdPartyAccount).HasMaxLength(30).HasColumnName("THIRD_PARTY_ACCOUNT");
-        builder.OwnsOne(d => d.ThirdPartyAddress, address =>
-        {
-            address.Property(a => a.Street).HasMaxLength(30).HasColumnName("THIRD_PARTY_STREET");
-            address.Property(a => a.Street2).HasMaxLength(30).HasColumnName("THIRD_PARTY_STREET2");
-            address.Property(a => a.Street3).HasMaxLength(30).HasColumnName("THIRD_PARTY_STREET3");
-            address.Property(a => a.Street4).HasMaxLength(30).HasColumnName("THIRD_PARTY_STREET4");
-            address.Property(a => a.City).HasMaxLength(25).HasColumnName("THIRD_PARTY_CITY");
-            address.Property(a => a.State).HasMaxLength(3).HasColumnName("THIRD_PARTY_STATE");
-            address.Property(a => a.PostalCode).HasMaxLength(9).HasColumnName("THIRD_PARTY_POSTAL_CODE");
-            address.Property(a => a.CountryIso).HasMaxLength(2).HasColumnName("THIRD_PARTY_COUNTRY_ISO")
-                .HasDefaultValue(Country.Constants.Us);
-            address.HasOne<Country>()
-                .WithMany()
-                .HasForeignKey(o => o.CountryIso);
-        });
+        builder.Property(d => d.ThirdPartyPayeeId).HasColumnName("THIRD_PARTY_PAYEE_ID");
+
         builder.Property(d => d.ForTheBenefitOfPayee).HasMaxLength(30).HasColumnName("FORTHEBENEFITOF_PAYEE");
         builder.Property(d => d.ForTheBenefitOfAccountType).HasMaxLength(30).HasColumnName("FORTHEBENEFITOF_ACCOUNT_TYPE");
 
@@ -53,7 +36,10 @@ internal sealed class DistributionMap : IEntityTypeConfiguration<Distribution>
         builder.Property(d => d.TaxCodeId).HasColumnName("TAX_CODE_ID");
         builder.Property(d => d.IsDeceased).HasColumnName("DECEASED").HasColumnType("NUMBER(1)");
         builder.Property(d => d.GenderId).HasColumnName("GENDER_ID");
-        builder.Property(d => d.QualifiedDomesticRelationsOrder).HasColumnType("NUMBER(1)").HasColumnName("QDRO");
+        builder.Property(d => d.QualifiedDomesticRelationsOrder)
+            .HasColumnType("NUMBER(1)")
+            .HasColumnName("QDRO")
+            .HasComment("Qualified Domestic Relations Order");
         builder.Property(d => d.RothIra).HasColumnType("NUMBER(1)").HasColumnName("ROTH_IRA");
         builder.Property(d => d.Memo).HasColumnName("MEMO").HasMaxLength(128);
 
@@ -63,5 +49,6 @@ internal sealed class DistributionMap : IEntityTypeConfiguration<Distribution>
         builder.HasOne(x => x.TaxCode).WithMany().HasForeignKey(t => t.TaxCodeId);
 
         builder.HasOne(x => x.Payee).WithMany(p=> p.Distributions).HasForeignKey(t => t.PayeeId);
+        builder.HasOne(x => x.ThirdPartyPayee).WithMany(p => p.Distributions).HasForeignKey(t => t.ThirdPartyPayeeId);
     }
 }
