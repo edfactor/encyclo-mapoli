@@ -11,10 +11,7 @@ internal sealed class DistributionThirdPartyPayeeMap : IEntityTypeConfiguration<
         builder.ToTable("DISTRIBUTION_THIRDPARTY_PAYEE");
         builder.HasKey(d => d.Id);
         
-        builder.HasIndex(d => d.Ssn, "IX_SSN");
-
         builder.Property(d => d.Id).ValueGeneratedOnAdd();
-        builder.Property(d => d.Ssn).HasColumnName("SSN").HasPrecision(9);
         
         builder.Property(d => d.Payee).HasMaxLength(35).HasColumnName("PAYEE");
         builder.Property(d => d.Name).HasMaxLength(35).HasColumnName("NAME");
