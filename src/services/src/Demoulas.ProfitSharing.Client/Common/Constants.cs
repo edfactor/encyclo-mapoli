@@ -17,7 +17,7 @@ internal static class Constants
 
     internal static JsonSerializerOptions GetJsonSerializerOptions()
     {
-        return new JsonSerializerOptions
+        return new JsonSerializerOptions(JsonSerializerDefaults.Web)
         {
             PropertyNameCaseInsensitive = true
         };

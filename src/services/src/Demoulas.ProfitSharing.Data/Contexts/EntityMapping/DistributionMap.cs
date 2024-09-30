@@ -13,7 +13,7 @@ internal sealed class DistributionMap : IEntityTypeConfiguration<Distribution>
         
         builder.HasIndex(d => new {d.Ssn, d.PaymentSequence }, "IX_SSN_PAYMENT_SEQUENCE").IsUnique();
 
-        builder.Property(d => d.Id).ValueGeneratedOnAdd();
+        builder.Property(d => d.Id).HasColumnName("ID").ValueGeneratedOnAdd();
         builder.Property(d => d.Ssn).HasColumnName("SSN").HasPrecision(9);
         builder.Property(d => d.PaymentSequence).HasColumnName("PAYMENT_SEQUENCE");
         builder.Property(d => d.EmployeeName).HasMaxLength(35).HasColumnName("EMPLOYEE_NAME");
