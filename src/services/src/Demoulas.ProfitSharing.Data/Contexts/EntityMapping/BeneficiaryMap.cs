@@ -14,6 +14,7 @@ public sealed class BeneficiaryMap : IEntityTypeConfiguration<Beneficiary>
 
         _ = builder.Property(c => c.Psn).IsRequired().HasPrecision(11).ValueGeneratedNever().HasColumnName("PSN");
 
+        _ = builder.HasIndex(d => d.Ssn, "IX_SSN");
         _ = builder.Property(c => c.Ssn).IsRequired().HasPrecision(9).HasColumnName("SSN");
 
         _ = builder.Property(b => b.FirstName).IsRequired().HasMaxLength(30).HasColumnName("FIRST_NAME");

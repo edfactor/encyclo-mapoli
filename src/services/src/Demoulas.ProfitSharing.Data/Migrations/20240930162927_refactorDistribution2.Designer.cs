@@ -3,6 +3,7 @@ using System;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 
@@ -11,9 +12,11 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    partial class ProfitSharingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240930162927_refactorDistribution2")]
+    partial class refactorDistribution2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2253,8 +2256,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("ACCOUNT");
 
                     b.Property<string>("Memo")
-                        .HasMaxLength(128)
-                        .HasColumnType("NVARCHAR2(128)")
+                        .HasColumnType("NVARCHAR2(2000)")
                         .HasColumnName("MEMO");
 
                     b.Property<string>("Name")
@@ -2267,8 +2269,16 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NVARCHAR2(35)")
                         .HasColumnName("PAYEE");
 
+                    b.Property<long>("Ssn")
+                        .HasPrecision(9)
+                        .HasColumnType("NUMBER(9)")
+                        .HasColumnName("SSN");
+
                     b.HasKey("Id")
                         .HasName("PK_DISTRIBUTION_THIRDPARTY_PAYEE");
+
+                    b.HasIndex(new[] { "Ssn" }, "IX_SSN")
+                        .HasDatabaseName("IX_DISTRIBUTION_THIRDPARTY_PAYEE_SSN");
 
                     b.ToTable("DISTRIBUTION_THIRDPARTY_PAYEE", (string)null);
                 });

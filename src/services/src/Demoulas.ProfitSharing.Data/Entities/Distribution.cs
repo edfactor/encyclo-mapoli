@@ -1,22 +1,29 @@
 ﻿
+using System.Diagnostics;
+
 namespace Demoulas.ProfitSharing.Data.Entities;
 
+
+[DebuggerDisplay("Id={Id} EmployeeName={EmployeeName} CheckAmount={CheckAmount}")]
 public sealed class Distribution
 {
+    public long Id { get; set; } 
+    
     public required long Ssn { get; set; }
-    public required int SequenceNumber{ get; set; }
+    public required byte PaymentSequence{ get; set; }
+    
     public required string EmployeeName { get; set; }
     public required char FrequencyId { get; set; }
-    public required DistributionFrequency Frequency { get; set; }
+    public DistributionFrequency? Frequency { get; set; }
     public required char StatusId { get; set; }
     public required DistributionStatus Status { get; set; }
-    public long PayeeSsn { get; set; }
-    public required string PayeeName { get; set; }
-    public required Address PayeeAddress { get; set; }
-    public string? ThirdPartyPayee { get; set; }
-    public string? ThirdPartyName { get; set; }
-    public string? ThirdPartyAccount { get; internal set; }
-    public required Address ThirdPartyAddress { get; set; }
+    
+    public DistributionPayee? Payee { get; set; }
+    public int? PayeeId { get; set; }
+
+    public DistributionThirdPartyPayee? ThirdPartyPayee { get; set; }
+    public int? ThirdPartyPayeeId { get; set; }
+
     public string? ForTheBenefitOfPayee { get; set; }
     public string? ForTheBenefitOfAccountType { get; set; }
     public bool Tax1099ForEmployee { get; set; }
@@ -29,7 +36,7 @@ public sealed class Distribution
     public decimal CheckAmount { get; set; }
     public char TaxCodeId { get; set; }
     public required TaxCode TaxCode { get; set; }
-    public bool Deceased { get; set; }
+    public bool IsDeceased { get; set; }
     public char? GenderId { get; set; }
     public Gender? Gender { get; set; }
     public bool QualifiedDomesticRelationsOrder { get; set; }
