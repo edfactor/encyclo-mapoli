@@ -8,15 +8,15 @@ internal sealed class DistributionThirdPartyPayeeMap : IEntityTypeConfiguration<
 {
     public void Configure(EntityTypeBuilder<DistributionThirdPartyPayee> builder)
     {
-        builder.ToTable("DISTRIBUTION_THIRDPARTY_PAYEE");
-        builder.HasKey(d => d.Id);
-        
-        builder.Property(d => d.Id).ValueGeneratedOnAdd();
-        
-        builder.Property(d => d.Payee).HasMaxLength(35).HasColumnName("PAYEE");
-        builder.Property(d => d.Name).HasMaxLength(35).HasColumnName("NAME");
-        builder.Property(d => d.Account).HasMaxLength(30).HasColumnName("ACCOUNT");
-        builder.OwnsOne(d => d.Address, address =>
+        _ = builder.ToTable("DISTRIBUTION_THIRDPARTY_PAYEE");
+        _ = builder.HasKey(d => d.Id);
+
+        _ = builder.Property(d => d.Id).ValueGeneratedOnAdd();
+
+        _ = builder.Property(d => d.Payee).HasMaxLength(35).HasColumnName("PAYEE");
+        _ = builder.Property(d => d.Name).HasMaxLength(35).HasColumnName("NAME");
+        _ = builder.Property(d => d.Account).HasMaxLength(30).HasColumnName("ACCOUNT");
+        _ = builder.OwnsOne(d => d.Address, address =>
         {
             address.Property(a => a.Street).HasMaxLength(30).HasColumnName("STREET");
             address.Property(a => a.Street2).HasMaxLength(30).HasColumnName("STREET2");
@@ -31,8 +31,8 @@ internal sealed class DistributionThirdPartyPayeeMap : IEntityTypeConfiguration<
                 .WithMany()
                 .HasForeignKey(o => o.CountryIso);
         });
-        
 
-        
+        _ = builder.Property(d => d.Memo).HasColumnName("MEMO").HasMaxLength(128);
+
     }
 }
