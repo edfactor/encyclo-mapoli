@@ -27,11 +27,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingReadOnlyDbContext = new Mock<ProfitSharingReadOnlyDbContext>();
         _storeInfoDbContext = new Mock<DemoulasCommonDataContext>();
 
-        List<Demographic>? demographics = new DemographicFaker().Generate(500);
-        Mock<DbSet<Demographic>> mockDemographic = demographics.AsQueryable().BuildMockDbSet();
-        _profitSharingDbContext.Setup(m => m.Demographics).Returns(mockDemographic.Object);
-        _profitSharingReadOnlyDbContext.Setup(m => m.Demographics).Returns(mockDemographic.Object);
-
+       
         List<Beneficiary>? beneficiaries = new BeneficiaryFaker().Generate(5_000);
         Mock<DbSet<Beneficiary>> mockBeneficiaries = beneficiaries.AsQueryable().BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaries.Object);
@@ -58,16 +54,28 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(m => m.TaxCodes).Returns(mockTaxCodes.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.TaxCodes).Returns(mockTaxCodes.Object);
 
+        List<Demographic>? demographics = new DemographicFaker().Generate(500);
+        
+
         var profitDetails = new ProfitDetailFaker(demographics).Generate(demographics.Count * 5);
         var mockProfitDetails = profitDetails.AsQueryable().BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
 
         List<PayProfit>? profits = new PayProfitFaker(demographics).Generate(demographics.Count);
+        
+        foreach (PayProfit payProfit in profits)
+        {
+            demographics.Find(d=> d.OracleHcmId == payProfit.OracleHcmId)?.PayProfits.Add(payProfit);
+        }
+
         Mock<DbSet<PayProfit>> mockProfits = profits.AsQueryable().BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.PayProfits).Returns(mockProfits.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.PayProfits).Returns(mockProfits.Object);
 
+        Mock<DbSet<Demographic>> mockDemographic = demographics.AsQueryable().BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.Demographics).Returns(mockDemographic.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.Demographics).Returns(mockDemographic.Object);
 
         Mock<DbSet<CaldarRecord>>? mockCalendar = CaldarRecordSeeder.Records.AsQueryable().BuildMockDbSet();
         _profitSharingReadOnlyDbContext.Setup(m => m.CaldarRecords).Returns(mockCalendar.Object);

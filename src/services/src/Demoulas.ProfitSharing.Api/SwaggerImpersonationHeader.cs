@@ -8,14 +8,19 @@ public class SwaggerImpersonationHeader : IOperationProcessor
 {
     public bool Process(OperationProcessorContext context)
     {
-        var hdrParameter = new OpenApiParameter()
+        var hdrParameter = new OpenApiParameter
         {
             Name = Role.IMPERSONATION,
             Kind = OpenApiParameterKind.Header,
             IsRequired = false,
             Type = JsonObjectType.String,
             Default = "",
-            Description = "A pipe-delimited list of roles to impersonate"
+            Description = "A list of roles to impersonate",
+            Schema = new JsonSchema
+            {
+                Type = JsonObjectType.String,
+                Enumeration = { Role.FINANCEMANAGER, Role.DISTRIBUTIONSCLERK, Role.HARDSHIPADMINISTRATOR, Role.ADMINISTRATOR, }
+            },
         };
 
         context.OperationDescription.Operation.Parameters.Add(hdrParameter);

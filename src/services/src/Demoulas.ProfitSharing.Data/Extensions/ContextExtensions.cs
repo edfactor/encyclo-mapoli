@@ -36,7 +36,7 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new DistributionMap());
         modelBuilder.ApplyConfiguration(new DemographicSyncAuditMap());
         modelBuilder.ApplyConfiguration(new StateTaxMap());
-
+        modelBuilder.ApplyConfiguration(new DistributionRequestMap());
         modelBuilder.ApplyConfiguration(new CaldarRecordMap());
 
         

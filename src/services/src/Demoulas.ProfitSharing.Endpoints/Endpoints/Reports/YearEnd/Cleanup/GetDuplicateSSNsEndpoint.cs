@@ -7,16 +7,17 @@ using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
-public class GetDuplicateSsNsEndpoint : EndpointWithCsvBase<PaginationRequestDto, PayrollDuplicateSsnResponseDto, GetDuplicateSsNsEndpoint.GetDuplicateSsNsResponseMap>
+public class GetDuplicateSsNsEndpoint : EndpointWithCsvBase<ProfitYearRequest, PayrollDuplicateSsnResponseDto, GetDuplicateSsNsEndpoint.GetDuplicateSsNsResponseMap>
 {
-    private readonly IYearEndService _yearEndService;
+    private readonly ICleanupReportService _cleanupReportService;
 
-    public GetDuplicateSsNsEndpoint(IYearEndService yearEndService)
+    public GetDuplicateSsNsEndpoint(ICleanupReportService cleanupReportService)
     {
-        _yearEndService = yearEndService;
+        _cleanupReportService = cleanupReportService;
     }
 
     public override void Configure()
@@ -52,9 +53,9 @@ public class GetDuplicateSsNsEndpoint : EndpointWithCsvBase<PaginationRequestDto
 
     public override string ReportFileName => "DuplicateSSns";
 
-    public override Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetResponse(PaginationRequestDto req, CancellationToken ct)
+    public override Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
-        return _yearEndService.GetDuplicateSsNs(req, ct);
+        return _cleanupReportService.GetDuplicateSsNs(req, ct);
     }
 
     public sealed class GetDuplicateSsNsResponseMap : ClassMap<PayrollDuplicateSsnResponseDto>

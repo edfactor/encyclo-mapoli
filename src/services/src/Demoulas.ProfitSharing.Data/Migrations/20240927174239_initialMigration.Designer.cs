@@ -12,7 +12,7 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    [Migration("20240910201556_initialMigration")]
+    [Migration("20240927174239_initialMigration")]
     partial class initialMigration
     {
         /// <inheritdoc />
@@ -2013,6 +2013,136 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.DistributionRequest", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(19)")
+                        .HasColumnName("ID");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<decimal?>("AmountAuthorized")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("DECIMAL(10,2)")
+                        .HasColumnName("AMOUNT_AUTHORIZED");
+
+                    b.Property<decimal>("AmountRequested")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("DECIMAL(10,2)")
+                        .HasColumnName("AMOUNT_REQUESTED");
+
+                    b.Property<DateTime?>("DateDecided")
+                        .HasColumnType("Date")
+                        .HasColumnName("DATE_DECIDED");
+
+                    b.Property<DateTime>("DateRequested")
+                        .HasColumnType("Date")
+                        .HasColumnName("DATE_REQUESTED");
+
+                    b.Property<long>("PSN")
+                        .HasPrecision(11)
+                        .HasColumnType("NUMBER(11)")
+                        .HasColumnName("PSN");
+
+                    b.Property<byte>("ReasonId")
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("REASON_ID");
+
+                    b.Property<string>("ReasonOtherText")
+                        .HasMaxLength(500)
+                        .HasColumnType("NVARCHAR2(500)")
+                        .HasColumnName("REASON_OTHER");
+
+                    b.Property<string>("ReasonText")
+                        .HasMaxLength(250)
+                        .HasColumnType("NVARCHAR2(250)")
+                        .HasColumnName("REASON_TEXT");
+
+                    b.Property<string>("StatusId")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR2(1)")
+                        .HasColumnName("STATUS_ID");
+
+                    b.Property<string>("TaxCodeCode")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR2(1)")
+                        .HasColumnName("TAXCODECODE");
+
+                    b.Property<byte>("TypeId")
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("TYPE_ID");
+
+                    b.HasKey("Id")
+                        .HasName("PK_DISTRIBUTION_REQUEST");
+
+                    b.HasIndex("ReasonId")
+                        .HasDatabaseName("IX_DISTRIBUTION_REQUEST_REASONID");
+
+                    b.HasIndex("StatusId")
+                        .HasDatabaseName("IX_DISTRIBUTION_REQUEST_STATUSID");
+
+                    b.HasIndex("TaxCodeCode")
+                        .HasDatabaseName("IX_DISTRIBUTION_REQUEST_TAXCODECODE");
+
+                    b.HasIndex("TypeId")
+                        .HasDatabaseName("IX_DISTRIBUTION_REQUEST_TYPEID");
+
+                    b.ToTable("DISTRIBUTION_REQUEST", (string)null);
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.DistributionRequestReason", b =>
+                {
+                    b.Property<byte>("Id")
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("ID");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("NAME");
+
+                    b.HasKey("Id")
+                        .HasName("PK_DISTRIBUTIONREQUESTREASON");
+
+                    b.ToTable("DISTRIBUTIONREQUESTREASON", (string)null);
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.DistributionRequestStatus", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NVARCHAR2(1)")
+                        .HasColumnName("ID");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("NAME");
+
+                    b.HasKey("Id")
+                        .HasName("PK_DISTRIBUTIONREQUESTSTATUS");
+
+                    b.ToTable("DISTRIBUTIONREQUESTSTATUS", (string)null);
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.DistributionRequestType", b =>
+                {
+                    b.Property<byte>("Id")
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("ID");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("NAME");
+
+                    b.HasKey("Id")
+                        .HasName("PK_DISTRIBUTIONREQUESTTYPE");
+
+                    b.ToTable("DISTRIBUTIONREQUESTTYPE", (string)null);
+                });
+
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.DistributionStatus", b =>
                 {
                     b.Property<string>("Id")
@@ -2193,8 +2323,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("NVARCHAR2(64)")
+                        .HasMaxLength(84)
+                        .HasColumnType("NVARCHAR2(84)")
                         .HasColumnName("NAME");
 
                     b.HasKey("Id")
@@ -2227,6 +2357,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         {
                             Id = (byte)4,
                             Name = "New vesting plan has Forfeiture records"
+                        },
+                        new
+                        {
+                            Id = (byte)9,
+                            Name = "Previous years enrollment is unknown. (History not previously tracked)"
                         });
                 });
 
@@ -28766,47 +28901,36 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.PayProfit", b =>
                 {
-                    b.Property<int>("BadgeNumber")
-                        .HasPrecision(7)
-                        .HasColumnType("NUMBER(7)")
-                        .HasColumnName("BADGE_NUMBER");
+                    b.Property<long>("OracleHcmId")
+                        .HasPrecision(15)
+                        .HasColumnType("NUMBER(15)")
+                        .HasColumnName("ORACLE_HCM_ID");
+
+                    b.Property<short>("ProfitYear")
+                        .HasPrecision(4)
+                        .HasColumnType("NUMBER(4)")
+                        .HasColumnName("PROFIT_YEAR");
 
                     b.Property<byte>("BeneficiaryTypeId")
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("BENEFICIARY_ID");
 
-                    b.Property<bool>("CertificateIssuedLastYear")
-                        .HasColumnType("NUMBER(1)")
-                        .HasColumnName("CERTIFICATE_ISSUED_LAST_YEAR");
+                    b.Property<decimal?>("CurrentHoursYear")
+                        .IsRequired()
+                        .HasPrecision(6, 2)
+                        .HasColumnType("DECIMAL(6,2)")
+                        .HasColumnName("CURRENT_HOURS_YEAR");
 
-                    b.Property<byte>("CompanyContributionYears")
-                        .HasColumnType("NUMBER(3)")
-                        .HasColumnName("COMPANY_CONTRIBUTION_YEARS");
-
-                    b.Property<decimal>("ContributionAmountLastYear")
+                    b.Property<decimal?>("CurrentIncomeYear")
+                        .IsRequired()
                         .HasPrecision(9, 2)
                         .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("CONTRIBUTION_AMOUNT_LAST_YEAR");
-
-                    b.Property<decimal>("EarningLastYear")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("EARNINGS_LAST_YEAR");
-
-                    b.Property<decimal>("EarningsAfterApplyingVestingRules")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("EARNINGS_AFTER_APPLYING_VESTING_RULES");
+                        .HasColumnName("CURRENT_INCOME_YEAR");
 
                     b.Property<decimal>("EarningsEtvaValue")
                         .HasPrecision(9, 2)
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("EARNINGS_ETVA_VALUE");
-
-                    b.Property<decimal?>("EarningsPriorEtvaValue")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("EARNINGS_PRIOR_ETVA_VALUE");
 
                     b.Property<byte>("EmployeeTypeId")
                         .HasColumnType("NUMBER(3)")
@@ -28816,57 +28940,15 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("ENROLLMENT_ID");
 
-                    b.Property<decimal>("ForfeitureAmountLastYear")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("FORFEITURE_AMOUNT_LAST_YEAR");
-
-                    b.Property<decimal?>("HoursCurrentYear")
-                        .IsRequired()
-                        .HasPrecision(6, 2)
-                        .HasColumnType("DECIMAL(6,2)")
-                        .HasColumnName("HOURS_CURRENT_YEAR");
-
                     b.Property<decimal>("HoursExecutive")
                         .HasPrecision(6, 2)
                         .HasColumnType("DECIMAL(6,2)")
                         .HasColumnName("HOURS_EXECUTIVE");
 
-                    b.Property<decimal>("HoursLastYear")
-                        .HasPrecision(6, 2)
-                        .HasColumnType("DECIMAL(6,2)")
-                        .HasColumnName("HOURS_LAST_YEAR");
-
-                    b.Property<decimal?>("IncomeCurrentYear")
-                        .IsRequired()
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("INCOME_CURRENT_YEAR");
-
                     b.Property<decimal>("IncomeExecutive")
                         .HasPrecision(9, 2)
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("INCOME_EXECUTIVE");
-
-                    b.Property<decimal>("IncomeLastYear")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("INCOME_LAST_YEAR");
-
-                    b.Property<short>("InitialContributionYear")
-                        .HasPrecision(4)
-                        .HasColumnType("NUMBER(4)")
-                        .HasColumnName("INITIAL_CONTRIBUTION_YEAR");
-
-                    b.Property<decimal>("NetBalanceLastYear")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("NET_BALANCE_LAST_YEAR");
-
-                    b.Property<int>("PointsEarnedLastYear")
-                        .HasPrecision(5)
-                        .HasColumnType("NUMBER(5)")
-                        .HasColumnName("POINTS_EARNED_LAST_YEAR");
 
                     b.Property<DateTime?>("PsCertificateIssuedDate")
                         .HasColumnType("DATE")
@@ -28882,21 +28964,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("SECONDARY_ETVA_EARNINGS");
 
-                    b.Property<long>("Ssn")
-                        .HasPrecision(9)
-                        .HasColumnType("NUMBER(9)")
-                        .HasColumnName("SSN");
-
-                    b.Property<decimal>("VestedBalanceLastYear")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("VESTED_BALANCE_LAST_YEAR");
-
-                    b.Property<byte>("WeeksWorkedLastYear")
-                        .HasPrecision(2)
-                        .HasColumnType("NUMBER(2)")
-                        .HasColumnName("WEEKS_WORKED_LAST_YEAR");
-
                     b.Property<byte>("WeeksWorkedYear")
                         .HasPrecision(2)
                         .HasColumnType("NUMBER(2)")
@@ -28906,7 +28973,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("ZERO_CONTRIBUTION_REASON_ID");
 
-                    b.HasKey("BadgeNumber")
+                    b.HasKey("OracleHcmId", "ProfitYear")
                         .HasName("PK_PAY_PROFIT");
 
                     b.HasIndex("BeneficiaryTypeId")
@@ -29087,6 +29154,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasIndex("ZeroContributionReasonId")
                         .HasDatabaseName("IX_PROFIT_DETAIL_ZEROCONTRIBUTIONREASONID");
+
+                    b.HasIndex(new[] { "Ssn", "DistributionSequence", "ProfitYear" }, "IX_SSN_SEQUENCE_YEAR")
+                        .HasDatabaseName("IX_PROFIT_DETAIL_SSN_DISTRIBUTIONSEQUENCE_PROFITYEAR");
 
                     b.ToTable("PROFIT_DETAIL", (string)null);
                 });
@@ -29937,6 +30007,45 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.DistributionRequest", b =>
+                {
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.DistributionRequestReason", "Reason")
+                        .WithMany()
+                        .HasForeignKey("ReasonId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_DISTRIBUTION_REQUEST_DISTRIBUTIONREQUESTREASON_REASONID");
+
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.DistributionRequestStatus", "Status")
+                        .WithMany()
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_DISTRIBUTION_REQUEST_DISTRIBUTIONREQUESTSTATUS_STATUSID");
+
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.TaxCode", "TaxCode")
+                        .WithMany()
+                        .HasForeignKey("TaxCodeCode")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_DISTRIBUTION_REQUEST_TAX_CODE_TAXCODECODE");
+
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.DistributionRequestType", "Type")
+                        .WithMany()
+                        .HasForeignKey("TypeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_DISTRIBUTION_REQUEST_DISTRIBUTIONREQUESTTYPE_TYPEID");
+
+                    b.Navigation("Reason");
+
+                    b.Navigation("Status");
+
+                    b.Navigation("TaxCode");
+
+                    b.Navigation("Type");
+                });
+
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.MassTransit.Job", b =>
                 {
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.MassTransit.JobStatus", "JobStatus")
@@ -29990,6 +30099,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_PAY_PROFIT_ENROLLMENT_ENROLLMENTID");
 
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Demographic", "Demographic")
+                        .WithMany("PayProfits")
+                        .HasForeignKey("OracleHcmId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_PAY_PROFIT_DEMOGRAPHIC_ORACLE_HCM_ID");
+
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.ZeroContributionReason", "ZeroContributionReason")
                         .WithMany("Profits")
                         .HasForeignKey("ZeroContributionReasonId")
@@ -29997,6 +30113,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasConstraintName("FK_PAY_PROFIT_ZEROCONTRIBUTIONREASON_ZEROCONTRIBUTIONREASONID");
 
                     b.Navigation("BeneficiaryType");
+
+                    b.Navigation("Demographic");
 
                     b.Navigation("EmployeeType");
 
@@ -30041,6 +30159,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BeneficiaryType", b =>
                 {
                     b.Navigation("Profits");
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Demographic", b =>
+                {
+                    b.Navigation("PayProfits");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Department", b =>

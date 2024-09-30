@@ -14,6 +14,7 @@ using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Wages;
 using CsvHelper.Configuration;
 using CsvHelper;
 using System.Globalization;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -35,7 +36,7 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
 
         var expectedResponse = new ReportResponseBase<WagesCurrentYearResponse>
         {
-            ReportName = "EJR PROF-DOLLAR-EXTRACT YEAR=THIS",
+            ReportName = $"EJR PROF-DOLLAR-EXTRACT YEAR={2023}",
             ReportDate = DateTimeOffset.Now,
             Response = new PaginatedResponseDto<WagesCurrentYearResponse> { Results = new List<WagesCurrentYearResponse> { } }
         };
@@ -43,7 +44,7 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
         // Act
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         var response =
-            await ApiClient.GETAsync<CurrentYearWagesEndpoint, PaginationRequestDto, ReportResponseBase<WagesCurrentYearResponse>>(new PaginationRequestDto());
+            await ApiClient.GETAsync<CurrentYearWagesEndpoint, ProfitYearRequest, ReportResponseBase<WagesCurrentYearResponse>>(new ProfitYearRequest{ ProfitYear = 2023});
 
         // Assert
         response.Result.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
@@ -57,7 +58,7 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
     {
         // Act
         DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        var response = await DownloadClient.GETAsync<CurrentYearWagesEndpoint, PaginationRequestDto, StreamContent>(new PaginationRequestDto());
+        var response = await DownloadClient.GETAsync<CurrentYearWagesEndpoint, ProfitYearRequest, StreamContent>(new ProfitYearRequest { ProfitYear = 2023 });
         response.Response.Content.Should().NotBeNull();
 
         string result = await response.Response.Content.ReadAsStringAsync();
@@ -83,7 +84,7 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
         // Validate the headers
         var headers = csv.HeaderRecord;
         headers.Should().NotBeNull();
-        headers.Should().ContainInOrder("", "", "BADGE", "HOURS THISYR", "DOLLARS THISYR");
+        headers.Should().ContainInOrder("", "", "BADGE", "HOURS YR", "DOLLARS YR");
 
     }
 

@@ -1,6 +1,7 @@
 ﻿using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -11,11 +12,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
 
-public class NegativeEtvaForSsNsOnPayProfitEndPoint : EndpointWithCsvBase<PaginationRequestDto, NegativeEtvaForSsNsOnPayProfitResponse, NegativeEtvaForSsNsOnPayProfitEndPoint.NegativeEtvaForSsNsOnPayProfitResponseMap>
+public class NegativeEtvaForSsNsOnPayProfitEndPoint : EndpointWithCsvBase<ProfitYearRequest, NegativeEtvaForSsNsOnPayProfitResponse, NegativeEtvaForSsNsOnPayProfitEndPoint.NegativeEtvaForSsNsOnPayProfitResponseMap>
 {
-    private readonly IYearEndService _reportService;
+    private readonly ICleanupReportService _reportService;
 
-    public NegativeEtvaForSsNsOnPayProfitEndPoint(IYearEndService reportService)
+    public NegativeEtvaForSsNsOnPayProfitEndPoint(ICleanupReportService reportService)
     {
         _reportService = reportService;
     }
@@ -51,7 +52,7 @@ public class NegativeEtvaForSsNsOnPayProfitEndPoint : EndpointWithCsvBase<Pagina
         base.Configure();
     }
 
-    public override async Task<ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>> GetResponse(PaginationRequestDto req, CancellationToken ct)
+    public override async Task<ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
         return await _reportService.GetNegativeETVAForSSNsOnPayProfitResponse(req, ct);
     }
