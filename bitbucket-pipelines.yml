@@ -15,7 +15,6 @@ definitions:
           runs-on:
             - windows
             - self.hosted
-            - appt125
           script:
             - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
             - $env:REPORTS_PATH="../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}"
@@ -32,7 +31,6 @@ definitions:
           runs-on:
            - windows
            - self.hosted
-           - appt125
           script:
            - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
           artifacts:
@@ -43,7 +41,6 @@ definitions:
       runs-on:
         - windows
         - self.hosted
-        - appt125
       artifacts:
         - dist\**
       script:
@@ -67,7 +64,6 @@ definitions:
       runs-on:
         - windows
         - self.hosted
-        - appt125
       artifacts:
         - dist\**
       script:
@@ -83,7 +79,6 @@ definitions:
       runs-on:
         - windows
         - self.hosted
-        - appt125
       artifacts:
         - dist\**
       script:
@@ -99,7 +94,6 @@ definitions:
       runs-on:
         - windows
         - self.hosted
-        - appt125
       artifacts:
         - dist\**
       script:
@@ -129,7 +123,6 @@ pipelines:
           runs-on:
             - windows
             - self.hosted
-            - appt125
           deployment: QA
           trigger: "manual"
       #     script:

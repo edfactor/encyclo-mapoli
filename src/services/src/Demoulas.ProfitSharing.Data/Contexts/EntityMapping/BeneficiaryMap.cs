@@ -9,9 +9,12 @@ public sealed class BeneficiaryMap : IEntityTypeConfiguration<Beneficiary>
 {
     public void Configure(EntityTypeBuilder<Beneficiary> builder)
     {
-        _ = builder.HasKey(c => c.Psn);
         _ = builder.ToTable("BENEFICIARY");
+        _ = builder.HasKey(c => c.Id);
 
+        _ = builder.Property(d => d.Id).HasColumnName("ID").ValueGeneratedOnAdd();
+
+        _ = builder.HasIndex(d => d.Psn, "IX_PSN");
         _ = builder.Property(c => c.Psn).IsRequired().HasPrecision(11).ValueGeneratedNever().HasColumnName("PSN");
 
         _ = builder.HasIndex(d => d.Ssn, "IX_SSN");
@@ -43,9 +46,9 @@ public sealed class BeneficiaryMap : IEntityTypeConfiguration<Beneficiary>
 
         _ = builder.OwnsOne(e => e.ContactInfo, contact =>
         {
-            contact.Property(a => a.PhoneNumber).HasMaxLength(15).HasColumnName("PHONE_NUMBER");
-            contact.Property(a => a.MobileNumber).HasMaxLength(15).HasColumnName("MOBILE_NUMBER");
-            contact.Property(a => a.EmailAddress).HasMaxLength(50).HasColumnName("EMAIL_ADDRESS");
+            contact.Property(a => a.PhoneNumber).HasMaxLength(16).HasColumnName("PHONE_NUMBER");
+            contact.Property(a => a.MobileNumber).HasMaxLength(16).HasColumnName("MOBILE_NUMBER");
+            contact.Property(a => a.EmailAddress).HasMaxLength(64).HasColumnName("EMAIL_ADDRESS");
         });
 
        _ = builder.Property(e => e.Distribution).HasPrecision(9, 2).HasColumnName("DISTRIBUTION");
@@ -57,9 +60,8 @@ public sealed class BeneficiaryMap : IEntityTypeConfiguration<Beneficiary>
            .HasColumnType("numeric(3,0)")
            .HasPrecision(3)
            .IsRequired();
-       
-       _ = builder.Property(e => e.Relationship).HasColumnName("RELATIONSHIP").HasMaxLength(10);
 
+       _ = builder.Property(e => e.Relationship).HasColumnName("RELATIONSHIP").HasMaxLength(10);
 
 
        _ = builder.HasOne(d => d.Kind)

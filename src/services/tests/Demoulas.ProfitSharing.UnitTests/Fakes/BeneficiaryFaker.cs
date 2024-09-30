@@ -11,17 +11,26 @@ namespace Demoulas.ProfitSharing.UnitTests.Fakes;
 /// </summary>
 internal sealed class BeneficiaryFaker : Faker<Beneficiary>
 {
+    private static int _iDCounter = 1000;
+    
     /// <summary>
     ///   Initializes a default instance of <c>BeneficiaryFaker</c>
     /// </summary>
     internal BeneficiaryFaker()
     {
+        RuleFor(d => d.Id, f => _iDCounter++);
+        RuleFor(b => b.Id, f => f.Random.Long(1000000000, 9999999999));
         RuleFor(b => b.Psn, f => f.Random.Long(1000000000, 9999999999));
         RuleFor(b => b.Ssn, f => f.Person.Ssn().ConvertSsnToLong());
         RuleFor(b => b.FirstName, f => f.Name.FirstName());
         RuleFor(b => b.MiddleName, f => f.Name.FirstName().OrNull(f));
         RuleFor(b => b.LastName, f => f.Name.LastName());
         RuleFor(b => b.DateOfBirth, f => f.Date.Past(50, DateTime.Now.AddYears(-18)).ToDateOnly());
+        RuleFor(pc => pc.Distribution, f => f.Finance.Amount(min: 100, max: 20_000, decimals: 2));
+        RuleFor(pc => pc.Amount, f => f.Finance.Amount(min: 100, max: 20_000, decimals: 2));
+        RuleFor(pc => pc.Earnings, f => f.Finance.Amount(min: 100, max: 20_000, decimals: 2));
+        RuleFor(pc => pc.SecondaryEarnings, f => f.Finance.Amount(min: 100, max: 2_000, decimals: 2));
+        
         RuleFor(b => b.Address, f => new Address
         {
             Street = f.Address.StreetAddress(),
