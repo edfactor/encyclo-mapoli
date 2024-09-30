@@ -3,20 +3,19 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
-
 internal sealed class DistributionPayeeMap : IEntityTypeConfiguration<DistributionPayee>
 {
     public void Configure(EntityTypeBuilder<DistributionPayee> builder)
     {
-        builder.ToTable("DISTRIBUTION_PAYEE");
-        builder.HasKey(d => d.Id);
+        _ = builder.ToTable("DISTRIBUTION_PAYEE");
+        _ = builder.HasKey(d => d.Id);
         
-        builder.Property(d => d.Id).ValueGeneratedOnAdd();
+        _ = builder.Property(d => d.Id).ValueGeneratedOnAdd();
 
         _ = builder.HasIndex(d => d.Ssn, "IX_SSN");
-        builder.Property(d => d.Ssn).HasColumnName("SSN").HasPrecision(9);
-        builder.Property(d => d.Name).HasMaxLength(350).HasColumnName("PAYEE_NAME");
-        builder.OwnsOne(d => d.Address, address =>
+        _ = builder.Property(d => d.Ssn).HasColumnName("SSN").HasPrecision(9);
+        _ = builder.Property(d => d.Name).HasMaxLength(350).HasColumnName("PAYEE_NAME");
+        _ = builder.OwnsOne(d => d.Address, address =>
         {
             address.Property(a => a.Street).HasMaxLength(30).HasColumnName("STREET");
             address.Property(a => a.Street2).HasMaxLength(30).HasColumnName("STREET2");
@@ -32,6 +31,6 @@ internal sealed class DistributionPayeeMap : IEntityTypeConfiguration<Distributi
                 .HasForeignKey(o => o.CountryIso);
         });
 
-        builder.Property(d => d.Memo).HasColumnName("MEMO").HasMaxLength(128);
+        _ = builder.Property(d => d.Memo).HasColumnName("MEMO").HasMaxLength(128);
     }
 }
