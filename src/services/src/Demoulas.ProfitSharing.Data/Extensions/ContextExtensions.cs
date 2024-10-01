@@ -8,6 +8,7 @@ internal static class ContextExtensions
 {
     public static ModelBuilder ApplyModelConfiguration(this ModelBuilder modelBuilder)
     {
+        modelBuilder.ApplyConfiguration(new BeneficiaryContactMap());
         modelBuilder.ApplyConfiguration(new BeneficiaryKindMap());
         modelBuilder.ApplyConfiguration(new BeneficiaryMap());
         modelBuilder.ApplyConfiguration(new BeneficiaryTypeMap());

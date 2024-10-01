@@ -3,24 +3,17 @@ public sealed class Beneficiary
 {
     public required int Id { get; set; }
     public required long Psn { get; set; }
-    public required long Ssn { get; set; }
+   
+    public BeneficiaryContact? Contact { get; set; }
+    public required int BeneficiaryContactId { get; set; }
 
-    public required string FirstName { get; set; } = string.Empty;
-    public string? MiddleName { get; set; }
-    public required string LastName { get; set; }= string.Empty;
-
-    public required DateOnly DateOfBirth { get; set; }
-
-    public required Address Address { get; set; }
-    public required ContactInfo ContactInfo { get; set; }
-
+    public string? Relationship { get; set; }
     public  char? KindId { get; set; }
     public  BeneficiaryKind? Kind { get; set; }
-
     public decimal Distribution{ get; set; }
     public decimal Amount { get; set; }
     public decimal Earnings { get; set; }
     public decimal SecondaryEarnings { get; set; }
     public required decimal Percent { get; set; }
-    public string? Relationship { get; set; }
+    
 }
