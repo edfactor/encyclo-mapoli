@@ -19,8 +19,7 @@ internal sealed class BeneficiaryFaker : Faker<Beneficiary>
     internal BeneficiaryFaker()
     {
         RuleFor(d => d.Id, f => _iDCounter++);
-        RuleFor(b => b.Id, f => f.Random.Long(1000000000, 9999999999));
-        RuleFor(b => b.Psn, f => f.Random.Long(1000000000, 9999999999));
+        RuleFor(b => b.Psn, f => f.Random.Long(100_000_000, 9_999_999_999));
         RuleFor(b => b.Ssn, f => f.Person.Ssn().ConvertSsnToLong());
         RuleFor(b => b.FirstName, f => f.Name.FirstName());
         RuleFor(b => b.MiddleName, f => f.Name.FirstName().OrNull(f));

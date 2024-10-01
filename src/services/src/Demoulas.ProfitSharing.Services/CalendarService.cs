@@ -39,8 +39,8 @@ public sealed class CalendarService
         return _dataContextFactory.UseReadOnlyContext(context =>
         {
             return context.CaldarRecords.Where(record => record.WeekDate >= dateTime)
-                .OrderBy(record => record.AccApWkend)
-                .Select(r => r.AccApWkend)
+                .OrderBy(record => record.WeekEndingDate)
+                .Select(r => r.WeekEndingDate)
                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
         });
     }
@@ -58,24 +58,37 @@ public sealed class CalendarService
             throw new ArgumentOutOfRangeException(nameof(calendarYear), $"Calendar Year value must be between {SqlDateTime.MinValue.Value.Year} and {SqlDateTime.MaxValue.Value.Year}");
         }
 
-        var calendarYearEnd = new DateOnly(calendarYear, 12, 31);
-
-        var startingDate = await _dataContextFactory.UseReadOnlyContext(context =>
+        var startingDate = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
-            return context.CaldarRecords
-                .Where(record => record.AccApWkend >= new DateOnly(calendarYear, 01, 01) &&
-                                 record.AccApWkend <= calendarYearEnd)
-                .Select(r => r.AccApWkend)
-                .MinAsync(cancellationToken: cancellationToken);
-
+            return await context.CaldarRecords
+                .Where(r => r.WeekEndingDate >= new DateOnly(calendarYear, 1, 1) &&
+                            r.WeekEndingDate <= new DateOnly(calendarYear, 12, 31))
+                .Select(r => r.WeekEndingDate)
+                .MinAsync(cancellationToken);
         });
 
-        var endingDate = await FindWeekendingDateFromDate(calendarYearEnd, cancellationToken);
-
-        if (endingDate == DateOnly.MinValue)
+        var endingDate = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
-            endingDate = calendarYearEnd;
-            // Loop until we find a Saturday
+            // Filter records where WeekEndingDate is in December of the given calendar year
+            var decemberRecords = context.CaldarRecords
+                .Where(r => r.WeekEndingDate.Year == calendarYear && r.WeekEndingDate.Month == 12);
+
+            // Get the maximum ACC_WEEKN for December
+            var maxAccWeekn = await decemberRecords
+                .MaxAsync(r => r.AccWeekN, cancellationToken);
+
+            // Retrieve the WeekEndingDate for the record with ACC_PERIOD == 12 and the maximum ACC_WEEKN
+            var endingWeekEndingDate = await decemberRecords
+                .Where(r => r.AccPeriod == 12 && r.AccWeekN == maxAccWeekn)
+                .Select(r => r.WeekEndingDate)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            return endingWeekEndingDate;
+        });
+
+        if (endingDate == default)
+        {
+            endingDate = new DateOnly(calendarYear, 12, 31);
             while (endingDate.DayOfWeek != DayOfWeek.Saturday)
             {
                 endingDate = endingDate.AddDays(1);
@@ -84,4 +97,5 @@ public sealed class CalendarService
 
         return (BeginDate: startingDate.AddDays(1), YearEndDate: endingDate);
     }
+
 }
