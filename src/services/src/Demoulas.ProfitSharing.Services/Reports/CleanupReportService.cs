@@ -266,4 +266,62 @@ public class CleanupReportService : ICleanupReportService
             };
         }
     }
+
+    public async Task<ReportResponseBase<DistributionsAndForfeitureResponse>> GetDistributionsAndForfeiture(DistributionsAndForfeituresRequest req, CancellationToken cancellationToken = default)
+    {
+        using (_logger.BeginScope("Request BEGIN DISTRIBUTIONS AND FORFEITURES"))
+        {
+            var distributionProfitCodes = new byte[] { 
+                ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id, 
+                ProfitCode.Constants.OutgoingDirectPayments.Id, 
+                ProfitCode.Constants.Outgoing100PercentVestedPayment.Id
+            };
+
+            var validProfitCodes = new byte[] {
+                ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
+                ProfitCode.Constants.OutgoingForfeitures.Id,
+                ProfitCode.Constants.OutgoingDirectPayments.Id,
+                ProfitCode.Constants.Outgoing100PercentVestedPayment.Id
+            };
+
+            var results = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+            {
+                var nameAndDobQuery = ctx.Demographics.Select(x=>new {x.Ssn, x.FirstName, x.LastName, x.DateOfBirth, x.BadgeNumber}).Union(ctx.Beneficiaries.Select(x=>new {x.Ssn, x.FirstName, x.LastName, x.DateOfBirth, BadgeNumber=0}))
+                                         .GroupBy(x=>x.Ssn)
+                                         .Select(x=>new {Ssn=x.Key, FirstName=x.Max(m=>m.FirstName), LastName=x.Max(m=>m.LastName), DateOfBirth=x.Max(m=>m.DateOfBirth), BadgeNumber=x.Max(m=>m.BadgeNumber)});
+
+                var query = from pd in ctx.ProfitDetails
+                            join nameAndDob in nameAndDobQuery on pd.Ssn equals nameAndDob.Ssn 
+                            where pd.ProfitYear == req.ProfitYear &&
+                                  validProfitCodes.Contains(pd.ProfitCodeId) &&
+                                  (pd.ProfitCodeId != 9 || (pd.ProfitCodeId == 9 && !pd.IsTransferOut && !pd.IsTransferIn)) &&
+                                  (req.StartMonth==0 || pd.MonthToDate>=req.StartMonth) &&
+                                  (req.EndMonth==0 || pd.MonthToDate<=req.EndMonth)
+                            orderby nameAndDob.LastName, nameAndDob.FirstName
+                            select new DistributionsAndForfeitureResponse()
+                            {
+                                BadgeNumber = nameAndDob.BadgeNumber,
+                                EmployeeSsn = pd.Ssn.MaskSsn(),
+                                EmployeeName = $"{nameAndDob.LastName}, {nameAndDob.FirstName}",
+                                DistributionAmount = distributionProfitCodes.Contains(pd.ProfitCodeId) ? pd.Forfeiture : 0,
+                                TaxCode = pd.TaxCodeId,
+                                StateTax = pd.StateTaxes,
+                                FederalTax = pd.FederalTaxes,
+                                ForfeitAmount = pd.ProfitCodeId == 2 ? pd.Forfeiture : 0,
+                                LoanDate = pd.MonthToDate > 0 ? new DateOnly(pd.YearToDate, pd.MonthToDate, 1) : null,
+                                Age = Convert.ToByte(Math.Floor((DateOnly.FromDateTime(DateTime.Now).DayNumber - nameAndDob.DateOfBirth.DayNumber) / 365.2499))
+                            };
+                return await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
+            });
+
+            _logger.LogInformation("Returned {Results} records", results.Results.Count());
+
+            return new ReportResponseBase<DistributionsAndForfeitureResponse>()
+            {
+                ReportDate = DateTimeOffset.Now,
+                ReportName = "DISTRIBUTIONS AND FORFEITURES",
+                Response = results
+            };
+        }
+    }
 }

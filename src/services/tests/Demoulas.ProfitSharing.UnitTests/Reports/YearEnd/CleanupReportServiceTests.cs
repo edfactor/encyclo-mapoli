@@ -313,4 +313,120 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
         _testOutputHelper.WriteLine(result);
 
     }
+
+    [Fact(DisplayName ="PS-294 : Distributions and Forfeitures (CSV)")]
+    public async Task GetDistributionsAndForfeitures()
+    {
+        decimal sampleforfeiture = 5150m;
+
+        _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+        var req = new DistributionsAndForfeituresRequest() { Skip=0, Take=Byte.MaxValue, ProfitYear = (short)(DateTime.Now.Year-1), IncludeOutgoingForfeitures=true};
+        Common.Contracts.Response.ReportResponseBase<Common.Contracts.Response.YearEnd.DistributionsAndForfeitureResponse> response;
+
+        
+        await MockDbContextFactory.UseWritableContext(async ctx =>
+        {
+            //Clear out existing data, so that random numbers don't cause the numbers to inflate
+            foreach (var dem in ctx.Demographics)
+            {
+                dem.Ssn = -1;
+            }
+            foreach (var ben in ctx.Beneficiaries)
+            {
+                ben.Ssn = -1;
+                ben.Psn = -1;
+            }
+            await ctx.SaveChangesAsync();
+        });
+        var distributionProfitCodes = new[] { 1, 3, 9 }; //Test to see that the forfeiture ends up in the right column for these codes.
+        foreach (var profitCode in distributionProfitCodes)
+        {
+            await MockDbContextFactory.UseWritableContext(async ctx =>
+            {
+                var demographic = await ctx.Demographics.FirstAsync();
+                demographic.Ssn = 1001;
+
+                var profitDetail = await ctx.ProfitDetails.FirstAsync();
+
+                profitDetail.ProfitYear = (short)(DateTime.Now.Year - 1);
+                profitDetail.ProfitYearIteration = 0;
+                profitDetail.ProfitCodeId = (byte)profitCode;
+                profitDetail.ProfitCode = new Data.Entities.ProfitCode() { Id = 1, Name = "Incoming contributions, forfeitures, earnings", Frequency = "Yearly" };
+                profitDetail.Forfeiture = sampleforfeiture;
+                profitDetail.MonthToDate = 3;
+                profitDetail.YearToDate = (short)(DateTime.Now.Year - 1);
+                profitDetail.FederalTaxes = 100;
+                profitDetail.StateTaxes = 50;
+                profitDetail.TaxCodeId = '7';
+                profitDetail.Ssn = demographic.Ssn;
+                profitDetail.DistributionSequence = 6011;
+
+                await ctx.SaveChangesAsync();
+            });
+            response = await _cleanupReportClient.GetDistributionsAndForfeiture(req, CancellationToken.None);
+
+            response.Should().NotBeNull();
+            response.ReportName.Should().BeEquivalentTo("DISTRIBUTIONS AND FORFEITURES");
+            response.Response.Results.Count().Should().Be(1);
+            response.Response.Results.First().DistributionAmount.Should().Be(sampleforfeiture);
+            response.Response.Results.First().ForfeitAmount.Should().Be(0);
+
+            _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+        }
+
+        await MockDbContextFactory.UseWritableContext(async ctx =>
+        {
+            var profitDetail = await ctx.ProfitDetails.FirstAsync();
+
+            profitDetail.ProfitCodeId = 2; //This profit code should end up in the forfeit column
+            await ctx.SaveChangesAsync();
+        });
+
+        response = await _cleanupReportClient.GetDistributionsAndForfeiture(req, CancellationToken.None);
+
+        response.Should().NotBeNull();
+        response.Response.Results.Count().Should().Be(1);
+        response.Response.Results.First().DistributionAmount.Should().Be(0);
+        response.Response.Results.First().ForfeitAmount.Should().Be(sampleforfeiture);
+
+        _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+
+        await MockDbContextFactory.UseWritableContext(async ctx =>
+        {
+            var profitDetail = await ctx.ProfitDetails.FirstAsync();
+
+            profitDetail.ProfitCodeId = 6; //This profit code shouldn't be in the report
+            await ctx.SaveChangesAsync();
+        });
+
+        response = await _cleanupReportClient.GetDistributionsAndForfeiture(req, CancellationToken.None);
+
+        response.Should().NotBeNull();
+        response.Response.Results.Count().Should().Be(0);
+
+        _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+
+        await MockDbContextFactory.UseWritableContext(async ctx =>
+        {
+            var profitDetail = await ctx.ProfitDetails.FirstAsync();
+
+            profitDetail.ProfitCodeId = 9; //This profit code shouldn't be in the report if is a transfer
+            profitDetail.IsTransferOut = true;
+            await ctx.SaveChangesAsync();
+        });
+
+        response = await _cleanupReportClient.GetDistributionsAndForfeiture(req, CancellationToken.None);
+
+        response.Should().NotBeNull();
+        response.Response.Results.Count().Should().Be(0);
+
+        _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+    }
+
+    [Fact(DisplayName = "CleanupReportService auth check")]
+    public async Task YearEndServiceAuthCheck()
+    {
+        _cleanupReportClient.CreateAndAssignTokenForClient(Role.HARDSHIPADMINISTRATOR);
+        await Assert.ThrowsAsync<HttpRequestException>(async () => { _ = await _cleanupReportClient.GetDemographicBadgesNotInPayProfit(_paginationRequest, CancellationToken.None); });
+    }
 }
