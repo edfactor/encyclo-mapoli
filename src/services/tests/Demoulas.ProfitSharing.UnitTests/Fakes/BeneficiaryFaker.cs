@@ -43,8 +43,14 @@ internal sealed class BeneficiaryFaker : Faker<Beneficiary>
         RuleFor(b => b.Contact, f =>
         {
             var contact = contactFaker.Generate();
-            RuleFor(b => b.BeneficiaryContactId, _ => contact.Id); // Set BeneficiaryContactId to the generated Contact's ID
             return contact;
+        });
+
+        // Move the setting of BeneficiaryContactId to its own RuleFor block
+        RuleFor(b => b.BeneficiaryContactId, f =>
+        {
+            var contact = contactFaker.Generate();
+            return contact.Id;
         });
     }
 }

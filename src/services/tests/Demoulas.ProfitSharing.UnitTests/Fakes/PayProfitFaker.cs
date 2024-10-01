@@ -8,7 +8,7 @@ internal sealed class PayProfitFaker : Faker<PayProfit>
     {
         var demographicQueue = new Queue<Demographic>(demographicFakes);
 
-        Demographic currentDemographic = demographicQueue.Dequeue();
+        Demographic currentDemographic = demographicQueue.Peek();
 
         RuleFor(pc => pc.OracleHcmId, (f, o) => (currentDemographic.OracleHcmId))
             .RuleFor(d => d.Demographic, (f, o) =>
