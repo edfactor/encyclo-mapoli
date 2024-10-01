@@ -22,7 +22,7 @@ internal sealed class BeneficiaryFaker : Faker<Beneficiary>
 
 
         RuleFor(d => d.Id, f => _iDCounter++);
-        RuleFor(b => b.Psn, f => f.Random.Long(100_000_000, 9_999_999_999));
+        RuleFor(b => b.PsnSuffix, f => f.Random.Short(1_000, 9_999));
         RuleFor(pc => pc.Distribution, f => f.Finance.Amount(min: 100, max: 20_000, decimals: 2));
         RuleFor(pc => pc.Amount, f => f.Finance.Amount(min: 100, max: 20_000, decimals: 2));
         RuleFor(pc => pc.Earnings, f => f.Finance.Amount(min: 100, max: 20_000, decimals: 2));

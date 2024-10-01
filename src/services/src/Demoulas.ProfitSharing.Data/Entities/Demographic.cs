@@ -65,4 +65,5 @@ public sealed class Demographic : Member
     
     
     public List<PayProfit> PayProfits { get; set; } = [];
+    public List<Beneficiary> Beneficiaries { get; set; } = [];
 }

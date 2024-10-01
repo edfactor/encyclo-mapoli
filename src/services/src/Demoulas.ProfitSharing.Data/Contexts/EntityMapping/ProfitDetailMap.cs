@@ -34,5 +34,8 @@ internal sealed class ProfitDetailMap : IEntityTypeConfiguration<ProfitDetail>
         _ = builder.Property(x => x.IsTransferIn).HasColumnName("IS_TRANSFER_IN").HasDefaultValue(0);
         _ = builder.Property(x => x.IsTransferOut).HasColumnName("IS_TRANSFER_OUT").HasDefaultValue(0);
 
+        _ = builder.HasOne(d => d.ZeroContributionReason)
+            .WithMany()
+            .HasForeignKey(d => d.ZeroContributionReasonId);
     }
 }

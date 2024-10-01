@@ -14,8 +14,21 @@ public sealed class BeneficiaryMap : IEntityTypeConfiguration<Beneficiary>
 
         _ = builder.Property(d => d.Id).HasColumnName("ID").ValueGeneratedOnAdd();
 
-        _ = builder.HasIndex(d => d.Psn, "IX_PSN");
-        _ = builder.Property(c => c.Psn).IsRequired().HasPrecision(11).HasColumnName("PSN").ValueGeneratedNever();
+        
+            _ = builder.HasIndex(e => e.PsnSuffix, "IX_PsnSuffix");
+        _ = builder.Property(e => e.PsnSuffix)
+            .HasPrecision(5)
+            .HasColumnName("PSN_SUFFIX");
+
+        _ = builder.HasIndex(e => e.BadgeNumber, "IX_BadgeNumber");
+        _ = builder.Property(e => e.BadgeNumber)
+            .HasPrecision(7)
+            .HasColumnName("BADGE_NUMBER");
+
+        _ = builder.Property(e => e.OracleHcmId)
+            .HasPrecision(15)
+            .ValueGeneratedNever()
+            .HasColumnName("ORACLE_HCM_ID");
 
         _ = builder.Property(b => b.KindId).HasColumnName("KIND_ID");
 

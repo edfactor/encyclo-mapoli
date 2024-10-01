@@ -334,7 +334,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
             foreach (var ben in ctx.Beneficiaries.Include(b=> b.Contact))
             {
                 ben.Contact!.Ssn = -1;
-                ben.Psn = -1;
+                ben.PsnSuffix = -1;
             }
             await ctx.SaveChangesAsync();
         });
