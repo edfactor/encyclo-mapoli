@@ -24,7 +24,8 @@ internal sealed class BeneficiaryContactFaker : Faker<BeneficiaryContact>
         RuleFor(b => b.MiddleName, f => f.Name.FirstName().OrNull(f));
         RuleFor(b => b.LastName, f => f.Name.LastName());
         RuleFor(b => b.DateOfBirth, f => f.Date.Past(50, DateTime.Now.AddYears(-18)).ToDateOnly());
-        
+        RuleFor(b => b.CreatedDate, f => f.Date.RecentDateOnly());
+
         RuleFor(b => b.Address, f => new Address
         {
             Street = f.Address.StreetAddress(),

@@ -31,8 +31,8 @@ internal sealed class ProfitDetailMap : IEntityTypeConfiguration<ProfitDetail>
         _ = builder.Property(x => x.Ssn).HasColumnName("SSN").HasPrecision(9).IsRequired();
         _ = builder.Property(x => x.DistributionSequence).HasColumnName("DISTRIBUTION_SEQUENCE");
         _ = builder.Property(x => x.TransferPsn).HasColumnName("TRANSFER_PSN");
-        _ = builder.Property(x => x.IsTransferIn).HasColumnName("IS_TRANSFER_IN").HasColumnType("NUMBER(1)").HasDefaultValue(0);
-        _ = builder.Property(x => x.IsTransferOut).HasColumnName("IS_TRANSFER_OUT").HasColumnType("NUMBER(1)").HasDefaultValue(0);
+        _ = builder.Property(x => x.IsTransferIn).HasColumnName("IS_TRANSFER_IN").HasDefaultValue(0);
+        _ = builder.Property(x => x.IsTransferOut).HasColumnName("IS_TRANSFER_OUT").HasDefaultValue(0);
 
     }
 }

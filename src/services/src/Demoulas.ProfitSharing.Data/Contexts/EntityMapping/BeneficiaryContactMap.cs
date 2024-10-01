@@ -22,6 +22,12 @@ public sealed class BeneficiaryContactMap : IEntityTypeConfiguration<Beneficiary
         _ = builder.Property(b => b.LastName).IsRequired().HasMaxLength(30).HasColumnName("LAST_NAME");
 
         _ = builder.Property(b => b.DateOfBirth).HasColumnType("DATE").HasConversion<DateOnlyConverter>().HasColumnName("DATE_OF_BIRTH");
+        _ = builder.Property(b => b.CreatedDate)
+            .HasColumnType("DATE")
+            .HasConversion<DateOnlyConverter>()
+            .HasColumnName("CREATED_DATE")
+            .HasDefaultValueSql("SYSDATE")
+            .ValueGeneratedOnAdd();
 
 
         _ = builder.OwnsOne(e => e.Address, address =>
