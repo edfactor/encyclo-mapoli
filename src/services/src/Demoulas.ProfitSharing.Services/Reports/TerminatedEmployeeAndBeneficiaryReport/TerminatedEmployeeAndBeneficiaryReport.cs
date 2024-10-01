@@ -37,14 +37,14 @@ public class TerminatedEmployeeAndBeneficiaryReport
             req.ProfitShareYear = (_todaysDate.Month < 4) ? _todaysDate.Year - 1 : _todaysDate.Year;
         }
 
-        List<MemberSlice> memberSlices = await RetrieveMemberSlices(req.StartDate, req.EndDate);
+        List<MemberSlice> memberSlices = await RetrieveMemberSlices(req.StartDate, req.EndDate, (short) req.ProfitShareYear);
         List<Member> members = await MergeMemberSlicesToMembers(memberSlices, req.ProfitShareYear);
         TerminatedEmployeeAndBeneficiaryResponse fullResponse =  CreateDataset(members, req);
         return fullResponse;
     }
 
 
-    private async Task<List<MemberSlice>> RetrieveMemberSlices(DateOnly startDate, DateOnly endDate)
+    private async Task<List<MemberSlice>> RetrieveMemberSlices(DateOnly startDate, DateOnly endDate, short profitYear)
     {
         // slices of member information (aka employee or beneficiary information)
         List<MemberSlice> memberSlices = new();
@@ -54,9 +54,9 @@ public class TerminatedEmployeeAndBeneficiaryReport
                         d.TerminationCodeId != TerminationCode.Constants.RetiredReceivingPension &&
                         d.TerminationDate >= startDate && d.TerminationDate <= endDate)
             .GroupJoin(
-                _ctx.PayProfits,
-                demographic => demographic.BadgeNumber,
-                payProfit => payProfit.BadgeNumber,
+                _ctx.PayProfits.Where(p=>p.ProfitYear == profitYear),
+                demographic => demographic.OracleHcmId,
+                payProfit => payProfit.OracleHcmId,
                 (demographic, payProfits) => new
                 {
                     Demographic = demographic,
@@ -85,16 +85,16 @@ public class TerminatedEmployeeAndBeneficiaryReport
                 Ssn = employee.Ssn,
                 BirthDate = employee.DateOfBirth,
                 HoursCurrentYear = 0, // hours
-                NetBalanceLastYear = pp.NetBalanceLastYear,
-                VestedBalanceLastYear = pp.VestedBalanceLastYear,
+                NetBalanceLastYear = 0m, // TO-DO !!! PayProfit refactor, pp.NetBalanceLastYear
+                VestedBalanceLastYear = 0m, // TO-DO !!!! PayProfit refactor pp.VestedBalanceLastYear,
                 EmploymentStatusCode = employee.EmploymentStatusId,
                 FullName = employee.FullName!,
                 FirstName = employee.FirstName,
                 MiddleInitial = employee.MiddleName?.Substring(0, 1) ?? "",
                 LastName = employee.LastName,
-                YearsInPs = pp.CompanyContributionYears,
+                YearsInPs = 0, // TO-DO !!! PayProfit refactor, pp.CompanyContributionYears,
                 TerminationDate = employee.TerminationDate,
-                IncomeRegAndExecCurrentYear = (pp.IncomeCurrentYear ?? 0) + pp.IncomeExecutive,
+                IncomeRegAndExecCurrentYear = (pp.CurrentIncomeYear ?? 0) + pp.IncomeExecutive,
                 TerminationCode = employee.TerminationCodeId,
                 ZeroCont = zeroCont,
                 Enrolled = pp.EnrollmentId,
@@ -112,7 +112,7 @@ public class TerminatedEmployeeAndBeneficiaryReport
                 from demographic in demographicsGroup.DefaultIfEmpty()
 
                 join payProfit in _ctx.PayProfits
-                    on demographic != null ? demographic.BadgeNumber : 0 equals payProfit.BadgeNumber into payProfitsGroup
+                    on demographic != null ? demographic.OracleHcmId : 0 equals payProfit.OracleHcmId into payProfitsGroup
                 from payProfit in payProfitsGroup.DefaultIfEmpty()
 
                 group new { demographic, payProfit } by beneficiary into grouped
@@ -165,7 +165,7 @@ public class TerminatedEmployeeAndBeneficiaryReport
                 }
                 if (amount == 0)
                 {
-                    amount = payProfits[0]?.NetBalanceLastYear ?? 0;
+                    amount = 0; // TO-DO !!! PayProfit Refactor !!!  payProfits[0]?.NetBalanceLastYear ?? 0
                 }
                 psn = demographic.BadgeNumber;
                 terminationDate =demographic.TerminationDate;

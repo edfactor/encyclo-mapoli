@@ -57,7 +57,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
             // Act
             ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
             var response =
-                await ApiClient.GETAsync<MilitaryAndRehireProfitSummaryEndpoint, PaginationRequestDto, ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>>(setup.Request);
+                await ApiClient.GETAsync<MilitaryAndRehireProfitSummaryEndpoint, ProfitYearRequest, ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>>(setup.Request);
 
             // Assert
             response.Result.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
@@ -74,7 +74,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
 
             // Act
             DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-            var response = await DownloadClient.GETAsync<MilitaryAndRehireProfitSummaryEndpoint, PaginationRequestDto, StreamContent>(setup.Request);
+            var response = await DownloadClient.GETAsync<MilitaryAndRehireProfitSummaryEndpoint, ProfitYearRequest, StreamContent>(setup.Request);
             response.Response.Content.Should().NotBeNull();
 
             string result = await response.Response.Content.ReadAsStringAsync();
@@ -125,7 +125,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
     public async Task GetResponse_Should_HandleEmptyResults()
     {
         // Arrange
-        var request = new MilitaryAndRehireRequest { Skip = 0, Take = 10, ReportingYear = (short)DateTime.Today.Year };
+        var request = new ProfitYearRequest { Skip = 0, Take = 10, ProfitYear = (short)DateTime.Today.Year };
         var cancellationToken = CancellationToken.None;
         var expectedResponse = new ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>
         {
@@ -146,7 +146,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
     public async Task GetResponse_Should_HandleNullResults()
     {
         // Arrange
-        var request = new MilitaryAndRehireRequest { Skip = 0, Take = 10, ReportingYear = (short)DateTime.Today.Year };
+        var request = new ProfitYearRequest { Skip = 0, Take = 10, ProfitYear = (short)DateTime.Today.Year };
         var cancellationToken = CancellationToken.None;
         var expectedResponse = new ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>
         {
@@ -173,7 +173,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
         reportFileName.Should().Be("MILITARY TERM-REHIRE");
     }
 
-    private static async Task<(MilitaryAndRehireRequest Request, MilitaryAndRehireProfitSummaryResponse ExpectedResponse)> SetupTestEmployee(ProfitSharingDbContext c)
+    private static async Task<(ProfitYearRequest Request, MilitaryAndRehireProfitSummaryResponse ExpectedResponse)> SetupTestEmployee(ProfitSharingDbContext c)
     {
         // Setup
         MilitaryAndRehireProfitSummaryResponse example = MilitaryAndRehireProfitSummaryResponse.ResponseExample();
@@ -183,10 +183,9 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
         demo.ReHireDate = DateTime.Today.ToDateOnly();
         
 
-        var payProfit = await c.PayProfits.FirstAsync(pp => pp.Ssn == demo.Ssn);
+        var payProfit = await c.PayProfits.FirstAsync(pp => pp.OracleHcmId == demo.OracleHcmId);
         payProfit.EnrollmentId = Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
-        payProfit.CompanyContributionYears = 10;
-        payProfit.HoursCurrentYear = 2358;
+        payProfit.CurrentHoursYear = 2358;
 
         var details = await c.ProfitDetails.Where(pd => pd.Ssn == demo.Ssn).ToListAsync();
         foreach (var detail in details)
@@ -202,11 +201,11 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
         example.BadgeNumber = demo.BadgeNumber;
         example.Ssn = demo.Ssn.MaskSsn();
         example.FullName = demo.FullName;
-        example.CompanyContributionYears = payProfit.CompanyContributionYears;
-        example.HoursCurrentYear = payProfit.HoursCurrentYear ?? 0;
+        example.CompanyContributionYears = 0;
+        example.HoursCurrentYear = payProfit.CurrentHoursYear ?? 0;
         example.ReHiredDate = demo.ReHireDate ?? SqlDateTime.MinValue.Value.ToDateOnly();
 
 
-        return (new MilitaryAndRehireRequest { Skip = 0, Take = 10, ReportingYear = (short)demo.ReHireDate!.Value.Year}, example);
+        return (new ProfitYearRequest { Skip = 0, Take = 10, ProfitYear = (short)demo.ReHireDate!.Value.Year}, example);
     }
 }

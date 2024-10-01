@@ -37,7 +37,7 @@ internal sealed class ProfitDetailFaker : Faker<ProfitDetail>
         });
         
         RuleFor(pd => pd.ProfitYear, fake => fake.Random.Short(Convert.ToInt16(DateTime.Now.Year-10), Convert.ToInt16(DateTime.Now.Year)))
-            .RuleFor(pd => pd.ProfitYearIteration, fake => (byte)0)
+            .RuleFor(pd => pd.ProfitYearIteration, fake => fake.Random.Byte(0, 25))
             .RuleFor(pd => pd.ProfitCodeId, fake => fake.PickRandom<byte>(ProfitCode.Constants.IncomingContributions.Id,
                 ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
                 ProfitCode.Constants.OutgoingForfeitures.Id,
@@ -53,7 +53,7 @@ internal sealed class ProfitDetailFaker : Faker<ProfitDetail>
             .RuleFor(pd => pd.YearToDate, fake => Convert.ToInt16(DateTime.Now.Year))
             .RuleFor(pd => pd.Remark, fake => fake.Lorem.Slug())
             .RuleFor(pd => pd.ZeroContributionReasonId, fake => (byte?)0)
-            .RuleFor(pd => pd.FederalTaxes, fake => fake.PickRandom<byte>(1, 2, 3, 4, 5, 6, 7))
+            .RuleFor(pd => pd.FederalTaxes, fake => fake.Finance.Amount(0, 10_000))
             .RuleFor(pd => pd.StateTaxes, fake => fake.Finance.Amount(0, 1000))
             .RuleFor(pd => pd.TaxCode, fake => taxCodeFaker.Generate())
             .RuleFor(pd => pd.TaxCodeId, fake => taxCodeFaker.Generate().Code);

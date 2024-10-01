@@ -14,7 +14,7 @@ using Demoulas.ProfitSharing.Security;
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
 
 public class MilitaryAndRehireForfeituresEndpoint :
-    EndpointWithCsvBase<MilitaryAndRehireRequest, MilitaryAndRehireForfeituresResponse, MilitaryAndRehireForfeituresEndpoint.MilitaryRehireProfitSharingResponseMap>
+    EndpointWithCsvBase<ProfitYearRequest, MilitaryAndRehireForfeituresResponse, MilitaryAndRehireForfeituresEndpoint.MilitaryRehireProfitSharingResponseMap>
 {
     private readonly IMilitaryAndRehireService _reportService;
 
@@ -56,7 +56,7 @@ public class MilitaryAndRehireForfeituresEndpoint :
 
     public override string ReportFileName => "REHIRE'S PROFIT SHARING DATA";
 
-    public override async Task<ReportResponseBase<MilitaryAndRehireForfeituresResponse>> GetResponse(MilitaryAndRehireRequest req, CancellationToken ct)
+    public override async Task<ReportResponseBase<MilitaryAndRehireForfeituresResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
         return await _reportService.FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYears(req, ct);
     }
@@ -100,7 +100,6 @@ public class MilitaryAndRehireForfeituresEndpoint :
                 csvWriter.WriteField(string.Empty); // Empty field for ReHireDate
                 csvWriter.WriteField(string.Empty); // Empty field for PY-YRS
                 csvWriter.WriteField(string.Empty); // Empty field for YTD HOURS
-                csvWriter.WriteField(string.Empty); // Empty field for EC
                 csvWriter.WriteField(record.ProfitYear);   // YEAR
                 csvWriter.WriteField(record.Forfeiture);   // FORFEITURES
                 csvWriter.WriteField(record.Remark);       // COMMENT

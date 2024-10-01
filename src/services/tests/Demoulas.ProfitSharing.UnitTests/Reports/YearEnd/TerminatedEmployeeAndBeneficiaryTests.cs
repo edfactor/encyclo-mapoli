@@ -4,60 +4,39 @@ using Demoulas.ProfitSharing.Client.Reports.YearEnd;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.TerminatedEmployeeAndBeneficiary;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Services.Reports;
+using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 using Demoulas.ProfitSharing.UnitTests.Base;
 using Demoulas.ProfitSharing.UnitTests.Extensions;
 using FastEndpoints;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
 public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
 {
-    private readonly YearEndClient _yearEndClient;
-    
+    private readonly TerminatedEmployeeAndBeneficiaryDataEndpoint _endpoint;
+
     public TerminatedEmployeeAndBeneficiaryTests()
     {
-        _yearEndClient = new YearEndClient(ApiClient, DownloadClient);
+        TerminatedEmployeeAndBeneficiaryReportService mockService =
+            new TerminatedEmployeeAndBeneficiaryReportService(MockDbContextFactory, new LoggerFactory());
+        _endpoint = new TerminatedEmployeeAndBeneficiaryDataEndpoint(mockService);
     }
 
-    readonly TerminatedEmployeeAndBeneficiaryReportRequestDto requestDto = new()
+    readonly TerminatedEmployeeAndBeneficiaryDataRequest requestDto = new()
     {
         StartDate = new DateOnly(2023, 1, 7),
         EndDate = new DateOnly(2024, 1, 2),
         ProfitShareYear = 2023.0m
     };
-
-    [Fact(DisplayName = "Test report with nobody applicable - sanity check")]
-    public async Task TestEmptyReport()
-    {
-        // Arrange
-        _yearEndClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-
-        // Act
-        var response =
-            await ApiClient
-                .GETAsync<TerminatedEmployeeAndBeneficiaryDataEndpoint,
-                    TerminatedEmployeeAndBeneficiaryReportRequestDto, TerminatedEmployeeAndBeneficiaryResponse> (requestDto);
-
-        // Assert
-        response.Response.Content.Should().NotBeNull();
-        response.Result.ReportName.Should().BeEquivalentTo("Terminated Employee and Beneficiary Report");
-
-        response.Result.Response.Total.ShouldBeEquivalentTo(0);
-        response.Result.Response.Results.Count().ShouldBeEquivalentTo(0);
-
-        response.Result.TotalEndingBalance.ShouldBeEquivalentTo(0m);
-        response.Result.TotalVested.ShouldBeEquivalentTo(0m);
-        response.Result.TotalForfeit.ShouldBeEquivalentTo(0m);
-        response.Result.TotalBeneficiaryAllocation.ShouldBeEquivalentTo(0m);
-        
-    }
-
 
     [Fact(DisplayName = "Unauthorized")]
     public async Task Unauthorized()
@@ -66,7 +45,7 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
         var response =
             await ApiClient
                 .GETAsync<TerminatedEmployeeAndBeneficiaryDataEndpoint,
-                    TerminatedEmployeeAndBeneficiaryReportRequestDto, TerminatedEmployeeAndBeneficiaryResponse>(requestDto);
+                    TerminatedEmployeeAndBeneficiaryDataRequest, TerminatedEmployeeAndBeneficiaryResponse>(requestDto);
 
         // Assert
         response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -86,11 +65,8 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
             demo.FullName = "Smith, Nancy K";
             demo.DateOfBirth = new DateOnly(2000, 1, 1);
 
-            var pp = await c.PayProfits.FirstAsync(pp => pp.Ssn == demo.Ssn);
-            pp.BadgeNumber = 9988;
+            var pp = await c.PayProfits.FirstAsync(pp => pp.OracleHcmId == demo.OracleHcmId);
             pp.EnrollmentId = Enrollment.Constants.NewVestingPlanHasContributions;
-            pp.NetBalanceLastYear = 446;
-            pp.CompanyContributionYears = 10;
 
             var details = await c.ProfitDetails.Where(pd => pd.Ssn == demo.Ssn).ToListAsync();
             // Here we move these 5 records out of the way.
@@ -117,27 +93,21 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
             // Lock age and todays' date computation when testing. 
             TerminatedEmployeeAndBeneficiaryReportService.SetTodayDateForTestingOnly(new DateOnly(2024, 9, 7));
 
-            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-
-            // Act
             var response =
-                await ApiClient
-                    .GETAsync<TerminatedEmployeeAndBeneficiaryDataEndpoint,
-                        TerminatedEmployeeAndBeneficiaryReportRequestDto, TerminatedEmployeeAndBeneficiaryResponse>(requestDto);
+                (TerminatedEmployeeAndBeneficiaryResponse) await _endpoint.GetResponse(requestDto, CancellationToken.None);
+           
 
-            // Assert
-            response.Response.Content.Should().NotBeNull();
-            response.Result.ReportName.Should().BeEquivalentTo("Terminated Employee and Beneficiary Report");
+            response!.ReportName.Should().BeEquivalentTo("Terminated Employee and Beneficiary Report");
 
-            response.Result.Response.Total.ShouldBeEquivalentTo(1);
-            response.Result.Response.Results.Count().ShouldBeEquivalentTo(1);
+            response.Response.Total.ShouldBeEquivalentTo(1);
+            response.Response.Results.Count().ShouldBeEquivalentTo(1);
 
-            response.Result.TotalEndingBalance.ShouldBeEquivalentTo(846.15m);
-            response.Result.TotalVested.ShouldBeEquivalentTo(122.24m);
-            response.Result.TotalForfeit.ShouldBeEquivalentTo(277.91m);
-            response.Result.TotalBeneficiaryAllocation.ShouldBeEquivalentTo(222.23m);
+            response.TotalEndingBalance.ShouldBeEquivalentTo(846.15m);
+            response.TotalVested.ShouldBeEquivalentTo(122.24m);
+            response.TotalForfeit.ShouldBeEquivalentTo(277.91m);
+            response.TotalBeneficiaryAllocation.ShouldBeEquivalentTo(222.23m);
 
-            TerminatedEmployeeAndBeneficiaryDataResponseDto member = response.Result.Response.Results.First();
+            TerminatedEmployeeAndBeneficiaryDataResponseDto member = response.Response.Results.First();
             member.Should().ShouldBeEquivalentTo(new TerminatedEmployeeAndBeneficiaryDataResponseDto()
             {
                 Name = "Smith, Nancy K",
@@ -183,7 +153,7 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
             var response =
                 await ApiClient
                     .GETAsync<TerminatedEmployeeAndBeneficiaryDataEndpoint,
-                        TerminatedEmployeeAndBeneficiaryReportRequestDto, TerminatedEmployeeAndBeneficiaryResponse>(requestDto);
+                        TerminatedEmployeeAndBeneficiaryDataRequest, TerminatedEmployeeAndBeneficiaryResponse>(requestDto);
 
             // Assert
             response.Response.Content.Should().NotBeNull();

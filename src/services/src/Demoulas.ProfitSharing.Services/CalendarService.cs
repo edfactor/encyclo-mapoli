@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.SqlTypes;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using MassTransit.Initializers;
 using Microsoft.EntityFrameworkCore;
@@ -29,7 +30,9 @@ public sealed class CalendarService
     public Task<DateOnly> FindWeekendingDateFromDate(DateOnly dateTime, CancellationToken cancellationToken = default)
     {
         // Validate the input date
+#pragma warning disable S6562
         if (dateTime < new DateOnly(2000, 1, 1) || dateTime > DateOnly.FromDateTime(DateTime.Today.AddYears(5)))
+#pragma warning restore S6562
         {
             throw new ArgumentOutOfRangeException(nameof(dateTime), InvalidDateError);
         }
@@ -50,18 +53,35 @@ public sealed class CalendarService
     /// <returns>A task that represents the asynchronous operation. The task result contains a tuple with the start and end accounting dates.</returns>
     public async Task<(DateOnly BeginDate, DateOnly YearEndDate)> GetYearStartAndEndAccountingDates(short calendarYear, CancellationToken cancellationToken = default)
     {
+        if (calendarYear < SqlDateTime.MinValue.Value.Year || calendarYear > SqlDateTime.MaxValue.Value.Year)
+        {
+            throw new ArgumentOutOfRangeException(nameof(calendarYear), $"Calendar Year value must be between {SqlDateTime.MinValue.Value.Year} and {SqlDateTime.MaxValue.Value.Year}");
+        }
+
+        var calendarYearEnd = new DateOnly(calendarYear, 12, 31);
+
         var startingDate = await _dataContextFactory.UseReadOnlyContext(context =>
         {
             return context.CaldarRecords
                 .Where(record => record.AccApWkend >= new DateOnly(calendarYear, 01, 01) &&
-                                 record.AccApWkend <= new DateOnly(calendarYear, 12, 31))
+                                 record.AccApWkend <= calendarYearEnd)
                 .Select(r => r.AccApWkend)
                 .MinAsync(cancellationToken: cancellationToken);
 
         });
-        
-        
-        var endingDate = await FindWeekendingDateFromDate(new DateOnly(calendarYear, 12, 31), cancellationToken);
+
+        var endingDate = await FindWeekendingDateFromDate(calendarYearEnd, cancellationToken);
+
+        if (endingDate == DateOnly.MinValue)
+        {
+            endingDate = calendarYearEnd;
+            // Loop until we find a Saturday
+            while (endingDate.DayOfWeek != DayOfWeek.Saturday)
+            {
+                endingDate = endingDate.AddDays(1);
+            }
+        }
+
         return (BeginDate: startingDate.AddDays(1), YearEndDate: endingDate);
     }
 }

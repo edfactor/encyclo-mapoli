@@ -29,14 +29,14 @@ public abstract class EndpointWithCsvBase<ReqType, RespType, MapType> : FastEndp
         if (!Env.IsTestEnvironment())
         {
            // Specify caching duration and store it in metadata
-           var cacheDuration = TimeSpan.FromMinutes(5);
+           TimeSpan cacheDuration = TimeSpan.FromMinutes(5);
             Options(x => x.CacheOutput(p => p.Expire(cacheDuration)));
         }
 
-        Description(b => 
+        Description(b =>
             b.Produces<ReportResponseBase<RespType>>(200, "application/json", "text/csv"));
     }
-    
+
     /// <summary>
     /// Use to provide a simple example request when no more complex than a simple Pagination Request is needed
     /// </summary>
@@ -57,8 +57,8 @@ public abstract class EndpointWithCsvBase<ReqType, RespType, MapType> : FastEndp
 
     public sealed override async Task HandleAsync(ReqType req, CancellationToken ct)
     {
-        string acceptHeader = HttpContext.Request.Headers["Accept"].ToString().ToLower(CultureInfo.InvariantCulture);
-        var response = await GetResponse(req, ct);
+        string acceptHeader = HttpContext.Request.Headers.Accept.ToString().ToLower(CultureInfo.InvariantCulture);
+        ReportResponseBase<RespType> response = await GetResponse(req, ct);
 
         if (acceptHeader.Contains("text/csv"))
         {
@@ -90,7 +90,7 @@ public abstract class EndpointWithCsvBase<ReqType, RespType, MapType> : FastEndp
 
     protected internal virtual async Task GenerateCsvContent(CsvWriter csvWriter, ReportResponseBase<RespType> report, CancellationToken cancellationToken)
     {
-        csvWriter.Context.RegisterClassMap<MapType>();
+        _ = csvWriter.Context.RegisterClassMap<MapType>();
         await csvWriter.WriteRecordsAsync(report.Response.Results, cancellationToken);
     }
 }

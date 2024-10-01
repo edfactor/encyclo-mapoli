@@ -8,38 +8,38 @@ internal static class ContextExtensions
 {
     public static ModelBuilder ApplyModelConfiguration(this ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfiguration(new CountryMap());
-        modelBuilder.ApplyConfiguration(new DemographicMap());
-        modelBuilder.ApplyConfiguration(new PayClassificationMap());
-        modelBuilder.ApplyConfiguration(new ProfitDetailMap());
-        modelBuilder.ApplyConfiguration(new ProfitCodeMap());
-        modelBuilder.ApplyConfiguration(new TaxCodeMap());
-        modelBuilder.ApplyConfiguration(new GenderMap());
-        modelBuilder.ApplyConfiguration(new PayFrequencyMap());
-        modelBuilder.ApplyConfiguration(new TerminationCodeMap());
-        modelBuilder.ApplyConfiguration(new EmploymentTypeMap());
-        modelBuilder.ApplyConfiguration(new DepartmentMap());
-        modelBuilder.ApplyConfiguration(new EnrollmentMap());
-        modelBuilder.ApplyConfiguration(new PayProfitMap());
-        modelBuilder.ApplyConfiguration(new BeneficiaryTypeMap());
-        modelBuilder.ApplyConfiguration(new EmployeeTypeMap());
-        modelBuilder.ApplyConfiguration(new ZeroContributionReasonMap());
-        modelBuilder.ApplyConfiguration(new BeneficiaryMap());
-        modelBuilder.ApplyConfiguration(new EmploymentStatusMap());
-        modelBuilder.ApplyConfiguration(new JobMap());
-        modelBuilder.ApplyConfiguration(new JobStatusMap());
-        modelBuilder.ApplyConfiguration(new StartMethodMap());
-        modelBuilder.ApplyConfiguration(new JobTypeMap());
         modelBuilder.ApplyConfiguration(new BeneficiaryKindMap());
-        modelBuilder.ApplyConfiguration(new DistributionStatusMap());
+        modelBuilder.ApplyConfiguration(new BeneficiaryMap());
+        modelBuilder.ApplyConfiguration(new BeneficiaryTypeMap());
+        modelBuilder.ApplyConfiguration(new CaldarRecordMap());
+        modelBuilder.ApplyConfiguration(new CountryMap());
+        modelBuilder.ApplyConfiguration(new DepartmentMap());
+        modelBuilder.ApplyConfiguration(new DemographicMap());
+        modelBuilder.ApplyConfiguration(new DemographicSyncAuditMap());
         modelBuilder.ApplyConfiguration(new DistributionFrequencyMap());
         modelBuilder.ApplyConfiguration(new DistributionMap());
+        modelBuilder.ApplyConfiguration(new DistributionPayeeMap());
         modelBuilder.ApplyConfiguration(new DistributionRequestMap());
-        modelBuilder.ApplyConfiguration(new DemographicSyncAuditMap());
+        modelBuilder.ApplyConfiguration(new DistributionStatusMap());
+        modelBuilder.ApplyConfiguration(new DistributionThirdPartyPayeeMap());
+        modelBuilder.ApplyConfiguration(new EmployeeTypeMap());
+        modelBuilder.ApplyConfiguration(new EmploymentStatusMap());
+        modelBuilder.ApplyConfiguration(new EmploymentTypeMap());
+        modelBuilder.ApplyConfiguration(new EnrollmentMap());
+        modelBuilder.ApplyConfiguration(new GenderMap());
+        modelBuilder.ApplyConfiguration(new JobMap());
+        modelBuilder.ApplyConfiguration(new JobStatusMap());
+        modelBuilder.ApplyConfiguration(new JobTypeMap());
+        modelBuilder.ApplyConfiguration(new PayClassificationMap());
+        modelBuilder.ApplyConfiguration(new PayFrequencyMap());
+        modelBuilder.ApplyConfiguration(new PayProfitMap());
+        modelBuilder.ApplyConfiguration(new ProfitCodeMap());
+        modelBuilder.ApplyConfiguration(new ProfitDetailMap());
+        modelBuilder.ApplyConfiguration(new StartMethodMap());
         modelBuilder.ApplyConfiguration(new StateTaxMap());
-        modelBuilder.ApplyConfiguration(new CaldarRecordMap());
-
-        
+        modelBuilder.ApplyConfiguration(new TaxCodeMap());
+        modelBuilder.ApplyConfiguration(new TerminationCodeMap());
+        modelBuilder.ApplyConfiguration(new ZeroContributionReasonMap());
 
 
         // Force table names to be upper case for consistency with all existing DSM projects
