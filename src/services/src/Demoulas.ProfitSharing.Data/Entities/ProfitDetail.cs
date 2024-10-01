@@ -21,5 +21,7 @@ public class ProfitDetail
     public char? TaxCodeId { get; set; }
     public long Ssn { get; set; }
     public int DistributionSequence { get; set; }
-    
+    public bool IsTransferOut { get; set; }
+    public bool IsTransferIn { get; set; }
+    public long? TransferPsn { get; set; }
 }

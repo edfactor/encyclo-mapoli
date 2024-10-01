@@ -13,4 +13,5 @@ public interface ICleanupReportService
 
     Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetDuplicateNamesAndBirthdays(ProfitYearRequest req, CancellationToken cancellationToken = default);
     Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfit(PaginationRequestDto req,CancellationToken cancellationToken = default);
+    Task<ReportResponseBase<DistributionsAndForfeitureResponse>> GetDistributionsAndForfeiture(DistributionsAndForfeituresRequest req, CancellationToken cancellationToken = default);
 }
