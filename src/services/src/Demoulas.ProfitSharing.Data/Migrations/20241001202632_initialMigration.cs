@@ -718,7 +718,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     PSN_SUFFIX = table.Column<short>(type: "NUMBER(5)", precision: 5, nullable: false),
                     BADGE_NUMBER = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false),
                     ORACLE_HCM_ID = table.Column<long>(type: "NUMBER(15)", precision: 15, nullable: false),
-                    BENEFICIARYCONTACTID = table.Column<int>(type: "NUMBER(10)", nullable: false),
+                    BENEFICIARY_CONTACT_ID = table.Column<int>(type: "NUMBER(10)", nullable: false),
                     RELATIONSHIP = table.Column<string>(type: "NVARCHAR2(10)", maxLength: 10, nullable: true),
                     KIND_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: true),
                     DISTRIBUTION = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
@@ -733,7 +733,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     table.PrimaryKey("PK_BENEFICIARY", x => x.ID);
                     table.ForeignKey(
                         name: "FK_BENEFICIARY_BENEFICIARY_CONTACT_BENEFICIARYCONTACTID",
-                        column: x => x.BENEFICIARYCONTACTID,
+                        column: x => x.BENEFICIARY_CONTACT_ID,
                         principalTable: "BENEFICIARY_CONTACT",
                         principalColumn: "ID");
                     table.ForeignKey(
@@ -2708,7 +2708,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_BENEFICIARY_BENEFICIARYCONTACTID",
                 table: "BENEFICIARY",
-                column: "BENEFICIARYCONTACTID");
+                column: "BENEFICIARY_CONTACT_ID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_BENEFICIARY_DEMOGRAPHICORACLEHCMID",

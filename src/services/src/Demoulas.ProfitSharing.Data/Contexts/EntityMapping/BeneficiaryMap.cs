@@ -31,6 +31,7 @@ public sealed class BeneficiaryMap : IEntityTypeConfiguration<Beneficiary>
             .HasColumnName("ORACLE_HCM_ID");
 
         _ = builder.Property(b => b.KindId).HasColumnName("KIND_ID");
+        _ = builder.Property(b => b.BeneficiaryContactId).HasColumnName("BENEFICIARY_CONTACT_ID");
 
         _ = builder.Property(e => e.Distribution).HasPrecision(9, 2).HasColumnName("DISTRIBUTION");
         _ = builder.Property(e => e.Amount).HasPrecision(9, 2).HasColumnName("AMOUNT");

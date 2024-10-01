@@ -44,7 +44,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.Property<int>("BeneficiaryContactId")
                         .HasColumnType("NUMBER(10)")
-                        .HasColumnName("BENEFICIARYCONTACTID");
+                        .HasColumnName("BENEFICIARY_CONTACT_ID");
 
                     b.Property<long?>("DemographicOracleHcmId")
                         .HasColumnType("NUMBER(15)")
