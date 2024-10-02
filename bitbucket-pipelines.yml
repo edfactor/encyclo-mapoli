@@ -106,7 +106,7 @@ definitions:
         - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
         - ${env:ENV} = "prod"
         - cd .\src\UI
-        - install --legacy-peer-deps;
+        - $env:NPM install --legacy-peer-deps;
         - ${env:NPM} run build:${env:ENV}
         - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.$env:ENV.zip" -Force        
 
