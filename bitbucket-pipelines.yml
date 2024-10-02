@@ -74,8 +74,8 @@ definitions:
         - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
         - ${env:ENV} = "qa"
         - cd .\src\UI
-        - ${env:NPM} install --legacy-peer-deps;
-        - ${env:NPM} run build:${env:ENV}
+        - C:\nvm\v20.4.0\npm.cmd install --legacy-peer-deps;
+        - C:\nvm\v20.4.0\npm.cmd run build:${env:ENV}
         - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.${env:ENV}.zip" -Force        
 
     create-frontend-artifact-uat: &create-frontend-artifact-uat
