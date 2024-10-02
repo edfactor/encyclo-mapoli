@@ -68,8 +68,6 @@ definitions:
         - windows
         - self.hosted
         - appt125
-      cache:
-        - node
       artifacts:
         - dist\**
       script:
