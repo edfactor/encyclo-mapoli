@@ -26,7 +26,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "BENEFICIARY_TYPE2",
+                name: "BENEFICIARY_TYPE",
                 columns: table => new
                 {
                     ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
@@ -725,8 +725,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     AMOUNT = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
                     EARNINGS = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
                     SECONDARY_EARNINGS = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
-                    PERCENT = table.Column<decimal>(type: "numeric(3,0)", precision: 3, nullable: false),
-                    DEMOGRAPHICORACLEHCMID = table.Column<long>(type: "NUMBER(15)", nullable: true)
+                    PERCENT = table.Column<decimal>(type: "numeric(3,0)", precision: 3, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -742,8 +741,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         principalTable: "BENEFICIARY_KIND",
                         principalColumn: "ID");
                     table.ForeignKey(
-                        name: "FK_BENEFICIARY_DEMOGRAPHIC_DEMOGRAPHICORACLEHCMID",
-                        column: x => x.DEMOGRAPHICORACLEHCMID,
+                        name: "FK_BENEFICIARY_DEMOGRAPHIC_ORACLE_HCM_ID",
+                        column: x => x.ORACLE_HCM_ID,
                         principalTable: "DEMOGRAPHIC",
                         principalColumn: "ORACLE_HCM_ID");
                 });
@@ -772,9 +771,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 {
                     table.PrimaryKey("PK_PAY_PROFIT", x => new { x.ORACLE_HCM_ID, x.PROFIT_YEAR });
                     table.ForeignKey(
-                        name: "FK_PAY_PROFIT_BENEFICIARY_TYPE2_BENEFICIARYTYPEID",
+                        name: "FK_PAY_PROFIT_BENEFICIARY_TYPE_BENEFICIARYTYPEID",
                         column: x => x.BENEFICIARY_TYPE_ID,
-                        principalTable: "BENEFICIARY_TYPE2",
+                        principalTable: "BENEFICIARY_TYPE",
                         principalColumn: "ID");
                     table.ForeignKey(
                         name: "FK_PAY_PROFIT_DEMOGRAPHIC_ORACLEHCMID",
@@ -808,7 +807,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "BENEFICIARY_TYPE2",
+                table: "BENEFICIARY_TYPE",
                 columns: new[] { "ID", "NAME" },
                 values: new object[,]
                 {
@@ -2711,14 +2710,14 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 column: "BENEFICIARY_CONTACT_ID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_BENEFICIARY_DEMOGRAPHICORACLEHCMID",
-                table: "BENEFICIARY",
-                column: "DEMOGRAPHICORACLEHCMID");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_BENEFICIARY_KINDID",
                 table: "BENEFICIARY",
                 column: "KIND_ID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BENEFICIARY_ORACLE_HCM_ID",
+                table: "BENEFICIARY",
+                column: "ORACLE_HCM_ID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_BENEFICIARY_PSNSUFFIX",
@@ -3001,7 +3000,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "JOBTYPE");
 
             migrationBuilder.DropTable(
-                name: "BENEFICIARY_TYPE2");
+                name: "BENEFICIARY_TYPE");
 
             migrationBuilder.DropTable(
                 name: "DEMOGRAPHIC");

@@ -12,7 +12,7 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    [Migration("20241001202632_initialMigration")]
+    [Migration("20241002154350_initialMigration")]
     partial class initialMigration
     {
         /// <inheritdoc />
@@ -48,10 +48,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<int>("BeneficiaryContactId")
                         .HasColumnType("NUMBER(10)")
                         .HasColumnName("BENEFICIARY_CONTACT_ID");
-
-                    b.Property<long?>("DemographicOracleHcmId")
-                        .HasColumnType("NUMBER(15)")
-                        .HasColumnName("DEMOGRAPHICORACLEHCMID");
 
                     b.Property<decimal>("Distribution")
                         .HasPrecision(9, 2)
@@ -98,11 +94,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasIndex("BeneficiaryContactId")
                         .HasDatabaseName("IX_BENEFICIARY_BENEFICIARYCONTACTID");
 
-                    b.HasIndex("DemographicOracleHcmId")
-                        .HasDatabaseName("IX_BENEFICIARY_DEMOGRAPHICORACLEHCMID");
-
                     b.HasIndex("KindId")
                         .HasDatabaseName("IX_BENEFICIARY_KINDID");
+
+                    b.HasIndex("OracleHcmId")
+                        .HasDatabaseName("IX_BENEFICIARY_ORACLE_HCM_ID");
 
                     b.HasIndex(new[] { "BadgeNumber" }, "IX_BadgeNumber")
                         .HasDatabaseName("IX_BENEFICIARY_BADGENUMBER");
@@ -209,7 +205,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasKey("Id")
                         .HasName("ID");
 
-                    b.ToTable("BENEFICIARY_TYPE2", (string)null);
+                    b.ToTable("BENEFICIARY_TYPE", (string)null);
 
                     b.HasData(
                         new
@@ -29674,17 +29670,18 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_BENEFICIARY_BENEFICIARY_CONTACT_BENEFICIARYCONTACTID");
 
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Demographic", "Demographic")
-                        .WithMany("Beneficiaries")
-                        .HasForeignKey("DemographicOracleHcmId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_BENEFICIARY_DEMOGRAPHIC_DEMOGRAPHICORACLEHCMID");
-
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.BeneficiaryKind", "Kind")
                         .WithMany("Beneficiaries")
                         .HasForeignKey("KindId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("FK_BENEFICIARY_BENEFICIARY_KIND_KINDID");
+
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Demographic", "Demographic")
+                        .WithMany("Beneficiaries")
+                        .HasForeignKey("OracleHcmId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_BENEFICIARY_DEMOGRAPHIC_ORACLE_HCM_ID");
 
                     b.Navigation("Contact");
 
@@ -30263,7 +30260,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasForeignKey("BeneficiaryTypeId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
-                        .HasConstraintName("FK_PAY_PROFIT_BENEFICIARY_TYPE2_BENEFICIARYTYPEID");
+                        .HasConstraintName("FK_PAY_PROFIT_BENEFICIARY_TYPE_BENEFICIARYTYPEID");
 
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.EmployeeType", "EmployeeType")
                         .WithMany()

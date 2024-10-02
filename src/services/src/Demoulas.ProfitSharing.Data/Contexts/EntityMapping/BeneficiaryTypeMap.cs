@@ -8,7 +8,7 @@ internal sealed class BeneficiaryTypeMap : IEntityTypeConfiguration<BeneficiaryT
 {
     public void Configure(EntityTypeBuilder<BeneficiaryType> builder)
     {
-        builder.ToTable("BENEFICIARY_TYPE2");
+        builder.ToTable("BENEFICIARY_TYPE");
 
         builder.HasKey(c => c.Id).HasName("ID");
 

@@ -187,7 +187,8 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             .HasForeignKey(d=> d.EmploymentStatusId);
 
         builder.HasMany(d => d.Beneficiaries)
-            .WithOne(p => p.Demographic);
+            .WithOne(p => p.Demographic)
+            .HasForeignKey(p=> p.OracleHcmId);
 
         _ = builder.HasMany(d => d.PayProfits)
             .WithOne(p => p.Demographic)
