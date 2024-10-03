@@ -21,10 +21,12 @@ public static class ServicesExtension
     {
         
         _ = builder.Services.AddScoped<IPayClassificationService, PayClassificationService>();
-        _ = builder.Services.AddScoped<IYearEndService, CleanupReportService>();
-        _ = builder.Services.AddScoped<IPayProfitService, PayProfitService>();
+        _ = builder.Services.AddScoped<ICleanupReportService, CleanupReportService>();
         _ = builder.Services.AddScoped<IMilitaryAndRehireService, MilitaryAndRehireService>();
         _ = builder.Services.AddScoped<IWagesService, WagesService>();
+
+        _ = builder.Services.AddScoped<ContributionService>();
+        
 
         _ = builder.Services.AddSingleton<IDemographicsServiceInternal, DemographicsService>();
         _ = builder.Services.AddSingleton<IStoreService, StoreService>();
@@ -49,7 +51,6 @@ public static class ServicesExtension
         builder.Services.AddSingleton<GenderMapper>();
         builder.Services.AddSingleton<EmploymentTypeMapper>();
         builder.Services.AddSingleton<DepartmentMapper>();
-        builder.Services.AddSingleton<PayProfitMapper>();
         builder.Services.AddSingleton<ZeroContributionReasonMapper>();
         builder.Services.AddSingleton<BeneficiaryTypeMapper>();
         builder.Services.AddSingleton<EmployeeTypeMapper>();

@@ -5,7 +5,7 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 public sealed record PayrollDuplicateSsnResponseDto
 {
     public required int BadgeNumber { get; set; }
-    public required long Ssn { get; set; }
+    public required string Ssn { get; set; }
     public string? Name { get; set; }
     public required AddressResponseDto Address { get; set; }
     public required DateOnly HireDate { get; set; }
@@ -23,7 +23,7 @@ public sealed record PayrollDuplicateSsnResponseDto
         return new PayrollDuplicateSsnResponseDto
         {
             BadgeNumber = 123,
-            Ssn = 123_45_6789,
+            Ssn = "XXX-XX-6789",
             Name = "John Doe",
             Address = AddressResponseDto.ResponseExample(),
             HireDate = SqlDateTime.MinValue.Value.ToDateOnly(),

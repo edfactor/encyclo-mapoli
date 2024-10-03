@@ -34,7 +34,7 @@ public sealed class ImpersonationAndEnvironmentAwareClaimsTransformation : IClai
             }
         }
 
-        if (string.Compare(GetEnvironment(),"Prod", ignoreCase: true) != 0 && roles.Contains(Role.IMPERSONATION))
+        if (string.Compare(GetEnvironment(),"Prod", StringComparison.OrdinalIgnoreCase) != 0 && roles.Contains(Role.IMPERSONATION))
         {
             roles = roles.Union(GetImpersonationRoles()).ToList();
         }

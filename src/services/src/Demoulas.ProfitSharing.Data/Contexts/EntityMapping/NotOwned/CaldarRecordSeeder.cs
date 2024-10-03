@@ -26067,27 +26067,8 @@ public static class CaldarRecordSeeder
                 AccCln6XPeriod = 12,
                 WeekDate = DateOnly.ParseExact("20241228", "yyyyMMdd", CultureInfo.InvariantCulture),
                 AccAltKeyNum = 1144
-            },
+            },		
 			
-			 new CaldarRecord
-            {
-                WeekEndingDate = DateOnly.ParseExact("241231", "yyMMdd", CultureInfo.InvariantCulture),
-                AccApWkend = DateOnly.ParseExact("250104", "yyMMdd", CultureInfo.InvariantCulture),
-                AccWeekN = 1,
-                AccPeriod = 12,
-                AccQuarter = 1,
-                AccCalPeriod = 12,
-                AccCln60Week = 52,
-                AccCln60Period = 12,
-                AccCln61Week = 52,
-                AccCln61Period = 12,
-                AccCln7XWeek = 51,
-                AccCln7XPeriod = 12,
-                AccCln6XWeek = 52,
-                AccCln6XPeriod = 12,
-                WeekDate = DateOnly.ParseExact("20250104", "yyyyMMdd", CultureInfo.InvariantCulture),
-                AccAltKeyNum = 1144
-            },
 
             new CaldarRecord
             {

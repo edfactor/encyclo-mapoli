@@ -22,7 +22,7 @@ public interface IMilitaryAndRehireService
     /// <param name="req">The request containing the criteria for finding rehires.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a report response with details of rehires and their potential entitlements.</returns>
-    Task<ReportResponseBase<MilitaryAndRehireForfeituresResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYears(MilitaryAndRehireRequest req,
+    Task<ReportResponseBase<MilitaryAndRehireForfeituresResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYears(ProfitYearRequest req,
         CancellationToken cancellationToken);
 
     /// <summary>
@@ -31,6 +31,6 @@ public interface IMilitaryAndRehireService
     /// <param name="req">The request details including pagination and reporting year.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the summary report response with profit sharing details for rehired military employees.</returns>
-    Task<ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>> GetMilitaryAndRehireProfitSummaryReport(MilitaryAndRehireRequest req,
+    Task<ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>> GetMilitaryAndRehireProfitSummaryReport(ProfitYearRequest req,
         CancellationToken cancellationToken);
 }

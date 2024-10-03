@@ -65,7 +65,7 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
     /// <param name="req">The pagination request containing the necessary parameters for the search.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a report response with the rehire profit sharing data.</returns>
-    public async Task<ReportResponseBase<MilitaryAndRehireForfeituresResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYears(MilitaryAndRehireRequest req, CancellationToken cancellationToken)
+    public async Task<ReportResponseBase<MilitaryAndRehireForfeituresResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYears(ProfitYearRequest req, CancellationToken cancellationToken)
     {
         var militaryMembers = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
@@ -103,7 +103,7 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
         };
     }
 
-    public async Task<ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>> GetMilitaryAndRehireProfitSummaryReport(MilitaryAndRehireRequest req, CancellationToken cancellationToken)
+    public async Task<ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>> GetMilitaryAndRehireProfitSummaryReport(ProfitYearRequest req, CancellationToken cancellationToken)
     {
         var militaryMembers = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
@@ -140,15 +140,15 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
     }
 
     private async Task<IQueryable<MilitaryAndRehireProfitSummaryQueryResponse>> GetMilitaryAndRehireProfitQueryBase(ProfitSharingReadOnlyDbContext context,
-        MilitaryAndRehireRequest req, CancellationToken cancellationToken)
+        ProfitYearRequest req, CancellationToken cancellationToken)
     {
-        var bracket = await _calendarService.GetYearStartAndEndAccountingDates(req.ReportingYear, cancellationToken);
+        var bracket = await _calendarService.GetYearStartAndEndAccountingDates(req.ProfitYear, cancellationToken);
 
         var query = context.Demographics
             .Join(
                 context.PayProfits, // Table to join with (PayProfit)
-                demographics => demographics.Ssn, // Primary key selector from Demographics
-                payProfit => payProfit.Ssn, // Foreign key selector from PayProfit
+                demographics => demographics.OracleHcmId, // Primary key selector from Demographics
+                payProfit => payProfit.OracleHcmId, // Foreign key selector from PayProfit
                 (demographics, payProfit) => new // Result selector after joining
                 {
                     demographics.BadgeNumber,
@@ -158,11 +158,11 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
                     demographics.TerminationDate,
                     demographics.ReHireDate,
                     demographics.StoreNumber,
-                    payProfit.CompanyContributionYears,
+                    //payProfit.CompanyContributionYears,
                     payProfit.EnrollmentId,
-                    payProfit.HoursCurrentYear,
-                    payProfit.NetBalanceLastYear,
-                    payProfit.VestedBalanceLastYear,
+                    payProfit.CurrentHoursYear,
+                    //payProfit.NetBalanceLastYear,
+                    //payProfit.VestedBalanceLastYear,
                     demographics.EmploymentStatusId
                 }
             )
@@ -184,11 +184,11 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
                     member.TerminationDate,
                     member.ReHireDate,
                     member.StoreNumber,
-                    member.CompanyContributionYears,
+                    //member.CompanyContributionYears,
                     member.EnrollmentId,
-                    member.HoursCurrentYear,
-                    member.NetBalanceLastYear,
-                    member.VestedBalanceLastYear,
+                    member.CurrentHoursYear,
+                    //member.NetBalanceLastYear,
+                    //member.VestedBalanceLastYear,
                     member.EmploymentStatusId,
                     profitDetail.Forfeiture,
                     profitDetail.Remark,
@@ -207,11 +207,11 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
                 TerminationDate = d.TerminationDate,
                 ReHiredDate = d.ReHireDate ?? SqlDateTime.MinValue.Value.ToDateOnly(),
                 StoreNumber = d.StoreNumber,
-                CompanyContributionYears = d.CompanyContributionYears,
+                CompanyContributionYears = 0, //d.CompanyContributionYears,
                 EnrollmentId = d.EnrollmentId,
-                HoursCurrentYear = d.HoursCurrentYear ?? 0,
-                NetBalanceLastYear = d.NetBalanceLastYear,
-                VestedBalanceLastYear = d.VestedBalanceLastYear,
+                HoursCurrentYear = d.CurrentHoursYear ?? 0,
+                NetBalanceLastYear = 0, //d.NetBalanceLastYear,
+                VestedBalanceLastYear = 0, //d.VestedBalanceLastYear,
                 EmploymentStatusId = d.EmploymentStatusId,
                 Forfeiture = d.Forfeiture,
                 Remark = d.Remark,

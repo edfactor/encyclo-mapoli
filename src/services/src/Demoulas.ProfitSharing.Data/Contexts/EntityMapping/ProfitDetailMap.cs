@@ -8,6 +8,9 @@ internal sealed class ProfitDetailMap : IEntityTypeConfiguration<ProfitDetail>
     public void Configure(EntityTypeBuilder<ProfitDetail> builder)
     {
         _ = builder.ToTable("PROFIT_DETAIL");
+        _ = builder.HasKey(p => p.Id);
+
+        _ = builder.HasIndex(p => new { p.Ssn, p.DistributionSequence, p.ProfitYear }, "IX_SSN_SEQUENCE_YEAR");
 
         _ = builder.Property(e => e.Id).HasColumnName("ID").ValueGeneratedOnAdd();
         _ = builder.Property(x=>x.ProfitYear).IsRequired().HasColumnName("PROFIT_YEAR");
@@ -27,6 +30,9 @@ internal sealed class ProfitDetailMap : IEntityTypeConfiguration<ProfitDetail>
         _ = builder.Property(x => x.TaxCodeId).HasColumnName("TAX_CODE_ID");
         _ = builder.Property(x => x.Ssn).HasColumnName("SSN").HasPrecision(9).IsRequired();
         _ = builder.Property(x => x.DistributionSequence).HasColumnName("DISTRIBUTION_SEQUENCE");
+        _ = builder.Property(x => x.TransferPsn).HasColumnName("TRANSFER_PSN");
+        _ = builder.Property(x => x.IsTransferIn).HasColumnName("IS_TRANSFER_IN").HasColumnType("NUMBER(1)").HasDefaultValue(0);
+        _ = builder.Property(x => x.IsTransferOut).HasColumnName("IS_TRANSFER_OUT").HasColumnType("NUMBER(1)").HasDefaultValue(0);
 
     }
 }
