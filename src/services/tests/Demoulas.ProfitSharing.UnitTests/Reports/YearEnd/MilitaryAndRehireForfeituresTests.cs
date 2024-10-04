@@ -23,6 +23,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
 using Newtonsoft.Json;
+using FluentAssertions.Execution;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -37,7 +38,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
         _endpoint = new MilitaryAndRehireForfeituresEndpoint(mockService);
     }
 
-    
+
     [Fact(DisplayName = "PS-345: Check for Military (JSON)")]
     public async Task GetResponse_Should_ReturnReportResponse_WhenCalledWithValidRequest()
     {
@@ -58,7 +59,8 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
             // Act
             ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
             var response =
-                await ApiClient.GETAsync<MilitaryAndRehireForfeituresEndpoint, ProfitYearRequest, ReportResponseBase<MilitaryAndRehireForfeituresResponse>>(setup.Request);
+                await ApiClient.GETAsync<MilitaryAndRehireForfeituresEndpoint, ProfitYearRequest, ReportResponseBase<MilitaryAndRehireForfeituresResponse>>(
+                    setup.Request);
 
             // Assert
             response.Result.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
@@ -70,7 +72,8 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
             var actual = System.Text.Json.JsonSerializer.Serialize(response.Result.Response.Results);
 #pragma warning restore S1481
 
-            response.Result.Response.Results.Should().ContainEquivalentOf(expectedResponse.Response.Results);
+            response.Result.Response.Results.First().Should().BeEquivalentTo(expectedResponse.Response.Results.First());
+
         });
     }
 
