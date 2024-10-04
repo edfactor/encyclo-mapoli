@@ -186,12 +186,16 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             .WithMany(p => p.Demographics)
             .HasForeignKey(d=> d.EmploymentStatusId);
 
-        builder.HasMany(d => d.Beneficiaries)
+        _ = builder.HasMany(d => d.Beneficiaries)
             .WithOne(p => p.Demographic)
             .HasForeignKey(p=> p.OracleHcmId);
 
         _ = builder.HasMany(d => d.PayProfits)
             .WithOne(p => p.Demographic)
             .HasForeignKey(d => d.OracleHcmId);
+
+        _ = builder.HasMany(d => d.Checks)
+            .WithOne()
+            .HasForeignKey(p => p.OracleHcmId);
     }
 }

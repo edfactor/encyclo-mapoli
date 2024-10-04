@@ -36,6 +36,7 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new PayProfitMap());
         modelBuilder.ApplyConfiguration(new ProfitCodeMap());
         modelBuilder.ApplyConfiguration(new ProfitDetailMap());
+        modelBuilder.ApplyConfiguration(new ProfitShareCheckMap());
         modelBuilder.ApplyConfiguration(new StartMethodMap());
         modelBuilder.ApplyConfiguration(new StateTaxMap());
         modelBuilder.ApplyConfiguration(new TaxCodeMap());

@@ -7,6 +7,16 @@ namespace Demoulas.ProfitSharing.UnitTests.Extensions;
 
 public static class ComparisonExtensions
 {
+    /// <summary>
+    /// Asserts that the properties of the specified entity are equivalent to the properties of the specified DTO.
+    /// </summary>
+    /// <typeparam name="T">The type of the entity.</typeparam>
+    /// <typeparam name="Tu">The type of the DTO.</typeparam>
+    /// <param name="entity">The entity to compare.</param>
+    /// <param name="dto">The DTO to compare.</param>
+    /// <remarks>
+    /// This method compares the properties of the entity and the DTO, skipping navigation properties and properties that do not match by name or type.
+    /// </remarks>
     public static void ShouldBeEquivalentTo<T, Tu>(this T entity, Tu dto)
     {
         PropertyInfo[] entityProperties = typeof(T).GetProperties();

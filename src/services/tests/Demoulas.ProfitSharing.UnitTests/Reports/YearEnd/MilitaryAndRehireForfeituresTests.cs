@@ -22,6 +22,7 @@ using System.Globalization;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
+using Newtonsoft.Json;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -61,8 +62,15 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
 
             // Assert
             response.Result.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
-            response.Result.Response.Results.Should().HaveCountGreaterThan(0);
-            response.Result.Response.Results.Should().Contain(expectedResponse.Response.Results);
+            response.Result.Response.Results.Should().HaveCountGreaterOrEqualTo(expectedResponse.Response.Results.Count());
+
+#pragma warning disable S1481
+            var expected = System.Text.Json.JsonSerializer.Serialize(expectedResponse.Response.Results);
+
+            var actual = System.Text.Json.JsonSerializer.Serialize(response.Result.Response.Results);
+#pragma warning restore S1481
+
+            response.Result.Response.Results.Should().ContainEquivalentOf(expectedResponse.Response.Results);
         });
     }
 
@@ -207,6 +215,8 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
             detail.ProfitYear = profitYear;
             detail.Remark = "Test remarks";
             detail.ProfitCodeId = ProfitCode.Constants.OutgoingForfeitures.Id;
+            detail.Contribution = byte.MaxValue;
+            detail.Earnings = byte.MaxValue;
         }
 
         await c.SaveChangesAsync();
