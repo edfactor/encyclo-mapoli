@@ -23,7 +23,7 @@ public class DatabaseDataTest : IClassFixture<ApiTestBase<Program>>
     public async Task BasicTest()
     {
         var configuration = new ConfigurationBuilder().AddUserSecrets<DatabaseDataTest>().Build();
-        string connectionString = configuration["ConnectionStrings:ProfitSharing"]!;
+        string connectionString = configuration["ConnectionStrings:ProfitSharing-ObfuscatedPristine"]!;
         var options = new DbContextOptionsBuilder<ProfitSharingDbContext>().UseOracle(connectionString).EnableSensitiveDataLogging()
             .LogTo(_output.WriteLine).Options;
         var ctx = new ProfitSharingDbContext(options);
