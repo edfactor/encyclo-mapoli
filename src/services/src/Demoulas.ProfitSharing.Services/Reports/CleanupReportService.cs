@@ -208,7 +208,6 @@ public class CleanupReportService : ICleanupReportService
                         dem.EmploymentStatusId,
                         dem.StoreNumber,
                         PdSsn = pd.Ssn,
-                        // pp.NetBalanceLastYear,
                         pp.CurrentHoursYear,
                         pp.CurrentIncomeYear
                     }
@@ -233,7 +232,6 @@ public class CleanupReportService : ICleanupReportService
                         Status = g.Key.EmploymentStatusId,
                         StoreNumber = g.Key.StoreNumber,
                         Count = g.Count(),
-                        //NetBalance = g.Key.NetBalanceLastYear,
                         HoursCurrentYear = g.Key.CurrentHoursYear,
                         IncomeCurrentYear = g.Key.CurrentIncomeYear
                     };
