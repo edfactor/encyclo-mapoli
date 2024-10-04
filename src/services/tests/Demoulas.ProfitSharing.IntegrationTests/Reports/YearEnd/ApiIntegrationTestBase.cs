@@ -13,7 +13,7 @@ using Moq;
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 
 /**
- * WARNING - needs a refactor
+ * WARNING - needs a refactor.   It is locked to the ExecutiveHoursAndDollarsResponse type at the moment.
  *
  * This class should be refactored to have a proper database connection to the pristine obfuscated database.
  *
@@ -55,9 +55,11 @@ public class ApiIntegrationTestBase<TStartup> where TStartup : class
         var options = new DbContextOptionsBuilder<ProfitSharingReadOnlyDbContext>().UseOracle(connectionString).EnableSensitiveDataLogging().Options;
         var ctx = new ProfitSharingReadOnlyDbContext(options);
 
-        // Probably should simply use a normal database connection
+        // Probably should simply use a normal database connection (aka proper instance of IProfitSharingDataContextFactory)
+        // but for now, use a mock.
         var profitSharingDataContextFactoryMock = new Mock<IProfitSharingDataContextFactory>();
 
+        // WARNING: note the very specific type matching required for this mock to get invoked, not general enough for other integration tests
         profitSharingDataContextFactoryMock
             .Setup(factory => factory.UseReadOnlyContext(It.IsAny<Func<ProfitSharingReadOnlyDbContext, Task<PaginatedResponseDto<ExecutiveHoursAndDollarsResponse>>>>()))
             .Returns<Func<ProfitSharingReadOnlyDbContext, Task<PaginatedResponseDto<ExecutiveHoursAndDollarsResponse>>>>(func => func(ctx));
