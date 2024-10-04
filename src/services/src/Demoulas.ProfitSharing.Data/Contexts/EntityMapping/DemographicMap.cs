@@ -128,7 +128,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             .HasColumnName("EMPLOYMENT_STATUS_ID");
 
 
-        builder.OwnsOne(e => e.Address, address =>
+        _ = builder.OwnsOne(e => e.Address, address =>
         {
             address.Property(a => a.Street).HasMaxLength(30).HasColumnName("STREET").HasComment("Street").IsRequired();
             address.Property(a => a.Street2).HasMaxLength(30).HasColumnName("STREET2").HasComment("Street2");

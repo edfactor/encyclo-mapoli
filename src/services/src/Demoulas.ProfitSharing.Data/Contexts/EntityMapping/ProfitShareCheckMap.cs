@@ -24,6 +24,94 @@ internal sealed class ProfitShareCheckMap : IEntityTypeConfiguration<ProfitShare
             .ValueGeneratedNever()
             .HasColumnName("CHECK_NUMBER");
 
-       
+        _ = builder.Property(e => e.Ssn)
+            .HasPrecision(9)
+            .IsRequired()
+            .ValueGeneratedNever()
+            .HasColumnName("SSN");
+
+        _ = builder.Property(e => e.OracleHcmId)
+            .HasPrecision(15)
+            .ValueGeneratedNever()
+            .HasColumnName("ORACLE_HCM_ID");
+
+        _ = builder.Property(e => e.PscCheckId)
+            .HasPrecision(15)
+            .ValueGeneratedNever()
+            .HasColumnName("PSC_CHECK_ID");
+
+        _ = builder.Property(e => e.FloatDays)
+            .HasPrecision(6)
+            .ValueGeneratedNever()
+            .HasColumnName("FLOAT_DAYS");
+
+        _ = builder.Property(e => e.CheckDate)
+            .HasColumnType("DATE")
+            .HasColumnName("CHECK_DATE")
+            .HasConversion<DateOnlyConverter>();
+
+        _ = builder.Property(e => e.VoidDate)
+            .HasColumnType("DATE")
+            .HasColumnName("VOID_CHECK_DATE")
+            .HasConversion<DateOnlyConverter>();
+
+        _ = builder.Property(e => e.ClearDate)
+            .HasColumnType("DATE")
+            .HasColumnName("CLEAR_DATE")
+            .HasConversion<DateOnlyConverter>();
+
+        _ = builder.Property(e => e.ClearDateLoaded)
+            .HasColumnType("DATE")
+            .HasColumnName("CLEAR_DATE_LOADED")
+            .HasConversion<DateOnlyConverter>();
+
+        _ = builder.Property(e => e.VoidReconDate)
+            .HasColumnType("DATE")
+            .HasColumnName("VOID_RECON_DATE")
+            .HasConversion<DateOnlyConverter>();
+
+        _ = builder.Property(e => e.CheckRunDate)
+            .HasColumnType("DATE")
+            .HasColumnName("CHECK_RUN_DATE")
+            .HasConversion<DateOnlyConverter>();
+
+        _ = builder.Property(e => e.DateLoaded)
+            .HasColumnType("DATE")
+            .HasColumnName("DATE_LOADED")
+            .HasConversion<DateOnlyConverter>();
+
+        _ = builder.Property(e => e.PayableName)
+            .HasMaxLength(84)
+            .HasColumnName("PAYABLE_NAME")
+            .IsRequired();
+
+        _ = builder.Property(e => e.RefNumber)
+            .HasMaxLength(36)
+            .HasColumnName("REF_NUMBER");
+
+        _ = builder.Property(e => e.ReplaceCheck)
+            .HasMaxLength(24)
+            .HasColumnName("REPLACE_CHECK");
+
+
+        _ = builder.Property(e => e.CheckAmount)
+            .HasPrecision(9, 2)
+            .HasColumnName("CHECK_AMOUNT")
+            .IsRequired();
+
+        _ = builder.Property(e => e.IsVoided)
+            .HasColumnName("VOID_FLAG");
+
+        _ = builder.Property(e => e.OtherBeneficiary)
+            .HasColumnName("OTHER_BENEFICIARY");
+
+
+        _ = builder.Property(e => e.IsManualCheck)
+            .HasColumnName("MANUAL_CHECK");
+
+        
+        _ = builder.HasOne(x => x.TaxCode)
+            .WithMany()
+            .HasForeignKey(t => t.TaxCodeId);
     }
 }
