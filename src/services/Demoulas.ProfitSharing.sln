@@ -68,6 +68,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SQL calculations view", "SQ
 		..\database\SQL calculations view\SQL SMART vs READY SQL comparison of vesting balance.sql = ..\database\SQL calculations view\SQL SMART vs READY SQL comparison of vesting balance.sql
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ddl", "ddl", "{15C6083C-777D-42C6-A1A7-5F4008345118}"
+	ProjectSection(SolutionItems) = preProject
+		..\database\ddl\ddl.sql = ..\database\ddl\ddl.sql
+		..\database\ddl\profit_sharing_ddl.png = ..\database\ddl\profit_sharing_ddl.png
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -146,6 +152,7 @@ Global
 		{57F488D4-7A41-4A7F-ABEF-4B1437B5B5A6} = {FDE7E8B7-3735-42D6-BF0E-B4FB1BF0FA86}
 		{0A7F4CAF-BDEA-44BC-8BEC-1F3979CF355B} = {946306F4-A7A7-40C5-A4EA-D32A46E09328}
 		{522242E2-FC59-49E9-9628-6E9B6AEEAF6F} = {946306F4-A7A7-40C5-A4EA-D32A46E09328}
+		{15C6083C-777D-42C6-A1A7-5F4008345118} = {946306F4-A7A7-40C5-A4EA-D32A46E09328}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FB1CB19A-BE8B-4F91-9186-FE7C9F3CE4D7}

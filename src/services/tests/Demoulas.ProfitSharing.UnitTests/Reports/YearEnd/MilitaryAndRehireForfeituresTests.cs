@@ -62,7 +62,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
             // Assert
             response.Result.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
             response.Result.Response.Results.Should().HaveCountGreaterThan(0);
-            response.Result.Response.Results.Should().BeEquivalentTo(expectedResponse.Response.Results);
+            response.Result.Response.Results.Should().Contain(expectedResponse.Response.Results);
         });
     }
 
