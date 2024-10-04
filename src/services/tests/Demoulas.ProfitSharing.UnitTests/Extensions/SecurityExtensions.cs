@@ -10,7 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Demoulas.ProfitSharing.UnitTests.Extensions;
 
-internal static class SecurityExtensions
+public static class SecurityExtensions
 {
     public static void CreateAndAssignTokenForClient(this HttpClient client, params string[] roles)
     {
