@@ -797,6 +797,48 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         principalColumn: "ID");
                 });
 
+            migrationBuilder.CreateTable(
+                name: "PROFIT_SHARE_CHECK",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "NUMBER(15)", precision: 15, nullable: false)
+                        .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
+                    CHECK_NUMBER = table.Column<int>(type: "NUMBER(15)", precision: 15, nullable: false),
+                    SSN = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false),
+                    ORACLE_HCM_ID = table.Column<long>(type: "NUMBER(15)", precision: 15, nullable: false),
+                    PAYABLE_NAME = table.Column<string>(type: "NVARCHAR2(84)", maxLength: 84, nullable: false),
+                    CHECK_AMOUNT = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    TAXCODEID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
+                    CHECK_DATE = table.Column<DateTime>(type: "DATE", nullable: false),
+                    VOID_FLAG = table.Column<bool>(type: "BOOLEAN", nullable: false),
+                    VOID_CHECK_DATE = table.Column<DateTime>(type: "DATE", nullable: true),
+                    VOID_RECON_DATE = table.Column<DateTime>(type: "DATE", nullable: true),
+                    CLEAR_DATE = table.Column<DateTime>(type: "DATE", nullable: true),
+                    CLEAR_DATE_LOADED = table.Column<DateTime>(type: "DATE", nullable: true),
+                    REF_NUMBER = table.Column<int>(type: "NUMBER(10)", maxLength: 36, nullable: false),
+                    FLOAT_DAYS = table.Column<short>(type: "NUMBER(6)", precision: 6, nullable: false),
+                    CHECK_RUN_DATE = table.Column<DateTime>(type: "DATE", nullable: true),
+                    DATE_LOADED = table.Column<DateTime>(type: "DATE", nullable: true),
+                    OTHER_BENEFICIARY = table.Column<bool>(type: "BOOLEAN", nullable: false),
+                    MANUAL_CHECK = table.Column<bool>(type: "BOOLEAN", nullable: false),
+                    REPLACE_CHECK = table.Column<string>(type: "NVARCHAR2(24)", maxLength: 24, nullable: true),
+                    PSC_CHECK_ID = table.Column<int>(type: "NUMBER(15)", precision: 15, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PROFIT_SHARE_CHECK", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PROFIT_SHARE_CHECK_DEMOGRAPHIC_ORACLEHCMID",
+                        column: x => x.ORACLE_HCM_ID,
+                        principalTable: "DEMOGRAPHIC",
+                        principalColumn: "ORACLE_HCM_ID");
+                    table.ForeignKey(
+                        name: "FK_PROFIT_SHARE_CHECK_TAXCODES_TAXCODEID",
+                        column: x => x.TAXCODEID,
+                        principalTable: "TAX_CODE",
+                        principalColumn: "CODE");
+                });
+
             migrationBuilder.InsertData(
                 table: "BENEFICIARY_KIND",
                 columns: new[] { "ID", "NAME" },
@@ -2923,7 +2965,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 columns: new[] { "SSN", "DISTRIBUTION_SEQUENCE", "PROFIT_YEAR" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_PROFIT_DETAIL_TAXCODEID",
+                name: "IX_PROFIT_DETAIL_TAX_CODE_ID",
                 table: "PROFIT_DETAIL",
                 column: "TAX_CODE_ID");
 
@@ -2931,6 +2973,22 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "IX_PROFIT_DETAIL_ZEROCONTRIBUTIONREASONID",
                 table: "PROFIT_DETAIL",
                 column: "ZERO_CONTRIBUTION_REASON_ID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PROFIT_SHARE_CHECK_CHECKNUMBER",
+                table: "PROFIT_SHARE_CHECK",
+                column: "CHECK_NUMBER",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PROFIT_SHARE_CHECK_ORACLEHCMID",
+                table: "PROFIT_SHARE_CHECK",
+                column: "ORACLE_HCM_ID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PROFIT_SHARE_CHECK_TAXCODEID",
+                table: "PROFIT_SHARE_CHECK",
+                column: "TAXCODEID");
         }
 
         /// <inheritdoc />
@@ -2959,6 +3017,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "PROFIT_DETAIL");
+
+            migrationBuilder.DropTable(
+                name: "PROFIT_SHARE_CHECK");
 
             migrationBuilder.DropTable(
                 name: "STATE_TAX");
@@ -3003,9 +3064,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "BENEFICIARY_TYPE");
 
             migrationBuilder.DropTable(
-                name: "DEMOGRAPHIC");
-
-            migrationBuilder.DropTable(
                 name: "EMPLOYEE_TYPE");
 
             migrationBuilder.DropTable(
@@ -3015,10 +3073,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "PROFIT_CODE");
 
             migrationBuilder.DropTable(
-                name: "TAX_CODE");
+                name: "ZERO_CONTRIBUTION_REASON");
 
             migrationBuilder.DropTable(
-                name: "ZERO_CONTRIBUTION_REASON");
+                name: "DEMOGRAPHIC");
+
+            migrationBuilder.DropTable(
+                name: "TAX_CODE");
 
             migrationBuilder.DropTable(
                 name: "COUNTRY");

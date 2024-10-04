@@ -12,7 +12,7 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    [Migration("20241002154350_initialMigration")]
+    [Migration("20241004203002_initialMigration")]
     partial class initialMigration
     {
         /// <inheritdoc />
@@ -29292,7 +29292,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasDatabaseName("IX_PROFIT_DETAIL_PROFITCODEID");
 
                     b.HasIndex("TaxCodeId")
-                        .HasDatabaseName("IX_PROFIT_DETAIL_TAXCODEID");
+                        .HasDatabaseName("IX_PROFIT_DETAIL_TAX_CODE_ID");
 
                     b.HasIndex("ZeroContributionReasonId")
                         .HasDatabaseName("IX_PROFIT_DETAIL_ZEROCONTRIBUTIONREASONID");
@@ -29301,6 +29301,123 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasDatabaseName("IX_PROFIT_DETAIL_SSN_DISTRIBUTIONSEQUENCE_PROFITYEAR");
 
                     b.ToTable("PROFIT_DETAIL", (string)null);
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.ProfitShareCheck", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(15)
+                        .HasColumnType("NUMBER(15)")
+                        .HasColumnName("Id");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("CheckAmount")
+                        .HasPrecision(9, 2)
+                        .HasColumnType("DECIMAL(9,2)")
+                        .HasColumnName("CHECK_AMOUNT");
+
+                    b.Property<DateTime>("CheckDate")
+                        .HasColumnType("DATE")
+                        .HasColumnName("CHECK_DATE");
+
+                    b.Property<int>("CheckNumber")
+                        .HasPrecision(15)
+                        .HasColumnType("NUMBER(15)")
+                        .HasColumnName("CHECK_NUMBER");
+
+                    b.Property<DateTime?>("CheckRunDate")
+                        .HasColumnType("DATE")
+                        .HasColumnName("CHECK_RUN_DATE");
+
+                    b.Property<DateTime?>("ClearDate")
+                        .HasColumnType("DATE")
+                        .HasColumnName("CLEAR_DATE");
+
+                    b.Property<DateTime?>("ClearDateLoaded")
+                        .HasColumnType("DATE")
+                        .HasColumnName("CLEAR_DATE_LOADED");
+
+                    b.Property<DateTime?>("DateLoaded")
+                        .HasColumnType("DATE")
+                        .HasColumnName("DATE_LOADED");
+
+                    b.Property<short>("FloatDays")
+                        .HasPrecision(6)
+                        .HasColumnType("NUMBER(6)")
+                        .HasColumnName("FLOAT_DAYS");
+
+                    b.Property<bool>("IsManualCheck")
+                        .HasColumnType("BOOLEAN")
+                        .HasColumnName("MANUAL_CHECK");
+
+                    b.Property<bool>("IsVoided")
+                        .HasColumnType("BOOLEAN")
+                        .HasColumnName("VOID_FLAG");
+
+                    b.Property<long>("OracleHcmId")
+                        .HasPrecision(15)
+                        .HasColumnType("NUMBER(15)")
+                        .HasColumnName("ORACLE_HCM_ID");
+
+                    b.Property<bool>("OtherBeneficiary")
+                        .HasColumnType("BOOLEAN")
+                        .HasColumnName("OTHER_BENEFICIARY");
+
+                    b.Property<string>("PayableName")
+                        .IsRequired()
+                        .HasMaxLength(84)
+                        .HasColumnType("NVARCHAR2(84)")
+                        .HasColumnName("PAYABLE_NAME");
+
+                    b.Property<int>("PscCheckId")
+                        .HasPrecision(15)
+                        .HasColumnType("NUMBER(15)")
+                        .HasColumnName("PSC_CHECK_ID");
+
+                    b.Property<int>("RefNumber")
+                        .HasMaxLength(36)
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("REF_NUMBER");
+
+                    b.Property<string>("ReplaceCheck")
+                        .HasMaxLength(24)
+                        .HasColumnType("NVARCHAR2(24)")
+                        .HasColumnName("REPLACE_CHECK");
+
+                    b.Property<int>("Ssn")
+                        .HasPrecision(9)
+                        .HasColumnType("NUMBER(9)")
+                        .HasColumnName("SSN");
+
+                    b.Property<string>("TaxCodeId")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR2(1)")
+                        .HasColumnName("TAXCODEID");
+
+                    b.Property<DateTime?>("VoidDate")
+                        .HasColumnType("DATE")
+                        .HasColumnName("VOID_CHECK_DATE");
+
+                    b.Property<DateTime?>("VoidReconDate")
+                        .HasColumnType("DATE")
+                        .HasColumnName("VOID_RECON_DATE");
+
+                    b.HasKey("Id")
+                        .HasName("PK_PROFIT_SHARE_CHECK");
+
+                    b.HasIndex("OracleHcmId")
+                        .HasDatabaseName("IX_PROFIT_SHARE_CHECK_ORACLEHCMID");
+
+                    b.HasIndex("TaxCodeId")
+                        .HasDatabaseName("IX_PROFIT_SHARE_CHECK_TAXCODEID");
+
+                    b.HasIndex(new[] { "CheckNumber" }, "IX_CheckNumber")
+                        .IsUnique()
+                        .HasDatabaseName("IX_PROFIT_SHARE_CHECK_CHECKNUMBER");
+
+                    b.ToTable("PROFIT_SHARE_CHECK", (string)null);
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.StateTax", b =>
@@ -30328,6 +30445,25 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Navigation("ZeroContributionReason");
                 });
 
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.ProfitShareCheck", b =>
+                {
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Demographic", null)
+                        .WithMany("Checks")
+                        .HasForeignKey("OracleHcmId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_PROFIT_SHARE_CHECK_DEMOGRAPHIC_ORACLEHCMID");
+
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.TaxCode", "TaxCode")
+                        .WithMany()
+                        .HasForeignKey("TaxCodeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_PROFIT_SHARE_CHECK_TAXCODES_TAXCODEID");
+
+                    b.Navigation("TaxCode");
+                });
+
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BeneficiaryContact", b =>
                 {
                     b.Navigation("Beneficiaries");
@@ -30341,6 +30477,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Demographic", b =>
                 {
                     b.Navigation("Beneficiaries");
+
+                    b.Navigation("Checks");
 
                     b.Navigation("PayProfits");
                 });
