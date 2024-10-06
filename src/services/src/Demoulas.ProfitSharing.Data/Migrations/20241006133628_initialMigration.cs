@@ -620,8 +620,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     FEDERAL_TAXES = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
                     STATE_TAXES = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
                     TAX_CODE_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: true),
-                    IS_TRANSFER_OUT = table.Column<bool>(type: "BOOLEAN", nullable: false, defaultValue: false),
-                    IS_TRANSFER_IN = table.Column<bool>(type: "BOOLEAN", nullable: false, defaultValue: false),
+                    IS_TRANSFER_OUT = table.Column<bool>(type: "NUMBER(1)", nullable: false, defaultValue: false),
+                    IS_TRANSFER_IN = table.Column<bool>(type: "NUMBER(1)", nullable: false, defaultValue: false),
                     TRANSFER_PSN = table.Column<long>(type: "NUMBER(19)", nullable: true)
                 },
                 constraints: table =>
@@ -810,7 +810,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     CHECK_AMOUNT = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
                     TAXCODEID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
                     CHECK_DATE = table.Column<DateTime>(type: "DATE", nullable: false),
-                    VOID_FLAG = table.Column<bool>(type: "BOOLEAN", nullable: false),
+                    VOID_FLAG = table.Column<bool>(type: "NUMBER(1)", nullable: false),
                     VOID_CHECK_DATE = table.Column<DateTime>(type: "DATE", nullable: true),
                     VOID_RECON_DATE = table.Column<DateTime>(type: "DATE", nullable: true),
                     CLEAR_DATE = table.Column<DateTime>(type: "DATE", nullable: true),
@@ -819,8 +819,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     FLOAT_DAYS = table.Column<short>(type: "NUMBER(6)", precision: 6, nullable: false),
                     CHECK_RUN_DATE = table.Column<DateTime>(type: "DATE", nullable: true),
                     DATE_LOADED = table.Column<DateTime>(type: "DATE", nullable: true),
-                    OTHER_BENEFICIARY = table.Column<bool>(type: "BOOLEAN", nullable: false),
-                    MANUAL_CHECK = table.Column<bool>(type: "BOOLEAN", nullable: false),
+                    OTHER_BENEFICIARY = table.Column<bool>(type: "NUMBER(1)", nullable: false),
+                    MANUAL_CHECK = table.Column<bool>(type: "NUMBER(1)", nullable: false),
                     REPLACE_CHECK = table.Column<string>(type: "NVARCHAR2(24)", maxLength: 24, nullable: true),
                     PSC_CHECK_ID = table.Column<int>(type: "NUMBER(15)", precision: 15, nullable: false)
                 },

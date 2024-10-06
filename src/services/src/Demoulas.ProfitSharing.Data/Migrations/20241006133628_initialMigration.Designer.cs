@@ -12,7 +12,7 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    [Migration("20241004203002_initialMigration")]
+    [Migration("20241006133628_initialMigration")]
     partial class initialMigration
     {
         /// <inheritdoc />
@@ -29226,13 +29226,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.Property<bool>("IsTransferIn")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("BOOLEAN")
+                        .HasColumnType("NUMBER(1)")
                         .HasDefaultValue(false)
                         .HasColumnName("IS_TRANSFER_IN");
 
                     b.Property<bool>("IsTransferOut")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("BOOLEAN")
+                        .HasColumnType("NUMBER(1)")
                         .HasDefaultValue(false)
                         .HasColumnName("IS_TRANSFER_OUT");
 
@@ -29349,11 +29349,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("FLOAT_DAYS");
 
                     b.Property<bool>("IsManualCheck")
-                        .HasColumnType("BOOLEAN")
+                        .HasColumnType("NUMBER(1)")
                         .HasColumnName("MANUAL_CHECK");
 
                     b.Property<bool>("IsVoided")
-                        .HasColumnType("BOOLEAN")
+                        .HasColumnType("NUMBER(1)")
                         .HasColumnName("VOID_FLAG");
 
                     b.Property<long>("OracleHcmId")
@@ -29362,7 +29362,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("ORACLE_HCM_ID");
 
                     b.Property<bool>("OtherBeneficiary")
-                        .HasColumnType("BOOLEAN")
+                        .HasColumnType("NUMBER(1)")
                         .HasColumnName("OTHER_BENEFICIARY");
 
                     b.Property<string>("PayableName")
