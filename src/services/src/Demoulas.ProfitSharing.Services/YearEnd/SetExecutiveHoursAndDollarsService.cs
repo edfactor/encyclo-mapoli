@@ -9,7 +9,7 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace Demoulas.ProfitSharing.Services;
+namespace Demoulas.ProfitSharing.Services.YearEnd;
 public class SetExecutiveHoursAndDollarsService : ISetExecutiveHoursAndDollarsService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
@@ -22,13 +22,17 @@ public class SetExecutiveHoursAndDollarsService : ISetExecutiveHoursAndDollarsSe
     {
         await _dataContextFactory.UseWritableContext(async ctx =>
         {
-            int ppCountForYear =  await ctx.PayProfits.CountAsync(pp => pp.ProfitYear == profitYear);
+            int ppCountForYear = await ctx.PayProfits.CountAsync(pp => pp.ProfitYear == profitYear);
             if (ppCountForYear == 0)
             {
                 throw new InvalidOperationException("The provided year is invalid.");
             }
 
             var badges = executiveHoursAndDollarsDtos.Select(dto => dto.BadgeNumber).ToList();
+            if (badges.Count == 0)
+            {
+                throw new InvalidOperationException("At least one executive must be provided.");
+            }
             if (badges.Count != badges.Distinct().Count())
             {
                 throw new InvalidOperationException("Badge numbers must be distinct.");

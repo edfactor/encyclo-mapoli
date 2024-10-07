@@ -21,7 +21,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
-public class ExecutiveHoursAndDollars : ApiTestBase<Api.Program>
+public class ExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
 {
     private readonly ExecutiveHoursAndDollarsEndpoint _endpoint;
     private const int ProfitShareTestYear = 1975; // used to avoid pre-canned data.
@@ -30,7 +30,7 @@ public class ExecutiveHoursAndDollars : ApiTestBase<Api.Program>
     private static readonly ExecutiveHoursAndDollarsResponse _example = ExecutiveHoursAndDollarsResponse.ResponseExample();
 
 
-    public ExecutiveHoursAndDollars()
+    public ExecutiveHoursAndDollarsTests()
     {
         ExecutiveHoursAndDollarsService mockService = new ExecutiveHoursAndDollarsService(MockDbContextFactory);
         _endpoint = new ExecutiveHoursAndDollarsEndpoint(mockService);

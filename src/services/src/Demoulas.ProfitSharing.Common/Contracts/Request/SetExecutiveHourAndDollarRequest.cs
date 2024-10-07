@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 public class SetExecutiveHoursAndDollarsRequest
 {
-    public short ProfitYear { get; set; }
-    public List<SetExecutiveHoursAndDollarsDto> ExecutiveHoursAndDollars { get; set; } = new();
+    public required short ProfitYear { get; set; }
+    public required List<SetExecutiveHoursAndDollarsDto> ExecutiveHoursAndDollars { get; set; } = new();
 }
 
