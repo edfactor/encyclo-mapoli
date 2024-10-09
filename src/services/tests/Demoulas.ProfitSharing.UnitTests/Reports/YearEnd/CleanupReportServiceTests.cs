@@ -10,6 +10,9 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Xunit.Abstractions;
 using IdGen;
+using MassTransit;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 public class CleanupReportServiceTests:ApiTestBase<Program>
@@ -314,14 +317,100 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
 
     }
 
-    [Fact(DisplayName ="PS-294 : Distributions and Forfeitures (CSV)")]
+    [Fact(DisplayName = "PS-61 : Year-end Profit Sharing Report (JSON)")]
+    public async Task GetYearEndProfitSharingReport()
+    {
+        _cleanupReportClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
+        var profitYear = (short)(DateTime.Now.Year - 1);
+        var req = new YearEndProfitSharingReportRequest() { Skip = 0, Take=Byte.MaxValue, ProfitYear = profitYear, IsYearEnd = true };
+        var testHours = 1001;
+        await MockDbContextFactory.UseWritableContext(async ctx =>
+        {
+            //Terminate all employees so that none of the random ones are returned
+            foreach (var dem in ctx.Demographics)
+            {
+                dem.EmploymentStatusId = 't';
+            }
+
+            //Prevent any payprofit records from being returned
+            foreach (var pp in ctx.PayProfits)
+            {
+                pp.ProfitYear = 1999;
+            }
+
+            //Setup employee to be returned
+            var payProfit = await ctx.PayProfits.FirstAsync();
+            var emp = payProfit.Demographic;
+
+            emp!.EmploymentStatusId = 'a';
+            emp!.DateOfBirth = new DateOnly(DateTime.Now.Year - 28, 9, 21);
+
+            payProfit.ProfitYear = profitYear;
+            payProfit.CurrentHoursYear = testHours;
+            payProfit.HoursExecutive = 0;
+
+            await ctx.SaveChangesAsync();
+        });
+
+        ReportResponseBase<YearEndProfitSharingReportResponse> response;
+
+        response = await _cleanupReportClient.GetYearEndProfitSharingReport(req, CancellationToken.None);
+
+        response.Should().NotBeNull();
+        response.ReportName.Should().BeEquivalentTo($"PROFIT SHARE YEAR END REPORT FOR {req.ProfitYear}");
+        response.Response.Total.Should().Be( 1 );
+        response.Response.Results.Count().Should().Be(1);
+
+        _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+
+        //Test omission if under 18
+        await MockDbContextFactory.UseWritableContext(async ctx =>
+        {
+            //Setup employee to be returned
+            var payProfit = await ctx.PayProfits.FirstAsync();
+            var emp = payProfit.Demographic;
+
+            emp!.DateOfBirth = new DateOnly(DateTime.Now.Year - 15, 9, 21);
+            await ctx.SaveChangesAsync();
+        });
+
+        response = await _cleanupReportClient.GetYearEndProfitSharingReport(req, CancellationToken.None);
+
+        response.Should().NotBeNull();
+        response.Response.Total.Should().Be(0);
+        response.Response.Results.Count().Should().Be(0);
+
+        _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+
+        //Test under 1000 hours
+        await MockDbContextFactory.UseWritableContext(async ctx =>
+        {
+            //Setup employee to be returned
+            var payProfit = await ctx.PayProfits.FirstAsync();
+            var emp = payProfit.Demographic;
+
+            emp!.DateOfBirth = new DateOnly(DateTime.Now.Year - 28, 9, 21);
+            payProfit.CurrentHoursYear = 50;
+            await ctx.SaveChangesAsync();
+        });
+
+        response = await _cleanupReportClient.GetYearEndProfitSharingReport(req, CancellationToken.None);
+
+        response.Should().NotBeNull();
+        response.Response.Total.Should().Be(0);
+        response.Response.Results.Count().Should().Be(0);
+
+        _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+    }
+
+    [Fact(DisplayName ="PS-294 : Distributions and Forfeitures (JSON)")]
     public async Task GetDistributionsAndForfeitures()
     {
         decimal sampleforfeiture = 5150m;
 
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         var req = new DistributionsAndForfeituresRequest() { Skip=0, Take=Byte.MaxValue, ProfitYear = (short)(DateTime.Now.Year-1), IncludeOutgoingForfeitures=true};
-        Common.Contracts.Response.ReportResponseBase<Common.Contracts.Response.YearEnd.DistributionsAndForfeitureResponse> response;
+        ReportResponseBase<DistributionsAndForfeitureResponse> response;
 
         
         await MockDbContextFactory.UseWritableContext(async ctx =>

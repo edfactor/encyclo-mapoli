@@ -94,6 +94,11 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
         return CallReportEndpoint<DistributionsAndForfeitureResponse, DistributionsAndForfeituresRequest>(req, "distributions-and-forfeitures", cancellationToken);
     }
 
+    public Task<ReportResponseBase<YearEndProfitSharingReportResponse>> GetYearEndProfitSharingReport(YearEndProfitSharingReportRequest req, CancellationToken cancellationToken = default)
+    {
+        return CallReportEndpoint<YearEndProfitSharingReportResponse, YearEndProfitSharingReportRequest>(req, "yearend-profit-sharing-report", cancellationToken);
+    }
+
     private async Task<ReportResponseBase<TResponseDto>> CallReportEndpoint<TResponseDto, TPaginatedRequest>(TPaginatedRequest req, string endpointRoute, CancellationToken cancellationToken) where TResponseDto : class where TPaginatedRequest : PaginationRequestDto
     {
         UriBuilder uriBuilder = BuildPaginatedUrl(req, endpointRoute);
@@ -131,6 +136,11 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
         if (req is ProfitYearRequest preq)
         {
             query[nameof(ProfitYearRequest.ProfitYear)] = preq.ProfitYear.ToString();
+        }
+
+        if (req is YearEndProfitSharingReportRequest yreq)
+        {
+            query[nameof(YearEndProfitSharingReportRequest.IsYearEnd)] = yreq.IsYearEnd.ToString();
         }
 
         if (req is DistributionsAndForfeituresRequest dafr)
