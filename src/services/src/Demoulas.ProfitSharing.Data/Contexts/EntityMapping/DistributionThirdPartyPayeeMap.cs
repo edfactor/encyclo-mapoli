@@ -13,8 +13,8 @@ internal sealed class DistributionThirdPartyPayeeMap : IEntityTypeConfiguration<
 
         _ = builder.Property(d => d.Id).ValueGeneratedOnAdd();
 
-        _ = builder.Property(d => d.Payee).HasMaxLength(35).HasColumnName("PAYEE");
-        _ = builder.Property(d => d.Name).HasMaxLength(35).HasColumnName("NAME");
+        _ = builder.Property(d => d.Payee).HasMaxLength(64).HasColumnName("PAYEE");
+        _ = builder.Property(d => d.Name).HasMaxLength(84).HasColumnName("NAME");
         _ = builder.Property(d => d.Account).HasMaxLength(30).HasColumnName("ACCOUNT");
         _ = builder.OwnsOne(d => d.Address, address =>
         {
