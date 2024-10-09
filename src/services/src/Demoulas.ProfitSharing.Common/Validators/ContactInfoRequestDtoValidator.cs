@@ -16,7 +16,7 @@ public class ContactInfoRequestDtoValidator : Validator<ContactInfoRequestDto>
             .MaximumLength(15).WithMessage("MobileNumber cannot exceed 15 characters.");
 
         RuleFor(x => x.EmailAddress)
-            .MaximumLength(50).WithMessage("EmailAddress cannot exceed 50 characters.");
+            .MaximumLength(84).WithMessage("EmailAddress cannot exceed 84 characters.");
 
         RuleFor(x => x.FullName)
             .MaximumLength(84).WithMessage("FullName cannot exceed 84 characters.");
