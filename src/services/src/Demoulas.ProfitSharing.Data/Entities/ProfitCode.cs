@@ -2,8 +2,15 @@
 
 namespace Demoulas.ProfitSharing.Data.Entities;
 
+/// <summary>
+/// Represents a profit code entity used in the profit-sharing system.
+/// </summary>
 public class ProfitCode : ILookupTable<byte>
 {
+    /// <summary>
+    /// Contains predefined constants for various profit codes used in the profit-sharing system.
+    /// </summary>
+    /// <remarks>https://demoulas.atlassian.net/wiki/spaces/~bherrmann/pages/58491096/Notes+on+Profit+Sharing+Calculations</remarks>
     public static class Constants
     {
         public static ProfitCode IncomingContributions => new ProfitCode

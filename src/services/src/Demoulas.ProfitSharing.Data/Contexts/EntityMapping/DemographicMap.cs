@@ -17,7 +17,8 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
         _ = builder.HasKey(e => e.OracleHcmId);
 
         _ = builder.HasIndex(e => e.Ssn, "IX_SSN");
-        _ = builder.HasIndex(e => new {e.Ssn, e.OracleHcmId}, "IX_Ssn_OracleHcmId");
+        _ = builder.HasIndex(e => new {e.Ssn, e.OracleHcmId}, "IX_SSN_ORACLE_HCM_ID");
+        
         _ = builder.Property(e => e.Ssn)
             .HasPrecision(9)
             .IsRequired()
@@ -35,7 +36,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             .HasColumnName("ORACLE_HCM_ID");
 
         _ = builder.Property(e => e.FullName)
-            .HasMaxLength(60)
+            .HasMaxLength(84)
             .HasComment("FullName")
             .HasColumnName("FULL_NAME")
             .IsRequired();
@@ -127,7 +128,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             .HasColumnName("EMPLOYMENT_STATUS_ID");
 
 
-        builder.OwnsOne(e => e.Address, address =>
+        _ = builder.OwnsOne(e => e.Address, address =>
         {
             address.Property(a => a.Street).HasMaxLength(30).HasColumnName("STREET").HasComment("Street").IsRequired();
             address.Property(a => a.Street2).HasMaxLength(30).HasColumnName("STREET2").HasComment("Street2");
@@ -184,5 +185,17 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
         builder.HasOne(d => d.EmploymentStatus)
             .WithMany(p => p.Demographics)
             .HasForeignKey(d=> d.EmploymentStatusId);
+
+        _ = builder.HasMany(d => d.Beneficiaries)
+            .WithOne(p => p.Demographic)
+            .HasForeignKey(p=> p.OracleHcmId);
+
+        _ = builder.HasMany(d => d.PayProfits)
+            .WithOne(p => p.Demographic)
+            .HasForeignKey(d => d.OracleHcmId);
+
+        _ = builder.HasMany(d => d.Checks)
+            .WithOne()
+            .HasForeignKey(p => p.OracleHcmId);
     }
 }

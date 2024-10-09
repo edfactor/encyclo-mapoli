@@ -14,11 +14,11 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
 public class DemographicBadgesNotInPayProfitEndpoint : EndpointWithCsvBase<PaginationRequestDto, DemographicBadgesNotInPayProfitResponse,
     DemographicBadgesNotInPayProfitEndpoint.DemographicBadgesNotInPayProfitResponseMap>
 {
-    private readonly IYearEndService _yearEndService;
+    private readonly ICleanupReportService _cleanupReportService;
 
-    public DemographicBadgesNotInPayProfitEndpoint(IYearEndService yearEndService)
+    public DemographicBadgesNotInPayProfitEndpoint(ICleanupReportService cleanupReportService)
     {
-        _yearEndService = yearEndService;
+        _cleanupReportService = cleanupReportService;
     }
 
     public override void Configure()
@@ -85,7 +85,7 @@ public class DemographicBadgesNotInPayProfitEndpoint : EndpointWithCsvBase<Pagin
 
     public override async Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetResponse(PaginationRequestDto req, CancellationToken ct)
     {
-        return await _yearEndService.GetDemographicBadgesNotInPayProfit(req, ct);
+        return await _cleanupReportService.GetDemographicBadgesNotInPayProfit(req, ct);
     }
 
     public sealed class DemographicBadgesNotInPayProfitResponseMap : ClassMap<DemographicBadgesNotInPayProfitResponse>

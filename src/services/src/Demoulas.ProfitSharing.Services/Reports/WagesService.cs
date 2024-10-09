@@ -1,9 +1,11 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 public class WagesService : IWagesService
@@ -15,39 +17,21 @@ public class WagesService : IWagesService
         _dataContextFactory = dataContextFactory;
     }
 
-    public async Task<ReportResponseBase<WagesCurrentYearResponse>> GetWagesCurrentYearReport(PaginationRequestDto request, CancellationToken cancellationToken)
+    public async Task<ReportResponseBase<WagesCurrentYearResponse>> GetWagesReport(ProfitYearRequest request, CancellationToken cancellationToken)
     {
        var result = _dataContextFactory.UseReadOnlyContext(c =>
         {
             return c.PayProfits
-                .Where(p => p.IncomeCurrentYear != 0)
-                .Select(p => new WagesCurrentYearResponse { BadgeNumber = p.BadgeNumber, HoursCurrentYear = p.HoursCurrentYear ?? 0,  IncomeCurrentYear = p.IncomeCurrentYear ?? 0 })
+                .Include(p=> p.Demographic)
+                .Where(p => p.CurrentIncomeYear != 0 && p.ProfitYear == request.ProfitYear)
+                .Select(p => new WagesCurrentYearResponse { BadgeNumber = p.Demographic!.BadgeNumber, HoursCurrentYear = p.CurrentHoursYear ?? 0,  IncomeCurrentYear = p.CurrentIncomeYear ?? 0 })
                 .ToPaginationResultsAsync(request, cancellationToken);
 
         });
 
         return new ReportResponseBase<WagesCurrentYearResponse>
         {
-            ReportName = "EJR PROF-DOLLAR-EXTRACT YEAR=THIS",
-            ReportDate = DateTimeOffset.Now,
-            Response = await result
-        };
-    }
-
-    public async Task<ReportResponseBase<WagesPreviousYearResponse>> GetWagesPreviousYearReport(PaginationRequestDto request, CancellationToken cancellationToken)
-    {
-        var result = _dataContextFactory.UseReadOnlyContext(c =>
-        {
-            return c.PayProfits
-                .Where(p => p.IncomeCurrentYear != 0)
-                .Select(p => new WagesPreviousYearResponse { BadgeNumber = p.BadgeNumber, HoursLastYear = p.HoursLastYear, IncomeLastYear = p.IncomeLastYear })
-                .ToPaginationResultsAsync(request, cancellationToken);
-
-        });
-
-        return new ReportResponseBase<WagesPreviousYearResponse>
-        {
-            ReportName = "EJR PROF-DOLLAR-EXTRACT YEAR=LAST",
+            ReportName = $"EJR PROF-DOLLAR-EXTRACT YEAR={request.ProfitYear}",
             ReportDate = DateTimeOffset.Now,
             Response = await result
         };

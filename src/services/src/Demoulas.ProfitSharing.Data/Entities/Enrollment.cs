@@ -11,10 +11,9 @@ public sealed class Enrollment : ILookupTable<byte>
         public const byte NewVestingPlanHasContributions = 2;
         public const byte OldVestingPlanHasForfeitureRecords = 3;
         public const byte NewVestingPlanHasForfeitureRecords = 4;
+        public const byte Import_Status_Unknown = 9;
     }
 
     public byte Id { get; set; }
     public required string Name { get; set; }
-
-    public ICollection<PayProfit>? Profits { get; set; }
 }

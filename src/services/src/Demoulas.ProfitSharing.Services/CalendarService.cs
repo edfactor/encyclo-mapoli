@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.SqlTypes;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using MassTransit.Initializers;
 using Microsoft.EntityFrameworkCore;
@@ -30,7 +31,7 @@ public sealed class CalendarService
     {
         // Validate the input date
 #pragma warning disable S6562
-        if (dateTime < DateOnly.FromDateTime(new DateTime(2000, 1, 1)) || dateTime > DateOnly.FromDateTime(DateTime.Today.AddYears(5)))
+        if (dateTime < new DateOnly(2000, 1, 1) || dateTime > DateOnly.FromDateTime(DateTime.Today.AddYears(5)))
 #pragma warning restore S6562
         {
             throw new ArgumentOutOfRangeException(nameof(dateTime), InvalidDateError);
@@ -38,8 +39,8 @@ public sealed class CalendarService
         return _dataContextFactory.UseReadOnlyContext(context =>
         {
             return context.CaldarRecords.Where(record => record.WeekDate >= dateTime)
-                .OrderBy(record => record.AccApWkend)
-                .Select(r => r.AccApWkend)
+                .OrderBy(record => record.WeekEndingDate)
+                .Select(r => r.WeekEndingDate)
                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
         });
     }
@@ -52,18 +53,49 @@ public sealed class CalendarService
     /// <returns>A task that represents the asynchronous operation. The task result contains a tuple with the start and end accounting dates.</returns>
     public async Task<(DateOnly BeginDate, DateOnly YearEndDate)> GetYearStartAndEndAccountingDates(short calendarYear, CancellationToken cancellationToken = default)
     {
-        var startingDate = await _dataContextFactory.UseReadOnlyContext(context =>
+        if (calendarYear < SqlDateTime.MinValue.Value.Year || calendarYear > SqlDateTime.MaxValue.Value.Year)
         {
-            return context.CaldarRecords
-                .Where(record => record.AccApWkend >= new DateOnly(calendarYear, 01, 01) &&
-                                 record.AccApWkend <= new DateOnly(calendarYear, 12, 31))
-                .Select(r => r.AccApWkend)
-                .MinAsync(cancellationToken: cancellationToken);
+            throw new ArgumentOutOfRangeException(nameof(calendarYear), $"Calendar Year value must be between {SqlDateTime.MinValue.Value.Year} and {SqlDateTime.MaxValue.Value.Year}");
+        }
 
+        var startingDate = await _dataContextFactory.UseReadOnlyContext(async context =>
+        {
+            return await context.CaldarRecords
+                .Where(r => r.WeekEndingDate >= new DateOnly(calendarYear, 1, 1) &&
+                            r.WeekEndingDate <= new DateOnly(calendarYear, 12, 31))
+                .Select(r => r.WeekEndingDate)
+                .MinAsync(cancellationToken);
         });
-        
-        
-        var endingDate = await FindWeekendingDateFromDate(new DateOnly(calendarYear, 12, 31), cancellationToken);
+
+        var endingDate = await _dataContextFactory.UseReadOnlyContext(async context =>
+        {
+            // Filter records where WeekEndingDate is in December of the given calendar year
+            var decemberRecords = context.CaldarRecords
+                .Where(r => r.WeekEndingDate.Year == calendarYear && r.WeekEndingDate.Month == 12);
+
+            // Get the maximum ACC_WEEKN for December
+            var maxAccWeekn = await decemberRecords
+                .MaxAsync(r => r.AccWeekN, cancellationToken);
+
+            // Retrieve the WeekEndingDate for the record with ACC_PERIOD == 12 and the maximum ACC_WEEKN
+            var endingWeekEndingDate = await decemberRecords
+                .Where(r => r.AccPeriod == 12 && r.AccWeekN == maxAccWeekn)
+                .Select(r => r.WeekEndingDate)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            return endingWeekEndingDate;
+        });
+
+        if (endingDate == default)
+        {
+            endingDate = new DateOnly(calendarYear, 12, 31);
+            while (endingDate.DayOfWeek != DayOfWeek.Saturday)
+            {
+                endingDate = endingDate.AddDays(1);
+            }
+        }
+
         return (BeginDate: startingDate.AddDays(1), YearEndDate: endingDate);
     }
+
 }

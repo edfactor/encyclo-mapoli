@@ -47,7 +47,7 @@ internal sealed class TerminationCodeMap : IEntityTypeConfiguration<TerminationC
             new TerminationCode { Id = TerminationCode.Constants.NeverReported, Name = "Never Reported" },
             new TerminationCode { Id = TerminationCode.Constants.RetiredReceivingPension, Name = "Retired Receiving Pension" },
             new TerminationCode { Id = TerminationCode.Constants.FmlaApproved, Name = "FMLA Approved" },
-            new TerminationCode { Id = TerminationCode.Constants.Deceased, Name = "Deceased" }
+            new TerminationCode { Id = TerminationCode.Constants.Deceased, Name = "IsDeceased" }
     );
     }
 }

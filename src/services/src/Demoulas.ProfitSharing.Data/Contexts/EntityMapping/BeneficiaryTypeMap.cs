@@ -14,11 +14,9 @@ internal sealed class BeneficiaryTypeMap : IEntityTypeConfiguration<BeneficiaryT
 
         builder.Property(c => c.Name).IsRequired().HasMaxLength(20).HasColumnName("NAME");
 
-        builder.HasMany(b => b.Profits).WithOne(p => p.BeneficiaryType);
-
         builder.HasData(
-            new PayFrequency { Id = BeneficiaryType.Constants.Employee, Name = "Employee" },
-            new PayFrequency { Id = BeneficiaryType.Constants.Beneficiary, Name = "Beneficiary" }
+            new BeneficiaryType { Id = BeneficiaryType.Constants.Employee, Name = "Employee" },
+            new BeneficiaryType { Id = BeneficiaryType.Constants.Beneficiary, Name = "Beneficiary" }
         );
     }
 }

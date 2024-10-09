@@ -1,25 +1,27 @@
 ﻿namespace Demoulas.ProfitSharing.Data.Entities;
 public sealed class Beneficiary
 {
-    public required long Psn { get; set; }
-    public required long Ssn { get; set; }
+    public required int Id { get; set; }
+    public required short PsnSuffix { get; set; } // Suffix for hierarchy (1000, 2000, etc.)
 
-    public required string FirstName { get; set; } = string.Empty;
-    public string? MiddleName { get; set; }
-    public required string LastName { get; set; }= string.Empty;
+    public required int BadgeNumber { get; set; }
+    public required long OracleHcmId { get; set; }
 
-    public required DateOnly DateOfBirth { get; set; }
+    // Reconstruct the full PSN dynamically
+    public string Psn => $"{BadgeNumber}{PsnSuffix:D4}"; // Reconstruct PSN w
 
-    public required Address Address { get; set; }
-    public required ContactInfo ContactInfo { get; set; }
+    public BeneficiaryContact? Contact { get; set; }
+    public required int BeneficiaryContactId { get; set; }
 
+    public string? Relationship { get; set; }
     public  char? KindId { get; set; }
     public  BeneficiaryKind? Kind { get; set; }
-
     public decimal Distribution{ get; set; }
     public decimal Amount { get; set; }
     public decimal Earnings { get; set; }
     public decimal SecondaryEarnings { get; set; }
     public required decimal Percent { get; set; }
-    public string? Relationship { get; set; }
+    
+    public Demographic? Demographic { get; set; }
+    
 }

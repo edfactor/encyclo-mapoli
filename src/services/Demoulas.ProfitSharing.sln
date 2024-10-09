@@ -1,4 +1,4 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # 17
 VisualStudioVersion = 17.8.0.0
 MinimumVisualStudioVersion = 17.8.0.0
@@ -52,13 +52,28 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ready_import", "ready_import", "{0A7F4CAF-BDEA-44BC-8BEC-1F3979CF355B}"
 	ProjectSection(SolutionItems) = preProject
 		..\database\ready_import\Readme.txt = ..\database\ready_import\Readme.txt
-		..\database\ready_import\SQL copy all from ready to smart ps.txt = ..\database\ready_import\SQL copy all from ready to smart ps.txt
-		..\database\ready_import\SQL copy beneficiary.txt = ..\database\ready_import\SQL copy beneficiary.txt
-		..\database\ready_import\SQL copy demographic.txt = ..\database\ready_import\SQL copy demographic.txt
-		..\database\ready_import\SQL copy distribution.txt = ..\database\ready_import\SQL copy distribution.txt
-		..\database\ready_import\SQL copy pay_profit.txt = ..\database\ready_import\SQL copy pay_profit.txt
-		..\database\ready_import\SQL copy profit_detail.txt = ..\database\ready_import\SQL copy profit_detail.txt
-		..\database\ready_import\SQL counts smart vs ready.txt = ..\database\ready_import\SQL counts smart vs ready.txt
+		..\database\ready_import\SQL copy all from ready to smart ps.sql = ..\database\ready_import\SQL copy all from ready to smart ps.sql
+		..\database\ready_import\SQL copy beneficiary.sql = ..\database\ready_import\SQL copy beneficiary.sql
+		..\database\ready_import\SQL copy demographic.sql = ..\database\ready_import\SQL copy demographic.sql
+		..\database\ready_import\SQL copy distribution.sql = ..\database\ready_import\SQL copy distribution.sql
+		..\database\ready_import\SQL copy pay_profit.sql = ..\database\ready_import\SQL copy pay_profit.sql
+		..\database\ready_import\SQL copy profit_detail.sql = ..\database\ready_import\SQL copy profit_detail.sql
+		..\database\ready_import\SQL counts smart vs ready.sql = ..\database\ready_import\SQL counts smart vs ready.sql
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demoulas.ProfitSharing.IntegrationTests", "tests\Demoulas.ProfitSharing.IntegrationTests\Demoulas.ProfitSharing.IntegrationTests.csproj", "{222677DF-CAD3-4E03-A1A1-C213DFD0DAA0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SQL calculations view", "SQL calculations view", "{522242E2-FC59-49E9-9628-6E9B6AEEAF6F}"
+	ProjectSection(SolutionItems) = preProject
+		..\database\SQL calculations view\SQL READY Profit Sharing view creation for calculations includes bene and zeroc-check.sql = ..\database\SQL calculations view\SQL READY Profit Sharing view creation for calculations includes bene and zeroc-check.sql
+		..\database\SQL calculations view\SQL SMART Profit Sharing view creation for calculations includes bene and zeroc-check.sql = ..\database\SQL calculations view\SQL SMART Profit Sharing view creation for calculations includes bene and zeroc-check.sql
+		..\database\SQL calculations view\SQL SMART vs READY SQL comparison of vesting balance.sql = ..\database\SQL calculations view\SQL SMART vs READY SQL comparison of vesting balance.sql
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ddl", "ddl", "{15C6083C-777D-42C6-A1A7-5F4008345118}"
+	ProjectSection(SolutionItems) = preProject
+		..\database\ddl\ddl.sql = ..\database\ddl\ddl.sql
+		..\database\ddl\profit_sharing_ddl.png = ..\database\ddl\profit_sharing_ddl.png
 	EndProjectSection
 EndProject
 Global
@@ -128,6 +143,12 @@ Global
 		{2376B169-4E82-463C-8EF3-3EE4AF7E195C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2376B169-4E82-463C-8EF3-3EE4AF7E195C}.Russ|Any CPU.ActiveCfg = Debug|Any CPU
 		{2376B169-4E82-463C-8EF3-3EE4AF7E195C}.Russ|Any CPU.Build.0 = Debug|Any CPU
+		{222677DF-CAD3-4E03-A1A1-C213DFD0DAA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{222677DF-CAD3-4E03-A1A1-C213DFD0DAA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{222677DF-CAD3-4E03-A1A1-C213DFD0DAA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{222677DF-CAD3-4E03-A1A1-C213DFD0DAA0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{222677DF-CAD3-4E03-A1A1-C213DFD0DAA0}.Russ|Any CPU.ActiveCfg = Russ|Any CPU
+		{222677DF-CAD3-4E03-A1A1-C213DFD0DAA0}.Russ|Any CPU.Build.0 = Russ|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -138,6 +159,9 @@ Global
 		{FDE7E8B7-3735-42D6-BF0E-B4FB1BF0FA86} = {946306F4-A7A7-40C5-A4EA-D32A46E09328}
 		{57F488D4-7A41-4A7F-ABEF-4B1437B5B5A6} = {FDE7E8B7-3735-42D6-BF0E-B4FB1BF0FA86}
 		{0A7F4CAF-BDEA-44BC-8BEC-1F3979CF355B} = {946306F4-A7A7-40C5-A4EA-D32A46E09328}
+		{222677DF-CAD3-4E03-A1A1-C213DFD0DAA0} = {80B088DC-C84B-46AA-BFF3-DC309C5B4325}
+		{522242E2-FC59-49E9-9628-6E9B6AEEAF6F} = {946306F4-A7A7-40C5-A4EA-D32A46E09328}
+		{15C6083C-777D-42C6-A1A7-5F4008345118} = {946306F4-A7A7-40C5-A4EA-D32A46E09328}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FB1CB19A-BE8B-4F91-9186-FE7C9F3CE4D7}

@@ -59,7 +59,9 @@ internal sealed class ZeroContributionReasonMap : IEntityTypeConfiguration<ZeroC
             },
             new PayFrequency
             {
+#pragma warning disable CS0618 // Type or member is obsolete
                 Id = ZeroContributionReason.Constants.Unknown,
+#pragma warning restore CS0618 // Type or member is obsolete
                 Name = "Unknown"
             }
         );

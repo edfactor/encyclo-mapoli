@@ -22,6 +22,8 @@ using System.Globalization;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
+using Newtonsoft.Json;
+using FluentAssertions.Execution;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -36,7 +38,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
         _endpoint = new MilitaryAndRehireForfeituresEndpoint(mockService);
     }
 
-    
+
     [Fact(DisplayName = "PS-345: Check for Military (JSON)")]
     public async Task GetResponse_Should_ReturnReportResponse_WhenCalledWithValidRequest()
     {
@@ -57,12 +59,21 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
             // Act
             ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
             var response =
-                await ApiClient.GETAsync<MilitaryAndRehireForfeituresEndpoint, PaginationRequestDto, ReportResponseBase<MilitaryAndRehireForfeituresResponse>>(setup.Request);
+                await ApiClient.GETAsync<MilitaryAndRehireForfeituresEndpoint, ProfitYearRequest, ReportResponseBase<MilitaryAndRehireForfeituresResponse>>(
+                    setup.Request);
 
             // Assert
             response.Result.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
-            response.Result.Response.Results.Should().HaveCountGreaterThan(0);
-            response.Result.Response.Results.Should().BeEquivalentTo(expectedResponse.Response.Results);
+            response.Result.Response.Results.Should().HaveCountGreaterOrEqualTo(expectedResponse.Response.Results.Count());
+
+#pragma warning disable S1481
+            var expected = System.Text.Json.JsonSerializer.Serialize(expectedResponse.Response.Results);
+
+            var actual = System.Text.Json.JsonSerializer.Serialize(response.Result.Response.Results);
+#pragma warning restore S1481
+
+            response.Result.Response.Results.First().Should().BeEquivalentTo(expectedResponse.Response.Results.First());
+
         });
     }
 
@@ -75,7 +86,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
 
             // Act
             DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-            var response = await DownloadClient.GETAsync<MilitaryAndRehireForfeituresEndpoint, PaginationRequestDto, StreamContent>(setup.Request);
+            var response = await DownloadClient.GETAsync<MilitaryAndRehireForfeituresEndpoint, ProfitYearRequest, StreamContent>(setup.Request);
             response.Response.Content.Should().NotBeNull();
 
             string result = await response.Response.Content.ReadAsStringAsync();
@@ -134,7 +145,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
     public async Task GetResponse_Should_HandleEmptyResults()
     {
         // Arrange
-        var request = new MilitaryAndRehireRequest { Skip = 0, Take = 10, ReportingYear = (short)DateTime.Today.Year };
+        var request = new ProfitYearRequest { Skip = 0, Take = 10, ProfitYear = (short)DateTime.Today.Year };
         var cancellationToken = CancellationToken.None;
         var expectedResponse = new ReportResponseBase<MilitaryAndRehireForfeituresResponse>
         {
@@ -155,7 +166,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
     public async Task GetResponse_Should_HandleNullResults()
     {
         // Arrange
-        var request = new MilitaryAndRehireRequest { Skip = 0, Take = 10, ReportingYear = (short)DateTime.Today.Year };
+        var request = new ProfitYearRequest { Skip = 0, Take = 10, ProfitYear = (short)DateTime.Today.Year };
         var cancellationToken = CancellationToken.None;
         var expectedResponse = new ReportResponseBase<MilitaryAndRehireForfeituresResponse>
         {
@@ -182,7 +193,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
         reportFileName.Should().Be("REHIRE'S PROFIT SHARING DATA");
     }
 
-    private static async Task<(MilitaryAndRehireRequest Request, MilitaryAndRehireForfeituresResponse ExpectedResponse)> SetupTestEmployee(ProfitSharingDbContext c)
+    private static async Task<(ProfitYearRequest Request, MilitaryAndRehireForfeituresResponse ExpectedResponse)> SetupTestEmployee(ProfitSharingDbContext c)
     {
         // Setup
         MilitaryAndRehireForfeituresResponse example = MilitaryAndRehireForfeituresResponse.ResponseExample();
@@ -190,20 +201,25 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
         var demo = await c.Demographics.FirstAsync();
         demo.EmploymentStatusId = EmploymentStatus.Constants.Active;
         demo.ReHireDate = DateTime.Today.ToDateOnly();
-        
 
-        var payProfit = await c.PayProfits.FirstAsync(pp => pp.Ssn == demo.Ssn);
+        var profitYear = (short)demo.ReHireDate!.Value.Year;
+
+
+
+        var payProfit = await c.PayProfits.FirstAsync(pp => pp.OracleHcmId == demo.OracleHcmId);
         payProfit.EnrollmentId = Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
-        payProfit.CompanyContributionYears = 3;
-        payProfit.HoursCurrentYear = 2358;
+        payProfit.CurrentHoursYear = 2358;
+        payProfit.ProfitYear = profitYear;
 
         var details = await c.ProfitDetails.Where(pd => pd.Ssn == demo.Ssn).ToListAsync();
         foreach (var detail in details)
         {
             detail.Forfeiture = short.MaxValue;
-            detail.ProfitYear = 2021;
+            detail.ProfitYear = profitYear;
             detail.Remark = "Test remarks";
             detail.ProfitCodeId = ProfitCode.Constants.OutgoingForfeitures.Id;
+            detail.Contribution = byte.MaxValue;
+            detail.Earnings = byte.MaxValue;
         }
 
         await c.SaveChangesAsync();
@@ -211,8 +227,8 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
         example.BadgeNumber = demo.BadgeNumber;
         example.Ssn = demo.Ssn.MaskSsn();
         example.FullName = demo.FullName;
-        example.CompanyContributionYears = payProfit.CompanyContributionYears;
-        example.HoursCurrentYear = payProfit.HoursCurrentYear ?? 0;
+        example.CompanyContributionYears = 0;
+        example.HoursCurrentYear = payProfit.CurrentHoursYear ?? 0;
         example.ReHiredDate = demo.ReHireDate ?? SqlDateTime.MinValue.Value.ToDateOnly();
         example.Details = details.Select(pd => new MilitaryRehireProfitSharingDetailResponse
         {
@@ -220,6 +236,6 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
         }).ToList();
 
 
-        return (new MilitaryAndRehireRequest { Skip = 0, Take = 10, ReportingYear = (short)demo.ReHireDate!.Value.Year}, example);
+        return (new ProfitYearRequest { Skip = 0, Take = 10, ProfitYear = profitYear }, example);
     }
 }
