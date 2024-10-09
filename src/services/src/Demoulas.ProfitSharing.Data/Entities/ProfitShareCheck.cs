@@ -12,15 +12,15 @@ public class ProfitShareCheck
     public TaxCode? TaxCode { get; set; }
     public char TaxCodeId { get; set; }
 
-    public DateOnly CheckDate { get; set; }
+    public DateOnly? CheckDate { get; set; }
     public bool? IsVoided { get; set; }
     public DateOnly? VoidDate { get; set; }
     public DateOnly? VoidReconDate { get; set; }
     public DateOnly? ClearDate { get; set; }
     public DateOnly? ClearDateLoaded { get; set; }
-    public int RefNumber { get; set; }
+    public int? RefNumber { get; set; }
     
-    public short FloatDays { get; set; }
+    public short? FloatDays { get; set; }
     public DateOnly? CheckRunDate { get; set; }
     public DateOnly? DateLoaded { get; set; }
     public bool? OtherBeneficiary{ get; set; }
