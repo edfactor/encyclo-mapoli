@@ -44,7 +44,7 @@ public class CleanupReportService : ICleanupReportService
                         {
                             dem.BadgeNumber,
                             SSN = dem.Ssn,
-                            dem.FullName,
+                            dem.ContactInfo.FullName,
                             dem.Address.Street,
                             dem.Address.City,
                             dem.Address.State,
@@ -133,7 +133,7 @@ public class CleanupReportService : ICleanupReportService
                     {
                         EmployeeBadge = dem.BadgeNumber,
                         EmployeeSsn = dem.Ssn,
-                        EmployeeName = dem.FullName ?? "",
+                        EmployeeName = dem.ContactInfo.FullName ?? "",
                         Status = dem.EmploymentStatusId,
                         Store = dem.StoreNumber,
                     };
@@ -158,9 +158,9 @@ public class CleanupReportService : ICleanupReportService
             {
                 var query = from dem in ctx.Demographics
 #pragma warning disable CA1847
-                    where dem.FullName == null || !dem.FullName.Contains(",")
+                    where dem.ContactInfo.FullName == null || !dem.ContactInfo.FullName.Contains(",")
 #pragma warning restore CA1847
-                    select new NamesMissingCommaResponse { EmployeeBadge = dem.BadgeNumber, EmployeeSsn = dem.Ssn, EmployeeName = dem.FullName ?? "", };
+                    select new NamesMissingCommaResponse { EmployeeBadge = dem.BadgeNumber, EmployeeSsn = dem.Ssn, EmployeeName = dem.ContactInfo.FullName ?? "", };
                 return await query.ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken: cancellationToken);
             });
 
@@ -181,7 +181,7 @@ public class CleanupReportService : ICleanupReportService
             var results = await _dataContextFactory.UseReadOnlyContext(ctx =>
             {
                 var dupNameSlashDateOfBirth = (from dem in ctx.Demographics
-                    group dem by new { dem.FullName, dem.DateOfBirth }
+                    group dem by new { dem.ContactInfo.FullName, dem.DateOfBirth }
                     into g
                     where g.Count() > 1
                     select g.Key.FullName);
@@ -191,12 +191,12 @@ public class CleanupReportService : ICleanupReportService
                     from pp in tmpPayProfit.DefaultIfEmpty()
                     join pdLj in ctx.ProfitDetails on dem.Ssn equals pdLj.Ssn into tmpProfitDetails
                     from pd in tmpProfitDetails.DefaultIfEmpty()
-                    where pp.ProfitYear == req.ProfitYear && dupNameSlashDateOfBirth.Contains(dem.FullName)
+                    where pp.ProfitYear == req.ProfitYear && dupNameSlashDateOfBirth.Contains(dem.ContactInfo.FullName)
                     group new { dem, pp, pd } by new
                     {
                         dem.BadgeNumber,
                         SSN = dem.Ssn,
-                        dem.FullName,
+                        dem.ContactInfo.FullName,
                         dem.DateOfBirth,
                         dem.Address.Street,
                         dem.Address.City,
@@ -282,15 +282,15 @@ public class CleanupReportService : ICleanupReportService
                 var nameAndDobQuery = ctx.Demographics.Select(x => new
                     {
                         x.Ssn,
-                        x.FirstName,
-                        x.LastName,
+                        x.ContactInfo.FirstName,
+                        x.ContactInfo.LastName,
                         x.DateOfBirth,
                         x.BadgeNumber
                     }).Union(ctx.Beneficiaries.Include(b => b.Contact).Select(x => new
                     {
                         x.Contact!.Ssn,
-                        x.Contact.FirstName,
-                        x.Contact.LastName,
+                        x.Contact.ContactInfo.FirstName,
+                        x.Contact.ContactInfo.LastName,
                         x.Contact.DateOfBirth,
                         BadgeNumber = 0
                     }))

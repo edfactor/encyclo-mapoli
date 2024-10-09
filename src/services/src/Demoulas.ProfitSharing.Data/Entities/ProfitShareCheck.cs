@@ -13,7 +13,7 @@ public class ProfitShareCheck
     public char TaxCodeId { get; set; }
 
     public DateOnly CheckDate { get; set; }
-    public bool IsVoided { get; set; }
+    public bool? IsVoided { get; set; }
     public DateOnly? VoidDate { get; set; }
     public DateOnly? VoidReconDate { get; set; }
     public DateOnly? ClearDate { get; set; }
@@ -23,9 +23,9 @@ public class ProfitShareCheck
     public short FloatDays { get; set; }
     public DateOnly? CheckRunDate { get; set; }
     public DateOnly? DateLoaded { get; set; }
-    public bool OtherBeneficiary{ get; set; }
+    public bool? OtherBeneficiary{ get; set; }
 
-    public bool IsManualCheck { get; set; }
+    public bool? IsManualCheck { get; set; }
     public string? ReplaceCheck { get; set; }
     public int PscCheckId { get; set; }
 }

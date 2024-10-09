@@ -152,11 +152,11 @@ public class ExecutiveHoursAndDollars : ApiTestBase<Api.Program>
 
     private static async Task SetupTestEmployee(ProfitSharingDbContext c)
     {
-        var demo = await c.Demographics.FirstAsync();
+        var demo = await c.Demographics.Include(demographic => demographic.ContactInfo).FirstAsync();
         var pp = await c.PayProfits.FirstAsync(pp => pp.OracleHcmId == demo.OracleHcmId);
 
         demo.BadgeNumber = _example.BadgeNumber;
-        demo.FullName = _example.FullName;
+        demo.ContactInfo.FullName = _example.FullName;
         demo.StoreNumber = _example.StoreNumber;
         pp.IncomeExecutive = _example.IncomeExecutive;
         pp.HoursExecutive = _example.HoursExecutive;

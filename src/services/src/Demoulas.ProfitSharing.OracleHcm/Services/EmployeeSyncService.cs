@@ -96,10 +96,6 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
                 OracleHcmId = employee.PersonId,
                 BadgeNumber = employee.BadgeNumber,
                 DateOfBirth = employee.DateOfBirth,
-                FirstName = employee.Name.FirstName,
-                MiddleName = employee.Name.MiddleNames,
-                LastName = employee.Name.LastName,
-                FullName = $"{employee.Name.LastName}, {employee.Name.FirstName}",
                 HireDate = employee.WorkRelationship?.StartDate ?? SqlDateTime.MinValue.Value.ToDateOnly(),
                 TerminationDate = employee.WorkRelationship?.TerminationDate,
                 Ssn = (employee.NationalIdentifier?.NationalIdentifierNumber ?? faker.Person.Ssn()).ConvertSsnToLong() ?? 0,
@@ -117,8 +113,15 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
                     "ORA_HRX_X" => Gender.Constants.Nonbinary,
                     _ => Gender.Constants.Unknown
                 },
-
-                ContactInfo = new ContactInfoRequestDto { PhoneNumber = employee.Phone?.PhoneNumber, EmailAddress = employee.Email?.EmailAddress },
+                ContactInfo = new ContactInfoRequestDto
+                {
+                    FirstName = employee.Name.FirstName,
+                    MiddleName = employee.Name.MiddleNames,
+                    LastName = employee.Name.LastName,
+                    FullName = $"{employee.Name.LastName}, {employee.Name.FirstName}",
+                    PhoneNumber = employee.Phone?.PhoneNumber,
+                    EmailAddress = employee.Email?.EmailAddress
+                },
                 Address = new AddressRequestDto
                 {
                     Street = employee.Address!.AddressLine1,
