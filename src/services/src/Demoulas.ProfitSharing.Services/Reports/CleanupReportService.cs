@@ -16,15 +16,19 @@ public class CleanupReportService : ICleanupReportService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ContributionService _contributionService;
+    private readonly CalendarService _calendarService;
     private readonly ILogger<CleanupReportService> _logger;
 
     public CleanupReportService(IProfitSharingDataContextFactory dataContextFactory,
         ContributionService contributionService,
-        ILoggerFactory factory)
+        ILoggerFactory factory,
+        CalendarService calendarService)
     {
         _dataContextFactory = dataContextFactory;
         _contributionService = contributionService;
+        _calendarService = calendarService;
         _logger = factory.CreateLogger<CleanupReportService>();
+        
     }
 
     public async Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsNs(ProfitYearRequest req, CancellationToken ct)
@@ -335,5 +339,57 @@ public class CleanupReportService : ICleanupReportService
                 ReportDate = DateTimeOffset.Now, ReportName = "DISTRIBUTIONS AND FORFEITURES", Response = results
             };
         }
+    }
+
+    public async Task<ReportResponseBase<YearEndProfitSharingReportResponse>> GetYearEndProfitSharingReport(YearEndProfitSharingReportRequest req, CancellationToken cancellationToken = default)
+    {
+        var yearEndDate = (await _calendarService.GetYearStartAndEndAccountingDates(req.ProfitYear, cancellationToken)).YearEndDate;
+        var over18BirthDate = yearEndDate.AddYears(-18);
+        var rslt = await _dataContextFactory.UseReadOnlyContext(ctx =>
+        {
+            return ctx.PayProfits
+                      .Include(d => d.Demographic)
+                      .Where(p => p.ProfitYear == req.ProfitYear) // Get right year
+                      .Where(p => p.Demographic!.EmploymentStatusId != EmploymentStatus.Constants.Terminated) //Don't show terminated employees
+                      .Where(p => (p.CurrentHoursYear  + p.HoursExecutive) >= 1000) //Employee worked 1000 hrs
+                      .Where(p => p.Demographic!.DateOfBirth < over18BirthDate) // Employee must be eighteen
+                      .OrderBy(p=>p.Demographic!.LastName)
+                      .ThenBy(p=>p.Demographic!.FirstName)
+                      .Select(x => new YearEndProfitSharingReportResponse()
+                      {
+                          BadgeNumber = x.Demographic!.BadgeNumber,
+                          EmployeeName = $"{x.Demographic!.LastName}, {x.Demographic.FirstName}",
+                          StoreNumber = x.Demographic!.StoreNumber,
+                          EmployeeTypeCode = x.Demographic!.EmploymentTypeId,
+                          DateOfBirth = x.Demographic!.DateOfBirth,
+                          Age = 0, //Filled out below after materialization
+                          EmployeeSsn = x.Demographic!.Ssn.MaskSsn(),
+                          Wages = (x.CurrentIncomeYear ?? 0m) + (x.IncomeExecutive),
+                          Hours = Math.Floor((x.CurrentHoursYear ?? 0m) + (x.HoursExecutive)),
+                          Points = 0, //Filled out below after materialization
+                          IsNew = x.EmployeeTypeId == EmployeeType.Constants.NewLastYear,
+                          IsUnder21 = false, //Filled out below after materialization
+                          EmployeeStatus = x.Demographic!.EmploymentStatusId
+                      })
+                      .ToPaginationResultsAsync(req, cancellationToken);
+        });
+
+        foreach (var item in rslt.Results)
+        {
+            item.Points = Convert.ToInt16(Math.Round(item.Wages / 100, 0, MidpointRounding.AwayFromZero));
+            item.Age = (byte)((yearEndDate.Year - item.DateOfBirth.Year) - (yearEndDate.DayOfYear < item.DateOfBirth.DayOfYear ? 1 : 0));
+            if (item.Age < 21)
+            {
+                item.IsUnder21 = true;
+                item.Points = 0;
+            }
+        }
+
+        return new ReportResponseBase<YearEndProfitSharingReportResponse>
+        {
+            ReportDate = DateTimeOffset.Now,
+            ReportName = $"PROFIT SHARE YEAR END REPORT FOR {req.ProfitYear}",
+            Response = rslt
+        };
     }
 }
