@@ -147,7 +147,7 @@ public class MilitaryAndRehireTests : ApiTestBase<Api.Program>
         // Setup
         MilitaryAndRehireReportResponse example = MilitaryAndRehireReportResponse.ResponseExample();
 
-        var demo = await c.Demographics.FirstAsync();
+        var demo = await c.Demographics.Include(demographic => demographic.ContactInfo).FirstAsync();
         demo.TerminationCodeId = TerminationCode.Constants.Military;
         demo.EmploymentStatusId = EmploymentStatus.Constants.Inactive;
 
@@ -158,7 +158,7 @@ public class MilitaryAndRehireTests : ApiTestBase<Api.Program>
         await c.SaveChangesAsync();
 
         example.Ssn = demo.Ssn.MaskSsn();
-        example.FullName = demo.FullName;
+        example.FullName = demo.ContactInfo.FullName;
 
 
         return (new PaginationRequestDto { Skip = 0, Take = 10 }, example);

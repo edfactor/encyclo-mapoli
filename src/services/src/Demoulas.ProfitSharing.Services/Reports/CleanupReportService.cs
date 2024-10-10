@@ -16,15 +16,19 @@ public class CleanupReportService : ICleanupReportService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ContributionService _contributionService;
+    private readonly CalendarService _calendarService;
     private readonly ILogger<CleanupReportService> _logger;
 
     public CleanupReportService(IProfitSharingDataContextFactory dataContextFactory,
         ContributionService contributionService,
-        ILoggerFactory factory)
+        ILoggerFactory factory,
+        CalendarService calendarService)
     {
         _dataContextFactory = dataContextFactory;
         _contributionService = contributionService;
+        _calendarService = calendarService;
         _logger = factory.CreateLogger<CleanupReportService>();
+        
     }
 
     public async Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsNs(ProfitYearRequest req, CancellationToken ct)
@@ -44,7 +48,7 @@ public class CleanupReportService : ICleanupReportService
                         {
                             dem.BadgeNumber,
                             SSN = dem.Ssn,
-                            dem.FullName,
+                            dem.ContactInfo.FullName,
                             dem.Address.Street,
                             dem.Address.City,
                             dem.Address.State,
@@ -133,7 +137,7 @@ public class CleanupReportService : ICleanupReportService
                     {
                         EmployeeBadge = dem.BadgeNumber,
                         EmployeeSsn = dem.Ssn,
-                        EmployeeName = dem.FullName ?? "",
+                        EmployeeName = dem.ContactInfo.FullName ?? "",
                         Status = dem.EmploymentStatusId,
                         Store = dem.StoreNumber,
                     };
@@ -158,9 +162,9 @@ public class CleanupReportService : ICleanupReportService
             {
                 var query = from dem in ctx.Demographics
 #pragma warning disable CA1847
-                    where dem.FullName == null || !dem.FullName.Contains(",")
+                    where dem.ContactInfo.FullName == null || !dem.ContactInfo.FullName.Contains(",")
 #pragma warning restore CA1847
-                    select new NamesMissingCommaResponse { EmployeeBadge = dem.BadgeNumber, EmployeeSsn = dem.Ssn, EmployeeName = dem.FullName ?? "", };
+                    select new NamesMissingCommaResponse { EmployeeBadge = dem.BadgeNumber, EmployeeSsn = dem.Ssn, EmployeeName = dem.ContactInfo.FullName ?? "", };
                 return await query.ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken: cancellationToken);
             });
 
@@ -181,7 +185,7 @@ public class CleanupReportService : ICleanupReportService
             var results = await _dataContextFactory.UseReadOnlyContext(ctx =>
             {
                 var dupNameSlashDateOfBirth = (from dem in ctx.Demographics
-                    group dem by new { dem.FullName, dem.DateOfBirth }
+                    group dem by new { dem.ContactInfo.FullName, dem.DateOfBirth }
                     into g
                     where g.Count() > 1
                     select g.Key.FullName);
@@ -191,12 +195,12 @@ public class CleanupReportService : ICleanupReportService
                     from pp in tmpPayProfit.DefaultIfEmpty()
                     join pdLj in ctx.ProfitDetails on dem.Ssn equals pdLj.Ssn into tmpProfitDetails
                     from pd in tmpProfitDetails.DefaultIfEmpty()
-                    where pp.ProfitYear == req.ProfitYear && dupNameSlashDateOfBirth.Contains(dem.FullName)
+                    where pp.ProfitYear == req.ProfitYear && dupNameSlashDateOfBirth.Contains(dem.ContactInfo.FullName)
                     group new { dem, pp, pd } by new
                     {
                         dem.BadgeNumber,
                         SSN = dem.Ssn,
-                        dem.FullName,
+                        dem.ContactInfo.FullName,
                         dem.DateOfBirth,
                         dem.Address.Street,
                         dem.Address.City,
@@ -282,15 +286,15 @@ public class CleanupReportService : ICleanupReportService
                 var nameAndDobQuery = ctx.Demographics.Select(x => new
                     {
                         x.Ssn,
-                        x.FirstName,
-                        x.LastName,
+                        x.ContactInfo.FirstName,
+                        x.ContactInfo.LastName,
                         x.DateOfBirth,
                         x.BadgeNumber
                     }).Union(ctx.Beneficiaries.Include(b => b.Contact).Select(x => new
                     {
                         x.Contact!.Ssn,
-                        x.Contact.FirstName,
-                        x.Contact.LastName,
+                        x.Contact.ContactInfo.FirstName,
+                        x.Contact.ContactInfo.LastName,
                         x.Contact.DateOfBirth,
                         BadgeNumber = 0
                     }))
@@ -335,5 +339,57 @@ public class CleanupReportService : ICleanupReportService
                 ReportDate = DateTimeOffset.Now, ReportName = "DISTRIBUTIONS AND FORFEITURES", Response = results
             };
         }
+    }
+
+    public async Task<ReportResponseBase<YearEndProfitSharingReportResponse>> GetYearEndProfitSharingReport(YearEndProfitSharingReportRequest req, CancellationToken cancellationToken = default)
+    {
+        var yearEndDate = (await _calendarService.GetYearStartAndEndAccountingDates(req.ProfitYear, cancellationToken)).YearEndDate;
+        var over18BirthDate = yearEndDate.AddYears(-18);
+        var rslt = await _dataContextFactory.UseReadOnlyContext(ctx =>
+        {
+            return ctx.PayProfits
+                      .Include(d => d.Demographic)
+                      .Where(p => p.ProfitYear == req.ProfitYear) // Get right year
+                      .Where(p => p.Demographic!.EmploymentStatusId != EmploymentStatus.Constants.Terminated) //Don't show terminated employees
+                      .Where(p => (p.CurrentHoursYear  + p.HoursExecutive) >= 1000) //Employee worked 1000 hrs
+                      .Where(p => p.Demographic!.DateOfBirth < over18BirthDate) // Employee must be eighteen
+                      .OrderBy(p=>p.Demographic!.ContactInfo.LastName)
+                      .ThenBy(p=>p.Demographic!.ContactInfo.FirstName)
+                      .Select(x => new YearEndProfitSharingReportResponse()
+                      {
+                          BadgeNumber = x.Demographic!.BadgeNumber,
+                          EmployeeName = $"{x.Demographic!.ContactInfo.LastName}, {x.Demographic.ContactInfo.FirstName}",
+                          StoreNumber = x.Demographic!.StoreNumber,
+                          EmployeeTypeCode = x.Demographic!.EmploymentTypeId,
+                          DateOfBirth = x.Demographic!.DateOfBirth,
+                          Age = 0, //Filled out below after materialization
+                          EmployeeSsn = x.Demographic!.Ssn.MaskSsn(),
+                          Wages = (x.CurrentIncomeYear ?? 0m) + (x.IncomeExecutive),
+                          Hours = Math.Floor((x.CurrentHoursYear ?? 0m) + (x.HoursExecutive)),
+                          Points = 0, //Filled out below after materialization
+                          IsNew = x.EmployeeTypeId == EmployeeType.Constants.NewLastYear,
+                          IsUnder21 = false, //Filled out below after materialization
+                          EmployeeStatus = x.Demographic!.EmploymentStatusId
+                      })
+                      .ToPaginationResultsAsync(req, cancellationToken);
+        });
+
+        foreach (var item in rslt.Results)
+        {
+            item.Points = Convert.ToInt16(Math.Round(item.Wages / 100, 0, MidpointRounding.AwayFromZero));
+            item.Age = (byte)((yearEndDate.Year - item.DateOfBirth.Year) - (yearEndDate.DayOfYear < item.DateOfBirth.DayOfYear ? 1 : 0));
+            if (item.Age < 21)
+            {
+                item.IsUnder21 = true;
+                item.Points = 0;
+            }
+        }
+
+        return new ReportResponseBase<YearEndProfitSharingReportResponse>
+        {
+            ReportDate = DateTimeOffset.Now,
+            ReportName = $"PROFIT SHARE YEAR END REPORT FOR {req.ProfitYear}",
+            Response = rslt
+        };
     }
 }

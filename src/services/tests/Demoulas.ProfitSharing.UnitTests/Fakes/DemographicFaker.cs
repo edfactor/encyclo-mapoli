@@ -20,10 +20,6 @@ internal sealed class DemographicFaker : Faker<Demographic>
         RuleFor(d => d.BadgeNumber, f => _badgeNumberCounter++)
             .RuleFor(d => d.Ssn, f => f.Person.Ssn().ConvertSsnToLong())
             .RuleFor(d => d.OracleHcmId, f => f.Random.Long(100000, 999999))
-            .RuleFor(d => d.LastName, f => f.Name.LastName())
-            .RuleFor(d => d.FirstName, f => f.Name.FirstName())
-            .RuleFor(d => d.MiddleName, f => f.Name.FirstName())
-            .RuleFor(d => d.FullName, (f, d) => $"{d.LastName}, {d.FirstName}")
             .RuleFor(d => d.StoreNumber, f => f.Random.Short(1, 99))
             .RuleFor(d => d.DepartmentId, f => f.PickRandom<byte>(1, 2, 3, 4, 5, 6, 7))
             .RuleFor(d => d.PayClassification, f => payClassificationFaker.Generate())
@@ -49,8 +45,7 @@ internal sealed class DemographicFaker : Faker<Demographic>
                     State = f.Address.StateAbbr(),
                     PostalCode = f.Address.ZipCode(),
                     CountryIso = Country.Constants.Us
-                })
-            .RuleFor(b => b.ContactInfo,
-                f => new ContactInfo { PhoneNumber = f.Phone.PhoneNumber("###-###-####"), MobileNumber = f.Phone.PhoneNumber("###-###-####"), EmailAddress = f.Internet.Email() });
+                });
+
     }
 }

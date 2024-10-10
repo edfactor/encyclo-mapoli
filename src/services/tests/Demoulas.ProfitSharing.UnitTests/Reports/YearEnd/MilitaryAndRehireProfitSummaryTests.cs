@@ -178,7 +178,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
         // Setup
         MilitaryAndRehireProfitSummaryResponse example = MilitaryAndRehireProfitSummaryResponse.ResponseExample();
 
-        var demo = await c.Demographics.FirstAsync();
+        var demo = await c.Demographics.Include(demographic => demographic.ContactInfo).FirstAsync();
         demo.EmploymentStatusId = EmploymentStatus.Constants.Active;
         demo.ReHireDate = DateTime.Today.ToDateOnly();
         
@@ -200,7 +200,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
 
         example.BadgeNumber = demo.BadgeNumber;
         example.Ssn = demo.Ssn.MaskSsn();
-        example.FullName = demo.FullName;
+        example.FullName = demo.ContactInfo.FullName;
         example.CompanyContributionYears = 0;
         example.HoursCurrentYear = payProfit.CurrentHoursYear ?? 0;
         example.ReHiredDate = demo.ReHireDate ?? SqlDateTime.MinValue.Value.ToDateOnly();
