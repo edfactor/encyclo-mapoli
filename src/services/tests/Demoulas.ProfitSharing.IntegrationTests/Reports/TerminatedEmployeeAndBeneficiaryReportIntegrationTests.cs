@@ -26,7 +26,9 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests
     {
         // Turned off because of PayProfit changes
         if (new DateOnly().Day > 0)
+        {
             return;
+        }
 
         // We get a connection to the database.     
         var configuration = new ConfigurationBuilder().AddUserSecrets<TerminatedEmployeeAndBeneficiaryReportIntegrationTests>().Build();
@@ -41,7 +43,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests
         // Plan admin may choose a range of dates (ie. Q2 ?)
         DateOnly startDate = new DateOnly(2023, 01, 07);
         DateOnly endDate = new DateOnly(2024, 01, 02);
-        decimal profitSharingYear = 2023.0m;
+        short profitSharingYear = 2023;
 
         Mock<ILogger> ilogger = new Mock<ILogger>();
 
@@ -49,7 +51,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests
         TerminatedEmployeeAndBeneficiaryReport terminatedEmployeeAndBeneficiaryReport = new TerminatedEmployeeAndBeneficiaryReport(ilogger.Object!, ctx, effectiveDateOfTestData);
         TerminatedEmployeeAndBeneficiaryDataRequest req = new()
         {
-            EndDate = endDate, ProfitShareYear = profitSharingYear, StartDate = startDate
+            EndDate = endDate, ProfitYear = profitSharingYear, StartDate = startDate
         };
         Stopwatch stopwatch = Stopwatch.StartNew();
         stopwatch.Start();

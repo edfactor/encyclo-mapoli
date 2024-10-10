@@ -30,15 +30,9 @@ public class TerminatedEmployeeAndBeneficiaryReport
 
     public async Task<TerminatedEmployeeAndBeneficiaryResponse> CreateData(TerminatedEmployeeAndBeneficiaryDataRequest req)
     {
-        // If the used the AutoSelectYear option
-        if (req.ProfitShareYear == ReferenceData.AutoSelectYear)
-        {
-            // Then if it is 
-            req.ProfitShareYear = (_todaysDate.Month < 4) ? _todaysDate.Year - 1 : _todaysDate.Year;
-        }
-
-        List<MemberSlice> memberSlices = await RetrieveMemberSlices(req.StartDate, req.EndDate, (short) req.ProfitShareYear);
-        List<Member> members = await MergeMemberSlicesToMembers(memberSlices, req.ProfitShareYear);
+     
+        List<MemberSlice> memberSlices = await RetrieveMemberSlices(req.StartDate, req.EndDate, req.ProfitYear);
+        List<Member> members = await MergeMemberSlicesToMembers(memberSlices, req.ProfitYear);
         TerminatedEmployeeAndBeneficiaryResponse fullResponse =  CreateDataset(members, req);
         return fullResponse;
     }
@@ -174,16 +168,16 @@ public class TerminatedEmployeeAndBeneficiaryReport
             MemberSlice memberSlice = new MemberSlice
             {
                 Psn = psn,
-                Ssn = beneficiary.Ssn,
-                BirthDate = beneficiary.DateOfBirth,
+                Ssn = beneficiary.Contact!.Ssn,
+                BirthDate = beneficiary.Contact!.DateOfBirth,
                 HoursCurrentYear = 0,
                 NetBalanceLastYear = amount,
                 VestedBalanceLastYear = amount,
                 EmploymentStatusCode = statusCode,
-                FullName = GetFullName(beneficiary),
-                FirstName = beneficiary.Contact.FirstName,
-                MiddleInitial = beneficiary.Contact.MiddleName!,
-                LastName = beneficiary.Contact.LastName,
+                FullName = beneficiary.Contact!.ContactInfo!.FullName!,
+                FirstName = beneficiary.Contact!.ContactInfo.FirstName,
+                MiddleInitial = beneficiary.Contact.ContactInfo.MiddleName!,
+                LastName = beneficiary.Contact.ContactInfo.LastName,
                 YearsInPs = 10,
                 TerminationDate = terminationDate,
                 IncomeRegAndExecCurrentYear = 0,
@@ -486,10 +480,5 @@ public class TerminatedEmployeeAndBeneficiaryReport
             }
         }
         return new ProfitDetailSummary(distribution, forfeiture, beneficiaryAllocation);
-    }
-
-    private static string GetFullName(Beneficiary b)
-    {
-        return $"{b.LastName}, {b.FirstName} {b.MiddleName}";
     }
 }

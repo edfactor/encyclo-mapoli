@@ -35,7 +35,7 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
     {
         StartDate = new DateOnly(2023, 1, 7),
         EndDate = new DateOnly(2024, 1, 2),
-        ProfitShareYear = 2023.0m
+        ProfitYear = 2023
     };
 
     [Fact(DisplayName = "Unauthorized")]
@@ -57,12 +57,12 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
         await MockDbContextFactory.UseWritableContext(async c =>
         {
             // Arrange
-            var demo = await c.Demographics.FirstAsync();
+            var demo = await c.Demographics.Include(demographic => demographic.ContactInfo).FirstAsync();
             demo.BadgeNumber = 9988;
             demo.TerminationCodeId = TerminationCode.Constants.AnotherJob;
             demo.EmploymentStatusId = EmploymentStatus.Constants.Terminated;
             demo.TerminationDate = new DateOnly(2023, 6, 1);
-            demo.FullName = "Smith, Nancy K";
+            demo.ContactInfo.FullName = "Smith, Nancy K";
             demo.DateOfBirth = new DateOnly(2000, 1, 1);
 
             var pp = await c.PayProfits.FirstAsync(pp => pp.OracleHcmId == demo.OracleHcmId);
@@ -134,13 +134,14 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
         await MockDbContextFactory.UseWritableContext(async c =>
         {
             // Arrange
-            var bene = await c.Beneficiaries.FirstAsync();
-            bene.Psn = 888888;
+            var bene = await c.Beneficiaries
+                .Include(beneficiary => beneficiary.Contact)
+                .ThenInclude(beneficiaryContact => beneficiaryContact!.ContactInfo).FirstAsync();
             bene.Amount = 379.44m;
-            bene.FirstName = "Rogue";
-            bene.LastName = "One";
-            bene.MiddleName = "I";
-            bene.DateOfBirth = new DateOnly(1990, 1, 1);
+            bene.Contact!.ContactInfo.FirstName = "Rogue";
+            bene.Contact.ContactInfo.LastName = "One";
+            bene.Contact.ContactInfo.MiddleName = "I";
+            bene.Contact.DateOfBirth = new DateOnly(1990, 1, 1);
 
             await c.SaveChangesAsync();
 

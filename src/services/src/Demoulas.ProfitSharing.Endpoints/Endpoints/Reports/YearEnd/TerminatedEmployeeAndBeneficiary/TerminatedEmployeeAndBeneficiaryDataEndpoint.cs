@@ -45,7 +45,7 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
             {
                 StartDate = new DateOnly(2023, 1, 7),
                 EndDate = new DateOnly(2024, 1, 2),
-                ProfitShareYear = ReferenceData.AutoSelectYear
+                ProfitYear = 2023
             };
             s.ResponseExamples = new Dictionary<int, object>
             {
