@@ -89,6 +89,16 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
         return DownloadCsvReport(profitYear, "duplicate-names-and-birthdays", cancellationToken);
     }
 
+    public Task<ReportResponseBase<DistributionsAndForfeitureResponse>> GetDistributionsAndForfeiture(DistributionsAndForfeituresRequest req, CancellationToken cancellationToken = default)
+    {
+        return CallReportEndpoint<DistributionsAndForfeitureResponse, DistributionsAndForfeituresRequest>(req, "distributions-and-forfeitures", cancellationToken);
+    }
+
+    public Task<ReportResponseBase<YearEndProfitSharingReportResponse>> GetYearEndProfitSharingReport(YearEndProfitSharingReportRequest req, CancellationToken cancellationToken = default)
+    {
+        return CallReportEndpoint<YearEndProfitSharingReportResponse, YearEndProfitSharingReportRequest>(req, "yearend-profit-sharing-report", cancellationToken);
+    }
+
     private async Task<ReportResponseBase<TResponseDto>> CallReportEndpoint<TResponseDto, TPaginatedRequest>(TPaginatedRequest req, string endpointRoute, CancellationToken cancellationToken) where TResponseDto : class where TPaginatedRequest : PaginationRequestDto
     {
         UriBuilder uriBuilder = BuildPaginatedUrl(req, endpointRoute);
@@ -128,11 +138,32 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
             query[nameof(ProfitYearRequest.ProfitYear)] = preq.ProfitYear.ToString();
         }
 
+        if (req is YearEndProfitSharingReportRequest yreq)
+        {
+            query[nameof(YearEndProfitSharingReportRequest.IsYearEnd)] = yreq.IsYearEnd.ToString();
+        }
+
+        if (req is DistributionsAndForfeituresRequest dafr)
+        {
+            if (dafr.StartMonth.HasValue)
+            {
+                query[nameof(DistributionsAndForfeituresRequest.StartMonth)] = dafr.StartMonth.ToString();
+            }
+
+            if (dafr.EndMonth.HasValue)
+            {
+                query[nameof(DistributionsAndForfeituresRequest.EndMonth)] = dafr.EndMonth.ToString();
+            }
+            if (dafr.IncludeOutgoingForfeitures.HasValue)
+            {
+                query[nameof(DistributionsAndForfeituresRequest.IncludeOutgoingForfeitures)] = dafr.IncludeOutgoingForfeitures.ToString();
+            }
+        }
+
         var uriBuilder = new UriBuilder($"{_httpClient.BaseAddress}{BaseApiPath}/{endpointRoute}/")
         {
             Query = query.ToString()
         };
         return uriBuilder;
     }
-
 }

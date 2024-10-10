@@ -12,10 +12,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\ExecutiveHoursAndDollars year=this.csv" />
     <None Remove="Resources\terminatedEmployeeAndBeneficiaryReport-correct.txt" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Resources\ExecutiveHoursAndDollars year=this.csv" />
     <EmbeddedResource Include="Resources\terminatedEmployeeAndBeneficiaryReport-correct.txt" />
   </ItemGroup>
 
@@ -72,4 +74,9 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Base\" />
+  </ItemGroup>
+
 </Project>
+

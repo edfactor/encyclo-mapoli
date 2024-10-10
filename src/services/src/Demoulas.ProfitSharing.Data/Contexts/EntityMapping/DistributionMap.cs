@@ -16,7 +16,7 @@ internal sealed class DistributionMap : IEntityTypeConfiguration<Distribution>
         builder.Property(d => d.Id).HasColumnName("ID").ValueGeneratedOnAdd();
         builder.Property(d => d.Ssn).HasColumnName("SSN").HasPrecision(9);
         builder.Property(d => d.PaymentSequence).HasColumnName("PAYMENT_SEQUENCE");
-        builder.Property(d => d.EmployeeName).HasMaxLength(35).HasColumnName("EMPLOYEE_NAME");
+        builder.Property(d => d.EmployeeName).HasMaxLength(84).HasColumnName("EMPLOYEE_NAME");
         builder.Property(d => d.FrequencyId).HasColumnName("FREQUENCY_ID");
         builder.Property(d => d.StatusId).HasColumnName("STATUS_ID");
         builder.Property(d => d.PayeeId).HasColumnName("PAYEE_ID");

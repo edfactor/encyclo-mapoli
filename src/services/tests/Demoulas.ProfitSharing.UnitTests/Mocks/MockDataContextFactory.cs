@@ -28,12 +28,6 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _storeInfoDbContext = new Mock<DemoulasCommonDataContext>();
 
        
-        List<Beneficiary>? beneficiaries = new BeneficiaryFaker().Generate(5_000);
-        Mock<DbSet<Beneficiary>> mockBeneficiaries = beneficiaries.AsQueryable().BuildMockDbSet();
-        _profitSharingDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaries.Object);
-        _profitSharingReadOnlyDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaries.Object);
-
-        
         List<Country>? countries = new CountryFaker().Generate(10);
         Mock<DbSet<Country>> mockCountry = countries.AsQueryable().BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.Countries).Returns(mockCountry.Object);
@@ -62,12 +56,18 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
 
-        List<PayProfit>? profits = new PayProfitFaker(demographics).Generate(demographics.Count);
+        List<Beneficiary>? beneficiaries = new BeneficiaryFaker(demographics).Generate(demographics.Count * 5);
+        List<PayProfit>? profits = new PayProfitFaker(demographics).Generate(demographics.Count * 3);
         
         foreach (PayProfit payProfit in profits)
         {
             demographics.Find(d=> d.OracleHcmId == payProfit.OracleHcmId)?.PayProfits.Add(payProfit);
         }
+
+
+        Mock<DbSet<Beneficiary>> mockBeneficiaries = beneficiaries.AsQueryable().BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaries.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaries.Object);
 
         Mock<DbSet<PayProfit>> mockProfits = profits.AsQueryable().BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.PayProfits).Returns(mockProfits.Object);

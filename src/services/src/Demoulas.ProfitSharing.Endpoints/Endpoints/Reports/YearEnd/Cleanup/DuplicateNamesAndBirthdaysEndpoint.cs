@@ -34,7 +34,7 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYear
                     new ReportResponseBase<DuplicateNamesAndBirthdaysResponse>
                     {
                         ReportDate = DateTime.Now,
-                        ReportName = "MISSING COMMA IN PY_NAME",
+                        ReportName = "DUPLICATE NAMES AND BIRTHDAYS",
                         Response = new PaginatedResponseDto<DuplicateNamesAndBirthdaysResponse>
                         {
                             Results = new List<DuplicateNamesAndBirthdaysResponse>

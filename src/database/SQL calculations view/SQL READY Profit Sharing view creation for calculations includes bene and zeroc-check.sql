@@ -1,0 +1,123 @@
+CREATE OR REPLACE VIEW PSCALCVIEW AS
+WITH DEMO_OR_PAYBEN AS (
+    SELECT
+        p.DEM_SSN AS SSN,
+        pp.PY_PS_ENROLLED,
+        p.PY_TERM,
+        CASE 
+            WHEN p.PY_TERM_DT = 0 THEN NULL
+            ELSE TO_DATE(TO_CHAR(p.PY_TERM_DT), 'yyyymmdd') 
+        END AS TERMDT,
+        pp.PY_PROF_ZEROCONT,
+        TO_DATE(p.PY_DOB, 'yyyymmdd') AS DOB,
+        pp.PY_PH,
+        pp.PY_PS_YEARS,
+        0 AS FROM_PAYBEN
+    FROM DEMOGRAPHICS p
+    JOIN PAYPROFIT pp ON p.DEM_SSN = pp.PAYPROF_SSN
+    UNION ALL
+    SELECT
+        pb.PYBEN_PAYSSN AS SSN,
+        0 AS PY_PS_ENROLLED,
+        ' ' AS PY_TERM,
+        TO_DATE('19000101', 'yyyymmdd') AS TERMDT,
+        0 AS PY_PROF_ZEROCONT,
+        TO_DATE(pb.PYBEN_DOBIRTH, 'yyyymmdd') AS DOB,
+        0 AS PY_PH,
+        0 AS PY_PS_YEARS,
+        1 AS FROM_PAYBEN
+    FROM PAYBEN pb
+    WHERE NOT EXISTS (SELECT 1 FROM DEMOGRAPHICS p WHERE p.DEM_SSN = pb.PYBEN_PAYSSN)
+)
+SELECT 
+    d.SSN,
+    d.PY_PS_ENROLLED,
+    d.PY_TERM,
+    d.TERMDT,
+    d.PY_PROF_ZEROCONT,
+    d.DOB,
+    d.PY_PH,
+    d.PY_PS_YEARS,
+    CASE 
+        WHEN d.FROM_PAYBEN = 1 THEN 1    
+        ELSE CASE 
+            WHEN TRUNC(MONTHS_BETWEEN(CURRENT_DATE, d.DOB) / 12) >= 65 
+             AND (d.TERMDT IS NULL OR d.TERMDT = TO_DATE('19000101', 'yyyymmdd') 
+              OR EXTRACT(YEAR FROM d.TERMDT) >= EXTRACT(YEAR FROM CURRENT_DATE)) 
+               THEN 1
+            WHEN d.PY_PS_ENROLLED IN (3,4) THEN 1
+            WHEN d.PY_TERM = 'Z' THEN 1
+            WHEN d.PY_PROF_ZEROCONT = 6 THEN 1
+            WHEN (CASE WHEN d.PY_PS_ENROLLED = 2 THEN 1 ELSE 0 END 
+                  + CASE WHEN d.PY_PH >= 1000 THEN 1 ELSE 0 END 
+                  + d.PY_PS_YEARS) < 3 THEN 0
+            WHEN (CASE WHEN d.PY_PS_ENROLLED = 2 THEN 1 ELSE 0 END 
+                  + CASE WHEN d.PY_PH >= 1000 THEN 1 ELSE 0 END 
+                  + d.PY_PS_YEARS) = 3 THEN .2
+            WHEN (CASE WHEN d.PY_PS_ENROLLED = 2 THEN 1 ELSE 0 END 
+                  + CASE WHEN d.PY_PH >= 1000 THEN 1 ELSE 0 END 
+                  + d.PY_PS_YEARS) = 4 THEN .4
+            WHEN (CASE WHEN d.PY_PS_ENROLLED = 2 THEN 1 ELSE 0 END 
+                  + CASE WHEN d.PY_PH >= 1000 THEN 1 ELSE 0 END 
+                  + d.PY_PS_YEARS) = 5 THEN .6
+            WHEN (CASE WHEN d.PY_PS_ENROLLED = 2 THEN 1 ELSE 0 END 
+                  + CASE WHEN d.PY_PH >= 1000 THEN 1 ELSE 0 END 
+                  + d.PY_PS_YEARS) = 6 THEN .8
+            WHEN (CASE WHEN d.PY_PS_ENROLLED = 2 THEN 1 ELSE 0 END 
+                  + CASE WHEN d.PY_PH >= 1000 THEN 1 ELSE 0 END 
+                  + d.PY_PS_YEARS) >= 7 THEN 1
+            ELSE 0
+        END
+    END AS VESTPCT,
+    -- ZEROC_CHECK column
+    CASE 
+        WHEN d.PY_PROF_ZEROCONT = 7 AND FLOOR(MONTHS_BETWEEN(CURRENT_DATE, d.DOB)/12) > 64 THEN 'Y'
+        ELSE 'N'
+    END AS ZEROC_CHECK,
+    COALESCE(total_balance_subquery.TOTAL_BALANCE, 0) AS TOTAL_BALANCE,
+    COALESCE(etva_subquery.ETVA, 0) AS ETVA,
+    COALESCE(distributions_subquery.DISTRIBUTIONS, 0) AS DISTRIBUTIONS,
+    COALESCE(grossamt_subquery.GROSSAMT, 0) AS GROSSAMT
+FROM 
+    DEMO_OR_PAYBEN d
+LEFT JOIN (
+    SELECT 
+        PR_DET_S_SEC_NUMBER,
+        SUM(CASE 
+            WHEN PROFIT_CODE = '9' THEN - PROFIT_FORT
+            WHEN PROFIT_CODE IN ('*', '1', '2', '3', '5') THEN - PROFIT_FORT + PROFIT_CONT + PROFIT_EARN
+            ELSE PROFIT_CONT + PROFIT_EARN + PROFIT_FORT
+        END) AS TOTAL_BALANCE
+    FROM PROFIT_DETAIL
+    GROUP BY PR_DET_S_SEC_NUMBER
+) total_balance_subquery ON d.SSN = total_balance_subquery.PR_DET_S_SEC_NUMBER
+LEFT JOIN (
+    SELECT 
+        PR_DET_S_SEC_NUMBER,
+        SUM(CASE 
+            WHEN PROFIT_CODE = '6' THEN PROFIT_CONT
+            WHEN PROFIT_CODE = '8' THEN PROFIT_EARN
+            WHEN PROFIT_CODE = '9' THEN - PROFIT_FORT
+        END) AS ETVA
+    FROM PROFIT_DETAIL
+    GROUP BY PR_DET_S_SEC_NUMBER
+) etva_subquery ON d.SSN = etva_subquery.PR_DET_S_SEC_NUMBER
+LEFT JOIN (
+    SELECT 
+        PR_DET_S_SEC_NUMBER,
+        SUM(CASE 
+            WHEN PROFIT_CODE IN ('1', '2', '3', '5') THEN PROFIT_FORT
+        END) AS DISTRIBUTIONS
+    FROM PROFIT_DETAIL
+    GROUP BY PR_DET_S_SEC_NUMBER
+) distributions_subquery ON d.SSN = distributions_subquery.PR_DET_S_SEC_NUMBER
+LEFT JOIN (
+    SELECT 
+        PROFDIST_SSN,
+        SUM(CASE 
+            WHEN PROFDIST_PAYFLAG NOT IN ('D', 'P') THEN PROFDIST_GROSSAMT
+        END) AS GROSSAMT
+    FROM PROFDIST
+    GROUP BY PROFDIST_SSN
+) grossamt_subquery ON d.SSN = grossamt_subquery.PROFDIST_SSN;
+

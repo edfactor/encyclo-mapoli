@@ -21,7 +21,7 @@ export default defineConfig(({ command, mode }) => {
       }
     },
     server: {
-      port: 3000
+      port: 3100
     },
     define: {
       //'process.env.YOUR_STRING_VARIABLE': JSON.stringify(env.YOUR_STRING_VARIABLE),

@@ -26,10 +26,17 @@ internal sealed class ProfitDetailMap : IEntityTypeConfiguration<ProfitDetail>
         _ = builder.Property(x => x.ZeroContributionReasonId).HasColumnName("ZERO_CONTRIBUTION_REASON_ID");
         _ = builder.Property(x => x.FederalTaxes).IsRequired().HasPrecision(9, 2).HasColumnName("FEDERAL_TAXES");
         _ = builder.Property(x => x.StateTaxes).IsRequired().HasPrecision(9, 2).HasColumnName("STATE_TAXES");
-        _ = builder.HasOne(x=> x.TaxCode).WithMany().HasForeignKey(t => t.TaxCodeId);
         _ = builder.Property(x => x.TaxCodeId).HasColumnName("TAX_CODE_ID");
         _ = builder.Property(x => x.Ssn).HasColumnName("SSN").HasPrecision(9).IsRequired();
         _ = builder.Property(x => x.DistributionSequence).HasColumnName("DISTRIBUTION_SEQUENCE");
+        _ = builder.Property(x => x.TransferPsn).HasColumnName("TRANSFER_PSN");
+        _ = builder.Property(x => x.IsTransferIn).HasColumnName("IS_TRANSFER_IN").HasDefaultValue(0);
+        _ = builder.Property(x => x.IsTransferOut).HasColumnName("IS_TRANSFER_OUT").HasDefaultValue(0);
 
+        _ = builder.HasOne(x => x.TaxCode).WithMany().HasForeignKey(t => t.TaxCodeId);
+
+        _ = builder.HasOne(d => d.ZeroContributionReason)
+            .WithMany()
+            .HasForeignKey(d => d.ZeroContributionReasonId);
     }
 }

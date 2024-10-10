@@ -3,8 +3,10 @@
 public class ProfitDetail
 {
     public int Id { get; set; }
+    public long Ssn { get; set; }
     public short ProfitYear { get; set; }
     public byte ProfitYearIteration { get; set; }
+    public int DistributionSequence { get; set; }
     public required ProfitCode ProfitCode { get; set; }
     public byte ProfitCodeId { get; set; }
     public decimal Contribution { get; set; }
@@ -19,7 +21,7 @@ public class ProfitDetail
     public decimal StateTaxes { get; set;}
     public TaxCode? TaxCode { get; set; }
     public char? TaxCodeId { get; set; }
-    public long Ssn { get; set; }
-    public int DistributionSequence { get; set; }
-    
+    public bool IsTransferOut { get; set; }
+    public bool IsTransferIn { get; set; }
+    public long? TransferPsn { get; set; }
 }
