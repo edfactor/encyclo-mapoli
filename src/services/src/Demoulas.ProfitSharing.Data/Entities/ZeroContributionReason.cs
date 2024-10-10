@@ -59,6 +59,4 @@ public sealed class ZeroContributionReason : ILookupTable<byte>
 
     public byte Id { get; set; }
     public required string Name { get; set; }
-
-    public ICollection<PayProfit>? Profits { get; set; }
 }

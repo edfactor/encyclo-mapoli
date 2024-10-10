@@ -14,7 +14,7 @@ internal sealed class DistributionPayeeMap : IEntityTypeConfiguration<Distributi
 
         _ = builder.HasIndex(d => d.Ssn, "IX_SSN");
         _ = builder.Property(d => d.Ssn).HasColumnName("SSN").HasPrecision(9);
-        _ = builder.Property(d => d.Name).HasMaxLength(35).HasColumnName("NAME");
+        _ = builder.Property(d => d.Name).HasMaxLength(84).HasColumnName("NAME");
         _ = builder.OwnsOne(d => d.Address, address =>
         {
             address.Property(a => a.Street).HasMaxLength(30).HasColumnName("STREET");

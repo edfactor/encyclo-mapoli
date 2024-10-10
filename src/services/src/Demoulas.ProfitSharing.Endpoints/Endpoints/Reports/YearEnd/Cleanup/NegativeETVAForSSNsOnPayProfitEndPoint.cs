@@ -27,6 +27,7 @@ public class NegativeEtvaForSsNsOnPayProfitEndPoint : EndpointWithCsvBase<Profit
         Summary(s =>
         {
             s.Summary = "Negative ETVA for SSNs on PayProfit";
+            s.Description = "ETVA = Early Termination Vested Amount";
             s.ExampleRequest = SimpleExampleRequest;
             s.ResponseExamples = new Dictionary<int, object>
             {
