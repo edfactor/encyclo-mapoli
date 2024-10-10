@@ -88,10 +88,10 @@ public class TerminatedEmployeeAndBeneficiaryReport
                 NetBalanceLastYear = 0m, // TO-DO !!! PayProfit refactor, pp.NetBalanceLastYear
                 VestedBalanceLastYear = 0m, // TO-DO !!!! PayProfit refactor pp.VestedBalanceLastYear,
                 EmploymentStatusCode = employee.EmploymentStatusId,
-                FullName = employee.FullName!,
-                FirstName = employee.FirstName,
-                MiddleInitial = employee.MiddleName?.Substring(0, 1) ?? "",
-                LastName = employee.LastName,
+                FullName = employee.ContactInfo.FullName!,
+                FirstName = employee.ContactInfo.FirstName,
+                MiddleInitial = employee.ContactInfo.MiddleName?.Substring(0, 1) ?? "",
+                LastName = employee.ContactInfo.LastName,
                 YearsInPs = 0, // TO-DO !!! PayProfit refactor, pp.CompanyContributionYears,
                 TerminationDate = employee.TerminationDate,
                 IncomeRegAndExecCurrentYear = (pp.CurrentIncomeYear ?? 0) + pp.IncomeExecutive,
@@ -108,7 +108,7 @@ public class TerminatedEmployeeAndBeneficiaryReport
 
         var beneficiariesWithPossibleEmployee = await (from beneficiary in _ctx.Beneficiaries
                 join demographic in _ctx.Demographics
-                    on beneficiary.Ssn equals demographic.Ssn into demographicsGroup
+                    on beneficiary.OracleHcmId equals demographic.OracleHcmId into demographicsGroup
                 from demographic in demographicsGroup.DefaultIfEmpty()
 
                 join payProfit in _ctx.PayProfits
@@ -140,7 +140,7 @@ public class TerminatedEmployeeAndBeneficiaryReport
             char statusCode = 'T';
             DateOnly? terminationDate = null;
             decimal amount = beneficiary.Amount;
-            long psn = beneficiary.Psn;
+            long psn = beneficiary.GetPsn();
 
             var results = beneWithEmp.DemographicsWithPayProfits;
             if (results.Count > 1)
@@ -181,9 +181,9 @@ public class TerminatedEmployeeAndBeneficiaryReport
                 VestedBalanceLastYear = amount,
                 EmploymentStatusCode = statusCode,
                 FullName = GetFullName(beneficiary),
-                FirstName = beneficiary.FirstName,
-                MiddleInitial = beneficiary.MiddleName!,
-                LastName = beneficiary.LastName,
+                FirstName = beneficiary.Contact.FirstName,
+                MiddleInitial = beneficiary.Contact.MiddleName!,
+                LastName = beneficiary.Contact.LastName,
                 YearsInPs = 10,
                 TerminationDate = terminationDate,
                 IncomeRegAndExecCurrentYear = 0,

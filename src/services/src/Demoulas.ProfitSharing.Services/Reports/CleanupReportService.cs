@@ -353,12 +353,12 @@ public class CleanupReportService : ICleanupReportService
                       .Where(p => p.Demographic!.EmploymentStatusId != EmploymentStatus.Constants.Terminated) //Don't show terminated employees
                       .Where(p => (p.CurrentHoursYear  + p.HoursExecutive) >= 1000) //Employee worked 1000 hrs
                       .Where(p => p.Demographic!.DateOfBirth < over18BirthDate) // Employee must be eighteen
-                      .OrderBy(p=>p.Demographic!.LastName)
-                      .ThenBy(p=>p.Demographic!.FirstName)
+                      .OrderBy(p=>p.Demographic!.ContactInfo.LastName)
+                      .ThenBy(p=>p.Demographic!.ContactInfo.FirstName)
                       .Select(x => new YearEndProfitSharingReportResponse()
                       {
                           BadgeNumber = x.Demographic!.BadgeNumber,
-                          EmployeeName = $"{x.Demographic!.LastName}, {x.Demographic.FirstName}",
+                          EmployeeName = $"{x.Demographic!.ContactInfo.LastName}, {x.Demographic.ContactInfo.FirstName}",
                           StoreNumber = x.Demographic!.StoreNumber,
                           EmployeeTypeCode = x.Demographic!.EmploymentTypeId,
                           DateOfBirth = x.Demographic!.DateOfBirth,

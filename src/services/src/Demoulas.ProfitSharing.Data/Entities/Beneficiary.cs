@@ -7,9 +7,6 @@ public sealed class Beneficiary
     public required int BadgeNumber { get; set; }
     public required long OracleHcmId { get; set; }
 
-    // Reconstruct the full PSN dynamically
-    public string Psn => $"{BadgeNumber}{PsnSuffix:D4}"; // Reconstruct PSN w
-
     public BeneficiaryContact? Contact { get; set; }
     public required int BeneficiaryContactId { get; set; }
 
@@ -23,5 +20,17 @@ public sealed class Beneficiary
     public required decimal Percent { get; set; }
     
     public Demographic? Demographic { get; set; }
-    
+
+
+    /// <summary>
+    /// Generates a PSN (Personal Serial Number) by concatenating the BadgeNumber and PsnSuffix properties.
+    /// </summary>
+    /// <returns>
+    /// A long value representing the generated PSN.
+    /// </returns>
+    public long GetPsn()
+    {
+        long.TryParse($"{BadgeNumber}{PsnSuffix:D4}", out long psn);
+        return psn;
+    }
 }
