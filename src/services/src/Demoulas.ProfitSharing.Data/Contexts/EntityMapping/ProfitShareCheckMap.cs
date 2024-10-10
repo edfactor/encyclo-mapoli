@@ -17,7 +17,7 @@ internal sealed class ProfitShareCheckMap : IEntityTypeConfiguration<ProfitShare
             .ValueGeneratedOnAdd()
             .HasColumnName("Id");
 
-        _ = builder.HasIndex(e => e.CheckNumber, "IX_CheckNumber").IsUnique();
+        _ = builder.HasIndex(e => new {e.CheckNumber, e.IsVoided}, "IX_CheckNumber_IsVoided");
         
         _ = builder.Property(e => e.CheckNumber)
             .HasPrecision(15)
@@ -35,6 +35,7 @@ internal sealed class ProfitShareCheckMap : IEntityTypeConfiguration<ProfitShare
             .ValueGeneratedNever()
             .HasColumnName("ORACLE_HCM_ID");
 
+        _ = builder.HasIndex(e => e.PscCheckId, "IX_PscCheckId").IsUnique();
         _ = builder.Property(e => e.PscCheckId)
             .HasPrecision(15)
             .ValueGeneratedNever()

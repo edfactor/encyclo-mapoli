@@ -179,10 +179,6 @@ public class DemographicsService : IDemographicsServiceInternal
     {
         existingEntity.Ssn = incomingEntity.Ssn;
         existingEntity.BadgeNumber = incomingEntity.BadgeNumber;
-        existingEntity.FullName = incomingEntity.FullName ?? $"{incomingEntity.LastName}, {incomingEntity.FirstName}";
-        existingEntity.LastName = incomingEntity.LastName;
-        existingEntity.FirstName = incomingEntity.FirstName;
-        existingEntity.MiddleName = incomingEntity.MiddleName;
         existingEntity.StoreNumber = incomingEntity.StoreNumber;
         existingEntity.DepartmentId = incomingEntity.DepartmentId;
         existingEntity.PayClassificationId = incomingEntity.PayClassificationId;

@@ -6,10 +6,6 @@ public record DemographicResponseDto : IMemberResponse
     public int BadgeNumber { get; set; }
 
     public required long OracleHcmId { get; set; }
-    public required string FullName { get; set; }
-    public required string LastName { get; set; }
-    public required string FirstName { get; set; }
-    public string? MiddleName { get; set; }
     public required short StoreNumber { get; set; }
 
     public required DepartmentResponseDto? Department { get; set; }
@@ -40,9 +36,6 @@ public record DemographicResponseDto : IMemberResponse
         {
             Ssn = "123-45-6789",
             OracleHcmId = 0,
-            FullName = "John Doe",
-            LastName = "John",
-            FirstName = "Doe",
             StoreNumber = 0,
             Department = new DepartmentResponseDto { Id = 3, Name = "Produce" },
             PayClassificationId = 0,
