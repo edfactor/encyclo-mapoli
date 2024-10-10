@@ -1,7 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { prepareHeaders, url } from "./api";
 import { RootState } from "reduxstore/store";
-
+import { DemographicBadgesNotInPayprofitRequestDto, DemographicBadgesNotInPayprofitResponse, DuplicateSSNDetail, DuplicateSSNsRequestDto, PagedReportResponse } from "reduxstore/types";
+import { setDemographicBadgesNotInPayprofitData, setDuplicateSSNsData } from "reduxstore/slices/yearsEndSlice";
 export const YearsEndApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: "https://localhost:7141/api/",
@@ -17,22 +18,42 @@ export const YearsEndApi = createApi({
   }),
   reducerPath: "yearsEndApi",
   endpoints: (builder) => ({
-    getDuplicateSSNs: builder.query({
-      query: () => "yearend/duplicate-ssns"
+    getDuplicateSSNs: builder.query<PagedReportResponse<DuplicateSSNDetail>, DuplicateSSNsRequestDto>({
+      query: (params) => ({
+        url: `yearend/duplicate-ssns`,
+        method: "GET",
+        params: {
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          profitYear: params.profitYear,
+          impersonation: params.impersonation
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          console.log("@D Dupes " + JSON.stringify(data));
+          dispatch(setDuplicateSSNsData(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
     }),
-    getDemographicBadgesNotInPayprofit: builder.query({
-      query: () => ({
+    getDemographicBadgesNotInPayprofit: builder.query<DemographicBadgesNotInPayprofitResponse, DemographicBadgesNotInPayprofitRequestDto>({
+      query: (params) => ({
         url: `yearend/demographic-badges-not-in-payprofit`,
         method: "GET",
         params: {
-          take: 25,
-          skip: 0
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          impersonation: params.impersonation
         }
       }),
-      async onQueryStarted({ dispatch, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           console.log("@D " + JSON.stringify(data));
+          dispatch(setDemographicBadgesNotInPayprofitData(data));
         } catch (err) {
           console.log("Err: " + err);
         }
