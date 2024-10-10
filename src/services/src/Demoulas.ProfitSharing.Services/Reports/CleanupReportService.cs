@@ -84,7 +84,7 @@ public class CleanupReportService : ICleanupReportService
                         HoursCurrentYear = grp.Key.CurrentHoursYear ?? 0,
                         IncomeCurrentYear = grp.Key.CurrentIncomeYear ?? 0,
                     }
-                ).ToPaginationResultsAsync(req, forceSingleQuery: true, ct);
+                ).ToPaginationResultsAsync(req, ct);
 
             return new ReportResponseBase<PayrollDuplicateSsnResponseDto> { ReportDate = DateTimeOffset.Now, ReportName = "Duplicate SSNs", Response = rslts };
         });
