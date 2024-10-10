@@ -1,6 +1,6 @@
 import { RootState } from "../store";
 
-export const url = process.env.REACT_APP_BH_API as string;
+export const url = process.env.VITE_REACT_APP_PS_API as string;
 
 export const tagTypes = ["Get"];
 
