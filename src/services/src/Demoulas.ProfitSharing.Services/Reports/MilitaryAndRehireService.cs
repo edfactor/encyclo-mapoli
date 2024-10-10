@@ -36,13 +36,13 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
         {
             var inactiveMilitaryMembers = await context.Demographics.Where(d => d.TerminationCodeId == TerminationCode.Constants.Military
                                                                                 && d.EmploymentStatusId == EmploymentStatus.Constants.Inactive)
-                .OrderBy(d => d.FullName)
+                .OrderBy(d => d.ContactInfo.FullName)
                 .Select(d => new MilitaryAndRehireReportResponse
                 {
                     DepartmentId = d.DepartmentId,
                     BadgeNumber = d.BadgeNumber,
                     Ssn = d.Ssn.MaskSsn(),
-                    FullName = d.FullName,
+                    FullName = d.ContactInfo.FullName,
                     DateOfBirth = d.DateOfBirth,
                     TerminationDate = d.TerminationDate
                 })
@@ -152,7 +152,7 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
                 (demographics, payProfit) => new // Result selector after joining
                 {
                     demographics.BadgeNumber,
-                    demographics.FullName,
+                    demographics.ContactInfo.FullName,
                     demographics.Ssn,
                     demographics.HireDate,
                     demographics.TerminationDate,

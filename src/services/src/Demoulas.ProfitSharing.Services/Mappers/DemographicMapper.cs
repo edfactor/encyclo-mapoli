@@ -42,8 +42,6 @@ public partial class DemographicMapper
         {
             Ssn = source.Ssn,
             OracleHcmId = source.OracleHcmId,
-            LastName = source.LastName,
-            FirstName = source.FirstName,
             StoreNumber = source.StoreNumber,
             DepartmentId = source.DepartmentId,
             PayClassificationId = source.PayClassificationId,
@@ -57,8 +55,6 @@ public partial class DemographicMapper
             GenderCode = source.GenderId,
             TerminationCodeId = source.TerminationCodeId,
             BadgeNumber = source.BadgeNumber,
-            FullName = source.FullName,
-            MiddleName = source.MiddleName,
             FullTimeDate = source.FullTimeDate,
             TerminationDate = source.TerminationDate,
             EmploymentStatusId = source.EmploymentStatusId
@@ -79,9 +75,6 @@ public partial class DemographicMapper
         {
             Ssn = source.Ssn.MaskSsn(),
             OracleHcmId = source.OracleHcmId,
-            FullName = source.FullName ?? $"{source.FirstName} {source.LastName}",
-            LastName = source.LastName,
-            FirstName = source.FirstName,
             StoreNumber = source.StoreNumber,
             Department = _departmentMapper.Map(source.Department),
             PayClassificationId = source.PayClassificationId,
@@ -94,7 +87,6 @@ public partial class DemographicMapper
             Gender = _genderMapper.Map(source.Gender),
         };
         target.BadgeNumber = source.BadgeNumber;
-        target.MiddleName = source.MiddleName;
         target.Address = _addressMapper.Map(source.Address);
         target.FullTimeDate = source.FullTimeDate;
         target.TerminationCode = _terminationCodeMapper.Map(source.TerminationCode);
@@ -111,10 +103,6 @@ public partial class DemographicMapper
             Ssn = source.Ssn,
             BadgeNumber = source.BadgeNumber,
             OracleHcmId = source.OracleHcmId,
-            FullName = source.FullName,
-            LastName = source.LastName,
-            FirstName = source.FirstName,
-            MiddleName = source.MiddleName,
             StoreNumber = source.StoreNumber,
             DepartmentId = source.DepartmentId,
             PayClassificationId = source.PayClassificationId,

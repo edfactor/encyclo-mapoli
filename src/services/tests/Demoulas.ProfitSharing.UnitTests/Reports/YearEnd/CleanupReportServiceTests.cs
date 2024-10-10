@@ -141,7 +141,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
             byte disruptedNameCount = 10;
             foreach (var dem in ctx.Demographics.Take(disruptedNameCount))
             {
-                dem.FullName = dem.FullName?.Replace(", ", " ");
+                dem.ContactInfo.FullName = dem.ContactInfo.FullName?.Replace(", ", " ");
             }
 
             await ctx.SaveChangesAsync();
@@ -170,7 +170,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
             byte disruptedNameCount = 10;
             await ctx.Demographics.Take(disruptedNameCount).ForEachAsync(dem =>
             {
-                dem.FullName = dem.FullName?.Replace(", ", " ");
+                dem.ContactInfo.FullName = dem.ContactInfo.FullName?.Replace(", ", " ");
             });
 
             await ctx.SaveChangesAsync();
@@ -254,14 +254,14 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
         byte duplicateRows = 5;
         await MockDbContextFactory.UseWritableContext(async c =>
         {
-            var modelDemographic = await c.Demographics.FirstAsync();
+            var modelDemographic = await c.Demographics.Include(demographic => demographic.ContactInfo).FirstAsync();
 
             foreach (var dem in c.Demographics.Take(duplicateRows))
             {
                 dem.DateOfBirth = modelDemographic.DateOfBirth;
-                dem.FirstName = modelDemographic.FirstName;
-                dem.LastName = modelDemographic.LastName;
-                dem.FullName = modelDemographic.FullName;
+                dem.ContactInfo.FirstName = modelDemographic.ContactInfo.FirstName;
+                dem.ContactInfo.LastName = modelDemographic.ContactInfo.LastName;
+                dem.ContactInfo.FullName = modelDemographic.ContactInfo.FullName;
                 dem.PayProfits[0]!.ProfitYear = _paginationRequest.ProfitYear;
             }
             
@@ -289,14 +289,14 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
         byte duplicateRows = 5;
         await MockDbContextFactory.UseWritableContext(async c =>
         {
-            var modelDemographic = await c.Demographics.FirstAsync();
+            var modelDemographic = await c.Demographics.Include(demographic => demographic.ContactInfo).FirstAsync();
 
             foreach (var dem in c.Demographics.Take(duplicateRows))
             {
                 dem.DateOfBirth = modelDemographic.DateOfBirth;
-                dem.FirstName = modelDemographic.FirstName;
-                dem.LastName = modelDemographic.LastName;
-                dem.FullName = modelDemographic.FullName;
+                dem.ContactInfo.FirstName = modelDemographic.ContactInfo.FirstName;
+                dem.ContactInfo.LastName = modelDemographic.ContactInfo.LastName;
+                dem.ContactInfo.FullName = modelDemographic.ContactInfo.FullName;
                 dem.PayProfits[0]!.ProfitYear = _paginationRequest.ProfitYear;
             }
 

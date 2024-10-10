@@ -19,20 +19,6 @@ public class DemographicsRequestDtoValidator : Validator<DemographicsRequest>
             .NotEmpty()
             .InclusiveBetween(1, 999_999_999_999_999).WithMessage("OracleHcmId must be a 15-digit number.");
 
-        RuleFor(x => x.FullName)
-            .MaximumLength(60).WithMessage("FullName cannot exceed 60 characters.");
-
-        RuleFor(x => x.LastName)
-            .NotEmpty()
-            .MaximumLength(30).WithMessage("LastName cannot exceed 30 characters.");
-
-        RuleFor(x => x.FirstName)
-            .NotEmpty()
-            .MaximumLength(30).WithMessage("FirstName cannot exceed 30 characters.");
-
-        RuleFor(x => x.MiddleName)
-            .MaximumLength(25).WithMessage("MiddleName cannot exceed 25 characters.");
-
         RuleFor(x => x.StoreNumber)
             .InclusiveBetween((short)1, (short)999)
             .WithMessage("StoreNumber must be a 3-digit number.");

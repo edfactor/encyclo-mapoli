@@ -9,6 +9,10 @@ internal sealed class ContactInfoFaker : Faker<ContactInfo>
     {
         RuleFor(ci => ci.PhoneNumber, f => f.Phone.PhoneNumber("###-###-####"))
             .RuleFor(ci => ci.MobileNumber, f => f.Phone.PhoneNumber("###-###-####"))
-            .RuleFor(ci => ci.EmailAddress, f => f.Internet.Email());
+            .RuleFor(ci => ci.EmailAddress, f => f.Internet.Email())
+            .RuleFor(ci => ci.FirstName, f => f.Name.FirstName())
+            .RuleFor(ci => ci.MiddleName, f => f.Name.FirstName().OrNull(f))
+            .RuleFor(ci => ci.LastName, f => f.Name.FirstName())
+            .RuleFor(d => d.FullName, (f, d) => $"{d.LastName}, {d.FirstName}");
     }
 }
