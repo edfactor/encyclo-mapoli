@@ -15,7 +15,7 @@ const DuplicateSSNsOnDemographicsGrid = () => {
   });
 
   const dispatch = useDispatch();
-  const { duplicateSSNsData } = useSelector((state: RootState) => state.yearsEnd)
+  const { duplicateSSNsData } = useSelector((state: RootState) => state.yearsEnd);
   const [_, { isLoading }] = useLazyGetDuplicateSSNsQuery();
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
@@ -23,22 +23,26 @@ const DuplicateSSNsOnDemographicsGrid = () => {
 
   return (
     <>
-      <div style={{ padding: "0 24px 0 24px" }}>
-        <Typography
-          variant="h2"
-          sx={{ color: "#0258A5" }}>
-          {`PAYROLL DUPLICATE SSNs ON DEMOGRAPHICS (${duplicateSSNsData?.response.total || 0})`}
-        </Typography>
-      </div>
-      <DSMGrid
-        preferenceKey={"DUPE_SSNS"}
-        isLoading={isLoading}
-        handleSortChanged={sortEventHandler}
-        providedOptions={{
-          rowData: duplicateSSNsData?.response.results,
-          columnDefs: columnDefs
-        }}
-      />
+      {duplicateSSNsData?.response && (
+        <>
+          <div style={{ padding: "0 24px 0 24px" }}>
+            <Typography
+              variant="h2"
+              sx={{ color: "#0258A5" }}>
+              {`DUPLICATE SSNs ON DEMOGRAPHICS (${duplicateSSNsData?.response.total || 0})`}
+            </Typography>
+          </div>
+          <DSMGrid
+            preferenceKey={"DUPE_SSNS"}
+            isLoading={false}
+            handleSortChanged={sortEventHandler}
+            providedOptions={{
+              rowData: duplicateSSNsData?.response.results,
+              columnDefs: columnDefs
+            }}
+          />
+        </>
+      )}
       {!!duplicateSSNsData && duplicateSSNsData.response.results.length > 0 && (
         <Pagination
           pageNumber={pageNumber}
