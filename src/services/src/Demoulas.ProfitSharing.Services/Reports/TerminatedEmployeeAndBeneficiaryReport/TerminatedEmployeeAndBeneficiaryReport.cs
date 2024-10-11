@@ -1,4 +1,5 @@
-﻿using Demoulas.Common.Contracts.Contracts.Request;
+﻿using System.Runtime.Intrinsics.X86;
+using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common;
@@ -14,32 +15,26 @@ namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficia
 /// <summary>
 /// Reports on both employees which where terminated in the time range specified (but not retired.), and all beneficiaries.
 /// </summary>
-public class TerminatedEmployeeAndBeneficiaryReport
+internal sealed class TerminatedEmployeeAndBeneficiaryReport
 {
-    private readonly ILogger _logger;
     private readonly ProfitSharingReadOnlyDbContext _ctx;
 
-    // This is usually Today's date, however when tests are running, a specific date can be used.
-    private readonly DateOnly _todaysDate;
-
-    public TerminatedEmployeeAndBeneficiaryReport(ILogger logger, ProfitSharingReadOnlyDbContext ctx, DateOnly todaysDate)
+    public TerminatedEmployeeAndBeneficiaryReport(ProfitSharingReadOnlyDbContext ctx)
     {
-        _logger = logger;
         _ctx = ctx;
-        _todaysDate = todaysDate;
     }
 
     public async Task<TerminatedEmployeeAndBeneficiaryResponse> CreateData(TerminatedEmployeeAndBeneficiaryDataRequest req)
     {
-     
-        List<MemberSlice> memberSlices = await RetrieveMemberSlices(req, CancellationToken.None);
-        List<Member> members = await MergeMemberSlicesToMembers(memberSlices, req.ProfitYear);
+
+        IOrderedQueryable<MemberSlice> memberSliceUnion = RetrieveMemberSlices(req);
+        List<Member> members = await MergeMemberSlicesToMembers(req, memberSliceUnion);
         TerminatedEmployeeAndBeneficiaryResponse fullResponse =  CreateDataset(members, req);
         return fullResponse;
     }
 
 
-    private async Task<PaginatedResponseDto<MemberSlice>> RetrieveMemberSlices(TerminatedEmployeeAndBeneficiaryDataRequest request, CancellationToken cancellationToken)
+    private IOrderedQueryable<MemberSlice> RetrieveMemberSlices(TerminatedEmployeeAndBeneficiaryDataRequest request)
     {
         // slices of member information (aka employee or beneficiary information)
 
@@ -91,7 +86,7 @@ public class TerminatedEmployeeAndBeneficiaryReport
            .Select(b => new
            {
                Beneficiary = b,
-               Demographic = b.Demographic,
+               b.Demographic,
                PayProfit = b.Demographic!.PayProfits
                    .First(p => p.ProfitYear == request.ProfitYear) // Select the PayProfit for the specified profit year since there's only one record, fetch the first
            })
@@ -119,98 +114,102 @@ public class TerminatedEmployeeAndBeneficiaryReport
                BeneficiaryAllocation = 0 // Adjust if needed
            });
 
-       var memberSlices = await demographicSlice.Union(beneficiarySlice).ToPaginationResultsAsync(request, cancellationToken);
-
-        return memberSlices;
+       return demographicSlice
+           .Union(beneficiarySlice)
+           .OrderBy(m => m.FullName);
     }
 
-    private async Task<List<Member>> MergeMemberSlicesToMembers(List<MemberSlice> memberSlices, decimal profitSharingYearWithIteration)
+    private async Task<List<Member>> MergeMemberSlicesToMembers(TerminatedEmployeeAndBeneficiaryDataRequest req,
+        IOrderedQueryable<MemberSlice> memberSliceUnion)
     {
-        // Order records by FullName
-        memberSlices.Sort((a, b) => StringComparer.Ordinal.Compare(a.FullName, b.FullName));
-        long ssn = long.MinValue;
-
-        // These values are merged 
-        decimal netBalanceLastYear = 0;
-        decimal vestedBalanceLastYear = 0;
-        decimal beneficiaryAllocation = 0;
-
-        List<Member> members = [];
-        Member? ms = null;
-
-        // This does seem odd, and possibly a bug?   We ask the user for the profit sharing year with a decimal.
-        // but then we ignore the decimal part when querying records, but display the full value when printing the report.
-        long profitSharingYearOnly = (long)Math.Truncate(profitSharingYearWithIteration);
-
-        var memberSsns = memberSlices.Select(ms => ms.Ssn).Distinct().ToList();
-        var profitDetails = await _ctx.ProfitDetails.Where(pd => memberSsns.Contains(pd.Ssn) &&
-                                                                 pd.ProfitYear >= profitSharingYearOnly &&
-                                                                 pd.ProfitYear < (profitSharingYearOnly + 1)).ToListAsync();
-
-        foreach (var m in memberSlices)
-        {
-            // if the ssn has changed,
-            if (((m.Ssn != ssn && ssn != long.MinValue) ||
-                (ssn == long.MaxValue)) && (m != memberSlices[^1]))
+        var combinedCollection =
+            from memberSlice in memberSliceUnion
+            join profitDetail in _ctx.ProfitDetails
+                on new { memberSlice.Ssn, req.ProfitYear } equals new { profitDetail.Ssn, profitDetail.ProfitYear } into profitDetailGroup
+            from profitDetail in profitDetailGroup // Left join to include MemberSlices even if there's no matching ProfitDetail
+            select new
             {
-                // then merge the slices together
-
-                // Get this year's transactions and merge in those amounts
-                ProfitDetailSummary ds = RetrieveProfitDetail(profitDetails, ssn);
-                beneficiaryAllocation += ds.BeneficiaryAllocation;
-
-                // If member has money (otherwise we skip them)
-                if (netBalanceLastYear != 0 || ds.BeneficiaryAllocation != 0 || ds.Distribution != 0 || ds.Forfeiture != 0)
-                {
-                    ms = ms! with
-                    {
-                        EndingBalance = netBalanceLastYear + ds.Forfeiture + ds.Distribution + beneficiaryAllocation,
-                        DistributionAmount = ds.Distribution,
-                        ForfeitAmount = ds.Forfeiture,
-                        VestedBalance = vestedBalanceLastYear + ds.Distribution + beneficiaryAllocation,
-                        BeneficiaryAllocation = beneficiaryAllocation
-                    };
-                    members.Add(ms);
-                }
-                netBalanceLastYear = 0;
-                vestedBalanceLastYear = 0;
-                beneficiaryAllocation = 0;
-            }
-            // This indicates we have processed the last record.
-            if (ssn == long.MaxValue)
-            {
-                break;
-            }
-            netBalanceLastYear += m.NetBalanceLastYear;
-            vestedBalanceLastYear += m.VestedBalanceLastYear;
-            beneficiaryAllocation += m.BeneficiaryAllocation;
-            ssn = m.Ssn;
-
-            ms = new Member
-            {
-                Psn = m.Psn,
-                FullName = m.FullName,
-                FirstName = m.FirstName,
-                LastName = m.LastName,
-                MiddleInitial = m.MiddleInitial,
-                Birthday = m.BirthDate,
-                HoursCurrentYear = m.HoursCurrentYear,
-                EarningsCurrentYear = m.IncomeRegAndExecCurrentYear,
-                Ssn = m.Ssn,
-                TerminationDate = m.TerminationDate,
-                TerminationCode = m.TerminationCode,
-                BeginningAmount = netBalanceLastYear,
-                CurrentVestedAmount = vestedBalanceLastYear,
-                YearsInPlan = m.YearsInPs,
-                ZeroCont = m.ZeroCont,
-                Enrolled = m.Enrolled,
-                Evta = m.Etva,
-                BeneficiaryAllocation = beneficiaryAllocation,
-                DistributionAmount = 0,
-                ForfeitAmount = 0,
-                EndingBalance = 0,
-                VestedBalance = 0
+                memberSlice.Psn,
+                memberSlice.Ssn,
+                memberSlice.FullName,
+                memberSlice.FirstName,
+                memberSlice.LastName,
+                memberSlice.MiddleInitial,
+                memberSlice.BirthDate,
+                memberSlice.HoursCurrentYear,
+                memberSlice.NetBalanceLastYear,
+                memberSlice.VestedBalanceLastYear,
+                memberSlice.EmploymentStatusCode,
+                memberSlice.TerminationDate,
+                memberSlice.IncomeRegAndExecCurrentYear,
+                memberSlice.BeneficiaryAllocation,
+                memberSlice.TerminationCode,
+                memberSlice.YearsInPs,
+                memberSlice.ZeroCont,
+                memberSlice.Enrolled,
+                memberSlice.Etva,
+                ProfitDetailForfeiture = profitDetail.Forfeiture,
+                ProfitDetailProfitCode = profitDetail.ProfitCodeId,
             };
+
+        var groupedMembers = await combinedCollection
+            .GroupBy(m => m.Ssn) // Group by SSN to process all slices for each SSN
+            .ToListAsync();
+
+        var members = new List<Member>();
+
+        foreach (var group in groupedMembers)
+        {
+            // Accumulate financial values for each SSN
+            decimal netBalanceLastYear = 0;
+            decimal vestedBalanceLastYear = 0;
+            decimal beneficiaryAllocation = 0;
+
+            foreach (var m in group)
+            {
+                netBalanceLastYear += m.NetBalanceLastYear;
+                vestedBalanceLastYear += m.VestedBalanceLastYear;
+                beneficiaryAllocation += m.BeneficiaryAllocation;
+            }
+
+            // Get ProfitDetailSummary for the current SSN
+            profitDetailsForAll.Where(pd => pd.Ssn == ssn).ToList()
+            ProfitDetailSummary ds = RetrieveProfitDetail(profitDetails, group.Key);
+            beneficiaryAllocation += ds.BeneficiaryAllocation;
+
+            // If the member has financial data, create a Member object
+            if (netBalanceLastYear != 0 || ds.BeneficiaryAllocation != 0 || ds.Distribution != 0 || ds.Forfeiture != 0)
+            {
+                var firstSlice = group.First(); // Use the first slice for common member data
+
+                var member = new Member
+                {
+                    Psn = firstSlice.Psn,
+                    FullName = firstSlice.FullName,
+                    FirstName = firstSlice.FirstName,
+                    LastName = firstSlice.LastName,
+                    MiddleInitial = firstSlice.MiddleInitial,
+                    Birthday = firstSlice.BirthDate,
+                    HoursCurrentYear = firstSlice.HoursCurrentYear,
+                    EarningsCurrentYear = firstSlice.IncomeRegAndExecCurrentYear,
+                    Ssn = firstSlice.Ssn,
+                    TerminationDate = firstSlice.TerminationDate,
+                    TerminationCode = firstSlice.TerminationCode,
+                    BeginningAmount = netBalanceLastYear,
+                    CurrentVestedAmount = vestedBalanceLastYear,
+                    YearsInPlan = firstSlice.YearsInPs,
+                    ZeroCont = firstSlice.ZeroCont,
+                    Enrolled = firstSlice.Enrolled,
+                    Evta = firstSlice.Etva,
+                    BeneficiaryAllocation = beneficiaryAllocation,
+                    DistributionAmount = ds.Distribution,
+                    ForfeitAmount = ds.Forfeiture,
+                    EndingBalance = netBalanceLastYear + ds.Forfeiture + ds.Distribution + beneficiaryAllocation,
+                    VestedBalance = vestedBalanceLastYear + ds.Distribution + beneficiaryAllocation
+                };
+
+                members.Add(member);
+            }
         }
 
         return members;
@@ -382,32 +381,32 @@ public class TerminatedEmployeeAndBeneficiaryReport
         {
             if (profitDetail.ProfitCodeId == ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal || profitDetail.ProfitCodeId == ProfitCode.Constants.OutgoingDirectPayments)
             {
-                distribution = distribution - profitDetail.Forfeiture;
+                distribution -= profitDetail.Forfeiture;
             }
 
             if (profitDetail.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures)
             {
-                forfeiture = forfeiture - profitDetail.Forfeiture;
+                forfeiture -= profitDetail.Forfeiture;
             }
 
             if (profitDetail.ProfitCodeId == ProfitCode.Constants.IncomingContributions)
             {
-                forfeiture = forfeiture + profitDetail.Forfeiture;
+                forfeiture += profitDetail.Forfeiture;
             }
 
             if (profitDetail.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment)
             {
-                distribution = distribution - profitDetail.Forfeiture;
+                distribution -= profitDetail.Forfeiture;
             }
 
             if (profitDetail.ProfitCodeId == ProfitCode.Constants.OutgoingXferBeneficiary)
             {
-                beneficiaryAllocation = beneficiaryAllocation - profitDetail.Forfeiture;
+                beneficiaryAllocation -= profitDetail.Forfeiture;
             }
 
             if (profitDetail.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary)
             {
-                beneficiaryAllocation = beneficiaryAllocation + profitDetail.Contribution;
+                beneficiaryAllocation += profitDetail.Contribution;
             }
         }
         return new ProfitDetailSummary(distribution, forfeiture, beneficiaryAllocation);

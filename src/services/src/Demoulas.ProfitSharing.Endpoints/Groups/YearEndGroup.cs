@@ -10,20 +10,28 @@ public sealed class YearEndGroup : Group
 {
     private const string Route = "yearend";
     private const string RouteName = "Year End";
-    public YearEndGroup()
+    public YearEndGroup(Action<RouteHandlerBuilder> builder)
     {
-        Configure(Route.ToLowerInvariant(), ep => //admin is the route prefix for the top level group
+        Configure(Route.ToLowerInvariant(), ep =>
         {
-            ep.Description(x => x
-                .Produces((int)HttpStatusCode.Unauthorized)
-                .Produces((int)HttpStatusCode.Forbidden)
-                .Produces((int)HttpStatusCode.NotFound)
-                .Produces((int)HttpStatusCode.TooManyRequests)
-                .Produces((int)HttpStatusCode.MethodNotAllowed)
-                .ProducesProblemFE<Microsoft.AspNetCore.Mvc.ProblemDetails>()
-                .ProducesProblemFE<Microsoft.AspNetCore.Mvc.ProblemDetails>((int)HttpStatusCode.InternalServerError)
-                .WithRequestTimeout(TimeSpan.FromMinutes(1))
-                .WithTags(RouteName));
-            ep.Policies(Policy.CanViewYearEndReports);});
+            ep.Description(x =>
+            {
+                // Apply chained methods to x
+                x.Produces((int)HttpStatusCode.Unauthorized)
+                    .Produces((int)HttpStatusCode.Forbidden)
+                    .Produces((int)HttpStatusCode.NotFound)
+                    .Produces((int)HttpStatusCode.TooManyRequests)
+                    .Produces((int)HttpStatusCode.MethodNotAllowed)
+                    .ProducesProblemFE<Microsoft.AspNetCore.Mvc.ProblemDetails>()
+                    .ProducesProblemFE<Microsoft.AspNetCore.Mvc.ProblemDetails>((int)HttpStatusCode.InternalServerError)
+                    .WithRequestTimeout(TimeSpan.FromMinutes(1))
+                    .WithTags(RouteName);
+
+                // Now invoke the builder, passing x (the RouteHandlerBuilder instance)
+                builder(x);
+            });
+
+            ep.Policies(Policy.CanViewYearEndReports);
+        });
     }
 }
