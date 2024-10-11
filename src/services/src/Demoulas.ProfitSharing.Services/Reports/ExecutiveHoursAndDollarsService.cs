@@ -84,14 +84,6 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
             foreach (var pp in ppQuery)
             {
                 var dto = executiveHoursAndDollarsDtos.First(x => x.BadgeNumber == pp.Demographic!.BadgeNumber);
-                /**
-                Works great with Oracle, but the test doesnt pass.
-                await ctx.PayProfits.Where(p=>p.OracleHcmId == pp.OracleHcmId && p.profitYear = profitYear).ExecuteUpdateAsync(
-                    p => p
-                        .SetProperty(p => p.HoursExecutive, p => dto.ExecutiveHours)
-                        .SetProperty(p => p.IncomeExecutive, p => dto.ExecutiveDollars)
-                    , cancellationToken);
-                **/
                 pp.HoursExecutive = dto.ExecutiveHours;
                 pp.IncomeExecutive = dto.ExecutiveDollars;
             }
