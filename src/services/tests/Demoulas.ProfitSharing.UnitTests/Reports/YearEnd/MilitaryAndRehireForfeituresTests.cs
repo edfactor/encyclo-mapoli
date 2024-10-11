@@ -22,8 +22,6 @@ using System.Globalization;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
-using Newtonsoft.Json;
-using FluentAssertions.Execution;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 

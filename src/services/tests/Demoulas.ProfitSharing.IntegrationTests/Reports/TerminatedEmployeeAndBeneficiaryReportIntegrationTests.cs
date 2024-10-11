@@ -46,10 +46,9 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests
         DateOnly endDate = new DateOnly(2024, 01, 02);
         short profitSharingYear = 2023;
 
-        Mock<ILogger> ilogger = new Mock<ILogger>();
-
+      
         DateOnly effectiveDateOfTestData = new DateOnly(2024, 9, 17);
-        TerminatedEmployeeAndBeneficiaryReport terminatedEmployeeAndBeneficiaryReport = new TerminatedEmployeeAndBeneficiaryReport(ilogger.Object!, ctx, effectiveDateOfTestData);
+        TerminatedEmployeeAndBeneficiaryReport terminatedEmployeeAndBeneficiaryReport = new TerminatedEmployeeAndBeneficiaryReport(ctx);
         TerminatedEmployeeAndBeneficiaryDataRequest req = new()
         {
             EndDate = endDate, ProfitYear = profitSharingYear, StartDate = startDate

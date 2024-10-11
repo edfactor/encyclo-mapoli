@@ -66,7 +66,7 @@ BADGE/PSN # EMPLOYEE NAME           BALANCE  ALLOCATION       AMOUNT       FORFE
         string ageStr = age.HasValue ? $"{age:00}" : "";
 
         _reportWriter.WriteLine(r2BadgePsnNp.PadLeft(11) + " " +
-                          r2EmployeeName.PadRight(19) + " " +
+                          r2EmployeeName?.PadRight(19) + " " +
                           FormatWithSingleComma(r2PsAmt).PadLeft(12) + " " +
                           FormatWithSingleComma(r2BenAlloc).PadLeft(12) + " " +
                           FormatWithSingleComma(r2PsLoan).PadLeft(12) + " " +

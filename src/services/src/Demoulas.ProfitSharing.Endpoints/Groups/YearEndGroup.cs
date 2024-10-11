@@ -10,7 +10,7 @@ public sealed class YearEndGroup : Group
 {
     private const string Route = "yearend";
     private const string RouteName = "Year End";
-    public YearEndGroup(Action<RouteHandlerBuilder> builder)
+    public YearEndGroup()
     {
         Configure(Route.ToLowerInvariant(), ep =>
         {
@@ -26,9 +26,6 @@ public sealed class YearEndGroup : Group
                     .ProducesProblemFE<Microsoft.AspNetCore.Mvc.ProblemDetails>((int)HttpStatusCode.InternalServerError)
                     .WithRequestTimeout(TimeSpan.FromMinutes(1))
                     .WithTags(RouteName);
-
-                // Now invoke the builder, passing x (the RouteHandlerBuilder instance)
-                builder(x);
             });
 
             ep.Policies(Policy.CanViewYearEndReports);

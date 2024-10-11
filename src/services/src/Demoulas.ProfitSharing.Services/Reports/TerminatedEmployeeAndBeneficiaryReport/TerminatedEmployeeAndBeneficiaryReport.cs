@@ -12,7 +12,7 @@ namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficia
 /// <summary>
 /// Reports on both employees which where terminated in the time range specified (but not retired.), and all beneficiaries.
 /// </summary>
-internal sealed class TerminatedEmployeeAndBeneficiaryReport
+public sealed class TerminatedEmployeeAndBeneficiaryReport
 {
     private readonly ProfitSharingReadOnlyDbContext _ctx;
 
@@ -61,7 +61,7 @@ internal sealed class TerminatedEmployeeAndBeneficiaryReport
                 EmploymentStatusCode = d.Demographic.EmploymentStatusId,
                 FullName = d.Demographic.ContactInfo.FullName,
                 FirstName = d.Demographic.ContactInfo.FirstName,
-                MiddleInitial = d.Demographic.ContactInfo.MiddleName != null ? d.Demographic.ContactInfo.MiddleName[..1] : string.Empty,
+                MiddleInitial = d.Demographic.ContactInfo.MiddleName != null ? d.Demographic.ContactInfo.MiddleName.Substring(0, 1) : string.Empty,
                 LastName = d.Demographic.ContactInfo.LastName,
                 YearsInPs = 0, // TO-DO !!! PayProfit refactor, pp.CompanyContributionYears,
                 TerminationDate = d.Demographic.TerminationDate,
@@ -99,7 +99,7 @@ internal sealed class TerminatedEmployeeAndBeneficiaryReport
                EmploymentStatusCode = x.Demographic!.EmploymentStatusId,
                FullName = x.Beneficiary.Contact!.FullName!,
                FirstName = x.Beneficiary.Contact!.FirstName,
-               MiddleInitial = x.Beneficiary.Contact.MiddleName != null ? x.Beneficiary.Contact.MiddleName[..1] : string.Empty,
+               MiddleInitial = x.Beneficiary.Contact.MiddleName != null ? x.Beneficiary.Contact.MiddleName.Substring(0, 1) : string.Empty,
                LastName = x.Beneficiary.Contact.LastName,
                YearsInPs = 0, // Use PayProfit for contribution years
                TerminationDate = x.Demographic.TerminationDate,

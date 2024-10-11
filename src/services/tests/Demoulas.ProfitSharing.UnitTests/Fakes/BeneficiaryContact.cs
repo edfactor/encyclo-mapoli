@@ -35,6 +35,6 @@ internal sealed class BeneficiaryContactFaker : Faker<BeneficiaryContact>
                 PostalCode = f.Address.ZipCode(),
                 CountryIso = Country.Constants.Us
             });
-        RuleFor(d => d.ContactInfo, f => contactInfoFaker.Generate());
+        RuleFor(d => d, f => contactInfoFaker.Generate());
     }
 }

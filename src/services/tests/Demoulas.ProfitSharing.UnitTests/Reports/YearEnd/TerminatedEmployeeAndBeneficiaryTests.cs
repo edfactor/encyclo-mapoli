@@ -1,22 +1,16 @@
 ﻿using System.Net;
 using Demoulas.ProfitSharing.Api;
-using Demoulas.ProfitSharing.Client.Reports.YearEnd;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.TerminatedEmployeeAndBeneficiary;
 using Demoulas.ProfitSharing.Security;
-using Demoulas.ProfitSharing.Services.Reports;
-using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 using Demoulas.ProfitSharing.UnitTests.Base;
 using Demoulas.ProfitSharing.UnitTests.Extensions;
 using FastEndpoints;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -27,7 +21,7 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
     public TerminatedEmployeeAndBeneficiaryTests()
     {
         TerminatedEmployeeAndBeneficiaryReportService mockService =
-            new TerminatedEmployeeAndBeneficiaryReportService(MockDbContextFactory, new LoggerFactory());
+            new TerminatedEmployeeAndBeneficiaryReportService(MockDbContextFactory);
         _endpoint = new TerminatedEmployeeAndBeneficiaryDataEndpoint(mockService);
     }
 
@@ -90,11 +84,7 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
 
             await c.SaveChangesAsync();
 
-            // Lock age and todays' date computation when testing. 
-            TerminatedEmployeeAndBeneficiaryReportService.SetTodayDateForTestingOnly(new DateOnly(2024, 9, 7));
-
-            var response =
-                (TerminatedEmployeeAndBeneficiaryResponse) await _endpoint.GetResponse(requestDto, CancellationToken.None);
+            var response = await _endpoint.GetResponse(requestDto, CancellationToken.None);
            
 
             response!.ReportName.Should().BeEquivalentTo("Terminated Employee and Beneficiary Report");
@@ -136,18 +126,16 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
             // Arrange
             var bene = await c.Beneficiaries
                 .Include(beneficiary => beneficiary.Contact)
-                .ThenInclude(beneficiaryContact => beneficiaryContact!.ContactInfo).FirstAsync();
+                .ThenInclude(beneficiaryContact => beneficiaryContact!).FirstAsync();
             bene.Amount = 379.44m;
-            bene.Contact!.ContactInfo.FirstName = "Rogue";
-            bene.Contact.ContactInfo.LastName = "One";
-            bene.Contact.ContactInfo.MiddleName = "I";
+            bene.Contact!.FirstName = "Rogue";
+            bene.Contact.LastName = "One";
+            bene.Contact.MiddleName = "I";
             bene.Contact.DateOfBirth = new DateOnly(1990, 1, 1);
 
             await c.SaveChangesAsync();
 
-            // Lock age and todays' date computation when testing. 
-            TerminatedEmployeeAndBeneficiaryReportService.SetTodayDateForTestingOnly(new DateOnly(2024, 9, 7));
-
+           
             // Act
             ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 

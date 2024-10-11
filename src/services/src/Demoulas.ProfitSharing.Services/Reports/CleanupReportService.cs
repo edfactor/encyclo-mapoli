@@ -293,8 +293,8 @@ public class CleanupReportService : ICleanupReportService
                     }).Union(ctx.Beneficiaries.Include(b => b.Contact).Select(x => new
                     {
                         x.Contact!.Ssn,
-                        x.Contact.ContactInfo.FirstName,
-                        x.Contact.ContactInfo.LastName,
+                        x.Contact.FirstName,
+                        x.Contact.LastName,
                         x.Contact.DateOfBirth,
                         BadgeNumber = 0
                     }))
