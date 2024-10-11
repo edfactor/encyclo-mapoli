@@ -10,7 +10,10 @@ public sealed class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<Pro
     public ProfitSharingDbContext CreateDbContext(string[] args)
     {
         DbContextOptionsBuilder<ProfitSharingDbContext> optionsBuilder = new DbContextOptionsBuilder<ProfitSharingDbContext>();
-        _ = optionsBuilder.UseOracle();
+        _ = optionsBuilder.UseOracle(builder =>
+        {
+            builder.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19);
+        });
         _ = optionsBuilder.UseUpperCaseNamingConvention();
 
         return new ProfitSharingDbContext(optionsBuilder.Options);

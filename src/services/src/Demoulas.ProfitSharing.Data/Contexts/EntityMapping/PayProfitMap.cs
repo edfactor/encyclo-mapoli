@@ -71,34 +71,28 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
             .HasColumnName("ENROLLMENT_ID");
 
         _ = builder.Property(e => e.BeneficiaryTypeId)
-            .HasColumnName("BENEFICIARY_ID");
+            .HasColumnName("BENEFICIARY_TYPE_ID");
 
         _ = builder.Property(e => e.EmployeeTypeId)
             .HasColumnName("EMPLOYEE_TYPE_ID");
 
-        _ = builder.HasOne(d => d.Demographic)
-            .WithMany(p => p.PayProfits)
-            .HasForeignKey(d => d.OracleHcmId)
-            .OnDelete(DeleteBehavior.NoAction);
-
-
         _ = builder.HasOne(e => e.Enrollment)
-            .WithMany(p => p.Profits)
+            .WithMany()
             .HasForeignKey(p => p.EnrollmentId)
             .OnDelete(DeleteBehavior.NoAction);
 
         _ = builder.HasOne(e => e.BeneficiaryType)
-            .WithMany(p => p.Profits)
+            .WithMany()
             .HasForeignKey(p => p.BeneficiaryTypeId)
             .OnDelete(DeleteBehavior.NoAction);
 
         _ = builder.HasOne(e => e.EmployeeType)
-            .WithMany(p => p.Profits)
+            .WithMany()
             .HasForeignKey(p => p.EmployeeTypeId)
             .OnDelete(DeleteBehavior.NoAction);
             
        _ = builder.HasOne(d => d.ZeroContributionReason)
-            .WithMany(p => p.Profits)
+            .WithMany()
             .HasForeignKey(d => d.ZeroContributionReasonId)
             .OnDelete(DeleteBehavior.NoAction);
     }

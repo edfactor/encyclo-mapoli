@@ -1,5 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.UnitTests.Mocks;
+using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,6 +38,7 @@ public class ApiTestBase<TStartup> where TStartup : class
     /// </remarks>
     public ApiTestBase()
     {
+        AssertionOptions.FormattingOptions.MaxLines = 250;
         MockDbContextFactory = MockDataContextFactory.InitializeForTesting();
         WebApplicationFactory<TStartup> webApplicationFactory = new WebApplicationFactory<TStartup>();
 

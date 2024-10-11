@@ -31,11 +31,11 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
         {
             return c.PayProfits
                 .Where(p => (p.HoursExecutive > 0 || p.IncomeExecutive > 0) && p.ProfitYear == request.ProfitYear)
-                .Include(p=>p.Demographic)
+                .Include(p => p.Demographic)
                 .Select(p => new ExecutiveHoursAndDollarsResponse
                 {
                     BadgeNumber = p.Demographic!.BadgeNumber,
-                    FullName = p.Demographic.FullName,
+                    FullName = p.Demographic.ContactInfo.FullName,
                     StoreNumber = p.Demographic.StoreNumber,
                     HoursExecutive = p.HoursExecutive,
                     IncomeExecutive = p.IncomeExecutive,

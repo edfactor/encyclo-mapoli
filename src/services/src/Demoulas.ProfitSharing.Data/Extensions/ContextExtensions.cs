@@ -8,6 +8,7 @@ internal static class ContextExtensions
 {
     public static ModelBuilder ApplyModelConfiguration(this ModelBuilder modelBuilder)
     {
+        modelBuilder.ApplyConfiguration(new BeneficiaryContactMap());
         modelBuilder.ApplyConfiguration(new BeneficiaryKindMap());
         modelBuilder.ApplyConfiguration(new BeneficiaryMap());
         modelBuilder.ApplyConfiguration(new BeneficiaryTypeMap());
@@ -35,6 +36,7 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new PayProfitMap());
         modelBuilder.ApplyConfiguration(new ProfitCodeMap());
         modelBuilder.ApplyConfiguration(new ProfitDetailMap());
+        modelBuilder.ApplyConfiguration(new ProfitShareCheckMap());
         modelBuilder.ApplyConfiguration(new StartMethodMap());
         modelBuilder.ApplyConfiguration(new StateTaxMap());
         modelBuilder.ApplyConfiguration(new TaxCodeMap());

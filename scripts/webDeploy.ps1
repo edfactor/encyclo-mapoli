@@ -34,14 +34,14 @@ $Deployments = @(
         IgnoreFiles = @("credSettings.$($envTarget).json")
         ConfigEnvironment = $configTarget
     }
-    #@{
-    #    Artifact = "Demoulas.Smart.UI.$($envTarget).zip"
-    #    TargetPath = 'C:\inetpub\wwwroot\frontend'
-    #    SiteName = 'Frontend'
-    #    AppPoolName = 'FrontendUIAppPool'
-    #    IgnoreFiles = @()
-    #    ConfigEnvironment = $configTarget
-    #}
+    @{
+        Artifact = "Demoulas.ProfitSharing.UI.$($envTarget).zip"
+        TargetPath = 'C:\inetpub\wwwroot\frontend'
+        SiteName = 'Frontend'
+        AppPoolName = 'FrontendUIAppPool'
+        IgnoreFiles = @()
+        ConfigEnvironment = $configTarget
+    }
 )
 
 $Failed = $false

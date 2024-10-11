@@ -7,10 +7,7 @@ public record DemographicsRequest : IMemberRequest
     public int BadgeNumber { get; set; }
 
     public required long OracleHcmId { get; set; }
-    public string? FullName { get; set; }
-    public required string LastName { get; set; }
-    public required string FirstName { get; set; }
-    public string? MiddleName { get; set; }
+    
     public required short StoreNumber { get; set; }
 
     public required byte DepartmentId { get; set; }

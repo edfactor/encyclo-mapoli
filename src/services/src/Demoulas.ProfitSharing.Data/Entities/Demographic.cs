@@ -6,7 +6,7 @@ namespace Demoulas.ProfitSharing.Data.Entities;
 /// <summary>
 /// https://demoulas.atlassian.net/wiki/spaces/~bherrmann/pages/39944312/Quick+Guide+to+Profit+Sharing+Tables
 /// </summary>
-[DebuggerDisplay("OracleHcmId={OracleHcmId} BadgeNumber={BadgeNumber} FullName={FullName} StoreNumber={StoreNumber}")]
+[DebuggerDisplay("OracleHcmId={OracleHcmId} BadgeNumber={BadgeNumber} FullName={ContactInfo.FullName} StoreNumber={StoreNumber}")]
 public sealed class Demographic : Member
 {
     /// <summary>
@@ -21,10 +21,6 @@ public sealed class Demographic : Member
     public required int BadgeNumber { get; set; }
     public DateTime LastModifiedDate { get; set; }
 
-    public string? FullName { get; set; }
-    public required string LastName { get; set; }
-    public required string FirstName { get; set; }
-    public string? MiddleName { get; set; }
     public required short StoreNumber { get; set; }
 
     public PayClassification? PayClassification { get; set; }
@@ -65,4 +61,7 @@ public sealed class Demographic : Member
     
     
     public List<PayProfit> PayProfits { get; set; } = [];
+    public List<Beneficiary> Beneficiaries { get; set; } = [];
+
+    public List<ProfitShareCheck> Checks { get; set; } = [];
 }

@@ -3,6 +3,7 @@ import { useOktaAuth } from "@okta/okta-react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { Outlet } from "react-router";
+import { setToken } from "reduxstore/slices/securitySlice";
 
 const Login = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED === "true";
@@ -23,7 +24,7 @@ const Login = () => {
       if (authState && authState.isAuthenticated) {
         const accessToken = oktaAuth.getAccessToken();
         if (accessToken) {
-          //dispatch(setToken(accessToken));
+          dispatch(setToken(accessToken));
           setSkipRole(false);
           setSkipPermission(false);
           setSkipUsername(false);

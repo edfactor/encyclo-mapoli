@@ -18,6 +18,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
 
         _ = builder.HasIndex(e => e.Ssn, "IX_SSN");
         _ = builder.HasIndex(e => new {e.Ssn, e.OracleHcmId}, "IX_SSN_ORACLE_HCM_ID");
+        
         _ = builder.Property(e => e.Ssn)
             .HasPrecision(9)
             .IsRequired()
@@ -33,29 +34,6 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             .HasPrecision(15)
             .ValueGeneratedNever()
             .HasColumnName("ORACLE_HCM_ID");
-
-        _ = builder.Property(e => e.FullName)
-            .HasMaxLength(60)
-            .HasComment("FullName")
-            .HasColumnName("FULL_NAME")
-            .IsRequired();
-
-        _ = builder.Property(e => e.LastName)
-            .HasMaxLength(30)
-            .HasComment("LastName")
-            .HasColumnName("LAST_NAME")
-            .IsRequired();
-
-        _ = builder.Property(e => e.FirstName)
-            .HasMaxLength(30)
-            .HasComment("FirstName")
-            .HasColumnName("FIRST_NAME")
-            .IsRequired();
-
-        _ = builder.Property(e => e.MiddleName)
-            .HasMaxLength(25)
-            .HasColumnName("MIDDLE_NAME")
-            .HasComment("MiddleName");
 
         _ = builder.Property(e => e.StoreNumber)
             .HasPrecision(3)
@@ -127,7 +105,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             .HasColumnName("EMPLOYMENT_STATUS_ID");
 
 
-        builder.OwnsOne(e => e.Address, address =>
+        _ = builder.OwnsOne(e => e.Address, address =>
         {
             address.Property(a => a.Street).HasMaxLength(30).HasColumnName("STREET").HasComment("Street").IsRequired();
             address.Property(a => a.Street2).HasMaxLength(30).HasColumnName("STREET2").HasComment("Street2");
@@ -145,9 +123,32 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
 
         builder.OwnsOne(e => e.ContactInfo, contact =>
         {
-            contact.Property(a => a.PhoneNumber).HasMaxLength(15).HasColumnName("PHONE_NUMBER");
-            contact.Property(a => a.MobileNumber).HasMaxLength(15).HasColumnName("MOBILE_NUMBER");
-            contact.Property(a => a.EmailAddress).HasMaxLength(50).HasColumnName("EMAIL_ADDRESS");
+            _ = contact.Property(e => e.FullName)
+                .HasMaxLength(84)
+                .HasComment("FullName")
+                .HasColumnName("FULL_NAME")
+                .IsRequired();
+
+            _ = contact.Property(e => e.LastName)
+                .HasMaxLength(30)
+                .HasComment("LastName")
+                .HasColumnName("LAST_NAME")
+                .IsRequired();
+
+            _ = contact.Property(e => e.FirstName)
+                .HasMaxLength(30)
+                .HasComment("FirstName")
+                .HasColumnName("FIRST_NAME")
+                .IsRequired();
+
+            _ = contact.Property(e => e.MiddleName)
+                .HasMaxLength(25)
+                .HasColumnName("MIDDLE_NAME")
+                .HasComment("MiddleName");
+
+            contact.Property(a => a.PhoneNumber).HasMaxLength(16).HasColumnName("PHONE_NUMBER");
+            contact.Property(a => a.MobileNumber).HasMaxLength(16).HasColumnName("MOBILE_NUMBER");
+            contact.Property(a => a.EmailAddress).HasMaxLength(84).HasColumnName("EMAIL_ADDRESS");
         });
 
 
@@ -184,5 +185,17 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
         builder.HasOne(d => d.EmploymentStatus)
             .WithMany(p => p.Demographics)
             .HasForeignKey(d=> d.EmploymentStatusId);
+
+        _ = builder.HasMany(d => d.Beneficiaries)
+            .WithOne(p => p.Demographic)
+            .HasForeignKey(p=> p.OracleHcmId);
+
+        _ = builder.HasMany(d => d.PayProfits)
+            .WithOne(p => p.Demographic)
+            .HasForeignKey(d => d.OracleHcmId);
+
+        _ = builder.HasMany(d => d.Checks)
+            .WithOne()
+            .HasForeignKey(p => p.OracleHcmId);
     }
 }

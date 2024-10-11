@@ -1,24 +1,158 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class refactorDistribution4 : Migration
+    public partial class profitSharingChecks : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropIndex(
+                name: "IX_PROFIT_SHARE_CHECK_CHECKNUMBER",
+                table: "PROFIT_SHARE_CHECK");
+
+            migrationBuilder.AlterColumn<bool>(
+                name: "VOID_FLAG",
+                table: "PROFIT_SHARE_CHECK",
+                type: "NUMBER(1)",
+                nullable: true,
+                oldClrType: typeof(bool),
+                oldType: "NUMBER(1)");
+
+            migrationBuilder.AlterColumn<int>(
+                name: "REF_NUMBER",
+                table: "PROFIT_SHARE_CHECK",
+                type: "NUMBER(10)",
+                maxLength: 36,
+                nullable: true,
+                oldClrType: typeof(int),
+                oldType: "NUMBER(10)",
+                oldMaxLength: 36);
+
+            migrationBuilder.AlterColumn<bool>(
+                name: "OTHER_BENEFICIARY",
+                table: "PROFIT_SHARE_CHECK",
+                type: "NUMBER(1)",
+                nullable: true,
+                oldClrType: typeof(bool),
+                oldType: "NUMBER(1)");
+
+            migrationBuilder.AlterColumn<bool>(
+                name: "MANUAL_CHECK",
+                table: "PROFIT_SHARE_CHECK",
+                type: "NUMBER(1)",
+                nullable: true,
+                oldClrType: typeof(bool),
+                oldType: "NUMBER(1)");
+
+            migrationBuilder.AlterColumn<short>(
+                name: "FLOAT_DAYS",
+                table: "PROFIT_SHARE_CHECK",
+                type: "NUMBER(6)",
+                precision: 6,
+                nullable: true,
+                oldClrType: typeof(int),
+                oldType: "NUMBER(6)",
+                oldPrecision: 6);
+
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "CHECK_DATE",
+                table: "PROFIT_SHARE_CHECK",
+                type: "DATE",
+                nullable: true,
+                oldClrType: typeof(DateTime),
+                oldType: "DATE");
+
             migrationBuilder.AlterColumn<string>(
-                name: "MEMO",
-                table: "DISTRIBUTION_THIRDPARTY_PAYEE",
-                type: "NVARCHAR2(128)",
-                maxLength: 128,
+                name: "PHONE_NUMBER",
+                table: "DEMOGRAPHIC",
+                type: "NVARCHAR2(16)",
+                maxLength: 16,
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "NVARCHAR2(2000)",
+                oldType: "NVARCHAR2(15)",
+                oldMaxLength: 15,
                 oldNullable: true);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "MOBILE_NUMBER",
+                table: "DEMOGRAPHIC",
+                type: "NVARCHAR2(16)",
+                maxLength: 16,
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "NVARCHAR2(15)",
+                oldMaxLength: 15,
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "EMAIL_ADDRESS",
+                table: "DEMOGRAPHIC",
+                type: "NVARCHAR2(84)",
+                maxLength: 84,
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "NVARCHAR2(50)",
+                oldMaxLength: 50,
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "MIDDLE_NAME",
+                table: "BENEFICIARY_CONTACT",
+                type: "NVARCHAR2(25)",
+                maxLength: 25,
+                nullable: true,
+                comment: "MiddleName",
+                oldClrType: typeof(string),
+                oldType: "NVARCHAR2(30)",
+                oldMaxLength: 30,
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "LAST_NAME",
+                table: "BENEFICIARY_CONTACT",
+                type: "NVARCHAR2(30)",
+                maxLength: 30,
+                nullable: false,
+                comment: "LastName",
+                oldClrType: typeof(string),
+                oldType: "NVARCHAR2(30)",
+                oldMaxLength: 30);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "FIRST_NAME",
+                table: "BENEFICIARY_CONTACT",
+                type: "NVARCHAR2(30)",
+                maxLength: 30,
+                nullable: false,
+                comment: "FirstName",
+                oldClrType: typeof(string),
+                oldType: "NVARCHAR2(30)",
+                oldMaxLength: 30);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "EMAIL_ADDRESS",
+                table: "BENEFICIARY_CONTACT",
+                type: "NVARCHAR2(84)",
+                maxLength: 84,
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "NVARCHAR2(64)",
+                oldMaxLength: 64,
+                oldNullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "FULL_NAME",
+                table: "BENEFICIARY_CONTACT",
+                type: "NVARCHAR2(84)",
+                maxLength: 84,
+                nullable: false,
+                defaultValue: "",
+                comment: "FullName");
 
             migrationBuilder.UpdateData(
                 table: "COUNTRY",
@@ -1377,19 +1511,174 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 keyValue: "ZW",
                 column: "ID",
                 value: (short)194);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PROFIT_SHARE_CHECK_CHECKNUMBER_ISVOIDED",
+                table: "PROFIT_SHARE_CHECK",
+                columns: new[] { "CHECK_NUMBER", "VOID_FLAG" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PROFIT_SHARE_CHECK_PSCCHECKID",
+                table: "PROFIT_SHARE_CHECK",
+                column: "PSC_CHECK_ID",
+                unique: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropIndex(
+                name: "IX_PROFIT_SHARE_CHECK_CHECKNUMBER_ISVOIDED",
+                table: "PROFIT_SHARE_CHECK");
+
+            migrationBuilder.DropIndex(
+                name: "IX_PROFIT_SHARE_CHECK_PSCCHECKID",
+                table: "PROFIT_SHARE_CHECK");
+
+            migrationBuilder.DropColumn(
+                name: "FULL_NAME",
+                table: "BENEFICIARY_CONTACT");
+
+            migrationBuilder.AlterColumn<bool>(
+                name: "VOID_FLAG",
+                table: "PROFIT_SHARE_CHECK",
+                type: "NUMBER(1)",
+                nullable: false,
+                defaultValue: false,
+                oldClrType: typeof(bool),
+                oldType: "NUMBER(1)",
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<int>(
+                name: "REF_NUMBER",
+                table: "PROFIT_SHARE_CHECK",
+                type: "NUMBER(10)",
+                maxLength: 36,
+                nullable: false,
+                defaultValue: 0,
+                oldClrType: typeof(int),
+                oldType: "NUMBER(10)",
+                oldMaxLength: 36,
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<bool>(
+                name: "OTHER_BENEFICIARY",
+                table: "PROFIT_SHARE_CHECK",
+                type: "NUMBER(1)",
+                nullable: false,
+                defaultValue: false,
+                oldClrType: typeof(bool),
+                oldType: "NUMBER(1)",
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<bool>(
+                name: "MANUAL_CHECK",
+                table: "PROFIT_SHARE_CHECK",
+                type: "NUMBER(1)",
+                nullable: false,
+                defaultValue: false,
+                oldClrType: typeof(bool),
+                oldType: "NUMBER(1)",
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<int>(
+                name: "FLOAT_DAYS",
+                table: "PROFIT_SHARE_CHECK",
+                type: "NUMBER(6)",
+                precision: 6,
+                nullable: false,
+                defaultValue: 0,
+                oldClrType: typeof(short),
+                oldType: "NUMBER(6)",
+                oldPrecision: 6,
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<DateTime>(
+                name: "CHECK_DATE",
+                table: "PROFIT_SHARE_CHECK",
+                type: "DATE",
+                nullable: false,
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                oldClrType: typeof(DateTime),
+                oldType: "DATE",
+                oldNullable: true);
+
             migrationBuilder.AlterColumn<string>(
-                name: "MEMO",
-                table: "DISTRIBUTION_THIRDPARTY_PAYEE",
-                type: "NVARCHAR2(2000)",
+                name: "PHONE_NUMBER",
+                table: "DEMOGRAPHIC",
+                type: "NVARCHAR2(15)",
+                maxLength: 15,
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "NVARCHAR2(128)",
-                oldMaxLength: 128,
+                oldType: "NVARCHAR2(16)",
+                oldMaxLength: 16,
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "MOBILE_NUMBER",
+                table: "DEMOGRAPHIC",
+                type: "NVARCHAR2(15)",
+                maxLength: 15,
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "NVARCHAR2(16)",
+                oldMaxLength: 16,
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "EMAIL_ADDRESS",
+                table: "DEMOGRAPHIC",
+                type: "NVARCHAR2(50)",
+                maxLength: 50,
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "NVARCHAR2(84)",
+                oldMaxLength: 84,
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "MIDDLE_NAME",
+                table: "BENEFICIARY_CONTACT",
+                type: "NVARCHAR2(30)",
+                maxLength: 30,
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "NVARCHAR2(25)",
+                oldMaxLength: 25,
+                oldNullable: true,
+                oldComment: "MiddleName");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "LAST_NAME",
+                table: "BENEFICIARY_CONTACT",
+                type: "NVARCHAR2(30)",
+                maxLength: 30,
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "NVARCHAR2(30)",
+                oldMaxLength: 30,
+                oldComment: "LastName");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "FIRST_NAME",
+                table: "BENEFICIARY_CONTACT",
+                type: "NVARCHAR2(30)",
+                maxLength: 30,
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "NVARCHAR2(30)",
+                oldMaxLength: 30,
+                oldComment: "FirstName");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "EMAIL_ADDRESS",
+                table: "BENEFICIARY_CONTACT",
+                type: "NVARCHAR2(64)",
+                maxLength: 64,
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "NVARCHAR2(84)",
+                oldMaxLength: 84,
                 oldNullable: true);
 
             migrationBuilder.UpdateData(
@@ -2749,6 +3038,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 keyValue: "ZW",
                 column: "ID",
                 value: (byte)194);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PROFIT_SHARE_CHECK_CHECKNUMBER",
+                table: "PROFIT_SHARE_CHECK",
+                column: "CHECK_NUMBER",
+                unique: true);
         }
     }
 }

@@ -20,8 +20,6 @@ internal sealed class EnrollmentMap : IEntityTypeConfiguration<Enrollment>
             .HasColumnName("NAME")
             .IsRequired();
 
-        builder.HasMany(e => e.Profits).WithOne(p => p.Enrollment);
-
         builder.HasData(
             new Enrollment { Id = Enrollment.Constants.NotEnrolled, Name = "Not Enrolled" },
             new Enrollment { Id = Enrollment.Constants.OldVestingPlanHasContributions, Name = "Old vesting plan has Contributions (7 years to full vesting)" },

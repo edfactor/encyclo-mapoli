@@ -15,7 +15,6 @@ definitions:
           runs-on:
             - windows
             - self.hosted
-            - appt125
           script:
             - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
             - $env:REPORTS_PATH="../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}"
@@ -32,7 +31,6 @@ definitions:
           runs-on:
            - windows
            - self.hosted
-           - appt125
           script:
            - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
           artifacts:
@@ -43,7 +41,6 @@ definitions:
       runs-on:
         - windows
         - self.hosted
-        - appt125
       artifacts:
         - dist\**
       script:
@@ -67,15 +64,16 @@ definitions:
       runs-on:
         - windows
         - self.hosted
-        - appt125
       artifacts:
         - dist\**
       script:
         - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
         - ${env:ENV} = "qa"
         - cd .\src\UI
-        - install --legacy-peer-deps;
-        - ${env:NPM} run build:${env:ENV}
+        - C:\nvm\v20.4.0\npm.cmd install --legacy-peer-deps;
+        - C:\nvm\v20.4.0\npm.cmd run build:${env:ENV}
+        - Copy-Item -Path ".\src\web.config" -Destination "..\..\src\UI\build"
+        - New-Item -Path "..\..\dist" -ItemType Directory
         - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.${env:ENV}.zip" -Force        
 
     create-frontend-artifact-uat: &create-frontend-artifact-uat
@@ -83,7 +81,6 @@ definitions:
       runs-on:
         - windows
         - self.hosted
-        - appt125
       artifacts:
         - dist\**
       script:
@@ -99,14 +96,13 @@ definitions:
       runs-on:
         - windows
         - self.hosted
-        - appt125
       artifacts:
         - dist\**
       script:
         - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
         - ${env:ENV} = "prod"
         - cd .\src\UI
-        - install --legacy-peer-deps;
+        - ${env:NPM} install --legacy-peer-deps;
         - ${env:NPM} run build:${env:ENV}
         - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.$env:ENV.zip" -Force        
 
@@ -119,9 +115,9 @@ pipelines:
           - step: *test-frontend
       - parallel:
           - step: *create-api-artifacts
-          # - step: *create-frontend-artifact-qa
-          # - step: *create-frontend-artifact-uat
-          # - step: *create-frontend-artifact-prod
+          - step: *create-frontend-artifact-qa
+          #- step: *create-frontend-artifact-uat
+          #- step: *create-frontend-artifact-prod
            # Deployment Stage
       
       - step:
@@ -129,7 +125,6 @@ pipelines:
           runs-on:
             - windows
             - self.hosted
-            - appt125
           deployment: QA
           trigger: "manual"
       #     script:
