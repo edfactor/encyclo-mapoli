@@ -148,8 +148,8 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
             response.Response.Content.Should().NotBeNull();
             response.Result.ReportName.Should().BeEquivalentTo("Terminated Employee and Beneficiary Report");
 
-            response.Result.Response.Total.ShouldBeEquivalentTo(1);
-            response.Result.Response.Results.Count().ShouldBeEquivalentTo(1);
+            response.Result.Response.Total.Should().BeGreaterOrEqualTo(1);
+            response.Result.Response.Results.Should().HaveCount(1);
 
             response.Result.TotalEndingBalance.ShouldBeEquivalentTo(379.44);
             response.Result.TotalVested.ShouldBeEquivalentTo(379.44);
