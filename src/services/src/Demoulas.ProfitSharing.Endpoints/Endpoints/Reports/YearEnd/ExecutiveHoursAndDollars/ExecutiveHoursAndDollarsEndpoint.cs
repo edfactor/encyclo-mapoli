@@ -35,16 +35,7 @@ public class ExecutiveHoursAndDollarsEndpoint :
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
-                    200,
-                    new ReportResponseBase<ExecutiveHoursAndDollarsResponse>
-                    {
-                        ReportName = ReportFileName,
-                        ReportDate = DateTimeOffset.Now,
-                        Response = new PaginatedResponseDto<ExecutiveHoursAndDollarsResponse>
-                        {
-                            Results = new List<ExecutiveHoursAndDollarsResponse> {  ExecutiveHoursAndDollarsResponse.ResponseExample() }
-                        }
-                    }
+                    204, "Operation completed successfully."
                 }
             };
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";

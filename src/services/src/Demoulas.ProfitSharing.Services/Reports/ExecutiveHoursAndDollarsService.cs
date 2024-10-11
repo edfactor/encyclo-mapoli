@@ -1,9 +1,11 @@
 ﻿using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
@@ -55,5 +57,48 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
         };
 
     }
+
+
+    public Task SetExecutiveHoursAndDollars(short profitYear, List<SetExecutiveHoursAndDollarsDto> executiveHoursAndDollarsDtos, CancellationToken cancellationToken)
+    {
+        return  _dataContextFactory.UseWritableContext(async ctx =>
+        {
+            var hasDataForYear = await ctx.PayProfits.AnyAsync(pp => pp.ProfitYear == profitYear, cancellationToken);
+            if (!hasDataForYear)
+            {
+                throw new BadHttpRequestException($"Year {profitYear} is not valid.");
+            }
+            var badges = executiveHoursAndDollarsDtos.Select(dto => dto.BadgeNumber).ToList();
+
+            var ppQuery = await ctx.PayProfits
+                .Include(p => p.Demographic)
+                .Where(p => p.ProfitYear == profitYear)
+                .Where(p => badges.Contains(p.Demographic!.BadgeNumber))
+                .ToListAsync(cancellationToken);
+
+            if (executiveHoursAndDollarsDtos.Count != ppQuery.Count)
+            {
+                throw new BadHttpRequestException("One or more badge numbers were not found.");
+            }
+
+            foreach (var pp in ppQuery)
+            {
+                var dto = executiveHoursAndDollarsDtos.First(x => x.BadgeNumber == pp.Demographic!.BadgeNumber);
+                /**
+                Works great with Oracle, but the test doesnt pass.
+                await ctx.PayProfits.Where(p=>p.OracleHcmId == pp.OracleHcmId && p.profitYear = profitYear).ExecuteUpdateAsync(
+                    p => p
+                        .SetProperty(p => p.HoursExecutive, p => dto.ExecutiveHours)
+                        .SetProperty(p => p.IncomeExecutive, p => dto.ExecutiveDollars)
+                    , cancellationToken);
+                **/
+                pp.HoursExecutive = dto.ExecutiveHours;
+                pp.IncomeExecutive = dto.ExecutiveDollars;
+            }
+
+            return await ctx.SaveChangesAsync(cancellationToken);
+        }, cancellationToken);
+    }
+
 
 }

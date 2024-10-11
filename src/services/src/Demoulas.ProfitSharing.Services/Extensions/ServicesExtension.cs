@@ -9,7 +9,6 @@ using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Caching;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
-using Demoulas.ProfitSharing.Services.YearEnd;
 
 namespace Demoulas.ProfitSharing.Services.Extensions;
 
@@ -20,10 +19,8 @@ public static class ServicesExtension
 {
     public static IHostApplicationBuilder AddProjectServices(this IHostApplicationBuilder builder)
     {
-        
         _ = builder.Services.AddScoped<IPayClassificationService, PayClassificationService>();
         _ = builder.Services.AddScoped<ICleanupReportService, CleanupReportService>();
-        _ = builder.Services.AddScoped<ISetExecutiveHoursAndDollarsService, SetExecutiveHoursAndDollarsService>();
         _ = builder.Services.AddScoped<IExecutiveHoursAndDollarsService, ExecutiveHoursAndDollarsService>();
         _ = builder.Services.AddScoped<IMilitaryAndRehireService, MilitaryAndRehireService>();
         _ = builder.Services.AddScoped<IWagesService, WagesService>();

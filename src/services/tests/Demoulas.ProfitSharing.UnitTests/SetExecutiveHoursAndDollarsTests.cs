@@ -1,6 +1,8 @@
 ﻿using System.Net;
 using System.Text.Json;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ExecutiveHoursAndDollars;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.UnitTests.Base;
@@ -8,19 +10,32 @@ using Demoulas.ProfitSharing.UnitTests.Extensions;
 using FastEndpoints;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Namotion.Reflection;
 
 namespace Demoulas.ProfitSharing.UnitTests;
 public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
 {
 
     [Fact]
-    public async Task A_bad_year_should_cause_validation_error()
+    public async Task duplicate_badge_is_bad()
     {
         // Arrange
         SetExecutiveHoursAndDollarsRequest request = new SetExecutiveHoursAndDollarsRequest
         {
             ProfitYear = 0,
-            ExecutiveHoursAndDollars = new List<SetExecutiveHoursAndDollarsDto> { }
+            ExecutiveHoursAndDollars = [
+
+                new() {
+                    BadgeNumber = 99,
+                    ExecutiveDollars = 0,
+                    ExecutiveHours = 0
+                },
+                new() {
+                    BadgeNumber = 99,
+                    ExecutiveDollars = 0,
+                    ExecutiveHours = 0
+                }
+            ]
         };
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
@@ -31,24 +46,23 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
         response.Response.StatusCode.ShouldBeEquivalentTo(HttpStatusCode.BadRequest);
 
         // Assert
-        await ErrorMessageShouldBe(response, "The provided year is invalid.");
+        await ErrorMessageShouldBe(response, "", "Badge Numbers must be unique.");
     }
 
     [Fact]
-    public async Task update_with_bad_badge()
+    public async Task A_bad_year_should_cause_validation_error()
     {
         // Arrange
-        short profitYear = await GetMaxProfitYearAsync();
         SetExecutiveHoursAndDollarsRequest request = new SetExecutiveHoursAndDollarsRequest
         {
-            ProfitYear = profitYear,
+            ProfitYear = 0,
             ExecutiveHoursAndDollars = new List<SetExecutiveHoursAndDollarsDto>
             {
-                new ()
+                new()
                 {
-                    BadgeNumber = int.MaxValue,
-                    ExecutiveDollars = 22,
-                    ExecutiveHours = 33
+                    BadgeNumber = 484848,
+                    ExecutiveDollars = 444m,
+                    ExecutiveHours = 555m
                 }
             }
         };
@@ -61,12 +75,42 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
         response.Response.StatusCode.ShouldBeEquivalentTo(HttpStatusCode.BadRequest);
 
         // Assert
-        await ErrorMessageShouldBe(response, "One or more badge numbers were not found.");
+        await ErrorMessageShouldBe(response, "", "Year 0 is not valid.");
+    }
+
+    [Fact]
+    public async Task update_with_bad_badge()
+    {
+        // Arrange
+        short profitYear = await GetMaxProfitYearAsync();
+        SetExecutiveHoursAndDollarsRequest request = new SetExecutiveHoursAndDollarsRequest
+        {
+            ProfitYear = profitYear,
+            ExecutiveHoursAndDollars =
+            [
+                new ()
+                {
+                    BadgeNumber = int.MaxValue,
+                    ExecutiveDollars = 22,
+                    ExecutiveHours = 33
+                }
+            ]
+        };
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+
+        // Act
+        var response =
+            await ApiClient
+                .PUTAsync<SetExecutiveHoursAndDollarsEndpoint, SetExecutiveHoursAndDollarsRequest, HttpResponseMessage>(request);
+        response.Response.StatusCode.ShouldBeEquivalentTo(HttpStatusCode.BadRequest);
+
+        // Assert
+        await ErrorMessageShouldBe(response, "", "One or more badge numbers were not found.");
 
     }
 
     [Fact]
-    public async Task at_least_one_executive_should_be_provided()
+    public async Task at_least_one_employee_should_be_provided()
     {
         // Arrange
         short profitYear = await GetMaxProfitYearAsync();
@@ -76,7 +120,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
             ExecutiveHoursAndDollars = new List<SetExecutiveHoursAndDollarsDto> { }
         };
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        
+
         // Act
         var response =
             await ApiClient
@@ -84,7 +128,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
         response.Response.StatusCode.ShouldBeEquivalentTo(HttpStatusCode.BadRequest);
 
         // Assert
-        await ErrorMessageShouldBe(response, "At least one executive must be provided.");
+        await ErrorMessageShouldBe(response, "executiveHoursAndDollars.Count", "At least one employee must be provided");
     }
 
 
@@ -97,20 +141,17 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
         {
             // Arrange
             short profitYear = await GetMaxProfitYearAsync();
-            
+
             // Grab an employee
-            var demographicsWithPayProfits = await ctx.Demographics
-                .Join(ctx.PayProfits,
-                    d => d.OracleHcmId,
-                    pp => pp.OracleHcmId,
-                    (d, pp) => new { Demographic = d, PayProfit = pp })
-                .Where(joined => joined.PayProfit.ProfitYear == profitYear)
+            var payProfit = await ctx.PayProfits
+                .Include(p => p.Demographic)
+                .Where(p => p.ProfitYear == profitYear)
                 .FirstAsync();
 
             // pull out badge number, create altered hours and dollars 
-            var badgeNumber = demographicsWithPayProfits.Demographic.BadgeNumber;
-            var newHoursExecutive = demographicsWithPayProfits.PayProfit.HoursExecutive + 41;
-            var newIncomeExecutive = demographicsWithPayProfits.PayProfit.IncomeExecutive + 43;
+            var badgeNumber = payProfit.Demographic!.BadgeNumber;
+            var newHoursExecutive = payProfit.HoursExecutive + 41;
+            var newIncomeExecutive = payProfit.IncomeExecutive + 43;
 
             // Make the request to change the employee
             SetExecutiveHoursAndDollarsRequest request = new SetExecutiveHoursAndDollarsRequest
@@ -135,20 +176,17 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
 
             // Assert
             response.Response.StatusCode.ShouldBeEquivalentTo(HttpStatusCode.NoContent);
-             
-            // Verify that the underlying employee was altered propertly
-            var demographicsWithPayProfit2s = await ctx.Demographics
-                .Where(d=> d.BadgeNumber == badgeNumber)
-                .Join(ctx.PayProfits,
-                    d => d.OracleHcmId,
-                    pp => pp.OracleHcmId,
-                    (d, pp) => new { Demographic = d, PayProfit = pp })
-                .Where(joined => joined.PayProfit.ProfitYear == profitYear)
+
+            // Verify that the underlying employee was altered properly.
+            payProfit = await ctx.PayProfits
+                .Include(p => p.Demographic)
+                .Where(p => p.ProfitYear == profitYear)
                 .FirstAsync();
 
+
             // verify updated hours and income
-            demographicsWithPayProfit2s.PayProfit.HoursExecutive.Should().Be(newHoursExecutive);
-            demographicsWithPayProfit2s.PayProfit.IncomeExecutive.Should().Be(newIncomeExecutive);
+            payProfit.HoursExecutive.Should().Be(newHoursExecutive);
+            payProfit.IncomeExecutive.Should().Be(newIncomeExecutive);
 
         });
 
@@ -162,7 +200,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
         {
             // Arrange
             short profitYear = await GetMaxProfitYearAsync();
-            
+
             // Gather employee
             var demographicsWithPayProfits = await ctx.Demographics
                 .Join(ctx.PayProfits,
@@ -180,11 +218,11 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
             var newIncomeExecutive = demographicsWithPayProfits.PayProfit.IncomeExecutive + 43;
 
             // Request with Bad Employee also included
-            SetExecutiveHoursAndDollarsRequest request = new SetExecutiveHoursAndDollarsRequest
+            var request = new SetExecutiveHoursAndDollarsRequest
             {
                 ProfitYear = profitYear,
-                ExecutiveHoursAndDollars = new List<SetExecutiveHoursAndDollarsDto>
-                {
+                ExecutiveHoursAndDollars = [
+                
                     new()
                     {
                         BadgeNumber = badgeNumber,
@@ -192,7 +230,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
                         ExecutiveHours = newHoursExecutive
                     },
                     new() { BadgeNumber = int.MaxValue, ExecutiveDollars = 44, ExecutiveHours = 55 }
-                }
+                ]
             };
             ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
@@ -203,7 +241,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
                         HttpResponseMessage>(request);
 
             // Assert
-            await ErrorMessageShouldBe(response, "One or more badge numbers were not found.");
+            await ErrorMessageShouldBe(response, "", "One or more badge numbers were not found.");
 
             // verify no change to existing employee.
             var demographicsWithPayProfitsReloaded = await ctx.Demographics
@@ -221,22 +259,24 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
     }
 
 
-    private static async Task ErrorMessageShouldBe(TestResult<HttpResponseMessage> response, string expectedMessage)
+    private static async Task ErrorMessageShouldBe(TestResult<HttpResponseMessage> response, string fieldName, string expectedMessage)
     {
-        response.Response.Content.Headers.ContentType!.MediaType.Should().Be("application/json");
+        response.Response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.Response.Content.Headers.ContentType!.MediaType.Should().Be("application/problem+json");
         string responseContent = await response.Response.Content.ReadAsStringAsync();
 
         using JsonDocument doc = JsonDocument.Parse(responseContent);
-        JsonElement root = doc.RootElement;
-
-        if (root.TryGetProperty("message", out JsonElement messageElement))
+        // If the 400 is from the service, it has the message in the title.
+        if (doc.RootElement.TryGetProperty("title", out JsonElement title))
         {
-            messageElement.GetString().Should().Be(expectedMessage);
+            title.GetString().Should().Be(expectedMessage);
+            return;
         }
-        else
-        {
-            Assert.Fail("Missing the error message");
-        }
+        // If the 400 is from the Validator, it has the message in the errors array.
+        string message = doc.RootElement.GetProperty("message").ToString();
+        string errorMessage = doc.RootElement.GetProperty("errors").GetProperty(fieldName)[0].GetString()!;
+        message.Should().Be("One or more errors occurred!");
+        errorMessage.Should().Be(expectedMessage);
     }
 
     private async Task<short> GetMaxProfitYearAsync()
