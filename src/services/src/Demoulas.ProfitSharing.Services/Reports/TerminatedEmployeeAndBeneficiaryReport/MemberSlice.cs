@@ -18,9 +18,9 @@ internal sealed record MemberSlice
     public decimal NetBalanceLastYear { get; init; }
     public decimal VestedBalanceLastYear { get; init; }
     public char EmploymentStatusCode { get; init; }
-    public string FullName { get; init; } = string.Empty;
+    public string? FullName { get; init; } = string.Empty;
     public string FirstName { get; init; } = string.Empty;
-    public string MiddleInitial { get; init; } = string.Empty;
+    public string? MiddleInitial { get; init; } = string.Empty;
     public string LastName { get; init; } = string.Empty;
     public int YearsInPs { get; init; }
     public DateOnly? BirthDate { get; init; }

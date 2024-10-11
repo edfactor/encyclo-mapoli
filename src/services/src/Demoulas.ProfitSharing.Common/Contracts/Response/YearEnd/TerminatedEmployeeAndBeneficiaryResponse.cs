@@ -1,8 +1,4 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.TerminatedEmployeeAndBeneficiary;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
 public sealed record TerminatedEmployeeAndBeneficiaryResponse : ReportResponseBase<TerminatedEmployeeAndBeneficiaryDataResponseDto>
 {

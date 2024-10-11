@@ -51,7 +51,7 @@ BADGE/PSN # EMPLOYEE NAME           BALANCE  ALLOCATION       AMOUNT       FORFE
 
     }
 
-    public void PrintDetails(string r2BadgePsnNp, string r2EmployeeName, decimal r2PsAmt, decimal r2BenAlloc, decimal r2PsLoan,
+    public void PrintDetails(string r2BadgePsnNp, string? r2EmployeeName, decimal r2PsAmt, decimal r2BenAlloc, decimal r2PsLoan,
                                     decimal r2PsForf, decimal r2PsDol, decimal r2Vest, DateOnly? wsDoTerm, decimal r2PsHrs,
                                     int wVestPert, int? age, byte? wEnrolled)
     {

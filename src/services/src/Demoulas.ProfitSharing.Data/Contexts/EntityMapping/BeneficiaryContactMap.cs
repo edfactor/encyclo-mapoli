@@ -25,6 +25,33 @@ public sealed class BeneficiaryContactMap : IEntityTypeConfiguration<Beneficiary
             .HasDefaultValueSql("SYSDATE")
             .ValueGeneratedOnAdd();
 
+        _ = builder.Property(e => e.FullName)
+            .HasMaxLength(84)
+            .HasComment("FullName")
+            .HasColumnName("FULL_NAME")
+            .IsRequired();
+
+        _ = builder.Property(e => e.LastName)
+            .HasMaxLength(30)
+            .HasComment("LastName")
+            .HasColumnName("LAST_NAME")
+            .IsRequired();
+
+        _ = builder.Property(e => e.FirstName)
+            .HasMaxLength(30)
+            .HasComment("FirstName")
+            .HasColumnName("FIRST_NAME")
+            .IsRequired();
+
+        _ = builder.Property(e => e.MiddleName)
+            .HasMaxLength(25)
+            .HasColumnName("MIDDLE_NAME")
+            .HasComment("MiddleName");
+
+        builder.Property(a => a.PhoneNumber).HasMaxLength(16).HasColumnName("PHONE_NUMBER");
+        builder.Property(a => a.MobileNumber).HasMaxLength(16).HasColumnName("MOBILE_NUMBER");
+        builder.Property(a => a.EmailAddress).HasMaxLength(84).HasColumnName("EMAIL_ADDRESS");
+
 
         _ = builder.OwnsOne(e => e.Address, address =>
         {
@@ -42,41 +69,9 @@ public sealed class BeneficiaryContactMap : IEntityTypeConfiguration<Beneficiary
                 .HasForeignKey(o => o.CountryIso);
         });
 
-        builder.OwnsOne(e => e.ContactInfo, contact =>
-        {
-            _ = contact.Property(e => e.FullName)
-                .HasMaxLength(84)
-                .HasComment("FullName")
-                .HasColumnName("FULL_NAME")
-                .IsRequired();
-
-            _ = contact.Property(e => e.LastName)
-                .HasMaxLength(30)
-                .HasComment("LastName")
-                .HasColumnName("LAST_NAME")
-                .IsRequired();
-
-            _ = contact.Property(e => e.FirstName)
-                .HasMaxLength(30)
-                .HasComment("FirstName")
-                .HasColumnName("FIRST_NAME")
-                .IsRequired();
-
-            _ = contact.Property(e => e.MiddleName)
-                .HasMaxLength(25)
-                .HasColumnName("MIDDLE_NAME")
-                .HasComment("MiddleName");
-
-            contact.Property(a => a.PhoneNumber).HasMaxLength(16).HasColumnName("PHONE_NUMBER");
-            contact.Property(a => a.MobileNumber).HasMaxLength(16).HasColumnName("MOBILE_NUMBER");
-            contact.Property(a => a.EmailAddress).HasMaxLength(84).HasColumnName("EMAIL_ADDRESS");
-        });
-
-     
-
-       _ = builder.HasMany(d => d.Beneficiaries)
-           .WithOne(p => p.Contact)
-           .HasForeignKey(d => d.BeneficiaryContactId)
-           .OnDelete(DeleteBehavior.NoAction);
+        _ = builder.HasMany(d => d.Beneficiaries)
+            .WithOne(p => p.Contact)
+            .HasForeignKey(d => d.BeneficiaryContactId)
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }

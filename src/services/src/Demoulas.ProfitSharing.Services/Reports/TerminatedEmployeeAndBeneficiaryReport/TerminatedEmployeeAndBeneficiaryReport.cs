@@ -1,10 +1,11 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.TerminatedEmployeeAndBeneficiary;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -31,164 +32,94 @@ public class TerminatedEmployeeAndBeneficiaryReport
     public async Task<TerminatedEmployeeAndBeneficiaryResponse> CreateData(TerminatedEmployeeAndBeneficiaryDataRequest req)
     {
      
-        List<MemberSlice> memberSlices = await RetrieveMemberSlices(req.StartDate, req.EndDate, req.ProfitYear);
+        List<MemberSlice> memberSlices = await RetrieveMemberSlices(req, CancellationToken.None);
         List<Member> members = await MergeMemberSlicesToMembers(memberSlices, req.ProfitYear);
         TerminatedEmployeeAndBeneficiaryResponse fullResponse =  CreateDataset(members, req);
         return fullResponse;
     }
 
 
-    private async Task<List<MemberSlice>> RetrieveMemberSlices(DateOnly startDate, DateOnly endDate, short profitYear)
+    private async Task<PaginatedResponseDto<MemberSlice>> RetrieveMemberSlices(TerminatedEmployeeAndBeneficiaryDataRequest request, CancellationToken cancellationToken)
     {
         // slices of member information (aka employee or beneficiary information)
-        List<MemberSlice> memberSlices = new();
 
-        var employeesWithPayProfits = await _ctx.Demographics
+       var demographicSlice =  _ctx.Demographics
+            .Include(d => d.PayProfits)
+            .Include(demographic => demographic.ContactInfo)
             .Where(d => d.EmploymentStatusId == EmploymentStatus.Constants.Terminated &&
                         d.TerminationCodeId != TerminationCode.Constants.RetiredReceivingPension &&
-                        d.TerminationDate >= startDate && d.TerminationDate <= endDate)
-            .GroupJoin(
-                _ctx.PayProfits.Where(p=>p.ProfitYear == profitYear),
-                demographic => demographic.OracleHcmId,
-                payProfit => payProfit.OracleHcmId,
-                (demographic, payProfits) => new
-                {
-                    Demographic = demographic,
-                    PayProfits = payProfits
-                })
-            .ToListAsync();
-
-        foreach (var employeeWithPayProfits in employeesWithPayProfits)
-        {
-            var employee = employeeWithPayProfits.Demographic;
-            IEnumerable<PayProfit> payProfits = employeeWithPayProfits.PayProfits;
-            if (payProfits.Count() != 1)
+                        d.TerminationDate >= request.StartDate && d.TerminationDate <= request.EndDate)
+            .Select(d => new
             {
-                _logger.LogError("Employee {BadgeNumber} does not have a single pay_profit row.", employee.BadgeNumber);
-                continue;
-            }
-            PayProfit pp = payProfits.First();
-
-            byte zeroCont = (employee.TerminationCodeId == TerminationCode.Constants.Deceased) ?
-                ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested // 6
-            : pp.ZeroContributionReasonId ?? 0;
-
-            MemberSlice memberSlice = new MemberSlice
+                Demographic = d,
+                PayProfit = d.PayProfits
+                    .Where(p => p.ProfitYear == request.ProfitYear)
+                    .GroupBy(p => p.ProfitYear)
+                    .Select(g => g.First()) // Extracting the first (and only) PayProfit for the year
+                    .First()
+            })
+            .Select(d => new MemberSlice
             {
-                Psn = employee.BadgeNumber,
-                Ssn = employee.Ssn,
-                BirthDate = employee.DateOfBirth,
+                Psn = d.Demographic.BadgeNumber,
+                Ssn = d.Demographic.Ssn,
+                BirthDate = d.Demographic.DateOfBirth,
                 HoursCurrentYear = 0, // hours
                 NetBalanceLastYear = 0m, // TO-DO !!! PayProfit refactor, pp.NetBalanceLastYear
                 VestedBalanceLastYear = 0m, // TO-DO !!!! PayProfit refactor pp.VestedBalanceLastYear,
-                EmploymentStatusCode = employee.EmploymentStatusId,
-                FullName = employee.ContactInfo.FullName!,
-                FirstName = employee.ContactInfo.FirstName,
-                MiddleInitial = employee.ContactInfo.MiddleName?.Substring(0, 1) ?? "",
-                LastName = employee.ContactInfo.LastName,
+                EmploymentStatusCode = d.Demographic.EmploymentStatusId,
+                FullName = d.Demographic.ContactInfo.FullName,
+                FirstName = d.Demographic.ContactInfo.FirstName,
+                MiddleInitial = d.Demographic.ContactInfo.MiddleName != null ? d.Demographic.ContactInfo.MiddleName[..1] : string.Empty,
+                LastName = d.Demographic.ContactInfo.LastName,
                 YearsInPs = 0, // TO-DO !!! PayProfit refactor, pp.CompanyContributionYears,
-                TerminationDate = employee.TerminationDate,
-                IncomeRegAndExecCurrentYear = (pp.CurrentIncomeYear ?? 0) + pp.IncomeExecutive,
-                TerminationCode = employee.TerminationCodeId,
-                ZeroCont = zeroCont,
-                Enrolled = pp.EnrollmentId,
-                Etva = pp.EarningsEtvaValue,
+                TerminationDate = d.Demographic.TerminationDate,
+                IncomeRegAndExecCurrentYear = (d.PayProfit.CurrentIncomeYear ?? 0) + d.PayProfit.IncomeExecutive,
+                TerminationCode = d.Demographic.TerminationCodeId,
+                ZeroCont = d.Demographic.TerminationCodeId == TerminationCode.Constants.Deceased
+                    ? ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested // 6
+                    : d.PayProfit.ZeroContributionReasonId ?? 0,
+                Enrolled = d.PayProfit.EnrollmentId,
+                Etva = d.PayProfit.EarningsEtvaValue,
                 BeneficiaryAllocation = 0
-            };
-
-            memberSlices.Add(memberSlice);
-
-        }
-
-        var beneficiariesWithPossibleEmployee = await (from beneficiary in _ctx.Beneficiaries
-                join demographic in _ctx.Demographics
-                    on beneficiary.OracleHcmId equals demographic.OracleHcmId into demographicsGroup
-                from demographic in demographicsGroup.DefaultIfEmpty()
-
-                join payProfit in _ctx.PayProfits
-                    on demographic != null ? demographic.OracleHcmId : 0 equals payProfit.OracleHcmId into payProfitsGroup
-                from payProfit in payProfitsGroup.DefaultIfEmpty()
-
-                group new { demographic, payProfit } by beneficiary into grouped
-                select new
-                {
-                    Beneficiary = grouped.Key,
-                    DemographicsWithPayProfits = grouped
-                        .Where(x => x.demographic != null) // Ensure demographic is not null
-                        .GroupBy(x => x.demographic)
-                        .Select(g => new
-                        {
-                            Demographic = g.Key,
-                            PayProfits = g.Select(x => x.payProfit)
-                                .Where(p => p != null) // Ensure payProfit is not null
-                                .ToList()
-                        })
-                        .ToList()
-                })
-            .ToListAsync();
+            });
 
 
-        foreach (var beneWithEmp in beneficiariesWithPossibleEmployee)
-        {
-            var beneficiary = beneWithEmp.Beneficiary;
-            char statusCode = 'T';
-            DateOnly? terminationDate = null;
-            decimal amount = beneficiary.Amount;
-            long psn = beneficiary.GetPsn();
+       var beneficiarySlice = _ctx.Beneficiaries
+           .Include(b => b.Demographic)
+           .ThenInclude(d => d!.PayProfits)
+           .Where(b => b.Demographic != null) // Ensure there is a related Demographic
+           .Select(b => new
+           {
+               Beneficiary = b,
+               Demographic = b.Demographic,
+               PayProfit = b.Demographic!.PayProfits
+                   .First(p => p.ProfitYear == request.ProfitYear) // Select the PayProfit for the specified profit year since there's only one record, fetch the first
+           })
+           .Where(x => x.Demographic != null) // Filter out invalid data
+           .Select(x => new MemberSlice
+           {
+               Psn = x.Demographic!.BadgeNumber,
+               Ssn = x.Beneficiary.Contact!.Ssn,
+               BirthDate = x.Beneficiary.Contact!.DateOfBirth,
+               HoursCurrentYear = 0, // Replace with actual logic if needed
+               NetBalanceLastYear = 0m, // Use PayProfit for the amounts
+               VestedBalanceLastYear = 0m,
+               EmploymentStatusCode = x.Demographic.EmploymentStatusId,
+               FullName = x.Beneficiary.Contact!.FullName!,
+               FirstName = x.Beneficiary.Contact!.FirstName,
+               MiddleInitial = x.Beneficiary.Contact.MiddleName != null ? x.Beneficiary.Contact.MiddleName[..1] : string.Empty,
+               LastName = x.Beneficiary.Contact.LastName,
+               YearsInPs = 0, // Use PayProfit for contribution years
+               TerminationDate = x.Demographic.TerminationDate,
+               IncomeRegAndExecCurrentYear = (x.PayProfit.CurrentIncomeYear ?? 0) + (x.PayProfit.IncomeExecutive),
+               TerminationCode = x.Demographic.TerminationCodeId,
+               ZeroCont = ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested,
+               Enrolled = x.PayProfit.EnrollmentId,
+               Etva = x.PayProfit.EarningsEtvaValue,
+               BeneficiaryAllocation = 0 // Adjust if needed
+           });
 
-            var results = beneWithEmp.DemographicsWithPayProfits;
-            if (results.Count > 1)
-            {
-                _logger.LogError("beneficiary matched multiple employees by ssn.");
-                continue;
-            }
-            if (results.Count == 1)
-            {
-                var demographic = results[0].Demographic;
-                var payProfits = results[0].PayProfits;
-                if (payProfits.Count != 1)
-                {
-                    _logger.LogError("Employee {BadgeNumber} does not have a single pay_profit row.", demographic.BadgeNumber);
-                    continue;
-                }
-                terminationDate = demographic.TerminationDate;
-                if (terminationDate >= startDate && terminationDate <= endDate)
-                {
-                    // if the termination date is out of range
-                    continue;
-                }
-                if (amount == 0)
-                {
-                    amount = 0; // TO-DO !!! PayProfit Refactor !!!  payProfits[0]?.NetBalanceLastYear ?? 0
-                }
-                psn = demographic.BadgeNumber;
-                terminationDate =demographic.TerminationDate;
-                statusCode =demographic.EmploymentStatusId;
-            }
-            MemberSlice memberSlice = new MemberSlice
-            {
-                Psn = psn,
-                Ssn = beneficiary.Contact!.Ssn,
-                BirthDate = beneficiary.Contact!.DateOfBirth,
-                HoursCurrentYear = 0,
-                NetBalanceLastYear = amount,
-                VestedBalanceLastYear = amount,
-                EmploymentStatusCode = statusCode,
-                FullName = beneficiary.Contact!.ContactInfo!.FullName!,
-                FirstName = beneficiary.Contact!.ContactInfo.FirstName,
-                MiddleInitial = beneficiary.Contact.ContactInfo.MiddleName!,
-                LastName = beneficiary.Contact.ContactInfo.LastName,
-                YearsInPs = 10,
-                TerminationDate = terminationDate,
-                IncomeRegAndExecCurrentYear = 0,
-                TerminationCode = null,
-                ZeroCont = ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested,
-                Enrolled = 0,
-                Etva = amount,
-                BeneficiaryAllocation = 0
-            };
-            memberSlices.Add(memberSlice);
-        }
+       var memberSlices = await demographicSlice.Union(beneficiarySlice).ToPaginationResultsAsync(request, cancellationToken);
 
         return memberSlices;
     }

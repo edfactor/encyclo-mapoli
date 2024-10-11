@@ -1,17 +1,12 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Response;
-using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using Demoulas.ProfitSharing.Endpoints.TypeConverters;
 using Demoulas.ProfitSharing.Security;
-using FastEndpoints;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.TerminatedEmployeeAndBeneficiary.TerminatedEmployeeAndBeneficiaryDataEndpoint;
 
 
@@ -20,7 +15,7 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.TerminatedE
 
 public class TerminatedEmployeeAndBeneficiaryDataEndpoint
     : EndpointWithCsvTotalsBase<TerminatedEmployeeAndBeneficiaryDataRequest,
-        ReportResponseBase<TerminatedEmployeeAndBeneficiaryDataResponseDto>,
+        TerminatedEmployeeAndBeneficiaryResponse,
         TerminatedEmployeeAndBeneficiaryDataResponseDto,
         TerminatedEmployeeAndBeneficiaryDataResponseMap>
 {
@@ -43,9 +38,7 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
                 "Reports on beneficiaries with a non-zero balance and employees who were terminated (and not retired) in the specified date range.";
             s.ExampleRequest = new TerminatedEmployeeAndBeneficiaryDataRequest()
             {
-                StartDate = new DateOnly(2023, 1, 7),
-                EndDate = new DateOnly(2024, 1, 2),
-                ProfitYear = 2023
+                StartDate = new DateOnly(2023, 1, 7), EndDate = new DateOnly(2024, 1, 2), ProfitYear = 2023
             };
             s.ResponseExamples = new Dictionary<int, object>
             {
@@ -53,7 +46,7 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
                     200,
                     new TerminatedEmployeeAndBeneficiaryResponse
                     {
-                        ReportName= "Terminated Employee and Beneficiary Report",
+                        ReportName = "Terminated Employee and Beneficiary Report",
                         ReportDate = default,
                         TotalVested = 1000,
                         TotalForfeit = 2000,
@@ -64,7 +57,7 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
                             Total = 1,
                             Results = new List<TerminatedEmployeeAndBeneficiaryDataResponseDto>
                             {
-                                TerminatedEmployeeAndBeneficiaryDataResponseDto.Example
+                                TerminatedEmployeeAndBeneficiaryDataResponseDto.ResponseExample()
                             }
                         }
                     }
@@ -78,23 +71,20 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
         base.Configure();
     }
 
-    public override async Task<ReportResponseBase<TerminatedEmployeeAndBeneficiaryDataResponseDto>> GetResponse(
+    public override Task<TerminatedEmployeeAndBeneficiaryResponse> GetResponse(
         TerminatedEmployeeAndBeneficiaryDataRequest req, CancellationToken ct)
     {
-        TerminatedEmployeeAndBeneficiaryResponse report =
-            await _terminatedEmployeeAndBeneficiaryReportService.GetReport(req, ct);
-        return report;
+        return _terminatedEmployeeAndBeneficiaryReportService.GetReport(req, ct);
     }
 
     public override string ReportFileName { get; }
 
 
-    protected internal override Task GenerateCsvContent(CsvWriter csvWriter, ReportResponseBase<TerminatedEmployeeAndBeneficiaryDataResponseDto> report, CancellationToken cancellationToken)
+    protected internal override Task GenerateCsvContent(CsvWriter csvWriter, TerminatedEmployeeAndBeneficiaryResponse responseWithTotals,
+        CancellationToken cancellationToken)
     {
         // Register the class map for the main member data
         csvWriter.Context.RegisterClassMap<TerminatedEmployeeAndBeneficiaryDataResponseMap>();
-
-        TerminatedEmployeeAndBeneficiaryResponse responseWithTotals = (report as TerminatedEmployeeAndBeneficiaryResponse)!;
 
         // Write out totals
         csvWriter.NextRecord();
@@ -104,7 +94,7 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
         csvWriter.WriteField(responseWithTotals.TotalVested);
         csvWriter.WriteField("Total Forfeitures");
         csvWriter.WriteField(responseWithTotals.TotalForfeit);
-        csvWriter.WriteField("Total Beneficiary Alloctions");
+        csvWriter.WriteField("Total Beneficiary Allocations");
         csvWriter.WriteField(responseWithTotals.TotalBeneficiaryAllocation);
 
         csvWriter.NextRecord();
@@ -117,7 +107,7 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
 
         csvWriter.NextRecord();
 
-        return base.GenerateCsvContent(csvWriter, report, cancellationToken);
+        return base.GenerateCsvContent(csvWriter, responseWithTotals, cancellationToken);
     }
 
 

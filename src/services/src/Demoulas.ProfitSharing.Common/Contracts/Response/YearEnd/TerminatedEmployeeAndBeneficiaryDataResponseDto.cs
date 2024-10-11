@@ -2,7 +2,7 @@
 public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto
 {
     public required string BadgePSn { get; set; }
-    public required string Name { get; set; }
+    public required string? Name { get; set; }
     public required decimal BeginningBalance { get; set; }
     public required decimal BeneficiaryAllocation { get; set; }
     public required decimal DistributionAmount { get; set; }
@@ -15,21 +15,24 @@ public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto
     public required int? Age { get; set; }
     public required byte? EnrollmentCode { get; set; }
 
-    public static readonly TerminatedEmployeeAndBeneficiaryDataResponseDto Example = new()
+    public static TerminatedEmployeeAndBeneficiaryDataResponseDto ResponseExample()
     {
-        BadgePSn = "777",
-        Name = "Example, Joe F",
-        BeginningBalance = 100,
-        BeneficiaryAllocation = 200,
-        DistributionAmount = 300,
-        Forfeit = 400,
-        EndingBalance = 500,
-        VestedBalance = 600,
-        DateTerm = null,
-        YtdPsHours = 980,
-        VestedPercent = 20,
-        Age = 44,
-        EnrollmentCode = 4
-    };
+        return new TerminatedEmployeeAndBeneficiaryDataResponseDto
+        {
+            BadgePSn = "777",
+            Name = "Example, Joe F",
+            BeginningBalance = 100,
+            BeneficiaryAllocation = 200,
+            DistributionAmount = 300,
+            Forfeit = 400,
+            EndingBalance = 500,
+            VestedBalance = 600,
+            DateTerm = null,
+            YtdPsHours = 980,
+            VestedPercent = 20,
+            Age = 44,
+            EnrollmentCode = 4
+        };
+    }
 
 }

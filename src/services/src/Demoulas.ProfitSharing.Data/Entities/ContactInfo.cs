@@ -1,5 +1,5 @@
 ﻿namespace Demoulas.ProfitSharing.Data.Entities;
-public sealed class ContactInfo
+public class ContactInfo
 {
     public string? FullName { get; set; }
     public required string LastName { get; set; }

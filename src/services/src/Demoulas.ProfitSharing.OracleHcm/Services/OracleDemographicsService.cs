@@ -42,7 +42,7 @@ internal sealed class OracleDemographicsService
     private async Task<string> BuildUrl(string url, int offset = 0, CancellationToken cancellationToken = default)
     {
         // Oracle will limit us to 500, but we run the risk of timeout well below that, so we need to be conservative.
-        ushort limit = ushort.Min(100, _oracleHcmConfig.Limit);
+        ushort limit = ushort.Min(75, _oracleHcmConfig.Limit);
         Dictionary<string, string> initialQuery = new Dictionary<string, string>
         {
             { "limit", $"{limit}" },

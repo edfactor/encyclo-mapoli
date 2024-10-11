@@ -1,6 +1,5 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.TerminatedEmployeeAndBeneficiary;
 
 namespace Demoulas.ProfitSharing.Common.Interfaces;
 public interface ITerminatedEmployeeAndBeneficiaryReportService
