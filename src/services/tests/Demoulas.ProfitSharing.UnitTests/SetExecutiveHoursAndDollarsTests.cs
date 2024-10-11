@@ -1,16 +1,13 @@
 ﻿using System.Net;
 using System.Text.Json;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ExecutiveHoursAndDollars;
 using Demoulas.ProfitSharing.Security;
-using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.UnitTests.Base;
 using Demoulas.ProfitSharing.UnitTests.Extensions;
 using FastEndpoints;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Namotion.Reflection;
 
 namespace Demoulas.ProfitSharing.UnitTests;
 public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
@@ -128,7 +125,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
         response.Response.StatusCode.ShouldBeEquivalentTo(HttpStatusCode.BadRequest);
 
         // Assert
-        await ErrorMessageShouldBe(response, "executiveHoursAndDollars.Count", "At least one employee must be provided");
+        await ErrorMessageShouldBe(response, "count", "At least one employee must be provided");
     }
 
 
@@ -157,15 +154,14 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
             SetExecutiveHoursAndDollarsRequest request = new SetExecutiveHoursAndDollarsRequest
             {
                 ProfitYear = profitYear,
-                ExecutiveHoursAndDollars = new List<SetExecutiveHoursAndDollarsDto>
-                {
+                ExecutiveHoursAndDollars = [
                     new()
                     {
                         BadgeNumber = badgeNumber,
                         ExecutiveDollars = newIncomeExecutive,
                         ExecutiveHours = newHoursExecutive
                     }
-                }
+                ]
             };
             ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
@@ -180,7 +176,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
             // Verify that the underlying employee was altered properly.
             payProfit = await ctx.PayProfits
                 .Include(p => p.Demographic)
-                .Where(p => p.ProfitYear == profitYear)
+                .Where(p => p.ProfitYear == profitYear && p.OracleHcmId == payProfit.OracleHcmId)
                 .FirstAsync();
 
 

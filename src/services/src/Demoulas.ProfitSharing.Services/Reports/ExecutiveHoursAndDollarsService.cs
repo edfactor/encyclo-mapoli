@@ -60,7 +60,7 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
 
     public Task SetExecutiveHoursAndDollars(short profitYear, List<SetExecutiveHoursAndDollarsDto> executiveHoursAndDollarsDtos, CancellationToken cancellationToken)
     {
-        return  _dataContextFactory.UseWritableContext(async ctx =>
+        return _dataContextFactory.UseWritableContext(async ctx =>
         {
             var hasDataForYear = await ctx.PayProfits.AnyAsync(pp => pp.ProfitYear == profitYear, cancellationToken);
             if (!hasDataForYear)
