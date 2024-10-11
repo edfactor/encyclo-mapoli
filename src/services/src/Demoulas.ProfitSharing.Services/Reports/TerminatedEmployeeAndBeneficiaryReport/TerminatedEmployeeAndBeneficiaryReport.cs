@@ -1,14 +1,11 @@
-﻿using System.Runtime.Intrinsics.X86;
-using Demoulas.Common.Contracts.Contracts.Request;
-using Demoulas.Common.Contracts.Contracts.Response;
-using Demoulas.Common.Data.Contexts.Extensions;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 
@@ -93,13 +90,13 @@ internal sealed class TerminatedEmployeeAndBeneficiaryReport
            .Where(x => x.Demographic != null) // Filter out invalid data
            .Select(x => new MemberSlice
            {
-               Psn = x.Demographic!.BadgeNumber,
+               Psn = x.Beneficiary.GetPsn(),
                Ssn = x.Beneficiary.Contact!.Ssn,
                BirthDate = x.Beneficiary.Contact!.DateOfBirth,
                HoursCurrentYear = 0, // Replace with actual logic if needed
                NetBalanceLastYear = 0m, // Use PayProfit for the amounts
                VestedBalanceLastYear = 0m,
-               EmploymentStatusCode = x.Demographic.EmploymentStatusId,
+               EmploymentStatusCode = x.Demographic!.EmploymentStatusId,
                FullName = x.Beneficiary.Contact!.FullName!,
                FirstName = x.Beneficiary.Contact!.FirstName,
                MiddleInitial = x.Beneficiary.Contact.MiddleName != null ? x.Beneficiary.Contact.MiddleName[..1] : string.Empty,
@@ -126,7 +123,6 @@ internal sealed class TerminatedEmployeeAndBeneficiaryReport
             from memberSlice in memberSliceUnion
             join profitDetail in _ctx.ProfitDetails
                 on new { memberSlice.Ssn, req.ProfitYear } equals new { profitDetail.Ssn, profitDetail.ProfitYear } into profitDetailGroup
-            from profitDetail in profitDetailGroup // Left join to include MemberSlices even if there's no matching ProfitDetail
             select new
             {
                 memberSlice.Psn,
@@ -148,64 +144,49 @@ internal sealed class TerminatedEmployeeAndBeneficiaryReport
                 memberSlice.ZeroCont,
                 memberSlice.Enrolled,
                 memberSlice.Etva,
-                ProfitDetailForfeiture = profitDetail.Forfeiture,
-                ProfitDetailProfitCode = profitDetail.ProfitCodeId,
+                ProfitDetails = profitDetailGroup.ToList() // Accumulate the collection of ProfitDetails
             };
 
-        var groupedMembers = await combinedCollection
-            .GroupBy(m => m.Ssn) // Group by SSN to process all slices for each SSN
-            .ToListAsync();
+        // Group by SSN, now profit details will be in a collection
+        var groupedMembers = await combinedCollection.ToListAsync();
 
         var members = new List<Member>();
 
-        foreach (var group in groupedMembers)
+        foreach (var group in groupedMembers.AsReadOnly())
         {
-            // Accumulate financial values for each SSN
-            decimal netBalanceLastYear = 0;
-            decimal vestedBalanceLastYear = 0;
-            decimal beneficiaryAllocation = 0;
-
-            foreach (var m in group)
-            {
-                netBalanceLastYear += m.NetBalanceLastYear;
-                vestedBalanceLastYear += m.VestedBalanceLastYear;
-                beneficiaryAllocation += m.BeneficiaryAllocation;
-            }
+            var beneficiaryAllocation = group.BeneficiaryAllocation;
 
             // Get ProfitDetailSummary for the current SSN
-            profitDetailsForAll.Where(pd => pd.Ssn == ssn).ToList()
-            ProfitDetailSummary ds = RetrieveProfitDetail(profitDetails, group.Key);
+            ProfitDetailSummary ds = RetrieveProfitDetail(group.ProfitDetails, group.Ssn);
             beneficiaryAllocation += ds.BeneficiaryAllocation;
 
             // If the member has financial data, create a Member object
-            if (netBalanceLastYear != 0 || ds.BeneficiaryAllocation != 0 || ds.Distribution != 0 || ds.Forfeiture != 0)
+            if (group.NetBalanceLastYear != 0 || ds.BeneficiaryAllocation != 0 || ds.Distribution != 0 || ds.Forfeiture != 0)
             {
-                var firstSlice = group.First(); // Use the first slice for common member data
-
                 var member = new Member
                 {
-                    Psn = firstSlice.Psn,
-                    FullName = firstSlice.FullName,
-                    FirstName = firstSlice.FirstName,
-                    LastName = firstSlice.LastName,
-                    MiddleInitial = firstSlice.MiddleInitial,
-                    Birthday = firstSlice.BirthDate,
-                    HoursCurrentYear = firstSlice.HoursCurrentYear,
-                    EarningsCurrentYear = firstSlice.IncomeRegAndExecCurrentYear,
-                    Ssn = firstSlice.Ssn,
-                    TerminationDate = firstSlice.TerminationDate,
-                    TerminationCode = firstSlice.TerminationCode,
-                    BeginningAmount = netBalanceLastYear,
-                    CurrentVestedAmount = vestedBalanceLastYear,
-                    YearsInPlan = firstSlice.YearsInPs,
-                    ZeroCont = firstSlice.ZeroCont,
-                    Enrolled = firstSlice.Enrolled,
-                    Evta = firstSlice.Etva,
+                    Psn = group.Psn,
+                    FullName = group.FullName,
+                    FirstName = group.FirstName,
+                    LastName = group.LastName,
+                    MiddleInitial = group.MiddleInitial,
+                    Birthday = group.BirthDate,
+                    HoursCurrentYear = group.HoursCurrentYear,
+                    EarningsCurrentYear = group.IncomeRegAndExecCurrentYear,
+                    Ssn = group.Ssn,
+                    TerminationDate = group.TerminationDate,
+                    TerminationCode = group.TerminationCode,
+                    BeginningAmount = group.NetBalanceLastYear,
+                    CurrentVestedAmount = group.VestedBalanceLastYear,
+                    YearsInPlan = group.YearsInPs,
+                    ZeroCont = group.ZeroCont,
+                    Enrolled = group.Enrolled,
+                    Evta = group.Etva,
                     BeneficiaryAllocation = beneficiaryAllocation,
                     DistributionAmount = ds.Distribution,
                     ForfeitAmount = ds.Forfeiture,
-                    EndingBalance = netBalanceLastYear + ds.Forfeiture + ds.Distribution + beneficiaryAllocation,
-                    VestedBalance = vestedBalanceLastYear + ds.Distribution + beneficiaryAllocation
+                    EndingBalance = group.NetBalanceLastYear + ds.Forfeiture + ds.Distribution + beneficiaryAllocation,
+                    VestedBalance = group.VestedBalanceLastYear + ds.Distribution + beneficiaryAllocation
                 };
 
                 members.Add(member);
@@ -224,6 +205,10 @@ internal sealed class TerminatedEmployeeAndBeneficiaryReport
 
         List<TerminatedEmployeeAndBeneficiaryDataResponseDto> membersSummary = new();
 
+#pragma warning disable S6562
+        var forBirthDate = new DateTime(req.ProfitYear, DateTime.Now.Month, DateTime.Now.Day);
+#pragma warning restore S6562
+
         foreach (var ms in members)
         {
             int vestingPercent = LookupVestingPercent(ms.Enrolled, ms.ZeroCont, ms.YearsInPlan);
@@ -235,6 +220,7 @@ internal sealed class TerminatedEmployeeAndBeneficiaryReport
             {
                 vestedBalance = ms.EndingBalance;
             }
+
             if (ms.EndingBalance == 0 && vestedBalance == 0)
             {
                 vestingPercent = 0;
@@ -243,26 +229,17 @@ internal sealed class TerminatedEmployeeAndBeneficiaryReport
             int? age = null;
             if (ms.Birthday.HasValue)
             {
-                int birthYear = ms.Birthday.Value.Year;
-                int birthMonth = ms.Birthday.Value.Month;
-                int birthDay = ms.Birthday.Value.Day;
-                age = _todaysDate.Year - birthYear;
-                if (birthMonth > _todaysDate.Month)
-                {
-                    age--;
-                }
-                if (birthMonth == _todaysDate.Month && birthDay > _todaysDate.Day)
-                {
-                    age--;
-                }
+                age = ms.Birthday.Value.ToDateTime(TimeOnly.MinValue).Age(forBirthDate);
             }
 
             // If they have a contribution the plan and are past the 1st/2nd year for the old/new plan 
             // or have a beneficiary allocation then add them in.
             if (
-                ((ms.Enrolled == Enrollment.Constants.NotEnrolled || ms.Enrolled == Enrollment.Constants.OldVestingPlanHasContributions || ms.Enrolled == Enrollment.Constants.OldVestingPlanHasForfeitureRecords)
+                (ms.Enrolled is (Enrollment.Constants.NotEnrolled or Enrollment.Constants.OldVestingPlanHasContributions
+                     or Enrollment.Constants.OldVestingPlanHasForfeitureRecords)
                  && ms.YearsInPlan > 2 && ms.BeginningAmount != 0)
-                || ((ms.Enrolled == Enrollment.Constants.NewVestingPlanHasContributions || ms.Enrolled == Enrollment.Constants.NewVestingPlanHasForfeitureRecords) && ms.YearsInPlan > 1 && ms.BeginningAmount != 0)
+                || (ms.Enrolled is (Enrollment.Constants.NewVestingPlanHasContributions or Enrollment.Constants.NewVestingPlanHasForfeitureRecords) &&
+                    ms.YearsInPlan > 1 && ms.BeginningAmount != 0)
                 || (ms.BeneficiaryAllocation != 0)
             )
             {
