@@ -49,14 +49,18 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingReadOnlyDbContext.Setup(m => m.TaxCodes).Returns(mockTaxCodes.Object);
 
         List<Demographic>? demographics = new DemographicFaker().Generate(500);
-        
+        List<Beneficiary>? beneficiaries = new BeneficiaryFaker(demographics).Generate(demographics.Count * 5);
 
-        var profitDetails = new ProfitDetailFaker(demographics).Generate(demographics.Count * 5);
+       HashSet<long> ssnSet = demographics.Select(d => d.Ssn)
+            .Union(beneficiaries.Select(b => b.Contact!.Ssn))
+            .ToHashSet();
+        
+        var profitDetails = new ProfitDetailFaker(ssnSet).Generate(demographics.Count * 5);
         var mockProfitDetails = profitDetails.AsQueryable().BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
 
-        List<Beneficiary>? beneficiaries = new BeneficiaryFaker(demographics).Generate(demographics.Count * 5);
+        
         List<PayProfit>? profits = new PayProfitFaker(demographics).Generate(demographics.Count * 3);
         
         foreach (PayProfit payProfit in profits)

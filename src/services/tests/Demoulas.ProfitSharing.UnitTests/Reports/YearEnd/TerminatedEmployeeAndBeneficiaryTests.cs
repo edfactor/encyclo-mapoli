@@ -118,7 +118,7 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
         });
     }
 
-    [Fact(DisplayName = "Test Single Beneficiary")]
+    [Fact(DisplayName = "PS-300 | Test Single Beneficiary")]
     public async Task SingleBeneficiary()
     {
         await MockDbContextFactory.UseWritableContext(async c =>
