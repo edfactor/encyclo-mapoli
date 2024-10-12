@@ -1,20 +1,10 @@
 ﻿using System.Reflection;
-using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-using Demoulas.ProfitSharing.Data.Contexts;
-using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ExecutiveHoursAndDollars;
-using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 using Demoulas.ProfitSharing.Security;
-using Demoulas.ProfitSharing.Services.Reports;
 using Demoulas.ProfitSharing.UnitTests.Extensions;
 using FastEndpoints;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Moq;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 public class ExecutiveHoursAndDollarsIntegrationTests : ApiIntegrationTestBase<Api.Program>

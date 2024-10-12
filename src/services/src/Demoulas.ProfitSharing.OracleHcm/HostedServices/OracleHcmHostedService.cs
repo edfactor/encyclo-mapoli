@@ -1,6 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Messaging;
-using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Entities.MassTransit;
+﻿using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Jobs;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

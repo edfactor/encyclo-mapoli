@@ -1,18 +1,12 @@
-﻿using System.Collections.Frozen;
-using Demoulas.ProfitSharing.Common.ActivitySources;
+﻿using Demoulas.ProfitSharing.Common.ActivitySources;
 using System.Diagnostics;
-using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Mappers;
 using Microsoft.EntityFrameworkCore;
-using MassTransit;
-using System.Linq;
-using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Data.Extensions;
 
 namespace Demoulas.ProfitSharing.Services;

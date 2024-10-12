@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
+﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 
 /* Ensure the CSV comparision is working correctly */
 public class TolerantCsvComparisonTests

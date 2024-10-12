@@ -1,7 +1,5 @@
-﻿using System;
-using System.Data.SqlTypes;
+﻿using System.Data.SqlTypes;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using MassTransit.Initializers;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services;

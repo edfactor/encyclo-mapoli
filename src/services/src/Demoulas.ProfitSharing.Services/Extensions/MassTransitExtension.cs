@@ -1,6 +1,4 @@
-﻿using Demoulas.ProfitSharing.OracleHcm.Extensions;
-using Demoulas.ProfitSharing.OracleHcm.Jobs;
-using Demoulas.Util.Extensions;
+﻿using Demoulas.ProfitSharing.OracleHcm.Jobs;
 using MassTransit;
 using Microsoft.Extensions.Hosting;
 
