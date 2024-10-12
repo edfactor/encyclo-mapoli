@@ -21,7 +21,7 @@ internal sealed record Member
     public decimal CurrentVestedAmount { get; init; }
     public decimal ForfeitAmount { get; init; }
     public decimal EndingBalance { get; init; }
-    public int YearsInPlan { get; init; }
+    public int YearsInPlan { get; set; }
     public decimal VestedBalance { get; init; }
     public byte? ZeroCont { get; init; }
     public byte Enrolled { get; init; }

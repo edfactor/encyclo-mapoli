@@ -8,7 +8,7 @@ public interface IProfitSharingDbContext
 {
     DbSet<Demographic> Demographics { get; set; }
     DbSet<Country> Countries { get; set; }
-    DbSet<PayClassification> PayClassifications { get; set; }
+    DbSet<ProfitDetail> ProfitDetails { get; set; }
 
     DbSet<Beneficiary> Beneficiaries { get; set; }
     DbSet<PayProfit> PayProfits { get; set; }

@@ -13,16 +13,12 @@ public class TerminatedEmployeeAndBeneficiaryReportService : ITerminatedEmployee
     {
         _dataContextFactory = dataContextFactory;
     }
-    
 
-    public  Task<TerminatedEmployeeAndBeneficiaryResponse>
+
+    public Task<TerminatedEmployeeAndBeneficiaryResponse>
         GetReport(TerminatedEmployeeAndBeneficiaryDataRequest req, CancellationToken ct)
     {
-        return _dataContextFactory
-            .UseReadOnlyContext<TerminatedEmployeeAndBeneficiaryResponse>(ctx =>
-            {
-                TerminatedEmployeeAndBeneficiaryReport reportGenerator = new TerminatedEmployeeAndBeneficiaryReport(ctx);
-                return  reportGenerator.CreateData(req);
-            });
+        TerminatedEmployeeAndBeneficiaryReport reportGenerator = new TerminatedEmployeeAndBeneficiaryReport(_dataContextFactory);
+        return reportGenerator.CreateData(req);
     }
 }

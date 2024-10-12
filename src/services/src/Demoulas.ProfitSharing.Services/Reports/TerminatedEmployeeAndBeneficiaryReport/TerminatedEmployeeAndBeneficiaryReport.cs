@@ -5,6 +5,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
@@ -14,27 +15,30 @@ namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficia
 /// </summary>
 public sealed class TerminatedEmployeeAndBeneficiaryReport
 {
-    private readonly ProfitSharingReadOnlyDbContext _ctx;
+    private readonly IProfitSharingDataContextFactory _factory;
+    private readonly ContributionService _contributionService;
 
-    public TerminatedEmployeeAndBeneficiaryReport(ProfitSharingReadOnlyDbContext ctx)
+    public TerminatedEmployeeAndBeneficiaryReport(IProfitSharingDataContextFactory factory)
     {
-        _ctx = ctx;
+        _factory = factory;
+        _contributionService = new ContributionService(factory);
     }
 
     public async Task<TerminatedEmployeeAndBeneficiaryResponse> CreateData(TerminatedEmployeeAndBeneficiaryDataRequest req)
     {
-
-        IOrderedQueryable<MemberSlice> memberSliceUnion = RetrieveMemberSlices(req);
-        List<Member> members = await MergeMemberSlicesToMembers(req, memberSliceUnion);
-        TerminatedEmployeeAndBeneficiaryResponse fullResponse =  CreateDataset(members, req);
-        return fullResponse;
+        return await _factory.UseReadOnlyContext(async ctx =>
+        {
+            IOrderedQueryable<MemberSlice> memberSliceUnion = RetrieveMemberSlices(ctx, req);
+            List<Member> members = await MergeMemberSlicesToMembers(ctx, req, memberSliceUnion);
+            TerminatedEmployeeAndBeneficiaryResponse fullResponse = CreateDataset(members, req);
+            return fullResponse;
+        });
     }
 
 
-    private IOrderedQueryable<MemberSlice> RetrieveMemberSlices(TerminatedEmployeeAndBeneficiaryDataRequest request)
+    private IOrderedQueryable<MemberSlice> RetrieveMemberSlices(ProfitSharingReadOnlyDbContext _ctx, TerminatedEmployeeAndBeneficiaryDataRequest request)
     {
         // slices of member information (aka employee or beneficiary information)
-
         var demographicSlice = _ctx.Demographics
             .Include(d => d.PayProfits)
             .Include(demographic => demographic.ContactInfo)
@@ -55,7 +59,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 Psn = d.Demographic.BadgeNumber,
                 Ssn = d.Demographic.Ssn,
                 BirthDate = d.Demographic.DateOfBirth,
-                HoursCurrentYear = 0, // hours
+                HoursCurrentYear = d.PayProfit.CurrentHoursYear ?? 0, // hours
                 NetBalanceLastYear = 0m, // TO-DO !!! PayProfit refactor, pp.NetBalanceLastYear
                 VestedBalanceLastYear = 0m, // TO-DO !!!! PayProfit refactor pp.VestedBalanceLastYear,
                 EmploymentStatusCode = d.Demographic.EmploymentStatusId,
@@ -108,14 +112,14 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 ZeroCont = ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested,
                 Enrolled = x.PayProfit.EnrollmentId,
                 Etva = x.PayProfit.EarningsEtvaValue,
-                BeneficiaryAllocation = 0 // Adjust if needed
+                BeneficiaryAllocation = x.Beneficiary.Amount // Adjust if needed
             });
 
         return demographicSlice.Union(beneficiarySlice)
             .OrderBy(m => m.FullName);
     }
 
-    private async Task<List<Member>> MergeMemberSlicesToMembers(TerminatedEmployeeAndBeneficiaryDataRequest req,
+    private async Task<List<Member>> MergeMemberSlicesToMembers(IProfitSharingDbContext _ctx, TerminatedEmployeeAndBeneficiaryDataRequest req,
         IQueryable<MemberSlice> memberSliceUnion)
     {
         var combinedCollection =
@@ -148,6 +152,9 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
         // Group by SSN, now profit details will be in a collection
         var groupedMembers = await combinedCollection.ToListAsync();
+
+        var psnSet = groupedMembers.Select(m => m.Psn).ToHashSet();
+        var contributionYears = await _contributionService.GetContributionYears(_ctx, psnSet);
 
         var members = new List<Member>();
 
@@ -187,6 +194,11 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                     EndingBalance = group.NetBalanceLastYear + ds.Forfeiture + ds.Distribution + beneficiaryAllocation,
                     VestedBalance = group.VestedBalanceLastYear + ds.Distribution + beneficiaryAllocation
                 };
+
+                if (contributionYears.TryGetValue(group.Psn, out var cy))
+                {
+                    member.YearsInPlan = cy;
+                }
 
                 members.Add(member);
             }

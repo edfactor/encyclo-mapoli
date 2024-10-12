@@ -15,17 +15,21 @@ public sealed class ContributionService
     }
 
 
-    internal Task<Dictionary<int, int>> GetContributionYears(ISet<int> badgeNumber)
+    internal Task<Dictionary<int, int>> GetContributionYears(ISet<int> badgeNumberSet)
     {
-        return _dataContextFactory.UseReadOnlyContext(context =>
-        {
+        return _dataContextFactory.UseReadOnlyContext(context => GetContributionYears(context, badgeNumberSet));
+    }
+
+    internal Task<Dictionary<int, int>> GetContributionYears(IProfitSharingDbContext context, ISet<int> badgeNumberSet)
+    {
+       
             return context.PayProfits
                 .Include(p => p.Demographic)
-                .Where(p => badgeNumber.Contains(p.Demographic!.BadgeNumber))
+                .Where(p => badgeNumberSet.Contains(p.Demographic!.BadgeNumber))
                 .GroupBy(p => p.Demographic!.BadgeNumber)
                 .Select(p => new { BadgeNumber = p.Key, ContributionYears = p.Count() })
                 .ToDictionaryAsync(arg => arg.BadgeNumber, arg => arg.ContributionYears);
-        });
+        
     }
 
     internal Task<Dictionary<int, InternalProfitDetailDto>> GetNetBalance(short profitYear, ISet<int> badgeNumbers, CancellationToken cancellationToken)
