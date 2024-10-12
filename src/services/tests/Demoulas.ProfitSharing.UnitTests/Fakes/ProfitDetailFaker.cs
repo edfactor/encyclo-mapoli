@@ -36,7 +36,7 @@ internal sealed class ProfitDetailFaker : Faker<ProfitDetail>
             return rslt;
         });
         
-        RuleFor(pd => pd.ProfitYear, fake => fake.Random.Short(Convert.ToInt16(DateTime.Now.Year-5), Convert.ToInt16(DateTime.Now.Year)))
+        RuleFor(pd => pd.ProfitYear, fake => fake.PickRandom<short>(2020, 2021, 2022, 2023))
             .RuleFor(pd => pd.ProfitYearIteration, fake => fake.Random.Byte(0, 25))
             .RuleFor(pd => pd.DistributionSequence, fake => fake.Random.Int(short.MaxValue, ushort.MaxValue))
             .RuleFor(pd => pd.ProfitCodeId, fake => fake.PickRandom<byte>(ProfitCode.Constants.IncomingContributions.Id,

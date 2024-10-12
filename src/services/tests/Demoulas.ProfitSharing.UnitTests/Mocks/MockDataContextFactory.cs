@@ -55,7 +55,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
             .Union(beneficiaries.Select(b => b.Contact!.Ssn))
             .ToHashSet();
         
-        var profitDetails = new ProfitDetailFaker(ssnSet).Generate(demographics.Count * 5);
+        var profitDetails = new ProfitDetailFaker(ssnSet).Generate(ssnSet.Count * 5);
         var mockProfitDetails = profitDetails.AsQueryable().BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
