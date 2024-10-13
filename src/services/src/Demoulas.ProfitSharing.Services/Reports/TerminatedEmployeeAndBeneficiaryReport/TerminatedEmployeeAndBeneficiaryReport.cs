@@ -30,14 +30,14 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         return await _factory.UseReadOnlyContext(async ctx =>
         {
             var memberSliceUnion = RetrieveMemberSlices(ctx, req);
-            List<Member> members = await MergeMemberSlicesToMembers(ctx, req, memberSliceUnion.AsQueryable(), cancellationToken);
+            List<Member> members = await MergeMemberSlicesToMembers(ctx, req, memberSliceUnion, cancellationToken);
             TerminatedEmployeeAndBeneficiaryResponse fullResponse = CreateDataset(members, req);
             return fullResponse;
         });
     }
 
 
-    private List<MemberSlice> RetrieveMemberSlices(ProfitSharingReadOnlyDbContext ctx, TerminatedEmployeeAndBeneficiaryDataRequest request)
+    private IOrderedQueryable<MemberSlice> RetrieveMemberSlices(ProfitSharingReadOnlyDbContext ctx, TerminatedEmployeeAndBeneficiaryDataRequest request)
     {
         List<byte> validEnrollmentId =
         [
@@ -67,7 +67,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         // Now, add the Join with ContributionYears
         var demographicWithContributionQuery = demographicSliceQuery
             .Join(
-                ContributionService.GetContributionYearsQuery(ctx, request.ProfitYear, demographicSliceQuery.Select(d => d.Demographic.BadgeNumber).ToList()),
+                ContributionService.GetContributionYearsQuery(ctx, request.ProfitYear, demographicSliceQuery.Select(d => d.Demographic.BadgeNumber)),
                 d => d.Demographic.BadgeNumber,
                 contribution => contribution.BadgeNumber,
                 (d, contribution) => new { d, contribution }
@@ -119,10 +119,9 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 Beneficiary = b,
                 b.Demographic,
                 PayProfit =
-                    b.Demographic!.PayProfits
-                        .FirstOrDefault() // Select the PayProfit for the specified profit year since there's only one record, fetch the first
+                    b.Demographic!.PayProfits[0] // Select the PayProfit for the specified profit year since there's only one record, fetch the first
             })
-            .Where(x => x.Demographic != null && x.PayProfit != null
+            .Where(x => x.Demographic != null
                                               && validEnrollmentId.Contains(x.PayProfit.EnrollmentId))
             .Select(x => new MemberSlice
             {
@@ -147,7 +146,9 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 BeneficiaryAllocation = x.Beneficiary.Amount // Adjust if needed
             });
 
-        return beneficiarySlice.OrderBy(m => m.FullName).ToList();
+        return beneficiarySlice
+            .Union(demographicSlice)
+            .OrderBy(m => m.FullName);
     }
 
     private async Task<List<Member>> MergeMemberSlicesToMembers(IProfitSharingDbContext ctx, TerminatedEmployeeAndBeneficiaryDataRequest req,
@@ -156,7 +157,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         var combinedCollection =
             from memberSlice in memberSliceUnion
             join profitDetail in ctx.ProfitDetails
-                on new { memberSlice.Ssn, req.ProfitYear } equals new { profitDetail.Ssn, profitDetail.ProfitYear } into profitDetailGroup
+                on new { memberSlice.Ssn, ProfitYear = (short)(req.ProfitYear-1) } equals new { profitDetail.Ssn, profitDetail.ProfitYear } into profitDetailGroup
             select new
             {
                 memberSlice.Psn,
@@ -178,7 +179,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 memberSlice.ZeroCont,
                 memberSlice.Enrolled,
                 memberSlice.Etva,
-                ProfitDetails = profitDetailGroup.ToList() // Accumulate the collection of ProfitDetails
+                ProfitDetails = profitDetailGroup // Accumulate the collection of ProfitDetails
             };
 
         // Group by SSN, now profit details will be in a collection
@@ -194,7 +195,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             var beneficiaryAllocation = group.BeneficiaryAllocation;
 
             // Get ProfitDetailSummary for the current SSN
-            ProfitDetailSummary ds = RetrieveProfitDetail(group.ProfitDetails, group.Ssn);
+            ProfitDetailSummary ds = RetrieveProfitDetail(group.ProfitDetails.ToList(), group.Ssn);
             beneficiaryAllocation += ds.BeneficiaryAllocation;
 
             // If the member has financial data, create a Member object
