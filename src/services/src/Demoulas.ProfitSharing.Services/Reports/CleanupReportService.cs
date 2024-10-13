@@ -245,13 +245,13 @@ public class CleanupReportService : ICleanupReportService
 
 
                 ISet<int> badgeNumbers = results.Results.Select(r => r.BadgeNumber).ToHashSet();
-                var dict = await _contributionService.GetContributionYears(ctx, badgeNumbers, cancellationToken);
+                var dict = await ContributionService.GetContributionYears(ctx, req.ProfitYear, badgeNumbers, cancellationToken);
                 var balanceDict = await _contributionService.GetNetBalance(ctx, req.ProfitYear, badgeNumbers, cancellationToken);
 
 
                 foreach (DuplicateNamesAndBirthdaysResponse dup in results.Results)
                 {
-                    _ = dict.TryGetValue(dup.BadgeNumber, out int years);
+                    _ = dict.TryGetValue(dup.BadgeNumber, out byte years);
                     dup.Years = (short)years;
 
                     balanceDict.TryGetValue(dup.BadgeNumber, out var balance);

@@ -15,24 +15,24 @@ public sealed class ContributionService
     }
 
 
-    internal Task<Dictionary<int, int>> GetContributionYears(ISet<int> badgeNumberSet, CancellationToken cancellationToken)
+    internal Task<Dictionary<int, byte>> GetContributionYears(short profitYear, ISet<int> badgeNumberSet, CancellationToken cancellationToken)
     {
-        return _dataContextFactory.UseReadOnlyContext(context => GetContributionYears(context, badgeNumberSet, cancellationToken));
+        return _dataContextFactory.UseReadOnlyContext(context => GetContributionYears(context, profitYear, badgeNumberSet, cancellationToken));
     }
 
-    internal Task<Dictionary<int, int>> GetContributionYears(IProfitSharingDbContext context, ISet<int> badgeNumberSet, CancellationToken cancellationToken)
+    internal static Task<Dictionary<int, byte>> GetContributionYears(IProfitSharingDbContext context, short profitYear, ISet<int> badgeNumberSet, CancellationToken cancellationToken)
     {
-        return GetContributionYearsQuery(context, badgeNumberSet)
-            .Select(p => new { BadgeNumber = p.Key, ContributionYears = p.Count() })
-            .ToDictionaryAsync(arg => arg.BadgeNumber, arg => arg.ContributionYears, cancellationToken);
+        return GetContributionYearsQuery(context, profitYear, badgeNumberSet)
+            .ToDictionaryAsync(arg => arg.BadgeNumber, arg => arg.YearsInPlan, cancellationToken);
     }
 
-    internal static IQueryable<IGrouping<int, PayProfit>> GetContributionYearsQuery(IProfitSharingDbContext context, ISet<int> badgeNumberSet)
+    internal static IQueryable<ContributionYears> GetContributionYearsQuery(IProfitSharingDbContext context, short profitYear, IEnumerable<int> badgeNumberSet)
     {
         return context.PayProfits
             .Include(p => p.Demographic)
-            .Where(p => badgeNumberSet.Contains(p.Demographic!.BadgeNumber))
-            .GroupBy(p => p.Demographic!.BadgeNumber);
+            .Where(p => p.ProfitYear <= profitYear && badgeNumberSet.Contains(p.Demographic!.BadgeNumber))
+            .GroupBy(p => p.Demographic!.BadgeNumber)
+            .Select(p => new ContributionYears { BadgeNumber = p.Key, YearsInPlan = (byte)p.Count() });
     }
 
     internal Task<Dictionary<int, InternalProfitDetailDto>> GetNetBalance(short profitYear, ISet<int> badgeNumbers, CancellationToken cancellationToken)

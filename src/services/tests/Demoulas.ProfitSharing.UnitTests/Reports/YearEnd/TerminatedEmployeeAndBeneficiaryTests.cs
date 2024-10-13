@@ -126,12 +126,16 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
             // Arrange
             var bene = await c.Beneficiaries
                 .Include(beneficiary => beneficiary.Contact)
-                .ThenInclude(beneficiaryContact => beneficiaryContact!).FirstAsync();
+                .ThenInclude(beneficiaryContact => beneficiaryContact!)
+                .Include(beneficiary => beneficiary.Demographic)
+                .ThenInclude(d => d!.PayProfits)
+                .FirstAsync();
             bene.Amount = 379.44m;
             bene.Contact!.FirstName = "Rogue";
             bene.Contact.LastName = "One";
             bene.Contact.MiddleName = "I";
             bene.Contact.DateOfBirth = new DateOnly(1990, 1, 1);
+            bene.Demographic!.PayProfits[0].ProfitYear = 2023;
 
             await c.SaveChangesAsync();
 

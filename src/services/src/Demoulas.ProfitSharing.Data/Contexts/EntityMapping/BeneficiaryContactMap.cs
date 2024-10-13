@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
 using Demoulas.Common.Data.Contexts.ValueConverters;
+using System.Reflection.Emit;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
 
@@ -10,6 +11,7 @@ public sealed class BeneficiaryContactMap : IEntityTypeConfiguration<Beneficiary
     public void Configure(EntityTypeBuilder<BeneficiaryContact> builder)
     {
         _ = builder.ToTable("BENEFICIARY_CONTACT");
+
         _ = builder.HasKey(c => c.Id);
 
         _ = builder.Property(d => d.Id).HasColumnName("ID").ValueGeneratedOnAdd();
