@@ -30,8 +30,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         return await _factory.UseReadOnlyContext(async ctx =>
         {
             IAsyncEnumerable<MemberSlice> memberSliceUnion = RetrieveMemberSlices(ctx, req);
-            List<Member> members = await MergeMemberSlicesToMembers(ctx, req, memberSliceUnion, cancellationToken);
-            TerminatedEmployeeAndBeneficiaryResponse fullResponse = CreateDataset(members, req);
+            var fullResponse = await MergeAndCreateDataset(ctx, req, memberSliceUnion, cancellationToken);
             return fullResponse;
         });
     }
@@ -153,11 +152,26 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             .AsAsyncEnumerable();
     }
 
-    private async Task<List<Member>> MergeMemberSlicesToMembers(IProfitSharingDbContext ctx, TerminatedEmployeeAndBeneficiaryDataRequest req,
-    IAsyncEnumerable<MemberSlice> memberSliceUnion, CancellationToken cancellationToken)
+    private async Task<TerminatedEmployeeAndBeneficiaryResponse> MergeAndCreateDataset(
+     IProfitSharingDbContext ctx,
+     TerminatedEmployeeAndBeneficiaryDataRequest req,
+     IAsyncEnumerable<MemberSlice> memberSliceUnion,
+     CancellationToken cancellationToken)
     {
+        decimal totalVested = 0;
+        decimal totalForfeit = 0;
+        decimal totalEndingBalance = 0;
+        decimal totalBeneficiaryAllocation = 0;
+
         var members = new List<Member>();
+        var membersSummary = new List<TerminatedEmployeeAndBeneficiaryDataResponseDto>();
         var psnSet = new HashSet<int>();
+
+        // Date for calculating age
+#pragma warning disable S6562
+        DateTime forBirthDate = new DateTime(req.ProfitYear, DateTime.Now.Month, DateTime.Now.Day);
+#pragma warning restore S6562
+
 
         await foreach (var memberSlice in memberSliceUnion.WithCancellation(cancellationToken))
         {
@@ -207,14 +221,68 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
                 members.Add(member);
 
-                if (members.Count >= req.Take)
+                // Add PSN to the set for balance lookup later
+                psnSet.Add(memberSlice.Psn);
+
+                // Process the member summary for the report
+                int vestingPercent = LookupVestingPercent(member.EnrollmentId, member.ZeroCont, member.YearsInPlan);
+
+                byte enrollmentId = member.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions ? Enrollment.Constants.NotEnrolled : member.EnrollmentId;
+
+                decimal vestedBalance = member.VestedBalance;
+                if (member.ZeroCont == 6)
                 {
-                    break;
+                    vestedBalance = member.EndingBalance;
+                }
+
+                if (member.EndingBalance == 0 && vestedBalance == 0)
+                {
+                    vestingPercent = 0;
+                }
+
+                int? age = null;
+                if (member.Birthday.HasValue)
+                {
+                    age = member.Birthday.Value.Age(forBirthDate);
+                }
+
+                if (
+                    (member.EnrollmentId is (Enrollment.Constants.NotEnrolled or Enrollment.Constants.OldVestingPlanHasContributions
+                         or Enrollment.Constants.OldVestingPlanHasForfeitureRecords)
+                     && member.YearsInPlan > 2 && member.BeginningAmount != 0)
+                    || (member.EnrollmentId is (Enrollment.Constants.NewVestingPlanHasContributions or Enrollment.Constants.NewVestingPlanHasForfeitureRecords) &&
+                        member.YearsInPlan > 1 && member.BeginningAmount != 0)
+                    || (member.BeneficiaryAllocation != 0)
+                )
+                {
+                    membersSummary.Add(new TerminatedEmployeeAndBeneficiaryDataResponseDto()
+                    {
+                        BadgePSn = member.Psn.ToString(),
+                        Name = member.FullName,
+                        BeginningBalance = member.BeginningAmount,
+                        BeneficiaryAllocation = member.BeneficiaryAllocation,
+                        DistributionAmount = member.DistributionAmount,
+                        Forfeit = member.ForfeitAmount,
+                        EndingBalance = member.EndingBalance,
+                        VestedBalance = vestedBalance,
+                        DateTerm = member.TerminationDate,
+                        YtdPsHours = member.HoursCurrentYear,
+                        VestedPercent = vestingPercent,
+                        Age = age,
+                        EnrollmentCode = enrollmentId
+                    });
+                    totalVested += vestedBalance;
+                    totalForfeit += member.ForfeitAmount;
+                    totalEndingBalance += member.EndingBalance;
+                    totalBeneficiaryAllocation += member.BeneficiaryAllocation;
                 }
             }
 
-            // Add PSN to the set for balance lookup later
-            psnSet.Add(memberSlice.Psn);
+            // Stop processing if we've hit the required count
+            if (members.Count >= req.Take)
+            {
+                break;
+            }
         }
 
         // Query last year's balance in one go using the collected PSNs
@@ -227,91 +295,6 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             {
                 member.BeginningAmount = balance.TotalEarnings;
             }
-        }
-
-        return members;
-    }
-
-
-
-    private TerminatedEmployeeAndBeneficiaryResponse CreateDataset(List<Member> members, TerminatedEmployeeAndBeneficiaryDataRequest req)
-    {
-        decimal totalVested = 0;
-        decimal totalForfeit = 0;
-        decimal totalEndingBalance = 0;
-        decimal totalBeneficiaryAllocation = 0;
-
-        List<TerminatedEmployeeAndBeneficiaryDataResponseDto> membersSummary = new List<TerminatedEmployeeAndBeneficiaryDataResponseDto>();
-
-#pragma warning disable S6562
-        DateTime forBirthDate = new DateTime(req.ProfitYear, DateTime.Now.Month, DateTime.Now.Day);
-#pragma warning restore S6562
-
-        foreach (Member ms in members)
-        {
-            int vestingPercent = LookupVestingPercent(ms.EnrollmentId, ms.ZeroCont, ms.YearsInPlan);
-
-            byte enrollmentId = ms.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions ? Enrollment.Constants.NotEnrolled : ms.EnrollmentId;
-
-            decimal vestedBalance = ms.VestedBalance;
-            if (ms.ZeroCont == 6)
-            {
-                vestedBalance = ms.EndingBalance;
-            }
-
-            if (ms.EndingBalance == 0 && vestedBalance == 0)
-            {
-                vestingPercent = 0;
-            }
-
-            int? age = null;
-            if (ms.Birthday.HasValue)
-            {
-                age = ms.Birthday.Value.Age(forBirthDate);
-            }
-
-            // If they have a contribution the plan and are past the 1st/2nd year for the old/new plan 
-            // or have a beneficiary allocation then add them in.
-            if (
-                (ms.EnrollmentId is (Enrollment.Constants.NotEnrolled or Enrollment.Constants.OldVestingPlanHasContributions
-                     or Enrollment.Constants.OldVestingPlanHasForfeitureRecords)
-                 && ms.YearsInPlan > 2 && ms.BeginningAmount != 0)
-                || (ms.EnrollmentId is (Enrollment.Constants.NewVestingPlanHasContributions or Enrollment.Constants.NewVestingPlanHasForfeitureRecords) &&
-                    ms.YearsInPlan > 1 && ms.BeginningAmount != 0)
-                || (ms.BeneficiaryAllocation != 0)
-            )
-            {
-                membersSummary.Add(new TerminatedEmployeeAndBeneficiaryDataResponseDto()
-                {
-                    BadgePSn = ms.Psn.ToString(),
-                    Name = ms.FullName,
-                    BeginningBalance = ms.BeginningAmount,
-                    BeneficiaryAllocation = ms.BeneficiaryAllocation,
-                    DistributionAmount = ms.DistributionAmount,
-                    Forfeit = ms.ForfeitAmount,
-                    EndingBalance = ms.EndingBalance,
-                    VestedBalance = vestedBalance,
-                    DateTerm = ms.TerminationDate,
-                    YtdPsHours = ms.HoursCurrentYear,
-                    VestedPercent = vestingPercent,
-                    Age = age,
-                    EnrollmentCode = enrollmentId
-                });
-                totalVested += vestedBalance;
-                totalForfeit += ms.ForfeitAmount;
-                totalEndingBalance += ms.EndingBalance;
-                totalBeneficiaryAllocation += ms.BeneficiaryAllocation;
-            }
-        }
-
-        if (req.Skip.HasValue)
-        {
-            membersSummary = membersSummary.Skip(req.Skip.Value).ToList();
-        }
-
-        if (req.Take.HasValue)
-        {
-            membersSummary = membersSummary.Take(req.Take.Value).ToList();
         }
 
         return new TerminatedEmployeeAndBeneficiaryResponse
@@ -328,8 +311,8 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 Total = membersSummary.Count
             }
         };
-
     }
+
 
     private static int LookupVestingPercent(byte enrollmentId, byte? zeroCont, int yearsInPlan)
     {
