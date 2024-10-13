@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.InternalDto;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
@@ -38,8 +39,17 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
     private IOrderedQueryable<MemberSlice> RetrieveMemberSlices(ProfitSharingReadOnlyDbContext ctx, TerminatedEmployeeAndBeneficiaryDataRequest request)
     {
+        List<byte> validEnrollmentId =
+        [
+            Enrollment.Constants.NotEnrolled,
+            Enrollment.Constants.OldVestingPlanHasContributions,
+            Enrollment.Constants.OldVestingPlanHasForfeitureRecords,
+            Enrollment.Constants.NewVestingPlanHasContributions,
+            Enrollment.Constants.NewVestingPlanHasForfeitureRecords
+        ];
+
         // slices of member information (aka employee or beneficiary information)
-        var demographicSlice = ctx.Demographics
+        IQueryable<MemberSlice> demographicSlice = ctx.Demographics
             .Include(d => d.PayProfits)
             .Include(demographic => demographic.ContactInfo)
             .Where(d => d.EmploymentStatusId == EmploymentStatus.Constants.Terminated &&
@@ -54,6 +64,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                     .Select(g => g.First()) // Extracting the first (and only) PayProfit for the year
                     .First()
             })
+            .Where(d=> validEnrollmentId.Contains(d.PayProfit.EnrollmentId))
             .Select(d => new MemberSlice
             {
                 Psn = d.Demographic.BadgeNumber,
@@ -80,18 +91,21 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             });
 
 
-        var beneficiarySlice = ctx.Beneficiaries
+        IQueryable<MemberSlice> beneficiarySlice = ctx.Beneficiaries
             .Include(b => b.Contact)
             .Include(b => b.Demographic)
-            .ThenInclude(d => d!.PayProfits.Where(p=> p.ProfitYear == request.ProfitYear))
+            .ThenInclude(d => d!.PayProfits.Where(p => p.ProfitYear == request.ProfitYear))
             .Where(b => b.Demographic != null) // Ensure there is a related Demographic
             .Select(b => new
             {
                 Beneficiary = b,
                 b.Demographic,
-                PayProfit = b.Demographic!.PayProfits.FirstOrDefault() // Select the PayProfit for the specified profit year since there's only one record, fetch the first
+                PayProfit =
+                    b.Demographic!.PayProfits
+                        .FirstOrDefault() // Select the PayProfit for the specified profit year since there's only one record, fetch the first
             })
-            .Where(x => x.Demographic != null && x.PayProfit != null) // Filter out invalid data
+            .Where(x => x.Demographic != null && x.PayProfit != null
+                                              && validEnrollmentId.Contains(x.PayProfit.EnrollmentId))
             .Select(x => new MemberSlice
             {
                 Psn = x.Beneficiary.PsnSuffix,
@@ -187,7 +201,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                     CurrentVestedAmount = group.VestedBalanceLastYear,
                     YearsInPlan = group.YearsInPs,
                     ZeroCont = group.ZeroCont,
-                    Enrolled = group.Enrolled,
+                    EnrollmentId = group.Enrolled,
                     Evta = group.Etva,
                     BeneficiaryAllocation = beneficiaryAllocation,
                     DistributionAmount = ds.Distribution,
@@ -201,7 +215,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                     member.YearsInPlan = cy;
                 }
 
-                if (lastYearsBalance.TryGetValue(group.Psn, out var balance))
+                if (lastYearsBalance.TryGetValue(group.Psn, out InternalProfitDetailDto? balance))
                 {
                     member.BeginningAmount = balance.TotalEarnings;
                 }
@@ -220,17 +234,17 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         decimal totalEndingBalance = 0;
         decimal totalBeneficiaryAllocation = 0;
 
-        List<TerminatedEmployeeAndBeneficiaryDataResponseDto> membersSummary = new();
+        List<TerminatedEmployeeAndBeneficiaryDataResponseDto> membersSummary = new List<TerminatedEmployeeAndBeneficiaryDataResponseDto>();
 
 #pragma warning disable S6562
-        var forBirthDate = new DateTime(req.ProfitYear, DateTime.Now.Month, DateTime.Now.Day);
+        DateTime forBirthDate = new DateTime(req.ProfitYear, DateTime.Now.Month, DateTime.Now.Day);
 #pragma warning restore S6562
 
-        foreach (var ms in members)
+        foreach (Member ms in members)
         {
-            int vestingPercent = LookupVestingPercent(ms.Enrolled, ms.ZeroCont, ms.YearsInPlan);
+            int vestingPercent = LookupVestingPercent(ms.EnrollmentId, ms.ZeroCont, ms.YearsInPlan);
 
-            byte enrolled = ms.Enrolled == 2 ? (byte)0 : ms.Enrolled;
+            byte enrollmentId = ms.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions ? Enrollment.Constants.NotEnrolled : ms.EnrollmentId;
 
             decimal vestedBalance = ms.VestedBalance;
             if (ms.ZeroCont == 6)
@@ -246,16 +260,16 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             int? age = null;
             if (ms.Birthday.HasValue)
             {
-                age = ms.Birthday.Value.ToDateTime(TimeOnly.MinValue).Age(forBirthDate);
+                age = ms.Birthday.Value.Age(forBirthDate);
             }
 
             // If they have a contribution the plan and are past the 1st/2nd year for the old/new plan 
             // or have a beneficiary allocation then add them in.
             if (
-                (ms.Enrolled is (Enrollment.Constants.NotEnrolled or Enrollment.Constants.OldVestingPlanHasContributions
+                (ms.EnrollmentId is (Enrollment.Constants.NotEnrolled or Enrollment.Constants.OldVestingPlanHasContributions
                      or Enrollment.Constants.OldVestingPlanHasForfeitureRecords)
                  && ms.YearsInPlan > 2 && ms.BeginningAmount != 0)
-                || (ms.Enrolled is (Enrollment.Constants.NewVestingPlanHasContributions or Enrollment.Constants.NewVestingPlanHasForfeitureRecords) &&
+                || (ms.EnrollmentId is (Enrollment.Constants.NewVestingPlanHasContributions or Enrollment.Constants.NewVestingPlanHasForfeitureRecords) &&
                     ms.YearsInPlan > 1 && ms.BeginningAmount != 0)
                 || (ms.BeneficiaryAllocation != 0)
             )
@@ -274,7 +288,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                     YtdPsHours = ms.HoursCurrentYear,
                     VestedPercent = vestingPercent,
                     Age = age,
-                    EnrollmentCode = enrolled
+                    EnrollmentCode = enrollmentId
                 });
                 totalVested += vestedBalance;
                 totalForfeit += ms.ForfeitAmount;
@@ -310,14 +324,14 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
     }
 
-    private static int LookupVestingPercent(byte enrolled, byte? zeroCont, int yearsInPlan)
+    private static int LookupVestingPercent(byte enrollmentId, byte? zeroCont, int yearsInPlan)
     {
-        if (enrolled > Enrollment.Constants.NewVestingPlanHasContributions || zeroCont == ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested)
+        if (enrollmentId > Enrollment.Constants.NewVestingPlanHasContributions || zeroCont == ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested)
         {
             return 100;
         }
         int vestingYearIndex;
-        if (enrolled < Enrollment.Constants.NewVestingPlanHasContributions)
+        if (enrollmentId < Enrollment.Constants.NewVestingPlanHasContributions)
         {
             if (yearsInPlan <= 1)
             {
@@ -371,7 +385,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         decimal forfeiture = 0;
         decimal beneficiaryAllocation = 0;
 
-        foreach (var profitDetail in profitDetails)
+        foreach (ProfitDetail profitDetail in profitDetails)
         {
             if (profitDetail.ProfitCodeId == ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal || profitDetail.ProfitCodeId == ProfitCode.Constants.OutgoingDirectPayments)
             {

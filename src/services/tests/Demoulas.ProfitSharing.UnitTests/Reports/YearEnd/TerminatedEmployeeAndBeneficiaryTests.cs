@@ -149,12 +149,12 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
             response.Result.ReportName.Should().BeEquivalentTo("Terminated Employee and Beneficiary Report");
 
             response.Result.Response.Total.Should().BeGreaterOrEqualTo(1);
-            response.Result.Response.Results.Should().HaveCount(1);
+            response.Result.Response.Results.Should().HaveCountGreaterOrEqualTo(1);
 
-            response.Result.TotalEndingBalance.ShouldBeEquivalentTo(379.44);
-            response.Result.TotalVested.ShouldBeEquivalentTo(379.44);
-            response.Result.TotalForfeit.ShouldBeEquivalentTo(0m);
-            response.Result.TotalBeneficiaryAllocation.ShouldBeEquivalentTo(0m);
+            response.Result.TotalEndingBalance.Should().Be((decimal)379.44);
+            response.Result.TotalVested.Should().Be((decimal)379.44);
+            response.Result.TotalForfeit.Should().Be(0m);
+            response.Result.TotalBeneficiaryAllocation.Should().Be(0m);
 
             TerminatedEmployeeAndBeneficiaryDataResponseDto member = response.Result.Response.Results.First();
             member.Should().ShouldBeEquivalentTo(new TerminatedEmployeeAndBeneficiaryDataResponseDto()

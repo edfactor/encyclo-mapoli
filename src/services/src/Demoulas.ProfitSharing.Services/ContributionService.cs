@@ -22,14 +22,17 @@ public sealed class ContributionService
 
     internal Task<Dictionary<int, int>> GetContributionYears(IProfitSharingDbContext context, ISet<int> badgeNumberSet, CancellationToken cancellationToken)
     {
+        return GetContributionYearsQuery(context, badgeNumberSet)
+            .Select(p => new { BadgeNumber = p.Key, ContributionYears = p.Count() })
+            .ToDictionaryAsync(arg => arg.BadgeNumber, arg => arg.ContributionYears, cancellationToken);
+    }
 
+    internal static IQueryable<IGrouping<int, PayProfit>> GetContributionYearsQuery(IProfitSharingDbContext context, ISet<int> badgeNumberSet)
+    {
         return context.PayProfits
             .Include(p => p.Demographic)
             .Where(p => badgeNumberSet.Contains(p.Demographic!.BadgeNumber))
-            .GroupBy(p => p.Demographic!.BadgeNumber)
-            .Select(p => new { BadgeNumber = p.Key, ContributionYears = p.Count() })
-            .ToDictionaryAsync(arg => arg.BadgeNumber, arg => arg.ContributionYears, cancellationToken);
-
+            .GroupBy(p => p.Demographic!.BadgeNumber);
     }
 
     internal Task<Dictionary<int, InternalProfitDetailDto>> GetNetBalance(short profitYear, ISet<int> badgeNumbers, CancellationToken cancellationToken)

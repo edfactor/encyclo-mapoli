@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
+﻿namespace Demoulas.ProfitSharing.Services.InternalDto;
 
 /// <summary>
 /// A slice of a member in the profit sharing system. An instance of this slice is either employee

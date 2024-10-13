@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
+﻿namespace Demoulas.ProfitSharing.Services.InternalDto;
 
 /// <summary>
 /// A member in the profit sharing system.   Can be an employee a beneficiary or both.
@@ -24,7 +24,7 @@ internal sealed record Member
     public int YearsInPlan { get; set; }
     public decimal VestedBalance { get; init; }
     public byte? ZeroCont { get; init; }
-    public byte Enrolled { get; init; }
+    public byte EnrollmentId { get; init; }
     public decimal Evta { get; init; }
     public decimal BeneficiaryAllocation { get; init; }
 }

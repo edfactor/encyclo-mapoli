@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
+﻿namespace Demoulas.ProfitSharing.Services.InternalDto;
 
 /// <summary>
 /// The summary of PROFIT_DETAIL rows for a given individual identified by SSN.
