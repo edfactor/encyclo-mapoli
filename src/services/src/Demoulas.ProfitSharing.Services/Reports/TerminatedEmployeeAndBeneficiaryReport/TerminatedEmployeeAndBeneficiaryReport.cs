@@ -24,22 +24,22 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         _contributionService = new ContributionService(factory);
     }
 
-    public async Task<TerminatedEmployeeAndBeneficiaryResponse> CreateData(TerminatedEmployeeAndBeneficiaryDataRequest req)
+    public async Task<TerminatedEmployeeAndBeneficiaryResponse> CreateData(TerminatedEmployeeAndBeneficiaryDataRequest req, CancellationToken cancellationToken)
     {
         return await _factory.UseReadOnlyContext(async ctx =>
         {
             IOrderedQueryable<MemberSlice> memberSliceUnion = RetrieveMemberSlices(ctx, req);
-            List<Member> members = await MergeMemberSlicesToMembers(ctx, req, memberSliceUnion);
+            List<Member> members = await MergeMemberSlicesToMembers(ctx, req, memberSliceUnion, cancellationToken);
             TerminatedEmployeeAndBeneficiaryResponse fullResponse = CreateDataset(members, req);
             return fullResponse;
         });
     }
 
 
-    private IOrderedQueryable<MemberSlice> RetrieveMemberSlices(ProfitSharingReadOnlyDbContext _ctx, TerminatedEmployeeAndBeneficiaryDataRequest request)
+    private IOrderedQueryable<MemberSlice> RetrieveMemberSlices(ProfitSharingReadOnlyDbContext ctx, TerminatedEmployeeAndBeneficiaryDataRequest request)
     {
         // slices of member information (aka employee or beneficiary information)
-        var demographicSlice = _ctx.Demographics
+        var demographicSlice = ctx.Demographics
             .Include(d => d.PayProfits)
             .Include(demographic => demographic.ContactInfo)
             .Where(d => d.EmploymentStatusId == EmploymentStatus.Constants.Terminated &&
@@ -80,7 +80,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             });
 
 
-        var beneficiarySlice = _ctx.Beneficiaries
+        var beneficiarySlice = ctx.Beneficiaries
             .Include(b => b.Contact)
             .Include(b => b.Demographic)
             .ThenInclude(d => d!.PayProfits.Where(p=> p.ProfitYear == request.ProfitYear))
@@ -119,12 +119,12 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             .OrderBy(m => m.FullName);
     }
 
-    private async Task<List<Member>> MergeMemberSlicesToMembers(IProfitSharingDbContext _ctx, TerminatedEmployeeAndBeneficiaryDataRequest req,
-        IQueryable<MemberSlice> memberSliceUnion)
+    private async Task<List<Member>> MergeMemberSlicesToMembers(IProfitSharingDbContext ctx, TerminatedEmployeeAndBeneficiaryDataRequest req,
+        IQueryable<MemberSlice> memberSliceUnion, CancellationToken cancellationToken)
     {
         var combinedCollection =
             from memberSlice in memberSliceUnion
-            join profitDetail in _ctx.ProfitDetails
+            join profitDetail in ctx.ProfitDetails
                 on new { memberSlice.Ssn, req.ProfitYear } equals new { profitDetail.Ssn, profitDetail.ProfitYear } into profitDetailGroup
             select new
             {
@@ -151,10 +151,11 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             };
 
         // Group by SSN, now profit details will be in a collection
-        var groupedMembers = await combinedCollection.ToListAsync();
+        var groupedMembers = await combinedCollection.ToListAsync(cancellationToken);
 
         var psnSet = groupedMembers.Select(m => m.Psn).ToHashSet();
-        var contributionYears = await _contributionService.GetContributionYears(_ctx, psnSet);
+        var contributionYears = await _contributionService.GetContributionYears(ctx, psnSet, cancellationToken);
+        var lastYearsBalance = await _contributionService.GetNetBalance(ctx, (short)(req.ProfitYear - 1), psnSet, cancellationToken);
 
         var members = new List<Member>();
 
@@ -195,9 +196,14 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                     VestedBalance = group.VestedBalanceLastYear + ds.Distribution + beneficiaryAllocation
                 };
 
-                if (contributionYears.TryGetValue(group.Psn, out var cy))
+                if (contributionYears.TryGetValue(group.Psn, out int cy))
                 {
                     member.YearsInPlan = cy;
+                }
+
+                if (lastYearsBalance.TryGetValue(group.Psn, out var balance))
+                {
+                    member.BeginningAmount = balance.TotalEarnings;
                 }
 
                 members.Add(member);

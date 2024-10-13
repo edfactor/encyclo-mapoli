@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -182,7 +183,7 @@ public class CleanupReportService : ICleanupReportService
     {
         using (_logger.BeginScope("Request BEGIN DUPLICATE NAMES AND BIRTHDAYS"))
         {
-            var results = await _dataContextFactory.UseReadOnlyContext(ctx =>
+            return await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
                 var dupNameSlashDateOfBirth = (from dem in ctx.Demographics
                     group dem by new { dem.ContactInfo.FullName, dem.DateOfBirth }
@@ -240,27 +241,28 @@ public class CleanupReportService : ICleanupReportService
                         IncomeCurrentYear = g.Key.CurrentIncomeYear
                     };
 
-                return query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
+                var results = await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
+
+
+                ISet<int> badgeNumbers = results.Results.Select(r => r.BadgeNumber).ToHashSet();
+                var dict = await _contributionService.GetContributionYears(ctx, badgeNumbers, cancellationToken);
+                var balanceDict = await _contributionService.GetNetBalance(ctx, req.ProfitYear, badgeNumbers, cancellationToken);
+
+
+                foreach (DuplicateNamesAndBirthdaysResponse dup in results.Results)
+                {
+                    _ = dict.TryGetValue(dup.BadgeNumber, out int years);
+                    dup.Years = (short)years;
+
+                    balanceDict.TryGetValue(dup.BadgeNumber, out var balance);
+                    dup.NetBalance = balance?.TotalEarnings ?? 0;
+                }
+
+                return new ReportResponseBase<DuplicateNamesAndBirthdaysResponse>()
+                {
+                    ReportDate = DateTimeOffset.Now, ReportName = "DUPLICATE NAMES AND BIRTHDAYS", Response = results
+                };
             });
-
-            ISet<int> badgeNumbers = results.Results.Select(r => r.BadgeNumber).ToHashSet();
-            var dict = await _contributionService.GetContributionYears(badgeNumbers);
-            var balanceDict = await _contributionService.GetNetBalance(req.ProfitYear, badgeNumbers, cancellationToken);
-
-
-            foreach (DuplicateNamesAndBirthdaysResponse dup in results.Results)
-            {
-                _ = dict.TryGetValue(dup.BadgeNumber, out int years);
-                dup.Years = (short)years;
-
-                balanceDict.TryGetValue(dup.BadgeNumber, out var balance);
-                dup.NetBalance = balance?.TotalEarnings ?? 0;
-            }
-
-            return new ReportResponseBase<DuplicateNamesAndBirthdaysResponse>()
-            {
-                ReportDate = DateTimeOffset.Now, ReportName = "DUPLICATE NAMES AND BIRTHDAYS", Response = results
-            };
         }
     }
 

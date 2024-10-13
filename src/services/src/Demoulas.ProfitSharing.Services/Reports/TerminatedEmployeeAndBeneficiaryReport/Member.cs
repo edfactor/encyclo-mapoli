@@ -17,7 +17,7 @@ internal sealed record Member
     public DateOnly? TerminationDate { get; init; }
     public char? TerminationCode { get; init; }
     public decimal DistributionAmount { get; init; }
-    public decimal BeginningAmount { get; init; }
+    public decimal BeginningAmount { get; set; }
     public decimal CurrentVestedAmount { get; init; }
     public decimal ForfeitAmount { get; init; }
     public decimal EndingBalance { get; init; }
