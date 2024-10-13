@@ -29,7 +29,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
     {
         return await _factory.UseReadOnlyContext(async ctx =>
         {
-            var memberSliceUnion = RetrieveMemberSlices(ctx, req);
+            IAsyncEnumerable<MemberSlice> memberSliceUnion = RetrieveMemberSlices(ctx, req);
             List<Member> members = await MergeMemberSlicesToMembers(ctx, req, memberSliceUnion, cancellationToken);
             TerminatedEmployeeAndBeneficiaryResponse fullResponse = CreateDataset(members, req);
             return fullResponse;
@@ -37,7 +37,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
     }
 
 
-    private IOrderedQueryable<MemberSlice> RetrieveMemberSlices(ProfitSharingReadOnlyDbContext ctx, TerminatedEmployeeAndBeneficiaryDataRequest request)
+    private IAsyncEnumerable<MemberSlice> RetrieveMemberSlices(ProfitSharingReadOnlyDbContext ctx, TerminatedEmployeeAndBeneficiaryDataRequest request)
     {
         List<byte> validEnrollmentId =
         [
@@ -148,96 +148,91 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
         return beneficiarySlice
             .Union(demographicSlice)
-            .OrderBy(m => m.FullName);
+            .OrderBy(m => m.FullName)
+            .Skip(request.Skip ?? 0)
+            .AsAsyncEnumerable();
     }
 
     private async Task<List<Member>> MergeMemberSlicesToMembers(IProfitSharingDbContext ctx, TerminatedEmployeeAndBeneficiaryDataRequest req,
-        IQueryable<MemberSlice> memberSliceUnion, CancellationToken cancellationToken)
+    IAsyncEnumerable<MemberSlice> memberSliceUnion, CancellationToken cancellationToken)
     {
-        var combinedCollection =
-            from memberSlice in memberSliceUnion
-            join profitDetail in ctx.ProfitDetails
-                on new { memberSlice.Ssn, ProfitYear = (short)(req.ProfitYear-1) } equals new { profitDetail.Ssn, profitDetail.ProfitYear } into profitDetailGroup
-            select new
-            {
-                memberSlice.Psn,
-                memberSlice.Ssn,
-                memberSlice.FullName,
-                memberSlice.FirstName,
-                memberSlice.LastName,
-                memberSlice.MiddleInitial,
-                memberSlice.BirthDate,
-                memberSlice.HoursCurrentYear,
-                memberSlice.NetBalanceLastYear,
-                memberSlice.VestedBalanceLastYear,
-                memberSlice.EmploymentStatusCode,
-                memberSlice.TerminationDate,
-                memberSlice.IncomeRegAndExecCurrentYear,
-                memberSlice.BeneficiaryAllocation,
-                memberSlice.TerminationCode,
-                memberSlice.YearsInPs,
-                memberSlice.ZeroCont,
-                memberSlice.Enrolled,
-                memberSlice.Etva,
-                ProfitDetails = profitDetailGroup // Accumulate the collection of ProfitDetails
-            };
-
-        // Group by SSN, now profit details will be in a collection
-        var groupedMembers = await combinedCollection.ToListAsync(cancellationToken);
-
-        var psnSet = groupedMembers.Select(m => m.Psn).ToHashSet();
-        var lastYearsBalance = await _contributionService.GetNetBalance(ctx, (short)(req.ProfitYear - 1), psnSet, cancellationToken);
-
         var members = new List<Member>();
+        var psnSet = new HashSet<int>();
 
-        foreach (var group in groupedMembers.AsReadOnly())
+        await foreach (var memberSlice in memberSliceUnion.WithCancellation(cancellationToken))
         {
-            var beneficiaryAllocation = group.BeneficiaryAllocation;
+            // Fetch profit details for the current member slice
+            var profitDetails = await ctx.ProfitDetails
+                .Where(pd => pd.ProfitYear <= req.ProfitYear && pd.Ssn == memberSlice.Ssn)
+                .ToListAsync(cancellationToken);
 
-            // Get ProfitDetailSummary for the current SSN
-            ProfitDetailSummary ds = RetrieveProfitDetail(group.ProfitDetails.ToList(), group.Ssn);
-            beneficiaryAllocation += ds.BeneficiaryAllocation;
+            // Retrieve profit detail summary directly from the list of profit details
+            ProfitDetailSummary profitDetailSummary = RetrieveProfitDetail(profitDetails, memberSlice.Ssn);
 
-            // If the member has financial data, create a Member object
-            if (group.NetBalanceLastYear != 0 || ds.BeneficiaryAllocation != 0 || ds.Distribution != 0 || ds.Forfeiture != 0)
+            // Accumulate beneficiary allocation
+            var beneficiaryAllocation = memberSlice.BeneficiaryAllocation + profitDetailSummary.BeneficiaryAllocation;
+
+            // Check if the member has financial data to create a Member object
+            if (memberSlice.NetBalanceLastYear != 0 ||
+                profitDetailSummary.BeneficiaryAllocation != 0 ||
+                profitDetailSummary.Distribution != 0 ||
+                profitDetailSummary.Forfeiture != 0)
             {
+                // Construct the Member object
                 var member = new Member
                 {
-                    Psn = group.Psn,
-                    FullName = group.FullName,
-                    FirstName = group.FirstName,
-                    LastName = group.LastName,
-                    MiddleInitial = group.MiddleInitial,
-                    Birthday = group.BirthDate,
-                    HoursCurrentYear = group.HoursCurrentYear,
-                    EarningsCurrentYear = group.IncomeRegAndExecCurrentYear,
-                    Ssn = group.Ssn,
-                    TerminationDate = group.TerminationDate,
-                    TerminationCode = group.TerminationCode,
-                    BeginningAmount = group.NetBalanceLastYear,
-                    CurrentVestedAmount = group.VestedBalanceLastYear,
-                    YearsInPlan = group.YearsInPs,
-                    ZeroCont = group.ZeroCont,
-                    EnrollmentId = group.Enrolled,
-                    Evta = group.Etva,
+                    Psn = memberSlice.Psn,
+                    FullName = memberSlice.FullName,
+                    FirstName = memberSlice.FirstName,
+                    LastName = memberSlice.LastName,
+                    MiddleInitial = memberSlice.MiddleInitial,
+                    Birthday = memberSlice.BirthDate,
+                    HoursCurrentYear = memberSlice.HoursCurrentYear,
+                    EarningsCurrentYear = memberSlice.IncomeRegAndExecCurrentYear,
+                    Ssn = memberSlice.Ssn,
+                    TerminationDate = memberSlice.TerminationDate,
+                    TerminationCode = memberSlice.TerminationCode,
+                    BeginningAmount = memberSlice.NetBalanceLastYear,
+                    CurrentVestedAmount = memberSlice.VestedBalanceLastYear,
+                    YearsInPlan = memberSlice.YearsInPs,
+                    ZeroCont = memberSlice.ZeroCont,
+                    EnrollmentId = memberSlice.Enrolled,
+                    Evta = memberSlice.Etva,
                     BeneficiaryAllocation = beneficiaryAllocation,
-                    DistributionAmount = ds.Distribution,
-                    ForfeitAmount = ds.Forfeiture,
-                    EndingBalance = group.NetBalanceLastYear + ds.Forfeiture + ds.Distribution + beneficiaryAllocation,
-                    VestedBalance = group.VestedBalanceLastYear + ds.Distribution + beneficiaryAllocation
+                    DistributionAmount = profitDetailSummary.Distribution,
+                    ForfeitAmount = profitDetailSummary.Forfeiture,
+                    EndingBalance = memberSlice.NetBalanceLastYear + profitDetailSummary.Forfeiture + profitDetailSummary.Distribution + beneficiaryAllocation,
+                    VestedBalance = memberSlice.VestedBalanceLastYear + profitDetailSummary.Distribution + beneficiaryAllocation
                 };
 
-                if (lastYearsBalance.TryGetValue(group.Psn, out InternalProfitDetailDto? balance))
-                {
-                    member.BeginningAmount = balance.TotalEarnings;
-                }
-
                 members.Add(member);
+
+                if (members.Count >= req.Take)
+                {
+                    break;
+                }
+            }
+
+            // Add PSN to the set for balance lookup later
+            psnSet.Add(memberSlice.Psn);
+        }
+
+        // Query last year's balance in one go using the collected PSNs
+        var lastYearsBalance = await _contributionService.GetNetBalance(ctx, (short)(req.ProfitYear - 1), psnSet, cancellationToken);
+
+        // Update beginning amounts using last year's balance
+        foreach (var member in members)
+        {
+            if (lastYearsBalance.TryGetValue(member.Psn, out InternalProfitDetailDto? balance))
+            {
+                member.BeginningAmount = balance.TotalEarnings;
             }
         }
 
         return members;
     }
+
+
 
     private TerminatedEmployeeAndBeneficiaryResponse CreateDataset(List<Member> members, TerminatedEmployeeAndBeneficiaryDataRequest req)
     {
