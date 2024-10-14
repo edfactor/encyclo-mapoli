@@ -71,8 +71,7 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
         base.Configure();
     }
 
-    public override Task<TerminatedEmployeeAndBeneficiaryResponse> GetResponse(
-        TerminatedEmployeeAndBeneficiaryDataRequest req, CancellationToken ct)
+    public override Task<TerminatedEmployeeAndBeneficiaryResponse> GetResponse(TerminatedEmployeeAndBeneficiaryDataRequest req, CancellationToken ct)
     {
         return _terminatedEmployeeAndBeneficiaryReportService.GetReport(req, ct);
     }

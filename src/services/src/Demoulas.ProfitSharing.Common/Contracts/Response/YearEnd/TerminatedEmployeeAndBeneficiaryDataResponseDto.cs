@@ -31,7 +31,7 @@ public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto
             YtdPsHours = 980,
             VestedPercent = 20,
             Age = 44,
-            EnrollmentCode = 4
+            EnrollmentCode = 4,
         };
     }
 

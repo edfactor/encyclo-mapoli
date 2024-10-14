@@ -1,4 +1,6 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Bogus.DataSets;
+using System.Collections.Generic;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -8,11 +10,12 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.InternalDto;
 using Microsoft.EntityFrameworkCore;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 
 /// <summary>
-/// Reports on both employees which where terminated in the time range specified (but not retired.), and all beneficiaries.
+/// Generates reports for terminated employees and their beneficiaries.
 /// </summary>
 public sealed class TerminatedEmployeeAndBeneficiaryReport
 {
@@ -167,7 +170,20 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
         // Date for calculating age
 #pragma warning disable S6562
-        DateTime forBirthDate = new DateTime(req.ProfitYear, DateTime.Now.Month, DateTime.Now.Day);
+        // Get the current month and day
+        int currentMonth = DateTime.Now.Month;
+        int currentDay = DateTime.Now.Day;
+
+        /*
+         * Validate the date using DateTime.DaysInMonth to ensure we don't create an invalid date.
+         * This ensures that if the current day(e.g., 30) exceeds the number of days in the month for the provided ProfitYear,
+         * the day is adjusted to the last valid day of the month(e.g., 28 or 29 for February, depending on whether the year is a leap year).
+         */
+        int validDay = Math.Min(currentDay, DateTime.DaysInMonth(req.ProfitYear, currentMonth));
+
+        // Safely construct the valid date
+        DateTime forBirthDate = new DateTime(req.ProfitYear, currentMonth, validDay);
+
 #pragma warning restore S6562
 
 
@@ -228,7 +244,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 byte enrollmentId = member.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions ? Enrollment.Constants.NotEnrolled : member.EnrollmentId;
 
                 decimal vestedBalance = member.VestedBalance;
-                if (member.ZeroCont == 6)
+                if (member.ZeroCont == ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested)
                 {
                     vestedBalance = member.EndingBalance;
                 }
