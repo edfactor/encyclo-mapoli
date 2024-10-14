@@ -72,10 +72,9 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 (d, contribution) => new { d, contribution }
             );
 
-        // Materialize the final result
-#pragma warning disable S1481
+
         var demographicSlice = demographicWithContributionQuery
-#pragma warning restore S1481
+            .Where(x=> validEnrollmentId.Contains(x.d.PayProfit.EnrollmentId))
             .Select(x => new MemberSlice
             {
                 Psn = x.d.Demographic.BadgeNumber,
@@ -145,8 +144,8 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 BeneficiaryAllocation = x.Beneficiary.Amount // Adjust if needed
             });
 
-        return beneficiarySlice
-            .Union(demographicSlice)
+        return demographicSlice
+            .Union(beneficiarySlice)
             .OrderBy(m => m.FullName)
             .Skip(request.Skip ?? 0)
             .AsAsyncEnumerable();
@@ -163,7 +162,6 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         decimal totalEndingBalance = 0;
         decimal totalBeneficiaryAllocation = 0;
 
-        var members = new List<Member>();
         var membersSummary = new List<TerminatedEmployeeAndBeneficiaryDataResponseDto>();
         var psnSet = new HashSet<int>();
 
@@ -219,7 +217,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                     VestedBalance = memberSlice.VestedBalanceLastYear + profitDetailSummary.Distribution + beneficiaryAllocation
                 };
 
-                members.Add(member);
+                
 
                 // Add PSN to the set for balance lookup later
                 psnSet.Add(memberSlice.Psn);
@@ -257,7 +255,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 {
                     membersSummary.Add(new TerminatedEmployeeAndBeneficiaryDataResponseDto()
                     {
-                        BadgePSn = member.Psn.ToString(),
+                        BadgePSn = member.Psn,
                         Name = member.FullName,
                         BeginningBalance = member.BeginningAmount,
                         BeneficiaryAllocation = member.BeneficiaryAllocation,
@@ -279,7 +277,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             }
 
             // Stop processing if we've hit the required count
-            if (members.Count >= req.Take)
+            if (membersSummary.Count >= req.Take)
             {
                 break;
             }
@@ -289,11 +287,11 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         var lastYearsBalance = await _contributionService.GetNetBalance(ctx, (short)(req.ProfitYear - 1), psnSet, cancellationToken);
 
         // Update beginning amounts using last year's balance
-        foreach (var member in members)
+        foreach (var member in membersSummary)
         {
-            if (lastYearsBalance.TryGetValue(member.Psn, out InternalProfitDetailDto? balance))
+            if (lastYearsBalance.TryGetValue(member.BadgePSn, out InternalProfitDetailDto? balance))
             {
-                member.BeginningAmount = balance.TotalEarnings;
+                member.BeginningBalance = balance.TotalEarnings;
             }
         }
 

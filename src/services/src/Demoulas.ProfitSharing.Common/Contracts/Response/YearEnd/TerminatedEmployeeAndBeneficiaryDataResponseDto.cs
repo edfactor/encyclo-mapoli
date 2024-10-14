@@ -1,7 +1,7 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto
 {
-    public required string BadgePSn { get; set; }
+    public required int BadgePSn { get; set; }
     public required string? Name { get; set; }
     public required decimal BeginningBalance { get; set; }
     public required decimal BeneficiaryAllocation { get; set; }
@@ -19,7 +19,7 @@ public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto
     {
         return new TerminatedEmployeeAndBeneficiaryDataResponseDto
         {
-            BadgePSn = "777",
+            BadgePSn = 777,
             Name = "Example, Joe F",
             BeginningBalance = 100,
             BeneficiaryAllocation = 200,
