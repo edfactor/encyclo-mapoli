@@ -137,18 +137,13 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 TerminationDate = employee.Demographic.TerminationDate,
                 IncomeRegAndExecCurrentYear = payProfit.CurrentIncomeYear.GetValueOrDefault(0) + payProfit.IncomeExecutive,
                 TerminationCode = employee.Demographic.TerminationCodeId,
-                //ZeroCont = (employee.Demographic.TerminationCodeId == TerminationCode.Constants.Deceased
-                //            ? ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested
-                //            : payProfit.ZeroContributionReasonId ?? 0),
+                ZeroCont = (employee.Demographic.TerminationCodeId == TerminationCode.Constants.Deceased
+                            ? ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested
+                            : payProfit.ZeroContributionReasonId ?? 0),
                 Enrolled = payProfit.EnrollmentId,
                 Etva = payProfit.EarningsEtvaValue,
                 BeneficiaryAllocation = 0
             };
-
-#pragma warning disable S1481
-        var list = await query.ToListAsync(cancellationToken);
-#pragma warning restore S1481
-
 
         return query;
     }
