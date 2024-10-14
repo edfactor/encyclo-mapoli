@@ -48,7 +48,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         var terminatedEmployees = await GetTerminatedEmployees(ctx, request, cancellationToken);
 
         // Step 2: Add Contributions to Terminated Employees
-        var terminatedWithContributions =await  GetEmployeesWithContributions(ctx, request, terminatedEmployees, cancellationToken);
+        var terminatedWithContributions = await GetEmployeesWithContributions(ctx, request, terminatedEmployees, cancellationToken);
 
         // Step 3: Filter Beneficiaries
         var beneficiaries = GetBeneficiaries(ctx, request);
@@ -155,7 +155,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
     {
         var validEnrollmentIds = GetValidEnrollmentIds();
 
-        return ctx.Beneficiaries
+        var query = ctx.Beneficiaries
             .Include(b => b.Contact)
             .Include(b => b.Demographic)
             .ThenInclude(d => d!.PayProfits.Where(p => p.ProfitYear == request.ProfitYear))
@@ -166,7 +166,8 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 Demographic = b.Demographic,
                 PayProfit = b.Demographic!.PayProfits.FirstOrDefault()
             })
-            .Where(x => x.Demographic != null && validEnrollmentIds.Contains(x.PayProfit!.EnrollmentId))
+            .Where(x => x.PayProfit != null 
+                        && validEnrollmentIds.Contains(x.PayProfit.EnrollmentId))
             .Select(x => new MemberSlice
             {
                 Psn = x.Beneficiary.PsnSuffix,
@@ -191,6 +192,8 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 Etva = x.PayProfit.EarningsEtvaValue,
                 BeneficiaryAllocation = x.Beneficiary.Amount
             });
+        
+        return query;
     }
 
     // Step 4: Combine terminated employees and beneficiaries and apply ordering and pagination
@@ -214,7 +217,8 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             Enrollment.Constants.OldVestingPlanHasContributions,
             Enrollment.Constants.OldVestingPlanHasForfeitureRecords,
             Enrollment.Constants.NewVestingPlanHasContributions,
-            Enrollment.Constants.NewVestingPlanHasForfeitureRecords
+            Enrollment.Constants.NewVestingPlanHasForfeitureRecords,
+            Enrollment.Constants.Import_Status_Unknown
         ];
     }
 
@@ -276,7 +280,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                     FullName = memberSlice.FullName,
                     FirstName = memberSlice.FirstName,
                     LastName = memberSlice.LastName,
-                    MiddleInitial = memberSlice.MiddleInitial,
+                    MiddleInitial = memberSlice.MiddleInitial?[..1],
                     Birthday = memberSlice.BirthDate,
                     HoursCurrentYear = memberSlice.HoursCurrentYear,
                     EarningsCurrentYear = memberSlice.IncomeRegAndExecCurrentYear,
