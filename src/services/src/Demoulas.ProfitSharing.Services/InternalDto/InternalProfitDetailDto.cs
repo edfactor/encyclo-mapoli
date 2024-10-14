@@ -10,5 +10,5 @@ internal sealed record InternalProfitDetailDto
     public decimal TotalPayments { get; set; }
     public decimal TotalFederalTaxes { get; set; }
     public decimal TotalStateTaxes { get; set; }
-
+    public decimal CurrentAmount { get; set; }
 }

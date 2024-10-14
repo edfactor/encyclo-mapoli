@@ -75,9 +75,71 @@ public sealed class ContributionService
                 TotalForfeitures = r.TotalForfeitures,
                 TotalPayments = r.TotalPayments,
                 TotalFederalTaxes = r.TotalFedTaxes,
-                TotalStateTaxes = r.TotalStateTaxes
+                TotalStateTaxes = r.TotalStateTaxes,
+                CurrentAmount = r.TotalContributions + r.TotalEarnings + r.TotalForfeitures - r.TotalPayments
             };
 
         return query.ToDictionaryAsync(d => d.BadgeNumber, cancellationToken);
     }
+
+    public static decimal CalculateCurrentVested(List<ProfitDetail> payments, decimal currentAmount, decimal vestedPercentage)
+    {
+        if (vestedPercentage == 100)
+        {
+            return currentAmount;
+        }
+
+        // First, adjust for before vesting
+        decimal vestedAmount = CalculatePayments(payments, currentAmount, true);
+
+        // Multiply by the vesting percentage
+        decimal percentage = vestedPercentage / 100;
+        vestedAmount *= percentage;
+
+        // Then, adjust for after vesting
+        vestedAmount = CalculatePayments(payments, vestedAmount, false);
+
+        return Math.Round(vestedAmount, 2, MidpointRounding.AwayFromZero);
+    }
+
+    private static decimal CalculatePayments(List<ProfitDetail> payments, decimal currentAmount, bool beforeVesting)
+    {
+        decimal vestedAmount = currentAmount;
+        decimal codeEightEarnings = 0;
+        decimal codeNineForfeiture = 0;
+
+        foreach (var payment in payments)
+        {
+            switch (payment.ProfitCodeId)
+            {
+                case var _ when payment.ProfitCodeId == ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id:  // Partial withdrawal
+                case var _ when payment.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id:  // Outgoing forfeitures
+                case var _ when payment.ProfitCodeId == ProfitCode.Constants.OutgoingDirectPayments.Id:  // Direct payments / rollovers
+                case var _ when payment.ProfitCodeId == ProfitCode.Constants.OutgoingXferBeneficiary.Id:  // XFER beneficiary / QDRO allocation
+                    vestedAmount = beforeVesting ? vestedAmount + payment.Forfeiture : vestedAmount - payment.Forfeiture;
+                    break;
+
+                case var _ when payment.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary.Id:  // Incoming QDRO beneficiary allocation
+                    vestedAmount = beforeVesting ? vestedAmount - payment.Contribution : vestedAmount + payment.Contribution;
+                    break;
+
+                case var _ when payment.ProfitCodeId == ProfitCode.Constants.Incoming100PercentVestedEarnings.Id:  // Incoming 100% vested earnings
+                    codeEightEarnings += payment.Earnings;
+                    break;
+
+                case var _ when payment.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id:  // Outgoing payment from 100% vested amount (ETVA)
+                    codeNineForfeiture += payment.Forfeiture;
+                    break;
+            }
+        }
+
+        // Calculate the ETVA value (Code 8 minus Code 9)
+        decimal evta = codeEightEarnings - codeNineForfeiture;
+
+        // Adjust the vested amount based on ETVA
+        vestedAmount = beforeVesting ? vestedAmount - evta : vestedAmount + evta;
+
+        return Math.Round(vestedAmount, 2, MidpointRounding.AwayFromZero);
+    }
+
 }

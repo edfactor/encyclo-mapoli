@@ -259,22 +259,19 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             
             // Query last year's balance in one go using the collected PSNs
             var lastYearsBalance = await _contributionService.GetNetBalance(ctx, (short)(req.ProfitYear - 1), new List<int> { memberSlice.BadgeNumber }, cancellationToken);
-
+            
             // Update beginning amounts using last year's balance
-           
-                if (lastYearsBalance.TryGetValue(memberSlice.BadgeNumber, out InternalProfitDetailDto? balance))
-                {
-                    profitDetailSummary = profitDetailSummary with { NetBalanceLastYear = balance.TotalEarnings };
-                }
-           
+            lastYearsBalance.TryGetValue(memberSlice.BadgeNumber, out var accountBalance);
+            ContributionService.CalculateCurrentVested(profitDetails, accountBalance?.CurrentAmount ?? 0, 99);
 
 
-          
+
+
             // Accumulate beneficiary allocation
             var beneficiaryAllocation = memberSlice.BeneficiaryAllocation + profitDetailSummary.BeneficiaryAllocation;
 
             // Check if the member has financial data to create a Member object
-            if (profitDetailSummary.NetBalanceLastYear == 0 &&
+            if ((accountBalance?.CurrentAmount ?? 0) == 0 &&
                 profitDetailSummary.BeneficiaryAllocation == 0 &&
                 profitDetailSummary.Distribution == 0 &&
                 profitDetailSummary.Forfeiture == 0)
@@ -296,7 +293,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 Ssn = memberSlice.Ssn,
                 TerminationDate = memberSlice.TerminationDate,
                 TerminationCode = memberSlice.TerminationCode,
-                BeginningAmount = profitDetailSummary.NetBalanceLastYear,
+                BeginningAmount = accountBalance?.CurrentAmount ?? 0,
                 CurrentVestedAmount = 0,
                 YearsInPlan = memberSlice.YearsInPs,
                 ZeroCont = memberSlice.ZeroCont,
@@ -306,7 +303,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 DistributionAmount = profitDetailSummary.Distribution,
                 ForfeitAmount = profitDetailSummary.Forfeiture,
                 EndingBalance =
-                    profitDetailSummary.NetBalanceLastYear + profitDetailSummary.Forfeiture + profitDetailSummary.Distribution + beneficiaryAllocation,
+                    accountBalance?.CurrentAmount ?? 0 + profitDetailSummary.Forfeiture + profitDetailSummary.Distribution + beneficiaryAllocation,
                 VestedBalance = 0 + profitDetailSummary.Distribution + beneficiaryAllocation
             };
 
@@ -446,7 +443,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
         if (profitDetails.Count == 0)
         {
-            return new ProfitDetailSummary(0, 0, 0, 0);
+            return new ProfitDetailSummary(0, 0, 0);
         }
 
         decimal distribution = 0;
@@ -486,6 +483,6 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 beneficiaryAllocation += profitDetail.Contribution;
             }
         }
-        return new ProfitDetailSummary(distribution, forfeiture, beneficiaryAllocation, 0);
+        return new ProfitDetailSummary(distribution, forfeiture, beneficiaryAllocation);
     }
 }
