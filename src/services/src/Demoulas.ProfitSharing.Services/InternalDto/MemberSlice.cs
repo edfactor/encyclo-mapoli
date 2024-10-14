@@ -6,11 +6,10 @@
 /// </summary>
 internal sealed record MemberSlice
 {
-    public int Psn { get; init; }
+    public short PsnSuffix { get; init; }
+    public required int BadgeNumber { get; init; }
     public long Ssn { get; init; }
     public decimal HoursCurrentYear { get; init; }
-    public decimal NetBalanceLastYear { get; init; }
-    public decimal VestedBalanceLastYear { get; init; }
     public char EmploymentStatusCode { get; init; }
     public string? FullName { get; init; } = string.Empty;
     public string FirstName { get; init; } = string.Empty;

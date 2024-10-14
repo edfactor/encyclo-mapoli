@@ -100,7 +100,7 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
             member.Should().ShouldBeEquivalentTo(new TerminatedEmployeeAndBeneficiaryDataResponseDto()
             {
                 Name = "Smith, Nancy K",
-                BadgePSn = 9988,
+                BadgePSn = "9988",
                 BeginningBalance = 446m,
                 BeneficiaryAllocation = 222.23m,
                 DistributionAmount = -99.99m,
@@ -163,7 +163,7 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
             member.Should().ShouldBeEquivalentTo(new TerminatedEmployeeAndBeneficiaryDataResponseDto()
             {
                 Name = "One, Rogue I",
-                BadgePSn = 888888,
+                BadgePSn = "888888",
                 BeginningBalance = 379.44m,
                 BeneficiaryAllocation = 0m,
                 DistributionAmount = 0m,

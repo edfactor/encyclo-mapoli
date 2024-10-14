@@ -35,15 +35,15 @@ public sealed class ContributionService
             .Select(p => new ContributionYears { BadgeNumber = p.Key, YearsInPlan = (byte)p.Count() });
     }
 
-    internal Task<Dictionary<int, InternalProfitDetailDto>> GetNetBalance(short profitYear, ISet<int> badgeNumbers, CancellationToken cancellationToken)
+    internal Task<Dictionary<int, InternalProfitDetailDto>> GetNetBalance(short profitYear, IEnumerable<int> badgeNumbers, CancellationToken cancellationToken)
     {
         return _dataContextFactory.UseReadOnlyContext(ctx => GetNetBalance(ctx, profitYear, badgeNumbers, cancellationToken));
     }
 
-    internal Task<Dictionary<int, InternalProfitDetailDto>> GetNetBalance(IProfitSharingDbContext context, short profitYear, ISet<int> badgeNumbers,
+    internal Task<Dictionary<int, InternalProfitDetailDto>> GetNetBalance(IProfitSharingDbContext context, short profitYear, IEnumerable<int> badgeNumbers,
         CancellationToken cancellationToken)
     {
-
+        var badgeHash = badgeNumbers.ToHashSet();
         var pdQuery = context.ProfitDetails
             .Where(details => details.ProfitYear <= profitYear)
             .GroupBy(details => details.Ssn)
@@ -61,7 +61,7 @@ public sealed class ContributionService
 
 
         var demoQuery = context.Demographics
-            .Where(d => badgeNumbers.Contains(d.BadgeNumber))
+            .Where(d => badgeHash.Contains(d.BadgeNumber))
             .Select(d => new { d.OracleHcmId, d.BadgeNumber, d.Ssn });
 
         var query = from d in demoQuery

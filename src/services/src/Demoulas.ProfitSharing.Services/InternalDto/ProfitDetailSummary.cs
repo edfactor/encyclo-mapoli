@@ -7,5 +7,6 @@ internal sealed record ProfitDetailSummary
 (
     decimal Distribution,
     decimal Forfeiture,
-    decimal BeneficiaryAllocation
+    decimal BeneficiaryAllocation,
+    decimal NetBalanceLastYear
 );

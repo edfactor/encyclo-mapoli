@@ -1,7 +1,4 @@
-﻿using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Threading;
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -119,15 +116,12 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             join contribution in contributionYearsQuery on employee.Demographic.BadgeNumber equals contribution.BadgeNumber
             join payProfit in payProfitsQuery on employee.Demographic.OracleHcmId equals payProfit.OracleHcmId
             select new MemberSlice
-#pragma warning disable S125
             {
-#pragma warning restore S125
-                Psn = employee.Demographic.BadgeNumber,
+                PsnSuffix = 0,
+                BadgeNumber = employee.Demographic.BadgeNumber,
                 Ssn = employee.Demographic.Ssn,
                 BirthDate = employee.Demographic.DateOfBirth,
                 HoursCurrentYear = payProfit.CurrentHoursYear ?? 0,
-                NetBalanceLastYear = 0m, // Placeholder for actual value
-                VestedBalanceLastYear = 0m, // Placeholder for actual value
                 EmploymentStatusCode = employee.Demographic.EmploymentStatusId,
                 FullName = employee.Demographic.ContactInfo.FullName,
                 FirstName = employee.Demographic.ContactInfo.FirstName,
@@ -170,12 +164,11 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                         && validEnrollmentIds.Contains(x.PayProfit.EnrollmentId))
             .Select(x => new MemberSlice
             {
-                Psn = x.Beneficiary.PsnSuffix,
+                PsnSuffix = x.Beneficiary.PsnSuffix,
+                BadgeNumber = x.Demographic!.BadgeNumber,
                 Ssn = x.Beneficiary.Contact!.Ssn,
                 BirthDate = x.Beneficiary.Contact!.DateOfBirth,
                 HoursCurrentYear = 0, // Placeholder logic for hours
-                NetBalanceLastYear = 0m, // Placeholder logic for balance
-                VestedBalanceLastYear = 0m,
                 EmploymentStatusCode = x.Demographic!.EmploymentStatusId,
                 FullName = x.Beneficiary.Contact!.FullName!,
                 FirstName = x.Beneficiary.Contact.FirstName,
@@ -217,8 +210,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             Enrollment.Constants.OldVestingPlanHasContributions,
             Enrollment.Constants.OldVestingPlanHasForfeitureRecords,
             Enrollment.Constants.NewVestingPlanHasContributions,
-            Enrollment.Constants.NewVestingPlanHasForfeitureRecords,
-            Enrollment.Constants.Import_Status_Unknown
+            Enrollment.Constants.NewVestingPlanHasForfeitureRecords
         ];
     }
 
@@ -235,7 +227,6 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         decimal totalBeneficiaryAllocation = 0;
 
         var membersSummary = new List<TerminatedEmployeeAndBeneficiaryDataResponseDto>();
-        var psnSet = new HashSet<int>();
 
 #pragma warning disable S6562
         // Get the current month and day
@@ -261,102 +252,119 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 .Where(pd => pd.ProfitYear <= req.ProfitYear && pd.Ssn == memberSlice.Ssn)
                 .ToListAsync(cancellationToken);
 
+
             // Retrieve profit detail summary directly from the list of profit details
             ProfitDetailSummary profitDetailSummary = RetrieveProfitDetail(profitDetails, memberSlice.Ssn);
 
+            
+            // Query last year's balance in one go using the collected PSNs
+            var lastYearsBalance = await _contributionService.GetNetBalance(ctx, (short)(req.ProfitYear - 1), new List<int> { memberSlice.BadgeNumber }, cancellationToken);
+
+            // Update beginning amounts using last year's balance
+           
+                if (lastYearsBalance.TryGetValue(memberSlice.BadgeNumber, out InternalProfitDetailDto? balance))
+                {
+                    profitDetailSummary = profitDetailSummary with { NetBalanceLastYear = balance.TotalEarnings };
+                }
+           
+
+
+          
             // Accumulate beneficiary allocation
             var beneficiaryAllocation = memberSlice.BeneficiaryAllocation + profitDetailSummary.BeneficiaryAllocation;
 
             // Check if the member has financial data to create a Member object
-            if (memberSlice.NetBalanceLastYear != 0 ||
-                profitDetailSummary.BeneficiaryAllocation != 0 ||
-                profitDetailSummary.Distribution != 0 ||
-                profitDetailSummary.Forfeiture != 0)
+            if (profitDetailSummary.NetBalanceLastYear == 0 &&
+                profitDetailSummary.BeneficiaryAllocation == 0 &&
+                profitDetailSummary.Distribution == 0 &&
+                profitDetailSummary.Forfeiture == 0)
             {
-                // Construct the Member object
-                var member = new Member
+                continue;
+            }
+
+            // Construct the Member object
+            var member = new Member
+            {
+                Psn = memberSlice.PsnSuffix > 0 ? $"{memberSlice.BadgeNumber}{memberSlice.PsnSuffix}" : memberSlice.BadgeNumber.ToString(),
+                FullName = memberSlice.FullName,
+                FirstName = memberSlice.FirstName,
+                LastName = memberSlice.LastName,
+                MiddleInitial = memberSlice.MiddleInitial?[..1],
+                Birthday = memberSlice.BirthDate,
+                HoursCurrentYear = memberSlice.HoursCurrentYear,
+                EarningsCurrentYear = memberSlice.IncomeRegAndExecCurrentYear,
+                Ssn = memberSlice.Ssn,
+                TerminationDate = memberSlice.TerminationDate,
+                TerminationCode = memberSlice.TerminationCode,
+                BeginningAmount = profitDetailSummary.NetBalanceLastYear,
+                CurrentVestedAmount = 0,
+                YearsInPlan = memberSlice.YearsInPs,
+                ZeroCont = memberSlice.ZeroCont,
+                EnrollmentId = memberSlice.Enrolled,
+                Evta = memberSlice.Etva,
+                BeneficiaryAllocation = beneficiaryAllocation,
+                DistributionAmount = profitDetailSummary.Distribution,
+                ForfeitAmount = profitDetailSummary.Forfeiture,
+                EndingBalance =
+                    profitDetailSummary.NetBalanceLastYear + profitDetailSummary.Forfeiture + profitDetailSummary.Distribution + beneficiaryAllocation,
+                VestedBalance = 0 + profitDetailSummary.Distribution + beneficiaryAllocation
+            };
+
+
+            // Process the member summary for the report
+            int vestingPercent = LookupVestingPercent(member.EnrollmentId, member.ZeroCont, member.YearsInPlan);
+
+            byte enrollmentId = member.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions
+                ? Enrollment.Constants.NotEnrolled
+                : member.EnrollmentId;
+
+            decimal vestedBalance = member.VestedBalance;
+            if (member.ZeroCont == ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested)
+            {
+                vestedBalance = member.EndingBalance;
+            }
+
+            if (member.EndingBalance == 0 && vestedBalance == 0)
+            {
+                vestingPercent = 0;
+            }
+
+            int? age = null;
+            if (member.Birthday.HasValue)
+            {
+                age = member.Birthday.Value.Age(forBirthDate);
+            }
+
+            if (
+                (member.EnrollmentId is (Enrollment.Constants.NotEnrolled or Enrollment.Constants.OldVestingPlanHasContributions
+                     or Enrollment.Constants.OldVestingPlanHasForfeitureRecords)
+                 && member.YearsInPlan > 2 && member.BeginningAmount != 0)
+                || (member.EnrollmentId is (Enrollment.Constants.NewVestingPlanHasContributions
+                        or Enrollment.Constants.NewVestingPlanHasForfeitureRecords) &&
+                    member.YearsInPlan > 1 && member.BeginningAmount != 0)
+                || (member.BeneficiaryAllocation != 0)
+            )
+            {
+                membersSummary.Add(new TerminatedEmployeeAndBeneficiaryDataResponseDto()
                 {
-                    Psn = memberSlice.Psn,
-                    FullName = memberSlice.FullName,
-                    FirstName = memberSlice.FirstName,
-                    LastName = memberSlice.LastName,
-                    MiddleInitial = memberSlice.MiddleInitial?[..1],
-                    Birthday = memberSlice.BirthDate,
-                    HoursCurrentYear = memberSlice.HoursCurrentYear,
-                    EarningsCurrentYear = memberSlice.IncomeRegAndExecCurrentYear,
-                    Ssn = memberSlice.Ssn,
-                    TerminationDate = memberSlice.TerminationDate,
-                    TerminationCode = memberSlice.TerminationCode,
-                    BeginningAmount = memberSlice.NetBalanceLastYear,
-                    CurrentVestedAmount = memberSlice.VestedBalanceLastYear,
-                    YearsInPlan = memberSlice.YearsInPs,
-                    ZeroCont = memberSlice.ZeroCont,
-                    EnrollmentId = memberSlice.Enrolled,
-                    Evta = memberSlice.Etva,
-                    BeneficiaryAllocation = beneficiaryAllocation,
-                    DistributionAmount = profitDetailSummary.Distribution,
-                    ForfeitAmount = profitDetailSummary.Forfeiture,
-                    EndingBalance = memberSlice.NetBalanceLastYear + profitDetailSummary.Forfeiture + profitDetailSummary.Distribution + beneficiaryAllocation,
-                    VestedBalance = memberSlice.VestedBalanceLastYear + profitDetailSummary.Distribution + beneficiaryAllocation
-                };
-
-                
-
-                // Add PSN to the set for balance lookup later
-                psnSet.Add(memberSlice.Psn);
-
-                // Process the member summary for the report
-                int vestingPercent = LookupVestingPercent(member.EnrollmentId, member.ZeroCont, member.YearsInPlan);
-
-                byte enrollmentId = member.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions ? Enrollment.Constants.NotEnrolled : member.EnrollmentId;
-
-                decimal vestedBalance = member.VestedBalance;
-                if (member.ZeroCont == ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested)
-                {
-                    vestedBalance = member.EndingBalance;
-                }
-
-                if (member.EndingBalance == 0 && vestedBalance == 0)
-                {
-                    vestingPercent = 0;
-                }
-
-                int? age = null;
-                if (member.Birthday.HasValue)
-                {
-                    age = member.Birthday.Value.Age(forBirthDate);
-                }
-
-                if (
-                    (member.EnrollmentId is (Enrollment.Constants.NotEnrolled or Enrollment.Constants.OldVestingPlanHasContributions
-                         or Enrollment.Constants.OldVestingPlanHasForfeitureRecords)
-                     && member.YearsInPlan > 2 && member.BeginningAmount != 0)
-                    || (member.EnrollmentId is (Enrollment.Constants.NewVestingPlanHasContributions or Enrollment.Constants.NewVestingPlanHasForfeitureRecords) &&
-                        member.YearsInPlan > 1 && member.BeginningAmount != 0)
-                    || (member.BeneficiaryAllocation != 0)
-                )
-                {
-                    membersSummary.Add(new TerminatedEmployeeAndBeneficiaryDataResponseDto()
-                    {
-                        BadgePSn = member.Psn,
-                        Name = member.FullName,
-                        BeginningBalance = member.BeginningAmount,
-                        BeneficiaryAllocation = member.BeneficiaryAllocation,
-                        DistributionAmount = member.DistributionAmount,
-                        Forfeit = member.ForfeitAmount,
-                        EndingBalance = member.EndingBalance,
-                        VestedBalance = vestedBalance,
-                        DateTerm = member.TerminationDate,
-                        YtdPsHours = member.HoursCurrentYear,
-                        VestedPercent = vestingPercent,
-                        Age = age,
-                        EnrollmentCode = enrollmentId
-                    });
-                    totalVested += vestedBalance;
-                    totalForfeit += member.ForfeitAmount;
-                    totalEndingBalance += member.EndingBalance;
-                    totalBeneficiaryAllocation += member.BeneficiaryAllocation;
-                }
+                    BadgePSn = member.Psn,
+                    Name = member.FullName,
+                    BeginningBalance = member.BeginningAmount,
+                    BeneficiaryAllocation = member.BeneficiaryAllocation,
+                    DistributionAmount = member.DistributionAmount,
+                    Forfeit = member.ForfeitAmount,
+                    EndingBalance = member.EndingBalance,
+                    VestedBalance = vestedBalance,
+                    DateTerm = member.TerminationDate,
+                    YtdPsHours = member.HoursCurrentYear,
+                    VestedPercent = vestingPercent,
+                    Age = age,
+                    EnrollmentCode = enrollmentId
+                });
+                totalVested += vestedBalance;
+                totalForfeit += member.ForfeitAmount;
+                totalEndingBalance += member.EndingBalance;
+                totalBeneficiaryAllocation += member.BeneficiaryAllocation;
             }
 
             // Stop processing if we've hit the required count
@@ -366,18 +374,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             }
         }
 
-        // Query last year's balance in one go using the collected PSNs
-        var lastYearsBalance = await _contributionService.GetNetBalance(ctx, (short)(req.ProfitYear - 1), psnSet, cancellationToken);
-
-        // Update beginning amounts using last year's balance
-        foreach (var member in membersSummary)
-        {
-            if (lastYearsBalance.TryGetValue(member.BadgePSn, out InternalProfitDetailDto? balance))
-            {
-                member.BeginningBalance = balance.TotalEarnings;
-            }
-        }
-
+      
         return new TerminatedEmployeeAndBeneficiaryResponse
         {
             ReportName = "Terminated Employee and Beneficiary Report",
@@ -449,7 +446,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
         if (profitDetails.Count == 0)
         {
-            return new ProfitDetailSummary(0, 0, 0);
+            return new ProfitDetailSummary(0, 0, 0, 0);
         }
 
         decimal distribution = 0;
@@ -458,7 +455,8 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
         foreach (ProfitDetail profitDetail in profitDetails)
         {
-            if (profitDetail.ProfitCodeId == ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal || profitDetail.ProfitCodeId == ProfitCode.Constants.OutgoingDirectPayments)
+            if (profitDetail.ProfitCodeId == ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal 
+                || profitDetail.ProfitCodeId == ProfitCode.Constants.OutgoingDirectPayments)
             {
                 distribution -= profitDetail.Forfeiture;
             }
@@ -488,6 +486,6 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 beneficiaryAllocation += profitDetail.Contribution;
             }
         }
-        return new ProfitDetailSummary(distribution, forfeiture, beneficiaryAllocation);
+        return new ProfitDetailSummary(distribution, forfeiture, beneficiaryAllocation, 0);
     }
 }
