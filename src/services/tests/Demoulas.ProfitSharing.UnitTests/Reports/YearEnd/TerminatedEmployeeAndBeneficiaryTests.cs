@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -25,10 +26,8 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
         _endpoint = new TerminatedEmployeeAndBeneficiaryDataEndpoint(mockService);
     }
 
-    readonly TerminatedEmployeeAndBeneficiaryDataRequest requestDto = new()
+    private readonly ProfitYearRequest _requestDto = new ProfitYearRequest()
     {
-        StartDate = new DateOnly(2023, 1, 7),
-        EndDate = new DateOnly(2024, 1, 2),
         ProfitYear = 2023
     };
 
@@ -39,7 +38,7 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
         var response =
             await ApiClient
                 .GETAsync<TerminatedEmployeeAndBeneficiaryDataEndpoint,
-                    TerminatedEmployeeAndBeneficiaryDataRequest, TerminatedEmployeeAndBeneficiaryResponse>(requestDto);
+                    ProfitYearRequest, TerminatedEmployeeAndBeneficiaryResponse>(_requestDto);
 
         // Assert
         response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -84,7 +83,7 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
 
             await c.SaveChangesAsync();
 
-            var response = await _endpoint.GetResponse(requestDto, CancellationToken.None);
+            var response = await _endpoint.GetResponse(_requestDto, CancellationToken.None);
            
 
             response!.ReportName.Should().BeEquivalentTo("Terminated Employee and Beneficiary Report");
@@ -101,7 +100,7 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
             member.Should().ShouldBeEquivalentTo(new TerminatedEmployeeAndBeneficiaryDataResponseDto()
             {
                 Name = "Smith, Nancy K",
-                BadgePSn = "9988",
+                BadgePSn = 9988,
                 BeginningBalance = 446m,
                 BeneficiaryAllocation = 222.23m,
                 DistributionAmount = -99.99m,
@@ -146,7 +145,7 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
             var response =
                 await ApiClient
                     .GETAsync<TerminatedEmployeeAndBeneficiaryDataEndpoint,
-                        TerminatedEmployeeAndBeneficiaryDataRequest, TerminatedEmployeeAndBeneficiaryResponse>(requestDto);
+                        ProfitYearRequest, TerminatedEmployeeAndBeneficiaryResponse>(_requestDto);
 
             // Assert
             response.Response.Content.Should().NotBeNull();
@@ -164,7 +163,7 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
             member.Should().ShouldBeEquivalentTo(new TerminatedEmployeeAndBeneficiaryDataResponseDto()
             {
                 Name = "One, Rogue I",
-                BadgePSn = "888888",
+                BadgePSn = 888888,
                 BeginningBalance = 379.44m,
                 BeneficiaryAllocation = 0m,
                 DistributionAmount = 0m,
