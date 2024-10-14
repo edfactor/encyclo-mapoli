@@ -10,7 +10,7 @@ using Demoulas.ProfitSharing.Security;
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ExecutiveHoursAndDollars;
 
 public class ExecutiveHoursAndDollarsEndpoint :
-    EndpointWithCsvBase<ProfitYearRequest, ExecutiveHoursAndDollarsResponse, ExecutiveHoursAndDollarsEndpoint.ExecutiveHoursAndDollarsMap
+    EndpointWithCsvBase<ExecutiveHoursAndDollarsRequest, ExecutiveHoursAndDollarsResponse, ExecutiveHoursAndDollarsEndpoint.ExecutiveHoursAndDollarsMap
     >
 {
     private readonly IExecutiveHoursAndDollarsService _reportService;
@@ -44,9 +44,9 @@ public class ExecutiveHoursAndDollarsEndpoint :
 
     public override string ReportFileName => "Executive Hours and Dollars";
 
-    public override async Task<ReportResponseBase< ExecutiveHoursAndDollarsResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
+    public override Task<ReportResponseBase<ExecutiveHoursAndDollarsResponse>> GetResponse(ExecutiveHoursAndDollarsRequest req, CancellationToken ct)
     {
-        return await _reportService.GetExecutiveHoursAndDollarsReport(req, ct);
+        return  _reportService.GetExecutiveHoursAndDollarsReport(req, ct);
     }
 
     public sealed class ExecutiveHoursAndDollarsMap : ClassMap<ExecutiveHoursAndDollarsResponse>

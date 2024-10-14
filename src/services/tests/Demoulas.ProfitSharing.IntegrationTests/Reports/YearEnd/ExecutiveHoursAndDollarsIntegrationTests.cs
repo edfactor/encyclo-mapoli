@@ -23,8 +23,8 @@ public class ExecutiveHoursAndDollarsIntegrationTests : ApiIntegrationTestBase<P
         DownloadClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
 
         var response =
-            await DownloadClient.GETAsync<ExecutiveHoursAndDollarsEndpoint, ProfitYearRequest, StreamContent>(
-                new ProfitYearRequest { ProfitYear = YearThis });
+            await DownloadClient.GETAsync<ExecutiveHoursAndDollarsEndpoint, ExecutiveHoursAndDollarsRequest, StreamContent>(
+                new ExecutiveHoursAndDollarsRequest { ProfitYear = YearThis, HasExecutiveHoursAndDollars = true});
 
         string csvData = await response.Response.Content.ReadAsStringAsync();
 
@@ -50,8 +50,8 @@ public class ExecutiveHoursAndDollarsIntegrationTests : ApiIntegrationTestBase<P
         DownloadClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
 
         var response =
-            await DownloadClient.GETAsync<ExecutiveHoursAndDollarsEndpoint, ProfitYearRequest, StreamContent>(
-                new ProfitYearRequest { ProfitYear = YearLast });
+            await DownloadClient.GETAsync<ExecutiveHoursAndDollarsEndpoint, ExecutiveHoursAndDollarsRequest, StreamContent>(
+                new ExecutiveHoursAndDollarsRequest { ProfitYear = YearLast, HasExecutiveHoursAndDollars = true});
 
         string csvData = await response.Response.Content.ReadAsStringAsync();
 

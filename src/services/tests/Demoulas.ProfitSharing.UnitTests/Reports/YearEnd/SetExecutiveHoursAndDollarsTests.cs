@@ -20,7 +20,6 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
         {
             ProfitYear = 0,
             ExecutiveHoursAndDollars = [
-
                 new() {
                     BadgeNumber = 99,
                     ExecutiveDollars = 0,
@@ -174,10 +173,9 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
 
             // Verify that the underlying employee was altered properly.
             payProfit = await ctx.PayProfits
-                .Include(p => p.Demographic)
+                .Include(p => p.Demographic != null)
                 .Where(p => p.ProfitYear == profitYear && p.OracleHcmId == payProfit.OracleHcmId)
                 .FirstAsync();
-
 
             // verify updated hours and income
             payProfit.HoursExecutive.Should().Be(newHoursExecutive);
