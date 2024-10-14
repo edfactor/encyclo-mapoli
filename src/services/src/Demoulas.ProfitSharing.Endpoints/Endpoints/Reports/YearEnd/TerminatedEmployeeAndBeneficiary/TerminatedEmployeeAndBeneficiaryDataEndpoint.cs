@@ -14,7 +14,7 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.TerminatedE
 
 
 public class TerminatedEmployeeAndBeneficiaryDataEndpoint
-    : EndpointWithCsvTotalsBase<TerminatedEmployeeAndBeneficiaryDataRequest,
+    : EndpointWithCsvTotalsBase<ProfitYearRequest,
         TerminatedEmployeeAndBeneficiaryResponse,
         TerminatedEmployeeAndBeneficiaryDataResponseDto,
         TerminatedEmployeeAndBeneficiaryDataResponseMap>
@@ -36,9 +36,9 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
             s.Summary = "Provide the Terminated Employee and Beneficiary Report (QPAY066) report.";
             s.Description =
                 "Reports on beneficiaries with a non-zero balance and employees who were terminated (and not retired) in the specified date range.";
-            s.ExampleRequest = new TerminatedEmployeeAndBeneficiaryDataRequest()
+            s.ExampleRequest = new ProfitYearRequest()
             {
-                StartDate = new DateOnly(2023, 1, 7), EndDate = new DateOnly(2024, 1, 2), ProfitYear = 2023
+                ProfitYear = 2023
             };
             s.ResponseExamples = new Dictionary<int, object>
             {
@@ -71,7 +71,7 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
         base.Configure();
     }
 
-    public override Task<TerminatedEmployeeAndBeneficiaryResponse> GetResponse(TerminatedEmployeeAndBeneficiaryDataRequest req, CancellationToken ct)
+    public override Task<TerminatedEmployeeAndBeneficiaryResponse> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
         return _terminatedEmployeeAndBeneficiaryReportService.GetReport(req, ct);
     }

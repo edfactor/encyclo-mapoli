@@ -1,6 +1,4 @@
-﻿using Bogus.DataSets;
-using System.Collections.Generic;
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -10,7 +8,6 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.InternalDto;
 using Microsoft.EntityFrameworkCore;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 
@@ -28,7 +25,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         _contributionService = new ContributionService(factory);
     }
 
-    public async Task<TerminatedEmployeeAndBeneficiaryResponse> CreateData(TerminatedEmployeeAndBeneficiaryDataRequest req, CancellationToken cancellationToken)
+    public async Task<TerminatedEmployeeAndBeneficiaryResponse> CreateData(ProfitYearRequest req, CancellationToken cancellationToken)
     {
         return await _factory.UseReadOnlyContext(async ctx =>
         {
@@ -39,7 +36,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
     }
 
 
-    private IAsyncEnumerable<MemberSlice> RetrieveMemberSlices(ProfitSharingReadOnlyDbContext ctx, TerminatedEmployeeAndBeneficiaryDataRequest request)
+    private IAsyncEnumerable<MemberSlice> RetrieveMemberSlices(ProfitSharingReadOnlyDbContext ctx, ProfitYearRequest request)
     {
         // Step 1: Filter Terminated Employees
         var terminatedEmployees = GetTerminatedEmployees(ctx, request);
@@ -55,14 +52,17 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
     }
 
     // Step 1: Get terminated employees with basic demographic and pay profit details
-    private IQueryable<TerminatedEmployeeDto> GetTerminatedEmployees(ProfitSharingReadOnlyDbContext ctx, TerminatedEmployeeAndBeneficiaryDataRequest request)
+    private IQueryable<TerminatedEmployeeDto> GetTerminatedEmployees(ProfitSharingReadOnlyDbContext ctx, ProfitYearRequest request)
     {
+        var firstDayOfTheYear = new DateOnly(request.ProfitYear, 01, 01);
+        var lastDayOfTheYear = new DateOnly(request.ProfitYear, 12, 31);
+
         return ctx.Demographics
             .Include(d => d.PayProfits)
             .Include(d => d.ContactInfo)
             .Where(d => d.EmploymentStatusId == EmploymentStatus.Constants.Terminated
                         && d.TerminationCodeId != TerminationCode.Constants.RetiredReceivingPension
-                        && d.TerminationDate >= request.StartDate && d.TerminationDate <= request.EndDate)
+                        && d.TerminationDate >= firstDayOfTheYear && d.TerminationDate <= lastDayOfTheYear)
             .Select(d => new TerminatedEmployeeDto
             {
                 Demographic = d,
@@ -75,7 +75,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
     }
 
     // Step 2: Join the terminated employees with contribution years
-    private IQueryable<MemberSlice> GetEmployeesWithContributions(ProfitSharingReadOnlyDbContext ctx, TerminatedEmployeeAndBeneficiaryDataRequest request, IQueryable<TerminatedEmployeeDto> terminatedEmployees)
+    private IQueryable<MemberSlice> GetEmployeesWithContributions(ProfitSharingReadOnlyDbContext ctx, ProfitYearRequest request, IQueryable<TerminatedEmployeeDto> terminatedEmployees)
     {
         var validEnrollmentIds = GetValidEnrollmentIds();
 
@@ -116,7 +116,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
     }
 
     // Step 3: Filter beneficiaries with necessary details
-    private IQueryable<MemberSlice> GetBeneficiaries(ProfitSharingReadOnlyDbContext ctx, TerminatedEmployeeAndBeneficiaryDataRequest request)
+    private IQueryable<MemberSlice> GetBeneficiaries(ProfitSharingReadOnlyDbContext ctx, ProfitYearRequest request)
     {
         var validEnrollmentIds = GetValidEnrollmentIds();
 
@@ -186,7 +186,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
     private async Task<TerminatedEmployeeAndBeneficiaryResponse> MergeAndCreateDataset(
      IProfitSharingDbContext ctx,
-     TerminatedEmployeeAndBeneficiaryDataRequest req,
+     ProfitYearRequest req,
      IAsyncEnumerable<MemberSlice> memberSliceUnion,
      CancellationToken cancellationToken)
     {
