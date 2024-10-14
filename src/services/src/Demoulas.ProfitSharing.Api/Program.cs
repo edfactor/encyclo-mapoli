@@ -19,12 +19,10 @@ using NSwag.Generation.AspNetCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder();
 
-if (!builder.Environment.IsTestEnvironment())
-{
-    builder.Configuration
-        .AddJsonFile($"credSettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
-        .AddUserSecrets<Program>();
-}
+builder.Configuration
+    .AddJsonFile($"credSettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+    .AddUserSecrets<Program>(optional: true);
+
 
 ElasticSearchConfig smartConfig = new ElasticSearchConfig();
 builder.Configuration.Bind("Logging:Smart", smartConfig);
@@ -35,10 +33,11 @@ if (!builder.Environment.IsTestEnvironment())
 {
     var rolePermissionService = new RolePermissionService();
     builder.Services.AddOktaSecurity(builder.Configuration, rolePermissionService);
-} 
+}
 else
 {
-    builder.Services.AddAuthenticationJwtBearer(s => {
+    builder.Services.AddAuthenticationJwtBearer(s =>
+    {
         s.SigningKey = string.Concat(Enumerable.Repeat("UNIT TEST SECRET KEY", 16));
     }).AddAuthorization();
 }
