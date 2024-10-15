@@ -8,8 +8,8 @@ public sealed record YearEndProfitSharingReportResponse
     public required DateOnly DateOfBirth { get; set; }
     public required byte Age { get; set; }
     public required string EmployeeSsn { get; set; }
-    public required Decimal Wages { get; set; }
-    public required Decimal Hours { get; set; }
+    public required decimal Wages { get; set; }
+    public required decimal Hours { get; set; }
     public short? Points { get; set; }
     public required bool IsUnder21 { get; set; }
     public required bool IsNew { get; set; }

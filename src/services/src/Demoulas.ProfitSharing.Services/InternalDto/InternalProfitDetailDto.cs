@@ -11,4 +11,6 @@ internal sealed record InternalProfitDetailDto
     public decimal TotalFederalTaxes { get; set; }
     public decimal TotalStateTaxes { get; set; }
     public decimal CurrentAmount { get; set; }
+    public decimal Distribution { get; set; }
+    public decimal BeneficiaryAllocation { get; set; }
 }

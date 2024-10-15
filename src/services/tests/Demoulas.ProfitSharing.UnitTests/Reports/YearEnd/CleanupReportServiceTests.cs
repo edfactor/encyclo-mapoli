@@ -321,7 +321,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
     {
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         var profitYear = (short)(DateTime.Now.Year - 1);
-        var req = new YearEndProfitSharingReportRequest() { Skip = 0, Take=Byte.MaxValue, ProfitYear = profitYear, IsYearEnd = true };
+        var req = new YearEndProfitSharingReportRequest() { Skip = 0, Take = byte.MaxValue, ProfitYear = profitYear, IsYearEnd = true };
         var testHours = 1001;
         await MockDbContextFactory.UseWritableContext(async ctx =>
         {
@@ -408,7 +408,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
         decimal sampleforfeiture = 5150m;
 
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        var req = new DistributionsAndForfeituresRequest() { Skip=0, Take=Byte.MaxValue, ProfitYear = (short)(DateTime.Now.Year-1), IncludeOutgoingForfeitures=true};
+        var req = new DistributionsAndForfeituresRequest() { Skip=0, Take=byte.MaxValue, ProfitYear = (short)(DateTime.Now.Year-1), IncludeOutgoingForfeitures=true};
         ReportResponseBase<DistributionsAndForfeitureResponse> response;
 
         

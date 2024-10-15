@@ -5,10 +5,10 @@ public sealed record DistributionsAndForfeitureResponse
     public required string EmployeeName { get; set; }
     public required string EmployeeSsn { get; set; }
     public DateOnly? LoanDate { get; set; }
-    public required Decimal DistributionAmount { get; set; }
-    public required Decimal StateTax { get; set; }
-    public required Decimal FederalTax { get; set; }
-    public required Decimal ForfeitAmount { get; set; }
+    public required decimal DistributionAmount { get; set; }
+    public required decimal StateTax { get; set; }
+    public required decimal FederalTax { get; set; }
+    public required decimal ForfeitAmount { get; set; }
     public byte? Age { get; set; }
     public char? TaxCode { get; set; }
     public string? OtherName { get; set; }
