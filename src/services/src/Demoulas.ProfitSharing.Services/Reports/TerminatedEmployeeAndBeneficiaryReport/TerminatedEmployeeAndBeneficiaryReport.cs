@@ -249,7 +249,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
             
             // Query last year's balance in one go using the collected PSNs
-            var lastYearsBalance = await ContributionService.GetNetBalance(ctx, (short)(req.ProfitYear - 1), new List<int> { memberSlice.BadgeNumber }, cancellationToken);
+            var lastYearsBalance = await ContributionService.GetNetBalance(ctx, req.ProfitYear, new List<int> { memberSlice.BadgeNumber }, cancellationToken);
 
 
             // Process the member summary for the report

@@ -26,6 +26,15 @@ public static class ContributionService
             .Select(p => new ContributionYears { BadgeNumber = p.Key, YearsInPlan = (byte)p.Count() });
     }
 
+    /// <summary>
+    /// Retrieves the net balance details for a given set of badge numbers and profit year.
+    /// </summary>
+    /// <param name="context">The database context used to access profit sharing data.</param>
+    /// <param name="profitYear">The profit year up to which the balance is calculated.</param>
+    /// <param name="badgeNumbers">A collection of badge numbers for which the net balance is to be retrieved.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <see cref="https://demoulas.atlassian.net/wiki/spaces/~bherrmann/pages/58491096/Notes+on+Profit+Sharing+Calculations#Computing-the-Current-Amount"/>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a dictionary where the key is the badge number and the value is the net balance details.</returns>
     internal static Task<Dictionary<int, InternalProfitDetailDto>> GetNetBalance(IProfitSharingDbContext context, short profitYear, IEnumerable<int> badgeNumbers,
         CancellationToken cancellationToken)
     {
