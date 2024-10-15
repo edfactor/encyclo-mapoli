@@ -35,7 +35,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         });
     }
 
-
+    #region Get Employees and Beneficiaries
     private async Task<IAsyncEnumerable<MemberSlice>> RetrieveMemberSlices(ProfitSharingReadOnlyDbContext ctx, ProfitYearRequest request,
         CancellationToken cancellationToken)
     {
@@ -200,7 +200,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             Enrollment.Constants.NewVestingPlanHasForfeitureRecords
         ];
     }
-
+    #endregion
 
     private async Task<TerminatedEmployeeAndBeneficiaryResponse> MergeAndCreateDataset(
         IProfitSharingDbContext ctx,
@@ -377,6 +377,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 Ssn = g.Key,
                 TotalContributions = g.Sum(x => x.Contribution),
                 TotalEarnings = g.Sum(x => x.Earnings),
+                TotalForfeitures = g.Sum(x => x.ProfitCodeId == ProfitCode.Constants.IncomingContributions ? x.Forfeiture : 0),
                 TotalPayments = g.Sum(x => x.ProfitCodeId != ProfitCode.Constants.IncomingContributions ? x.Forfeiture : 0),
                 TotalFedTaxes = g.Sum(x => x.FederalTaxes),
                 TotalStateTaxes = g.Sum(x => x.StateTaxes),
@@ -385,9 +386,6 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                     x.ProfitCodeId == ProfitCode.Constants.OutgoingDirectPayments ||
                     x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment
                         ? -x.Forfeiture : 0),
-                TotalForfeitures = g.Sum(x =>
-                    x.ProfitCodeId == ProfitCode.Constants.IncomingContributions ? x.Forfeiture
-                        : (x.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures ? -x.Forfeiture : 0)),
                 BeneficiaryAllocation = g.Sum(x =>
                     x.ProfitCodeId == ProfitCode.Constants.OutgoingXferBeneficiary
                         ? -x.Forfeiture : (x.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary ? x.Contribution : 0))
