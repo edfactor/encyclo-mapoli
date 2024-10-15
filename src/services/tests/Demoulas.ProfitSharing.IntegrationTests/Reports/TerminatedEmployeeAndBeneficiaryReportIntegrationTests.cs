@@ -20,7 +20,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : TestClassB
 
     [Fact]
     public async Task EnsureSmartReportMatchesReadyReport()
-    {   
+    {
         // These are arguments to the program/rest endpoint
         // Plan admin may choose a range of dates (ie. Q2 ?)
         DateOnly startDate = new DateOnly(2023, 01, 07);
