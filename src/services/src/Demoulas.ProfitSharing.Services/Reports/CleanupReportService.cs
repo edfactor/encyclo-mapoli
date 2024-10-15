@@ -15,17 +15,14 @@ namespace Demoulas.ProfitSharing.Services.Reports;
 public class CleanupReportService : ICleanupReportService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
-    private readonly ContributionService _contributionService;
     private readonly CalendarService _calendarService;
     private readonly ILogger<CleanupReportService> _logger;
 
     public CleanupReportService(IProfitSharingDataContextFactory dataContextFactory,
-        ContributionService contributionService,
         ILoggerFactory factory,
         CalendarService calendarService)
     {
         _dataContextFactory = dataContextFactory;
-        _contributionService = contributionService;
         _calendarService = calendarService;
         _logger = factory.CreateLogger<CleanupReportService>();
         
@@ -245,7 +242,7 @@ public class CleanupReportService : ICleanupReportService
 
                 ISet<int> badgeNumbers = results.Results.Select(r => r.BadgeNumber).ToHashSet();
                 var dict = await ContributionService.GetContributionYears(ctx, req.ProfitYear, badgeNumbers, cancellationToken);
-                var balanceDict = await _contributionService.GetNetBalance(ctx, req.ProfitYear, badgeNumbers, cancellationToken);
+                var balanceDict = await ContributionService.GetNetBalance(ctx, req.ProfitYear, badgeNumbers, cancellationToken);
 
 
                 foreach (DuplicateNamesAndBirthdaysResponse dup in results.Results)

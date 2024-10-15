@@ -17,13 +17,11 @@ namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficia
 public sealed class TerminatedEmployeeAndBeneficiaryReport
 {
     private readonly IProfitSharingDataContextFactory _factory;
-    private readonly ContributionService _contributionService;
     private readonly CalendarService _calendarService;
 
     public TerminatedEmployeeAndBeneficiaryReport(IProfitSharingDataContextFactory factory)
     {
         _factory = factory;
-        _contributionService = new ContributionService(factory);
         _calendarService = new CalendarService(factory);
     }
 
@@ -76,19 +74,14 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                     .FirstOrDefault()
             });
 
-#pragma warning disable S1481
-        var list = await queryable.ToListAsync(cancellationToken);
-#pragma warning restore S1481
-
         return queryable;
     }
 
     // Step 2: Join the terminated employees with contribution years
 
-#pragma warning disable S2325
-    private async Task<IQueryable<MemberSlice>> GetEmployeesWithContributions(ProfitSharingReadOnlyDbContext ctx, ProfitYearRequest request,
+
+    private static async Task<IQueryable<MemberSlice>> GetEmployeesWithContributions(ProfitSharingReadOnlyDbContext ctx, ProfitYearRequest request,
         IQueryable<TerminatedEmployeeDto> terminatedEmployees, CancellationToken cancellationToken)
-#pragma warning restore S2325
     {
         // Pre-fetch badge numbers
         var demKeyList = await terminatedEmployees.Select(e => new { e.Demographic.OracleHcmId, e.Demographic.BadgeNumber }).ToListAsync(cancellationToken);
@@ -96,7 +89,6 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         var badgeNumbers = demKeyList.Select(e => e.BadgeNumber).ToHashSet();
 
         // Fetch contribution years for the provided badge numbers
-#pragma warning disable S1481
         var contributionYearsQuery = ContributionService.GetContributionYearsQuery(ctx, request.ProfitYear, badgeNumbers);
 
 
@@ -134,7 +126,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 ZeroCont = (employee.Demographic.TerminationCodeId == TerminationCode.Constants.Deceased
                             ? ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested
                             : payProfit.ZeroContributionReasonId ?? 0),
-                Enrolled = payProfit.EnrollmentId,
+                EnrollmentId = payProfit.EnrollmentId,
                 Etva = payProfit.EarningsEtvaValue,
                 BeneficiaryAllocation = 0
             };
@@ -181,7 +173,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 IncomeRegAndExecCurrentYear = (x.PayProfit!.CurrentIncomeYear ?? 0) + x.PayProfit.IncomeExecutive,
                 TerminationCode = x.Demographic.TerminationCodeId,
                 ZeroCont = ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested,
-                Enrolled = x.PayProfit.EnrollmentId,
+                EnrollmentId = x.PayProfit.EnrollmentId,
                 Etva = x.PayProfit.EarningsEtvaValue,
                 BeneficiaryAllocation = x.Beneficiary.Amount
             });
@@ -258,11 +250,15 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
             
             // Query last year's balance in one go using the collected PSNs
-            var lastYearsBalance = await _contributionService.GetNetBalance(ctx, (short)(req.ProfitYear - 1), new List<int> { memberSlice.BadgeNumber }, cancellationToken);
-            
+            var lastYearsBalance = await ContributionService.GetNetBalance(ctx, (short)(req.ProfitYear - 1), new List<int> { memberSlice.BadgeNumber }, cancellationToken);
+
+
+            // Process the member summary for the report
+            int vestingPercent = ContributionService.LookupVestingPercent(memberSlice.EnrollmentId, memberSlice.ZeroCont, memberSlice.YearsInPs);
+
             // Update beginning amounts using last year's balance
             lastYearsBalance.TryGetValue(memberSlice.BadgeNumber, out var accountBalance);
-            ContributionService.CalculateCurrentVested(profitDetails, accountBalance?.CurrentAmount ?? 0, 99);
+            ContributionService.CalculateCurrentVested(profitDetails, accountBalance?.CurrentAmount ?? 0, vestingPercent);
 
 
 
@@ -297,7 +293,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 CurrentVestedAmount = 0,
                 YearsInPlan = memberSlice.YearsInPs,
                 ZeroCont = memberSlice.ZeroCont,
-                EnrollmentId = memberSlice.Enrolled,
+                EnrollmentId = memberSlice.EnrollmentId,
                 Evta = memberSlice.Etva,
                 BeneficiaryAllocation = beneficiaryAllocation,
                 DistributionAmount = profitDetailSummary.Distribution,
@@ -307,9 +303,9 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 VestedBalance = 0 + profitDetailSummary.Distribution + beneficiaryAllocation
             };
 
+            //EndingBalance = memberSlice.NetBalanceLastYear + profitDetailSummary.Forfeiture + profitDetailSummary.Distribution + beneficiaryAllocation,
+            //VestedBalance = memberSlice.VestedBalanceLastYear + profitDetailSummary.Distribution + beneficiaryAllocation
 
-            // Process the member summary for the report
-            int vestingPercent = LookupVestingPercent(member.EnrollmentId, member.ZeroCont, member.YearsInPlan);
 
             byte enrollmentId = member.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions
                 ? Enrollment.Constants.NotEnrolled
@@ -387,53 +383,6 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             }
         };
     }
-
-
-    private static int LookupVestingPercent(byte enrollmentId, byte? zeroCont, int yearsInPlan)
-    {
-        if (enrollmentId > Enrollment.Constants.NewVestingPlanHasContributions || zeroCont == ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested)
-        {
-            return 100;
-        }
-        int vestingYearIndex;
-        if (enrollmentId < Enrollment.Constants.NewVestingPlanHasContributions)
-        {
-            if (yearsInPlan <= 1)
-            {
-                vestingYearIndex = 1;
-            }
-            else
-            {
-                if (yearsInPlan > 6)
-                {
-                    vestingYearIndex = 7;
-                }
-                else
-                {
-                    vestingYearIndex = yearsInPlan;
-                }
-            }
-            return ReferenceData.OlderVestingSchedule[vestingYearIndex - 1];
-        }
-        if (yearsInPlan <= 1)
-        {
-            vestingYearIndex = 1;
-        }
-        else
-        {
-            if (yearsInPlan > 5)
-            {
-                vestingYearIndex = 6;
-            }
-            else
-            {
-                vestingYearIndex = yearsInPlan;
-            }
-        }
-        return ReferenceData.NewerVestingSchedule[vestingYearIndex - 1];
-
-    }
-
 
     private static ProfitDetailSummary RetrieveProfitDetail(List<ProfitDetail> profitDetailsForAll, long ssn)
     {

@@ -15,13 +15,13 @@ internal sealed record MemberSlice
     public string FirstName { get; init; } = string.Empty;
     public string? MiddleInitial { get; init; } = string.Empty;
     public string LastName { get; init; } = string.Empty;
-    public int YearsInPs { get; init; }
+    public byte YearsInPs { get; init; }
     public DateOnly? BirthDate { get; init; }
     public DateOnly? TerminationDate { get; init; }
     public decimal IncomeRegAndExecCurrentYear { get; init; }
     public char? TerminationCode { get; init; }
     public byte? ZeroCont { get; init; }
-    public byte Enrolled { get; init; }
+    public byte EnrollmentId { get; init; }
     public decimal Etva { get; init; }
     public decimal BeneficiaryAllocation { get; init; }
 }

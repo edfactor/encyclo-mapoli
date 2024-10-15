@@ -1,25 +1,16 @@
-﻿using Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.ProfitSharing.Common;
+using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities.Base;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.InternalDto;
+using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
+using Member = Demoulas.ProfitSharing.Services.InternalDto.Member;
 
 namespace Demoulas.ProfitSharing.Services;
 
-public sealed class ContributionService
+public static class ContributionService
 {
-    private readonly IProfitSharingDataContextFactory _dataContextFactory;
-
-    public ContributionService(IProfitSharingDataContextFactory dataContextFactory)
-    {
-        _dataContextFactory = dataContextFactory;
-    }
-
-
-    internal Task<Dictionary<int, byte>> GetContributionYears(short profitYear, ISet<int> badgeNumberSet, CancellationToken cancellationToken)
-    {
-        return _dataContextFactory.UseReadOnlyContext(context => GetContributionYears(context, profitYear, badgeNumberSet, cancellationToken));
-    }
-
     internal static Task<Dictionary<int, byte>> GetContributionYears(IProfitSharingDbContext context, short profitYear, ISet<int> badgeNumberSet, CancellationToken cancellationToken)
     {
         return GetContributionYearsQuery(context, profitYear, badgeNumberSet)
@@ -35,12 +26,7 @@ public sealed class ContributionService
             .Select(p => new ContributionYears { BadgeNumber = p.Key, YearsInPlan = (byte)p.Count() });
     }
 
-    internal Task<Dictionary<int, InternalProfitDetailDto>> GetNetBalance(short profitYear, IEnumerable<int> badgeNumbers, CancellationToken cancellationToken)
-    {
-        return _dataContextFactory.UseReadOnlyContext(ctx => GetNetBalance(ctx, profitYear, badgeNumbers, cancellationToken));
-    }
-
-    internal Task<Dictionary<int, InternalProfitDetailDto>> GetNetBalance(IProfitSharingDbContext context, short profitYear, IEnumerable<int> badgeNumbers,
+    internal static Task<Dictionary<int, InternalProfitDetailDto>> GetNetBalance(IProfitSharingDbContext context, short profitYear, IEnumerable<int> badgeNumbers,
         CancellationToken cancellationToken)
     {
         var badgeHash = badgeNumbers.ToHashSet();
@@ -82,6 +68,7 @@ public sealed class ContributionService
         return query.ToDictionaryAsync(d => d.BadgeNumber, cancellationToken);
     }
 
+    #region  Vesting Amount
     public static decimal CalculateCurrentVested(List<ProfitDetail> payments, decimal currentAmount, decimal vestedPercentage)
     {
         if (vestedPercentage == 100)
@@ -141,5 +128,55 @@ public sealed class ContributionService
 
         return Math.Round(vestedAmount, 2, MidpointRounding.AwayFromZero);
     }
+    #endregion
 
+    #region Vesting Percent
+
+    internal static byte LookupVestingPercent(byte enrollmentId, byte? zeroCont, byte yearsInPlan)
+    {
+        if (enrollmentId > Enrollment.Constants.NewVestingPlanHasContributions || zeroCont == ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested)
+        {
+            return 100;
+        }
+        int vestingYearIndex;
+        if (enrollmentId < Enrollment.Constants.NewVestingPlanHasContributions)
+        {
+            if (yearsInPlan <= 1)
+            {
+                vestingYearIndex = 1;
+            }
+            else
+            {
+                if (yearsInPlan > 6)
+                {
+                    vestingYearIndex = 7;
+                }
+                else
+                {
+                    vestingYearIndex = yearsInPlan;
+                }
+            }
+            return ReferenceData.OlderVestingSchedule[vestingYearIndex - 1];
+        }
+        if (yearsInPlan <= 1)
+        {
+            vestingYearIndex = 1;
+        }
+        else
+        {
+            if (yearsInPlan > 5)
+            {
+                vestingYearIndex = 6;
+            }
+            else
+            {
+                vestingYearIndex = yearsInPlan;
+            }
+        }
+        return ReferenceData.NewerVestingSchedule[vestingYearIndex - 1];
+
+    }
+
+
+    #endregion
 }
