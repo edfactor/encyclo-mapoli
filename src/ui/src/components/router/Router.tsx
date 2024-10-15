@@ -24,30 +24,23 @@ const Router = () => {
       <RouteSecurity oktaEnabled={oktaEnabled}>
         <Route
           path=""
-          index={true}
           element={<LandingPage />}></Route>
         <Route
           path="demographic-badges-not-in-payprofit"
-          index={true}
           element={<DemographicBadgesNotInPayprofit />}></Route>
         <Route
-          index={true}
           path="duplicate-ssns-demographics"
           element={<DuplicateSSNsOnDemographics />}></Route>
           <Route
-          index={true}
           path="negative-etva-for-ssns-on-payprofit"
           element={<NegativeEtvaForSSNsOnPayprofit />}></Route>
           <Route
-          index={true}
           path="payroll-duplicate-ssns-on-payprofit"
           element={<PayrollDuplicateSSNsOnPayprofit />}></Route>
           <Route
-          index={true}
           path="duplicate-names-and-birthdays"
           element={<DuplicateNamesAndBirthdays />}></Route>
           <Route
-          index={true}
           path="missing-comma-in-py-name"
           element={<MissingCommaInPyName />}></Route>
       </RouteSecurity>
