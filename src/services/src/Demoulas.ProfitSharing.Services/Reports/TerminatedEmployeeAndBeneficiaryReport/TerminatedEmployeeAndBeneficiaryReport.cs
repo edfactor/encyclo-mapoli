@@ -200,7 +200,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
             var currentVestedAmount = ContributionService.CalculateCurrentVested(profitDetails, profitDetailSummary.CurrentAmount, vestingPercent);
 
-            var beneficiaryAllocation = memberSlice.BeneficiaryAllocation + profitDetailSummary.BeneficiaryAllocation;
+            var beneficiaryAllocation = profitDetailSummary.BeneficiaryAllocation;
 
             if (profitDetailSummary is { CurrentAmount: 0, BeneficiaryAllocation: 0 } and { Distribution: 0, TotalForfeitures: 0 })
             {
@@ -255,12 +255,12 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 age = member.Birthday.Value.Age();
             }
 
+            // If they have a contribution the plan and are past the 1st/2nd year for the old/new plan 
+            // or have a beneficiary allocation then add them in.
             if (
-                (member.EnrollmentId is (Enrollment.Constants.NotEnrolled or Enrollment.Constants.OldVestingPlanHasContributions
-                    or Enrollment.Constants.OldVestingPlanHasForfeitureRecords) && member.YearsInPlan > 2 && member.BeginningAmount != 0) ||
-                (member.EnrollmentId is (Enrollment.Constants.NewVestingPlanHasContributions or Enrollment.Constants.NewVestingPlanHasForfeitureRecords) &&
-                 member.YearsInPlan > 1 && member.BeginningAmount != 0) ||
-                (member.BeneficiaryAllocation != 0)
+                (member.EnrollmentId is (Enrollment.Constants.NotEnrolled or Enrollment.Constants.OldVestingPlanHasContributions or Enrollment.Constants.OldVestingPlanHasForfeitureRecords) && member.YearsInPlan > 2 && member.BeginningAmount != 0) 
+                || (member.EnrollmentId is (Enrollment.Constants.NewVestingPlanHasContributions or Enrollment.Constants.NewVestingPlanHasForfeitureRecords) && member.YearsInPlan > 1 && member.BeginningAmount != 0) 
+                || (member.BeneficiaryAllocation != 0)
             )
             {
                 membersSummary.Add(new TerminatedEmployeeAndBeneficiaryDataResponseDto
