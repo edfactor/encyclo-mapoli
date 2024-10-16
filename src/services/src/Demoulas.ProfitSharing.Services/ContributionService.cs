@@ -70,8 +70,7 @@ public static class ContributionService
                 TotalForfeitures = r.TotalForfeitures,
                 TotalPayments = r.TotalPayments,
                 TotalFederalTaxes = r.TotalFedTaxes,
-                TotalStateTaxes = r.TotalStateTaxes,
-                CurrentAmount = r.TotalContributions + r.TotalEarnings + r.TotalForfeitures - r.TotalPayments
+                TotalStateTaxes = r.TotalStateTaxes
             };
 
         return query.ToDictionaryAsync(d => d.BadgeNumber, cancellationToken);

@@ -36,6 +36,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
     }
 
     #region Get Employees and Beneficiaries
+
     private async Task<IAsyncEnumerable<MemberSlice>> RetrieveMemberSlices(ProfitSharingReadOnlyDbContext ctx, ProfitYearRequest request,
         CancellationToken cancellationToken)
     {
@@ -200,6 +201,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             Enrollment.Constants.NewVestingPlanHasForfeitureRecords
         ];
     }
+
     #endregion
 
     private async Task<TerminatedEmployeeAndBeneficiaryResponse> MergeAndCreateDataset(
@@ -377,18 +379,34 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 Ssn = g.Key,
                 TotalContributions = g.Sum(x => x.Contribution),
                 TotalEarnings = g.Sum(x => x.Earnings),
-                TotalForfeitures = g.Sum(x => x.ProfitCodeId == ProfitCode.Constants.IncomingContributions ? x.Forfeiture : 0),
-                TotalPayments = g.Sum(x => x.ProfitCodeId != ProfitCode.Constants.IncomingContributions ? x.Forfeiture : 0),
+
+                // Total Forfeitures: Handling both incoming and outgoing forfeitures
+                TotalForfeitures = g.Sum(x =>
+                    x.ProfitCodeId == ProfitCode.Constants.IncomingContributions
+                        ? x.Forfeiture
+                        : (x.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures ? -x.Forfeiture : 0)),
+
+                // Total Payments: Contributions that are not incoming, treated as payments
+                TotalPayments = g.Sum(x =>
+                    x.ProfitCodeId != ProfitCode.Constants.IncomingContributions ? x.Forfeiture : 0),
                 TotalFedTaxes = g.Sum(x => x.FederalTaxes),
                 TotalStateTaxes = g.Sum(x => x.StateTaxes),
+
+                // Distribution logic: Handling specific profit codes for distribution
                 Distribution = g.Sum(x =>
-                    x.ProfitCodeId == ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal ||
-                    x.ProfitCodeId == ProfitCode.Constants.OutgoingDirectPayments ||
-                    x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment
-                        ? -x.Forfeiture : 0),
+                    (x.ProfitCodeId == ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal ||
+                     x.ProfitCodeId == ProfitCode.Constants.OutgoingDirectPayments ||
+                     x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment)
+                        ? -x.Forfeiture
+                        : 0),
+
+                // Beneficiary Allocation: Explicit handling of incoming and outgoing beneficiary allocations
                 BeneficiaryAllocation = g.Sum(x =>
-                    x.ProfitCodeId == ProfitCode.Constants.OutgoingXferBeneficiary
-                        ? -x.Forfeiture : (x.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary ? x.Contribution : 0))
+                    (x.ProfitCodeId == ProfitCode.Constants.OutgoingXferBeneficiary)
+                        ? -x.Forfeiture
+                        : (x.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary)
+                            ? x.Contribution
+                            : 0)
             })
             .Select(r => new InternalProfitDetailDto
             {
@@ -398,10 +416,50 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 TotalPayments = r.TotalPayments,
                 TotalFederalTaxes = r.TotalFedTaxes,
                 TotalStateTaxes = r.TotalStateTaxes,
-                CurrentAmount = r.TotalContributions + r.TotalEarnings + r.TotalForfeitures - r.TotalPayments,
                 Distribution = r.Distribution,
                 BeneficiaryAllocation = r.BeneficiaryAllocation
             }).First();
+
+        decimal distribution = 0;
+        decimal forfeiture = 0;
+        decimal beneficiaryAllocation = 0;
+
+        foreach (var profitDetail in profitDetails)
+        {
+            if (profitDetail.ProfitCodeId == ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal || profitDetail.ProfitCodeId == ProfitCode.Constants.OutgoingDirectPayments)
+            {
+                distribution = distribution - profitDetail.Forfeiture;
+            }
+
+            if (profitDetail.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures)
+            {
+                forfeiture = forfeiture - profitDetail.Forfeiture;
+            }
+
+            if (profitDetail.ProfitCodeId == ProfitCode.Constants.IncomingContributions)
+            {
+                forfeiture = forfeiture + profitDetail.Forfeiture;
+            }
+
+            if (profitDetail.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment)
+            {
+                distribution = distribution - profitDetail.Forfeiture;
+            }
+
+            if (profitDetail.ProfitCodeId == ProfitCode.Constants.OutgoingXferBeneficiary)
+            {
+                beneficiaryAllocation = beneficiaryAllocation - profitDetail.Forfeiture;
+            }
+
+            if (profitDetail.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary)
+            {
+                beneficiaryAllocation = beneficiaryAllocation + profitDetail.Contribution;
+            }
+        }
+#pragma warning disable S1481
+        var pds = new ProfitDetailSummary(distribution, forfeiture, beneficiaryAllocation);
+#pragma warning restore S1481
+
 #pragma warning restore S3358
         return pdQuery;
     }
