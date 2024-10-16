@@ -1,15 +1,11 @@
-﻿
-
-using System.Globalization;
-using System.Net;
-using CsvHelper.Configuration;
-using CsvHelper;
-using Demoulas.Common.Contracts.Contracts.Request;
+﻿using System.Net;
 using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Data.Contexts;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ExecutiveHoursAndDollars;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.Reports;
@@ -21,43 +17,111 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
-public class ExecutiveHoursAndDollars : ApiTestBase<Api.Program>
+public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
 {
-    private readonly ExecutiveHoursAndDollarsEndpoint _endpoint;
-    private const int ProfitShareTestYear = 1975; // used to avoid pre-canned data.
-    private readonly string _expectedReportName = $"Executive Hours and Dollars for Year {ProfitShareTestYear}";
-    private static readonly ProfitYearRequest _request = new () { ProfitYear = ProfitShareTestYear, Skip = 0, Take = 10 };
-    private static readonly ExecutiveHoursAndDollarsResponse _example = ExecutiveHoursAndDollarsResponse.ResponseExample();
+    private const int ProfitShareTestYear = 2075; // used to avoid pre-canned data.
 
-
-    public ExecutiveHoursAndDollars()
+    private static readonly ExecutiveHoursAndDollarsRequest _request = new()
     {
-        ExecutiveHoursAndDollarsService mockService = new ExecutiveHoursAndDollarsService(MockDbContextFactory);
+        ProfitYear = ProfitShareTestYear, Skip = 0, Take = 10
+    };
+
+    private static readonly ExecutiveHoursAndDollarsResponse _example =
+        ExecutiveHoursAndDollarsResponse.ResponseExample();
+
+    private readonly ExecutiveHoursAndDollarsEndpoint _endpoint;
+    private readonly string _expectedReportName = $"Executive Hours and Dollars for Year {ProfitShareTestYear}";
+
+
+    public ExecutiveHoursAndDollarsTests()
+    {
+        ExecutiveHoursAndDollarsService mockService = new(MockDbContextFactory);
         _endpoint = new ExecutiveHoursAndDollarsEndpoint(mockService);
     }
 
 
-    [Fact(DisplayName = "PS-360: Executive Hours and Dollars (JSON)")]
-    public async Task GetResponse_Should_ReturnReportResponse_WhenCalledWithValidRequest()
+    [Fact(DisplayName = "PS-360: Check to ensure unauthorized")]
+    public async Task Unauthorized()
     {
         await MockDbContextFactory.UseWritableContext(async c =>
         {
-            await SetupTestEmployee(c);
+            await SetupTestEmployee_With_HoursAndDollars(c);
 
-            var expectedResponse = new ReportResponseBase<ExecutiveHoursAndDollarsResponse>
+            TestResult<ReportResponseBase<ExecutiveHoursAndDollarsResponse>> response =
+                await ApiClient
+                    .GETAsync<ExecutiveHoursAndDollarsEndpoint, ExecutiveHoursAndDollarsRequest,
+                        ReportResponseBase<ExecutiveHoursAndDollarsResponse>>(_request);
+
+            response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        });
+    }
+
+    [Fact(DisplayName = "PS-360: return all employees (no exec dollars/hours constraint)")]
+    public async Task get_all()
+    {
+        await MockDbContextFactory.UseWritableContext(async c =>
+        {
+            // Arrange
+            await SetupTestEmployee_Without_HoursAndDollars(c);
+            ReportResponseBase<ExecutiveHoursAndDollarsResponse> expectedResponse = StockResponse();
+            expectedResponse.Response.Results.First().HoursExecutive = 0;
+            expectedResponse.Response.Results.First().IncomeExecutive = 0;
+
+            // Act
+            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+            TestResult<ReportResponseBase<ExecutiveHoursAndDollarsResponse>> response =
+                await ApiClient
+                    .GETAsync<ExecutiveHoursAndDollarsEndpoint, ExecutiveHoursAndDollarsRequest,
+                        ReportResponseBase<ExecutiveHoursAndDollarsResponse>>(_request);
+
+            // Assert
+            response.Result.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
+            response.Result.Response.Results.Count().Should().Be(1);
+            response.Result.Response.Results.Should().BeEquivalentTo(expectedResponse.Response.Results);
+        });
+    }
+
+    [Fact(DisplayName = "PS-360: return only employees with dollars/hours -> expect none")]
+    public async Task get_nothing()
+    {
+        await MockDbContextFactory.UseWritableContext(async c =>
+        {
+            // Arrange
+            await SetupTestEmployee_Without_HoursAndDollars(c);
+            ExecutiveHoursAndDollarsRequest request = new()
             {
-                ReportName = _expectedReportName,
-                ReportDate = DateTimeOffset.Now,
-                Response = new PaginatedResponseDto<ExecutiveHoursAndDollarsResponse>
-                {
-                    Results = new List<ExecutiveHoursAndDollarsResponse> { _example }
-                }
+                ProfitYear = ProfitShareTestYear, Skip = 0, Take = 10, HasExecutiveHoursAndDollars = true
             };
 
             // Act
             ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-            var response =
-                await ApiClient.GETAsync<ExecutiveHoursAndDollarsEndpoint, ProfitYearRequest, ReportResponseBase<ExecutiveHoursAndDollarsResponse>>(_request);
+            TestResult<ReportResponseBase<ExecutiveHoursAndDollarsResponse>> response =
+                await ApiClient
+                    .GETAsync<ExecutiveHoursAndDollarsEndpoint, ExecutiveHoursAndDollarsRequest,
+                        ReportResponseBase<ExecutiveHoursAndDollarsResponse>>(request);
+
+            // Assert
+
+            response.Result.ReportName.Should().BeEquivalentTo(_expectedReportName);
+            response.Result.Response.Results.Count().Should().Be(0);
+        });
+    }
+
+    [Fact(DisplayName = "PS-360: return all employees (no dollars/hours)")]
+    public async Task get_one_row_json()
+    {
+        await MockDbContextFactory.UseWritableContext(async c =>
+        {
+            // Arrange
+            await SetupTestEmployee_With_HoursAndDollars(c);
+            ReportResponseBase<ExecutiveHoursAndDollarsResponse> expectedResponse = StockResponse();
+
+            // Act
+            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+            TestResult<ReportResponseBase<ExecutiveHoursAndDollarsResponse>> response =
+                await ApiClient
+                    .GETAsync<ExecutiveHoursAndDollarsEndpoint, ExecutiveHoursAndDollarsRequest,
+                        ReportResponseBase<ExecutiveHoursAndDollarsResponse>>(_request);
 
             // Assert
             response.Result.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
@@ -67,76 +131,46 @@ public class ExecutiveHoursAndDollars : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "PS-360: Executive Hours and Dollars (CSV)")]
-    public async Task GetResponse_Should_ReturnReportResponse_WhenCalledWithValidRequest_CSV()
+    public async Task get_one_row_csv()
     {
         await MockDbContextFactory.UseWritableContext(async c =>
         {
-            await SetupTestEmployee(c);
+            // Arrange
+            await SetupTestEmployee_With_HoursAndDollars(c);
+            DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+            ExecutiveHoursAndDollarsRequest request = new()
+            {
+                ProfitYear = ProfitShareTestYear, HasExecutiveHoursAndDollars = true
+            };
 
             // Act
-            DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-            var response = await DownloadClient.GETAsync<ExecutiveHoursAndDollarsEndpoint, ProfitYearRequest, StreamContent>(_request);
+            TestResult<StreamContent> response = await DownloadClient
+                .GETAsync<ExecutiveHoursAndDollarsEndpoint, ExecutiveHoursAndDollarsRequest, StreamContent>(request);
+
+            // Assert
             response.Response.Content.Should().NotBeNull();
 
-            string csvData = await response.Response.Content.ReadAsStringAsync();
-
             // Verify CSV file
+            string csvData = await response.Response.Content.ReadAsStringAsync();
             string[] lines = csvData.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
-
             lines[1].Should().Be(_expectedReportName);
             lines[2].Should().Be("BADGE,NAME,STR,EXEC HRS,EXEC DOLS,ORA HRS CUR,ORA DOLS CUR,FREQ,STATUS");
             lines[3].Should().Be(@"1,""John, Null E"",2,3,4,5,6,2,a");
             lines[4].Should().Be("");
-
         });
     }
 
-    [Fact(DisplayName = "PS-360: Check to ensure unauthorized")]
-    public async Task Unauthorized()
-    {
-        await MockDbContextFactory.UseWritableContext(async c =>
-        {
-            await SetupTestEmployee(c);
-
-            var response =
-                await ApiClient.GETAsync<ExecutiveHoursAndDollarsEndpoint, PaginationRequestDto, ReportResponseBase<ExecutiveHoursAndDollarsResponse>>(_request);
-
-            response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
-        });
-    }
 
     [Fact(DisplayName = "PS-360: Empty Results")]
     public async Task GetResponse_Should_HandleEmptyResults()
     {
         // Arrange
-        var expectedResponse = new ReportResponseBase<ExecutiveHoursAndDollarsResponse>
-        {
-            ReportName = _expectedReportName,
-            ReportDate = DateTimeOffset.Now,
-            Response = new PaginatedResponseDto<ExecutiveHoursAndDollarsResponse> { Results = new List<ExecutiveHoursAndDollarsResponse>() }
-        };
+        ReportResponseBase<ExecutiveHoursAndDollarsResponse> expectedResponse = StockResponse();
+        expectedResponse.Response = new PaginatedResponseDto<ExecutiveHoursAndDollarsResponse>();
 
         // Act
-        var response = await _endpoint.GetResponse(_request, CancellationToken.None);
-
-        // Assert
-        response.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
-        response.Response.Results.Should().BeEquivalentTo(expectedResponse.Response.Results);
-    }
-
-    [Fact(DisplayName = "PS-360: Null Results")]
-    public async Task GetResponse_Should_HandleNullResults()
-    {
-        // Arrange
-        var expectedResponse = new ReportResponseBase<ExecutiveHoursAndDollarsResponse>
-        {
-            ReportName = _expectedReportName,
-            ReportDate = DateTimeOffset.Now,
-            Response = new PaginatedResponseDto<ExecutiveHoursAndDollarsResponse> { Results = [] }
-        };
-
-        // Act
-        var response = await _endpoint.GetResponse(_request, CancellationToken.None);
+        ReportResponseBase<ExecutiveHoursAndDollarsResponse> response =
+            await _endpoint.GetResponse(_request, CancellationToken.None);
 
         // Assert
         response.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
@@ -146,14 +180,84 @@ public class ExecutiveHoursAndDollars : ApiTestBase<Api.Program>
     [Fact(DisplayName = "PS-360: Report name is correct")]
     public void ReportFileName_Should_ReturnCorrectValue()
     {
-        var reportFileName = _endpoint.ReportFileName;
+        string reportFileName = _endpoint.ReportFileName;
         reportFileName.Should().Be("Executive Hours and Dollars");
     }
 
-    private static async Task SetupTestEmployee(ProfitSharingDbContext c)
+    [Fact]
+    public async Task GetResponse_Should_search_by_fullname()
     {
-        var demo = await c.Demographics.Include(demographic => demographic.ContactInfo).FirstAsync();
-        var pp = await c.PayProfits.FirstAsync(pp => pp.OracleHcmId == demo.OracleHcmId);
+        await MockDbContextFactory.UseWritableContext(async c =>
+        {
+            // Arrange
+            PayProfit payProfit = await SetupTestEmployee_With_HoursAndDollars(c);
+            ExecutiveHoursAndDollarsRequest request = new()
+            {
+                FullNameContains = payProfit.Demographic!.ContactInfo.FullName,
+                ProfitYear = ProfitShareTestYear,
+                Skip = 0,
+                Take = 10
+            };
+            ReportResponseBase<ExecutiveHoursAndDollarsResponse> expectedResponse = StockResponse();
+            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+
+            // Act
+            TestResult<ReportResponseBase<ExecutiveHoursAndDollarsResponse>> response =
+                await ApiClient
+                    .GETAsync<ExecutiveHoursAndDollarsEndpoint, ExecutiveHoursAndDollarsRequest,
+                        ReportResponseBase<ExecutiveHoursAndDollarsResponse>>(request);
+
+            // Assert
+            response.Result.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
+            response.Result.Response.Results.Count().Should().Be(1);
+            response.Result.Response.Results.Should().BeEquivalentTo(expectedResponse.Response.Results);
+        });
+    }
+
+    [Fact]
+    public async Task GetResponse_Should_search_by_fullname_not_found()
+    {
+        await MockDbContextFactory.UseWritableContext(async c =>
+        {
+            // Arrange
+            PayProfit payProfit = await SetupTestEmployee_With_HoursAndDollars(c);
+            ExecutiveHoursAndDollarsRequest request = new()
+            {
+                FullNameContains = "ZZ" + payProfit.Demographic!.ContactInfo.FullName,
+                ProfitYear = ProfitShareTestYear,
+                Skip = 0,
+                Take = 10
+            };
+            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+
+            // Act
+            TestResult<ReportResponseBase<ExecutiveHoursAndDollarsResponse>> response =
+                await ApiClient
+                    .GETAsync<ExecutiveHoursAndDollarsEndpoint, ExecutiveHoursAndDollarsRequest,
+                        ReportResponseBase<ExecutiveHoursAndDollarsResponse>>(request);
+
+            // Assert
+            response.Result.Response.Results.Count().Should().Be(0);
+        });
+    }
+
+    private ReportResponseBase<ExecutiveHoursAndDollarsResponse> StockResponse()
+    {
+        return new ReportResponseBase<ExecutiveHoursAndDollarsResponse>
+        {
+            ReportName = _expectedReportName,
+            ReportDate = DateTimeOffset.Now,
+            Response = new PaginatedResponseDto<ExecutiveHoursAndDollarsResponse>
+            {
+                Results = [ExecutiveHoursAndDollarsResponse.ResponseExample()]
+            }
+        };
+    }
+
+    private static async Task<PayProfit> SetupTestEmployee_With_HoursAndDollars(ProfitSharingDbContext c)
+    {
+        PayProfit pp = await c.PayProfits.Include(p => p.Demographic != null).FirstAsync();
+        Demographic demo = pp.Demographic!;
 
         demo.BadgeNumber = _example.BadgeNumber;
         demo.ContactInfo.FullName = _example.FullName;
@@ -164,9 +268,31 @@ public class ExecutiveHoursAndDollars : ApiTestBase<Api.Program>
         pp.CurrentHoursYear = _example.CurrentHoursYear;
         demo.PayFrequencyId = _example.PayFrequencyId;
         demo.EmploymentStatusId = _example.EmploymentStatusId;
-        pp.ProfitYear = 1975;
+        pp.ProfitYear = ProfitShareTestYear;
         pp.Demographic = demo;
 
         await c.SaveChangesAsync();
+        return pp;
+    }
+
+    private static async Task<PayProfit> SetupTestEmployee_Without_HoursAndDollars(ProfitSharingDbContext c)
+    {
+        PayProfit pp = await c.PayProfits.Include(p => p.Demographic != null).FirstAsync();
+        Demographic demo = pp.Demographic!;
+
+        demo.BadgeNumber = _example.BadgeNumber;
+        demo.ContactInfo.FullName = _example.FullName;
+        demo.StoreNumber = _example.StoreNumber;
+        pp.IncomeExecutive = 0m;
+        pp.HoursExecutive = 0;
+        pp.CurrentIncomeYear = _example.CurrentIncomeYear;
+        pp.CurrentHoursYear = _example.CurrentHoursYear;
+        demo.PayFrequencyId = _example.PayFrequencyId;
+        demo.EmploymentStatusId = _example.EmploymentStatusId;
+        pp.ProfitYear = ProfitShareTestYear;
+        pp.Demographic = demo;
+
+        await c.SaveChangesAsync();
+        return pp;
     }
 }
