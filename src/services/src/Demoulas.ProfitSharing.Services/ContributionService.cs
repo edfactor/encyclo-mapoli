@@ -1,11 +1,8 @@
 ﻿using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Data.Entities.Base;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.InternalDto;
-using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Member = Demoulas.ProfitSharing.Services.InternalDto.Member;
 
 namespace Demoulas.ProfitSharing.Services;
 

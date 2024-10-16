@@ -147,7 +147,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 IncomeRegAndExecCurrentYear = (x.PayProfit!.CurrentIncomeYear ?? 0) + x.PayProfit.IncomeExecutive,
                 TerminationCode = x.Demographic.TerminationCodeId,
                 ZeroCont = ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested,
-                EnrollmentId = x.PayProfit.EnrollmentId,
+                EnrollmentId = Enrollment.Constants.NotEnrolled,
                 Etva = x.PayProfit.EarningsEtvaValue,
                 BeneficiaryAllocation = x.Beneficiary.Amount
             });
@@ -194,7 +194,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             var profitDetails = await ctx.ProfitDetails.Where(pd => pd.ProfitYear <= req.ProfitYear && pd.Ssn == memberSlice.Ssn)
                 .ToListAsync(cancellationToken);
 
-            var profitDetailSummary = RetrieveProfitDetail(profitDetails);
+            InternalProfitDetailDto profitDetailSummary = RetrieveProfitDetail(profitDetails);
 
             int vestingPercent = ContributionService.LookupVestingPercent(memberSlice.EnrollmentId, memberSlice.ZeroCont, memberSlice.YearsInPs);
 
@@ -202,7 +202,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
             var beneficiaryAllocation = profitDetailSummary.BeneficiaryAllocation;
 
-            if (profitDetailSummary is { CurrentAmount: 0, BeneficiaryAllocation: 0 } and { Distribution: 0, TotalForfeitures: 0 })
+            if (profitDetailSummary is { CurrentAmount: 0, BeneficiaryAllocation: 0, Distribution: 0, TotalForfeitures: 0 })
             {
                 continue;
             }
