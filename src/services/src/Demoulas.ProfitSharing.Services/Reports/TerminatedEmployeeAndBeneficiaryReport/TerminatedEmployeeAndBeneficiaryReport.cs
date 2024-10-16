@@ -364,8 +364,6 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 TotalEarnings = r.TotalEarnings,
                 TotalForfeitures = r.TotalForfeitures,
                 TotalPayments = r.TotalPayments,
-                TotalFederalTaxes = r.TotalFedTaxes,
-                TotalStateTaxes = r.TotalStateTaxes,
                 CurrentAmount = currentBalance,
                 Distribution = r.Distribution,
                 BeneficiaryAllocation = r.BeneficiaryAllocation
