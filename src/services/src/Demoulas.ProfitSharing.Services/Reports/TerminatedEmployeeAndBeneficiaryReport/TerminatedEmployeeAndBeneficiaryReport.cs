@@ -369,15 +369,40 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         {
             return new InternalProfitDetailDto();
         }
+
+#pragma warning disable S1481
+        var currentBalance = profitDetails
+            .GroupBy(details => details.Ssn)
+            .Select(g => new
+            {
+                TotalContributions = g.Sum(x => x.Contribution),
+                TotalEarnings = g.Sum(x => x.Earnings),
+                TotalForfeitures = g.Sum(x => x.ProfitCodeId == ProfitCode.Constants.IncomingContributions ? x.Forfeiture : 0),
+                TotalPayments = g.Sum(x => x.ProfitCodeId != ProfitCode.Constants.IncomingContributions ? x.Forfeiture : 0),
+            })
+            .Select(r =>  r.TotalContributions + r.TotalEarnings + r.TotalForfeitures - r.TotalPayments).First();
+
+
+        
 #pragma warning disable S3358
+
+        if (!profitDetails.Exists(pd => pd.ProfitYear == 2023))
+        {
+           return new InternalProfitDetailDto { CurrentAmount = currentBalance };
+        }
+
+
         var pdQuery = profitDetails
+            .Where(pd => pd.ProfitYear == 2023)
             .GroupBy(details => details.Ssn)
             .Select(g => new
             {
                 Ssn = g.Key,
                 TotalContributions = g.Sum(x => x.Contribution),
                 TotalEarnings = g.Sum(x => x.Earnings),
-                TotalForfeitures = g.Sum(x => x.ProfitCodeId == ProfitCode.Constants.IncomingContributions ? x.Forfeiture : 0),
+                TotalForfeitures = g.Sum(x =>
+                    x.ProfitCodeId == ProfitCode.Constants.IncomingContributions ? x.Forfeiture
+                        : (x.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures ? -x.Forfeiture : 0)),
                 TotalPayments = g.Sum(x => x.ProfitCodeId != ProfitCode.Constants.IncomingContributions ? x.Forfeiture : 0),
                 TotalFedTaxes = g.Sum(x => x.FederalTaxes),
                 TotalStateTaxes = g.Sum(x => x.StateTaxes),
@@ -398,11 +423,14 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 TotalPayments = r.TotalPayments,
                 TotalFederalTaxes = r.TotalFedTaxes,
                 TotalStateTaxes = r.TotalStateTaxes,
-                CurrentAmount = r.TotalContributions + r.TotalEarnings + r.TotalForfeitures - r.TotalPayments,
+                CurrentAmount = currentBalance,
                 Distribution = r.Distribution,
                 BeneficiaryAllocation = r.BeneficiaryAllocation
             }).First();
 #pragma warning restore S3358
+#pragma warning restore S1481
+
+
         return pdQuery;
     }
 }
