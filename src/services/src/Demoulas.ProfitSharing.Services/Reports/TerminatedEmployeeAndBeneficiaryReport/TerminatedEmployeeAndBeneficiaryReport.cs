@@ -315,7 +315,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         }
 #pragma warning disable S3358
         var pdQuery = profitDetails
-            .GroupBy(details => details.Ssn)
+            .GroupBy(details => 0)
             .Select(g => new
             {
                 TotalContributions = g.Sum(x => x.Contribution),
@@ -346,6 +346,48 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 BeneficiaryAllocation = r.BeneficiaryAllocation
             }).First();
 #pragma warning restore S3358
+
+        decimal distribution = 0;
+        decimal forfeiture = 0;
+        decimal beneficiaryAllocation = 0;
+
+        foreach (var profitDetail in profitDetails)
+        {
+            if (profitDetail.ProfitCodeId == ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal || profitDetail.ProfitCodeId == ProfitCode.Constants.OutgoingDirectPayments)
+            {
+                distribution = distribution - profitDetail.Forfeiture;
+            }
+
+            if (profitDetail.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures)
+            {
+                forfeiture = forfeiture - profitDetail.Forfeiture;
+            }
+
+            if (profitDetail.ProfitCodeId == ProfitCode.Constants.IncomingContributions)
+            {
+                forfeiture = forfeiture + profitDetail.Forfeiture;
+            }
+
+            if (profitDetail.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment)
+            {
+                distribution = distribution - profitDetail.Forfeiture;
+            }
+
+            if (profitDetail.ProfitCodeId == ProfitCode.Constants.OutgoingXferBeneficiary)
+            {
+                beneficiaryAllocation = beneficiaryAllocation - profitDetail.Forfeiture;
+            }
+
+            if (profitDetail.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary)
+            {
+                beneficiaryAllocation = beneficiaryAllocation + profitDetail.Contribution;
+            }
+        }
+#pragma warning disable S1481
+        var pds = new ProfitDetailSummary(distribution, forfeiture, beneficiaryAllocation);
+#pragma warning restore S1481
+
+
         return pdQuery;
     }
 }
