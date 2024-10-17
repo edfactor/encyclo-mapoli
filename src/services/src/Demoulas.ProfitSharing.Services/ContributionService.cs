@@ -127,10 +127,10 @@ public static class ContributionService
         }
 
         // Calculate the ETVA value (Code 8 minus Code 9)
-        decimal evta = codeEightEarnings - codeNineForfeiture;
+        decimal etva = codeEightEarnings - codeNineForfeiture;
 
         // Adjust the vested amount based on ETVA
-        vestedAmount = beforeVesting ? vestedAmount - evta : vestedAmount + evta;
+        vestedAmount = beforeVesting ? vestedAmount - etva : vestedAmount + etva;
 
         return Math.Round(vestedAmount, 2, MidpointRounding.AwayFromZero);
     }
