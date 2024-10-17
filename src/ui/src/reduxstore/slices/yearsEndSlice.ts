@@ -1,14 +1,16 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-import { DemographicBadgesNotInPayprofit, DuplicateSSNDetail, PagedReportResponse } from "reduxstore/types";
+import { DemographicBadgesNotInPayprofit, DuplicateSSNDetail, NegativeEtvaForSSNsOnPayProfit, PagedReportResponse } from "reduxstore/types";
 
 export interface YearsEndState {
   duplicateSSNsData: PagedReportResponse<DuplicateSSNDetail> | null;
   demographicBadges: PagedReportResponse<DemographicBadgesNotInPayprofit> | null;
+  negativeEtvaForSSNsOnPayprofit: PagedReportResponse<NegativeEtvaForSSNsOnPayProfit> | null;
 }
 
 const initialState: YearsEndState = {
     duplicateSSNsData: null,
     demographicBadges: null,
+    negativeEtvaForSSNsOnPayprofit: null,
 };
 
 export const yearsEndSlice = createSlice({
@@ -20,8 +22,11 @@ export const yearsEndSlice = createSlice({
       },
     setDemographicBadgesNotInPayprofitData: (state, action: PayloadAction<PagedReportResponse<DemographicBadgesNotInPayprofit>>) => {
         state.demographicBadges = action.payload;
-      }
+      },
+    setNegativeEtvaForSssnsOnPayprofit: (state, action: PayloadAction<PagedReportResponse<NegativeEtvaForSSNsOnPayProfit>>) => {
+        state.negativeEtvaForSSNsOnPayprofit = action.payload;
+    }
   }});
 
-export const { setDuplicateSSNsData, setDemographicBadgesNotInPayprofitData } = yearsEndSlice.actions;
+export const { setDuplicateSSNsData, setDemographicBadgesNotInPayprofitData, setNegativeEtvaForSssnsOnPayprofit } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;
