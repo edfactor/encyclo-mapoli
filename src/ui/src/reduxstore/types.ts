@@ -66,3 +66,14 @@ export interface DuplicateSSNsRequestDto extends ImpersonationRequest {
   profitYear: number;
   pagination: PaginationParams;
 }
+
+export interface NegativeEtvaForSSNsOnPayprofitRequestDto extends ImpersonationRequest {
+  profitYear: number;
+  pagination: PaginationParams;
+}
+
+export interface NegativeEtvaForSSNsOnPayProfit {
+  employeeBadge: number;
+  employeeSsn: number;
+  etvaValue: number;
+}
