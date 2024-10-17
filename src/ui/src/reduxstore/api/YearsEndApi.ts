@@ -1,9 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 import { RootState } from "reduxstore/store";
-import { DemographicBadgesNotInPayprofitRequestDto, DemographicBadgesNotInPayprofitResponse, DuplicateNameAndBirthday, DuplicateNameAndBirthdayRequestDto, DuplicateSSNDetail, DuplicateSSNsRequestDto, PagedReportResponse } from "reduxstore/types";
-import { setDemographicBadgesNotInPayprofitData, setDuplicateNamesAndBirthdays, setDuplicateSSNsData } from "reduxstore/slices/yearsEndSlice";
-
+import { DemographicBadgesNotInPayprofitRequestDto, DemographicBadgesNotInPayprofitResponse, DuplicateNameAndBirthday, DuplicateNameAndBirthdayRequestDto, DuplicateSSNDetail, DuplicateSSNsRequestDto, NegativeEtvaForSSNsOnPayProfit, NegativeEtvaForSSNsOnPayprofitRequestDto, PagedReportResponse } from "reduxstore/types";
+import { setDemographicBadgesNotInPayprofitData, setDuplicateNamesAndBirthdays, setDuplicateSSNsData, setNegativeEtvaForSssnsOnPayprofit } from "reduxstore/slices/yearsEndSlice";
 export const YearsEndApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: "https://localhost:7141/api/",
@@ -169,19 +168,20 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getNegativeEVTASSN: builder.query({
-      query: () => ({
+    getNegativeEVTASSN: builder.query<PagedReportResponse<NegativeEtvaForSSNsOnPayProfit>, NegativeEtvaForSSNsOnPayprofitRequestDto>({
+      query: (params) => ({
         url: "yearend/negative-evta-ssn",
         method: "GET",
         params: {
-          take: 25,
-          skip: 0
+          profitYear: params.profitYear,
+          take: params.pagination.take,
+          skip: params.pagination.skip
         }
       }),
-      async onQueryStarted({ dispatch, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          console.log("@D " + JSON.stringify(data));
+          dispatch(setNegativeEtvaForSssnsOnPayprofit(data));
         } catch (err) {
           console.log("Err: " + err);
         }

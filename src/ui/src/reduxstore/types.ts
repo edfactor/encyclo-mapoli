@@ -73,6 +73,11 @@ export interface DuplicateNameAndBirthdayRequestDto extends ImpersonationRequest
   pagination: PaginationParams;
 }
 
+export interface NegativeEtvaForSSNsOnPayprofitRequestDto extends ImpersonationRequest {
+  profitYear: number;
+  pagination: PaginationParams;
+}
+
 export interface DuplicateNameBirthdayAddress {
   street: string;
   street2: string | null;
@@ -97,4 +102,9 @@ export interface DuplicateNameAndBirthday {
   netBalance: number;
   hoursCurrentYear: number;
   incomeCurrentYear: number;
+}
+export interface NegativeEtvaForSSNsOnPayProfit {
+  employeeBadge: number;
+  employeeSsn: number;
+  etvaValue: number;
 }
