@@ -3,6 +3,7 @@ import {
   DemographicBadgesNotInPayprofit,
   DuplicateNameAndBirthday,
   DuplicateSSNDetail,
+  MissingCommasInPYName,
   NegativeEtvaForSSNsOnPayProfit,
   PagedReportResponse
 } from "reduxstore/types";
@@ -12,13 +13,15 @@ export interface YearsEndState {
   demographicBadges: PagedReportResponse<DemographicBadgesNotInPayprofit> | null;
   duplicateNamesAndBirthday: PagedReportResponse<DuplicateNameAndBirthday> | null;
   negativeEtvaForSSNsOnPayprofit: PagedReportResponse<NegativeEtvaForSSNsOnPayProfit> | null;
+  missingCommaInPYName: PagedReportResponse<MissingCommasInPYName> | null;
 }
 
 const initialState: YearsEndState = {
   duplicateSSNsData: null,
   demographicBadges: null,
   duplicateNamesAndBirthday: null,
-  negativeEtvaForSSNsOnPayprofit: null
+  negativeEtvaForSSNsOnPayprofit: null,
+  missingCommaInPYName: null
 };
 
 export const yearsEndSlice = createSlice({
@@ -42,10 +45,13 @@ export const yearsEndSlice = createSlice({
       action: PayloadAction<PagedReportResponse<NegativeEtvaForSSNsOnPayProfit>>
     ) => {
       state.negativeEtvaForSSNsOnPayprofit = action.payload;
-    }
+    },
+    setMissingCommaInPYName: (state, action: PayloadAction<PagedReportResponse<MissingCommasInPYName>>) => {
+      state.missingCommaInPYName = action.payload;
+    },
   }
 });
 
-export const { setDuplicateSSNsData, setDemographicBadgesNotInPayprofitData, setNegativeEtvaForSssnsOnPayprofit, setDuplicateNamesAndBirthdays } =
+export const { setDuplicateSSNsData, setDemographicBadgesNotInPayprofitData, setNegativeEtvaForSssnsOnPayprofit, setDuplicateNamesAndBirthdays, setMissingCommaInPYName } =
   yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

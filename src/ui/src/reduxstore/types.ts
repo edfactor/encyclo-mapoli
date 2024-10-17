@@ -67,6 +67,15 @@ export interface DuplicateSSNsRequestDto extends ImpersonationRequest {
   pagination: PaginationParams;
 }
 
+export interface MissingCommasInPYNameRequestDto extends ImpersonationRequest {
+  pagination: PaginationParams;
+}
+
+export interface MissingCommasInPYName {
+  exployeeBadge: number;
+  employeeSsn: number;
+  employeeName: string;
+}
 
 export interface DuplicateNameAndBirthdayRequestDto extends ImpersonationRequest {
   profitYear: number;
