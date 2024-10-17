@@ -12,6 +12,8 @@ public interface IProfitSharingDbContext
 
     DbSet<Beneficiary> Beneficiaries { get; set; }
     DbSet<PayProfit> PayProfits { get; set; }
+    DbSet<ProfitDetail> ProfitDetails { get; set; }
+    DbSet<Distribution> Distributions { get; set; }
 
     DbSet<Job> Jobs { get; set; }
 }
