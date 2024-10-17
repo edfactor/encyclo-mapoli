@@ -10,54 +10,53 @@ namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
  */
 internal static class TolerantCsvComparisonUtility
 {
-    internal static void ShouldBeTheSame(string csv1, string csv2)
+    internal static void ShouldBeTheSame(string actualCsvContents, string expectedCsvContents)
     {
-        using var reader1 = new StringReader(csv1);
-        using var reader2 = new StringReader(csv2);
+        // Read all records from both CSVs
+        var actualRecords = GetRecords(actualCsvContents);
+        var expectedRecords = GetRecords(expectedCsvContents);
 
+        // Compare the counts first
+        actualRecords.Count.Should().Be(expectedRecords.Count, because: "the number of records in both CSVs should be equal\r\nActual CSV\r\n"+actualCsvContents+"\r\n\r\nExpected Csv Contents\r\n"+expectedCsvContents);
+
+        // Compare each record
+        for (int i = 0; i < actualRecords.Count; i++)
+        {
+            var actual = actualRecords[i];
+            var expected = expectedRecords[i];
+
+            AreRecordsEqual(actual, expected, i + 1);
+        }
+    }
+
+    private static List<dynamic> GetRecords(string csvContents)
+    {
+        using var stringReader = new StringReader(csvContents);
         var csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
         {
             BadDataFound = null // Ignore bad data, Ready's spaces after double quotes causes grief
         };
-
-        using var csv1Reader = new CsvReader(reader1, csvConfig);
-        using var csv2Reader = new CsvReader(reader2, csvConfig);
-
-        // Read all records from both CSVs
-        var records1 = csv1Reader.GetRecords<dynamic>().ToList();
-        var records2 = csv2Reader.GetRecords<dynamic>().ToList();
-
-        // Compare the counts first
-        records1.Count.Should().Be(records2.Count, because: "the number of records in both CSVs should be equal");
-
-        // Compare each record
-        for (int i = 0; i < records1.Count; i++)
-        {
-            var record1 = records1[i];
-            var record2 = records2[i];
-
-            AreRecordsEqual(record1, record2, i + 1);
-        }
+        using var csvReader = new CsvReader(stringReader, csvConfig);
+        return csvReader.GetRecords<dynamic>().ToList();
     }
 
-    private static void AreRecordsEqual(dynamic record1, dynamic record2, int lineNumber)
+    private static void AreRecordsEqual(dynamic actualRecords, dynamic expectedRecords, int lineNumber)
     {
-        var dict1 = (IDictionary<string, object>)record1;
-        var dict2 = (IDictionary<string, object>)record2;
+        var actual = (IDictionary<string, object>)actualRecords;
+        var expected = (IDictionary<string, object>)expectedRecords;
 
         // Compare the number of fields
-        dict1.Count.Should().Be(dict2.Count, because: $"the number of fields should be equal at line {lineNumber}");
-
+        actual.Count.Should().Be(expected.Count, because: $"the number of fields should be equal at line {lineNumber}");
 
         // Compare each field value
-        foreach (var key in dict1.Keys)
+        foreach (var key in actual.Keys)
         {
             // Ensure the column names are the same
-            dict2.Should().ContainKey(key, because: $"at line {lineNumber}, the columns are different?");
+            expected.Should().ContainKey(key, because: $"at line {lineNumber}, the columns are different?");
 
             // Get the value from both records
-            object value1 = dict1[key];
-            object value2 = dict2[key];
+            object value1 = actual[key];
+            object value2 = expected[key];
 
             // Handle null values if needed
             if (value1 == null && value2 == null)
