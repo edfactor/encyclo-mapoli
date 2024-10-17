@@ -1,8 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { prepareHeaders, url } from "./api";
+
 import { RootState } from "reduxstore/store";
-import { DemographicBadgesNotInPayprofitRequestDto, DemographicBadgesNotInPayprofitResponse, DuplicateSSNDetail, DuplicateSSNsRequestDto, NegativeEtvaForSSNsOnPayProfit, NegativeEtvaForSSNsOnPayprofitRequestDto, PagedReportResponse } from "reduxstore/types";
-import { setDemographicBadgesNotInPayprofitData, setDuplicateSSNsData, setNegativeEtvaForSssnsOnPayprofit } from "reduxstore/slices/yearsEndSlice";
+import { DemographicBadgesNotInPayprofitRequestDto, DemographicBadgesNotInPayprofitResponse, DuplicateNameAndBirthday, DuplicateNameAndBirthdayRequestDto, DuplicateSSNDetail, DuplicateSSNsRequestDto, NegativeEtvaForSSNsOnPayProfit, NegativeEtvaForSSNsOnPayprofitRequestDto, PagedReportResponse } from "reduxstore/types";
+import { setDemographicBadgesNotInPayprofitData, setDuplicateNamesAndBirthdays, setDuplicateSSNsData, setNegativeEtvaForSssnsOnPayprofit } from "reduxstore/slices/yearsEndSlice";
 export const YearsEndApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: "https://localhost:7141/api/",
@@ -59,19 +59,20 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getDuplicateNamesAndBirthdays: builder.query({
-      query: () => ({
+    getDuplicateNamesAndBirthdays: builder.query<PagedReportResponse<DuplicateNameAndBirthday>, DuplicateNameAndBirthdayRequestDto>({
+      query: (params) => ({
         url: "yearend/duplicate-names-and-birthdays",
         method: "GET",
         params: {
-          take: 25,
-          skip: 0
+          profitYear: params.profitYear,
+          take: params.pagination.take,
+          skip: params.pagination.skip
         }
       }),
-      async onQueryStarted({ dispatch, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          console.log("@D " + JSON.stringify(data));
+          dispatch(setDuplicateNamesAndBirthdays(data));
         } catch (err) {
           console.log("Err: " + err);
         }

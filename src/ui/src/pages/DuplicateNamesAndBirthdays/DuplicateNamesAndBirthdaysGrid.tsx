@@ -1,12 +1,12 @@
 import { Typography } from "@mui/material";
 import { useState, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useLazyGetNegativeEVTASSNQuery } from "reduxstore/api/YearsEndApi";
+import { useSelector } from "react-redux";
+import { useLazyGetDuplicateNamesAndBirthdaysQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { GetNegativeEtvaForSSNsOnPayProfitColumns } from "./NegativeEtvaForSSNsOnPayprofitGridColumn";
+import { GetDuplicateNamesAndBirthdayColumns } from "./DuplicateNamesAndBirthdaysGridColumns";
 
-const NegativeEtvaForSSNsOnPayprofitGrid = () => {
+const DuplicateNamesAndBirthdaysGrid = () => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
@@ -14,22 +14,21 @@ const NegativeEtvaForSSNsOnPayprofitGrid = () => {
     isSortDescending: false
   });
 
-  const dispatch = useDispatch();
-  const { negativeEtvaForSSNsOnPayprofit } = useSelector((state: RootState) => state.yearsEnd);
-  const [_, { isLoading }] = useLazyGetNegativeEVTASSNQuery();
+  const { duplicateNamesAndBirthday } = useSelector((state: RootState) => state.yearsEnd);
+  const [_, { isLoading }] = useLazyGetDuplicateNamesAndBirthdaysQuery();
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
-  const columnDefs = useMemo(() => GetNegativeEtvaForSSNsOnPayProfitColumns(), []);
+  const columnDefs = useMemo(() => GetDuplicateNamesAndBirthdayColumns(), []);
 
   return (
     <>
-      {negativeEtvaForSSNsOnPayprofit?.response && (
+      {duplicateNamesAndBirthday?.response && (
         <>
           <div style={{ padding: "0 24px 0 24px" }}>
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`Negative ETVA For SSNs On Payprofit (${negativeEtvaForSSNsOnPayprofit?.response.total || 0})`}
+              {`DUPLICATE NAMES AND BIRTHDAYS (${duplicateNamesAndBirthday?.response.total || 0})`}
             </Typography>
           </div>
           <DSMGrid
@@ -37,13 +36,13 @@ const NegativeEtvaForSSNsOnPayprofitGrid = () => {
             isLoading={false}
             handleSortChanged={sortEventHandler}
             providedOptions={{
-              rowData: negativeEtvaForSSNsOnPayprofit?.response.results,
+              rowData: duplicateNamesAndBirthday?.response.results,
               columnDefs: columnDefs
             }}
           />
         </>
       )}
-      {!!negativeEtvaForSSNsOnPayprofit && negativeEtvaForSSNsOnPayprofit.response.results.length > 0 && (
+      {!!duplicateNamesAndBirthday && duplicateNamesAndBirthday.response.results.length > 0 && (
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
@@ -54,11 +53,11 @@ const NegativeEtvaForSSNsOnPayprofitGrid = () => {
             setPageSize(value);
             setPageNumber(1);
           }}
-          recordCount={negativeEtvaForSSNsOnPayprofit.response.total}
+          recordCount={duplicateNamesAndBirthday.response.total}
         />
       )}
     </>
   );
 };
 
-export default NegativeEtvaForSSNsOnPayprofitGrid;
+export default DuplicateNamesAndBirthdaysGrid;
