@@ -19,7 +19,10 @@ public sealed class BeneficiaryContactMap : IEntityTypeConfiguration<Beneficiary
         _ = builder.HasIndex(d => d.Ssn, "IX_SSN");
         _ = builder.Property(c => c.Ssn).IsRequired().HasPrecision(9).HasColumnName("SSN");
 
-        _ = builder.Property(b => b.DateOfBirth).HasColumnType("DATE").HasConversion<DateOnlyConverter>().HasColumnName("DATE_OF_BIRTH");
+        _ = builder.Property(b => b.DateOfBirth)
+            .HasColumnType("DATE")
+            .HasConversion<DateOnlyConverter>()
+            .HasColumnName("DATE_OF_BIRTH");
         _ = builder.Property(b => b.CreatedDate)
             .HasColumnType("DATE")
             .HasConversion<DateOnlyConverter>()

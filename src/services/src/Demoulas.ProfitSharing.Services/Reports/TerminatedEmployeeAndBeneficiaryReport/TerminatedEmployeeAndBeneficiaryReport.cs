@@ -131,7 +131,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             .Select(x => new MemberSlice
             {
                 PsnSuffix = x.Beneficiary.PsnSuffix,
-                BadgeNumber = x.Demographic!.BadgeNumber,
+                BadgeNumber = x.Beneficiary!.BadgeNumber,
                 Ssn = x.Beneficiary.Contact!.Ssn,
                 BirthDate = x.Beneficiary.Contact!.DateOfBirth,
                 HoursCurrentYear = 0, // Placeholder logic for hours
