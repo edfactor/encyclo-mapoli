@@ -66,3 +66,35 @@ export interface DuplicateSSNsRequestDto extends ImpersonationRequest {
   profitYear: number;
   pagination: PaginationParams;
 }
+
+
+export interface DuplicateNameAndBirthdayRequestDto extends ImpersonationRequest {
+  profitYear: number;
+  pagination: PaginationParams;
+}
+
+export interface DuplicateNameBirthdayAddress {
+  street: string;
+  street2: string | null;
+  city: string;
+  state: string;
+  postalCode: string;
+  countryIso: string;
+}
+
+export interface DuplicateNameAndBirthday {
+  badgeNumber: number;
+  ssn: string;
+  name: string;
+  dateOfBirth: string;
+  address: DuplicateNameBirthdayAddress;
+  years: number;
+  hireDate: string;
+  terminationDate: string | null;
+  status: string;
+  storeNumber: number;
+  count: number;
+  netBalance: number;
+  hoursCurrentYear: number;
+  incomeCurrentYear: number;
+}
