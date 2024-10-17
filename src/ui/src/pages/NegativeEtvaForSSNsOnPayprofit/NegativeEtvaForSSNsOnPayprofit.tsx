@@ -1,6 +1,8 @@
 import { Divider } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { Page } from "smart-ui-library";
+import { DSMAccordion, Page } from "smart-ui-library";
+import NegativeEtvaForSSNsOnPayprofitSearchFilter from "./NegativeEtvaForSSNsOnPayprofitSearchFilter";
+import NegativeEtvaForSSNsOnPayprofitGrid from "./NegativeEtvaForSSNsOnPayprofitGrid";
 
 const NegativeEtvaForSSNsOnPayprofit = () => {
   return (
@@ -13,11 +15,14 @@ const NegativeEtvaForSSNsOnPayprofit = () => {
           </Grid2>
           <Grid2
             width={"100%"}>
-             Search Filters
+              <DSMAccordion title="Filter">
+                <NegativeEtvaForSSNsOnPayprofitSearchFilter />
+              </DSMAccordion>
+             
           </Grid2>
 
           <Grid2 width="100%">
-            Grid
+            <NegativeEtvaForSSNsOnPayprofitGrid />
           </Grid2>
         </Grid2>
     </Page>
