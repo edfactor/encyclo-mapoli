@@ -52,6 +52,6 @@ export const yearsEndSlice = createSlice({
   }
 });
 
-export const { setDuplicateSSNsData, setDemographicBadgesNotInPayprofitData, setNegativeEtvaForSssnsOnPayprofit, setDuplicateNamesAndBirthdays } =
+export const { setDuplicateSSNsData, setDemographicBadgesNotInPayprofitData, setNegativeEtvaForSssnsOnPayprofit, setDuplicateNamesAndBirthdays, setMissingCommaInPYName } =
   yearsEndSlice.actions;
 export default yearsEndSlice.reducer;
