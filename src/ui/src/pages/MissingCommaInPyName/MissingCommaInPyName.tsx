@@ -1,6 +1,8 @@
 import { Divider } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { Page } from "smart-ui-library";
+import { DSMAccordion, Page } from "smart-ui-library";
+import MissingCommaInPyNameSearchFilter from "./MissingCommaInPyNameSearchFilter";
+import MissingCommaInPyNameGrid from "./MissingCommaInPyNameGrid";
 
 const MissingCommaInPyName = () => {
   return (
@@ -13,11 +15,13 @@ const MissingCommaInPyName = () => {
           </Grid2>
           <Grid2
             width={"100%"}>
-             Search Filters
+             <DSMAccordion title="Filter">
+              <MissingCommaInPyNameSearchFilter />
+             </DSMAccordion>
           </Grid2>
 
           <Grid2 width="100%">
-            Grid
+            <MissingCommaInPyNameGrid />
           </Grid2>
         </Grid2>
     </Page>
