@@ -1,8 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { prepareHeaders, url } from "./api";
 import { RootState } from "reduxstore/store";
-import { DemographicBadgesNotInPayprofitRequestDto, DemographicBadgesNotInPayprofitResponse, DuplicateSSNDetail, DuplicateSSNsRequestDto, PagedReportResponse } from "reduxstore/types";
-import { setDemographicBadgesNotInPayprofitData, setDuplicateSSNsData } from "reduxstore/slices/yearsEndSlice";
+import { DemographicBadgesNotInPayprofitRequestDto, DemographicBadgesNotInPayprofitResponse, DuplicateSSNDetail, DuplicateSSNsRequestDto, MissingCommasInPYName, MissingCommasInPYNameRequestDto, PagedReportResponse } from "reduxstore/types";
+import { setDemographicBadgesNotInPayprofitData, setDuplicateSSNsData, setMissingCommaInPYName } from "reduxstore/slices/yearsEndSlice";
 export const YearsEndApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: "https://localhost:7141/api/",
@@ -149,19 +149,19 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getNamesMissingCommas: builder.query({
-      query: () => ({
+    getNamesMissingCommas: builder.query<PagedReportResponse<MissingCommasInPYName>, MissingCommasInPYNameRequestDto>({
+      query: (params) => ({
         url: "yearend/names-missing-commas",
         method: "GET",
         params: {
-          take: 25,
-          skip: 0
+          take: params.pagination.take,
+          skip: params.pagination.skip
         }
       }),
-      async onQueryStarted({ dispatch, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          console.log("@D " + JSON.stringify(data));
+          dispatch(setMissingCommaInPYName(data));
         } catch (err) {
           console.log("Err: " + err);
         }
