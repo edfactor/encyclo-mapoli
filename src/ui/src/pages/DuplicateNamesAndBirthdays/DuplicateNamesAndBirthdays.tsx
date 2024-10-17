@@ -1,6 +1,8 @@
 import { Divider } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { Page } from "smart-ui-library";
+import { DSMAccordion, Page } from "smart-ui-library";
+import DuplicateNamesAndBirthdaysSearchFilter from "./DuplicateNamesAndBirthdaysSearchFilter";
+import DuplicateNamesAndBirthdaysGrid from "./DuplicateNamesAndBirthdaysGrid";
 
 const DuplicateNamesAndBirthdays = () => {
   return (
@@ -13,11 +15,13 @@ const DuplicateNamesAndBirthdays = () => {
           </Grid2>
           <Grid2
             width={"100%"}>
-             Search Filters
+             <DSMAccordion title="Filter">
+              <DuplicateNamesAndBirthdaysSearchFilter />
+             </DSMAccordion>
           </Grid2>
 
           <Grid2 width="100%">
-            Grid
+            <DuplicateNamesAndBirthdaysGrid />
           </Grid2>
         </Grid2>
     </Page>

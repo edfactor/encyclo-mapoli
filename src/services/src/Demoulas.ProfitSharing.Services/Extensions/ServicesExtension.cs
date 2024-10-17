@@ -30,6 +30,7 @@ public static class ServicesExtension
 
         _ = builder.Services.AddSingleton<IDemographicsServiceInternal, DemographicsService>();
         _ = builder.Services.AddSingleton<IStoreService, StoreService>();
+        _ = builder.Services.AddSingleton<TotalService>();
         _ = builder.Services.AddSingleton<CalendarService>();
         
 
