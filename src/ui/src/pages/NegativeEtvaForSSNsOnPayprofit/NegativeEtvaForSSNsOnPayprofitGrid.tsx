@@ -29,7 +29,7 @@ const NegativeEtvaForSSNsOnPayprofitGrid = () => {
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`DUPLICATE SSNs ON DEMOGRAPHICS (${negativeEtvaForSSNsOnPayprofit?.response.total || 0})`}
+              {`Negative ETVA For SSNs On Payprofit (${negativeEtvaForSSNsOnPayprofit?.response.total || 0})`}
             </Typography>
           </div>
           <DSMGrid
