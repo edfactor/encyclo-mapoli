@@ -143,7 +143,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                     : string.Empty,
                 LastName = x.Beneficiary.Contact.LastName,
                 YearsInPs = 0,
-                TerminationDate = x.Demographic.TerminationDate,
+                TerminationDate = null,
                 IncomeRegAndExecCurrentYear = (x.PayProfit!.CurrentIncomeYear ?? 0) + x.PayProfit.IncomeExecutive,
                 TerminationCode = x.Demographic.TerminationCodeId,
                 ZeroCont = ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested,
@@ -194,7 +194,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             var profitDetails = await ctx.ProfitDetails.Where(pd => pd.ProfitYear <= req.ProfitYear && pd.Ssn == memberSlice.Ssn)
                 .ToListAsync(cancellationToken);
 
-            InternalProfitDetailDto profitDetailSummary = RetrieveProfitDetail(profitDetails);
+            InternalProfitDetailDto profitDetailSummary = RetrieveProfitDetail(profitDetails, req.ProfitYear);
 
             int vestingPercent = ContributionService.LookupVestingPercent(memberSlice.EnrollmentId, memberSlice.ZeroCont, memberSlice.YearsInPs);
 
@@ -213,7 +213,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 FullName = memberSlice.FullName,
                 FirstName = memberSlice.FirstName,
                 LastName = memberSlice.LastName,
-                MiddleInitial = memberSlice.MiddleInitial?[..1],
+                MiddleInitial = memberSlice.MiddleInitial?.Substring(0,1),
                 Birthday = memberSlice.BirthDate,
                 HoursCurrentYear = memberSlice.HoursCurrentYear,
                 EarningsCurrentYear = memberSlice.IncomeRegAndExecCurrentYear,
@@ -307,7 +307,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         };
     }
 
-    private static InternalProfitDetailDto RetrieveProfitDetail(List<ProfitDetail> profitDetails)
+    private static InternalProfitDetailDto RetrieveProfitDetail(List<ProfitDetail> profitDetails, short profitYear)
     {
         if (profitDetails.Count == 0)
         {
@@ -330,14 +330,14 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         
 #pragma warning disable S3358
 
-        if (!profitDetails.Exists(pd => pd.ProfitYear == 2023))
+        if (!profitDetails.Exists(pd => pd.ProfitYear == profitYear))
         {
            return new InternalProfitDetailDto { CurrentAmount = currentBalance };
         }
 
 
         var pdQuery = profitDetails
-            .Where(pd => pd.ProfitYear == 2023)
+            .Where(pd => pd.ProfitYear == profitYear)
             .GroupBy(details => details.Ssn)
             .Select(g => new
             {

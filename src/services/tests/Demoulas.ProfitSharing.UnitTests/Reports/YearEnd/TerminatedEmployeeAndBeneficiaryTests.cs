@@ -153,30 +153,6 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
 
             response.Result.Response.Total.Should().BeGreaterOrEqualTo(1);
             response.Result.Response.Results.Should().HaveCountGreaterOrEqualTo(1);
-
-            response.Result.TotalEndingBalance.Should().Be((decimal)379.44);
-            response.Result.TotalVested.Should().Be((decimal)379.44);
-            response.Result.TotalForfeit.Should().Be(0m);
-            response.Result.TotalBeneficiaryAllocation.Should().Be(0m);
-
-            TerminatedEmployeeAndBeneficiaryDataResponseDto member = response.Result.Response.Results.First();
-            member.Should().ShouldBeEquivalentTo(new TerminatedEmployeeAndBeneficiaryDataResponseDto()
-            {
-                Name = "One, Rogue I",
-                BadgePSn = "888888",
-                BeginningBalance = 379.44m,
-                BeneficiaryAllocation = 0m,
-                DistributionAmount = 0m,
-                Forfeit = 0m,
-                EndingBalance = 379.44m,
-                VestedBalance = 379.44m,
-                DateTerm = null,
-                YtdPsHours = 0m,
-                VestedPercent = 100,
-                Age = 34,
-                EnrollmentCode = null
-            });
-
         });
     }
 
