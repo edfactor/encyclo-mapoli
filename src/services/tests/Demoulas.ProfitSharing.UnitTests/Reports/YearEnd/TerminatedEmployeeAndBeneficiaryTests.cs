@@ -134,7 +134,10 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
             bene.Contact.LastName = "One";
             bene.Contact.MiddleName = "I";
             bene.Contact.DateOfBirth = new DateOnly(1990, 1, 1);
-            bene.Demographic!.PayProfits[0].ProfitYear = 2023;
+            if (bene.Demographic!.PayProfits.TrueForAll(pp => pp.ProfitYear != 2023))
+            {
+                bene.Demographic!.PayProfits[0].ProfitYear = 2023;
+            }
 
             await c.SaveChangesAsync();
 
