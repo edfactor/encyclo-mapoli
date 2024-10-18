@@ -213,7 +213,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 FullName = memberSlice.FullName,
                 FirstName = memberSlice.FirstName,
                 LastName = memberSlice.LastName,
-                MiddleInitial = memberSlice.MiddleInitial?.Substring(0,1),
+                MiddleInitial = memberSlice.MiddleInitial?.Length > 1 ? memberSlice.MiddleInitial?[..1] : memberSlice.MiddleInitial,
                 Birthday = memberSlice.BirthDate,
                 HoursCurrentYear = memberSlice.HoursCurrentYear,
                 EarningsCurrentYear = memberSlice.IncomeRegAndExecCurrentYear,
