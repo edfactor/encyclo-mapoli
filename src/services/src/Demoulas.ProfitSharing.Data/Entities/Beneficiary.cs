@@ -18,19 +18,5 @@ public sealed class Beneficiary
     public decimal Earnings { get; set; }
     public decimal SecondaryEarnings { get; set; }
     public required decimal Percent { get; set; }
-    
     public Demographic? Demographic { get; set; }
-
-
-    /// <summary>
-    /// Generates a PSN (Personal Serial Number) by concatenating the BadgeNumber and PsnSuffix properties.
-    /// </summary>
-    /// <returns>
-    /// A long value representing the generated PSN.
-    /// </returns>
-    public long GetPsn()
-    {
-        long.TryParse($"{BadgeNumber}{PsnSuffix:D4}", out long psn);
-        return psn;
-    }
 }

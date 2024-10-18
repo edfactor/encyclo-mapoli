@@ -10,10 +10,13 @@
   <ItemGroup>
     <Compile Remove="Interfaces\**" />
     <Compile Remove="Validators\**" />
+    <Compile Remove="YearEnd\**" />
     <EmbeddedResource Remove="Interfaces\**" />
     <EmbeddedResource Remove="Validators\**" />
+    <EmbeddedResource Remove="YearEnd\**" />
     <None Remove="Interfaces\**" />
     <None Remove="Validators\**" />
+    <None Remove="YearEnd\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -42,10 +45,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="YearEnd\" />
   </ItemGroup>
 
 </Project>
