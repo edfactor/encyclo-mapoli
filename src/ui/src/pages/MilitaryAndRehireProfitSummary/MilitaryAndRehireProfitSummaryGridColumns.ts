@@ -4,8 +4,8 @@ export const GetMilitaryAndRehireProfitSummaryColumns = (): ColDef[] => {
   return [
     {
       headerName: "Badge",
-      field: "employeeBadge",
-      colId: "employeeBadge",
+      field: "badgeNumber",
+      colId: "badgeNumber",
       minWidth: 80,
       headerClass: "right-align",
       cellClass: "right-align",
@@ -14,8 +14,8 @@ export const GetMilitaryAndRehireProfitSummaryColumns = (): ColDef[] => {
     },
     {
       headerName: "SSN",
-      field: "employeeSsn",
-      colId: "employeeSsn",
+      field: "ssn",
+      colId: "ssn",
       minWidth: 120,
       headerClass: "left-align",
       cellClass: "left-align",
@@ -23,9 +23,9 @@ export const GetMilitaryAndRehireProfitSummaryColumns = (): ColDef[] => {
       valueFormatter: (params) => params.value ? `***-**-${params.value.toString().slice(-4)}` : ""
     },
     {
-      headerName: "ETVA",
-      field: "etvaValue",
-      colId: "etvaValue",
+      headerName: "Net Balance",
+      field: "netBalanceLastYear",
+      colId: "netBalanceLastYear",
       minWidth: 150,
       headerClass: "left-align",
       cellClass: "left-align",

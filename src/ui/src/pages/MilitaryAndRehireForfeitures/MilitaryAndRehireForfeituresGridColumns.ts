@@ -4,8 +4,8 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
   return [
     {
       headerName: "Badge",
-      field: "employeeBadge",
-      colId: "employeeBadge",
+      field: "badgeNumber",
+      colId: "badgeNumber",
       minWidth: 80,
       headerClass: "right-align",
       cellClass: "right-align",
@@ -13,9 +13,18 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       sortable: true
     },
     {
+      headerName: "Full Name",
+      field: "fullName",
+      colId: "fullName",
+      minWidth: 150,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true
+    },
+    {
       headerName: "SSN",
-      field: "employeeSsn",
-      colId: "employeeSsn",
+      field: "ssn",
+      colId: "ssn",
       minWidth: 120,
       headerClass: "left-align",
       cellClass: "left-align",
@@ -23,9 +32,9 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       valueFormatter: (params) => params.value ? `***-**-${params.value.toString().slice(-4)}` : ""
     },
     {
-      headerName: "ETVA",
-      field: "etvaValue",
-      colId: "etvaValue",
+      headerName: "Contribution Years",
+      field: "companyContributionYears",
+      colId: "companyContributionYears",
       minWidth: 150,
       headerClass: "left-align",
       cellClass: "left-align",
