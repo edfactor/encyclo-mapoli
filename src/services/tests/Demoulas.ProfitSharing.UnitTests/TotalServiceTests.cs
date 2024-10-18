@@ -202,8 +202,8 @@ public class TotalServiceTests : ApiTestBase<Program>
                 prof.ProfitCode = ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal;
                 prof.ProfitCodeId = ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id;
                 prof.Contribution = Convert.ToDecimal(Math.Pow(2, i * 3));
-                prof.Earnings = Convert.ToDecimal(Math.Pow(2, i * 3 + 1));
-                prof.Forfeiture = Convert.ToDecimal(Math.Pow(2, i * 3 + 2));
+                prof.Earnings = Convert.ToDecimal(Math.Pow(2, (i * 3) + 1));
+                prof.Forfeiture = Convert.ToDecimal(Math.Pow(2, (i * 3) + 2));
                 prof.MonthToDate = 0;
                 prof.YearToDate = (short)(DateTime.Now.Year - i);
                 prof.FederalTaxes = 0.5m;

@@ -27,19 +27,9 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
     public virtual DbSet<Beneficiary> Beneficiaries { get; set; }
     public virtual DbSet<PayProfit> PayProfits { get; set; }
     public virtual DbSet<Distribution> Distributions { get; set; }
-    public virtual DbSet<DistributionRequest> DistributionRequests { get; set; }
-    public DbSet<StateTax> StateTaxes { get; set; }
 
     public virtual DbSet<Job> Jobs { get; set; }
     public virtual DbSet<DemographicSyncAudit> DemographicSyncAudit { get; set; }
-    
-
-    public virtual DbSet<Enrollment> Enrollments { get; set; }
-    public virtual DbSet<BeneficiaryType> BeneficiaryTypes { get; set; }
-    public virtual DbSet<EmployeeType> EmployeeTypes { get; set; }
-    public virtual DbSet<BeneficiaryKind> BeneficiaryKinds { get; set; }
-    public virtual DbSet<DistributionStatus> DistributionStatuses { get; set; }
-    public virtual DbSet<DistributionFrequency> DistributionFrequencies { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
