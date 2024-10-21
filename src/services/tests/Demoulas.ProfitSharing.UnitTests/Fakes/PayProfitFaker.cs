@@ -2,31 +2,43 @@
 using Demoulas.ProfitSharing.Data.Entities;
 
 namespace Demoulas.ProfitSharing.UnitTests.Fakes;
+
 internal sealed class PayProfitFaker : Faker<PayProfit>
 {
+    private readonly HashSet<(long OracleHcmId, short ProfitYear)> _existingCombinations = new HashSet<(long, short)>();
+
     internal PayProfitFaker(IList<Demographic> demographicFakes)
     {
         var demographicQueue = new Queue<Demographic>(demographicFakes);
-
         Demographic currentDemographic = demographicQueue.Peek();
 
-        RuleFor(pc => pc.OracleHcmId, (f, o) => (currentDemographic.OracleHcmId))
+        RuleFor(pc => pc.OracleHcmId, (f, o) => currentDemographic.OracleHcmId)
             .RuleFor(d => d.Demographic, (f, o) =>
             {
-                if (demographicQueue.Any()) // demographic record that contains the both of them
+                if (demographicQueue.Any())
                 {
-                    // So by keeping a state field outside the lamdba, we can refer to an existing demographic
-                    currentDemographic = demographicQueue.Dequeue(); // record and copy its values.
+                    currentDemographic = demographicQueue.Dequeue();
                 }
                 else
                 {
-                    demographicQueue = new Queue<Demographic>(demographicFakes); // Reset the queue if it's empty
-                    currentDemographic = demographicQueue.Dequeue(); // Start over with the first item
+                    demographicQueue = new Queue<Demographic>(demographicFakes);
+                    currentDemographic = demographicQueue.Dequeue();
                 }
 
                 return currentDemographic;
             })
-            .RuleFor(pc => pc.ProfitYear, f => f.PickRandom<short>(2020, 2021, 2022, 2023))
+            .RuleFor(pc => pc.ProfitYear, (f, o) =>
+            {
+                short profitYear;
+                do
+                {
+                    profitYear = f.PickRandom<short>(2018, 2019, 2020, 2021, 2022, 2023);
+                }
+                while (_existingCombinations.Contains((currentDemographic.OracleHcmId, profitYear)));
+
+                _existingCombinations.Add((currentDemographic.OracleHcmId, profitYear));
+                return profitYear;
+            })
             .RuleFor(pc => pc.CurrentHoursYear, f => f.Random.Int(min: 0, max: 3000))
             .RuleFor(pc => pc.HoursExecutive, f => f.Random.Int(min: 0, max: 1000))
             .RuleFor(pc => pc.WeeksWorkedYear, f => f.Random.Byte(min: 0, max: 53))
@@ -47,6 +59,5 @@ internal sealed class PayProfitFaker : Faker<PayProfit>
                 ZeroContributionReason.Constants.TerminatedEmployeeOver1000HoursWorkedGetsYearVested,
                 ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay,
                 ZeroContributionReason.Constants.Under21WithOver1Khours));
-
     }
 }

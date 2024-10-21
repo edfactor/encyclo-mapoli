@@ -1,16 +1,14 @@
-import { FormHelperText, FormLabel, TextField, Typography } from "@mui/material";
+import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { isValid } from "date-fns";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { useDispatch } from "react-redux";
-import { useLazyGetDuplicateSSNsQuery } from "reduxstore/api/YearsEndApi";
+import { useLazyGetNegativeEVTASSNQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { ImpersonationRoles } from "reduxstore/types";
 
-interface DuplicateSSNsOnDemographicsSearch {
+interface NegativeEtvaForSSNsOnPayprofitSearch {
   profitYear: number;
 }
 
@@ -24,10 +22,10 @@ const schema = yup.object().shape({
     .required("Year is required")
 });
 
-const DuplicateSSNsOnDemographicsSearchFilter = () => {
+const NegativeEtvaForSSNsOnPayprofitSearchFilter = () => {
   const [isFetching, setIsFetching] = useState(false);
 
-  const [triggerSearch, { isLoading }] = useLazyGetDuplicateSSNsQuery();
+  const [triggerSearch, { isLoading }] = useLazyGetNegativeEVTASSNQuery();
 
   const {
     control,
@@ -35,7 +33,7 @@ const DuplicateSSNsOnDemographicsSearchFilter = () => {
     formState: { errors, isValid },
     reset,
     trigger
-  } = useForm<DuplicateSSNsOnDemographicsSearch>({
+  } = useForm<NegativeEtvaForSSNsOnPayprofitSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
       profitYear: undefined
@@ -107,4 +105,4 @@ const DuplicateSSNsOnDemographicsSearchFilter = () => {
   );
 };
 
-export default DuplicateSSNsOnDemographicsSearchFilter;
+export default NegativeEtvaForSSNsOnPayprofitSearchFilter;

@@ -1,25 +1,16 @@
 ﻿using System.Reflection;
-using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-using Demoulas.ProfitSharing.Data.Contexts;
-using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ExecutiveHoursAndDollars;
-using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 using Demoulas.ProfitSharing.Security;
-using Demoulas.ProfitSharing.Services.Reports;
 using Demoulas.ProfitSharing.UnitTests.Extensions;
 using FastEndpoints;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Moq;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
-public class ExecutiveHoursAndDollarsIntegrationTests : ApiIntegrationTestBase<Api.Program>
+public class ExecutiveHoursAndDollarsIntegrationTests : ApiIntegrationTestBase<Program>
 {
-    // Probably should define these somewhere more global. 
+    // Probably should define these somewhere more global, or be looked up dynamically 
     private const short YearThis = 2023;
     private const short YearLast = 2022;
 
@@ -32,8 +23,8 @@ public class ExecutiveHoursAndDollarsIntegrationTests : ApiIntegrationTestBase<A
         DownloadClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
 
         var response =
-            await DownloadClient.GETAsync<ExecutiveHoursAndDollarsEndpoint, ProfitYearRequest, StreamContent>(
-                new ProfitYearRequest { ProfitYear = YearThis });
+            await DownloadClient.GETAsync<ExecutiveHoursAndDollarsEndpoint, ExecutiveHoursAndDollarsRequest, StreamContent>(
+                new ExecutiveHoursAndDollarsRequest { ProfitYear = YearThis, HasExecutiveHoursAndDollars = true});
 
         string csvData = await response.Response.Content.ReadAsStringAsync();
 
@@ -59,8 +50,8 @@ public class ExecutiveHoursAndDollarsIntegrationTests : ApiIntegrationTestBase<A
         DownloadClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
 
         var response =
-            await DownloadClient.GETAsync<ExecutiveHoursAndDollarsEndpoint, ProfitYearRequest, StreamContent>(
-                new ProfitYearRequest { ProfitYear = YearLast });
+            await DownloadClient.GETAsync<ExecutiveHoursAndDollarsEndpoint, ExecutiveHoursAndDollarsRequest, StreamContent>(
+                new ExecutiveHoursAndDollarsRequest { ProfitYear = YearLast, HasExecutiveHoursAndDollars = true});
 
         string csvData = await response.Response.Content.ReadAsStringAsync();
 

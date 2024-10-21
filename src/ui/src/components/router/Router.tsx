@@ -7,6 +7,13 @@ import MenuData from "../../MenuData";
 import ImpersonationMultiSelect from "components/MenuBar/ImpersonationMultiSelect";
 import DemographicBadgesNotInPayprofit from "pages/DemographicBadgesNotInPayprofit/DemographicBadgesNotInPayprofit";
 import DuplicateSSNsOnDemographics from "pages/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographics";
+import NegativeEtvaForSSNsOnPayprofit from "pages/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofit";
+import PayrollDuplicateSSNsOnPayprofit from "pages/PayrollDuplicateSSNsOnPayprofit/PayrollDuplicateSSNsOnPayprofit";
+import DuplicateNamesAndBirthdays from "pages/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdays";
+import MissingCommaInPyName from "pages/MissingCommaInPyName/MissingCommaInPyName";
+import MilitaryAndRehire from "pages/MilitaryAndRehire/MilitaryAndRehire";
+import MilitaryAndRehireForfeitures from "pages/MilitaryAndRehireForfeitures/MilitaryAndRehireForfeitures";
+import MilitaryAndRehireProfitSummary from "pages/MilitaryAndRehireProfitSummary/MilitaryAndRehireProfitSummary";
 
 const Router = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -20,16 +27,34 @@ const Router = () => {
       <RouteSecurity oktaEnabled={oktaEnabled}>
         <Route
           path=""
-          index={true}
           element={<LandingPage />}></Route>
         <Route
           path="demographic-badges-not-in-payprofit"
-          index={true}
           element={<DemographicBadgesNotInPayprofit />}></Route>
         <Route
-          index={true}
           path="duplicate-ssns-demographics"
           element={<DuplicateSSNsOnDemographics />}></Route>
+          <Route
+          path="negative-etva-for-ssns-on-payprofit"
+          element={<NegativeEtvaForSSNsOnPayprofit />}></Route>
+          <Route
+          path="payroll-duplicate-ssns-on-payprofit"
+          element={<PayrollDuplicateSSNsOnPayprofit />}></Route>
+          <Route
+          path="duplicate-names-and-birthdays"
+          element={<DuplicateNamesAndBirthdays />}></Route>
+          <Route
+          path="missing-comma-in-py-name"
+          element={<MissingCommaInPyName />}></Route>
+          <Route
+          path="military-and-rehire"
+          element={<MilitaryAndRehire />}></Route>
+          <Route
+          path="military-and-rehire-forfeitures"
+          element={<MilitaryAndRehireForfeitures />}></Route>
+          <Route
+          path="military-and-rehire-profit-summary"
+          element={<MilitaryAndRehireProfitSummary />}></Route>
       </RouteSecurity>
     </BrowserRouter>
   );

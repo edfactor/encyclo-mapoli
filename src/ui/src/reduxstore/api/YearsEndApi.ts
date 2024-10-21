@@ -1,8 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { prepareHeaders, url } from "./api";
+
 import { RootState } from "reduxstore/store";
-import { DemographicBadgesNotInPayprofitRequestDto, DemographicBadgesNotInPayprofitResponse, DuplicateSSNDetail, DuplicateSSNsRequestDto, PagedReportResponse } from "reduxstore/types";
-import { setDemographicBadgesNotInPayprofitData, setDuplicateSSNsData } from "reduxstore/slices/yearsEndSlice";
+import { DemographicBadgesNotInPayprofitRequestDto, DemographicBadgesNotInPayprofitResponse, DuplicateNameAndBirthday, DuplicateNameAndBirthdayRequestDto, DuplicateSSNDetail, DuplicateSSNsRequestDto, MilitaryAndRehire, MilitaryAndRehireForfeiture, MilitaryAndRehireForfeituresRequestDto, MilitaryAndRehireProfitSummary, MilitaryAndRehireProfitSummaryRequestDto, MilitaryAndRehireRequestDto, MissingCommasInPYName, MissingCommasInPYNameRequestDto, NegativeEtvaForSSNsOnPayProfit, NegativeEtvaForSSNsOnPayprofitRequestDto, PagedReportResponse } from "reduxstore/types";
+import { setDemographicBadgesNotInPayprofitData, setDuplicateNamesAndBirthdays, setDuplicateSSNsData, setMilitaryAndRehireDetails, setMilitaryAndRehireForfeituresDetails, setMilitaryAndRehireProfitSummaryDetails, setMissingCommaInPYName, setNegativeEtvaForSssnsOnPayprofit } from "reduxstore/slices/yearsEndSlice";
 export const YearsEndApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: "https://localhost:7141/api/",
@@ -32,7 +32,6 @@ export const YearsEndApi = createApi({
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          console.log("@D Dupes " + JSON.stringify(data));
           dispatch(setDuplicateSSNsData(data));
         } catch (err) {
           console.log("Err: " + err);
@@ -52,32 +51,32 @@ export const YearsEndApi = createApi({
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          console.log("@D " + JSON.stringify(data));
           dispatch(setDemographicBadgesNotInPayprofitData(data));
         } catch (err) {
           console.log("Err: " + err);
         }
       }
     }),
-    getDuplicateNamesAndBirthdays: builder.query({
-      query: () => ({
+    getDuplicateNamesAndBirthdays: builder.query<PagedReportResponse<DuplicateNameAndBirthday>, DuplicateNameAndBirthdayRequestDto>({
+      query: (params) => ({
         url: "yearend/duplicate-names-and-birthdays",
         method: "GET",
         params: {
-          take: 25,
-          skip: 0
+          profitYear: params.profitYear,
+          take: params.pagination.take,
+          skip: params.pagination.skip
         }
       }),
-      async onQueryStarted({ dispatch, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          console.log("@D " + JSON.stringify(data));
+          dispatch(setDuplicateNamesAndBirthdays(data));
         } catch (err) {
           console.log("Err: " + err);
         }
       }
     }),
-    getMilitaryAndRehire: builder.query({
+    getMilitaryAndRehire: builder.query<PagedReportResponse<MilitaryAndRehire>, MilitaryAndRehireRequestDto>({
       query: () => ({
         url: "yearend/military-and-rehire",
         method: "GET",
@@ -86,46 +85,48 @@ export const YearsEndApi = createApi({
           skip: 0
         }
       }),
-      async onQueryStarted({ dispatch, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          console.log("@D " + JSON.stringify(data));
+          dispatch(setMilitaryAndRehireDetails(data));
         } catch (err) {
           console.log("Err: " + err);
         }
       }
     }),
-    getMilitaryAndRehireForfeitures: builder.query({
-      query: () => ({
-        url: "yearend/military-and-rehire-forfeitures",
+    getMilitaryAndRehireForfeitures: builder.query<PagedReportResponse<MilitaryAndRehireForfeiture>, MilitaryAndRehireForfeituresRequestDto>({
+      query: (params) => ({
+        url: `yearend/military-and-rehire-forfeitures/${params.reportingYear}`,
         method: "GET",
         params: {
+          profitYear: params.profitYear,
           take: 25,
           skip: 0
         }
       }),
-      async onQueryStarted({ dispatch, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          console.log("@D " + JSON.stringify(data));
+          dispatch(setMilitaryAndRehireForfeituresDetails(data));
         } catch (err) {
           console.log("Err: " + err);
         }
       }
     }),
-    getMilitaryAndRehireProfitSummary: builder.query({
-      query: () => ({
-        url: "yearend/military-and-rehire-profit-summary",
+    getMilitaryAndRehireProfitSummary: builder.query<PagedReportResponse<MilitaryAndRehireProfitSummary>, MilitaryAndRehireProfitSummaryRequestDto>({
+      query: (params) => ({
+        url: `yearend/military-and-rehire-profit-summary/${params.reportingYear}`,
         method: "GET",
         params: {
+          profitYear: params.profitYear,
           take: 25,
           skip: 0
         }
       }),
-      async onQueryStarted({ dispatch, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          console.log("@D " + JSON.stringify(data));
+          dispatch(setMilitaryAndRehireProfitSummaryDetails(data));
         } catch (err) {
           console.log("Err: " + err);
         }
@@ -143,43 +144,43 @@ export const YearsEndApi = createApi({
       async onQueryStarted({ dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          console.log("@D " + JSON.stringify(data));
         } catch (err) {
           console.log("Err: " + err);
         }
       }
     }),
-    getNamesMissingCommas: builder.query({
-      query: () => ({
+    getNamesMissingCommas: builder.query<PagedReportResponse<MissingCommasInPYName>, MissingCommasInPYNameRequestDto>({
+      query: (params) => ({
         url: "yearend/names-missing-commas",
         method: "GET",
         params: {
-          take: 25,
-          skip: 0
+          take: params.pagination.take,
+          skip: params.pagination.skip
         }
       }),
-      async onQueryStarted({ dispatch, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          console.log("@D " + JSON.stringify(data));
+          dispatch(setMissingCommaInPYName(data));
         } catch (err) {
           console.log("Err: " + err);
         }
       }
     }),
-    getNegativeEVTASSN: builder.query({
-      query: () => ({
+    getNegativeEVTASSN: builder.query<PagedReportResponse<NegativeEtvaForSSNsOnPayProfit>, NegativeEtvaForSSNsOnPayprofitRequestDto>({
+      query: (params) => ({
         url: "yearend/negative-evta-ssn",
         method: "GET",
         params: {
-          take: 25,
-          skip: 0
+          profitYear: params.profitYear,
+          take: params.pagination.take,
+          skip: params.pagination.skip
         }
       }),
-      async onQueryStarted({ dispatch, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          console.log("@D " + JSON.stringify(data));
+          dispatch(setNegativeEtvaForSssnsOnPayprofit(data));
         } catch (err) {
           console.log("Err: " + err);
         }
@@ -197,7 +198,6 @@ export const YearsEndApi = createApi({
       async onQueryStarted({ dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          console.log("@D " + JSON.stringify(data));
         } catch (err) {
           console.log("Err: " + err);
         }
@@ -215,7 +215,6 @@ export const YearsEndApi = createApi({
       async onQueryStarted({ dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          console.log("@D " + JSON.stringify(data));
         } catch (err) {
           console.log("Err: " + err);
         }
@@ -233,7 +232,6 @@ export const YearsEndApi = createApi({
       async onQueryStarted({ dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          console.log("@D " + JSON.stringify(data));
         } catch (err) {
           console.log("Err: " + err);
         }
@@ -251,7 +249,6 @@ export const YearsEndApi = createApi({
       async onQueryStarted({ dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          console.log("@D " + JSON.stringify(data));
         } catch (err) {
           console.log("Err: " + err);
         }

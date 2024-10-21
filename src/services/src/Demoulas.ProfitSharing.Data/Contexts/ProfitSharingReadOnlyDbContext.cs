@@ -30,7 +30,7 @@ public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitShar
     public virtual DbSet<TaxCode> TaxCodes { get; set; }
     public virtual DbSet<Beneficiary> Beneficiaries { get; set; }
     public virtual DbSet<PayProfit> PayProfits { get; set; }
-
+    public virtual DbSet<Distribution> Distributions { get; set; }
     public DbSet<Job> Jobs { get; set; }
 
     public virtual DbSet<CaldarRecord> CaldarRecords { get; set; }

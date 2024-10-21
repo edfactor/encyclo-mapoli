@@ -4,13 +4,13 @@ import { isValid } from "date-fns";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useDispatch } from "react-redux";
-import { useLazyGetDuplicateSSNsQuery } from "reduxstore/api/YearsEndApi";
+import { useLazyGetDuplicateNamesAndBirthdaysQuery, useLazyGetDuplicateSSNsQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { ImpersonationRoles } from "reduxstore/types";
 
-interface DuplicateSSNsOnDemographicsSearch {
+interface DuplicateNamesAndBirthdaysSearch {
   profitYear: number;
 }
 
@@ -24,10 +24,10 @@ const schema = yup.object().shape({
     .required("Year is required")
 });
 
-const DuplicateSSNsOnDemographicsSearchFilter = () => {
+const DuplicateNamesAndBirthdaysSearchFilter = () => {
   const [isFetching, setIsFetching] = useState(false);
 
-  const [triggerSearch, { isLoading }] = useLazyGetDuplicateSSNsQuery();
+  const [triggerSearch, { isLoading }] = useLazyGetDuplicateNamesAndBirthdaysQuery();
 
   const {
     control,
@@ -35,7 +35,7 @@ const DuplicateSSNsOnDemographicsSearchFilter = () => {
     formState: { errors, isValid },
     reset,
     trigger
-  } = useForm<DuplicateSSNsOnDemographicsSearch>({
+  } = useForm<DuplicateNamesAndBirthdaysSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
       profitYear: undefined
@@ -107,4 +107,4 @@ const DuplicateSSNsOnDemographicsSearchFilter = () => {
   );
 };
 
-export default DuplicateSSNsOnDemographicsSearchFilter;
+export default DuplicateNamesAndBirthdaysSearchFilter;
