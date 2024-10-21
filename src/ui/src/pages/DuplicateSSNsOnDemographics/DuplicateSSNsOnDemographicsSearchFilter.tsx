@@ -45,7 +45,6 @@ const DuplicateSSNsOnDemographicsSearchFilter = () => {
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
       setIsFetching(true);
-      console.log("Search submitted:", data);
       triggerSearch(
         {
           profitYear: data.profitYear,
