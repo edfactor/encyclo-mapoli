@@ -11,6 +11,9 @@ import NegativeEtvaForSSNsOnPayprofit from "pages/NegativeEtvaForSSNsOnPayprofit
 import PayrollDuplicateSSNsOnPayprofit from "pages/PayrollDuplicateSSNsOnPayprofit/PayrollDuplicateSSNsOnPayprofit";
 import DuplicateNamesAndBirthdays from "pages/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdays";
 import MissingCommaInPyName from "pages/MissingCommaInPyName/MissingCommaInPyName";
+import MilitaryAndRehire from "pages/MilitaryAndRehire/MilitaryAndRehire";
+import MilitaryAndRehireForfeitures from "pages/MilitaryAndRehireForfeitures/MilitaryAndRehireForfeitures";
+import MilitaryAndRehireProfitSummary from "pages/MilitaryAndRehireProfitSummary/MilitaryAndRehireProfitSummary";
 
 const Router = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -43,6 +46,15 @@ const Router = () => {
           <Route
           path="missing-comma-in-py-name"
           element={<MissingCommaInPyName />}></Route>
+          <Route
+          path="military-and-rehire"
+          element={<MilitaryAndRehire />}></Route>
+          <Route
+          path="military-and-rehire-forfeitures"
+          element={<MilitaryAndRehireForfeitures />}></Route>
+          <Route
+          path="military-and-rehire-profit-summary"
+          element={<MilitaryAndRehireProfitSummary />}></Route>
       </RouteSecurity>
     </BrowserRouter>
   );

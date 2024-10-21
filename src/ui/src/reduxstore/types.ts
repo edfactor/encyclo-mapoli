@@ -117,3 +117,64 @@ export interface NegativeEtvaForSSNsOnPayProfit {
   employeeSsn: number;
   etvaValue: number;
 }
+
+export interface MilitaryAndRehireRequestDto extends ImpersonationRequest {
+  pagination: PaginationParams;
+}
+
+export interface MilitaryAndRehire {
+  departmentId: number;
+  badgeNumber: number;
+  ssn: string;
+  fullName: string;
+  dateOfBirth: string;
+  terminationDate: string;
+}
+
+export interface MilitaryAndRehireForfeituresRequestDto extends ImpersonationRequest {
+  reportingYear: string;
+  profitYear: number;
+  pagination: PaginationParams;
+}
+
+export interface ForfeitureDetail {
+  profitYear: number;
+  forfeiture: number;
+  remark: string;
+}
+
+export interface MilitaryAndRehireForfeiture {
+  badgeNumber: number;
+  fullName: string;
+  ssn: string;
+  reHiredDate: string;
+  companyContributionYears: number;
+  hoursCurrentYear: number;
+  details: ForfeitureDetail[];
+}
+
+export interface MilitaryAndRehireProfitSummaryRequestDto extends ImpersonationRequest {
+  reportingYear: string;
+  profitYear: number;
+  pagination: PaginationParams;
+}
+
+export interface MilitaryAndRehireProfitSummary {
+  badgeNumber: number;
+  fullName: string;
+  ssn: string;
+  storeNumber: number;
+  hireDate: string;
+  terminationDate: string;
+  reHiredDate: string;
+  companyContributionYears: number;
+  hoursCurrentYear: number;
+  profitYear: number;
+  forfeiture: number;
+  remark: string;
+  enrollmentId: number;
+  netBalanceLastYear: number;
+  vestedBalanceLastYear: number;
+  employmentStatusId: string;
+  profitCodeId: number;
+}
