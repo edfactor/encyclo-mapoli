@@ -21,7 +21,7 @@ const DemographicBadgesNotInPayprofitSearchFilter = () => {
   };
 
   const handleReset = () => {
-    console.log("Resetting...");
+    // TODO - handle reset
   };
 
   return (

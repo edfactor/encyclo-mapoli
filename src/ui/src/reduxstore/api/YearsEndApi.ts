@@ -32,7 +32,6 @@ export const YearsEndApi = createApi({
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          console.log("@D Dupes " + JSON.stringify(data));
           dispatch(setDuplicateSSNsData(data));
         } catch (err) {
           console.log("Err: " + err);
@@ -52,7 +51,6 @@ export const YearsEndApi = createApi({
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          console.log("@D " + JSON.stringify(data));
           dispatch(setDemographicBadgesNotInPayprofitData(data));
         } catch (err) {
           console.log("Err: " + err);
@@ -146,7 +144,6 @@ export const YearsEndApi = createApi({
       async onQueryStarted({ dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          console.log("@D " + JSON.stringify(data));
         } catch (err) {
           console.log("Err: " + err);
         }
@@ -201,7 +198,6 @@ export const YearsEndApi = createApi({
       async onQueryStarted({ dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          console.log("@D " + JSON.stringify(data));
         } catch (err) {
           console.log("Err: " + err);
         }
@@ -219,7 +215,6 @@ export const YearsEndApi = createApi({
       async onQueryStarted({ dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          console.log("@D " + JSON.stringify(data));
         } catch (err) {
           console.log("Err: " + err);
         }
@@ -237,7 +232,6 @@ export const YearsEndApi = createApi({
       async onQueryStarted({ dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          console.log("@D " + JSON.stringify(data));
         } catch (err) {
           console.log("Err: " + err);
         }
@@ -255,7 +249,6 @@ export const YearsEndApi = createApi({
       async onQueryStarted({ dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          console.log("@D " + JSON.stringify(data));
         } catch (err) {
           console.log("Err: " + err);
         }
