@@ -3,6 +3,9 @@ import {
   DemographicBadgesNotInPayprofit,
   DuplicateNameAndBirthday,
   DuplicateSSNDetail,
+  MilitaryAndRehire,
+  MilitaryAndRehireForfeiture,
+  MilitaryAndRehireProfitSummary,
   MissingCommasInPYName,
   NegativeEtvaForSSNsOnPayProfit,
   PagedReportResponse
@@ -14,6 +17,9 @@ export interface YearsEndState {
   duplicateNamesAndBirthday: PagedReportResponse<DuplicateNameAndBirthday> | null;
   negativeEtvaForSSNsOnPayprofit: PagedReportResponse<NegativeEtvaForSSNsOnPayProfit> | null;
   missingCommaInPYName: PagedReportResponse<MissingCommasInPYName> | null;
+  militaryAndRehire: PagedReportResponse<MilitaryAndRehire> | null;
+  militaryAndRehireForfeitures: PagedReportResponse<MilitaryAndRehireForfeiture> | null;
+  militaryAndRehireProfitSummary: PagedReportResponse<MilitaryAndRehireProfitSummary> | null;
 }
 
 const initialState: YearsEndState = {
@@ -21,7 +27,10 @@ const initialState: YearsEndState = {
   demographicBadges: null,
   duplicateNamesAndBirthday: null,
   negativeEtvaForSSNsOnPayprofit: null,
-  missingCommaInPYName: null
+  missingCommaInPYName: null,
+  militaryAndRehire: null,
+  militaryAndRehireForfeitures: null,
+  militaryAndRehireProfitSummary: null
 };
 
 export const yearsEndSlice = createSlice({
@@ -49,9 +58,32 @@ export const yearsEndSlice = createSlice({
     setMissingCommaInPYName: (state, action: PayloadAction<PagedReportResponse<MissingCommasInPYName>>) => {
       state.missingCommaInPYName = action.payload;
     },
+    setMilitaryAndRehireDetails: (state, action: PayloadAction<PagedReportResponse<MilitaryAndRehire>>) => {
+      state.militaryAndRehire = action.payload;
+    },
+    setMilitaryAndRehireForfeituresDetails: (
+      state,
+      action: PayloadAction<PagedReportResponse<MilitaryAndRehireForfeiture>>
+    ) => {
+      state.militaryAndRehireForfeitures = action.payload;
+    },
+    setMilitaryAndRehireProfitSummaryDetails: (
+      state,
+      action: PayloadAction<PagedReportResponse<MilitaryAndRehireProfitSummary>>
+    ) => {
+      state.militaryAndRehireProfitSummary = action.payload;
+    }
   }
 });
 
-export const { setDuplicateSSNsData, setDemographicBadgesNotInPayprofitData, setNegativeEtvaForSssnsOnPayprofit, setDuplicateNamesAndBirthdays, setMissingCommaInPYName } =
-  yearsEndSlice.actions;
+export const {
+  setDuplicateSSNsData,
+  setDemographicBadgesNotInPayprofitData,
+  setNegativeEtvaForSssnsOnPayprofit,
+  setDuplicateNamesAndBirthdays,
+  setMissingCommaInPYName,
+  setMilitaryAndRehireDetails,
+  setMilitaryAndRehireForfeituresDetails,
+  setMilitaryAndRehireProfitSummaryDetails
+} = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;
