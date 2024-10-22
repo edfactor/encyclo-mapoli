@@ -1,15 +1,11 @@
-# React + TypeScript + Vite
+# Project Setup
 
-This template provides a minimal setup to initialize a new SMART React app.
-
-In order to create a new SMART project, do the following:
-
-0. Clone this cra-template-smart repo to your machine in the same location as your other repos.
-1. Create a new directory on your local machine next to your other repos using mkdir - `mkdir newrepo`
-2. Change into that directory - `cd new repo`
-3. Initialize a new git repository - `git init`
-4. Copy the project structure from the template directory using the following two commands:
-  1. `cp -R ..\cra-template-smart\vite-template-smart\* .`
-  2. `cp -R ..\cra-template-smart\vite-template-smart\.* .`
-5. Install node dependencies - `npm i`
-6. Run the new UI - `npm run dev`
+0. Make sure you're authenticated with the Demoulas JFrog instance. (Follow the Set Me Up guide to auth your local npm client in the Artifactory website.)
+1. create a new `.npmrc` file in the src/ui directory with the following contents:
+```
+registry=https://registry.npmjs.org/
+smart-ui-library:registry=https://demoulas.jfrog.io/artifactory/api/npm/npm-smart-registry-local/
+```
+This will ensure that when you run npm install you're only using the Jfrog registry for smart-ui-library, the standard npm registry otherwise.
+2. run `npm i --legacy-peer-deps`
+3. run `npm run dev`

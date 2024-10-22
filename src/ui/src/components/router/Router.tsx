@@ -23,7 +23,7 @@ const Router = () => {
 
   return (
     <BrowserRouter>
-      <MenuBar data={MenuData}>{showImpersonation && <ImpersonationMultiSelect />}</MenuBar>
+      <MenuBar menuInfo={MenuData} impersonationMultiSelect={showImpersonation && <ImpersonationMultiSelect />} />
       <RouteSecurity oktaEnabled={oktaEnabled}>
         <Route
           path=""
