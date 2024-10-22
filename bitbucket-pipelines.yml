@@ -70,6 +70,12 @@ definitions:
         - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
         - ${env:ENV} = "qa"
         - cd .\src\UI
+        - |
+          @"
+          registry=https://registry.npmjs.org/
+          smart-ui-library:registry=https://demoulas.jfrog.io/artifactory/api/npm/npm-smart-registry-local/
+          //demoulas.jfrog.io/artifactory/api/npm/npm-smart-registry-local/:_authToken=$env:JFROG_WORKSPACE_VARIABLE
+          "@ | Out-File -FilePath .npmrc -Encoding ASCII
         - C:\nvm\v20.4.0\npm.cmd install --legacy-peer-deps;
         - C:\nvm\v20.4.0\npm.cmd run build:${env:ENV}
         - Copy-Item -Path ".\src\web.config" -Destination "..\..\src\UI\build"
