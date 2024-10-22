@@ -68,12 +68,10 @@ public sealed class CalendarService
         var endingDate = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
             // Filter records where WeekEndingDate is in December of the given calendar year
-            var startDate = new DateOnly(calendarYear, 12, 1);
-            var endDate = new DateOnly(calendarYear, 12, 31);
-            
+            var decStart = new DateOnly(calendarYear, 12, 1);
+            var decEnd = new DateOnly(calendarYear, 12, 31);
             var decemberRecords = context.CaldarRecords
-                .Where(r => r.WeekEndingDate >= startDate && r.WeekEndingDate <= endDate);
-
+                .Where(r => r.WeekEndingDate >= decStart && r.WeekEndingDate <= decEnd);
 
             // Get the maximum ACC_WEEKN for December
             var maxAccWeekn = await decemberRecords

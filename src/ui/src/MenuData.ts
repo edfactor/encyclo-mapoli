@@ -9,6 +9,9 @@ const exampleMenu: MenuBarData = {
     { caption: "Payroll Duplicate SSNs on Payprofit", route: "/payroll-duplicate-ssns-on-payprofit" },
     { caption: "Duplicate Names and Birthdays", route: "/duplicate-names-and-birthdays" },
     { caption: "Missing Comma in PY_NAME", route: "/missing-comma-in-py-name" },
+    { caption: "Military and Rehire", route: "/military-and-rehire" },
+    { caption: "Military and Rehire Forfeitures", route: "/military-and-rehire-forfeitures"},
+    { caption: "Military and Rehire Profit Summary", route: "/military-and-rehire-profit-summary"}
   ]
 };
 
