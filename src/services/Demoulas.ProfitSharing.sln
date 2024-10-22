@@ -1,4 +1,5 @@
-﻿Microsoft Visual Studio Solution File, Format Version 12.00
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
 # 17
 VisualStudioVersion = 17.8.0.0
 MinimumVisualStudioVersion = 17.8.0.0
@@ -48,20 +49,59 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Obfuscation", "Obfuscation", "{FDE7E8B7-3735-42D6-BF0E-B4FB1BF0FA86}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{57F488D4-7A41-4A7F-ABEF-4B1437B5B5A6}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ready_import", "ready_import", "{0A7F4CAF-BDEA-44BC-8BEC-1F3979CF355B}"
 	ProjectSection(SolutionItems) = preProject
-		..\database\ready_import\Readme.txt = ..\database\ready_import\Readme.txt
-		..\database\ready_import\SQL copy all from ready to smart ps.sql = ..\database\ready_import\SQL copy all from ready to smart ps.sql
-		..\database\ready_import\SQL copy beneficiary.sql = ..\database\ready_import\SQL copy beneficiary.sql
-		..\database\ready_import\SQL copy demographic.sql = ..\database\ready_import\SQL copy demographic.sql
-		..\database\ready_import\SQL copy distribution.sql = ..\database\ready_import\SQL copy distribution.sql
-		..\database\ready_import\SQL copy pay_profit.sql = ..\database\ready_import\SQL copy pay_profit.sql
-		..\database\ready_import\SQL copy profit_detail.sql = ..\database\ready_import\SQL copy profit_detail.sql
-		..\database\ready_import\SQL counts smart vs ready.sql = ..\database\ready_import\SQL counts smart vs ready.sql
+		..\database\obfuscation\scripts\CHANGELOG.txt = ..\database\obfuscation\scripts\CHANGELOG.txt
+		..\database\obfuscation\scripts\check_psn_orphans.sql = ..\database\obfuscation\scripts\check_psn_orphans.sql
+		..\database\obfuscation\scripts\create_employee_obf_table.sql = ..\database\obfuscation\scripts\create_employee_obf_table.sql
+		..\database\obfuscation\scripts\create_indexes.sql = ..\database\obfuscation\scripts\create_indexes.sql
+		..\database\obfuscation\scripts\create_key_lookup_tables.sql = ..\database\obfuscation\scripts\create_key_lookup_tables.sql
+		..\database\obfuscation\scripts\create_log_table.sql = ..\database\obfuscation\scripts\create_log_table.sql
+		..\database\obfuscation\scripts\create_task_tables.sql = ..\database\obfuscation\scripts\create_task_tables.sql
+		..\database\obfuscation\scripts\delete_audit_data.sql = ..\database\obfuscation\scripts\delete_audit_data.sql
+		..\database\obfuscation\scripts\delete_employees_data.sql = ..\database\obfuscation\scripts\delete_employees_data.sql
+		..\database\obfuscation\scripts\delete_framework_data.sql = ..\database\obfuscation\scripts\delete_framework_data.sql
+		..\database\obfuscation\scripts\delete_orphan_records.sql = ..\database\obfuscation\scripts\delete_orphan_records.sql
+		..\database\obfuscation\scripts\fill_profit_detail_psns_table.sql = ..\database\obfuscation\scripts\fill_profit_detail_psns_table.sql
+		..\database\obfuscation\scripts\fill_profit_ss_detail_psns_table.sql = ..\database\obfuscation\scripts\fill_profit_ss_detail_psns_table.sql
+		..\database\obfuscation\scripts\fill_psn_orphan_tables.sql = ..\database\obfuscation\scripts\fill_psn_orphan_tables.sql
+		..\database\obfuscation\scripts\fill_psn_task_tables.sql = ..\database\obfuscation\scripts\fill_psn_task_tables.sql
+		..\database\obfuscation\scripts\fill_ssn_psn_lookup_tables.sql = ..\database\obfuscation\scripts\fill_ssn_psn_lookup_tables.sql
+		..\database\obfuscation\scripts\fill_ssn_task_tables_ben.sql = ..\database\obfuscation\scripts\fill_ssn_task_tables_ben.sql
+		..\database\obfuscation\scripts\fill_ssn_task_tables_emp.sql = ..\database\obfuscation\scripts\fill_ssn_task_tables_emp.sql
+		..\database\obfuscation\scripts\fill_store_tables.sql = ..\database\obfuscation\scripts\fill_store_tables.sql
+		..\database\obfuscation\scripts\functions_core.sql = ..\database\obfuscation\scripts\functions_core.sql
+		..\database\obfuscation\scripts\functions_fill_task_tables.sql = ..\database\obfuscation\scripts\functions_fill_task_tables.sql
+		..\database\obfuscation\scripts\functions_random.sql = ..\database\obfuscation\scripts\functions_random.sql
+		..\database\obfuscation\scripts\obfuscate_beneficiaries.sql = ..\database\obfuscation\scripts\obfuscate_beneficiaries.sql
+		..\database\obfuscation\scripts\obfuscate_beneficiary_psns.sql = ..\database\obfuscation\scripts\obfuscate_beneficiary_psns.sql
+		..\database\obfuscation\scripts\obfuscate_beneficiary_ssns.sql = ..\database\obfuscation\scripts\obfuscate_beneficiary_ssns.sql
+		..\database\obfuscation\scripts\obfuscate_employees.sql = ..\database\obfuscation\scripts\obfuscate_employees.sql
+		..\database\obfuscation\scripts\obfuscate_employee_psns.sql = ..\database\obfuscation\scripts\obfuscate_employee_psns.sql
+		..\database\obfuscation\scripts\obfuscate_employee_ssns.sql = ..\database\obfuscation\scripts\obfuscate_employee_ssns.sql
+		..\database\obfuscation\scripts\obfuscate_emp_distribution_state.sql = ..\database\obfuscation\scripts\obfuscate_emp_distribution_state.sql
+		..\database\obfuscation\scripts\obfuscate_master.sql = ..\database\obfuscation\scripts\obfuscate_master.sql
+		..\database\obfuscation\scripts\obfuscate_other_fields.sql = ..\database\obfuscation\scripts\obfuscate_other_fields.sql
+		..\database\obfuscation\scripts\obfuscate_start_run.sql = ..\database\obfuscation\scripts\obfuscate_start_run.sql
+		..\database\obfuscation\scripts\obfuscate_validation.sql = ..\database\obfuscation\scripts\obfuscate_validation.sql
+		..\database\obfuscation\scripts\obfuscation_setup.sql = ..\database\obfuscation\scripts\obfuscation_setup.sql
+		..\database\obfuscation\scripts\reset_sequences.sql = ..\database\obfuscation\scripts\reset_sequences.sql
+		..\database\obfuscation\scripts\target_build_ben_lookups.sql = ..\database\obfuscation\scripts\target_build_ben_lookups.sql
+		..\database\obfuscation\scripts\target_build_emp_lookups.sql = ..\database\obfuscation\scripts\target_build_emp_lookups.sql
+		..\database\obfuscation\scripts\target_delete_checks.sql = ..\database\obfuscation\scripts\target_delete_checks.sql
+		..\database\obfuscation\scripts\target_delete_details.sql = ..\database\obfuscation\scripts\target_delete_details.sql
+		..\database\obfuscation\scripts\target_delete_others.sql = ..\database\obfuscation\scripts\target_delete_others.sql
+		..\database\obfuscation\scripts\target_master.sql = ..\database\obfuscation\scripts\target_master.sql
+		..\database\obfuscation\scripts\target_report.sql = ..\database\obfuscation\scripts\target_report.sql
+		..\database\obfuscation\scripts\target_seed_all.sql = ..\database\obfuscation\scripts\target_seed_all.sql
+		..\database\obfuscation\scripts\target_setup.sql = ..\database\obfuscation\scripts\target_setup.sql
+		..\database\obfuscation\scripts\test_bulk_data_create.sql = ..\database\obfuscation\scripts\test_bulk_data_create.sql
+		..\database\obfuscation\scripts\test_create_data.sql = ..\database\obfuscation\scripts\test_create_data.sql
+		..\database\obfuscation\scripts\test_insert_orphan_records.sql = ..\database\obfuscation\scripts\test_insert_orphan_records.sql
+		..\database\obfuscation\scripts\test_load_emp_ssns.sql = ..\database\obfuscation\scripts\test_load_emp_ssns.sql
+		..\database\obfuscation\scripts\test_view_data.sql = ..\database\obfuscation\scripts\test_view_data.sql
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demoulas.ProfitSharing.IntegrationTests", "tests\Demoulas.ProfitSharing.IntegrationTests\Demoulas.ProfitSharing.IntegrationTests.csproj", "{222677DF-CAD3-4E03-A1A1-C213DFD0DAA0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.IntegrationTests", "tests\Demoulas.ProfitSharing.IntegrationTests\Demoulas.ProfitSharing.IntegrationTests.csproj", "{222677DF-CAD3-4E03-A1A1-C213DFD0DAA0}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SQL calculations view", "SQL calculations view", "{522242E2-FC59-49E9-9628-6E9B6AEEAF6F}"
 	ProjectSection(SolutionItems) = preProject
@@ -158,7 +198,6 @@ Global
 		{66B0DDDA-624B-4BF3-A4C7-CAEBC3E3DA62} = {D1297442-67BE-4098-A95F-727F04A68FA3}
 		{FDE7E8B7-3735-42D6-BF0E-B4FB1BF0FA86} = {946306F4-A7A7-40C5-A4EA-D32A46E09328}
 		{57F488D4-7A41-4A7F-ABEF-4B1437B5B5A6} = {FDE7E8B7-3735-42D6-BF0E-B4FB1BF0FA86}
-		{0A7F4CAF-BDEA-44BC-8BEC-1F3979CF355B} = {946306F4-A7A7-40C5-A4EA-D32A46E09328}
 		{222677DF-CAD3-4E03-A1A1-C213DFD0DAA0} = {80B088DC-C84B-46AA-BFF3-DC309C5B4325}
 		{522242E2-FC59-49E9-9628-6E9B6AEEAF6F} = {946306F4-A7A7-40C5-A4EA-D32A46E09328}
 		{15C6083C-777D-42C6-A1A7-5F4008345118} = {946306F4-A7A7-40C5-A4EA-D32A46E09328}

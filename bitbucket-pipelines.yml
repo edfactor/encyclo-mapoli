@@ -104,7 +104,39 @@ definitions:
         - cd .\src\UI
         - ${env:NPM} install --legacy-peer-deps;
         - ${env:NPM} run build:${env:ENV}
-        - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.$env:ENV.zip" -Force        
+        - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.$env:ENV.zip" -Force   
+        
+    upgrade-database: &upgrade-database
+      name: Upgrade Database
+      runs-on:
+        - windows
+        - self.hosted
+      script:
+        - echo "Upgrading Database..."
+        - cd .\src\Services\src\Demoulas.ProfitSharing.Data
+        - dotnet ef database update --context ProfitSharingDbContext --connection "$DB_CONNECTION_STRING"
+
+    drop-and-recreate-database: &drop-and-recreate-database
+      name: Drop and Recreate Database
+      runs-on:
+        - windows
+        - self.hosted
+      script:
+        - echo "Dropping the Database..."
+        - cd .\src\Services\src\Demoulas.ProfitSharing.Data
+        - #PROFITSHARING_CONNECTION_STRING is used by the application code and as of EF.Core 8, is the only way to drop the database
+        - $env:PROFITSHARING_CONNECTION_STRING = $DB_CONNECTION_STRING
+        - dotnet ef database drop --force --context ProfitSharingDbContext       
+
+    run-custom-sql: &run-custom-sql
+      name: Run Custom SQL Script
+      runs-on:
+        - windows
+        - self.hosted
+      script:
+        - echo "Running Data migration script..."
+        - cd .\src\Services\src\Demoulas.ProfitSharing.Data
+        - dotnet ef dbcontext  execute-sql --sql "..\..\..\database\SQL copy all from ready to smart ps.sql" --connection "$DB_CONNECTION_STRING"
 
 
 pipelines:
@@ -120,34 +152,18 @@ pipelines:
           #- step: *create-frontend-artifact-prod
            # Deployment Stage
       
+      - step: *upgrade-database
       - step:
           name: "Application Deployment"
           runs-on:
             - windows
             - self.hosted
           deployment: QA
-          trigger: "manual"
-      #     script:
-      #       - $env:NUGET_ORG="https://api.nuget.org/v3/index.json"
-      #       - echo "Upgrading Database..."
-      #       - dotnet tool update --global dotnet-ef --add-source $env:NUGET_ORG   
-      #       - Write-Host $(Get-Location)
-      #       - Write-Host $(Get-ChildItem) 
-      #       - New-Item -Path .\publish -ItemType Directory
-      #       - Expand-Archive -Path .\dist\Demoulas.ProfitSharing.Api.zip -DestinationPath .\publish
-      #       - dotnet ef database update --assembly .\publish\Demoulas.ProfitSharing.Data.dll --context ProfitSharingDbContext --connection "${env:ConnectionStrings_ProfitSharing_QA}"
-
-      # - step:
-      #     name: "Application Deployment"
-      #     runs-on:
-      #       - windows
-      #       - self.hosted
-      #       - appt125
+          trigger: "manual"     
           script:
             - echo "Deploying application..."
             - $env:API_SERVER_QA = "appt23d"            
-            - powershell .\scripts\webDeploy.ps1 QA $env:API_SERVER_QA
-   
+            - powershell .\scripts\webDeploy.ps1 QA $env:API_SERVER_QA      
   
     develop:
       - parallel:
@@ -159,3 +175,6 @@ pipelines:
       - parallel:
           - step: *build-and-test-backend
           - step: *test-frontend
+  
+  custom:
+      deploy_demoulas_common:

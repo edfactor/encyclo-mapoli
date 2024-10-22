@@ -30,14 +30,18 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
     
     public virtual DbSet<Job> Jobs { get; set; }
     public virtual DbSet<DemographicSyncAudit> DemographicSyncAudit { get; set; }
-    
 
-    public virtual DbSet<Enrollment> Enrollments { get; set; }
-    public virtual DbSet<BeneficiaryType> BeneficiaryTypes { get; set; }
-    public virtual DbSet<EmployeeType> EmployeeTypes { get; set; }
-    public virtual DbSet<BeneficiaryKind> BeneficiaryKinds { get; set; }
-    public virtual DbSet<DistributionStatus> DistributionStatuses { get; set; }
-    public virtual DbSet<DistributionFrequency> DistributionFrequencies { get; set; }
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            var connectionString = Environment.GetEnvironmentVariable("PROFITSHARING_CONNECTION_STRING");
+            optionsBuilder.UseOracle(connectionString, builder =>
+            {
+                builder.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19);
+            });
+        }
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

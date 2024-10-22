@@ -10,6 +10,40 @@
   <ItemGroup>
     <Content Remove="C:\Users\russh\.nuget\packages\demoulas.common.data.services\3.0.0\contentFiles\any\net8.0\readme.md" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="ImportScripts\SQL copy all from ready to smart ps.sql" />
+    <None Remove="ImportScripts\SQL copy beneficiary.sql" />
+    <None Remove="ImportScripts\SQL copy demographic.sql" />
+    <None Remove="ImportScripts\SQL copy distribution.sql" />
+    <None Remove="ImportScripts\SQL copy pay_profit.sql" />
+    <None Remove="ImportScripts\SQL copy profit_detail.sql" />
+    <None Remove="ImportScripts\SQL counts smart vs ready.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="ImportScripts\SQL copy all from ready to smart ps.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ImportScripts\SQL copy beneficiary.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ImportScripts\SQL copy demographic.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ImportScripts\SQL copy distribution.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ImportScripts\SQL copy pay_profit.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ImportScripts\SQL copy profit_detail.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ImportScripts\SQL counts smart vs ready.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
  
 
   <ItemGroup>
