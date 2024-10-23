@@ -14,6 +14,7 @@ import MissingCommaInPyName from "pages/MissingCommaInPyName/MissingCommaInPyNam
 import MilitaryAndRehire from "pages/MilitaryAndRehire/MilitaryAndRehire";
 import MilitaryAndRehireForfeitures from "pages/MilitaryAndRehireForfeitures/MilitaryAndRehireForfeitures";
 import MilitaryAndRehireProfitSummary from "pages/MilitaryAndRehireProfitSummary/MilitaryAndRehireProfitSummary";
+import DistributionsAndForfeitures from "pages/DistributionsAndForfeitures/DistributionAndForfeitures";
 
 const Router = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -23,7 +24,10 @@ const Router = () => {
 
   return (
     <BrowserRouter>
-      <MenuBar menuInfo={MenuData} impersonationMultiSelect={showImpersonation && <ImpersonationMultiSelect />} />
+      <MenuBar
+        menuInfo={MenuData}
+        impersonationMultiSelect={showImpersonation && <ImpersonationMultiSelect />}
+      />
       <RouteSecurity oktaEnabled={oktaEnabled}>
         <Route
           path=""
@@ -34,27 +38,30 @@ const Router = () => {
         <Route
           path="duplicate-ssns-demographics"
           element={<DuplicateSSNsOnDemographics />}></Route>
-          <Route
+        <Route
           path="negative-etva-for-ssns-on-payprofit"
           element={<NegativeEtvaForSSNsOnPayprofit />}></Route>
-          <Route
+        <Route
           path="payroll-duplicate-ssns-on-payprofit"
           element={<PayrollDuplicateSSNsOnPayprofit />}></Route>
-          <Route
+        <Route
           path="duplicate-names-and-birthdays"
           element={<DuplicateNamesAndBirthdays />}></Route>
-          <Route
+        <Route
           path="missing-comma-in-py-name"
           element={<MissingCommaInPyName />}></Route>
-          <Route
+        <Route
           path="military-and-rehire"
           element={<MilitaryAndRehire />}></Route>
-          <Route
+        <Route
           path="military-and-rehire-forfeitures"
           element={<MilitaryAndRehireForfeitures />}></Route>
-          <Route
+        <Route
           path="military-and-rehire-profit-summary"
           element={<MilitaryAndRehireProfitSummary />}></Route>
+        <Route
+          path="distributions-and-forfeitures"
+          element={<DistributionsAndForfeitures />}></Route>
       </RouteSecurity>
     </BrowserRouter>
   );
