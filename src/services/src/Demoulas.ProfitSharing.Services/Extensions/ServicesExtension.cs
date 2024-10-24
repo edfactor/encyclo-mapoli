@@ -48,11 +48,6 @@ public static class ServicesExtension
         builder.Services.AddSingleton<AddressMapper>();
         builder.Services.AddSingleton<ContactInfoMapper>();
         builder.Services.AddSingleton<DemographicMapper>();
-        builder.Services.AddSingleton<TerminationCodeMapper>();
-        builder.Services.AddSingleton<PayFrequencyMapper>();
-        builder.Services.AddSingleton<GenderMapper>();
-        builder.Services.AddSingleton<EmploymentTypeMapper>();
-        builder.Services.AddSingleton<DepartmentMapper>();
         builder.Services.AddSingleton<ZeroContributionReasonMapper>();
         builder.Services.AddSingleton<BeneficiaryTypeMapper>();
         builder.Services.AddSingleton<EmployeeTypeMapper>();
