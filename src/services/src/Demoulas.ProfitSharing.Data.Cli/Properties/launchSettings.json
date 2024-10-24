@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Demoulas.ProfitSharing.Data.Cli": {
+      "commandName": "Project",
+      "commandLineArgs": "drop-recreate-db --connection-name ProfitSharing"
+    }
+  }
+}
