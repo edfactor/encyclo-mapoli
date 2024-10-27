@@ -47,20 +47,6 @@ public static class DatabaseServicesExtension
                     {
                         await context.Database.MigrateAsync();
                     }
-
-                    if (dropAndRecreate)
-                    {
-                        // Get the location of the executing assembly
-                        string assemblyPath = Assembly.GetExecutingAssembly().Location;
-
-                        // Get the directory of the executing assembly
-                        string? directoryPath = Path.GetDirectoryName(assemblyPath);
-                        
-                        string migrateScript =
-                            await File.ReadAllTextAsync($"{directoryPath}{Path.DirectorySeparatorChar}ImportScripts{Path.DirectorySeparatorChar}SQL copy all from ready to smart ps.sql");
-                        migrateScript = migrateScript.Replace("COMMIT ;", string.Empty).Trim();
-                        await context.Database.ExecuteSqlRawAsync(migrateScript);
-                    }
                 }
                 catch (Exception e)
                 {

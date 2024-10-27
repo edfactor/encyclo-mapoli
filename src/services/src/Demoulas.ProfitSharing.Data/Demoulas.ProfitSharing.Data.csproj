@@ -8,12 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="ImportScripts\**" />
-    <EmbeddedResource Remove="ImportScripts\**" />
-    <None Remove="ImportScripts\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Remove="C:\Users\russh\.nuget\packages\demoulas.common.data.services\3.0.0\contentFiles\any\net8.0\readme.md" />
   </ItemGroup>
  
