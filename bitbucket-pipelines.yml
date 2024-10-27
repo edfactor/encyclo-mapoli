@@ -183,4 +183,43 @@ pipelines:
           - step: *test-frontend
   
   custom:
-      deploy_demoulas_common:
+      profitsharing_database:
+        - variables: # https://bitbucket.org/blog/predefine-values-of-custom-pipeline-variables
+                  - name: Action
+                    default: upgrade-db
+                    allowed-values: # optionally restrict variable values
+                        - upgrade-db
+                        - drop-recreate-db
+                        - import-from-ready                        
+      - step:
+              name: "Determine Database Action"
+              script:
+                - powershell: |
+              if ($Env:Action -eq "upgrade-db") {
+                  Write-Output "Running upgrade-database step"
+                  Exit 10  # Exit code 10 for upgrade-db
+              }
+              elseif ($Env:Action -eq "drop-recreate-db") {
+                  Write-Output "Running drop-and-recreate-database step"
+                  Exit 20  # Exit code 20 for drop-recreate-db
+              }
+              elseif ($Env:Action -eq "import-from-ready") {
+                  Write-Output "Running run-custom-sql step"
+                  Exit 30  # Exit code 30 for import-from-ready
+              }
+              else {
+                  Write-Output "Invalid Action specified: $Env:Action"
+                  Exit 1
+              }
+
+      - step: *upgrade-database
+          condition:
+          exit_codes: [10]
+
+      - step: *drop-and-recreate-database
+          condition:
+          exit_codes: [20]
+
+      - step: *run-custom-sql
+          condition:
+          exit_codes: [30]
