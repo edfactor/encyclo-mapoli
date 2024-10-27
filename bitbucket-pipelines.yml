@@ -196,31 +196,26 @@ pipelines:
               script:
                   - if ($Env:Action -eq "upgrade-db") {
                       Write-Output "Running upgrade-database step"
-                      Exit 10  # Exit code 10 for upgrade-db
+                      Exit 10
                     }
 
                   - if ($Env:Action -eq "drop-recreate-db") {
                       Write-Output "Running drop-and-recreate-database step"
-                      Exit 20  # Exit code 20 for drop-recreate-db
-                  }
+                      Exit 20
+                    }
 
                   - if ($Env:Action -eq "import-from-ready") {
-                      Write-Output "Running run-custom-sql step"
-                      Exit 30  # Exit code 30 for import-from-ready
-                  }
-                  else {
-                      Write-Output "Invalid Action specified: $Env:Action"
-                      Exit 1
-                  }
+                      Exit 30
+                    } 
 
         - step: *upgrade-database
-              condition:
-              exit_codes: [10]
+          condition:
+            exit_codes: [10]
 
         - step: *drop-and-recreate-database
-             condition:
-             exit_codes: [20]
+          condition:
+            exit_codes: [20]
 
         - step: *run-custom-sql
-             condition:
-             exit_codes: [30]
+          condition:
+            exit_codes: [30]
