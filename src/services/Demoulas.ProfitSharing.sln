@@ -116,7 +116,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ddl", "ddl", "{15C6083C-777
 		..\database\ddl\profit_sharing_ddl.png = ..\database\ddl\profit_sharing_ddl.png
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demoulas.ProfitSharing.Data.Cli", "src\Demoulas.ProfitSharing.Data.Cli\Demoulas.ProfitSharing.Data.Cli.csproj", "{4A1F269F-574D-4FBC-8EFD-63D8CF871704}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.Data.Cli", "src\Demoulas.ProfitSharing.Data.Cli\Demoulas.ProfitSharing.Data.Cli.csproj", "{4A1F269F-574D-4FBC-8EFD-63D8CF871704}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ready Import", "ready Import", "{10F3A928-8DEB-4366-AAC4-F508D3E67C11}"
+	ProjectSection(SolutionItems) = preProject
+		..\database\ready Import\Readme.txt = ..\database\ready Import\Readme.txt
+		..\database\ready Import\SQL copy all from ready to smart ps.sql = ..\database\ready Import\SQL copy all from ready to smart ps.sql
+		..\database\ready Import\SQL copy beneficiary.sql = ..\database\ready Import\SQL copy beneficiary.sql
+		..\database\ready Import\SQL copy demographic.sql = ..\database\ready Import\SQL copy demographic.sql
+		..\database\ready Import\SQL copy distribution.sql = ..\database\ready Import\SQL copy distribution.sql
+		..\database\ready Import\SQL copy pay_profit.sql = ..\database\ready Import\SQL copy pay_profit.sql
+		..\database\ready Import\SQL copy profit_detail.sql = ..\database\ready Import\SQL copy profit_detail.sql
+		..\database\ready Import\SQL counts smart vs ready.sql = ..\database\ready Import\SQL counts smart vs ready.sql
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -209,6 +221,7 @@ Global
 		{222677DF-CAD3-4E03-A1A1-C213DFD0DAA0} = {80B088DC-C84B-46AA-BFF3-DC309C5B4325}
 		{522242E2-FC59-49E9-9628-6E9B6AEEAF6F} = {946306F4-A7A7-40C5-A4EA-D32A46E09328}
 		{15C6083C-777D-42C6-A1A7-5F4008345118} = {946306F4-A7A7-40C5-A4EA-D32A46E09328}
+		{10F3A928-8DEB-4366-AAC4-F508D3E67C11} = {946306F4-A7A7-40C5-A4EA-D32A46E09328}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FB1CB19A-BE8B-4F91-9186-FE7C9F3CE4D7}
