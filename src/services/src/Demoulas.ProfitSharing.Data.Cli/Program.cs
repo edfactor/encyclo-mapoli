@@ -108,10 +108,11 @@ public  class Program
             };
 
             var factory = DataContextFactory.Initialize(builder, contextFactoryRequests: list);
-            await factory.UseWritableContext(context =>
+            await factory.UseWritableContext(async context =>
             {
-                sqlFile = sqlFile.Replace("COMMIT ;", string.Empty).Trim();
-                return context.Database.ExecuteSqlRawAsync(sqlFile);
+                string sqlCommand = await File.ReadAllTextAsync(sqlFile);
+                sqlCommand = sqlCommand.Replace("COMMIT ;", string.Empty).Trim();
+                return await context.Database.ExecuteSqlRawAsync(sqlCommand);
             });
         });
 
