@@ -1,8 +1,9 @@
-import { MenuBarData } from "smart-ui-library/dist/components/MenuBar/MenuDataTypes";
+import { RouteCategory } from "smart-ui-library/dist/components/MenuBar/MenuBar";
 
-const exampleMenu: MenuBarData = {
-  header: "Year End Reports",
-  subMenuItems: [
+const yearEndReports: RouteCategory = {
+  menuLabel: "Year End Reports",
+  parentRoute: "",
+  items: [
     { caption: "Demographic Bages Not In Payprofit", route: "/demographic-badges-not-in-payprofit" },
     { caption: "Duplicate SSNs in Demographics", route: "/duplicate-ssns-demographics" },
     { caption: "Negative ETVA for SSNs on Payprofit", route: "/negative-etva-for-ssns-on-payprofit" },
@@ -15,6 +16,6 @@ const exampleMenu: MenuBarData = {
   ]
 };
 
-const MenuData: MenuBarData[] = [exampleMenu];
+const MenuData: RouteCategory[] = [yearEndReports];
 
 export default MenuData;
