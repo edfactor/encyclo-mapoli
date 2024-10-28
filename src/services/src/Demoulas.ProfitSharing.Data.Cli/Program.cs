@@ -113,10 +113,12 @@ public class Program
         });
 
         // Add commands to root command
+        rootCommand.TreatUnmatchedTokensAsErrors = false;
         rootCommand.AddCommand(upgradeDbCommand);
         rootCommand.AddCommand(dropRecreateDbCommand);
         rootCommand.AddCommand(runSqlCommand);
 
+        
         // Invoke the root command
         return await rootCommand.InvokeAsync(args);
 #pragma warning restore S3928
