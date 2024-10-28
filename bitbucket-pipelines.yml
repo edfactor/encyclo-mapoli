@@ -191,5 +191,9 @@ pipelines:
                         - import-from-ready                        
         - step:
               name: "Determine Database Action"
+              runs-on:
+                - windows
+                - self.hosted
               script:
-                 - Demoulas.ProfitSharing.Data.Cli $env:Action --connection-name ProfitSharing --sql-file \"R:\\repos\\Demoulas\\smart-profit-sharing\\src\\services\\src\\Demoulas.ProfitSharing.Data\\ImportScripts\\SQL copy all from ready to smart ps.sql\""     
+                - dotnet build .\src\services\src\Demoulas.ProfitSharing.Data.Cli\Demoulas.ProfitSharing.Data.Cli.csproj -o .\
+                - .\Demoulas.ProfitSharing.Data.Cli $env:Action --connection-name ProfitSharing --sql-file \"R:\\repos\\Demoulas\\smart-profit-sharing\\src\\services\\src\\Demoulas.ProfitSharing.Data\\ImportScripts\\SQL copy all from ready to smart ps.sql\""     
