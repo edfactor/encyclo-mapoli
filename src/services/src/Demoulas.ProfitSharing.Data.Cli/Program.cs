@@ -76,7 +76,7 @@ public class Program
         });
 
         // Define and set up "run-sql" command
-        var runSqlCommand = new Command("run-sql", "Run a custom SQL script after migrations")
+        var runSqlCommand = new Command("import-from-ready", "Run a custom SQL script after migrations")
         {
             new Option<string>("--connection-name", "The name of the configuration property that holds the connection string"),
             new Option<string>("--sql-file", "The path to the custom SQL file")
