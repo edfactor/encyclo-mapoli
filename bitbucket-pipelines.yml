@@ -117,30 +117,15 @@ definitions:
         - self.hosted
       script:
         - echo "Upgrading Database..."
-        - cd .\src\Services\src\Demoulas.ProfitSharing.Data
-        - dotnet ef database update --context ProfitSharingDbContext --connection "$DB_CONNECTION_STRING"
+        - $env:NUGET_ORG="https://api.nuget.org/v3/index.json"
+        - $env:ConnectionStrings:ProfitSharing=$env:ConnectionStrings_ProfitSharing_QA
+        - dotnet build .\src\services\src\Demoulas.ProfitSharing.Data.Cli\Demoulas.ProfitSharing.Data.Cli.csproj -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -o .\output
+        - $action = $env:Action
+        - if (-not $action) { $action = "upgrade-db" }
+        - .\output\Demoulas.ProfitSharing.Data.Cli $action --connection-name ProfitSharing --sql-file `"R:\repos\Demoulas\smart-profit-sharing\src\services\src\Demoulas.ProfitSharing.Data\ImportScripts\SQL copy all from ready to smart ps.sql`"
+  
 
-    drop-and-recreate-database: &drop-and-recreate-database
-      name: Drop and Recreate Database
-      runs-on:
-        - windows
-        - self.hosted
-      script:
-        - echo "Dropping the Database..."
-        - cd .\src\Services\src\Demoulas.ProfitSharing.Data
-        - #PROFITSHARING_CONNECTION_STRING is used by the application code and as of EF.Core 8, is the only way to drop the database
-        - $env:PROFITSHARING_CONNECTION_STRING = $DB_CONNECTION_STRING
-        - dotnet ef database drop --force --context ProfitSharingDbContext       
-
-    run-custom-sql: &run-custom-sql
-      name: Run Custom SQL Script
-      runs-on:
-        - windows
-        - self.hosted
-      script:
-        - echo "Running Data migration script..."
-        - cd .\src\Services\src\Demoulas.ProfitSharing.Data
-        - dotnet ef dbcontext  execute-sql --sql "..\..\..\database\SQL copy all from ready to smart ps.sql" --connection "$DB_CONNECTION_STRING"
+   
 
 
 pipelines:
@@ -189,13 +174,5 @@ pipelines:
                         - upgrade-db
                         - drop-recreate-db
                         - import-from-ready                        
-        - step:
-              name: "Determine Database Action"
-              runs-on:
-                - windows
-                - self.hosted
-              script:
-                - $env:NUGET_ORG="https://api.nuget.org/v3/index.json"
-                - $env:ConnectionStrings:ProfitSharing=$env:ConnectionStrings_ProfitSharing_QA
-                - dotnet build .\src\services\src\Demoulas.ProfitSharing.Data.Cli\Demoulas.ProfitSharing.Data.Cli.csproj -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -o .\output
-                - .\output\Demoulas.ProfitSharing.Data.Cli $env:Action --connection-name ProfitSharing --sql-file `"R:\repos\Demoulas\smart-profit-sharing\src\services\src\Demoulas.ProfitSharing.Data\ImportScripts\SQL copy all from ready to smart ps.sql`"
+        - step: *upgrade-database
+
