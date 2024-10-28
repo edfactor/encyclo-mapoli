@@ -126,6 +126,7 @@ public class Program
     {
         var builder = Host.CreateApplicationBuilder(args);
         builder.Configuration.AddUserSecrets<Program>();
+        builder.Configuration.AddEnvironmentVariables();
         return builder;
     }
 }

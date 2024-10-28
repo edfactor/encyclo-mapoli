@@ -196,5 +196,6 @@ pipelines:
                 - self.hosted
               script:
                 - $env:NUGET_ORG="https://api.nuget.org/v3/index.json"
+                - $env:ProfitSharing=$env:ConnectionStrings_ProfitSharing_QA
                 - dotnet build .\src\services\src\Demoulas.ProfitSharing.Data.Cli\Demoulas.ProfitSharing.Data.Cli.csproj -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -o .\output
-                - .\output\Demoulas.ProfitSharing.Data.Cli $env:Action --connection-name ProfitSharing --sql-file \"R:\\repos\\Demoulas\\smart-profit-sharing\\src\\services\\src\\Demoulas.ProfitSharing.Data\\ImportScripts\\SQL copy all from ready to smart ps.sql\""     
+                - .\output\Demoulas.ProfitSharing.Data.Cli $env:Action --connection-name ProfitSharing --sql-file `"R:\repos\Demoulas\smart-profit-sharing\src\services\src\Demoulas.ProfitSharing.Data\ImportScripts\SQL copy all from ready to smart ps.sql`"
