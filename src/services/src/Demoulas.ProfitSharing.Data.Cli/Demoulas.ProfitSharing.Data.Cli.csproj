@@ -6,8 +6,6 @@
     <UserSecretsId>a3be1bce-4a9e-4da4-a908-5f315c147298</UserSecretsId>
     <Nullable>enable</Nullable>
     <TargetFramework>net8.0</TargetFramework>
-    <AutoGenerateBindingRedirects>False</AutoGenerateBindingRedirects>
-    <PackAsTool>True</PackAsTool>
   </PropertyGroup>
 
   <ItemGroup>

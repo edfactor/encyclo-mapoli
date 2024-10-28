@@ -5,7 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Factories;
-using Demoulas.ProfitSharing.Data.Interfaces;
+
 
 #pragma warning disable S3928
 // Setup configuration to include command-line arguments
