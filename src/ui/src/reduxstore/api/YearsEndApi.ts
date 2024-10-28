@@ -1,8 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 import { RootState } from "reduxstore/store";
-import { DemographicBadgesNotInPayprofitRequestDto, DemographicBadgesNotInPayprofitResponse, DuplicateNameAndBirthday, DuplicateNameAndBirthdayRequestDto, DuplicateSSNDetail, DuplicateSSNsRequestDto, MilitaryAndRehire, MilitaryAndRehireForfeiture, MilitaryAndRehireForfeituresRequestDto, MilitaryAndRehireProfitSummary, MilitaryAndRehireProfitSummaryRequestDto, MilitaryAndRehireRequestDto, MissingCommasInPYName, MissingCommasInPYNameRequestDto, NegativeEtvaForSSNsOnPayProfit, NegativeEtvaForSSNsOnPayprofitRequestDto, PagedReportResponse } from "reduxstore/types";
-import { setDemographicBadgesNotInPayprofitData, setDuplicateNamesAndBirthdays, setDuplicateSSNsData, setMilitaryAndRehireDetails, setMilitaryAndRehireForfeituresDetails, setMilitaryAndRehireProfitSummaryDetails, setMissingCommaInPYName, setNegativeEtvaForSssnsOnPayprofit } from "reduxstore/slices/yearsEndSlice";
+import { DemographicBadgesNotInPayprofitRequestDto, DemographicBadgesNotInPayprofitResponse, DistributionsAndForfeitures, DistributionsAndForfeituresRequestDto, DuplicateNameAndBirthday, DuplicateNameAndBirthdayRequestDto, DuplicateSSNDetail, DuplicateSSNsRequestDto, MilitaryAndRehire, MilitaryAndRehireForfeiture, MilitaryAndRehireForfeituresRequestDto, MilitaryAndRehireProfitSummary, MilitaryAndRehireProfitSummaryRequestDto, MilitaryAndRehireRequestDto, MissingCommasInPYName, MissingCommasInPYNameRequestDto, NegativeEtvaForSSNsOnPayProfit, NegativeEtvaForSSNsOnPayprofitRequestDto, PagedReportResponse } from "reduxstore/types";
+import { setDemographicBadgesNotInPayprofitData, setDistributionsAndForfeitures, setDuplicateNamesAndBirthdays, setDuplicateSSNsData, setMilitaryAndRehireDetails, setMilitaryAndRehireForfeituresDetails, setMilitaryAndRehireProfitSummaryDetails, setMissingCommaInPYName, setNegativeEtvaForSssnsOnPayprofit } from "reduxstore/slices/yearsEndSlice";
 export const YearsEndApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: "https://localhost:7141/api/",
@@ -52,6 +52,29 @@ export const YearsEndApi = createApi({
         try {
           const { data } = await queryFulfilled;
           dispatch(setDemographicBadgesNotInPayprofitData(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
+    getDistributionsAndForfeitures: builder.query<PagedReportResponse<DistributionsAndForfeitures>, DistributionsAndForfeituresRequestDto>({
+      query: (params) => ({
+        url: `yearend/distributions-and-forfeitures`,
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          includeOutgoingForfeitures: params.includeOutgoingForfeitures,
+          startMonth: params.startMonth,
+          endMonth: params.endMonth,
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          impersonation: params.impersonation
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setDistributionsAndForfeitures(data));
         } catch (err) {
           console.log("Err: " + err);
         }
@@ -270,5 +293,6 @@ export const {
   useLazyGetNegativeEVTASSNQuery,
   useLazyGetPayprofitBadgeWithoutDemographicsQuery,
   useLazyGetPayrollDuplicateSSNsOnPayprofitQuery,
-  useLazyGetWagesPreviousYearQuery
+  useLazyGetWagesPreviousYearQuery,
+  useLazyGetDistributionsAndForfeituresQuery
 } = YearsEndApi;
