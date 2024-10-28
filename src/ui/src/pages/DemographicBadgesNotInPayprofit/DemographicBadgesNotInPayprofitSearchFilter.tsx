@@ -13,7 +13,8 @@ const DemographicBadgesNotInPayprofitSearchFilter = () => {
 
   const [triggerSearch, { isLoading }] = useLazyGetDemographicBadgesNotInPayprofitQuery();
 
-  const validateAndSearch = () => {
+  const validateAndSearch = (event: any) => {
+    event.preventDefault();
     triggerSearch(
       { pagination: { skip: 0, take: 25 }, impersonation: ImpersonationRoles.ProfitSharingAdministrator },
       false

@@ -41,8 +41,8 @@ public static class OracleHcmExtension
             options.TotalRequestTimeout = new HttpTimeoutStrategyOptions { Timeout = TimeSpan.FromMinutes(2) };
         });
 
-        OracleHcmConfig oktaSettings = builder.Configuration.GetSection("OracleHcm").Get<OracleHcmConfig>() ?? new OracleHcmConfig { Url = string.Empty };
-        _ = builder.Services.AddSingleton(oktaSettings);
+        OracleHcmConfig oracleHcmConfig = builder.Configuration.GetSection("OracleHcm").Get<OracleHcmConfig>() ?? new OracleHcmConfig { Url = string.Empty };
+        _ = builder.Services.AddSingleton(oracleHcmConfig);
 
         _ = builder.Services.AddSingleton<OracleHcmJobConsumer>();
         _ = builder.Services.AddSingleton<OracleEmployeeValidator>();

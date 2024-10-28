@@ -8,7 +8,6 @@ import DemographicBadgesNotInPayprofitSearchFilter from "./DemographicBadgesNotI
 import DemographicBadgesNotInPayprofitGrid from "./DemographicBadgesNotInPayprofitGrid";
 
 const DemographicBadgesNotInPayprofit = () => {
-  const [openModal, setOpenModal] = useState<boolean>(false);
 
   const [trigger] = useLazyGetDemographicBadgesNotInPayprofitQuery();
   return (

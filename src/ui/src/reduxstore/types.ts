@@ -35,7 +35,29 @@ export interface PagedReportResponse<T> {
   response: Paged<T>;
 }
 
-export interface DistributionsAndForfeitures {}
+export interface DistributionsAndForfeituresRequestDto extends ImpersonationRequest {
+  startMonth?: number;
+  endMonth?: number;
+  includeOutgoingForfeitures?: boolean;
+  profitYear: number;
+  pagination: PaginationParams;
+}
+
+export interface DistributionsAndForfeitures {
+  badgeNumber: number;
+  employeeName: string;
+  employeeSsn: string;
+  loanDate: string;
+  distributionAmount: number;
+  stateTax: number;
+  federalTax: number;
+  forfeitAmount: number;
+  age: number;
+  taxCode: string | null,
+  otherName: string | null,
+  otherSsn: string | null,
+  enrolled: boolean | null;
+}
 
 export interface DuplicateSSNAddress {
   street: string;
