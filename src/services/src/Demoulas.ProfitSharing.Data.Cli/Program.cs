@@ -111,7 +111,7 @@ rootCommand.AddCommand(dropRecreateDbCommand);
 rootCommand.AddCommand(runSqlCommand);
 
 // Invoke the root command
-return await rootCommand.InvokeAsync(args);
+await rootCommand.InvokeAsync(args);
 #pragma warning restore S3928
 
 
