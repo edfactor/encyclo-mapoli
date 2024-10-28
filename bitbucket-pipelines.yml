@@ -6,8 +6,6 @@
 #
 # ------------------------------------------------------------------------
 
-image: mcr.microsoft.com/dotnet/sdk:8.0
-
 definitions:
   steps:
     build-and-test-backend: &build-and-test-backend
@@ -194,28 +192,4 @@ pipelines:
         - step:
               name: "Determine Database Action"
               script:
-                  - if ($Env:Action -eq "upgrade-db") {
-                      Write-Output "Running upgrade-database step"
-                      Exit 10
-                    }
-
-                  - if ($Env:Action -eq "drop-recreate-db") {
-                      Write-Output "Running drop-and-recreate-database step"
-                      Exit 20
-                    }
-
-                  - if ($Env:Action -eq "import-from-ready") {
-                      Exit 30
-                    } 
-
-        - step: *upgrade-database
-          condition:
-            exit_codes: [10]
-
-        - step: *drop-and-recreate-database
-          condition:
-            exit_codes: [20]
-
-        - step: *run-custom-sql
-          condition:
-            exit_codes: [30]
+                 - Demoulas.ProfitSharing.Data.Cli $env:Action --connection-name ProfitSharing --sql-file \"R:\\repos\\Demoulas\\smart-profit-sharing\\src\\services\\src\\Demoulas.ProfitSharing.Data\\ImportScripts\\SQL copy all from ready to smart ps.sql\""     
