@@ -122,7 +122,7 @@ definitions:
         - dotnet build .\src\services\src\Demoulas.ProfitSharing.Data.Cli\Demoulas.ProfitSharing.Data.Cli.csproj -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -o .\output
         - $action = $env:Action
         - if (-not $action) { $action = "upgrade-db" }
-        - .\output\Demoulas.ProfitSharing.Data.Cli $action --connection-name ProfitSharing --sql-file `"R:\repos\Demoulas\smart-profit-sharing\src\services\src\Demoulas.ProfitSharing.Data\ImportScripts\SQL copy all from ready to smart ps.sql`"
+        - .\output\Demoulas.ProfitSharing.Data.Cli $action --connection-name ProfitSharing --sql-file `".\src\database\ready_import\SQL copy all from ready to smart ps.sql`"
   
 
    
