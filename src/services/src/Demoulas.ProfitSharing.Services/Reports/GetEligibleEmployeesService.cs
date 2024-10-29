@@ -40,7 +40,7 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
            .Where(p => p.ProfitYear == request.ProfitYear)
            .Where(p => p.Demographic!.DateOfBirth <= birthDateOfExactly21YearsOld /*over 21*/  && p.CurrentHoursYear >= 1000 && p.Demographic!.EmploymentStatusId != EmploymentStatus.Constants.Terminated).CountAsync(cancellationToken);
 
-            var result = c.PayProfits
+            var result = await c.PayProfits
                 .Include(p => p.Demographic)
                 .Where(p =>  p.ProfitYear == request.ProfitYear)
                 .Where(p => p.Demographic!.DateOfBirth <= birthDateOfExactly21YearsOld /*over 21*/  && p.CurrentHoursYear >= 1000 && p.Demographic!.EmploymentStatusId != EmploymentStatus.Constants.Terminated)
@@ -57,7 +57,7 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
             {
                 ReportName = $"Get Eligible Employees for Year {request.ProfitYear}",
                 ReportDate = DateTimeOffset.Now,
-                Response = await result,
+                Response = result,
                 NumberReadOnFrozen = numberReadOnFrozen,
                 NumberNotSelected = numberNotSelected,
                 NumberWritten = totalEligible
