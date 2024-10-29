@@ -59,4 +59,3 @@ internal sealed class OracleHcmHostedService : IHostedService
         }
     }
 }
-

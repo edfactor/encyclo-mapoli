@@ -40,7 +40,6 @@ public static class ServicesExtension
         _ = builder.Services.AddKeyedSingleton<IBaseCacheService<LookupTableCache<byte>>, DepartmentHostedService>(nameof(DepartmentHostedService));
 
 
-        _ = builder.ConfigureMassTransitServices();
         _ = builder.ConfigureOracleHcm();
 
         #region Mappers
