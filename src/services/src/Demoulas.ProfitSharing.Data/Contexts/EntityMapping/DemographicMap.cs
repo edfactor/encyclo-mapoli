@@ -14,7 +14,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
         //https://demoulas.atlassian.net/wiki/spaces/~bherrmann/pages/39944312/Quick+Guide+to+Profit+Sharing+Tables
 
         _ = builder.ToTable("DEMOGRAPHIC");
-        _ = builder.HasKey(e => e.OracleHcmId);
+        _ = builder.HasKey(e => e.Id);
 
         _ = builder.HasIndex(e => e.Ssn, "IX_SSN");
         _ = builder.HasIndex(e => new {e.Ssn, e.OracleHcmId}, "IX_SSN_ORACLE_HCM_ID");
@@ -30,6 +30,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             .HasPrecision(7)
             .HasColumnName("BADGE_NUMBER");
 
+        _ = builder.HasIndex(e => e.OracleHcmId, "IX_ORACLE_HCM_ID").IsUnique();
         _ = builder.Property(e => e.OracleHcmId)
             .HasPrecision(15)
             .ValueGeneratedNever()
@@ -188,14 +189,14 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
 
         _ = builder.HasMany(d => d.Beneficiaries)
             .WithOne(p => p.Demographic)
-            .HasForeignKey(p=> p.OracleHcmId);
+            .HasForeignKey(p=> p.DemographicId);
 
         _ = builder.HasMany(d => d.PayProfits)
             .WithOne(p => p.Demographic)
-            .HasForeignKey(d => d.OracleHcmId);
+            .HasForeignKey(d => d.DemographicId);
 
         _ = builder.HasMany(d => d.Checks)
             .WithOne()
-            .HasForeignKey(p => p.OracleHcmId);
+            .HasForeignKey(p => p.DemographicId);
     }
 }

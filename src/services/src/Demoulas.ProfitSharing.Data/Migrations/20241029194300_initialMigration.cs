@@ -357,9 +357,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     ID = table.Column<int>(type: "NUMBER(10)", nullable: false)
                         .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
                     SSN = table.Column<long>(type: "NUMBER(9)", precision: 9, nullable: false),
-                    FIRST_NAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false),
-                    MIDDLE_NAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true),
-                    LAST_NAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false),
                     DATE_OF_BIRTH = table.Column<DateTime>(type: "DATE", nullable: false),
                     STREET = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "Street"),
                     STREET2 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true, comment: "Street2"),
@@ -369,9 +366,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     STATE = table.Column<string>(type: "NVARCHAR2(3)", maxLength: 3, nullable: false, comment: "State"),
                     POSTAL_CODE = table.Column<string>(type: "NVARCHAR2(9)", maxLength: 9, nullable: false, comment: "Postal Code"),
                     COUNTRY_ISO = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: true, defaultValue: "US"),
+                    FULL_NAME = table.Column<string>(type: "NVARCHAR2(84)", maxLength: 84, nullable: false, comment: "FullName"),
+                    LAST_NAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "LastName"),
+                    FIRST_NAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "FirstName"),
+                    MIDDLE_NAME = table.Column<string>(type: "NVARCHAR2(25)", maxLength: 25, nullable: true, comment: "MiddleName"),
                     PHONE_NUMBER = table.Column<string>(type: "NVARCHAR2(16)", maxLength: 16, nullable: true),
                     MOBILE_NUMBER = table.Column<string>(type: "NVARCHAR2(16)", maxLength: 16, nullable: true),
-                    EMAIL_ADDRESS = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: true),
+                    EMAIL_ADDRESS = table.Column<string>(type: "NVARCHAR2(84)", maxLength: 84, nullable: true),
                     CREATED_DATE = table.Column<DateTime>(type: "DATE", nullable: false, defaultValueSql: "SYSDATE")
                 },
                 constraints: table =>
@@ -521,19 +522,21 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "DEMOGRAPHIC",
                 columns: table => new
                 {
+                    ID = table.Column<int>(type: "NUMBER(10)", nullable: false)
+                        .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
                     ORACLE_HCM_ID = table.Column<long>(type: "NUMBER(15)", precision: 15, nullable: false),
                     SSN = table.Column<long>(type: "NUMBER(9)", precision: 9, nullable: false),
                     BADGE_NUMBER = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false),
                     LAST_MODIFIED_DATE = table.Column<DateTime>(type: "DATE", nullable: false, defaultValueSql: "SYSDATE"),
+                    STORE_NUMBER = table.Column<short>(type: "NUMBER(3)", precision: 3, nullable: false, comment: "StoreNumber"),
+                    PAY_CLASSIFICATION_ID = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false, comment: "PayClassification"),
                     FULL_NAME = table.Column<string>(type: "NVARCHAR2(84)", maxLength: 84, nullable: false, comment: "FullName"),
                     LAST_NAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "LastName"),
                     FIRST_NAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "FirstName"),
                     MIDDLE_NAME = table.Column<string>(type: "NVARCHAR2(25)", maxLength: 25, nullable: true, comment: "MiddleName"),
-                    STORE_NUMBER = table.Column<short>(type: "NUMBER(3)", precision: 3, nullable: false, comment: "StoreNumber"),
-                    PAY_CLASSIFICATION_ID = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false, comment: "PayClassification"),
-                    PHONE_NUMBER = table.Column<string>(type: "NVARCHAR2(15)", maxLength: 15, nullable: true),
-                    MOBILE_NUMBER = table.Column<string>(type: "NVARCHAR2(15)", maxLength: 15, nullable: true),
-                    EMAIL_ADDRESS = table.Column<string>(type: "NVARCHAR2(50)", maxLength: 50, nullable: true),
+                    PHONE_NUMBER = table.Column<string>(type: "NVARCHAR2(16)", maxLength: 16, nullable: true),
+                    MOBILE_NUMBER = table.Column<string>(type: "NVARCHAR2(16)", maxLength: 16, nullable: true),
+                    EMAIL_ADDRESS = table.Column<string>(type: "NVARCHAR2(84)", maxLength: 84, nullable: true),
                     STREET = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "Street"),
                     STREET2 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true, comment: "Street2"),
                     STREET3 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true, comment: "Street3"),
@@ -556,7 +559,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DEMOGRAPHIC", x => x.ORACLE_HCM_ID);
+                    table.PrimaryKey("PK_DEMOGRAPHIC", x => x.ID);
                     table.ForeignKey(
                         name: "FK_DEMOGRAPHIC_COUNTRY_COUNTRY_ISO",
                         column: x => x.COUNTRY_ISO,
@@ -683,7 +686,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         principalTable: "DISTRIBUTION_PAYEE",
                         principalColumn: "ID");
                     table.ForeignKey(
-                        name: "FK_DISTRIBUTION_DISTRIBUTIONSTATUSES_STATUSID",
+                        name: "FK_DISTRIBUTION_DISTRIBUTIONSTATUS_STATUSID",
                         column: x => x.STATUS_ID,
                         principalTable: "DISTRIBUTION_STATUS",
                         principalColumn: "ID");
@@ -717,7 +720,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
                     PSN_SUFFIX = table.Column<short>(type: "NUMBER(5)", precision: 5, nullable: false),
                     BADGE_NUMBER = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false),
-                    ORACLE_HCM_ID = table.Column<long>(type: "NUMBER(15)", precision: 15, nullable: false),
+                    DEMOGRAPHIC_ID = table.Column<int>(type: "NUMBER(11)", precision: 11, nullable: false),
                     BENEFICIARY_CONTACT_ID = table.Column<int>(type: "NUMBER(10)", nullable: false),
                     RELATIONSHIP = table.Column<string>(type: "NVARCHAR2(10)", maxLength: 10, nullable: true),
                     KIND_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: true),
@@ -741,17 +744,17 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         principalTable: "BENEFICIARY_KIND",
                         principalColumn: "ID");
                     table.ForeignKey(
-                        name: "FK_BENEFICIARY_DEMOGRAPHIC_ORACLE_HCM_ID",
-                        column: x => x.ORACLE_HCM_ID,
+                        name: "FK_BENEFICIARY_DEMOGRAPHICS_DEMOGRAPHICID",
+                        column: x => x.DEMOGRAPHIC_ID,
                         principalTable: "DEMOGRAPHIC",
-                        principalColumn: "ORACLE_HCM_ID");
+                        principalColumn: "ID");
                 });
 
             migrationBuilder.CreateTable(
                 name: "PAY_PROFIT",
                 columns: table => new
                 {
-                    ORACLE_HCM_ID = table.Column<long>(type: "NUMBER(15)", precision: 15, nullable: false),
+                    DEMOGRAPHIC_ID = table.Column<int>(type: "NUMBER(11)", precision: 11, nullable: false),
                     PROFIT_YEAR = table.Column<short>(type: "NUMBER(4)", precision: 4, nullable: false),
                     CURRENT_HOURS_YEAR = table.Column<decimal>(type: "DECIMAL(6,2)", precision: 6, scale: 2, nullable: false),
                     CURRENT_INCOME_YEAR = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
@@ -769,17 +772,17 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PAY_PROFIT", x => new { x.ORACLE_HCM_ID, x.PROFIT_YEAR });
+                    table.PrimaryKey("PK_PAY_PROFIT", x => new { x.DEMOGRAPHIC_ID, x.PROFIT_YEAR });
                     table.ForeignKey(
                         name: "FK_PAY_PROFIT_BENEFICIARY_TYPE_BENEFICIARYTYPEID",
                         column: x => x.BENEFICIARY_TYPE_ID,
                         principalTable: "BENEFICIARY_TYPE",
                         principalColumn: "ID");
                     table.ForeignKey(
-                        name: "FK_PAY_PROFIT_DEMOGRAPHIC_ORACLEHCMID",
-                        column: x => x.ORACLE_HCM_ID,
+                        name: "FK_PAY_PROFIT_DEMOGRAPHIC_DEMOGRAPHICID",
+                        column: x => x.DEMOGRAPHIC_ID,
                         principalTable: "DEMOGRAPHIC",
-                        principalColumn: "ORACLE_HCM_ID");
+                        principalColumn: "ID");
                     table.ForeignKey(
                         name: "FK_PAY_PROFIT_EMPLOYEE_TYPE_EMPLOYEETYPEID",
                         column: x => x.EMPLOYEE_TYPE_ID,
@@ -805,22 +808,22 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
                     CHECK_NUMBER = table.Column<int>(type: "NUMBER(15)", precision: 15, nullable: false),
                     SSN = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false),
-                    ORACLE_HCM_ID = table.Column<long>(type: "NUMBER(15)", precision: 15, nullable: false),
+                    DEMOGRAPHIC_ID = table.Column<int>(type: "NUMBER(11)", precision: 11, nullable: false),
                     PAYABLE_NAME = table.Column<string>(type: "NVARCHAR2(84)", maxLength: 84, nullable: false),
                     CHECK_AMOUNT = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
                     TAXCODEID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
-                    CHECK_DATE = table.Column<DateTime>(type: "DATE", nullable: false),
-                    VOID_FLAG = table.Column<bool>(type: "NUMBER(1)", nullable: false),
+                    CHECK_DATE = table.Column<DateTime>(type: "DATE", nullable: true),
+                    VOID_FLAG = table.Column<bool>(type: "NUMBER(1)", nullable: true),
                     VOID_CHECK_DATE = table.Column<DateTime>(type: "DATE", nullable: true),
                     VOID_RECON_DATE = table.Column<DateTime>(type: "DATE", nullable: true),
                     CLEAR_DATE = table.Column<DateTime>(type: "DATE", nullable: true),
                     CLEAR_DATE_LOADED = table.Column<DateTime>(type: "DATE", nullable: true),
-                    REF_NUMBER = table.Column<int>(type: "NUMBER(10)", maxLength: 36, nullable: false),
-                    FLOAT_DAYS = table.Column<short>(type: "NUMBER(6)", precision: 6, nullable: false),
+                    REF_NUMBER = table.Column<int>(type: "NUMBER(10)", maxLength: 36, nullable: true),
+                    FLOAT_DAYS = table.Column<short>(type: "NUMBER(6)", precision: 6, nullable: true),
                     CHECK_RUN_DATE = table.Column<DateTime>(type: "DATE", nullable: true),
                     DATE_LOADED = table.Column<DateTime>(type: "DATE", nullable: true),
-                    OTHER_BENEFICIARY = table.Column<bool>(type: "NUMBER(1)", nullable: false),
-                    MANUAL_CHECK = table.Column<bool>(type: "NUMBER(1)", nullable: false),
+                    OTHER_BENEFICIARY = table.Column<bool>(type: "NUMBER(1)", nullable: true),
+                    MANUAL_CHECK = table.Column<bool>(type: "NUMBER(1)", nullable: true),
                     REPLACE_CHECK = table.Column<string>(type: "NVARCHAR2(24)", maxLength: 24, nullable: true),
                     PSC_CHECK_ID = table.Column<int>(type: "NUMBER(15)", precision: 15, nullable: false)
                 },
@@ -828,10 +831,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 {
                     table.PrimaryKey("PK_PROFIT_SHARE_CHECK", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PROFIT_SHARE_CHECK_DEMOGRAPHIC_ORACLEHCMID",
-                        column: x => x.ORACLE_HCM_ID,
+                        name: "FK_PROFIT_SHARE_CHECK_DEMOGRAPHIC_DEMOGRAPHICID",
+                        column: x => x.DEMOGRAPHIC_ID,
                         principalTable: "DEMOGRAPHIC",
-                        principalColumn: "ORACLE_HCM_ID");
+                        principalColumn: "ID");
                     table.ForeignKey(
                         name: "FK_PROFIT_SHARE_CHECK_TAXCODES_TAXCODEID",
                         column: x => x.TAXCODEID,
@@ -2752,14 +2755,14 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 column: "BENEFICIARY_CONTACT_ID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_BENEFICIARY_DEMOGRAPHICID",
+                table: "BENEFICIARY",
+                column: "DEMOGRAPHIC_ID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_BENEFICIARY_KINDID",
                 table: "BENEFICIARY",
                 column: "KIND_ID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_BENEFICIARY_ORACLE_HCM_ID",
-                table: "BENEFICIARY",
-                column: "ORACLE_HCM_ID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_BENEFICIARY_PSNSUFFIX",
@@ -2817,6 +2820,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "IX_DEMOGRAPHIC_GENDERID",
                 table: "DEMOGRAPHIC",
                 column: "GENDER_ID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DEMOGRAPHIC_ORACLEHCMID",
+                table: "DEMOGRAPHIC",
+                column: "ORACLE_HCM_ID",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_DEMOGRAPHIC_PAYCLASSIFICATIONID",
@@ -2975,15 +2984,20 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 column: "ZERO_CONTRIBUTION_REASON_ID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PROFIT_SHARE_CHECK_CHECKNUMBER",
+                name: "IX_PROFIT_SHARE_CHECK_CHECKNUMBER_ISVOIDED",
                 table: "PROFIT_SHARE_CHECK",
-                column: "CHECK_NUMBER",
-                unique: true);
+                columns: new[] { "CHECK_NUMBER", "VOID_FLAG" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_PROFIT_SHARE_CHECK_ORACLEHCMID",
+                name: "IX_PROFIT_SHARE_CHECK_DEMOGRAPHICID",
                 table: "PROFIT_SHARE_CHECK",
-                column: "ORACLE_HCM_ID");
+                column: "DEMOGRAPHIC_ID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PROFIT_SHARE_CHECK_PSCCHECKID",
+                table: "PROFIT_SHARE_CHECK",
+                column: "PSC_CHECK_ID",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_PROFIT_SHARE_CHECK_TAXCODEID",

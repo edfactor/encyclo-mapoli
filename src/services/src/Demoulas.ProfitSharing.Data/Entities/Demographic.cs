@@ -9,6 +9,7 @@ namespace Demoulas.ProfitSharing.Data.Entities;
 [DebuggerDisplay("OracleHcmId={OracleHcmId} BadgeNumber={BadgeNumber} FullName={ContactInfo.FullName} StoreNumber={StoreNumber}")]
 public sealed class Demographic : Member
 {
+    public int Id { get; set; }
     /// <summary>
     /// Gets or sets the Oracle HCM (Human Capital Management) ID.
     /// This ID is used to uniquely identify an employee within the Oracle HCM system.

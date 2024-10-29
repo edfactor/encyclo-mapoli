@@ -97,12 +97,14 @@ public class DemographicsService : IDemographicsServiceInternal
 
             // Create lookup dictionaries for both OracleHcmId and SSN
             var demographicOracleHcmIdLookup = demographicsEntities.ToDictionary(entity => entity.OracleHcmId);
-            var demographicSsnLookup = demographicsEntities.ToDictionary(entity => entity.Ssn);
+            var demographicSsnLookup = demographicsEntities.ToLookup(entity => (entity.Ssn, entity.BadgeNumber));
+            var ssnCollection = demographicsEntities.Select(d => d.Ssn).ToHashSet();
+            var dobCollection = demographicsEntities.Select(d => d.DateOfBirth).ToHashSet();
 
             // Fetch existing entities from the database using both OracleHcmId and SSN
             var existingEntities = await context.Demographics
                                                 .Where(dbEntity => demographicOracleHcmIdLookup.Keys.Contains(dbEntity.OracleHcmId) ||
-                                                                   demographicSsnLookup.Keys.Contains(dbEntity.Ssn))
+                                                                   (ssnCollection.Contains(dbEntity.Ssn) && dobCollection.Contains(dbEntity.DateOfBirth)))
                                                 .ToListAsync(cancellationToken);
 
             // Handle potential duplicates in the existing database (SSN duplicates)
@@ -140,7 +142,7 @@ public class DemographicsService : IDemographicsServiceInternal
                 context.Demographics.AddRange(newEntities);
             }
 
-            // Update existing entities based on either OracleHcmId or SSN
+            // Update existing entities based on either OracleHcmId or SSN & BadgeNumber
             foreach (var existingEntity in existingEntities)
             {
                 Demographic? incomingEntity = null;
@@ -150,9 +152,13 @@ public class DemographicsService : IDemographicsServiceInternal
                 {
                     incomingEntity = entityByOracleHcmId;
                 }
-                else if (demographicSsnLookup.TryGetValue(existingEntity.Ssn, out var entityBySsn))
+                else
                 {
-                    incomingEntity = entityBySsn;
+                    var entityBySsn = demographicSsnLookup[(existingEntity.Ssn, existingEntity.BadgeNumber)].FirstOrDefault();
+                    if (entityBySsn != null)
+                    {
+                        incomingEntity = entityBySsn;
+                    }
                 }
 
                 // If we have a match, update the existing entity with new values

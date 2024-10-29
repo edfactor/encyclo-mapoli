@@ -6,7 +6,7 @@ public sealed class PayProfit
     /// Gets or sets the Oracle HCM (Human Capital Management) identifier.
     /// This identifier is used to uniquely associate the PayProfit entity with a Demographic/Oracle HCM record.
     /// </summary>
-    public required long OracleHcmId { get; set; }
+    public required int DemographicId { get; set; }
 
     /// <summary>
     /// Gets or sets the year for which the profit is being calculated.

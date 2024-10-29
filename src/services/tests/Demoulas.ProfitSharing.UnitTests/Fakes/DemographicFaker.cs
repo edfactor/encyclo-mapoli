@@ -8,8 +8,10 @@ namespace Demoulas.ProfitSharing.UnitTests.Fakes;
 
 internal sealed class DemographicFaker : Faker<Demographic>
 {
-    private static int _badgeNumberCounter = 1000;
-    private static long _oracleHcmIdCounter = 100000;
+    private static int _badgeNumberCounter = 1_000;
+    private static int _idCounter = 10_000;
+    private static long _oracleHcmIdCounter = 100_000;
+    
 
     internal DemographicFaker()
     {
@@ -19,6 +21,7 @@ internal sealed class DemographicFaker : Faker<Demographic>
         EmploymentStatusFaker employmentStatusFaker = new EmploymentStatusFaker();
 
         RuleFor(d => d.BadgeNumber, f => _badgeNumberCounter++)
+            .RuleFor(d => d.Id, f => _idCounter++)
             .RuleFor(d => d.Ssn, f => f.Person.Ssn().ConvertSsnToLong())
             .RuleFor(d => d.OracleHcmId, f => _oracleHcmIdCounter++)
             .RuleFor(d => d.StoreNumber, f => f.Random.Short(1, 99))

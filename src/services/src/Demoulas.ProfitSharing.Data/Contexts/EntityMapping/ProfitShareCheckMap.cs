@@ -30,10 +30,10 @@ internal sealed class ProfitShareCheckMap : IEntityTypeConfiguration<ProfitShare
             .ValueGeneratedNever()
             .HasColumnName("SSN");
 
-        _ = builder.Property(e => e.OracleHcmId)
-            .HasPrecision(15)
+        _ = builder.Property(e => e.DemographicId)
+            .HasPrecision(11)
             .ValueGeneratedNever()
-            .HasColumnName("ORACLE_HCM_ID");
+            .HasColumnName("DEMOGRAPHIC_ID");
 
         _ = builder.HasIndex(e => e.PscCheckId, "IX_PscCheckId").IsUnique();
         _ = builder.Property(e => e.PscCheckId)

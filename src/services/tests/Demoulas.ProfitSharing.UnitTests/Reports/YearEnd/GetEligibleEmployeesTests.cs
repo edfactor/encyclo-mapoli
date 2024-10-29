@@ -211,7 +211,7 @@ public class GetEligibleEmployeesTests : ApiTestBase<Api.Program>
     {
         var pp = await ctx.PayProfits.Include(p => p.Demographic != null).FirstAsync();
         pp.ProfitYear = TestProfitYear;
-        pp.OracleHcmId = testEmployee.OracleHcmId;
+        pp.DemographicId = testEmployee.OracleHcmId;
         pp.Demographic!.OracleHcmId = testEmployee.OracleHcmId;
         pp.Demographic.ContactInfo.FullName = testEmployee.FullName;
         pp.Demographic.BadgeNumber = testEmployee.BadgeNumber;

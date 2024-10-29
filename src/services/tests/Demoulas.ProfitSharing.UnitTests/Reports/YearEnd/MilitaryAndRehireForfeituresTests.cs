@@ -206,7 +206,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
 
 
 
-        var payProfit = await c.PayProfits.FirstAsync(pp => pp.OracleHcmId == demo.OracleHcmId);
+        var payProfit = await c.PayProfits.FirstAsync(pp => pp.DemographicId == demo.Id);
         payProfit.EnrollmentId = Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
         payProfit.CurrentHoursYear = 2358;
         payProfit.ProfitYear = profitYear;

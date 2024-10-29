@@ -147,8 +147,8 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
         var query = context.Demographics
             .Join(
                 context.PayProfits, // Table to join with (PayProfit)
-                demographics => demographics.OracleHcmId, // Primary key selector from Demographics
-                payProfit => payProfit.OracleHcmId, // Foreign key selector from PayProfit
+                demographics => demographics.Id, // Primary key selector from Demographics
+                payProfit => payProfit.DemographicId, // Foreign key selector from PayProfit
                 (demographics, payProfit) => new // Result selector after joining
                 {
                     demographics.BadgeNumber,

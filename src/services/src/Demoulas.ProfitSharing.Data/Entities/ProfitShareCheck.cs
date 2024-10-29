@@ -6,7 +6,7 @@ public class ProfitShareCheck
 
 
     public int Ssn { get; set; }
-    public required long OracleHcmId { get; set; }
+    public required int DemographicId { get; set; }
     public string? PayableName { get; set; }
     public decimal CheckAmount { get; set; }
     public TaxCode? TaxCode { get; set; }

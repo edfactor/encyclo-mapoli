@@ -8,5 +8,5 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Services;
 public class ParticipantTotalDto
 {
     public required long Ssn { get; set; }
-    public required Decimal Total { get; set; }
+    public required decimal Total { get; set; }
 }
