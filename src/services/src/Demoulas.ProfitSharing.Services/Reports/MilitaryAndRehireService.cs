@@ -16,9 +16,9 @@ namespace Demoulas.ProfitSharing.Services.Reports;
 public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
-    private readonly CalendarService _calendarService;
+    private readonly ICalendarService _calendarService;
 
-    public MilitaryAndRehireService(IProfitSharingDataContextFactory dataContextFactory, CalendarService calendarService)
+    public MilitaryAndRehireService(IProfitSharingDataContextFactory dataContextFactory, ICalendarService calendarService)
     {
         _dataContextFactory = dataContextFactory;
         _calendarService = calendarService;

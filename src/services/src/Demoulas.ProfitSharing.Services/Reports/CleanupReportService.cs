@@ -16,13 +16,13 @@ public class CleanupReportService : ICleanupReportService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ContributionService _contributionService;
-    private readonly CalendarService _calendarService;
+    private readonly ICalendarService _calendarService;
     private readonly ILogger<CleanupReportService> _logger;
 
     public CleanupReportService(IProfitSharingDataContextFactory dataContextFactory,
         ContributionService contributionService,
         ILoggerFactory factory,
-        CalendarService calendarService)
+        ICalendarService calendarService)
     {
         _dataContextFactory = dataContextFactory;
         _contributionService = contributionService;
@@ -343,8 +343,8 @@ public class CleanupReportService : ICleanupReportService
 
     public async Task<ReportResponseBase<YearEndProfitSharingReportResponse>> GetYearEndProfitSharingReport(YearEndProfitSharingReportRequest req, CancellationToken cancellationToken = default)
     {
-        var yearEndDate = (await _calendarService.GetYearStartAndEndAccountingDates(req.ProfitYear, cancellationToken)).YearEndDate;
-        var over18BirthDate = yearEndDate.AddYears(-18);
+        var response = await _calendarService.GetYearStartAndEndAccountingDates(req.ProfitYear, cancellationToken);
+        var over18BirthDate = response.YearEndDate.AddYears(-18);
         var rslt = await _dataContextFactory.UseReadOnlyContext(ctx =>
         {
             return ctx.PayProfits
@@ -377,7 +377,7 @@ public class CleanupReportService : ICleanupReportService
         foreach (var item in rslt.Results)
         {
             item.Points = Convert.ToInt16(Math.Round(item.Wages / 100, 0, MidpointRounding.AwayFromZero));
-            item.Age = (byte)((yearEndDate.Year - item.DateOfBirth.Year) - (yearEndDate.DayOfYear < item.DateOfBirth.DayOfYear ? 1 : 0));
+            item.Age = (byte)((response.YearEndDate.Year - item.DateOfBirth.Year) - (response.YearEndDate.DayOfYear < item.DateOfBirth.DayOfYear ? 1 : 0));
             if (item.Age < 21)
             {
                 item.IsUnder21 = true;
