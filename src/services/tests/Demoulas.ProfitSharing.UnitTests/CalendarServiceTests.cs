@@ -95,7 +95,7 @@ public class CalendarServiceTests : ApiTestBase<Api.Program>
                 .GETAsync<CalendarRecordEndpoint, CalendarRequestDto, CalendarResponseDto>(new CalendarRequestDto { ProfitYear = 2023});
 
         response.Result.Should().NotBeNull();
-        response.Result.BeginDate.Should().NotBeOnOrBefore(DateOnly.MinValue);
-        response.Result.YearEndDate.Should().NotBeOnOrBefore(DateOnly.MinValue);
+        response.Result.FiscalBeginDate.Should().NotBeOnOrBefore(DateOnly.MinValue);
+        response.Result.FiscalEndDate.Should().NotBeOnOrBefore(DateOnly.MinValue);
     }
 }

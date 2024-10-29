@@ -169,8 +169,8 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
             .Where(m =>
                 m.EmploymentStatusId == EmploymentStatus.Constants.Active
                 && m.ReHireDate != null
-                && m.ReHireDate >= bracket.BeginDate
-                && m.ReHireDate <= bracket.YearEndDate)
+                && m.ReHireDate >= bracket.FiscalBeginDate
+                && m.ReHireDate <= bracket.FiscalEndDate)
             .Join(
                 context.ProfitDetails, // Table to join with (ProfitDetail)
                 combined => combined.Ssn, // Key selector from the result of the first join

@@ -98,8 +98,8 @@ public sealed class CalendarService : ICalendarService
 
         return new CalendarResponseDto
         {
-            BeginDate = startingDate.AddDays(1),
-            YearEndDate = endingDate
+            FiscalBeginDate = startingDate.AddDays(1),
+            FiscalEndDate = endingDate
         };
     }
 }

@@ -23,7 +23,7 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
     public async Task<GetEligibleEmployeesResponse> GetEligibleEmployees(ProfitYearRequest request, CancellationToken cancellationToken)
     {
         var response = await _calendarService.GetYearStartAndEndAccountingDates(request.ProfitYear, cancellationToken);
-        var birthDateOfExactly21YearsOld = response.YearEndDate.AddYears(-21);
+        var birthDateOfExactly21YearsOld = response.FiscalEndDate.AddYears(-21);
 
         return  await _dataContextFactory.UseReadOnlyContext(async c =>
         {

@@ -344,7 +344,7 @@ public class CleanupReportService : ICleanupReportService
     public async Task<ReportResponseBase<YearEndProfitSharingReportResponse>> GetYearEndProfitSharingReport(YearEndProfitSharingReportRequest req, CancellationToken cancellationToken = default)
     {
         var response = await _calendarService.GetYearStartAndEndAccountingDates(req.ProfitYear, cancellationToken);
-        var over18BirthDate = response.YearEndDate.AddYears(-18);
+        var over18BirthDate = response.FiscalEndDate.AddYears(-18);
         var rslt = await _dataContextFactory.UseReadOnlyContext(ctx =>
         {
             return ctx.PayProfits
@@ -377,7 +377,7 @@ public class CleanupReportService : ICleanupReportService
         foreach (var item in rslt.Results)
         {
             item.Points = Convert.ToInt16(Math.Round(item.Wages / 100, 0, MidpointRounding.AwayFromZero));
-            item.Age = (byte)((response.YearEndDate.Year - item.DateOfBirth.Year) - (response.YearEndDate.DayOfYear < item.DateOfBirth.DayOfYear ? 1 : 0));
+            item.Age = (byte)((response.FiscalEndDate.Year - item.DateOfBirth.Year) - (response.FiscalEndDate.DayOfYear < item.DateOfBirth.DayOfYear ? 1 : 0));
             if (item.Age < 21)
             {
                 item.IsUnder21 = true;

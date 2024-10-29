@@ -25,7 +25,7 @@ public class CalendarRecordEndpoint : Endpoint<CalendarRequestDto, CalendarRespo
             {
                 200, new List<CalendarResponseDto>
                 {
-                    new CalendarResponseDto { BeginDate = new DateOnly(2024, 01, 07), YearEndDate = new DateOnly(2025, 01, 05)}
+                    new CalendarResponseDto { FiscalBeginDate = new DateOnly(2024, 01, 07), FiscalEndDate = new DateOnly(2025, 01, 05)}
                 }
             } };
         });
