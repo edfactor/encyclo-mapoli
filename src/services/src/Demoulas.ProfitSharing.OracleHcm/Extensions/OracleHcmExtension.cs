@@ -46,7 +46,8 @@ public static class OracleHcmExtension
 
         _ = builder.Services.AddSingleton<OracleHcmJobConsumer>();
         _ = builder.Services.AddSingleton<OracleEmployeeValidator>();
-        _ = builder.Services.AddSingleton<IJobFactory, SimpleJobFactory>();
+        _ = builder.Services.AddSingleton<EmployeeSyncJob>();
+        _ = builder.Services.AddSingleton<IJobFactory, OracleHcmJobFactory>();
         _ = builder.Services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
         _ = builder.Services.AddSingleton<IOracleHcmSynchronizationService, OracleHcmSynchronizationService>();
 
