@@ -10,7 +10,7 @@
     <PackageVersion Include="IdGen" Version="3.0.7" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="8.2.0" />
     <PackageVersion Include="CsvHelper" Version="33.0.1" />
-    <PackageVersion Include="Demoulas.Common.Api" Version="1.2.16" />
+    <PackageVersion Include="Demoulas.Common.Api" Version="1.2.17" />
     <PackageVersion Include="Demoulas.Common.Data.Contexts" Version="2.1.13" />
     <PackageVersion Include="Demoulas.Common.Data.Services" Version="3.2.1" />
     <PackageVersion Include="Demoulas.Security" Version="3.3.3" />

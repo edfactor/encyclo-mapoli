@@ -1,12 +1,19 @@
 ﻿using System.Globalization;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.NotOwned;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ExecutiveHoursAndDollars;
+using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.UnitTests.Base;
 using Demoulas.ProfitSharing.UnitTests.Extensions;
+using FastEndpoints;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 
 namespace Demoulas.ProfitSharing.UnitTests;
 
@@ -79,5 +86,16 @@ public class CalendarServiceTests : ApiTestBase<Api.Program>
         weekEndingDate.DayOfWeek.Should().Be(DayOfWeek.Saturday);
     }
 
+    [Fact(DisplayName = "PS-366 Get start and end dates for a provided fiscal year")]
+    public async Task GetStartEndProvidedFiscalYear()
+    {
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+        TestResult<CalendarResponseDto> response =
+            await ApiClient
+                .GETAsync<CalendarRecordEndpoint, CalendarRequestDto, CalendarResponseDto>(new CalendarRequestDto { ProfitYear = 2023});
 
+        response.Result.Should().NotBeNull();
+        response.Result.BeginDate.Should().NotBeOnOrBefore(DateOnly.MinValue);
+        response.Result.YearEndDate.Should().NotBeOnOrBefore(DateOnly.MinValue);
+    }
 }
