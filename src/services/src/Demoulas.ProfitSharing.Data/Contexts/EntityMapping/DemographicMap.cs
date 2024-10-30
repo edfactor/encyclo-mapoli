@@ -22,7 +22,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
 
         _ = builder.Property(e => e.Id)
             .HasPrecision(11)
-            .ValueGeneratedNever()
+            .ValueGeneratedOnAdd()
             .HasColumnName("ID");
 
         _ = builder.Property(e => e.Ssn)

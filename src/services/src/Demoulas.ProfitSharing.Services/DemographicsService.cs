@@ -9,6 +9,8 @@ using Demoulas.ProfitSharing.Services.Mappers;
 using Microsoft.EntityFrameworkCore;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Microsoft.Extensions.Logging;
+using Oracle.ManagedDataAccess.Client;
+using EntityFramework.Exceptions.Common;
 
 namespace Demoulas.ProfitSharing.Services;
 
@@ -144,13 +146,26 @@ public class DemographicsService : IDemographicsServiceInternal
                     {
                         context.Demographics.Add(entity);
                     }
-                    catch (InvalidOperationException e) when (e.Message.Contains("When attaching existing entities, ensure that only one entity instance with a given key value is attached."))
+                    catch (InvalidOperationException e) when (e.Message.Contains(
+                                                                  "When attaching existing entities, ensure that only one entity instance with a given key value is attached."))
                     {
-                        await context.SaveChangesAsync(cancellationToken);
                         _logger.LogCritical(e, "Failed to process Demographic/OracleHCM employee record for EmployeeId {EmployeeId}", entity.BadgeNumber);
+                        try
+                        {
+                            await context.SaveChangesAsync(cancellationToken);
+                        }
+                        catch (CannotInsertNullException exception)
+                        {
+                            _logger.LogCritical(exception, "Failed to save Demographic/OracleHCM employee batch");
+                        }
+                        catch (OracleException exception)
+                        {
+                            _logger.LogCritical(exception, "Failed to save Demographic/OracleHCM employee batch");
+                        }
                     }
                 }
             }
+
 
             // Update existing entities based on either OracleHcmId or SSN & BadgeNumber
             foreach (var existingEntity in existingEntities)
