@@ -18,7 +18,13 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
 
         _ = builder.HasIndex(e => e.Ssn, "IX_SSN");
         _ = builder.HasIndex(e => new {e.Ssn, e.OracleHcmId}, "IX_SSN_ORACLE_HCM_ID");
-        
+
+
+        _ = builder.Property(e => e.Id)
+            .HasPrecision(11)
+            .ValueGeneratedNever()
+            .HasColumnName("ID");
+
         _ = builder.Property(e => e.Ssn)
             .HasPrecision(9)
             .IsRequired()

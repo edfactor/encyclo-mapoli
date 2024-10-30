@@ -3,11 +3,14 @@ using Demoulas.ProfitSharing.Common.Caching;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using FastEndpoints;
 using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Validators;
 public sealed class OracleEmployeeValidator : Validator<OracleEmployee>
 {
+    private readonly AddressItemValidator _addressValidator = new AddressItemValidator();
+
     private readonly IBaseCacheService<LookupTableCache<byte>> _accountCache;
     private readonly IBaseCacheService<LookupTableCache<byte>> _depCache;
     private const int MaxStoreId = 899;
@@ -31,6 +34,20 @@ public sealed class OracleEmployeeValidator : Validator<OracleEmployee>
         RuleFor(e => e.Address)
             .Must(v => v != null)
             .WithMessage(e=> BadAddress);
+
+        // Use the AddressRequestDtoValidator to validate the Address object
+        RuleFor(e => e.Address)
+            .Custom((address, context) =>
+            {
+                if (address != null)
+                {
+                    ValidationResult result = _addressValidator.Validate(address);
+                    foreach (var error in result.Errors)
+                    {
+                        context.AddFailure(error);
+                    }
+                }
+            });
 
         RuleFor(e => e.WorkRelationship)
             .Must(v => v != null)
@@ -66,6 +83,16 @@ public sealed class OracleEmployeeValidator : Validator<OracleEmployee>
             .WithState(e => e.WorkRelationship?.Assignment.PositionCode)
             .OverridePropertyName("WorkRelationship.Assignment.PositionCode");
 
+
+        RuleFor(x => x.BadgeNumber)
+            .InclusiveBetween(1, 9_999_999).WithMessage("BadgeNumber must be a 7-digit number.");
+
+        RuleFor(x => x.PersonId)
+            .NotEmpty()
+            .InclusiveBetween(1, 999_999_999_999_999).WithMessage("OracleHcmId(PersonId) must be a 15-digit number.");
+
+        RuleFor(x => x.DateOfBirth)
+            .NotEmpty().WithMessage("DateOfBirth is required.");
     }
 
     private async Task<bool> ValidatePayClassificationAsync(byte? jobCode, CancellationToken ct)
