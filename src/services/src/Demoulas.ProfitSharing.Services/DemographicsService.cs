@@ -103,9 +103,9 @@ public class DemographicsService : IDemographicsServiceInternal
 
             // Fetch existing entities from the database using both OracleHcmId and SSN
             var existingEntities = await context.Demographics
-                                                .Where(dbEntity => demographicOracleHcmIdLookup.Keys.Contains(dbEntity.OracleHcmId) ||
-                                                                   (ssnCollection.Contains(dbEntity.Ssn) && dobCollection.Contains(dbEntity.DateOfBirth)))
-                                                .ToListAsync(cancellationToken);
+                .Where(dbEntity => demographicOracleHcmIdLookup.Keys.Contains(dbEntity.OracleHcmId) ||
+                                   (ssnCollection.Contains(dbEntity.Ssn) && dobCollection.Contains(dbEntity.DateOfBirth)))
+                .ToListAsync(cancellationToken);
 
             // Handle potential duplicates in the existing database (SSN duplicates)
             var duplicateSsnEntities = existingEntities.GroupBy(e => e.Ssn)
@@ -165,7 +165,8 @@ public class DemographicsService : IDemographicsServiceInternal
                 if (incomingEntity != null)
                 {
                     // Correct OracleHcmId if it's missing or incorrect (for legacy records)
-                    if (existingEntity.OracleHcmId != incomingEntity.OracleHcmId)
+                    // Assume all legacy records are below 2.1B and Oracle HCM ID is over that
+                    if (existingEntity.OracleHcmId != incomingEntity.OracleHcmId && existingEntity.OracleHcmId < int.MaxValue)
                     {
                         existingEntity.OracleHcmId = incomingEntity.OracleHcmId;
                     }
