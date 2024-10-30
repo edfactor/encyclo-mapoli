@@ -1,19 +1,14 @@
-﻿using System.Collections.Frozen;
-using Demoulas.ProfitSharing.Common.ActivitySources;
+﻿using Demoulas.ProfitSharing.Common.ActivitySources;
 using System.Diagnostics;
-using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Mappers;
 using Microsoft.EntityFrameworkCore;
-using MassTransit;
-using System.Linq;
-using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Data.Extensions;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services;
 
@@ -21,12 +16,15 @@ public class DemographicsService : IDemographicsServiceInternal
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly DemographicMapper _mapper;
+    private readonly ILogger<DemographicsService> _logger;
 
     public DemographicsService(IProfitSharingDataContextFactory dataContextFactory,
-        DemographicMapper mapper)
+        DemographicMapper mapper,
+        ILogger<DemographicsService> logger)
     {
         _dataContextFactory = dataContextFactory;
         _mapper = mapper;
+        _logger = logger;
     }
 
     /// <summary>
@@ -139,7 +137,19 @@ public class DemographicsService : IDemographicsServiceInternal
             if (newEntities.Any())
             {
                 // Bulk insert new entities
-                context.Demographics.AddRange(newEntities);
+
+                foreach (var entity in newEntities)
+                {
+                    try
+                    {
+                        context.Demographics.Add(entity);
+                    }
+                    catch (InvalidOperationException e) when (e.Message.Contains("When attaching existing entities, ensure that only one entity instance with a given key value is attached."))
+                    {
+                        await context.SaveChangesAsync(cancellationToken);
+                        _logger.LogCritical(e, "Failed to process Demographic/OracleHCM employee record for EmployeeId {EmployeeId}", entity.BadgeNumber);
+                    }
+                }
             }
 
             // Update existing entities based on either OracleHcmId or SSN & BadgeNumber

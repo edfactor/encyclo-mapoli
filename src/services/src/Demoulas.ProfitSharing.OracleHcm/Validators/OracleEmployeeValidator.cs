@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Demoulas.ProfitSharing.OracleHcm.Validators;
 public sealed class OracleEmployeeValidator : Validator<OracleEmployee>
 {
+    private readonly NameItemValidator _nameItemValidator = new NameItemValidator();
     private readonly AddressItemValidator _addressValidator = new AddressItemValidator();
 
     private readonly IBaseCacheService<LookupTableCache<byte>> _accountCache;
@@ -42,6 +43,19 @@ public sealed class OracleEmployeeValidator : Validator<OracleEmployee>
                 if (address != null)
                 {
                     ValidationResult result = _addressValidator.Validate(address);
+                    foreach (var error in result.Errors)
+                    {
+                        context.AddFailure(error);
+                    }
+                }
+            });
+
+        RuleFor(e => e.Name)
+            .Custom((nameItem, context) =>
+            {
+                if (nameItem != null)
+                {
+                    ValidationResult result = _nameItemValidator.Validate(nameItem);
                     foreach (var error in result.Errors)
                     {
                         context.AddFailure(error);
