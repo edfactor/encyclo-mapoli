@@ -13,6 +13,7 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Validators;
 using Demoulas.Util.Extensions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services;
 
@@ -40,7 +41,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
     public async Task SynchronizeEmployees(CancellationToken cancellationToken)
     {
         using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(SynchronizeEmployees), ActivityKind.Internal);
-
+        await CleanAuditError(cancellationToken);
         var oracleHcmEmployees = _oracleDemographicsService.GetAllEmployees(cancellationToken);
         var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, cancellationToken);
         await _demographicsService.AddDemographicsStream(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
@@ -68,6 +69,16 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
             c.DemographicSyncAudit.AddRange(auditRecords);
 
             return c.SaveChangesAsync(cancellationToken);
+        }, cancellationToken);
+    }
+
+    private Task CleanAuditError(CancellationToken cancellationToken)
+    {
+        return _profitSharingDataContextFactory.UseWritableContext(c =>
+        {
+            DateTime clearBackTo = DateTime.Today.AddDays(-30);
+
+            return c.DemographicSyncAudit.Where(t => t.Created < clearBackTo).ExecuteDeleteAsync(cancellationToken);
         }, cancellationToken);
     }
 
