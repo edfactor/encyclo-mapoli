@@ -17,6 +17,7 @@ public record WorkRelationshipAssignment(
     string? DepartmentName,
     string? DepartmentId,
     string? FullPartTime,
+    string? AssignmentCategory,
     char? Frequency
 )
 {
@@ -33,6 +34,7 @@ public record WorkRelationshipAssignment(
 
     /// <summary>Indicates whether the assignment is full-time or part-time.</summary>
     public string? FullPartTime { get; init; } = FullPartTime;
+    public string? AssignmentCategory { get; init; } = AssignmentCategory;
 
     /// <summary>The frequency of the assignment, such as weekly or monthly.</summary>
     public char? Frequency { get; init; } = Frequency;
