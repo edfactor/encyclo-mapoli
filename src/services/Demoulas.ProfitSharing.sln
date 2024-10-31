@@ -1,6 +1,5 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# 17
 VisualStudioVersion = 17.8.0.0
 MinimumVisualStudioVersion = 17.8.0.0
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.AppHost", "src\Demoulas.ProfitSharing.AppHost\Demoulas.ProfitSharing.AppHost.csproj", "{92A3B192-25F3-40C4-94BD-A13779CF0B81}"
@@ -99,6 +98,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{57F4
 		..\database\obfuscation\scripts\test_insert_orphan_records.sql = ..\database\obfuscation\scripts\test_insert_orphan_records.sql
 		..\database\obfuscation\scripts\test_load_emp_ssns.sql = ..\database\obfuscation\scripts\test_load_emp_ssns.sql
 		..\database\obfuscation\scripts\test_view_data.sql = ..\database\obfuscation\scripts\test_view_data.sql
+		..\database\ready_import\SQL update comment types.sql = ..\database\ready_import\SQL update comment types.sql
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.IntegrationTests", "tests\Demoulas.ProfitSharing.IntegrationTests\Demoulas.ProfitSharing.IntegrationTests.csproj", "{222677DF-CAD3-4E03-A1A1-C213DFD0DAA0}"

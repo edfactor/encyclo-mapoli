@@ -21,7 +21,11 @@ public class ProfitDetail
     public decimal StateTaxes { get; set;}
     public TaxCode? TaxCode { get; set; }
     public char? TaxCodeId { get; set; }
-    public bool IsTransferOut { get; set; }
-    public bool IsTransferIn { get; set; }
-    public long? TransferPsn { get; set; }
+    public int? CommentTypeId { get; set; }
+    public CommentType? CommentType { get; set; }
+    public int? CommentRelatedCheckNumber { get; set; }
+    public string? CommentRelatedState { get; set; }
+    public long? CommentRelatedOracleHcmId { get; set; }
+    public short? CommentRelatedPsnSuffix { get; set; }
+    public bool? CommentIsPartialTransaction { get; set; }
 }
