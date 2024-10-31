@@ -9,6 +9,7 @@ using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.UnitTests.Base;
 using Demoulas.ProfitSharing.UnitTests.Extensions;
+using Demoulas.ProfitSharing.UnitTests.Fakes;
 using FastEndpoints;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
@@ -211,13 +212,21 @@ public class GetEligibleEmployeesTests : ApiTestBase<Api.Program>
     {
         var pp = await ctx.PayProfits.Include(p => p.Demographic != null).FirstAsync();
         pp.ProfitYear = TestProfitYear;
-        pp.DemographicId = testEmployee.OracleHcmId;
-        pp.Demographic!.OracleHcmId = testEmployee.OracleHcmId;
-        pp.Demographic.ContactInfo.FullName = testEmployee.FullName;
-        pp.Demographic.BadgeNumber = testEmployee.BadgeNumber;
-        pp.Demographic.DateOfBirth = convertAgeToBirthDate(TestProfitYear, testEmployee.Age);
+        pp.OracleHcmId = testEmployee.OracleHcmId;
         pp.CurrentHoursYear = testEmployee.HoursWorked;
-        pp.Demographic.EmploymentStatusId = testEmployee.EmploymentStatusId;
+        var demo = pp.Demographic!;
+        demo.OracleHcmId = testEmployee.OracleHcmId;
+        demo.ContactInfo.FullName = testEmployee.FullName;
+        demo.BadgeNumber = testEmployee.BadgeNumber;
+        demo.DateOfBirth = convertAgeToBirthDate(TestProfitYear, testEmployee.Age);
+        demo.EmploymentStatusId = testEmployee.EmploymentStatusId;
+
+        var df = new DemographicFaker();
+        // The fake PayProfits entities share fake Demographic entities. (see demographicQueue in PayProfitFaker)
+        // PayProfit and Demographic are 1-1 in the database, to prevent errors - we assign the PayProfits sharing this
+        // Demographic new Demographics.
+        var otherPayProfitsUsingOurDemograhic = await ctx.PayProfits.Where(ppo => ppo != pp && ppo.Demographic == demo).ToListAsync();
+        otherPayProfitsUsingOurDemograhic.ForEach(pp => pp.Demographic = df.Generate());
 
         await ctx.SaveChangesAsync();
     }
