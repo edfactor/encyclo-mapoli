@@ -51,6 +51,7 @@ public sealed record HttpRequestFields
         "PositionCode", // Split on dash "-", Department will be the last value Example: "14-CASHIERS - PM-1" Department = 1
         "DepartmentName",
         "DepartmentId",
+        "AssignmentCategory",
         "FullPartTime", // Might need to be mapped for EmploymentType
         "Frequency" // W = 1(Weekly) M=2(Monthly)
     ];

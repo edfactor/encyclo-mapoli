@@ -64,6 +64,18 @@ public static byte GetPayFrequency(this WorkRelationshipAssignment work)
         const char partTime = 'P';
         const char fullTimeStraightSalary = 'H';
 
+        char result = work.AssignmentCategory switch
+        {
+            "PT" => partTime,
+            "FT" => fullTimeStraightSalary,
+            _ => char.MinValue
+        };
+
+        if (result != char.MinValue)
+        {
+            return result;
+        }
+
         return work.FullPartTime switch
         {
             "PART_TIME" => partTime,
