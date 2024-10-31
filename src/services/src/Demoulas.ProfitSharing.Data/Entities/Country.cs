@@ -1,7 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
-public sealed class Country : ILookupTable<short>
+public sealed class Country : ILookupTable<byte>
 {
     public static class Constants
     {
@@ -9,7 +9,7 @@ public sealed class Country : ILookupTable<short>
         public const string Canada = "CA";
     }
 
-    public short Id { get; set; }
+    public byte Id { get; set; }
     public required string Name { get; set; }
 
     public required string Iso { get; init; }

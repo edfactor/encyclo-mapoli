@@ -13,6 +13,7 @@ using IdGen;
 using MassTransit;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Data.Entities;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 public class CleanupReportServiceTests:ApiTestBase<Program>
@@ -498,7 +499,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
             var profitDetail = await ctx.ProfitDetails.FirstAsync();
 
             profitDetail.ProfitCodeId = 9; //This profit code shouldn't be in the report if is a transfer
-            profitDetail.IsTransferOut = true;
+            profitDetail.CommentTypeId = CommentType.Constants.TransferOut;
             await ctx.SaveChangesAsync();
         });
 

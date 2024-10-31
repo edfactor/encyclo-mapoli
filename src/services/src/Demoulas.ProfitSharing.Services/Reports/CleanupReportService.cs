@@ -308,11 +308,13 @@ public class CleanupReportService : ICleanupReportService
                         BadgeNumber = x.Max(m => m.BadgeNumber)
                     });
 
+                var transferAndQdroCommentTypes = new List<int>() { CommentType.Constants.TransferIn.Id, CommentType.Constants.TransferOut.Id, CommentType.Constants.QdroIn.Id, CommentType.Constants.QdroOut.Id };
+
                 var query = from pd in ctx.ProfitDetails
                     join nameAndDob in nameAndDobQuery on pd.Ssn equals nameAndDob.Ssn
                     where pd.ProfitYear == req.ProfitYear &&
                           validProfitCodes.Contains(pd.ProfitCodeId) &&
-                          (pd.ProfitCodeId != 9 || (pd.ProfitCodeId == 9 && !pd.IsTransferOut && !pd.IsTransferIn)) &&
+                          (pd.ProfitCodeId != 9 || (pd.ProfitCodeId == 9 && (!pd.CommentTypeId.HasValue || !transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)))) &&
                           (req.StartMonth == 0 || pd.MonthToDate >= req.StartMonth) &&
                           (req.EndMonth == 0 || pd.MonthToDate <= req.EndMonth)
                     orderby nameAndDob.LastName, nameAndDob.FirstName
