@@ -64,11 +64,23 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "COMMENT_TYPE",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "NUMBER(10)", nullable: false),
+                    NAME = table.Column<string>(type: "NVARCHAR2(128)", maxLength: 128, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_COMMENT_TYPE", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "COUNTRY",
                 columns: table => new
                 {
                     ISO = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: false),
-                    ID = table.Column<short>(type: "NUMBER(3)", precision: 3, nullable: false),
+                    ID = table.Column<byte>(type: "NUMBER(3)", precision: 3, nullable: false),
                     NAME = table.Column<string>(type: "NVARCHAR2(100)", maxLength: 100, nullable: false),
                     TELEPHONE_CODE = table.Column<string>(type: "NVARCHAR2(10)", maxLength: 10, nullable: false)
                 },
@@ -357,9 +369,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     ID = table.Column<int>(type: "NUMBER(10)", nullable: false)
                         .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
                     SSN = table.Column<long>(type: "NUMBER(9)", precision: 9, nullable: false),
-                    FIRST_NAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false),
-                    MIDDLE_NAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true),
-                    LAST_NAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false),
                     DATE_OF_BIRTH = table.Column<DateTime>(type: "DATE", nullable: false),
                     STREET = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "Street"),
                     STREET2 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true, comment: "Street2"),
@@ -369,9 +378,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     STATE = table.Column<string>(type: "NVARCHAR2(3)", maxLength: 3, nullable: false, comment: "State"),
                     POSTAL_CODE = table.Column<string>(type: "NVARCHAR2(9)", maxLength: 9, nullable: false, comment: "Postal Code"),
                     COUNTRY_ISO = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: true, defaultValue: "US"),
+                    FULL_NAME = table.Column<string>(type: "NVARCHAR2(84)", maxLength: 84, nullable: false, comment: "FullName"),
+                    LAST_NAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "LastName"),
+                    FIRST_NAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "FirstName"),
+                    MIDDLE_NAME = table.Column<string>(type: "NVARCHAR2(25)", maxLength: 25, nullable: true, comment: "MiddleName"),
                     PHONE_NUMBER = table.Column<string>(type: "NVARCHAR2(16)", maxLength: 16, nullable: true),
                     MOBILE_NUMBER = table.Column<string>(type: "NVARCHAR2(16)", maxLength: 16, nullable: true),
-                    EMAIL_ADDRESS = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: true),
+                    EMAIL_ADDRESS = table.Column<string>(type: "NVARCHAR2(84)", maxLength: 84, nullable: true),
                     CREATED_DATE = table.Column<DateTime>(type: "DATE", nullable: false, defaultValueSql: "SYSDATE")
                 },
                 constraints: table =>
@@ -521,19 +534,21 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "DEMOGRAPHIC",
                 columns: table => new
                 {
+                    ID = table.Column<int>(type: "NUMBER(11)", precision: 11, nullable: false)
+                        .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
                     ORACLE_HCM_ID = table.Column<long>(type: "NUMBER(15)", precision: 15, nullable: false),
                     SSN = table.Column<long>(type: "NUMBER(9)", precision: 9, nullable: false),
                     BADGE_NUMBER = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false),
                     LAST_MODIFIED_DATE = table.Column<DateTime>(type: "DATE", nullable: false, defaultValueSql: "SYSDATE"),
+                    STORE_NUMBER = table.Column<short>(type: "NUMBER(4)", precision: 4, nullable: false, comment: "StoreNumber"),
+                    PAY_CLASSIFICATION_ID = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false, comment: "PayClassification"),
                     FULL_NAME = table.Column<string>(type: "NVARCHAR2(84)", maxLength: 84, nullable: false, comment: "FullName"),
                     LAST_NAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "LastName"),
                     FIRST_NAME = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "FirstName"),
                     MIDDLE_NAME = table.Column<string>(type: "NVARCHAR2(25)", maxLength: 25, nullable: true, comment: "MiddleName"),
-                    STORE_NUMBER = table.Column<short>(type: "NUMBER(3)", precision: 3, nullable: false, comment: "StoreNumber"),
-                    PAY_CLASSIFICATION_ID = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false, comment: "PayClassification"),
-                    PHONE_NUMBER = table.Column<string>(type: "NVARCHAR2(15)", maxLength: 15, nullable: true),
-                    MOBILE_NUMBER = table.Column<string>(type: "NVARCHAR2(15)", maxLength: 15, nullable: true),
-                    EMAIL_ADDRESS = table.Column<string>(type: "NVARCHAR2(50)", maxLength: 50, nullable: true),
+                    PHONE_NUMBER = table.Column<string>(type: "NVARCHAR2(16)", maxLength: 16, nullable: true),
+                    MOBILE_NUMBER = table.Column<string>(type: "NVARCHAR2(16)", maxLength: 16, nullable: true),
+                    EMAIL_ADDRESS = table.Column<string>(type: "NVARCHAR2(84)", maxLength: 84, nullable: true),
                     STREET = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "Street"),
                     STREET2 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true, comment: "Street2"),
                     STREET3 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true, comment: "Street3"),
@@ -556,7 +571,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DEMOGRAPHIC", x => x.ORACLE_HCM_ID);
+                    table.PrimaryKey("PK_DEMOGRAPHIC", x => x.ID);
                     table.ForeignKey(
                         name: "FK_DEMOGRAPHIC_COUNTRY_COUNTRY_ISO",
                         column: x => x.COUNTRY_ISO,
@@ -620,13 +635,21 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     FEDERAL_TAXES = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
                     STATE_TAXES = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
                     TAX_CODE_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: true),
-                    IS_TRANSFER_OUT = table.Column<bool>(type: "NUMBER(1)", nullable: false, defaultValue: false),
-                    IS_TRANSFER_IN = table.Column<bool>(type: "NUMBER(1)", nullable: false, defaultValue: false),
-                    TRANSFER_PSN = table.Column<long>(type: "NUMBER(19)", nullable: true)
+                    COMMENT_TYPE_ID = table.Column<int>(type: "NUMBER(10)", nullable: true),
+                    COMMENT_RELATED_CHECK_NUMBER = table.Column<int>(type: "NUMBER(10)", nullable: true),
+                    COMMENT_RELATED_STATE = table.Column<string>(type: "NVARCHAR2(2000)", nullable: true),
+                    COMMENT_RELATED_ORACLE_HCM_ID = table.Column<long>(type: "NUMBER(19)", nullable: true),
+                    COMMENT_RELATED_PSN_SUFFIX = table.Column<short>(type: "NUMBER(5)", nullable: true),
+                    COMMENT_IS_PARTIAL_TRANSACTION = table.Column<bool>(type: "NUMBER(1)", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PROFIT_DETAIL", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_PROFIT_DETAIL_COMMENT_TYPE_COMMENTTYPEID",
+                        column: x => x.COMMENT_TYPE_ID,
+                        principalTable: "COMMENT_TYPE",
+                        principalColumn: "ID");
                     table.ForeignKey(
                         name: "FK_PROFIT_DETAIL_PROFIT_CODE_PROFITCODEID",
                         column: x => x.PROFIT_CODE_ID,
@@ -683,7 +706,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         principalTable: "DISTRIBUTION_PAYEE",
                         principalColumn: "ID");
                     table.ForeignKey(
-                        name: "FK_DISTRIBUTION_DISTRIBUTIONSTATUSES_STATUSID",
+                        name: "FK_DISTRIBUTION_DISTRIBUTIONSTATUS_STATUSID",
                         column: x => x.STATUS_ID,
                         principalTable: "DISTRIBUTION_STATUS",
                         principalColumn: "ID");
@@ -717,7 +740,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
                     PSN_SUFFIX = table.Column<short>(type: "NUMBER(5)", precision: 5, nullable: false),
                     BADGE_NUMBER = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false),
-                    ORACLE_HCM_ID = table.Column<long>(type: "NUMBER(15)", precision: 15, nullable: false),
+                    DEMOGRAPHIC_ID = table.Column<int>(type: "NUMBER(11)", precision: 11, nullable: false),
                     BENEFICIARY_CONTACT_ID = table.Column<int>(type: "NUMBER(10)", nullable: false),
                     RELATIONSHIP = table.Column<string>(type: "NVARCHAR2(10)", maxLength: 10, nullable: true),
                     KIND_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: true),
@@ -741,17 +764,17 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         principalTable: "BENEFICIARY_KIND",
                         principalColumn: "ID");
                     table.ForeignKey(
-                        name: "FK_BENEFICIARY_DEMOGRAPHIC_ORACLE_HCM_ID",
-                        column: x => x.ORACLE_HCM_ID,
+                        name: "FK_BENEFICIARY_DEMOGRAPHICS_DEMOGRAPHICID",
+                        column: x => x.DEMOGRAPHIC_ID,
                         principalTable: "DEMOGRAPHIC",
-                        principalColumn: "ORACLE_HCM_ID");
+                        principalColumn: "ID");
                 });
 
             migrationBuilder.CreateTable(
                 name: "PAY_PROFIT",
                 columns: table => new
                 {
-                    ORACLE_HCM_ID = table.Column<long>(type: "NUMBER(15)", precision: 15, nullable: false),
+                    DEMOGRAPHIC_ID = table.Column<int>(type: "NUMBER(11)", precision: 11, nullable: false),
                     PROFIT_YEAR = table.Column<short>(type: "NUMBER(4)", precision: 4, nullable: false),
                     CURRENT_HOURS_YEAR = table.Column<decimal>(type: "DECIMAL(6,2)", precision: 6, scale: 2, nullable: false),
                     CURRENT_INCOME_YEAR = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
@@ -769,17 +792,17 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PAY_PROFIT", x => new { x.ORACLE_HCM_ID, x.PROFIT_YEAR });
+                    table.PrimaryKey("PK_PAY_PROFIT", x => new { x.DEMOGRAPHIC_ID, x.PROFIT_YEAR });
                     table.ForeignKey(
                         name: "FK_PAY_PROFIT_BENEFICIARY_TYPE_BENEFICIARYTYPEID",
                         column: x => x.BENEFICIARY_TYPE_ID,
                         principalTable: "BENEFICIARY_TYPE",
                         principalColumn: "ID");
                     table.ForeignKey(
-                        name: "FK_PAY_PROFIT_DEMOGRAPHIC_ORACLEHCMID",
-                        column: x => x.ORACLE_HCM_ID,
+                        name: "FK_PAY_PROFIT_DEMOGRAPHIC_DEMOGRAPHICID",
+                        column: x => x.DEMOGRAPHIC_ID,
                         principalTable: "DEMOGRAPHIC",
-                        principalColumn: "ORACLE_HCM_ID");
+                        principalColumn: "ID");
                     table.ForeignKey(
                         name: "FK_PAY_PROFIT_EMPLOYEE_TYPE_EMPLOYEETYPEID",
                         column: x => x.EMPLOYEE_TYPE_ID,
@@ -805,22 +828,22 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
                     CHECK_NUMBER = table.Column<int>(type: "NUMBER(15)", precision: 15, nullable: false),
                     SSN = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false),
-                    ORACLE_HCM_ID = table.Column<long>(type: "NUMBER(15)", precision: 15, nullable: false),
+                    DEMOGRAPHIC_ID = table.Column<int>(type: "NUMBER(11)", precision: 11, nullable: false),
                     PAYABLE_NAME = table.Column<string>(type: "NVARCHAR2(84)", maxLength: 84, nullable: false),
                     CHECK_AMOUNT = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
                     TAXCODEID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
-                    CHECK_DATE = table.Column<DateTime>(type: "DATE", nullable: false),
-                    VOID_FLAG = table.Column<bool>(type: "NUMBER(1)", nullable: false),
+                    CHECK_DATE = table.Column<DateTime>(type: "DATE", nullable: true),
+                    VOID_FLAG = table.Column<bool>(type: "NUMBER(1)", nullable: true),
                     VOID_CHECK_DATE = table.Column<DateTime>(type: "DATE", nullable: true),
                     VOID_RECON_DATE = table.Column<DateTime>(type: "DATE", nullable: true),
                     CLEAR_DATE = table.Column<DateTime>(type: "DATE", nullable: true),
                     CLEAR_DATE_LOADED = table.Column<DateTime>(type: "DATE", nullable: true),
-                    REF_NUMBER = table.Column<int>(type: "NUMBER(10)", maxLength: 36, nullable: false),
-                    FLOAT_DAYS = table.Column<short>(type: "NUMBER(6)", precision: 6, nullable: false),
+                    REF_NUMBER = table.Column<int>(type: "NUMBER(10)", maxLength: 36, nullable: true),
+                    FLOAT_DAYS = table.Column<short>(type: "NUMBER(6)", precision: 6, nullable: true),
                     CHECK_RUN_DATE = table.Column<DateTime>(type: "DATE", nullable: true),
                     DATE_LOADED = table.Column<DateTime>(type: "DATE", nullable: true),
-                    OTHER_BENEFICIARY = table.Column<bool>(type: "NUMBER(1)", nullable: false),
-                    MANUAL_CHECK = table.Column<bool>(type: "NUMBER(1)", nullable: false),
+                    OTHER_BENEFICIARY = table.Column<bool>(type: "NUMBER(1)", nullable: true),
+                    MANUAL_CHECK = table.Column<bool>(type: "NUMBER(1)", nullable: true),
                     REPLACE_CHECK = table.Column<string>(type: "NVARCHAR2(24)", maxLength: 24, nullable: true),
                     PSC_CHECK_ID = table.Column<int>(type: "NUMBER(15)", precision: 15, nullable: false)
                 },
@@ -828,10 +851,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 {
                     table.PrimaryKey("PK_PROFIT_SHARE_CHECK", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PROFIT_SHARE_CHECK_DEMOGRAPHIC_ORACLEHCMID",
-                        column: x => x.ORACLE_HCM_ID,
+                        name: "FK_PROFIT_SHARE_CHECK_DEMOGRAPHIC_DEMOGRAPHICID",
+                        column: x => x.DEMOGRAPHIC_ID,
                         principalTable: "DEMOGRAPHIC",
-                        principalColumn: "ORACLE_HCM_ID");
+                        principalColumn: "ID");
                     table.ForeignKey(
                         name: "FK_PROFIT_SHARE_CHECK_TAXCODES_TAXCODEID",
                         column: x => x.TAXCODEID,
@@ -2221,204 +2244,233 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "COMMENT_TYPE",
+                columns: new[] { "ID", "NAME" },
+                values: new object[,]
+                {
+                    { 1, "Transfer Out" },
+                    { 2, "Transfer In" },
+                    { 3, "QDRO Out" },
+                    { 4, "QDRO In" },
+                    { 5, "V-Only" },
+                    { 6, "Forfeit" },
+                    { 7, "Un-Forfeit" },
+                    { 8, "Class Action" },
+                    { 9, "Voided" },
+                    { 10, "Hardship" },
+                    { 11, "Distribution" },
+                    { 12, "Payoff" },
+                    { 13, "Dirpay" },
+                    { 14, "Rollover" },
+                    { 15, "Roth IRA" },
+                    { 16, "> 64 - 1 Year Vested" },
+                    { 17, "> 64 - 2 Year Vested" },
+                    { 18, "> 64 - 3 Year Vested" },
+                    { 19, "Military" },
+                    { 20, "Other" },
+                    { 21, "Rev" },
+                    { 22, "Unrev" }
+                });
+
+            migrationBuilder.InsertData(
                 table: "COUNTRY",
                 columns: new[] { "ISO", "ID", "NAME", "TELEPHONE_CODE" },
                 values: new object[,]
                 {
-                    { "AD", (short)4, "Andorra", "+376" },
-                    { "AE", (short)184, "United Arab Emirates", "+971" },
-                    { "AF", (short)1, "Afghanistan", "+93" },
-                    { "AG", (short)6, "Antigua and Barbuda", "+1-268" },
-                    { "AL", (short)2, "Albania", "+355" },
-                    { "AM", (short)8, "Armenia", "+374" },
-                    { "AO", (short)5, "Angola", "+244" },
-                    { "AR", (short)7, "Argentina", "+54" },
-                    { "AT", (short)10, "Austria", "+43" },
-                    { "AU", (short)9, "Australia", "+61" },
-                    { "AZ", (short)11, "Azerbaijan", "+994" },
-                    { "BA", (short)22, "Bosnia and Herzegovina", "+387" },
-                    { "BB", (short)15, "Barbados", "+1-246" },
-                    { "BD", (short)14, "Bangladesh", "+880" },
-                    { "BE", (short)17, "Belgium", "+32" },
-                    { "BF", (short)27, "Burkina Faso", "+226" },
-                    { "BG", (short)26, "Bulgaria", "+359" },
-                    { "BH", (short)13, "Bahrain", "+973" },
-                    { "BI", (short)28, "Burundi", "+257" },
-                    { "BJ", (short)19, "Benin", "+229" },
-                    { "BN", (short)25, "Brunei", "+673" },
-                    { "BO", (short)21, "Bolivia", "+591" },
-                    { "BR", (short)24, "Brazil", "+55" },
-                    { "BS", (short)12, "Bahamas", "+1-242" },
-                    { "BT", (short)20, "Bhutan", "+975" },
-                    { "BW", (short)23, "Botswana", "+267" },
-                    { "BY", (short)16, "Belarus", "+375" },
-                    { "BZ", (short)18, "Belize", "+501" },
-                    { "CA", (short)32, "Canada", "+1" },
-                    { "CD", (short)45, "Democratic Republic of the Congo", "+243" },
-                    { "CF", (short)33, "Central African Republic", "+236" },
-                    { "CG", (short)39, "Congo (Congo-Brazzaville)", "+242" },
-                    { "CH", (short)168, "Switzerland", "+41" },
-                    { "CL", (short)35, "Chile", "+56" },
-                    { "CM", (short)31, "Cameroon", "+237" },
-                    { "CN", (short)36, "China", "+86" },
-                    { "CO", (short)37, "Colombia", "+57" },
-                    { "CR", (short)40, "Costa Rica", "+506" },
-                    { "CU", (short)42, "Cuba", "+53" },
-                    { "CV", (short)29, "Cabo Verde", "+238" },
-                    { "CY", (short)43, "Cyprus", "+357" },
-                    { "CZ", (short)44, "Czechia (Czech Republic)", "+420" },
-                    { "DE", (short)64, "Germany", "+49" },
-                    { "DJ", (short)47, "Djibouti", "+253" },
-                    { "DK", (short)46, "Denmark", "+45" },
-                    { "DM", (short)48, "Dominica", "+1-767" },
-                    { "DO", (short)49, "Dominican Republic", "+1-809" },
-                    { "DZ", (short)3, "Algeria", "+213" },
-                    { "EC", (short)50, "Ecuador", "+593" },
-                    { "EE", (short)55, "Estonia", "+372" },
-                    { "EG", (short)51, "Egypt", "+20" },
-                    { "ER", (short)54, "Eritrea", "+291" },
-                    { "ES", (short)163, "Spain", "+34" },
-                    { "ET", (short)57, "Ethiopia", "+251" },
-                    { "FI", (short)59, "Finland", "+358" },
-                    { "FJ", (short)58, "Fiji", "+679" },
-                    { "FM", (short)110, "Micronesia", "+691" },
-                    { "FR", (short)60, "France", "+33" },
-                    { "GA", (short)61, "Gabon", "+241" },
-                    { "GB", (short)185, "United Kingdom", "+44" },
-                    { "GD", (short)67, "Grenada", "+1-473" },
-                    { "GE", (short)63, "Georgia", "+995" },
-                    { "GH", (short)65, "Ghana", "+233" },
-                    { "GM", (short)62, "Gambia", "+220" },
-                    { "GN", (short)69, "Guinea", "+224" },
-                    { "GQ", (short)53, "Equatorial Guinea", "+240" },
-                    { "GR", (short)66, "Greece", "+30" },
-                    { "GT", (short)68, "Guatemala", "+502" },
-                    { "GW", (short)70, "Guinea-Bissau", "+245" },
-                    { "GY", (short)71, "Guyana", "+592" },
-                    { "HN", (short)73, "Honduras", "+504" },
-                    { "HR", (short)41, "Croatia", "+385" },
-                    { "HT", (short)72, "Haiti", "+509" },
-                    { "HU", (short)74, "Hungary", "+36" },
-                    { "ID", (short)77, "Indonesia", "+62" },
-                    { "IE", (short)80, "Ireland", "+353" },
-                    { "IL", (short)81, "Israel", "+972" },
-                    { "IN", (short)76, "India", "+91" },
-                    { "IQ", (short)79, "Iraq", "+964" },
-                    { "IR", (short)78, "Iran", "+98" },
-                    { "IS", (short)75, "Iceland", "+354" },
-                    { "IT", (short)82, "Italy", "+39" },
-                    { "JM", (short)83, "Jamaica", "+1-876" },
-                    { "JO", (short)85, "Jordan", "+962" },
-                    { "JP", (short)84, "Japan", "+81" },
-                    { "KE", (short)87, "Kenya", "+254" },
-                    { "KG", (short)90, "Kyrgyzstan", "+996" },
-                    { "KH", (short)30, "Cambodia", "+855" },
-                    { "KI", (short)88, "Kiribati", "+686" },
-                    { "KM", (short)38, "Comoros", "+269" },
-                    { "KN", (short)144, "Saint Kitts and Nevis", "+1-869" },
-                    { "KP", (short)126, "North Korea", "+850" },
-                    { "KR", (short)161, "South Korea", "+82" },
-                    { "KW", (short)89, "Kuwait", "+965" },
-                    { "KZ", (short)86, "Kazakhstan", "+7" },
-                    { "LA", (short)91, "Laos", "+856" },
-                    { "LB", (short)93, "Lebanon", "+961" },
-                    { "LC", (short)145, "Saint Lucia", "+1-758" },
-                    { "LI", (short)97, "Liechtenstein", "+423" },
-                    { "LK", (short)164, "Sri Lanka", "+94" },
-                    { "LR", (short)95, "Liberia", "+231" },
-                    { "LS", (short)94, "Lesotho", "+266" },
-                    { "LT", (short)98, "Lithuania", "+370" },
-                    { "LU", (short)99, "Luxembourg", "+352" },
-                    { "LV", (short)92, "Latvia", "+371" },
-                    { "LY", (short)96, "Libya", "+218" },
-                    { "MA", (short)115, "Morocco", "+212" },
-                    { "MC", (short)112, "Monaco", "+377" },
-                    { "MD", (short)111, "Moldova", "+373" },
-                    { "ME", (short)114, "Montenegro", "+382" },
-                    { "MG", (short)100, "Madagascar", "+261" },
-                    { "MH", (short)106, "Marshall Islands", "+692" },
-                    { "MK", (short)127, "North Macedonia", "+389" },
-                    { "ML", (short)104, "Mali", "+223" },
-                    { "MM", (short)117, "Myanmar (Burma)", "+95" },
-                    { "MN", (short)113, "Mongolia", "+976" },
-                    { "MR", (short)107, "Mauritania", "+222" },
-                    { "MT", (short)105, "Malta", "+356" },
-                    { "MU", (short)108, "Mauritius", "+230" },
-                    { "MV", (short)103, "Maldives", "+960" },
-                    { "MW", (short)101, "Malawi", "+265" },
-                    { "MX", (short)109, "Mexico", "+52" },
-                    { "MY", (short)102, "Malaysia", "+60" },
-                    { "MZ", (short)116, "Mozambique", "+258" },
-                    { "NA", (short)118, "Namibia", "+264" },
-                    { "NE", (short)124, "Niger", "+227" },
-                    { "NG", (short)125, "Nigeria", "+234" },
-                    { "NI", (short)123, "Nicaragua", "+505" },
-                    { "NL", (short)121, "Netherlands", "+31" },
-                    { "NO", (short)128, "Norway", "+47" },
-                    { "NP", (short)120, "Nepal", "+977" },
-                    { "NR", (short)119, "Nauru", "+674" },
-                    { "NZ", (short)122, "New Zealand", "+64" },
-                    { "OM", (short)129, "Oman", "+968" },
-                    { "PA", (short)133, "Panama", "+507" },
-                    { "PE", (short)136, "Peru", "+51" },
-                    { "PG", (short)134, "Papua New Guinea", "+675" },
-                    { "PH", (short)137, "Philippines", "+63" },
-                    { "PK", (short)130, "Pakistan", "+92" },
-                    { "PL", (short)138, "Poland", "+48" },
-                    { "PS", (short)132, "Palestine State", "+970" },
-                    { "PT", (short)139, "Portugal", "+351" },
-                    { "PW", (short)131, "Palau", "+680" },
-                    { "PY", (short)135, "Paraguay", "+595" },
-                    { "QA", (short)140, "Qatar", "+974" },
-                    { "RO", (short)141, "Romania", "+40" },
-                    { "RS", (short)152, "Serbia", "+381" },
-                    { "RU", (short)142, "Russia", "+7" },
-                    { "RW", (short)143, "Rwanda", "+250" },
-                    { "SA", (short)150, "Saudi Arabia", "+966" },
-                    { "SB", (short)158, "Solomon Islands", "+677" },
-                    { "SC", (short)153, "Seychelles", "+248" },
-                    { "SD", (short)165, "Sudan", "+249" },
-                    { "SE", (short)167, "Sweden", "+46" },
-                    { "SG", (short)155, "Singapore", "+65" },
-                    { "SI", (short)157, "Slovenia", "+386" },
-                    { "SK", (short)156, "Slovakia", "+421" },
-                    { "SL", (short)154, "Sierra Leone", "+232" },
-                    { "SM", (short)148, "San Marino", "+378" },
-                    { "SN", (short)151, "Senegal", "+221" },
-                    { "SO", (short)159, "Somalia", "+252" },
-                    { "SR", (short)166, "Suriname", "+597" },
-                    { "SS", (short)162, "South Sudan", "+211" },
-                    { "ST", (short)149, "Sao Tome and Principe", "+239" },
-                    { "SV", (short)52, "El Salvador", "+503" },
-                    { "SY", (short)169, "Syria", "+963" },
-                    { "SZ", (short)56, "Eswatini (Swaziland)", "+268" },
-                    { "TD", (short)34, "Chad", "+235" },
-                    { "TG", (short)175, "Togo", "+228" },
-                    { "TH", (short)173, "Thailand", "+66" },
-                    { "TJ", (short)171, "Tajikistan", "+992" },
-                    { "TL", (short)174, "Timor-Leste", "+670" },
-                    { "TM", (short)180, "Turkmenistan", "+993" },
-                    { "TN", (short)178, "Tunisia", "+216" },
-                    { "TO", (short)176, "Tonga", "+676" },
-                    { "TR", (short)179, "Turkey", "+90" },
-                    { "TT", (short)177, "Trinidad and Tobago", "+1-868" },
-                    { "TV", (short)181, "Tuvalu", "+688" },
-                    { "TW", (short)170, "Taiwan", "+886" },
-                    { "TZ", (short)172, "Tanzania", "+255" },
-                    { "UA", (short)183, "Ukraine", "+380" },
-                    { "UG", (short)182, "Uganda", "+256" },
-                    { "US", (short)186, "United States of America", "+1" },
-                    { "UY", (short)187, "Uruguay", "+598" },
-                    { "UZ", (short)188, "Uzbekistan", "+998" },
-                    { "VC", (short)146, "Saint Vincent and the Grenadines", "+1-784" },
-                    { "VE", (short)190, "Venezuela", "+58" },
-                    { "VN", (short)191, "Vietnam", "+84" },
-                    { "VU", (short)189, "Vanuatu", "+678" },
-                    { "WS", (short)147, "Samoa", "+685" },
-                    { "YE", (short)192, "Yemen", "+967" },
-                    { "ZA", (short)160, "South Africa", "+27" },
-                    { "ZM", (short)193, "Zambia", "+260" },
-                    { "ZW", (short)194, "Zimbabwe", "+263" }
+                    { "AD", (byte)4, "Andorra", "+376" },
+                    { "AE", (byte)184, "United Arab Emirates", "+971" },
+                    { "AF", (byte)1, "Afghanistan", "+93" },
+                    { "AG", (byte)6, "Antigua and Barbuda", "+1-268" },
+                    { "AL", (byte)2, "Albania", "+355" },
+                    { "AM", (byte)8, "Armenia", "+374" },
+                    { "AO", (byte)5, "Angola", "+244" },
+                    { "AR", (byte)7, "Argentina", "+54" },
+                    { "AT", (byte)10, "Austria", "+43" },
+                    { "AU", (byte)9, "Australia", "+61" },
+                    { "AZ", (byte)11, "Azerbaijan", "+994" },
+                    { "BA", (byte)22, "Bosnia and Herzegovina", "+387" },
+                    { "BB", (byte)15, "Barbados", "+1-246" },
+                    { "BD", (byte)14, "Bangladesh", "+880" },
+                    { "BE", (byte)17, "Belgium", "+32" },
+                    { "BF", (byte)27, "Burkina Faso", "+226" },
+                    { "BG", (byte)26, "Bulgaria", "+359" },
+                    { "BH", (byte)13, "Bahrain", "+973" },
+                    { "BI", (byte)28, "Burundi", "+257" },
+                    { "BJ", (byte)19, "Benin", "+229" },
+                    { "BN", (byte)25, "Brunei", "+673" },
+                    { "BO", (byte)21, "Bolivia", "+591" },
+                    { "BR", (byte)24, "Brazil", "+55" },
+                    { "BS", (byte)12, "Bahamas", "+1-242" },
+                    { "BT", (byte)20, "Bhutan", "+975" },
+                    { "BW", (byte)23, "Botswana", "+267" },
+                    { "BY", (byte)16, "Belarus", "+375" },
+                    { "BZ", (byte)18, "Belize", "+501" },
+                    { "CA", (byte)32, "Canada", "+1" },
+                    { "CD", (byte)45, "Democratic Republic of the Congo", "+243" },
+                    { "CF", (byte)33, "Central African Republic", "+236" },
+                    { "CG", (byte)39, "Congo (Congo-Brazzaville)", "+242" },
+                    { "CH", (byte)168, "Switzerland", "+41" },
+                    { "CL", (byte)35, "Chile", "+56" },
+                    { "CM", (byte)31, "Cameroon", "+237" },
+                    { "CN", (byte)36, "China", "+86" },
+                    { "CO", (byte)37, "Colombia", "+57" },
+                    { "CR", (byte)40, "Costa Rica", "+506" },
+                    { "CU", (byte)42, "Cuba", "+53" },
+                    { "CV", (byte)29, "Cabo Verde", "+238" },
+                    { "CY", (byte)43, "Cyprus", "+357" },
+                    { "CZ", (byte)44, "Czechia (Czech Republic)", "+420" },
+                    { "DE", (byte)64, "Germany", "+49" },
+                    { "DJ", (byte)47, "Djibouti", "+253" },
+                    { "DK", (byte)46, "Denmark", "+45" },
+                    { "DM", (byte)48, "Dominica", "+1-767" },
+                    { "DO", (byte)49, "Dominican Republic", "+1-809" },
+                    { "DZ", (byte)3, "Algeria", "+213" },
+                    { "EC", (byte)50, "Ecuador", "+593" },
+                    { "EE", (byte)55, "Estonia", "+372" },
+                    { "EG", (byte)51, "Egypt", "+20" },
+                    { "ER", (byte)54, "Eritrea", "+291" },
+                    { "ES", (byte)163, "Spain", "+34" },
+                    { "ET", (byte)57, "Ethiopia", "+251" },
+                    { "FI", (byte)59, "Finland", "+358" },
+                    { "FJ", (byte)58, "Fiji", "+679" },
+                    { "FM", (byte)110, "Micronesia", "+691" },
+                    { "FR", (byte)60, "France", "+33" },
+                    { "GA", (byte)61, "Gabon", "+241" },
+                    { "GB", (byte)185, "United Kingdom", "+44" },
+                    { "GD", (byte)67, "Grenada", "+1-473" },
+                    { "GE", (byte)63, "Georgia", "+995" },
+                    { "GH", (byte)65, "Ghana", "+233" },
+                    { "GM", (byte)62, "Gambia", "+220" },
+                    { "GN", (byte)69, "Guinea", "+224" },
+                    { "GQ", (byte)53, "Equatorial Guinea", "+240" },
+                    { "GR", (byte)66, "Greece", "+30" },
+                    { "GT", (byte)68, "Guatemala", "+502" },
+                    { "GW", (byte)70, "Guinea-Bissau", "+245" },
+                    { "GY", (byte)71, "Guyana", "+592" },
+                    { "HN", (byte)73, "Honduras", "+504" },
+                    { "HR", (byte)41, "Croatia", "+385" },
+                    { "HT", (byte)72, "Haiti", "+509" },
+                    { "HU", (byte)74, "Hungary", "+36" },
+                    { "ID", (byte)77, "Indonesia", "+62" },
+                    { "IE", (byte)80, "Ireland", "+353" },
+                    { "IL", (byte)81, "Israel", "+972" },
+                    { "IN", (byte)76, "India", "+91" },
+                    { "IQ", (byte)79, "Iraq", "+964" },
+                    { "IR", (byte)78, "Iran", "+98" },
+                    { "IS", (byte)75, "Iceland", "+354" },
+                    { "IT", (byte)82, "Italy", "+39" },
+                    { "JM", (byte)83, "Jamaica", "+1-876" },
+                    { "JO", (byte)85, "Jordan", "+962" },
+                    { "JP", (byte)84, "Japan", "+81" },
+                    { "KE", (byte)87, "Kenya", "+254" },
+                    { "KG", (byte)90, "Kyrgyzstan", "+996" },
+                    { "KH", (byte)30, "Cambodia", "+855" },
+                    { "KI", (byte)88, "Kiribati", "+686" },
+                    { "KM", (byte)38, "Comoros", "+269" },
+                    { "KN", (byte)144, "Saint Kitts and Nevis", "+1-869" },
+                    { "KP", (byte)126, "North Korea", "+850" },
+                    { "KR", (byte)161, "South Korea", "+82" },
+                    { "KW", (byte)89, "Kuwait", "+965" },
+                    { "KZ", (byte)86, "Kazakhstan", "+7" },
+                    { "LA", (byte)91, "Laos", "+856" },
+                    { "LB", (byte)93, "Lebanon", "+961" },
+                    { "LC", (byte)145, "Saint Lucia", "+1-758" },
+                    { "LI", (byte)97, "Liechtenstein", "+423" },
+                    { "LK", (byte)164, "Sri Lanka", "+94" },
+                    { "LR", (byte)95, "Liberia", "+231" },
+                    { "LS", (byte)94, "Lesotho", "+266" },
+                    { "LT", (byte)98, "Lithuania", "+370" },
+                    { "LU", (byte)99, "Luxembourg", "+352" },
+                    { "LV", (byte)92, "Latvia", "+371" },
+                    { "LY", (byte)96, "Libya", "+218" },
+                    { "MA", (byte)115, "Morocco", "+212" },
+                    { "MC", (byte)112, "Monaco", "+377" },
+                    { "MD", (byte)111, "Moldova", "+373" },
+                    { "ME", (byte)114, "Montenegro", "+382" },
+                    { "MG", (byte)100, "Madagascar", "+261" },
+                    { "MH", (byte)106, "Marshall Islands", "+692" },
+                    { "MK", (byte)127, "North Macedonia", "+389" },
+                    { "ML", (byte)104, "Mali", "+223" },
+                    { "MM", (byte)117, "Myanmar (Burma)", "+95" },
+                    { "MN", (byte)113, "Mongolia", "+976" },
+                    { "MR", (byte)107, "Mauritania", "+222" },
+                    { "MT", (byte)105, "Malta", "+356" },
+                    { "MU", (byte)108, "Mauritius", "+230" },
+                    { "MV", (byte)103, "Maldives", "+960" },
+                    { "MW", (byte)101, "Malawi", "+265" },
+                    { "MX", (byte)109, "Mexico", "+52" },
+                    { "MY", (byte)102, "Malaysia", "+60" },
+                    { "MZ", (byte)116, "Mozambique", "+258" },
+                    { "NA", (byte)118, "Namibia", "+264" },
+                    { "NE", (byte)124, "Niger", "+227" },
+                    { "NG", (byte)125, "Nigeria", "+234" },
+                    { "NI", (byte)123, "Nicaragua", "+505" },
+                    { "NL", (byte)121, "Netherlands", "+31" },
+                    { "NO", (byte)128, "Norway", "+47" },
+                    { "NP", (byte)120, "Nepal", "+977" },
+                    { "NR", (byte)119, "Nauru", "+674" },
+                    { "NZ", (byte)122, "New Zealand", "+64" },
+                    { "OM", (byte)129, "Oman", "+968" },
+                    { "PA", (byte)133, "Panama", "+507" },
+                    { "PE", (byte)136, "Peru", "+51" },
+                    { "PG", (byte)134, "Papua New Guinea", "+675" },
+                    { "PH", (byte)137, "Philippines", "+63" },
+                    { "PK", (byte)130, "Pakistan", "+92" },
+                    { "PL", (byte)138, "Poland", "+48" },
+                    { "PS", (byte)132, "Palestine State", "+970" },
+                    { "PT", (byte)139, "Portugal", "+351" },
+                    { "PW", (byte)131, "Palau", "+680" },
+                    { "PY", (byte)135, "Paraguay", "+595" },
+                    { "QA", (byte)140, "Qatar", "+974" },
+                    { "RO", (byte)141, "Romania", "+40" },
+                    { "RS", (byte)152, "Serbia", "+381" },
+                    { "RU", (byte)142, "Russia", "+7" },
+                    { "RW", (byte)143, "Rwanda", "+250" },
+                    { "SA", (byte)150, "Saudi Arabia", "+966" },
+                    { "SB", (byte)158, "Solomon Islands", "+677" },
+                    { "SC", (byte)153, "Seychelles", "+248" },
+                    { "SD", (byte)165, "Sudan", "+249" },
+                    { "SE", (byte)167, "Sweden", "+46" },
+                    { "SG", (byte)155, "Singapore", "+65" },
+                    { "SI", (byte)157, "Slovenia", "+386" },
+                    { "SK", (byte)156, "Slovakia", "+421" },
+                    { "SL", (byte)154, "Sierra Leone", "+232" },
+                    { "SM", (byte)148, "San Marino", "+378" },
+                    { "SN", (byte)151, "Senegal", "+221" },
+                    { "SO", (byte)159, "Somalia", "+252" },
+                    { "SR", (byte)166, "Suriname", "+597" },
+                    { "SS", (byte)162, "South Sudan", "+211" },
+                    { "ST", (byte)149, "Sao Tome and Principe", "+239" },
+                    { "SV", (byte)52, "El Salvador", "+503" },
+                    { "SY", (byte)169, "Syria", "+963" },
+                    { "SZ", (byte)56, "Eswatini (Swaziland)", "+268" },
+                    { "TD", (byte)34, "Chad", "+235" },
+                    { "TG", (byte)175, "Togo", "+228" },
+                    { "TH", (byte)173, "Thailand", "+66" },
+                    { "TJ", (byte)171, "Tajikistan", "+992" },
+                    { "TL", (byte)174, "Timor-Leste", "+670" },
+                    { "TM", (byte)180, "Turkmenistan", "+993" },
+                    { "TN", (byte)178, "Tunisia", "+216" },
+                    { "TO", (byte)176, "Tonga", "+676" },
+                    { "TR", (byte)179, "Turkey", "+90" },
+                    { "TT", (byte)177, "Trinidad and Tobago", "+1-868" },
+                    { "TV", (byte)181, "Tuvalu", "+688" },
+                    { "TW", (byte)170, "Taiwan", "+886" },
+                    { "TZ", (byte)172, "Tanzania", "+255" },
+                    { "UA", (byte)183, "Ukraine", "+380" },
+                    { "UG", (byte)182, "Uganda", "+256" },
+                    { "US", (byte)186, "United States of America", "+1" },
+                    { "UY", (byte)187, "Uruguay", "+598" },
+                    { "UZ", (byte)188, "Uzbekistan", "+998" },
+                    { "VC", (byte)146, "Saint Vincent and the Grenadines", "+1-784" },
+                    { "VE", (byte)190, "Venezuela", "+58" },
+                    { "VN", (byte)191, "Vietnam", "+84" },
+                    { "VU", (byte)189, "Vanuatu", "+678" },
+                    { "WS", (byte)147, "Samoa", "+685" },
+                    { "YE", (byte)192, "Yemen", "+967" },
+                    { "ZA", (byte)160, "South Africa", "+27" },
+                    { "ZM", (byte)193, "Zambia", "+260" },
+                    { "ZW", (byte)194, "Zimbabwe", "+263" }
                 });
 
             migrationBuilder.InsertData(
@@ -2752,14 +2804,14 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 column: "BENEFICIARY_CONTACT_ID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_BENEFICIARY_DEMOGRAPHICID",
+                table: "BENEFICIARY",
+                column: "DEMOGRAPHIC_ID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_BENEFICIARY_KINDID",
                 table: "BENEFICIARY",
                 column: "KIND_ID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_BENEFICIARY_ORACLE_HCM_ID",
-                table: "BENEFICIARY",
-                column: "ORACLE_HCM_ID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_BENEFICIARY_PSNSUFFIX",
@@ -2817,6 +2869,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "IX_DEMOGRAPHIC_GENDERID",
                 table: "DEMOGRAPHIC",
                 column: "GENDER_ID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DEMOGRAPHIC_ORACLEHCMID",
+                table: "DEMOGRAPHIC",
+                column: "ORACLE_HCM_ID",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_DEMOGRAPHIC_PAYCLASSIFICATIONID",
@@ -2955,6 +3013,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 column: "ZERO_CONTRIBUTION_REASON_ID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_PROFIT_DETAIL_COMMENTTYPEID",
+                table: "PROFIT_DETAIL",
+                column: "COMMENT_TYPE_ID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PROFIT_DETAIL_PROFITCODEID",
                 table: "PROFIT_DETAIL",
                 column: "PROFIT_CODE_ID");
@@ -2975,15 +3038,20 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 column: "ZERO_CONTRIBUTION_REASON_ID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PROFIT_SHARE_CHECK_CHECKNUMBER",
+                name: "IX_PROFIT_SHARE_CHECK_CHECKNUMBER_ISVOIDED",
                 table: "PROFIT_SHARE_CHECK",
-                column: "CHECK_NUMBER",
-                unique: true);
+                columns: new[] { "CHECK_NUMBER", "VOID_FLAG" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_PROFIT_SHARE_CHECK_ORACLEHCMID",
+                name: "IX_PROFIT_SHARE_CHECK_DEMOGRAPHICID",
                 table: "PROFIT_SHARE_CHECK",
-                column: "ORACLE_HCM_ID");
+                column: "DEMOGRAPHIC_ID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PROFIT_SHARE_CHECK_PSCCHECKID",
+                table: "PROFIT_SHARE_CHECK",
+                column: "PSC_CHECK_ID",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_PROFIT_SHARE_CHECK_TAXCODEID",
@@ -3068,6 +3136,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "ENROLLMENT");
+
+            migrationBuilder.DropTable(
+                name: "COMMENT_TYPE");
 
             migrationBuilder.DropTable(
                 name: "PROFIT_CODE");

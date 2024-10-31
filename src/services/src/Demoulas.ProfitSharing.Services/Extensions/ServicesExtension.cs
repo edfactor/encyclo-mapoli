@@ -1,4 +1,5 @@
 ﻿using Demoulas.Common.Caching.Interfaces;
+using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Services.HostedServices;
 using Demoulas.ProfitSharing.Services.Mappers;
@@ -25,7 +26,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IGetEligibleEmployeesService, GetEligibleEmployeesService>();
         _ = builder.Services.AddScoped<IMilitaryAndRehireService, MilitaryAndRehireService>();
         _ = builder.Services.AddScoped<IWagesService, WagesService>();
-
+        
         _ = builder.Services.AddScoped<ContributionService>();
         
 
@@ -40,7 +41,6 @@ public static class ServicesExtension
         _ = builder.Services.AddKeyedSingleton<IBaseCacheService<LookupTableCache<byte>>, DepartmentHostedService>(nameof(DepartmentHostedService));
 
 
-        _ = builder.ConfigureMassTransitServices();
         _ = builder.ConfigureOracleHcm();
 
         #region Mappers
@@ -54,6 +54,8 @@ public static class ServicesExtension
 
         #endregion
 
+        builder.ConfigureMassTransitServices();
+        
         return builder;
     }
 }

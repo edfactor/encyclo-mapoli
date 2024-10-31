@@ -18,6 +18,7 @@ namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
 internal sealed record TestEmployee
 {
+    public int Id { get; init; }
     public int OracleHcmId { get; init; }
     public int BadgeNumber { get; init; }
     public required string FullName { get; init; }
@@ -199,6 +200,7 @@ public class GetEligibleEmployeesTests : ApiTestBase<Api.Program>
 
     private TestEmployee StockEmployee() => new TestEmployee
     {
+        Id = 17,
         OracleHcmId = 7,
         BadgeNumber = 77,
         FullName = "Smith, Joe K",
@@ -210,12 +212,14 @@ public class GetEligibleEmployeesTests : ApiTestBase<Api.Program>
 
     private static async Task save(TestEmployee testEmployee, ProfitSharingDbContext ctx)
     {
-        var pp = await ctx.PayProfits.Include(p => p.Demographic != null).FirstAsync();
+        var pp = await ctx.PayProfits.Include(payProfit => payProfit.Demographic!)
+            .ThenInclude(demographic => demographic.ContactInfo).Include(p => p.Demographic != null).FirstAsync();
         pp.ProfitYear = TestProfitYear;
-        pp.OracleHcmId = testEmployee.OracleHcmId;
+        pp.DemographicId = testEmployee.Id;
         pp.CurrentHoursYear = testEmployee.HoursWorked;
         var demo = pp.Demographic!;
         demo.OracleHcmId = testEmployee.OracleHcmId;
+        demo.Id = testEmployee.Id;
         demo.ContactInfo.FullName = testEmployee.FullName;
         demo.BadgeNumber = testEmployee.BadgeNumber;
         demo.DateOfBirth = convertAgeToBirthDate(TestProfitYear, testEmployee.Age);

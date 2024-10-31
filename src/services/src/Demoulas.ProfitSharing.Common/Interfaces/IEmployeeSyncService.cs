@@ -2,5 +2,5 @@
 
 public interface IEmployeeSyncService
 {
-    Task SynchronizeEmployees(CancellationToken cancellationToken);
+    Task SynchronizeEmployees(string requestedBy = "System", CancellationToken cancellationToken = default);
 }

@@ -37,7 +37,7 @@ public sealed class CalendarService : ICalendarService
         }
         return _dataContextFactory.UseReadOnlyContext(context =>
         {
-            return context.CaldarRecords.Where(record => record.WeekDate >= dateTime)
+            return context.CaldarRecords.Where(record => record.WeekEndingDate >= dateTime)
                 .OrderBy(record => record.WeekEndingDate)
                 .Select(r => r.WeekEndingDate)
                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);

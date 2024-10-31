@@ -40,7 +40,7 @@ public class CleanupReportService : ICleanupReportService
             var rslts = await (from dem in ctx.Demographics
                     join pdJoin in ctx.ProfitDetails on dem.Ssn equals pdJoin.Ssn into demPdJoin
                     from pd in demPdJoin.DefaultIfEmpty()
-                    join pp in ctx.PayProfits on dem.OracleHcmId equals pp.OracleHcmId into DemPdPpJoin
+                    join pp in ctx.PayProfits on dem.Id equals pp.DemographicId into DemPdPpJoin
                     from DemPdPp in DemPdPpJoin.DefaultIfEmpty()
                     where DemPdPp.ProfitYear == req.ProfitYear && dupSsns.Contains(dem.Ssn)
                     group new { dem, DemPdPp }
@@ -132,7 +132,7 @@ public class CleanupReportService : ICleanupReportService
             var results = await _dataContextFactory.UseReadOnlyContext(ctx =>
             {
                 var query = from dem in ctx.Demographics
-                    where !(from pp in ctx.PayProfits select pp.OracleHcmId).Contains(dem.OracleHcmId)
+                    where !(from pp in ctx.PayProfits select pp.DemographicId).Contains(dem.Id)
                     select new DemographicBadgesNotInPayProfitResponse
                     {
                         EmployeeBadge = dem.BadgeNumber,
@@ -191,7 +191,7 @@ public class CleanupReportService : ICleanupReportService
                     select g.Key.FullName);
 
                 var query = from dem in ctx.Demographics
-                    join ppLj in ctx.PayProfits on dem.OracleHcmId equals ppLj.OracleHcmId into tmpPayProfit
+                    join ppLj in ctx.PayProfits on dem.Id equals ppLj.DemographicId into tmpPayProfit
                     from pp in tmpPayProfit.DefaultIfEmpty()
                     join pdLj in ctx.ProfitDetails on dem.Ssn equals pdLj.Ssn into tmpProfitDetails
                     from pd in tmpProfitDetails.DefaultIfEmpty()

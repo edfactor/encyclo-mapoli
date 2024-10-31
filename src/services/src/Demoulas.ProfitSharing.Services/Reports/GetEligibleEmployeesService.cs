@@ -46,7 +46,7 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
                 .Where(p => p.Demographic!.DateOfBirth <= birthDateOfExactly21YearsOld /*over 21*/  && p.CurrentHoursYear >= 1000 && p.Demographic!.EmploymentStatusId != EmploymentStatus.Constants.Terminated)
                 .Select(p => new GetEligibleEmployeesResponseDto()
                 {
-                    OracleHcmId = p.OracleHcmId,
+                    OracleHcmId = p.Demographic!.OracleHcmId,
                     BadgeNumber = p.Demographic!.BadgeNumber,
                     FullName = p.Demographic!.ContactInfo.FullName!,
                 })

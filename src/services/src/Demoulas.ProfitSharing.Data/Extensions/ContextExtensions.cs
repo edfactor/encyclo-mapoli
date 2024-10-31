@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
+﻿using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping;
+using Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.MassTransit;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.NotOwned;
 using Microsoft.EntityFrameworkCore;
