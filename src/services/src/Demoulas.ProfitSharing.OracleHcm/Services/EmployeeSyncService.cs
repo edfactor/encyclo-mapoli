@@ -14,11 +14,14 @@ using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Validators;
 using Demoulas.Util.Extensions;
-using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services;
 
+/// <summary>
+/// Service responsible for synchronizing employee data from the Oracle HCM system to the Profit Sharing system.
+/// This includes fetching employee data, validating it, and updating the Profit Sharing database.
+/// </summary>
 public sealed class EmployeeSyncService : IEmployeeSyncService
 {
     private readonly OracleDemographicsService _oracleDemographicsService;
@@ -40,7 +43,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
         _employeeValidator = employeeValidator;
     }
 
-    public async Task SynchronizeEmployees(CancellationToken cancellationToken)
+    public async Task SynchronizeEmployees(string requestedBy = "System", CancellationToken cancellationToken = default)
     {
         using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(SynchronizeEmployees), ActivityKind.Internal);
 
@@ -48,7 +51,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
         {
             JobTypeId = JobType.Constants.Full,
             StartMethodId = StartMethod.Constants.System,
-            RequestedBy = "System",
+            RequestedBy = requestedBy,
             JobStatusId = JobStatus.Constants.Running,
             Started = DateTime.Now
         };
@@ -62,7 +65,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
 
         await CleanAuditError(cancellationToken);
         var oracleHcmEmployees = _oracleDemographicsService.GetAllEmployees(cancellationToken);
-        var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, cancellationToken);
+        var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, requestedBy, cancellationToken);
         await _demographicsService.AddDemographicsStream(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
 
         job.Completed = DateTime.Now;
@@ -70,7 +73,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
         await _profitSharingDataContextFactory.UseWritableContext(db => db.SaveChangesAsync(cancellationToken), cancellationToken);
     }
 
-    private Task AuditError(int badgeNumber, IEnumerable<FluentValidation.Results.ValidationFailure> errorMessages, IAppUser? appUser = null, CancellationToken cancellationToken = default,
+    private Task AuditError(int badgeNumber, IEnumerable<FluentValidation.Results.ValidationFailure> errorMessages, string requestedBy, CancellationToken cancellationToken = default,
         params object?[] args)
     {
         return _profitSharingDataContextFactory.UseWritableContext(c =>
@@ -86,7 +89,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
                     BadgeNumber = badgeNumber,
                     InvalidValue = e.AttemptedValue?.ToString() ?? e.CustomState?.ToString(),
                     Message = e.ErrorMessage,
-                    UserName = appUser?.UserName ?? "System",
+                    UserName = requestedBy,
                     PropertyName = e.PropertyName
                 });
             c.DemographicSyncAudit.AddRange(auditRecords);
@@ -105,7 +108,8 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
         }, cancellationToken);
     }
 
-    private async IAsyncEnumerable<DemographicsRequest> ConvertToRequestDto(IAsyncEnumerable<OracleEmployee?> asyncEnumerable,
+    private async IAsyncEnumerable<DemographicsRequest> ConvertToRequestDto(IAsyncEnumerable<OracleEmployee?> asyncEnumerable, 
+        string requestedBy,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(ConvertToRequestDto), ActivityKind.Internal);
@@ -120,7 +124,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
             var result = await _employeeValidator.ValidateAsync(employee!, cancellationToken);
             if (!result.IsValid)
             {
-                await AuditError(badgeNumber, result.Errors, null, cancellationToken);
+                await AuditError(badgeNumber, result.Errors, requestedBy, cancellationToken);
                 continue;
             }
 

@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using Demoulas.Common.Api.Extensions;
 using Demoulas.Common.Contracts.Configuration;
+using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.ProfitSharing.Api.Extensions;
@@ -29,7 +30,9 @@ ElasticSearchConfig smartConfig = new ElasticSearchConfig();
 builder.Configuration.Bind("Logging:Smart", smartConfig);
 
 await builder.SetDefaultLoggerConfigurationAsync(smartConfig);
-builder.Services.AddTransient<IClaimsTransformation, ImpersonationAndEnvironmentAwareClaimsTransformation>();
+
+_ = builder.Services.AddTransient<IClaimsTransformation, ImpersonationAndEnvironmentAwareClaimsTransformation>();
+
 if (!builder.Environment.IsTestEnvironment())
 {
     var rolePermissionService = new RolePermissionService();

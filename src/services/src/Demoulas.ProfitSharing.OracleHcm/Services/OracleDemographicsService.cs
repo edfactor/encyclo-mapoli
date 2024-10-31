@@ -30,7 +30,7 @@ internal sealed class OracleDemographicsService
     /// <returns></returns>
     public async IAsyncEnumerable<OracleEmployee?> GetAllEmployees([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        string initialUrl = await BuildUrl(_oracleHcmConfig.Url, offset: 62250, cancellationToken: cancellationToken);
+        string initialUrl = await BuildUrl(_oracleHcmConfig.Url, cancellationToken: cancellationToken);
 
         var returnValues = FetchOracleDemographic(initialUrl, cancellationToken);
         await foreach (var emp in returnValues)
