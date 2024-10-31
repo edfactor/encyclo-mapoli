@@ -10,9 +10,11 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Validators;
 using Demoulas.Util.Extensions;
+using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services;
@@ -41,10 +43,31 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
     public async Task SynchronizeEmployees(CancellationToken cancellationToken)
     {
         using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(SynchronizeEmployees), ActivityKind.Internal);
+
+        var job = new Job
+        {
+            JobTypeId = JobType.Constants.Full,
+            StartMethodId = StartMethod.Constants.System,
+            RequestedBy = "System",
+            JobStatusId = JobStatus.Constants.Running,
+            Started = DateTime.Now
+        };
+
+        await _profitSharingDataContextFactory.UseWritableContext(db =>
+        {
+            db.Jobs.Add(job);
+            return db.SaveChangesAsync(cancellationToken);
+        }, cancellationToken);
+
+
         await CleanAuditError(cancellationToken);
         var oracleHcmEmployees = _oracleDemographicsService.GetAllEmployees(cancellationToken);
         var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, cancellationToken);
         await _demographicsService.AddDemographicsStream(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
+
+        job.Completed = DateTime.Now;
+        job.JobStatusId = JobStatus.Constants.Completed;
+        await _profitSharingDataContextFactory.UseWritableContext(db => db.SaveChangesAsync(cancellationToken), cancellationToken);
     }
 
     private Task AuditError(int badgeNumber, IEnumerable<FluentValidation.Results.ValidationFailure> errorMessages, IAppUser? appUser = null, CancellationToken cancellationToken = default,

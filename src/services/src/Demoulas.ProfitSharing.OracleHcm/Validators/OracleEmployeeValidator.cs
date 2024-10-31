@@ -14,7 +14,7 @@ public sealed class OracleEmployeeValidator : Validator<OracleEmployee>
 
     private readonly IBaseCacheService<LookupTableCache<byte>> _accountCache;
     private readonly IBaseCacheService<LookupTableCache<byte>> _depCache;
-    private const int MaxStoreId = 899;
+    private const int MaxStoreId = 10_000;
 
     private const string BadAddress = "No address found for employee";
     private const string BadWorkRelationship = "No work relationship found for employee";

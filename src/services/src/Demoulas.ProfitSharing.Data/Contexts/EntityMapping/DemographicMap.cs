@@ -43,7 +43,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             .HasColumnName("ORACLE_HCM_ID");
 
         _ = builder.Property(e => e.StoreNumber)
-            .HasPrecision(3)
+            .HasPrecision(4)
             .HasColumnName("STORE_NUMBER")
             .HasComment("StoreNumber");
 

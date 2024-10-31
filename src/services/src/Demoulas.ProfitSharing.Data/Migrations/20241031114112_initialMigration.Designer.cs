@@ -12,7 +12,7 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    [Migration("20241029194300_initialMigration")]
+    [Migration("20241031114112_initialMigration")]
     partial class initialMigration
     {
         /// <inheritdoc />
@@ -1597,7 +1597,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)")
+                        .HasPrecision(11)
+                        .HasColumnType("NUMBER(11)")
                         .HasColumnName("ID");
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
@@ -1681,8 +1682,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("SSN");
 
                     b.Property<short>("StoreNumber")
-                        .HasPrecision(3)
-                        .HasColumnType("NUMBER(3)")
+                        .HasPrecision(4)
+                        .HasColumnType("NUMBER(4)")
                         .HasColumnName("STORE_NUMBER")
                         .HasComment("StoreNumber");
 
@@ -29973,7 +29974,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.OwnsOne("Demoulas.ProfitSharing.Data.Entities.Address", "Address", b1 =>
                         {
                             b1.Property<int>("DemographicId")
-                                .HasColumnType("NUMBER(10)")
+                                .HasColumnType("NUMBER(11)")
                                 .HasColumnName("ID");
 
                             b1.Property<string>("City")
@@ -30050,7 +30051,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.OwnsOne("Demoulas.ProfitSharing.Data.Entities.ContactInfo", "ContactInfo", b1 =>
                         {
                             b1.Property<int>("DemographicId")
-                                .HasColumnType("NUMBER(10)")
+                                .HasColumnType("NUMBER(11)")
                                 .HasColumnName("ID");
 
                             b1.Property<string>("EmailAddress")

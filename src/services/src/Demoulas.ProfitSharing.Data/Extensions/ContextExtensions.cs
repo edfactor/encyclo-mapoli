@@ -14,7 +14,6 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new BeneficiaryMap());
         modelBuilder.ApplyConfiguration(new BeneficiaryTypeMap());
         modelBuilder.ApplyConfiguration(new CaldarRecordMap());
-        modelBuilder.ApplyConfiguration(new AccountingPeriodConfiguration());
         modelBuilder.ApplyConfiguration(new CountryMap());
         modelBuilder.ApplyConfiguration(new DepartmentMap());
         modelBuilder.ApplyConfiguration(new DemographicMap());
