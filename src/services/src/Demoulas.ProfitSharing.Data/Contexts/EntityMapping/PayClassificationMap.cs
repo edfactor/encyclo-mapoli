@@ -52,6 +52,7 @@ internal sealed class PayClassificationMap : IEntityTypeConfiguration<PayClassif
             new PayClassification { Id = PayClassification.Constants.EndsPartTime, Name = "ENDS - PART TIME" },
             new PayClassification { Id = PayClassification.Constants.FirstMeatCutter, Name = "FIRST MEAT CUTTER" },
             new PayClassification { Id = PayClassification.Constants.NotUsed35, Name = "NOT USED" },
+            new PayClassification { Id = PayClassification.Constants.MarketsKitchenPartTime, Name = "MARKETS KITCHEN PT 16-17" },
             new PayClassification { Id = PayClassification.Constants.CafePartTime, Name = "CAFE PART TIME" },
             new PayClassification { Id = PayClassification.Constants.Receiver, Name = "RECEIVER" },
             new PayClassification { Id = PayClassification.Constants.NotUsed39, Name = "NOT USED" },

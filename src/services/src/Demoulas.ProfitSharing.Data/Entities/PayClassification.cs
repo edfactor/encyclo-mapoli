@@ -37,6 +37,7 @@ public sealed class PayClassification : ILookupTable<byte>
         public const byte EndsPartTime = 32;
         public const byte FirstMeatCutter = 33;
         public const byte NotUsed35 = 35;
+        public const byte MarketsKitchenPartTime = 36;
         public const byte CafePartTime = 37;
         public const byte Receiver = 38;
         public const byte NotUsed39 = 39;
