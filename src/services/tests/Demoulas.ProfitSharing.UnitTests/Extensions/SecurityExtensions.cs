@@ -15,7 +15,7 @@ public static class SecurityExtensions
     public static void CreateAndAssignTokenForClient(this HttpClient client, params string[] roles)
     {
 #pragma warning disable S6781 // JWT secret keys should not be disclosed
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(string.Concat(Enumerable.Repeat("UNIT TEST SECRET KEY", 16))));
+        var securityKey = new SymmetricSecurityKey("abcdefghijklmnopqrstuvwxyz123456"u8.ToArray());
 #pragma warning restore S6781 // JWT secret keys should not be disclosed
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 

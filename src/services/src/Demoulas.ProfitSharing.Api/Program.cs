@@ -33,16 +33,14 @@ await builder.SetDefaultLoggerConfigurationAsync(smartConfig);
 
 _ = builder.Services.AddTransient<IClaimsTransformation, ImpersonationAndEnvironmentAwareClaimsTransformation>();
 
+var rolePermissionService = new RolePermissionService();
 if (!builder.Environment.IsTestEnvironment())
 {
-    var rolePermissionService = new RolePermissionService();
     builder.Services.AddOktaSecurity(builder.Configuration, rolePermissionService);
 } 
 else
 {
-    builder.Services.AddAuthenticationJwtBearer(s => {
-        s.SigningKey = string.Concat(Enumerable.Repeat("UNIT TEST SECRET KEY", 16));
-    }).AddAuthorization();
+    builder.Services.AddTestingSecurity(builder.Configuration, rolePermissionService);
 }
 
 builder.ConfigurePolicies();
