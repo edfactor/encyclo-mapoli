@@ -13,6 +13,7 @@ using IdGen;
 using MassTransit;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Data.Entities;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 public class CleanupReportServiceTests:ApiTestBase<Program>
@@ -72,7 +73,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
             foreach (var dem in c.Demographics.Take(mismatchedValues))
             {
                 long lastSevenDigits = _generator.CreateId() % 10_000_000;
-                dem.OracleHcmId += (int)lastSevenDigits;
+                dem.Id += (int)lastSevenDigits;
             }
 
             await c.SaveChangesAsync();
@@ -104,7 +105,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
             foreach (var dem in c.Demographics.Take(mismatchedValues))
             {
                 long lastSevenDigits = _generator.CreateId() % 10_000_000;
-                dem.OracleHcmId += (int)lastSevenDigits;
+                dem.Id += (int)lastSevenDigits;
             }
 
             await c.SaveChangesAsync();
@@ -322,7 +323,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
     {
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         var profitYear = (short)(DateTime.Now.Year - 1);
-        var req = new YearEndProfitSharingReportRequest() { Skip = 0, Take=Byte.MaxValue, ProfitYear = profitYear, IsYearEnd = true };
+        var req = new YearEndProfitSharingReportRequest() { Skip = 0, Take=byte.MaxValue, ProfitYear = profitYear, IsYearEnd = true };
         var testHours = 1001;
         await MockDbContextFactory.UseWritableContext(async ctx =>
         {
@@ -339,7 +340,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
             }
 
             //Setup employee to be returned
-            var payProfit = await ctx.PayProfits.FirstAsync();
+            var payProfit = await ctx.PayProfits.Include(payProfit => payProfit.Demographic).FirstAsync();
             var emp = payProfit.Demographic;
 
             emp!.EmploymentStatusId = 'a';
@@ -352,9 +353,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
             await ctx.SaveChangesAsync();
         });
 
-        ReportResponseBase<YearEndProfitSharingReportResponse> response;
-
-        response = await _cleanupReportClient.GetYearEndProfitSharingReport(req, CancellationToken.None);
+        ReportResponseBase<YearEndProfitSharingReportResponse> response = await _cleanupReportClient.GetYearEndProfitSharingReport(req, CancellationToken.None);
 
         response.Should().NotBeNull();
         response.ReportName.Should().BeEquivalentTo($"PROFIT SHARE YEAR END REPORT FOR {req.ProfitYear}");
@@ -367,7 +366,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
         await MockDbContextFactory.UseWritableContext(async ctx =>
         {
             //Setup employee to be returned
-            var payProfit = await ctx.PayProfits.FirstAsync();
+            var payProfit = await ctx.PayProfits.Include(payProfit => payProfit.Demographic).FirstAsync();
             var emp = payProfit.Demographic;
 
             emp!.DateOfBirth = new DateOnly(DateTime.Now.Year - 15, 9, 21);
@@ -386,7 +385,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
         await MockDbContextFactory.UseWritableContext(async ctx =>
         {
             //Setup employee to be returned
-            var payProfit = await ctx.PayProfits.FirstAsync();
+            var payProfit = await ctx.PayProfits.Include(payProfit => payProfit.Demographic).FirstAsync();
             var emp = payProfit.Demographic;
 
             emp!.DateOfBirth = new DateOnly(DateTime.Now.Year - 28, 9, 21);
@@ -409,7 +408,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
         decimal sampleforfeiture = 5150m;
 
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        var req = new DistributionsAndForfeituresRequest() { Skip=0, Take=Byte.MaxValue, ProfitYear = (short)(DateTime.Now.Year-1), IncludeOutgoingForfeitures=true};
+        var req = new DistributionsAndForfeituresRequest() { Skip=0, Take=byte.MaxValue, ProfitYear = (short)(DateTime.Now.Year-1), IncludeOutgoingForfeitures=true};
         ReportResponseBase<DistributionsAndForfeitureResponse> response;
 
         
@@ -500,7 +499,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
             var profitDetail = await ctx.ProfitDetails.FirstAsync();
 
             profitDetail.ProfitCodeId = 9; //This profit code shouldn't be in the report if is a transfer
-            profitDetail.IsTransferOut = true;
+            profitDetail.CommentTypeId = CommentType.Constants.TransferOut;
             await ctx.SaveChangesAsync();
         });
 

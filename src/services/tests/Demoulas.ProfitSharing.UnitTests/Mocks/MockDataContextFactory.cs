@@ -62,7 +62,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         
         foreach (PayProfit payProfit in profits)
         {
-            demographics.Find(d=> d.OracleHcmId == payProfit.OracleHcmId)?.PayProfits.Add(payProfit);
+            demographics.Find(d=> d.Id == payProfit.DemographicId)?.PayProfits.Add(payProfit);
         }
 
 

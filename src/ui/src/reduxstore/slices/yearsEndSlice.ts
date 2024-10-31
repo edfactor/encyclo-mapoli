@@ -1,6 +1,7 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import {
   DemographicBadgesNotInPayprofit,
+  DistributionsAndForfeitures,
   DuplicateNameAndBirthday,
   DuplicateSSNDetail,
   MilitaryAndRehire,
@@ -20,6 +21,7 @@ export interface YearsEndState {
   militaryAndRehire: PagedReportResponse<MilitaryAndRehire> | null;
   militaryAndRehireForfeitures: PagedReportResponse<MilitaryAndRehireForfeiture> | null;
   militaryAndRehireProfitSummary: PagedReportResponse<MilitaryAndRehireProfitSummary> | null;
+  distributionsAndForfeitures: PagedReportResponse<DistributionsAndForfeitures> | null;
 }
 
 const initialState: YearsEndState = {
@@ -30,7 +32,8 @@ const initialState: YearsEndState = {
   missingCommaInPYName: null,
   militaryAndRehire: null,
   militaryAndRehireForfeitures: null,
-  militaryAndRehireProfitSummary: null
+  militaryAndRehireProfitSummary: null,
+  distributionsAndForfeitures: null
 };
 
 export const yearsEndSlice = createSlice({
@@ -72,6 +75,12 @@ export const yearsEndSlice = createSlice({
       action: PayloadAction<PagedReportResponse<MilitaryAndRehireProfitSummary>>
     ) => {
       state.militaryAndRehireProfitSummary = action.payload;
+    },
+    setDistributionsAndForfeitures: (
+      state,
+      action: PayloadAction<PagedReportResponse<DistributionsAndForfeitures>>
+    ) => {
+      state.distributionsAndForfeitures = action.payload;
     }
   }
 });
@@ -84,6 +93,7 @@ export const {
   setMissingCommaInPYName,
   setMilitaryAndRehireDetails,
   setMilitaryAndRehireForfeituresDetails,
-  setMilitaryAndRehireProfitSummaryDetails
+  setMilitaryAndRehireProfitSummaryDetails,
+  setDistributionsAndForfeitures
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

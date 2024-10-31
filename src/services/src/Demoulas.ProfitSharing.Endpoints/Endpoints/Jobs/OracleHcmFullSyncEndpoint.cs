@@ -1,19 +1,23 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Messaging;
+﻿using System.Threading;
+using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.ProfitSharing.Common.Contracts.Messaging;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Job;
-using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
+using MassTransit;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Jobs;
 
 public class OracleHcmFullSyncEndpoint : EndpointWithoutRequest<SendMessageResponse>
 {
-    private readonly IOracleHcmSynchronizationService _oracleHcmSynchronizationService;
+    private readonly IBus _bus;
+    private readonly IAppUser _appUser;
 
-    public OracleHcmFullSyncEndpoint(IOracleHcmSynchronizationService oracleHcmSynchronizationService)
+    public OracleHcmFullSyncEndpoint(IBus bus, IAppUser appUser)
     {
-        _oracleHcmSynchronizationService = oracleHcmSynchronizationService;
+        _bus = bus;
+        _appUser = appUser;
     }
 
     public override void Configure()
@@ -30,18 +34,20 @@ public class OracleHcmFullSyncEndpoint : EndpointWithoutRequest<SendMessageRespo
         Group<JobsGroup>();
     }
 
-    public override async Task HandleAsync(CancellationToken ct)
+    public override Task HandleAsync(CancellationToken ct)
     {
-        bool jobStarted = await _oracleHcmSynchronizationService.SendSynchronizationRequest(
-            new OracleHcmJobRequest { JobType = JobType.Constants.Full, StartMethod = StartMethod.Constants.OnDemand, RequestedBy = "Not Implemented" }, ct);
-
-        var message = new SendMessageResponse();
-
-        if (!jobStarted)
+        var message = new MessageRequest<OracleHcmJobRequest>
         {
-            message.Message = "Unable to queue message";
-        }
+            ApplicationName = Env.ApplicationName,
+            Body = new OracleHcmJobRequest
+            {
+                JobType = JobType.Constants.Full,
+                StartMethod = StartMethod.Constants.OnDemand,
+                RequestedBy = _appUser.UserName ?? "UnKnown User"
+            }
+        };
 
-        await SendAsync(new SendMessageResponse(), 202, ct);
+        return _bus.Publish(message: message, cancellationToken: ct);
     }
 }
+

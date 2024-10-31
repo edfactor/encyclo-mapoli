@@ -16,13 +16,13 @@ public class CleanupReportService : ICleanupReportService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ContributionService _contributionService;
-    private readonly CalendarService _calendarService;
+    private readonly ICalendarService _calendarService;
     private readonly ILogger<CleanupReportService> _logger;
 
     public CleanupReportService(IProfitSharingDataContextFactory dataContextFactory,
         ContributionService contributionService,
         ILoggerFactory factory,
-        CalendarService calendarService)
+        ICalendarService calendarService)
     {
         _dataContextFactory = dataContextFactory;
         _contributionService = contributionService;
@@ -40,7 +40,7 @@ public class CleanupReportService : ICleanupReportService
             var rslts = await (from dem in ctx.Demographics
                     join pdJoin in ctx.ProfitDetails on dem.Ssn equals pdJoin.Ssn into demPdJoin
                     from pd in demPdJoin.DefaultIfEmpty()
-                    join pp in ctx.PayProfits on dem.OracleHcmId equals pp.OracleHcmId into DemPdPpJoin
+                    join pp in ctx.PayProfits on dem.Id equals pp.DemographicId into DemPdPpJoin
                     from DemPdPp in DemPdPpJoin.DefaultIfEmpty()
                     where DemPdPp.ProfitYear == req.ProfitYear && dupSsns.Contains(dem.Ssn)
                     group new { dem, DemPdPp }
@@ -132,7 +132,7 @@ public class CleanupReportService : ICleanupReportService
             var results = await _dataContextFactory.UseReadOnlyContext(ctx =>
             {
                 var query = from dem in ctx.Demographics
-                    where !(from pp in ctx.PayProfits select pp.OracleHcmId).Contains(dem.OracleHcmId)
+                    where !(from pp in ctx.PayProfits select pp.DemographicId).Contains(dem.Id)
                     select new DemographicBadgesNotInPayProfitResponse
                     {
                         EmployeeBadge = dem.BadgeNumber,
@@ -191,7 +191,7 @@ public class CleanupReportService : ICleanupReportService
                     select g.Key.FullName);
 
                 var query = from dem in ctx.Demographics
-                    join ppLj in ctx.PayProfits on dem.OracleHcmId equals ppLj.OracleHcmId into tmpPayProfit
+                    join ppLj in ctx.PayProfits on dem.Id equals ppLj.DemographicId into tmpPayProfit
                     from pp in tmpPayProfit.DefaultIfEmpty()
                     join pdLj in ctx.ProfitDetails on dem.Ssn equals pdLj.Ssn into tmpProfitDetails
                     from pd in tmpProfitDetails.DefaultIfEmpty()
@@ -308,11 +308,13 @@ public class CleanupReportService : ICleanupReportService
                         BadgeNumber = x.Max(m => m.BadgeNumber)
                     });
 
+                var transferAndQdroCommentTypes = new List<int>() { CommentType.Constants.TransferIn.Id, CommentType.Constants.TransferOut.Id, CommentType.Constants.QdroIn.Id, CommentType.Constants.QdroOut.Id };
+
                 var query = from pd in ctx.ProfitDetails
                     join nameAndDob in nameAndDobQuery on pd.Ssn equals nameAndDob.Ssn
                     where pd.ProfitYear == req.ProfitYear &&
                           validProfitCodes.Contains(pd.ProfitCodeId) &&
-                          (pd.ProfitCodeId != 9 || (pd.ProfitCodeId == 9 && !pd.IsTransferOut && !pd.IsTransferIn)) &&
+                          (pd.ProfitCodeId != 9 || (pd.ProfitCodeId == 9 && (!pd.CommentTypeId.HasValue || !transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)))) &&
                           (req.StartMonth == 0 || pd.MonthToDate >= req.StartMonth) &&
                           (req.EndMonth == 0 || pd.MonthToDate <= req.EndMonth)
                     orderby nameAndDob.LastName, nameAndDob.FirstName
@@ -343,8 +345,8 @@ public class CleanupReportService : ICleanupReportService
 
     public async Task<ReportResponseBase<YearEndProfitSharingReportResponse>> GetYearEndProfitSharingReport(YearEndProfitSharingReportRequest req, CancellationToken cancellationToken = default)
     {
-        var yearEndDate = (await _calendarService.GetYearStartAndEndAccountingDates(req.ProfitYear, cancellationToken)).YearEndDate;
-        var over18BirthDate = yearEndDate.AddYears(-18);
+        var response = await _calendarService.GetYearStartAndEndAccountingDates(req.ProfitYear, cancellationToken);
+        var over18BirthDate = response.FiscalEndDate.AddYears(-18);
         var rslt = await _dataContextFactory.UseReadOnlyContext(ctx =>
         {
             return ctx.PayProfits
@@ -377,7 +379,7 @@ public class CleanupReportService : ICleanupReportService
         foreach (var item in rslt.Results)
         {
             item.Points = Convert.ToInt16(Math.Round(item.Wages / 100, 0, MidpointRounding.AwayFromZero));
-            item.Age = (byte)((yearEndDate.Year - item.DateOfBirth.Year) - (yearEndDate.DayOfYear < item.DateOfBirth.DayOfYear ? 1 : 0));
+            item.Age = (byte)((response.FiscalEndDate.Year - item.DateOfBirth.Year) - (response.FiscalEndDate.DayOfYear < item.DateOfBirth.DayOfYear ? 1 : 0));
             if (item.Age < 21)
             {
                 item.IsUnder21 = true;

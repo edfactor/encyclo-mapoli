@@ -6,9 +6,10 @@ namespace Demoulas.ProfitSharing.Data.Entities;
 /// <summary>
 /// https://demoulas.atlassian.net/wiki/spaces/~bherrmann/pages/39944312/Quick+Guide+to+Profit+Sharing+Tables
 /// </summary>
-[DebuggerDisplay("OracleHcmId={OracleHcmId} BadgeNumber={BadgeNumber} FullName={ContactInfo.FullName} StoreNumber={StoreNumber}")]
+[DebuggerDisplay("Id={Id} OracleHcmId={OracleHcmId} BadgeNumber={BadgeNumber} FullName={ContactInfo.FullName} StoreNumber={StoreNumber}")]
 public sealed class Demographic : Member
 {
+    public int Id { get; set; }
     /// <summary>
     /// Gets or sets the Oracle HCM (Human Capital Management) ID.
     /// This ID is used to uniquely identify an employee within the Oracle HCM system.

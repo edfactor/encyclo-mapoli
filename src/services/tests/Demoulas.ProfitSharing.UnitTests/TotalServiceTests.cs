@@ -48,8 +48,6 @@ public class TotalServiceTests : ApiTestBase<Program>
                 prof.YearToDate = (short)(DateTime.Now.Year - i);
                 prof.FederalTaxes = 0.5m;
                 prof.StateTaxes = 0.25m;
-                prof.IsTransferIn = false;
-                prof.IsTransferOut = false;
             }
 
             await ctx.SaveChangesAsync();
@@ -116,8 +114,6 @@ public class TotalServiceTests : ApiTestBase<Program>
                 prof.YearToDate = (short)(DateTime.Now.Year - i);
                 prof.FederalTaxes = 0.5m;
                 prof.StateTaxes = 0.25m;
-                prof.IsTransferIn = false;
-                prof.IsTransferOut = false;
             }
 
             await ctx.SaveChangesAsync();
@@ -208,8 +204,6 @@ public class TotalServiceTests : ApiTestBase<Program>
                 prof.YearToDate = (short)(DateTime.Now.Year - i);
                 prof.FederalTaxes = 0.5m;
                 prof.StateTaxes = 0.25m;
-                prof.IsTransferIn = false;
-                prof.IsTransferOut = false;
             }
 
             await ctx.SaveChangesAsync();

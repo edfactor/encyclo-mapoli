@@ -9,6 +9,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="CsvHelper" />
+		<PackageReference Include="Demoulas.Common.Api" />
 	</ItemGroup>
 
 	<ItemGroup>

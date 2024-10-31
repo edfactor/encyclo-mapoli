@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Immutable;
 using Demoulas.Security;
 
 namespace Demoulas.ProfitSharing.Security;
@@ -21,7 +16,7 @@ public static class RolePermissionList
                 rslt.AddRange(AdminRoles);
                 rslt.AddRange(FinanceManagerRoles);
                 rslt.AddRange(DistributionClerkRoles);
-                rslt.AddRange(HardshipAdministatorRoles);
+                rslt.AddRange(HardshipAdministratorRoles);
                 _allRolePermissions = rslt.ToImmutableList();
             }
             
@@ -38,5 +33,5 @@ public static class RolePermissionList
     ];
 
     public static readonly List<RolePermissionModel> DistributionClerkRoles = [];
-    public static readonly List<RolePermissionModel> HardshipAdministatorRoles = [];
+    public static readonly List<RolePermissionModel> HardshipAdministratorRoles = [];
 }

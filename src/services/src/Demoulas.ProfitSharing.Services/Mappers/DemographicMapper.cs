@@ -11,89 +11,15 @@ public partial class DemographicMapper
 {
     private readonly AddressMapper _addressMapper;
     private readonly ContactInfoMapper _contactInfoMapper;
-    private readonly DepartmentMapper _departmentMapper;
-    private readonly EmploymentTypeMapper _employmentTypeMapper;
-    private readonly PayFrequencyMapper _payFrequencyMapper;
-    private readonly GenderMapper _genderMapper;
-    private readonly TerminationCodeMapper _terminationCodeMapper;
 
     public DemographicMapper(AddressMapper addressMapper, 
-        ContactInfoMapper contactInfoMapper, 
-        DepartmentMapper departmentMapper, 
-        EmploymentTypeMapper employmentTypeMapper,
-        PayFrequencyMapper payFrequencyMapper,
-        GenderMapper genderMapper,
-        TerminationCodeMapper terminationCodeMapper)
+        ContactInfoMapper contactInfoMapper)
     {
         _addressMapper = addressMapper;
         _contactInfoMapper = contactInfoMapper;
-        _departmentMapper = departmentMapper;
-        _employmentTypeMapper = employmentTypeMapper;
-        _payFrequencyMapper = payFrequencyMapper;
-        _genderMapper = genderMapper;
-        _terminationCodeMapper = terminationCodeMapper;
     }
 
-    public partial IEnumerable<DemographicsRequest> MapToRequest(IEnumerable<Demographic> sources);
-
-    public DemographicsRequest MapToRequest(Demographic source)
-    {
-        DemographicsRequest target = new DemographicsRequest
-        {
-            Ssn = source.Ssn,
-            OracleHcmId = source.OracleHcmId,
-            StoreNumber = source.StoreNumber,
-            DepartmentId = source.DepartmentId,
-            PayClassificationId = source.PayClassificationId,
-            ContactInfo = _contactInfoMapper.MapToContactInfoRequestDto(source.ContactInfo),
-            Address = _addressMapper.MapToAddressRequestDto(source.Address),
-            DateOfBirth = source.DateOfBirth,
-            HireDate = source.HireDate,
-            ReHireDate = source.ReHireDate,
-            PayFrequencyId = source.PayFrequencyId,
-            EmploymentTypeCode = source.EmploymentTypeId,
-            GenderCode = source.GenderId,
-            TerminationCodeId = source.TerminationCodeId,
-            BadgeNumber = source.BadgeNumber,
-            FullTimeDate = source.FullTimeDate,
-            TerminationDate = source.TerminationDate,
-            EmploymentStatusId = source.EmploymentStatusId
-        };
-        return target;
-    }
-
-    public partial ISet<DemographicResponseDto> Map(IEnumerable<Demographic> sources);
-
-    public DemographicResponseDto? Map(Demographic? source)
-    {
-        if (source == null)
-        {
-            return null;
-        }
-
-        DemographicResponseDto target = new DemographicResponseDto
-        {
-            Ssn = source.Ssn.MaskSsn(),
-            OracleHcmId = source.OracleHcmId,
-            StoreNumber = source.StoreNumber,
-            Department = _departmentMapper.Map(source.Department),
-            PayClassificationId = source.PayClassificationId,
-            ContactInfo = _contactInfoMapper.Map(source.ContactInfo),
-            DateOfBirth = source.DateOfBirth,
-            HireDate = source.HireDate,
-            ReHireDate = source.ReHireDate,
-            EmploymentType = _employmentTypeMapper.Map(source.EmploymentType),
-            PayFrequency = _payFrequencyMapper.Map(source.PayFrequency),
-            Gender = _genderMapper.Map(source.Gender),
-        };
-        target.BadgeNumber = source.BadgeNumber;
-        target.Address = _addressMapper.Map(source.Address);
-        target.FullTimeDate = source.FullTimeDate;
-        target.TerminationCode = _terminationCodeMapper.Map(source.TerminationCode);
-        target.TerminationDate = source.TerminationDate;
-        return target;
-    }
-
+    
     public partial IEnumerable<Demographic> Map(IEnumerable<DemographicsRequest> sources);
 
     public Demographic Map(DemographicsRequest source)

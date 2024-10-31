@@ -5,7 +5,7 @@ public sealed class Beneficiary
     public required short PsnSuffix { get; set; } // Suffix for hierarchy (1000, 2000, etc.)
 
     public required int BadgeNumber { get; set; }
-    public required long OracleHcmId { get; set; }
+    public required int DemographicId { get; set; }
 
     // Reconstruct the full PSN dynamically
     public string Psn => $"{BadgeNumber}{PsnSuffix:D4}"; // Reconstruct PSN w
