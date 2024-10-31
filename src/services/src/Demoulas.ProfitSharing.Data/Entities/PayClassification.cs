@@ -13,6 +13,8 @@ public sealed class PayClassification : ILookupTable<byte>
         public const byte ZeroOne = 0; // at least 4 people in prod have this Pay Classification/JobClass (see PROFITSHARE)
         public const byte Manager = 1;
         public const byte AssistantManager = 2;
+        public const byte SpiritsManager = 4;
+        public const byte AsstSpiritsManager = 5;
         public const byte SpiritsClerkFt = 6;
         public const byte SpiritsClerkPt = 7;  //  at least 1 person in prod has this Pay Classification/JobClass (see PROFITSHARE)
         public const byte FrontEndManager = 10;
