@@ -24,6 +24,7 @@ public sealed class PayClassification : ILookupTable<byte>
         public const byte Sackers1415 = 18;
         public const byte StoreMaintenance = 19;
         public const byte OfficeManager = 20;
+        public const byte AsstOfficeManager = 21;
         public const byte CourtesyBoothAm = 22;
         public const byte CourtesyBoothPm = 23;
         public const byte PosFullTime = 24;

@@ -39,6 +39,7 @@ internal sealed class PayClassificationMap : IEntityTypeConfiguration<PayClassif
             new PayClassification { Id = PayClassification.Constants.Sackers1415, Name = "SACKERS 14-15" },
             new PayClassification { Id = PayClassification.Constants.StoreMaintenance, Name = "STORE MAINTENANCE" },
             new PayClassification { Id = PayClassification.Constants.OfficeManager, Name = "OFFICE MANAGER" },
+            new PayClassification { Id = PayClassification.Constants.AsstOfficeManager, Name = "ASST OFFICE MANAGER" },
             new PayClassification { Id = PayClassification.Constants.CourtesyBoothAm, Name = "COURTESY BOOTH - AM" },
             new PayClassification { Id = PayClassification.Constants.CourtesyBoothPm, Name = "COURTESY BOOTH - PM" },
             new PayClassification { Id = PayClassification.Constants.PosFullTime, Name = "POS - FULL TIME" },
