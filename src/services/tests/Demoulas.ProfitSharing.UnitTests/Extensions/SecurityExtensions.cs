@@ -16,10 +16,10 @@ public static class SecurityExtensions
     {
 #pragma warning disable S6781 // JWT secret keys should not be disclosed
         var securityKey = new SymmetricSecurityKey("abcdefghijklmnopqrstuvwxyz123456"u8.ToArray());
-#pragma warning restore S6781 // JWT secret keys should not be disclosed
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+#pragma warning restore S6781 // JWT secret keys should not be disclosed
 
-        var claims = new List<Claim> { new Claim(ClaimTypes.Name, "Unit Test User"), new Claim(ClaimTypes.Email, "Unit@test.com"), };
+        var claims = new List<Claim> { new Claim(ClaimTypes.Name, "Unit Test User"), new Claim(ClaimTypes.Email, "testuser@demoulasmarketbasket.com"), };
 
         foreach (var role in roles)
         {
