@@ -63,15 +63,23 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
             return db.SaveChangesAsync(cancellationToken);
         }, cancellationToken);
 
-
-        await CleanAuditError(cancellationToken);
-        var oracleHcmEmployees = _oracleDemographicsService.GetAllEmployees(cancellationToken);
-        var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, requestedBy, cancellationToken);
-        await _demographicsService.AddDemographicsStream(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
-
-        job.Completed = DateTime.Now;
-        job.JobStatusId = JobStatus.Constants.Completed;
-        await _profitSharingDataContextFactory.UseWritableContext(db => db.SaveChangesAsync(cancellationToken), cancellationToken);
+        try
+        {
+            await CleanAuditError(cancellationToken);
+            var oracleHcmEmployees = _oracleDemographicsService.GetAllEmployees(cancellationToken);
+            var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, requestedBy, cancellationToken);
+            await _demographicsService.AddDemographicsStream(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            await AuditError(0, new[] { new FluentValidation.Results.ValidationFailure("Error", ex.Message) }, requestedBy, cancellationToken);
+        }
+        finally
+        {
+            job.Completed = DateTime.Now;
+            job.JobStatusId = JobStatus.Constants.Completed;
+            await _profitSharingDataContextFactory.UseWritableContext(db => db.SaveChangesAsync(cancellationToken), cancellationToken);
+        }
     }
 
     private Task AuditError(int badgeNumber, IEnumerable<FluentValidation.Results.ValidationFailure> errorMessages, string requestedBy, CancellationToken cancellationToken = default,
