@@ -349,14 +349,46 @@ public class CleanupReportService : ICleanupReportService
         var over18BirthDate = response.FiscalEndDate.AddYears(-18);
         var rslt = await _dataContextFactory.UseReadOnlyContext(ctx =>
         {
-            return ctx.PayProfits
-                      .Include(d => d.Demographic)
-                      .Where(p => p.ProfitYear == req.ProfitYear) // Get right year
-                      .Where(p => p.Demographic!.EmploymentStatusId != EmploymentStatus.Constants.Terminated) //Don't show terminated employees
-                      .Where(p => (p.CurrentHoursYear  + p.HoursExecutive) >= 1000) //Employee worked 1000 hrs
-                      .Where(p => p.Demographic!.DateOfBirth < over18BirthDate) // Employee must be eighteen
-                      .OrderBy(p=>p.Demographic!.ContactInfo.LastName)
-                      .ThenBy(p=>p.Demographic!.ContactInfo.FirstName)
+            var qry = ctx.PayProfits.Include(x => x.Demographic).Where(p => p.ProfitYear == req.ProfitYear);
+            if (req.MinimumHoursInclusive.HasValue)
+            {
+                qry = qry.Where(p => (p.CurrentHoursYear + p.HoursExecutive) >= req.MinimumHoursInclusive.Value);
+            }
+            if (req.MaximumHoursInclusive.HasValue)
+            {
+                qry = qry.Where(p => (p.CurrentHoursYear + p.HoursExecutive) <= req.MaximumHoursInclusive.Value);
+            }
+            if (req.MinimumAgeInclusive.HasValue)
+            {
+                var minBirthDate = response.FiscalEndDate.AddYears(req.MinimumAgeInclusive.Value * -1);
+                qry = qry.Where(p => p.Demographic!.DateOfBirth <= minBirthDate);
+            }
+            if (req.MaximumAgeInclusive.HasValue)
+            {
+                var maxBirthDate = response.FiscalEndDate.AddYears(req.MaximumAgeInclusive.Value * -1);
+                qry = qry.Where(p => p.Demographic!.DateOfBirth >= maxBirthDate);
+            }
+            if (!req.IncludeActiveEmployees || !req.IncludeTerminatedEmployees || !req.IncludeInactiveEmployees)
+            {
+                var validStatus = new List<char>();
+                if (req.IncludeActiveEmployees)
+                {
+                    validStatus.Add(EmploymentStatus.Constants.Active);
+                }
+                if (req.IncludeInactiveEmployees)
+                {
+                    validStatus.Add(EmploymentStatus.Constants.Inactive);
+                }
+                if (req.IncludeTerminatedEmployees)
+                {
+                    validStatus.Add(EmploymentStatus.Constants.Terminated);
+                }
+                qry = qry.Where(p => validStatus.Contains(p.Demographic!.EmploymentStatusId));
+            }
+
+            return qry
+                      .OrderBy(p => p.Demographic!.ContactInfo.LastName)
+                      .ThenBy(p => p.Demographic!.ContactInfo.FirstName)
                       .Select(x => new YearEndProfitSharingReportResponse()
                       {
                           BadgeNumber = x.Demographic!.BadgeNumber,
