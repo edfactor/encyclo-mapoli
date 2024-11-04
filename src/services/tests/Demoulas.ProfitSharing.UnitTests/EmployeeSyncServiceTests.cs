@@ -23,7 +23,7 @@ public class EmployeeSyncServiceTests : IClassFixture<ApiTestBase<Program>>
         Mock<IProfitSharingDataContextFactory> mockDataContextFactory = new Mock<IProfitSharingDataContextFactory>();
         Mock<IBaseCacheService<LookupTableCache<byte>>> mockAccountCache = new Mock<IBaseCacheService<LookupTableCache<byte>>>();
         Mock<IBaseCacheService<LookupTableCache<byte>>> mockDepCache = new Mock<IBaseCacheService<LookupTableCache<byte>>>();
-        OracleHcmConfig oracleHcmConfig = new OracleHcmConfig {Url = "localhost"};
+        OracleHcmConfig oracleHcmConfig = new OracleHcmConfig {BaseAddress = "localhost", Url = string.Empty};
         OracleEmployeeValidator employeeValidator = new OracleEmployeeValidator(mockAccountCache.Object, mockDepCache.Object);
         Mock<HttpClient> mockHttpClient = new Mock<HttpClient>();
         

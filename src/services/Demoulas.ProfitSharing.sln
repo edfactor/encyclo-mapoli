@@ -1,5 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+# 17
 VisualStudioVersion = 17.8.0.0
 MinimumVisualStudioVersion = 17.8.0.0
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.AppHost", "src\Demoulas.ProfitSharing.AppHost\Demoulas.ProfitSharing.AppHost.csproj", "{92A3B192-25F3-40C4-94BD-A13779CF0B81}"
@@ -84,6 +85,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{57F4
 		..\database\obfuscation\scripts\obfuscate_validation.sql = ..\database\obfuscation\scripts\obfuscate_validation.sql
 		..\database\obfuscation\scripts\obfuscation_setup.sql = ..\database\obfuscation\scripts\obfuscation_setup.sql
 		..\database\obfuscation\scripts\reset_sequences.sql = ..\database\obfuscation\scripts\reset_sequences.sql
+		..\database\ready_import\SQL update comment types.sql = ..\database\ready_import\SQL update comment types.sql
 		..\database\obfuscation\scripts\target_build_ben_lookups.sql = ..\database\obfuscation\scripts\target_build_ben_lookups.sql
 		..\database\obfuscation\scripts\target_build_emp_lookups.sql = ..\database\obfuscation\scripts\target_build_emp_lookups.sql
 		..\database\obfuscation\scripts\target_delete_checks.sql = ..\database\obfuscation\scripts\target_delete_checks.sql
@@ -98,7 +100,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{57F4
 		..\database\obfuscation\scripts\test_insert_orphan_records.sql = ..\database\obfuscation\scripts\test_insert_orphan_records.sql
 		..\database\obfuscation\scripts\test_load_emp_ssns.sql = ..\database\obfuscation\scripts\test_load_emp_ssns.sql
 		..\database\obfuscation\scripts\test_view_data.sql = ..\database\obfuscation\scripts\test_view_data.sql
-		..\database\ready_import\SQL update comment types.sql = ..\database\ready_import\SQL update comment types.sql
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.IntegrationTests", "tests\Demoulas.ProfitSharing.IntegrationTests\Demoulas.ProfitSharing.IntegrationTests.csproj", "{222677DF-CAD3-4E03-A1A1-C213DFD0DAA0}"
@@ -129,6 +130,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ready import", "ready impor
 		..\database\ready_import\SQL copy profit_detail.sql = ..\database\ready_import\SQL copy profit_detail.sql
 		..\database\ready_import\SQL counts smart vs ready.sql = ..\database\ready_import\SQL counts smart vs ready.sql
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp1", "ConsoleApp1\ConsoleApp1.csproj", "{40935146-F324-43A2-9C89-572CFC6AE91D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -209,6 +212,12 @@ Global
 		{4A1F269F-574D-4FBC-8EFD-63D8CF871704}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4A1F269F-574D-4FBC-8EFD-63D8CF871704}.Russ|Any CPU.ActiveCfg = Release|Any CPU
 		{4A1F269F-574D-4FBC-8EFD-63D8CF871704}.Russ|Any CPU.Build.0 = Release|Any CPU
+		{40935146-F324-43A2-9C89-572CFC6AE91D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40935146-F324-43A2-9C89-572CFC6AE91D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40935146-F324-43A2-9C89-572CFC6AE91D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40935146-F324-43A2-9C89-572CFC6AE91D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{40935146-F324-43A2-9C89-572CFC6AE91D}.Russ|Any CPU.ActiveCfg = Release|Any CPU
+		{40935146-F324-43A2-9C89-572CFC6AE91D}.Russ|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
