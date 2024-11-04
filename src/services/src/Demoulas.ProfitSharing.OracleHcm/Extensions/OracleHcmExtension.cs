@@ -25,7 +25,7 @@ public static class OracleHcmExtension
     public static IHostApplicationBuilder ConfigureOracleHcm(this IHostApplicationBuilder builder)
     {
         OracleHcmConfig oracleHcmConfig = builder.Configuration.GetSection("OracleHcm").Get<OracleHcmConfig>() ??
-                                          new OracleHcmConfig { BaseAddress = string.Empty, Url = string.Empty };
+                                          new OracleHcmConfig { BaseAddress = string.Empty, DemographicUrl = string.Empty };
         _ = builder.Services.AddSingleton(oracleHcmConfig);
 
         _ = builder.Services.AddSingleton<OracleEmployeeValidator>();
@@ -40,9 +40,9 @@ public static class OracleHcmExtension
 
             byte[] bytes = Encoding.UTF8.GetBytes($"{config.Username}:{config.Password}");
             string encodedAuth = Convert.ToBase64String(bytes);
-            if (!string.IsNullOrEmpty(config.Url))
+            if (!string.IsNullOrEmpty(config.DemographicUrl))
             {
-                client.BaseAddress = new Uri(string.Concat(config.BaseAddress, config.Url), UriKind.Absolute);
+                client.BaseAddress = new Uri(string.Concat(config.BaseAddress, config.DemographicUrl), UriKind.Absolute);
             }
 
             client.DefaultRequestHeaders.Add(FrameworkVersionHeader, config.RestFrameworkVersion);
@@ -59,9 +59,9 @@ public static class OracleHcmExtension
         {
             OracleHcmConfig config = services.GetRequiredService<OracleHcmConfig>();
 
-            byte[] bytes = Encoding.UTF8.GetBytes($"{config.PayrollUsername}:{config.PayrollPassword}");
+            byte[] bytes = Encoding.UTF8.GetBytes($"{config.Username}:{config.Password}");
             string encodedAuth = Convert.ToBase64String(bytes);
-            if (!string.IsNullOrEmpty(config.Url))
+            if (!string.IsNullOrEmpty(config.DemographicUrl))
             {
                 client.BaseAddress = new Uri(string.Concat(config.BaseAddress, config.PayrollUrl), UriKind.Absolute);
             }
