@@ -4,6 +4,7 @@ using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Polly.Timeout;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services;
@@ -24,11 +25,15 @@ public class PayrollSyncClient
 
     private readonly HttpClient _httpClient;
     private readonly IProfitSharingDataContextFactory _contextFactory;
+    private readonly ILogger<PayrollSyncClient> _logger;
 
-    public PayrollSyncClient(HttpClient httpClient, IProfitSharingDataContextFactory contextFactory)
+    public PayrollSyncClient(HttpClient httpClient, 
+        IProfitSharingDataContextFactory contextFactory,
+        ILogger<PayrollSyncClient> logger)
     {
         _httpClient = httpClient;
         _contextFactory = contextFactory;
+        _logger = logger;
     }
 
     // Method to get payroll process results for a list of person IDs
@@ -64,10 +69,7 @@ public class PayrollSyncClient
             }
             catch (TimeoutRejectedException e)
             {
-                var startingColor = Console.ForegroundColor;
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(e);
-                Console.ForegroundColor = startingColor;
+                _logger.LogError(e, e.Message);
             }
 
             if (isSuccessful)
@@ -128,7 +130,7 @@ public class PayrollSyncClient
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error fetching balance types for ObjectActionId {objectActionId}: {ex.Message}");
+                    _logger.LogError(ex , "Error fetching balance types for ObjectActionId {ObjectActionId}: {Message}", objectActionId, ex.Message);
                 }
             }
         }
