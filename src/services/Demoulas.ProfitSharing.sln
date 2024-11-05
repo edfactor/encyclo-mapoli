@@ -131,8 +131,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ready import", "ready impor
 		..\database\ready_import\SQL counts smart vs ready.sql = ..\database\ready_import\SQL counts smart vs ready.sql
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp1", "ConsoleApp1\ConsoleApp1.csproj", "{40935146-F324-43A2-9C89-572CFC6AE91D}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -212,12 +210,6 @@ Global
 		{4A1F269F-574D-4FBC-8EFD-63D8CF871704}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4A1F269F-574D-4FBC-8EFD-63D8CF871704}.Russ|Any CPU.ActiveCfg = Release|Any CPU
 		{4A1F269F-574D-4FBC-8EFD-63D8CF871704}.Russ|Any CPU.Build.0 = Release|Any CPU
-		{40935146-F324-43A2-9C89-572CFC6AE91D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{40935146-F324-43A2-9C89-572CFC6AE91D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{40935146-F324-43A2-9C89-572CFC6AE91D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{40935146-F324-43A2-9C89-572CFC6AE91D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{40935146-F324-43A2-9C89-572CFC6AE91D}.Russ|Any CPU.ActiveCfg = Release|Any CPU
-		{40935146-F324-43A2-9C89-572CFC6AE91D}.Russ|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
