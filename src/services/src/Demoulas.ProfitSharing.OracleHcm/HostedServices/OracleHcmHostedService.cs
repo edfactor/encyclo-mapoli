@@ -32,8 +32,12 @@ internal sealed class OracleHcmHostedService : IHostedService
         _scheduler.JobFactory = _jobFactory;
 
         // Schedule the recurring job
-        var job = JobBuilder.Create<EmployeeSyncJob>()
-            .WithIdentity("dailyJob")
+        var employeeSyncJob = JobBuilder.Create<EmployeeSyncJob>()
+            .WithIdentity(nameof(EmployeeSyncJob))
+            .Build();
+
+        var payrollSyncJob = JobBuilder.Create<PayrollSyncJob>()
+            .WithIdentity(nameof(PayrollSyncJob))
             .Build();
 
         var trigger = TriggerBuilder.Create()
@@ -46,7 +50,8 @@ internal sealed class OracleHcmHostedService : IHostedService
             })
             .Build();
 
-        await _scheduler.ScheduleJob(job, trigger, cancellationToken);
+        await _scheduler.ScheduleJob(employeeSyncJob, trigger, cancellationToken);
+        await _scheduler.ScheduleJob(payrollSyncJob, trigger, cancellationToken);
 
         await _scheduler.Start(cancellationToken);
     }

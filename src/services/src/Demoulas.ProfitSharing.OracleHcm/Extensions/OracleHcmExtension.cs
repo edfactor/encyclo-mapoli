@@ -12,9 +12,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Http.Resilience;
 using Quartz.Impl;
-using Quartz.Simpl;
 using Quartz.Spi;
 using Quartz;
+using Demoulas.ProfitSharing.OracleHcm.Factories;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Extensions;
 public static class OracleHcmExtension
@@ -30,6 +30,7 @@ public static class OracleHcmExtension
 
         _ = builder.Services.AddSingleton<OracleEmployeeValidator>();
         _ = builder.Services.AddSingleton<EmployeeSyncJob>();
+        _ = builder.Services.AddSingleton<PayrollSyncJob>();
         _ = builder.Services.AddSingleton<IJobFactory, OracleHcmJobFactory>();
         _ = builder.Services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
 

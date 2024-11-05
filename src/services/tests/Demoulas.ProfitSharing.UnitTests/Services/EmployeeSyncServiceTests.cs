@@ -10,7 +10,7 @@ using Demoulas.ProfitSharing.OracleHcm.Validators;
 using Demoulas.ProfitSharing.UnitTests.Base;
 using Moq;
 
-namespace Demoulas.ProfitSharing.UnitTests;
+namespace Demoulas.ProfitSharing.UnitTests.Services;
 
 public class EmployeeSyncServiceTests : IClassFixture<ApiTestBase<Program>>
 {
@@ -23,10 +23,10 @@ public class EmployeeSyncServiceTests : IClassFixture<ApiTestBase<Program>>
         Mock<IProfitSharingDataContextFactory> mockDataContextFactory = new Mock<IProfitSharingDataContextFactory>();
         Mock<IBaseCacheService<LookupTableCache<byte>>> mockAccountCache = new Mock<IBaseCacheService<LookupTableCache<byte>>>();
         Mock<IBaseCacheService<LookupTableCache<byte>>> mockDepCache = new Mock<IBaseCacheService<LookupTableCache<byte>>>();
-        OracleHcmConfig oracleHcmConfig = new OracleHcmConfig {BaseAddress = "localhost", DemographicUrl = string.Empty};
+        OracleHcmConfig oracleHcmConfig = new OracleHcmConfig { BaseAddress = "localhost", DemographicUrl = string.Empty };
         OracleEmployeeValidator employeeValidator = new OracleEmployeeValidator(mockAccountCache.Object, mockDepCache.Object);
         Mock<HttpClient> mockHttpClient = new Mock<HttpClient>();
-        
+
         _employeeSyncService = new EmployeeSyncService(
             mockHttpClient.Object,
             _mockDemographicsService.Object,
@@ -47,5 +47,4 @@ public class EmployeeSyncServiceTests : IClassFixture<ApiTestBase<Program>>
         _mockDemographicsService.Verify(d => d.AddDemographicsStream(It.IsAny<IAsyncEnumerable<DemographicsRequest>>(), It.IsAny<byte>(), cancellationToken),
             Times.Once);
     }
-    // Additional tests for other methods and scenarios can be added here
 }

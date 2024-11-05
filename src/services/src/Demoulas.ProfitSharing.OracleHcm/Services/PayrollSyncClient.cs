@@ -40,7 +40,7 @@ public class PayrollSyncClient
     internal async IAsyncEnumerable<KeyValuePair<long, List<int>>> GetPayrollProcessResultsAsync(
         List<long> personIds, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        foreach (var personId in personIds)
+        foreach (long personId in personIds)
         {
             List<int> objectActionIds = new List<int>();
             bool isSuccessful = false;
@@ -100,14 +100,14 @@ public class PayrollSyncClient
 
         int year = DateTime.Today.Year;
 
-        foreach (var objectActionId in objectActionIds)
+        foreach (int objectActionId in objectActionIds)
         {
-            foreach (var balanceTypeId in balanceTypeIds)
+            foreach (long balanceTypeId in balanceTypeIds)
             {
-                var url = $"personProcessResults/{objectActionId}/child/BalanceView/" +
-                          $"?onlyData=true&fields=BalanceTypeId,TotalValue1,TotalValue2,DefbalId1,DimensionName" +
-                          $"&finder=findByBalVar;pBalGroupUsageId1=null,pBalGroupUsageId2=-1," +
-                          $"pLDGId={PLDGId},pLC={PLC},pBalTypeId={balanceTypeId}&onlyData=true";
+                string url = $"personProcessResults/{objectActionId}/child/BalanceView/" +
+                             $"?onlyData=true&fields=BalanceTypeId,TotalValue1,TotalValue2,DefbalId1,DimensionName" +
+                             $"&finder=findByBalVar;pBalGroupUsageId1=null,pBalGroupUsageId2=-1," +
+                             $"pLDGId={PLDGId},pLC={PLC},pBalTypeId={balanceTypeId}&onlyData=true";
 
                 try
                 {
@@ -117,7 +117,7 @@ public class PayrollSyncClient
                     {
                         var balanceResults = await response.Content.ReadFromJsonAsync<BalanceRoot>(cancellationToken);
 
-                        var total = balanceResults!.Items
+                        decimal total = balanceResults!.Items
                             .Sum(b => b.TotalValue1 + b.TotalValue2);
 
                         // Accumulate totals per balance type ID
@@ -160,8 +160,8 @@ public class PayrollSyncClient
             // Update PayProfit with accumulated totals
             foreach (var kvp in balanceTypeTotals)
             {
-                var balanceTypeId = kvp.Key;
-                var total = kvp.Value;
+                long balanceTypeId = kvp.Key;
+                decimal total = kvp.Value;
 
                 switch (balanceTypeId)
                 {
