@@ -15,7 +15,7 @@ var host = builder.Build();
 
 var client = host.Services.GetRequiredService<PayrollSyncClient>();
 
-await client.RetrievePayrollBalancesAsync([100000005363137, 100000005321744, 100000005360352]);
+await client.RetrievePayrollBalancesAsync([100000005363137, 100000005321744, 100000005360352], CancellationToken.None);
 
 
 
