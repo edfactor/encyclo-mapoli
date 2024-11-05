@@ -81,8 +81,8 @@ public class CleanupReportService : ICleanupReportService
                         Status = grp.Key.EmploymentStatusId,
                         StoreNumber = grp.Key.StoreNumber,
                         ProfitSharingRecords = grp.Count(),
-                        HoursCurrentYear = grp.Key.CurrentHoursYear ?? 0,
-                        IncomeCurrentYear = grp.Key.CurrentIncomeYear ?? 0,
+                        HoursCurrentYear = grp.Key.CurrentHoursYear,
+                        IncomeCurrentYear = grp.Key.CurrentIncomeYear,
                     }
                 ).ToPaginationResultsAsync(req, ct);
 
@@ -398,8 +398,8 @@ public class CleanupReportService : ICleanupReportService
                           DateOfBirth = x.Demographic!.DateOfBirth,
                           Age = 0, //Filled out below after materialization
                           EmployeeSsn = x.Demographic!.Ssn.MaskSsn(),
-                          Wages = (x.CurrentIncomeYear ?? 0m) + (x.IncomeExecutive),
-                          Hours = Math.Floor((x.CurrentHoursYear ?? 0m) + (x.HoursExecutive)),
+                          Wages = (x.CurrentIncomeYear) + (x.IncomeExecutive),
+                          Hours = Math.Floor((x.CurrentHoursYear) + (x.HoursExecutive)),
                           Points = 0, //Filled out below after materialization
                           IsNew = x.EmployeeTypeId == EmployeeType.Constants.NewLastYear,
                           IsUnder21 = false, //Filled out below after materialization

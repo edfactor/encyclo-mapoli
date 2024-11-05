@@ -85,6 +85,8 @@ public sealed class PayProfit
     /// Executive earnings
     /// </summary>
     public decimal IncomeExecutive { get; set; }
+    
+    public DateTime LastUpdate { get; set; }
 
 
     public Demographic? Demographic { get; set; }

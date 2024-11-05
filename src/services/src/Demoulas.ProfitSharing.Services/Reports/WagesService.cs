@@ -19,12 +19,15 @@ public class WagesService : IWagesService
 
     public async Task<ReportResponseBase<WagesCurrentYearResponse>> GetWagesReport(ProfitYearRequest request, CancellationToken cancellationToken)
     {
-       var result = _dataContextFactory.UseReadOnlyContext(c =>
+        var result = _dataContextFactory.UseReadOnlyContext(c =>
         {
             return c.PayProfits
-                .Include(p=> p.Demographic)
+                .Include(p => p.Demographic)
                 .Where(p => p.CurrentIncomeYear != 0 && p.ProfitYear == request.ProfitYear)
-                .Select(p => new WagesCurrentYearResponse { BadgeNumber = p.Demographic!.BadgeNumber, HoursCurrentYear = p.CurrentHoursYear ?? 0,  IncomeCurrentYear = p.CurrentIncomeYear ?? 0 })
+                .Select(p => new WagesCurrentYearResponse
+                {
+                    BadgeNumber = p.Demographic!.BadgeNumber, HoursCurrentYear = p.CurrentHoursYear, IncomeCurrentYear = p.CurrentIncomeYear
+                })
                 .ToPaginationResultsAsync(request, cancellationToken);
 
         });
