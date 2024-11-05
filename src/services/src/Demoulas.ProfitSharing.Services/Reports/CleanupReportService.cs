@@ -368,6 +368,14 @@ public class CleanupReportService : ICleanupReportService
                 var maxBirthDate = response.FiscalEndDate.AddYears(req.MaximumAgeInclusive.Value * -1);
                 qry = qry.Where(p => p.Demographic!.DateOfBirth >= maxBirthDate);
             }
+            if (!req.IncludeEmployeesWithNoPriorProfitSharingAmounts && req.IncludeEmployeesWithPriorProfitSharingAmounts)
+            {
+                qry = qry.Where(p => ctx.PayProfits.Where(ly=>ly.ProfitYear == req.ProfitYear - 1 && ly.DemographicId == p.DemographicId && ly.PointsEarned > 0).Any());
+            }
+            if (req.IncludeEmployeesWithNoPriorProfitSharingAmounts && !req.IncludeEmployeesWithPriorProfitSharingAmounts)
+            {
+                qry = qry.Where(p => ctx.PayProfits.Where(ly => ly.ProfitYear == req.ProfitYear - 1 && ly.DemographicId == p.DemographicId && ly.PointsEarned == 0).Any());
+            }
             if (!req.IncludeActiveEmployees || !req.IncludeTerminatedEmployees || !req.IncludeInactiveEmployees)
             {
                 var validStatus = new List<char>();

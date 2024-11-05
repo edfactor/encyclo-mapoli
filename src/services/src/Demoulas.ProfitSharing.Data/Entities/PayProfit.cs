@@ -88,6 +88,11 @@ public sealed class PayProfit
     
     public DateTime LastUpdate { get; set; }
 
+    /// <summary>
+    /// Points Earned (for the ProfitYear).
+    /// </summary>
+    public decimal? PointsEarned { get; set; }
+
 
     public Demographic? Demographic { get; set; }
 }
