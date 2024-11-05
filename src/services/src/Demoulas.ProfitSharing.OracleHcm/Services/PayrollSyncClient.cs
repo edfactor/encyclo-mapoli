@@ -1,5 +1,7 @@
-﻿using System.Net.Http.Json;
+﻿using System.Diagnostics;
+using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
+using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -186,6 +188,7 @@ public class PayrollSyncClient
 
     public async Task RetrievePayrollBalancesAsync(CancellationToken cancellationToken)
     {
+        using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(RetrievePayrollBalancesAsync), ActivityKind.Internal);
         List<long> list = await _contextFactory.UseReadOnlyContext(c =>
             c.Demographics
                 .Select(d => d.OracleHcmId)

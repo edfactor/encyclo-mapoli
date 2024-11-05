@@ -121,7 +121,6 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
         string requestedBy,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(ConvertToRequestDto), ActivityKind.Internal);
         await foreach (OracleEmployee? employee in asyncEnumerable.WithCancellation(cancellationToken))
         {
             int badgeNumber = employee?.BadgeNumber ?? 0;
