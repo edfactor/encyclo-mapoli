@@ -1,8 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 import { RootState } from "reduxstore/store";
-import { DemographicBadgesNotInPayprofitRequestDto, DemographicBadgesNotInPayprofitResponse, DistributionsAndForfeitures, DistributionsAndForfeituresRequestDto, DuplicateNameAndBirthday, DuplicateNameAndBirthdayRequestDto, DuplicateSSNDetail, DuplicateSSNsRequestDto, MilitaryAndRehire, MilitaryAndRehireForfeiture, MilitaryAndRehireForfeituresRequestDto, MilitaryAndRehireProfitSummary, MilitaryAndRehireProfitSummaryRequestDto, MilitaryAndRehireRequestDto, MissingCommasInPYName, MissingCommasInPYNameRequestDto, NegativeEtvaForSSNsOnPayProfit, NegativeEtvaForSSNsOnPayprofitRequestDto, PagedReportResponse } from "reduxstore/types";
-import { setDemographicBadgesNotInPayprofitData, setDistributionsAndForfeitures, setDuplicateNamesAndBirthdays, setDuplicateSSNsData, setMilitaryAndRehireDetails, setMilitaryAndRehireForfeituresDetails, setMilitaryAndRehireProfitSummaryDetails, setMissingCommaInPYName, setNegativeEtvaForSssnsOnPayprofit } from "reduxstore/slices/yearsEndSlice";
+import { DemographicBadgesNotInPayprofitRequestDto, DemographicBadgesNotInPayprofitResponse, DistributionsAndForfeitures, DistributionsAndForfeituresRequestDto, DuplicateNameAndBirthday, DuplicateNameAndBirthdayRequestDto, DuplicateSSNDetail, DuplicateSSNsRequestDto, ExecutiveHoursAndDollars, ExecutiveHoursAndDollarsRequestDto, MilitaryAndRehire, MilitaryAndRehireForfeiture, MilitaryAndRehireForfeituresRequestDto, MilitaryAndRehireProfitSummary, MilitaryAndRehireProfitSummaryRequestDto, MilitaryAndRehireRequestDto, MissingCommasInPYName, MissingCommasInPYNameRequestDto, NegativeEtvaForSSNsOnPayProfit, NegativeEtvaForSSNsOnPayprofitRequestDto, PagedReportResponse } from "reduxstore/types";
+import { setDemographicBadgesNotInPayprofitData, setDistributionsAndForfeitures, setDuplicateNamesAndBirthdays, setDuplicateSSNsData, setExecutiveHoursAndDollars, setMilitaryAndRehireDetails, setMilitaryAndRehireForfeituresDetails, setMilitaryAndRehireProfitSummaryDetails, setMissingCommaInPYName, setNegativeEtvaForSssnsOnPayprofit } from "reduxstore/slices/yearsEndSlice";
 export const YearsEndApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: "https://localhost:7141/api/",
@@ -276,6 +276,28 @@ export const YearsEndApi = createApi({
           console.log("Err: " + err);
         }
       }
+    }),
+    getExecutiveHoursAndDollars: builder.query<PagedReportResponse<ExecutiveHoursAndDollars>, ExecutiveHoursAndDollarsRequestDto>({
+      query: (params) => ({
+        url: "yearend/executive-hours-and-dollars",
+        method: "GET",
+        params: {
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          profitYear: params.profitYear,
+          badgeNumber: params.badgeNumber,
+          fullNameContains: params.fullNameContains,
+          hasExecutiveHoursAndDollars: params.hasExecutiveHoursAndDollars
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setExecutiveHoursAndDollars(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
     })
   })
 });
@@ -294,5 +316,6 @@ export const {
   useLazyGetPayprofitBadgeWithoutDemographicsQuery,
   useLazyGetPayrollDuplicateSSNsOnPayprofitQuery,
   useLazyGetWagesPreviousYearQuery,
-  useLazyGetDistributionsAndForfeituresQuery
+  useLazyGetDistributionsAndForfeituresQuery,
+  useLazyGetExecutiveHoursAndDollarsQuery
 } = YearsEndApi;
