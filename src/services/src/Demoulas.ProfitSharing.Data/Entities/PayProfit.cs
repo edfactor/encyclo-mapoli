@@ -86,6 +86,11 @@ public sealed class PayProfit
     /// </summary>
     public decimal IncomeExecutive { get; set; }
 
+    /// <summary>
+    /// Points Earned (for the ProfitYear).
+    /// </summary>
+    public decimal? PointsEarned { get; set; }
+
 
     public Demographic? Demographic { get; set; }
 }

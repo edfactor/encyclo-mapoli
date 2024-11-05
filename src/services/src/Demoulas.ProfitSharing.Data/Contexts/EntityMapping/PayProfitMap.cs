@@ -76,6 +76,10 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
         _ = builder.Property(e => e.EmployeeTypeId)
             .HasColumnName("EMPLOYEE_TYPE_ID");
 
+        _ = builder.Property(e => e.PointsEarned)
+            .HasColumnName("POINTS_EARNED")
+            .HasPrecision(9, 2);
+
         _ = builder.HasOne(e => e.Enrollment)
             .WithMany()
             .HasForeignKey(p => p.EnrollmentId)

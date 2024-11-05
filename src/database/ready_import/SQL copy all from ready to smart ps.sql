@@ -275,7 +275,8 @@ LEFT JOIN PROFITSHARE.PAYREL ON PYBEN.PYBEN_PSN = PAYREL.PYREL_PSN;
         EMPLOYEE_TYPE_ID,
         ZERO_CONTRIBUTION_REASON_ID,
         HOURS_EXECUTIVE,
-        INCOME_EXECUTIVE)
+        INCOME_EXECUTIVE,
+        POINTS_EARNED)
     SELECT
         (select ID from DEMOGRAPHIC where BADGE_NUMBER = PAYPROF_BADGE) AS DEMOGRAPHIC_ID,
         this_year AS PROFIT_YEAR,
@@ -295,7 +296,8 @@ LEFT JOIN PROFITSHARE.PAYREL ON PYBEN.PYBEN_PSN = PAYREL.PYREL_PSN;
         PY_PROF_NEWEMP AS EMPLOYEE_TYPE_ID,
         PY_PROF_ZEROCONT AS ZERO_CONTRIBUTION_REASON_ID,
         NVL(PY_PH_EXEC, 0) AS HOURS_EXECUTIVE,
-        NVL(PY_PD_EXEC, 0) AS INCOME_EXECUTIVE
+        NVL(PY_PD_EXEC, 0) AS INCOME_EXECUTIVE,
+        0 -- Field in current system is for prior year, not current
     FROM PROFITSHARE.PAYPROFIT
     where PAYPROF_BADGE in ( select BADGE_NUMBER from DEMOGRAPHIC  );
 
@@ -315,7 +317,8 @@ LEFT JOIN PROFITSHARE.PAYREL ON PYBEN.PYBEN_PSN = PAYREL.PYREL_PSN;
         EMPLOYEE_TYPE_ID,
         ZERO_CONTRIBUTION_REASON_ID,
         HOURS_EXECUTIVE,
-        INCOME_EXECUTIVE)
+        INCOME_EXECUTIVE,
+        POINTS_EARNED)
     SELECT
         (select ID from DEMOGRAPHIC where BADGE_NUMBER = PAYPROF_BADGE) AS DEMOGRAPHIC_ID,
         last_year AS PROFIT_YEAR,
@@ -326,16 +329,17 @@ LEFT JOIN PROFITSHARE.PAYREL ON PYBEN.PYBEN_PSN = PAYREL.PYREL_PSN;
         0 AS SECONDARY_ETVA_EARNINGS, -- History not previously tracked
         PY_WEEKS_WORK_LAST AS WEEKS_WORKED_YEAR,
         null AS PS_CERTIFICATE_ISSUED_DATE,
-        PY_PS_ENROLLED AS ENROLLMENT_ID, -- History not previously tracked, using current value
+        9 AS ENROLLMENT_ID, -- 9/History not previously tracked
         PY_PROF_BENEFICIARY AS BENEFICIARY_ID,
          CASE
             WHEN PY_PROF_NEWEMP  = '1' THEN
                 0
             ELSE 0
         END AS EMPLOYEE_TYPE_ID,
-        PY_PROF_ZEROCONT AS ZERO_CONTRIBUTION_REASON_ID, -- History not previously tracked, using current value
+        8 AS ZERO_CONTRIBUTION_REASON_ID, -- 8/History not previously tracked (Unknown)
         0 AS HOURS_EXECUTIVE, -- History not previously tracked
-        0 AS INCOME_EXECUTIVE -- History not previously tracked
+        0 AS INCOME_EXECUTIVE, -- History not previously tracked
+        PY_PROF_POINTS  as POINTS_EARNED
     FROM PROFITSHARE.PAYPROFIT
     where PAYPROF_BADGE in ( select BADGE_NUMBER from DEMOGRAPHIC  );
 
