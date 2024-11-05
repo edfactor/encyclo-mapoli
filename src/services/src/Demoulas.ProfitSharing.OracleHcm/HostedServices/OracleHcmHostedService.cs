@@ -1,9 +1,5 @@
 ﻿using Demoulas.ProfitSharing.Common.Configuration;
-using Demoulas.ProfitSharing.Common.Contracts.Messaging;
-using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.OracleHcm.Jobs;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Quartz;
 using Quartz.Spi;
