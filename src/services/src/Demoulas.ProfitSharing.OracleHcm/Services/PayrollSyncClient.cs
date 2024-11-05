@@ -1,6 +1,6 @@
 ﻿using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
-using System.Text.Json.Serialization;
+using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +10,6 @@ namespace Demoulas.ProfitSharing.OracleHcm.Services;
 
 public class PayrollSyncClient
 {
-
     // Define constants for balance type IDs
     private static class BalanceTypeIds
     {
@@ -33,7 +32,7 @@ public class PayrollSyncClient
     }
 
     // Method to get payroll process results for a list of person IDs
-    public async IAsyncEnumerable<KeyValuePair<long, List<int>>> GetPayrollProcessResultsAsync(
+    internal async IAsyncEnumerable<KeyValuePair<long, List<int>>> GetPayrollProcessResultsAsync(
         List<long> personIds, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         foreach (var personId in personIds)
@@ -49,7 +48,7 @@ public class PayrollSyncClient
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var results = await response.Content.ReadFromJsonAsync<Root>(cancellationToken);
+                    var results = await response.Content.ReadFromJsonAsync<PayrollRoot>(cancellationToken);
 
                     objectActionIds = results!.Items
                         .Where(result => result is { PayrollActionId: 2003, ObjectActionId: not null })
@@ -81,7 +80,7 @@ public class PayrollSyncClient
 
 
     // Method to get balance types for each ObjectActionId
-    public async Task GetBalanceTypesForProcessResultsAsync(
+    internal async Task GetBalanceTypesForProcessResultsAsync(
         long oracleHcmId,
         List<int> objectActionIds,
         CancellationToken cancellationToken)
@@ -198,53 +197,3 @@ public class PayrollSyncClient
         }
     }
 }
-
-
-
-public record Item(
-    [property: JsonPropertyName("PayrollActionId")] int? PayrollActionId,
-    [property: JsonPropertyName("ObjectActionId")] int? ObjectActionId
-);
-
-public record Link(
-    [property: JsonPropertyName("rel")] string Rel,
-    [property: JsonPropertyName("href")] string Href,
-    [property: JsonPropertyName("name")] string Name,
-    [property: JsonPropertyName("kind")] string Kind
-);
-
-public record Root(
-    [property: JsonPropertyName("items")] IReadOnlyList<Item> Items,
-    [property: JsonPropertyName("count")] int? Count,
-    [property: JsonPropertyName("hasMore")] bool? HasMore,
-    [property: JsonPropertyName("limit")] int? Limit,
-    [property: JsonPropertyName("offset")] int? Offset,
-    [property: JsonPropertyName("links")] IReadOnlyList<Link> Links
-);
-
-
-public record BalanceItem(
-    [property: JsonPropertyName("BalanceTypeId")] long BalanceTypeId,
-    [property: JsonPropertyName("TotalValue1")] decimal TotalValue1,
-    [property: JsonPropertyName("TotalValue2")] decimal TotalValue2,
-    [property: JsonPropertyName("DefbalId1")] long DefbalId1,
-    [property: JsonPropertyName("DimensionName")] string DimensionName
-);
-
-public record BalanceLink(
-    [property: JsonPropertyName("rel")] string Rel,
-    [property: JsonPropertyName("href")] string Href,
-    [property: JsonPropertyName("name")] string Name,
-    [property: JsonPropertyName("kind")] string Kind
-);
-
-public record BalanceRoot(
-    [property: JsonPropertyName("items")] IReadOnlyList<BalanceItem> Items,
-    [property: JsonPropertyName("count")] int? Count,
-    [property: JsonPropertyName("hasMore")] bool? HasMore,
-    [property: JsonPropertyName("limit")] int? Limit,
-    [property: JsonPropertyName("offset")] int? Offset,
-    [property: JsonPropertyName("links")] IReadOnlyList<BalanceLink> Links
-);
-
-
