@@ -122,7 +122,7 @@ public sealed class TotalService
                 b.Contact.DateOfBirth,
                 FromBeneficiary = (short)1,
                 Years = 0,
-                Hours = (Decimal?)0
+                Hours = (decimal)0
             }
         );
 
@@ -135,7 +135,7 @@ public sealed class TotalService
             select new ParticipantTotalRatioDto()
             {
                 Ssn = db.Ssn,
-                Ratio = (double)db.FromBeneficiary == 1 ? 1.0 :
+                Ratio = db.FromBeneficiary == 1 ? 1.0 :
                         db.DateOfBirth <= BirthDate65 && (db.TerminationDate == null || db.TerminationDate < BeginningOfYear) ? 1 :
                         db.EnrollmentId == 3 || db.EnrollmentId == 4 ? 1 :
                         db.TerminationCodeId == 'Z' ? 1 :

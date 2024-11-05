@@ -1,18 +1,9 @@
-﻿using System;
-using System.Collections.Frozen;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.Common.Data.Contexts.Extensions;
+﻿using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-using Demoulas.ProfitSharing.Common.Contracts.Services;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -114,7 +105,7 @@ public class FrozenReportService:IFrozenReportService
                     var lypp = lastYearPayProfits.Find(x => x.BadgeNumber == rec.EmployeeBadgeNumber);
                     if (lypp != null)
                     {
-                        rec.ForfeitPoints = Convert.ToInt16(Math.Round((lypp.CurrentIncomeYear ?? 0) / 100, 0, MidpointRounding.AwayFromZero));
+                        rec.ForfeitPoints = Convert.ToInt16(Math.Round((lypp.CurrentIncomeYear) / 100, 0, MidpointRounding.AwayFromZero));
                     }
                 }
 
