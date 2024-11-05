@@ -53,7 +53,7 @@ internal sealed class OracleHcmHostedService : IHostedService
 
         var payrollSyncTrigger = TriggerBuilder.Create()
             .WithIdentity("payrollSyncTrigger")
-            .StartNow()
+            .StartAt(DateTimeOffset.UtcNow.AddMinutes(5))
             .WithSimpleSchedule(x =>
             {
                 x.WithIntervalInHours(_oracleHcmConfig.IntervalInHours)

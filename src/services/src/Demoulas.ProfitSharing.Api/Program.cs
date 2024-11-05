@@ -63,7 +63,7 @@ List<ContextFactoryRequest> list = new List<ContextFactoryRequest>
 };
 
 #if RUSS
-await builder.AddDatabaseServices(list, true, false);
+await builder.AddDatabaseServices(list, true, true);
 #else
 await builder.AddDatabaseServices(list);
 #endif
