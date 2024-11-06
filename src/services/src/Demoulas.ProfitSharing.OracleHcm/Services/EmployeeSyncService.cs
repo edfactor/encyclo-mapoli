@@ -76,9 +76,13 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
         }
         finally
         {
-            job.Completed = DateTime.Now;
-            job.JobStatusId = JobStatus.Constants.Completed;
-            await _profitSharingDataContextFactory.UseWritableContext(db => db.SaveChangesAsync(cancellationToken), cancellationToken);
+            await _profitSharingDataContextFactory.UseWritableContext(db =>
+            {
+                return db.Jobs.Where(j=> j.Id == job.Id).ExecuteUpdateAsync(s => s
+                    .SetProperty(b => b.Completed, b => DateTime.Now)
+                    .SetProperty(b => b.JobStatusId, b => JobStatus.Constants.Completed),
+                    cancellationToken: cancellationToken);
+            }, cancellationToken);
         }
     }
 
