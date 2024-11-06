@@ -120,7 +120,7 @@ public class PayrollSyncClient
                         var balanceResults = await response.Content.ReadFromJsonAsync<BalanceRoot>(cancellationToken);
 
                         decimal total = balanceResults!.Items
-                            .Sum(b => b.TotalValue1 + b.TotalValue2);
+                            .Sum(b => b.TotalValue1);
 
                         // Accumulate totals per balance type ID
                         balanceTypeTotals[balanceTypeId] += total;
