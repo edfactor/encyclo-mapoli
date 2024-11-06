@@ -200,3 +200,23 @@ export interface MilitaryAndRehireProfitSummary {
   employmentStatusId: string;
   profitCodeId: number;
 }
+
+export interface ExecutiveHoursAndDollarsRequestDto extends ImpersonationRequest {
+  badgeNumber?: number;
+  fullNameContains?: string;
+  profitYear: number;
+  hasExecutiveHoursAndDollars: boolean
+  pagination: PaginationParams;
+}
+
+export interface ExecutiveHoursAndDollars {
+  badgeNumber: number;
+  fullName: string;
+  storeNumber: number;
+  hoursExecutive: number;
+  incomeExecutive: number;
+  currentHoursYear: number;
+  currentIncomeYear: number;
+  payFrequencyId: number;
+  employmentStatusId: string;
+}
