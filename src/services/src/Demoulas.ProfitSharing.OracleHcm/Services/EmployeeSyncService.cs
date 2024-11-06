@@ -50,7 +50,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
 
         var job = new Job
         {
-            JobTypeId = JobType.Constants.Full,
+            JobTypeId = JobType.Constants.EmployeeSyncFull,
             StartMethodId = StartMethod.Constants.System,
             RequestedBy = requestedBy,
             JobStatusId = JobStatus.Constants.Running,
@@ -63,6 +63,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
             return db.SaveChangesAsync(cancellationToken);
         }, cancellationToken);
 
+        bool success = true;
         try
         {
             await CleanAuditError(cancellationToken);
@@ -72,6 +73,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
         }
         catch (Exception ex)
         {
+            success = false;
             await AuditError(0, new[] { new FluentValidation.Results.ValidationFailure("Error", ex.Message) }, requestedBy, cancellationToken);
         }
         finally
@@ -80,7 +82,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
             {
                 return db.Jobs.Where(j=> j.Id == job.Id).ExecuteUpdateAsync(s => s
                     .SetProperty(b => b.Completed, b => DateTime.Now)
-                    .SetProperty(b => b.JobStatusId, b => JobStatus.Constants.Completed),
+                    .SetProperty(b => b.JobStatusId, b => success ? JobStatus.Constants.Completed : JobStatus.Constants.Failed),
                     cancellationToken: cancellationToken);
             }, cancellationToken);
         }

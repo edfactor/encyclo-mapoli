@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -26,15 +27,15 @@ public class PayrollSyncClient
     private const string PLC = "US";
 
     private readonly HttpClient _httpClient;
-    private readonly IProfitSharingDataContextFactory _contextFactory;
+    private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
     private readonly ILogger<PayrollSyncClient> _logger;
 
     public PayrollSyncClient(HttpClient httpClient, 
-        IProfitSharingDataContextFactory contextFactory,
+        IProfitSharingDataContextFactory profitSharingDataContextFactory,
         ILogger<PayrollSyncClient> logger)
     {
         _httpClient = httpClient;
-        _contextFactory = contextFactory;
+        _profitSharingDataContextFactory = profitSharingDataContextFactory;
         _logger = logger;
     }
 
@@ -138,7 +139,7 @@ public class PayrollSyncClient
         }
 
         // Single database interaction
-        await _contextFactory.UseWritableContext(async context =>
+        await _profitSharingDataContextFactory.UseWritableContext(async context =>
         {
             var demographic = await context.Demographics
                 .Include(d => d.PayProfits.Where(p => p.ProfitYear == year))
@@ -186,19 +187,54 @@ public class PayrollSyncClient
         }, cancellationToken);
     }
 
-    public async Task RetrievePayrollBalancesAsync(CancellationToken cancellationToken)
+    public async Task RetrievePayrollBalancesAsync(string requestedBy = "System", CancellationToken cancellationToken = default)
     {
         using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(RetrievePayrollBalancesAsync), ActivityKind.Internal);
-        List<long> list = await _contextFactory.UseReadOnlyContext(c =>
-            c.Demographics
-                .Select(d => d.OracleHcmId)
-                .ToListAsync(cancellationToken));
 
-        // Step 1: Get payroll process results (ObjectActionIds) for each PersonId
-        await foreach (KeyValuePair<long, List<int>> emp in GetPayrollProcessResultsAsync(list, cancellationToken))
+        var job = new Job
         {
-            // Step 2: Get specific balance types for each ObjectActionId
-            await GetBalanceTypesForProcessResultsAsync(emp.Key, emp.Value, cancellationToken);
+            JobTypeId = JobType.Constants.PayrollSyncFull,
+            StartMethodId = StartMethod.Constants.System,
+            RequestedBy = requestedBy,
+            JobStatusId = JobStatus.Constants.Running,
+            Started = DateTime.Now
+        };
+
+        await _profitSharingDataContextFactory.UseWritableContext(db =>
+        {
+            db.Jobs.Add(job);
+            return db.SaveChangesAsync(cancellationToken);
+        }, cancellationToken);
+
+        bool success = true;
+        try
+        {
+            List<long> list = await _profitSharingDataContextFactory.UseReadOnlyContext(c =>
+                c.Demographics
+                    .Select(d => d.OracleHcmId)
+                    .ToListAsync(cancellationToken));
+
+            // Step 1: Get payroll process results (ObjectActionIds) for each PersonId
+            await foreach (KeyValuePair<long, List<int>> emp in GetPayrollProcessResultsAsync(list, cancellationToken))
+            {
+                // Step 2: Get specific balance types for each ObjectActionId
+                await GetBalanceTypesForProcessResultsAsync(emp.Key, emp.Value, cancellationToken);
+            }
+        }
+        catch (Exception ex)
+        {
+            success = false;
+            _logger.LogCritical(ex, ex.Message);
+        }
+        finally
+        {
+            await _profitSharingDataContextFactory.UseWritableContext(db =>
+            {
+                return db.Jobs.Where(j => j.Id == job.Id).ExecuteUpdateAsync(s => s
+                        .SetProperty(b => b.Completed, b => DateTime.Now)
+                        .SetProperty(b => b.JobStatusId, b => success ? JobStatus.Constants.Completed : JobStatus.Constants.Failed),
+                    cancellationToken: cancellationToken);
+            }, cancellationToken);
         }
     }
 }
