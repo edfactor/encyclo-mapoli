@@ -33,11 +33,23 @@ public sealed class ContributionService
         });
     }
 
-    internal Task<Dictionary<int, InternalProfitDetailDto>> GetNetBalance(short profitYear, ISet<int> badgeNumbers, CancellationToken cancellationToken)
+    internal static IQueryable<Demographic> GetEligibleEmployees(IProfitSharingDbContext ctx, short profitYear, DateOnly asOfDate)
     {
-        return _dataContextFactory.UseReadOnlyContext(ctx =>
-        {
-            var pdQuery = ctx.ProfitDetails
+        var birthDate21Years = asOfDate.AddYears(-21);
+        return (
+            from d in ctx.Demographics
+            join pp in ctx.PayProfits on d.Id equals pp.DemographicId
+            where pp.ProfitYear == profitYear
+              && (pp.HoursExecutive + pp.CurrentHoursYear) >= 1000
+              && d.DateOfBirth < birthDate21Years
+              && (d.TerminationDate == null || d.TerminationDate < asOfDate)
+            select d
+        );
+    }
+
+    internal IQueryable<InternalProfitDetailDto> GetNetBalanceQuery(short profitYear, IProfitSharingDbContext ctx)
+    {
+        var pdQuery = ctx.ProfitDetails
                 .Where(details => details.ProfitYear <= profitYear)
                 .GroupBy(details => details.Ssn)
                 .Select(g => new
@@ -53,23 +65,29 @@ public sealed class ContributionService
 
 
 
-            var demoQuery = ctx.Demographics
-                .Where(d => badgeNumbers.Contains(d.BadgeNumber))
-                .Select(d => new { d.OracleHcmId, d.BadgeNumber, d.Ssn });
-            
-            var query = from d in demoQuery
-                join r in pdQuery on d.Ssn equals r.Ssn
-                select new InternalProfitDetailDto
-                {
-                    OracleHcmId = d.OracleHcmId,
-                    BadgeNumber = d.BadgeNumber,
-                    TotalContributions = r.TotalContributions,
-                    TotalEarnings = r.TotalEarnings,
-                    TotalForfeitures = r.TotalForfeitures,
-                    TotalPayments = r.TotalPayments,
-                    TotalFederalTaxes = r.TotalFedTaxes,
-                    TotalStateTaxes = r.TotalStateTaxes
-                };
+        var demoQuery = ctx.Demographics
+            .Select(d => new { d.OracleHcmId, d.BadgeNumber, d.Ssn });
+
+        var query = from d in demoQuery
+                    join r in pdQuery on d.Ssn equals r.Ssn
+                    select new InternalProfitDetailDto
+                    {
+                        OracleHcmId = d.OracleHcmId,
+                        BadgeNumber = d.BadgeNumber,
+                        TotalContributions = r.TotalContributions,
+                        TotalEarnings = r.TotalEarnings,
+                        TotalForfeitures = r.TotalForfeitures,
+                        TotalPayments = r.TotalPayments,
+                        TotalFederalTaxes = r.TotalFedTaxes,
+                        TotalStateTaxes = r.TotalStateTaxes
+                    };
+        return query;
+    }
+    internal Task<Dictionary<int, InternalProfitDetailDto>> GetNetBalance(short profitYear, ISet<int> badgeNumbers, CancellationToken cancellationToken)
+    {
+        return _dataContextFactory.UseReadOnlyContext(ctx =>
+        {
+            var query = from d in GetNetBalanceQuery(profitYear, ctx).Where(x => badgeNumbers.Contains(x.BadgeNumber)) select d;
 
             return query.ToDictionaryAsync(d=> d.BadgeNumber, cancellationToken);
         });

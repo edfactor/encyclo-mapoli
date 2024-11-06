@@ -12,6 +12,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.OracleHcm.Extensions;
 using Demoulas.ProfitSharing.OracleHcm.Validators;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -62,15 +63,23 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
             return db.SaveChangesAsync(cancellationToken);
         }, cancellationToken);
 
-
-        await CleanAuditError(cancellationToken);
-        var oracleHcmEmployees = _oracleDemographicsService.GetAllEmployees(cancellationToken);
-        var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, requestedBy, cancellationToken);
-        await _demographicsService.AddDemographicsStream(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
-
-        job.Completed = DateTime.Now;
-        job.JobStatusId = JobStatus.Constants.Completed;
-        await _profitSharingDataContextFactory.UseWritableContext(db => db.SaveChangesAsync(cancellationToken), cancellationToken);
+        try
+        {
+            await CleanAuditError(cancellationToken);
+            var oracleHcmEmployees = _oracleDemographicsService.GetAllEmployees(cancellationToken);
+            var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, requestedBy, cancellationToken);
+            await _demographicsService.AddDemographicsStream(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            await AuditError(0, new[] { new FluentValidation.Results.ValidationFailure("Error", ex.Message) }, requestedBy, cancellationToken);
+        }
+        finally
+        {
+            job.Completed = DateTime.Now;
+            job.JobStatusId = JobStatus.Constants.Completed;
+            await _profitSharingDataContextFactory.UseWritableContext(db => db.SaveChangesAsync(cancellationToken), cancellationToken);
+        }
     }
 
     private Task AuditError(int badgeNumber, IEnumerable<FluentValidation.Results.ValidationFailure> errorMessages, string requestedBy, CancellationToken cancellationToken = default,
@@ -112,7 +121,6 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
         string requestedBy,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(ConvertToRequestDto), ActivityKind.Internal);
         await foreach (OracleEmployee? employee in asyncEnumerable.WithCancellation(cancellationToken))
         {
             int badgeNumber = employee?.BadgeNumber ?? 0;

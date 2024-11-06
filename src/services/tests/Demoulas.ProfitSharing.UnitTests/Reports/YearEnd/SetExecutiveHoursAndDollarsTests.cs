@@ -123,7 +123,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
         response.Response.StatusCode.ShouldBeEquivalentTo(HttpStatusCode.BadRequest);
 
         // Assert
-        await ErrorMessageShouldBe(response, "count", "At least one employee must be provided");
+        await ErrorMessageShouldBe(response, "executiveHoursAndDollars.Count", "At least one employee must be provided");
     }
 
 

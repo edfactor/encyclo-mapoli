@@ -13,6 +13,9 @@ public sealed class PayClassification : ILookupTable<byte>
         public const byte ZeroOne = 0; // at least 4 people in prod have this Pay Classification/JobClass (see PROFITSHARE)
         public const byte Manager = 1;
         public const byte AssistantManager = 2;
+        public const byte SpiritsManager = 4;
+        public const byte AsstSpiritsManager = 5;
+        public const byte SpiritsClerkFt = 6;
         public const byte SpiritsClerkPt = 7;  //  at least 1 person in prod has this Pay Classification/JobClass (see PROFITSHARE)
         public const byte FrontEndManager = 10;
         public const byte AssistantHeadCashier = 11;
@@ -24,6 +27,7 @@ public sealed class PayClassification : ILookupTable<byte>
         public const byte Sackers1415 = 18;
         public const byte StoreMaintenance = 19;
         public const byte OfficeManager = 20;
+        public const byte AsstOfficeManager = 21;
         public const byte CourtesyBoothAm = 22;
         public const byte CourtesyBoothPm = 23;
         public const byte PosFullTime = 24;
@@ -37,6 +41,7 @@ public sealed class PayClassification : ILookupTable<byte>
         public const byte EndsPartTime = 32;
         public const byte FirstMeatCutter = 33;
         public const byte NotUsed35 = 35;
+        public const byte MarketsKitchenPartTime = 36;
         public const byte CafePartTime = 37;
         public const byte Receiver = 38;
         public const byte NotUsed39 = 39;

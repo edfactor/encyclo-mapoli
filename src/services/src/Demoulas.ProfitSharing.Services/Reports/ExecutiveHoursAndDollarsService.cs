@@ -56,8 +56,8 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
                     StoreNumber = p.Demographic.StoreNumber,
                     HoursExecutive = p.HoursExecutive,
                     IncomeExecutive = p.IncomeExecutive,
-                    CurrentHoursYear = p.CurrentHoursYear ?? 0,
-                    CurrentIncomeYear = p.CurrentIncomeYear ?? 0,
+                    CurrentHoursYear = p.CurrentHoursYear,
+                    CurrentIncomeYear = p.CurrentIncomeYear,
                     PayFrequencyId = p.Demographic.PayFrequencyId,
                     EmploymentStatusId = p.Demographic.EmploymentStatusId
                 })

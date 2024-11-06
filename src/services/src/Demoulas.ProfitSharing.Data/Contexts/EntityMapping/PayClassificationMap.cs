@@ -25,10 +25,16 @@ internal sealed class PayClassificationMap : IEntityTypeConfiguration<PayClassif
             .HasComment("Pay Classification");
 
         builder.HasData(
-            new PayClassification { Id = PayClassification.Constants.ZeroOne, Name = "01" }, // There are 4 people in the obfuscation dataset with this JOBCLASS 
+            new PayClassification
+            {
+                Id = PayClassification.Constants.ZeroOne, Name = "01"
+            }, // There are 4 people in the obfuscation dataset with this JOBCLASS 
             new PayClassification { Id = PayClassification.Constants.Manager, Name = "MANAGER" },
             new PayClassification { Id = PayClassification.Constants.AssistantManager, Name = "ASSISTANT MANAGER" },
-            new PayClassification { Id = PayClassification.Constants.SpiritsClerkPt, Name = "SPIRITS CLERK - PT" }, // 1 person in obfuscation dataset with this JOBCLASS
+            new PayClassification { Id = PayClassification.Constants.SpiritsManager, Name = "SPIRITS MANAGER" },
+            new PayClassification { Id = PayClassification.Constants.AsstSpiritsManager, Name = "ASST SPIRITS MANAGER" },
+            new PayClassification { Id = PayClassification.Constants.SpiritsClerkFt, Name = "SPIRITS CLERK - FT" },
+            new PayClassification { Id = PayClassification.Constants.SpiritsClerkPt, Name = "SPIRITS CLERK - PT" },
             new PayClassification { Id = PayClassification.Constants.FrontEndManager, Name = "FRONT END MANAGER" },
             new PayClassification { Id = PayClassification.Constants.AssistantHeadCashier, Name = "ASSISTANT HEAD CASHIER" },
             new PayClassification { Id = PayClassification.Constants.CashiersAm, Name = "CASHIERS - AM" },
@@ -39,6 +45,7 @@ internal sealed class PayClassificationMap : IEntityTypeConfiguration<PayClassif
             new PayClassification { Id = PayClassification.Constants.Sackers1415, Name = "SACKERS 14-15" },
             new PayClassification { Id = PayClassification.Constants.StoreMaintenance, Name = "STORE MAINTENANCE" },
             new PayClassification { Id = PayClassification.Constants.OfficeManager, Name = "OFFICE MANAGER" },
+            new PayClassification { Id = PayClassification.Constants.AsstOfficeManager, Name = "ASST OFFICE MANAGER" },
             new PayClassification { Id = PayClassification.Constants.CourtesyBoothAm, Name = "COURTESY BOOTH - AM" },
             new PayClassification { Id = PayClassification.Constants.CourtesyBoothPm, Name = "COURTESY BOOTH - PM" },
             new PayClassification { Id = PayClassification.Constants.PosFullTime, Name = "POS - FULL TIME" },
@@ -52,6 +59,7 @@ internal sealed class PayClassificationMap : IEntityTypeConfiguration<PayClassif
             new PayClassification { Id = PayClassification.Constants.EndsPartTime, Name = "ENDS - PART TIME" },
             new PayClassification { Id = PayClassification.Constants.FirstMeatCutter, Name = "FIRST MEAT CUTTER" },
             new PayClassification { Id = PayClassification.Constants.NotUsed35, Name = "NOT USED" },
+            new PayClassification { Id = PayClassification.Constants.MarketsKitchenPartTime, Name = "MARKETS KITCHEN PT 16-17" },
             new PayClassification { Id = PayClassification.Constants.CafePartTime, Name = "CAFE PART TIME" },
             new PayClassification { Id = PayClassification.Constants.Receiver, Name = "RECEIVER" },
             new PayClassification { Id = PayClassification.Constants.NotUsed39, Name = "NOT USED" },

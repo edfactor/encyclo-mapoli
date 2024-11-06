@@ -81,8 +81,8 @@ public class CleanupReportService : ICleanupReportService
                         Status = grp.Key.EmploymentStatusId,
                         StoreNumber = grp.Key.StoreNumber,
                         ProfitSharingRecords = grp.Count(),
-                        HoursCurrentYear = grp.Key.CurrentHoursYear ?? 0,
-                        IncomeCurrentYear = grp.Key.CurrentIncomeYear ?? 0,
+                        HoursCurrentYear = grp.Key.CurrentHoursYear,
+                        IncomeCurrentYear = grp.Key.CurrentIncomeYear,
                     }
                 ).ToPaginationResultsAsync(req, ct);
 
@@ -349,14 +349,54 @@ public class CleanupReportService : ICleanupReportService
         var over18BirthDate = response.FiscalEndDate.AddYears(-18);
         var rslt = await _dataContextFactory.UseReadOnlyContext(ctx =>
         {
-            return ctx.PayProfits
-                      .Include(d => d.Demographic)
-                      .Where(p => p.ProfitYear == req.ProfitYear) // Get right year
-                      .Where(p => p.Demographic!.EmploymentStatusId != EmploymentStatus.Constants.Terminated) //Don't show terminated employees
-                      .Where(p => (p.CurrentHoursYear  + p.HoursExecutive) >= 1000) //Employee worked 1000 hrs
-                      .Where(p => p.Demographic!.DateOfBirth < over18BirthDate) // Employee must be eighteen
-                      .OrderBy(p=>p.Demographic!.ContactInfo.LastName)
-                      .ThenBy(p=>p.Demographic!.ContactInfo.FirstName)
+            var qry = ctx.PayProfits.Include(x => x.Demographic).Where(p => p.ProfitYear == req.ProfitYear);
+            if (req.MinimumHoursInclusive.HasValue)
+            {
+                qry = qry.Where(p => (p.CurrentHoursYear + p.HoursExecutive) >= req.MinimumHoursInclusive.Value);
+            }
+            if (req.MaximumHoursInclusive.HasValue)
+            {
+                qry = qry.Where(p => (p.CurrentHoursYear + p.HoursExecutive) <= req.MaximumHoursInclusive.Value);
+            }
+            if (req.MinimumAgeInclusive.HasValue)
+            {
+                var minBirthDate = response.FiscalEndDate.AddYears(req.MinimumAgeInclusive.Value * -1);
+                qry = qry.Where(p => p.Demographic!.DateOfBirth <= minBirthDate);
+            }
+            if (req.MaximumAgeInclusive.HasValue)
+            {
+                var maxBirthDate = response.FiscalEndDate.AddYears(req.MaximumAgeInclusive.Value * -1);
+                qry = qry.Where(p => p.Demographic!.DateOfBirth >= maxBirthDate);
+            }
+            if (!req.IncludeEmployeesWithNoPriorProfitSharingAmounts && req.IncludeEmployeesWithPriorProfitSharingAmounts)
+            {
+                qry = qry.Where(p => ctx.PayProfits.Where(ly=>ly.ProfitYear == req.ProfitYear - 1 && ly.DemographicId == p.DemographicId && ly.PointsEarned > 0).Any());
+            }
+            if (req.IncludeEmployeesWithNoPriorProfitSharingAmounts && !req.IncludeEmployeesWithPriorProfitSharingAmounts)
+            {
+                qry = qry.Where(p => ctx.PayProfits.Where(ly => ly.ProfitYear == req.ProfitYear - 1 && ly.DemographicId == p.DemographicId && ly.PointsEarned == 0).Any());
+            }
+            if (!req.IncludeActiveEmployees || !req.IncludeTerminatedEmployees || !req.IncludeInactiveEmployees)
+            {
+                var validStatus = new List<char>();
+                if (req.IncludeActiveEmployees)
+                {
+                    validStatus.Add(EmploymentStatus.Constants.Active);
+                }
+                if (req.IncludeInactiveEmployees)
+                {
+                    validStatus.Add(EmploymentStatus.Constants.Inactive);
+                }
+                if (req.IncludeTerminatedEmployees)
+                {
+                    validStatus.Add(EmploymentStatus.Constants.Terminated);
+                }
+                qry = qry.Where(p => validStatus.Contains(p.Demographic!.EmploymentStatusId));
+            }
+
+            return qry
+                      .OrderBy(p => p.Demographic!.ContactInfo.LastName)
+                      .ThenBy(p => p.Demographic!.ContactInfo.FirstName)
                       .Select(x => new YearEndProfitSharingReportResponse()
                       {
                           BadgeNumber = x.Demographic!.BadgeNumber,
@@ -366,8 +406,8 @@ public class CleanupReportService : ICleanupReportService
                           DateOfBirth = x.Demographic!.DateOfBirth,
                           Age = 0, //Filled out below after materialization
                           EmployeeSsn = x.Demographic!.Ssn.MaskSsn(),
-                          Wages = (x.CurrentIncomeYear ?? 0m) + (x.IncomeExecutive),
-                          Hours = Math.Floor((x.CurrentHoursYear ?? 0m) + (x.HoursExecutive)),
+                          Wages = (x.CurrentIncomeYear) + (x.IncomeExecutive),
+                          Hours = Math.Floor((x.CurrentHoursYear) + (x.HoursExecutive)),
                           Points = 0, //Filled out below after materialization
                           IsNew = x.EmployeeTypeId == EmployeeType.Constants.NewLastYear,
                           IsUnder21 = false, //Filled out below after materialization

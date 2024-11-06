@@ -19,13 +19,13 @@ public sealed class PayProfit
     /// <summary>
     /// Hours towards Profit Sharing in the current year (updated weekly)
     /// </summary>
-    public decimal? CurrentHoursYear { get; set; }
+    public decimal CurrentHoursYear { get; set; }
 
     
     /// <summary>
     /// Income (Wage) accumulated so far in the current year (updated weekly)
     /// </summary>
-    public decimal? CurrentIncomeYear { get; set; }
+    public decimal CurrentIncomeYear { get; set; }
 
     /// <summary>
     /// earnings on the ETVA value 
@@ -45,7 +45,7 @@ public sealed class PayProfit
     /// <summary>
     /// Number of weeks worked in the current year
     /// </summary>
-    public required byte WeeksWorkedYear { get; set; }
+    public byte WeeksWorkedYear { get; set; }
 
     /// <summary>
     /// Date the last PS Certificate was issued
@@ -58,19 +58,19 @@ public sealed class PayProfit
     /// </summary>
     ///
     public byte EnrollmentId { get; set; }
-    public required Enrollment? Enrollment { get; set; }
+    public Enrollment? Enrollment { get; set; }
 
     /// <summary>
     /// 0=Employee, 1=Beneficiary
     /// </summary>
     public byte BeneficiaryTypeId { get; set; }
-    public required BeneficiaryType? BeneficiaryType { get; set; }
+    public BeneficiaryType? BeneficiaryType { get; set; }
 
     /// <summary>
     /// 0=NOT New in plan last year, 1=New last year
     /// </summary>
     public byte EmployeeTypeId { get; set; }
-    public required EmployeeType? EmployeeType { get; set; }
+    public EmployeeType? EmployeeType { get; set; }
 
     
     public byte? ZeroContributionReasonId { get; set; }
@@ -85,6 +85,13 @@ public sealed class PayProfit
     /// Executive earnings
     /// </summary>
     public decimal IncomeExecutive { get; set; }
+    
+    public DateTime LastUpdate { get; set; }
+
+    /// <summary>
+    /// Points Earned (for the ProfitYear).
+    /// </summary>
+    public decimal? PointsEarned { get; set; }
 
 
     public Demographic? Demographic { get; set; }

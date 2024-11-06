@@ -14,6 +14,9 @@ using MassTransit;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Data.Entities;
+using Microsoft.Extensions.DependencyInjection;
+using FastEndpoints;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareReport;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 public class CleanupReportServiceTests:ApiTestBase<Program>
@@ -400,6 +403,81 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
         response.Response.Results.Count().Should().Be(0);
 
         _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+    }
+
+    [Fact(DisplayName = "PS-399 : Year-end Profit Sharing Report with filters (JSON")]
+    public async Task GetYearEndProfitSharingReportWithFilters()
+    {
+        _cleanupReportClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
+        var profitYear = (short)(DateTime.Now.Year - 1);
+        var req = new YearEndProfitSharingReportRequest() { Skip = 0, Take = byte.MaxValue, ProfitYear = profitYear, IsYearEnd = true };
+        var testHours = 1001;
+        await MockDbContextFactory.UseWritableContext(async ctx =>
+        {
+            //"Delete" all employees so that none of the random ones are returned
+            foreach (var dem in ctx.Demographics)
+            {
+                dem.EmploymentStatusId = 'd';
+            }
+
+            //Prevent any payprofit records from being returned
+            foreach (var pp in ctx.PayProfits)
+            {
+                pp.ProfitYear = 1999;
+            }
+
+            //Setup employee to be returned
+            var payProfit = await ctx.PayProfits.Include(payProfit => payProfit.Demographic).FirstAsync();
+            var emp = payProfit.Demographic;
+
+            emp!.EmploymentStatusId = 'a';
+            emp!.DateOfBirth = new DateOnly(DateTime.Now.Year - 28, 9, 21);
+
+            payProfit.ProfitYear = profitYear;
+            payProfit.CurrentHoursYear = testHours;
+            payProfit.HoursExecutive = 0;
+
+            await ctx.SaveChangesAsync();
+        });
+
+        var response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest,ReportResponseBase<YearEndProfitSharingReportResponse>>(req);
+        response.Should().NotBeNull();
+        response.Result.ReportName.Should().BeEquivalentTo($"PROFIT SHARE YEAR END REPORT FOR {req.ProfitYear}");
+        response.Result.Response.Total.Should().Be(1);
+        response.Result.Response.Results.Count().Should().Be(1);
+
+        req.IncludeActiveEmployees = false; //Test Active filter
+        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, ReportResponseBase<YearEndProfitSharingReportResponse>>(req);
+        response.Should().NotBeNull();
+        response.Result.Response.Total.Should().Be(0);
+        response.Result.Response.Results.Count().Should().Be(0);
+
+        req.IncludeActiveEmployees = true;
+        req.MaximumAgeInclusive = 20; //Test Max Age filter
+        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, ReportResponseBase<YearEndProfitSharingReportResponse>>(req);
+        response.Should().NotBeNull();
+        response.Result.Response.Total.Should().Be(0);
+        response.Result.Response.Results.Count().Should().Be(0);
+
+        req.MaximumAgeInclusive = null;
+        req.MinimumAgeInclusive = 30; //Test Min Age filter
+        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, ReportResponseBase<YearEndProfitSharingReportResponse>>(req);
+        response.Should().NotBeNull();
+        response.Result.Response.Total.Should().Be(0);
+        response.Result.Response.Results.Count().Should().Be(0);
+
+        req.MinimumAgeInclusive = null;
+        req.MinimumHoursInclusive = (short?)(testHours + 1); //Test Minimum hours
+        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, ReportResponseBase<YearEndProfitSharingReportResponse>>(req);
+        response.Should().NotBeNull();
+        response.Result.Response.Total.Should().Be(0);
+        response.Result.Response.Results.Count().Should().Be(0);
+
+        req.MinimumHoursInclusive = null;
+        req.MaximumHoursInclusive = (short?)(testHours - 1); //Test Maximum hours
+        response.Should().NotBeNull();
+        response.Result.Response.Total.Should().Be(0);
+        response.Result.Response.Results.Count().Should().Be(0);
     }
 
     [Fact(DisplayName ="PS-294 : Distributions and Forfeitures (JSON)")]

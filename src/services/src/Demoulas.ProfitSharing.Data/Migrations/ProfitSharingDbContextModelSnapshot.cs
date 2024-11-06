@@ -1960,7 +1960,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         new
                         {
                             Id = (byte)6,
-                            Name = "Beer and Wine"
+                            Name = "Beer/Wine"
                         },
                         new
                         {
@@ -28670,6 +28670,21 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         },
                         new
                         {
+                            Id = (byte)4,
+                            Name = "SPIRITS MANAGER"
+                        },
+                        new
+                        {
+                            Id = (byte)5,
+                            Name = "ASST SPIRITS MANAGER"
+                        },
+                        new
+                        {
+                            Id = (byte)6,
+                            Name = "SPIRITS CLERK - FT"
+                        },
+                        new
+                        {
                             Id = (byte)7,
                             Name = "SPIRITS CLERK - PT"
                         },
@@ -28722,6 +28737,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         {
                             Id = (byte)20,
                             Name = "OFFICE MANAGER"
+                        },
+                        new
+                        {
+                            Id = (byte)21,
+                            Name = "ASST OFFICE MANAGER"
                         },
                         new
                         {
@@ -28787,6 +28807,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         {
                             Id = (byte)35,
                             Name = "NOT USED"
+                        },
+                        new
+                        {
+                            Id = (byte)36,
+                            Name = "MARKETS KITCHEN PT 16-17"
                         },
                         new
                         {
@@ -29136,14 +29161,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("BENEFICIARY_TYPE_ID");
 
-                    b.Property<decimal?>("CurrentHoursYear")
-                        .IsRequired()
+                    b.Property<decimal>("CurrentHoursYear")
                         .HasPrecision(6, 2)
                         .HasColumnType("DECIMAL(6,2)")
                         .HasColumnName("CURRENT_HOURS_YEAR");
 
-                    b.Property<decimal?>("CurrentIncomeYear")
-                        .IsRequired()
+                    b.Property<decimal>("CurrentIncomeYear")
                         .HasPrecision(9, 2)
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("CURRENT_INCOME_YEAR");
@@ -29170,6 +29193,17 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasPrecision(9, 2)
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("INCOME_EXECUTIVE");
+
+                    b.Property<DateTime>("LastUpdate")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("TIMESTAMP")
+                        .HasColumnName("LAST_UPDATE")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<decimal?>("PointsEarned")
+                        .HasPrecision(9, 2)
+                        .HasColumnType("DECIMAL(9,2)")
+                        .HasColumnName("POINTS_EARNED");
 
                     b.Property<DateTime?>("PsCertificateIssuedDate")
                         .HasColumnType("DATE")

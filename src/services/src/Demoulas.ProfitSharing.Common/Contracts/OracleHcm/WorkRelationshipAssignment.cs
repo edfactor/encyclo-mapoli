@@ -1,4 +1,6 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
+﻿using System.Text.RegularExpressions;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 
 /// <summary>
 /// Represents an assignment within a work relationship in the Oracle HCM system.
@@ -12,41 +14,28 @@ public record WorkRelationshipAssignment(
     short? LocationCode,
     byte? JobCode,
     string? PositionCode,
+    string? DepartmentName,
+    string? DepartmentId,
     string? FullPartTime,
+    string? AssignmentCategory,
     char? Frequency
 )
 {
-    public byte GetPayFrequency()
-    {
-        const byte weekly = 1;
-        const byte monthly = 2;
-        switch (Frequency)
-        {
-            case 'W':
-                return weekly;
-            case 'M':
-                return monthly;
-            default:
-                return byte.MinValue;
-        }
-    }
+    /// <summary>The code representing the location of the assignment.</summary>
+    public short? LocationCode { get; init; } = LocationCode;
 
-    public byte GetDepartmentId()
-    {
-        _ = byte.TryParse(PositionCode?.Split('-').LastOrDefault(), out byte departmentId);
-        return departmentId;
-    }
+    /// <summary>The code representing the job associated with the assignment.</summary>
+    public byte? JobCode { get; init; } = JobCode;
 
-    public char GetEmploymentType()
-    {
-        const char partTime = 'P';
-        const char fullTimeStraightSalary = 'H';
+    /// <summary>The code representing the position of the assignment.</summary>
+    public string? PositionCode { get; init; } = PositionCode;
+    public string? DepartmentName { get; init; } = DepartmentName;
+    public string? DepartmentId { get; init; } = DepartmentId;
 
-        return FullPartTime switch
-        {
-            "PART_TIME" => partTime,
-            "FULL_TIME" => fullTimeStraightSalary,
-            _ => char.MinValue
-        };
-    }
+    /// <summary>Indicates whether the assignment is full-time or part-time.</summary>
+    public string? FullPartTime { get; init; } = FullPartTime;
+    public string? AssignmentCategory { get; init; } = AssignmentCategory;
+
+    /// <summary>The frequency of the assignment, such as weekly or monthly.</summary>
+    public char? Frequency { get; init; } = Frequency;
 }

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class initialMigration : Migration
+    public partial class initialMigrations : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -788,7 +788,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     EMPLOYEE_TYPE_ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
                     ZERO_CONTRIBUTION_REASON_ID = table.Column<byte>(type: "NUMBER(3)", nullable: true),
                     HOURS_EXECUTIVE = table.Column<decimal>(type: "DECIMAL(6,2)", precision: 6, scale: 2, nullable: false),
-                    INCOME_EXECUTIVE = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false)
+                    INCOME_EXECUTIVE = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    LAST_UPDATE = table.Column<DateTime>(type: "TIMESTAMP", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    POINTS_EARNED = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -2483,7 +2485,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     { (byte)3, "Produce" },
                     { (byte)4, "Deli" },
                     { (byte)5, "Dairy" },
-                    { (byte)6, "Beer and Wine" },
+                    { (byte)6, "Beer/Wine" },
                     { (byte)7, "Bakery" }
                 });
 
@@ -2608,6 +2610,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     { (byte)0, "01" },
                     { (byte)1, "MANAGER" },
                     { (byte)2, "ASSISTANT MANAGER" },
+                    { (byte)4, "SPIRITS MANAGER" },
+                    { (byte)5, "ASST SPIRITS MANAGER" },
+                    { (byte)6, "SPIRITS CLERK - FT" },
                     { (byte)7, "SPIRITS CLERK - PT" },
                     { (byte)10, "FRONT END MANAGER" },
                     { (byte)11, "ASSISTANT HEAD CASHIER" },
@@ -2619,6 +2624,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     { (byte)18, "SACKERS 14-15" },
                     { (byte)19, "STORE MAINTENANCE" },
                     { (byte)20, "OFFICE MANAGER" },
+                    { (byte)21, "ASST OFFICE MANAGER" },
                     { (byte)22, "COURTESY BOOTH - AM" },
                     { (byte)23, "COURTESY BOOTH - PM" },
                     { (byte)24, "POS - FULL TIME" },
@@ -2632,6 +2638,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     { (byte)32, "ENDS - PART TIME" },
                     { (byte)33, "FIRST MEAT CUTTER" },
                     { (byte)35, "NOT USED" },
+                    { (byte)36, "MARKETS KITCHEN PT 16-17" },
                     { (byte)37, "CAFE PART TIME" },
                     { (byte)38, "RECEIVER" },
                     { (byte)39, "NOT USED" },
