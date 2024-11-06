@@ -63,7 +63,13 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
             .HasColumnName("HOURS_EXECUTIVE")
             .HasPrecision(6, 2);
 
-        
+        _ = builder.Property(e => e.LastUpdate)
+            .HasColumnName("LAST_UPDATE")
+            .HasColumnType("TIMESTAMP")
+            .HasDefaultValueSql("CURRENT_TIMESTAMP")
+            .ValueGeneratedOnAddOrUpdate();
+
+
         _ = builder.Property(e => e.ZeroContributionReasonId)
             .HasColumnName("ZERO_CONTRIBUTION_REASON_ID");
 
@@ -75,6 +81,7 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
 
         _ = builder.Property(e => e.EmployeeTypeId)
             .HasColumnName("EMPLOYEE_TYPE_ID");
+        
 
         _ = builder.Property(e => e.PointsEarned)
             .HasColumnName("POINTS_EARNED")

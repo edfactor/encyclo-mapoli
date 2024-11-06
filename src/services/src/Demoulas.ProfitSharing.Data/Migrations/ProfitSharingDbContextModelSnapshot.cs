@@ -29161,14 +29161,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("BENEFICIARY_TYPE_ID");
 
-                    b.Property<decimal?>("CurrentHoursYear")
-                        .IsRequired()
+                    b.Property<decimal>("CurrentHoursYear")
                         .HasPrecision(6, 2)
                         .HasColumnType("DECIMAL(6,2)")
                         .HasColumnName("CURRENT_HOURS_YEAR");
 
-                    b.Property<decimal?>("CurrentIncomeYear")
-                        .IsRequired()
+                    b.Property<decimal>("CurrentIncomeYear")
                         .HasPrecision(9, 2)
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("CURRENT_INCOME_YEAR");
@@ -29195,6 +29193,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasPrecision(9, 2)
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("INCOME_EXECUTIVE");
+
+                    b.Property<DateTime>("LastUpdate")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("TIMESTAMP")
+                        .HasColumnName("LAST_UPDATE")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<decimal?>("PointsEarned")
                         .HasPrecision(9, 2)

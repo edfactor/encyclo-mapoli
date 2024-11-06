@@ -42,7 +42,6 @@ public class DemographicsService : IDemographicsServiceInternal
     public async Task AddDemographicsStream(IAsyncEnumerable<DemographicsRequest> employees, byte batchSize = byte.MaxValue,
         CancellationToken cancellationToken = default)
     {
-        using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(AddDemographicsStream), ActivityKind.Internal);
         var batch = new List<DemographicsRequest>();
 
         await foreach (var employee in employees.WithCancellation(cancellationToken))

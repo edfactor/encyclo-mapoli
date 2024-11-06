@@ -1,9 +1,5 @@
 ﻿using Demoulas.ProfitSharing.Common.Configuration;
-using Demoulas.ProfitSharing.Common.Contracts.Messaging;
-using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.OracleHcm.Jobs;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Quartz;
 using Quartz.Spi;
@@ -31,13 +27,13 @@ internal sealed class OracleHcmHostedService : IHostedService
         _scheduler = await _schedulerFactory.GetScheduler(cancellationToken);
         _scheduler.JobFactory = _jobFactory;
 
-        // Schedule the recurring job
-        var job = JobBuilder.Create<EmployeeSyncJob>()
-            .WithIdentity("dailyJob")
+        // Schedule the recurring job for EmployeeSyncJob
+        var employeeSyncJob = JobBuilder.Create<EmployeeSyncJob>()
+            .WithIdentity(nameof(EmployeeSyncJob))
             .Build();
 
-        var trigger = TriggerBuilder.Create()
-            .WithIdentity("dailyTrigger")
+        var employeeSyncTrigger = TriggerBuilder.Create()
+            .WithIdentity("employeeSyncTrigger")
             .StartNow()
             .WithSimpleSchedule(x =>
             {
@@ -46,7 +42,24 @@ internal sealed class OracleHcmHostedService : IHostedService
             })
             .Build();
 
-        await _scheduler.ScheduleJob(job, trigger, cancellationToken);
+        // Schedule the recurring job for PayrollSyncJob
+        var payrollSyncJob = JobBuilder.Create<PayrollSyncJob>()
+            .WithIdentity(nameof(PayrollSyncJob))
+            .Build();
+
+        var payrollSyncTrigger = TriggerBuilder.Create()
+            .WithIdentity("payrollSyncTrigger")
+            .StartAt(DateTimeOffset.UtcNow.AddMinutes(5))
+            .WithSimpleSchedule(x =>
+            {
+                x.WithIntervalInHours(_oracleHcmConfig.IntervalInHours)
+                    .RepeatForever();
+            })
+            .Build();
+
+        await _scheduler.ScheduleJob(employeeSyncJob, employeeSyncTrigger, cancellationToken);
+        await _scheduler.ScheduleJob(payrollSyncJob, payrollSyncTrigger, cancellationToken);
+
 
         await _scheduler.Start(cancellationToken);
     }

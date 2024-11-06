@@ -209,7 +209,7 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
                 StoreNumber = d.StoreNumber,
                 CompanyContributionYears = 0, //d.CompanyContributionYears,
                 EnrollmentId = d.EnrollmentId,
-                HoursCurrentYear = d.CurrentHoursYear ?? 0,
+                HoursCurrentYear = d.CurrentHoursYear,
                 NetBalanceLastYear = 0, //d.NetBalanceLastYear,
                 VestedBalanceLastYear = 0, //d.VestedBalanceLastYear,
                 EmploymentStatusId = d.EmploymentStatusId,

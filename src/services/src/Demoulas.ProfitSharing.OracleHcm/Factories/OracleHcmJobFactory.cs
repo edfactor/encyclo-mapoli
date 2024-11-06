@@ -2,7 +2,11 @@
 using Quartz;
 using Quartz.Spi;
 
-namespace Demoulas.ProfitSharing.OracleHcm.Jobs;
+namespace Demoulas.ProfitSharing.OracleHcm.Factories;
+
+/// <summary>
+/// Factory class responsible for creating instances of Oracle HCM jobs.
+/// </summary>
 public class OracleHcmJobFactory : IJobFactory
 {
     private readonly IServiceProvider _serviceProvider;

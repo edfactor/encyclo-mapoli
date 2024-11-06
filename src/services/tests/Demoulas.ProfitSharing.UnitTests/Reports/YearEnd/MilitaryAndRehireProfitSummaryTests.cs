@@ -202,7 +202,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
         example.Ssn = demo.Ssn.MaskSsn();
         example.FullName = demo.ContactInfo.FullName;
         example.CompanyContributionYears = 0;
-        example.HoursCurrentYear = payProfit.CurrentHoursYear ?? 0;
+        example.HoursCurrentYear = payProfit.CurrentHoursYear;
         example.ReHiredDate = demo.ReHireDate ?? SqlDateTime.MinValue.Value.ToDateOnly();
 
 
