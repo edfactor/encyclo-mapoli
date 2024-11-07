@@ -10,11 +10,9 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Xunit.Abstractions;
 using IdGen;
-using MassTransit;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Data.Entities;
-using Microsoft.Extensions.DependencyInjection;
 using FastEndpoints;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareReport;
 
