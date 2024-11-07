@@ -53,9 +53,9 @@ export interface DistributionsAndForfeitures {
   federalTax: number;
   forfeitAmount: number;
   age: number;
-  taxCode: string | null,
-  otherName: string | null,
-  otherSsn: string | null,
+  taxCode: string | null;
+  otherName: string | null;
+  otherSsn: string | null;
   enrolled: boolean | null;
 }
 
@@ -205,7 +205,7 @@ export interface ExecutiveHoursAndDollarsRequestDto extends ImpersonationRequest
   badgeNumber?: number;
   fullNameContains?: string;
   profitYear: number;
-  hasExecutiveHoursAndDollars: boolean
+  hasExecutiveHoursAndDollars: boolean;
   pagination: PaginationParams;
 }
 
@@ -219,4 +219,23 @@ export interface ExecutiveHoursAndDollars {
   currentIncomeYear: number;
   payFrequencyId: number;
   employmentStatusId: string;
+}
+
+export interface EligibleEmployeesRequestDto extends ImpersonationRequest {
+  profitYear: number;
+  pagination: PaginationParams;
+}
+export interface EligibleEmployee {
+  oracleHcmId: number;
+  badgeNumber: number;
+  fullName: string;
+}
+
+export interface EligibleEmployeeResponseDto {
+  numberReadOnFrozen: number;
+  numberNotSelected: number;
+  numberWritten: number;
+  reportName: string;
+  reportDate: string;
+  response: Paged<EligibleEmployee>;
 }

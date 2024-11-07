@@ -1,11 +1,12 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 import { RootState } from "reduxstore/store";
-import { DemographicBadgesNotInPayprofitRequestDto, DemographicBadgesNotInPayprofitResponse, DistributionsAndForfeitures, DistributionsAndForfeituresRequestDto, DuplicateNameAndBirthday, DuplicateNameAndBirthdayRequestDto, DuplicateSSNDetail, DuplicateSSNsRequestDto, ExecutiveHoursAndDollars, ExecutiveHoursAndDollarsRequestDto, MilitaryAndRehire, MilitaryAndRehireForfeiture, MilitaryAndRehireForfeituresRequestDto, MilitaryAndRehireProfitSummary, MilitaryAndRehireProfitSummaryRequestDto, MilitaryAndRehireRequestDto, MissingCommasInPYName, MissingCommasInPYNameRequestDto, NegativeEtvaForSSNsOnPayProfit, NegativeEtvaForSSNsOnPayprofitRequestDto, PagedReportResponse } from "reduxstore/types";
-import { setDemographicBadgesNotInPayprofitData, setDistributionsAndForfeitures, setDuplicateNamesAndBirthdays, setDuplicateSSNsData, setExecutiveHoursAndDollars, setMilitaryAndRehireDetails, setMilitaryAndRehireForfeituresDetails, setMilitaryAndRehireProfitSummaryDetails, setMissingCommaInPYName, setNegativeEtvaForSssnsOnPayprofit } from "reduxstore/slices/yearsEndSlice";
+import { DemographicBadgesNotInPayprofitRequestDto, DemographicBadgesNotInPayprofitResponse, DistributionsAndForfeitures, DistributionsAndForfeituresRequestDto, DuplicateNameAndBirthday, DuplicateNameAndBirthdayRequestDto, DuplicateSSNDetail, DuplicateSSNsRequestDto, EligibleEmployeeResponseDto, EligibleEmployeesRequestDto, ExecutiveHoursAndDollars, ExecutiveHoursAndDollarsRequestDto, MilitaryAndRehire, MilitaryAndRehireForfeiture, MilitaryAndRehireForfeituresRequestDto, MilitaryAndRehireProfitSummary, MilitaryAndRehireProfitSummaryRequestDto, MilitaryAndRehireRequestDto, MissingCommasInPYName, MissingCommasInPYNameRequestDto, NegativeEtvaForSSNsOnPayProfit, NegativeEtvaForSSNsOnPayprofitRequestDto, PagedReportResponse } from "reduxstore/types";
+import { setDemographicBadgesNotInPayprofitData, setDistributionsAndForfeitures, setDuplicateNamesAndBirthdays, setDuplicateSSNsData, setEligibleEmployees, setExecutiveHoursAndDollars, setMilitaryAndRehireDetails, setMilitaryAndRehireForfeituresDetails, setMilitaryAndRehireProfitSummaryDetails, setMissingCommaInPYName, setNegativeEtvaForSssnsOnPayprofit } from "reduxstore/slices/yearsEndSlice";
+import { url } from "./api";
 export const YearsEndApi = createApi({
   baseQuery: fetchBaseQuery({
-    baseUrl: "https://localhost:7141/api/",
+    baseUrl: `${url}/api/`,
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).security.token;
       if (token) {
@@ -298,7 +299,26 @@ export const YearsEndApi = createApi({
           console.log("Err: " + err);
         }
       }
-    })
+    }),
+    getEligibleEmployees: builder.query<EligibleEmployeeResponseDto, EligibleEmployeesRequestDto>({
+      query: (params) => ({
+        url: "yearend/eligible-employees",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          take: params.pagination.take,
+          skip: params.pagination.skip
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setEligibleEmployees(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
   })
 });
 
@@ -317,5 +337,6 @@ export const {
   useLazyGetPayrollDuplicateSSNsOnPayprofitQuery,
   useLazyGetWagesPreviousYearQuery,
   useLazyGetDistributionsAndForfeituresQuery,
-  useLazyGetExecutiveHoursAndDollarsQuery
+  useLazyGetExecutiveHoursAndDollarsQuery,
+  useLazyGetEligibleEmployeesQuery
 } = YearsEndApi;

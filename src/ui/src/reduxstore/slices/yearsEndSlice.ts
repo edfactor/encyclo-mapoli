@@ -4,6 +4,7 @@ import {
   DistributionsAndForfeitures,
   DuplicateNameAndBirthday,
   DuplicateSSNDetail,
+  EligibleEmployeeResponseDto,
   ExecutiveHoursAndDollars,
   MilitaryAndRehire,
   MilitaryAndRehireForfeiture,
@@ -24,6 +25,7 @@ export interface YearsEndState {
   militaryAndRehireProfitSummary: PagedReportResponse<MilitaryAndRehireProfitSummary> | null;
   distributionsAndForfeitures: PagedReportResponse<DistributionsAndForfeitures> | null;
   executiveHoursAndDollars: PagedReportResponse<ExecutiveHoursAndDollars> | null;
+  eligibleEmployees: EligibleEmployeeResponseDto | null;
 }
 
 const initialState: YearsEndState = {
@@ -36,7 +38,8 @@ const initialState: YearsEndState = {
   militaryAndRehireForfeitures: null,
   militaryAndRehireProfitSummary: null,
   distributionsAndForfeitures: null,
-  executiveHoursAndDollars: null
+  executiveHoursAndDollars: null,
+  eligibleEmployees: null
 };
 
 export const yearsEndSlice = createSlice({
@@ -91,6 +94,12 @@ export const yearsEndSlice = createSlice({
     ) => {
       state.executiveHoursAndDollars = action.payload;
     },
+    setEligibleEmployees: (
+      state,
+      action: PayloadAction<EligibleEmployeeResponseDto>
+    ) => {
+      state.eligibleEmployees = action.payload;
+    },
   }
 });
 
@@ -104,6 +113,7 @@ export const {
   setMilitaryAndRehireForfeituresDetails,
   setMilitaryAndRehireProfitSummaryDetails,
   setDistributionsAndForfeitures,
-  setExecutiveHoursAndDollars
+  setExecutiveHoursAndDollars,
+  setEligibleEmployees
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;
