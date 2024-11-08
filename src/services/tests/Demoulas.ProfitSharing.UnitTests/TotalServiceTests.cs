@@ -49,7 +49,7 @@ public class TotalServiceTests : ApiTestBase<Program>
                                         .Where(x => x.Ssn == demoSsn).ToListAsync();
             testRslt.Should().NotBeNull(); //Testing where Forfeiture, Contribution and Earnigns are all added
             testRslt.Count.Should().Be(1);
-            testRslt[0].Total.Should().Be(32767);
+            testRslt[0].Total.Should().Be(-4681M);
 
             foreach (var prof in pdArray)
             {
@@ -73,13 +73,13 @@ public class TotalServiceTests : ApiTestBase<Program>
                                         .Where(x => x.Ssn == demoSsn).ToListAsync();
             testRslt.Should().NotBeNull(); // Testing where Earnings and forfeitures are added
             testRslt.Count.Should().Be(1);
-            testRslt[0].Total.Should().Be(28086);
+            testRslt[0].Total.Should().Be(32767M);
 
             testRslt = await _totalService.GetTotalBalanceSet(ctx, (short)(DateTime.Now.Year -1))
                                         .Where(x => x.Ssn == demoSsn).ToListAsync();
             testRslt.Should().NotBeNull(); // Testing As of filter
             testRslt.Count.Should().Be(1);
-            testRslt[0].Total.Should().Be(28080);
+            testRslt[0].Total.Should().Be(32760M);
         });
 
     }

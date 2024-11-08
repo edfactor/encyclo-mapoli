@@ -7,27 +7,25 @@ public sealed class TotalService
 {
     public IQueryable<ParticipantTotalDto> GetTotalBalanceSet(IProfitSharingDbContext ctx, short profitYear)
     {
+        var sumAllFieldProfitCodeTypes = new[] {
+                                       ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
+                                       ProfitCode.Constants.OutgoingForfeitures.Id,
+                                       ProfitCode.Constants.OutgoingDirectPayments.Id,
+                                       ProfitCode.Constants.OutgoingXferBeneficiary.Id
+        };
+
+#pragma warning disable S3358 // Ternary operators should not be nested
         return (from pd in ctx.ProfitDetails
                 where pd.ProfitYear <= profitYear
                 group pd by pd.Ssn into pd_g
                 select new ParticipantTotalDto
                 {
                     Ssn = pd_g.Key,
-                    Total = pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment).Sum(x => x.Forfeiture * -1) +
-                                   pd_g.Where(x => new[] {
-                                       ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
-                                       ProfitCode.Constants.OutgoingForfeitures.Id,
-                                       ProfitCode.Constants.OutgoingDirectPayments.Id,
-                                       ProfitCode.Constants.OutgoingXferBeneficiary.Id
-                                       }.Contains(x.ProfitCodeId)).Sum(x => x.Forfeiture + x.Contribution + x.Earnings) +
-                                   pd_g.Where(x => !new[] {
-                                       ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
-                                       ProfitCode.Constants.OutgoingForfeitures.Id,
-                                       ProfitCode.Constants.OutgoingDirectPayments.Id,
-                                       ProfitCode.Constants.OutgoingXferBeneficiary.Id,
-                                       ProfitCode.Constants.Outgoing100PercentVestedPayment.Id
-                                       }.Contains(x.ProfitCodeId)).Sum(x => x.Earnings + x.Forfeiture)
+                    Total = pd_g.Sum(x=> x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment ? x.Forfeiture * -1 : //Just look at forfeiture
+                                          sumAllFieldProfitCodeTypes.Contains(x.ProfitCodeId) ? - x.Forfeiture + x.Contribution + x.Earnings : //Invert forfeiture, and add columns
+                                          x.Contribution + x.Earnings + x.Forfeiture) //Just add the columns
                 });
+#pragma warning restore S3358 // Ternary operators should not be nested
     }
 
     public IQueryable<ParticipantTotalDto> GetTotalEtva(IProfitSharingDbContext ctx, short profitYear)
@@ -79,21 +77,26 @@ public sealed class TotalService
         );
     }
 
+    public IQueryable<ParticipantTotalYearsDto> GetYearsOfService(IProfitSharingDbContext ctx, short profitYear)
+    {
+        return (from pd in ctx.ProfitDetails
+                where pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions &&
+                      pd.ProfitYearIteration == 0 &&
+                      pd.ProfitYear <= profitYear
+                group pd by pd.Ssn into g
+                select new ParticipantTotalYearsDto { Ssn = g.Key, Years = (short)g.Count() }); //Need to verify logic here
+    }
+
     public IQueryable<ParticipantTotalRatioDto> GetVestingRatio(IProfitSharingDbContext ctx, short profitYear, DateOnly asOfDate)
     {
 
         var BirthDate65 = asOfDate.AddYears(-65);
         var BeginningOfYear = asOfDate.AddYears(-1).AddDays(1);
 
-        var contributionYears = (from pd in ctx.ProfitDetails
-                                 where pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions
-                                 group pd by pd.Ssn into g
-                                 select new { Ssn = g.Key, Years = g.Count() }); //Need to verify logic here
-
         var demoInfo = (
             from d in ctx.Demographics
             join pp in ctx.PayProfits on new { d.Id, ProfitYear = profitYear } equals new { Id = pp.DemographicId, pp.ProfitYear }
-            join cy in contributionYears on d.Ssn equals cy.Ssn
+            join cy in GetYearsOfService(ctx, profitYear) on d.Ssn equals cy.Ssn
             select new
             {
                 d.Ssn,
@@ -121,7 +124,7 @@ public sealed class TotalService
                 ZeroContributionReasonId = (byte?)null,
                 b.Contact.DateOfBirth,
                 FromBeneficiary = (short)1,
-                Years = 0,
+                Years = (short)0,
                 Hours = (decimal)0
             }
         );
