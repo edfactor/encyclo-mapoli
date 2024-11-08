@@ -76,6 +76,18 @@ public static byte GetPayFrequency(this WorkRelationshipAssignment work)
             return result;
         }
 
+        result = work.AssignmentCategoryMeaning switch
+        {
+            "Part-time" => partTime,
+            "Full-time" => fullTimeStraightSalary,
+            _ => char.MinValue
+        };
+
+        if (result != char.MinValue)
+        {
+            return result;
+        }
+
         return work.FullPartTime switch
         {
             "PART_TIME" => partTime,
