@@ -1,12 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Reflection;
-using System.Threading;
+﻿using System.Reflection;
 using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.Common.Data.Services.Entities.Entities;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.NotOwned;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Data.Entities.NotOwned;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.UnitTests.Fakes;
 using Microsoft.EntityFrameworkCore;

@@ -66,7 +66,7 @@ public class DemographicsService : IDemographicsServiceInternal
         return _dataContextFactory.UseReadOnlyContext(c =>
         {
             return c.Jobs.Where(c =>
-                    c.JobStatusId == JobStatus.Constants.Completed && (c.JobTypeId == JobType.Constants.Full || c.JobTypeId == JobType.Constants.Delta))
+                    c.JobStatusId == JobStatus.Constants.Completed && (c.JobTypeId == JobType.Constants.EmployeeSyncFull || c.JobTypeId == JobType.Constants.PayrollSyncFull))
                 .MaxAsync(j => j.Completed, cancellationToken: cancellationToken);
         });
     }

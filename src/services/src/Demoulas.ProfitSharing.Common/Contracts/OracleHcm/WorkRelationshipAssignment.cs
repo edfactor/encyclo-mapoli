@@ -18,6 +18,7 @@ public record WorkRelationshipAssignment(
     string? DepartmentId,
     string? FullPartTime,
     string? AssignmentCategory,
+    string? AssignmentCategoryMeaning,
     char? Frequency
 )
 {

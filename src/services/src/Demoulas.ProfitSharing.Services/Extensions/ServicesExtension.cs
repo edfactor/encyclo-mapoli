@@ -35,10 +35,11 @@ public static class ServicesExtension
         _ = builder.Services.AddSingleton<IDemographicsServiceInternal, DemographicsService>();
         _ = builder.Services.AddSingleton<IStoreService, StoreService>();
         _ = builder.Services.AddSingleton<TotalService>();
+        _ = builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
         _ = builder.Services.AddSingleton<ICalendarService, CalendarService>();
-        
 
-       
+
+
         _ = builder.Services.AddKeyedSingleton<IBaseCacheService<LookupTableCache<byte>>, PayClassificationHostedService>(nameof(PayClassificationHostedService));
         _ = builder.Services.AddKeyedSingleton<IBaseCacheService<LookupTableCache<byte>>, DepartmentHostedService>(nameof(DepartmentHostedService));
 

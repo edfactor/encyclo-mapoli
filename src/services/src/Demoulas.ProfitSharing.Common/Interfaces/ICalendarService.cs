@@ -1,6 +1,6 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 
-namespace Demoulas.ProfitSharing.Services;
+namespace Demoulas.ProfitSharing.Common.Interfaces;
 
 public interface ICalendarService
 {

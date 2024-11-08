@@ -4,7 +4,6 @@ using FluentAssertions;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.Common.Contracts.Contracts.Response;
-using Demoulas.ProfitSharing.Services.Reports;
 using JetBrains.Annotations;
 using Demoulas.ProfitSharing.UnitTests.Base;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -14,8 +13,9 @@ using Demoulas.ProfitSharing.UnitTests.Extensions;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using Demoulas.ProfitSharing.Data.Contexts;
-using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
+using Demoulas.ProfitSharing.Common.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -26,7 +26,7 @@ public class MilitaryAndRehireTests : ApiTestBase<Api.Program>
 
     public MilitaryAndRehireTests()
     {
-        MilitaryAndRehireService mockService = new MilitaryAndRehireService(MockDbContextFactory, new CalendarService(MockDbContextFactory));
+        IMilitaryAndRehireService mockService = ServiceProvider?.GetRequiredService<IMilitaryAndRehireService>()!;
         _endpoint = new MilitaryAndRehireEndpoint(mockService);
     }
 

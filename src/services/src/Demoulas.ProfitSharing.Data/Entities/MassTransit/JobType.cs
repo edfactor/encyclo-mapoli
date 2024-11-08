@@ -5,9 +5,8 @@ public sealed class JobType : ILookupTable<byte>
 {
     public static class Constants
     {
-        public const byte Full = 0;
-        public const byte Delta = 1;
-        public const byte Individual = 2;
+        public const byte EmployeeSyncFull = 0;
+        public const byte PayrollSyncFull = 1;
     }
 
 
