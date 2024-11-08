@@ -2,6 +2,7 @@
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -17,12 +18,12 @@ namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficia
 public sealed class TerminatedEmployeeAndBeneficiaryReport
 {
     private readonly IProfitSharingDataContextFactory _factory;
-    private readonly CalendarService _calendarService;
+    private readonly ICalendarService _calendarService;
 
-    public TerminatedEmployeeAndBeneficiaryReport(IProfitSharingDataContextFactory factory)
+    public TerminatedEmployeeAndBeneficiaryReport(IProfitSharingDataContextFactory factory, ICalendarService calendarService)
     {
         _factory = factory;
-        _calendarService = new CalendarService(factory);
+        _calendarService = calendarService;
     }
 
     public async Task<TerminatedEmployeeAndBeneficiaryResponse> CreateData(ProfitYearRequest req, CancellationToken cancellationToken)

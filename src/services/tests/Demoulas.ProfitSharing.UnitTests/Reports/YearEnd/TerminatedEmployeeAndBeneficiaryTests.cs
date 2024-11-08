@@ -3,6 +3,7 @@ using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.TerminatedEmployeeAndBeneficiary;
 using Demoulas.ProfitSharing.Security;
@@ -12,6 +13,7 @@ using Demoulas.ProfitSharing.UnitTests.Extensions;
 using FastEndpoints;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -21,8 +23,9 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
 
     public TerminatedEmployeeAndBeneficiaryTests()
     {
+        var calendarService = ServiceProvider?.GetRequiredService<ICalendarService>()!;
         TerminatedEmployeeAndBeneficiaryReportService mockService =
-            new TerminatedEmployeeAndBeneficiaryReportService(MockDbContextFactory);
+            new TerminatedEmployeeAndBeneficiaryReportService(MockDbContextFactory, calendarService);
         _endpoint = new TerminatedEmployeeAndBeneficiaryDataEndpoint(mockService);
     }
 
