@@ -12,17 +12,14 @@ namespace Demoulas.ProfitSharing.Services.Reports;
 public class FrozenReportService:IFrozenReportService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
-    private readonly ContributionService _contributionService;
     private readonly ILogger _logger;
 
     public FrozenReportService(
         IProfitSharingDataContextFactory dataContextFactory,
-        ILoggerFactory loggerFactory,
-        ContributionService contributionService
+        ILoggerFactory loggerFactory
     )
     {
         _dataContextFactory = dataContextFactory;
-        _contributionService = contributionService;
         _logger = loggerFactory.CreateLogger<FrozenReportService>();
     }
 
@@ -64,7 +61,7 @@ public class FrozenReportService:IFrozenReportService
                 ).ToPaginationResultsAsync(req, cancellationToken);
 
                 var badges = recs.Results.Select(x=>(int)x.EmployeeBadgeNumber).ToHashSet();
-                var totals = await _contributionService.GetNetBalance((req.ProfitYear), badges, cancellationToken);
+                var totals = await ContributionService.GetNetBalance(ctx, (req.ProfitYear), badges, cancellationToken);
 
                 var currentYear = await (from pd in ctx.ProfitDetails
                                          join d in ctx.Demographics on pd.Ssn equals d.Ssn

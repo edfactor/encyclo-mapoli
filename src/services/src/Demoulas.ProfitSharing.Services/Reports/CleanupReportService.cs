@@ -17,7 +17,6 @@ namespace Demoulas.ProfitSharing.Services.Reports;
 public class CleanupReportService : ICleanupReportService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
-    private readonly ContributionService _contributionService;
     private readonly ICalendarService _calendarService;
     private readonly ILogger<CleanupReportService> _logger;
     private readonly TotalService _totalService;
@@ -387,8 +386,8 @@ public class CleanupReportService : ICleanupReportService
                           EmploymentStatusId = ' ',
                           TerminationDate = (DateOnly?)null,
                           b.Contact!.Ssn,
-                          b.Contact!.ContactInfo.LastName,
-                          b.Contact!.ContactInfo.FirstName,
+                          b.Contact!.LastName,
+                          b.Contact!.FirstName,
                           StoreNumber = (short)0,
                           EmploymentTypeId = ' ',
                           CurrentIncomeYear = 0m,

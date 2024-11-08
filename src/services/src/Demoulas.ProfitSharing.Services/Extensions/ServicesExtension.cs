@@ -29,9 +29,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IMilitaryAndRehireService, MilitaryAndRehireService>();
         _ = builder.Services.AddScoped<IWagesService, WagesService>();
         
-        _ = builder.Services.AddScoped<ContributionService>();
         
-
         _ = builder.Services.AddScoped<ITerminatedEmployeeAndBeneficiaryReportService, TerminatedEmployeeAndBeneficiaryReportService>();
 
         _ = builder.Services.AddSingleton<IDemographicsServiceInternal, DemographicsService>();
@@ -52,7 +50,6 @@ public static class ServicesExtension
         builder.Services.AddSingleton<AddressMapper>();
         builder.Services.AddSingleton<ContactInfoMapper>();
         builder.Services.AddSingleton<DemographicMapper>();
-        builder.Services.AddSingleton<ZeroContributionReasonMapper>();
         builder.Services.AddSingleton<BeneficiaryTypeMapper>();
         builder.Services.AddSingleton<EmployeeTypeMapper>();
 

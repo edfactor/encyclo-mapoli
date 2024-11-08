@@ -58,7 +58,7 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
             demo.ContactInfo.FullName = "Smith, Nancy K";
             demo.DateOfBirth = new DateOnly(2000, 1, 1);
 
-            var pp = await c.PayProfits.FirstAsync(pp => pp.OracleHcmId == demo.OracleHcmId);
+            var pp = await c.PayProfits.FirstAsync(pp => pp.DemographicId == demo.Id);
             pp.EnrollmentId = Enrollment.Constants.NewVestingPlanHasContributions;
 
             var details = await c.ProfitDetails.Where(pd => pd.Ssn == demo.Ssn).ToListAsync();

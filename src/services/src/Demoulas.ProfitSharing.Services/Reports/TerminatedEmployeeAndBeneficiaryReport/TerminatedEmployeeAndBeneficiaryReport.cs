@@ -56,7 +56,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             .Include(d => d.ContactInfo)
             .Where(d => d.EmploymentStatusId == EmploymentStatus.Constants.Terminated
                         && d.TerminationCodeId != TerminationCode.Constants.RetiredReceivingPension
-                        && d.TerminationDate >= startEnd.BeginDate && d.TerminationDate <= startEnd.YearEndDate)
+                        && d.TerminationDate >= startEnd.FiscalBeginDate && d.TerminationDate <= startEnd.FiscalEndDate)
             .Select(d => new TerminatedEmployeeDto
             {
                 Demographic = d,
@@ -73,8 +73,8 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
     private static async Task<IQueryable<MemberSlice>> GetEmployeesWithContributions(ProfitSharingReadOnlyDbContext ctx, ProfitYearRequest request,
         IQueryable<TerminatedEmployeeDto> terminatedEmployees, CancellationToken cancellationToken)
     {
-        var demKeyList = await terminatedEmployees.Select(e => new { e.Demographic.OracleHcmId, e.Demographic.BadgeNumber }).ToListAsync(cancellationToken);
-        var oracleHcmList = demKeyList.Select(e => e.OracleHcmId).ToHashSet();
+        var demKeyList = await terminatedEmployees.Select(e => new { e.Demographic.Id, e.Demographic.BadgeNumber }).ToListAsync(cancellationToken);
+        var idList = demKeyList.Select(e => e.Id).ToHashSet();
         var badgeNumbers = demKeyList.Select(e => e.BadgeNumber).ToHashSet();
 
         var contributionYearsQuery = ContributionService.GetContributionYearsQuery(ctx, request.ProfitYear, badgeNumbers);
@@ -83,19 +83,19 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
         var payProfitsQuery = ctx.PayProfits
             .Where(p => p.ProfitYear == request.ProfitYear
-                        && oracleHcmList.Contains(p.OracleHcmId)
+                        && idList.Contains(p.DemographicId)
                         && validEnrollmentIds.Contains(p.EnrollmentId));
 
         var query = from employee in terminatedEmployees
             join contribution in contributionYearsQuery on employee.Demographic.BadgeNumber equals contribution.BadgeNumber
-            join payProfit in payProfitsQuery on employee.Demographic.OracleHcmId equals payProfit.OracleHcmId
+            join payProfit in payProfitsQuery on employee.Demographic.Id equals payProfit.DemographicId
             select new MemberSlice
             {
                 PsnSuffix = 0,
                 BadgeNumber = employee.Demographic.BadgeNumber,
                 Ssn = employee.Demographic.Ssn,
                 BirthDate = employee.Demographic.DateOfBirth,
-                HoursCurrentYear = payProfit.CurrentHoursYear ?? 0,
+                HoursCurrentYear = payProfit.CurrentHoursYear,
                 EmploymentStatusCode = employee.Demographic.EmploymentStatusId,
                 FullName = employee.Demographic.ContactInfo.FullName,
                 FirstName = employee.Demographic.ContactInfo.FirstName,
@@ -103,7 +103,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 LastName = employee.Demographic.ContactInfo.LastName,
                 YearsInPs = contribution.YearsInPlan,
                 TerminationDate = employee.Demographic.TerminationDate,
-                IncomeRegAndExecCurrentYear = payProfit.CurrentIncomeYear.GetValueOrDefault(0) + payProfit.IncomeExecutive,
+                IncomeRegAndExecCurrentYear = payProfit.CurrentIncomeYear + payProfit.IncomeExecutive,
                 TerminationCode = employee.Demographic.TerminationCodeId,
                 ZeroCont = (employee.Demographic.TerminationCodeId == TerminationCode.Constants.Deceased
                     ? ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested
@@ -144,7 +144,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 LastName = x.Beneficiary.Contact.LastName,
                 YearsInPs = 0,
                 TerminationDate = null,
-                IncomeRegAndExecCurrentYear = (x.PayProfit!.CurrentIncomeYear ?? 0) + x.PayProfit.IncomeExecutive,
+                IncomeRegAndExecCurrentYear = (x.PayProfit!.CurrentIncomeYear ) + x.PayProfit.IncomeExecutive,
                 TerminationCode = x.Demographic.TerminationCodeId,
                 ZeroCont = ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested,
                 EnrollmentId = Enrollment.Constants.NotEnrolled,
