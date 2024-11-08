@@ -52,7 +52,8 @@ builder.Services.AddCors(options =>
     {
         _ = pol.AllowAnyMethod() // Specify the allowed methods, e.g., GET, POST, etc.
         .AllowAnyHeader()
-        .AllowAnyOrigin();
+        .AllowAnyOrigin()
+        .WithExposedHeaders("Location");
     });
 });
 
