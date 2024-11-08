@@ -90,9 +90,9 @@ public class PayrollSyncClient
         List<int> objectActionIds,
         CancellationToken cancellationToken)
     {
-
-
-
+        // DimensionName should be set to Relationship No Calculation Breakdown Inception to Date. That will give you the correct value for current dollars, weeks, hours.
+        const string dimensionName = "Relationship No Calculation Breakdown Inception to Date";
+        
         var balanceTypeIds = new List<long> { BalanceTypeIds.MbProfitSharingDollars, BalanceTypeIds.MbProfitSharingHours, BalanceTypeIds.MbProfitSharingWeeks };
 
         // Initialize totals dictionary
@@ -107,10 +107,7 @@ public class PayrollSyncClient
         {
             foreach (long balanceTypeId in balanceTypeIds)
             {
-                string url = $"personProcessResults/{objectActionId}/child/BalanceView/" +
-                             $"?onlyData=true&fields=BalanceTypeId,TotalValue1,TotalValue2,DefbalId1,DimensionName" +
-                             $"&finder=findByBalVar;pBalGroupUsageId1=null,pBalGroupUsageId2=-1," +
-                             $"pLDGId={PLDGId},pLC={PLC},pBalTypeId={balanceTypeId}&onlyData=true";
+                string url = $"personProcessResults/{objectActionId}/child/BalanceView/?onlyData=true&fields=BalanceTypeId,TotalValue1,TotalValue2,DefbalId1,DimensionName&finder=findByBalVar;pBalGroupUsageId1=null,pBalGroupUsageId2=-1,pLDGId={PLDGId},pLC={PLC},pBalTypeId={balanceTypeId}&onlyData=true";
 
                 try
                 {
@@ -120,7 +117,7 @@ public class PayrollSyncClient
                     {
                         var balanceResults = await response.Content.ReadFromJsonAsync<BalanceRoot>(cancellationToken);
 
-                        decimal total = balanceResults!.Items
+                        decimal total = balanceResults!.Items.Where(i=> string.CompareOrdinal(i.DimensionName, dimensionName) == 0)
                             .Sum(b => b.TotalValue1);
 
                         // Accumulate totals per balance type ID
