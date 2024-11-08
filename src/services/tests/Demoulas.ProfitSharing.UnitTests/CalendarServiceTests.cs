@@ -1,12 +1,9 @@
 ﻿using System.Globalization;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.NotOwned;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ExecutiveHoursAndDollars;
 using Demoulas.ProfitSharing.Security;
-using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.UnitTests.Base;
 using Demoulas.ProfitSharing.UnitTests.Extensions;
 using FastEndpoints;
@@ -14,6 +11,8 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
+using Demoulas.Common.Data.Services.Service;
+using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.UnitTests;
 
@@ -31,7 +30,7 @@ public class CalendarServiceTests : ApiTestBase<Api.Program>
     [Fact(DisplayName = "Check Calendar can be accessed")]
     public async Task CheckCalendarAccess()
     {
-        long count = await _dataContextFactory.UseReadOnlyContext(c => c.CaldarRecords.LongCountAsync());
+        long count = await _dataContextFactory.UseReadOnlyContext(c => c.AccountingPeriods.LongCountAsync());
 
         count.ShouldBeEquivalentTo(CaldarRecordSeeder.Records.Length);
     }
@@ -72,7 +71,7 @@ public class CalendarServiceTests : ApiTestBase<Api.Program>
         var calendarService = ServiceProvider?.GetRequiredService<ICalendarService>()!;
         Func<Task> act = async () => await calendarService.FindWeekendingDateFromDate(futureDate);
         await act.Should().ThrowAsync<ArgumentOutOfRangeException>()
-            .WithMessage($"{CalendarService.InvalidDateError} (Parameter 'dateTime')");
+            .WithMessage($"{AccountingPeriodsService.InvalidDateError} (Parameter 'dateTime')");
     }
 
 

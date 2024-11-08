@@ -18,6 +18,6 @@ internal sealed class PayrollSyncJob : IJob
 
     public Task Execute(IJobExecutionContext context)
     {
-        return _payrollSyncClient.RetrievePayrollBalancesAsync(context.CancellationToken);
+        return _payrollSyncClient.RetrievePayrollBalancesAsync(requestedBy: "System", context.CancellationToken);
     }
 }

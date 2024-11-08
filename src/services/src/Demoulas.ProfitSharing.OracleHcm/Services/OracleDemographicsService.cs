@@ -31,37 +31,7 @@ internal sealed class OracleDemographicsService
     /// <returns></returns>
     public async IAsyncEnumerable<OracleEmployee?> GetAllEmployees([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        string initialUrl = await BuildUrl(cancellationToken: cancellationToken);
-
-        var returnValues = FetchOracleDemographic(initialUrl, cancellationToken);
-        await foreach (var emp in returnValues)
-        {
-            yield return emp;
-        }
-    }
-
-    private async Task<string> BuildUrl(int offset = 0, CancellationToken cancellationToken = default)
-    {
-        // Oracle will limit us to 500, but we run the risk of timeout well below that, so we need to be conservative.
-        ushort limit = ushort.Min(50, _oracleHcmConfig.Limit);
-        Dictionary<string, string> initialQuery = new Dictionary<string, string>
-        {
-            { "limit", $"{limit}" },
-            { "offset", $"{offset}" },
-            { "totalResults", "false" },
-            { "onlyData", "true" },
-            { "fields", HttpRequestFields.ToFormattedString() }
-        };
-        UriBuilder initialUriBuilder = new UriBuilder(string.Concat(_oracleHcmConfig.BaseAddress, _oracleHcmConfig.DemographicUrl));
-        string initialQueryString = await new FormUrlEncodedContent(initialQuery).ReadAsStringAsync(cancellationToken);
-        initialUriBuilder.Query = initialQueryString;
-        return initialUriBuilder.Uri.ToString();
-    }
-
-    private async IAsyncEnumerable<OracleEmployee?> FetchOracleDemographic(string initialUrl, [EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-        // Task to fetch data and enqueue it
-        string url = initialUrl;
+        string url = await BuildUrl(cancellationToken: cancellationToken);
 
         while (true)
         {
@@ -93,6 +63,26 @@ internal sealed class OracleDemographicsService
             url = nextUrl;
         }
     }
+
+    private async Task<string> BuildUrl(int offset = 0, CancellationToken cancellationToken = default)
+    {
+        // Oracle will limit us to 500, but we run the risk of timeout well below that, so we need to be conservative.
+        ushort limit = ushort.Min(50, _oracleHcmConfig.Limit);
+        Dictionary<string, string> initialQuery = new Dictionary<string, string>
+        {
+            { "limit", $"{limit}" },
+            { "offset", $"{offset}" },
+            { "totalResults", "false" },
+            { "onlyData", "true" },
+            { "fields", HttpRequestFields.ToFormattedString() }
+        };
+        UriBuilder initialUriBuilder = new UriBuilder(string.Concat(_oracleHcmConfig.BaseAddress, _oracleHcmConfig.DemographicUrl));
+        string initialQueryString = await new FormUrlEncodedContent(initialQuery).ReadAsStringAsync(cancellationToken);
+        initialUriBuilder.Query = initialQueryString;
+        return initialUriBuilder.Uri.ToString();
+    }
+
+   
 
     private async Task<HttpResponseMessage> GetOracleHcmValue(string url, CancellationToken cancellationToken)
     {

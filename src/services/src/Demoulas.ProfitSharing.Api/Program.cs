@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using Demoulas.Common.Api.Extensions;
 using Demoulas.Common.Contracts.Configuration;
-using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.ProfitSharing.Api.Extensions;
@@ -12,7 +11,6 @@ using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.Security;
 using Demoulas.Util.Extensions;
-using FastEndpoints.Security;
 using MassTransit.Monitoring;
 using Microsoft.AspNetCore.Authentication;
 using NSwag.Generation.AspNetCore;
@@ -29,7 +27,10 @@ if (!builder.Environment.IsTestEnvironment())
 ElasticSearchConfig smartConfig = new ElasticSearchConfig();
 builder.Configuration.Bind("Logging:Smart", smartConfig);
 
-await builder.SetDefaultLoggerConfigurationAsync(smartConfig);
+FileSystemLogConfig fileSystemLog = new FileSystemLogConfig();
+builder.Configuration.Bind("Logging:FileSystem", fileSystemLog);
+
+await builder.SetDefaultLoggerConfigurationAsync(smartConfig, fileSystemLog);
 
 _ = builder.Services.AddTransient<IClaimsTransformation, ImpersonationAndEnvironmentAwareClaimsTransformation>();
 
@@ -51,7 +52,8 @@ builder.Services.AddCors(options =>
     {
         _ = pol.AllowAnyMethod() // Specify the allowed methods, e.g., GET, POST, etc.
         .AllowAnyHeader()
-        .AllowAnyOrigin();
+        .AllowAnyOrigin()
+        .WithExposedHeaders("Location");
     });
 });
 

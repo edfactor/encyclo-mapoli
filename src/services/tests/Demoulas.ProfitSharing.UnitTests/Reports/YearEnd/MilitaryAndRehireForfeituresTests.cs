@@ -5,7 +5,6 @@ using FluentAssertions;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.Common.Contracts.Contracts.Response;
-using Demoulas.ProfitSharing.Services.Reports;
 using JetBrains.Annotations;
 using Demoulas.ProfitSharing.UnitTests.Base;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -20,10 +19,9 @@ using CsvHelper.Configuration;
 using CsvHelper;
 using System.Globalization;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
-using Newtonsoft.Json;
-using FluentAssertions.Execution;
+using Microsoft.Extensions.DependencyInjection;
+using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -34,7 +32,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Api.Program>
 
     public MilitaryAndRehireForfeituresTests()
     {
-        MilitaryAndRehireService mockService = new MilitaryAndRehireService(MockDbContextFactory, new CalendarService(MockDbContextFactory));
+        IMilitaryAndRehireService mockService = ServiceProvider?.GetRequiredService<IMilitaryAndRehireService>()!;
         _endpoint = new MilitaryAndRehireForfeituresEndpoint(mockService);
     }
 

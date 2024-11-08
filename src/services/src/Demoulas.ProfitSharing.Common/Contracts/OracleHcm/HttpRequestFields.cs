@@ -52,6 +52,7 @@ public sealed record HttpRequestFields
         "DepartmentName",
         "DepartmentId",
         "AssignmentCategory",
+        "AssignmentCategoryMeaning",
         "FullPartTime", // Might need to be mapped for EmploymentType
         "Frequency" // W = 1(Weekly) M=2(Monthly)
     ];
