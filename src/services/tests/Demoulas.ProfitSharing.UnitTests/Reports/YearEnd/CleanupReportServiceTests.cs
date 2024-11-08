@@ -17,6 +17,7 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.Extensions.DependencyInjection;
 using FastEndpoints;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareReport;
+using Quartz.Simpl;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 public class CleanupReportServiceTests:ApiTestBase<Program>
@@ -326,7 +327,13 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
     {
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         var profitYear = (short)(DateTime.Now.Year - 1);
-        var req = new YearEndProfitSharingReportRequest() { Skip = 0, Take=byte.MaxValue, ProfitYear = profitYear, IsYearEnd = true };
+        var req = new YearEndProfitSharingReportRequest() { Skip = 0, Take=byte.MaxValue, ProfitYear = profitYear, IsYearEnd = true, 
+            IncludeActiveEmployees = true, 
+            IncludeEmployeesWithNoPriorProfitSharingAmounts = true, 
+            IncludeEmployeesWithPriorProfitSharingAmounts = true,
+            MinimumHoursInclusive = 1000,
+            MinimumAgeInclusive = 18,
+        };
         var testHours = 1001;
         await MockDbContextFactory.UseWritableContext(async ctx =>
         {
@@ -353,15 +360,30 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
             payProfit.CurrentHoursYear = testHours;
             payProfit.HoursExecutive = 0;
 
+            var profitDetails = await ctx.ProfitDetails.Where(x => x.Ssn == emp!.Ssn).ToListAsync();
+            foreach (var pd in profitDetails.Skip(2))
+            {
+                pd.Ssn = 0; //Reset the profit detail records
+            }
+
+            profitDetails[0].ProfitYear = profitYear;
+            profitDetails[0].ProfitYearIteration = 0;
+            profitDetails[0].ProfitCodeId = ProfitCode.Constants.IncomingContributions.Id;
+            profitDetails[0].ProfitCode = ProfitCode.Constants.IncomingContributions;
+            profitDetails[1].ProfitYear = (short)(profitYear - 1);
+            profitDetails[1].ProfitYearIteration = 0;
+            profitDetails[1].ProfitCodeId = ProfitCode.Constants.IncomingContributions.Id;
+            profitDetails[1].ProfitCode = ProfitCode.Constants.IncomingContributions;
+
             await ctx.SaveChangesAsync();
         });
 
-        ReportResponseBase<YearEndProfitSharingReportResponse> response = await _cleanupReportClient.GetYearEndProfitSharingReport(req, CancellationToken.None);
+        var response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, ReportResponseBase<YearEndProfitSharingReportResponse>>(req);
 
         response.Should().NotBeNull();
-        response.ReportName.Should().BeEquivalentTo($"PROFIT SHARE YEAR END REPORT FOR {req.ProfitYear}");
-        response.Response.Total.Should().Be( 1 );
-        response.Response.Results.Count().Should().Be(1);
+        response.Result.ReportName.Should().BeEquivalentTo($"PROFIT SHARE YEAR END REPORT FOR {req.ProfitYear}");
+        response.Result.Response.Total.Should().Be( 1 );
+        response.Result.Response.Results.Count().Should().Be(1);
 
         _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
 
@@ -375,12 +397,12 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
             emp!.DateOfBirth = new DateOnly(DateTime.Now.Year - 15, 9, 21);
             await ctx.SaveChangesAsync();
         });
+        
+        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, ReportResponseBase<YearEndProfitSharingReportResponse>>(req);
 
-        response = await _cleanupReportClient.GetYearEndProfitSharingReport(req, CancellationToken.None);
-
-        response.Should().NotBeNull();
-        response.Response.Total.Should().Be(0);
-        response.Response.Results.Count().Should().Be(0);
+        response.Result.Should().NotBeNull();
+        response.Result.Response.Total.Should().Be(0);
+        response.Result.Response.Results.Count().Should().Be(0);
 
         _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
 
@@ -396,11 +418,11 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
             await ctx.SaveChangesAsync();
         });
 
-        response = await _cleanupReportClient.GetYearEndProfitSharingReport(req, CancellationToken.None);
+        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, ReportResponseBase<YearEndProfitSharingReportResponse>>(req);
 
-        response.Should().NotBeNull();
-        response.Response.Total.Should().Be(0);
-        response.Response.Results.Count().Should().Be(0);
+        response.Result.Should().NotBeNull();
+        response.Result.Response.Total.Should().Be(0);
+        response.Result.Response.Results.Count().Should().Be(0);
 
         _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
     }
@@ -436,6 +458,21 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
             payProfit.ProfitYear = profitYear;
             payProfit.CurrentHoursYear = testHours;
             payProfit.HoursExecutive = 0;
+
+            var profitDetails = await ctx.ProfitDetails.Where(x => x.Ssn == emp!.Ssn).ToListAsync();
+            foreach (var pd in profitDetails.Skip(2))
+            {
+                pd.Ssn = 0; //Reset the profit detail records
+            }
+
+            profitDetails[0].ProfitYear = profitYear;
+            profitDetails[0].ProfitYearIteration = 0;
+            profitDetails[0].ProfitCodeId = ProfitCode.Constants.IncomingContributions.Id;
+            profitDetails[0].ProfitCode = ProfitCode.Constants.IncomingContributions;
+            profitDetails[1].ProfitYear = (short)(profitYear - 1);
+            profitDetails[1].ProfitYearIteration = 0;
+            profitDetails[1].ProfitCodeId = ProfitCode.Constants.IncomingContributions.Id;
+            profitDetails[1].ProfitCode = ProfitCode.Constants.IncomingContributions;
 
             await ctx.SaveChangesAsync();
         });

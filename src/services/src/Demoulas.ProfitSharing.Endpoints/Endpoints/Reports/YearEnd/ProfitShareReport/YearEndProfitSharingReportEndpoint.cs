@@ -40,12 +40,13 @@ public class YearEndProfitSharingReportEndpoint: EndpointWithCsvBase<YearEndProf
                     {
                         ReportName = ReportFileName,
                         ReportDate = DateTimeOffset.Now,
-                        Response = new PaginatedResponseDto<YearEndProfitSharingReportResponse>()
+                        Response = new PaginatedResponseDto<YearEndProfitSharingReportResponse>(new Demoulas.Common.Contracts.Contracts.Request.PaginationRequestDto(){Skip = 0 , Take=255})
                         {
-                            Results = new List<YearEndProfitSharingReportResponse>
-                            {
+                            Results =
+                            [
                                YearEndProfitSharingReportResponse.ResponseExample()
-                            }
+                            ],
+                            Total = 1,
                         }
                     }
                 }
