@@ -1,14 +1,16 @@
 ﻿using Demoulas.Common.Data.Contexts.Contexts;
+using Demoulas.Common.Data.Services.Entities.Entities;
+using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.MassTransit;
-using Demoulas.ProfitSharing.Data.Entities.NotOwned;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Department = Demoulas.ProfitSharing.Data.Entities.Department;
 
 namespace Demoulas.ProfitSharing.Data.Contexts;
 
-public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitSharingReadOnlyDbContext>, IProfitSharingDbContext
+public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitSharingReadOnlyDbContext>, IProfitSharingDbContext, IAccountingPeriodContext
 {
     public ProfitSharingReadOnlyDbContext()
     {
@@ -33,7 +35,7 @@ public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitShar
     public virtual DbSet<Distribution> Distributions { get; set; }
     public DbSet<Job> Jobs { get; set; }
 
-    public virtual DbSet<CaldarRecord> CaldarRecords { get; set; }
+    public virtual DbSet<AccountingPeriod> AccountingPeriods { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
