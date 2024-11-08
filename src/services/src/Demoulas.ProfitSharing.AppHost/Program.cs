@@ -1,5 +1,11 @@
 ﻿IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);
 
-builder.AddProject<Projects.Demoulas_ProfitSharing_Api>("demoulas-profitsharing-api");
+var api = builder.AddProject<Projects.Demoulas_ProfitSharing_Api>("demoulas-profitsharing-api");
+
+builder.AddNpmApp("demoulas-profitsharing-ui", "../../../ui/", "dev")
+    .WithReference(api)
+    .WaitFor(api)
+    .WithHttpsEndpoint(env: "PORT", port: 3100)
+    .WithExternalHttpEndpoints();
 
 await builder.Build().RunAsync();
