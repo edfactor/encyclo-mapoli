@@ -123,7 +123,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
         response.Response.StatusCode.ShouldBeEquivalentTo(HttpStatusCode.BadRequest);
 
         // Assert
-        await ErrorMessageShouldBe(response, "count", "At least one employee must be provided");
+        await ErrorMessageShouldBe(response, "executiveHoursAndDollars.Count", "At least one employee must be provided");
     }
 
 
@@ -174,7 +174,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
             // Verify that the underlying employee was altered properly.
             payProfit = await ctx.PayProfits
                 .Include(p => p.Demographic != null)
-                .Where(p => p.ProfitYear == profitYear && p.OracleHcmId == payProfit.OracleHcmId)
+                .Where(p => p.ProfitYear == profitYear && p.DemographicId == payProfit.DemographicId)
                 .FirstAsync();
 
             // verify updated hours and income
@@ -197,8 +197,8 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
             // Gather employee
             var demographicsWithPayProfits = await ctx.Demographics
                 .Join(ctx.PayProfits,
-                    d => d.OracleHcmId,
-                    pp => pp.OracleHcmId,
+                    d => d.Id,
+                    pp => pp.DemographicId,
                     (d, pp) => new { Demographic = d, PayProfit = pp })
                 .Where(joined => joined.PayProfit.ProfitYear == profitYear)
                 .FirstAsync();
@@ -240,8 +240,8 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
             var demographicsWithPayProfitsReloaded = await ctx.Demographics
                 .Where(d => d.BadgeNumber == badgeNumber)
                 .Join(ctx.PayProfits,
-                    d => d.OracleHcmId,
-                    pp => pp.OracleHcmId,
+                    d => d.Id,
+                    pp => pp.DemographicId,
                     (d, pp) => new { Demographic = d, PayProfit = pp })
                 .Where(joined => joined.PayProfit.ProfitYear == profitYear)
                 .FirstAsync();

@@ -2,6 +2,10 @@
 using Quartz;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Jobs;
+
+/// <summary>
+/// Represents a job that synchronizes employee data with the Oracle HCM system.
+/// </summary>
 internal sealed class EmployeeSyncJob : IJob
 {
     private readonly IEmployeeSyncService _employeeSyncService;
@@ -13,6 +17,6 @@ internal sealed class EmployeeSyncJob : IJob
 
     public Task Execute(IJobExecutionContext context)
     {
-        return _employeeSyncService.SynchronizeEmployees(context.CancellationToken);
+        return _employeeSyncService.SynchronizeEmployees(requestedBy: "System", context.CancellationToken);
     }
 }

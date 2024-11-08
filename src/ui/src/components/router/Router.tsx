@@ -15,6 +15,8 @@ import MilitaryAndRehire from "pages/MilitaryAndRehire/MilitaryAndRehire";
 import MilitaryAndRehireForfeitures from "pages/MilitaryAndRehireForfeitures/MilitaryAndRehireForfeitures";
 import MilitaryAndRehireProfitSummary from "pages/MilitaryAndRehireProfitSummary/MilitaryAndRehireProfitSummary";
 import DistributionsAndForfeitures from "pages/DistributionsAndForfeitures/DistributionAndForfeitures";
+import ManageExecutiveHoursAndDollars from "pages/ManageExecutiveHoursAndDollars/ManageExecutiveHoursAndDollars";
+import EligibleEmployees from "pages/EligibleEmployees/EligibleEmployees";
 
 const Router = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -62,6 +64,12 @@ const Router = () => {
         <Route
           path="distributions-and-forfeitures"
           element={<DistributionsAndForfeitures />}></Route>
+          <Route
+          path="manage-executive-hours-and-dolars"
+          element={<ManageExecutiveHoursAndDollars />}></Route>
+          <Route
+          path="eligible-employees"
+          element={<EligibleEmployees />}></Route>
       </RouteSecurity>
     </BrowserRouter>
   );

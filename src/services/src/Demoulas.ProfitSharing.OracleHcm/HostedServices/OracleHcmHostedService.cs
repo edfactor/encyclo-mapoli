@@ -1,8 +1,5 @@
 ﻿using Demoulas.ProfitSharing.Common.Configuration;
-using Demoulas.ProfitSharing.Common.Contracts.Messaging;
-using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Jobs;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Quartz;
 using Quartz.Spi;
@@ -13,18 +10,15 @@ internal sealed class OracleHcmHostedService : IHostedService
 {
     private readonly ISchedulerFactory _schedulerFactory;
     private readonly IJobFactory _jobFactory;
-    private readonly IServiceProvider _serviceProvider;
     private readonly OracleHcmConfig _oracleHcmConfig;
     private IScheduler? _scheduler;
 
     public OracleHcmHostedService(ISchedulerFactory schedulerFactory,
         IJobFactory jobFactory,
-        IServiceProvider serviceProvider,
         OracleHcmConfig oracleHcmConfig)
     {
         _schedulerFactory = schedulerFactory;
         _jobFactory = jobFactory;
-        _serviceProvider = serviceProvider;
         _oracleHcmConfig = oracleHcmConfig;
     }
 
@@ -33,34 +27,39 @@ internal sealed class OracleHcmHostedService : IHostedService
         _scheduler = await _schedulerFactory.GetScheduler(cancellationToken);
         _scheduler.JobFactory = _jobFactory;
 
-        // Run the initial task ( Fire and forget )
-        _ = RunStartupTask(cancellationToken);
-
-        // Schedule the recurring job
-        var job = JobBuilder.Create<EmployeeSyncJob>()
-            .WithIdentity("dailyJob")
+        // Schedule the recurring job for EmployeeSyncJob
+        var employeeSyncJob = JobBuilder.Create<EmployeeSyncJob>()
+            .WithIdentity(nameof(EmployeeSyncJob))
             .Build();
 
-        /*
-         * Explanation of the cron expression:
-            0 0 0/4 1/1 * ? *
-            0: Seconds (0th second)
-            0: Minutes (0th minute)
-            0/4: Hours (every 4 hours, starting from midnight)
-            1/1: Day of month (every day)
-            *: Month (every month)
-            ?: Day of week (no specific day of the week)
-            *: Year (every year)
-         */
-        var trigger = TriggerBuilder.Create()
-            .WithIdentity("dailyTrigger")
-            .WithCronSchedule(_oracleHcmConfig.CronSchedule, builder =>
+        var employeeSyncTrigger = TriggerBuilder.Create()
+            .WithIdentity("employeeSyncTrigger")
+            .StartNow()
+            .WithSimpleSchedule(x =>
             {
-                builder.InTimeZone(TimeZoneInfo.Local);
-            }) // Runs daily at midnight
+                x.WithIntervalInHours(_oracleHcmConfig.IntervalInHours)
+                    .RepeatForever();
+            })
             .Build();
 
-        await _scheduler.ScheduleJob(job, trigger, cancellationToken);
+        // Schedule the recurring job for PayrollSyncJob
+        var payrollSyncJob = JobBuilder.Create<PayrollSyncJob>()
+            .WithIdentity(nameof(PayrollSyncJob))
+            .Build();
+
+        var payrollSyncTrigger = TriggerBuilder.Create()
+            .WithIdentity("payrollSyncTrigger")
+            .StartAt(DateTimeOffset.UtcNow.AddMinutes(5))
+            .WithSimpleSchedule(x =>
+            {
+                x.WithIntervalInHours(_oracleHcmConfig.IntervalInHours)
+                    .RepeatForever();
+            })
+            .Build();
+
+        await _scheduler.ScheduleJob(employeeSyncJob, employeeSyncTrigger, cancellationToken);
+        await _scheduler.ScheduleJob(payrollSyncJob, payrollSyncTrigger, cancellationToken);
+
 
         await _scheduler.Start(cancellationToken);
     }
@@ -72,11 +71,4 @@ internal sealed class OracleHcmHostedService : IHostedService
             await _scheduler.Shutdown(cancellationToken);
         }
     }
-
-    private Task RunStartupTask(CancellationToken cancellationToken)
-    {
-        var employeeSyncService = _serviceProvider.GetRequiredService<IEmployeeSyncService>();
-        return employeeSyncService.SynchronizeEmployees(cancellationToken);
-    }
 }
-

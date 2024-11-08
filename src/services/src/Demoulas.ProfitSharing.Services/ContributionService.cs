@@ -23,53 +23,61 @@ public static class ContributionService
             .Select(p => new ContributionYears { BadgeNumber = p.Key, YearsInPlan = (byte)p.Count() });
     }
 
-    /// <summary>
-    /// Retrieves the net balance details for a given set of badge numbers and profit year.
-    /// </summary>
-    /// <param name="context">The database context used to access profit sharing data.</param>
-    /// <param name="profitYear">The profit year up to which the balance is calculated.</param>
-    /// <param name="badgeNumbers">A collection of badge numbers for which the net balance is to be retrieved.</param>
-    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <see cref="https://demoulas.atlassian.net/wiki/spaces/~bherrmann/pages/58491096/Notes+on+Profit+Sharing+Calculations#Computing-the-Current-Amount"/>
-    /// <returns>A task that represents the asynchronous operation. The task result contains a dictionary where the key is the badge number and the value is the net balance details.</returns>
-    internal static Task<Dictionary<int, InternalProfitDetailDto>> GetNetBalance(IProfitSharingDbContext context, short profitYear, IEnumerable<int> badgeNumbers,
-        CancellationToken cancellationToken)
+    internal static IQueryable<Demographic> GetEligibleEmployees(IProfitSharingDbContext ctx, short profitYear, DateOnly asOfDate)
     {
-        var badgeHash = badgeNumbers.ToHashSet();
-        var pdQuery = context.ProfitDetails
-            .Where(details => details.ProfitYear <= profitYear)
-            .GroupBy(details => details.Ssn)
-            .Select(g => new
-            {
-                Ssn = g.Key,
-                TotalContributions = g.Sum(x => x.Contribution),
-                TotalEarnings = g.Sum(x => x.Earnings),
-                TotalForfeitures = g.Sum(x => x.ProfitCodeId == ProfitCode.Constants.IncomingContributions ? x.Forfeiture : 0),
-                TotalPayments = g.Sum(x => x.ProfitCodeId != ProfitCode.Constants.IncomingContributions ? x.Forfeiture : 0),
-                TotalFedTaxes = g.Sum(x => x.FederalTaxes),
-                TotalStateTaxes = g.Sum(x => x.StateTaxes)
-            });
+        var birthDate21Years = asOfDate.AddYears(-21);
+        return (
+            from d in ctx.Demographics
+            join pp in ctx.PayProfits on d.Id equals pp.DemographicId
+            where pp.ProfitYear == profitYear
+              && (pp.HoursExecutive + pp.CurrentHoursYear) >= 1000
+              && d.DateOfBirth < birthDate21Years
+              && (d.TerminationDate == null || d.TerminationDate < asOfDate)
+            select d
+        );
+    }
+
+    internal IQueryable<InternalProfitDetailDto> GetNetBalanceQuery(short profitYear, IProfitSharingDbContext ctx)
+    {
+        var pdQuery = ctx.ProfitDetails
+                .Where(details => details.ProfitYear <= profitYear)
+                .GroupBy(details => details.Ssn)
+                .Select(g => new
+                {
+                    Ssn = g.Key,
+                    TotalContributions = g.Sum(x => x.Contribution),
+                    TotalEarnings = g.Sum(x => x.Earnings),
+                    TotalForfeitures = g.Sum(x => x.ProfitCodeId == ProfitCode.Constants.IncomingContributions ? x.Forfeiture : 0),
+                    TotalPayments = g.Sum(x => x.ProfitCodeId != ProfitCode.Constants.IncomingContributions ? x.Forfeiture : 0),
+                    TotalFedTaxes = g.Sum(x => x.FederalTaxes),
+                    TotalStateTaxes = g.Sum(x => x.StateTaxes)
+                });
 
 
 
-        var demoQuery = context.Demographics
-            .Where(d => badgeHash.Contains(d.BadgeNumber))
+        var demoQuery = ctx.Demographics
             .Select(d => new { d.OracleHcmId, d.BadgeNumber, d.Ssn });
 
         var query = from d in demoQuery
-            join r in pdQuery on d.Ssn equals r.Ssn
-            select new InternalProfitDetailDto
-            {
-                OracleHcmId = d.OracleHcmId,
-                BadgeNumber = d.BadgeNumber,
-                TotalContributions = r.TotalContributions,
-                TotalEarnings = r.TotalEarnings,
-                TotalForfeitures = r.TotalForfeitures,
-                TotalPayments = r.TotalPayments,
-                TotalFederalTaxes = r.TotalFedTaxes,
-                TotalStateTaxes = r.TotalStateTaxes,
-                CurrentAmount = r.TotalContributions + r.TotalEarnings + r.TotalForfeitures - r.TotalPayments
-            };
+                    join r in pdQuery on d.Ssn equals r.Ssn
+                    select new InternalProfitDetailDto
+                    {
+                        OracleHcmId = d.OracleHcmId,
+                        BadgeNumber = d.BadgeNumber,
+                        TotalContributions = r.TotalContributions,
+                        TotalEarnings = r.TotalEarnings,
+                        TotalForfeitures = r.TotalForfeitures,
+                        TotalPayments = r.TotalPayments,
+                        TotalFederalTaxes = r.TotalFedTaxes,
+                        TotalStateTaxes = r.TotalStateTaxes
+                    };
+        return query;
+    }
+    internal Task<Dictionary<int, InternalProfitDetailDto>> GetNetBalance(short profitYear, ISet<int> badgeNumbers, CancellationToken cancellationToken)
+    {
+        return _dataContextFactory.UseReadOnlyContext(ctx =>
+        {
+            var query = from d in GetNetBalanceQuery(profitYear, ctx).Where(x => badgeNumbers.Contains(x.BadgeNumber)) select d;
 
         return query.ToDictionaryAsync(d => d.BadgeNumber, cancellationToken);
     }

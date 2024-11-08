@@ -9,6 +9,7 @@ using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.UnitTests.Base;
 using Demoulas.ProfitSharing.UnitTests.Extensions;
+using Demoulas.ProfitSharing.UnitTests.Fakes;
 using FastEndpoints;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,7 @@ namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
 internal sealed record TestEmployee
 {
+    public int Id { get; init; }
     public int OracleHcmId { get; init; }
     public int BadgeNumber { get; init; }
     public required string FullName { get; init; }
@@ -198,6 +200,7 @@ public class GetEligibleEmployeesTests : ApiTestBase<Api.Program>
 
     private TestEmployee StockEmployee() => new TestEmployee
     {
+        Id = 17,
         OracleHcmId = 7,
         BadgeNumber = 77,
         FullName = "Smith, Joe K",
@@ -209,15 +212,25 @@ public class GetEligibleEmployeesTests : ApiTestBase<Api.Program>
 
     private static async Task save(TestEmployee testEmployee, ProfitSharingDbContext ctx)
     {
-        var pp = await ctx.PayProfits.Include(p => p.Demographic != null).FirstAsync();
+        var pp = await ctx.PayProfits.Include(payProfit => payProfit.Demographic!)
+            .ThenInclude(demographic => demographic.ContactInfo).Include(p => p.Demographic != null).FirstAsync();
         pp.ProfitYear = TestProfitYear;
-        pp.OracleHcmId = testEmployee.OracleHcmId;
-        pp.Demographic!.OracleHcmId = testEmployee.OracleHcmId;
-        pp.Demographic.ContactInfo.FullName = testEmployee.FullName;
-        pp.Demographic.BadgeNumber = testEmployee.BadgeNumber;
-        pp.Demographic.DateOfBirth = convertAgeToBirthDate(TestProfitYear, testEmployee.Age);
+        pp.DemographicId = testEmployee.Id;
         pp.CurrentHoursYear = testEmployee.HoursWorked;
-        pp.Demographic.EmploymentStatusId = testEmployee.EmploymentStatusId;
+        var demo = pp.Demographic!;
+        demo.OracleHcmId = testEmployee.OracleHcmId;
+        demo.Id = testEmployee.Id;
+        demo.ContactInfo.FullName = testEmployee.FullName;
+        demo.BadgeNumber = testEmployee.BadgeNumber;
+        demo.DateOfBirth = convertAgeToBirthDate(TestProfitYear, testEmployee.Age);
+        demo.EmploymentStatusId = testEmployee.EmploymentStatusId;
+
+        var df = new DemographicFaker();
+        // The fake PayProfits entities share fake Demographic entities. (see demographicQueue in PayProfitFaker)
+        // PayProfit and Demographic are 1-1 in the database, to prevent errors - we assign the PayProfits sharing this
+        // Demographic new Demographics.
+        var otherPayProfitsUsingOurDemograhic = await ctx.PayProfits.Where(ppo => ppo != pp && ppo.Demographic == demo).ToListAsync();
+        otherPayProfitsUsingOurDemograhic.ForEach(pp => pp.Demographic = df.Generate());
 
         await ctx.SaveChangesAsync();
     }

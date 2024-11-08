@@ -12,7 +12,7 @@ internal sealed class PayProfitFaker : Faker<PayProfit>
         var demographicQueue = new Queue<Demographic>(demographicFakes);
         Demographic currentDemographic = demographicQueue.Peek();
 
-        RuleFor(pc => pc.OracleHcmId, (f, o) => currentDemographic.OracleHcmId)
+        RuleFor(pc => pc.DemographicId, (f, o) => currentDemographic.Id)
             .RuleFor(d => d.Demographic, (f, o) =>
             {
                 if (demographicQueue.Any())
@@ -34,9 +34,9 @@ internal sealed class PayProfitFaker : Faker<PayProfit>
                 {
                     profitYear = f.PickRandom<short>(2018, 2019, 2020, 2021, 2022, 2023);
                 }
-                while (_existingCombinations.Contains((currentDemographic.OracleHcmId, profitYear)));
+                while (_existingCombinations.Contains((currentDemographic.Id, profitYear)));
 
-                _existingCombinations.Add((currentDemographic.OracleHcmId, profitYear));
+                _existingCombinations.Add((currentDemographic.Id, profitYear));
                 return profitYear;
             })
             .RuleFor(pc => pc.CurrentHoursYear, f => f.Random.Int(min: 0, max: 3000))

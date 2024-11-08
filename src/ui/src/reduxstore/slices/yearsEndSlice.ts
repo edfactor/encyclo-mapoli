@@ -4,6 +4,8 @@ import {
   DistributionsAndForfeitures,
   DuplicateNameAndBirthday,
   DuplicateSSNDetail,
+  EligibleEmployeeResponseDto,
+  ExecutiveHoursAndDollars,
   MilitaryAndRehire,
   MilitaryAndRehireForfeiture,
   MilitaryAndRehireProfitSummary,
@@ -22,6 +24,8 @@ export interface YearsEndState {
   militaryAndRehireForfeitures: PagedReportResponse<MilitaryAndRehireForfeiture> | null;
   militaryAndRehireProfitSummary: PagedReportResponse<MilitaryAndRehireProfitSummary> | null;
   distributionsAndForfeitures: PagedReportResponse<DistributionsAndForfeitures> | null;
+  executiveHoursAndDollars: PagedReportResponse<ExecutiveHoursAndDollars> | null;
+  eligibleEmployees: EligibleEmployeeResponseDto | null;
 }
 
 const initialState: YearsEndState = {
@@ -33,7 +37,9 @@ const initialState: YearsEndState = {
   militaryAndRehire: null,
   militaryAndRehireForfeitures: null,
   militaryAndRehireProfitSummary: null,
-  distributionsAndForfeitures: null
+  distributionsAndForfeitures: null,
+  executiveHoursAndDollars: null,
+  eligibleEmployees: null
 };
 
 export const yearsEndSlice = createSlice({
@@ -81,7 +87,19 @@ export const yearsEndSlice = createSlice({
       action: PayloadAction<PagedReportResponse<DistributionsAndForfeitures>>
     ) => {
       state.distributionsAndForfeitures = action.payload;
-    }
+    },
+    setExecutiveHoursAndDollars: (
+      state,
+      action: PayloadAction<PagedReportResponse<ExecutiveHoursAndDollars>>
+    ) => {
+      state.executiveHoursAndDollars = action.payload;
+    },
+    setEligibleEmployees: (
+      state,
+      action: PayloadAction<EligibleEmployeeResponseDto>
+    ) => {
+      state.eligibleEmployees = action.payload;
+    },
   }
 });
 
@@ -94,6 +112,8 @@ export const {
   setMilitaryAndRehireDetails,
   setMilitaryAndRehireForfeituresDetails,
   setMilitaryAndRehireProfitSummaryDetails,
-  setDistributionsAndForfeitures
+  setDistributionsAndForfeitures,
+  setExecutiveHoursAndDollars,
+  setEligibleEmployees
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

@@ -1,12 +1,19 @@
 ﻿using System.Globalization;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.NotOwned;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ExecutiveHoursAndDollars;
+using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.UnitTests.Base;
 using Demoulas.ProfitSharing.UnitTests.Extensions;
+using FastEndpoints;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 
 namespace Demoulas.ProfitSharing.UnitTests;
 
@@ -38,7 +45,7 @@ public class CalendarServiceTests : ApiTestBase<Api.Program>
     public async Task FindWeekendingDate(string sDate)
     {
         var date = DateOnly.ParseExact(sDate, "yyMMdd", CultureInfo.InvariantCulture);
-        var calendarService = ServiceProvider?.GetRequiredService<CalendarService>()!;
+        var calendarService = ServiceProvider?.GetRequiredService<ICalendarService>()!;
 
         var weekEndingDate = await calendarService.FindWeekendingDateFromDate(date);
 
@@ -52,7 +59,7 @@ public class CalendarServiceTests : ApiTestBase<Api.Program>
     public async Task FindWeekendingDate_InvalidDate()
     {
         var invalidDate = DateOnly.MaxValue;
-        var calendarService = ServiceProvider?.GetRequiredService<CalendarService>()!;
+        var calendarService = ServiceProvider?.GetRequiredService<ICalendarService>()!;
         Func<Task> act = async () => await calendarService.FindWeekendingDateFromDate(invalidDate);
         await act.Should().ThrowAsync<Exception>();
     }
@@ -62,7 +69,7 @@ public class CalendarServiceTests : ApiTestBase<Api.Program>
     public async Task FindWeekendingDate_FutureDate()
     {
         var futureDate = DateOnly.FromDateTime(DateTime.Now.AddYears(6));
-        var calendarService = ServiceProvider?.GetRequiredService<CalendarService>()!;
+        var calendarService = ServiceProvider?.GetRequiredService<ICalendarService>()!;
         Func<Task> act = async () => await calendarService.FindWeekendingDateFromDate(futureDate);
         await act.Should().ThrowAsync<ArgumentOutOfRangeException>()
             .WithMessage($"{CalendarService.InvalidDateError} (Parameter 'dateTime')");
@@ -73,11 +80,22 @@ public class CalendarServiceTests : ApiTestBase<Api.Program>
     public async Task FindWeekendingDate_ValidDate()
     {
         var validDate = DateOnly.ParseExact("230101", "yyMMdd", CultureInfo.InvariantCulture);
-        var calendarService = ServiceProvider?.GetRequiredService<CalendarService>()!;
+        var calendarService = ServiceProvider?.GetRequiredService<ICalendarService>()!;
         var weekEndingDate = await calendarService.FindWeekendingDateFromDate(validDate);
         weekEndingDate.Should().BeOnOrAfter(validDate);
         weekEndingDate.DayOfWeek.Should().Be(DayOfWeek.Saturday);
     }
 
+    [Fact(DisplayName = "PS-366 Get start and end dates for a provided fiscal year")]
+    public async Task GetStartEndProvidedFiscalYear()
+    {
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+        TestResult<CalendarResponseDto> response =
+            await ApiClient
+                .GETAsync<CalendarRecordEndpoint, CalendarRequestDto, CalendarResponseDto>(new CalendarRequestDto { ProfitYear = 2023});
 
+        response.Result.Should().NotBeNull();
+        response.Result.FiscalBeginDate.Should().NotBeOnOrBefore(DateOnly.MinValue);
+        response.Result.FiscalEndDate.Should().NotBeOnOrBefore(DateOnly.MinValue);
+    }
 }

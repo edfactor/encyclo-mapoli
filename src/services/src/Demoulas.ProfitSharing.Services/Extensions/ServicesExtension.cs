@@ -1,4 +1,5 @@
 ﻿using Demoulas.Common.Caching.Interfaces;
+using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Services.HostedServices;
 using Demoulas.ProfitSharing.Services.Mappers;
@@ -22,16 +23,21 @@ public static class ServicesExtension
     {
         _ = builder.Services.AddScoped<IPayClassificationService, PayClassificationService>();
         _ = builder.Services.AddScoped<ICleanupReportService, CleanupReportService>();
+        _ = builder.Services.AddScoped<IFrozenReportService, FrozenReportService>();
         _ = builder.Services.AddScoped<IExecutiveHoursAndDollarsService, ExecutiveHoursAndDollarsService>();
         _ = builder.Services.AddScoped<IGetEligibleEmployeesService, GetEligibleEmployeesService>();
         _ = builder.Services.AddScoped<IMilitaryAndRehireService, MilitaryAndRehireService>();
         _ = builder.Services.AddScoped<IWagesService, WagesService>();
+        
+        _ = builder.Services.AddScoped<ContributionService>();
+        
+
         _ = builder.Services.AddScoped<ITerminatedEmployeeAndBeneficiaryReportService, TerminatedEmployeeAndBeneficiaryReportService>();
 
         _ = builder.Services.AddSingleton<IDemographicsServiceInternal, DemographicsService>();
         _ = builder.Services.AddSingleton<IStoreService, StoreService>();
         _ = builder.Services.AddSingleton<TotalService>();
-        _ = builder.Services.AddSingleton<CalendarService>();
+        _ = builder.Services.AddSingleton<ICalendarService, CalendarService>();
         
 
        
@@ -39,7 +45,6 @@ public static class ServicesExtension
         _ = builder.Services.AddKeyedSingleton<IBaseCacheService<LookupTableCache<byte>>, DepartmentHostedService>(nameof(DepartmentHostedService));
 
 
-        _ = builder.ConfigureMassTransitServices();
         _ = builder.ConfigureOracleHcm();
 
         #region Mappers
@@ -47,11 +52,14 @@ public static class ServicesExtension
         builder.Services.AddSingleton<AddressMapper>();
         builder.Services.AddSingleton<ContactInfoMapper>();
         builder.Services.AddSingleton<DemographicMapper>();
+        builder.Services.AddSingleton<ZeroContributionReasonMapper>();
         builder.Services.AddSingleton<BeneficiaryTypeMapper>();
         builder.Services.AddSingleton<EmployeeTypeMapper>();
 
         #endregion
 
+        builder.ConfigureMassTransitServices();
+        
         return builder;
     }
 }

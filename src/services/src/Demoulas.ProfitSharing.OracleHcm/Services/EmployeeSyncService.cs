@@ -10,12 +10,19 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.OracleHcm.Extensions;
 using Demoulas.ProfitSharing.OracleHcm.Validators;
 using Demoulas.Util.Extensions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services;
 
+/// <summary>
+/// Service responsible for synchronizing employee data from the Oracle HCM system to the Profit Sharing system.
+/// This includes fetching employee data, validating it, and updating the Profit Sharing database.
+/// </summary>
 public sealed class EmployeeSyncService : IEmployeeSyncService
 {
     private readonly OracleDemographicsService _oracleDemographicsService;
@@ -37,16 +44,45 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
         _employeeValidator = employeeValidator;
     }
 
-    public async Task SynchronizeEmployees(CancellationToken cancellationToken)
+    public async Task SynchronizeEmployees(string requestedBy = "System", CancellationToken cancellationToken = default)
     {
         using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(SynchronizeEmployees), ActivityKind.Internal);
 
-        var oracleHcmEmployees = _oracleDemographicsService.GetAllEmployees(cancellationToken);
-        var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, cancellationToken);
-        await _demographicsService.AddDemographicsStream(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
+        var job = new Job
+        {
+            JobTypeId = JobType.Constants.Full,
+            StartMethodId = StartMethod.Constants.System,
+            RequestedBy = requestedBy,
+            JobStatusId = JobStatus.Constants.Running,
+            Started = DateTime.Now
+        };
+
+        await _profitSharingDataContextFactory.UseWritableContext(db =>
+        {
+            db.Jobs.Add(job);
+            return db.SaveChangesAsync(cancellationToken);
+        }, cancellationToken);
+
+        try
+        {
+            await CleanAuditError(cancellationToken);
+            var oracleHcmEmployees = _oracleDemographicsService.GetAllEmployees(cancellationToken);
+            var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, requestedBy, cancellationToken);
+            await _demographicsService.AddDemographicsStream(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            await AuditError(0, new[] { new FluentValidation.Results.ValidationFailure("Error", ex.Message) }, requestedBy, cancellationToken);
+        }
+        finally
+        {
+            job.Completed = DateTime.Now;
+            job.JobStatusId = JobStatus.Constants.Completed;
+            await _profitSharingDataContextFactory.UseWritableContext(db => db.SaveChangesAsync(cancellationToken), cancellationToken);
+        }
     }
 
-    private Task AuditError(int badgeNumber, IEnumerable<FluentValidation.Results.ValidationFailure> errorMessages, IAppUser? appUser = null, CancellationToken cancellationToken = default,
+    private Task AuditError(int badgeNumber, IEnumerable<FluentValidation.Results.ValidationFailure> errorMessages, string requestedBy, CancellationToken cancellationToken = default,
         params object?[] args)
     {
         return _profitSharingDataContextFactory.UseWritableContext(c =>
@@ -62,7 +98,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
                     BadgeNumber = badgeNumber,
                     InvalidValue = e.AttemptedValue?.ToString() ?? e.CustomState?.ToString(),
                     Message = e.ErrorMessage,
-                    UserName = appUser?.UserName ?? "System",
+                    UserName = requestedBy,
                     PropertyName = e.PropertyName
                 });
             c.DemographicSyncAudit.AddRange(auditRecords);
@@ -71,10 +107,20 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
         }, cancellationToken);
     }
 
-    private async IAsyncEnumerable<DemographicsRequest> ConvertToRequestDto(IAsyncEnumerable<OracleEmployee?> asyncEnumerable,
+    private Task CleanAuditError(CancellationToken cancellationToken)
+    {
+        return _profitSharingDataContextFactory.UseWritableContext(c =>
+        {
+            DateTime clearBackTo = DateTime.Today.AddDays(-30);
+
+            return c.DemographicSyncAudit.Where(t => t.Created < clearBackTo).ExecuteDeleteAsync(cancellationToken);
+        }, cancellationToken);
+    }
+
+    private async IAsyncEnumerable<DemographicsRequest> ConvertToRequestDto(IAsyncEnumerable<OracleEmployee?> asyncEnumerable, 
+        string requestedBy,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(ConvertToRequestDto), ActivityKind.Internal);
         await foreach (OracleEmployee? employee in asyncEnumerable.WithCancellation(cancellationToken))
         {
             int badgeNumber = employee?.BadgeNumber ?? 0;
@@ -86,7 +132,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
             var result = await _employeeValidator.ValidateAsync(employee!, cancellationToken);
             if (!result.IsValid)
             {
-                await AuditError(badgeNumber, result.Errors, null, cancellationToken);
+                await AuditError(badgeNumber, result.Errors, requestedBy, cancellationToken);
                 continue;
             }
 

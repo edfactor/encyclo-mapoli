@@ -5,6 +5,7 @@ using System.Text.Json;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
+using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services;
 
@@ -30,7 +31,7 @@ internal sealed class OracleDemographicsService
     /// <returns></returns>
     public async IAsyncEnumerable<OracleEmployee?> GetAllEmployees([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        string initialUrl = await BuildUrl(_oracleHcmConfig.Url, cancellationToken: cancellationToken);
+        string initialUrl = await BuildUrl(cancellationToken: cancellationToken);
 
         var returnValues = FetchOracleDemographic(initialUrl, cancellationToken);
         await foreach (var emp in returnValues)
@@ -39,10 +40,10 @@ internal sealed class OracleDemographicsService
         }
     }
 
-    private async Task<string> BuildUrl(string url, int offset = 0, CancellationToken cancellationToken = default)
+    private async Task<string> BuildUrl(int offset = 0, CancellationToken cancellationToken = default)
     {
         // Oracle will limit us to 500, but we run the risk of timeout well below that, so we need to be conservative.
-        ushort limit = ushort.Min(75, _oracleHcmConfig.Limit);
+        ushort limit = ushort.Min(50, _oracleHcmConfig.Limit);
         Dictionary<string, string> initialQuery = new Dictionary<string, string>
         {
             { "limit", $"{limit}" },
@@ -51,7 +52,7 @@ internal sealed class OracleDemographicsService
             { "onlyData", "true" },
             { "fields", HttpRequestFields.ToFormattedString() }
         };
-        UriBuilder initialUriBuilder = new UriBuilder(url);
+        UriBuilder initialUriBuilder = new UriBuilder(string.Concat(_oracleHcmConfig.BaseAddress, _oracleHcmConfig.DemographicUrl));
         string initialQueryString = await new FormUrlEncodedContent(initialQuery).ReadAsStringAsync(cancellationToken);
         initialUriBuilder.Query = initialQueryString;
         return initialUriBuilder.Uri.ToString();
@@ -59,7 +60,6 @@ internal sealed class OracleDemographicsService
 
     private async IAsyncEnumerable<OracleEmployee?> FetchOracleDemographic(string initialUrl, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        OracleHcmActivitySource.Instance.StartActivity(nameof(FetchOracleDemographic), ActivityKind.Internal);
         // Task to fetch data and enqueue it
         string url = initialUrl;
 
@@ -84,7 +84,7 @@ internal sealed class OracleDemographicsService
             }
 
             // Construct the next URL for pagination
-            string nextUrl = await BuildUrl(_oracleHcmConfig.Url, demographics.Count + demographics.Offset, cancellationToken);
+            string nextUrl = await BuildUrl(demographics.Count + demographics.Offset, cancellationToken);
             if (string.IsNullOrEmpty(nextUrl))
             {
                 break;

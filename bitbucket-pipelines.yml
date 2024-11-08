@@ -6,8 +6,6 @@
 #
 # ------------------------------------------------------------------------
 
-image: mcr.microsoft.com/dotnet/sdk:8.0
-
 definitions:
   steps:
     build-and-test-backend: &build-and-test-backend
@@ -110,11 +108,26 @@ definitions:
         - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
         - ${env:ENV} = "prod"
         - cd .\src\UI
-        - C:\nvm\v20.4.0\npm.cmd install --legacy-peer-deps;
-        - C:\nvm\v20.4.0\npm.cmd run build:${env:ENV}
-        - Copy-Item -Path ".\src\web.config" -Destination "..\..\src\UI\build"
-        - New-Item -Path "..\..\dist" -ItemType Directory
-        - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.${env:ENV}.zip" -Force       
+        - ${env:NPM} install --legacy-peer-deps;
+        - ${env:NPM} run build:${env:ENV}
+        - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.$env:ENV.zip" -Force   
+        
+    upgrade-database: &upgrade-database
+      name: Upgrade Database
+      runs-on:
+        - windows
+        - self.hosted
+      script:
+        - echo "Upgrading Database..."
+        - $env:NUGET_ORG="https://api.nuget.org/v3/index.json"
+        - $env:ConnectionStrings:ProfitSharing=$env:ConnectionStrings_ProfitSharing_QA
+        - dotnet build .\src\services\src\Demoulas.ProfitSharing.Data.Cli\Demoulas.ProfitSharing.Data.Cli.csproj -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -o .\output
+        - $action = $env:Action
+        - if (-not $action) { $action = "upgrade-db" }
+        - .\output\Demoulas.ProfitSharing.Data.Cli $action --connection-name ProfitSharing --sql-file `".\src\database\ready_import\SQL copy all from ready to smart ps.sql`"
+  
+
+   
 
 
 pipelines:
@@ -130,34 +143,18 @@ pipelines:
           #- step: *create-frontend-artifact-prod
            # Deployment Stage
       
+      - step: *upgrade-database
       - step:
           name: "Application Deployment"
           runs-on:
             - windows
             - self.hosted
           deployment: QA
-          trigger: "manual"
-      #     script:
-      #       - $env:NUGET_ORG="https://api.nuget.org/v3/index.json"
-      #       - echo "Upgrading Database..."
-      #       - dotnet tool update --global dotnet-ef --add-source $env:NUGET_ORG   
-      #       - Write-Host $(Get-Location)
-      #       - Write-Host $(Get-ChildItem) 
-      #       - New-Item -Path .\publish -ItemType Directory
-      #       - Expand-Archive -Path .\dist\Demoulas.ProfitSharing.Api.zip -DestinationPath .\publish
-      #       - dotnet ef database update --assembly .\publish\Demoulas.ProfitSharing.Data.dll --context ProfitSharingDbContext --connection "${env:ConnectionStrings_ProfitSharing_QA}"
-
-      # - step:
-      #     name: "Application Deployment"
-      #     runs-on:
-      #       - windows
-      #       - self.hosted
-      #       - appt125
+          trigger: "manual"     
           script:
             - echo "Deploying application..."
             - $env:API_SERVER_QA = "appt23d"            
-            - powershell .\scripts\webDeploy.ps1 QA $env:API_SERVER_QA
-   
+            - powershell .\scripts\webDeploy.ps1 QA $env:API_SERVER_QA      
   
     develop:
       - parallel:
@@ -169,3 +166,15 @@ pipelines:
       - parallel:
           - step: *build-and-test-backend
           - step: *test-frontend
+  
+  custom:
+      profitsharing_database:
+        - variables: # https://bitbucket.org/blog/predefine-values-of-custom-pipeline-variables
+                  - name: Action
+                    default: upgrade-db
+                    allowed-values: # optionally restrict variable values
+                        - upgrade-db
+                        - drop-recreate-db
+                        - import-from-ready                        
+        - step: *upgrade-database
+

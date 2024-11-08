@@ -10,12 +10,12 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
     {
         _ = builder.ToTable("PAY_PROFIT");
 
-        _ = builder.HasKey(e => new {e.OracleHcmId, e.ProfitYear});
+        _ = builder.HasKey(e => new { e.DemographicId, e.ProfitYear});
 
-        _ = builder.Property(e => e.OracleHcmId)
-            .HasPrecision(15)
+        _ = builder.Property(e => e.DemographicId)
+            .HasPrecision(11)
             .ValueGeneratedNever()
-            .HasColumnName("ORACLE_HCM_ID");
+            .HasColumnName("DEMOGRAPHIC_ID");
 
         _ = builder.Property(e => e.ProfitYear)
             .HasPrecision(4)
@@ -63,7 +63,13 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
             .HasColumnName("HOURS_EXECUTIVE")
             .HasPrecision(6, 2);
 
-        
+        _ = builder.Property(e => e.LastUpdate)
+            .HasColumnName("LAST_UPDATE")
+            .HasColumnType("TIMESTAMP")
+            .HasDefaultValueSql("CURRENT_TIMESTAMP")
+            .ValueGeneratedOnAddOrUpdate();
+
+
         _ = builder.Property(e => e.ZeroContributionReasonId)
             .HasColumnName("ZERO_CONTRIBUTION_REASON_ID");
 
@@ -75,6 +81,11 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
 
         _ = builder.Property(e => e.EmployeeTypeId)
             .HasColumnName("EMPLOYEE_TYPE_ID");
+        
+
+        _ = builder.Property(e => e.PointsEarned)
+            .HasColumnName("POINTS_EARNED")
+            .HasPrecision(9, 2);
 
         _ = builder.HasOne(e => e.Enrollment)
             .WithMany()

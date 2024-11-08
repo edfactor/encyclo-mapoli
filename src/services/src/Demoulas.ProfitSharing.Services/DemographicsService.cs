@@ -8,6 +8,9 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Mappers;
 using Microsoft.EntityFrameworkCore;
 using Demoulas.ProfitSharing.Data.Extensions;
+using Microsoft.Extensions.Logging;
+using Oracle.ManagedDataAccess.Client;
+using EntityFramework.Exceptions.Common;
 
 namespace Demoulas.ProfitSharing.Services;
 
@@ -15,12 +18,15 @@ public class DemographicsService : IDemographicsServiceInternal
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly DemographicMapper _mapper;
+    private readonly ILogger<DemographicsService> _logger;
 
     public DemographicsService(IProfitSharingDataContextFactory dataContextFactory,
-        DemographicMapper mapper)
+        DemographicMapper mapper,
+        ILogger<DemographicsService> logger)
     {
         _dataContextFactory = dataContextFactory;
         _mapper = mapper;
+        _logger = logger;
     }
 
     /// <summary>
@@ -36,7 +42,6 @@ public class DemographicsService : IDemographicsServiceInternal
     public async Task AddDemographicsStream(IAsyncEnumerable<DemographicsRequest> employees, byte batchSize = byte.MaxValue,
         CancellationToken cancellationToken = default)
     {
-        using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(AddDemographicsStream), ActivityKind.Internal);
         var batch = new List<DemographicsRequest>();
 
         await foreach (var employee in employees.WithCancellation(cancellationToken))
@@ -91,13 +96,15 @@ public class DemographicsService : IDemographicsServiceInternal
 
             // Create lookup dictionaries for both OracleHcmId and SSN
             var demographicOracleHcmIdLookup = demographicsEntities.ToDictionary(entity => entity.OracleHcmId);
-            var demographicSsnLookup = demographicsEntities.ToDictionary(entity => entity.Ssn);
+            var demographicSsnLookup = demographicsEntities.ToLookup(entity => (entity.Ssn, entity.BadgeNumber));
+            var ssnCollection = demographicsEntities.Select(d => d.Ssn).ToHashSet();
+            var dobCollection = demographicsEntities.Select(d => d.DateOfBirth).ToHashSet();
 
             // Fetch existing entities from the database using both OracleHcmId and SSN
             var existingEntities = await context.Demographics
-                                                .Where(dbEntity => demographicOracleHcmIdLookup.Keys.Contains(dbEntity.OracleHcmId) ||
-                                                                   demographicSsnLookup.Keys.Contains(dbEntity.Ssn))
-                                                .ToListAsync(cancellationToken);
+                .Where(dbEntity => demographicOracleHcmIdLookup.Keys.Contains(dbEntity.OracleHcmId) ||
+                                   (ssnCollection.Contains(dbEntity.Ssn) && dobCollection.Contains(dbEntity.DateOfBirth)))
+                .ToListAsync(cancellationToken);
 
             // Handle potential duplicates in the existing database (SSN duplicates)
             var duplicateSsnEntities = existingEntities.GroupBy(e => e.Ssn)
@@ -131,10 +138,35 @@ public class DemographicsService : IDemographicsServiceInternal
             if (newEntities.Any())
             {
                 // Bulk insert new entities
-                context.Demographics.AddRange(newEntities);
+
+                foreach (var entity in newEntities)
+                {
+                    try
+                    {
+                        context.Demographics.Add(entity);
+                    }
+                    catch (InvalidOperationException e) when (e.Message.Contains(
+                                                                  "When attaching existing entities, ensure that only one entity instance with a given key value is attached."))
+                    {
+                        _logger.LogCritical(e, "Failed to process Demographic/OracleHCM employee record for EmployeeId {EmployeeId}", entity.BadgeNumber);
+                        try
+                        {
+                            await context.SaveChangesAsync(cancellationToken);
+                        }
+                        catch (CannotInsertNullException exception)
+                        {
+                            _logger.LogCritical(exception, "Failed to save Demographic/OracleHCM employee batch");
+                        }
+                        catch (OracleException exception)
+                        {
+                            _logger.LogCritical(exception, "Failed to save Demographic/OracleHCM employee batch");
+                        }
+                    }
+                }
             }
 
-            // Update existing entities based on either OracleHcmId or SSN
+
+            // Update existing entities based on either OracleHcmId or SSN & BadgeNumber
             foreach (var existingEntity in existingEntities)
             {
                 Demographic? incomingEntity = null;
@@ -144,16 +176,21 @@ public class DemographicsService : IDemographicsServiceInternal
                 {
                     incomingEntity = entityByOracleHcmId;
                 }
-                else if (demographicSsnLookup.TryGetValue(existingEntity.Ssn, out var entityBySsn))
+                else
                 {
-                    incomingEntity = entityBySsn;
+                    var entityBySsn = demographicSsnLookup[(existingEntity.Ssn, existingEntity.BadgeNumber)].FirstOrDefault();
+                    if (entityBySsn != null)
+                    {
+                        incomingEntity = entityBySsn;
+                    }
                 }
 
                 // If we have a match, update the existing entity with new values
                 if (incomingEntity != null)
                 {
                     // Correct OracleHcmId if it's missing or incorrect (for legacy records)
-                    if (existingEntity.OracleHcmId != incomingEntity.OracleHcmId)
+                    // Assume all legacy records are below 2.1B and Oracle HCM ID is over that
+                    if (existingEntity.OracleHcmId != incomingEntity.OracleHcmId && existingEntity.OracleHcmId < int.MaxValue)
                     {
                         existingEntity.OracleHcmId = incomingEntity.OracleHcmId;
                     }

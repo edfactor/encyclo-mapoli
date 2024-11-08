@@ -21,7 +21,7 @@ internal sealed class BeneficiaryFaker : Faker<Beneficiary>
 
         Demographic currentDemographic = demographicQueue.Peek();
 
-        RuleFor(pc => pc.OracleHcmId, (f, o) => (currentDemographic.OracleHcmId));
+        RuleFor(pc => pc.DemographicId, (f, o) => (currentDemographic.Id));
         RuleFor(pc => pc.BadgeNumber, (f, o) => (currentDemographic.BadgeNumber));
         RuleFor(d => d.Demographic, (f, o) =>
         {

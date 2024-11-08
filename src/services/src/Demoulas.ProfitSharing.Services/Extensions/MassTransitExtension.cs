@@ -1,21 +1,21 @@
-﻿using Demoulas.ProfitSharing.OracleHcm.Jobs;
+﻿using Demoulas.ProfitSharing.OracleHcm.Messaging;
 using MassTransit;
 using Microsoft.Extensions.Hosting;
 
-namespace Demoulas.ProfitSharing.Services.Extensions;
+    namespace Demoulas.ProfitSharing.Services.Extensions;
 
 internal static class MassTransitExtension
 {
     public static IHostApplicationBuilder ConfigureMassTransitServices(this IHostApplicationBuilder builder)
     {
         builder.Services.AddMassTransit(x =>
-        {
-            x.SetKebabCaseEndpointNameFormatter();
+            {
+                x.SetKebabCaseEndpointNameFormatter();
 
-            x.AddConsumer<OracleHcmJobConsumer>();
+                x.AddConsumer<OracleHcmMessageConsumer>();
 
-            x.UsingInMemory((context, cfg) => { cfg.ConfigureEndpoints(context); });
-        });
+                x.UsingInMemory((context, cfg) => { cfg.ConfigureEndpoints(context); });
+            });
 
 
         return builder;

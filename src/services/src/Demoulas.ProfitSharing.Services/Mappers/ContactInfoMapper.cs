@@ -1,6 +1,4 @@
-﻿// YourMapper.cs
-
-using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Data.Entities;
 using Riok.Mapperly.Abstractions;
@@ -12,7 +10,4 @@ public partial class ContactInfoMapper
 {
     public partial ContactInfoResponseDto Map(ContactInfo source);
     public partial ContactInfo Map(ContactInfoRequestDto source);
-
-    public partial ContactInfoRequestDto MapToContactInfoRequestDto(ContactInfo source);
-
 }

@@ -85,6 +85,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{57F4
 		..\database\obfuscation\scripts\obfuscate_validation.sql = ..\database\obfuscation\scripts\obfuscate_validation.sql
 		..\database\obfuscation\scripts\obfuscation_setup.sql = ..\database\obfuscation\scripts\obfuscation_setup.sql
 		..\database\obfuscation\scripts\reset_sequences.sql = ..\database\obfuscation\scripts\reset_sequences.sql
+		..\database\ready_import\SQL update comment types.sql = ..\database\ready_import\SQL update comment types.sql
 		..\database\obfuscation\scripts\target_build_ben_lookups.sql = ..\database\obfuscation\scripts\target_build_ben_lookups.sql
 		..\database\obfuscation\scripts\target_build_emp_lookups.sql = ..\database\obfuscation\scripts\target_build_emp_lookups.sql
 		..\database\obfuscation\scripts\target_delete_checks.sql = ..\database\obfuscation\scripts\target_delete_checks.sql
@@ -101,18 +102,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{57F4
 		..\database\obfuscation\scripts\test_view_data.sql = ..\database\obfuscation\scripts\test_view_data.sql
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ready_import", "ready_import", "{0A7F4CAF-BDEA-44BC-8BEC-1F3979CF355B}"
-	ProjectSection(SolutionItems) = preProject
-		..\database\ready_import\Readme.txt = ..\database\ready_import\Readme.txt
-		..\database\ready_import\SQL copy all from ready to smart ps.sql = ..\database\ready_import\SQL copy all from ready to smart ps.sql
-		..\database\ready_import\SQL copy beneficiary.sql = ..\database\ready_import\SQL copy beneficiary.sql
-		..\database\ready_import\SQL copy demographic.sql = ..\database\ready_import\SQL copy demographic.sql
-		..\database\ready_import\SQL copy distribution.sql = ..\database\ready_import\SQL copy distribution.sql
-		..\database\ready_import\SQL copy pay_profit.sql = ..\database\ready_import\SQL copy pay_profit.sql
-		..\database\ready_import\SQL copy profit_detail.sql = ..\database\ready_import\SQL copy profit_detail.sql
-		..\database\ready_import\SQL counts smart vs ready.sql = ..\database\ready_import\SQL counts smart vs ready.sql
-	EndProjectSection
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.IntegrationTests", "tests\Demoulas.ProfitSharing.IntegrationTests\Demoulas.ProfitSharing.IntegrationTests.csproj", "{222677DF-CAD3-4E03-A1A1-C213DFD0DAA0}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SQL calculations view", "SQL calculations view", "{522242E2-FC59-49E9-9628-6E9B6AEEAF6F}"
@@ -126,6 +115,20 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ddl", "ddl", "{15C6083C-777
 	ProjectSection(SolutionItems) = preProject
 		..\database\ddl\ddl.sql = ..\database\ddl\ddl.sql
 		..\database\ddl\profit_sharing_ddl.png = ..\database\ddl\profit_sharing_ddl.png
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.Data.Cli", "src\Demoulas.ProfitSharing.Data.Cli\Demoulas.ProfitSharing.Data.Cli.csproj", "{4A1F269F-574D-4FBC-8EFD-63D8CF871704}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ready import", "ready import", "{10F3A928-8DEB-4366-AAC4-F508D3E67C11}"
+	ProjectSection(SolutionItems) = preProject
+		..\database\ready_import\Readme.txt = ..\database\ready_import\Readme.txt
+		..\database\ready_import\SQL copy all from ready to smart ps.sql = ..\database\ready_import\SQL copy all from ready to smart ps.sql
+		..\database\ready_import\SQL copy beneficiary.sql = ..\database\ready_import\SQL copy beneficiary.sql
+		..\database\ready_import\SQL copy demographic.sql = ..\database\ready_import\SQL copy demographic.sql
+		..\database\ready_import\SQL copy distribution.sql = ..\database\ready_import\SQL copy distribution.sql
+		..\database\ready_import\SQL copy pay_profit.sql = ..\database\ready_import\SQL copy pay_profit.sql
+		..\database\ready_import\SQL copy profit_detail.sql = ..\database\ready_import\SQL copy profit_detail.sql
+		..\database\ready_import\SQL counts smart vs ready.sql = ..\database\ready_import\SQL counts smart vs ready.sql
 	EndProjectSection
 EndProject
 Global
@@ -201,6 +204,12 @@ Global
 		{222677DF-CAD3-4E03-A1A1-C213DFD0DAA0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{222677DF-CAD3-4E03-A1A1-C213DFD0DAA0}.Russ|Any CPU.ActiveCfg = Russ|Any CPU
 		{222677DF-CAD3-4E03-A1A1-C213DFD0DAA0}.Russ|Any CPU.Build.0 = Russ|Any CPU
+		{4A1F269F-574D-4FBC-8EFD-63D8CF871704}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A1F269F-574D-4FBC-8EFD-63D8CF871704}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A1F269F-574D-4FBC-8EFD-63D8CF871704}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A1F269F-574D-4FBC-8EFD-63D8CF871704}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A1F269F-574D-4FBC-8EFD-63D8CF871704}.Russ|Any CPU.ActiveCfg = Release|Any CPU
+		{4A1F269F-574D-4FBC-8EFD-63D8CF871704}.Russ|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -210,10 +219,10 @@ Global
 		{66B0DDDA-624B-4BF3-A4C7-CAEBC3E3DA62} = {D1297442-67BE-4098-A95F-727F04A68FA3}
 		{FDE7E8B7-3735-42D6-BF0E-B4FB1BF0FA86} = {946306F4-A7A7-40C5-A4EA-D32A46E09328}
 		{57F488D4-7A41-4A7F-ABEF-4B1437B5B5A6} = {FDE7E8B7-3735-42D6-BF0E-B4FB1BF0FA86}
-		{0A7F4CAF-BDEA-44BC-8BEC-1F3979CF355B} = {946306F4-A7A7-40C5-A4EA-D32A46E09328}
 		{222677DF-CAD3-4E03-A1A1-C213DFD0DAA0} = {80B088DC-C84B-46AA-BFF3-DC309C5B4325}
 		{522242E2-FC59-49E9-9628-6E9B6AEEAF6F} = {946306F4-A7A7-40C5-A4EA-D32A46E09328}
 		{15C6083C-777D-42C6-A1A7-5F4008345118} = {946306F4-A7A7-40C5-A4EA-D32A46E09328}
+		{10F3A928-8DEB-4366-AAC4-F508D3E67C11} = {946306F4-A7A7-40C5-A4EA-D32A46E09328}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FB1CB19A-BE8B-4F91-9186-FE7C9F3CE4D7}

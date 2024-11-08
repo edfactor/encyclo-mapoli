@@ -14,6 +14,8 @@ public sealed record YearEndProfitSharingReportResponse
     public required bool IsUnder21 { get; set; }
     public required bool IsNew { get; set; }
     public char? EmployeeStatus { get; set; }
+    public required Decimal Balance { get; set; }
+    public required short YearsInPlan { get; set; }
 
     public static YearEndProfitSharingReportResponse ResponseExample()
     {
@@ -31,7 +33,9 @@ public sealed record YearEndProfitSharingReportResponse
             Points = 2653,
             IsUnder21 = false,
             IsNew = false,
-            EmployeeStatus = ' '
+            EmployeeStatus = ' ',
+            Balance = 51351.55m,
+            YearsInPlan = 1
         };
     }
 }

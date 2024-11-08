@@ -48,17 +48,15 @@ public class TotalServiceTests : ApiTestBase<Program>
                 prof.YearToDate = (short)(DateTime.Now.Year - i);
                 prof.FederalTaxes = 0.5m;
                 prof.StateTaxes = 0.25m;
-                prof.IsTransferIn = false;
-                prof.IsTransferOut = false;
             }
 
             await ctx.SaveChangesAsync();
 
-            var testRslt = await _totalService.GetTotalBalanceSet(ctx, new DateOnly(DateTime.Now.Year, 12, 31))
+            var testRslt = await _totalService.GetTotalBalanceSet(ctx, (short)DateTime.Now.Year)
                                         .Where(x => x.Ssn == demoSsn).ToListAsync();
             testRslt.Should().NotBeNull(); //Testing where Forfeiture, Contribution and Earnigns are all added
             testRslt.Count.Should().Be(1);
-            testRslt[0].Total.Should().Be(32767);
+            testRslt[0].Total.Should().Be(-4681M);
 
             foreach (var prof in pdArray)
             {
@@ -66,7 +64,7 @@ public class TotalServiceTests : ApiTestBase<Program>
                 prof.ProfitCodeId = ProfitCode.Constants.Outgoing100PercentVestedPayment.Id;
             }
 
-            testRslt = await _totalService.GetTotalBalanceSet(ctx, new DateOnly(DateTime.Now.Year, 12, 31))
+            testRslt = await _totalService.GetTotalBalanceSet(ctx, (short)DateTime.Now.Year)
                                         .Where(x => x.Ssn == demoSsn).ToListAsync();
             testRslt.Should().NotBeNull(); //Testing where only forfeitures are added (negatively)
             testRslt.Count.Should().Be(1);
@@ -78,17 +76,17 @@ public class TotalServiceTests : ApiTestBase<Program>
                 prof.ProfitCodeId = ProfitCode.Constants.IncomingContributions.Id;
             }
 
-            testRslt = await _totalService.GetTotalBalanceSet(ctx, new DateOnly(DateTime.Now.Year, 12, 31))
+            testRslt = await _totalService.GetTotalBalanceSet(ctx, (short)DateTime.Now.Year)
                                         .Where(x => x.Ssn == demoSsn).ToListAsync();
             testRslt.Should().NotBeNull(); // Testing where Earnings and forfeitures are added
             testRslt.Count.Should().Be(1);
-            testRslt[0].Total.Should().Be(28086);
+            testRslt[0].Total.Should().Be(32767M);
 
-            testRslt = await _totalService.GetTotalBalanceSet(ctx, new DateOnly(DateTime.Now.Year - 1, 12, 31))
+            testRslt = await _totalService.GetTotalBalanceSet(ctx, (short)(DateTime.Now.Year -1))
                                         .Where(x => x.Ssn == demoSsn).ToListAsync();
             testRslt.Should().NotBeNull(); // Testing As of filter
             testRslt.Count.Should().Be(1);
-            testRslt[0].Total.Should().Be(28080);
+            testRslt[0].Total.Should().Be(32760M);
         });
 
     }
@@ -116,13 +114,11 @@ public class TotalServiceTests : ApiTestBase<Program>
                 prof.YearToDate = (short)(DateTime.Now.Year - i);
                 prof.FederalTaxes = 0.5m;
                 prof.StateTaxes = 0.25m;
-                prof.IsTransferIn = false;
-                prof.IsTransferOut = false;
             }
 
             await ctx.SaveChangesAsync();
 
-            var testRslt = await _totalService.GetTotalEtva(ctx, new DateOnly(DateTime.Now.Year, 12, 31)).Where(x => x.Ssn == demoSsn).ToListAsync();
+            var testRslt = await _totalService.GetTotalEtva(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync();
             testRslt.Should().NotBeNull(); // Incoming QDRO Beneficiary
             testRslt.Count.Should().Be(1);
             testRslt[0].Total.Should().Be(4681);
@@ -136,7 +132,7 @@ public class TotalServiceTests : ApiTestBase<Program>
 
             await ctx.SaveChangesAsync();
 
-            testRslt = await _totalService.GetTotalEtva(ctx, new DateOnly(DateTime.Now.Year, 12, 31)).Where(x => x.Ssn == demoSsn).ToListAsync();
+            testRslt = await _totalService.GetTotalEtva(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync();
             testRslt.Should().NotBeNull(); // Incoming 100% Vested Earnings
             testRslt.Count.Should().Be(1);
             testRslt[0].Total.Should().Be(9362);
@@ -150,7 +146,7 @@ public class TotalServiceTests : ApiTestBase<Program>
 
             await ctx.SaveChangesAsync();
 
-            testRslt = await _totalService.GetTotalEtva(ctx, new DateOnly(DateTime.Now.Year, 12, 31)).Where(x => x.Ssn == demoSsn).ToListAsync();
+            testRslt = await _totalService.GetTotalEtva(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync();
             testRslt.Should().NotBeNull(); // Outgoing 100% Vested Earnings
             testRslt.Count.Should().Be(1);
             testRslt[0].Total.Should().Be(18724);
@@ -164,7 +160,7 @@ public class TotalServiceTests : ApiTestBase<Program>
 
             await ctx.SaveChangesAsync();
 
-            testRslt = await _totalService.GetTotalEtva(ctx, new DateOnly(DateTime.Now.Year - 1, 12, 31)).Where(x => x.Ssn == demoSsn).ToListAsync();
+            testRslt = await _totalService.GetTotalEtva(ctx, (short)(DateTime.Now.Year -1)).Where(x => x.Ssn == demoSsn).ToListAsync();
             testRslt.Should().NotBeNull(); // Test as of filter
             testRslt.Count.Should().Be(1);
             testRslt[0].Total.Should().Be(18720);
@@ -178,7 +174,7 @@ public class TotalServiceTests : ApiTestBase<Program>
 
             await ctx.SaveChangesAsync();
 
-            testRslt = await _totalService.GetTotalEtva(ctx, new DateOnly(DateTime.Now.Year, 12, 31)).Where(x => x.Ssn == demoSsn).ToListAsync();
+            testRslt = await _totalService.GetTotalEtva(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync();
             testRslt.Should().NotBeNull(); // All non-etva records
             testRslt.Count.Should().Be(1);
             testRslt[0].Total.Should().Be(0);
@@ -208,13 +204,11 @@ public class TotalServiceTests : ApiTestBase<Program>
                 prof.YearToDate = (short)(DateTime.Now.Year - i);
                 prof.FederalTaxes = 0.5m;
                 prof.StateTaxes = 0.25m;
-                prof.IsTransferIn = false;
-                prof.IsTransferOut = false;
             }
 
             await ctx.SaveChangesAsync();
 
-            var testRslt = await _totalService.GetTotalDistributions(ctx, new DateOnly(DateTime.Now.Year, 12, 31)).Where(x => x.Ssn == demoSsn).ToListAsync();
+            var testRslt = await _totalService.GetTotalDistributions(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync();
             testRslt.Should().NotBeNull(); // Outgoing Partial Withdrawal
             testRslt.Count.Should().Be(1);
             testRslt[0].Total.Should().Be(18724);
@@ -228,7 +222,7 @@ public class TotalServiceTests : ApiTestBase<Program>
 
             await ctx.SaveChangesAsync();
 
-            testRslt = await _totalService.GetTotalDistributions(ctx, new DateOnly(DateTime.Now.Year, 12, 31)).Where(x => x.Ssn == demoSsn).ToListAsync();
+            testRslt = await _totalService.GetTotalDistributions(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync();
             testRslt.Should().NotBeNull(); // Outgoing Forfeitures
             testRslt.Count.Should().Be(1);
             testRslt[0].Total.Should().Be(18724);
@@ -242,7 +236,7 @@ public class TotalServiceTests : ApiTestBase<Program>
 
             await ctx.SaveChangesAsync();
 
-            testRslt = await _totalService.GetTotalDistributions(ctx, new DateOnly(DateTime.Now.Year, 12, 31)).Where(x => x.Ssn == demoSsn).ToListAsync();
+            testRslt = await _totalService.GetTotalDistributions(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync();
             testRslt.Should().NotBeNull(); // Outgoing 100% Vested Earnings
             testRslt.Count.Should().Be(1);
             testRslt[0].Total.Should().Be(18724);
@@ -256,7 +250,7 @@ public class TotalServiceTests : ApiTestBase<Program>
 
             await ctx.SaveChangesAsync();
 
-            testRslt = await _totalService.GetTotalDistributions(ctx, new DateOnly(DateTime.Now.Year - 1, 12, 31)).Where(x => x.Ssn == demoSsn).ToListAsync();
+            testRslt = await _totalService.GetTotalDistributions(ctx, (short)(DateTime.Now.Year-1)).Where(x => x.Ssn == demoSsn).ToListAsync();
             testRslt.Should().NotBeNull(); // Test as of filter
             testRslt.Count.Should().Be(1);
             testRslt[0].Total.Should().Be(18720);
@@ -270,7 +264,7 @@ public class TotalServiceTests : ApiTestBase<Program>
 
             await ctx.SaveChangesAsync();
 
-            testRslt = await _totalService.GetTotalDistributions(ctx, new DateOnly(DateTime.Now.Year, 12, 31)).Where(x => x.Ssn == demoSsn).ToListAsync();
+            testRslt = await _totalService.GetTotalDistributions(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync();
             testRslt.Should().NotBeNull(); // All non-distributon records
             testRslt.Count.Should().Be(1);
             testRslt[0].Total.Should().Be(0);

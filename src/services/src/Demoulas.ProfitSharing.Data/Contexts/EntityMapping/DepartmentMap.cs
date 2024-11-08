@@ -27,7 +27,7 @@ internal sealed class DepartmentMap : IEntityTypeConfiguration<Department>
             new Department { Id = Department.Constants.Produce, Name = "Produce" },
             new Department { Id = Department.Constants.Deli, Name = "Deli" },
             new Department { Id = Department.Constants.Dairy, Name = "Dairy" },
-            new Department { Id = Department.Constants.BeerAndWine, Name = "Beer and Wine" },
+            new Department { Id = Department.Constants.BeerAndWine, Name = "Beer/Wine" },
             new Department { Id = Department.Constants.Bakery, Name = "Bakery" }
         );
     }

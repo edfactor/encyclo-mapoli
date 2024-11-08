@@ -29,9 +29,13 @@ internal sealed class ProfitDetailMap : IEntityTypeConfiguration<ProfitDetail>
         _ = builder.Property(x => x.TaxCodeId).HasColumnName("TAX_CODE_ID");
         _ = builder.Property(x => x.Ssn).HasColumnName("SSN").HasPrecision(9).IsRequired();
         _ = builder.Property(x => x.DistributionSequence).HasColumnName("DISTRIBUTION_SEQUENCE");
-        _ = builder.Property(x => x.TransferPsn).HasColumnName("TRANSFER_PSN");
-        _ = builder.Property(x => x.IsTransferIn).HasColumnName("IS_TRANSFER_IN").HasDefaultValue(0);
-        _ = builder.Property(x => x.IsTransferOut).HasColumnName("IS_TRANSFER_OUT").HasDefaultValue(0);
+        _ = builder.Property(x => x.CommentTypeId).HasColumnName("COMMENT_TYPE_ID");
+        _ = builder.HasOne(x => x.CommentType).WithMany().HasForeignKey(x => x.CommentTypeId);
+        _ = builder.Property(x => x.CommentRelatedOracleHcmId).HasColumnName("COMMENT_RELATED_ORACLE_HCM_ID");
+        _ = builder.Property(x => x.CommentRelatedPsnSuffix).HasColumnName("COMMENT_RELATED_PSN_SUFFIX");
+        _ = builder.Property(x => x.CommentRelatedState).HasColumnName("COMMENT_RELATED_STATE");
+        _ = builder.Property(x => x.CommentRelatedCheckNumber).HasColumnName("COMMENT_RELATED_CHECK_NUMBER");
+        _ = builder.Property(x => x.CommentIsPartialTransaction).HasColumnName("COMMENT_IS_PARTIAL_TRANSACTION");
 
         _ = builder.HasOne(x => x.TaxCode).WithMany().HasForeignKey(t => t.TaxCodeId);
         _ = builder.HasOne(x => x.ProfitCode).WithMany().HasForeignKey(x => x.ProfitCodeId);

@@ -23,10 +23,10 @@ public sealed class BeneficiaryMap : IEntityTypeConfiguration<Beneficiary>
             .HasPrecision(7)
             .HasColumnName("BADGE_NUMBER");
 
-        _ = builder.Property(e => e.OracleHcmId)
-            .HasPrecision(15)
+        _ = builder.Property(e => e.DemographicId)
+            .HasPrecision(11)
             .ValueGeneratedNever()
-            .HasColumnName("ORACLE_HCM_ID");
+            .HasColumnName("DEMOGRAPHIC_ID");
 
         _ = builder.Property(b => b.KindId).HasColumnName("KIND_ID");
         _ = builder.Property(b => b.BeneficiaryContactId).HasColumnName("BENEFICIARY_CONTACT_ID");
