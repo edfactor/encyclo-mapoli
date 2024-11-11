@@ -136,9 +136,7 @@ pipelines:
           - step: *test-frontend
       - parallel:
           - step: *create-api-artifacts
-          - step: *create-frontend-artifact-qa
-          - step: *create-frontend-artifact-uat
-          #- step: *create-frontend-artifact-prod
+          - step: *create-frontend-artifact-qa          
            # Deployment Stage
       
       - step:
@@ -152,7 +150,9 @@ pipelines:
             - echo "Deploying application..."
             - $env:API_SERVER_QA = "appt23d"            
             - powershell .\scripts\webDeploy.ps1 QA $env:API_SERVER_QA
-      - step: *upgrade-database
+      - parallel:
+          - step: *upgrade-database
+          - step: *create-frontend-artifact-uat
       - step:
           name: "Application Deployment"
           runs-on:
@@ -164,7 +164,9 @@ pipelines:
             - echo "Deploying application..."
             - $env:API_SERVER_UAT = "appt24d"            
             - powershell .\scripts\webDeploy.ps1 UAT $env:API_SERVER_UAT
-  
+      #- step: *create-frontend-artifact-prod
+
+
     develop:
       - parallel:
           - step: *build-and-test-backend
