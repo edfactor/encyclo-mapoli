@@ -88,20 +88,38 @@ definitions:
       artifacts:
         - dist\**
       script:
-         - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
-         - ${env:ENV} = "uat"
-         - cd .\src\UI
-         - |
-           @"
-           registry=https://registry.npmjs.org/
-           smart-ui-library:registry=https://demoulas.jfrog.io/artifactory/api/npm/npm-smart-registry-local/
-           //demoulas.jfrog.io/artifactory/api/npm/npm-smart-registry-local/:_authToken=$env:JFROG_WORKSPACE_VARIABLE
-           "@ | Out-File -FilePath .npmrc -Encoding ASCII
-         - C:\nvm\v20.4.0\npm.cmd install --legacy-peer-deps;
-         - C:\nvm\v20.4.0\npm.cmd run build:${env:ENV}
-         - Copy-Item -Path ".\src\web.config" -Destination "..\..\src\UI\build"
-         - New-Item -Path "..\..\dist" -ItemType Directory
-         - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.${env:ENV}.zip" -Force   
+        # Set environment variables
+        - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
+        - ${env:ENV} = "uat"
+
+        # Navigate to the UI source directory
+        - cd .\src\UI
+
+        # Create and configure .npmrc file
+        - |
+            @"
+            registry=https://registry.npmjs.org/
+            smart-ui-library:registry=https://demoulas.jfrog.io/artifactory/api/npm/npm-smart-registry-local/
+            //demoulas.jfrog.io/artifactory/api/npm/npm-smart-registry-local/:_authToken=$env:JFROG_WORKSPACE_VARIABLE
+            "@ | Out-File -FilePath .npmrc -Encoding ASCII
+
+        # Install dependencies with legacy peer deps
+        - $env:NPM install --legacy-peer-deps
+
+        # Run the build process for the specified environment
+        - $env:NPM run build:${env:ENV}
+
+        # Copy the web.config file to the build directory
+        - Copy-Item -Path ".\src\web.config" -Destination "..\..\src\UI\build" -Force
+
+        # Ensure the dist directory exists before compressing
+        - if (!(Test-Path -Path "..\..\dist")) {
+            New-Item -Path "..\..\dist" -ItemType Directory
+            }
+
+        # Compress the build output into a zip file in the dist folder
+        - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.${env:ENV}.zip" -Force
+
 
     create-frontend-artifact-prod: &create-frontend-artifact-prod
       name: Create FrontEnd Artifacts (PROD)     
