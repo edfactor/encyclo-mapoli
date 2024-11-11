@@ -195,5 +195,5 @@ pipelines:
                         - upgrade-db
                         - drop-recreate-db
                         - import-from-ready                        
-        - step: *upgrade-database
+        - step: *upgrade-qa-database
 
