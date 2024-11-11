@@ -89,7 +89,6 @@ definitions:
         - dist\**
       script:
         # Set environment variables
-        - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
         - ${env:ENV} = "uat"
 
         # Navigate to the UI source directory
@@ -104,10 +103,10 @@ definitions:
             "@ | Out-File -FilePath .npmrc -Encoding ASCII
 
         # Install dependencies with legacy peer deps
-        - $env:NPM install --legacy-peer-deps
+        - C:\nvm\v20.4.0\npm.cmd install --legacy-peer-deps
 
         # Run the build process for the specified environment
-        - $env:NPM run build:${env:ENV}
+        - C:\nvm\v20.4.0\npm.cmd run build:${env:ENV}
 
         # Copy the web.config file to the build directory
         - Copy-Item -Path ".\src\web.config" -Destination "..\..\src\UI\build" -Force
