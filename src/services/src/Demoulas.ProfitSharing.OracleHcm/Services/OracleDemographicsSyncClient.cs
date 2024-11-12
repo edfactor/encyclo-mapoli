@@ -9,14 +9,14 @@ using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services;
 
-internal sealed class OracleDemographicsService
+internal sealed class OracleDemographicsSyncClient
 {
     private readonly HttpClient _httpClient;
     private readonly OracleHcmConfig _oracleHcmConfig;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
 
 
-    public OracleDemographicsService(HttpClient httpClient, OracleHcmConfig oracleHcmConfig)
+    public OracleDemographicsSyncClient(HttpClient httpClient, OracleHcmConfig oracleHcmConfig)
     {
         _httpClient = httpClient;
         _oracleHcmConfig = oracleHcmConfig;

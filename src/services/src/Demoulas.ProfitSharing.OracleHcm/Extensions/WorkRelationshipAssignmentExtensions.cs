@@ -68,6 +68,7 @@ public static byte GetPayFrequency(this WorkRelationshipAssignment work)
         {
             "PT" => partTime,
             "FT" => fullTimeStraightSalary,
+            "FR" => fullTimeStraightSalary, // Full Time Regular
             _ => char.MinValue
         };
 

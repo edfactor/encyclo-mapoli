@@ -37,8 +37,6 @@ catch (Exception ex)
 }
 
 
-
-
 var api = builder.AddProject<Projects.Demoulas_ProfitSharing_Api>("demoulas-profitsharing-api");
 
 builder.AddNpmApp("demoulas-profitsharing-ui", "../../../ui/", "dev")
