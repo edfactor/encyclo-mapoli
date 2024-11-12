@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -130,17 +131,33 @@ public class FrozenReportService : IFrozenReportService
     public async Task<ReportResponseBase<ProfitSharingDistributionsByAge>> GetDistributionsByAgeYear(ProfitYearRequest req,
         CancellationToken cancellationToken = default)
     {
-        var result = _dataContextFactory.UseReadOnlyContext(context =>
+        List<byte> codes = new List<byte>
         {
-            var distributions = context.Demographics
-                .Include(d => d.PayProfits
-                    .Where(pp=> pp.ProfitYear == req.ProfitYear && pp.));
+            ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal,
+            ProfitCode.Constants.OutgoingDirectPayments,
+            ProfitCode.Constants.Outgoing100PercentVestedPayment
+        };
+
+        _ = await _dataContextFactory.UseReadOnlyContext(ctx =>
+        {
+            return (from pd in ctx.ProfitDetails
+                join d in ctx.Demographics on pd.Ssn equals d.Ssn
+                where pd.ProfitYear == req.ProfitYear && codes.Contains(pd.ProfitCodeId)
+                let age = d.DateOfBirth.Age()
+                let employmentType = d.EmploymentTypeId == EmploymentType.Constants.PartTime ? "PartTime" : "FullTime"
+                group new { d.BadgeNumber, pd.Forfeiture } by new { age, employmentType } into g
+                select new
+                {
+                    Age = g.Key.age,
+                    EmploymentType = g.Key.employmentType,
+                    BadgeNumberCount = g.Select(x => x.BadgeNumber).Distinct().Count(),
+                    ForfeitureCount = g.Sum(x => x.Forfeiture)
+                }).ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
         });
+
         return new ReportResponseBase<ProfitSharingDistributionsByAge>
         {
-            ReportName = $"PROFIT SHARING DISTRIBUTIONS BY AGE FOR {req.ProfitYear}",
-            ReportDate = DateTimeOffset.UtcNow,
-            Response = new PaginatedResponseDto<ProfitSharingDistributionsByAge> { Items = distributions, TotalCount = distributions.Count }
+            ReportName = "ABC", ReportDate = DateTimeOffset.Now, Response = new PaginatedResponseDto<ProfitSharingDistributionsByAge>(req)
         };
     }
 }
