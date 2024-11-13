@@ -3,6 +3,7 @@ using System;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 
@@ -11,9 +12,11 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    partial class ProfitSharingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241113150339_RenameBadgeNumberToEmployeeId")]
+    partial class RenameBadgeNumberToEmployeeId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -24520,6 +24523,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("AMOUNT");
 
+                    b.Property<int>("BadgeNumber")
+                        .HasPrecision(7)
+                        .HasColumnType("NUMBER(7)")
+                        .HasColumnName("BADGE_NUMBER");
+
                     b.Property<int>("BeneficiaryContactId")
                         .HasColumnType("NUMBER(10)")
                         .HasColumnName("BENEFICIARY_CONTACT_ID");
@@ -24538,11 +24546,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasPrecision(9, 2)
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("EARNINGS");
-
-                    b.Property<int>("EmployeeId")
-                        .HasPrecision(7)
-                        .HasColumnType("NUMBER(7)")
-                        .HasColumnName("EMPLOYEE_ID");
 
                     b.Property<string>("KindId")
                         .HasColumnType("NVARCHAR2(1)")
@@ -24580,8 +24583,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasIndex("KindId")
                         .HasDatabaseName("IX_BENEFICIARY_KINDID");
 
-                    b.HasIndex(new[] { "EmployeeId" }, "IX_EMPLOYEE_ID")
-                        .HasDatabaseName("IX_BENEFICIARY_EMPLOYEEID");
+                    b.HasIndex(new[] { "BadgeNumber" }, "IX_BadgeNumber")
+                        .HasDatabaseName("IX_BENEFICIARY_BADGENUMBER");
 
                     b.HasIndex(new[] { "PsnSuffix" }, "IX_PsnSuffix")
                         .HasDatabaseName("IX_BENEFICIARY_PSNSUFFIX");

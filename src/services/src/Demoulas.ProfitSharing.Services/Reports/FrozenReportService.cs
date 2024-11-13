@@ -52,10 +52,9 @@ public class FrozenReportService : IFrozenReportService
                     join fLj in forfeitures on d.Id equals fLj.DemographicId into fTmp
                     from f in fTmp.DefaultIfEmpty()
                     where pp.ProfitYear == req.ProfitYear
-                    orderby d.BadgeNumber
-                    select new ForfeituresAndPointsForYearResponse()
-                    {
-                        EmployeeBadgeNumber = d.BadgeNumber,
+                    orderby d.EmployeeId
+                    select new ForfeituresAndPointsForYearResponse() {
+                        EmployeeBadgeNumber = d.EmployeeId,
                         EmployeeName = d.ContactInfo.FullName,
                         EmployeeSsn = d.Ssn.ToString(),
                         Forfeitures = f.Forfeitures,
@@ -70,12 +69,12 @@ public class FrozenReportService : IFrozenReportService
                 var currentYear = await (from pd in ctx.ProfitDetails
                     join d in ctx.Demographics on pd.Ssn equals d.Ssn
                     where pd.ProfitYear == req.ProfitYear
-                          && badges.Contains(d.BadgeNumber)
-                    group pd by new { pd.Ssn, d.BadgeNumber }
+                          && badges.Contains(d.EmployeeId)
+                    group pd by new { pd.Ssn, d.EmployeeId }
                     into pd_g
                     select new
                     {
-                        pd_g.Key.BadgeNumber,
+                        pd_g.Key.EmployeeId,
                         pd_g.Key.Ssn,
                         loan1Total =
                             pd_g.Where(x =>
@@ -90,14 +89,14 @@ public class FrozenReportService : IFrozenReportService
 
                 var lastYearPayProfits = await (from pp in ctx.PayProfits
                         join d in ctx.Demographics on pp.DemographicId equals d.Id
-                        where pp.ProfitYear == req.ProfitYear - 1 && badges.Contains(d.BadgeNumber)
+                        where pp.ProfitYear == req.ProfitYear - 1 && badges.Contains(d.EmployeeId)
                                                                   && (pp.HoursExecutive + pp.CurrentHoursYear) >= 1000
-                        select new { d.BadgeNumber, pp.CurrentIncomeYear }
+                        select new { d.EmployeeId, pp.CurrentIncomeYear }
                     ).ToListAsync(cancellationToken);
 
                 foreach (var rec in recs.Results.Where(rec => totals.ContainsKey((int)rec.EmployeeBadgeNumber)))
                 {
-                    var cy = currentYear.Find(x => x.BadgeNumber == rec.EmployeeBadgeNumber);
+                    var cy = currentYear.Find(x => x.EmployeeId == rec.EmployeeBadgeNumber);
                     if (cy != default)
                     {
                         var points = (totals[(int)rec.EmployeeBadgeNumber].TotalContributions +
@@ -109,7 +108,7 @@ public class FrozenReportService : IFrozenReportService
                         rec.EarningPoints = Convert.ToInt16(Math.Round(points / 100, 0, MidpointRounding.AwayFromZero));
                     }
 
-                    var lypp = lastYearPayProfits.Find(x => x.BadgeNumber == rec.EmployeeBadgeNumber);
+                    var lypp = lastYearPayProfits.Find(x => x.EmployeeId == rec.EmployeeBadgeNumber);
                     if (lypp != null)
                     {
                         rec.ForfeitPoints = Convert.ToInt16(Math.Round((lypp.CurrentIncomeYear) / 100, 0, MidpointRounding.AwayFromZero));
@@ -145,12 +144,12 @@ public class FrozenReportService : IFrozenReportService
                 where pd.ProfitYear == req.ProfitYear && codes.Contains(pd.ProfitCodeId)
                 let age = d.DateOfBirth.Age()
                 let employmentType = d.EmploymentTypeId == EmploymentType.Constants.PartTime ? "PartTime" : "FullTime"
-                group new { d.BadgeNumber, pd.Forfeiture } by new { age, employmentType } into g
+                group new { d.EmployeeId, pd.Forfeiture } by new { age, employmentType } into g
                 select new
                 {
                     Age = g.Key.age,
                     EmploymentType = g.Key.employmentType,
-                    BadgeNumberCount = g.Select(x => x.BadgeNumber).Distinct().Count(),
+                    BadgeNumberCount = g.Select(x => x.EmployeeId).Distinct().Count(),
                     ForfeitureCount = g.Sum(x => x.Forfeiture)
                 }).ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
         });

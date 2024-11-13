@@ -24,7 +24,7 @@ BEGIN
         INCOME_EXECUTIVE,
         POINTS_EARNED)
     SELECT
-        (select ID from DEMOGRAPHIC where BADGE_NUMBER = PAYPROF_BADGE) AS DEMOGRAPHIC_ID,
+        (select ID from DEMOGRAPHIC where EMPLOYEE_ID = PAYPROF_BADGE) AS DEMOGRAPHIC_ID,
         this_year AS PROFIT_YEAR,
         PY_PH AS CURRENT_HOURS_YEAR,
         PY_PD AS CURRENT_INCOME_YEAR,
@@ -45,7 +45,7 @@ BEGIN
         NVL(PY_PD_EXEC, 0) AS INCOME_EXECUTIVE,
         0 -- Field in current system is for prior year, not current
     FROM PROFITSHARE.PAYPROFIT
-    where PAYPROF_BADGE in ( select BADGE_NUMBER from DEMOGRAPHIC  );
+    where PAYPROF_BADGE in ( select EMPLOYEE_ID from DEMOGRAPHIC  );
 
     -- Insert LAST YEARS data into the PAY_PROFIT table
     INSERT INTO PAY_PROFIT
@@ -66,7 +66,7 @@ BEGIN
         INCOME_EXECUTIVE,
         POINTS_EARNED)
     SELECT
-        (select ID from DEMOGRAPHIC where BADGE_NUMBER = PAYPROF_BADGE) AS DEMOGRAPHIC_ID,
+        (select ID from DEMOGRAPHIC where EMPLOYEE_ID = PAYPROF_BADGE) AS DEMOGRAPHIC_ID,
         last_year AS PROFIT_YEAR,
         PY_PH_LASTYR AS CURRENT_HOURS_YEAR,
         PY_PD_LASTYR AS CURRENT_INCOME_YEAR,
@@ -87,6 +87,6 @@ BEGIN
         0 AS INCOME_EXECUTIVE, -- History not previously tracked
         PY_PROF_POINTS  as POINTS_EARNED
     FROM PROFITSHARE.PAYPROFIT
-    where PAYPROF_BADGE in ( select BADGE_NUMBER from DEMOGRAPHIC  );
+    where PAYPROF_BADGE in ( select EMPLOYEE_ID from DEMOGRAPHIC  );
 END;
 COMMIT ;

@@ -199,7 +199,7 @@ public sealed class TotalService : ITotalService
                 {
                     var rslt = await (from t in TotalVestingBalance(ctx, profitYear, calendarInfo.FiscalEndDate)
                                       join d in ctx.Demographics on t.Ssn equals d.Ssn
-                                      where d.BadgeNumber == employeeId
+                                      where d.EmployeeId == employeeId
                                       select new BalanceEndpointResponse { Id = id, Ssn = t.Ssn.MaskSsn(), CurrentBalance = t.CurrentBalance, Etva = t.Etva, TotalDistributions = t.TotalDistributions, VestedBalance = t.VestedBalance, VestingPercent = t.VestingPercent }).FirstOrDefaultAsync();
                     return rslt;
                 });
