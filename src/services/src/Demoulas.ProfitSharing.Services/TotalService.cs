@@ -1,10 +1,25 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Services;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Services;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using FastEndpoints;
+using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services;
-public sealed class TotalService
+
+public sealed class TotalService : ITotalService
 {
+    private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
+    private readonly ICalendarService _calendarService;
+
+    public TotalService(IProfitSharingDataContextFactory profitSharingDataContextFactory, ICalendarService calendarService)
+    {
+        _profitSharingDataContextFactory = profitSharingDataContextFactory;
+        _calendarService = calendarService;
+    }
     public IQueryable<ParticipantTotalDto> GetTotalBalanceSet(IProfitSharingDbContext ctx, short profitYear)
     {
         var sumAllFieldProfitCodeTypes = new[] {
@@ -21,8 +36,8 @@ public sealed class TotalService
                 select new ParticipantTotalDto
                 {
                     Ssn = pd_g.Key,
-                    Total = pd_g.Sum(x=> x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment ? x.Forfeiture * -1 : //Just look at forfeiture
-                                          sumAllFieldProfitCodeTypes.Contains(x.ProfitCodeId) ? - x.Forfeiture + x.Contribution + x.Earnings : //Invert forfeiture, and add columns
+                    Total = pd_g.Sum(x => x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment ? x.Forfeiture * -1 : //Just look at forfeiture
+                                          sumAllFieldProfitCodeTypes.Contains(x.ProfitCodeId) ? -x.Forfeiture + x.Contribution + x.Earnings : //Invert forfeiture, and add columns
                                           x.Contribution + x.Earnings + x.Forfeiture) //Just add the columns
                 });
 #pragma warning restore S3358 // Ternary operators should not be nested
@@ -138,20 +153,66 @@ public sealed class TotalService
             select new ParticipantTotalRatioDto()
             {
                 Ssn = db.Ssn,
-                Ratio = db.FromBeneficiary == 1 ? 1.0 :
-                        db.DateOfBirth <= BirthDate65 && (db.TerminationDate == null || db.TerminationDate < BeginningOfYear) ? 1 :
-                        db.EnrollmentId == 3 || db.EnrollmentId == 4 ? 1 :
-                        db.TerminationCodeId == 'Z' ? 1 :
-                        db.ZeroContributionReasonId == 6 ? 1 :
-                        (db.EnrollmentId == 2 ? 1 : 0) + (db.Hours >= 1000 ? 1 : 0) + db.Years < 3 ? 0 :
-                        (db.EnrollmentId == 2 ? 1 : 0) + (db.Hours >= 1000 ? 1 : 0) + db.Years == 3 ? .2 :
-                        (db.EnrollmentId == 2 ? 1 : 0) + (db.Hours >= 1000 ? 1 : 0) + db.Years == 4 ? .4 :
-                        (db.EnrollmentId == 2 ? 1 : 0) + (db.Hours >= 1000 ? 1 : 0) + db.Years == 5 ? .6 :
-                        (db.EnrollmentId == 2 ? 1 : 0) + (db.Hours >= 1000 ? 1 : 0) + db.Years == 6 ? .8 :
-                        (db.EnrollmentId == 2 ? 1 : 0) + (db.Hours >= 1000 ? 1 : 0) + db.Years > 6 ? 1 : 0
+                Ratio = db.FromBeneficiary == 1 ? 1.0m :
+                        db.DateOfBirth <= BirthDate65 && (db.TerminationDate == null || db.TerminationDate < BeginningOfYear) ? 1m :
+                        db.EnrollmentId == 3 || db.EnrollmentId == 4 ? 1m :
+                        db.TerminationCodeId == 'Z' ? 1m :
+                        db.ZeroContributionReasonId == 6 ? 1m :
+                        (db.EnrollmentId == 2 ? 1 : 0) + (db.Hours >= 1000 ? 1 : 0) + db.Years < 3 ? 0m :
+                        (db.EnrollmentId == 2 ? 1 : 0) + (db.Hours >= 1000 ? 1 : 0) + db.Years == 3 ? .2m :
+                        (db.EnrollmentId == 2 ? 1 : 0) + (db.Hours >= 1000 ? 1 : 0) + db.Years == 4 ? .4m :
+                        (db.EnrollmentId == 2 ? 1 : 0) + (db.Hours >= 1000 ? 1 : 0) + db.Years == 5 ? .6m :
+                        (db.EnrollmentId == 2 ? 1 : 0) + (db.Hours >= 1000 ? 1 : 0) + db.Years == 6 ? .8m :
+                        (db.EnrollmentId == 2 ? 1 : 0) + (db.Hours >= 1000 ? 1 : 0) + db.Years > 6 ? 1m : 0
             }
         );
 #pragma warning restore S3358 // Ternary operators should not be nested
 #pragma warning restore S1244 // Floating point numbers should not be tested for equality
+    }
+
+    public IQueryable<ParticipantTotalVestingBalanceDto> TotalVestingBalance(IProfitSharingDbContext ctx, short profitYear, DateOnly asOfDate)
+    {
+        return (from b in GetTotalBalanceSet(ctx, profitYear)
+                join e in GetTotalEtva(ctx, profitYear) on b.Ssn equals e.Ssn
+                join d in GetTotalDistributions(ctx, profitYear) on b.Ssn equals d.Ssn
+                join v in GetVestingRatio(ctx, profitYear, asOfDate) on e.Ssn equals v.Ssn
+                select new ParticipantTotalVestingBalanceDto
+                {
+                    Ssn = e.Ssn,
+                    CurrentBalance = b.Total,
+                    Etva = e.Total,
+                    TotalDistributions = d.Total,
+                    VestingPercent = v.Ratio,
+                    VestedBalance = ((b.Total + d.Total - e.Total) * v.Ratio) + e.Total - d.Total
+                }
+        );
+    }
+
+    public async Task<BalanceEndpointResponse?> GetVestingBalanceForSingleMember(SearchBy searchBy, string id, short profitYear)
+    {
+        var calendarInfo = await _calendarService.GetYearStartAndEndAccountingDates(profitYear);
+        switch (searchBy)
+        {
+            case SearchBy.EmployeeId:
+                var employeeId = Convert.ToInt32(id);
+                return await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
+                {
+                    var rslt = await (from t in TotalVestingBalance(ctx, profitYear, calendarInfo.FiscalEndDate)
+                                      join d in ctx.Demographics on t.Ssn equals d.Ssn
+                                      where d.BadgeNumber == employeeId
+                                      select new BalanceEndpointResponse { Id = id, Ssn = t.Ssn.MaskSsn(), CurrentBalance = t.CurrentBalance, Etva = t.Etva, TotalDistributions = t.TotalDistributions, VestedBalance = t.VestedBalance, VestingPercent = t.VestingPercent }).FirstOrDefaultAsync();
+                    return rslt;
+                });
+
+            default: //SSN
+                var ssn = Convert.ToInt64(id);
+                return await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
+                {
+                    var rslt = await (from t in TotalVestingBalance(ctx, profitYear, calendarInfo.FiscalEndDate) where t.Ssn == ssn 
+                                      select new BalanceEndpointResponse { Id = id, Ssn = t.Ssn.MaskSsn(), CurrentBalance = t.CurrentBalance, Etva = t.Etva, TotalDistributions = t.TotalDistributions, VestedBalance =  t.VestedBalance, VestingPercent = t.VestingPercent}).FirstOrDefaultAsync();
+                    return rslt;
+                });
+                
+        }
     }
 }

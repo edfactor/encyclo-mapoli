@@ -26,6 +26,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IExecutiveHoursAndDollarsService, ExecutiveHoursAndDollarsService>();
         _ = builder.Services.AddScoped<IGetEligibleEmployeesService, GetEligibleEmployeesService>();
         _ = builder.Services.AddScoped<IMilitaryAndRehireService, MilitaryAndRehireService>();
+        _ = builder.Services.AddScoped<ITotalService, TotalService>();
         _ = builder.Services.AddScoped<IWagesService, WagesService>();
         
         _ = builder.Services.AddScoped<ContributionService>();
