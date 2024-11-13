@@ -34,9 +34,15 @@ public sealed class PayClassificationHostedService : BaseCacheHostedService<Look
 
     private async Task<IEnumerable<LookupTableCache<byte>>> GetAllPayClassifications(CancellationToken cancellationToken)
     {
-        return await _contextFactory.UseReadOnlyContext(func: context =>
+        return await _contextFactory.UseReadOnlyContext(func: async context =>
         {
-            return context.PayClassifications
+            bool canConnect = await context.Database.CanConnectAsync(cancellationToken);
+            if (!canConnect)
+            {
+                return [];
+            }
+
+            return await context.PayClassifications
                 .Select(selector: c => new LookupTableCache<byte>
                 {
                     Id = c.Id,
