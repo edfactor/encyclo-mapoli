@@ -10,12 +10,12 @@ public class PAY444
     string DAEMON_DISP_PROG;
     string DAEMON_DISP_MSG;
     string DAEMON_DISP_DISPLAY = "Dummy";
-    string? DAEMON_ACCEPT_PROG = "pay444";
+    string? DAEMON_ACCEPT_PROG;
 
     Dictionary<int, int> META_SW = new Dictionary<int, int>();
 
     string SPACES = " ";
-    CLIENT_TOT client_tot = new();
+    ClientTot client_tot = new();
     CONSOLE_RESPONSE console_response = new();
     CONSOLE_RESPONSE_MASKS console_response_masks = new();
     DEM_REC dem_rec = new();
@@ -26,10 +26,8 @@ public class PAY444
     HEADER_2 header_2 = new();
     HEADER_3 header_3 = new();
     HOLD_KEY hold_key = new();
-    INDATEX indatex = new();
     INPUT_DATES input_dates = new();
     INTERMEDIATE_VALUES intermediate_values = new();
-    OPTION_LINK option_link = new();
     PAYBEN_REC payben_rec = new();
     PAYBEN1_REC payben1_rec = new();
     PAYPROF_REC payprof_rec = new();
@@ -42,11 +40,9 @@ public class PAY444
     REPORT_LINE_2 report_line_2 = new();
     RERUN_TOT rerun_tot = new();
     SD_PRFT sd_prft = new();
-    SOC_SEC_REC soc_sec_rec = new();
     TOTAL_HEADER_1 total_header_1 = new();
     TOTAL_HEADER_2 total_header_2 = new();
     TOTAL_HEADER_3 total_header_3 = new();
-    WORK_DATEX work_datex = new();
     WS_CLIENT_TOTALS ws_client_totals = new();
     WS_COMPUTE_TOTALS ws_compute_totals = new();
     WS_COUNTERS ws_counters = new();
@@ -54,7 +50,6 @@ public class PAY444
     WS_ENDING_BALANCE ws_ending_balance = new();
     WS_GRAND_TOTALS ws_grand_totals = new();
     WS_INDICATORS ws_indicators = new();
-    WS_KEY ws_key = new();
     WS_MAXCONT_TOTALS ws_maxcont_totals = new();
     WS_PAYPROFIT ws_payprofit = new();
     WS_PROFIT_YEAR ws_profit_year = new();
@@ -84,27 +79,12 @@ public class PAY444
     //- -___- COPY X_FD_PAYBEN.
     //- -___- END of COPY X_FD_PAYBEN.
     //- 77  IDS2_CURRENT             PIC X(7) IS GLOBAL.
-    public string? IDS2_CURRENT { get; set; }
     //- 77  IDS2_REC_NAME            PIC X(30) IS GLOBAL.
-    public string? IDS2_REC_NAME { get; set; }
     //- 77  IDS2_SET_NAME            PIC X(30) IS GLOBAL.
-    public string? IDS2_SET_NAME { get; set; }
-    //- 77  IDS2_KEY_NAME            PIC X(30) IS GLOBAL.
-    public string? IDS2_KEY_NAME { get; set; }
-    //- 77  IDS2_AREA_NAME           PIC X(30) IS GLOBAL.
-    public string? IDS2_AREA_NAME { get; set; }
-    //- 77  IDS2_ARGUMENTS           PIC X(3100) IS GLOBAL.
-    public string? IDS2_ARGUMENTS { get; set; }
-    //- 77  IDS2_LIST_OF_SETS        PIC X(3100) IS GLOBAL.
-    public string? IDS2_LIST_OF_SETS { get; set; }
-    //- 77  DB_CONDITION             PIC 9 VALUE ZERO IS GLOBAL.
-    public long DB_CONDITION { get; set; }
     //- 88 DB_CONDITION_TRUE     VALUE 0.
     //- 88 DB_CONDITION_FALSE    VALUE 1.
     //- 77  IDS2_NAVIGATION_MODE     PIC X(30) IS GLOBAL.
-    public string? IDS2_NAVIGATION_MODE { get; set; }
     //- 77  RELATIVE_POS             PIC S9(9) IS GLOBAL.
-    public long RELATIVE_POS { get; set; }
 
     //- -___- COPY UWA_REC_profit_ss_detail.
 
@@ -329,7 +309,7 @@ public class PAY444
 
     //- SELECT PAYPROFIT_FILE ASSIGN "PAYPROF1"
     //- ORGANIZATION LINE SEQUENTIAL.
-    ScaffoldFile PAYPROFIT_FILE = new ScaffoldFile("PAYPROF1");
+    PayProfRecTableHelper PAYPROFIT_FILE = new PayProfRecTableHelper();
 
     //- SELECT PAYBEN1 ASSIGN "PAYBEN1"
     //- ORGANIZATION LINE SEQUENTIAL.
@@ -337,7 +317,6 @@ public class PAY444
 
     //- SELECT PRINT_FILE ASSIGN LINE ADVANCING "P1"
     //- ORGANIZATION LINE SEQUENTIAL.
-    ScaffoldFile PRINT_FILE = new ScaffoldFile("P1");
 
     //- SELECT PRINT_FILE2 ASSIGN LINE ADVANCING "P2"
     //- ORGANIZATION LINE SEQUENTIAL.
@@ -369,8 +348,6 @@ public class PAY444
     //- LABEL RECORDS ARE STANDARD
     //- DATA RECORD IS P_REC2.
     //- 01  P_REC2                       PIC X(136).
-    public string? P_REC2 { get; set; }
-
     //- /
 
     //- FD PROFIT
@@ -389,10 +366,6 @@ public class PAY444
     //- COPY IDSII_TECH_FIELDS.
 
     //- 01 UFAS_OPEN_MODE PIC X(6).
-    public string? UFAS_OPEN_MODE { get; set; }
-    //- 01 UFAS_ALT_KEY_NAME PIC X(20).
-    public string? UFAS_ALT_KEY_NAME { get; set; }
-
     //- COPY X_FD_PAYBEN.
     //- COPY X_FD_PAYPROFIT.
     //- COPY X_FD_DEMOGRAPHICS.
@@ -414,7 +387,6 @@ public class PAY444
     public long AGE { get; set; }
     //- 01  WORK_CYMD REDEFINES WORK_DATEX PIC 9(8).
     //- 01  WS1_DOB               PIC 9(08) VALUE IS ZEROES.
-    public long WS1_DOB { get; set; }
     //- 01  FIRST_REC                                PIC 9    VALUE 0.
     public long FIRST_REC { get; set; }
     //- 01  FIRST_PAYBEN_REC                         PIC 9    VALUE 0.
@@ -424,13 +396,11 @@ public class PAY444
     //- 01  HOLD_PAYSSN                              PIC 9(9) VALUE 0.
     public long HOLD_PAYSSN { get; set; }
     //- 01  HOLD_KEY1                                PIC 9(9) VALUE 0.
-    public long HOLD_KEY1 { get; set; }
     //- 01  HOLD_KEY                                 PIC 9(7) VALUE 0.
     public long HOLD_KEY { get; set; }
     //- 01  INVALID_CNT                              PIC 9(6) VALUE 0.
     public long INVALID_CNT { get; set; }
     //- 01  WK_PROF_POINTS                           PIC S9(5) VALUE 0.
-    public long WK_PROF_POINTS { get; set; }
     //- 01  HOLD_EFF_DATE        PIC 9(4)          VALUE ZERO.
     public long HOLD_EFF_DATE { get; set; }
 
@@ -438,7 +408,6 @@ public class PAY444
     // also have ws_profit_year, so boot this -->    public decimal WS_PROFIT_YEAR { get; set; }
 
     //- 01  HOLD_PROF_FORF     PIC S9(6)V99.
-    public decimal HOLD_PROF_FORF { get; set; }
     //- COPY GAC_WS.
 
     //- 01  ws_temp_psn                  pic x(11)      value "00000000000".
@@ -488,7 +457,9 @@ public class PAY444
     //- 015_MAIN_PROCESSING.
     public void m015MainProcessing(Dictionary<int, int> META_SW, string ETEXT)
     {
+        // This connection is bound late.
         PAYBEN1.Connection = connection;
+        PAYPROFIT_FILE.connection = connection;
 
         this.META_SW = META_SW;
         //- set META_CHKPT_TAB_FCD_PTR to address of TAB_FCD.
@@ -515,17 +486,11 @@ public class PAY444
         //- OPEN INPUT PAYBEN1.
         //- OPEN OUTPUT PROFIT
         //- MOVE "I_O" TO UFAS_OPEN_MODE
-        UFAS_OPEN_MODE = "I_O";
         //- CALL "OPEN_PAYPROFIT" USING PAYPROFIT_FILE_STATUS UFAS_OPEN_MODE.
-        OPEN_PAYPROFIT(PAYPROFIT_FILE_STATUS, UFAS_OPEN_MODE, PAYPROFIT_FILE, payprof_rec1);
         //- CALL "OPEN_PAYBEN" USING PAYBEN_FILE_STATUS UFAS_OPEN_MODE.
-        OPEN_PAYBEN(PAYBEN_FILE_STATUS, UFAS_OPEN_MODE);
         //- MOVE "INPUT" TO UFAS_OPEN_MODE
-        UFAS_OPEN_MODE = "INPUT";
         //- CALL "OPEN_DEMO_PROFSHARE" USING DEMO_PROFSHARE_FILE_STATUS
-        OPEN_DEMO_PROFSHARE(DEMO_PROFSHARE_FILE_STATUS, UFAS_OPEN_MODE);
         //- PERFORM GAC_CALL.
-        mGacCall();
         //- MOVE "0000000" TO DB_STATUS.
         DB_STATUS = 0;
         //- MOVE "PAY444" TO DAEMON_DISP_PROG
@@ -573,31 +538,9 @@ public class PAY444
         //- EXIT PROGRAM.
     }
 
-    List<SD_PRFT> sd_prfts = new();
-
-    private void OPEN_PAYPROFIT(string? pAYPROFIT_FILE_STATUS, string uFAS_OPEN_MODE, ScaffoldFile pAYPROFIT_FILE, PAYPROF_REC pAYPROFIT_REC)
-    {
-        pAYPROFIT_FILE.connection = connection;
-    }
-
     private void DISPCONS(object _)
     {
         Console.WriteLine(DAEMON_DISP_MSG);
-    }
-
-    private void mGacCall()
-    {
-        Console.WriteLine("------- do some gac locking?");
-    }
-
-    private void OPEN_DEMO_PROFSHARE(string? dEMO_PROFSHARE_FILE_STATUS, string uFAS_OPEN_MODE)
-    {
-
-    }
-
-    private void OPEN_PAYBEN(string? pAYBEN_FILE_STATUS, string uFAS_OPEN_MODE)
-    {
-
     }
 
 
@@ -779,6 +722,8 @@ public class PAY444
         DISPCONS(DAEMON_DISP_DISPLAY);
         //- MOVE "PAY444" TO DAEMON_ACCEPT_PROG
         DAEMON_ACCEPT_PROG = "PAY444";
+        Console.WriteLine(DAEMON_ACCEPT_PROG); // To Prevent compiler warning BOBH
+        Console.WriteLine(DAEMON_DISP_PROG); // ditto
         //- CALL "ACCCONS" USING DAEMON_ACCEPT_MSGQ
         ACCCONS();
         //- MOVE DAEMON_ACCEPT_BACK TO EFFECTIVE_DATE.
@@ -2331,7 +2276,6 @@ public class PAY444
         //- MOVE PYBEN_PAYSSN1 TO PAYPROF_SSN OF payprof_rec.
         payprof_rec.PAYPROF_SSN = payben1_rec.PYBEN_PAYSSN1;
         //- MOVE "PAYPROF_SSN_KEY" TO UFAS_ALT_KEY_NAME
-        UFAS_ALT_KEY_NAME = "PAYPROF_SSN_KEY";
         //- CALL "READ_ALT_KEY_PAYPROFIT" USING PAYPROFIT_FILE_STATUS
         PAYPROFIT_FILE_STATUS = READ_ALT_KEY_PAYPROFIT(payprof_rec);
         //- UFAS_ALT_KEY_NAME payprof_rec.
@@ -3351,12 +3295,10 @@ public class PAY444
         //- *     display "at 510-GET-DETAILS ["  SOC-SEC-NUMBER "]".
 
         //- MOVE "FIRST" TO IDS2_NAVIGATION_MODE
-        IDS2_NAVIGATION_MODE = "FIRST";
         //- MOVE "PR_DET" TO IDS2_REC_NAME
-        IDS2_REC_NAME = "PR_DET";
         //- CALL "MSTR_FIND_WITHIN_PR_DET_S" USING IDS2_NAVIGATION_MODE
         //- IDS2_REC_NAME.
-        DB_STATUS = MSTR_FIND_WITHIN_PR_DET_S(IDS2_NAVIGATION_MODE, IDS2_REC_NAME);
+        DB_STATUS = MSTR_FIND_WITHIN_PR_DET_S();
         //- IF DB_STATUS == 0
         if (DB_STATUS == 0)
         {
@@ -3369,12 +3311,9 @@ public class PAY444
         }
 
         //- MOVE "FIRST" TO IDS2_NAVIGATION_MODE
-        IDS2_NAVIGATION_MODE = "FIRST";
-        //- MOVE "PR_SD" TO IDS2_REC_NAME
-        IDS2_REC_NAME = "PR_SD";
         //- CALL "MSTR_FIND_WITHIN_PR_SS_D_S" USING IDS2_NAVIGATION_MODE
         //- IDS2_REC_NAME.
-        DB_STATUS = MSTR_FIND_WITHIN_PR_SS_D_S(IDS2_NAVIGATION_MODE, IDS2_REC_NAME);
+        DB_STATUS = MSTR_FIND_WITHIN_PR_SS_D_S();
         //- IF DB_STATUS == 0
         if (DB_STATUS == 0)
         {
@@ -3391,7 +3330,7 @@ public class PAY444
         //- EXIT.
     }
 
-    private int MSTR_FIND_WITHIN_PR_SS_D_S(string iDS2_NAVIGATION_MODE, string iDS2_REC_NAME)
+    private int MSTR_FIND_WITHIN_PR_SS_D_S()
     {
         // throw new NotImplementedException();
         Debug.WriteLine("WARNING: READING PROFIT_SS_DETAILS IS DISABLED.");
@@ -3400,7 +3339,7 @@ public class PAY444
 
     private ProfitDetailTableHelper profitDetailTable = null;
 
-    private int MSTR_FIND_WITHIN_PR_DET_S(string iDS2_NAVIGATION_MODE, string iDS2_REC_NAME)
+    private int MSTR_FIND_WITHIN_PR_DET_S()
     {
         if (profitDetailTable == null || profitDetailTable.ssn != SOC_SEC_NUMBER)
         {
@@ -3421,7 +3360,6 @@ public class PAY444
     l520_TOTAL_UP_DETAILS:
         //- *        display "at 520-TOTAL-UP-DETAILS".
         //- MOVE SPACES TO IDS2_REC_NAME
-        IDS2_REC_NAME = SPACES;
         //- CALL "MSTR_GET_REC" USING IDS2_REC_NAME.
         // not needed?   DB_STATUS = MSTR_GET_REC(IDS2_REC_NAME);
 
@@ -3512,12 +3450,10 @@ public class PAY444
           //- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         //- MOVE "NEXT" TO IDS2_NAVIGATION_MODE
-        IDS2_NAVIGATION_MODE = "NEXT";
         //- MOVE "PR_DET" TO IDS2_REC_NAME
-        IDS2_REC_NAME = "PR_DET";
         //- CALL "MSTR_FIND_WITHIN_PR_DET_S" USING IDS2_NAVIGATION_MODE
         //- IDS2_REC_NAME.
-        DB_STATUS = MSTR_FIND_WITHIN_PR_DET_S(IDS2_NAVIGATION_MODE, IDS2_REC_NAME);
+        DB_STATUS = MSTR_FIND_WITHIN_PR_DET_S();
 
         //- IF DB_STATUS == 0
         if (DB_STATUS == 0)
@@ -3536,9 +3472,8 @@ public class PAY444
     l530_TOTAL_UP_SS_DETAILS:
         //- *     display "at 530-TOTAL-UP-SS-DETAILS".
         //- MOVE SPACES TO IDS2_REC_NAME
-        IDS2_REC_NAME = SPACES;
         //- CALL "MSTR_GET_REC" USING IDS2_REC_NAME.
-        // NOP, MSTR_GET_REC(IDS2_REC_NAME); 
+        // MSTR_GET_REC(IDS2_REC_NAME); 
 
         //- MOVE PROFIT_SS_YEAR TO ws_profit_year.
         ws_profit_year.WS_PROFIT_YEAR_FIRST_4 = (long) profit_ss_detail.PROFIT_SS_YEAR;
@@ -3558,12 +3493,10 @@ public class PAY444
             } //- END-IF
         } //- END-IF.
           //- MOVE "NEXT" TO IDS2_NAVIGATION_MODE
-        IDS2_NAVIGATION_MODE = "NEXT";
         //- MOVE "PR_SD" TO IDS2_REC_NAME
-        IDS2_REC_NAME = "PR_SD";
         //- CALL "MSTR_FIND_WITHIN_PR_SS_D_S" USING IDS2_NAVIGATION_MODE
         //- IDS2_REC_NAME.
-        MSTR_FIND_WITHIN_PR_SS_D_S(IDS2_NAVIGATION_MODE, IDS2_REC_NAME);
+        MSTR_FIND_WITHIN_PR_SS_D_S();
 
         //- IF DB_STATUS == 0
         if (DB_STATUS == 0)
@@ -3891,9 +3824,8 @@ public class PAY444
         //- MOVE SD_SSN TO PYBEN_PAYSSN.
         payben_rec.PYBEN_PAYSSN = sd_prft.SD_SSN;
         //- MOVE "PAYBEN_SK" TO UFAS_ALT_KEY_NAME.
-        UFAS_ALT_KEY_NAME = "PAYBEN_SK";
         //- CALL "READ_ALT_KEY_PAYBEN" USING PAYBEN_FILE_STATUS
-        PAYBEN_FILE_STATUS = READ_ALT_KEY_PAYBEN(payben_rec, UFAS_ALT_KEY_NAME);
+        PAYBEN_FILE_STATUS = READ_ALT_KEY_PAYBEN(payben_rec);
         //- IF PAYBEN_FILE_STATUS  == "00"
         if (PAYBEN_FILE_STATUS == "00")
         {
@@ -3905,7 +3837,7 @@ public class PAY444
         //- EXIT.
     }
 
-    private string? READ_ALT_KEY_PAYBEN(PAYBEN_REC payben_rec, string uFAS_ALT_KEY_NAME)
+    private string? READ_ALT_KEY_PAYBEN(PAYBEN_REC payben_rec)
     {
         throw new NotImplementedException();
     }
@@ -4012,7 +3944,7 @@ public class PAY444
         WRITE(total_header_2);
         //- WRITE P_REC FROM TOTAL_HEADER_3 AFTER 1.
         WRITE(total_header_3);
-        //- WRITE P_REC FROM CLIENT_TOT     AFTER 2.
+        //- WRITE P_REC FROM ClientTot     AFTER 2.
         WRITE("");
         WRITE(client_tot);
 
@@ -4036,7 +3968,7 @@ public class PAY444
         client_tot.END_BAL_TOT = ws_client_totals.WS_TOT_PXFER + ws_client_totals.WS_TOT_XFER;
         //- MOVE "ALLOC   " TO TOT_FILLER.
         client_tot.TOT_FILLER = "ALLOC   ";
-        //- WRITE P_REC FROM CLIENT_TOT AFTER 1.
+        //- WRITE P_REC FROM ClientTot AFTER 1.
         WRITE(client_tot);
 
         //- * Points line in totals
@@ -4056,8 +3988,9 @@ public class PAY444
                                                                   //- MOVE WS_EARN_PTS_TOTAL TO EARN_PTS_TOT.
         client_tot.EARN_TOT = ws_client_totals.WS_EARN_PTS_TOTAL;  // Weird redefine EARN_TOT <-> EARN_PTS_TOT
                                                                    //- move "POINTS " to tot_filler.
+        client_tot.useRedefineFormatting = true;
         client_tot.TOT_FILLER = "POINT";
-        //- WRITE P_REC FROM CLIENT_TOT AFTER 2.
+        //- WRITE P_REC FROM ClientTot AFTER 2.
         WRITE("");
         WRITE(client_tot);
 
@@ -4084,7 +4017,7 @@ public class PAY444
         rerun_tot.RERUN_MAX = WS_CONTR_MAX;
 
         //- WRITE P_REC FROM RERUN_TOT AFTER 10.
-        WRITE("\n\n\n\n\n\n\n\n\n");
+        outputLines.Add("\n\n\n\n\n\n\n\n\n");
         WRITE(rerun_tot);
 
         //- INITIALIZE WS_MAXCONT_TOTALS.

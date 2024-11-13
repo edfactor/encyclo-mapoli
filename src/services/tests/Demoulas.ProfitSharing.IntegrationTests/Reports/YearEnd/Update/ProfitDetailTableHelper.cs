@@ -6,6 +6,7 @@ using System.Text.Json;
 
 public class ProfitDetailTableHelper
 {
+#pragma warning disable S2933
 
     List<PROFIT_DETAIL> records = new();
     private PROFIT_DETAIL profit_detail;
@@ -17,7 +18,7 @@ public class ProfitDetailTableHelper
         this.profit_detail = profit_detail;
         this.ssn = ssn;
 
-        string query = $"SELECT * FROM profit_detail where PR_DET_S_SEC_NUMBER = {ssn}";
+        string query = $"SELECT * FROM PROFITSHARE.profit_detail where PR_DET_S_SEC_NUMBER = {ssn}";
         using (var command = new OracleCommand(query, connection))
         {
             using (var reader = command.ExecuteReader())

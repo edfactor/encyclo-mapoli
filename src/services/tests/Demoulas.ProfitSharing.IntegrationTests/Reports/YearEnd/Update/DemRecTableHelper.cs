@@ -7,6 +7,7 @@ namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
 public class DemRecTableHelper
 {
+#pragma warning disable S2933
     List<DEM_REC> demographicRecords = new();
     private DEM_REC dem_rec;
 
@@ -14,7 +15,7 @@ public class DemRecTableHelper
     {
         this.dem_rec = dem_rec;
 
-        string query = "SELECT * FROM DEMOGRAPHICS";
+        string query = "SELECT * FROM PROFITSHARE.DEMOGRAPHICS";
         using (var command = new OracleCommand(query, connection))
         {
             using (var reader = command.ExecuteReader())

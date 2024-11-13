@@ -2,8 +2,9 @@
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
+#pragma warning disable S2933
 
-internal class PayBenReader
+internal sealed class PayBenReader
 {
     List<PAYBEN1_REC> benes = new();
     private int pos = -1;
@@ -11,7 +12,7 @@ internal class PayBenReader
 
     public void dataload()
     {
-        string query = "SELECT * FROM PAYBEN";
+        string query = "SELECT * FROM PROFITSHARE.PAYBEN";
         using (var command = new OracleCommand(query, Connection))
         {
             using (var reader = command.ExecuteReader())

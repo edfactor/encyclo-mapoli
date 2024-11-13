@@ -8,6 +8,7 @@
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <Configurations>Debug;Release;Russ</Configurations>
+    <NoWarn>$(NoWarn);IDE0044</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -53,6 +54,7 @@
   </ItemGroup>
 
   <ItemGroup>
+  <!--
     <PackageReference Update="AsyncAwaitBestPractices">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -69,6 +71,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    -->
   </ItemGroup>
 
   <ItemGroup>

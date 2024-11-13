@@ -1,6 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
-
-using static Utils;
+﻿using static Utils;
 
 public class RERUN_TOT
 {
@@ -17,8 +15,8 @@ public class RERUN_TOT
             rformat(FILLER0, "string?", "X(20)")
             + rformat(RERUN_OVER, "decimal", "ZZ,ZZZ,ZZZ.99-")
             + rformat(FILLER1, "string?", "X(17)")
-            + rformat(RERUN_POINTS, "long", "ZZ,ZZZ,ZZZ-")
-            + rformat(FILLER2, "string?", "X(40)")
+            + (RERUN_POINTS == 0 ? "".PadLeft("ZZ,ZZZ,ZZZ-".Length) : rformat(RERUN_POINTS, "long", "ZZ,ZZZ,ZZZ-"))
+            + rformat(FILLER2, "string?", "X(41)")
             + rformat(RERUN_MAX, "long", "Z,ZZZ,ZZ9")
             ;
     }
