@@ -16,7 +16,17 @@ internal static class WorkRelationshipAssignmentExtensions
         new Department { Id = Department.Constants.Bakery, Name = "Bakery" }
     ];
 
-public static byte GetPayFrequency(this WorkRelationshipAssignment work)
+    /// <summary>
+    /// Retrieves the pay frequency for the specified work relationship assignment.
+    /// </summary>
+    /// <param name="work">The work relationship assignment instance.</param>
+    /// <returns>
+    /// A byte representing the pay frequency:
+    /// 1 for weekly,
+    /// 2 for monthly,
+    /// or <see cref="byte.MinValue"/> if the frequency is not recognized.
+    /// </returns>
+    public static byte GetPayFrequency(this WorkRelationshipAssignment work)
     {
         const byte weekly = 1;
         const byte monthly = 2;
@@ -31,6 +41,13 @@ public static byte GetPayFrequency(this WorkRelationshipAssignment work)
         }
     }
 
+    /// <summary>
+    /// Retrieves the department ID associated with the specified work relationship assignment.
+    /// </summary>
+    /// <param name="work">The work relationship assignment from which to extract the department ID.</param>
+    /// <returns>
+    /// The department ID as a byte. Returns 0 if the department ID cannot be determined.
+    /// </returns>
     public static byte GetDepartmentId(this WorkRelationshipAssignment work)
     {
         if (string.IsNullOrWhiteSpace(work.PositionCode) && string.IsNullOrWhiteSpace(work.DepartmentName))
@@ -38,7 +55,7 @@ public static byte GetPayFrequency(this WorkRelationshipAssignment work)
             return 0;
         }
 
-        var department = _departmentArray.Find(d => string.Compare(d.Name , work.DepartmentName, StringComparison.InvariantCultureIgnoreCase) == 0 );
+        var department = _departmentArray.Find(d => string.Compare(d.Name, work.DepartmentName, StringComparison.InvariantCultureIgnoreCase) == 0);
         if (department != null)
         {
             return department.Id;
@@ -59,6 +76,16 @@ public static byte GetPayFrequency(this WorkRelationshipAssignment work)
         return 0; // Return default value if parsing fails
     }
 
+    /// <summary>
+    /// Determines the employment type of a given work relationship assignment.
+    /// </summary>
+    /// <param name="work">The work relationship assignment to evaluate.</param>
+    /// <returns>
+    /// A character representing the employment type:
+    /// 'P' for part-time,
+    /// 'H' for full-time straight salary,
+    /// or <see cref="char.MinValue"/> if the employment type cannot be determined.
+    /// </returns>
     public static char GetEmploymentType(this WorkRelationshipAssignment work)
     {
         const char partTime = 'P';
@@ -68,6 +95,7 @@ public static byte GetPayFrequency(this WorkRelationshipAssignment work)
         {
             "PT" => partTime,
             "FT" => fullTimeStraightSalary,
+            "FR" => fullTimeStraightSalary, // Full Time Regular
             _ => char.MinValue
         };
 

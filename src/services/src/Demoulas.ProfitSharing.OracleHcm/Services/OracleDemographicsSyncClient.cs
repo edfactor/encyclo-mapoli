@@ -1,22 +1,19 @@
-﻿using System.Diagnostics;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
-using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services;
 
-internal sealed class OracleDemographicsService
+internal sealed class OracleDemographicsSyncClient
 {
     private readonly HttpClient _httpClient;
     private readonly OracleHcmConfig _oracleHcmConfig;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
 
 
-    public OracleDemographicsService(HttpClient httpClient, OracleHcmConfig oracleHcmConfig)
+    public OracleDemographicsSyncClient(HttpClient httpClient, OracleHcmConfig oracleHcmConfig)
     {
         _httpClient = httpClient;
         _oracleHcmConfig = oracleHcmConfig;

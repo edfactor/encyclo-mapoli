@@ -35,7 +35,7 @@ internal sealed class OracleHcmHostedService : IHostedService
 
         var employeeSyncTrigger = TriggerBuilder.Create()
             .WithIdentity("employeeSyncTrigger")
-            .StartNow()
+            .StartAt(DateTimeOffset.UtcNow.AddMinutes(Debugger.IsAttached ? 0 : 5))
             .WithSimpleSchedule(x =>
             {
                 x.WithIntervalInHours(_oracleHcmConfig.IntervalInHours)
