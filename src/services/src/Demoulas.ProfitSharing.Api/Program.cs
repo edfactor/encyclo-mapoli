@@ -21,7 +21,13 @@ if (!builder.Environment.IsTestEnvironment())
 {
     builder.Configuration
         .AddJsonFile($"credSettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+        .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
         .AddUserSecrets<Program>();
+}
+else
+{
+    builder.Configuration
+        .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
 }
 
 ElasticSearchConfig smartConfig = new ElasticSearchConfig();
