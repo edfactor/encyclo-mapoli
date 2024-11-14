@@ -13,10 +13,14 @@
 
   <ItemGroup>
     <None Remove="Resources\ExecutiveHoursAndDollars year=this.csv" />
+    <None Remove="Resources\psupdate-pay444.15.1.2.0.30000-2024.txt" />
+    <None Remove="Resources\psupdate-pay444-report2023.txt" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Resources\ExecutiveHoursAndDollars year=this.csv" />
+    <EmbeddedResource Include="Resources\psupdate-pay444.15.1.2.0.30000-2024.txt" />
+    <EmbeddedResource Include="Resources\psupdate-pay444-report2023.txt" />
   </ItemGroup>
 
   <ItemGroup>

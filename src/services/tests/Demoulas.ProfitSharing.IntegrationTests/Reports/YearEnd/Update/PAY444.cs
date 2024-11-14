@@ -14,7 +14,6 @@ public class PAY444
 
     Dictionary<int, int> META_SW = new Dictionary<int, int>();
 
-    string SPACES = " ";
     ClientTot client_tot = new();
     CONSOLE_RESPONSE console_response = new();
     CONSOLE_RESPONSE_MASKS console_response_masks = new();
@@ -473,7 +472,7 @@ public class PAY444
             //- DISPLAY "DO NOT UPDATE PAYPROFIT/PAYBEN"
         } //- END-IF.
           //- IF META_SW (3) == 1     GO TO 016_BYPASS_VALUES.
-        if (META_SW[3] == 1)
+        if (META_SW[3] == 1)  // Do not ask for input values
             goto l016_BYPASS_VALUES;
 
         //- PERFORM 110_ACCEPT_VALUES_01 THRU 110_EXIT.
@@ -725,7 +724,7 @@ public class PAY444
         Console.WriteLine(DAEMON_ACCEPT_PROG); // To Prevent compiler warning BOBH
         Console.WriteLine(DAEMON_DISP_PROG); // ditto
         //- CALL "ACCCONS" USING DAEMON_ACCEPT_MSGQ
-        ACCCONS();
+        //ACCCONS();
         //- MOVE DAEMON_ACCEPT_BACK TO EFFECTIVE_DATE.
         input_dates.EFFECTIVE_DATE = DAEMON_ACCEPT_BACK;
         //- GO TO 027_VALIDATE_INPUT_DATE.
@@ -745,17 +744,16 @@ public class PAY444
     //- 110_ACCEPT_VALUES_01.
     public void m110AcceptValues01()
     {
-        //- PERFORM 112_CONT_01 THRU 112_EXIT.
-        m112Cont01();
-        //- PERFORM 114_FORF_01 THRU 114_EXIT.
-        m114Forf01();
-        //- PERFORM 116_EARN_01 THRU 116_EXIT.
-        m116Earn01();
+        point_values.PV_CONT_01 = 15;
+        point_values.PV_FORF_01 = 1;
+        point_values.PV_EARN_01 = 2;
+
         //- IF META_SW (5) == 1 THEN
-        if (META_SW[5] == 1)
+        if (META_SW[5] == 1) // Secondary Earnings Flag
         {
             //- PERFORM 117_EARN2_01 THRU 117_EXIT
             m117Earn201();
+
             //- IF PV_EARN2_01 == 0
             if (point_values.PV_EARN2_01 == 0)
             {
@@ -763,29 +761,29 @@ public class PAY444
                 META_SW[5] = 0;
             } //- END-IF
         } //- END-IF.
+
           //- IF META_SW (4) == 1 THEN
-        if (META_SW[4] == 1)
+        if (META_SW[4] == 1) // Manual Adjustments Flag
         {
             //- NEXT SENTENCE
         }
         else //- ELSE
         {
             //- PERFORM 118_ADJUST THRU 118_EXIT
-            m118Adjust();
+            point_values.PV_ADJUST_BADGE = 0; // badge to adjust
+            point_values.PV_ADJ_CONTRIB = 0; // amount to adjust employee
+            point_values.PV_ADJ_FORFEIT = 0;
+            point_values.PV_ADJ_EARN = 0;
 
             //- IF META_SW (5) == 1 THEN
-            if (META_SW[5] == 1)
+            if (META_SW[5] == 1) // Secondary Earnings Flag
             {
                 //- PERFORM 118_EMP_2_ADJUST THRU 118_EMP_2_EXIT
                 m118Emp2Adjust();
             } //- END-IF
         } //- END-IF.
 
-        //- PERFORM 119_MAX_01 THRU 119_EXIT.
-        m119Max01();
-    //- 110_EXIT.
-    l110_EXIT:; ;
-        //- EXIT.
+        WS_CONTR_MAX = 20_000;
     }
 
     decimal str2dec(string x)
@@ -793,370 +791,6 @@ public class PAY444
         return decimal.Parse(x);
     }
 
-    //- * =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-    //- 112_CONT_01.
-    public void m112Cont01()
-    {
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " **************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " **************************************** ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " ENTER CONTRIBUTION POINT VALUE  " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " ENTER CONTRIBUTION POINT VALUE  ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                 999V999999                " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                 999V999999                ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " **************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " **************************************** ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_ACCEPT_PROG
-        DAEMON_ACCEPT_PROG = "PAY444";
-        //- CALL "ACCCONS" USING DAEMON_ACCEPT_MSGQ
-        ACCCONS();
-        //- MOVE function numval(DAEMON_ACCEPT_BACK) TO PV_CONT_01.
-        point_values.PV_CONT_01 = str2dec(DAEMON_ACCEPT_BACK);
-        //- MOVE PV_CONT_01 TO PV_MASK.
-        console_response_masks.PV_MASK = point_values.PV_CONT_01;
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " **************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " **************************************** ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE SPACES TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = SPACES;
-        //- STRING  "     VALUE ENTERED IS  "
-        //- PV_MASK
-        //- DELIMITED SIZE INTO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = $" VALUE ENTERED IS  {console_response_masks.PV_MASK}";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                         " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                         ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " IS VALUE ENTERED CORRECT: ENTER YES OR NO" TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " IS VALUE ENTERED CORRECT: ENTER YES OR NO";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " **************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " **************************************** ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_ACCEPT_PROG
-        DAEMON_ACCEPT_PROG = "PAY444";
-        //- CALL "ACCCONS" USING DAEMON_ACCEPT_MSGQ
-        ACCCONS();
-        //- MOVE DAEMON_ACCEPT_BACK TO CONSOLE_ANSWER.
-        console_response.CONSOLE_ANSWER = DAEMON_ACCEPT_BACK;
-        //- IF CONSOLE_ANSWER == CONSOLE_YES NEXT SENTENCE
-        if (console_response.CONSOLE_ANSWER == console_response.CONSOLE_YES)
-        {
-
-        }
-        else //- ELSE GO TO 112-CONT-01.
-        {
-            m112Cont01();
-        }
-    //- 112_EXIT.
-    l112_EXIT:;
-        //- EXIT.
-    }
-
-    //- * =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-    //- 114_FORF_01.
-    public void m114Forf01()
-    {
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " **************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " **************************************** ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " ENTER FORFEITURE POINT VALUE  " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " ENTER FORFEITURE POINT VALUE  ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                 999V999999                " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                 999V999999                ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " **************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " **************************************** ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_ACCEPT_PROG
-        DAEMON_ACCEPT_PROG = "PAY444";
-        //- CALL "ACCCONS" USING DAEMON_ACCEPT_MSGQ
-        ACCCONS();
-        //- MOVE function numval(DAEMON_ACCEPT_BACK) TO PV_FORF_01.
-        point_values.PV_FORF_01 = str2dec(DAEMON_ACCEPT_BACK);
-        //- MOVE PV_FORF_01 TO PV_MASK.
-        console_response_masks.PV_MASK = point_values.PV_FORF_01;
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " **************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " **************************************** ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE SPACES TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = SPACES;
-        //- STRING  "     VALUE ENTERED IS  "
-        //- PV_MASK
-        //- DELIMITED SIZE INTO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = $"     VALUE ENTERED IS  {console_response_masks.PV_MASK}";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                         " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                         ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " IS VALUE ENTERED CORRECT: ENTER YES OR NO" TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " IS VALUE ENTERED CORRECT: ENTER YES OR NO";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " **************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " **************************************** ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_ACCEPT_PROG
-        DAEMON_ACCEPT_PROG = "PAY444";
-        //- CALL "ACCCONS" USING DAEMON_ACCEPT_MSGQ
-        ACCCONS();
-        //- MOVE DAEMON_ACCEPT_BACK TO CONSOLE_ANSWER.
-        console_response.CONSOLE_ANSWER = DAEMON_ACCEPT_BACK;
-        //- IF CONSOLE_ANSWER == CONSOLE_YES NEXT SENTENCE
-        if (console_response.CONSOLE_ANSWER == console_response.CONSOLE_YES)
-        {
-        }
-        else //- ELSE GO TO 114-FORF-01.
-        {
-        //- 114_EXIT.
-        l114_EXIT:; ;
-            //- EXIT.
-        }
-    }
-
-    //- * =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-    //- 116_EARN_01.
-    public void m116Earn01()
-    {
-        //- IF META_SW (2) == 1 GO TO 116_EXIT.
-        if (META_SW[2] == 1)
-        {
-            goto l116_EXIT;
-        }
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " **************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " **************************************** ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " ENTER EARNINGS POINT VALUE  " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " ENTER EARNINGS POINT VALUE  ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                 999V999999                " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                 999V999999                ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " **************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " **************************************** ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_ACCEPT_PROG
-        DAEMON_ACCEPT_PROG = "PAY444";
-        //- CALL "ACCCONS" USING DAEMON_ACCEPT_MSGQ
-        ACCCONS();
-        //- MOVE function numval(DAEMON_ACCEPT_BACK) TO PV_EARN_01.
-        point_values.PV_EARN_01 = str2dec(DAEMON_ACCEPT_BACK);
-        //- MOVE PV_EARN_01 TO PV_MASK.
-        console_response_masks.PV_MASK = point_values.PV_EARN_01;
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " **************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " **************************************** ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE SPACES TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = SPACES;
-        //- STRING  "     VALUE ENTERED IS  "
-        //- PV_MASK
-        //- DELIMITED SIZE INTO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = $"     VALUE ENTERED IS  {console_response_masks.PV_MASK}";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                         " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                         ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " IS VALUE ENTERED CORRECT: ENTER YES OR NO" TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " IS VALUE ENTERED CORRECT: ENTER YES OR NO";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " **************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " **************************************** ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_ACCEPT_PROG
-        DAEMON_ACCEPT_PROG = "PAY444";
-        //- CALL "ACCCONS" USING DAEMON_ACCEPT_MSGQ
-        ACCCONS();
-        //- MOVE DAEMON_ACCEPT_BACK TO CONSOLE_ANSWER.
-        console_response.CONSOLE_ANSWER = DAEMON_ACCEPT_BACK;
-        //- IF CONSOLE_ANSWER == CONSOLE_YES NEXT SENTENCE
-        if (console_response.CONSOLE_ANSWER == console_response.CONSOLE_YES)
-        {
-        }
-        else //- ELSE GO TO 116-EARN-01.
-        {
-            m116Earn01();
-        }
-    //- 116_EXIT.
-    l116_EXIT:;
-        //- EXIT.
-    }
 
     //- * =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
@@ -1309,449 +943,13 @@ public class PAY444
         //- EXIT.
     }
 
-    //- * =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-    //- 118_ADJUST.
-    public void m118Adjust()
-    {
-        //- IF META_SW (2) == 1 GO TO 118_EXIT.
-        if (META_SW[2] == 1)
-        {
-            goto l118_EXIT;
-        }
-    l118_ADJUST:
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " **************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " **************************************** ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " ENTER EMPLOYEE BADGE NUMBER FOR ADJUSTMENT " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " ENTER EMPLOYEE BADGE NUMBER FOR ADJUSTMENT ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " **************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " **************************************** ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_ACCEPT_PROG
-        DAEMON_ACCEPT_PROG = "PAY444";
-        //- CALL "ACCCONS" USING DAEMON_ACCEPT_MSGQ
-        ACCCONS();
-        //- MOVE function numval(DAEMON_ACCEPT_BACK) TO PV_ADJUST_BADGE.
-        point_values.PV_ADJUST_BADGE = str2long(DAEMON_ACCEPT_BACK);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " **************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " **************************************** ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- IF PV_ADJUST_BADGE == 0 THEN
-        if (point_values.PV_ADJUST_BADGE == 0)
-        {
-            //- MOVE "PAY444" TO DAEMON_DISP_PROG
-            DAEMON_DISP_PROG = "PAY444";
-            //- MOVE " NO ADJUSTMENT THIS RUN. CORRECT: ENTER YES OR NO " TO DAEMON_DISP_MSG
-            DAEMON_DISP_MSG = " NO ADJUSTMENT THIS RUN. CORRECT: ENTER YES OR NO ";
-            //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY
-            DISPCONS(DAEMON_DISP_DISPLAY);
-        }
-        else //- ELSE
-        {
-            //- MOVE "PAY444" TO DAEMON_DISP_PROG
-            DAEMON_DISP_PROG = "PAY444";
-            //- MOVE SPACES TO DAEMON_DISP_MSG
-            DAEMON_DISP_MSG = SPACES;
-            //- STRING  
-            //- DELIMITED SIZE INTO DAEMON_DISP_MSG
-            //- PV_ADJUST_BADGE
-            DAEMON_DISP_MSG = $"     VALUE ENTERED IS  {point_values.PV_ADJUST_BADGE}";
-            //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY
-            DISPCONS(DAEMON_DISP_DISPLAY);
-            //- MOVE "PAY444" TO DAEMON_DISP_PROG
-            DAEMON_DISP_PROG = "PAY444";
-            //- MOVE " IS VALUE ENTERED CORRECT: ENTER YES OR NO" TO DAEMON_DISP_MSG
-            DAEMON_DISP_MSG = " IS VALUE ENTERED CORRECT: ENTER YES OR NO";
-            //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-            DISPCONS(DAEMON_DISP_DISPLAY);
-        }
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " **************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " **************************************** ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_ACCEPT_PROG
-        DAEMON_ACCEPT_PROG = "PAY444";
-        //- CALL "ACCCONS" USING DAEMON_ACCEPT_MSGQ
-        ACCCONS();
-        //- MOVE DAEMON_ACCEPT_BACK TO CONSOLE_ANSWER.
-        console_response.CONSOLE_ANSWER = DAEMON_ACCEPT_BACK;
-        //- IF CONSOLE_ANSWER == CONSOLE_YES AND PV_ADJUST_BADGE == 0
-        if (console_response.CONSOLE_ANSWER == console_response.CONSOLE_YES && point_values.PV_ADJUST_BADGE == 0)
-        {
-            //- GO TO 118_EXIT
-            goto l118_EXIT;
-        }
-        else //- ELSE     
-             //- IF CONSOLE_ANSWER == CONSOLE_YES
-            if (console_response.CONSOLE_ANSWER == console_response.CONSOLE_YES)
-        {
-            //- NEXT SENTENCE
-        }
-        else //- ELSE
-        {
-            //- GO TO 118_ADJUST.
-            goto l118_ADJUST;
-        }
-
-    //- 118_CONTRIB.
-    l118_CONTRIB:
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " **************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " **************************************** ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " ENTER CONTRIBUTION ADJUSTMENT -999V99 " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " ENTER CONTRIBUTION ADJUSTMENT -999V99 ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " **************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " **************************************** ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_ACCEPT_PROG
-        DAEMON_ACCEPT_PROG = "PAY444";
-        //- CALL "ACCCONS" USING DAEMON_ACCEPT_MSGQ
-        ACCCONS();
-        //- MOVE function numval(DAEMON_ACCEPT_BACK) TO PV_ADJ_CONTRIB.
-        point_values.PV_ADJ_CONTRIB = str2dec(DAEMON_ACCEPT_BACK);
-        //- MOVE PV_ADJ_CONTRIB TO PV_ADJ_MASK.
-        console_response_masks.PV_ADJ_MASK = point_values.PV_ADJ_CONTRIB;
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " **************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " **************************************** ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE SPACES TO DAEMON_DISP_MSG    
-        DAEMON_DISP_MSG = SPACES;
-        //- STRING  "     VALUE ENTERED IS  : "
-        //- PV_ADJ_MASK
-        //- DELIMITED SIZE INTO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = $"     VALUE ENTERED IS  : {console_response_masks.PV_ADJ_MASK}";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                            " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                            ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " IS VALUE ENTERED CORRECT: ENTER YES OR NO " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " IS VALUE ENTERED CORRECT: ENTER YES OR NO ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                            " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                            ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " ***************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " ***************************************** ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_ACCEPT_PROG
-        DAEMON_ACCEPT_PROG = "PAY444";
-        //- CALL "ACCCONS" USING DAEMON_ACCEPT_MSGQ
-        ACCCONS();
-        //- MOVE DAEMON_ACCEPT_BACK TO CONSOLE_ANSWER.
-        console_response.CONSOLE_ANSWER = DAEMON_ACCEPT_BACK;
-        //- IF CONSOLE_ANSWER == CONSOLE_YES NEXT SENTENCE
-        if (console_response.CONSOLE_ANSWER == console_response.CONSOLE_YES)
-        {
-        }
-        else //- ELSE GO TO 118-CONTRIB.
-        {
-            goto l118_CONTRIB;
-        }
-    //- 118_EARNINGS.
-    l118_EARNINGS:
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " **************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " **************************************** ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " ENTER EARNINGS ADJUSTMENT FOR EMPLOYEE 9V99" TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " ENTER EARNINGS ADJUSTMENT FOR EMPLOYEE 9V99";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " **************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " **************************************** ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_ACCEPT_PROG
-        DAEMON_ACCEPT_PROG = "PAY444";
-        //- CALL "ACCCONS" USING DAEMON_ACCEPT_MSGQ
-        ACCCONS();
-        //- MOVE function numval(DAEMON_ACCEPT_BACK) TO PV_ADJ_EARN.
-        point_values.PV_ADJ_EARN = str2dec(DAEMON_ACCEPT_BACK);
-        //- MOVE PV_ADJ_EARN TO PV_ADJ_MASK.
-        console_response_masks.PV_ADJ_MASK = point_values.PV_ADJ_EARN;
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " **************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " **************************************** ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE SPACES TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = SPACES;
-        //- STRING  "     VALUE ENTERED IS  "
-        //- PV_ADJ_MASK
-        //- DELIMITED SIZE INTO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = $"     VALUE ENTERED IS  {console_response_masks.PV_ADJ_MASK}";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.     
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " IS VALUE ENTERED CORRECT: ENTER YES OR NO" TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " IS VALUE ENTERED CORRECT: ENTER YES OR NO";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " **************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " **************************************** ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_ACCEPT_PROG
-        DAEMON_ACCEPT_PROG = "PAY444";
-        //- CALL "ACCCONS" USING DAEMON_ACCEPT_MSGQ
-        ACCCONS();
-        //- MOVE DAEMON_ACCEPT_BACK TO CONSOLE_ANSWER.
-        console_response.CONSOLE_ANSWER = DAEMON_ACCEPT_BACK;
-        //- IF CONSOLE_ANSWER == CONSOLE_YES NEXT SENTENCE
-        if (console_response.CONSOLE_ANSWER == console_response.CONSOLE_YES)
-        {
-        }
-        else //- ELSE GO TO 118-EARNINGS.
-        {
-            goto l118_EARNINGS;
-        }
-    //- 118_FORFEIT.
-    l118_FORFEIT:
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " **************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " **************************************** ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " ENTER FORFEITURE ADJUSTMENT FOR EMPLOYEE 9V99" TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " ENTER FORFEITURE ADJUSTMENT FOR EMPLOYEE 9V99";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " **************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " **************************************** ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_ACCEPT_PROG
-        DAEMON_ACCEPT_PROG = "PAY444";
-        //- CALL "ACCCONS" USING DAEMON_ACCEPT_MSGQ
-        ACCCONS();
-        //- MOVE function numval(DAEMON_ACCEPT_BACK) TO PV_ADJ_FORFEIT.
-        point_values.PV_ADJ_FORFEIT = str2dec(DAEMON_ACCEPT_BACK);
-        //- MOVE PV_ADJ_FORFEIT TO PV_ADJ_MASK.
-        console_response_masks.PV_ADJ_MASK = point_values.PV_ADJ_FORFEIT;
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " **************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " **************************************** ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE SPACES TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = SPACES;
-        //- STRING  "     VALUE ENTERED IS  "
-        //- PV_ADJ_MASK
-        //- DELIMITED SIZE INTO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = $"     VALUE ENTERED IS  {console_response_masks.PV_ADJ_MASK}";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " IS VALUE ENTERED CORRECT: ENTER YES OR NO" TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " IS VALUE ENTERED CORRECT: ENTER YES OR NO";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " **************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " **************************************** ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_ACCEPT_PROG
-        DAEMON_ACCEPT_PROG = "PAY444";
-        //- CALL "ACCCONS" USING DAEMON_ACCEPT_MSGQ
-        ACCCONS();
-        //- MOVE DAEMON_ACCEPT_BACK TO CONSOLE_ANSWER.
-        console_response.CONSOLE_ANSWER = DAEMON_ACCEPT_BACK;
-        //- IF CONSOLE_ANSWER == CONSOLE_YES NEXT SENTENCE
-        if (console_response.CONSOLE_ANSWER == console_response.CONSOLE_YES)
-        {
-        }
-        else //- ELSE
-        {
-            //- GO TO 118_FORFEIT.
-            goto l118_FORFEIT;
-        }
-
-    //- 118_EXIT.
-    l118_EXIT:;
-        //- EXIT.
-    }
-
-    static List<string> answers = ["15", "YES", "1", "YES", "2", "YES", "0", "YES", "20000", "YES"];
-    static int answerIndex = 0;
+    private string SPACES = " ";
 
     private void ACCCONS()
     {
-        //console_response.CONSOLE_ANSWER = Console.ReadLine();
-        console_response.CONSOLE_ANSWER = answers[answerIndex++];
-
-        DAEMON_ACCEPT_BACK = console_response.CONSOLE_ANSWER;
+        throw new NotImplementedException();
     }
 
-    //- * =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
     //- 118_EMP_2_ADJUST.
     public void m118Emp2Adjust()
@@ -1995,118 +1193,6 @@ public class PAY444
 
 
 
-    //- * =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-    //- 119_MAX_01.
-    public void m119Max01()
-    {
-    l119_MAX_01:
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " **************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " **************************************** ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " ENTER MAXIMUM CONTRIBUTION AMOUNT 999999" TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " ENTER MAXIMUM CONTRIBUTION AMOUNT 999999";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " **************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " **************************************** ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_ACCEPT_PROG.
-        DAEMON_ACCEPT_PROG = "PAY444";
-        //- CALL "ACCCONS" USING DAEMON_ACCEPT_MSGQ.
-        ACCCONS();
-        //- MOVE function numval(DAEMON_ACCEPT_BACK) TO WS_CONTR_MAX.
-        WS_CONTR_MAX = str2long(DAEMON_ACCEPT_BACK);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " **************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " **************************************** ";
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " **************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " **************************************** ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE SPACES TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = SPACES;
-        //- STRING  "     VALUE ENTERED IS  "
-        //- WS_CONTR_MAX
-        //- DELIMITED SIZE INTO DAEMON_DISP_MSG.
-        DAEMON_DISP_MSG = $"     VALUE ENTERED IS  {WS_CONTR_MAX}";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " IS VALUE ENTERED CORRECT: ENTER YES OR NO" TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " IS VALUE ENTERED CORRECT: ENTER YES OR NO";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE "                                          " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = "                                          ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_DISP_PROG
-        DAEMON_DISP_PROG = "PAY444";
-        //- MOVE " **************************************** " TO DAEMON_DISP_MSG
-        DAEMON_DISP_MSG = " **************************************** ";
-        //- CALL "DISPCONS" USING DAEMON_DISP_DISPLAY.
-        DISPCONS(DAEMON_DISP_DISPLAY);
-        //- MOVE "PAY444" TO DAEMON_ACCEPT_PROG
-        DAEMON_ACCEPT_PROG = "PAY444";
-        //- CALL "ACCCONS" USING DAEMON_ACCEPT_MSGQ
-        ACCCONS();
-        //- MOVE DAEMON_ACCEPT_BACK TO CONSOLE_ANSWER.
-        console_response.CONSOLE_ANSWER = DAEMON_ACCEPT_BACK;
-        //- IF CONSOLE_ANSWER == CONSOLE_YES NEXT SENTENCE
-        if (console_response.CONSOLE_ANSWER == console_response.CONSOLE_YES)
-        {
-        }
-        else //- ELSE
-        {
-            //- GO TO 119_MAX_01.
-            goto l119_MAX_01;
-        }
-    //- 119_EXIT.
-    l119_EXIT:;
-        //- EXIT.
-    }
-
     //- * -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
     //- *    PROCESS SEQUENTIAL INPUT FILES PAYPROFIT/PAYBEN
     //- * -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -2125,7 +1211,7 @@ public class PAY444
     //- * =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
     public void m201ProcessPayProfit()
-        {
+    {
     l201_PROCESS_PAYPROFIT:
         //- *     display "at 201-PROCESS-PAYPROFIT".
         //- READ PAYPROFIT_FILE NEXT AT END
@@ -2396,7 +1482,7 @@ public class PAY444
         //- MOVE ZERO TO PY_PROF_MAXCONT OF payprof_rec.
         payprof_rec.PY_PROF_MAXCONT = 0;
         //- IF PY_PROF_MAXCONT OF PAYPROF_REC == 1 OR META_SW (2) == 1
-        if (payprof_rec.PY_PROF_MAXCONT == 1 || META_SW[2] == 1)
+        if (payprof_rec.PY_PROF_MAXCONT == 1 || META_SW[2] == 1)  // Special Run. 
         {
             //- PERFORM 410_LOAD_PROFIT THRU 410_EXIT
             m410LoadProfit();
@@ -2593,7 +1679,7 @@ public class PAY444
         //- *     DISPLAY "AT 220-PAYBEN-COMPUTATION [" PYBEN-PAYSSN1 "]" pyben-pay-ssn1.
         //- MOVE PYBEN_PSN1 TO PSKEY.
         // <same key> PSKEY = payben1_rec.PYBEN_PSN1;
-        payben_rec.PYBEN_PSN =  payben1_rec.PYBEN_PSN1;
+        payben_rec.PYBEN_PSN = payben1_rec.PYBEN_PSN1;
         //- CALL "READ_KEY_PAYBEN" USING PAYBEN_FILE_STATUS
         //- PAYBEN_REC.
         PAYBEN_FILE_STATUS = READ_KEY_PAYBEN(payben_rec);
@@ -3364,7 +2450,7 @@ public class PAY444
         // not needed?   DB_STATUS = MSTR_GET_REC(IDS2_REC_NAME);
 
         //- MOVE PROFIT_YEAR TO ws_profit_year.
-        ws_profit_year.WS_PROFIT_YEAR_FIRST_4 = (long) profit_detail.PROFIT_YEAR;
+        ws_profit_year.WS_PROFIT_YEAR_FIRST_4 = (long)profit_detail.PROFIT_YEAR;
         string[] parts = profit_detail.PROFIT_YEAR.ToString().Split('.');
         long decimalPart = parts.Length > 1 ? long.Parse(parts[1]) : 0;
         ws_profit_year.WS_PROFIT_YEAR_EXTENSION = decimalPart;
@@ -3476,7 +2562,7 @@ public class PAY444
         // MSTR_GET_REC(IDS2_REC_NAME); 
 
         //- MOVE PROFIT_SS_YEAR TO ws_profit_year.
-        ws_profit_year.WS_PROFIT_YEAR_FIRST_4 = (long) profit_ss_detail.PROFIT_SS_YEAR;
+        ws_profit_year.WS_PROFIT_YEAR_FIRST_4 = (long)profit_ss_detail.PROFIT_SS_YEAR;
         string[] parts = profit_ss_detail.PROFIT_SS_YEAR.ToString().Split('.');
         long decimalPart = parts.Length > 1 ? long.Parse(parts[1]) : 0;
         ws_profit_year.WS_PROFIT_YEAR_EXTENSION = decimalPart;
@@ -3493,9 +2579,9 @@ public class PAY444
             } //- END-IF
         } //- END-IF.
           //- MOVE "NEXT" TO IDS2_NAVIGATION_MODE
-        //- MOVE "PR_SD" TO IDS2_REC_NAME
-        //- CALL "MSTR_FIND_WITHIN_PR_SS_D_S" USING IDS2_NAVIGATION_MODE
-        //- IDS2_REC_NAME.
+          //- MOVE "PR_SD" TO IDS2_REC_NAME
+          //- CALL "MSTR_FIND_WITHIN_PR_SS_D_S" USING IDS2_NAVIGATION_MODE
+          //- IDS2_REC_NAME.
         MSTR_FIND_WITHIN_PR_SS_D_S();
 
         //- IF DB_STATUS == 0
@@ -3527,7 +2613,7 @@ public class PAY444
         //- MOVE SPACES TO P_REC.
         P_REC = SPACES;
         //- WRITE P_REC FROM XEROX_HEADER AFTER ADVANCING PAGE.
-        WRITE("\f"+xerox_header.ToString().Trim());
+        WRITE("\f" + xerox_header.ToString().Trim());
         //- MOVE SPACES TO P_REC.
         P_REC = SPACES;
         //- ACCEPT WS_DATE FROM DATE.
@@ -3555,7 +2641,7 @@ public class PAY444
         total_header_1.TOT_HDR1_YEAR1 = HOLD_EFF_DATE;
         total_header_1.TOT_HDR1_DD = 12;
         total_header_1.TOT_HDR1_MM = 11;
-            total_header_1.TOT_HDR1_YY = 24;
+        total_header_1.TOT_HDR1_YY = 24;
         //- ACCEPT WS_TIME FROM TIME.
         //?
 
@@ -3642,7 +2728,8 @@ public class PAY444
             {
                 report_line.PR_NEWEMP = "NEW";
             }
-            else if (sd_prft.SD_NEWEMP == 2){
+            else if (sd_prft.SD_NEWEMP == 2)
+            {
                 m820CheckPayben();
             }
             else
@@ -3851,7 +2938,7 @@ public class PAY444
         //- MOVE WS_PAGE_CTR TO HDR1_PAGE.
         header_1.HDR1_PAGE = ws_counters.WS_PAGE_CTR;
         //- WRITE P_REC FROM HEADER_1 AFTER  PAGE
-        WRITE("\f"+header_1);
+        WRITE("\f" + header_1);
         //- WRITE P_REC FROM HEADER_2 AFTER  2
         WRITE("");
         WRITE(header_2);
@@ -3938,7 +3025,7 @@ public class PAY444
         //- ADD WS_TOT_CAF     TO WS_GRTOT_CAF.
         ws_grand_totals.WS_GRTOT_CAF += ws_client_totals.WS_TOT_CAF;
         //- WRITE P_REC FROM TOTAL_HEADER_1 AFTER PAGE.
-        WRITE("\f"+total_header_1);
+        WRITE("\f" + total_header_1);
         //- WRITE P_REC FROM TOTAL_HEADER_2 AFTER 2.
         WRITE("");
         WRITE(total_header_2);

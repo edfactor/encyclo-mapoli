@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Reflection;
 using System.Text;
 using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
@@ -43,28 +44,33 @@ public class ProftShareUpdateTests
         pay444.connection = connection;
         pay444.m015MainProcessing(metaSw, etext);
 
-        // Does not put NL in front of formfeeds, something that COBOL seems to handle
         var sb = new StringBuilder();
         for (var i = 0; i < pay444.outputLines.Count; i++)
         {
             sb.Append(pay444.outputLines[i]);
+            // Cobol is smart enough to not emit a Newline if the next character is a form feed.
             if (i < pay444.outputLines.Count - 2 && !pay444.outputLines[i + 1].StartsWith("\f")) sb.Append("\n");
         }
         sb.Append("\n");
-
         var actual = sb.ToString();
 
-        File.WriteAllText("/tmp/ref3.txt", sb.ToString(), Encoding.ASCII);
+        string expected = ReadEmbeddedResource("psupdate-pay444-report2023.txt").Replace("\r", "");
 
-        string expected = File.ReadAllText("/tmp/ref1.txt");
-
-        if (expected != sb.ToString())
+        if (expected != actual && File.Exists("/Program Files/Meld/Meld.exe"))
         {
+            string expectedFile = Path.GetTempFileName();
+            //File.WriteAllText(expectedFile, expected, Encoding.ASCII);
+            File.WriteAllBytes(expectedFile, Encoding.ASCII.GetBytes(expected));
+
+            string actualFile = Path.GetTempFileName();
+            // File.WriteAllText(actualFile, actual, Encoding.ASCII);
+            File.WriteAllBytes(actualFile, Encoding.ASCII.GetBytes(actual));
+
 
             var startInfo = new ProcessStartInfo
             {
                 FileName = "/Program Files/Meld/Meld.exe",
-                ArgumentList = { "/tmp/ref1.txt", "/tmp/ref3.txt" },
+                ArgumentList = { expectedFile, actualFile },
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true
@@ -74,6 +80,18 @@ public class ProftShareUpdateTests
             using var process = Process.Start(startInfo);
         }
 
-        sb.ToString().Should().Be(expected);
+        actual.Should().Be(expected);
+    }
+
+    // "pay444.15.1.2.0.30000.txt"
+
+
+    public static string ReadEmbeddedResource(string resourceName)
+    {
+        using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Demoulas.ProfitSharing.IntegrationTests.Resources." + resourceName))
+        using (var reader = new StreamReader(stream!))
+        {
+            return reader.ReadToEnd();
+        }
     }
 }
