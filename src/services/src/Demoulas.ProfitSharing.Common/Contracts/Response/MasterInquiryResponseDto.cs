@@ -1,6 +1,5 @@
-
-
 namespace Demoulas.ProfitSharing.Common.Contracts.Response;
+
 public sealed record MasterInquiryResponseDto
 {
     public int Id { get; set; }

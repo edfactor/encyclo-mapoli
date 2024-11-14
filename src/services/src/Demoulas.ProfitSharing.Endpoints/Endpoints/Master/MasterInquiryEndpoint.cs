@@ -6,9 +6,10 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
+using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Master;
-public class MasterInquiryEndpoint : EndpointWithCsvBase<MasterInquiryRequest, MasterInquiryResponseDto, MasterInquiryEndpoint.MasterInquiryEndpointMapper>
+public class MasterInquiryEndpoint : Endpoint<MasterInquiryRequest, ReportResponseBase<MasterInquiryResponseDto>>
 {
     private readonly IMasterInquiryService _masterInquiryService;
 
@@ -16,7 +17,6 @@ public class MasterInquiryEndpoint : EndpointWithCsvBase<MasterInquiryRequest, M
     {
         _masterInquiryService = masterInquiryService;
     }
-    public override string ReportFileName => $"PS Master Inquiry";
 
     public override void Configure()
     {
@@ -27,14 +27,13 @@ public class MasterInquiryEndpoint : EndpointWithCsvBase<MasterInquiryRequest, M
             s.Description =
                 "This endpoint returns master inquiry details.";
 
-            s.ExampleRequest = SimpleExampleRequest;
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
                     200,
                     new ReportResponseBase<MasterInquiryResponseDto>
                     {
-                        ReportName = ReportFileName,
+                        ReportName = "Example Response",
                         ReportDate = DateTimeOffset.Now,
                         Response = new PaginatedResponseDto<MasterInquiryResponseDto>
                         {
@@ -46,19 +45,10 @@ public class MasterInquiryEndpoint : EndpointWithCsvBase<MasterInquiryRequest, M
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
         Group<YearEndGroup>();
-        base.Configure();
     }
 
-    public override Task<ReportResponseBase<MasterInquiryResponseDto>> GetResponse(MasterInquiryRequest req, CancellationToken ct)
+    public override Task<ReportResponseBase<MasterInquiryResponseDto>> ExecuteAsync(MasterInquiryRequest req, CancellationToken ct)
     {
         return _masterInquiryService.GetMasterInquiry(req, ct);
-    }
-
-    public class MasterInquiryEndpointMapper : ClassMap<MasterInquiryResponseDto>
-    {
-        public MasterInquiryEndpointMapper()
-        {
-            Map(m => m.ProfitYear).Index(0).Name("YEAR");
-        }
     }
 }
