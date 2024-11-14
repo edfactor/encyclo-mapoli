@@ -135,8 +135,8 @@ definitions:
         - ${env:NPM} run build:${env:ENV}
         - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.$env:ENV.zip" -Force   
         
-    upgrade-qa-database: &upgrade-qa-database
-      name: Upgrade QA Database
+    upgrade-database: &upgrade-database
+      name: Upgrade Database
       runs-on:
         - windows
         - self.hosted
@@ -185,7 +185,7 @@ pipelines:
             - $env:API_SERVER_QA = "appt23d"            
             - powershell .\scripts\webDeploy.ps1 QA $env:API_SERVER_QA
       - parallel:
-          - step: *upgrade-qa-database
+          - step: *upgrade-database
           - step: *create-frontend-artifact-uat
       - step:
           name: "Application Deployment"
@@ -226,5 +226,5 @@ pipelines:
                         - upgrade-db
                         - drop-recreate-db
                         - import-from-ready                        
-        - step: *upgrade-qa-database
+        - step: *upgrade-database
 
