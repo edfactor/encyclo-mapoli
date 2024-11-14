@@ -17,11 +17,11 @@ public class ForfeituresAndPointsForYearEndpoint:EndpointWithCsvBase<ProfitYearR
     {
         _frozenReportService = frozenReportService;
     }
-    public override string ReportFileName => $"Forfeitures and Points for Year";
+    public override string ReportFileName => "Forfeitures and Points for Year";
 
     public override void Configure()
     {
-        Get("forfeitures-and-points");
+        Get("frozen/forfeitures-and-points");
         Summary(s =>
         {
             s.Summary = "Forfeitures and Points for Year";

@@ -24,7 +24,7 @@ public class ReportByAgeEndpoint : EndpointWithCsvBase<ProfitYearRequest, Profit
 
     public override void Configure()
     {
-        Get("report-by-age");
+        Get("frozen/report-by-age");
         Summary(s =>
         {
             s.Summary = "PROFIT SHARING DISTRIBUTIONS BY AGE";
@@ -41,13 +41,13 @@ public class ReportByAgeEndpoint : EndpointWithCsvBase<ProfitYearRequest, Profit
             {
                 {
                     200,
-                    new ReportResponseBase<ForfeituresAndPointsForYearResponse>
+                    new ReportResponseBase<ProfitSharingDistributionsByAge>
                     {
                         ReportName = ReportFileName,
                         ReportDate = DateTimeOffset.Now,
-                        Response = new PaginatedResponseDto<ForfeituresAndPointsForYearResponse>
+                        Response = new PaginatedResponseDto<ProfitSharingDistributionsByAge>
                         {
-                            Results = new List<ForfeituresAndPointsForYearResponse> { ForfeituresAndPointsForYearResponse.ResponseExample() }
+                            Results = new List<ProfitSharingDistributionsByAge> { ProfitSharingDistributionsByAge.ResponseExample() }
                         }
                     }
                 }
@@ -67,13 +67,9 @@ public class ReportByAgeEndpoint : EndpointWithCsvBase<ProfitYearRequest, Profit
     {
         public ProfitSharingDistributionsByAgeMapper()
         {
-            Map(m => m.EmployeeBadgeNumber).Index(0).Name("EMPLOYEE_BADGE");
-            Map(m => m.EmployeeName).Index(1).Name("EMPLOYEE_NAME");
-            Map(m => m.EmployeeSsn).Index(2).Name("EMPLOYEE_SSN");
-            Map(m => m.Forfeitures).Index(3).Name("FORFEITURES");
-            Map(m => m.ForfeitPoints).Index(4).Name("FORFEIT_POINTS");
-            Map(m => m.EarningPoints).Index(5).Name("EARNING_POINTS");
-            Map(m => m.BeneficiaryPsn).Index(6).Name("BENEFICIARY_SSN");
+            Map(m => m.Age).Index(0).Name("AGE");
+            Map(m => m.EmployeeCount).Index(1).Name("EMPS");
+            Map(m => m.Amount).Index(2).Name("AMOUNT");
         }
     }
 }

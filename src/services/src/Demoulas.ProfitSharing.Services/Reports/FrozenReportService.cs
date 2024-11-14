@@ -130,33 +130,48 @@ public class FrozenReportService : IFrozenReportService
     public async Task<ReportResponseBase<ProfitSharingDistributionsByAge>> GetDistributionsByAgeYear(ProfitYearRequest req,
         CancellationToken cancellationToken = default)
     {
-        List<byte> codes = new List<byte>
-        {
+        List<byte> codes =
+        [
             ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal,
             ProfitCode.Constants.OutgoingDirectPayments,
             ProfitCode.Constants.Outgoing100PercentVestedPayment
-        };
+        ];
 
-        _ = await _dataContextFactory.UseReadOnlyContext(ctx =>
+        var response = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            return (from pd in ctx.ProfitDetails
-                join d in ctx.Demographics on pd.Ssn equals d.Ssn
-                where pd.ProfitYear == req.ProfitYear && codes.Contains(pd.ProfitCodeId)
-                let age = d.DateOfBirth.Age()
-                let employmentType = d.EmploymentTypeId == EmploymentType.Constants.PartTime ? "PartTime" : "FullTime"
-                group new { d.EmployeeId, pd.Forfeiture } by new { age, employmentType } into g
-                select new
+            var query = await (from pd in ctx.ProfitDetails
+                    join d in ctx.Demographics on pd.Ssn equals d.Ssn
+                    where pd.ProfitYear == req.ProfitYear && codes.Contains(pd.ProfitCodeId)
+                   select new
+                    {
+                        d.DateOfBirth,
+                        EmploymentType = d.EmploymentTypeId == EmploymentType.Constants.PartTime ? "PartTime" : "FullTime",
+                       d.EmployeeId,
+                        Amount = pd.Forfeiture
+                    })
+                .ToListAsync(cancellationToken: cancellationToken);
+
+            return query.Select(x => new { Age = x.DateOfBirth.Age(), x.EmploymentType, x.EmployeeId, x.Amount })
+                .GroupBy(x => new { x.Age, x.EmploymentType })
+                .Select(g => new ProfitSharingDistributionsByAge
                 {
-                    Age = g.Key.age,
-                    EmploymentType = g.Key.employmentType,
-                    BadgeNumberCount = g.Select(x => x.EmployeeId).Distinct().Count(),
-                    ForfeitureCount = g.Sum(x => x.Forfeiture)
-                }).ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
+                    Age = g.Key.Age,
+                    EmploymentType = g.Key.EmploymentType,
+                    EmployeeCount = g.Select(x => x.EmployeeId).Distinct().Count(),
+                    Amount = g.Sum(x => x.Amount)
+                })
+                .OrderByDescending(x=> x.Age)
+                .ToList();
+
         });
 
         return new ReportResponseBase<ProfitSharingDistributionsByAge>
         {
-            ReportName = "ABC", ReportDate = DateTimeOffset.Now, Response = new PaginatedResponseDto<ProfitSharingDistributionsByAge>(req)
+            ReportName = "PROFIT SHARING DISTRIBUTIONS BY AGE", ReportDate = DateTimeOffset.Now, Response = new PaginatedResponseDto<ProfitSharingDistributionsByAge>(req)
+            {
+                Results = response,
+                Total = response.Count
+            }
         };
     }
 }
