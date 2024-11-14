@@ -143,10 +143,19 @@ definitions:
       script:
         - echo "Upgrading Database..."
         - $env:NUGET_ORG="https://api.nuget.org/v3/index.json"
-        - $env:ConnectionStrings:ProfitSharing=$env:ConnectionStrings_ProfitSharing_QA
         - dotnet build .\src\services\src\Demoulas.ProfitSharing.Data.Cli\Demoulas.ProfitSharing.Data.Cli.csproj -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -o .\output
+        - $environment = $env:Environment
         - $action = $env:Action
+        - if (-not $environment) { $action = "QA" }
         - if (-not $action) { $action = "upgrade-db" }
+        
+        - $env:ConnectionStrings:ProfitSharing=$env:ConnectionStrings_ProfitSharing_QA
+
+        - if ($environment -eq "UAT") {
+            $env:ConnectionStrings:ProfitSharing=$env:ConnectionStrings_ProfitSharing_UAT
+          }
+        
+        
         - .\output\Demoulas.ProfitSharing.Data.Cli $action --connection-name ProfitSharing --sql-file `".\src\database\ready_import\SQL copy all from ready to smart ps.sql`"
   
 
@@ -206,6 +215,11 @@ pipelines:
   custom:
       profitsharing_database:
         - variables: # https://bitbucket.org/blog/predefine-values-of-custom-pipeline-variables
+                  - name: Environment
+                    default: QA
+                    allowed-values: # optionally restrict variable values
+                        - QA
+                        - UAT                        
                   - name: Action
                     default: upgrade-db
                     allowed-values: # optionally restrict variable values
