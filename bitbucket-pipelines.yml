@@ -146,17 +146,22 @@ definitions:
         - dotnet build .\src\services\src\Demoulas.ProfitSharing.Data.Cli\Demoulas.ProfitSharing.Data.Cli.csproj -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -o .\output
         - $environment = $env:Environment
         - $action = $env:Action
+        - $sourceSchema = ""
         - if (-not $environment) { $action = "QA" }
         - if (-not $action) { $action = "upgrade-db" }
         
-        - $env:ConnectionStrings:ProfitSharing=$env:ConnectionStrings_ProfitSharing_QA
+        - if ($environment -eq "QA") {
+            $env:ConnectionStrings:ProfitSharing=$env:ConnectionStrings_ProfitSharing_QA
+            $sourceSchema = "PROFITSHARE"
+          }
 
         - if ($environment -eq "UAT") {
             $env:ConnectionStrings:ProfitSharing=$env:ConnectionStrings_ProfitSharing_UAT
+            $sourceSchema = "PROFITSHARE_STAGING"
           }
         
         
-        - .\output\Demoulas.ProfitSharing.Data.Cli $action --connection-name ProfitSharing --sql-file `".\src\database\ready_import\SQL copy all from ready to smart ps.sql`"
+        - .\output\Demoulas.ProfitSharing.Data.Cli $action --connection-name ProfitSharing --sql-file `".\src\database\ready_import\SQL copy all from ready to smart ps.sql` --source-Schema $sourceSchema"
   
 
    
