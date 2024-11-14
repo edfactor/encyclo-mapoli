@@ -128,7 +128,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
     {
         await foreach (OracleEmployee? employee in asyncEnumerable.WithCancellation(cancellationToken))
         {
-            int badgeNumber = employee?.BadgeNumber ?? 0;
+            int badgeNumber = employee?.EmployeeId ?? 0;
             if (employee == null || badgeNumber == 0)
             {
                 continue;
@@ -145,7 +145,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
             yield return new DemographicsRequest
             {
                 OracleHcmId = employee.PersonId,
-                BadgeNumber = employee.BadgeNumber,
+                BadgeNumber = employee.EmployeeId,
                 DateOfBirth = employee.DateOfBirth,
                 HireDate = employee.WorkRelationship?.StartDate ?? SqlDateTime.MinValue.Value.ToDateOnly(),
                 TerminationDate = employee.WorkRelationship?.TerminationDate,
