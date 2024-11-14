@@ -1,20 +1,24 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-public sealed record ProfitSharingDistributionsByAge
-{
-    public required int Age { get; set; }
-    public int EmployeeCount { get; set; }
-    public decimal Amount { get; set; }
-    public required string EmploymentType { get; set; }
-    
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+public sealed record ProfitSharingDistributionsByAge : PaginatedResponseDto<ProfitSharingDistributionsByAgeDetail>
+{
+    public short TotalEmployees { get; set; }
+    public short HardshipTotalEmployees { get; set; }
+    public decimal TotalAmount { get; set; }
+    public decimal HardshipTotalAmount { get; set; }
+    public short DistributionTotalAmount { get; set; }
+
+    
     public static ProfitSharingDistributionsByAge ResponseExample()
     {
         return new ProfitSharingDistributionsByAge
         {
-           Age = 32,
-           EmploymentType = "Full Time",
-           Amount = (decimal)159_451.46,
-           EmployeeCount = 7
+            TotalEmployees = 93,
+            HardshipTotalEmployees = 18,
+            TotalAmount = (decimal)1_855_156.09,
+            HardshipTotalAmount = (decimal)386_243.46,
+            DistributionTotalAmount = 0
         };
     }
 }
