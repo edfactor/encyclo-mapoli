@@ -50,7 +50,7 @@ else
     builder.Services.AddTestingSecurity(builder.Configuration, rolePermissionService);
 }
 
-builder.ConfigurePolicies();
+builder.ConfigureSecurityPolicies();
 
 builder.Services.AddCors(options =>
 {

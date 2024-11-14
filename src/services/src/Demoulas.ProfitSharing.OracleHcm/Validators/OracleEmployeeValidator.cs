@@ -99,7 +99,7 @@ public sealed class OracleEmployeeValidator : Validator<OracleEmployee>
             .OverridePropertyName("WorkRelationship.Assignment.PositionCode");
 
 
-        RuleFor(x => x.BadgeNumber)
+        RuleFor(x => x.EmployeeId)
             .InclusiveBetween(1, 9_999_999).WithMessage("BadgeNumber must be a 7-digit number.");
 
         RuleFor(x => x.PersonId)

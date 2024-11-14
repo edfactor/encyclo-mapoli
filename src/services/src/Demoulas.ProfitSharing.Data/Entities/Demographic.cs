@@ -15,7 +15,7 @@ public sealed class Demographic : Member
     /// This ID is used to uniquely identify an employee within the Oracle HCM system.
     /// </summary>
     /// <value>
-    /// The Oracle HCM ID of the employee.
+    /// The People ID of the employee.
     /// </value>
     public required long OracleHcmId { get; set; }
     public required long Ssn { get; set; }

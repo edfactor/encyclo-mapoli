@@ -11,11 +11,7 @@ try
     // Get all processes with the name "node"
     Process[] nodeProcesses = Process.GetProcessesByName("node");
 
-    if (nodeProcesses.Length == 0)
-    {
-        Console.WriteLine("No running instances of node.exe found.");
-    }
-    else
+    if (nodeProcesses.Length != 0)
     {
         Console.WriteLine($"Found {nodeProcesses.Length} instance(s) of node.exe. Terminating...");
 
