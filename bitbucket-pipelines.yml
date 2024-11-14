@@ -151,13 +151,13 @@ definitions:
         - if (-not $action) { $action = "upgrade-db" }
         
         - if ($environment -eq "QA") {
-            $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_QA
-            $sourceSchema = "PROFITSHARE"
+            $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_QA;
+            $sourceSchema = "PROFITSHARE";
           }
 
         - if ($environment -eq "UAT") {
-            $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_UAT
-            $sourceSchema = "PROFITSHARE_STAGING"
+            $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_UAT;
+            $sourceSchema = "PROFITSHARE_STAGING";
           }
         
         - .\output\Demoulas.ProfitSharing.Data.Cli $action --connection-name ProfitSharing --sql-file ".\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-Schema $sourceSchema
