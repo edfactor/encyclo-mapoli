@@ -1,5 +1,4 @@
 ﻿#if DEBUG || RUSS
-using System.Diagnostics;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.UnitTests.Base;
@@ -33,6 +32,13 @@ public class DatabaseDataTest : IClassFixture<ApiTestBase<Program>>
         await ctx.PayProfits.Take(5).ToListAsync();
         await ctx.ProfitDetails.Take(5).ToListAsync();
         await ctx.Distributions.Take(5).ToListAsync();
+
+
+        var readOnlyOptions = new DbContextOptionsBuilder<ProfitSharingReadOnlyDbContext>().UseOracle(connectionString).EnableSensitiveDataLogging()
+            .LogTo(_output.WriteLine).Options;
+        var readctx = new ProfitSharingReadOnlyDbContext(readOnlyOptions);
+
+        await readctx.AccountingPeriods.Take(5).ToListAsync();
 
         Assert.True(true);
     }

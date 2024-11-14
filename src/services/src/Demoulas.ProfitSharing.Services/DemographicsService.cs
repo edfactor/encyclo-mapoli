@@ -66,7 +66,7 @@ public class DemographicsService : IDemographicsServiceInternal
         return _dataContextFactory.UseReadOnlyContext(c =>
         {
             return c.Jobs.Where(c =>
-                    c.JobStatusId == JobStatus.Constants.Completed && (c.JobTypeId == JobType.Constants.Full || c.JobTypeId == JobType.Constants.Delta))
+                    c.JobStatusId == JobStatus.Constants.Completed && (c.JobTypeId == JobType.Constants.EmployeeSyncFull || c.JobTypeId == JobType.Constants.PayrollSyncFull))
                 .MaxAsync(j => j.Completed, cancellationToken: cancellationToken);
         });
     }
@@ -96,7 +96,7 @@ public class DemographicsService : IDemographicsServiceInternal
 
             // Create lookup dictionaries for both OracleHcmId and SSN
             var demographicOracleHcmIdLookup = demographicsEntities.ToDictionary(entity => entity.OracleHcmId);
-            var demographicSsnLookup = demographicsEntities.ToLookup(entity => (entity.Ssn, entity.BadgeNumber));
+            var demographicSsnLookup = demographicsEntities.ToLookup(entity => (entity.Ssn, entity.EmployeeId));
             var ssnCollection = demographicsEntities.Select(d => d.Ssn).ToHashSet();
             var dobCollection = demographicsEntities.Select(d => d.DateOfBirth).ToHashSet();
 
@@ -117,7 +117,7 @@ public class DemographicsService : IDemographicsServiceInternal
                 // Log duplicate SSN entries to the audit table
                 var audit = duplicateSsnEntities.Select(d => new DemographicSyncAudit
                 {
-                    BadgeNumber = d.BadgeNumber,
+                    BadgeNumber = d.EmployeeId,
                     InvalidValue = d.Ssn.MaskSsn(),
                     Message = "Duplicate SSNs found in the database.",
                     UserName = "System",
@@ -148,7 +148,7 @@ public class DemographicsService : IDemographicsServiceInternal
                     catch (InvalidOperationException e) when (e.Message.Contains(
                                                                   "When attaching existing entities, ensure that only one entity instance with a given key value is attached."))
                     {
-                        _logger.LogCritical(e, "Failed to process Demographic/OracleHCM employee record for EmployeeId {EmployeeId}", entity.BadgeNumber);
+                        _logger.LogCritical(e, "Failed to process Demographic/OracleHCM employee record for EmployeeId {EmployeeId}", entity.EmployeeId);
                         try
                         {
                             await context.SaveChangesAsync(cancellationToken);
@@ -178,7 +178,7 @@ public class DemographicsService : IDemographicsServiceInternal
                 }
                 else
                 {
-                    var entityBySsn = demographicSsnLookup[(existingEntity.Ssn, existingEntity.BadgeNumber)].FirstOrDefault();
+                    var entityBySsn = demographicSsnLookup[(existingEntity.Ssn, existingEntity.EmployeeId)].FirstOrDefault();
                     if (entityBySsn != null)
                     {
                         incomingEntity = entityBySsn;
@@ -209,7 +209,7 @@ public class DemographicsService : IDemographicsServiceInternal
     private static void UpdateEntityValues(Demographic existingEntity, Demographic incomingEntity, DateTime modificationDate)
     {
         existingEntity.Ssn = incomingEntity.Ssn;
-        existingEntity.BadgeNumber = incomingEntity.BadgeNumber;
+        existingEntity.EmployeeId = incomingEntity.EmployeeId;
         existingEntity.StoreNumber = incomingEntity.StoreNumber;
         existingEntity.DepartmentId = incomingEntity.DepartmentId;
         existingEntity.PayClassificationId = incomingEntity.PayClassificationId;

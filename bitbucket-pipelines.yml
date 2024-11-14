@@ -88,12 +88,37 @@ definitions:
       artifacts:
         - dist\**
       script:
-        - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
+        # Set environment variables
         - ${env:ENV} = "uat"
+
+        # Navigate to the UI source directory
         - cd .\src\UI
-        - install --legacy-peer-deps;
-        - ${env:NPM} run build:${env:ENV}
-        - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.$env:ENV.zip" -Force        
+
+        # Create and configure .npmrc file
+        - |
+            @"
+            registry=https://registry.npmjs.org/
+            smart-ui-library:registry=https://demoulas.jfrog.io/artifactory/api/npm/npm-smart-registry-local/
+            //demoulas.jfrog.io/artifactory/api/npm/npm-smart-registry-local/:_authToken=$env:JFROG_WORKSPACE_VARIABLE
+            "@ | Out-File -FilePath .npmrc -Encoding ASCII
+
+        # Install dependencies with legacy peer deps
+        - C:\nvm\v20.4.0\npm.cmd install --legacy-peer-deps
+
+        # Run the build process for the specified environment
+        - C:\nvm\v20.4.0\npm.cmd run build:${env:ENV}
+
+        # Copy the web.config file to the build directory
+        - Copy-Item -Path ".\src\web.config" -Destination "..\..\src\UI\build" -Force
+
+        # Ensure the dist directory exists before compressing
+        - if (!(Test-Path -Path "..\..\dist")) {
+            New-Item -Path "..\..\dist" -ItemType Directory
+            }
+
+        # Compress the build output into a zip file in the dist folder
+        - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.${env:ENV}.zip" -Force
+
 
     create-frontend-artifact-prod: &create-frontend-artifact-prod
       name: Create FrontEnd Artifacts (PROD)     
@@ -110,8 +135,8 @@ definitions:
         - ${env:NPM} run build:${env:ENV}
         - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.$env:ENV.zip" -Force   
         
-    upgrade-database: &upgrade-database
-      name: Upgrade Database
+    upgrade-qa-database: &upgrade-qa-database
+      name: Upgrade QA Database
       runs-on:
         - windows
         - self.hosted
@@ -136,12 +161,9 @@ pipelines:
           - step: *test-frontend
       - parallel:
           - step: *create-api-artifacts
-          - step: *create-frontend-artifact-qa
-          #- step: *create-frontend-artifact-uat
-          #- step: *create-frontend-artifact-prod
+          - step: *create-frontend-artifact-qa          
            # Deployment Stage
       
-      - step: *upgrade-database
       - step:
           name: "Application Deployment"
           runs-on:
@@ -152,8 +174,24 @@ pipelines:
           script:
             - echo "Deploying application..."
             - $env:API_SERVER_QA = "appt23d"            
-            - powershell .\scripts\webDeploy.ps1 QA $env:API_SERVER_QA      
-  
+            - powershell .\scripts\webDeploy.ps1 QA $env:API_SERVER_QA
+      - parallel:
+          - step: *upgrade-qa-database
+          - step: *create-frontend-artifact-uat
+      - step:
+          name: "Application Deployment"
+          runs-on:
+            - windows
+            - self.hosted
+          deployment: UAT
+          trigger: "manual"     
+          script:
+            - echo "Deploying application..."
+            - $env:API_SERVER_UAT = "appt24d"            
+            - powershell .\scripts\webDeploy.ps1 UAT $env:API_SERVER_UAT
+      #- step: *create-frontend-artifact-prod
+
+
     develop:
       - parallel:
           - step: *build-and-test-backend
@@ -174,5 +212,5 @@ pipelines:
                         - upgrade-db
                         - drop-recreate-db
                         - import-from-ready                        
-        - step: *upgrade-database
+        - step: *upgrade-qa-database
 

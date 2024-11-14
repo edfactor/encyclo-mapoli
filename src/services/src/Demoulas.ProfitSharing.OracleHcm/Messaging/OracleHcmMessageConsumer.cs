@@ -29,12 +29,12 @@ public class OracleHcmMessageConsumer : IConsumer<MessageRequest<OracleHcmJobReq
         CancellationToken cancellationToken = context.CancellationToken;
         var message = context.Message;
 
-        if (message.Body.JobType is JobType.Constants.Full or JobType.Constants.Delta)
+        if (message.Body.JobType is JobType.Constants.EmployeeSyncFull or JobType.Constants.PayrollSyncFull)
         {
             bool jobIsAlreadyRunning = await _dataContext.UseReadOnlyContext(c =>
             {
                 var runningJobs = c.Jobs
-                    .Where(j => (j.JobTypeId == JobType.Constants.Full || j.JobTypeId == JobType.Constants.Delta) &&
+                    .Where(j => (j.JobTypeId == JobType.Constants.EmployeeSyncFull || j.JobTypeId == JobType.Constants.PayrollSyncFull) &&
                                 j.JobStatusId == JobStatus.Constants.Running
                                 && j.Started > DateTime.Now.AddHours(-8));
 

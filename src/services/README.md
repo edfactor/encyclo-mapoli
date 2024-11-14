@@ -7,7 +7,7 @@
 ### Getting Started
 Install 3rd Party Libraries:
 
-1. Visual Studio Professional 2022 (17.11.3) or higher installed - https://visualstudio.microsoft.com/downloads/
+1. Visual Studio Professional 2022 (17.11.5) or higher installed - https://visualstudio.microsoft.com/downloads/
 
     ![Workload](./setup_images/workload.PNG)
     - Install the "ASP.net and web development", "Azure" workload, and ".NET desktop development" workloads
@@ -23,10 +23,10 @@ Install 3rd Party Libraries:
     - Locate Demoulas.ProfitSharing.sln and open with Visual Studio.
 2. Set the 'Demoulas.ProfitSharing.AppHost' project as your startup project
     - Find the project, right click and choose "set as startup project"
-3. Check for ngds.nuget NuGet package source
+3. Check for ArtifactoryCloud NuGet package source
     - Open a command prompt or terminal window.
     - run dotnet nuget list source
-    - If "ngds.nuget" is not in the list, reach out to a team member and get the connection details
+    - If "ArtifactoryCloud" is not in the list, reach out to a team member and get the connection details
 3. Get secrets.json from one of the team members
     - [Safe storage of app secrets in development](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-8.0&tabs=windows#manage-user-secrets-with-visual-studio)
 4. F5/Run, it's that simple.

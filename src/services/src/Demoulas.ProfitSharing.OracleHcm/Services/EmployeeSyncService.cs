@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Bogus.Extensions.UnitedStates;
-using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
@@ -25,7 +24,7 @@ namespace Demoulas.ProfitSharing.OracleHcm.Services;
 /// </summary>
 public sealed class EmployeeSyncService : IEmployeeSyncService
 {
-    private readonly OracleDemographicsService _oracleDemographicsService;
+    private readonly OracleDemographicsSyncClient _oracleDemographicsSyncClient;
     private readonly IDemographicsServiceInternal _demographicsService;
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
     private readonly OracleHcmConfig _oracleHcmConfig;
@@ -37,7 +36,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
         OracleHcmConfig oracleHcmConfig,
         OracleEmployeeValidator employeeValidator)
     {
-        _oracleDemographicsService = new OracleDemographicsService(httpClient, oracleHcmConfig);
+        _oracleDemographicsSyncClient = new OracleDemographicsSyncClient(httpClient, oracleHcmConfig);
         _demographicsService = demographicsService;
         _profitSharingDataContextFactory = profitSharingDataContextFactory;
         _oracleHcmConfig = oracleHcmConfig;
@@ -50,7 +49,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
 
         var job = new Job
         {
-            JobTypeId = JobType.Constants.Full,
+            JobTypeId = JobType.Constants.EmployeeSyncFull,
             StartMethodId = StartMethod.Constants.System,
             RequestedBy = requestedBy,
             JobStatusId = JobStatus.Constants.Running,
@@ -63,22 +62,28 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
             return db.SaveChangesAsync(cancellationToken);
         }, cancellationToken);
 
+        bool success = true;
         try
         {
             await CleanAuditError(cancellationToken);
-            var oracleHcmEmployees = _oracleDemographicsService.GetAllEmployees(cancellationToken);
+            var oracleHcmEmployees = _oracleDemographicsSyncClient.GetAllEmployees(cancellationToken);
             var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, requestedBy, cancellationToken);
             await _demographicsService.AddDemographicsStream(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
         }
         catch (Exception ex)
         {
+            success = false;
             await AuditError(0, new[] { new FluentValidation.Results.ValidationFailure("Error", ex.Message) }, requestedBy, cancellationToken);
         }
         finally
         {
-            job.Completed = DateTime.Now;
-            job.JobStatusId = JobStatus.Constants.Completed;
-            await _profitSharingDataContextFactory.UseWritableContext(db => db.SaveChangesAsync(cancellationToken), cancellationToken);
+            await _profitSharingDataContextFactory.UseWritableContext(db =>
+            {
+                return db.Jobs.Where(j=> j.Id == job.Id).ExecuteUpdateAsync(s => s
+                    .SetProperty(b => b.Completed, b => DateTime.Now)
+                    .SetProperty(b => b.JobStatusId, b => success ? JobStatus.Constants.Completed : JobStatus.Constants.Failed),
+                    cancellationToken: cancellationToken);
+            }, cancellationToken);
         }
     }
 

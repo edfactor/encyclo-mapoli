@@ -1,12 +1,10 @@
 ﻿using System.Net;
-using System.Threading;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Eligibility;
 using Demoulas.ProfitSharing.Security;
-using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.UnitTests.Base;
 using Demoulas.ProfitSharing.UnitTests.Extensions;
 using Demoulas.ProfitSharing.UnitTests.Fakes;
@@ -221,7 +219,7 @@ public class GetEligibleEmployeesTests : ApiTestBase<Api.Program>
         demo.OracleHcmId = testEmployee.OracleHcmId;
         demo.Id = testEmployee.Id;
         demo.ContactInfo.FullName = testEmployee.FullName;
-        demo.BadgeNumber = testEmployee.BadgeNumber;
+        demo.EmployeeId = testEmployee.BadgeNumber;
         demo.DateOfBirth = convertAgeToBirthDate(TestProfitYear, testEmployee.Age);
         demo.EmploymentStatusId = testEmployee.EmploymentStatusId;
 

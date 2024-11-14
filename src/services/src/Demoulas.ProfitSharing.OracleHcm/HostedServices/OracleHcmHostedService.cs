@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Common.Configuration;
+﻿using System.Diagnostics;
+using Demoulas.ProfitSharing.Common.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Jobs;
 using Microsoft.Extensions.Hosting;
 using Quartz;
@@ -34,7 +35,7 @@ internal sealed class OracleHcmHostedService : IHostedService
 
         var employeeSyncTrigger = TriggerBuilder.Create()
             .WithIdentity("employeeSyncTrigger")
-            .StartNow()
+            .StartAt(DateTimeOffset.UtcNow.AddMinutes(Debugger.IsAttached ? 0 : 5))
             .WithSimpleSchedule(x =>
             {
                 x.WithIntervalInHours(_oracleHcmConfig.IntervalInHours)
@@ -49,7 +50,7 @@ internal sealed class OracleHcmHostedService : IHostedService
 
         var payrollSyncTrigger = TriggerBuilder.Create()
             .WithIdentity("payrollSyncTrigger")
-            .StartAt(DateTimeOffset.UtcNow.AddMinutes(5))
+            .StartAt(DateTimeOffset.UtcNow.AddMinutes(Debugger.IsAttached ? 0 : 15))
             .WithSimpleSchedule(x =>
             {
                 x.WithIntervalInHours(_oracleHcmConfig.IntervalInHours)

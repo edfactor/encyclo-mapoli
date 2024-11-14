@@ -1,5 +1,6 @@
 ﻿using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.Common.Data.Services.Entities.Contexts;
+using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.ProfitSharing.Data.Contexts;
 
 namespace Demoulas.ProfitSharing.Data.Interfaces;

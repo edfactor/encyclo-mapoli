@@ -27,7 +27,7 @@ public partial class DemographicMapper
         return new Demographic
         {
             Ssn = source.Ssn,
-            BadgeNumber = source.BadgeNumber,
+            EmployeeId = source.BadgeNumber,
             OracleHcmId = source.OracleHcmId,
             StoreNumber = source.StoreNumber,
             DepartmentId = source.DepartmentId,

@@ -5,7 +5,6 @@ using FluentAssertions;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.Common.Contracts.Contracts.Response;
-using Demoulas.ProfitSharing.Services.Reports;
 using JetBrains.Annotations;
 using Demoulas.ProfitSharing.UnitTests.Base;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -20,8 +19,9 @@ using CsvHelper.Configuration;
 using CsvHelper;
 using System.Globalization;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
+using Demoulas.ProfitSharing.Common.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -32,7 +32,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
 
     public MilitaryAndRehireProfitSummaryTests()
     {
-        MilitaryAndRehireService mockService = new MilitaryAndRehireService(MockDbContextFactory, new CalendarService(MockDbContextFactory));
+        IMilitaryAndRehireService mockService = ServiceProvider?.GetRequiredService<IMilitaryAndRehireService>()!;
         _endpoint = new MilitaryAndRehireProfitSummaryEndpoint(mockService);
     }
 
@@ -198,7 +198,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
 
         await c.SaveChangesAsync();
 
-        example.BadgeNumber = demo.BadgeNumber;
+        example.BadgeNumber = demo.EmployeeId;
         example.Ssn = demo.Ssn.MaskSsn();
         example.FullName = demo.ContactInfo.FullName;
         example.CompanyContributionYears = 0;

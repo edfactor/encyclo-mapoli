@@ -41,7 +41,7 @@ public class OracleHcmFullSyncEndpoint : EndpointWithoutRequest<SendMessageRespo
             ApplicationName = Env.ApplicationName,
             Body = new OracleHcmJobRequest
             {
-                JobType = JobType.Constants.Full,
+                JobType = JobType.Constants.EmployeeSyncFull,
                 StartMethod = StartMethod.Constants.OnDemand,
                 RequestedBy = _appUser.UserName ?? "UnKnown User"
             }

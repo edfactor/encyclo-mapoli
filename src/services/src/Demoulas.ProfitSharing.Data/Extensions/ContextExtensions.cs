@@ -1,7 +1,6 @@
 ﻿using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.MassTransit;
-using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.NotOwned;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Data.Extensions;
@@ -13,7 +12,7 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new BeneficiaryKindMap());
         modelBuilder.ApplyConfiguration(new BeneficiaryMap());
         modelBuilder.ApplyConfiguration(new BeneficiaryTypeMap());
-        modelBuilder.ApplyConfiguration(new CaldarRecordMap());
+        modelBuilder.ApplyConfiguration(new AccountingPeriodConfiguration { ExcludeFromMigrations = false, SeedDataAfterMigrations = true });
         modelBuilder.ApplyConfiguration(new CommentTypeMap());
         modelBuilder.ApplyConfiguration(new CountryMap());
         modelBuilder.ApplyConfiguration(new DepartmentMap());

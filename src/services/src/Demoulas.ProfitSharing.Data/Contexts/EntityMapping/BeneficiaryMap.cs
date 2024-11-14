@@ -21,10 +21,10 @@ public sealed class BeneficiaryMap : IEntityTypeConfiguration<Beneficiary>
             .HasPrecision(5)
             .HasColumnName("PSN_SUFFIX");
 
-        _ = builder.HasIndex(e => e.BadgeNumber, "IX_BadgeNumber");
-        _ = builder.Property(e => e.BadgeNumber)
+        _ = builder.HasIndex(e => e.EmployeeId, "IX_EMPLOYEE_ID");
+        _ = builder.Property(e => e.EmployeeId)
             .HasPrecision(7)
-            .HasColumnName("BADGE_NUMBER");
+            .HasColumnName("EMPLOYEE_ID");
 
         _ = builder.Property(e => e.DemographicId)
             .HasPrecision(11)
