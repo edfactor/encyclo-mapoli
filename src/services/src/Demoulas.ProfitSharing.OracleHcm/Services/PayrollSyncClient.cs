@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -29,6 +30,7 @@ public class PayrollSyncClient
     private readonly HttpClient _httpClient;
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
     private readonly ILogger<PayrollSyncClient> _logger;
+    private readonly JsonSerializerOptions _jsonSerializerOptions;
 
     public PayrollSyncClient(HttpClient httpClient, 
         IProfitSharingDataContextFactory profitSharingDataContextFactory,
@@ -37,6 +39,7 @@ public class PayrollSyncClient
         _httpClient = httpClient;
         _profitSharingDataContextFactory = profitSharingDataContextFactory;
         _logger = logger;
+        _jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
     }
 
     // Method to get payroll process results for a list of person IDs
@@ -56,7 +59,7 @@ public class PayrollSyncClient
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var results = await response.Content.ReadFromJsonAsync<PayrollRoot>(cancellationToken);
+                    var results = await response.Content.ReadFromJsonAsync<PayrollRoot>(_jsonSerializerOptions, cancellationToken);
 
                     objectActionIds = results!.Items
                         .Where(result => result is { PayrollActionId: 2003, ObjectActionId: not null })
