@@ -48,7 +48,7 @@ public sealed class CommentType : ILookupTable<byte>
         return Id.GetHashCode();
     }
 
-    public static implicit operator int(CommentType commentType)
+    public static implicit operator byte(CommentType commentType)
     {
         return commentType.Id;
     }
