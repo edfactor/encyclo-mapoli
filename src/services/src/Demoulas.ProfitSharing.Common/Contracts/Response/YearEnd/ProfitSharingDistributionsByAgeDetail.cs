@@ -5,7 +5,8 @@ public sealed record ProfitSharingDistributionsByAgeDetail
     public int EmployeeCount { get; set; }
     public decimal Amount { get; set; }
     public required string EmploymentType { get; set; }
-    
+    public byte? CommentTypeId { get; set; }
+
 
     public static ProfitSharingDistributionsByAgeDetail ResponseExample()
     {

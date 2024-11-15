@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.Xml;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Common.Interfaces;
+﻿using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
-public sealed class CommentType : ILookupTable<int>
+public sealed class CommentType : ILookupTable<byte>
 {
-    public required int Id { get; set; }
+    public required byte Id { get; set; }
     public required string Name { get; set; }
 
     public static class Constants

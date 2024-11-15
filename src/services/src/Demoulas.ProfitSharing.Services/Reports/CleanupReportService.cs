@@ -325,7 +325,7 @@ public class CleanupReportService : ICleanupReportService
                     orderby nameAndDob.LastName, nameAndDob.FirstName
                     select new DistributionsAndForfeitureResponse()
                     {
-                        BadgeNumber = nameAndDob.BadgeNumber,
+                        EmployeeId = nameAndDob.BadgeNumber,
                         EmployeeSsn = pd.Ssn.MaskSsn(),
                         EmployeeName = $"{nameAndDob.LastName}, {nameAndDob.FirstName}",
                         DistributionAmount = distributionProfitCodes.Contains(pd.ProfitCodeId) ? pd.Forfeiture : 0,
@@ -471,7 +471,7 @@ public class CleanupReportService : ICleanupReportService
                       .ThenBy(p => p.pp.FirstName)
                       .Select(x => new YearEndProfitSharingReportResponse()
                       {
-                          BadgeNumber = x.pp.EmployeeId,
+                          EmployeeId = x.pp.EmployeeId,
                           EmployeeName = $"{x.pp.LastName}, {x.pp.FirstName}",
                           StoreNumber = x.pp.StoreNumber,
                           EmployeeTypeCode = x.pp.EmploymentTypeId,

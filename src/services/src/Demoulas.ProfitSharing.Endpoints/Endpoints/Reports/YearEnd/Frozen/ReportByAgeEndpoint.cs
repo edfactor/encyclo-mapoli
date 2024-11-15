@@ -11,7 +11,7 @@ using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen.R
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
 
-public class ReportByAgeEndpoint : EndpointWithCsvBase<ProfitYearRequest, ProfitSharingDistributionsByAge, ProfitSharingDistributionsByAgeMapper>
+public class ReportByAgeEndpoint : EndpointWithCsvBase<ProfitYearRequest, ProfitSharingDistributionsByAgeDetail, ProfitSharingDistributionsByAgeMapper>
 {
     private readonly IFrozenReportService _frozenReportService;
 
@@ -58,18 +58,20 @@ public class ReportByAgeEndpoint : EndpointWithCsvBase<ProfitYearRequest, Profit
         base.Configure();
     }
 
-    public override Task<ReportResponseBase<ProfitSharingDistributionsByAge>> GetResponse(ProfitYearRequest req, CancellationToken ct)
+    public override async Task<ReportResponseBase<ProfitSharingDistributionsByAgeDetail>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
-        return _frozenReportService.GetDistributionsByAgeYear(req, ct);
+        return await _frozenReportService.GetDistributionsByAgeYear(req, ct);
     }
 
-    public class ProfitSharingDistributionsByAgeMapper : ClassMap<ProfitSharingDistributionsByAge>
+    public class ProfitSharingDistributionsByAgeMapper : ClassMap<ProfitSharingDistributionsByAgeDetail>
     {
         public ProfitSharingDistributionsByAgeMapper()
         {
-            Map(m => m.Age).Index(0).Name("AGE");
-            Map(m => m.EmployeeCount).Index(1).Name("EMPS");
-            Map(m => m.Amount).Index(2).Name("AMOUNT");
+#pragma warning disable S125
+            //Map(m => m.Age).Index(0).Name("AGE");
+#pragma warning restore S125
+            //Map(m => m.EmployeeCount).Index(1).Name("EMPS");
+            //Map(m => m.Amount).Index(2).Name("AMOUNT");
         }
     }
 }
