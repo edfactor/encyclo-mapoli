@@ -30,9 +30,12 @@ definitions:
            - windows
            - self.hosted
           script:
+           - nvm current
            - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
           artifacts:
             - build/**
+          after-script: 
+            - nvm use 16.14.2
    
     create-api-artifacts: &create-api-artifacts
       name: Create API Artifacts      
