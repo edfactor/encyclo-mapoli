@@ -183,7 +183,8 @@ public class FrozenReportService : IFrozenReportService
         {
             ReportName = "PROFIT SHARING DISTRIBUTIONS BY AGE",
             ReportDate = DateTimeOffset.Now,
-            Response = new PaginatedResponseDto<ProfitSharingDistributionsByAgeDetail>(req) { Results = details },
+            
+            TotalResults = details,
             TotalEmployees = totalEmployees,
             HardshipTotalEmployees = hardshipTotalEmployees,
             HardshipTotalAmount = hardshipTotalAmount,
@@ -198,7 +199,11 @@ public class FrozenReportService : IFrozenReportService
             PartTimeTotalEmployees = (short)partTimeDetails.Sum(d => d.EmployeeCount),
             PartTimeTotalAmount = partTimeDetails.Sum(d => d.Amount),
             PartTimeHardshipTotalEmployees = (short)partTimeDetails.Where(d => d.CommentTypeId == CommentType.Constants.Hardship).Sum(d => d.EmployeeCount),
-            PartTimeHardshipTotalAmount = partTimeDetails.Where(d => d.CommentTypeId == CommentType.Constants.Hardship).Sum(d => d.Amount)
+            PartTimeHardshipTotalAmount = partTimeDetails.Where(d => d.CommentTypeId == CommentType.Constants.Hardship).Sum(d => d.Amount),
+            
+            
+            // Not a paginated report
+            Response = new PaginatedResponseDto<ProfitSharingDistributionsByAgeDetail>(req)
         };
     }
 }

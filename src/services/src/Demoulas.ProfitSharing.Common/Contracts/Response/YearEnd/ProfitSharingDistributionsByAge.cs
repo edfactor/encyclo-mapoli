@@ -31,6 +31,7 @@ public sealed record ProfitSharingDistributionsByAge : ReportResponseBase<Profit
     public decimal PartTimeHardshipTotalAmount { get; set; }
     public decimal PartTimeDistributionTotalAmount { get; set; }
 
+    public IEnumerable<ProfitSharingDistributionsByAgeDetail> TotalResults { get; init; } = FrozenSet<ProfitSharingDistributionsByAgeDetail>.Empty;
     public IEnumerable<ProfitSharingDistributionsByAgeDetail> FullTimeResults { get; init; } = FrozenSet<ProfitSharingDistributionsByAgeDetail>.Empty;
     public IEnumerable<ProfitSharingDistributionsByAgeDetail> PartTimeResults { get; init; } = FrozenSet<ProfitSharingDistributionsByAgeDetail>.Empty;
 

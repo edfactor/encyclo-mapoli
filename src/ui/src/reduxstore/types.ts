@@ -239,3 +239,55 @@ export interface EligibleEmployeeResponseDto {
   reportDate: string;
   response: Paged<EligibleEmployee>;
 }
+
+export type ProfitSharingDistributionsByAge = {
+  reportName: string
+  reportDate: string
+  response: {
+    pageSize: number
+    currentPage: number
+    totalPages: number
+    total: number
+    results: Array<{
+      totalEmployees: number
+      hardshipTotalEmployees: number
+      totalAmount: number
+      hardshipTotalAmount: number
+      distributionTotalAmount: number
+      fullTimeTotalEmployees: number
+      fullTimeHardshipTotalEmployees: number
+      fullTimeTotalAmount: number
+      fullTimeHardshipTotalAmount: number
+      fullTimeDistributionTotalAmount: number
+      partTimeTotalEmployees: number
+      partTimeHardshipTotalEmployees: number
+      partTimeTotalAmount: number
+      partTimeHardshipTotalAmount: number
+      partTimeDistributionTotalAmount: number
+      totalResults:  Array<{
+        age: number
+        employeeCount: number
+        amount: number
+        employmentType: string
+        commentTypeId: number
+      }>
+      fullTimeResults: Array<{
+        age: number
+        employeeCount: number
+        amount: number
+        employmentType: string
+        commentTypeId: number
+      }>
+      partTimeResults: Array<{
+        age: number
+        employeeCount: number
+        amount: number
+        employmentType: string
+        commentTypeId: number
+      }>
+      reportName: string
+      reportDate: string
+    }>
+  }
+}
+

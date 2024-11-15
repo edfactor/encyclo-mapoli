@@ -15,7 +15,8 @@ const yearEndReports: RouteCategory = {
     { caption: "Military and Rehire Profit Summary", route: "/military-and-rehire-profit-summary" },
     { caption: "Distributions and Forfeitures", route: "/distributions-and-forfeitures" },
     { caption: "Manage Executive Hours and Dollars", route: "/manage-executive-hours-and-dolars"},
-    { caption: "Get Eligible Employees", route: "/eligible-employees" }
+    { caption: "Get Eligible Employees", route: "/eligible-employees" },
+    { caption: "Get Distributions by Age", route: "/distributions-by-age" }
   ]
 };
 
