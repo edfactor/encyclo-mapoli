@@ -30,12 +30,9 @@ definitions:
            - windows
            - self.hosted
           script:
-           - nvm current
            - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
           artifacts:
             - build/**
-          after-script: 
-            - nvm use 16.14.2
    
     create-api-artifacts: &create-api-artifacts
       name: Create API Artifacts      
@@ -68,7 +65,6 @@ definitions:
       artifacts:
         - dist\**
       script:
-        - nvm current
         - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
         - ${env:ENV} = "qa"
         - cd .\src\UI
@@ -82,9 +78,7 @@ definitions:
         - C:\nvm\v20.4.0\npm.cmd run build:${env:ENV}
         - Copy-Item -Path ".\src\web.config" -Destination "..\..\src\UI\build"
         - New-Item -Path "..\..\dist" -ItemType Directory
-        - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.${env:ENV}.zip" -Force   
-      after-script: 
-        - nvm use 16.14.2
+        - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.${env:ENV}.zip" -Force        
 
     create-frontend-artifact-uat: &create-frontend-artifact-uat
       name: Create FrontEnd Artifacts (UAT)     
