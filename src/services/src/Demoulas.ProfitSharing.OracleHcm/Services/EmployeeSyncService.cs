@@ -145,7 +145,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
             yield return new DemographicsRequest
             {
                 OracleHcmId = employee.PersonId,
-                BadgeNumber = employee.EmployeeId,
+                EmployeeId = employee.EmployeeId,
                 DateOfBirth = employee.DateOfBirth,
                 HireDate = employee.WorkRelationship?.StartDate ?? SqlDateTime.MinValue.Value.ToDateOnly(),
                 TerminationDate = employee.WorkRelationship?.TerminationDate,

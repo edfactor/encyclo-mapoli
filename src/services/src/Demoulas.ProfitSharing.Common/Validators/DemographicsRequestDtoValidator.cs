@@ -12,7 +12,7 @@ public class DemographicsRequestDtoValidator : Validator<DemographicsRequest>
             .NotEmpty()
             .InclusiveBetween(1000000, 999_99_9999).WithMessage("Must be a valid SSN number.");
 
-        RuleFor(x => x.BadgeNumber)
+        RuleFor(x => x.EmployeeId)
             .InclusiveBetween(1, 9_999_999).WithMessage("EmployeeId must be a 7-digit number.");
 
         RuleFor(x => x.OracleHcmId)
