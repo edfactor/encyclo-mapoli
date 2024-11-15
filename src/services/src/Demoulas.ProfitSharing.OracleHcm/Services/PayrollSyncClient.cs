@@ -117,7 +117,7 @@ public class PayrollSyncClient
 
                     if (response.IsSuccessStatusCode)
                     {
-                        var balanceResults = await response.Content.ReadFromJsonAsync<BalanceRoot>(cancellationToken);
+                        var balanceResults = await response.Content.ReadFromJsonAsync<BalanceRoot>(_jsonSerializerOptions, cancellationToken);
 
                         decimal total = balanceResults!.Items.Where(i=> string.CompareOrdinal(i.DimensionName, dimensionName) == 0)
                             .Sum(b => b.TotalValue1);
