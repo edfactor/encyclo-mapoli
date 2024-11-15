@@ -3,8 +3,11 @@ using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Data.Entities;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Extensions;
-internal static class WorkRelationshipAssignmentExtensions
+internal static partial class WorkRelationshipAssignmentExtensions
 {
+    [GeneratedRegex(@"(?:.*?-){2}(\d+)", RegexOptions.Compiled)]
+    private static partial Regex _departmentRegex();
+
     private static readonly List<Department> _departmentArray =
     [
         new Department { Id = Department.Constants.Grocery, Name = "Grocery" },
@@ -67,7 +70,7 @@ internal static class WorkRelationshipAssignmentExtensions
         }
 
         // Regular expression to find the first numeric sequence after the second dash
-        var match = Regex.Match(work.PositionCode, @"(?:.*?-){2}(\d+)", RegexOptions.Compiled);
+        var match = _departmentRegex().Match(work.PositionCode);
         if (match.Success && byte.TryParse(match.Groups[1].Value, out byte departmentId))
         {
             return departmentId;
