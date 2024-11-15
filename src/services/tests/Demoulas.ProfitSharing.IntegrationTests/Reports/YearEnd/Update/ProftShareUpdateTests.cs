@@ -2,94 +2,135 @@
 using System.Reflection;
 using System.Text;
 using FluentAssertions;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Oracle.ManagedDataAccess.Client;
-using Xunit;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
 public class ProftShareUpdateTests
 {
     [Fact]
-    public void EnsureSmartReportMatchesCobolReport()
+    public void Ensure2023ReportMatchesReady()
     {
-        var configuration = new ConfigurationBuilder().AddUserSecrets<ProftShareUpdateTests>().Build();
-        string connectionString = configuration["ConnectionStrings:ProfitSharing-ObfuscatedPristine"]!;
-
-        using (var connection = new OracleConnection(connectionString))
-        {
-            connection.Open();
-            runPay444(connection);
-        }
-    }
-
-    private static void runPay444(OracleConnection connection)
-    {
-        //- * Meta-sw (2) = 1 : Special Run
-        //- * Meta-sw (3) = 1 : Do NOT ask for Input Values.
-        //- * Meta-sw (4) = 1 : Manual Adjustments
-        //- * Meta-sw (5) = 1 : Secondary Earnings
-        //- * Meta-sw (8) = 1 : Do NOT update PAYR/PAYBEN
-
+        // Arrange
         Dictionary<int, int> metaSw = new();
-        metaSw[2] = 0;
-        metaSw[3] = 1;
-        metaSw[4] = 0;
-        metaSw[5] = 0;
-        metaSw[8] = 1; // reports only mode
-
+        metaSw[2] = 0; // Special Run
+        metaSw[3] = 1; // Do NOT ask for Input Values.
+        metaSw[4] = 0; // Manual Adjustments
+        metaSw[5] = 0; // Secondary Earnings
+        metaSw[8] = 1; // Do NOT update PAYR/PAYBEN
+        using OracleConnection connection = GetOracleConnection();
+        connection.Open();
         PAY444 pay444 = new();
-        var etext = "2023*Something";
+        int year = 2023;
         pay444.connection = connection;
-        pay444.m015MainProcessing(metaSw, etext);
+        String reportName = "psupdate-pay444-report2023.txt";
+        pay444.TodaysDateTime = new DateTime(2024, 11, 12, 9, 43, 0);  // time report was generated
 
-        var sb = new StringBuilder();
-        for (var i = 0; i < pay444.outputLines.Count; i++)
-        {
-            sb.Append(pay444.outputLines[i]);
-            // Cobol is smart enough to not emit a Newline if the next character is a form feed.
-            if (i < pay444.outputLines.Count - 2 && !pay444.outputLines[i + 1].StartsWith("\f")) sb.Append("\n");
-        }
-        sb.Append("\n");
-        var actual = sb.ToString();
+        // Act
+        pay444.m015MainProcessing(metaSw, year);
 
-        string expected = ReadEmbeddedResource("psupdate-pay444-report2023.txt").Replace("\r", "");
+        // Assert
+        string actual = CollectLines(pay444.outputLines);
+        string expected = ReadEmbeddedResource(reportName).Replace("\r", "");
 
-        if (expected != actual && File.Exists("/Program Files/Meld/Meld.exe"))
-        {
-            string expectedFile = Path.GetTempFileName();
-            //File.WriteAllText(expectedFile, expected, Encoding.ASCII);
-            File.WriteAllBytes(expectedFile, Encoding.ASCII.GetBytes(expected));
-
-            string actualFile = Path.GetTempFileName();
-            // File.WriteAllText(actualFile, actual, Encoding.ASCII);
-            File.WriteAllBytes(actualFile, Encoding.ASCII.GetBytes(actual));
-
-
-            var startInfo = new ProcessStartInfo
-            {
-                FileName = "/Program Files/Meld/Meld.exe",
-                ArgumentList = { expectedFile, actualFile },
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true
-            };
-
-            // Start the process
-            using var process = Process.Start(startInfo);
-        }
+        PopUpExternalMeld(actual, expected);
 
         actual.Should().Be(expected);
     }
 
-    // "pay444.15.1.2.0.30000.txt"
+    [Fact]
+    public void EnsureUpdateWithValuesMatchesReady()
+    {
+        // Arrange
+        Dictionary<int, int> metaSw = new();
+        metaSw[2] = 0; // Special Run
+        metaSw[3] = 0; // Do NOT ask for Input Values.
+        metaSw[4] = 0; // Manual Adjustments
+        metaSw[5] = 0; // Secondary Earnings
+        metaSw[8] = 1; // Do NOT update PAYR/PAYBEN
+        using OracleConnection connection = GetOracleConnection();
+        connection.Open();
+        PAY444 pay444 = new();
+        int year = 2024;
+        String reportName = "psupdate-pay444.15.1.2.0.30000-2024.txt";
+        pay444.TodaysDateTime = new DateTime(2024, 11, 14, 10, 35, 0);  // time report was generated
 
+        // We should pass in the point values, but ATM they are hard coded.
+        pay444.connection = connection;
+
+        // Act
+        pay444.m015MainProcessing(metaSw, year);
+
+        // Assert
+        string actual = CollectLines(pay444.outputLines);
+        string expected = ReadEmbeddedResource(reportName).Replace("\r", "");
+
+        PopUpExternalMeld(actual, expected);
+
+        actual.Should().Be(expected);
+    }
+
+
+
+    private static OracleConnection GetOracleConnection()
+    {
+        IConfigurationRoot configuration = new ConfigurationBuilder().AddUserSecrets<ProftShareUpdateTests>().Build();
+        string connectionString = configuration["ConnectionStrings:ProfitSharing-ObfuscatedPristine"]!;
+        return new OracleConnection(connectionString);
+    }
+
+    private static string CollectLines(List<string> lines)
+    {
+        StringBuilder sb = new();
+        for (int i = 0; i < lines.Count; i++)
+        {
+            sb.Append(lines[i]);
+            // Cobol is smart enough to not emit a Newline if the next character is a form feed.
+            if (i < lines.Count - 2 && !lines[i + 1].StartsWith("\f"))
+            {
+                sb.Append("\n");
+            }
+        }
+
+        sb.Append("\n");
+        return sb.ToString();
+    }
+
+    private static void PopUpExternalMeld(string actual, string expected)
+    {
+        if (expected == actual || !File.Exists("/Program Files/Meld/Meld.exe"))
+        {
+            return;
+        }
+
+        string expectedFile = Path.GetTempFileName();
+        //File.WriteAllText(expectedFile, expected, Encoding.ASCII);
+        File.WriteAllBytes(expectedFile, Encoding.ASCII.GetBytes(expected));
+
+        string actualFile = Path.GetTempFileName();
+        // File.WriteAllText(actualFile, actual, Encoding.ASCII);
+        File.WriteAllBytes(actualFile, Encoding.ASCII.GetBytes(actual));
+
+
+        ProcessStartInfo startInfo = new()
+        {
+            FileName = "/Program Files/Meld/Meld.exe",
+            ArgumentList = { expectedFile, actualFile },
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true
+        };
+
+        // Start the process
+        using Process? process = Process.Start(startInfo);
+    }
 
     public static string ReadEmbeddedResource(string resourceName)
     {
-        using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Demoulas.ProfitSharing.IntegrationTests.Resources." + resourceName))
-        using (var reader = new StreamReader(stream!))
+        using (Stream? stream = Assembly.GetExecutingAssembly()
+                   .GetManifestResourceStream("Demoulas.ProfitSharing.IntegrationTests.Resources." + resourceName))
+        using (StreamReader reader = new(stream!))
         {
             return reader.ReadToEnd();
         }
