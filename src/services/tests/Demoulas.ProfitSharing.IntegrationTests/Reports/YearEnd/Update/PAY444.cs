@@ -36,7 +36,6 @@ public class PAY444
     private readonly WS_ENDING_BALANCE ws_ending_balance = new();
     private readonly WS_GRAND_TOTALS ws_grand_totals = new();
     private readonly WS_INDICATORS ws_indicators = new();
-    private readonly WS_PROFIT_YEAR ws_profit_year = new();
     private readonly WS_SOCIAL_SECURITY ws_social_security = new();
     private readonly XEROX_HEADER xerox_header = new();
     public OracleConnection connection = null;
@@ -288,7 +287,7 @@ public class PAY444
             INVALID_CNT += 1;
             DISPLAY("INVALID PAYPROFIT RECORD NOT UPDATED :" + PAYPROFIT_FILE_STATUS);
             DISPLAY($"{payprof_rec.PAYPROF_BADGE} = INVALID PAYPROFIT RECORD NOT UPDATED");
-            goto l210_EXIT;
+            return;
         }
 
         if (payprof_rec.PY_PROF_NEWEMP == 0)
@@ -306,14 +305,14 @@ public class PAY444
         }
         else
         {
-            goto l210_EXIT;
+            return;
         }
 
         dem_rec.DEM_BADGE = payprof_rec.PAYPROF_BADGE;
         DEMO_PROFSHARE_FILE_STATUS = READ_KEY_DEMO_PROFSHARE(dem_rec);
         if (DEMO_PROFSHARE_FILE_STATUS != "00")
         {
-            goto l210_EXIT;
+            return;
         }
 
         WS_REWRITE_WHICH = 1;
@@ -328,7 +327,7 @@ public class PAY444
         if (payprof_rec.PY_PROF_MAXCONT == 1 || META_SW[2] == 1) // Special Run. 
         {
             m410LoadProfit();
-            goto l210_EXIT;
+            return;
         }
 
         m230ComputeContribution();
@@ -363,9 +362,7 @@ public class PAY444
         m250ComputeEarnings();
 
         intermediate_values.WS_FD_XFER = ALLOCATION_TOTAL;
-
         intermediate_values.WS_FD_PXFER = PALLOCATION_TOTAL;
-
         intermediate_values.WS_FD_AMT = ws_payprofit.WS_PS_AMT;
         intermediate_values.WS_FD_DIST1 = DIST_TOTAL;
         intermediate_values.WS_FD_MIL = ws_payprofit.WS_PROF_MIL;
@@ -879,12 +876,12 @@ public class PAY444
     {
         // not needed?   DB_STATUS = MSTR_GET_REC(IDS2_REC_NAME);
 
-        ws_profit_year.WS_PROFIT_YEAR_FIRST_4 = (long)profit_detail.PROFIT_YEAR;
+        long WS_PROFIT_YEAR_FIRST_4 = (long)profit_detail.PROFIT_YEAR;
         string[] parts = profit_detail.PROFIT_YEAR.ToString().Split('.');
         long decimalPart = parts.Length > 1 ? long.Parse(parts[1]) : 0;
-        ws_profit_year.WS_PROFIT_YEAR_EXTENSION = decimalPart;
+        long WS_PROFIT_YEAR_EXTENSION = decimalPart;
 
-        if (ws_profit_year.WS_PROFIT_YEAR_FIRST_4 == EffectiveYear)
+        if (WS_PROFIT_YEAR_FIRST_4 == EffectiveYear)
         {
             if (profit_detail.PROFIT_CODE == "1" || profit_detail.PROFIT_CODE == "3")
             {
@@ -921,12 +918,12 @@ public class PAY444
                 ALLOCATION_TOTAL = ALLOCATION_TOTAL + profit_detail.PROFIT_CONT;
             }
 
-            if (ws_profit_year.WS_PROFIT_YEAR_EXTENSION == 1)
+            if (WS_PROFIT_YEAR_EXTENSION == 1)
             {
                 ws_payprofit.WS_PROF_MIL = ws_payprofit.WS_PROF_MIL + profit_detail.PROFIT_CONT;
             }
 
-            if (ws_profit_year.WS_PROFIT_YEAR_EXTENSION == 2)
+            if (WS_PROFIT_YEAR_EXTENSION == 2)
             {
                 ws_payprofit.WS_PROF_CAF = ws_payprofit.WS_PROF_CAF + profit_detail.PROFIT_EARN;
             }
@@ -940,12 +937,11 @@ public class PAY444
     {
         // MSTR_GET_REC(IDS2_REC_NAME); 
 
-        ws_profit_year.WS_PROFIT_YEAR_FIRST_4 = (long)profit_ss_detail.PROFIT_SS_YEAR;
+         long WS_PROFIT_YEAR_FIRST_4 = (long)profit_ss_detail.PROFIT_SS_YEAR;
         string[] parts = profit_ss_detail.PROFIT_SS_YEAR.ToString().Split('.');
-        long decimalPart = parts.Length > 1 ? long.Parse(parts[1]) : 0;
-        ws_profit_year.WS_PROFIT_YEAR_EXTENSION = decimalPart;
+        long WS_PROFIT_YEAR_EXTENSION = parts.Length > 1 ? long.Parse(parts[1]) : 0;
 
-        if (ws_profit_year.WS_PROFIT_YEAR_FIRST_4 == EffectiveYear)
+        if (WS_PROFIT_YEAR_FIRST_4 == EffectiveYear)
         {
             if (profit_ss_detail.PROFIT_SS_CODE == "1" || profit_ss_detail.PROFIT_SS_CODE == "3" ||
                 profit_ss_detail.PROFIT_SS_CODE == "9")
