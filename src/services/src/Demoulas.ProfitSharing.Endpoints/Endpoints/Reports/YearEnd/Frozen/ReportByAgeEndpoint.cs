@@ -8,12 +8,11 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
-using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Eligibility.GetEligibleEmployeesEndpoint;
 using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen.ReportByAgeEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
 
-public class ReportByAgeEndpoint : EndpointWithCsvTotalsBase<ProfitYearRequest, ProfitSharingDistributionsByAge, ProfitSharingDistributionsByAgeDetail, ProfitSharingDistributionsByAgeMapper>
+public class ReportByAgeEndpoint : EndpointWithCsvTotalsBase<DistributionsByAgeRequest, DistributionsByAge, DistributionsByAgeDetail, ProfitSharingDistributionsByAgeMapper>
 {
     private readonly IFrozenReportService _frozenReportService;
 
@@ -33,25 +32,11 @@ public class ReportByAgeEndpoint : EndpointWithCsvTotalsBase<ProfitYearRequest, 
             s.Description =
                 "This report produces a list of members showing their points, and any forfeitures over the year";
 
-            s.ExampleRequest = new ProfitYearRequest
-            {
-                ProfitYear = 2023,
-                Skip = 0,
-                Take = 25
-            };
+            s.ExampleRequest = DistributionsByAgeRequest.RequestExample();
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
-                    200,
-                    new ReportResponseBase<ProfitSharingDistributionsByAge>
-                    {
-                        ReportName = ReportFileName,
-                        ReportDate = DateTimeOffset.Now,
-                        Response = new PaginatedResponseDto<ProfitSharingDistributionsByAge>
-                        {
-                            Results = new List<ProfitSharingDistributionsByAge> { ProfitSharingDistributionsByAge.ResponseExample() }
-                        }
-                    }
+                    200, DistributionsByAge.ResponseExample()
                 }
             };
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
@@ -60,19 +45,17 @@ public class ReportByAgeEndpoint : EndpointWithCsvTotalsBase<ProfitYearRequest, 
         base.Configure();
     }
 
-    public override Task<ProfitSharingDistributionsByAge> GetResponse(ProfitYearRequest req, CancellationToken ct)
+    public override Task<DistributionsByAge> GetResponse(DistributionsByAgeRequest req, CancellationToken ct)
     {
         return _frozenReportService.GetDistributionsByAgeYear(req, ct);
     }
 
-    protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, ProfitSharingDistributionsByAge report, CancellationToken cancellationToken)
+    protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, DistributionsByAge report, CancellationToken cancellationToken)
     {
         // Register the class map for the main member data
         csvWriter.Context.RegisterClassMap<ProfitSharingDistributionsByAgeMapper>();
 
-        await base.GenerateCsvContent(csvWriter, report.TotalResults, cancellationToken);
-        await base.GenerateCsvContent(csvWriter, report.FullTimeResults, cancellationToken);
-        await base.GenerateCsvContent(csvWriter, report.PartTimeResults, cancellationToken);
+        await base.GenerateCsvContent(csvWriter, report, cancellationToken);
 
         // Write out totals
         await csvWriter.NextRecordAsync();
@@ -92,14 +75,14 @@ public class ReportByAgeEndpoint : EndpointWithCsvTotalsBase<ProfitYearRequest, 
         await csvWriter.NextRecordAsync();
 
         // Write the headers
-        csvWriter.WriteHeader<ProfitSharingDistributionsByAgeDetail>();
+        csvWriter.WriteHeader<DistributionsByAgeDetail>();
         await csvWriter.NextRecordAsync();
 
        
     }
   
 
-    public class ProfitSharingDistributionsByAgeMapper : ClassMap<ProfitSharingDistributionsByAgeDetail>
+    public class ProfitSharingDistributionsByAgeMapper : ClassMap<DistributionsByAgeDetail>
     {
         public ProfitSharingDistributionsByAgeMapper()
         {

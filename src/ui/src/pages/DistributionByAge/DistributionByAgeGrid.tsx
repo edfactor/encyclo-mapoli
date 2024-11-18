@@ -42,20 +42,6 @@ const DistributionByAgeGrid = () => {
           />
         </>
       )}
-      {!!distributionsByAge && distributionsByAge.response.results.length > 0 && (
-        <Pagination
-          pageNumber={pageNumber}
-          setPageNumber={(value: number) => {
-            setPageNumber(value - 1);
-          }}
-          pageSize={pageSize}
-          setPageSize={(value: number) => {
-            setPageSize(value);
-            setPageNumber(1);
-          }}
-          recordCount={distributionsByAge.response.total}
-        />
-      )}
     </>
   );
 };
