@@ -243,6 +243,7 @@ export interface EligibleEmployeeResponseDto {
 export interface DistributionsByAgeRequest extends ImpersonationRequest {
   profitYear: number;
   pagination: PaginationParams;
+  reportType: number;
 }
 
 export interface ProfitSharingDistributionsByAge {

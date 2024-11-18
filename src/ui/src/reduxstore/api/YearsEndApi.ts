@@ -364,6 +364,7 @@ export const YearsEndApi = createApi({
         method: "GET",
         params: {
           profitYear: params.profitYear,
+          reportType: params.reportType,
           take: params.pagination.take,
           skip: params.pagination.skip
         }
