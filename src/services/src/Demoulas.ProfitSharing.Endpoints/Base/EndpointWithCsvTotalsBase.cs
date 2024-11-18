@@ -77,9 +77,14 @@ public abstract class EndpointWithCsvTotalsBase<ReqType, RespType, ItemType, Map
         return memoryStream;
     }
 
-    protected internal virtual async Task GenerateCsvContent(CsvWriter csvWriter, RespType report, CancellationToken cancellationToken)
+    protected internal virtual Task GenerateCsvContent(CsvWriter csvWriter, RespType report, CancellationToken cancellationToken)
+    {
+        return GenerateCsvContent(csvWriter, report.Response.Results, cancellationToken);
+    }
+
+    protected internal virtual Task GenerateCsvContent(CsvWriter csvWriter, IEnumerable<ItemType> items, CancellationToken cancellationToken)
     {
         csvWriter.Context.RegisterClassMap<MapType>();
-        await csvWriter.WriteRecordsAsync(report.Response.Results, cancellationToken);
+        return csvWriter.WriteRecordsAsync(items, cancellationToken);
     }
 }

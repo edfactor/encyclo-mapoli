@@ -128,8 +128,7 @@ public class FrozenReportService : IFrozenReportService
         }
     }
 
-    public async Task<ProfitSharingDistributionsByAge> GetDistributionsByAgeYear(ProfitYearRequest req,
-    CancellationToken cancellationToken = default)
+    public async Task<ProfitSharingDistributionsByAge> GetDistributionsByAgeYear(ProfitYearRequest req, CancellationToken cancellationToken = default)
     {
         List<byte> codes =
         [
@@ -156,7 +155,14 @@ public class FrozenReportService : IFrozenReportService
                     })
                 .ToListAsync(cancellationToken: cancellationToken);
 
-            return query.Select(x => new { Age = x.DateOfBirth.Age(), x.EmploymentType, x.EmployeeId, x.Amount, x.CommentTypeId })
+            return query.Select(x => new
+                {
+                    Age = x.DateOfBirth.Age(),
+                    x.EmploymentType,
+                    x.EmployeeId,
+                    x.Amount,
+                    x.CommentTypeId
+                })
                 .GroupBy(x => new { x.Age, x.EmploymentType, x.CommentTypeId })
                 .Select(g => new ProfitSharingDistributionsByAgeDetail()
                 {

@@ -67,10 +67,7 @@ public class GetEligibleEmployeesEndpoint : EndpointWithCsvTotalsBase<ProfitYear
         return base.GenerateCsvContent(csvWriter, responseWithTotals, cancellationToken);
     }
 
-
-
-    public sealed class
-        GetEligibleEmployeesResponseDtoMap : ClassMap<GetEligibleEmployeesResponseDto>
+    public sealed class GetEligibleEmployeesResponseDtoMap : ClassMap<GetEligibleEmployeesResponseDto>
     {
         public GetEligibleEmployeesResponseDtoMap()
         {

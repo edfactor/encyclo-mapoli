@@ -1,4 +1,5 @@
-﻿using CsvHelper.Configuration;
+﻿using CsvHelper;
+using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -7,11 +8,12 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
+using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Eligibility.GetEligibleEmployeesEndpoint;
 using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen.ReportByAgeEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
 
-public class ReportByAgeEndpoint : EndpointWithCsvBase<ProfitYearRequest, ProfitSharingDistributionsByAgeDetail, ProfitSharingDistributionsByAgeMapper>
+public class ReportByAgeEndpoint : EndpointWithCsvTotalsBase<ProfitYearRequest, ProfitSharingDistributionsByAge, ProfitSharingDistributionsByAgeDetail, ProfitSharingDistributionsByAgeMapper>
 {
     private readonly IFrozenReportService _frozenReportService;
 
@@ -58,20 +60,52 @@ public class ReportByAgeEndpoint : EndpointWithCsvBase<ProfitYearRequest, Profit
         base.Configure();
     }
 
-    public override async Task<ReportResponseBase<ProfitSharingDistributionsByAgeDetail>> GetResponse(ProfitYearRequest req, CancellationToken ct)
+    public override Task<ProfitSharingDistributionsByAge> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
-        return await _frozenReportService.GetDistributionsByAgeYear(req, ct);
+        return _frozenReportService.GetDistributionsByAgeYear(req, ct);
     }
+
+    protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, ProfitSharingDistributionsByAge report, CancellationToken cancellationToken)
+    {
+        // Register the class map for the main member data
+        csvWriter.Context.RegisterClassMap<ProfitSharingDistributionsByAgeMapper>();
+
+        await base.GenerateCsvContent(csvWriter, report.TotalResults, cancellationToken);
+        await base.GenerateCsvContent(csvWriter, report.FullTimeResults, cancellationToken);
+        await base.GenerateCsvContent(csvWriter, report.PartTimeResults, cancellationToken);
+
+        // Write out totals
+        await csvWriter.NextRecordAsync();
+        csvWriter.WriteField("");
+        csvWriter.WriteField(report.RegularTotalEmployees);
+
+        await csvWriter.NextRecordAsync();
+        csvWriter.WriteField("HARDSHIP");
+        csvWriter.WriteField(report.HardshipTotalEmployees);
+        csvWriter.WriteField(report.HardshipTotalAmount);
+
+        await csvWriter.NextRecordAsync();
+        csvWriter.WriteField("DIST TTL");
+        csvWriter.WriteField("");
+        csvWriter.WriteField(report.DistributionTotalAmount);
+
+        await csvWriter.NextRecordAsync();
+
+        // Write the headers
+        csvWriter.WriteHeader<ProfitSharingDistributionsByAgeDetail>();
+        await csvWriter.NextRecordAsync();
+
+       
+    }
+  
 
     public class ProfitSharingDistributionsByAgeMapper : ClassMap<ProfitSharingDistributionsByAgeDetail>
     {
         public ProfitSharingDistributionsByAgeMapper()
         {
-#pragma warning disable S125
-            //Map(m => m.Age).Index(0).Name("AGE");
-#pragma warning restore S125
-            //Map(m => m.EmployeeCount).Index(1).Name("EMPS");
-            //Map(m => m.Amount).Index(2).Name("AMOUNT");
+            Map(m => m.Age).Index(0).Name("AGE");
+            Map(m => m.EmployeeCount).Index(1).Name("EMPS");
+            Map(m => m.Amount).Index(2).Name("AMOUNT");
         }
     }
 }

@@ -10,7 +10,7 @@ internal sealed class ProfitDetailMap : IEntityTypeConfiguration<ProfitDetail>
         _ = builder.ToTable("PROFIT_DETAIL");
         _ = builder.HasKey(p => p.Id);
 
-        _ = builder.HasIndex(p => new { p.Ssn, p.DistributionSequence, p.ProfitYear }, "IX_SSN_SEQUENCE_YEAR");
+        _ = builder.HasIndex(p => new { p.Ssn, p.ProfitYear }, "IX_SSN_YEAR");
 
         _ = builder.Property(e => e.Id).HasColumnName("ID").ValueGeneratedOnAdd();
         _ = builder.Property(x=>x.ProfitYear).IsRequired().HasColumnName("PROFIT_YEAR");
