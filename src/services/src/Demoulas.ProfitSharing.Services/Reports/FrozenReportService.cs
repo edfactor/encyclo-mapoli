@@ -1,5 +1,4 @@
-﻿using System.Collections.Frozen;
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -7,10 +6,10 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.InternalDto;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using static System.Net.WebRequestMethods;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 
@@ -132,12 +131,12 @@ public class FrozenReportService : IFrozenReportService
     public async Task<ProfitSharingDistributionsByAge> GetDistributionsByAgeYear(ProfitYearRequest req,
     CancellationToken cancellationToken = default)
     {
-        List<byte> codes = new()
-    {
-        ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal,
-        ProfitCode.Constants.OutgoingDirectPayments,
-        ProfitCode.Constants.Outgoing100PercentVestedPayment
-    };
+        List<byte> codes =
+        [
+            ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal,
+            ProfitCode.Constants.OutgoingDirectPayments,
+            ProfitCode.Constants.Outgoing100PercentVestedPayment
+        ];
 
         const string FT = "FullTime";
         const string PT = "PartTime";
@@ -171,39 +170,59 @@ public class FrozenReportService : IFrozenReportService
                 .ToList();
         });
 
-        // Compute aggregates
+        // Separate details by employment type
         var fullTimeDetails = details.Where(d => d.EmploymentType == FT).ToList();
         var partTimeDetails = details.Where(d => d.EmploymentType == PT).ToList();
 
-        var totalEmployees = (short)details.Sum(d => d.EmployeeCount);
-        var hardshipTotalEmployees = (short)details.Where(d => d.CommentTypeId == CommentType.Constants.Hardship).Sum(d => d.EmployeeCount);
-        var hardshipTotalAmount = details.Where(d => d.CommentTypeId == CommentType.Constants.Hardship).Sum(d => d.Amount);
+        // Compute aggregates using helper method
+        var totalAggregates = ComputeAggregates(details);
+        var fullTimeAggregates = ComputeAggregates(fullTimeDetails);
+        var partTimeAggregates = ComputeAggregates(partTimeDetails);
 
         return new ProfitSharingDistributionsByAge
         {
             ReportName = "PROFIT SHARING DISTRIBUTIONS BY AGE",
             ReportDate = DateTimeOffset.Now,
-            
+
             TotalResults = details,
-            TotalEmployees = totalEmployees,
-            HardshipTotalEmployees = hardshipTotalEmployees,
-            HardshipTotalAmount = hardshipTotalAmount,
             FullTimeResults = fullTimeDetails,
             PartTimeResults = partTimeDetails,
-            
-            FullTimeTotalEmployees = (short)fullTimeDetails.Sum(d => d.EmployeeCount),
-            FullTimeTotalAmount = fullTimeDetails.Sum(d => d.Amount),
-            FullTimeHardshipTotalEmployees = (short)fullTimeDetails.Where(d => d.CommentTypeId == CommentType.Constants.Hardship).Sum(d => d.EmployeeCount),
-            FullTimeHardshipTotalAmount = fullTimeDetails.Where(d => d.CommentTypeId == CommentType.Constants.Hardship).Sum(d => d.Amount),
-            
-            PartTimeTotalEmployees = (short)partTimeDetails.Sum(d => d.EmployeeCount),
-            PartTimeTotalAmount = partTimeDetails.Sum(d => d.Amount),
-            PartTimeHardshipTotalEmployees = (short)partTimeDetails.Where(d => d.CommentTypeId == CommentType.Constants.Hardship).Sum(d => d.EmployeeCount),
-            PartTimeHardshipTotalAmount = partTimeDetails.Where(d => d.CommentTypeId == CommentType.Constants.Hardship).Sum(d => d.Amount),
-            
-            
+
+            RegularTotalEmployees = totalAggregates.RegularTotalEmployees,
+            RegularTotalAmount = totalAggregates.RegularAmount,
+            HardshipTotalEmployees = totalAggregates.HardshipTotalEmployees,
+            HardshipTotalAmount = totalAggregates.HardshipTotalAmount,
+
+
+            FullTimeRegularEmployees = fullTimeAggregates.RegularTotalEmployees,
+            FullTimeRegularAmount = fullTimeAggregates.RegularAmount,
+            FullTimeHardshipTotalEmployees = fullTimeAggregates.HardshipTotalEmployees,
+            FullTimeHardshipTotalAmount = fullTimeAggregates.HardshipTotalAmount,
+
+
+
+            PartTimeRegularEmployees = partTimeAggregates.RegularTotalEmployees,
+            PartTimeRegularAmount = partTimeAggregates.RegularAmount,
+            PartTimeHardshipTotalEmployees = partTimeAggregates.HardshipTotalEmployees,
+            PartTimeHardshipTotalAmount = partTimeAggregates.HardshipTotalAmount,
+
             // Not a paginated report
             Response = new PaginatedResponseDto<ProfitSharingDistributionsByAgeDetail>(req)
+        };
+    }
+
+    private ProfitSharingAggregates ComputeAggregates(List<ProfitSharingDistributionsByAgeDetail> details)
+    {
+        var hardshipDetails = details.Where(d => d.CommentTypeId == CommentType.Constants.Hardship).ToList();
+        var regularDetails = details.Where(d => d.CommentTypeId != CommentType.Constants.Hardship).ToList();
+
+        return new ProfitSharingAggregates
+        {
+            RegularAmount = regularDetails.Sum(d => d.Amount),
+            RegularTotalEmployees = (short)regularDetails.Sum(d => d.EmployeeCount),
+
+            HardshipTotalEmployees = (short)hardshipDetails.Sum(d => d.EmployeeCount),
+            HardshipTotalAmount = hardshipDetails.Sum(d => d.Amount),
         };
     }
 }
