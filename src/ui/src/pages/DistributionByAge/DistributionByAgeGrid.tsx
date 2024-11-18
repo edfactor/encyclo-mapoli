@@ -7,15 +7,13 @@ import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetDistributionsByAgeColumns } from "./DistributionByAgeGridColumns";
 
 const DistributionByAgeGrid = () => {
-  const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
-  const [_, setSortParams] = useState<ISortParams>({
+  const [_discard0, setSortParams] = useState<ISortParams>({
     sortBy: "Badge",
     isSortDescending: false
   });
 
   const { distributionsByAge } = useSelector((state: RootState) => state.yearsEnd);
-  const [dummy1, { isLoading }] = useLazyGetDistributionsByAgeQuery();
+  const [_discard1, { isLoading }] = useLazyGetDistributionsByAgeQuery();
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetDistributionsByAgeColumns(), []);
