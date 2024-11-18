@@ -1,14 +1,16 @@
-import { FormHelperText, FormLabel, TextField } from "@mui/material";
+import { FormHelperText, FormLabel, TextField, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
+import { isValid } from "date-fns";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { useLazyGetEligibleEmployeesQuery, useLazyGetNegativeEVTASSNQuery } from "reduxstore/api/YearsEndApi";
+import { useDispatch } from "react-redux";
+import { useLazyGetDuplicateNamesAndBirthdaysQuery, useLazyGetDuplicateSSNsQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { ImpersonationRoles } from "reduxstore/types";
 
-interface EligibleEmployeesSearch {
+interface DuplicateNamesAndBirthdaysSearch {
   profitYear: number;
 }
 
@@ -22,10 +24,10 @@ const schema = yup.object().shape({
     .required("Year is required")
 });
 
-const EligibleEmployeesSearchFilter = () => {
+const DuplicateNamesAndBirthdaysSearchFilter = () => {
   const [isFetching, setIsFetching] = useState(false);
 
-  const [triggerSearch, { isLoading }] = useLazyGetEligibleEmployeesQuery();
+  const [triggerSearch, { isLoading }] = useLazyGetDuplicateNamesAndBirthdaysQuery();
 
   const {
     control,
@@ -33,7 +35,7 @@ const EligibleEmployeesSearchFilter = () => {
     formState: { errors, isValid },
     reset,
     trigger
-  } = useForm<EligibleEmployeesSearch>({
+  } = useForm<DuplicateNamesAndBirthdaysSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
       profitYear: undefined
@@ -105,4 +107,4 @@ const EligibleEmployeesSearchFilter = () => {
   );
 };
 
-export default EligibleEmployeesSearchFilter;
+export default DuplicateNamesAndBirthdaysSearchFilter;
