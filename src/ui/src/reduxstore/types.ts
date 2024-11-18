@@ -134,6 +134,7 @@ export interface DuplicateNameAndBirthday {
   hoursCurrentYear: number;
   incomeCurrentYear: number;
 }
+
 export interface NegativeEtvaForSSNsOnPayProfit {
   employeeBadge: number;
   employeeSsn: number;
@@ -225,6 +226,7 @@ export interface EligibleEmployeesRequestDto extends ImpersonationRequest {
   profitYear: number;
   pagination: PaginationParams;
 }
+
 export interface EligibleEmployee {
   oracleHcmId: number;
   badgeNumber: number;
@@ -267,11 +269,10 @@ export interface ProfitSharingDistributionsByAge {
   response: Paged<ProfitSharingDistributionsByAgeResponse>;
 }
 
-export interface  ProfitSharingDistributionsByAgeResponse
-{
-    age: number;
-    employeeCount: number;
-    amount : number;
-    employmentType: string;
-    commentTypeId: number | null;
-  }
+export interface ProfitSharingDistributionsByAgeResponse {
+  age: number;
+  employeeCount: number;
+  amount: number;
+  employmentType: string;
+  commentTypeId: number | null;
+}

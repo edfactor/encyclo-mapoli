@@ -1,8 +1,8 @@
 import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
-import {useLazyGetDistributionsByAgeQuery} from "reduxstore/api/YearsEndApi";
+import { Controller, useForm } from "react-hook-form";
+import { useLazyGetDistributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -49,7 +49,7 @@ const DistributionByAgeSearchFilter = () => {
           profitYear: data.profitYear,
           reportType: 0,
           pagination: { skip: 0, take: 25 },
-          impersonation: ImpersonationRoles.ProfitSharingAdministrator,
+          impersonation: ImpersonationRoles.ProfitSharingAdministrator
         },
         false
       );

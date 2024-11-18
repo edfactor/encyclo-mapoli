@@ -3,7 +3,7 @@ import { useState, useMemo } from "react";
 import { useSelector } from "react-redux";
 import {  useLazyGetDistributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { DSMGrid, ISortParams } from "smart-ui-library";
 import { GetDistributionsByAgeColumns } from "./DistributionByAgeGridColumns";
 
 const DistributionByAgeGrid = () => {
