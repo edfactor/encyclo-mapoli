@@ -39,7 +39,9 @@ const groupHeaders = [
 ];
 
 export const GetDistributionsByAgeColumns = () =>
-  groupHeaders.map((groupName) => ({
-    headerName: groupName,
+  groupHeaders.map(({ name, className }) => ({
+    headerName: name, // Use the 'name' property for the header name
+    headerClass: className, // Apply the class for styling
     children: baseColumnDefs,
   }));
+
