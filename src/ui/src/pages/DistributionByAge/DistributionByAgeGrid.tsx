@@ -30,7 +30,7 @@ const DistributionByAgeGrid = () => {
             </Typography>
           </div>
           <DSMGrid
-            preferenceKey={"DUPE_SSNS"}
+            preferenceKey={"AGE"}
             isLoading={isLoading}
             handleSortChanged={sortEventHandler}
             providedOptions={{
