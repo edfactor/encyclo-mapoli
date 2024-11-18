@@ -242,10 +242,17 @@ export interface EligibleEmployeeResponseDto {
   response: Paged<EligibleEmployee>;
 }
 
+export enum DistributionByAgeReportType {
+  Total = 0,
+  FullTime = 1,
+  PartTime = 2,
+}
+
+
 export interface DistributionsByAgeRequest extends ImpersonationRequest {
   profitYear: number;
   pagination: PaginationParams;
-  reportType: number;
+  reportType: DistributionByAgeReportType;
 }
 
 export interface ProfitSharingDistributionsByAge {

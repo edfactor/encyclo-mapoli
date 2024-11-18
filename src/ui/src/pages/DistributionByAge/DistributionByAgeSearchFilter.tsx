@@ -6,11 +6,11 @@ import { useLazyGetDistributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { ImpersonationRoles } from "reduxstore/types";
+import { ImpersonationRoles, DistributionByAgeReportType } from "reduxstore/types";
 
 interface DistributionByAgeSearch {
   profitYear: number;
-  reportType: number;
+  reportType: DistributionByAgeReportType;
 }
 
 const schema = yup.object().shape({
@@ -47,8 +47,8 @@ const DistributionByAgeSearchFilter = () => {
       triggerSearch(
         {
           profitYear: data.profitYear,
-          reportType: 0,
-          pagination: { skip: 0, take: 25 },
+          reportType: DistributionByAgeReportType.Total,
+          pagination: { skip: 0, take: 255 },
           impersonation: ImpersonationRoles.ProfitSharingAdministrator
         },
         false
@@ -59,7 +59,8 @@ const DistributionByAgeSearchFilter = () => {
 
   const handleReset = () => {
     reset({
-      profitYear: undefined
+      profitYear: undefined,
+      reportType: undefined
     });
   };
 
