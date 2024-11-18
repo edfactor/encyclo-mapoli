@@ -26,7 +26,7 @@ public class ReportByAgeEndpoint : EndpointWithCsvTotalsBase<ProfitYearRequest, 
 
     public override void Configure()
     {
-        Get("frozen/report-by-age");
+        Get("frozen/distributions-by-age");
         Summary(s =>
         {
             s.Summary = "PROFIT SHARING DISTRIBUTIONS BY AGE";

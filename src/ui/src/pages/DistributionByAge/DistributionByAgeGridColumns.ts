@@ -1,12 +1,12 @@
 import { ColDef } from "ag-grid-community";
-import { dateUtils } from "smart-ui-library";
+import { formattingUtils } from "smart-ui-library";
 
-export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
+export const GetDistributionsByAgeColumns = (): ColDef[] => {
   return [
     {
-      headerName: "Badge",
-      field: "badgeNumber",
-      colId: "badgeNumber",
+      headerName: "Age",
+      field: "age",
+      colId: "age",
       minWidth: 80,
       headerClass: "right-align",
       cellClass: "right-align",
@@ -14,82 +14,23 @@ export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
       sort: 'asc'
     },
     {
-      headerName: "SSN",
-      field: "ssn",
-      colId: "ssn",
+      headerName: "EMPS",
+      field: "employeeCount",
+      colId: "employeeCount",
       minWidth: 100,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true
     },
     {
-      headerName: "Name",
-      field: "name",
-      colId: "name",
+      headerName: "Amount",
+      field: "amount",
+      colId: "amount",
       minWidth: 150,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true
-    },
-    {
-      headerName: "DOB",
-      field: "dateOfBirth",
-      colId: "dateOfBirth",
-      minWidth: 100,
-      headerClass: "left-align",
-      cellClass: "left-align",
       resizable: true,
-      valueFormatter: (params) => params.value ? dateUtils.yyyyMMDDToMMDDYYYY(params.value) : ""
-    },
-    {
-      headerName: "Address",
-      field: "address",
-      colId: "address",
-      minWidth: 200,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      valueGetter: (params) => {
-        const addr = params.data.address;
-        return addr ? `${addr.street}${addr.street2 ? ', ' + addr.street2 : ''}` : "";
-      }
-    },
-    {
-      headerName: "City",
-      field: "address.city",
-      colId: "city",
-      minWidth: 120,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
-    {
-      headerName: "State",
-      field: "address.state",
-      colId: "state",
-      minWidth: 60,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true
-    },
-    {
-      headerName: "Years",
-      field: "years",
-      colId: "years",
-      minWidth: 60,
-      headerClass: "right-align",
-      cellClass: "right-align",
-      resizable: true
-    },
-    {
-      headerName: "Hire",
-      field: "hireDate",
-      colId: "hireDate",
-      minWidth: 100,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      valueFormatter: (params) => params.value ? dateUtils.yyyyMMDDToMMDDYYYY(params.value) : ""
+      valueFormatter: formattingUtils.agGridNumberToCurrency
     }
   ];
 };

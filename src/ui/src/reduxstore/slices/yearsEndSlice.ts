@@ -11,7 +11,7 @@ import {
   MilitaryAndRehireProfitSummary,
   MissingCommasInPYName,
   NegativeEtvaForSSNsOnPayProfit,
-  PagedReportResponse
+  PagedReportResponse, ProfitSharingDistributionsByAge
 } from "reduxstore/types";
 
 export interface YearsEndState {
@@ -26,6 +26,7 @@ export interface YearsEndState {
   distributionsAndForfeitures: PagedReportResponse<DistributionsAndForfeitures> | null;
   executiveHoursAndDollars: PagedReportResponse<ExecutiveHoursAndDollars> | null;
   eligibleEmployees: EligibleEmployeeResponseDto | null;
+  distributionsByAge: ProfitSharingDistributionsByAge | null;
 }
 
 const initialState: YearsEndState = {
@@ -39,7 +40,8 @@ const initialState: YearsEndState = {
   militaryAndRehireProfitSummary: null,
   distributionsAndForfeitures: null,
   executiveHoursAndDollars: null,
-  eligibleEmployees: null
+  eligibleEmployees: null,
+  distributionsByAge: null,
 };
 
 export const yearsEndSlice = createSlice({
@@ -100,6 +102,12 @@ export const yearsEndSlice = createSlice({
     ) => {
       state.eligibleEmployees = action.payload;
     },
+    setDistributionsByAge: (
+      state,
+      action: PayloadAction<ProfitSharingDistributionsByAge>
+    ) => {
+      state.distributionsByAge = action.payload;
+    },
   }
 });
 
@@ -114,6 +122,7 @@ export const {
   setMilitaryAndRehireProfitSummaryDetails,
   setDistributionsAndForfeitures,
   setExecutiveHoursAndDollars,
-  setEligibleEmployees
+  setEligibleEmployees,
+  setDistributionsByAge
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

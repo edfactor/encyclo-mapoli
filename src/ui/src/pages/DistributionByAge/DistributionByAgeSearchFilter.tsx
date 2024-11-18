@@ -4,7 +4,11 @@ import { isValid } from "date-fns";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useDispatch } from "react-redux";
-import { useLazyGetDuplicateNamesAndBirthdaysQuery, useLazyGetDuplicateSSNsQuery } from "reduxstore/api/YearsEndApi";
+import {
+  useLazyGetDistributionsAndForfeituresQuery, useLazyGetDistributionsByAgeQuery,
+  useLazyGetDuplicateNamesAndBirthdaysQuery,
+  useLazyGetDuplicateSSNsQuery
+} from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -24,10 +28,10 @@ const schema = yup.object().shape({
     .required("Year is required")
 });
 
-const DuplicateNamesAndBirthdaysSearchFilter = () => {
+const DistributionByAgeSearchFilter = () => {
   const [isFetching, setIsFetching] = useState(false);
 
-  const [triggerSearch, { isLoading }] = useLazyGetDuplicateNamesAndBirthdaysQuery();
+  const [triggerSearch, { isLoading }] = useLazyGetDistributionsByAgeQuery();
 
   const {
     control,
@@ -107,4 +111,4 @@ const DuplicateNamesAndBirthdaysSearchFilter = () => {
   );
 };
 
-export default DuplicateNamesAndBirthdaysSearchFilter;
+export default DistributionByAgeSearchFilter;
