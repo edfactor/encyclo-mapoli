@@ -1,3 +1,15 @@
 body {
     margin: 0;
 }
+
+.ag-header-cell-group.group-total {
+  border-right: 2px solid #ddd; /* Light gray border */
+}
+
+.ag-header-cell-group.group-full-time {
+  border-right: 2px solid #aaa; /* Slightly darker border */
+}
+
+.ag-header-cell-group.group-part-time {
+  /* No border after the last group */
+}

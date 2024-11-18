@@ -32,7 +32,11 @@ const baseColumnDefs = [
   },
 ];
 
-const groupHeaders = ["Total", "Full Time", "Part Time"];
+const groupHeaders = [
+  { name: "Total", className: "group-total" },
+  { name: "Full Time", className: "group-full-time" },
+  { name: "Part Time", className: "group-part-time" },
+];
 
 export const GetDistributionsByAgeColumns = () =>
   groupHeaders.map((groupName) => ({
