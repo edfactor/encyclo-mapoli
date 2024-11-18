@@ -33,7 +33,7 @@ internal sealed class ProfitDetailMap : IEntityTypeConfiguration<ProfitDetail>
         _ = builder.HasOne(x => x.CommentType).WithMany().HasForeignKey(x => x.CommentTypeId);
         _ = builder.Property(x => x.CommentRelatedOracleHcmId).HasColumnName("COMMENT_RELATED_ORACLE_HCM_ID");
         _ = builder.Property(x => x.CommentRelatedPsnSuffix).HasColumnName("COMMENT_RELATED_PSN_SUFFIX");
-        _ = builder.Property(x => x.CommentRelatedState).HasColumnName("COMMENT_RELATED_STATE");
+        _ = builder.Property(x => x.CommentRelatedState).HasMaxLength(24).HasColumnName("COMMENT_RELATED_STATE");
         _ = builder.Property(x => x.CommentRelatedCheckNumber).HasColumnName("COMMENT_RELATED_CHECK_NUMBER");
         _ = builder.Property(x => x.CommentIsPartialTransaction).HasColumnName("COMMENT_IS_PARTIAL_TRANSACTION");
 
