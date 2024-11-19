@@ -220,7 +220,7 @@ export const YearsEndApi = createApi({
           skip: 0
         }
       }),
-      async onQueryStarted({ dispatch, queryFulfilled }) {
+      async onQueryStarted({ queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
         } catch (err) {
@@ -399,7 +399,6 @@ export const {
   useLazyGetNamesMissingCommasQuery,
   useLazyGetNegativeEVTASSNQuery,
   useLazyGetPayprofitBadgeWithoutDemographicsQuery,
-  useLazyGetPayrollDuplicateSSNsOnPayprofitQuery,
   useLazyGetWagesPreviousYearQuery,
   useLazyGetDistributionsAndForfeituresQuery,
   useLazyGetExecutiveHoursAndDollarsQuery,
