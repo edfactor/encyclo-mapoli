@@ -21,7 +21,7 @@ public sealed record DistributionsByAgeRequest : ProfitYearRequest
     {
         return new DistributionsByAgeRequest
         {
-            ReportType = Report.PartTime,
+            ReportType = Report.Total,
             ProfitYear = 2023
         };
     }

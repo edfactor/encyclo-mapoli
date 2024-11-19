@@ -1,22 +1,20 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
-using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
-using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen.ReportByAgeEndpoint;
+using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen.DistributionsByAgeEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
 
-public class ReportByAgeEndpoint : EndpointWithCsvTotalsBase<DistributionsByAgeRequest, DistributionsByAge, DistributionsByAgeDetail, ProfitSharingDistributionsByAgeMapper>
+public class DistributionsByAgeEndpoint : EndpointWithCsvTotalsBase<DistributionsByAgeRequest, DistributionsByAge, DistributionsByAgeDetail, ProfitSharingDistributionsByAgeMapper>
 {
     private readonly IFrozenReportService _frozenReportService;
 
-    public ReportByAgeEndpoint(IFrozenReportService frozenReportService)
+    public DistributionsByAgeEndpoint(IFrozenReportService frozenReportService)
     {
         _frozenReportService = frozenReportService;
     }

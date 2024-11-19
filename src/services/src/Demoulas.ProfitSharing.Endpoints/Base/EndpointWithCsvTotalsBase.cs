@@ -46,7 +46,7 @@ public abstract class EndpointWithCsvTotalsBase<ReqType, RespType, ItemType, Map
 
     public sealed override async Task HandleAsync(ReqType req, CancellationToken ct)
     {
-        string acceptHeader = HttpContext.Request.Headers["Accept"].ToString().ToLower(CultureInfo.InvariantCulture);
+        string acceptHeader = HttpContext.Request.Headers.Accept.ToString().ToLower(CultureInfo.InvariantCulture);
         var response = await GetResponse(req, ct);
 
         if (acceptHeader.Contains("text/csv"))
