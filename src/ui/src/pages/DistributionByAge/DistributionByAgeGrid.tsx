@@ -6,7 +6,6 @@ import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams } from "smart-ui-library";
 import { GetDistributionsByAgeColumns } from "./DistributionByAgeGridColumns";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { DistributionByAgeReportType } from "../../reduxstore/types";
 
 const DistributionByAgeGrid = () => {
   const [_discard0, setSortParams] = useState<ISortParams>({
@@ -20,9 +19,25 @@ const DistributionByAgeGrid = () => {
   const [_discard1, { isLoading }] = useLazyGetDistributionsByAgeQuery();
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
-  const columnDefsTotal = GetDistributionsByAgeColumns(DistributionByAgeReportType.Total);
-  const columnDefsFullTime = GetDistributionsByAgeColumns(DistributionByAgeReportType.FullTime);
-  const columnDefsPartTime = GetDistributionsByAgeColumns(DistributionByAgeReportType.PartTime);
+
+  const columnDefsTotal = distributionsByAgeTotal
+    ? GetDistributionsByAgeColumns(distributionsByAgeTotal)
+    : {
+        headerName: "",
+        children: []
+      };
+  const columnDefsFullTime = distributionsByAgeFullTime
+    ? GetDistributionsByAgeColumns(distributionsByAgeFullTime)
+    : {
+        headerName: "",
+        children: []
+      };
+  const columnDefsPartTime = distributionsByAgePartTime
+    ? GetDistributionsByAgeColumns(distributionsByAgePartTime)
+    : {
+        headerName: "",
+        children: []
+      };
 
   return (
     <>
@@ -45,44 +60,32 @@ const DistributionByAgeGrid = () => {
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: distributionsByAgeTotal?.response.results,
-                  columnDefs: [
-                    {
-                      headerName: columnDefsTotal.headerName,
-                      children: columnDefsTotal.children
-                    }
-                  ]
+                  pinnedTopRowData: columnDefsTotal.pinnedRowDataTotal,
+                  columnDefs: columnDefsTotal.children
                 }}
               />
             </Grid2>
             <Grid2 xs={4}>
               <DSMGrid
-                preferenceKey={"AGE"}
+                preferenceKey={"AGE_FullTime"}
                 isLoading={isLoading}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: distributionsByAgeFullTime?.response.results,
-                  columnDefs: [
-                    {
-                      headerName: columnDefsFullTime.headerName,
-                      children: columnDefsFullTime.children
-                    }
-                  ]
+                  pinnedTopRowData: columnDefsFullTime.pinnedRowDataTotal,
+                  columnDefs: columnDefsFullTime.children
                 }}
               />
             </Grid2>
             <Grid2 xs={4}>
               <DSMGrid
-                preferenceKey={"AGE"}
+                preferenceKey={"AGE_PartTime"}
                 isLoading={isLoading}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: distributionsByAgePartTime?.response.results,
-                  columnDefs: [
-                    {
-                      headerName: columnDefsPartTime?.headerName,
-                      children: columnDefsPartTime?.children
-                    }
-                  ]
+                  pinnedTopRowData: columnDefsPartTime.pinnedRowDataTotal,
+                  columnDefs: columnDefsPartTime.children
                 }}
               />
             </Grid2>

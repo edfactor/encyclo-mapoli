@@ -259,21 +259,11 @@ export interface ProfitSharingDistributionsByAge {
   reportName: string;
   reportDate: string;
   reportType: DistributionByAgeReportType;
-  totalEmployees: number;
   hardshipTotalEmployees: number;
-  totalAmount: number;
+  regularTotalAmount:number;
+  regularTotalEmployees: number;
   hardshipTotalAmount: number;
   distributionTotalAmount: number;
-  fullTimeTotalEmployees: number;
-  fullTimeHardshipTotalEmployees: number;
-  fullTimeTotalAmount: number;
-  fullTimeHardshipTotalAmount: number;
-  fullTimeDistributionTotalAmount: number;
-  partTimeTotalEmployees: number;
-  partTimeHardshipTotalEmployees: number;
-  partTimeTotalAmount: number;
-  partTimeHardshipTotalAmount: number;
-  partTimeDistributionTotalAmount: number;
   response: Paged<ProfitSharingDistributionsByAgeResponse>;
 }
 
