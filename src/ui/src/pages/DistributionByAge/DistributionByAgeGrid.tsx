@@ -59,7 +59,7 @@ const DistributionByAgeGrid = () => {
                     },
                     {
                       age: "Dist Total",
-                      employeeCount: 0,
+                      employeeCount: (distributionsByAgeTotal?.regularTotalEmployees || 0) + (distributionsByAgeTotal?.hardshipTotalEmployees || 0),
                       amount: distributionsByAgeTotal?.distributionTotalAmount
                     }
                   ],
@@ -92,7 +92,7 @@ const DistributionByAgeGrid = () => {
                     },
                     {
                       age: "Dist Total",
-                      employeeCount: 0,
+                      employeeCount: (distributionsByAgeFullTime?.regularTotalEmployees || 0) + (distributionsByAgeFullTime?.hardshipTotalEmployees || 0),
                       amount: distributionsByAgeFullTime?.distributionTotalAmount
                     }
                   ],
@@ -125,7 +125,7 @@ const DistributionByAgeGrid = () => {
                     },
                     {
                       age: "Dist Total",
-                      employeeCount: 0,
+                      employeeCount: (distributionsByAgePartTime?.regularTotalEmployees || 0) + (distributionsByAgePartTime?.hardshipTotalEmployees || 0),
                       amount: distributionsByAgePartTime?.distributionTotalAmount
                     }
                   ],
