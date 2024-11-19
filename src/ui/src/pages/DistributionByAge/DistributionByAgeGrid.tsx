@@ -33,7 +33,7 @@ const DistributionByAgeGrid = () => {
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`${distributionsByAgeTotal.reportName} (${distributionsByAgeTotal?.response.total || 0})`}
+              {`${distributionsByAgeTotal.reportName}`}
             </Typography>
           </div>
           <Grid2
