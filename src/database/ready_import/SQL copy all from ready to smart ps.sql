@@ -154,10 +154,11 @@ SELECT
     END AS converted_date, 
     PY_DP,
     TRIM(PY_FUL),
-    CASE
-    WHEN PY_GENDER = 'O' THEN 'X' -- Nonbinary
-    WHEN PY_GENDER IS NULL then 'U' -- 'U'nknown
-    ELSE PY_GENDER
+     CASE
+    WHEN TRIM(PY_GENDER) = 'O' THEN 'X' -- Nonbinary
+    WHEN TRIM(PY_GENDER) IS NULL then 'U' -- 'U'nknown
+    WHEN TRIM(PY_GENDER) = '' then 'U' -- 'U'nknown
+    ELSE TRIM(PY_GENDER)
     END AS PY_GENDER,
     PY_FREQ,
     CASE
