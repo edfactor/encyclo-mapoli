@@ -134,6 +134,7 @@ export interface DuplicateNameAndBirthday {
   hoursCurrentYear: number;
   incomeCurrentYear: number;
 }
+
 export interface NegativeEtvaForSSNsOnPayProfit {
   employeeBadge: number;
   employeeSsn: number;
@@ -225,6 +226,7 @@ export interface EligibleEmployeesRequestDto extends ImpersonationRequest {
   profitYear: number;
   pagination: PaginationParams;
 }
+
 export interface EligibleEmployee {
   oracleHcmId: number;
   badgeNumber: number;
@@ -238,4 +240,37 @@ export interface EligibleEmployeeResponseDto {
   reportName: string;
   reportDate: string;
   response: Paged<EligibleEmployee>;
+}
+
+export enum DistributionByAgeReportType {
+  Total = "Total",
+  FullTime = "FullTime",
+  PartTime = "PartTime",
+}
+
+
+export interface DistributionsByAgeRequest extends ImpersonationRequest {
+  profitYear: number;
+  pagination: PaginationParams;
+  reportType: DistributionByAgeReportType;
+}
+
+export interface ProfitSharingDistributionsByAge {
+  reportName: string;
+  reportDate: string;
+  reportType: DistributionByAgeReportType;
+  hardshipTotalEmployees: number;
+  regularTotalAmount:number;
+  regularTotalEmployees: number;
+  hardshipTotalAmount: number;
+  distributionTotalAmount: number;
+  response: Paged<ProfitSharingDistributionsByAgeResponse>;
+}
+
+export interface ProfitSharingDistributionsByAgeResponse {
+  age: number;
+  employeeCount: number;
+  amount: number;
+  employmentType: string;
+  commentTypeId: number | null;
 }

@@ -28,11 +28,11 @@ public sealed class BeneficiaryContactMap : IEntityTypeConfiguration<Beneficiary
 
         _ = builder.OwnsOne(e => e.Address, address =>
         {
-            address.Property(a => a.Street).HasMaxLength(30).HasColumnName("STREET").HasComment("Street").IsRequired();
-            address.Property(a => a.Street2).HasMaxLength(30).HasColumnName("STREET2").HasComment("Street2");
-            address.Property(a => a.Street3).HasMaxLength(30).HasColumnName("STREET3").HasComment("Street3");
-            address.Property(a => a.Street4).HasMaxLength(30).HasColumnName("STREET4").HasComment("Street4");
-            address.Property(a => a.City).HasMaxLength(25).HasColumnName("CITY").HasComment("City").IsRequired();
+            address.Property(a => a.Street).HasMaxLength(56).HasColumnName("STREET").HasComment("Street").IsRequired();
+            address.Property(a => a.Street2).HasMaxLength(56).HasColumnName("STREET2").HasComment("Street2");
+            address.Property(a => a.Street3).HasMaxLength(56).HasColumnName("STREET3").HasComment("Street3");
+            address.Property(a => a.Street4).HasMaxLength(56).HasColumnName("STREET4").HasComment("Street4");
+            address.Property(a => a.City).HasMaxLength(36).HasColumnName("CITY").HasComment("City").IsRequired();
             address.Property(a => a.State).HasMaxLength(3).HasColumnName("STATE").HasComment("State").IsRequired();
             address.Property(a => a.PostalCode).HasMaxLength(9).HasColumnName("POSTAL_CODE").HasComment("Postal Code").IsRequired();
             address.Property(a => a.CountryIso).HasMaxLength(2).HasColumnName("COUNTRY_ISO").HasDefaultValue(Country.Constants.Us);

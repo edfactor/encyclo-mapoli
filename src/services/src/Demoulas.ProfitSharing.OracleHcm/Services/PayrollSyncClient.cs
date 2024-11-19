@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -29,6 +30,7 @@ public class PayrollSyncClient
     private readonly HttpClient _httpClient;
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
     private readonly ILogger<PayrollSyncClient> _logger;
+    private readonly JsonSerializerOptions _jsonSerializerOptions;
 
     public PayrollSyncClient(HttpClient httpClient, 
         IProfitSharingDataContextFactory profitSharingDataContextFactory,
@@ -37,31 +39,31 @@ public class PayrollSyncClient
         _httpClient = httpClient;
         _profitSharingDataContextFactory = profitSharingDataContextFactory;
         _logger = logger;
+        _jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
     }
 
     // Method to get payroll process results for a list of person IDs
-    internal async IAsyncEnumerable<KeyValuePair<long, List<int>>> GetPayrollProcessResultsAsync(
+    internal async IAsyncEnumerable<KeyValuePair<long, HashSet<int>>> GetPayrollProcessResultsAsync(
         List<long> personIds, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         foreach (long personId in personIds)
         {
-            List<int> objectActionIds = new List<int>();
+            HashSet<int> objectActionIds = new HashSet<int>();
             bool isSuccessful = false;
 
             try
             {
-                var response = await _httpClient.GetAsync(
-                    $"?q=PersonId={personId}&fields=PayrollActionId,ObjectActionId&onlyData=true",
+                var response = await _httpClient.GetAsync($"?q=PersonId={personId}&fields=PayrollActionId,ObjectActionId&onlyData=true",
                     cancellationToken);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var results = await response.Content.ReadFromJsonAsync<PayrollRoot>(cancellationToken);
+                    var results = await response.Content.ReadFromJsonAsync<PayrollRoot>(_jsonSerializerOptions, cancellationToken);
 
                     objectActionIds = results!.Items
                         .Where(result => result is { PayrollActionId: 2003, ObjectActionId: not null })
                         .Select(result => result.ObjectActionId!.Value)
-                        .ToList();
+                        .ToHashSet();
 
                     isSuccessful = true;
                 }
@@ -77,7 +79,7 @@ public class PayrollSyncClient
 
             if (isSuccessful)
             {
-                yield return new KeyValuePair<long, List<int>>(personId, objectActionIds);
+                yield return new KeyValuePair<long, HashSet<int>>(personId, objectActionIds);
             }
         }
     }
@@ -87,7 +89,7 @@ public class PayrollSyncClient
     // Method to get balance types for each ObjectActionId
     internal async Task GetBalanceTypesForProcessResultsAsync(
         long oracleHcmId,
-        List<int> objectActionIds,
+        HashSet<int> objectActionIds,
         CancellationToken cancellationToken)
     {
         // DimensionName should be set to Relationship No Calculation Breakdown Inception to Date. That will give you the correct value for current dollars, weeks, hours.
@@ -115,7 +117,7 @@ public class PayrollSyncClient
 
                     if (response.IsSuccessStatusCode)
                     {
-                        var balanceResults = await response.Content.ReadFromJsonAsync<BalanceRoot>(cancellationToken);
+                        var balanceResults = await response.Content.ReadFromJsonAsync<BalanceRoot>(_jsonSerializerOptions, cancellationToken);
 
                         decimal total = balanceResults!.Items.Where(i=> string.CompareOrdinal(i.DimensionName, dimensionName) == 0)
                             .Sum(b => b.TotalValue1);
@@ -212,7 +214,7 @@ public class PayrollSyncClient
                     .ToListAsync(cancellationToken));
 
             // Step 1: Get payroll process results (ObjectActionIds) for each PersonId
-            await foreach (KeyValuePair<long, List<int>> emp in GetPayrollProcessResultsAsync(list, cancellationToken))
+            await foreach (KeyValuePair<long, HashSet<int>> emp in GetPayrollProcessResultsAsync(list, cancellationToken))
             {
                 // Step 2: Get specific balance types for each ObjectActionId
                 await GetBalanceTypesForProcessResultsAsync(emp.Key, emp.Value, cancellationToken);

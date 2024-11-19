@@ -100,7 +100,7 @@ public sealed class OracleEmployeeValidator : Validator<OracleEmployee>
 
 
         RuleFor(x => x.EmployeeId)
-            .InclusiveBetween(1, 9_999_999).WithMessage("BadgeNumber must be a 7-digit number.");
+            .InclusiveBetween(1, 9_999_999).WithMessage("EmployeeId must be a 7-digit number.");
 
         RuleFor(x => x.PersonId)
             .NotEmpty()

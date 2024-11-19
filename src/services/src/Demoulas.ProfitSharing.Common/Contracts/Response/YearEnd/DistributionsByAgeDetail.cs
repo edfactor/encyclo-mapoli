@@ -1,15 +1,16 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-public sealed record ProfitSharingDistributionsByAge
+public sealed record DistributionsByAgeDetail
 {
     public required int Age { get; set; }
     public int EmployeeCount { get; set; }
     public decimal Amount { get; set; }
+    public decimal HardshipAmount { get; set; }
+    public decimal RegularAmount { get; set; }
     public required string EmploymentType { get; set; }
-    
 
-    public static ProfitSharingDistributionsByAge ResponseExample()
+    public static DistributionsByAgeDetail ResponseExample()
     {
-        return new ProfitSharingDistributionsByAge
+        return new DistributionsByAgeDetail
         {
            Age = 32,
            EmploymentType = "Full Time",
