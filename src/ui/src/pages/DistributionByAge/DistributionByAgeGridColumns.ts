@@ -1,25 +1,15 @@
 import { formattingUtils } from "smart-ui-library";
-import { ProfitSharingDistributionsByAge } from "../../reduxstore/types";
+import { DistributionByAgeReportType } from "../../reduxstore/types";
 import { ColDef } from "ag-grid-community";
 
 export interface IDistributionByAgeGridColumns {
   headerName: string;
-  pinnedRowDataTotal?: ColDef[];
   children?: ColDef[];
 }
 
-export const GetDistributionsByAgeColumns = (
-  response: ProfitSharingDistributionsByAge
-): IDistributionByAgeGridColumns => {
+export const GetDistributionsByAgeColumns = (  reportType: DistributionByAgeReportType): IDistributionByAgeGridColumns => {
   return {
-    headerName: response.reportType,
-    pinnedRowDataTotal: [
-      {
-        headerName: "Employee Count",
-        field: "hardshipTotalEmployees",
-        colId: "distributionTotalAmount"
-      }
-    ],
+    headerName: reportType,
     children: [
       {
         headerName: "Age",
@@ -29,7 +19,8 @@ export const GetDistributionsByAgeColumns = (
         headerClass: "right-align",
         cellClass: "right-align",
         resizable: true,
-        sort: "asc"
+        sort: "asc",
+        cellDataType: "text"
       },
       {
         headerName: "EMPS",

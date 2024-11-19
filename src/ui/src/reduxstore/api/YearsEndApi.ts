@@ -150,12 +150,12 @@ export const YearsEndApi = createApi({
       }
     }),
     getMilitaryAndRehire: builder.query<PagedReportResponse<MilitaryAndRehire>, MilitaryAndRehireRequestDto>({
-      query: () => ({
+      query: (params) => ({
         url: "yearend/military-and-rehire",
         method: "GET",
         params: {
-          take: 25,
-          skip: 0
+          take: params.pagination.take,
+          skip: params.pagination.skip
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -176,8 +176,8 @@ export const YearsEndApi = createApi({
         method: "GET",
         params: {
           profitYear: params.profitYear,
-          take: 25,
-          skip: 0
+          take: params.pagination.take,
+          skip: params.pagination.skip
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -198,8 +198,8 @@ export const YearsEndApi = createApi({
         method: "GET",
         params: {
           profitYear: params.profitYear,
-          take: 25,
-          skip: 0
+          take: params.pagination.take,
+          skip: params.pagination.skip
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -212,12 +212,12 @@ export const YearsEndApi = createApi({
       }
     }),
     getMismatchedSSNsPayprofitAndDemoOnSameBadge: builder.query({
-      query: () => ({
+      query: (params) => ({
         url: "yearend/mismatched-ssns-payprofit-and-demo-on-same-badge",
         method: "GET",
         params: {
-          take: 25,
-          skip: 0
+          take: params.pagination.take,
+          skip: params.pagination.skip
         }
       }),
       async onQueryStarted({ queryFulfilled }) {
@@ -269,12 +269,12 @@ export const YearsEndApi = createApi({
       }
     }),
     getPayprofitBadgeWithoutDemographics: builder.query({
-      query: () => ({
+      query: (params) => ({
         url: "yearend/payprofit-badges-without-demographics",
         method: "GET",
         params: {
-          take: 25,
-          skip: 0
+          take: params.pagination.take,
+          skip: params.pagination.skip
         }
       }),
       async onQueryStarted({ dispatch, queryFulfilled }) {
@@ -286,12 +286,12 @@ export const YearsEndApi = createApi({
       }
     }),
     getWagesCurrentYear: builder.query({
-      query: () => ({
+      query: (params) => ({
         url: "yearend/wages-current-year",
         method: "GET",
         params: {
-          take: 25,
-          skip: 0
+          take: params.pagination.take,
+          skip: params.pagination.skip
         }
       }),
       async onQueryStarted({ dispatch, queryFulfilled }) {
@@ -303,12 +303,12 @@ export const YearsEndApi = createApi({
       }
     }),
     getWagesPreviousYear: builder.query({
-      query: () => ({
+      query: (params) => ({
         url: "yearend/wages-previous-year",
         method: "GET",
         params: {
-          take: 25,
-          skip: 0
+          take: params.pagination.take,
+          skip: params.pagination.skip
         }
       }),
       async onQueryStarted({ dispatch, queryFulfilled }) {
@@ -370,9 +370,7 @@ export const YearsEndApi = createApi({
         method: "GET",
         params: {
           profitYear: params.profitYear,
-          reportType: params.reportType,
-          take: params.pagination.take,
-          skip: params.pagination.skip
+          reportType: params.reportType
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
