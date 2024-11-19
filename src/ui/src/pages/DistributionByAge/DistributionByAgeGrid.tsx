@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetDistributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
@@ -7,7 +7,6 @@ import { DSMGrid, ISortParams } from "smart-ui-library";
 import { GetDistributionsByAgeColumns } from "./DistributionByAgeGridColumns";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { DistributionByAgeReportType } from "../../reduxstore/types";
-import { string } from "yup";
 
 const DistributionByAgeGrid = () => {
   const [_discard0, setSortParams] = useState<ISortParams>({
@@ -41,14 +40,17 @@ const DistributionByAgeGrid = () => {
             xs={12}>
             <Grid2 xs={4}>
               <DSMGrid
-                preferenceKey={"AGE"}
+                preferenceKey={"AGE_Total"}
                 isLoading={isLoading}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
-                  defaultColGroupDef: {headerName : "Total"},
                   rowData: distributionsByAgeTotal?.response.results,
-                  columnDefs: columnDefsTotal.children
-
+                  columnDefs: [
+                    {
+                      headerName: columnDefsTotal.headerName,
+                      children: columnDefsTotal.children
+                    }
+                  ]
                 }}
               />
             </Grid2>
@@ -59,7 +61,12 @@ const DistributionByAgeGrid = () => {
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: distributionsByAgeFullTime?.response.results,
-                  columnDefs: columnDefsFullTime.children
+                  columnDefs: [
+                    {
+                      headerName: columnDefsFullTime.headerName,
+                      children: columnDefsFullTime.children
+                    }
+                  ]
                 }}
               />
             </Grid2>
@@ -69,9 +76,13 @@ const DistributionByAgeGrid = () => {
                 isLoading={isLoading}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
-                  defaultColGroupDef: {headerName : "Part Time"},
                   rowData: distributionsByAgePartTime?.response.results,
-                  columnDefs: columnDefsPartTime.children
+                  columnDefs: [
+                    {
+                      headerName: columnDefsPartTime?.headerName,
+                      children: columnDefsPartTime?.children
+                    }
+                  ]
                 }}
               />
             </Grid2>
