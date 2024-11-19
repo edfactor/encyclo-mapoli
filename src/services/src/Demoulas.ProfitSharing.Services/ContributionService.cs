@@ -26,8 +26,8 @@ public sealed class ContributionService
         {
             return context.PayProfits
                 .Include(p => p.Demographic)
-                .Where(p => badgeNumber.Contains(p.Demographic!.BadgeNumber))
-                .GroupBy(p => p.Demographic!.BadgeNumber)
+                .Where(p => badgeNumber.Contains(p.Demographic!.EmployeeId))
+                .GroupBy(p => p.Demographic!.EmployeeId)
                 .Select(p => new { BadgeNumber = p.Key, ContributionYears = p.Count() })
                 .ToDictionaryAsync(arg => arg.BadgeNumber, arg => arg.ContributionYears);
         });
@@ -66,14 +66,14 @@ public sealed class ContributionService
 
 
         var demoQuery = ctx.Demographics
-            .Select(d => new { d.OracleHcmId, d.BadgeNumber, d.Ssn });
+            .Select(d => new { d.OracleHcmId, d.EmployeeId, d.Ssn });
 
         var query = from d in demoQuery
                     join r in pdQuery on d.Ssn equals r.Ssn
                     select new InternalProfitDetailDto
                     {
                         OracleHcmId = d.OracleHcmId,
-                        BadgeNumber = d.BadgeNumber,
+                        BadgeNumber = d.EmployeeId,
                         TotalContributions = r.TotalContributions,
                         TotalEarnings = r.TotalEarnings,
                         TotalForfeitures = r.TotalForfeitures,

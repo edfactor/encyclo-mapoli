@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Bogus.Extensions.UnitedStates;
-using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
@@ -25,7 +24,7 @@ namespace Demoulas.ProfitSharing.OracleHcm.Services;
 /// </summary>
 public sealed class EmployeeSyncService : IEmployeeSyncService
 {
-    private readonly OracleDemographicsService _oracleDemographicsService;
+    private readonly OracleDemographicsSyncClient _oracleDemographicsSyncClient;
     private readonly IDemographicsServiceInternal _demographicsService;
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
     private readonly OracleHcmConfig _oracleHcmConfig;
@@ -37,7 +36,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
         OracleHcmConfig oracleHcmConfig,
         OracleEmployeeValidator employeeValidator)
     {
-        _oracleDemographicsService = new OracleDemographicsService(httpClient, oracleHcmConfig);
+        _oracleDemographicsSyncClient = new OracleDemographicsSyncClient(httpClient, oracleHcmConfig);
         _demographicsService = demographicsService;
         _profitSharingDataContextFactory = profitSharingDataContextFactory;
         _oracleHcmConfig = oracleHcmConfig;
@@ -67,7 +66,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
         try
         {
             await CleanAuditError(cancellationToken);
-            var oracleHcmEmployees = _oracleDemographicsService.GetAllEmployees(cancellationToken);
+            var oracleHcmEmployees = _oracleDemographicsSyncClient.GetAllEmployees(cancellationToken);
             var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, requestedBy, cancellationToken);
             await _demographicsService.AddDemographicsStream(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
         }
@@ -129,7 +128,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
     {
         await foreach (OracleEmployee? employee in asyncEnumerable.WithCancellation(cancellationToken))
         {
-            int badgeNumber = employee?.BadgeNumber ?? 0;
+            int badgeNumber = employee?.EmployeeId ?? 0;
             if (employee == null || badgeNumber == 0)
             {
                 continue;
@@ -146,7 +145,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
             yield return new DemographicsRequest
             {
                 OracleHcmId = employee.PersonId,
-                BadgeNumber = employee.BadgeNumber,
+                BadgeNumber = employee.EmployeeId,
                 DateOfBirth = employee.DateOfBirth,
                 HireDate = employee.WorkRelationship?.StartDate ?? SqlDateTime.MinValue.Value.ToDateOnly(),
                 TerminationDate = employee.WorkRelationship?.TerminationDate,

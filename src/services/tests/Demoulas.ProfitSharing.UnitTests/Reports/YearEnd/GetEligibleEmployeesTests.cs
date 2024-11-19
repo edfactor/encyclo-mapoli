@@ -219,7 +219,7 @@ public class GetEligibleEmployeesTests : ApiTestBase<Api.Program>
         demo.OracleHcmId = testEmployee.OracleHcmId;
         demo.Id = testEmployee.Id;
         demo.ContactInfo.FullName = testEmployee.FullName;
-        demo.BadgeNumber = testEmployee.BadgeNumber;
+        demo.EmployeeId = testEmployee.BadgeNumber;
         demo.DateOfBirth = convertAgeToBirthDate(TestProfitYear, testEmployee.Age);
         demo.EmploymentStatusId = testEmployee.EmploymentStatusId;
 

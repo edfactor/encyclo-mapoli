@@ -34,9 +34,15 @@ public sealed class DepartmentHostedService : BaseCacheHostedService<LookupTable
 
     private async Task<IEnumerable<LookupTableCache<byte>>> GetAllDepartments(CancellationToken cancellationToken)
     {
-        return await _contextFactory.UseReadOnlyContext(func: context =>
+        return await _contextFactory.UseReadOnlyContext(func: async context =>
         {
-            return context.Departments
+            bool canConnect = await context.Database.CanConnectAsync(cancellationToken);
+            if (!canConnect)
+            {
+                return [];
+            }
+
+            return await context.Departments
                 .Select(selector: c => new LookupTableCache<byte>
                 {
                     Id = c.Id,

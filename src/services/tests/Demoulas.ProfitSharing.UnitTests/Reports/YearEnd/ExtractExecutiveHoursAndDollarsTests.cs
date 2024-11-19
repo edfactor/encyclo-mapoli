@@ -259,7 +259,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         PayProfit pp = await c.PayProfits.Include(p => p.Demographic != null).FirstAsync();
         Demographic demo = pp.Demographic!;
 
-        demo.BadgeNumber = _example.BadgeNumber;
+        demo.EmployeeId = _example.BadgeNumber;
         demo.ContactInfo.FullName = _example.FullName;
         demo.StoreNumber = _example.StoreNumber;
         pp.IncomeExecutive = _example.IncomeExecutive;
@@ -280,7 +280,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         PayProfit pp = await c.PayProfits.Include(p => p.Demographic != null).FirstAsync();
         Demographic demo = pp.Demographic!;
 
-        demo.BadgeNumber = _example.BadgeNumber;
+        demo.EmployeeId = _example.BadgeNumber;
         demo.ContactInfo.FullName = _example.FullName;
         demo.StoreNumber = _example.StoreNumber;
         pp.IncomeExecutive = 0m;
