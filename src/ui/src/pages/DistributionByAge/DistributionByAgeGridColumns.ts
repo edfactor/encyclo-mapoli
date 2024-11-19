@@ -1,47 +1,47 @@
 import { formattingUtils } from "smart-ui-library";
+import { DistributionByAgeReportType } from "../../reduxstore/types";
+import { ColDef } from "ag-grid-community";
 
-const baseColumnDefs = [
-  {
-    headerName: "Age",
-    field: "age",
-    colId: "age",
-    minWidth: 10,
-    headerClass: "left-align",
-    cellClass: "left-align",
-    resizable: true,
-    sort: "asc",
-  },
-  {
-    headerName: "EMPS",
-    field: "employeeCount",
-    colId: "employeeCount",
-    minWidth: 10,
-    headerClass: "left-align",
-    cellClass: "left-align",
-    resizable: true,
-  },
-  {
-    headerName: "Amount",
-    field: "amount",
-    colId: "amount",
-    minWidth: 50,
-    headerClass: "left-align",
-    cellClass: "left-align",
-    resizable: true,
-    valueFormatter: formattingUtils.agGridNumberToCurrency,
-  },
-];
+export interface IDistributionByAgeGridColumns {
+  headerName: string;
+  children?: ColDef[];
+}
 
-const groupHeaders = [
-  { name: "Total", className: "group-total" },
-  { name: "Full Time", className: "group-full-time" },
-  { name: "Part Time", className: "group-part-time" },
-];
-
-export const GetDistributionsByAgeColumns = () =>
-  groupHeaders.map(({ name, className }) => ({
-    headerName: name, // Use the 'name' property for the header name
-    headerClass: className, // Apply the class for styling
-    children: baseColumnDefs,
-  }));
-
+export const GetDistributionsByAgeColumns = (
+  reportType: DistributionByAgeReportType
+): IDistributionByAgeGridColumns => {
+  return {
+    headerName: reportType,
+    children: [
+      {
+        headerName: "Age",
+        field: "age",
+        colId: "age",
+        minWidth: 80,
+        headerClass: "right-align",
+        cellClass: "right-align",
+        resizable: true,
+        sort: "asc"
+      },
+      {
+        headerName: "EMPS",
+        field: "employeeCount",
+        colId: "employeeCount",
+        minWidth: 100,
+        headerClass: "left-align",
+        cellClass: "left-align",
+        resizable: true
+      },
+      {
+        headerName: "Amount",
+        field: "amount",
+        colId: "amount",
+        minWidth: 150,
+        headerClass: "left-align",
+        cellClass: "left-align",
+        resizable: true,
+        valueFormatter: formattingUtils.agGridNumberToCurrency
+      }
+    ]
+  };
+};

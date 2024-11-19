@@ -243,9 +243,9 @@ export interface EligibleEmployeeResponseDto {
 }
 
 export enum DistributionByAgeReportType {
-  Total = 0,
-  FullTime = 1,
-  PartTime = 2,
+  Total = "Total",
+  FullTime = "FullTime",
+  PartTime = "PartTime",
 }
 
 
@@ -258,6 +258,7 @@ export interface DistributionsByAgeRequest extends ImpersonationRequest {
 export interface ProfitSharingDistributionsByAge {
   reportName: string;
   reportDate: string;
+  reportType: DistributionByAgeReportType;
   totalEmployees: number;
   hardshipTotalEmployees: number;
   totalAmount: number;

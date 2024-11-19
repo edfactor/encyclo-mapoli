@@ -1,6 +1,7 @@
-import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
   DemographicBadgesNotInPayprofit,
+  DistributionByAgeReportType,
   DistributionsAndForfeitures,
   DuplicateNameAndBirthday,
   DuplicateSSNDetail,
@@ -11,7 +12,8 @@ import {
   MilitaryAndRehireProfitSummary,
   MissingCommasInPYName,
   NegativeEtvaForSSNsOnPayProfit,
-  PagedReportResponse, ProfitSharingDistributionsByAge
+  PagedReportResponse,
+  ProfitSharingDistributionsByAge
 } from "reduxstore/types";
 
 export interface YearsEndState {
@@ -26,7 +28,9 @@ export interface YearsEndState {
   distributionsAndForfeitures: PagedReportResponse<DistributionsAndForfeitures> | null;
   executiveHoursAndDollars: PagedReportResponse<ExecutiveHoursAndDollars> | null;
   eligibleEmployees: EligibleEmployeeResponseDto | null;
-  distributionsByAge: ProfitSharingDistributionsByAge | null;
+  distributionsByAgeTotal: ProfitSharingDistributionsByAge | null;
+  distributionsByAgeFullTime: ProfitSharingDistributionsByAge | null;
+  distributionsByAgePartTime: ProfitSharingDistributionsByAge | null;
 }
 
 const initialState: YearsEndState = {
@@ -41,7 +45,9 @@ const initialState: YearsEndState = {
   distributionsAndForfeitures: null,
   executiveHoursAndDollars: null,
   eligibleEmployees: null,
-  distributionsByAge: null,
+  distributionsByAgeTotal: null,
+  distributionsByAgeFullTime: null,
+  distributionsByAgePartTime: null
 };
 
 export const yearsEndSlice = createSlice({
@@ -90,24 +96,25 @@ export const yearsEndSlice = createSlice({
     ) => {
       state.distributionsAndForfeitures = action.payload;
     },
-    setExecutiveHoursAndDollars: (
-      state,
-      action: PayloadAction<PagedReportResponse<ExecutiveHoursAndDollars>>
-    ) => {
+    setExecutiveHoursAndDollars: (state, action: PayloadAction<PagedReportResponse<ExecutiveHoursAndDollars>>) => {
       state.executiveHoursAndDollars = action.payload;
     },
-    setEligibleEmployees: (
-      state,
-      action: PayloadAction<EligibleEmployeeResponseDto>
-    ) => {
+    setEligibleEmployees: (state, action: PayloadAction<EligibleEmployeeResponseDto>) => {
       state.eligibleEmployees = action.payload;
     },
-    setDistributionsByAge: (
-      state,
-      action: PayloadAction<ProfitSharingDistributionsByAge>
-    ) => {
-      state.distributionsByAge = action.payload;
-    },
+    setDistributionsByAge: (state, action: PayloadAction<ProfitSharingDistributionsByAge>) => {
+      if (action.payload.reportType == DistributionByAgeReportType.Total) {
+        state.distributionsByAgeTotal = action.payload;
+      }
+
+      if (action.payload.reportType == DistributionByAgeReportType.FullTime) {
+        state.distributionsByAgeFullTime = action.payload;
+      }
+
+      if (action.payload.reportType == DistributionByAgeReportType.PartTime) {
+        state.distributionsByAgePartTime = action.payload;
+      }
+    }
   }
 });
 

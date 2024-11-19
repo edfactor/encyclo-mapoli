@@ -10,7 +10,7 @@ import { ImpersonationRoles, DistributionByAgeReportType } from "reduxstore/type
 
 interface DistributionByAgeSearch {
   profitYear: number;
-  reportType: DistributionByAgeReportType;
+  reportType?: DistributionByAgeReportType;
 }
 
 const schema = yup.object().shape({
@@ -48,6 +48,24 @@ const DistributionByAgeSearchFilter = () => {
         {
           profitYear: data.profitYear,
           reportType: DistributionByAgeReportType.Total,
+          pagination: { skip: 0, take: 255 },
+          impersonation: ImpersonationRoles.ProfitSharingAdministrator
+        },
+        false
+      );
+      triggerSearch(
+        {
+          profitYear: data.profitYear,
+          reportType: DistributionByAgeReportType.FullTime,
+          pagination: { skip: 0, take: 255 },
+          impersonation: ImpersonationRoles.ProfitSharingAdministrator
+        },
+        false
+      );
+      triggerSearch(
+        {
+          profitYear: data.profitYear,
+          reportType: DistributionByAgeReportType.PartTime,
           pagination: { skip: 0, take: 255 },
           impersonation: ImpersonationRoles.ProfitSharingAdministrator
         },
