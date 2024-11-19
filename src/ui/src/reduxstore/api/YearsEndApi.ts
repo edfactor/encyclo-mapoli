@@ -285,23 +285,6 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getPayrollDuplicateSSNsOnPayprofit: builder.query({
-      query: () => ({
-        url: "yearend/payroll-duplicate-ssns-on-payprofit",
-        method: "GET",
-        params: {
-          take: 25,
-          skip: 0
-        }
-      }),
-      async onQueryStarted({ dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-        } catch (err) {
-          console.log("Err: " + err);
-        }
-      }
-    }),
     getWagesCurrentYear: builder.query({
       query: () => ({
         url: "yearend/wages-current-year",
@@ -395,7 +378,6 @@ export const YearsEndApi = createApi({
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          console.log(JSON.stringify(data));
           dispatch(setDistributionsByAge(data));
         } catch (err) {
           console.log("Err: " + err);

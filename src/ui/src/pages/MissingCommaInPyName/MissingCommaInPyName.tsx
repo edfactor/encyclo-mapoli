@@ -6,7 +6,7 @@ import MissingCommaInPyNameGrid from "./MissingCommaInPyNameGrid";
 
 const MissingCommaInPyName = () => {
   return (
-    <Page label="Missing Comma in PY_Name">
+    <Page label="Missing Comma in Full Name">
         <Grid2
           container
           rowSpacing="24px">

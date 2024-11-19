@@ -8,7 +8,6 @@ import ImpersonationMultiSelect from "components/MenuBar/ImpersonationMultiSelec
 import DemographicBadgesNotInPayprofit from "pages/DemographicBadgesNotInPayprofit/DemographicBadgesNotInPayprofit";
 import DuplicateSSNsOnDemographics from "pages/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographics";
 import NegativeEtvaForSSNsOnPayprofit from "pages/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofit";
-import PayrollDuplicateSSNsOnPayprofit from "pages/PayrollDuplicateSSNsOnPayprofit/PayrollDuplicateSSNsOnPayprofit";
 import DuplicateNamesAndBirthdays from "pages/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdays";
 import MissingCommaInPyName from "pages/MissingCommaInPyName/MissingCommaInPyName";
 import MilitaryAndRehire from "pages/MilitaryAndRehire/MilitaryAndRehire";
@@ -44,9 +43,6 @@ const Router = () => {
         <Route
           path="negative-etva-for-ssns-on-payprofit"
           element={<NegativeEtvaForSSNsOnPayprofit />}></Route>
-        <Route
-          path="payroll-duplicate-ssns-on-payprofit"
-          element={<PayrollDuplicateSSNsOnPayprofit />}></Route>
         <Route
           path="duplicate-names-and-birthdays"
           element={<DuplicateNamesAndBirthdays />}></Route>
