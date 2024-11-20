@@ -1,9 +1,10 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 import { RootState } from "reduxstore/store";
-import { DemographicBadgesNotInPayprofitRequestDto, DemographicBadgesNotInPayprofitResponse, DistributionsAndForfeitures, DistributionsAndForfeituresRequestDto, DuplicateNameAndBirthday, DuplicateNameAndBirthdayRequestDto, DuplicateSSNDetail, DuplicateSSNsRequestDto, EligibleEmployeeResponseDto, EligibleEmployeesRequestDto, ExecutiveHoursAndDollars, ExecutiveHoursAndDollarsRequestDto, MilitaryAndRehire, MilitaryAndRehireForfeiture, MilitaryAndRehireForfeituresRequestDto, MilitaryAndRehireProfitSummary, MilitaryAndRehireProfitSummaryRequestDto, MilitaryAndRehireRequestDto, MissingCommasInPYName, MissingCommasInPYNameRequestDto, NegativeEtvaForSSNsOnPayProfit, NegativeEtvaForSSNsOnPayprofitRequestDto, PagedReportResponse } from "reduxstore/types";
-import { setDemographicBadgesNotInPayprofitData, setDistributionsAndForfeitures, setDuplicateNamesAndBirthdays, setDuplicateSSNsData, setEligibleEmployees, setExecutiveHoursAndDollars, setMilitaryAndRehireDetails, setMilitaryAndRehireForfeituresDetails, setMilitaryAndRehireProfitSummaryDetails, setMissingCommaInPYName, setNegativeEtvaForSssnsOnPayprofit } from "reduxstore/slices/yearsEndSlice";
+import { DemographicBadgesNotInPayprofitRequestDto, DemographicBadgesNotInPayprofitResponse, DistributionsAndForfeitures, DistributionsAndForfeituresRequestDto, DuplicateNameAndBirthday, DuplicateNameAndBirthdayRequestDto, DuplicateSSNDetail, DuplicateSSNsRequestDto, EligibleEmployeeResponseDto, EligibleEmployeesRequestDto, ExecutiveHoursAndDollars, ExecutiveHoursAndDollarsRequestDto, MasterInquiryDetail, MasterInquryRequest, MilitaryAndRehire, MilitaryAndRehireForfeiture, MilitaryAndRehireForfeituresRequestDto, MilitaryAndRehireProfitSummary, MilitaryAndRehireProfitSummaryRequestDto, MilitaryAndRehireRequestDto, MissingCommasInPYName, MissingCommasInPYNameRequestDto, NegativeEtvaForSSNsOnPayProfit, NegativeEtvaForSSNsOnPayprofitRequestDto, PagedReportResponse } from "reduxstore/types";
+import { setDemographicBadgesNotInPayprofitData, setDistributionsAndForfeitures, setDuplicateNamesAndBirthdays, setDuplicateSSNsData, setEligibleEmployees, setExecutiveHoursAndDollars, setMasterInquiryData, setMilitaryAndRehireDetails, setMilitaryAndRehireForfeituresDetails, setMilitaryAndRehireProfitSummaryDetails, setMissingCommaInPYName, setNegativeEtvaForSssnsOnPayprofit } from "reduxstore/slices/yearsEndSlice";
 import { url } from "./api";
+import { Paged } from "smart-ui-library";
 export const YearsEndApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: `${url}/api/`,
@@ -319,6 +320,35 @@ export const YearsEndApi = createApi({
         }
       }
     }),
+    getProfitMasterInquiry: builder.query<Paged<MasterInquiryDetail>, MasterInquryRequest>({
+      query: (params) => ({
+        url: "yearend/master-inquiry",
+        method: "GET",
+        params: {
+          startProfitYear: params.startProfitYear,
+          endProfitYear: params.endProfitYear,
+          startProfitMonth: params.startProfitMonth,
+          endProfitMonth: params.endProfitMonth,
+          profitCode: params.profitCode,
+          contributionAmount: params.contributionAmount,
+          earningsAmount: params.earningsAmount,
+          forfeitureAmount: params.forfeitureAmount,
+          paymentAmount: params.paymentAmount,
+          socialSecurity: params.socialSecurity,
+          comment: params.comment,
+          take: params.pagination.take,
+          skip: params.pagination.skip
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setMasterInquiryData(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
   })
 });
 
@@ -338,5 +368,6 @@ export const {
   useLazyGetWagesPreviousYearQuery,
   useLazyGetDistributionsAndForfeituresQuery,
   useLazyGetExecutiveHoursAndDollarsQuery,
-  useLazyGetEligibleEmployeesQuery
+  useLazyGetEligibleEmployeesQuery,
+  useLazyGetProfitMasterInquiryQuery
 } = YearsEndApi;

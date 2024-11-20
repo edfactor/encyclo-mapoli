@@ -6,6 +6,7 @@ import {
   DuplicateSSNDetail,
   EligibleEmployeeResponseDto,
   ExecutiveHoursAndDollars,
+  MasterInquiryDetail,
   MilitaryAndRehire,
   MilitaryAndRehireForfeiture,
   MilitaryAndRehireProfitSummary,
@@ -13,6 +14,7 @@ import {
   NegativeEtvaForSSNsOnPayProfit,
   PagedReportResponse
 } from "reduxstore/types";
+import { Paged } from "smart-ui-library";
 
 export interface YearsEndState {
   duplicateSSNsData: PagedReportResponse<DuplicateSSNDetail> | null;
@@ -26,6 +28,7 @@ export interface YearsEndState {
   distributionsAndForfeitures: PagedReportResponse<DistributionsAndForfeitures> | null;
   executiveHoursAndDollars: PagedReportResponse<ExecutiveHoursAndDollars> | null;
   eligibleEmployees: EligibleEmployeeResponseDto | null;
+  masterInquiryData: Paged<MasterInquiryDetail> | null;
 }
 
 const initialState: YearsEndState = {
@@ -39,7 +42,8 @@ const initialState: YearsEndState = {
   militaryAndRehireProfitSummary: null,
   distributionsAndForfeitures: null,
   executiveHoursAndDollars: null,
-  eligibleEmployees: null
+  eligibleEmployees: null,
+  masterInquiryData: null
 };
 
 export const yearsEndSlice = createSlice({
@@ -100,6 +104,17 @@ export const yearsEndSlice = createSlice({
     ) => {
       state.eligibleEmployees = action.payload;
     },
+    setMasterInquiryData: (
+      state,
+      action: PayloadAction<Paged<MasterInquiryDetail>>
+    ) => {
+      state.masterInquiryData = action.payload;
+    },
+    clearMasterInquiryData: (
+      state
+    ) => {
+      state.masterInquiryData = null;
+    },
   }
 });
 
@@ -114,6 +129,8 @@ export const {
   setMilitaryAndRehireProfitSummaryDetails,
   setDistributionsAndForfeitures,
   setExecutiveHoursAndDollars,
-  setEligibleEmployees
+  setEligibleEmployees,
+  setMasterInquiryData,
+  clearMasterInquiryData
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;
