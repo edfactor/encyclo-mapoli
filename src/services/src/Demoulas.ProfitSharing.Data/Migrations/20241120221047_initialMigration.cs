@@ -742,7 +742,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     AMOUNT_AUTHORIZED = table.Column<decimal>(type: "DECIMAL(10,2)", precision: 10, scale: 2, nullable: true),
                     DATE_REQUESTED = table.Column<DateTime>(type: "Date", nullable: false),
                     DATE_DECIDED = table.Column<DateTime>(type: "Date", nullable: true),
-                    TAXCODEID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false)
+                    TAX_CODE_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -769,7 +769,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         principalColumn: "ID");
                     table.ForeignKey(
                         name: "FK_DISTRIBUTION_REQUEST_TAXCODES_TAXCODEID",
-                        column: x => x.TAXCODEID,
+                        column: x => x.TAX_CODE_ID,
                         principalTable: "TAX_CODE",
                         principalColumn: "ID");
                 });
@@ -3008,7 +3008,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_DISTRIBUTION_REQUEST_TAXCODEID",
                 table: "DISTRIBUTION_REQUEST",
-                column: "TAXCODEID");
+                column: "TAX_CODE_ID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DISTRIBUTION_REQUEST_TYPEID",

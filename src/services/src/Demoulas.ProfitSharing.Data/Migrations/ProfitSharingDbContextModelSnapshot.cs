@@ -26738,7 +26738,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<string>("TaxCodeId")
                         .IsRequired()
                         .HasColumnType("NVARCHAR2(1)")
-                        .HasColumnName("TAXCODEID");
+                        .HasColumnName("TAX_CODE_ID");
 
                     b.Property<byte>("TypeId")
                         .HasColumnType("NUMBER(3)")
