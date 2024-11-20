@@ -242,6 +242,45 @@ export interface EligibleEmployeeResponseDto {
   response: Paged<EligibleEmployee>;
 }
 
+export interface MasterInquiryDetail {
+  id: number;
+  ssn: number;
+  profitYear: number;
+  profitYearIteration: number;
+  distributionSequence: number;
+  profitCodeId: number;
+  contribution: number;
+  earnings: number;
+  forfeiture: number;
+  monthToDate: number;
+  yearToDate: number;
+  remark?: string;
+  zeroContributionReasonId?: number;
+  federalTaxes: number;
+  stateTaxes: number;
+  taxCodeId?: string;
+  commentTypeId?: number;
+  commentRelatedCheckNumber?: number;
+  commentRelatedState?: string;
+  commentRelatedOracleHcmId?: number;
+  commentRelatedPsnSuffix?: number;
+  commentIsPartialTransaction?: boolean;
+}
+
+export interface MasterInquryRequest extends ImpersonationRequest {
+  startProfitYear?: number;
+  endProfitYear?: number;
+  startProfitMonth?: number;
+  endProfitMonth?: number;
+  profitCode?: number;
+  contributionAmount?: number;
+  earningsAmount?: number;
+  forfeitureAmount?: number;
+  paymentAmount?: number;
+  socialSecurity?: number;
+  comment?: string
+  pagination: PaginationParams;
+}
 export enum DistributionByAgeReportType {
   Total = "Total",
   FullTime = "FullTime",

@@ -4,7 +4,7 @@ const yearEndReports: RouteCategory = {
   menuLabel: "Year End Reports",
   parentRoute: "",
   items: [
-    { caption: "Demographic Bages Not In Payprofit", route: "/demographic-badges-not-in-payprofit" },
+    { caption: "Demographic Badges Not In Payprofit", route: "/demographic-badges-not-in-payprofit" },
     { caption: "Duplicate SSNs in Demographics", route: "/duplicate-ssns-demographics" },
     { caption: "Negative ETVA for SSNs on Payprofit", route: "/negative-etva-for-ssns-on-payprofit" },
     { caption: "Duplicate Names and Birthdays", route: "/duplicate-names-and-birthdays" },
@@ -15,6 +15,7 @@ const yearEndReports: RouteCategory = {
     { caption: "Distributions and Forfeitures", route: "/distributions-and-forfeitures" },
     { caption: "Manage Executive Hours and Dollars", route: "/manage-executive-hours-and-dolars"},
     { caption: "Get Eligible Employees", route: "/eligible-employees" },
+    { caption: "Master Inquiry", route: "/master-inquiry" },
     { caption: "Get Distributions by Age", route: "/distributions-by-age" }
   ]
 };

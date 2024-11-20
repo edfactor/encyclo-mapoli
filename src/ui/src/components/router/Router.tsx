@@ -16,6 +16,7 @@ import MilitaryAndRehireProfitSummary from "pages/MilitaryAndRehireProfitSummary
 import DistributionsAndForfeitures from "pages/DistributionsAndForfeitures/DistributionAndForfeitures";
 import ManageExecutiveHoursAndDollars from "pages/ManageExecutiveHoursAndDollars/ManageExecutiveHoursAndDollars";
 import EligibleEmployees from "pages/EligibleEmployees/EligibleEmployees";
+import MasterInquiry from "pages/MasterInquiry/MasterInquiry";
 import DistributionByAge from "../../pages/DistributionByAge/DistributionByAge";
 
 const Router = () => {
@@ -67,6 +68,9 @@ const Router = () => {
           <Route
           path="eligible-employees"
           element={<EligibleEmployees />}></Route>
+          <Route
+          path="master-inquiry"
+          element={<MasterInquiry />}></Route>
          <Route
           path="distributions-by-age"
           element={<DistributionByAge />}></Route>
