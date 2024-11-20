@@ -15,6 +15,8 @@ import {
   EligibleEmployeesRequestDto,
   ExecutiveHoursAndDollars,
   ExecutiveHoursAndDollarsRequestDto,
+  MasterInquiryDetail,
+  MasterInquryRequest,
   MilitaryAndRehire,
   MilitaryAndRehireForfeiture,
   MilitaryAndRehireForfeituresRequestDto,
@@ -36,6 +38,7 @@ import {
   setDuplicateSSNsData,
   setEligibleEmployees,
   setExecutiveHoursAndDollars,
+  setMasterInquiryData,
   setMilitaryAndRehireDetails,
   setMilitaryAndRehireForfeituresDetails,
   setMilitaryAndRehireProfitSummaryDetails,
@@ -43,6 +46,7 @@ import {
   setNegativeEtvaForSssnsOnPayprofit
 } from "reduxstore/slices/yearsEndSlice";
 import { url } from "./api";
+import { Paged } from "smart-ui-library";
 
 export const YearsEndApi = createApi({
   baseQuery: fetchBaseQuery({
@@ -381,7 +385,36 @@ export const YearsEndApi = createApi({
           console.log("Err: " + err);
         }
       }
-    })
+    }),
+    getProfitMasterInquiry: builder.query<Paged<MasterInquiryDetail>, MasterInquryRequest>({
+      query: (params) => ({
+        url: "yearend/master-inquiry",
+        method: "GET",
+        params: {
+          startProfitYear: params.startProfitYear,
+          endProfitYear: params.endProfitYear,
+          startProfitMonth: params.startProfitMonth,
+          endProfitMonth: params.endProfitMonth,
+          profitCode: params.profitCode,
+          contributionAmount: params.contributionAmount,
+          earningsAmount: params.earningsAmount,
+          forfeitureAmount: params.forfeitureAmount,
+          paymentAmount: params.paymentAmount,
+          socialSecurity: params.socialSecurity,
+          comment: params.comment,
+          take: params.pagination.take,
+          skip: params.pagination.skip
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setMasterInquiryData(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
   })
 });
 
@@ -401,5 +434,6 @@ export const {
   useLazyGetDistributionsAndForfeituresQuery,
   useLazyGetExecutiveHoursAndDollarsQuery,
   useLazyGetEligibleEmployeesQuery,
-  useLazyGetDistributionsByAgeQuery
+  useLazyGetDistributionsByAgeQuery,
+  useLazyGetProfitMasterInquiryQuery
 } = YearsEndApi;

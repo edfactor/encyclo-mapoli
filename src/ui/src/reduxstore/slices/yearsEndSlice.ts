@@ -7,6 +7,7 @@ import {
   DuplicateSSNDetail,
   EligibleEmployeeResponseDto,
   ExecutiveHoursAndDollars,
+  MasterInquiryDetail,
   MilitaryAndRehire,
   MilitaryAndRehireForfeiture,
   MilitaryAndRehireProfitSummary,
@@ -15,6 +16,7 @@ import {
   PagedReportResponse,
   ProfitSharingDistributionsByAge
 } from "reduxstore/types";
+import { Paged } from "smart-ui-library";
 
 export interface YearsEndState {
   duplicateSSNsData: PagedReportResponse<DuplicateSSNDetail> | null;
@@ -28,6 +30,7 @@ export interface YearsEndState {
   distributionsAndForfeitures: PagedReportResponse<DistributionsAndForfeitures> | null;
   executiveHoursAndDollars: PagedReportResponse<ExecutiveHoursAndDollars> | null;
   eligibleEmployees: EligibleEmployeeResponseDto | null;
+  masterInquiryData: Paged<MasterInquiryDetail> | null;
   distributionsByAgeTotal: ProfitSharingDistributionsByAge | null;
   distributionsByAgeFullTime: ProfitSharingDistributionsByAge | null;
   distributionsByAgePartTime: ProfitSharingDistributionsByAge | null;
@@ -45,6 +48,7 @@ const initialState: YearsEndState = {
   distributionsAndForfeitures: null,
   executiveHoursAndDollars: null,
   eligibleEmployees: null,
+  masterInquiryData: null,
   distributionsByAgeTotal: null,
   distributionsByAgeFullTime: null,
   distributionsByAgePartTime: null
@@ -102,6 +106,17 @@ export const yearsEndSlice = createSlice({
     setEligibleEmployees: (state, action: PayloadAction<EligibleEmployeeResponseDto>) => {
       state.eligibleEmployees = action.payload;
     },
+    setMasterInquiryData: (
+      state,
+      action: PayloadAction<Paged<MasterInquiryDetail>>
+    ) => {
+      state.masterInquiryData = action.payload;
+    },
+    clearMasterInquiryData: (
+      state
+    ) => {
+      state.masterInquiryData = null;
+    },
     setDistributionsByAge: (state, action: PayloadAction<ProfitSharingDistributionsByAge>) => {
       if (action.payload.reportType == DistributionByAgeReportType.Total) {
         state.distributionsByAgeTotal = action.payload;
@@ -130,6 +145,8 @@ export const {
   setDistributionsAndForfeitures,
   setExecutiveHoursAndDollars,
   setEligibleEmployees,
+  setMasterInquiryData,
+  clearMasterInquiryData,
   setDistributionsByAge
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;
