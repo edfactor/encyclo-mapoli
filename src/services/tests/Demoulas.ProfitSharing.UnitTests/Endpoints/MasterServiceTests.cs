@@ -2,16 +2,15 @@
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Master;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Base;
 using Demoulas.ProfitSharing.UnitTests.Extensions;
 using FastEndpoints;
 using FluentAssertions;
 
-namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
+namespace Demoulas.ProfitSharing.UnitTests.Endpoints;
 public class MasterServiceTests : ApiTestBase<Program>
 {
    [Fact(DisplayName ="PS-433: Profit Master Inquiry - Start Profit Year")]
@@ -54,7 +53,7 @@ public class MasterServiceTests : ApiTestBase<Program>
     public async Task GetMasterInquiryWithProfitCode()
     {
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
-        var request = new MasterInquiryRequest() { ProfitCode = "D", Skip = 0, Take = 25 };
+        var request = new MasterInquiryRequest() { ProfitCode = ProfitCode.Constants.IncomingContributions.Id, Skip = 0, Take = 25 };
         var response = await ApiClient.GETAsync<MasterInquiryEndpoint, MasterInquiryRequest, ReportResponseBase<MasterInquiryResponseDto>>(request);
         response.Should().NotBeNull();
     }
@@ -90,7 +89,7 @@ public class MasterServiceTests : ApiTestBase<Program>
     public async Task GetMasterInquiryWithSocialSecurity()
     {
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
-        var request = new MasterInquiryRequest() { SocialSecurity = "000000000", Skip = 0, Take = 25 };
+        var request = new MasterInquiryRequest() { SocialSecurity = 000000000, Skip = 0, Take = 25 };
         var response = await ApiClient.GETAsync<MasterInquiryEndpoint, MasterInquiryRequest, ReportResponseBase<MasterInquiryResponseDto>>(request);
         response.Should().NotBeNull();
     }
@@ -99,7 +98,7 @@ public class MasterServiceTests : ApiTestBase<Program>
     public async Task GetMasterInquiryWithSocialSecurityWithAll()
     {
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
-        var request = new MasterInquiryRequest() { StartProfitMonth = 1, EndProfitMonth = 12, StartProfitYear = 2022, EndProfitYear = 2024, ContributionAmount = 0, EarningsAmount = 0, ForfeitureAmount = 0, PaymentAmount = 0, ProfitCode = "F",  SocialSecurity = "000000000", Skip = 0, Take = 25 };
+        var request = new MasterInquiryRequest() { StartProfitMonth = 1, EndProfitMonth = 12, StartProfitYear = 2022, EndProfitYear = 2024, ContributionAmount = 0, EarningsAmount = 0, ForfeitureAmount = 0, PaymentAmount = 0, ProfitCode = ProfitCode.Constants.IncomingContributions.Id,  SocialSecurity = 000000000, Skip = 0, Take = 25 };
         var response = await ApiClient.GETAsync<MasterInquiryEndpoint, MasterInquiryRequest, ReportResponseBase<MasterInquiryResponseDto>>(request);
         response.Should().NotBeNull();
     }

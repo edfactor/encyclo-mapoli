@@ -2,10 +2,11 @@ using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Services.Reports;
+namespace Demoulas.ProfitSharing.Services;
 public class MasterInquiryService : IMasterInquiryService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
@@ -34,12 +35,12 @@ public class MasterInquiryService : IMasterInquiryService
 
                 if (req.StartProfitYear.HasValue)
                 {
-                    query = query.Where(x => Math.Floor(Convert.ToDouble(x.ProfitDetail.ProfitYear)) >= req.StartProfitYear);
+                    query = query.Where(x => x.ProfitDetail.ProfitYear >= req.StartProfitYear);
                 }
 
                 if (req.EndProfitYear.HasValue)
                 {
-                    query = query.Where(x => Math.Floor(Convert.ToDouble(x.ProfitDetail.ProfitYear)) <= req.EndProfitYear);
+                    query = query.Where(x => x.ProfitDetail.ProfitYear <= req.EndProfitYear);
                 }
 
                 if (req.StartProfitMonth.HasValue)
@@ -52,9 +53,9 @@ public class MasterInquiryService : IMasterInquiryService
                     query = query.Where(x => x.ProfitDetail.MonthToDate <= req.EndProfitMonth);
                 }
 
-                if (!string.IsNullOrEmpty(req.ProfitCode))
+                if (req.ProfitCode.HasValue)
                 {
-                    query = query.Where(x => x.ProfitDetail.ProfitCode.Id == Convert.ToInt32(req.ProfitCode));
+                    query = query.Where(x => x.ProfitDetail.ProfitCode.Id == req.ProfitCode);
                 }
 
                 if (req.ContributionAmount.HasValue)
@@ -69,20 +70,20 @@ public class MasterInquiryService : IMasterInquiryService
 
                 if (req.SocialSecurity != null)
                 {
-                    query = query.Where(x => x.ProfitDetail.Ssn.ToString() == req.SocialSecurity);
+                    query = query.Where(x => x.ProfitDetail.Ssn == req.SocialSecurity);
                 }
 
                 if (req.ForfeitureAmount.HasValue)
                 {
                     query = query.Where(x =>
-                        x.ProfitDetail.ProfitCode.Id.ToString() == "0" &&
+                        x.ProfitDetail.ProfitCode.Id == ProfitCode.Constants.IncomingContributions.Id &&
                         x.ProfitDetail.Forfeiture == req.ForfeitureAmount);
                 }
 
                 if (req.PaymentAmount.HasValue)
                 {
                     query = query.Where(x =>
-                        x.ProfitDetail.ProfitCode.Id.ToString() != "0" &&
+                        x.ProfitDetail.ProfitCode.Id != ProfitCode.Constants.IncomingContributions.Id &&
                         x.ProfitDetail.Forfeiture == req.PaymentAmount);
                 }
                 var results = await query
@@ -90,7 +91,7 @@ public class MasterInquiryService : IMasterInquiryService
                 {
                     Id = x.ProfitDetail.Id,
                     Ssn = x.ProfitDetail.Ssn,
-                    ProfitYear = (short)Math.Floor(Convert.ToDouble(x.ProfitDetail.ProfitYear)),
+                    ProfitYear = x.ProfitDetail.ProfitYear,
                     ProfitYearIteration = x.ProfitDetail.ProfitYearIteration,
                     DistributionSequence = x.ProfitDetail.DistributionSequence,
                     ProfitCodeId = x.ProfitDetail.ProfitCodeId,
