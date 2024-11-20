@@ -1,6 +1,7 @@
-import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
   DemographicBadgesNotInPayprofit,
+  DistributionByAgeReportType,
   DistributionsAndForfeitures,
   DuplicateNameAndBirthday,
   DuplicateSSNDetail,
@@ -12,7 +13,8 @@ import {
   MilitaryAndRehireProfitSummary,
   MissingCommasInPYName,
   NegativeEtvaForSSNsOnPayProfit,
-  PagedReportResponse
+  PagedReportResponse,
+  ProfitSharingDistributionsByAge
 } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
 
@@ -29,6 +31,9 @@ export interface YearsEndState {
   executiveHoursAndDollars: PagedReportResponse<ExecutiveHoursAndDollars> | null;
   eligibleEmployees: EligibleEmployeeResponseDto | null;
   masterInquiryData: Paged<MasterInquiryDetail> | null;
+  distributionsByAgeTotal: ProfitSharingDistributionsByAge | null;
+  distributionsByAgeFullTime: ProfitSharingDistributionsByAge | null;
+  distributionsByAgePartTime: ProfitSharingDistributionsByAge | null;
 }
 
 const initialState: YearsEndState = {
@@ -43,7 +48,10 @@ const initialState: YearsEndState = {
   distributionsAndForfeitures: null,
   executiveHoursAndDollars: null,
   eligibleEmployees: null,
-  masterInquiryData: null
+  masterInquiryData: null,
+  distributionsByAgeTotal: null,
+  distributionsByAgeFullTime: null,
+  distributionsByAgePartTime: null
 };
 
 export const yearsEndSlice = createSlice({
@@ -92,16 +100,10 @@ export const yearsEndSlice = createSlice({
     ) => {
       state.distributionsAndForfeitures = action.payload;
     },
-    setExecutiveHoursAndDollars: (
-      state,
-      action: PayloadAction<PagedReportResponse<ExecutiveHoursAndDollars>>
-    ) => {
+    setExecutiveHoursAndDollars: (state, action: PayloadAction<PagedReportResponse<ExecutiveHoursAndDollars>>) => {
       state.executiveHoursAndDollars = action.payload;
     },
-    setEligibleEmployees: (
-      state,
-      action: PayloadAction<EligibleEmployeeResponseDto>
-    ) => {
+    setEligibleEmployees: (state, action: PayloadAction<EligibleEmployeeResponseDto>) => {
       state.eligibleEmployees = action.payload;
     },
     setMasterInquiryData: (
@@ -115,6 +117,19 @@ export const yearsEndSlice = createSlice({
     ) => {
       state.masterInquiryData = null;
     },
+    setDistributionsByAge: (state, action: PayloadAction<ProfitSharingDistributionsByAge>) => {
+      if (action.payload.reportType == DistributionByAgeReportType.Total) {
+        state.distributionsByAgeTotal = action.payload;
+      }
+
+      if (action.payload.reportType == DistributionByAgeReportType.FullTime) {
+        state.distributionsByAgeFullTime = action.payload;
+      }
+
+      if (action.payload.reportType == DistributionByAgeReportType.PartTime) {
+        state.distributionsByAgePartTime = action.payload;
+      }
+    }
   }
 });
 
@@ -131,6 +146,7 @@ export const {
   setExecutiveHoursAndDollars,
   setEligibleEmployees,
   setMasterInquiryData,
-  clearMasterInquiryData
+  clearMasterInquiryData,
+  setDistributionsByAge
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

@@ -166,7 +166,7 @@ public class DemographicsService : IDemographicsServiceInternal
             }
 
 
-            // Update existing entities based on either OracleHcmId or SSN & BadgeNumber
+            // Update existing entities based on either OracleHcmId or SSN & EmployeeId
             foreach (var existingEntity in existingEntities)
             {
                 Demographic? incomingEntity = null;

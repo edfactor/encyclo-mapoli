@@ -29,7 +29,7 @@ const MilitaryAndRehireProfitSummaryGrid = () => {
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`Negative ETVA For SSNs On Payprofit (${militaryAndRehireProfitSummary?.response.total || 0})`}
+              {`Military and Rehire Profit Summary(${militaryAndRehireProfitSummary?.response.total || 0})`}
             </Typography>
           </div>
           <DSMGrid

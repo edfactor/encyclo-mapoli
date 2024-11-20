@@ -1,6 +1,4 @@
 ﻿
-using Demoulas.Util.Extensions;
-
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 public sealed record  ExecutiveHoursAndDollarsResponse
 {

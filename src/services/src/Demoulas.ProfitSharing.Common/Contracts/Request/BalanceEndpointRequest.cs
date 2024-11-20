@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 
 public enum SearchBy
 {
-    Ssn,
-    EmployeeId
+    Ssn = 0,
+    EmployeeId = 1
 }
 public sealed class BalanceEndpointRequest
 {

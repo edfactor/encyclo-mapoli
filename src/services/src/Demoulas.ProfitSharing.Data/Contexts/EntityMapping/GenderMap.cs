@@ -17,7 +17,7 @@ internal sealed class GenderMap : IEntityTypeConfiguration<Gender>
             .IsRequired();
 
         builder.Property(e => e.Name)
-            .HasMaxLength(64)
+            .HasMaxLength(32)
             .HasColumnName("NAME")
             .IsRequired();
 
