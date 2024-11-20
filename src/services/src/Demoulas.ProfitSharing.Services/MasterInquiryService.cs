@@ -67,6 +67,11 @@ public class MasterInquiryService : IMasterInquiryService
                     query = query.Where(x => x.ProfitDetail.Earnings == req.EarningsAmount);
                 }
 
+                if (req.SocialSecurity != null)
+                {
+                    query = query.Where(x => x.ProfitDetail.Ssn.ToString() == req.SocialSecurity);
+                }
+
                 if (req.ForfeitureAmount.HasValue)
                 {
                     query = query.Where(x =>
