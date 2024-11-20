@@ -1,7 +1,7 @@
 ﻿namespace Demoulas.ProfitSharing.Data.Extensions;
 public static class SsnExtensions
 {
-    public static string MaskSsn(this long ssn)
+    public static string MaskSsn(this int ssn)
     {
         Span<char> ssnSpan = stackalloc char[9];
         ssn.ToString().AsSpan().CopyTo(ssnSpan[(9 - ssn.ToString().Length)..]);

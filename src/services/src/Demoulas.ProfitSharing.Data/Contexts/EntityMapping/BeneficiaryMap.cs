@@ -26,7 +26,7 @@ public sealed class BeneficiaryMap : IEntityTypeConfiguration<Beneficiary>
             .HasColumnName("EMPLOYEE_ID");
 
         _ = builder.Property(e => e.DemographicId)
-            .HasPrecision(11)
+            .HasPrecision(9)
             .ValueGeneratedNever()
             .HasColumnName("DEMOGRAPHIC_ID");
 

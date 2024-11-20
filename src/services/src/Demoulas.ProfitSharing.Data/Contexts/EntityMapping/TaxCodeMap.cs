@@ -15,7 +15,7 @@ internal sealed class TaxCodeMap : IEntityTypeConfiguration<TaxCode>
         builder.HasData(GetPredefinedTaxCodes());
     }
 
-    private List<TaxCode> GetPredefinedTaxCodes()
+    private static List<TaxCode> GetPredefinedTaxCodes()
     {
         return
         [

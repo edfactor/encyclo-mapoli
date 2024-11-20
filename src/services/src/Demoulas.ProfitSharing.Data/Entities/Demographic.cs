@@ -18,7 +18,7 @@ public sealed class Demographic : Member
     /// The People ID of the employee.
     /// </value>
     public required long OracleHcmId { get; set; }
-    public required long Ssn { get; set; }
+    public required int Ssn { get; set; }
     public required int EmployeeId { get; set; }
     public DateTime LastModifiedDate { get; set; }
 
@@ -65,4 +65,5 @@ public sealed class Demographic : Member
     public List<Beneficiary> Beneficiaries { get; set; } = [];
 
     public List<ProfitShareCheck> Checks { get; set; } = [];
+    public List<DistributionRequest> DistributionRequests { get; set; } = [];
 }

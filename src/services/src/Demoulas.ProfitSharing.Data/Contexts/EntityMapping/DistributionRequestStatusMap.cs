@@ -9,6 +9,7 @@ internal sealed class DistributionRequestStatusMap : IEntityTypeConfiguration<Di
     {
         builder.ToTable("DISTRIBUTION_REQUEST_STATUS");
         builder.HasKey(c => c.Id);
+        builder.Property(x => x.Id).IsRequired().ValueGeneratedNever().HasColumnName("ID");
         builder.Property(c => c.Name).HasMaxLength(20);
         builder.HasData(
                 new DistributionRequestStatus { Id = DistributionRequestStatus.Constants.NEW_ENTRY, Name = "NEW_ENTRY" },

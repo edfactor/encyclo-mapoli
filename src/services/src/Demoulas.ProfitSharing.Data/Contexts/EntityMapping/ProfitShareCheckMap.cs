@@ -31,7 +31,7 @@ internal sealed class ProfitShareCheckMap : IEntityTypeConfiguration<ProfitShare
             .HasColumnName("SSN");
 
         _ = builder.Property(e => e.DemographicId)
-            .HasPrecision(11)
+            .HasPrecision(9)
             .ValueGeneratedNever()
             .HasColumnName("DEMOGRAPHIC_ID");
 

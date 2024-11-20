@@ -22,7 +22,7 @@ internal sealed class DemographicFaker : Faker<Demographic>
 
         RuleFor(d => d.EmployeeId, f => _badgeNumberCounter++)
             .RuleFor(d => d.Id, f => _idCounter++)
-            .RuleFor(d => d.Ssn, f => f.Person.Ssn().ConvertSsnToLong())
+            .RuleFor(d => d.Ssn, f => f.Person.Ssn().ConvertSsnToInt())
             .RuleFor(d => d.OracleHcmId, f => _oracleHcmIdCounter++)
             .RuleFor(d => d.StoreNumber, f => f.Random.Short(1, 99))
             .RuleFor(d => d.DepartmentId, f => f.PickRandom<byte>(1, 2, 3, 4, 5, 6, 7))
