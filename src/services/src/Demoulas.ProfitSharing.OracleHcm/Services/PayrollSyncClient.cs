@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Polly.Timeout;
@@ -29,15 +30,18 @@ public class PayrollSyncClient
 
     private readonly HttpClient _httpClient;
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
+    private readonly OracleHcmConfig _oracleHcmConfig;
     private readonly ILogger<PayrollSyncClient> _logger;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
 
     public PayrollSyncClient(HttpClient httpClient, 
         IProfitSharingDataContextFactory profitSharingDataContextFactory,
+        OracleHcmConfig oracleHcmConfig,
         ILogger<PayrollSyncClient> logger)
     {
         _httpClient = httpClient;
         _profitSharingDataContextFactory = profitSharingDataContextFactory;
+        _oracleHcmConfig = oracleHcmConfig;
         _logger = logger;
         _jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
     }
@@ -53,23 +57,27 @@ public class PayrollSyncClient
 
             try
             {
-                var response = await _httpClient.GetAsync($"?q=PersonId={personId}&fields=PayrollActionId,ObjectActionId&onlyData=true",
-                    cancellationToken);
+                string query = $"{_oracleHcmConfig.PayrollUrl}?q=PersonId={personId}&fields=PayrollActionId,ObjectActionId&onlyData=true";
+                using var response = await _httpClient.GetAsync(query, cancellationToken);
 
                 if (response.IsSuccessStatusCode)
                 {
                     var results = await response.Content.ReadFromJsonAsync<PayrollRoot>(_jsonSerializerOptions, cancellationToken);
-
+                    if ((results?.Count ?? 0) == 0)
+                    {
+                        continue;
+                    }
+                    
                     objectActionIds = results!.Items
                         .Where(result => result is { PayrollActionId: 2003, ObjectActionId: not null })
                         .Select(result => result.ObjectActionId!.Value)
                         .ToHashSet();
 
-                    isSuccessful = true;
+                    isSuccessful = objectActionIds.Any();
                 }
                 else
                 {
-                    Console.WriteLine($"Failed to get payroll process results for PersonId {personId}: {response.ReasonPhrase}");
+                    _logger.LogError("Failed to get payroll process results for PersonId {PersonId}: {ResponseReasonPhrase}", personId, response.ReasonPhrase);
                 }
             }
             catch (TimeoutRejectedException e)
@@ -109,11 +117,11 @@ public class PayrollSyncClient
         {
             foreach (long balanceTypeId in balanceTypeIds)
             {
-                string url = $"personProcessResults/{objectActionId}/child/BalanceView/?onlyData=true&fields=BalanceTypeId,TotalValue1,TotalValue2,DefbalId1,DimensionName&finder=findByBalVar;pBalGroupUsageId1=null,pBalGroupUsageId2=-1,pLDGId={PLDGId},pLC={PLC},pBalTypeId={balanceTypeId}&onlyData=true";
+                string url = $"{_oracleHcmConfig.PayrollUrl}/{objectActionId}/child/BalanceView/?onlyData=true&fields=BalanceTypeId,TotalValue1,TotalValue2,DefbalId1,DimensionName&finder=findByBalVar;pBalGroupUsageId1=null,pBalGroupUsageId2=-1,pLDGId={PLDGId},pLC={PLC},pBalTypeId={balanceTypeId}&onlyData=true";
 
                 try
                 {
-                    var response = await _httpClient.GetAsync(url, cancellationToken);
+                    using var response = await _httpClient.GetAsync(url, cancellationToken);
 
                     if (response.IsSuccessStatusCode)
                     {
@@ -127,7 +135,7 @@ public class PayrollSyncClient
                     }
                     else
                     {
-                        Console.WriteLine($"Failed to get balance types for ObjectActionId {objectActionId}: {response.ReasonPhrase}");
+                        _logger.LogError("Failed to get balance types for ObjectActionId {ObjectActionId}: {ResponseReasonPhrase}", objectActionId, response.ReasonPhrase);
                     }
                 }
                 catch (Exception ex)

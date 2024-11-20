@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Common.Configuration;
+﻿namespace Demoulas.ProfitSharing.OracleHcm.Configuration;
 public sealed record OracleHcmConfig
 {
     public required string BaseAddress { get; set; }
