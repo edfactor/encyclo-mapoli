@@ -1,3 +1,4 @@
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -20,7 +21,7 @@ public class MasterInquiryService : IMasterInquiryService
         _logger = loggerFactory.CreateLogger<MasterInquiryService>();
     }
 
-    public async Task<ReportResponseBase<MasterInquiryResponseDto>> GetMasterInquiry(MasterInquiryRequest req, CancellationToken cancellationToken = default)
+    public async Task<PaginatedResponseDto<MasterInquiryResponseDto>> GetMasterInquiry(MasterInquiryRequest req, CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("REQUEST MASTER INQUIRY"))
         {
@@ -119,12 +120,7 @@ public class MasterInquiryService : IMasterInquiryService
                 return results;
             });
 
-            return new ReportResponseBase<MasterInquiryResponseDto>
-            {
-                ReportDate = DateTimeOffset.Now,
-                ReportName = $"PROFIT SHARING MASTER INQUIRY FOR {req.StartProfitYear}",
-                Response = rslt
-            };
+            return rslt;
         }
     }
 }
