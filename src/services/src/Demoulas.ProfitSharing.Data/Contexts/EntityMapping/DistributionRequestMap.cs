@@ -26,5 +26,6 @@ internal sealed class DistributionRequestMap : IEntityTypeConfiguration<Distribu
         builder.HasOne(e => e.Reason).WithMany().HasForeignKey(p => p.ReasonId);
         builder.HasOne(e => e.Status).WithMany().HasForeignKey(p => p.StatusId);
         builder.HasOne(e => e.Type).WithMany().HasForeignKey(p => p.TypeId);
+        builder.HasOne(e => e.TaxCode).WithMany();
     }
 }
