@@ -17,6 +17,7 @@ import MilitaryAndRehireProfitSummary from "pages/MilitaryAndRehireProfitSummary
 import DistributionsAndForfeitures from "pages/DistributionsAndForfeitures/DistributionAndForfeitures";
 import ManageExecutiveHoursAndDollars from "pages/ManageExecutiveHoursAndDollars/ManageExecutiveHoursAndDollars";
 import EligibleEmployees from "pages/EligibleEmployees/EligibleEmployees";
+import MasterInquiry from "pages/MasterInquiry/MasterInquiry";
 
 const Router = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -70,6 +71,9 @@ const Router = () => {
           <Route
           path="eligible-employees"
           element={<EligibleEmployees />}></Route>
+          <Route
+          path="master-inquiry"
+          element={<MasterInquiry />}></Route>
       </RouteSecurity>
     </BrowserRouter>
   );
