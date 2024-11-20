@@ -1,7 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
-using Demoulas.Common.Data.Contexts.ValueConverters;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
 

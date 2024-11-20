@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class initialMigrations : Migration
+    public partial class initialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -110,7 +110,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "DEPARTMENT",
                 columns: table => new
                 {
-                    ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    ID = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false),
                     NAME = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: false)
                 },
                 constraints: table =>
@@ -131,6 +131,42 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "DISTRIBUTION_REQUEST_REASON",
+                columns: table => new
+                {
+                    ID = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false),
+                    NAME = table.Column<string>(type: "NVARCHAR2(32)", maxLength: 32, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DISTRIBUTION_REQUEST_REASON", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DISTRIBUTION_REQUEST_STATUS",
+                columns: table => new
+                {
+                    ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
+                    NAME = table.Column<string>(type: "NVARCHAR2(20)", maxLength: 20, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DISTRIBUTION_REQUEST_STATUS", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DISTRIBUTION_REQUEST_TYPE",
+                columns: table => new
+                {
+                    ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    NAME = table.Column<string>(type: "NVARCHAR2(32)", maxLength: 32, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DISTRIBUTION_REQUEST_TYPE", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "DISTRIBUTION_STATUS",
                 columns: table => new
                 {
@@ -140,42 +176,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_DISTRIBUTION_STATUS", x => x.ID);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "DISTRIBUTIONREQUESTREASON",
-                columns: table => new
-                {
-                    ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
-                    NAME = table.Column<string>(type: "NVARCHAR2(2000)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_DISTRIBUTIONREQUESTREASON", x => x.ID);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "DISTRIBUTIONREQUESTSTATUS",
-                columns: table => new
-                {
-                    ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
-                    NAME = table.Column<string>(type: "NVARCHAR2(2000)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_DISTRIBUTIONREQUESTSTATUS", x => x.ID);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "DISTRIBUTIONREQUESTTYPE",
-                columns: table => new
-                {
-                    ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
-                    NAME = table.Column<string>(type: "NVARCHAR2(2000)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_DISTRIBUTIONREQUESTTYPE", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
@@ -493,7 +493,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     ID = table.Column<long>(type: "NUMBER(19)", nullable: false)
                         .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
                     PSN = table.Column<long>(type: "NUMBER(11)", precision: 11, nullable: false),
-                    REASON_ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
+                    REASON_ID = table.Column<byte>(type: "NUMBER(2)", nullable: false),
                     STATUS_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
                     TYPE_ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
                     REASON_TEXT = table.Column<string>(type: "NVARCHAR2(250)", maxLength: 250, nullable: true),
@@ -510,17 +510,17 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     table.ForeignKey(
                         name: "FK_DISTRIBUTION_REQUEST_DISTRIBUTIONREQUESTREASON_REASONID",
                         column: x => x.REASON_ID,
-                        principalTable: "DISTRIBUTIONREQUESTREASON",
+                        principalTable: "DISTRIBUTION_REQUEST_REASON",
                         principalColumn: "ID");
                     table.ForeignKey(
                         name: "FK_DISTRIBUTION_REQUEST_DISTRIBUTIONREQUESTSTATUS_STATUSID",
                         column: x => x.STATUS_ID,
-                        principalTable: "DISTRIBUTIONREQUESTSTATUS",
+                        principalTable: "DISTRIBUTION_REQUEST_STATUS",
                         principalColumn: "ID");
                     table.ForeignKey(
                         name: "FK_DISTRIBUTION_REQUEST_DISTRIBUTIONREQUESTTYPE_TYPEID",
                         column: x => x.TYPE_ID,
-                        principalTable: "DISTRIBUTIONREQUESTTYPE",
+                        principalTable: "DISTRIBUTION_REQUEST_TYPE",
                         principalColumn: "ID");
                     table.ForeignKey(
                         name: "FK_DISTRIBUTION_REQUEST_TAXCODES_TAXCODECODE",
@@ -2502,6 +2502,46 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "DISTRIBUTION_REQUEST_REASON",
+                columns: new[] { "ID", "NAME" },
+                values: new object[,]
+                {
+                    { (byte)1, "CAR" },
+                    { (byte)2, "EDUCATION_EXP" },
+                    { (byte)3, "EVICTION_OR_FORECLOSE" },
+                    { (byte)4, "FUNERAL_EXP" },
+                    { (byte)5, "HOME_PURCHASE" },
+                    { (byte)6, "HOME_REPAIR" },
+                    { (byte)7, "MEDICAL_DENTAL" },
+                    { (byte)8, "OTHER" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "DISTRIBUTION_REQUEST_STATUS",
+                columns: new[] { "ID", "NAME" },
+                values: new object[,]
+                {
+                    { "A", "APPROVED" },
+                    { "C", "IN_COMMITTEE_REVIEW" },
+                    { "D", "DECLINED" },
+                    { "N", "NEW_ENTRY" },
+                    { "P", "PROCESSED" },
+                    { "R", "READY_FOR_REVIEW" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "DISTRIBUTION_REQUEST_TYPE",
+                columns: new[] { "ID", "NAME" },
+                values: new object[,]
+                {
+                    { (byte)0, "HARDSHIP" },
+                    { (byte)1, "YEARY" },
+                    { (byte)2, "ONE_TIME" },
+                    { (byte)3, "PAYOUT" },
+                    { (byte)4, "ROLLOVER" }
+                });
+
+            migrationBuilder.InsertData(
                 table: "DISTRIBUTION_STATUS",
                 columns: new[] { "ID", "NAME" },
                 values: new object[,]
@@ -3104,13 +3144,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "DISTRIBUTION_FREQUENCY");
 
             migrationBuilder.DropTable(
-                name: "DISTRIBUTIONREQUESTREASON");
+                name: "DISTRIBUTION_REQUEST_REASON");
 
             migrationBuilder.DropTable(
-                name: "DISTRIBUTIONREQUESTSTATUS");
+                name: "DISTRIBUTION_REQUEST_STATUS");
 
             migrationBuilder.DropTable(
-                name: "DISTRIBUTIONREQUESTTYPE");
+                name: "DISTRIBUTION_REQUEST_TYPE");
 
             migrationBuilder.DropTable(
                 name: "JOBSTARTMETHOD");

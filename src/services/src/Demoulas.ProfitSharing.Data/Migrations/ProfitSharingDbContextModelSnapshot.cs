@@ -26400,7 +26400,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Department", b =>
                 {
                     b.Property<byte>("Id")
-                        .HasColumnType("NUMBER(3)")
+                        .HasPrecision(2)
+                        .HasColumnType("NUMBER(2)")
                         .HasColumnName("ID");
 
                     b.Property<string>("Name")
@@ -26715,7 +26716,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("PSN");
 
                     b.Property<byte>("ReasonId")
-                        .HasColumnType("NUMBER(3)")
+                        .HasColumnType("NUMBER(2)")
                         .HasColumnName("REASON_ID");
 
                     b.Property<string>("ReasonOtherText")
@@ -26763,18 +26764,62 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.DistributionRequestReason", b =>
                 {
                     b.Property<byte>("Id")
-                        .HasColumnType("NUMBER(3)")
+                        .HasPrecision(2)
+                        .HasColumnType("NUMBER(2)")
                         .HasColumnName("ID");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasMaxLength(32)
+                        .HasColumnType("NVARCHAR2(32)")
                         .HasColumnName("NAME");
 
                     b.HasKey("Id")
-                        .HasName("PK_DISTRIBUTIONREQUESTREASON");
+                        .HasName("PK_DISTRIBUTION_REQUEST_REASON");
 
-                    b.ToTable("DISTRIBUTIONREQUESTREASON", (string)null);
+                    b.ToTable("DISTRIBUTION_REQUEST_REASON", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = (byte)1,
+                            Name = "CAR"
+                        },
+                        new
+                        {
+                            Id = (byte)2,
+                            Name = "EDUCATION_EXP"
+                        },
+                        new
+                        {
+                            Id = (byte)3,
+                            Name = "EVICTION_OR_FORECLOSE"
+                        },
+                        new
+                        {
+                            Id = (byte)4,
+                            Name = "FUNERAL_EXP"
+                        },
+                        new
+                        {
+                            Id = (byte)5,
+                            Name = "HOME_PURCHASE"
+                        },
+                        new
+                        {
+                            Id = (byte)6,
+                            Name = "HOME_REPAIR"
+                        },
+                        new
+                        {
+                            Id = (byte)7,
+                            Name = "MEDICAL_DENTAL"
+                        },
+                        new
+                        {
+                            Id = (byte)8,
+                            Name = "OTHER"
+                        });
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.DistributionRequestStatus", b =>
@@ -26786,13 +26831,46 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasMaxLength(20)
+                        .HasColumnType("NVARCHAR2(20)")
                         .HasColumnName("NAME");
 
                     b.HasKey("Id")
-                        .HasName("PK_DISTRIBUTIONREQUESTSTATUS");
+                        .HasName("PK_DISTRIBUTION_REQUEST_STATUS");
 
-                    b.ToTable("DISTRIBUTIONREQUESTSTATUS", (string)null);
+                    b.ToTable("DISTRIBUTION_REQUEST_STATUS", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "N",
+                            Name = "NEW_ENTRY"
+                        },
+                        new
+                        {
+                            Id = "R",
+                            Name = "READY_FOR_REVIEW"
+                        },
+                        new
+                        {
+                            Id = "C",
+                            Name = "IN_COMMITTEE_REVIEW"
+                        },
+                        new
+                        {
+                            Id = "A",
+                            Name = "APPROVED"
+                        },
+                        new
+                        {
+                            Id = "D",
+                            Name = "DECLINED"
+                        },
+                        new
+                        {
+                            Id = "P",
+                            Name = "PROCESSED"
+                        });
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.DistributionRequestType", b =>
@@ -26803,13 +26881,41 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasMaxLength(32)
+                        .HasColumnType("NVARCHAR2(32)")
                         .HasColumnName("NAME");
 
                     b.HasKey("Id")
-                        .HasName("PK_DISTRIBUTIONREQUESTTYPE");
+                        .HasName("PK_DISTRIBUTION_REQUEST_TYPE");
 
-                    b.ToTable("DISTRIBUTIONREQUESTTYPE", (string)null);
+                    b.ToTable("DISTRIBUTION_REQUEST_TYPE", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = (byte)0,
+                            Name = "HARDSHIP"
+                        },
+                        new
+                        {
+                            Id = (byte)1,
+                            Name = "YEARY"
+                        },
+                        new
+                        {
+                            Id = (byte)2,
+                            Name = "ONE_TIME"
+                        },
+                        new
+                        {
+                            Id = (byte)3,
+                            Name = "PAYOUT"
+                        },
+                        new
+                        {
+                            Id = (byte)4,
+                            Name = "ROLLOVER"
+                        });
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.DistributionStatus", b =>

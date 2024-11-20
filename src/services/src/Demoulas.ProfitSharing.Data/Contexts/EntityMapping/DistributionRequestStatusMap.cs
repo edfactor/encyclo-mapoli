@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -18,7 +13,7 @@ internal sealed class DistributionRequestStatusMap : IEntityTypeConfiguration<Di
         builder.HasData(
                 new DistributionRequestStatus { Id = DistributionRequestStatus.Constants.NEW_ENTRY, Name = "NEW_ENTRY" },
                 new DistributionRequestStatus { Id = DistributionRequestStatus.Constants.READY_FOR_REVIEW, Name = "READY_FOR_REVIEW" },
-                new DistributionRequestStatus { Id = DistributionRequestStatus.Constants.IN_COMMITTIE_REVIEW, Name = "IN_COMMITTIE_REVIEW" },
+                new DistributionRequestStatus { Id = DistributionRequestStatus.Constants.IN_COMMITTEE_REVIEW, Name = "IN_COMMITTEE_REVIEW" },
                 new DistributionRequestStatus { Id = DistributionRequestStatus.Constants.APPROVED, Name = "APPROVED" },
                 new DistributionRequestStatus { Id = DistributionRequestStatus.Constants.DECLINED, Name = "DECLINED" },
                 new DistributionRequestStatus { Id = DistributionRequestStatus.Constants.PROCESSED, Name = "PROCESSED" }

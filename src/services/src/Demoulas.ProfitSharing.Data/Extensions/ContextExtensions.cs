@@ -22,6 +22,9 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new DistributionMap());
         modelBuilder.ApplyConfiguration(new DistributionPayeeMap());
         modelBuilder.ApplyConfiguration(new DistributionRequestMap());
+        modelBuilder.ApplyConfiguration(new DistributionRequestTypeMap());
+        modelBuilder.ApplyConfiguration(new DistributionRequestReasonMap());
+        modelBuilder.ApplyConfiguration(new DistributionRequestStatusMap());
         modelBuilder.ApplyConfiguration(new DistributionStatusMap());
         modelBuilder.ApplyConfiguration(new DistributionThirdPartyPayeeMap());
         modelBuilder.ApplyConfiguration(new EmployeeTypeMap());
