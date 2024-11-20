@@ -46,7 +46,7 @@ public abstract class EndpointWithCsvTotalsBase<ReqType, RespType, ItemType, Map
 
     public sealed override async Task HandleAsync(ReqType req, CancellationToken ct)
     {
-        string acceptHeader = HttpContext.Request.Headers["Accept"].ToString().ToLower(CultureInfo.InvariantCulture);
+        string acceptHeader = HttpContext.Request.Headers.Accept.ToString().ToLower(CultureInfo.InvariantCulture);
         var response = await GetResponse(req, ct);
 
         if (acceptHeader.Contains("text/csv"))
@@ -77,9 +77,14 @@ public abstract class EndpointWithCsvTotalsBase<ReqType, RespType, ItemType, Map
         return memoryStream;
     }
 
-    protected internal virtual async Task GenerateCsvContent(CsvWriter csvWriter, RespType report, CancellationToken cancellationToken)
+    protected internal virtual Task GenerateCsvContent(CsvWriter csvWriter, RespType report, CancellationToken cancellationToken)
+    {
+        return GenerateCsvContent(csvWriter, report.Response.Results, cancellationToken);
+    }
+
+    protected internal virtual Task GenerateCsvContent(CsvWriter csvWriter, IEnumerable<ItemType> items, CancellationToken cancellationToken)
     {
         csvWriter.Context.RegisterClassMap<MapType>();
-        await csvWriter.WriteRecordsAsync(report.Response.Results, cancellationToken);
+        return csvWriter.WriteRecordsAsync(items, cancellationToken);
     }
 }

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class initialMigration : Migration
+    public partial class initialMigrations : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -66,7 +66,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "COMMENT_TYPE",
                 columns: table => new
                 {
-                    ID = table.Column<int>(type: "NUMBER(10)", nullable: false),
+                    ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
                     NAME = table.Column<string>(type: "NVARCHAR2(128)", maxLength: 128, nullable: false)
                 },
                 constraints: table =>
@@ -231,7 +231,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 columns: table => new
                 {
                     ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
-                    NAME = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: false)
+                    NAME = table.Column<string>(type: "NVARCHAR2(32)", maxLength: 32, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -369,11 +369,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
                     SSN = table.Column<long>(type: "NUMBER(9)", precision: 9, nullable: false),
                     DATE_OF_BIRTH = table.Column<DateTime>(type: "DATE", nullable: false),
-                    STREET = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "Street"),
-                    STREET2 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true, comment: "Street2"),
-                    STREET3 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true, comment: "Street3"),
-                    STREET4 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true, comment: "Street4"),
-                    CITY = table.Column<string>(type: "NVARCHAR2(25)", maxLength: 25, nullable: false, comment: "City"),
+                    STREET = table.Column<string>(type: "NVARCHAR2(56)", maxLength: 56, nullable: false, comment: "Street"),
+                    STREET2 = table.Column<string>(type: "NVARCHAR2(56)", maxLength: 56, nullable: true, comment: "Street2"),
+                    STREET3 = table.Column<string>(type: "NVARCHAR2(56)", maxLength: 56, nullable: true, comment: "Street3"),
+                    STREET4 = table.Column<string>(type: "NVARCHAR2(56)", maxLength: 56, nullable: true, comment: "Street4"),
+                    CITY = table.Column<string>(type: "NVARCHAR2(36)", maxLength: 36, nullable: false, comment: "City"),
                     STATE = table.Column<string>(type: "NVARCHAR2(3)", maxLength: 3, nullable: false, comment: "State"),
                     POSTAL_CODE = table.Column<string>(type: "NVARCHAR2(9)", maxLength: 9, nullable: false, comment: "Postal Code"),
                     COUNTRY_ISO = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: true, defaultValue: "US"),
@@ -404,11 +404,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
                     SSN = table.Column<long>(type: "NUMBER(9)", precision: 9, nullable: false),
                     NAME = table.Column<string>(type: "NVARCHAR2(84)", maxLength: 84, nullable: false),
-                    STREET = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false),
-                    STREET2 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true),
-                    STREET3 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true),
-                    STREET4 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true),
-                    CITY = table.Column<string>(type: "NVARCHAR2(25)", maxLength: 25, nullable: true),
+                    STREET = table.Column<string>(type: "NVARCHAR2(56)", maxLength: 56, nullable: false),
+                    STREET2 = table.Column<string>(type: "NVARCHAR2(56)", maxLength: 56, nullable: true),
+                    STREET3 = table.Column<string>(type: "NVARCHAR2(56)", maxLength: 56, nullable: true),
+                    STREET4 = table.Column<string>(type: "NVARCHAR2(56)", maxLength: 56, nullable: true),
+                    CITY = table.Column<string>(type: "NVARCHAR2(36)", maxLength: 36, nullable: true),
                     STATE = table.Column<string>(type: "NVARCHAR2(3)", maxLength: 3, nullable: true),
                     POSTAL_CODE = table.Column<string>(type: "NVARCHAR2(9)", maxLength: 9, nullable: true),
                     COUNTRY_ISO = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: true, defaultValue: "US"),
@@ -433,11 +433,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     PAYEE = table.Column<string>(type: "NVARCHAR2(64)", maxLength: 64, nullable: true),
                     NAME = table.Column<string>(type: "NVARCHAR2(84)", maxLength: 84, nullable: true),
                     ACCOUNT = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true),
-                    STREET = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false),
-                    STREET2 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true),
-                    STREET3 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true),
-                    STREET4 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true),
-                    CITY = table.Column<string>(type: "NVARCHAR2(25)", maxLength: 25, nullable: true),
+                    STREET = table.Column<string>(type: "NVARCHAR2(56)", maxLength: 56, nullable: false),
+                    STREET2 = table.Column<string>(type: "NVARCHAR2(56)", maxLength: 56, nullable: true),
+                    STREET3 = table.Column<string>(type: "NVARCHAR2(56)", maxLength: 56, nullable: true),
+                    STREET4 = table.Column<string>(type: "NVARCHAR2(56)", maxLength: 56, nullable: true),
+                    CITY = table.Column<string>(type: "NVARCHAR2(36)", maxLength: 36, nullable: true),
                     STATE = table.Column<string>(type: "NVARCHAR2(3)", maxLength: 3, nullable: true),
                     POSTAL_CODE = table.Column<string>(type: "NVARCHAR2(9)", maxLength: 9, nullable: true),
                     COUNTRY_ISO = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: true, defaultValue: "US"),
@@ -537,7 +537,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
                     ORACLE_HCM_ID = table.Column<long>(type: "NUMBER(15)", precision: 15, nullable: false),
                     SSN = table.Column<long>(type: "NUMBER(9)", precision: 9, nullable: false),
-                    BADGE_NUMBER = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false),
+                    EMPLOYEE_ID = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false),
                     LAST_MODIFIED_DATE = table.Column<DateTime>(type: "DATE", nullable: false, defaultValueSql: "SYSDATE"),
                     STORE_NUMBER = table.Column<short>(type: "NUMBER(4)", precision: 4, nullable: false, comment: "StoreNumber"),
                     PAY_CLASSIFICATION_ID = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false, comment: "PayClassification"),
@@ -548,11 +548,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     PHONE_NUMBER = table.Column<string>(type: "NVARCHAR2(16)", maxLength: 16, nullable: true),
                     MOBILE_NUMBER = table.Column<string>(type: "NVARCHAR2(16)", maxLength: 16, nullable: true),
                     EMAIL_ADDRESS = table.Column<string>(type: "NVARCHAR2(84)", maxLength: 84, nullable: true),
-                    STREET = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: false, comment: "Street"),
-                    STREET2 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true, comment: "Street2"),
-                    STREET3 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true, comment: "Street3"),
-                    STREET4 = table.Column<string>(type: "NVARCHAR2(30)", maxLength: 30, nullable: true, comment: "Street4"),
-                    CITY = table.Column<string>(type: "NVARCHAR2(25)", maxLength: 25, nullable: false, comment: "City"),
+                    STREET = table.Column<string>(type: "NVARCHAR2(56)", maxLength: 56, nullable: false, comment: "Street"),
+                    STREET2 = table.Column<string>(type: "NVARCHAR2(56)", maxLength: 56, nullable: true, comment: "Street2"),
+                    STREET3 = table.Column<string>(type: "NVARCHAR2(56)", maxLength: 56, nullable: true, comment: "Street3"),
+                    STREET4 = table.Column<string>(type: "NVARCHAR2(56)", maxLength: 56, nullable: true, comment: "Street4"),
+                    CITY = table.Column<string>(type: "NVARCHAR2(36)", maxLength: 36, nullable: false, comment: "City"),
                     STATE = table.Column<string>(type: "NVARCHAR2(3)", maxLength: 3, nullable: false, comment: "State"),
                     POSTAL_CODE = table.Column<string>(type: "NVARCHAR2(9)", maxLength: 9, nullable: false, comment: "Postal Code"),
                     COUNTRY_ISO = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: true, defaultValue: "US"),
@@ -634,9 +634,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     FEDERAL_TAXES = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
                     STATE_TAXES = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
                     TAX_CODE_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: true),
-                    COMMENT_TYPE_ID = table.Column<int>(type: "NUMBER(10)", nullable: true),
+                    COMMENT_TYPE_ID = table.Column<byte>(type: "NUMBER(3)", nullable: true),
                     COMMENT_RELATED_CHECK_NUMBER = table.Column<int>(type: "NUMBER(10)", nullable: true),
-                    COMMENT_RELATED_STATE = table.Column<string>(type: "NVARCHAR2(2000)", nullable: true),
+                    COMMENT_RELATED_STATE = table.Column<string>(type: "NVARCHAR2(24)", maxLength: 24, nullable: true),
                     COMMENT_RELATED_ORACLE_HCM_ID = table.Column<long>(type: "NUMBER(19)", nullable: true),
                     COMMENT_RELATED_PSN_SUFFIX = table.Column<short>(type: "NUMBER(5)", nullable: true),
                     COMMENT_IS_PARTIAL_TRANSACTION = table.Column<bool>(type: "NUMBER(1)", nullable: true)
@@ -738,7 +738,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     ID = table.Column<int>(type: "NUMBER(10)", nullable: false)
                         .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
                     PSN_SUFFIX = table.Column<short>(type: "NUMBER(5)", precision: 5, nullable: false),
-                    BADGE_NUMBER = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false),
+                    EMPLOYEE_ID = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false),
                     DEMOGRAPHIC_ID = table.Column<int>(type: "NUMBER(11)", precision: 11, nullable: false),
                     BENEFICIARY_CONTACT_ID = table.Column<int>(type: "NUMBER(10)", nullable: false),
                     RELATIONSHIP = table.Column<string>(type: "NVARCHAR2(10)", maxLength: 10, nullable: true),
@@ -2249,28 +2249,28 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 columns: new[] { "ID", "NAME" },
                 values: new object[,]
                 {
-                    { 1, "Transfer Out" },
-                    { 2, "Transfer In" },
-                    { 3, "QDRO Out" },
-                    { 4, "QDRO In" },
-                    { 5, "V-Only" },
-                    { 6, "Forfeit" },
-                    { 7, "Un-Forfeit" },
-                    { 8, "Class Action" },
-                    { 9, "Voided" },
-                    { 10, "Hardship" },
-                    { 11, "Distribution" },
-                    { 12, "Payoff" },
-                    { 13, "Dirpay" },
-                    { 14, "Rollover" },
-                    { 15, "Roth IRA" },
-                    { 16, "> 64 - 1 Year Vested" },
-                    { 17, "> 64 - 2 Year Vested" },
-                    { 18, "> 64 - 3 Year Vested" },
-                    { 19, "Military" },
-                    { 20, "Other" },
-                    { 21, "Rev" },
-                    { 22, "Unrev" }
+                    { (byte)1, "Transfer Out" },
+                    { (byte)2, "Transfer In" },
+                    { (byte)3, "QDRO Out" },
+                    { (byte)4, "QDRO In" },
+                    { (byte)5, "V-Only" },
+                    { (byte)6, "Forfeit" },
+                    { (byte)7, "Un-Forfeit" },
+                    { (byte)8, "Class Action" },
+                    { (byte)9, "Voided" },
+                    { (byte)10, "Hardship" },
+                    { (byte)11, "Distribution" },
+                    { (byte)12, "Payoff" },
+                    { (byte)13, "Dirpay" },
+                    { (byte)14, "Rollover" },
+                    { (byte)15, "Roth IRA" },
+                    { (byte)16, "> 64 - 1 Year Vested" },
+                    { (byte)17, "> 64 - 2 Year Vested" },
+                    { (byte)18, "> 64 - 3 Year Vested" },
+                    { (byte)19, "Military" },
+                    { (byte)20, "Other" },
+                    { (byte)21, "Rev" },
+                    { (byte)22, "Unrev" }
                 });
 
             migrationBuilder.InsertData(
@@ -2799,11 +2799,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_BENEFICIARY_BADGENUMBER",
-                table: "BENEFICIARY",
-                column: "BADGE_NUMBER");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_BENEFICIARY_BENEFICIARYCONTACTID",
                 table: "BENEFICIARY",
                 column: "BENEFICIARY_CONTACT_ID");
@@ -2812,6 +2807,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "IX_BENEFICIARY_DEMOGRAPHICID",
                 table: "BENEFICIARY",
                 column: "DEMOGRAPHIC_ID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BENEFICIARY_EMPLOYEEID",
+                table: "BENEFICIARY",
+                column: "EMPLOYEE_ID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_BENEFICIARY_KINDID",
@@ -2834,11 +2834,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 column: "SSN");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DEMOGRAPHIC_BADGENUMBER",
-                table: "DEMOGRAPHIC",
-                column: "BADGE_NUMBER");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_DEMOGRAPHIC_COUNTRY_ISO",
                 table: "DEMOGRAPHIC",
                 column: "COUNTRY_ISO");
@@ -2847,6 +2842,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "IX_DEMOGRAPHIC_DEPARTMENTID",
                 table: "DEMOGRAPHIC",
                 column: "DEPARTMENT");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DEMOGRAPHIC_EMPLOYEEID",
+                table: "DEMOGRAPHIC",
+                column: "EMPLOYEE_ID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DEMOGRAPHIC_EMPLOYMENTSTATUSID",
@@ -3016,9 +3016,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 column: "PROFIT_CODE_ID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PROFIT_DETAIL_SSN_DISTRIBUTIONSEQUENCE_PROFITYEAR",
+                name: "IX_PROFIT_DETAIL_SSN_PROFITYEAR",
                 table: "PROFIT_DETAIL",
-                columns: new[] { "SSN", "DISTRIBUTION_SEQUENCE", "PROFIT_YEAR" });
+                columns: new[] { "SSN", "PROFIT_YEAR" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_PROFIT_DETAIL_TAX_CODE_ID",

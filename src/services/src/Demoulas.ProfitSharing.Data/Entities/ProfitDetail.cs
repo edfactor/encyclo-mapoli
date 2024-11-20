@@ -21,7 +21,7 @@ public class ProfitDetail
     public decimal StateTaxes { get; set;}
     public TaxCode? TaxCode { get; set; }
     public char? TaxCodeId { get; set; }
-    public int? CommentTypeId { get; set; }
+    public byte? CommentTypeId { get; set; }
     public CommentType? CommentType { get; set; }
     public int? CommentRelatedCheckNumber { get; set; }
     public string? CommentRelatedState { get; set; }

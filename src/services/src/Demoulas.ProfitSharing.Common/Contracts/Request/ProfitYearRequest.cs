@@ -6,4 +6,15 @@ public record ProfitYearRequest : PaginationRequestDto
 {
     [DefaultValue(2023)]
     public short ProfitYear { get; set; }
+
+
+    public static ProfitYearRequest RequestExample()
+    {
+        return new ProfitYearRequest
+        {
+            ProfitYear = 2023,
+            Skip = 0,
+            Take = 25
+        };
+    }
 }

@@ -6,7 +6,7 @@ import MilitaryAndRehireProfitSummaryGrid from "./MilitaryAndRehireProfitSummary
 
 const MilitaryAndRehireProfitSummary = () => {
   return (
-    <Page label="Negative ETVA for SSNs on Payprofit">
+    <Page label="Military and Rehire Profit Summary">
         <Grid2
           container
           rowSpacing="24px">

@@ -15,10 +15,6 @@
     <PackageReference Include="coverlet.collector" />
     <PackageReference Include="FastEndpoints.Testing" />
     <PackageReference Include="FluentAssertions" />
-    <PackageReference Include="FluentAssertions.Analyzers">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="IdGen" />
     <PackageReference Include="JetBrains.Annotations" />
     <PackageReference Include="JunitXml.TestLogger" />
@@ -38,6 +34,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Demoulas.ProfitSharing.Api\Demoulas.ProfitSharing.Api.csproj" />
     <ProjectReference Include="..\..\src\Demoulas.ProfitSharing.Client\Demoulas.ProfitSharing.Client.csproj" />
+    <ProjectReference Include="..\..\src\Demoulas.ProfitSharing.Endpoints\Demoulas.ProfitSharing.Endpoints.csproj" />
     <ProjectReference Include="..\..\src\Demoulas.ProfitSharing.OracleHcm\Demoulas.ProfitSharing.OracleHcm.csproj" />
     <ProjectReference Include="..\..\src\Demoulas.ProfitSharing.Security\Demoulas.ProfitSharing.Security.csproj" />
   </ItemGroup>
@@ -60,6 +57,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Update="Roslynator.Formatting.Analyzers">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="FluentAssertions.Analyzers">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

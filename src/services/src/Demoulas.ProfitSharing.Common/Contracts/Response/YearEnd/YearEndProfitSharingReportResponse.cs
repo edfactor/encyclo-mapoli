@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 public sealed record YearEndProfitSharingReportResponse
 {
-    public required long BadgeNumber { get; set; }
+    public required long EmployeeId { get; set; }
     public required string EmployeeName { get; set; }
     public required short StoreNumber { get; set; }
     public required char EmployeeTypeCode { get; set; }
@@ -27,7 +21,7 @@ public sealed record YearEndProfitSharingReportResponse
     {
         return new YearEndProfitSharingReportResponse()
         {
-            BadgeNumber = 135,
+            EmployeeId = 135,
             EmployeeName = "John Doe",
             StoreNumber = 23,
             EmployeeTypeCode = 'a',

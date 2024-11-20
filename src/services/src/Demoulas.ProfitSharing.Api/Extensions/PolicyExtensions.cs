@@ -9,7 +9,7 @@ namespace Demoulas.ProfitSharing.Api.Extensions;
 
 internal static class PolicyExtensions
 {
-    internal static WebApplicationBuilder ConfigurePolicies(this WebApplicationBuilder builder)
+    internal static WebApplicationBuilder ConfigureSecurityPolicies(this WebApplicationBuilder builder)
     {
 
         _ = builder.Services.AddAuthorization(options =>

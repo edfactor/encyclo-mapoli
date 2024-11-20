@@ -12,8 +12,8 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    [Migration("20241107131732_initialMigration")]
-    partial class initialMigration
+    [Migration("20241119204806_initialMigrations")]
+    partial class initialMigrations
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,7 +21,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .UseCollation("USING_NLS_COMP")
-                .HasAnnotation("ProductVersion", "8.0.10")
+                .HasAnnotation("ProductVersion", "8.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             OracleModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -24523,11 +24523,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("AMOUNT");
 
-                    b.Property<int>("BadgeNumber")
-                        .HasPrecision(7)
-                        .HasColumnType("NUMBER(7)")
-                        .HasColumnName("BADGE_NUMBER");
-
                     b.Property<int>("BeneficiaryContactId")
                         .HasColumnType("NUMBER(10)")
                         .HasColumnName("BENEFICIARY_CONTACT_ID");
@@ -24546,6 +24541,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasPrecision(9, 2)
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("EARNINGS");
+
+                    b.Property<int>("EmployeeId")
+                        .HasPrecision(7)
+                        .HasColumnType("NUMBER(7)")
+                        .HasColumnName("EMPLOYEE_ID");
 
                     b.Property<string>("KindId")
                         .HasColumnType("NVARCHAR2(1)")
@@ -24583,8 +24583,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasIndex("KindId")
                         .HasDatabaseName("IX_BENEFICIARY_KINDID");
 
-                    b.HasIndex(new[] { "BadgeNumber" }, "IX_BadgeNumber")
-                        .HasDatabaseName("IX_BENEFICIARY_BADGENUMBER");
+                    b.HasIndex(new[] { "EmployeeId" }, "IX_EMPLOYEE_ID")
+                        .HasDatabaseName("IX_BENEFICIARY_EMPLOYEEID");
 
                     b.HasIndex(new[] { "PsnSuffix" }, "IX_PsnSuffix")
                         .HasDatabaseName("IX_BENEFICIARY_PSNSUFFIX");
@@ -24688,8 +24688,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.CommentType", b =>
                 {
-                    b.Property<int>("Id")
-                        .HasColumnType("NUMBER(10)")
+                    b.Property<byte>("Id")
+                        .HasColumnType("NUMBER(3)")
                         .HasColumnName("ID");
 
                     b.Property<string>("Name")
@@ -24706,112 +24706,112 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = 1,
+                            Id = (byte)1,
                             Name = "Transfer Out"
                         },
                         new
                         {
-                            Id = 2,
+                            Id = (byte)2,
                             Name = "Transfer In"
                         },
                         new
                         {
-                            Id = 3,
+                            Id = (byte)3,
                             Name = "QDRO Out"
                         },
                         new
                         {
-                            Id = 4,
+                            Id = (byte)4,
                             Name = "QDRO In"
                         },
                         new
                         {
-                            Id = 5,
+                            Id = (byte)5,
                             Name = "V-Only"
                         },
                         new
                         {
-                            Id = 6,
+                            Id = (byte)6,
                             Name = "Forfeit"
                         },
                         new
                         {
-                            Id = 7,
+                            Id = (byte)7,
                             Name = "Un-Forfeit"
                         },
                         new
                         {
-                            Id = 8,
+                            Id = (byte)8,
                             Name = "Class Action"
                         },
                         new
                         {
-                            Id = 9,
+                            Id = (byte)9,
                             Name = "Voided"
                         },
                         new
                         {
-                            Id = 10,
+                            Id = (byte)10,
                             Name = "Hardship"
                         },
                         new
                         {
-                            Id = 11,
+                            Id = (byte)11,
                             Name = "Distribution"
                         },
                         new
                         {
-                            Id = 12,
+                            Id = (byte)12,
                             Name = "Payoff"
                         },
                         new
                         {
-                            Id = 13,
+                            Id = (byte)13,
                             Name = "Dirpay"
                         },
                         new
                         {
-                            Id = 14,
+                            Id = (byte)14,
                             Name = "Rollover"
                         },
                         new
                         {
-                            Id = 15,
+                            Id = (byte)15,
                             Name = "Roth IRA"
                         },
                         new
                         {
-                            Id = 16,
+                            Id = (byte)16,
                             Name = "> 64 - 1 Year Vested"
                         },
                         new
                         {
-                            Id = 17,
+                            Id = (byte)17,
                             Name = "> 64 - 2 Year Vested"
                         },
                         new
                         {
-                            Id = 18,
+                            Id = (byte)18,
                             Name = "> 64 - 3 Year Vested"
                         },
                         new
                         {
-                            Id = 19,
+                            Id = (byte)19,
                             Name = "Military"
                         },
                         new
                         {
-                            Id = 20,
+                            Id = (byte)20,
                             Name = "Other"
                         },
                         new
                         {
-                            Id = 21,
+                            Id = (byte)21,
                             Name = "Rev"
                         },
                         new
                         {
-                            Id = 22,
+                            Id = (byte)22,
                             Name = "Unrev"
                         });
                 });
@@ -26216,11 +26216,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("BadgeNumber")
-                        .HasPrecision(7)
-                        .HasColumnType("NUMBER(7)")
-                        .HasColumnName("BADGE_NUMBER");
-
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("DATE")
                         .HasColumnName("DATE_OF_BIRTH")
@@ -26231,6 +26226,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(1)")
                         .HasColumnName("DEPARTMENT")
                         .HasComment("Department");
+
+                    b.Property<int>("EmployeeId")
+                        .HasPrecision(7)
+                        .HasColumnType("NUMBER(7)")
+                        .HasColumnName("EMPLOYEE_ID");
 
                     b.Property<string>("EmploymentStatusId")
                         .IsRequired()
@@ -26335,8 +26335,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasIndex("TerminationCodeId")
                         .HasDatabaseName("IX_DEMOGRAPHIC_TERMINATIONCODEID");
 
-                    b.HasIndex(new[] { "BadgeNumber" }, "IX_BadgeNumber")
-                        .HasDatabaseName("IX_DEMOGRAPHIC_BADGENUMBER");
+                    b.HasIndex(new[] { "EmployeeId" }, "IX_EmployeeId")
+                        .HasDatabaseName("IX_DEMOGRAPHIC_EMPLOYEEID");
 
                     b.HasIndex(new[] { "OracleHcmId" }, "IX_ORACLE_HCM_ID")
                         .IsUnique()
@@ -27080,8 +27080,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("NVARCHAR2(64)")
+                        .HasMaxLength(32)
+                        .HasColumnType("NVARCHAR2(32)")
                         .HasColumnName("NAME");
 
                     b.HasKey("Id")
@@ -27981,11 +27981,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("COMMENT_RELATED_PSN_SUFFIX");
 
                     b.Property<string>("CommentRelatedState")
-                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasMaxLength(24)
+                        .HasColumnType("NVARCHAR2(24)")
                         .HasColumnName("COMMENT_RELATED_STATE");
 
-                    b.Property<int?>("CommentTypeId")
-                        .HasColumnType("NUMBER(10)")
+                    b.Property<byte?>("CommentTypeId")
+                        .HasColumnType("NUMBER(3)")
                         .HasColumnName("COMMENT_TYPE_ID");
 
                     b.Property<decimal>("Contribution")
@@ -28072,8 +28073,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasIndex("ZeroContributionReasonId")
                         .HasDatabaseName("IX_PROFIT_DETAIL_ZEROCONTRIBUTIONREASONID");
 
-                    b.HasIndex(new[] { "Ssn", "DistributionSequence", "ProfitYear" }, "IX_SSN_SEQUENCE_YEAR")
-                        .HasDatabaseName("IX_PROFIT_DETAIL_SSN_DISTRIBUTIONSEQUENCE_PROFITYEAR");
+                    b.HasIndex(new[] { "Ssn", "ProfitYear" }, "IX_SSN_YEAR")
+                        .HasDatabaseName("IX_PROFIT_DETAIL_SSN_PROFITYEAR");
 
                     b.ToTable("PROFIT_DETAIL", (string)null);
                 });
@@ -28595,8 +28596,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                             b1.Property<string>("City")
                                 .IsRequired()
-                                .HasMaxLength(25)
-                                .HasColumnType("NVARCHAR2(25)")
+                                .HasMaxLength(36)
+                                .HasColumnType("NVARCHAR2(36)")
                                 .HasColumnName("CITY")
                                 .HasComment("City");
 
@@ -28623,26 +28624,26 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                             b1.Property<string>("Street")
                                 .IsRequired()
-                                .HasMaxLength(30)
-                                .HasColumnType("NVARCHAR2(30)")
+                                .HasMaxLength(56)
+                                .HasColumnType("NVARCHAR2(56)")
                                 .HasColumnName("STREET")
                                 .HasComment("Street");
 
                             b1.Property<string>("Street2")
-                                .HasMaxLength(30)
-                                .HasColumnType("NVARCHAR2(30)")
+                                .HasMaxLength(56)
+                                .HasColumnType("NVARCHAR2(56)")
                                 .HasColumnName("STREET2")
                                 .HasComment("Street2");
 
                             b1.Property<string>("Street3")
-                                .HasMaxLength(30)
-                                .HasColumnType("NVARCHAR2(30)")
+                                .HasMaxLength(56)
+                                .HasColumnType("NVARCHAR2(56)")
                                 .HasColumnName("STREET3")
                                 .HasComment("Street3");
 
                             b1.Property<string>("Street4")
-                                .HasMaxLength(30)
-                                .HasColumnType("NVARCHAR2(30)")
+                                .HasMaxLength(56)
+                                .HasColumnType("NVARCHAR2(56)")
                                 .HasColumnName("STREET4")
                                 .HasComment("Street4");
 
@@ -28786,8 +28787,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                             b1.Property<string>("City")
                                 .IsRequired()
-                                .HasMaxLength(25)
-                                .HasColumnType("NVARCHAR2(25)")
+                                .HasMaxLength(36)
+                                .HasColumnType("NVARCHAR2(36)")
                                 .HasColumnName("CITY")
                                 .HasComment("City");
 
@@ -28814,26 +28815,26 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                             b1.Property<string>("Street")
                                 .IsRequired()
-                                .HasMaxLength(30)
-                                .HasColumnType("NVARCHAR2(30)")
+                                .HasMaxLength(56)
+                                .HasColumnType("NVARCHAR2(56)")
                                 .HasColumnName("STREET")
                                 .HasComment("Street");
 
                             b1.Property<string>("Street2")
-                                .HasMaxLength(30)
-                                .HasColumnType("NVARCHAR2(30)")
+                                .HasMaxLength(56)
+                                .HasColumnType("NVARCHAR2(56)")
                                 .HasColumnName("STREET2")
                                 .HasComment("Street2");
 
                             b1.Property<string>("Street3")
-                                .HasMaxLength(30)
-                                .HasColumnType("NVARCHAR2(30)")
+                                .HasMaxLength(56)
+                                .HasColumnType("NVARCHAR2(56)")
                                 .HasColumnName("STREET3")
                                 .HasComment("Street3");
 
                             b1.Property<string>("Street4")
-                                .HasMaxLength(30)
-                                .HasColumnType("NVARCHAR2(30)")
+                                .HasMaxLength(56)
+                                .HasColumnType("NVARCHAR2(56)")
                                 .HasColumnName("STREET4")
                                 .HasComment("Street4");
 
@@ -28996,8 +28997,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                                 .HasColumnName("ID");
 
                             b1.Property<string>("City")
-                                .HasMaxLength(25)
-                                .HasColumnType("NVARCHAR2(25)")
+                                .HasMaxLength(36)
+                                .HasColumnType("NVARCHAR2(36)")
                                 .HasColumnName("CITY");
 
                             b1.Property<string>("CountryIso")
@@ -29019,23 +29020,23 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                             b1.Property<string>("Street")
                                 .IsRequired()
-                                .HasMaxLength(30)
-                                .HasColumnType("NVARCHAR2(30)")
+                                .HasMaxLength(56)
+                                .HasColumnType("NVARCHAR2(56)")
                                 .HasColumnName("STREET");
 
                             b1.Property<string>("Street2")
-                                .HasMaxLength(30)
-                                .HasColumnType("NVARCHAR2(30)")
+                                .HasMaxLength(56)
+                                .HasColumnType("NVARCHAR2(56)")
                                 .HasColumnName("STREET2");
 
                             b1.Property<string>("Street3")
-                                .HasMaxLength(30)
-                                .HasColumnType("NVARCHAR2(30)")
+                                .HasMaxLength(56)
+                                .HasColumnType("NVARCHAR2(56)")
                                 .HasColumnName("STREET3");
 
                             b1.Property<string>("Street4")
-                                .HasMaxLength(30)
-                                .HasColumnType("NVARCHAR2(30)")
+                                .HasMaxLength(56)
+                                .HasColumnType("NVARCHAR2(56)")
                                 .HasColumnName("STREET4");
 
                             b1.HasKey("DistributionPayeeId");
@@ -29108,8 +29109,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                                 .HasColumnName("ID");
 
                             b1.Property<string>("City")
-                                .HasMaxLength(25)
-                                .HasColumnType("NVARCHAR2(25)")
+                                .HasMaxLength(36)
+                                .HasColumnType("NVARCHAR2(36)")
                                 .HasColumnName("CITY");
 
                             b1.Property<string>("CountryIso")
@@ -29131,23 +29132,23 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                             b1.Property<string>("Street")
                                 .IsRequired()
-                                .HasMaxLength(30)
-                                .HasColumnType("NVARCHAR2(30)")
+                                .HasMaxLength(56)
+                                .HasColumnType("NVARCHAR2(56)")
                                 .HasColumnName("STREET");
 
                             b1.Property<string>("Street2")
-                                .HasMaxLength(30)
-                                .HasColumnType("NVARCHAR2(30)")
+                                .HasMaxLength(56)
+                                .HasColumnType("NVARCHAR2(56)")
                                 .HasColumnName("STREET2");
 
                             b1.Property<string>("Street3")
-                                .HasMaxLength(30)
-                                .HasColumnType("NVARCHAR2(30)")
+                                .HasMaxLength(56)
+                                .HasColumnType("NVARCHAR2(56)")
                                 .HasColumnName("STREET3");
 
                             b1.Property<string>("Street4")
-                                .HasMaxLength(30)
-                                .HasColumnType("NVARCHAR2(30)")
+                                .HasMaxLength(56)
+                                .HasColumnType("NVARCHAR2(56)")
                                 .HasColumnName("STREET4");
 
                             b1.HasKey("DistributionThirdPartyPayeeId");
