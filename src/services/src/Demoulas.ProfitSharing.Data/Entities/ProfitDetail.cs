@@ -3,7 +3,7 @@
 public class ProfitDetail
 {
     public int Id { get; set; }
-    public long Ssn { get; set; }
+    public int Ssn { get; set; }
     public short ProfitYear { get; set; }
     public byte ProfitYearIteration { get; set; }
     public int DistributionSequence { get; set; }

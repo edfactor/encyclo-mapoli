@@ -3,7 +3,7 @@ public sealed class BeneficiaryContact
 {
     public required int Id { get; set; }
 
-    public required long Ssn { get; set; }
+    public required int Ssn { get; set; }
 
     public required DateOnly DateOfBirth { get; set; }
 

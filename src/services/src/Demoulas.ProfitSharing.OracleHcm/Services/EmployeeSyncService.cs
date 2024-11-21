@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Bogus.Extensions.UnitedStates;
 using Demoulas.ProfitSharing.Common.ActivitySources;
-using Demoulas.ProfitSharing.Common.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Extensions;
@@ -11,6 +10,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
 using Demoulas.ProfitSharing.OracleHcm.Validators;
 using Demoulas.Util.Extensions;
@@ -149,7 +149,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
                 DateOfBirth = employee.DateOfBirth,
                 HireDate = employee.WorkRelationship?.StartDate ?? SqlDateTime.MinValue.Value.ToDateOnly(),
                 TerminationDate = employee.WorkRelationship?.TerminationDate,
-                Ssn = (employee.NationalIdentifier?.NationalIdentifierNumber ?? faker.Person.Ssn()).ConvertSsnToLong() ?? 0,
+                Ssn = (employee.NationalIdentifier?.NationalIdentifierNumber ?? faker.Person.Ssn()).ConvertSsnToInt() ?? 0,
                 StoreNumber = employee.WorkRelationship?.Assignment.LocationCode ?? 0,
                 DepartmentId = employee.WorkRelationship?.Assignment.GetDepartmentId() ?? 0,
                 PayClassificationId = employee.WorkRelationship?.Assignment.JobCode ?? 0,
