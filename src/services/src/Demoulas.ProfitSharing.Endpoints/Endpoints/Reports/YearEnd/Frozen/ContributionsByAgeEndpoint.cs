@@ -28,7 +28,7 @@ public class ContributionsByAgeEndpoint : EndpointWithCsvTotalsBase<FrozenReport
         {
             s.Summary = ReportFileName;
             s.Description =
-                "This report produces a list of members showing their points, and any forfeitures over the year";
+                "This report produces a list of members showing their contributions over the year grouped by age";
 
             s.ExampleRequest = FrozenReportsByAgeRequest.RequestExample();
             s.ResponseExamples = new Dictionary<int, object>
