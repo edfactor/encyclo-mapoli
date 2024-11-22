@@ -246,8 +246,7 @@ public class FrozenReportService : IFrozenReportService
                     d.DateOfBirth,
                     EmploymentType = d.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT,
                     d.EmployeeId,
-                    Amount = pd.Forfeiture,
-                    pd.CommentTypeId
+                    Amount = pd.Contribution
                 });
 
             query = req.ReportType switch
@@ -265,10 +264,8 @@ public class FrozenReportService : IFrozenReportService
         var details = queryResult.Select(x => new
             {
                 Age = x.DateOfBirth.Age(),
-                x.EmploymentType,
                 x.EmployeeId,
-                x.Amount,
-                x.CommentTypeId
+                x.Amount
             })
             .GroupBy(x => new { x.Age })
             .Select(g => new ContributionsByAgeDetail
