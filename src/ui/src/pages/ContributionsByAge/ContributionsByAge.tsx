@@ -1,12 +1,12 @@
 import { Divider } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { DSMAccordion, Page } from "smart-ui-library";
-import DistributionByAgeSearchFilter from "./DistributionByAgeSearchFilter";
-import DistributionByAgeGrid from "./DistributionByAgeGrid";
+import ContributionsByAgeSearchFilter from "./ContributionsByAgeSearchFilter";
+import ContributionsByAgeGrid from "./ContributionsByAgeGrid";
 
-const DistributionByAge = () => {
+const ContributionsByAge = () => {
   return (
-    <Page label="Distributions By Age">
+    <Page label="Contributions By Age">
         <Grid2
           container
           rowSpacing="24px">
@@ -16,16 +16,16 @@ const DistributionByAge = () => {
           <Grid2
             width={"100%"}>
              <DSMAccordion title="Filter">
-              <DistributionByAgeSearchFilter />
+              <ContributionsByAgeSearchFilter />
              </DSMAccordion>
           </Grid2>
 
           <Grid2 width="100%">
-            <DistributionByAgeGrid />
+            <ContributionsByAgeGrid />
           </Grid2>
         </Grid2>
     </Page>
   );
 };
 
-export default DistributionByAge;
+export default ContributionsByAge;

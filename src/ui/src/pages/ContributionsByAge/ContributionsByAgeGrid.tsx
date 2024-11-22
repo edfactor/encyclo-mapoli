@@ -1,39 +1,39 @@
 import { Typography } from "@mui/material";
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { useLazyGetDistributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
+import { useLazyGetContributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams } from "smart-ui-library";
-import { GetDistributionsByAgeColumns } from "./DistributionByAgeGridColumns";
+import { GetContributionsByAgeColumns } from "./ContributionsByAgeGridColumns";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { FrozenReportsByAgeRequestType } from "../../reduxstore/types";
 
-const DistributionByAgeGrid = () => {
+const ContributionsByAgeGrid = () => {
   const [_discard0, setSortParams] = useState<ISortParams>({
     sortBy: "Badge",
     isSortDescending: false
   });
 
-  const { distributionsByAgeTotal, distributionsByAgeFullTime, distributionsByAgePartTime } = useSelector(
+  const { contributionsByAgeTotal, contributionsByAgeFullTime, contributionsByAgePartTime } = useSelector(
     (state: RootState) => state.yearsEnd
   );
-  const [_discard1, { isLoading }] = useLazyGetDistributionsByAgeQuery();
+  const [_discard1, { isLoading }] = useLazyGetContributionsByAgeQuery();
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
-  const columnDefsTotal = GetDistributionsByAgeColumns(FrozenReportsByAgeRequestType.Total);
-  const columnDefsFullTime = GetDistributionsByAgeColumns(FrozenReportsByAgeRequestType.FullTime);
-  const columnDefsPartTime = GetDistributionsByAgeColumns(FrozenReportsByAgeRequestType.PartTime);
+  const columnDefsTotal = GetContributionsByAgeColumns(FrozenReportsByAgeRequestType.Total);
+  const columnDefsFullTime = GetContributionsByAgeColumns(FrozenReportsByAgeRequestType.FullTime);
+  const columnDefsPartTime = GetContributionsByAgeColumns(FrozenReportsByAgeRequestType.PartTime);
 
   return (
     <>
-      {distributionsByAgeTotal?.response && (
+      {contributionsByAgeTotal?.response && (
         <>
           <div style={{ padding: "0 24px 0 24px" }}>
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`${distributionsByAgeTotal.reportName}`}
+              {`${contributionsByAgeTotal.reportName}`}
             </Typography>
           </div>
           <Grid2
@@ -45,22 +45,12 @@ const DistributionByAgeGrid = () => {
                 isLoading={isLoading}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
-                  rowData: distributionsByAgeTotal?.response.results,
+                  rowData: contributionsByAgeTotal?.response.results,
                   pinnedTopRowData: [
                     {
-                      age: "Regular",
-                      employeeCount: distributionsByAgeTotal?.regularTotalEmployees,
-                      amount: distributionsByAgeTotal?.regularTotalAmount
-                    },
-                    {
-                      age: "Hardship",
-                      employeeCount: distributionsByAgeTotal?.hardshipTotalEmployees,
-                      amount: distributionsByAgeTotal?.hardshipTotalAmount
-                    },
-                    {
                       age: "Dist Total",
-                      employeeCount: (distributionsByAgeTotal?.regularTotalEmployees || 0) + (distributionsByAgeTotal?.hardshipTotalEmployees || 0),
-                      amount: distributionsByAgeTotal?.distributionTotalAmount
+                      employeeCount: (contributionsByAgeTotal?.totalEmployees || 0),
+                      amount: contributionsByAgeTotal?.distributionTotalAmount
                     }
                   ],
                   columnDefs: [
@@ -78,22 +68,12 @@ const DistributionByAgeGrid = () => {
                 isLoading={isLoading}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
-                  rowData: distributionsByAgeFullTime?.response.results,
+                  rowData: contributionsByAgeFullTime?.response.results,
                   pinnedTopRowData: [
                     {
-                      age: "Regular",
-                      employeeCount: distributionsByAgeFullTime?.regularTotalEmployees,
-                      amount: distributionsByAgeFullTime?.regularTotalAmount
-                    },
-                    {
-                      age: "Hardship",
-                      employeeCount: distributionsByAgeFullTime?.hardshipTotalEmployees,
-                      amount: distributionsByAgeFullTime?.hardshipTotalAmount
-                    },
-                    {
-                      age: "Dist Total",
-                      employeeCount: (distributionsByAgeFullTime?.regularTotalEmployees || 0) + (distributionsByAgeFullTime?.hardshipTotalEmployees || 0),
-                      amount: distributionsByAgeFullTime?.distributionTotalAmount
+                     age: "Dist Total",
+                      employeeCount: (contributionsByAgeTotal?.totalEmployees || 0),
+                      amount: contributionsByAgeTotal?.distributionTotalAmount
                     }
                   ],
                   columnDefs: [
@@ -111,22 +91,12 @@ const DistributionByAgeGrid = () => {
                 isLoading={isLoading}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
-                  rowData: distributionsByAgePartTime?.response.results,
+                  rowData: contributionsByAgePartTime?.response.results,
                   pinnedTopRowData: [
                     {
-                      age: "Regular",
-                      employeeCount: distributionsByAgePartTime?.regularTotalEmployees,
-                      amount: distributionsByAgePartTime?.regularTotalAmount
-                    },
-                    {
-                      age: "Hardship",
-                      employeeCount: distributionsByAgePartTime?.hardshipTotalEmployees,
-                      amount: distributionsByAgePartTime?.hardshipTotalAmount
-                    },
-                    {
                       age: "Dist Total",
-                      employeeCount: (distributionsByAgePartTime?.regularTotalEmployees || 0) + (distributionsByAgePartTime?.hardshipTotalEmployees || 0),
-                      amount: distributionsByAgePartTime?.distributionTotalAmount
+                      employeeCount: (contributionsByAgeTotal?.totalEmployees || 0),
+                      amount: contributionsByAgeTotal?.distributionTotalAmount
                     }
                   ],
                   columnDefs: [
@@ -145,4 +115,4 @@ const DistributionByAgeGrid = () => {
   );
 };
 
-export default DistributionByAgeGrid;
+export default ContributionsByAgeGrid;

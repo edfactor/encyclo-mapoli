@@ -2,13 +2,13 @@ import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { useLazyGetDistributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
+import { useLazyGetContributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { ImpersonationRoles, FrozenReportsByAgeRequestType } from "reduxstore/types";
 
-interface DistributionByAgeSearch {
+interface ContributionsByAgeSearch {
   profitYear: number;
   reportType?: FrozenReportsByAgeRequestType;
 }
@@ -18,22 +18,22 @@ const schema = yup.object().shape({
     .number()
     .typeError("Year must be a number")
     .integer("Year must be an integer")
-    .min(1900, "Year must be 1900 or later")
+    .min(2000, "Year must be 2000 or later")
     .max(2100, "Year must be 2100 or earlier")
     .required("Year is required")
 });
 
-const DistributionByAgeSearchFilter = () => {
+const ContributionsByAgeSearchFilter = () => {
   const [isFetching, setIsFetching] = useState(false);
 
-  const [triggerSearch] = useLazyGetDistributionsByAgeQuery();
+  const [triggerSearch] = useLazyGetContributionsByAgeQuery();
 
   const {
     control,
     handleSubmit,
     formState: { errors, isValid },
     reset
-  } = useForm<DistributionByAgeSearch>({
+  } = useForm<ContributionsByAgeSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
       profitYear: undefined,
@@ -126,4 +126,4 @@ const DistributionByAgeSearchFilter = () => {
   );
 };
 
-export default DistributionByAgeSearchFilter;
+export default ContributionsByAgeSearchFilter;

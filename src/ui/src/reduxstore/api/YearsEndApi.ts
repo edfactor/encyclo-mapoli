@@ -28,12 +28,13 @@ import {
   NegativeEtvaForSSNsOnPayProfit,
   NegativeEtvaForSSNsOnPayprofitRequestDto,
   PagedReportResponse,
-  ProfitSharingDistributionsByAge
+  ProfitSharingDistributionsByAge, ContributionsByAge
 } from "reduxstore/types";
 import {
   setDemographicBadgesNotInPayprofitData,
   setDistributionsAndForfeitures,
   setDistributionsByAge,
+  setContributionsByAge,
   setDuplicateNamesAndBirthdays,
   setDuplicateSSNsData,
   setEligibleEmployees,
@@ -386,6 +387,24 @@ export const YearsEndApi = createApi({
         }
       }
     }),
+     getContributionsByAge: builder.query<ContributionsByAge, FrozenReportsByAgeRequest>({
+      query: (params) => ({
+        url: "yearend/frozen/contributions-by-age",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          reportType: params.reportType
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setContributionsByAge(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
     getProfitMasterInquiry: builder.query<Paged<MasterInquiryDetail>, MasterInquryRequest>({
       query: (params) => ({
         url: "yearend/master-inquiry",
@@ -435,5 +454,6 @@ export const {
   useLazyGetExecutiveHoursAndDollarsQuery,
   useLazyGetEligibleEmployeesQuery,
   useLazyGetDistributionsByAgeQuery,
+  useLazyGetContributionsByAgeQuery,
   useLazyGetProfitMasterInquiryQuery
 } = YearsEndApi;

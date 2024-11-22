@@ -204,7 +204,7 @@ public class FrozenReportService : IFrozenReportService
             .OrderBy(x => x.Age)
             .ToList();
 
-        req = req with { Take = details.Count };
+        req = req with { Take = details.Count + 1 };
         // Compute aggregates using helper method
         var totalAggregates = ComputeAggregates(details);
 
@@ -220,13 +220,6 @@ public class FrozenReportService : IFrozenReportService
             Response = new PaginatedResponseDto<DistributionsByAgeDetail>(req) { Results = details, Total = details.Count }
         };
     }
-
-
-
-
-
-
-
 
 
     public async Task<ContributionsByAge> GetContributionsByAgeYear(FrozenReportsByAgeRequest req, CancellationToken cancellationToken = default)
@@ -277,7 +270,7 @@ public class FrozenReportService : IFrozenReportService
             .OrderBy(x => x.Age)
             .ToList();
 
-        req = req with { Take = details.Count };
+        req = req with { Take = details.Count + 1 };
 
 
         return new ContributionsByAge
