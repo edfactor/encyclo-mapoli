@@ -129,7 +129,7 @@ public class FrozenReportService : IFrozenReportService
         }
     }
 
-    public async Task<DistributionsByAge> GetDistributionsByAgeYear(DistributionsByAgeRequest req, CancellationToken cancellationToken = default)
+    public async Task<DistributionsByAge> GetDistributionsByAgeYear(FrozenReportsByAgeRequest req, CancellationToken cancellationToken = default)
     {
         List<byte> codes =
         [
@@ -141,7 +141,7 @@ public class FrozenReportService : IFrozenReportService
         const string FT = "FullTime";
         const string PT = "PartTime";
 
-        var details = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        var queryResult = await _dataContextFactory.UseReadOnlyContext(ctx =>
         {
             var query = (from pd in ctx.ProfitDetails
                 join d in ctx.Demographics on pd.Ssn equals d.Ssn
@@ -157,40 +157,52 @@ public class FrozenReportService : IFrozenReportService
 
             query = req.ReportType switch
             {
-                DistributionsByAgeRequest.Report.FullTime => query.Where(q => q.EmploymentType == FT),
-                DistributionsByAgeRequest.Report.PartTime => query.Where(q => q.EmploymentType == PT),
+                FrozenReportsByAgeRequest.Report.FullTime => query.Where(q => q.EmploymentType == FT),
+                FrozenReportsByAgeRequest.Report.PartTime => query.Where(q => q.EmploymentType == PT),
                 _ => query
             };
 
-            var result = await query.ToListAsync(cancellationToken: cancellationToken);
-
-            return result.Select(x => new
-                {
-                    Age = x.DateOfBirth.Age(),
-                    x.EmploymentType,
-                    x.EmployeeId,
-                    x.Amount,
-                    x.CommentTypeId
-                })
-                .GroupBy(x => new { x.Age, x.EmploymentType })
-                .Select(g => new DistributionsByAgeDetail
-                {
-                    Age = g.Key.Age,
-                    EmploymentType = g.Key.EmploymentType,
-                    EmployeeCount = g.Select(x => x.EmployeeId).Distinct().Count(),
-                    Amount = g.Sum(x => x.Amount),
-                    // Compute the total hardship amount within the group
-                    HardshipAmount = g
-                        .Where(x => x.CommentTypeId == CommentType.Constants.Hardship)
-                        .Sum(x => x.Amount),
-                    // Compute the total regular amount within the group
-                    RegularAmount = g
-                        .Where(x => x.CommentTypeId != CommentType.Constants.Hardship)
-                        .Sum(x => x.Amount)
-                })
-                .OrderBy(x => x.Age)
-                .ToList();
+            return query.ToListAsync(cancellationToken: cancellationToken);
         });
+
+
+        static ProfitSharingAggregates ComputeAggregates(List<DistributionsByAgeDetail> details)
+        {
+            return new ProfitSharingAggregates
+            {
+                RegularTotalEmployees = (short)details.Where(d => d.RegularAmount > 0).Sum(d => d.EmployeeCount),
+                RegularAmount = details.Sum(d => d.RegularAmount),
+                HardshipTotalEmployees = (short)details.Where(d => d.HardshipAmount > 0).Sum(d => d.EmployeeCount),
+                HardshipTotalAmount = details.Sum(d => d.HardshipAmount),
+            };
+        }
+
+        var details = queryResult.Select(x => new
+            {
+                Age = x.DateOfBirth.Age(),
+                x.EmploymentType,
+                x.EmployeeId,
+                x.Amount,
+                x.CommentTypeId
+            })
+            .GroupBy(x => new { x.Age, x.EmploymentType })
+            .Select(g => new DistributionsByAgeDetail
+            {
+                Age = g.Key.Age,
+                EmploymentType = g.Key.EmploymentType,
+                EmployeeCount = g.Select(x => x.EmployeeId).Distinct().Count(),
+                Amount = g.Sum(x => x.Amount),
+                // Compute the total hardship amount within the group
+                HardshipAmount = g
+                    .Where(x => x.CommentTypeId == CommentType.Constants.Hardship)
+                    .Sum(x => x.Amount),
+                // Compute the total regular amount within the group
+                RegularAmount = g
+                    .Where(x => x.CommentTypeId != CommentType.Constants.Hardship)
+                    .Sum(x => x.Amount)
+            })
+            .OrderBy(x => x.Age)
+            .ToList();
 
         req = req with { Take = details.Count };
         // Compute aggregates using helper method
@@ -209,14 +221,75 @@ public class FrozenReportService : IFrozenReportService
         };
     }
 
-    private ProfitSharingAggregates ComputeAggregates(List<DistributionsByAgeDetail> details)
+
+
+
+
+
+
+
+
+    public async Task<ContributionsByAge> GetContributionsByAgeYear(FrozenReportsByAgeRequest req, CancellationToken cancellationToken = default)
     {
-        return new ProfitSharingAggregates
+        const string FT = "FullTime";
+        const string PT = "PartTime";
+
+        var queryResult = await _dataContextFactory.UseReadOnlyContext(ctx =>
         {
-            RegularTotalEmployees = (short)details.Where(d => d.RegularAmount > 0).Sum(d => d.EmployeeCount),
-            RegularAmount = details.Sum(d => d.RegularAmount),
-            HardshipTotalEmployees = (short)details.Where(d => d.HardshipAmount > 0).Sum(d => d.EmployeeCount),
-            HardshipTotalAmount = details.Sum(d => d.HardshipAmount),
+            var query = (from pd in ctx.ProfitDetails
+                join d in ctx.Demographics on pd.Ssn equals d.Ssn
+                where pd.ProfitYear == req.ProfitYear
+                      && pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions
+                      && pd.Contribution > 0
+                select new
+                {
+                    d.DateOfBirth,
+                    EmploymentType = d.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT,
+                    d.EmployeeId,
+                    Amount = pd.Forfeiture,
+                    pd.CommentTypeId
+                });
+
+            query = req.ReportType switch
+            {
+                FrozenReportsByAgeRequest.Report.FullTime => query.Where(q => q.EmploymentType == FT),
+                FrozenReportsByAgeRequest.Report.PartTime => query.Where(q => q.EmploymentType == PT),
+                _ => query
+            };
+
+
+            return query.ToListAsync(cancellationToken: cancellationToken);
+        });
+
+
+        var details = queryResult.Select(x => new
+            {
+                Age = x.DateOfBirth.Age(),
+                x.EmploymentType,
+                x.EmployeeId,
+                x.Amount,
+                x.CommentTypeId
+            })
+            .GroupBy(x => new { x.Age })
+            .Select(g => new ContributionsByAgeDetail
+            {
+                Age = g.Key.Age, 
+                EmployeeCount = g.Select(x => x.EmployeeId).Distinct().Count(),
+                Amount = g.Sum(x => x.Amount),
+            })
+            .OrderBy(x => x.Age)
+            .ToList();
+
+        req = req with { Take = details.Count };
+
+
+        return new ContributionsByAge
+        {
+            ReportName = "PROFIT SHARING CONTRIBUTIONS BY AGE",
+            ReportDate = DateTimeOffset.Now,
+            ReportType = req.ReportType,
+            RegularTotalAmount = details.Sum(d => d.Amount),
+            Response = new PaginatedResponseDto<ContributionsByAgeDetail>(req) { Results = details, Total = details.Count }
         };
     }
 }

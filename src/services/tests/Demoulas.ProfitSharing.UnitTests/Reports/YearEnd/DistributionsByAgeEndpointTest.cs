@@ -22,13 +22,13 @@ public class DistributionsByAgeEndpointTest : ApiTestBase<Program>
     public async Task GetResponse_ShouldReturnExpectedResponse()
     {
         // Arrange
-        var request = new DistributionsByAgeRequest { ProfitYear = 2023, ReportType = DistributionsByAgeRequest.Report.Total };
+        var request = new FrozenReportsByAgeRequest { ProfitYear = 2023, ReportType = FrozenReportsByAgeRequest.Report.Total };
 
 
         // Act
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         TestResult<DistributionsByAge> response = await ApiClient
-            .GETAsync<DistributionsByAgeEndpoint, DistributionsByAgeRequest, DistributionsByAge>(request);
+            .GETAsync<DistributionsByAgeEndpoint, FrozenReportsByAgeRequest, DistributionsByAge>(request);
 
         // Assert
         response.Should().NotBeNull();
@@ -40,12 +40,12 @@ public class DistributionsByAgeEndpointTest : ApiTestBase<Program>
     public async Task GenerateCsvContent_ShouldWriteCorrectContent()
     {
         // Arrange
-        var request = DistributionsByAgeRequest.RequestExample();
+        var request = FrozenReportsByAgeRequest.RequestExample();
 
         // Act
         DownloadClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         TestResult<StreamContent> response = await DownloadClient
-            .GETAsync<DistributionsByAgeEndpoint, DistributionsByAgeRequest, StreamContent>(request);
+            .GETAsync<DistributionsByAgeEndpoint, FrozenReportsByAgeRequest, StreamContent>(request);
 
             
         string content = await response.Response.Content.ReadAsStringAsync();
@@ -59,12 +59,12 @@ public class DistributionsByAgeEndpointTest : ApiTestBase<Program>
     {
 
         // Arrange
-        var request = new DistributionsByAgeRequest { ProfitYear = 2023, ReportType = DistributionsByAgeRequest.Report.Total };
+        var request = new FrozenReportsByAgeRequest { ProfitYear = 2023, ReportType = FrozenReportsByAgeRequest.Report.Total };
 
 
         // Act
         TestResult<DistributionsByAge> response = await ApiClient
-            .GETAsync<DistributionsByAgeEndpoint, DistributionsByAgeRequest, DistributionsByAge>(request);
+            .GETAsync<DistributionsByAgeEndpoint, FrozenReportsByAgeRequest, DistributionsByAge>(request);
 
         response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
