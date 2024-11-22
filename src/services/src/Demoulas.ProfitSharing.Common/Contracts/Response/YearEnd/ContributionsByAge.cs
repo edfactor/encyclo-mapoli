@@ -13,11 +13,10 @@ public sealed record ContributionsByAge : ReportResponseBase<ContributionsByAgeD
         ReportDate = DateTimeOffset.Now;
     }
 
-    public FrozenReportsByAgeRequest.Report ReportType { get; set; }
+    public FrozenReportsByAgeRequest.Report ReportType { get; init; }
 
-    public decimal RegularTotalAmount { get; set; }
-
-    public decimal DistributionTotalAmount { get; set; }
+    public required short TotalEmployees { get; init; }
+    public required decimal DistributionTotalAmount { get; init; }
 
 
 
@@ -29,7 +28,8 @@ public sealed record ContributionsByAge : ReportResponseBase<ContributionsByAgeD
         {
             ReportName = "PROFIT SHARING CONTRIBUTIONS BY AGE",
             ReportDate = DateTimeOffset.Now,
-            RegularTotalAmount = (decimal)1_855_156.09,
+            DistributionTotalAmount = (decimal)1_855_156.09,
+            TotalEmployees = 63,
             
             Response = new PaginatedResponseDto<ContributionsByAgeDetail>(new PaginationRequestDto())
             {

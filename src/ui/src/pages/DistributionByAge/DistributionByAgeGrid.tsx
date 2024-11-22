@@ -6,7 +6,7 @@ import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams } from "smart-ui-library";
 import { GetDistributionsByAgeColumns } from "./DistributionByAgeGridColumns";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { DistributionByAgeReportType } from "../../reduxstore/types";
+import { FrozenReportsByAgeRequestType } from "../../reduxstore/types";
 
 const DistributionByAgeGrid = () => {
   const [_discard0, setSortParams] = useState<ISortParams>({
@@ -21,9 +21,9 @@ const DistributionByAgeGrid = () => {
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
-  const columnDefsTotal = GetDistributionsByAgeColumns(DistributionByAgeReportType.Total);
-  const columnDefsFullTime = GetDistributionsByAgeColumns(DistributionByAgeReportType.FullTime);
-  const columnDefsPartTime = GetDistributionsByAgeColumns(DistributionByAgeReportType.PartTime);
+  const columnDefsTotal = GetDistributionsByAgeColumns(FrozenReportsByAgeRequestType.Total);
+  const columnDefsFullTime = GetDistributionsByAgeColumns(FrozenReportsByAgeRequestType.FullTime);
+  const columnDefsPartTime = GetDistributionsByAgeColumns(FrozenReportsByAgeRequestType.PartTime);
 
   return (
     <>

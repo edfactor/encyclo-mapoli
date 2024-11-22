@@ -6,7 +6,7 @@ import {
   DemographicBadgesNotInPayprofitResponse,
   DistributionsAndForfeitures,
   DistributionsAndForfeituresRequestDto,
-  DistributionsByAgeRequest,
+  FrozenReportsByAgeRequest,
   DuplicateNameAndBirthday,
   DuplicateNameAndBirthdayRequestDto,
   DuplicateSSNDetail,
@@ -368,7 +368,7 @@ export const YearsEndApi = createApi({
       }
     }),
 
-    getDistributionsByAge: builder.query<ProfitSharingDistributionsByAge, DistributionsByAgeRequest>({
+    getDistributionsByAge: builder.query<ProfitSharingDistributionsByAge, FrozenReportsByAgeRequest>({
       query: (params) => ({
         url: "yearend/frozen/distributions-by-age",
         method: "GET",

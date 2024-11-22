@@ -1,9 +1,9 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 public sealed record ContributionsByAgeDetail
 {
-    public required int Age { get; set; }
-    public int EmployeeCount { get; set; }
-    public decimal Amount { get; set; }
+    public required int Age { get; init; }
+    public required int EmployeeCount { get; init; }
+    public required decimal Amount { get; init; }
 
     public static ContributionsByAgeDetail ResponseExample()
     {
