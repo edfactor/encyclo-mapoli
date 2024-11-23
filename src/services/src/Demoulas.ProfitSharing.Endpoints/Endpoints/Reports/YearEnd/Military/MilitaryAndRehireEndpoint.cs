@@ -53,9 +53,9 @@ public class MilitaryAndRehireEndpoint : EndpointWithCsvBase<PaginationRequestDt
 
     public override string ReportFileName => "EMPLOYEES ON MILITARY LEAVE";
 
-    public override async Task<ReportResponseBase<MilitaryAndRehireReportResponse>> GetResponse(PaginationRequestDto req, CancellationToken ct)
+    public override Task<ReportResponseBase<MilitaryAndRehireReportResponse>> GetResponse(PaginationRequestDto req, CancellationToken ct)
     {
-        return await _reportService.GetMilitaryAndRehireReport(req, ct);
+        return _reportService.GetMilitaryAndRehireReport(req, ct);
     }
 
 

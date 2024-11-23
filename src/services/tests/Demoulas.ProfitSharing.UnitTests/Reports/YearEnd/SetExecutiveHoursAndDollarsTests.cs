@@ -129,10 +129,10 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
 
 
     [Fact]
-    public async Task update_one_employee()
+    public Task update_one_employee()
     {
 
-        await MockDbContextFactory.UseWritableContext(async ctx =>
+        return MockDbContextFactory.UseWritableContext(async ctx =>
         {
             // Arrange
             short profitYear = await GetMaxProfitYearAsync();
@@ -186,10 +186,10 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
     }
 
     [Fact]
-    public async Task ensure_bad_badge_stops_updating_of_others()
+    public Task ensure_bad_badge_stops_updating_of_others()
     {
 
-        await MockDbContextFactory.UseWritableContext(async ctx =>
+        return MockDbContextFactory.UseWritableContext(async ctx =>
         {
             // Arrange
             short profitYear = await GetMaxProfitYearAsync();
@@ -272,9 +272,9 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
         errorMessage.Should().Be(expectedMessage);
     }
 
-    private async Task<short> GetMaxProfitYearAsync()
+    private Task<short> GetMaxProfitYearAsync()
     {
-        return await MockDbContextFactory.UseWritableContext(async ctx =>
+        return MockDbContextFactory.UseWritableContext(async ctx =>
         {
             return await ctx.PayProfits.MaxAsync(pp => pp.ProfitYear);
         });

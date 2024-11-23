@@ -34,9 +34,9 @@ public class CleanupReportService : ICleanupReportService
         
     }
 
-    public async Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsNs(ProfitYearRequest req, CancellationToken ct)
+    public Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsNs(ProfitYearRequest req, CancellationToken ct)
     {
-        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var dupSsns = await ctx.Demographics.GroupBy(x => x.Ssn).Where(x => x.Count() > 1).Select(x => x.Key).ToListAsync(cancellationToken: ct);
 
@@ -430,15 +430,15 @@ public class CleanupReportService : ICleanupReportService
                 {
                     validStatus.Add(EmploymentStatus.Constants.Terminated);
                 }
-                if (req.IncludeActiveEmployees && !req.IncludeEmployeesTerminatedThisYear)
+                if (req is { IncludeActiveEmployees: true, IncludeEmployeesTerminatedThisYear: false })
                 {
                     qry = qry.Where(p => validStatus.Contains(p.EmploymentStatusId) || p.TerminationDate > response.FiscalEndDate);
                 } 
-                else if (req.IncludeEmployeesTerminatedThisYear && !req.IncludeActiveEmployees && !req.IncludeInactiveEmployees)
+                else if (req.IncludeEmployeesTerminatedThisYear && req is { IncludeActiveEmployees: false, IncludeInactiveEmployees: false })
                 {
                     qry = qry.Where(p => validStatus.Contains(p.EmploymentStatusId) && p.TerminationDate <= response.FiscalEndDate && p.TerminationDate >= response.FiscalBeginDate);
                 }
-                else if (req.IncludeTerminatedEmployees && !req.IncludeInactiveEmployees && !req.IncludeActiveEmployees)
+                else if (req.IncludeTerminatedEmployees && req is { IncludeInactiveEmployees: false, IncludeActiveEmployees: false })
                 {
                     qry = qry.Where(p => validStatus.Contains(p.EmploymentStatusId) && p.TerminationDate <= response.FiscalEndDate);
                 }
@@ -453,16 +453,16 @@ public class CleanupReportService : ICleanupReportService
                       .Join(_totalService.GetTotalBalanceSet(ctx, req.ProfitYear), x => x.Ssn, x => x.Ssn, (pp, tot) => new { pp, tot });
 
 
-            if (!req.IncludeEmployeesWithNoPriorProfitSharingAmounts && req.IncludeEmployeesWithPriorProfitSharingAmounts)
+            if (req is { IncludeEmployeesWithNoPriorProfitSharingAmounts: false, IncludeEmployeesWithPriorProfitSharingAmounts: true })
             {
                 joinedQry = joinedQry.Where(jq => jq.tot.Total > 0);
             }
-            if (req.IncludeEmployeesWithNoPriorProfitSharingAmounts && !req.IncludeEmployeesWithPriorProfitSharingAmounts)
+            if (req is { IncludeEmployeesWithNoPriorProfitSharingAmounts: true, IncludeEmployeesWithPriorProfitSharingAmounts: false })
             {
                 joinedQry = joinedQry.Where(jq => jq.tot.Total == 0);
             }
 
-            var r = joinedQry.ToList();
+            var r = joinedQry.ToListAsync(cancellationToken: cancellationToken);
 
             return joinedQry
                       .OrderBy(p => p.pp.LastName)

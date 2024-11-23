@@ -54,9 +54,9 @@ public class MilitaryAndRehireProfitSummaryEndpoint :
 
     public override string ReportFileName => "MILITARY TERM-REHIRE";
 
-    public override async Task<ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
+    public override Task<ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
-        return await _reportService.GetMilitaryAndRehireProfitSummaryReport(req, ct);
+        return _reportService.GetMilitaryAndRehireProfitSummaryReport(req, ct);
     }
 
     public sealed class MilitaryRehireProfitSharingResponseMap : ClassMap<MilitaryAndRehireProfitSummaryResponse>
