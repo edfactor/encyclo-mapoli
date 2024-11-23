@@ -61,7 +61,7 @@ public class MilitaryAndRehireForfeituresEndpoint :
         return await _reportService.FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYears(req, ct);
     }
 
-    protected internal override Task GenerateCsvContent(CsvWriter csvWriter, ReportResponseBase<MilitaryAndRehireForfeituresResponse> report, CancellationToken cancellationToken)
+    protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, ReportResponseBase<MilitaryAndRehireForfeituresResponse> report, CancellationToken cancellationToken)
     {
         // Register the class map for the main member data
         csvWriter.Context.RegisterClassMap<MilitaryRehireProfitSharingResponseMap>();
@@ -70,7 +70,7 @@ public class MilitaryAndRehireForfeituresEndpoint :
         csvWriter.WriteHeader<MilitaryAndRehireForfeituresResponse>();
 
         // Add additional headers for the details section (Profit Year, Forfeitures, Comment)
-        csvWriter.NextRecord();
+        await csvWriter.NextRecordAsync();
         csvWriter.WriteField(string.Empty);
         csvWriter.WriteField(string.Empty);
         csvWriter.WriteField(string.Empty);
@@ -81,14 +81,14 @@ public class MilitaryAndRehireForfeituresEndpoint :
         csvWriter.WriteField("COMMENT");
 
         // Move to the next record to separate the headers from the data
-        csvWriter.NextRecord();
+        await csvWriter.NextRecordAsync();
 
         // Write the records (member + details)
         foreach (var member in report.Response.Results)
         {
             // Write the member details once
             csvWriter.WriteRecord(member);
-            csvWriter.NextRecord();
+            await csvWriter.NextRecordAsync();
 
             // Write each profit-detail record under the employee details
             foreach (var record in member.Details)
@@ -103,10 +103,9 @@ public class MilitaryAndRehireForfeituresEndpoint :
                 csvWriter.WriteField(record.ProfitYear);   // YEAR
                 csvWriter.WriteField(record.Forfeiture);   // FORFEITURES
                 csvWriter.WriteField(record.Remark);       // COMMENT
-                csvWriter.NextRecord();
+                await csvWriter.NextRecordAsync();
             }
         }
-        return Task.CompletedTask;
     }
 
     public sealed class MilitaryRehireProfitSharingResponseMap : ClassMap<MilitaryAndRehireForfeituresResponse>
