@@ -1,4 +1,3 @@
-
 ---THIS SCRIPT WILL LOAD ALL SMART PROFIT SHARING TABLES
 ---TO "YOUR CURRENT SCHEMA" FROM - {SOURCE_PROFITSHARE_SCHEMA}
 -------------------------------------------------------------------------------------
