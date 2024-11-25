@@ -572,7 +572,7 @@ FROM {SOURCE_PROFITSHARE_SCHEMA}.PROFIT_SS_DETAIL;
         DEMOGRAPHIC_ID,
         PAYABLE_NAME,
         CHECK_AMOUNT,
-        TAXCODEID,
+        TAX_CODE_ID,
         CHECK_DATE,
         VOID_FLAG,
         VOID_CHECK_DATE,
@@ -594,7 +594,9 @@ FROM {SOURCE_PROFITSHARE_SCHEMA}.PROFIT_SS_DETAIL;
         d.ID AS DEMOGRAPHIC_ID,  -- Lookup ORACLE_HCM_ID from DEMOGRAPHIC table using SSN
         psc.PAYABLE_NAME,
         psc.CHECK_AMOUNT,
-        psc.TAX_CODE AS TAXCODEID,
+        CASE WHEN psc.TAX_CODE IS NULL THEN 0
+        ELSE psc.TAX_CODE
+        END AS TAX_CODE_ID,
         psc.CHECK_DATE,
         psc.VOID_FLAG,  -- Store VOID_FLAG as a NUMBER(1) (1 for true, 0 for false)
         psc.VOID_CHECK_DATE,
