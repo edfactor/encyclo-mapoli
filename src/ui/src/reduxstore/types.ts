@@ -134,6 +134,7 @@ export interface DuplicateNameAndBirthday {
   hoursCurrentYear: number;
   incomeCurrentYear: number;
 }
+
 export interface NegativeEtvaForSSNsOnPayProfit {
   employeeBadge: number;
   employeeSsn: number;
@@ -225,6 +226,7 @@ export interface EligibleEmployeesRequestDto extends ImpersonationRequest {
   profitYear: number;
   pagination: PaginationParams;
 }
+
 export interface EligibleEmployee {
   oracleHcmId: number;
   badgeNumber: number;
@@ -238,4 +240,106 @@ export interface EligibleEmployeeResponseDto {
   reportName: string;
   reportDate: string;
   response: Paged<EligibleEmployee>;
+}
+
+export interface MasterInquiryDetail {
+  id: number;
+  ssn: number;
+  profitYear: number;
+  profitYearIteration: number;
+  distributionSequence: number;
+  profitCodeId: number;
+  contribution: number;
+  earnings: number;
+  forfeiture: number;
+  monthToDate: number;
+  yearToDate: number;
+  remark?: string;
+  zeroContributionReasonId?: number;
+  federalTaxes: number;
+  stateTaxes: number;
+  taxCodeId?: string;
+  commentTypeId?: number;
+  commentRelatedCheckNumber?: number;
+  commentRelatedState?: string;
+  commentRelatedOracleHcmId?: number;
+  commentRelatedPsnSuffix?: number;
+  commentIsPartialTransaction?: boolean;
+}
+
+export interface MasterInquryRequest extends ImpersonationRequest {
+  startProfitYear?: number;
+  endProfitYear?: number;
+  startProfitMonth?: number;
+  endProfitMonth?: number;
+  profitCode?: number;
+  contributionAmount?: number;
+  earningsAmount?: number;
+  forfeitureAmount?: number;
+  paymentAmount?: number;
+  socialSecurity?: number;
+  comment?: string
+  pagination: PaginationParams;
+}
+export enum FrozenReportsByAgeRequestType {
+  Total = "Total",
+  FullTime = "FullTime",
+  PartTime = "PartTime",
+}
+
+
+export interface FrozenReportsByAgeRequest extends ImpersonationRequest {
+  profitYear: number;
+  pagination: PaginationParams;
+  reportType: FrozenReportsByAgeRequestType;
+}
+
+export interface ProfitSharingDistributionsByAge {
+  reportName: string;
+  reportDate: string;
+  reportType: FrozenReportsByAgeRequestType;
+  hardshipTotalEmployees: number;
+  regularTotalAmount:number;
+  regularTotalEmployees: number;
+  hardshipTotalAmount: number;
+  distributionTotalAmount: number;
+  response: Paged<ProfitSharingDistributionsByAgeResponse>;
+}
+
+export interface ProfitSharingDistributionsByAgeResponse {
+  age: number;
+  employeeCount: number;
+  amount: number;
+  employmentType: string;
+  commentTypeId: number | null;
+}
+
+export interface ContributionsByAge {
+  reportName: string;
+  reportDate: string;
+  reportType: FrozenReportsByAgeRequestType;
+  totalEmployees: number;
+  distributionTotalAmount: number;
+  response: Paged<ContributionsByAgeDetail>;
+}
+
+export interface ContributionsByAgeDetail {
+  age: number;
+  employeeCount: number;
+  amount: number;
+}
+
+export interface ForfeituresByAge {
+  reportName: string;
+  reportDate: string;
+  reportType: FrozenReportsByAgeRequestType;
+  totalEmployees: number;
+  distributionTotalAmount: number;
+  response: Paged<ForfeituresByAgeDetail>;
+}
+
+export interface ForfeituresByAgeDetail {
+  age: number;
+  employeeCount: number;
+  amount: number;
 }

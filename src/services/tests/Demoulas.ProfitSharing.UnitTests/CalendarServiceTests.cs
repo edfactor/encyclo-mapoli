@@ -55,22 +55,22 @@ public class CalendarServiceTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "Find Weekending Date - Invalid Date")]
-    public async Task FindWeekendingDate_InvalidDate()
+    public Task FindWeekendingDate_InvalidDate()
     {
         var invalidDate = DateOnly.MaxValue;
         var calendarService = ServiceProvider?.GetRequiredService<ICalendarService>()!;
         Func<Task> act = async () => await calendarService.FindWeekendingDateFromDate(invalidDate);
-        await act.Should().ThrowAsync<Exception>();
+        return act.Should().ThrowAsync<Exception>();
     }
 
 
     [Fact(DisplayName = "Find Weekending Date - Future Date")]
-    public async Task FindWeekendingDate_FutureDate()
+    public Task FindWeekendingDate_FutureDate()
     {
         var futureDate = DateOnly.FromDateTime(DateTime.Now.AddYears(6));
         var calendarService = ServiceProvider?.GetRequiredService<ICalendarService>()!;
         Func<Task> act = async () => await calendarService.FindWeekendingDateFromDate(futureDate);
-        await act.Should().ThrowAsync<ArgumentOutOfRangeException>()
+        return act.Should().ThrowAsync<ArgumentOutOfRangeException>()
             .WithMessage($"{AccountingPeriodsService.InvalidDateError} (Parameter 'dateTime')");
     }
 

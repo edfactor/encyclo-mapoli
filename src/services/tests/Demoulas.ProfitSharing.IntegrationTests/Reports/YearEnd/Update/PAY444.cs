@@ -5,29 +5,29 @@ namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
 public class PAY444
 {
-    // classic pay444 structures
+    // Data records
     private readonly DEM_REC dem_rec = new();
     private readonly PAYBEN_REC payben_rec = new();
-    private readonly PayBenReader PAYBEN1 = new();
     private readonly PAYBEN1_REC payben1_rec = new();
     private readonly PAYPROF_REC payprof_rec = new();
-    private readonly PayProfRecTableHelper PAYPROFIT_FILE = new();
-    private readonly POINT_VALUES point_values = new();
-    private readonly List<PRFT> prfts = new();
-    private readonly PRINT_ADJ_LINE1 print_adj_line1 = new();
     private readonly PROFIT_DETAIL profit_detail = new();
-    private readonly REPORT_LINE report_line = new();
-    private readonly REPORT_LINE_2 report_line_2 = new();
-    private readonly RERUN_TOT rerun_tot = new();
-    private readonly TOTAL_HEADER_1 total_header_1 = new();
-    private readonly TOTAL_HEADER_2 total_header_2 = new();
-    private readonly TOTAL_HEADER_3 total_header_3 = new();
-    private readonly WS_COUNTERS ws_counters = new();
-    private readonly WS_SOCIAL_SECURITY ws_social_security = new();
-    private readonly XEROX_HEADER xerox_header = new();
-    public OracleConnection connection = null;
-    public DemRecTableHelper DemRecTableHelper;
 
+    // Utilities for reading /writing data
+    public DemRecTableHelper DemRecTableHelper;
+    private readonly PayBenReader PAYBEN1 = new();
+    private readonly PayProfRecTableHelper PAYPROFIT_FILE = new();
+
+    // Where input values are stored
+    private readonly POINT_VALUES point_values = new();
+
+    // Collection of modified payprofit data
+    private readonly List<PRFT> prfts = new();
+
+    
+    private readonly Counters _counters = new();
+
+    public OracleConnection connection = null;
+    
     private long holdBadge;
     private INTERMEDIATE_VALUES intermediate_values = new();
 
@@ -905,22 +905,15 @@ public class PAY444
 
     public void m805PrintSequence()
     {
-        WRITE("\f" + xerox_header.ToString().Trim());
+        WRITE("\fDJDE JDE=PAY426,JDL=PAYROL,END,;");
         ws_maxcont_totals = new WS_MAXCONT_TOTALS();
         HEADER_1 header_1 = new();
         header_1.HDR1_YY = TodaysDateTime.Year - 2000;
         header_1.HDR1_MM = TodaysDateTime.Month;
         header_1.HDR1_DD = TodaysDateTime.Day;
         header_1.HDR1_YEAR1 = EffectiveYear;
-        TOTAL_HEADER_1 total_header1 = new();
-        total_header_1.TOT_HDR1_YEAR1 = EffectiveYear;
-        total_header_1.TOT_HDR1_DD = TodaysDateTime.Day;
-        total_header_1.TOT_HDR1_MM = TodaysDateTime.Month;
-        total_header_1.TOT_HDR1_YY = TodaysDateTime.Year - 2000;
         header_1.HDR1_HR = TodaysDateTime.Hour;
         header_1.HDR1_MN = TodaysDateTime.Minute;
-        total_header_1.TOT_HDR1_HR = TodaysDateTime.Hour;
-        total_header_1.TOT_HDR1_MN = TodaysDateTime.Minute;
 
 
         prfts.Sort((a, b) =>
@@ -941,24 +934,24 @@ public class PAY444
 
     private void WRITE(object obj)
     {
-        //Console.WriteLine(obj.ToString());
         outputLines.Add(obj.ToString().TrimEnd());
     }
 
 
     public void m810WriteReport(HEADER_1 header_1)
     {
-        if (ws_counters.WS_LINE_CTR > 60)
+        if (_counters.LineCounter > 60)
         {
             m830PrintHeader(header_1);
         }
 
+        REPORT_LINE report_line = new();
+        REPORT_LINE_2 report_line_2 = new();
         if (sd_prft.SD_BADGE > 0)
         {
             report_line.BADGE_NBR = sd_prft.SD_BADGE;
             report_line.EMP_NAME = sd_prft.SD_NAME?.Length > 24 ? sd_prft.SD_NAME.Substring(0, 24) : sd_prft.SD_NAME;
 
-            ws_social_security.WS_SSN = sd_prft.SD_SSN;
             report_line.BEG_BAL = sd_prft.SD_AMT;
             report_line.PR_DIST1 = sd_prft.SD_DIST1;
 
@@ -968,7 +961,13 @@ public class PAY444
             }
             else if (sd_prft.SD_NEWEMP == 2)
             {
-                m820CheckPayben();
+                payben_rec.PYBEN_PAYSSN = sd_prft.SD_SSN;
+                PAYBEN_FILE_STATUS = READ_ALT_KEY_PAYBEN(payben_rec);
+                if (PAYBEN_FILE_STATUS == "00")
+                {
+                    report_line.PR_NEWEMP = "BEN";
+                }
+
             }
             else
             {
@@ -1061,48 +1060,35 @@ public class PAY444
             || sd_prft.SD_EARN != 0m
             || sd_prft.SD_EARN2 != 0m)
         {
-            m840PrintReport();
-        }
-    }
+            if (sd_prft.SD_BADGE > 0)
+            {
+                _counters.EmployeeCounter += 1;
+                WRITE(report_line);
+            }
 
-    public void m820CheckPayben()
-    {
-        payben_rec.PYBEN_PAYSSN = sd_prft.SD_SSN;
-        PAYBEN_FILE_STATUS = READ_ALT_KEY_PAYBEN(payben_rec);
-        if (PAYBEN_FILE_STATUS == "00")
-        {
-            report_line.PR_NEWEMP = "BEN";
+            if (sd_prft.SD_BADGE == 0)
+            {
+                _counters.BeneficiaryCounter += 1;
+                WRITE(report_line_2);
+            }
+
+            _counters.LineCounter += 1;
+
         }
     }
 
     public void m830PrintHeader(HEADER_1 header_1)
     {
-        ws_counters.WS_PAGE_CTR += 1;
-        header_1.HDR1_PAGE = ws_counters.WS_PAGE_CTR;
+        _counters.PageCounter += 1;
+        header_1.HDR1_PAGE = _counters.PageCounter;
         WRITE("\f" + header_1);
         WRITE("");
         WRITE(new HEADER_2());
         WRITE(new HEADER_3());
-        ws_counters.WS_LINE_CTR = 4;
+        _counters.LineCounter = 4;
     }
 
-    public void m840PrintReport()
-    {
-        if (sd_prft.SD_BADGE > 0)
-        {
-            ws_counters.WS_EMPLOYEE_CTR += 1;
-            WRITE(report_line);
-        }
-
-        if (sd_prft.SD_BADGE == 0)
-        {
-            ws_counters.WS_EMPLOYEE_CTR_PAYBEN += 1;
-            WRITE(report_line_2);
-        }
-
-        ws_counters.WS_LINE_CTR += 1;
-    }
-
+  
     public void m850PrintTotals()
     {
         ClientTot client_tot = new();
@@ -1122,10 +1108,18 @@ public class PAY444
         client_tot.END_BAL_TOT = ws_client_totals.WS_TOT_ENDBAL;
 
 
+        TOTAL_HEADER_1 total_header_1 = new();
+        total_header_1.TOT_HDR1_YEAR1 = EffectiveYear;
+        total_header_1.TOT_HDR1_DD = TodaysDateTime.Day;
+        total_header_1.TOT_HDR1_MM = TodaysDateTime.Month;
+        total_header_1.TOT_HDR1_YY = TodaysDateTime.Year - 2000;
+        total_header_1.TOT_HDR1_HR = TodaysDateTime.Hour;
+        total_header_1.TOT_HDR1_MN = TodaysDateTime.Minute;
+
         WRITE("\f" + total_header_1);
         WRITE("");
-        WRITE(total_header_2);
-        WRITE(total_header_3);
+        WRITE(new TOTAL_HEADER_2());
+        WRITE(new TOTAL_HEADER_3());
         WRITE("");
         WRITE(client_tot);
 
@@ -1161,17 +1155,18 @@ public class PAY444
         WRITE(client_tot);
 
         EMPLOYEE_COUNT_TOT employee_count_tot = new();
-        employee_count_tot.PR_TOT_EMPLOYEE_COUNT = ws_counters.WS_EMPLOYEE_CTR;
+        employee_count_tot.PR_TOT_EMPLOYEE_COUNT = _counters.EmployeeCounter;
         WRITE("");
         WRITE(employee_count_tot);
         EMPLOYEE_COUNT_TOT_PAYBEN employee_count_tot_payben = new ();
-        employee_count_tot_payben.PB_TOT_EMPLOYEE_COUNT = ws_counters.WS_EMPLOYEE_CTR_PAYBEN;
+        employee_count_tot_payben.PB_TOT_EMPLOYEE_COUNT = _counters.BeneficiaryCounter;
         WRITE("");
         WRITE(employee_count_tot_payben);
 
         ws_compute_totals = new WS_COMPUTE_TOTALS();
         ws_client_totals = new WS_CLIENT_TOTALS();
 
+        RERUN_TOT rerun_tot = new RERUN_TOT();
         rerun_tot.RERUN_OVER = ws_maxcont_totals.WS_TOT_OVER;
         rerun_tot.RERUN_POINTS = ws_maxcont_totals.WS_TOT_POINTS;
         rerun_tot.RERUN_MAX = WS_CONTR_MAX;
@@ -1201,6 +1196,7 @@ public class PAY444
         WRITE2_advance2(header_4);
         WRITE2_advance2(header_5);
 
+        PRINT_ADJ_LINE1 print_adj_line1 = new();
         print_adj_line1.PL_ADJUST_BADGE = point_values.PV_ADJUST_BADGE;
         print_adj_line1.PL_ADJ_DESC = "INITIAL";
         print_adj_line1.PL_CONT_AMT = point_values.SV_CONT_AMT;

@@ -53,9 +53,9 @@ public class CurrentYearWagesEndpoint : EndpointWithCsvBase<ProfitYearRequest, W
 
     public override string ReportFileName => "EJR PROF-DOLLAR-EXTRACT YEAR=THIS";
 
-    public override async Task<ReportResponseBase<WagesCurrentYearResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
+    public override Task<ReportResponseBase<WagesCurrentYearResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
-        return await _reportService.GetWagesReport(req, ct);
+        return _reportService.GetWagesReport(req, ct);
     }
 
 
@@ -66,7 +66,7 @@ public class CurrentYearWagesEndpoint : EndpointWithCsvBase<ProfitYearRequest, W
         {
             Map().Index(0).Convert(_ => string.Empty);
             Map().Index(1).Convert(_ => string.Empty);
-            Map(m => m.BadgeNumber).Index(2).Name("BADGE");
+            Map(m => m.EmployeeId).Index(2).Name("BADGE");
             Map(m => m.HoursCurrentYear).Index(3).Name("HOURS YR");
             Map(m => m.IncomeCurrentYear).Index(4).Name("DOLLARS YR");
         }

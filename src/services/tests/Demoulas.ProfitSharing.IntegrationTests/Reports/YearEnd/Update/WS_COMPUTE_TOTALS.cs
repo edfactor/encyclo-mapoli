@@ -5,16 +5,10 @@ public class WS_COMPUTE_TOTALS
     public decimal WS_POINTS_DOLLARS { get; set; } // PIC S9(8)V99
     public decimal WS_EARNINGS_BALANCE { get; set; } // PIC S9(8)V99
     public long WS_EARN_POINTS { get; set; } // PIC S9(5)
-    public long WS_REMAINDER { get; set; } // PIC 99
     public decimal WS_FORF_AMT { get; set; } // PIC S9(8)V99
     public decimal WS_CONT_AMT { get; set; } // PIC S9(8)V99
-    public decimal WS_MIL_AMT { get; set; } // PIC S9(8)V99
-    public decimal WS_XFER_AMT { get; set; } // PIC S9(8)V99
-    public decimal WS_PXFER_AMT { get; set; } // PIC S9(8)V99
     public decimal WS_EARN_AMT { get; set; } // PIC S9(8)V99
     public decimal WS_EARN2_AMT { get; set; } // PIC S9(8)V99
-    public decimal WS_EARN_1_PLUS_2 { get; set; } // PIC S9(8)V99
-    public decimal WS_CAF_AMT { get; set; } // PIC S9(8)V99
 }
 
 /*

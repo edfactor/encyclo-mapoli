@@ -43,9 +43,9 @@ public class GetEligibleEmployeesTests : ApiTestBase<Api.Program>
     }
 
     [Fact]
-    public async Task happy_path_json()
+    public Task happy_path_json()
     {
-        await MockDbContextFactory.UseWritableContext(async c =>
+        return MockDbContextFactory.UseWritableContext(async c =>
         {
             // Arrange
             TestEmployee te = StockEmployee();
@@ -73,9 +73,9 @@ public class GetEligibleEmployeesTests : ApiTestBase<Api.Program>
     }
 
     [Fact]
-    public async Task happy_path_csv()
+    public Task happy_path_csv()
     {
-        await MockDbContextFactory.UseWritableContext(async c =>
+        return MockDbContextFactory.UseWritableContext(async c =>
         {
             // Arrange
             TestEmployee te = StockEmployee();
@@ -126,9 +126,9 @@ public class GetEligibleEmployeesTests : ApiTestBase<Api.Program>
     }
     
     [Fact]
-    public async Task no_employees_too_young()
+    public Task no_employees_too_young()
     {
-        await MockDbContextFactory.UseWritableContext(async c =>
+        return MockDbContextFactory.UseWritableContext(async c =>
         {
             // Arrange
             TestEmployee te = StockEmployee() with { Age = 20 };
@@ -150,9 +150,9 @@ public class GetEligibleEmployeesTests : ApiTestBase<Api.Program>
     }
 
     [Fact]
-    public async Task not_enough_hours()
+    public Task not_enough_hours()
     {
-        await MockDbContextFactory.UseWritableContext(async c =>
+        return MockDbContextFactory.UseWritableContext(async c =>
         {
             // Arrange
             TestEmployee te = StockEmployee() with { HoursWorked = 999 };
@@ -173,9 +173,9 @@ public class GetEligibleEmployeesTests : ApiTestBase<Api.Program>
         });
     }
     [Fact]
-    public async Task employee_terminated()
+    public Task employee_terminated()
     {
-        await MockDbContextFactory.UseWritableContext(async c =>
+        return MockDbContextFactory.UseWritableContext(async c =>
         {
             // Arrange
             TestEmployee te = StockEmployee() with { EmploymentStatusId = EmploymentStatus.Constants.Terminated };
@@ -219,7 +219,7 @@ public class GetEligibleEmployeesTests : ApiTestBase<Api.Program>
         demo.OracleHcmId = testEmployee.OracleHcmId;
         demo.Id = testEmployee.Id;
         demo.ContactInfo.FullName = testEmployee.FullName;
-        demo.BadgeNumber = testEmployee.BadgeNumber;
+        demo.EmployeeId = testEmployee.BadgeNumber;
         demo.DateOfBirth = convertAgeToBirthDate(TestProfitYear, testEmployee.Age);
         demo.EmploymentStatusId = testEmployee.EmploymentStatusId;
 

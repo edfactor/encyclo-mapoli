@@ -51,9 +51,9 @@ public class NamesMissingCommasEndpoint : EndpointWithCsvBase<PaginationRequestD
 
     public override string ReportFileName => "NAMES-MISSING-COMMAS";
 
-    public override async Task<ReportResponseBase<NamesMissingCommaResponse>> GetResponse(PaginationRequestDto req, CancellationToken ct)
+    public override Task<ReportResponseBase<NamesMissingCommaResponse>> GetResponse(PaginationRequestDto req, CancellationToken ct)
     {
-        return await _cleanupReportService.GetNamesMissingComma(req, ct);
+        return _cleanupReportService.GetNamesMissingComma(req, ct);
     }
 
     public sealed class NamesMissingCommasResponseMap : ClassMap<NamesMissingCommaResponse>

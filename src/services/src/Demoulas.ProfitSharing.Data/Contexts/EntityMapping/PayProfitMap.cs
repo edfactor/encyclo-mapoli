@@ -13,7 +13,7 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
         _ = builder.HasKey(e => new { e.DemographicId, e.ProfitYear});
 
         _ = builder.Property(e => e.DemographicId)
-            .HasPrecision(11)
+            .HasPrecision(9)
             .ValueGeneratedNever()
             .HasColumnName("DEMOGRAPHIC_ID");
 

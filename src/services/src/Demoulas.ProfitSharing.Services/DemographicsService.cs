@@ -81,12 +81,12 @@ public class DemographicsService : IDemographicsServiceInternal
    /// This method ensures that demographic records are either inserted as new entries or updated if they already exist in the database.
    /// The operation is performed within a writable database context to maintain data integrity.
    /// </remarks>
-    private async Task UpsertDemographicsAsync(IEnumerable<DemographicsRequest> demographicsRequests, CancellationToken cancellationToken)
+    private Task UpsertDemographicsAsync(IEnumerable<DemographicsRequest> demographicsRequests, CancellationToken cancellationToken)
     {
         DateTime currentModificationDate = DateTime.Now;
 
         // Use writable context for the upsert operation
-        await _dataContextFactory.UseWritableContext(async context =>
+        return _dataContextFactory.UseWritableContext(async context =>
         {
             // Map incoming demographic requests to entity models
             List<Demographic> demographicsEntities = _mapper.Map(demographicsRequests).ToList();
@@ -96,7 +96,7 @@ public class DemographicsService : IDemographicsServiceInternal
 
             // Create lookup dictionaries for both OracleHcmId and SSN
             var demographicOracleHcmIdLookup = demographicsEntities.ToDictionary(entity => entity.OracleHcmId);
-            var demographicSsnLookup = demographicsEntities.ToLookup(entity => (entity.Ssn, entity.BadgeNumber));
+            var demographicSsnLookup = demographicsEntities.ToLookup(entity => (entity.Ssn, entity.EmployeeId));
             var ssnCollection = demographicsEntities.Select(d => d.Ssn).ToHashSet();
             var dobCollection = demographicsEntities.Select(d => d.DateOfBirth).ToHashSet();
 
@@ -117,7 +117,7 @@ public class DemographicsService : IDemographicsServiceInternal
                 // Log duplicate SSN entries to the audit table
                 var audit = duplicateSsnEntities.Select(d => new DemographicSyncAudit
                 {
-                    BadgeNumber = d.BadgeNumber,
+                    BadgeNumber = d.EmployeeId,
                     InvalidValue = d.Ssn.MaskSsn(),
                     Message = "Duplicate SSNs found in the database.",
                     UserName = "System",
@@ -148,7 +148,7 @@ public class DemographicsService : IDemographicsServiceInternal
                     catch (InvalidOperationException e) when (e.Message.Contains(
                                                                   "When attaching existing entities, ensure that only one entity instance with a given key value is attached."))
                     {
-                        _logger.LogCritical(e, "Failed to process Demographic/OracleHCM employee record for EmployeeId {EmployeeId}", entity.BadgeNumber);
+                        _logger.LogCritical(e, "Failed to process Demographic/OracleHCM employee record for EmployeeId {EmployeeId}", entity.EmployeeId);
                         try
                         {
                             await context.SaveChangesAsync(cancellationToken);
@@ -166,7 +166,7 @@ public class DemographicsService : IDemographicsServiceInternal
             }
 
 
-            // Update existing entities based on either OracleHcmId or SSN & BadgeNumber
+            // Update existing entities based on either OracleHcmId or SSN & EmployeeId
             foreach (var existingEntity in existingEntities)
             {
                 Demographic? incomingEntity = null;
@@ -178,7 +178,7 @@ public class DemographicsService : IDemographicsServiceInternal
                 }
                 else
                 {
-                    var entityBySsn = demographicSsnLookup[(existingEntity.Ssn, existingEntity.BadgeNumber)].FirstOrDefault();
+                    var entityBySsn = demographicSsnLookup[(existingEntity.Ssn, existingEntity.EmployeeId)].FirstOrDefault();
                     if (entityBySsn != null)
                     {
                         incomingEntity = entityBySsn;
@@ -209,7 +209,7 @@ public class DemographicsService : IDemographicsServiceInternal
     private static void UpdateEntityValues(Demographic existingEntity, Demographic incomingEntity, DateTime modificationDate)
     {
         existingEntity.Ssn = incomingEntity.Ssn;
-        existingEntity.BadgeNumber = incomingEntity.BadgeNumber;
+        existingEntity.EmployeeId = incomingEntity.EmployeeId;
         existingEntity.StoreNumber = incomingEntity.StoreNumber;
         existingEntity.DepartmentId = incomingEntity.DepartmentId;
         existingEntity.PayClassificationId = incomingEntity.PayClassificationId;

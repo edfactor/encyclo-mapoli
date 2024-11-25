@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 public sealed record YearEndProfitSharingReportResponse
 {
-    public required long BadgeNumber { get; set; }
+    public required long EmployeeId { get; set; }
     public required string EmployeeName { get; set; }
     public required short StoreNumber { get; set; }
     public required char EmployeeTypeCode { get; set; }
@@ -20,14 +14,14 @@ public sealed record YearEndProfitSharingReportResponse
     public required bool IsUnder21 { get; set; }
     public required bool IsNew { get; set; }
     public char? EmployeeStatus { get; set; }
-    public required Decimal Balance { get; set; }
+    public required decimal Balance { get; set; }
     public required short YearsInPlan { get; set; }
 
     public static YearEndProfitSharingReportResponse ResponseExample()
     {
         return new YearEndProfitSharingReportResponse()
         {
-            BadgeNumber = 135,
+            EmployeeId = 135,
             EmployeeName = "John Doe",
             StoreNumber = 23,
             EmployeeTypeCode = 'a',

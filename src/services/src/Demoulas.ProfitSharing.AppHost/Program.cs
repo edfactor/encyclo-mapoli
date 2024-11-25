@@ -11,11 +11,7 @@ try
     // Get all processes with the name "node"
     Process[] nodeProcesses = Process.GetProcessesByName("node");
 
-    if (nodeProcesses.Length == 0)
-    {
-        Console.WriteLine("No running instances of node.exe found.");
-    }
-    else
+    if (nodeProcesses.Length != 0)
     {
         Console.WriteLine($"Found {nodeProcesses.Length} instance(s) of node.exe. Terminating...");
 
@@ -37,16 +33,16 @@ catch (Exception ex)
 }
 
 
-
-
-var api = builder.AddProject<Projects.Demoulas_ProfitSharing_Api>("demoulas-profitsharing-api");
+var api = builder.AddProject<Projects.Demoulas_ProfitSharing_Api>("demoulas-profitsharing-api")
+    .WithHttpHealthCheck("/health")
+    .WithHttpsHealthCheck("/health")
+    .AsHttp2Service();
 
 builder.AddNpmApp("demoulas-profitsharing-ui", "../../../ui/", "dev")
     .WithReference(api)
     .WaitFor(api)
     .WithHttpEndpoint(port: uiPort, isProxied:false)
-    .WithExternalHttpEndpoints()
-    .AsHttp2Service();
+    .WithExternalHttpEndpoints();
 
 
 await using DistributedApplication host = builder.Build();

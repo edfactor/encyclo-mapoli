@@ -19,10 +19,10 @@ public class TotalServiceTests : ApiTestBase<Program>
     }
 
     [Fact(DisplayName = "Totals - Should return records")]
-    public async Task TotalBalanceShouldReturnCorrectly()
+    public Task TotalBalanceShouldReturnCorrectly()
     {
         long demoSsn = 0;
-        await _dataContextFactory.UseWritableContext(async ctx =>
+        return _dataContextFactory.UseWritableContext(async ctx =>
         {
             var demoTest = await ctx.Demographics.FirstAsync();
             demoSsn = demoTest.Ssn;
@@ -85,10 +85,10 @@ public class TotalServiceTests : ApiTestBase<Program>
     }
 
     [Fact(DisplayName = "Total ETVA Tests")]
-    public async Task TotalEtvaShouldReturnCorrectly()
+    public Task TotalEtvaShouldReturnCorrectly()
     {
         long demoSsn = 0;
-        await _dataContextFactory.UseWritableContext(async ctx =>
+        return _dataContextFactory.UseWritableContext(async ctx =>
         {
             var demoTest = await ctx.Demographics.FirstAsync();
             demoSsn = demoTest.Ssn;
@@ -175,10 +175,10 @@ public class TotalServiceTests : ApiTestBase<Program>
     }
 
     [Fact(DisplayName = "Total Distribution Tests")]
-    public async Task TotalDistributionShouldReturnCorrectly()
+    public Task TotalDistributionShouldReturnCorrectly()
     {
         long demoSsn = 0;
-        await _dataContextFactory.UseWritableContext(async ctx =>
+        return _dataContextFactory.UseWritableContext(async ctx =>
         {
             var demoTest = await ctx.Demographics.FirstAsync();
             demoSsn = demoTest.Ssn;

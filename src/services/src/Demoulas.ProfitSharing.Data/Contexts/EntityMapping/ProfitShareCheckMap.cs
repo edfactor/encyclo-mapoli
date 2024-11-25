@@ -24,6 +24,7 @@ internal sealed class ProfitShareCheckMap : IEntityTypeConfiguration<ProfitShare
             .ValueGeneratedNever()
             .HasColumnName("CHECK_NUMBER");
 
+        _ = builder.HasIndex(e => e.Ssn, "IX_SSN");
         _ = builder.Property(e => e.Ssn)
             .HasPrecision(9)
             .IsRequired()
@@ -31,11 +32,11 @@ internal sealed class ProfitShareCheckMap : IEntityTypeConfiguration<ProfitShare
             .HasColumnName("SSN");
 
         _ = builder.Property(e => e.DemographicId)
-            .HasPrecision(11)
+            .HasPrecision(9)
             .ValueGeneratedNever()
             .HasColumnName("DEMOGRAPHIC_ID");
 
-        _ = builder.HasIndex(e => e.PscCheckId, "IX_PscCheckId").IsUnique();
+        _ = builder.HasIndex(e => e.PscCheckId, "IX_PSC_CHECKID").IsUnique();
         _ = builder.Property(e => e.PscCheckId)
             .HasPrecision(15)
             .ValueGeneratedNever()
@@ -110,7 +111,10 @@ internal sealed class ProfitShareCheckMap : IEntityTypeConfiguration<ProfitShare
         _ = builder.Property(e => e.IsManualCheck)
             .HasColumnName("MANUAL_CHECK");
 
-        
+        _ = builder.Property(e => e.TaxCodeId)
+            .HasColumnName("TAX_CODE_ID");
+
+
         _ = builder.HasOne(x => x.TaxCode)
             .WithMany()
             .HasForeignKey(t => t.TaxCodeId);

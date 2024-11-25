@@ -62,7 +62,7 @@ public class DistributionsAndForfeitureEndpoint: EndpointWithCsvBase<Distributio
     {
         public DistributionsAndForfeitureResponseMap()
         {
-            Map(m => m.BadgeNumber).Index(0).Name("BADGE #");
+            Map(m => m.EmployeeId).Index(0).Name("BADGE #");
             Map(m => m.EmployeeName).Index(1).Name("NAME");
             Map(m => m.EmployeeSsn).Index(2).Name("SSN");
             Map(m => m.LoanDate).Index(3).Name("DATE");

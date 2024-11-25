@@ -1,11 +1,13 @@
 ﻿using System.Diagnostics;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Polly.Timeout;
@@ -28,46 +30,54 @@ public class PayrollSyncClient
 
     private readonly HttpClient _httpClient;
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
+    private readonly OracleHcmConfig _oracleHcmConfig;
     private readonly ILogger<PayrollSyncClient> _logger;
+    private readonly JsonSerializerOptions _jsonSerializerOptions;
 
     public PayrollSyncClient(HttpClient httpClient, 
         IProfitSharingDataContextFactory profitSharingDataContextFactory,
+        OracleHcmConfig oracleHcmConfig,
         ILogger<PayrollSyncClient> logger)
     {
         _httpClient = httpClient;
         _profitSharingDataContextFactory = profitSharingDataContextFactory;
+        _oracleHcmConfig = oracleHcmConfig;
         _logger = logger;
+        _jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
     }
 
     // Method to get payroll process results for a list of person IDs
-    internal async IAsyncEnumerable<KeyValuePair<long, List<int>>> GetPayrollProcessResultsAsync(
+    internal async IAsyncEnumerable<KeyValuePair<long, HashSet<int>>> GetPayrollProcessResultsAsync(
         List<long> personIds, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         foreach (long personId in personIds)
         {
-            List<int> objectActionIds = new List<int>();
+            HashSet<int> objectActionIds = new HashSet<int>();
             bool isSuccessful = false;
 
             try
             {
-                var response = await _httpClient.GetAsync(
-                    $"?q=PersonId={personId}&fields=PayrollActionId,ObjectActionId&onlyData=true",
-                    cancellationToken);
+                string query = $"{_oracleHcmConfig.PayrollUrl}?q=PersonId={personId}&fields=PayrollActionId,ObjectActionId&onlyData=true";
+                using var response = await _httpClient.GetAsync(query, cancellationToken);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var results = await response.Content.ReadFromJsonAsync<PayrollRoot>(cancellationToken);
-
+                    var results = await response.Content.ReadFromJsonAsync<PayrollRoot>(_jsonSerializerOptions, cancellationToken);
+                    if ((results?.Count ?? 0) == 0)
+                    {
+                        continue;
+                    }
+                    
                     objectActionIds = results!.Items
                         .Where(result => result is { PayrollActionId: 2003, ObjectActionId: not null })
                         .Select(result => result.ObjectActionId!.Value)
-                        .ToList();
+                        .ToHashSet();
 
-                    isSuccessful = true;
+                    isSuccessful = objectActionIds.Any();
                 }
                 else
                 {
-                    Console.WriteLine($"Failed to get payroll process results for PersonId {personId}: {response.ReasonPhrase}");
+                    _logger.LogError("Failed to get payroll process results for PersonId {PersonId}: {ResponseReasonPhrase}", personId, response.ReasonPhrase);
                 }
             }
             catch (TimeoutRejectedException e)
@@ -77,7 +87,7 @@ public class PayrollSyncClient
 
             if (isSuccessful)
             {
-                yield return new KeyValuePair<long, List<int>>(personId, objectActionIds);
+                yield return new KeyValuePair<long, HashSet<int>>(personId, objectActionIds);
             }
         }
     }
@@ -87,7 +97,7 @@ public class PayrollSyncClient
     // Method to get balance types for each ObjectActionId
     internal async Task GetBalanceTypesForProcessResultsAsync(
         long oracleHcmId,
-        List<int> objectActionIds,
+        HashSet<int> objectActionIds,
         CancellationToken cancellationToken)
     {
         // DimensionName should be set to Relationship No Calculation Breakdown Inception to Date. That will give you the correct value for current dollars, weeks, hours.
@@ -107,15 +117,15 @@ public class PayrollSyncClient
         {
             foreach (long balanceTypeId in balanceTypeIds)
             {
-                string url = $"personProcessResults/{objectActionId}/child/BalanceView/?onlyData=true&fields=BalanceTypeId,TotalValue1,TotalValue2,DefbalId1,DimensionName&finder=findByBalVar;pBalGroupUsageId1=null,pBalGroupUsageId2=-1,pLDGId={PLDGId},pLC={PLC},pBalTypeId={balanceTypeId}&onlyData=true";
+                string url = $"{_oracleHcmConfig.PayrollUrl}/{objectActionId}/child/BalanceView/?onlyData=true&fields=BalanceTypeId,TotalValue1,TotalValue2,DefbalId1,DimensionName&finder=findByBalVar;pBalGroupUsageId1=null,pBalGroupUsageId2=-1,pLDGId={PLDGId},pLC={PLC},pBalTypeId={balanceTypeId}&onlyData=true";
 
                 try
                 {
-                    var response = await _httpClient.GetAsync(url, cancellationToken);
+                    using var response = await _httpClient.GetAsync(url, cancellationToken);
 
                     if (response.IsSuccessStatusCode)
                     {
-                        var balanceResults = await response.Content.ReadFromJsonAsync<BalanceRoot>(cancellationToken);
+                        var balanceResults = await response.Content.ReadFromJsonAsync<BalanceRoot>(_jsonSerializerOptions, cancellationToken);
 
                         decimal total = balanceResults!.Items.Where(i=> string.CompareOrdinal(i.DimensionName, dimensionName) == 0)
                             .Sum(b => b.TotalValue1);
@@ -125,7 +135,7 @@ public class PayrollSyncClient
                     }
                     else
                     {
-                        Console.WriteLine($"Failed to get balance types for ObjectActionId {objectActionId}: {response.ReasonPhrase}");
+                        _logger.LogError("Failed to get balance types for ObjectActionId {ObjectActionId}: {ResponseReasonPhrase}", objectActionId, response.ReasonPhrase);
                     }
                 }
                 catch (Exception ex)
@@ -212,7 +222,7 @@ public class PayrollSyncClient
                     .ToListAsync(cancellationToken));
 
             // Step 1: Get payroll process results (ObjectActionIds) for each PersonId
-            await foreach (KeyValuePair<long, List<int>> emp in GetPayrollProcessResultsAsync(list, cancellationToken))
+            await foreach (KeyValuePair<long, HashSet<int>> emp in GetPayrollProcessResultsAsync(list, cancellationToken))
             {
                 // Step 2: Get specific balance types for each ObjectActionId
                 await GetBalanceTypesForProcessResultsAsync(emp.Key, emp.Value, cancellationToken);

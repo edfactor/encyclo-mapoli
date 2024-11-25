@@ -1,12 +1,12 @@
 ﻿using System.Text;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
-public sealed record HttpRequestFields
+public static class HttpRequestFields
 {
-    private readonly HashSet<string> _root = ["PersonNumber", "PersonId", "DateOfBirth", "LastUpdateDate"];
+    private static readonly HashSet<string> _root = ["PersonNumber", "PersonId", "DateOfBirth", "LastUpdateDate"];
 
     // ReSharper disable once InconsistentNaming
-    public HashSet<string> addresses { get; }=
+    private static HashSet<string> addresses { get; }=
     [
         "AddressId",
         "AddressLine1",
@@ -32,7 +32,7 @@ public sealed record HttpRequestFields
     ];
 
     // ReSharper disable once InconsistentNaming
-    public HashSet<string> workRelationships { get; } =
+    private static HashSet<string> workRelationships { get; } =
     [
         "WorkerType",
         "StartDate",
@@ -44,7 +44,7 @@ public sealed record HttpRequestFields
     ];
 
     // ReSharper disable once InconsistentNaming
-    public HashSet<string> workRelationships_assignments { get; } =
+    private static HashSet<string> workRelationships_assignments { get; } =
     [
         "LocationCode", // Store Number
         "JobCode", // Pay Classification
@@ -58,7 +58,7 @@ public sealed record HttpRequestFields
     ];
 
     // ReSharper disable once InconsistentNaming
-    public HashSet<string> emails { get; } =
+    private static HashSet<string> emails { get; } =
     [
         "EmailAddressId",
         "EmailType",
@@ -66,8 +66,19 @@ public sealed record HttpRequestFields
         "PrimaryFlag"
     ];
 
+    private static HashSet<string> phones { get; } =
+    [
+        nameof(PhoneItem.AreaCode),
+        nameof(PhoneItem.CountryCodeNumber),
+        nameof(PhoneItem.LegislationCode),
+        nameof(PhoneItem.PhoneNumber),
+        nameof(PhoneItem.PhoneId),
+        nameof(PhoneItem.PhoneType),
+        nameof(PhoneItem.PrimaryFlag),
+    ];
+
     // ReSharper disable once InconsistentNaming
-    public HashSet<string> names { get; } =
+    private static HashSet<string> names { get; } =
     [
         "PersonNameId",
         "EffectiveStartDate",
@@ -89,7 +100,7 @@ public sealed record HttpRequestFields
     ];
 
     // ReSharper disable once InconsistentNaming
-    public HashSet<string> nationalIdentifiers { get; } =
+    private static HashSet<string> nationalIdentifiers { get; } =
     [
         "NationalIdentifierNumber",
         "LastUpdateDate",
@@ -97,32 +108,38 @@ public sealed record HttpRequestFields
     ];
 
     // ReSharper disable once InconsistentNaming
-    public HashSet<string> legislativeInfo { get; } =
+    private static HashSet<string> legislativeInfo { get; } =
     [
         "Gender",
         "MaritalStatus",
         "LastUpdateDate",
     ];
 
+
+    private static string _finalFormatted = string.Empty;
     public static string ToFormattedString()
     {
-        var request = new HttpRequestFields();
+        if (!string.IsNullOrWhiteSpace(_finalFormatted))
+        {
+            return _finalFormatted;
+        }
 
         var collections = new Dictionary<string, HashSet<string>>
         {
-            { "addresses", request.addresses },
-            { "workRelationships", request.workRelationships },
-            { "workRelationships.assignments", request.workRelationships_assignments },
-            { "emails", request.emails },
-            { "names", request.names },
-            { "nationalIdentifiers", request.nationalIdentifiers },
-            { "legislativeInfo", request.legislativeInfo }
+            { "addresses", addresses },
+            { "workRelationships", workRelationships },
+            { "workRelationships.assignments", workRelationships_assignments },
+            { "emails", emails },
+            { "phones", phones },
+            { "names", names },
+            { "nationalIdentifiers", nationalIdentifiers },
+            { "legislativeInfo", legislativeInfo }
         };
 
         StringBuilder sb = new StringBuilder();
 
         // Append the root elements
-        sb.Append(string.Join(",", request._root));
+        sb.Append(string.Join(",", _root));
         sb.Append(';');
 
         // Append the key-value pairs
@@ -135,6 +152,8 @@ public sealed record HttpRequestFields
         }
 
         // Return the formatted string, trimmed of the trailing semicolon
-        return sb.ToString().TrimEnd(';');
+        _finalFormatted = sb.ToString().TrimEnd(';');
+
+        return _finalFormatted;
     }
 }

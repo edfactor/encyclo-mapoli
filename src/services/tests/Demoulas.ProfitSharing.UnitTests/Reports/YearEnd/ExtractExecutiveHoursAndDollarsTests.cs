@@ -41,9 +41,9 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
 
 
     [Fact(DisplayName = "PS-360: Check to ensure unauthorized")]
-    public async Task Unauthorized()
+    public Task Unauthorized()
     {
-        await MockDbContextFactory.UseWritableContext(async c =>
+        return MockDbContextFactory.UseWritableContext(async c =>
         {
             await SetupTestEmployee_With_HoursAndDollars(c);
 
@@ -57,9 +57,9 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
     }
 
     [Fact(DisplayName = "PS-360: return all employees (no exec dollars/hours constraint)")]
-    public async Task get_all()
+    public Task get_all()
     {
-        await MockDbContextFactory.UseWritableContext(async c =>
+        return MockDbContextFactory.UseWritableContext(async c =>
         {
             // Arrange
             await SetupTestEmployee_Without_HoursAndDollars(c);
@@ -82,9 +82,9 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
     }
 
     [Fact(DisplayName = "PS-360: return only employees with dollars/hours -> expect none")]
-    public async Task get_nothing()
+    public Task get_nothing()
     {
-        await MockDbContextFactory.UseWritableContext(async c =>
+        return MockDbContextFactory.UseWritableContext(async c =>
         {
             // Arrange
             await SetupTestEmployee_Without_HoursAndDollars(c);
@@ -108,9 +108,9 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
     }
 
     [Fact(DisplayName = "PS-360: return all employees (no dollars/hours)")]
-    public async Task get_one_row_json()
+    public Task get_one_row_json()
     {
-        await MockDbContextFactory.UseWritableContext(async c =>
+        return MockDbContextFactory.UseWritableContext(async c =>
         {
             // Arrange
             await SetupTestEmployee_With_HoursAndDollars(c);
@@ -131,9 +131,9 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
     }
 
     [Fact(DisplayName = "PS-360: Executive Hours and Dollars (CSV)")]
-    public async Task get_one_row_csv()
+    public Task get_one_row_csv()
     {
-        await MockDbContextFactory.UseWritableContext(async c =>
+        return MockDbContextFactory.UseWritableContext(async c =>
         {
             // Arrange
             await SetupTestEmployee_With_HoursAndDollars(c);
@@ -185,9 +185,9 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
     }
 
     [Fact]
-    public async Task GetResponse_Should_search_by_fullname()
+    public Task GetResponse_Should_search_by_fullname()
     {
-        await MockDbContextFactory.UseWritableContext(async c =>
+        return MockDbContextFactory.UseWritableContext(async c =>
         {
             // Arrange
             PayProfit payProfit = await SetupTestEmployee_With_HoursAndDollars(c);
@@ -215,9 +215,9 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
     }
 
     [Fact]
-    public async Task GetResponse_Should_search_by_fullname_not_found()
+    public Task GetResponse_Should_search_by_fullname_not_found()
     {
-        await MockDbContextFactory.UseWritableContext(async c =>
+        return MockDbContextFactory.UseWritableContext(async c =>
         {
             // Arrange
             PayProfit payProfit = await SetupTestEmployee_With_HoursAndDollars(c);
@@ -256,10 +256,14 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
 
     private static async Task<PayProfit> SetupTestEmployee_With_HoursAndDollars(ProfitSharingDbContext c)
     {
-        PayProfit pp = await c.PayProfits.Include(p => p.Demographic != null).FirstAsync();
+        PayProfit pp = await c.PayProfits
+            .Include(payProfit => payProfit.Demographic!)
+            .ThenInclude(demographic => demographic.ContactInfo)
+            .Include(p => p.Demographic != null)
+            .FirstAsync();
         Demographic demo = pp.Demographic!;
 
-        demo.BadgeNumber = _example.BadgeNumber;
+        demo.EmployeeId = _example.BadgeNumber;
         demo.ContactInfo.FullName = _example.FullName;
         demo.StoreNumber = _example.StoreNumber;
         pp.IncomeExecutive = _example.IncomeExecutive;
@@ -275,12 +279,16 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         return pp;
     }
 
-    private static async Task<PayProfit> SetupTestEmployee_Without_HoursAndDollars(ProfitSharingDbContext c)
+    private static async Task SetupTestEmployee_Without_HoursAndDollars(ProfitSharingDbContext c)
     {
-        PayProfit pp = await c.PayProfits.Include(p => p.Demographic != null).FirstAsync();
+        PayProfit pp = await c.PayProfits
+            .Include(payProfit => payProfit.Demographic!)
+            .ThenInclude(demographic => demographic.ContactInfo)
+            .Include(p => p.Demographic != null)
+            .FirstAsync();
         Demographic demo = pp.Demographic!;
 
-        demo.BadgeNumber = _example.BadgeNumber;
+        demo.EmployeeId = _example.BadgeNumber;
         demo.ContactInfo.FullName = _example.FullName;
         demo.StoreNumber = _example.StoreNumber;
         pp.IncomeExecutive = 0m;
@@ -293,6 +301,5 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         pp.Demographic = demo;
 
         await c.SaveChangesAsync();
-        return pp;
     }
 }

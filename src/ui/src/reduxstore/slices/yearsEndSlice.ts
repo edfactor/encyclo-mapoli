@@ -1,18 +1,24 @@
-import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
+  ContributionsByAge,
+  ForfeituresByAge,
   DemographicBadgesNotInPayprofit,
   DistributionsAndForfeitures,
   DuplicateNameAndBirthday,
   DuplicateSSNDetail,
   EligibleEmployeeResponseDto,
   ExecutiveHoursAndDollars,
+  FrozenReportsByAgeRequestType,
+  MasterInquiryDetail,
   MilitaryAndRehire,
   MilitaryAndRehireForfeiture,
   MilitaryAndRehireProfitSummary,
   MissingCommasInPYName,
   NegativeEtvaForSSNsOnPayProfit,
-  PagedReportResponse
+  PagedReportResponse,
+  ProfitSharingDistributionsByAge
 } from "reduxstore/types";
+import { Paged } from "smart-ui-library";
 
 export interface YearsEndState {
   duplicateSSNsData: PagedReportResponse<DuplicateSSNDetail> | null;
@@ -26,6 +32,16 @@ export interface YearsEndState {
   distributionsAndForfeitures: PagedReportResponse<DistributionsAndForfeitures> | null;
   executiveHoursAndDollars: PagedReportResponse<ExecutiveHoursAndDollars> | null;
   eligibleEmployees: EligibleEmployeeResponseDto | null;
+  masterInquiryData: Paged<MasterInquiryDetail> | null;
+  distributionsByAgeTotal: ProfitSharingDistributionsByAge | null;
+  distributionsByAgeFullTime: ProfitSharingDistributionsByAge | null;
+  distributionsByAgePartTime: ProfitSharingDistributionsByAge | null;
+  contributionsByAgeTotal: ContributionsByAge | null;
+  contributionsByAgeFullTime: ContributionsByAge | null;
+  contributionsByAgePartTime: ContributionsByAge | null;
+  forfeituresByAgeTotal: ForfeituresByAge | null;
+  forfeituresByAgeFullTime: ForfeituresByAge | null;
+  forfeituresByAgePartTime: ForfeituresByAge | null;
 }
 
 const initialState: YearsEndState = {
@@ -39,7 +55,17 @@ const initialState: YearsEndState = {
   militaryAndRehireProfitSummary: null,
   distributionsAndForfeitures: null,
   executiveHoursAndDollars: null,
-  eligibleEmployees: null
+  eligibleEmployees: null,
+  masterInquiryData: null,
+  distributionsByAgeTotal: null,
+  distributionsByAgeFullTime: null,
+  distributionsByAgePartTime: null,
+  contributionsByAgeTotal: null,
+  contributionsByAgeFullTime: null,
+  contributionsByAgePartTime: null,
+  forfeituresByAgeTotal: null,
+  forfeituresByAgeFullTime: null,
+  forfeituresByAgePartTime: null
 };
 
 export const yearsEndSlice = createSlice({
@@ -88,18 +114,57 @@ export const yearsEndSlice = createSlice({
     ) => {
       state.distributionsAndForfeitures = action.payload;
     },
-    setExecutiveHoursAndDollars: (
-      state,
-      action: PayloadAction<PagedReportResponse<ExecutiveHoursAndDollars>>
-    ) => {
+    setExecutiveHoursAndDollars: (state, action: PayloadAction<PagedReportResponse<ExecutiveHoursAndDollars>>) => {
       state.executiveHoursAndDollars = action.payload;
     },
-    setEligibleEmployees: (
-      state,
-      action: PayloadAction<EligibleEmployeeResponseDto>
-    ) => {
+    setEligibleEmployees: (state, action: PayloadAction<EligibleEmployeeResponseDto>) => {
       state.eligibleEmployees = action.payload;
     },
+    setMasterInquiryData: (state, action: PayloadAction<Paged<MasterInquiryDetail>>) => {
+      state.masterInquiryData = action.payload;
+    },
+    clearMasterInquiryData: (state) => {
+      state.masterInquiryData = null;
+    },
+    setDistributionsByAge: (state, action: PayloadAction<ProfitSharingDistributionsByAge>) => {
+      if (action.payload.reportType == FrozenReportsByAgeRequestType.Total) {
+        state.distributionsByAgeTotal = action.payload;
+      }
+
+      if (action.payload.reportType == FrozenReportsByAgeRequestType.FullTime) {
+        state.distributionsByAgeFullTime = action.payload;
+      }
+
+      if (action.payload.reportType == FrozenReportsByAgeRequestType.PartTime) {
+        state.distributionsByAgePartTime = action.payload;
+      }
+    },
+    setContributionsByAge: (state, action: PayloadAction<ContributionsByAge>) => {
+      if (action.payload.reportType == FrozenReportsByAgeRequestType.Total) {
+        state.contributionsByAgeTotal = action.payload;
+      }
+
+      if (action.payload.reportType == FrozenReportsByAgeRequestType.FullTime) {
+        state.contributionsByAgeFullTime = action.payload;
+      }
+
+      if (action.payload.reportType == FrozenReportsByAgeRequestType.PartTime) {
+        state.contributionsByAgePartTime = action.payload;
+      }
+    },
+    setForfeituresByAge: (state, action: PayloadAction<ForfeituresByAge>) => {
+      if (action.payload.reportType == FrozenReportsByAgeRequestType.Total) {
+        state.forfeituresByAgeTotal = action.payload;
+      }
+
+      if (action.payload.reportType == FrozenReportsByAgeRequestType.FullTime) {
+        state.forfeituresByAgeFullTime = action.payload;
+      }
+
+      if (action.payload.reportType == FrozenReportsByAgeRequestType.PartTime) {
+        state.forfeituresByAgePartTime = action.payload;
+      }
+    }
   }
 });
 
@@ -114,6 +179,11 @@ export const {
   setMilitaryAndRehireProfitSummaryDetails,
   setDistributionsAndForfeitures,
   setExecutiveHoursAndDollars,
-  setEligibleEmployees
+  setEligibleEmployees,
+  setMasterInquiryData,
+  clearMasterInquiryData,
+  setDistributionsByAge,
+  setContributionsByAge,
+  setForfeituresByAge
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

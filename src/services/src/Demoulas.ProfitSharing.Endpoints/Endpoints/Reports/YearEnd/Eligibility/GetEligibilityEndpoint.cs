@@ -40,37 +40,34 @@ public class GetEligibleEmployeesEndpoint : EndpointWithCsvTotalsBase<ProfitYear
         return _getEligibleEmployeesService.GetEligibleEmployees(req, ct);
     }
 
-    protected internal override Task GenerateCsvContent(CsvWriter csvWriter, GetEligibleEmployeesResponse responseWithTotals, CancellationToken cancellationToken)
+    protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, GetEligibleEmployeesResponse responseWithTotals, CancellationToken cancellationToken)
     {
         // Register the class map for the main member data
         csvWriter.Context.RegisterClassMap<GetEligibleEmployeesResponseDtoMap>();
 
         // Write out totals
-        csvWriter.NextRecord();
+        await csvWriter.NextRecordAsync();
         csvWriter.WriteField("Number read on FROZEN");
         csvWriter.WriteField(responseWithTotals.NumberReadOnFrozen);
 
-        csvWriter.NextRecord();
+        await csvWriter.NextRecordAsync();
         csvWriter.WriteField("Number not selected");
         csvWriter.WriteField(responseWithTotals.NumberNotSelected);
 
-        csvWriter.NextRecord();
+        await csvWriter.NextRecordAsync();
         csvWriter.WriteField("Number written");
         csvWriter.WriteField(responseWithTotals.NumberWritten);
 
-        csvWriter.NextRecord();
+        await csvWriter.NextRecordAsync();
 
         // Write the headers
         csvWriter.WriteHeader<GetEligibleEmployeesResponseDto>();
-        csvWriter.NextRecord();
+        await csvWriter.NextRecordAsync();
 
-        return base.GenerateCsvContent(csvWriter, responseWithTotals, cancellationToken);
+        await base.GenerateCsvContent(csvWriter, responseWithTotals, cancellationToken);
     }
 
-
-
-    public sealed class
-        GetEligibleEmployeesResponseDtoMap : ClassMap<GetEligibleEmployeesResponseDto>
+    public sealed class GetEligibleEmployeesResponseDtoMap : ClassMap<GetEligibleEmployeesResponseDto>
     {
         public GetEligibleEmployeesResponseDtoMap()
         {

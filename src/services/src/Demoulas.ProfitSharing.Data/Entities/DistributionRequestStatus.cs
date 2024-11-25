@@ -8,7 +8,7 @@ public class DistributionRequestStatus : ILookupTable<char>
     {
         public const char NEW_ENTRY = 'N';
         public const char READY_FOR_REVIEW = 'R';
-        public const char IN_COMMITTIE_REVIEW = 'C';
+        public const char IN_COMMITTEE_REVIEW = 'C';
         public const char APPROVED = 'A';
         public const char DECLINED = 'D';
         public const char PROCESSED = 'P';
