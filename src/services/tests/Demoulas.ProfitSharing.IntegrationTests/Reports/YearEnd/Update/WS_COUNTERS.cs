@@ -1,6 +1,7 @@
 ﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
-public class WS_COUNTERS {
+public class WS_COUNTERS
+{
     public long WS_PAGE_CTR { get; set; } // PIC 9(05)
     public long WS_LINE_CTR { get; set; } = 99; // PIC 99
     public long WS_FILE_CTR { get; set; } // PIC 9

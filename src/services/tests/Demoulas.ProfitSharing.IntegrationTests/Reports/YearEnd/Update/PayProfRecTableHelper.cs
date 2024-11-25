@@ -1,19 +1,12 @@
-﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
+﻿using Oracle.ManagedDataAccess.Client;
 
-using System;
-using System.Collections.Generic;
-using System.Data;
-using Oracle.ManagedDataAccess.Client;
-
-
-using System.Data.Common;
-using Oracle.ManagedDataAccess.Client;
+namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
 public class PayProfRecTableHelper
 {
-    bool hasRead = false;
-    int reads = 0;
-    bool eof = false;
+    private bool eof;
+    private bool hasRead;
+    private int reads;
     public List<PAYPROF_REC> rows { get; set; } = new();
     public OracleConnection connection { get; set; }
 
@@ -32,37 +25,38 @@ public class PayProfRecTableHelper
 
         if (reads < rows.Count)
         {
-            var record = rows[reads];
+            PAYPROF_REC record = rows[reads];
             reads++;
             return record;
         }
-        else
-        {
-            Console.WriteLine("Hit EOF");
-            eof = true;
-            return null;
-        }
+
+        Console.WriteLine("Hit EOF");
+        eof = true;
+        return null;
     }
 
     public void loadData()
     {
-        var payProfRecords = new List<PAYPROF_REC>();
+        List<PAYPROF_REC> payProfRecords = new List<PAYPROF_REC>();
         string query = "SELECT * FROM PROFITSHARE.PAYPROFIT";
 
-        using (var command = new OracleCommand(query, connection))
+        using (OracleCommand command = new OracleCommand(query, connection))
         {
-            using (var reader = command.ExecuteReader())
+            using (OracleDataReader? reader = command.ExecuteReader())
             {
                 while (reader.Read())
                 {
-                    var record = new PAYPROF_REC
+                    PAYPROF_REC record = new PAYPROF_REC
                     {
                         PAYPROF_BADGE = reader.GetInt64(reader.GetOrdinal("PAYPROF_BADGE")),
                         PAYPROF_SSN = reader.GetInt64(reader.GetOrdinal("PAYPROF_SSN")),
                         PY_PH = reader.GetDecimal(reader.GetOrdinal("PY_PH")),
                         PY_PD = reader.GetDecimal(reader.GetOrdinal("PY_PD")),
                         PY_WEEKS_WORK = reader.GetInt64(reader.GetOrdinal("PY_WEEKS_WORK")),
-                        PY_PROF_CERT = reader.IsDBNull(reader.GetOrdinal("PY_PROF_CERT")) ? null : reader.GetString(reader.GetOrdinal("PY_PROF_CERT")),
+                        PY_PROF_CERT =
+                            reader.IsDBNull(reader.GetOrdinal("PY_PROF_CERT"))
+                                ? null
+                                : reader.GetString(reader.GetOrdinal("PY_PROF_CERT")),
                         PY_PS_ENROLLED = reader.GetInt64(reader.GetOrdinal("PY_PS_ENROLLED")),
                         PY_PS_YEARS = reader.GetInt64(reader.GetOrdinal("PY_PS_YEARS")),
                         PY_PROF_BENEFICIARY = reader.GetInt64(reader.GetOrdinal("PY_PROF_BENEFICIARY")),
@@ -75,7 +69,10 @@ public class PayProfRecTableHelper
                         PY_PROF_POINTS = reader.GetInt64(reader.GetOrdinal("PY_PROF_POINTS")),
                         PY_PROF_CONT = reader.GetDecimal(reader.GetOrdinal("PY_PROF_CONT")),
                         PY_PROF_FORF = reader.GetDecimal(reader.GetOrdinal("PY_PROF_FORF")),
-                        PY_VESTED_FLAG = reader.IsDBNull(reader.GetOrdinal("PY_VESTED_FLAG")) ? null : reader.GetString(reader.GetOrdinal("PY_VESTED_FLAG")),
+                        PY_VESTED_FLAG =
+                            reader.IsDBNull(reader.GetOrdinal("PY_VESTED_FLAG"))
+                                ? null
+                                : reader.GetString(reader.GetOrdinal("PY_VESTED_FLAG")),
                         PY_PROF_MAXCONT = reader.GetInt64(reader.GetOrdinal("PY_PROF_MAXCONT")),
                         PY_PROF_ZEROCONT = reader.GetInt64(reader.GetOrdinal("PY_PROF_ZEROCONT")),
                         PY_WEEKS_WORK_LAST = reader.GetInt64(reader.GetOrdinal("PY_WEEKS_WORK_LAST")),
@@ -92,8 +89,6 @@ public class PayProfRecTableHelper
                 }
             }
         }
-
-
     }
 
     public PAYPROF_REC findByBadge(long payprofBadge)

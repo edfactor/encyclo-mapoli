@@ -1,6 +1,7 @@
 ﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
-public class WS_COMPUTE_TOTALS {
+public class WS_COMPUTE_TOTALS
+{
     public decimal WS_POINTS_DOLLARS { get; set; } // PIC S9(8)V99
     public decimal WS_EARNINGS_BALANCE { get; set; } // PIC S9(8)V99
     public long WS_EARN_POINTS { get; set; } // PIC S9(5)

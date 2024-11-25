@@ -4,7 +4,6 @@ using System.Text;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Oracle.ManagedDataAccess.Client;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
@@ -25,18 +24,17 @@ public class ProftShareUpdateTests
         PAY444 pay444 = new();
         int year = 2023;
         pay444.connection = connection;
-        String reportName = "psupdate-pay444-r1.txt";
-        pay444.TodaysDateTime = new DateTime(2024, 11, 12, 9, 43, 0);  // time report was generated
+        string reportName = "psupdate-pay444-r1.txt";
+        pay444.TodaysDateTime = new DateTime(2024, 11, 12, 9, 43, 0); // time report was generated
 
         // Act
-        pay444.m015MainProcessing(metaSw, year, 0, 0,0,0,0,0,0,0,0,0,0);
+        pay444.m015MainProcessing(metaSw, year, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
         // Assert
         string actual = CollectLines(pay444.outputLines);
         string expected = LoadExpectedReport(reportName).Replace("\r", "");
 
         AssertReportsAreEquivalent(expected, actual);
-
     }
 
     [Fact]
@@ -54,8 +52,8 @@ public class ProftShareUpdateTests
 
         PAY444 pay444 = new();
         int year = 2024;
-        String reportName = "psupdate-pay444-r2.txt";
-        pay444.TodaysDateTime = new DateTime(2024, 11, 14, 10, 35, 0);  // time report was generated
+        string reportName = "psupdate-pay444-r2.txt";
+        pay444.TodaysDateTime = new DateTime(2024, 11, 14, 10, 35, 0); // time report was generated
 
         // We should pass in the point values, but ATM they are hard coded.
         pay444.connection = connection;
@@ -67,8 +65,7 @@ public class ProftShareUpdateTests
         string expected = LoadExpectedReport(reportName).Replace("\r", "");
         string actual = CollectLines(pay444.outputLines);
 
-        AssertReportsAreEquivalent(expected,actual);
-
+        AssertReportsAreEquivalent(expected, actual);
     }
 
     [Fact]
@@ -85,8 +82,8 @@ public class ProftShareUpdateTests
         connection.Open();
         PAY444 pay444 = new();
         int year = 2024;
-        String reportName = "psupdate-pay444-r3.txt";
-        pay444.TodaysDateTime = new DateTime(2024, 11, 19, 19, 18, 0);  // time report was generated
+        string reportName = "psupdate-pay444-r3.txt";
+        pay444.TodaysDateTime = new DateTime(2024, 11, 19, 19, 18, 0); // time report was generated
 
         // We should pass in the point values, but ATM they are hard coded.
         pay444.connection = connection;
@@ -99,7 +96,6 @@ public class ProftShareUpdateTests
         string actual = CollectLines(pay444.outputLines);
 
         AssertReportsAreEquivalent(expected, actual);
-
     }
 
     [Fact]
@@ -116,16 +112,16 @@ public class ProftShareUpdateTests
         connection.Open();
         PAY444 pay444 = new();
         int year = 2024;
-        String reportName = "psupdate-pay444-r4.txt";
-        
-        pay444.TodaysDateTime = new DateTime(2024, 11, 22, 13, 18, 0);  // time report was generated
+        string reportName = "psupdate-pay444-r4.txt";
+
+        pay444.TodaysDateTime = new DateTime(2024, 11, 22, 13, 18, 0); // time report was generated
 
         // We should pass in the point values, but ATM they are hard coded.
         pay444.connection = connection;
 
         // Act
-        pay444.m015MainProcessing(metaSw, year, 17, 2.75m, 7.95m, 3.74m, 
-            700196, 1.11m, 3.33m, 2.22m, 
+        pay444.m015MainProcessing(metaSw, year, 17, 2.75m, 7.95m, 3.74m,
+            700196, 1.11m, 3.33m, 2.22m,
             700417, 4.44m, 30000);
 
         // Assert
@@ -134,9 +130,8 @@ public class ProftShareUpdateTests
 
 #if false
 // Pending outcome of Secondary earnings clarification
-        PopUpExternalMeld(expected, actual);
+        AssertReportsAreEquivalent(expected, actual);
 #endif
-
     }
 
 
@@ -191,7 +186,7 @@ public class ProftShareUpdateTests
         // Start the process
         using Process? process = Process.Start(startInfo);
     }
-    
+
     public static string LoadExpectedReport(string resourceName)
     {
         using (Stream? stream = Assembly.GetExecutingAssembly()

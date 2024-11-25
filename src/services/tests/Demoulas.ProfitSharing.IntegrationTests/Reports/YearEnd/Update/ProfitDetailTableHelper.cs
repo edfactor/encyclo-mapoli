@@ -1,17 +1,15 @@
-﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
+﻿using Oracle.ManagedDataAccess.Client;
 
-using Oracle.ManagedDataAccess.Client;
-using System.Collections.Generic;
-using System.Text.Json;
+namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
 public class ProfitDetailTableHelper
 {
 #pragma warning disable S2933
 
-    List<PROFIT_DETAIL> records = new();
-    private PROFIT_DETAIL profit_detail;
+    private readonly List<PROFIT_DETAIL> records = new();
+    private readonly PROFIT_DETAIL profit_detail;
     public long ssn;
-    private int pos = 0;
+    private int pos;
 
     public ProfitDetailTableHelper(OracleConnection connection, PROFIT_DETAIL profit_detail, long ssn)
     {
@@ -19,14 +17,13 @@ public class ProfitDetailTableHelper
         this.ssn = ssn;
 
         string query = $"SELECT * FROM PROFITSHARE.profit_detail where PR_DET_S_SEC_NUMBER = {ssn}";
-        using (var command = new OracleCommand(query, connection))
+        using (OracleCommand command = new OracleCommand(query, connection))
         {
-            using (var reader = command.ExecuteReader())
+            using (OracleDataReader? reader = command.ExecuteReader())
             {
                 while (reader.Read())
                 {
-
-                    var record = new PROFIT_DETAIL
+                    PROFIT_DETAIL record = new PROFIT_DETAIL
                     {
                         PROFIT_YEAR = reader.GetDecimal(reader.GetOrdinal("PROFIT_YEAR")),
                         PROFIT_CLIENT = reader.GetInt64(reader.GetOrdinal("PROFIT_CLIENT")),
@@ -49,22 +46,19 @@ public class ProfitDetailTableHelper
                         PROFIT_TAX_CODE = reader.IsDBNull(reader.GetOrdinal("PROFIT_TAX_CODE"))
                             ? null
                             : reader.GetString(reader.GetOrdinal("PROFIT_TAX_CODE"))
-
                     };
                     records.Add(record);
                 }
             }
         }
-
-
     }
 
     public int LoadNextRecord()
     {
         if (pos < records.Count)
         {
-            var shared = profit_detail;
-            var l = records[pos];
+            PROFIT_DETAIL shared = profit_detail;
+            PROFIT_DETAIL l = records[pos];
             shared.PROFIT_YEAR = l.PROFIT_YEAR;
             shared.PROFIT_CLIENT = l.PROFIT_CLIENT;
             shared.PROFIT_CODE = l.PROFIT_CODE;
@@ -83,6 +77,5 @@ public class ProfitDetailTableHelper
         }
 
         return 77;
-
     }
 }

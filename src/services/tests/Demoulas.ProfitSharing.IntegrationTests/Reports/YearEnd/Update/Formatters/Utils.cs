@@ -1,11 +1,11 @@
 ﻿using System.Globalization;
 using System.Text.RegularExpressions;
 
-public static class Utils
+public static class FormatUtils
 {
     public static string rformat(object value, string type, string picClause)
     {
-        var fmt = "";
+        string fmt = "";
         switch (type)
         {
             case "decimal":
@@ -30,7 +30,7 @@ public static class Utils
     private static string FormatDecimal(decimal value, string picClause)
     {
         // Define COBOL-like decimal formats.
-        var jj = picClause switch
+        string jj = picClause switch
         {
             // Weird dropping of Comma cases.
             "ZZZZ,ZZZ.99-" => FormatWithSingleComma(value, picClause.Length),
@@ -78,22 +78,25 @@ public static class Utils
     //    1000,000 <--good
     private static string FormatWithSingleComma(decimal number, int length)
     {
-        var numberStr = number.ToString("#,###.00 ;#,###.00-");
+        string numberStr = number.ToString("#,###.00 ;#,###.00-");
 
-        var parts = numberStr.Split(',');
-        if (parts.Length == 3) return parts[0] + parts[1] + "," + parts[2];
+        string[] parts = numberStr.Split(',');
+        if (parts.Length == 3)
+        {
+            return parts[0] + parts[1] + "," + parts[2];
+        }
 
         return numberStr.PadLeft(length);
     }
 
     private static string FormatWithDoubleComma(decimal number, int length)
     {
-        var numberStr = number.ToString("#,### ;#,###.-");
+        string numberStr = number.ToString("#,### ;#,###.-");
 
         // if we have three commas remove the first one.
         if (numberStr.Where(c => c == ',').Count() == 3)
         {
-            var cdex = numberStr.IndexOf(",");
+            int cdex = numberStr.IndexOf(",");
             numberStr = numberStr[..cdex] + numberStr[cdex + 1];
         }
 
@@ -103,7 +106,7 @@ public static class Utils
 
     private static string FormatSignedLong(long value, int width)
     {
-        var formattedValue = value < 0 ? $"{Math.Abs(value)}-" : $"{value} ";
+        string formattedValue = value < 0 ? $"{Math.Abs(value)}-" : $"{value} ";
         return formattedValue.PadLeft(width);
     }
 
@@ -111,7 +114,9 @@ public static class Utils
     private static string FormatDate(DateOnly? date, string picClause)
     {
         if (picClause != "9(8).")
+        {
             throw new ArgumentException($"Unsupported PIC clause for DateOnly?: {picClause}");
+        }
 
         return date.HasValue ? date.Value.ToString("yyyyMMdd") : new string(' ', 8);
     }
@@ -121,13 +126,16 @@ public static class Utils
         // Strip 'X(' and ')' to get the length from the PIC clause.
         if (picClause.StartsWith("X(") && picClause.EndsWith(")"))
         {
-            var length = int.Parse(picClause[2..^1]);
+            int length = int.Parse(picClause[2..^1]);
             return (value ?? "").PadRight(length).Substring(0, length);
         }
 
         if (picClause == "X")
         {
-            if (value == null) return " ";
+            if (value == null)
+            {
+                return " ";
+            }
 
             return value.PadLeft(1);
         }
@@ -141,12 +149,16 @@ public static class Utils
 
         // If value is zero, use ".00" (or ".00-" for signed formats) for decimal formats.
         if (value == 0m)
+        {
             formattedValue = ".00 ";
+        }
         else
             // Handle negative values with trailing minus.
+        {
             formattedValue = value < 0
                 ? Math.Abs(value).ToString(format, CultureInfo.InvariantCulture) + "-"
                 : value.ToString(format, CultureInfo.InvariantCulture) + " ";
+        }
 
         //        var wz = formattedValue;
         // Replace leading zeros with spaces.
@@ -165,7 +177,9 @@ public static class Utils
 
         if (value != 0)
             // Replace leading zeros with spaces.
+        {
             formattedValue = Regex.Replace(formattedValue, @"(?<!\S)0+", m => new string(' ', m.Length));
+        }
 
         return formattedValue.PadLeft(width);
     }

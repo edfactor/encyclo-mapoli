@@ -1,6 +1,7 @@
 ﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
-public class PRFT {
+public class PRFT
+{
     public long FD_BADGE { get; set; } // PIC 9(7).
     public string? FD_NAME { get; set; } // PIC X(25).
     public long FD_SSN { get; set; } // PIC 9(9)

@@ -1,6 +1,6 @@
 ﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.ReportFormatters;
 
-using static Utils;
+using static FormatUtils;
 
 public class HEADER_3
 {
@@ -27,25 +27,25 @@ public class HEADER_3
     public override string ToString()
     {
         return
-        rformat(FILLER0, "string?", "X(07)")
-        + rformat(FILLER1, "string?", "X(06)")
-        + rformat(FILLER2, "string?", "X(04)")
-        + rformat(FILLER3, "string?", "X(20)")
-        + rformat(FILLER4, "string?", "X(07)")
-        + rformat(FILLER5, "string?", "X(05)")
-        + rformat(FILLER6, "string?", "X(07)")
-        + rformat(FILLER7, "string?", "X(04)")
-        + rformat(FILLER8, "string?", "X(08)")
-        + rformat(FILLER9, "string?", "X(03)")
-        + rformat(FILLER10, "string?", "X(09)")
-        + rformat(FILLER11, "string?", "X(03)")
-        + rformat(FILLER12, "string?", "X(08)")
-        + rformat(FILLER13, "string?", "X(05)")
-        + rformat(FILLER14, "string?", "X(07)")
-        + rformat(FILLER15, "string?", "X(03)")
-        + rformat(FILLER16, "string?", "X(10)")
-        + rformat(FILLER17, "string?", "X(03)")
-        + rformat(FILLER18, "string?", "X(07)")
+            rformat(FILLER0, "string?", "X(07)")
+            + rformat(FILLER1, "string?", "X(06)")
+            + rformat(FILLER2, "string?", "X(04)")
+            + rformat(FILLER3, "string?", "X(20)")
+            + rformat(FILLER4, "string?", "X(07)")
+            + rformat(FILLER5, "string?", "X(05)")
+            + rformat(FILLER6, "string?", "X(07)")
+            + rformat(FILLER7, "string?", "X(04)")
+            + rformat(FILLER8, "string?", "X(08)")
+            + rformat(FILLER9, "string?", "X(03)")
+            + rformat(FILLER10, "string?", "X(09)")
+            + rformat(FILLER11, "string?", "X(03)")
+            + rformat(FILLER12, "string?", "X(08)")
+            + rformat(FILLER13, "string?", "X(05)")
+            + rformat(FILLER14, "string?", "X(07)")
+            + rformat(FILLER15, "string?", "X(03)")
+            + rformat(FILLER16, "string?", "X(10)")
+            + rformat(FILLER17, "string?", "X(03)")
+            + rformat(FILLER18, "string?", "X(07)")
             ;
     }
 }
@@ -81,7 +81,7 @@ public class HEADER_3
      05  FILLER                   PIC X(03)     VALUE SPACES.
      05  FILLER                   PIC X(08)     VALUE
          "BALANCE ".
-         
+
 * =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 * PRINT ADJUSTMENTS REPORT
 * =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=

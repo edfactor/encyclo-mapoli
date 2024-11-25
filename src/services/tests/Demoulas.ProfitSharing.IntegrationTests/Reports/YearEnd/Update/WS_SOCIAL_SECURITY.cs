@@ -1,6 +1,7 @@
 ﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
-public class WS_SOCIAL_SECURITY {
+public class WS_SOCIAL_SECURITY
+{
     public long WS_SSN { get; set; } // PIC 9(9)
     public long WS_SSN1 { get; set; } // PIC 999.
     public long WS_SSN2 { get; set; } // PIC 99.

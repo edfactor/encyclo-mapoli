@@ -1,32 +1,13 @@
 ﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
-public class SD_PRFT {
-    public long SD_BADGE { get; set; } // PIC 9(7).
-    public string? SD_NAME { get; set; } // PIC X(25).
-    public long SD_SSN { get; set; } // PIC 9(9)
-    public decimal SD_AMT { get; set; } // PIC S9(8)V99
-    public decimal SD_DIST1 { get; set; } // PIC S9(8)V99
-    public decimal SD_MIL { get; set; } // PIC S9(8)V99
-    public decimal SD_XFER { get; set; } // PIC S9(8)V99
-    public decimal SD_PXFER { get; set; } // PIC S9(8)V99
-    public long SD_NEWEMP { get; set; } // PIC 99
-    public long SD_POINTS { get; set; } // PIC S9(5)
-    public long SD_POINTS_EARN { get; set; } // PIC S9(5)
-    public decimal SD_CONT { get; set; } // PIC S9(8)V99
-    public decimal SD_FORF { get; set; } // PIC S9(8)V99
-    public decimal SD_EARN { get; set; } // PIC S9(8)V99
-    public decimal SD_EARN2 { get; set; } // PIC S9(8)V99
-    public decimal SD_MAXOVER { get; set; } // PIC S9(8)V99
-    public long SD_MAXPOINTS { get; set; } // PIC S9(5)
-    public long SD_PSN { get; set; } // PIC 9(11)
-    public decimal SD_CAF { get; set; } // PIC S9(8)V99
-
-public SD_PRFT(){
-  
-}
+public class SD_PRFT
+{
+    public SD_PRFT()
+    {
+    }
 
 
-public SD_PRFT(PRFT prft)
+    public SD_PRFT(PRFT prft)
     {
         SD_BADGE = prft.FD_BADGE;
         SD_NAME = prft.FD_NAME;
@@ -48,6 +29,26 @@ public SD_PRFT(PRFT prft)
         SD_PSN = prft.FD_PSN;
         SD_CAF = prft.FD_CAF;
     }
+
+    public long SD_BADGE { get; set; } // PIC 9(7).
+    public string? SD_NAME { get; set; } // PIC X(25).
+    public long SD_SSN { get; set; } // PIC 9(9)
+    public decimal SD_AMT { get; set; } // PIC S9(8)V99
+    public decimal SD_DIST1 { get; set; } // PIC S9(8)V99
+    public decimal SD_MIL { get; set; } // PIC S9(8)V99
+    public decimal SD_XFER { get; set; } // PIC S9(8)V99
+    public decimal SD_PXFER { get; set; } // PIC S9(8)V99
+    public long SD_NEWEMP { get; set; } // PIC 99
+    public long SD_POINTS { get; set; } // PIC S9(5)
+    public long SD_POINTS_EARN { get; set; } // PIC S9(5)
+    public decimal SD_CONT { get; set; } // PIC S9(8)V99
+    public decimal SD_FORF { get; set; } // PIC S9(8)V99
+    public decimal SD_EARN { get; set; } // PIC S9(8)V99
+    public decimal SD_EARN2 { get; set; } // PIC S9(8)V99
+    public decimal SD_MAXOVER { get; set; } // PIC S9(8)V99
+    public long SD_MAXPOINTS { get; set; } // PIC S9(5)
+    public long SD_PSN { get; set; } // PIC 9(11)
+    public decimal SD_CAF { get; set; } // PIC S9(8)V99
 }
 /*
 

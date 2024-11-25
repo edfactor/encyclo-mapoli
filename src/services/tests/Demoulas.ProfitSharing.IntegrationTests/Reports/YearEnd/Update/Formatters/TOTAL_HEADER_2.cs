@@ -1,6 +1,6 @@
 ﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.ReportFormatters;
 
-using static Utils;
+using static FormatUtils;
 
 public class TOTAL_HEADER_2
 {
@@ -14,12 +14,12 @@ public class TOTAL_HEADER_2
     public override string ToString()
     {
         return
-        rformat(FILLER0, "string?", "X(10)")
-        + rformat(FILLER1, "string?", "X(19)")
-        + rformat(FILLER2, "string?", "X(77)")
-        + rformat(FILLER3, "string?", "X(09)")
-        + rformat(FILLER4, "string?", "X(04)")
-        + rformat(FILLER5, "string?", "X(6)")
+            rformat(FILLER0, "string?", "X(10)")
+            + rformat(FILLER1, "string?", "X(19)")
+            + rformat(FILLER2, "string?", "X(77)")
+            + rformat(FILLER3, "string?", "X(09)")
+            + rformat(FILLER4, "string?", "X(04)")
+            + rformat(FILLER5, "string?", "X(6)")
             ;
     }
 }
@@ -35,5 +35,5 @@ public class TOTAL_HEADER_2
      05  FILLER                   PIC X(6)     VALUE
          "ENDING".
 
- 
+
 */

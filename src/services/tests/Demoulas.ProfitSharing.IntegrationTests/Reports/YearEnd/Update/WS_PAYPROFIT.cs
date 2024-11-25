@@ -1,6 +1,7 @@
 ﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
-public class WS_PAYPROFIT {
+public class WS_PAYPROFIT
+{
     public decimal WS_PS_AMT { get; set; } // PIC S9(8)V99
     public decimal WS_PYBEN_ETVA { get; set; } // PIC S9(8)V99
     public long WS_PROF_NEWEMP { get; set; } // PIC 99

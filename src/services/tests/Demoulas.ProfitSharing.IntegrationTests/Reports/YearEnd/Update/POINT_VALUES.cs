@@ -1,6 +1,7 @@
 ﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
-public class POINT_VALUES {
+public class POINT_VALUES
+{
     public decimal PV_CONT_01 { get; set; } // PIC S999V999999
     public decimal PV_FORF_01 { get; set; } // PIC S999V999999
     public decimal PV_EARN_01 { get; set; } // PIC S999V999999

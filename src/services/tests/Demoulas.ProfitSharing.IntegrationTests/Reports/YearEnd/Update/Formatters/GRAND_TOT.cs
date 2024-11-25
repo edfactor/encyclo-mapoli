@@ -50,11 +50,11 @@ public class GRAND_TOT
 
 * =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 * PRINT REPORT DETAILS SECTION.
-* NOTE : The detail data exceeds 135 characters so we need to 
+* NOTE : The detail data exceeds 135 characters so we need to
 *        reduce the size of Earnings2 and Military. These should
 *        be this large, where the others can be.
 * =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-*MAIN-1488  ADJUSTED FILLER AND BADGE DUE TO PSN EXPANSION.  
+*MAIN-1488  ADJUSTED FILLER AND BADGE DUE TO PSN EXPANSION.
 *           PAYBEN INFO DID NOT LINE UP WITH EMP INFO AND SKEWED COLUMN
 *           ALIGNMENT WHEN DON DOWNLOADED THE REPORT TO EXCEL.
 

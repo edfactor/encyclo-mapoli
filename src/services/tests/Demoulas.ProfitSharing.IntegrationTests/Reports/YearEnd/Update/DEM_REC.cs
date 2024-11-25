@@ -1,5 +1,7 @@
 ﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
-public class DEM_REC {
+
+public class DEM_REC
+{
     public long DEM_BADGE { get; set; } // PIC 9(7).
     public long DEM_SSN { get; set; } // PIC 9(9).
     public string? PY_NAM { get; set; } // PIC X(40).
@@ -42,7 +44,7 @@ public class DEM_REC {
      03 DEM-KEY.
         05 DEM-BADGE    PIC 9(7).
      03 DEM-SSN         PIC 9(9).
-     03 PY-NAM          PIC X(40). 
+     03 PY-NAM          PIC X(40).
      03 PY-LNAME        PIC X(25).
      03 PY-FNAME        PIC X(25).
      03 PY-MNAME        PIC X(25).
@@ -67,7 +69,7 @@ public class DEM_REC {
      03 PY-ASSIGN-ID    PIC 9(15).
      03 PY-ASSIGN-DESC  PIC X(15).
      03 PY-NEW-EMP      PIC X(1).
-     03 PY-GENDER       PIC X(1). 
+     03 PY-GENDER       PIC X(1).
      03 PY-EMP-TELNO    PIC 9(10).
      03 PY-SHOUR        PIC 9(3)V99.
      03 PY-SET-PWD      PIC X(1).

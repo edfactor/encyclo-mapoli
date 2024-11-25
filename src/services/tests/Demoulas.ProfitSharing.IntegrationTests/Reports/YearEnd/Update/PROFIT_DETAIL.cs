@@ -1,6 +1,7 @@
 ﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
-public class PROFIT_DETAIL {
+public class PROFIT_DETAIL
+{
     public decimal PROFIT_YEAR { get; set; } // PIC S9(4)V9(1)
     public long PROFIT_CLIENT { get; set; } // PIC S9(3)
     public string? PROFIT_CODE { get; set; } // PIC X(1).

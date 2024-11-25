@@ -1,6 +1,6 @@
 ﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.ReportFormatters;
 
-using static Utils;
+using static FormatUtils;
 
 public class TOTAL_HEADER_3
 {
@@ -55,22 +55,22 @@ public class TOTAL_HEADER_3
     public override string ToString()
     {
         return
-        rformat(FILLER0, "string?", "X(11)")
-        + rformat(FILLER1, "string?", "X(07)")
-        + rformat(FILLER2, "string?", "X(09)")
-        + rformat(FILLER3, "string?", "X(07)")
-        + rformat(FILLER4, "string?", "X(06)")
-        + rformat(FILLER5, "string?", "X(08)")
-        + rformat(FILLER6, "string?", "X(08)")
-        + rformat(FILLER7, "string?", "X(09)")
-        + rformat(FILLER8, "string?", "X(06)")
-        + rformat(FILLER9, "string?", "X(08)")
-        + rformat(FILLER10, "string?", "X(12)")
-        + rformat(FILLER11, "string?", "X(07)")
-        + rformat(FILLER12, "string?", "X(08)")
-        + rformat(FILLER13, "string?", "X(10)")
-        + rformat(FILLER14, "string?", "X(03)")
-        + rformat(FILLER15, "string?", "X(07)")
+            rformat(FILLER0, "string?", "X(11)")
+            + rformat(FILLER1, "string?", "X(07)")
+            + rformat(FILLER2, "string?", "X(09)")
+            + rformat(FILLER3, "string?", "X(07)")
+            + rformat(FILLER4, "string?", "X(06)")
+            + rformat(FILLER5, "string?", "X(08)")
+            + rformat(FILLER6, "string?", "X(08)")
+            + rformat(FILLER7, "string?", "X(09)")
+            + rformat(FILLER8, "string?", "X(06)")
+            + rformat(FILLER9, "string?", "X(08)")
+            + rformat(FILLER10, "string?", "X(12)")
+            + rformat(FILLER11, "string?", "X(07)")
+            + rformat(FILLER12, "string?", "X(08)")
+            + rformat(FILLER13, "string?", "X(10)")
+            + rformat(FILLER14, "string?", "X(03)")
+            + rformat(FILLER15, "string?", "X(07)")
             ;
     }
 }

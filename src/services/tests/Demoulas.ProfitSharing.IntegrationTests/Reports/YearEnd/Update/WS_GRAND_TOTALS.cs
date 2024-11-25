@@ -1,6 +1,7 @@
 ﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
-public class WS_GRAND_TOTALS {
+public class WS_GRAND_TOTALS
+{
     public decimal WS_GRTOT_BEGBAL { get; set; } // PIC S9(10)V99
     public decimal WS_GRTOT_CONT { get; set; } // PIC S9(8)V99
     public decimal WS_GRTOT_EARN { get; set; } // PIC S9(9)V99
@@ -28,5 +29,5 @@ public class WS_GRAND_TOTALS {
      05  WS-GRTOT-PXFER             PIC S9(8)V99  VALUE ZERO.
      05  WS-GRTOT-ENDBAL            PIC S9(10)V99  VALUE ZERO.
      05  WS-GRTOT-CAF               PIC S9(8)V99  VALUE ZERO.
-     
+
 */

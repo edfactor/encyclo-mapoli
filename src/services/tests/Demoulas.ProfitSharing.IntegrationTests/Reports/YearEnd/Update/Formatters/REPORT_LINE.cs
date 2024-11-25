@@ -1,6 +1,6 @@
 ﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.ReportFormatters;
 
-using static Utils;
+using static FormatUtils;
 
 public class REPORT_LINE
 {
@@ -22,20 +22,20 @@ public class REPORT_LINE
     public override string ToString()
     {
         return
-        rformat(FILLER0, "string?", "X(04)")
-        + rformat(BADGE_NBR, "long", "9(07)")
-        + rformat(FILLER1, "string?", "X(01)")
-        + rformat(EMP_NAME, "string?", "X(22)")
-        + rformat(FILLER2, "string?", "X(01)")
-        + rformat(BEG_BAL, "decimal", "ZZZZ,ZZZ.99-")
-        + rformat(PR_CONT, "decimal", "ZZZZ,ZZZ.99-")
-        + rformat(PR_EARN, "decimal", "ZZZZ,ZZZ.99-")
-        + rformat(PR_EARN2, "decimal", "ZZZ,ZZZ.99-")
-        + rformat(PR_FORF, "decimal", "ZZZZ,ZZZ.99-")
-        + rformat(PR_DIST1, "decimal", "ZZZZ,ZZZ.99-")
-        + rformat(PR_MIL, "decimal", "ZZZ,ZZZ.99-")
-        + rformat(END_BAL, "decimal", "ZZZZ,ZZZ.99-")
-        + rformat(PR_NEWEMP, "string?", "X(3)")
+            rformat(FILLER0, "string?", "X(04)")
+            + rformat(BADGE_NBR, "long", "9(07)")
+            + rformat(FILLER1, "string?", "X(01)")
+            + rformat(EMP_NAME, "string?", "X(22)")
+            + rformat(FILLER2, "string?", "X(01)")
+            + rformat(BEG_BAL, "decimal", "ZZZZ,ZZZ.99-")
+            + rformat(PR_CONT, "decimal", "ZZZZ,ZZZ.99-")
+            + rformat(PR_EARN, "decimal", "ZZZZ,ZZZ.99-")
+            + rformat(PR_EARN2, "decimal", "ZZZ,ZZZ.99-")
+            + rformat(PR_FORF, "decimal", "ZZZZ,ZZZ.99-")
+            + rformat(PR_DIST1, "decimal", "ZZZZ,ZZZ.99-")
+            + rformat(PR_MIL, "decimal", "ZZZ,ZZZ.99-")
+            + rformat(END_BAL, "decimal", "ZZZZ,ZZZ.99-")
+            + rformat(PR_NEWEMP, "string?", "X(3)")
             ;
     }
 }

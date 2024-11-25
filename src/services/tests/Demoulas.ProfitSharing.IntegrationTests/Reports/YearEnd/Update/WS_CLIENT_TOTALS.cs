@@ -1,6 +1,7 @@
 ﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
-public class WS_CLIENT_TOTALS {
+public class WS_CLIENT_TOTALS
+{
     public decimal WS_TOT_BEGBAL { get; set; } // PIC S9(10)V99
     public decimal WS_TOT_CONT { get; set; } // PIC S9(8)V99
     public decimal WS_TOT_EARN { get; set; } // PIC S9(9)V99
@@ -32,5 +33,5 @@ public class WS_CLIENT_TOTALS {
      05  WS-TOT-CAF               PIC S9(8)V99  VALUE ZERO.
      05  WS-PROF-PTS-TOTAL        PIC S9(8)     VALUE ZERO.
      05  WS-EARN-PTS-TOTAL        PIC S9(8)     VALUE ZERO.
- 
+
 */

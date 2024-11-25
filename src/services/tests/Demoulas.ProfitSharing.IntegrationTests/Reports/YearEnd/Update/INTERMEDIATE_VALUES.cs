@@ -1,6 +1,7 @@
 ﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
-public class INTERMEDIATE_VALUES {
+public class INTERMEDIATE_VALUES
+{
     public long WS_FD_BADGE { get; set; } // PIC 9(7).
     public string? WS_FD_NAME { get; set; } // PIC X(25).
     public long WS_FD_SSN { get; set; } // PIC 9(9)

@@ -6,21 +6,20 @@ namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
 internal sealed class PayBenReader
 {
-    List<PAYBEN1_REC> benes = new();
+    private readonly List<PAYBEN1_REC> benes = new();
     private int pos = -1;
     public OracleConnection Connection { get; set; }
 
     public void dataload()
     {
         string query = "SELECT * FROM PROFITSHARE.PAYBEN";
-        using (var command = new OracleCommand(query, Connection))
+        using (OracleCommand command = new OracleCommand(query, Connection))
         {
-            using (var reader = command.ExecuteReader())
+            using (OracleDataReader? reader = command.ExecuteReader())
             {
                 while (reader.Read())
                 {
-
-                    var record = new PAYBEN1_REC
+                    PAYBEN1_REC record = new PAYBEN1_REC
                     {
                         PYBEN_PSN1 = reader.GetInt64(reader.GetOrdinal("PYBEN_PSN")),
                         PYBEN_PAYSSN1 = reader.GetInt64(reader.GetOrdinal("PYBEN_PAYSSN")),
@@ -49,13 +48,11 @@ internal sealed class PayBenReader
                         PYBEN_PSAMT1 = reader.GetDecimal(reader.GetOrdinal("PYBEN_PSAMT")),
                         PYBEN_PROF_EARN1 = reader.GetDecimal(reader.GetOrdinal("PYBEN_PROF_EARN")),
                         PYBEN_PROF_EARN21 = reader.GetDecimal(reader.GetOrdinal("PYBEN_PROF_EARN2"))
-
                     };
                     benes.Add(record);
                 }
             }
         }
-
     }
 
     public string Read(PAYBEN1_REC pbrec)
@@ -65,9 +62,10 @@ internal sealed class PayBenReader
             dataload();
             pos = 0;
         }
+
         if (pos < benes.Count)
         {
-            var l = benes[pos];
+            PAYBEN1_REC l = benes[pos];
             pbrec.PYBEN_PSN1 = l.PYBEN_PSN1;
             pbrec.PYBEN_PAYSSN1 = l.PYBEN_PAYSSN1;
             pbrec.PYBEN_TYPE1 = l.PYBEN_TYPE1;
@@ -97,7 +95,7 @@ internal sealed class PayBenReader
 
     public string? findByPSN(PAYBEN_REC pbrec)
     {
-        var l =benes.Where(b => b.PYBEN_PSN1 == pbrec.PYBEN_PSN).First();
+        PAYBEN1_REC l = benes.Where(b => b.PYBEN_PSN1 == pbrec.PYBEN_PSN).First();
         pbrec.PYBEN_PSN = l.PYBEN_PSN1;
         pbrec.PYBEN_PAYSSN = l.PYBEN_PAYSSN1;
         pbrec.PYBEN_TYPE = l.PYBEN_TYPE1;

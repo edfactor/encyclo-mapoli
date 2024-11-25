@@ -1,10 +1,10 @@
 ﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.ReportFormatters;
 
-using static Utils;
+using static FormatUtils;
 
 public class TOTAL_HEADER_1
 {
-    public string? FILLER0 { get; set; } = "PAY444";// PIC X(14)
+    public string? FILLER0 { get; set; } = "PAY444"; // PIC X(14)
     public string? FILLER1 { get; set; } // PIC X(11)
     public string? FILLER2 { get; set; } = "         P R O F I T     S H A R I N G    F O R    "; // PIC X(52)
     public long TOT_HDR1_YEAR1 { get; set; } // PIC 9(4)
@@ -12,7 +12,7 @@ public class TOTAL_HEADER_1
     public long TOT_HDR1_MM { get; set; } // PIC 99
     public string? FILLER4 { get; set; } = "/"; // PIC X
     public long TOT_HDR1_DD { get; set; } // PIC 99
-    public string? FILLER5 { get; set; } = "/";// PIC X
+    public string? FILLER5 { get; set; } = "/"; // PIC X
     public long TOT_HDR1_YY { get; set; } // PIC 99
     public string? FILLER6 { get; set; } // PIC X(4)
     public long TOT_HDR1_HR { get; set; } // PIC 99
@@ -23,21 +23,21 @@ public class TOTAL_HEADER_1
     public override string ToString()
     {
         return
-        rformat(FILLER0, "string?", "X(14)")
-        + rformat(FILLER1, "string?", "X(11)")
-        + rformat(FILLER2, "string?", "X(52)")
-        + rformat(TOT_HDR1_YEAR1, "long", "9(4)")
-        + rformat(FILLER3, "string?", "X(21)")
-        + rformat(TOT_HDR1_MM, "long", "99")
-        + rformat(FILLER4, "string?", "X")
-        + rformat(TOT_HDR1_DD, "long", "99")
-        + rformat(FILLER5, "string?", "X")
-        + rformat(TOT_HDR1_YY, "long", "99")
-        + rformat(FILLER6, "string?", "X(4)")
-        + rformat(TOT_HDR1_HR, "long", "99")
-        + rformat(FILLER7, "string?", "X")
-        + rformat(TOT_HDR1_MN, "long", "99")
-        + rformat(FILLER8, "string?", "X(15)")
+            rformat(FILLER0, "string?", "X(14)")
+            + rformat(FILLER1, "string?", "X(11)")
+            + rformat(FILLER2, "string?", "X(52)")
+            + rformat(TOT_HDR1_YEAR1, "long", "9(4)")
+            + rformat(FILLER3, "string?", "X(21)")
+            + rformat(TOT_HDR1_MM, "long", "99")
+            + rformat(FILLER4, "string?", "X")
+            + rformat(TOT_HDR1_DD, "long", "99")
+            + rformat(FILLER5, "string?", "X")
+            + rformat(TOT_HDR1_YY, "long", "99")
+            + rformat(FILLER6, "string?", "X(4)")
+            + rformat(TOT_HDR1_HR, "long", "99")
+            + rformat(FILLER7, "string?", "X")
+            + rformat(TOT_HDR1_MN, "long", "99")
+            + rformat(FILLER8, "string?", "X(15)")
             ;
     }
 }

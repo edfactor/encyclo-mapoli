@@ -26,7 +26,7 @@ public class HEADER_5
 
      05  FILLER                   PIC X(12)     VALUE SPACES.
 
-     05  FILLER                   PIC X(05)     VALUE 
+     05  FILLER                   PIC X(05)     VALUE
              "BADGE".
      05  FILLER                   PIC X(11)     VALUE SPACES.
 

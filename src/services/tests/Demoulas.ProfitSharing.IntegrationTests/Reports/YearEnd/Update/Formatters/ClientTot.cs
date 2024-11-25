@@ -1,4 +1,4 @@
-﻿using static Utils;
+﻿using static FormatUtils;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.ReportFormatters;
 

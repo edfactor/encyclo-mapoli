@@ -1,6 +1,7 @@
 ﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
-public class PAYPROF_REC {
+public class PAYPROF_REC
+{
     public long PAYPROF_BADGE { get; set; } // PIC 9(7).
     public long PAYPROF_SSN { get; set; } // PIC 9(9).
     public decimal PY_PH { get; set; } // PIC 9(4)V99.
@@ -31,7 +32,6 @@ public class PAYPROF_REC {
     public decimal PY_PROF_ETVA2 { get; set; } // PIC S9(7)V99.
     public long PY_PH_EXEC { get; set; } // PIC 9(4)v99.
     public decimal PY_PD_EXEC { get; set; } // PIC 9(6)V99.
-
 }
 /*
 
@@ -64,7 +64,7 @@ public class PAYPROF_REC {
      05  PY-PRIOR-ETVA         PIC  S9(8)V99.
      05  PY-PROF-ETVA          PIC  S9(7)V99.
      05  PY-PROF-EARN2         PIC  S9(7)V99.
-     05  PY-PROF-ETVA2         PIC  S9(7)V99.     
+     05  PY-PROF-ETVA2         PIC  S9(7)V99.
      05  PY-PH-EXEC            PIC  9(4)v99.
-     05  PY-PD-EXEC            PIC  9(6)V99. 
+     05  PY-PD-EXEC            PIC  9(6)V99.
 */

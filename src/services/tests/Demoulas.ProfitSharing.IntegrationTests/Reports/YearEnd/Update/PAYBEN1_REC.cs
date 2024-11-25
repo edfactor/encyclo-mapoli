@@ -1,6 +1,7 @@
 ﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
-public class PAYBEN1_REC {
+public class PAYBEN1_REC
+{
     public long PYBEN_PSN1 { get; set; } // PIC 9(11).
     public long PYBEN_PAYSSN1 { get; set; } // PIC 9(9).
     public string? PYBEN_TYPE1 { get; set; } // PIC X.

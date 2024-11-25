@@ -1,6 +1,6 @@
 ﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.ReportFormatters;
 
-using static Utils;
+using static FormatUtils;
 
 public class EMPLOYEE_COUNT_TOT
 {
@@ -10,8 +10,8 @@ public class EMPLOYEE_COUNT_TOT
     public override string ToString()
     {
         return
-        rformat(FILLER0, "string?", "X(27)")
-        + rformat(PR_TOT_EMPLOYEE_COUNT, "long", "ZZZ,ZZ9.")
+            rformat(FILLER0, "string?", "X(27)")
+            + rformat(PR_TOT_EMPLOYEE_COUNT, "long", "ZZZ,ZZ9.")
             ;
     }
 }

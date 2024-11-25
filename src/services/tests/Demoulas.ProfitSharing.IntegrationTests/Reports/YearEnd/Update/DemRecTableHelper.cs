@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
+﻿using System.Globalization;
 using Oracle.ManagedDataAccess.Client;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
@@ -8,74 +6,133 @@ namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 public class DemRecTableHelper
 {
 #pragma warning disable S2933
-    List<DEM_REC> demographicRecords = new();
-    private DEM_REC dem_rec;
+    private readonly List<DEM_REC> demographicRecords = new();
+    private readonly DEM_REC dem_rec;
 
     public DemRecTableHelper(OracleConnection connection, DEM_REC dem_rec)
     {
         this.dem_rec = dem_rec;
 
         string query = "SELECT * FROM PROFITSHARE.DEMOGRAPHICS";
-        using (var command = new OracleCommand(query, connection))
+        using (OracleCommand command = new OracleCommand(query, connection))
         {
-            using (var reader = command.ExecuteReader())
+            using (OracleDataReader? reader = command.ExecuteReader())
             {
                 while (reader.Read())
                 {
-                    var record = new DEM_REC
+                    DEM_REC record = new DEM_REC
                     {
                         DEM_BADGE = reader.GetInt64(reader.GetOrdinal("DEM_BADGE")),
                         DEM_SSN = reader.GetInt64(reader.GetOrdinal("DEM_SSN")),
-                        PY_NAM = reader.IsDBNull(reader.GetOrdinal("PY_NAM")) ? null : reader.GetString(reader.GetOrdinal("PY_NAM")),
-                        PY_LNAME = reader.IsDBNull(reader.GetOrdinal("PY_LNAME")) ? null : reader.GetString(reader.GetOrdinal("PY_LNAME")),
-                        PY_FNAME = reader.IsDBNull(reader.GetOrdinal("PY_FNAME")) ? null : reader.GetString(reader.GetOrdinal("PY_FNAME")),
-                        PY_MNAME = reader.IsDBNull(reader.GetOrdinal("PY_MNAME")) ? null : reader.GetString(reader.GetOrdinal("PY_MNAME")),
+                        PY_NAM =
+                            reader.IsDBNull(reader.GetOrdinal("PY_NAM"))
+                                ? null
+                                : reader.GetString(reader.GetOrdinal("PY_NAM")),
+                        PY_LNAME =
+                            reader.IsDBNull(reader.GetOrdinal("PY_LNAME"))
+                                ? null
+                                : reader.GetString(reader.GetOrdinal("PY_LNAME")),
+                        PY_FNAME =
+                            reader.IsDBNull(reader.GetOrdinal("PY_FNAME"))
+                                ? null
+                                : reader.GetString(reader.GetOrdinal("PY_FNAME")),
+                        PY_MNAME =
+                            reader.IsDBNull(reader.GetOrdinal("PY_MNAME"))
+                                ? null
+                                : reader.GetString(reader.GetOrdinal("PY_MNAME")),
                         PY_STOR = reader.GetInt64(reader.GetOrdinal("PY_STOR")),
                         PY_DP = reader.GetInt64(reader.GetOrdinal("PY_DP")),
                         PY_CLA = reader.GetInt64(reader.GetOrdinal("PY_CLA")),
-                        PY_ADD = reader.IsDBNull(reader.GetOrdinal("PY_ADD")) ? null : reader.GetString(reader.GetOrdinal("PY_ADD")),
-                        PY_ADD2 = reader.IsDBNull(reader.GetOrdinal("PY_ADD2")) ? null : reader.GetString(reader.GetOrdinal("PY_ADD2")),
-                        PY_CITY = reader.IsDBNull(reader.GetOrdinal("PY_CITY")) ? null : reader.GetString(reader.GetOrdinal("PY_CITY")),
-                        PY_STATE = reader.IsDBNull(reader.GetOrdinal("PY_STATE")) ? null : reader.GetString(reader.GetOrdinal("PY_STATE")),
+                        PY_ADD =
+                            reader.IsDBNull(reader.GetOrdinal("PY_ADD"))
+                                ? null
+                                : reader.GetString(reader.GetOrdinal("PY_ADD")),
+                        PY_ADD2 =
+                            reader.IsDBNull(reader.GetOrdinal("PY_ADD2"))
+                                ? null
+                                : reader.GetString(reader.GetOrdinal("PY_ADD2")),
+                        PY_CITY =
+                            reader.IsDBNull(reader.GetOrdinal("PY_CITY"))
+                                ? null
+                                : reader.GetString(reader.GetOrdinal("PY_CITY")),
+                        PY_STATE =
+                            reader.IsDBNull(reader.GetOrdinal("PY_STATE"))
+                                ? null
+                                : reader.GetString(reader.GetOrdinal("PY_STATE")),
                         PY_ZIP = reader.GetInt64(reader.GetOrdinal("PY_ZIP")),
                         PY_DOB = reader.GetInt64(reader.GetOrdinal("PY_DOB")),
-                        PY_FUL = reader.IsDBNull(reader.GetOrdinal("PY_FUL")) ? null : reader.GetString(reader.GetOrdinal("PY_FUL")),
-                        PY_FREQ = reader.IsDBNull(reader.GetOrdinal("PY_FREQ")) ? null : reader.GetString(reader.GetOrdinal("PY_FREQ")),
-                        PY_TYPE = reader.IsDBNull(reader.GetOrdinal("PY_TYPE")) ? null : reader.GetString(reader.GetOrdinal("PY_TYPE")),
-                        PY_SCOD = reader.IsDBNull(reader.GetOrdinal("PY_SCOD")) ? null : reader.GetString(reader.GetOrdinal("PY_SCOD")),
+                        PY_FUL =
+                            reader.IsDBNull(reader.GetOrdinal("PY_FUL"))
+                                ? null
+                                : reader.GetString(reader.GetOrdinal("PY_FUL")),
+                        PY_FREQ =
+                            reader.IsDBNull(reader.GetOrdinal("PY_FREQ"))
+                                ? null
+                                : reader.GetString(reader.GetOrdinal("PY_FREQ")),
+                        PY_TYPE =
+                            reader.IsDBNull(reader.GetOrdinal("PY_TYPE"))
+                                ? null
+                                : reader.GetString(reader.GetOrdinal("PY_TYPE")),
+                        PY_SCOD =
+                            reader.IsDBNull(reader.GetOrdinal("PY_SCOD"))
+                                ? null
+                                : reader.GetString(reader.GetOrdinal("PY_SCOD")),
                         PY_HIRE_DT = ParseDate(reader, "PY_HIRE_DT"),
                         PY_FULL_DT = ParseDate(reader, "PY_FULL_DT"),
                         PY_REHIRE_DT = ParseDate(reader, "PY_REHIRE_DT"),
                         PY_TERM_DT = ParseDate(reader, "PY_TERM_DT"),
-                        PY_TERM = reader.IsDBNull(reader.GetOrdinal("PY_TERM")) ? null : reader.GetString(reader.GetOrdinal("PY_TERM")),
+                        PY_TERM =
+                            reader.IsDBNull(reader.GetOrdinal("PY_TERM"))
+                                ? null
+                                : reader.GetString(reader.GetOrdinal("PY_TERM")),
                         PY_ASSIGN_ID = reader.GetInt64(reader.GetOrdinal("PY_ASSIGN_ID")),
-                        PY_ASSIGN_DESC = reader.IsDBNull(reader.GetOrdinal("PY_ASSIGN_DESC")) ? null : reader.GetString(reader.GetOrdinal("PY_ASSIGN_DESC")),
-                        PY_NEW_EMP = reader.IsDBNull(reader.GetOrdinal("PY_NEW_EMP")) ? null : reader.GetString(reader.GetOrdinal("PY_NEW_EMP")),
-                        PY_GENDER = reader.IsDBNull(reader.GetOrdinal("PY_GENDER")) ? null : reader.GetString(reader.GetOrdinal("PY_GENDER")),
+                        PY_ASSIGN_DESC =
+                            reader.IsDBNull(reader.GetOrdinal("PY_ASSIGN_DESC"))
+                                ? null
+                                : reader.GetString(reader.GetOrdinal("PY_ASSIGN_DESC")),
+                        PY_NEW_EMP =
+                            reader.IsDBNull(reader.GetOrdinal("PY_NEW_EMP"))
+                                ? null
+                                : reader.GetString(reader.GetOrdinal("PY_NEW_EMP")),
+                        PY_GENDER =
+                            reader.IsDBNull(reader.GetOrdinal("PY_GENDER"))
+                                ? null
+                                : reader.GetString(reader.GetOrdinal("PY_GENDER")),
                         PY_EMP_TELNO = reader.GetInt64(reader.GetOrdinal("PY_EMP_TELNO")),
                         PY_SHOUR = reader.GetDecimal(reader.GetOrdinal("PY_SHOUR")),
-                        PY_SET_PWD = reader.IsDBNull(reader.GetOrdinal("PY_SET_PWD")) ? null : reader.GetString(reader.GetOrdinal("PY_SET_PWD")),
-                        PY_SET_PWD_DT = reader.IsDBNull(reader.GetOrdinal("PY_SET_PWD_DT")) ? null : reader.GetString(reader.GetOrdinal("PY_SET_PWD_DT")),
+                        PY_SET_PWD =
+                            reader.IsDBNull(reader.GetOrdinal("PY_SET_PWD"))
+                                ? null
+                                : reader.GetString(reader.GetOrdinal("PY_SET_PWD")),
+                        PY_SET_PWD_DT =
+                            reader.IsDBNull(reader.GetOrdinal("PY_SET_PWD_DT"))
+                                ? null
+                                : reader.GetString(reader.GetOrdinal("PY_SET_PWD_DT")),
                         PY_CLASS_DT = ParseDate(reader, "PY_CLASS_DT"),
-                        PY_GUID = reader.IsDBNull(reader.GetOrdinal("PY_GUID")) ? null : reader.GetString(reader.GetOrdinal("PY_GUID")),
+                        PY_GUID = reader.IsDBNull(reader.GetOrdinal("PY_GUID"))
+                            ? null
+                            : reader.GetString(reader.GetOrdinal("PY_GUID"))
                     };
                     demographicRecords.Add(record);
                 }
             }
         }
-
     }
 
 
     private static DateOnly? ParseDate(OracleDataReader reader, string columnName)
     {
         if (reader.IsDBNull(reader.GetOrdinal(columnName)))
+        {
             return null;
+        }
 
-        var dateValue = reader.GetInt64(reader.GetOrdinal(columnName));
-        var dateString = dateValue.ToString("D8"); // Convert to yyyyMMdd format
-        if (DateOnly.TryParseExact(dateString, "yyyyMMdd", null, System.Globalization.DateTimeStyles.None, out var date))
+        long dateValue = reader.GetInt64(reader.GetOrdinal(columnName));
+        string dateString = dateValue.ToString("D8"); // Convert to yyyyMMdd format
+        if (DateOnly.TryParseExact(dateString, "yyyyMMdd", null, DateTimeStyles.None, out DateOnly date))
+        {
             return date;
+        }
 
         return null;
     }
