@@ -283,4 +283,66 @@ public class FrozenReportService : IFrozenReportService
             Response = new PaginatedResponseDto<ContributionsByAgeDetail>(req) { Results = details, Total = details.Count }
         };
     }
+
+    public async Task<ForfeituresByAge> GetForfeituresByAgeYear(FrozenReportsByAgeRequest req, CancellationToken cancellationToken = default)
+    {
+        const string FT = "FullTime";
+        const string PT = "PartTime";
+
+        var queryResult = await _dataContextFactory.UseReadOnlyContext(ctx =>
+        {
+            var query = (from pd in ctx.ProfitDetails
+                         join d in ctx.Demographics on pd.Ssn equals d.Ssn
+                         where pd.ProfitYear == req.ProfitYear
+                               && pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions
+                               && pd.Forfeiture > 0
+                         select new
+                         {
+                             d.DateOfBirth,
+                             EmploymentType = d.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT,
+                             d.EmployeeId,
+                             Amount = pd.Forfeiture
+                         });
+
+            query = req.ReportType switch
+            {
+                FrozenReportsByAgeRequest.Report.FullTime => query.Where(q => q.EmploymentType == FT),
+                FrozenReportsByAgeRequest.Report.PartTime => query.Where(q => q.EmploymentType == PT),
+                _ => query
+            };
+
+
+            return query.ToListAsync(cancellationToken: cancellationToken);
+        });
+
+
+        var details = queryResult.Select(x => new
+        {
+            Age = x.DateOfBirth.Age(),
+            x.EmployeeId,
+            x.Amount
+        })
+            .GroupBy(x => new { x.Age })
+            .Select(g => new ForfeituresByAgeDetail
+            {
+                Age = g.Key.Age,
+                EmployeeCount = g.Select(x => x.EmployeeId).Distinct().Count(),
+                Amount = g.Sum(x => x.Amount),
+            })
+            .OrderBy(x => x.Age)
+            .ToList();
+
+        req = req with { Take = details.Count + 1 };
+
+
+        return new ForfeituresByAge
+        {
+            ReportName = "PROFIT SHARING FORFEITURES BY AGE",
+            ReportDate = DateTimeOffset.Now,
+            ReportType = req.ReportType,
+            DistributionTotalAmount = details.Sum(d => d.Amount),
+            TotalEmployees = (short)details.Sum(d => d.EmployeeCount),
+            Response = new PaginatedResponseDto<ForfeituresByAgeDetail>(req) { Results = details, Total = details.Count }
+        };
+    }
 }
