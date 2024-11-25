@@ -79,14 +79,14 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
     public override string ReportFileName { get; }
 
 
-    protected internal override Task GenerateCsvContent(CsvWriter csvWriter, TerminatedEmployeeAndBeneficiaryResponse responseWithTotals,
+    protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, TerminatedEmployeeAndBeneficiaryResponse responseWithTotals,
         CancellationToken cancellationToken)
     {
         // Register the class map for the main member data
         csvWriter.Context.RegisterClassMap<TerminatedEmployeeAndBeneficiaryDataResponseMap>();
 
         // Write out totals
-        csvWriter.NextRecord();
+        await csvWriter.NextRecordAsync();
         csvWriter.WriteField("Amount In Profit Sharing");
         csvWriter.WriteField(responseWithTotals.TotalEndingBalance);
         csvWriter.WriteField("Vested Amount");
@@ -96,17 +96,17 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
         csvWriter.WriteField("Total Beneficiary Allocations");
         csvWriter.WriteField(responseWithTotals.TotalBeneficiaryAllocation);
 
-        csvWriter.NextRecord();
+        await csvWriter.NextRecordAsync();
 
         // Move to the next record to separate the headers from the data
-        csvWriter.NextRecord();
+        await csvWriter.NextRecordAsync();
 
         // Write the headers using the registered class map
         csvWriter.WriteHeader<TerminatedEmployeeAndBeneficiaryDataResponseDto>();
 
-        csvWriter.NextRecord();
+        await csvWriter.NextRecordAsync();
 
-        return base.GenerateCsvContent(csvWriter, responseWithTotals, cancellationToken);
+        await base.GenerateCsvContent(csvWriter, responseWithTotals, cancellationToken);
     }
 
 

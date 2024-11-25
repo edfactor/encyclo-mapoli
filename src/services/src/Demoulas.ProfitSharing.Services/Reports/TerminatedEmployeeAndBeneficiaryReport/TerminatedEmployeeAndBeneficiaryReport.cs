@@ -19,11 +19,13 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 {
     private readonly IProfitSharingDataContextFactory _factory;
     private readonly ICalendarService _calendarService;
+    private readonly ContributionService _contributionService;
 
-    public TerminatedEmployeeAndBeneficiaryReport(IProfitSharingDataContextFactory factory, ICalendarService calendarService)
+    public TerminatedEmployeeAndBeneficiaryReport(IProfitSharingDataContextFactory factory, ICalendarService calendarService, ContributionService contributionService)
     {
         _factory = factory;
         _calendarService = calendarService;
+        _contributionService = contributionService;
     }
 
     public async Task<TerminatedEmployeeAndBeneficiaryResponse> CreateData(ProfitYearRequest req, CancellationToken cancellationToken)
@@ -71,14 +73,14 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         return queryable;
     }
 
-    private static async Task<IQueryable<MemberSlice>> GetEmployeesWithContributions(ProfitSharingReadOnlyDbContext ctx, ProfitYearRequest request,
+    private async Task<IQueryable<MemberSlice>> GetEmployeesWithContributions(ProfitSharingReadOnlyDbContext ctx, ProfitYearRequest request,
         IQueryable<TerminatedEmployeeDto> terminatedEmployees, CancellationToken cancellationToken)
     {
         var demKeyList = await terminatedEmployees.Select(e => new { e.Demographic.Id, e.Demographic.EmployeeId }).ToListAsync(cancellationToken);
         var idList = demKeyList.Select(e => e.Id).ToHashSet();
         var badgeNumbers = demKeyList.Select(e => e.EmployeeId).ToHashSet();
 
-        var contributionYearsQuery = ContributionService.GetContributionYearsQuery(ctx, request.ProfitYear, badgeNumbers);
+        var contributionYearsQuery = _contributionService.GetContributionYears(badgeNumbers);
 
         var validEnrollmentIds = GetValidEnrollmentIds();
 
@@ -137,12 +139,12 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 BirthDate = x.Beneficiary.Contact!.DateOfBirth,
                 HoursCurrentYear = 0, // Placeholder logic for hours
                 EmploymentStatusCode = x.Demographic!.EmploymentStatusId,
-                FullName = x.Beneficiary.Contact!.FullName!,
-                FirstName = x.Beneficiary.Contact.FirstName,
-                MiddleInitial = x.Beneficiary.Contact.MiddleName != null
-                    ? x.Beneficiary.Contact.MiddleName.Substring(0, 1)
+                FullName = x.Beneficiary.Contact!.ContactInfo.FullName!,
+                FirstName = x.Beneficiary.Contact.ContactInfo.FirstName,
+                MiddleInitial = x.Beneficiary.Contact.ContactInfo.MiddleName != null
+                    ? x.Beneficiary.Contact.ContactInfo.MiddleName.Substring(0, 1)
                     : string.Empty,
-                LastName = x.Beneficiary.Contact.LastName,
+                LastName = x.Beneficiary.Contact.ContactInfo.LastName,
                 YearsInPs = 0,
                 TerminationDate = null,
                 IncomeRegAndExecCurrentYear = (x.PayProfit!.CurrentIncomeYear ) + x.PayProfit.IncomeExecutive,
@@ -197,9 +199,9 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
             InternalProfitDetailDto profitDetailSummary = RetrieveProfitDetail(profitDetails, req.ProfitYear);
 
-            int vestingPercent = ContributionService.LookupVestingPercent(memberSlice.EnrollmentId, memberSlice.ZeroCont, memberSlice.YearsInPs);
+            int vestingPercent = _contributionService.LookupVestingPercent(memberSlice.EnrollmentId, memberSlice.ZeroCont, memberSlice.YearsInPs);
 
-            var currentVestedAmount = ContributionService.CalculateCurrentVested(profitDetails, profitDetailSummary.CurrentAmount, vestingPercent);
+            var currentVestedAmount = _contributionService.CalculateCurrentVested(profitDetails, profitDetailSummary.CurrentAmount, vestingPercent);
 
             var beneficiaryAllocation = profitDetailSummary.BeneficiaryAllocation;
 
