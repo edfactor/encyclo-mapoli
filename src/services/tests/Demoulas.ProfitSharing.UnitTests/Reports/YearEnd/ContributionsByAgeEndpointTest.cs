@@ -49,7 +49,7 @@ public class ContributionsByAgeEndpointTest : ApiTestBase<Program>
             
         string content = await response.Response.Content.ReadAsStringAsync();
         content.Should().Contain("AGE,EMPS,AMOUNT");
-        content.Should().Contain("DIST TTL,,");
+        content.Should().Contain("CONT TTL,,");
     }
 
     [Fact(DisplayName = "PS-502: Check to ensure unauthorized")]
