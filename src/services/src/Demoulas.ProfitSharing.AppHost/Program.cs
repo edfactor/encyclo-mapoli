@@ -35,14 +35,14 @@ catch (Exception ex)
 
 var api = builder.AddProject<Projects.Demoulas_ProfitSharing_Api>("demoulas-profitsharing-api")
     .WithHttpHealthCheck("/health")
-    .WithHttpsHealthCheck("/health");
+    .WithHttpsHealthCheck("/health")
+    .AsHttp2Service();
 
 builder.AddNpmApp("demoulas-profitsharing-ui", "../../../ui/", "dev")
     .WithReference(api)
     .WaitFor(api)
     .WithHttpEndpoint(port: uiPort, isProxied:false)
-    .WithExternalHttpEndpoints()
-    .AsHttp2Service();
+    .WithExternalHttpEndpoints();
 
 
 await using DistributedApplication host = builder.Build();

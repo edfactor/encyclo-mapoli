@@ -88,9 +88,9 @@ public abstract class EndpointWithCsvBase<ReqType, RespType, MapType> : Endpoint
         return memoryStream;
     }
 
-    protected internal virtual async Task GenerateCsvContent(CsvWriter csvWriter, ReportResponseBase<RespType> report, CancellationToken cancellationToken)
+    protected internal virtual Task GenerateCsvContent(CsvWriter csvWriter, ReportResponseBase<RespType> report, CancellationToken cancellationToken)
     {
         _ = csvWriter.Context.RegisterClassMap<MapType>();
-        await csvWriter.WriteRecordsAsync(report.Response.Results, cancellationToken);
+        return csvWriter.WriteRecordsAsync(report.Response.Results, cancellationToken);
     }
 }

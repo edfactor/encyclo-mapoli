@@ -56,7 +56,7 @@ public class ContributionsByAgeEndpoint : EndpointWithCsvTotalsBase<FrozenReport
         await base.GenerateCsvContent(csvWriter, report, cancellationToken);
 
         await csvWriter.NextRecordAsync();
-        csvWriter.WriteField("DIST TTL");
+        csvWriter.WriteField("CONT TTL");
         csvWriter.WriteField("");
         csvWriter.WriteField(report.DistributionTotalAmount);
 

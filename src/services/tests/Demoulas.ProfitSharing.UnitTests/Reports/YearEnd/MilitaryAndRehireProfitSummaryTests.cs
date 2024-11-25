@@ -38,9 +38,9 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
 
     
     [Fact(DisplayName = "PS-346: Check for Military (JSON)")]
-    public async Task GetResponse_Should_ReturnReportResponse_WhenCalledWithValidRequest()
+    public Task GetResponse_Should_ReturnReportResponse_WhenCalledWithValidRequest()
     {
-        await MockDbContextFactory.UseWritableContext(async c =>
+        return MockDbContextFactory.UseWritableContext(async c =>
         {
             var setup = await SetupTestEmployee(c);
 
@@ -66,9 +66,9 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
     }
 
     [Fact(DisplayName = "PS-346: Check for Military (CSV)")]
-    public async Task GetResponse_Should_ReturnReportResponse_WhenCalledWithValidRequest_CSV()
+    public Task GetResponse_Should_ReturnReportResponse_WhenCalledWithValidRequest_CSV()
     {
-        await MockDbContextFactory.UseWritableContext(async c =>
+        return MockDbContextFactory.UseWritableContext(async c =>
         {
             var setup = await SetupTestEmployee(c);
 
@@ -108,9 +108,9 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
 
 
     [Fact(DisplayName = "PS-346: Check to ensure unauthorized")]
-    public async Task Unauthorized()
+    public Task Unauthorized()
     {
-        await MockDbContextFactory.UseWritableContext(async c =>
+        return MockDbContextFactory.UseWritableContext(async c =>
         {
             var setup = await SetupTestEmployee(c);
 
