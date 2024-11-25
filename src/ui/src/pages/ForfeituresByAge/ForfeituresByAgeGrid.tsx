@@ -1,39 +1,39 @@
 import { Typography } from "@mui/material";
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { useLazyGetContributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
+import { useLazyGetForfeituresByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams } from "smart-ui-library";
-import { GetContributionsByAgeColumns } from "./ContributionsByAgeGridColumns";
+import { GetForfeituresByAgeColumns } from "./ForfeituresByAgeGridColumns";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { FrozenReportsByAgeRequestType } from "../../reduxstore/types";
 
-const ContributionsByAgeGrid = () => {
+const ForfeituresByAgeGrid = () => {
   const [_discard0, setSortParams] = useState<ISortParams>({
     sortBy: "Badge",
     isSortDescending: false
   });
 
-  const { contributionsByAgeTotal, contributionsByAgeFullTime, contributionsByAgePartTime } = useSelector(
+  const { forfeituresByAgeTotal, forfeituresByAgeFullTime, forfeituresByAgePartTime } = useSelector(
     (state: RootState) => state.yearsEnd
   );
-  const [_discard1, { isLoading }] = useLazyGetContributionsByAgeQuery();
+  const [_discard1, { isLoading }] = useLazyGetForfeituresByAgeQuery();
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
-  const columnDefsTotal = GetContributionsByAgeColumns(FrozenReportsByAgeRequestType.Total);
-  const columnDefsFullTime = GetContributionsByAgeColumns(FrozenReportsByAgeRequestType.FullTime);
-  const columnDefsPartTime = GetContributionsByAgeColumns(FrozenReportsByAgeRequestType.PartTime);
+  const columnDefsTotal = GetForfeituresByAgeColumns(FrozenReportsByAgeRequestType.Total);
+  const columnDefsFullTime = GetForfeituresByAgeColumns(FrozenReportsByAgeRequestType.FullTime);
+  const columnDefsPartTime = GetForfeituresByAgeColumns(FrozenReportsByAgeRequestType.PartTime);
 
   return (
     <>
-      {contributionsByAgeTotal?.response && (
+      {forfeituresByAgeTotal?.response && (
         <>
           <div style={{ padding: "0 24px 0 24px" }}>
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`${contributionsByAgeTotal.reportName}`}
+              {`${forfeituresByAgeTotal.reportName}`}
             </Typography>
           </div>
           <Grid2
@@ -45,12 +45,12 @@ const ContributionsByAgeGrid = () => {
                 isLoading={isLoading}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
-                  rowData: contributionsByAgeTotal?.response.results,
+                  rowData: forfeituresByAgeTotal?.response.results,
                   pinnedTopRowData: [
                     {
-                      age: "CONT TTL",
-                      employeeCount: (contributionsByAgeTotal?.totalEmployees || 0),
-                      amount: contributionsByAgeTotal?.distributionTotalAmount
+                      age: "FORF  TTL",
+                      employeeCount: (forfeituresByAgeTotal?.totalEmployees || 0),
+                      amount: forfeituresByAgeTotal?.distributionTotalAmount
                     }
                   ],
                   columnDefs: [
@@ -68,12 +68,12 @@ const ContributionsByAgeGrid = () => {
                 isLoading={isLoading}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
-                  rowData: contributionsByAgeFullTime?.response.results,
+                  rowData: forfeituresByAgeFullTime?.response.results,
                   pinnedTopRowData: [
                     {
-                     age: "CONT TTL",
-                      employeeCount: (contributionsByAgeTotal?.totalEmployees || 0),
-                      amount: contributionsByAgeTotal?.distributionTotalAmount
+                     age: "FORF  TTL",
+                      employeeCount: (forfeituresByAgeTotal?.totalEmployees || 0),
+                      amount: forfeituresByAgeTotal?.distributionTotalAmount
                     }
                   ],
                   columnDefs: [
@@ -91,12 +91,12 @@ const ContributionsByAgeGrid = () => {
                 isLoading={isLoading}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
-                  rowData: contributionsByAgePartTime?.response.results,
+                  rowData: forfeituresByAgePartTime?.response.results,
                   pinnedTopRowData: [
                     {
-                      age: "CONT TTL",
-                      employeeCount: (contributionsByAgeTotal?.totalEmployees || 0),
-                      amount: contributionsByAgeTotal?.distributionTotalAmount
+                     age: "FORF  TTL",
+                      employeeCount: (forfeituresByAgeTotal?.totalEmployees || 0),
+                      amount: forfeituresByAgeTotal?.distributionTotalAmount
                     }
                   ],
                   columnDefs: [
@@ -115,4 +115,4 @@ const ContributionsByAgeGrid = () => {
   );
 };
 
-export default ContributionsByAgeGrid;
+export default ForfeituresByAgeGrid;

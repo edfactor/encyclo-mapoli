@@ -2,13 +2,13 @@ import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { useLazyGetContributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
+import { useLazyGetForfeituresByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { ImpersonationRoles, FrozenReportsByAgeRequestType } from "reduxstore/types";
 
-interface ContributionsByAgeSearch {
+interface ForfeituresByAgeSearch {
   profitYear: number;
   reportType?: FrozenReportsByAgeRequestType;
 }
@@ -23,17 +23,17 @@ const schema = yup.object().shape({
     .required("Year is required")
 });
 
-const ContributionsByAgeSearchFilter = () => {
+const ForfeituresByAgeSearchFilter = () => {
   const [isFetching, setIsFetching] = useState(false);
 
-  const [triggerSearch] = useLazyGetContributionsByAgeQuery();
+  const [triggerSearch] = useLazyGetForfeituresByAgeQuery();
 
   const {
     control,
     handleSubmit,
     formState: { errors, isValid },
     reset
-  } = useForm<ContributionsByAgeSearch>({
+  } = useForm<ForfeituresByAgeSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
       profitYear: undefined,
@@ -126,4 +126,4 @@ const ContributionsByAgeSearchFilter = () => {
   );
 };
 
-export default ContributionsByAgeSearchFilter;
+export default ForfeituresByAgeSearchFilter;
