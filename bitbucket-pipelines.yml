@@ -76,6 +76,10 @@ definitions:
           "@ | Out-File -FilePath .npmrc -Encoding ASCII
         - C:\nvm\v20.4.0\npm.cmd install --legacy-peer-deps;
         - C:\nvm\v20.4.0\npm.cmd run build:${env:ENV}
+        
+        - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
+        - Copy-Item -Path ".buildinfo.json" -Destination "..\..\src\UI\build"
+        
         - Copy-Item -Path ".\src\web.config" -Destination "..\..\src\UI\build"
         - New-Item -Path "..\..\dist" -ItemType Directory
         - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.${env:ENV}.zip" -Force        
