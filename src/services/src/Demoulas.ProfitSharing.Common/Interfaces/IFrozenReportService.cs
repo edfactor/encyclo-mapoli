@@ -6,4 +6,5 @@ namespace Demoulas.ProfitSharing.Common.Interfaces;
 public interface IFrozenReportService
 {
     public Task<ReportResponseBase<ForfeituresAndPointsForYearResponse>> GetForfeituresAndPointsForYear(ProfitYearRequest req, CancellationToken cancellationToken = default);
+    public Task<DistributionsByAge> GetDistributionsByAgeYear(DistributionsByAgeRequest req, CancellationToken cancellationToken = default);
 }

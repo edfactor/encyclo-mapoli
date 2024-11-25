@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Demoulas.Common.Contracts.Contracts.Request;
+﻿using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -9,7 +8,6 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query.Internal;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
@@ -48,7 +46,7 @@ public class CleanupReportService : ICleanupReportService
                     group new { dem, DemPdPp }
                         by new
                         {
-                            dem.BadgeNumber,
+                            dem.EmployeeId,
                             SSN = dem.Ssn,
                             dem.ContactInfo.FullName,
                             dem.Address.Street,
@@ -66,7 +64,7 @@ public class CleanupReportService : ICleanupReportService
                     into grp
                     select new PayrollDuplicateSsnResponseDto
                     {
-                        BadgeNumber = grp.Key.BadgeNumber,
+                        BadgeNumber = grp.Key.EmployeeId,
                         Ssn = grp.Key.SSN.MaskSsn(),
                         Name = grp.Key.FullName,
                         Address = new AddressResponseDto
@@ -111,7 +109,7 @@ public class CleanupReportService : ICleanupReportService
                                 && p.EarningsEtvaValue < 0)
                     .Select(p => new NegativeEtvaForSsNsOnPayProfitResponse
                     {
-                        EmployeeBadge = p.Demographic!.BadgeNumber, EmployeeSsn = p.Demographic.Ssn, EtvaValue = p.EarningsEtvaValue
+                        EmployeeBadge = p.Demographic!.EmployeeId, EmployeeSsn = p.Demographic.Ssn, EtvaValue = p.EarningsEtvaValue
                     })
                     .OrderBy(p => p.EmployeeBadge)
                     .ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken);
@@ -137,7 +135,7 @@ public class CleanupReportService : ICleanupReportService
                     where !(from pp in ctx.PayProfits select pp.DemographicId).Contains(dem.Id)
                     select new DemographicBadgesNotInPayProfitResponse
                     {
-                        EmployeeBadge = dem.BadgeNumber,
+                        EmployeeBadge = dem.EmployeeId,
                         EmployeeSsn = dem.Ssn,
                         EmployeeName = dem.ContactInfo.FullName ?? "",
                         Status = dem.EmploymentStatusId,
@@ -166,7 +164,7 @@ public class CleanupReportService : ICleanupReportService
 #pragma warning disable CA1847
                     where dem.ContactInfo.FullName == null || !dem.ContactInfo.FullName.Contains(",")
 #pragma warning restore CA1847
-                    select new NamesMissingCommaResponse { EmployeeBadge = dem.BadgeNumber, EmployeeSsn = dem.Ssn, EmployeeName = dem.ContactInfo.FullName ?? "", };
+                    select new NamesMissingCommaResponse { EmployeeBadge = dem.EmployeeId, EmployeeSsn = dem.Ssn, EmployeeName = dem.ContactInfo.FullName ?? "", };
                 return await query.ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken: cancellationToken);
             });
 
@@ -200,7 +198,7 @@ public class CleanupReportService : ICleanupReportService
                     where pp.ProfitYear == req.ProfitYear && dupNameSlashDateOfBirth.Contains(dem.ContactInfo.FullName)
                     group new { dem, pp, pd } by new
                     {
-                        dem.BadgeNumber,
+                        dem.EmployeeId,
                         SSN = dem.Ssn,
                         dem.ContactInfo.FullName,
                         dem.DateOfBirth,
@@ -218,10 +216,10 @@ public class CleanupReportService : ICleanupReportService
                         pp.CurrentIncomeYear
                     }
                     into g
-                    orderby g.Key.FullName, g.Key.DateOfBirth, g.Key.SSN, g.Key.BadgeNumber
-                    select new DuplicateNamesAndBirthdaysResponse
+                    orderby g.Key.FullName, g.Key.DateOfBirth, g.Key.SSN, g.Key.EmployeeId
+                            select new DuplicateNamesAndBirthdaysResponse
                     {
-                        BadgeNumber = g.Key.BadgeNumber,
+                        BadgeNumber = g.Key.EmployeeId,
                         Ssn = g.Key.SSN.MaskSsn(),
                         Name = g.Key.FullName,
                         DateOfBirth = g.Key.DateOfBirth,
@@ -292,14 +290,14 @@ public class CleanupReportService : ICleanupReportService
                         x.ContactInfo.FirstName,
                         x.ContactInfo.LastName,
                         x.DateOfBirth,
-                        x.BadgeNumber
-                    }).Union(ctx.Beneficiaries.Include(b => b.Contact).Select(x => new
+                        x.EmployeeId
+                }).Union(ctx.Beneficiaries.Include(b => b.Contact).Select(x => new
                     {
                         x.Contact!.Ssn,
                         x.Contact.FirstName,
                         x.Contact.LastName,
                         x.Contact.DateOfBirth,
-                        BadgeNumber = 0
+                        EmployeeId = 0
                     }))
                     .GroupBy(x => x.Ssn)
                     .Select(x => new
@@ -308,7 +306,7 @@ public class CleanupReportService : ICleanupReportService
                         FirstName = x.Max(m => m.FirstName),
                         LastName = x.Max(m => m.LastName),
                         DateOfBirth = x.Max(m => m.DateOfBirth),
-                        BadgeNumber = x.Max(m => m.BadgeNumber)
+                        BadgeNumber = x.Max(m => m.EmployeeId)
                     });
 
                 var transferAndQdroCommentTypes = new List<int>() { CommentType.Constants.TransferIn.Id, CommentType.Constants.TransferOut.Id, CommentType.Constants.QdroIn.Id, CommentType.Constants.QdroOut.Id };
@@ -323,7 +321,7 @@ public class CleanupReportService : ICleanupReportService
                     orderby nameAndDob.LastName, nameAndDob.FirstName
                     select new DistributionsAndForfeitureResponse()
                     {
-                        BadgeNumber = nameAndDob.BadgeNumber,
+                        EmployeeId = nameAndDob.BadgeNumber,
                         EmployeeSsn = pd.Ssn.MaskSsn(),
                         EmployeeName = $"{nameAndDob.LastName}, {nameAndDob.FirstName}",
                         DistributionAmount = distributionProfitCodes.Contains(pd.ProfitCodeId) ? pd.Forfeiture : 0,
@@ -356,7 +354,7 @@ public class CleanupReportService : ICleanupReportService
                 .Join(_totalService.GetYearsOfService(ctx, req.ProfitYear), x => x.Demographic!.Ssn, x => x.Ssn, (p, tot) => new { pp=p, yip = tot })
                 .Select(p => new 
                 {
-                    p.pp.Demographic!.BadgeNumber,
+                    p.pp.Demographic!.EmployeeId,
                     p.pp.CurrentHoursYear,
                     p.pp.HoursExecutive,
                     p.pp.Demographic!.DateOfBirth,
@@ -379,7 +377,7 @@ public class CleanupReportService : ICleanupReportService
                       where (!ctx.Demographics.Any(x=>x.Ssn == b.Contact!.Ssn)) //Filter out employees who are beneficiaries
                       select new
                       {
-                          BadgeNumber = 0,
+                          EmployeeId = 0,
                           CurrentHoursYear = 0m,
                           HoursExecutive = 0m,
                           b.Contact!.DateOfBirth,
@@ -469,7 +467,7 @@ public class CleanupReportService : ICleanupReportService
                       .ThenBy(p => p.pp.FirstName)
                       .Select(x => new YearEndProfitSharingReportResponse()
                       {
-                          BadgeNumber = x.pp.BadgeNumber,
+                          EmployeeId = x.pp.EmployeeId,
                           EmployeeName = $"{x.pp.LastName}, {x.pp.FirstName}",
                           StoreNumber = x.pp.StoreNumber,
                           EmployeeTypeCode = x.pp.EmploymentTypeId,

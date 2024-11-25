@@ -38,7 +38,7 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
             }
             if (request.BadgeNumber.HasValue)
             {
-                query = query.Where(pp => pp.Demographic!.BadgeNumber == request.BadgeNumber);
+                query = query.Where(pp => pp.Demographic!.EmployeeId == request.BadgeNumber);
             }
             if (request.FullNameContains != null)
             {
@@ -51,7 +51,7 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
             return query
                 .Select(p => new ExecutiveHoursAndDollarsResponse
                 {
-                    BadgeNumber = p.Demographic!.BadgeNumber,
+                    BadgeNumber = p.Demographic!.EmployeeId,
                     FullName = p.Demographic.ContactInfo.FullName,
                     StoreNumber = p.Demographic.StoreNumber,
                     HoursExecutive = p.HoursExecutive,
@@ -90,7 +90,7 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
             var ppQuery = await ctx.PayProfits
                 .Include(p => p.Demographic)
                 .Where(p => p.ProfitYear == profitYear)
-                .Where(p => badges.Contains(p.Demographic!.BadgeNumber))
+                .Where(p => badges.Contains(p.Demographic!.EmployeeId))
                 .ToListAsync(cancellationToken);
 
             if (executiveHoursAndDollarsDtos.Count != ppQuery.Count)
@@ -100,7 +100,7 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
 
             foreach (var pp in ppQuery)
             {
-                var dto = executiveHoursAndDollarsDtos.First(x => x.BadgeNumber == pp.Demographic!.BadgeNumber);
+                var dto = executiveHoursAndDollarsDtos.First(x => x.BadgeNumber == pp.Demographic!.EmployeeId);
                 pp.HoursExecutive = dto.ExecutiveHours;
                 pp.IncomeExecutive = dto.ExecutiveDollars;
             }

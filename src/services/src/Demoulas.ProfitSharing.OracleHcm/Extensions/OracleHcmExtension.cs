@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
-using Demoulas.ProfitSharing.Common.Configuration;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.HostedServices;
 using Demoulas.ProfitSharing.OracleHcm.Jobs;
 using Demoulas.ProfitSharing.OracleHcm.Services;
@@ -15,6 +15,8 @@ using Quartz.Impl;
 using Quartz.Spi;
 using Quartz;
 using Demoulas.ProfitSharing.OracleHcm.Factories;
+using Demoulas.ProfitSharing.OracleHcm.HealthCheck;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Extensions;
 public static class OracleHcmExtension
@@ -35,20 +37,7 @@ public static class OracleHcmExtension
         _ = builder.Services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
 
 
-        _ = builder.Services.AddHttpClient<IEmployeeSyncService, EmployeeSyncService>((services, client) =>
-        {
-            OracleHcmConfig config = services.GetRequiredService<OracleHcmConfig>();
-
-            byte[] bytes = Encoding.UTF8.GetBytes($"{config.Username}:{config.Password}");
-            string encodedAuth = Convert.ToBase64String(bytes);
-            if (!string.IsNullOrEmpty(config.DemographicUrl))
-            {
-                client.BaseAddress = new Uri(string.Concat(config.BaseAddress, config.DemographicUrl), UriKind.Absolute);
-            }
-
-            client.DefaultRequestHeaders.Add(FrameworkVersionHeader, config.RestFrameworkVersion);
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", encodedAuth);
-        }).AddStandardResilienceHandler(options =>
+        _ = builder.Services.AddHttpClient<IEmployeeSyncService, EmployeeSyncService>("EmployeeSync", BuildOracleHcmAuthClient).AddStandardResilienceHandler(options =>
         {
             options.CircuitBreaker = new HttpCircuitBreakerStrategyOptions { SamplingDuration = TimeSpan.FromMinutes(2) };
             options.AttemptTimeout = new HttpTimeoutStrategyOptions { Timeout = TimeSpan.FromMinutes(1) };
@@ -56,20 +45,7 @@ public static class OracleHcmExtension
         });
 
 
-        _ = builder.Services.AddHttpClient<PayrollSyncClient>((services, client) =>
-        {
-            OracleHcmConfig config = services.GetRequiredService<OracleHcmConfig>();
-
-            byte[] bytes = Encoding.UTF8.GetBytes($"{config.Username}:{config.Password}");
-            string encodedAuth = Convert.ToBase64String(bytes);
-            if (!string.IsNullOrEmpty(config.DemographicUrl))
-            {
-                client.BaseAddress = new Uri(string.Concat(config.BaseAddress, config.PayrollUrl), UriKind.Absolute);
-            }
-
-            client.DefaultRequestHeaders.Add(FrameworkVersionHeader, config.RestFrameworkVersion);
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", encodedAuth);
-        }).AddStandardResilienceHandler(options =>
+        _ = builder.Services.AddHttpClient<PayrollSyncClient>("PayrollSync", BuildOracleHcmAuthClient).AddStandardResilienceHandler(options =>
         {
             options.CircuitBreaker = new HttpCircuitBreakerStrategyOptions { SamplingDuration = TimeSpan.FromMinutes(2) };
             options.AttemptTimeout = new HttpTimeoutStrategyOptions { Timeout = TimeSpan.FromMinutes(1) };
@@ -77,15 +53,28 @@ public static class OracleHcmExtension
         });
 
 
+        builder.Services.AddHttpClient<OracleHcmHealthCheck>("HealthCheck", BuildOracleHcmAuthClient);
 
 
 
         if (!builder.Environment.IsTestEnvironment())
         {
             _ = builder.Services.AddHostedService<OracleHcmHostedService>();
+            _ = builder.Services.AddHealthChecks().AddCheck<OracleHcmHealthCheck>("OracleHcm");
         }
 
 
         return builder;
+    }
+
+    private static void BuildOracleHcmAuthClient(IServiceProvider services, HttpClient client)
+    {
+        OracleHcmConfig config = services.GetRequiredService<OracleHcmConfig>();
+
+        byte[] bytes = Encoding.UTF8.GetBytes($"{config.Username}:{config.Password}");
+        string encodedAuth = Convert.ToBase64String(bytes);
+        client.BaseAddress = new Uri(config.BaseAddress, UriKind.Absolute);
+        client.DefaultRequestHeaders.Add(FrameworkVersionHeader, config.RestFrameworkVersion);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", encodedAuth);
     }
 }

@@ -1,18 +1,22 @@
-import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
   DemographicBadgesNotInPayprofit,
+  DistributionByAgeReportType,
   DistributionsAndForfeitures,
   DuplicateNameAndBirthday,
   DuplicateSSNDetail,
   EligibleEmployeeResponseDto,
   ExecutiveHoursAndDollars,
+  MasterInquiryDetail,
   MilitaryAndRehire,
   MilitaryAndRehireForfeiture,
   MilitaryAndRehireProfitSummary,
   MissingCommasInPYName,
   NegativeEtvaForSSNsOnPayProfit,
-  PagedReportResponse
+  PagedReportResponse,
+  ProfitSharingDistributionsByAge
 } from "reduxstore/types";
+import { Paged } from "smart-ui-library";
 
 export interface YearsEndState {
   duplicateSSNsData: PagedReportResponse<DuplicateSSNDetail> | null;
@@ -26,6 +30,10 @@ export interface YearsEndState {
   distributionsAndForfeitures: PagedReportResponse<DistributionsAndForfeitures> | null;
   executiveHoursAndDollars: PagedReportResponse<ExecutiveHoursAndDollars> | null;
   eligibleEmployees: EligibleEmployeeResponseDto | null;
+  masterInquiryData: Paged<MasterInquiryDetail> | null;
+  distributionsByAgeTotal: ProfitSharingDistributionsByAge | null;
+  distributionsByAgeFullTime: ProfitSharingDistributionsByAge | null;
+  distributionsByAgePartTime: ProfitSharingDistributionsByAge | null;
 }
 
 const initialState: YearsEndState = {
@@ -39,7 +47,11 @@ const initialState: YearsEndState = {
   militaryAndRehireProfitSummary: null,
   distributionsAndForfeitures: null,
   executiveHoursAndDollars: null,
-  eligibleEmployees: null
+  eligibleEmployees: null,
+  masterInquiryData: null,
+  distributionsByAgeTotal: null,
+  distributionsByAgeFullTime: null,
+  distributionsByAgePartTime: null
 };
 
 export const yearsEndSlice = createSlice({
@@ -88,18 +100,36 @@ export const yearsEndSlice = createSlice({
     ) => {
       state.distributionsAndForfeitures = action.payload;
     },
-    setExecutiveHoursAndDollars: (
-      state,
-      action: PayloadAction<PagedReportResponse<ExecutiveHoursAndDollars>>
-    ) => {
+    setExecutiveHoursAndDollars: (state, action: PayloadAction<PagedReportResponse<ExecutiveHoursAndDollars>>) => {
       state.executiveHoursAndDollars = action.payload;
     },
-    setEligibleEmployees: (
-      state,
-      action: PayloadAction<EligibleEmployeeResponseDto>
-    ) => {
+    setEligibleEmployees: (state, action: PayloadAction<EligibleEmployeeResponseDto>) => {
       state.eligibleEmployees = action.payload;
     },
+    setMasterInquiryData: (
+      state,
+      action: PayloadAction<Paged<MasterInquiryDetail>>
+    ) => {
+      state.masterInquiryData = action.payload;
+    },
+    clearMasterInquiryData: (
+      state
+    ) => {
+      state.masterInquiryData = null;
+    },
+    setDistributionsByAge: (state, action: PayloadAction<ProfitSharingDistributionsByAge>) => {
+      if (action.payload.reportType == DistributionByAgeReportType.Total) {
+        state.distributionsByAgeTotal = action.payload;
+      }
+
+      if (action.payload.reportType == DistributionByAgeReportType.FullTime) {
+        state.distributionsByAgeFullTime = action.payload;
+      }
+
+      if (action.payload.reportType == DistributionByAgeReportType.PartTime) {
+        state.distributionsByAgePartTime = action.payload;
+      }
+    }
   }
 });
 
@@ -114,6 +144,9 @@ export const {
   setMilitaryAndRehireProfitSummaryDetails,
   setDistributionsAndForfeitures,
   setExecutiveHoursAndDollars,
-  setEligibleEmployees
+  setEligibleEmployees,
+  setMasterInquiryData,
+  clearMasterInquiryData,
+  setDistributionsByAge
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

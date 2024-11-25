@@ -86,6 +86,7 @@ public class Program
         {
             string? connectionName = configuration["connection-name"];
             string? sqlFile = configuration["sql-file"];
+            string? sourceSchema = configuration["source-Schema"];
             if (string.IsNullOrEmpty(connectionName))
             {
                 throw new ArgumentNullException(nameof(connectionName), "Connection name must be provided.");
@@ -93,8 +94,12 @@ public class Program
 
             if (string.IsNullOrEmpty(sqlFile))
             {
-
                 throw new ArgumentNullException(nameof(sqlFile), "SQL file path must be provided.");
+            }
+
+            if (string.IsNullOrEmpty(sourceSchema))
+            {
+                throw new ArgumentNullException(nameof(sourceSchema), "A source schema name must be provided.");
             }
 
             HostApplicationBuilder builder = CreateHostBuilder(args);
@@ -107,7 +112,8 @@ public class Program
             await factory.UseWritableContext(async context =>
             {
                 string sqlCommand = await File.ReadAllTextAsync(sqlFile);
-                sqlCommand = sqlCommand.Replace("COMMIT ;", string.Empty).Trim();
+                sqlCommand = sqlCommand.Replace("COMMIT ;", string.Empty)
+                    .Replace("{SOURCE_PROFITSHARE_SCHEMA}", sourceSchema).Trim();
                 return await context.Database.ExecuteSqlRawAsync(sqlCommand);
             });
         });

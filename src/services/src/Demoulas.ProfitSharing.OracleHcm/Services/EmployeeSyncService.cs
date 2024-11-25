@@ -2,9 +2,7 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Bogus.Extensions.UnitedStates;
-using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.ActivitySources;
-using Demoulas.ProfitSharing.Common.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Extensions;
@@ -12,6 +10,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
 using Demoulas.ProfitSharing.OracleHcm.Validators;
 using Demoulas.Util.Extensions;
@@ -25,7 +24,7 @@ namespace Demoulas.ProfitSharing.OracleHcm.Services;
 /// </summary>
 public sealed class EmployeeSyncService : IEmployeeSyncService
 {
-    private readonly OracleDemographicsService _oracleDemographicsService;
+    private readonly OracleDemographicsSyncClient _oracleDemographicsSyncClient;
     private readonly IDemographicsServiceInternal _demographicsService;
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
     private readonly OracleHcmConfig _oracleHcmConfig;
@@ -37,7 +36,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
         OracleHcmConfig oracleHcmConfig,
         OracleEmployeeValidator employeeValidator)
     {
-        _oracleDemographicsService = new OracleDemographicsService(httpClient, oracleHcmConfig);
+        _oracleDemographicsSyncClient = new OracleDemographicsSyncClient(httpClient, oracleHcmConfig);
         _demographicsService = demographicsService;
         _profitSharingDataContextFactory = profitSharingDataContextFactory;
         _oracleHcmConfig = oracleHcmConfig;
@@ -67,7 +66,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
         try
         {
             await CleanAuditError(cancellationToken);
-            var oracleHcmEmployees = _oracleDemographicsService.GetAllEmployees(cancellationToken);
+            var oracleHcmEmployees = _oracleDemographicsSyncClient.GetAllEmployees(cancellationToken);
             var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, requestedBy, cancellationToken);
             await _demographicsService.AddDemographicsStream(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
         }
@@ -129,7 +128,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
     {
         await foreach (OracleEmployee? employee in asyncEnumerable.WithCancellation(cancellationToken))
         {
-            int badgeNumber = employee?.BadgeNumber ?? 0;
+            int badgeNumber = employee?.EmployeeId ?? 0;
             if (employee == null || badgeNumber == 0)
             {
                 continue;
@@ -146,11 +145,11 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
             yield return new DemographicsRequest
             {
                 OracleHcmId = employee.PersonId,
-                BadgeNumber = employee.BadgeNumber,
+                EmployeeId = employee.EmployeeId,
                 DateOfBirth = employee.DateOfBirth,
                 HireDate = employee.WorkRelationship?.StartDate ?? SqlDateTime.MinValue.Value.ToDateOnly(),
                 TerminationDate = employee.WorkRelationship?.TerminationDate,
-                Ssn = (employee.NationalIdentifier?.NationalIdentifierNumber ?? faker.Person.Ssn()).ConvertSsnToLong() ?? 0,
+                Ssn = (employee.NationalIdentifier?.NationalIdentifierNumber ?? faker.Person.Ssn()).ConvertSsnToInt() ?? 0,
                 StoreNumber = employee.WorkRelationship?.Assignment.LocationCode ?? 0,
                 DepartmentId = employee.WorkRelationship?.Assignment.GetDepartmentId() ?? 0,
                 PayClassificationId = employee.WorkRelationship?.Assignment.JobCode ?? 0,

@@ -40,7 +40,7 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
                 .Select(d => new MilitaryAndRehireReportResponse
                 {
                     DepartmentId = d.DepartmentId,
-                    BadgeNumber = d.BadgeNumber,
+                    BadgeNumber = d.EmployeeId,
                     Ssn = d.Ssn.MaskSsn(),
                     FullName = d.ContactInfo.FullName,
                     DateOfBirth = d.DateOfBirth,
@@ -151,7 +151,7 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
                 payProfit => payProfit.DemographicId, // Foreign key selector from PayProfit
                 (demographics, payProfit) => new // Result selector after joining
                 {
-                    demographics.BadgeNumber,
+                    demographics.EmployeeId,
                     demographics.ContactInfo.FullName,
                     demographics.Ssn,
                     demographics.HireDate,
@@ -177,7 +177,7 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
                 profitDetail => profitDetail.Ssn, // Foreign key selector from ProfitDetail
                 (member, profitDetail) => new // Result selector after joining ProfitDetail
                 {
-                    member.BadgeNumber,
+                    member.EmployeeId,
                     member.FullName,
                     member.Ssn,
                     member.HireDate,
@@ -196,11 +196,11 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
                     profitDetail.ProfitCodeId
                 }
             )
-            .OrderBy(m => m.BadgeNumber)
+            .OrderBy(m => m.EmployeeId)
             .ThenBy(m => m.FullName)
             .Select(d => new MilitaryAndRehireProfitSummaryQueryResponse
             {
-                BadgeNumber = d.BadgeNumber,
+                BadgeNumber = d.EmployeeId,
                 FullName = d.FullName,
                 Ssn = d.Ssn,
                 HireDate = d.HireDate,

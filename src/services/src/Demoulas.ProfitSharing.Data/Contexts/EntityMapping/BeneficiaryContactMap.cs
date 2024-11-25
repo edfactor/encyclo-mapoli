@@ -30,11 +30,30 @@ public sealed class BeneficiaryContactMap : IEntityTypeConfiguration<Beneficiary
             .HasDefaultValueSql("SYSDATE")
             .ValueGeneratedOnAdd();
 
-        _ = builder.Property(e => e.FullName)
-            .HasMaxLength(84)
-            .HasComment("FullName")
-            .HasColumnName("FULL_NAME")
-            .IsRequired();
+
+        _ = builder.OwnsOne(e => e.Address, address =>
+        {
+            address.Property(a => a.Street).HasMaxLength(56).HasColumnName("STREET").HasComment("Street").IsRequired();
+            address.Property(a => a.Street2).HasMaxLength(56).HasColumnName("STREET2").HasComment("Street2");
+            address.Property(a => a.Street3).HasMaxLength(56).HasColumnName("STREET3").HasComment("Street3");
+            address.Property(a => a.Street4).HasMaxLength(56).HasColumnName("STREET4").HasComment("Street4");
+            address.Property(a => a.City).HasMaxLength(36).HasColumnName("CITY").HasComment("City").IsRequired();
+            address.Property(a => a.State).HasMaxLength(3).HasColumnName("STATE").HasComment("State").IsRequired();
+            address.Property(a => a.PostalCode).HasMaxLength(9).HasColumnName("POSTAL_CODE").HasComment("Postal Code").IsRequired();
+            address.Property(a => a.CountryIso).HasMaxLength(2).HasColumnName("COUNTRY_ISO").HasDefaultValue(Country.Constants.Us);
+
+            address.HasOne<Country>()
+                .WithMany()
+                .HasForeignKey(o => o.CountryIso);
+        });
+
+        builder.OwnsOne(e => e.ContactInfo, contact =>
+        {
+            _ = contact.Property(e => e.FullName)
+                .HasMaxLength(84)
+                .HasComment("FullName")
+                .HasColumnName("FULL_NAME")
+                .IsRequired();
 
         _ = builder.Property(e => e.LastName)
             .HasMaxLength(30)

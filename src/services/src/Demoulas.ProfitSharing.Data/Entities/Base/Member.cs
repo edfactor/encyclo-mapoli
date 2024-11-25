@@ -8,7 +8,7 @@ public abstract class Member
      * Actions to become a member
      * PSN Number is a link to an employee where the money comes from
      *
-     * BadgeNumber number is only by an employee
+     * EmployeeId number is only by an employee
      *
      * User
      *

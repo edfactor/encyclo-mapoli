@@ -19,7 +19,7 @@ internal sealed class BeneficiaryContactFaker : Faker<BeneficiaryContact>
     internal BeneficiaryContactFaker()
     {
         RuleFor(d => d.Id, f => _iDCounter++);
-        RuleFor(b => b.Ssn, f => f.Person.Ssn().ConvertSsnToLong());
+        RuleFor(b => b.Ssn, f => f.Person.Ssn().ConvertSsnToInt());
         RuleFor(b => b.DateOfBirth, f => f.Date.Past(50, DateTime.Now.AddYears(-18)).ToDateOnly());
         RuleFor(b => b.CreatedDate, f => f.Date.RecentDateOnly());
 

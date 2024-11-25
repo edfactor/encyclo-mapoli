@@ -6,7 +6,7 @@ namespace Demoulas.ProfitSharing.Data.Entities;
 /// <summary>
 /// https://demoulas.atlassian.net/wiki/spaces/~bherrmann/pages/39944312/Quick+Guide+to+Profit+Sharing+Tables
 /// </summary>
-[DebuggerDisplay("Id={Id} OracleHcmId={OracleHcmId} BadgeNumber={BadgeNumber} FullName={ContactInfo.FullName} StoreNumber={StoreNumber}")]
+[DebuggerDisplay("Id={Id} OracleHcmId={OracleHcmId} EmployeeId={EmployeeId} FullName={ContactInfo.FullName} StoreNumber={StoreNumber}")]
 public sealed class Demographic : Member
 {
     public int Id { get; set; }
@@ -15,11 +15,11 @@ public sealed class Demographic : Member
     /// This ID is used to uniquely identify an employee within the Oracle HCM system.
     /// </summary>
     /// <value>
-    /// The Oracle HCM ID of the employee.
+    /// The People ID of the employee.
     /// </value>
     public required long OracleHcmId { get; set; }
-    public required long Ssn { get; set; }
-    public required int BadgeNumber { get; set; }
+    public required int Ssn { get; set; }
+    public required int EmployeeId { get; set; }
     public DateTime LastModifiedDate { get; set; }
 
     public required short StoreNumber { get; set; }
@@ -65,4 +65,5 @@ public sealed class Demographic : Member
     public List<Beneficiary> Beneficiaries { get; set; } = [];
 
     public List<ProfitShareCheck> Checks { get; set; } = [];
+    public List<DistributionRequest> DistributionRequests { get; set; } = [];
 }

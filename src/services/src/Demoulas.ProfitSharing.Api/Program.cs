@@ -18,10 +18,18 @@ using NSwag.Generation.AspNetCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder();
 
-builder.Configuration
-    .AddJsonFile($"credSettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
-    .AddUserSecrets<Program>(optional: true);
-
+if (!builder.Environment.IsTestEnvironment())
+{
+    builder.Configuration
+        .AddJsonFile($"credSettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+        .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+        .AddUserSecrets<Program>();
+}
+else
+{
+    builder.Configuration
+        .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
+}
 
 ElasticSearchConfig smartConfig = new ElasticSearchConfig();
 builder.Configuration.Bind("Logging:Smart", smartConfig);
@@ -43,7 +51,7 @@ else
     builder.Services.AddTestingSecurity(builder.Configuration, rolePermissionService);
 }
 
-builder.ConfigurePolicies();
+builder.ConfigureSecurityPolicies();
 
 builder.Services.AddCors(options =>
 {

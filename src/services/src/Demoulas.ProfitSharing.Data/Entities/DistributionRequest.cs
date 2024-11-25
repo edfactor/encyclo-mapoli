@@ -1,15 +1,9 @@
-﻿
-
-/**
- * Was PROFIT_DIST_REQ  in READY system.
- */
-
-namespace Demoulas.ProfitSharing.Data.Entities;
+﻿namespace Demoulas.ProfitSharing.Data.Entities;
 public class DistributionRequest
 {
-    public required long Id { get; set; }
+    public required int Id { get; set; }
 
-    public required long PSN { get; set; }
+    public required int DemographicId { get; set; }
 
     public byte ReasonId { get; set; }
     public required DistributionRequestReason Reason { get; set; }
@@ -32,6 +26,7 @@ public class DistributionRequest
 
     public DateOnly? DateDecided { get; set; }
 
+    public char TaxCodeId { get; set; }
     public required TaxCode TaxCode { get; set; }
 
 }

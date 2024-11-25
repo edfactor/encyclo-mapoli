@@ -88,14 +88,37 @@ definitions:
       artifacts:
         - dist\**
       script:
-        - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
+        # Set environment variables
         - ${env:ENV} = "uat"
+
+        # Navigate to the UI source directory
         - cd .\src\UI
-        - C:\nvm\v20.4.0\npm.cmd install --legacy-peer-deps;
+
+        # Create and configure .npmrc file
+        - |
+            @"
+            registry=https://registry.npmjs.org/
+            smart-ui-library:registry=https://demoulas.jfrog.io/artifactory/api/npm/npm-smart-registry-local/
+            //demoulas.jfrog.io/artifactory/api/npm/npm-smart-registry-local/:_authToken=$env:JFROG_WORKSPACE_VARIABLE
+            "@ | Out-File -FilePath .npmrc -Encoding ASCII
+
+        # Install dependencies with legacy peer deps
+        - C:\nvm\v20.4.0\npm.cmd install --legacy-peer-deps
+
+        # Run the build process for the specified environment
         - C:\nvm\v20.4.0\npm.cmd run build:${env:ENV}
-        - Copy-Item -Path ".\src\web.config" -Destination "..\..\src\UI\build"
-        - New-Item -Path "..\..\dist" -ItemType Directory
-        - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.${env:ENV}.zip" -Force 
+
+        # Copy the web.config file to the build directory
+        - Copy-Item -Path ".\src\web.config" -Destination "..\..\src\UI\build" -Force
+
+        # Ensure the dist directory exists before compressing
+        - if (!(Test-Path -Path "..\..\dist")) {
+            New-Item -Path "..\..\dist" -ItemType Directory
+            }
+
+        # Compress the build output into a zip file in the dist folder
+        - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.${env:ENV}.zip" -Force
+
 
     create-frontend-artifact-prod: &create-frontend-artifact-prod
       name: Create FrontEnd Artifacts (PROD)     
@@ -120,12 +143,25 @@ definitions:
       script:
         - echo "Upgrading Database..."
         - $env:NUGET_ORG="https://api.nuget.org/v3/index.json"
-        - $env:ConnectionStrings:ProfitSharing=$env:ConnectionStrings_ProfitSharing_QA
         - dotnet build .\src\services\src\Demoulas.ProfitSharing.Data.Cli\Demoulas.ProfitSharing.Data.Cli.csproj -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -o .\output
+        - $environment = $env:Environment
         - $action = $env:Action
+        - $sourceSchema = ""
+        - if (-not $environment) { $environment = "QA" }
         - if (-not $action) { $action = "upgrade-db" }
-        - .\output\Demoulas.ProfitSharing.Data.Cli $action --connection-name ProfitSharing --sql-file `".\src\database\ready_import\SQL copy all from ready to smart ps.sql`"
-  
+        
+        - if ($environment -eq "QA") {
+            $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_QA;
+            $sourceSchema = "PROFITSHARE";
+          }
+
+        - if ($environment -eq "UAT") {
+            $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_UAT;
+            $sourceSchema = "PROFITSHARE_STAGING";
+          }
+        
+        - .\output\Demoulas.ProfitSharing.Data.Cli $action --connection-name ProfitSharing --sql-file ".\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-Schema $sourceSchema
+
 
    
 
@@ -138,12 +174,9 @@ pipelines:
           - step: *test-frontend
       - parallel:
           - step: *create-api-artifacts
-          - step: *create-frontend-artifact-qa
-          #- step: *create-frontend-artifact-uat
-          #- step: *create-frontend-artifact-prod
+          - step: *create-frontend-artifact-qa          
            # Deployment Stage
       
-      - step: *upgrade-database
       - step:
           name: "Application Deployment"
           runs-on:
@@ -154,8 +187,24 @@ pipelines:
           script:
             - echo "Deploying application..."
             - $env:API_SERVER_QA = "appt23d"            
-            - powershell .\scripts\webDeploy.ps1 QA $env:API_SERVER_QA      
-  
+            - powershell .\scripts\webDeploy.ps1 QA $env:API_SERVER_QA
+      - parallel:
+          - step: *upgrade-database
+          - step: *create-frontend-artifact-uat
+      - step:
+          name: "Application Deployment"
+          runs-on:
+            - windows
+            - self.hosted
+          deployment: UAT
+          trigger: "manual"     
+          script:
+            - echo "Deploying application..."
+            - $env:API_SERVER_UAT = "appt24d"            
+            - powershell .\scripts\webDeploy.ps1 UAT $env:API_SERVER_UAT
+      #- step: *create-frontend-artifact-prod
+
+
     develop:
       - parallel:
           - step: *build-and-test-backend
@@ -170,6 +219,11 @@ pipelines:
   custom:
       profitsharing_database:
         - variables: # https://bitbucket.org/blog/predefine-values-of-custom-pipeline-variables
+                  - name: Environment
+                    default: QA
+                    allowed-values: # optionally restrict variable values
+                        - QA
+                        - UAT                        
                   - name: Action
                     default: upgrade-db
                     allowed-values: # optionally restrict variable values

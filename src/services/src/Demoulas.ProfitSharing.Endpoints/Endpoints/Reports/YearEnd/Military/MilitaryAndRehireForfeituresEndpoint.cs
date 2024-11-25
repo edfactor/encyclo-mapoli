@@ -93,7 +93,7 @@ public class MilitaryAndRehireForfeituresEndpoint :
             foreach (var record in member.Details)
             {
                 // These fields correspond to the empty fields for the member data
-                csvWriter.WriteField(string.Empty); // Empty field for BadgeNumber
+                csvWriter.WriteField(string.Empty); // Empty field for EmployeeId
                 csvWriter.WriteField(string.Empty); // Empty field for EmployeeName
                 csvWriter.WriteField(string.Empty); // Empty field for SSN
                 csvWriter.WriteField(string.Empty); // Empty field for ReHireDate

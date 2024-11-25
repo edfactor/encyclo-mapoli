@@ -1,22 +1,19 @@
-﻿using System.Diagnostics;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using Demoulas.ProfitSharing.Common.ActivitySources;
-using Demoulas.ProfitSharing.Common.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
-using FastEndpoints;
+using Demoulas.ProfitSharing.OracleHcm.Configuration;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services;
 
-internal sealed class OracleDemographicsService
+internal sealed class OracleDemographicsSyncClient
 {
     private readonly HttpClient _httpClient;
     private readonly OracleHcmConfig _oracleHcmConfig;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
 
 
-    public OracleDemographicsService(HttpClient httpClient, OracleHcmConfig oracleHcmConfig)
+    public OracleDemographicsSyncClient(HttpClient httpClient, OracleHcmConfig oracleHcmConfig)
     {
         _httpClient = httpClient;
         _oracleHcmConfig = oracleHcmConfig;
@@ -35,7 +32,7 @@ internal sealed class OracleDemographicsService
 
         while (true)
         {
-            HttpResponseMessage response = await GetOracleHcmValue(url, cancellationToken);
+            using HttpResponseMessage response = await GetOracleHcmValue(url, cancellationToken);
             OracleDemographics? demographics = await response.Content.ReadFromJsonAsync<OracleDemographics>(_jsonSerializerOptions, cancellationToken);
 
             if (demographics?.Employees == null)
@@ -86,7 +83,7 @@ internal sealed class OracleDemographicsService
 
     private async Task<HttpResponseMessage> GetOracleHcmValue(string url, CancellationToken cancellationToken)
     {
-        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+        using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
         HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken);
         if (!response.IsSuccessStatusCode)
         {

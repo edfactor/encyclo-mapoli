@@ -17,11 +17,15 @@ public static class ContributionService
 
     internal static IQueryable<ContributionYears> GetContributionYearsQuery(IProfitSharingDbContext context, short profitYear, IEnumerable<int> badgeNumberSet)
     {
-        return context.PayProfits
-            .Include(p => p.Demographic)
-            .Where(p => p.ProfitYear <= profitYear && badgeNumberSet.Contains(p.Demographic!.BadgeNumber))
-            .GroupBy(p => p.Demographic!.BadgeNumber)
-            .Select(p => new ContributionYears { BadgeNumber = p.Key, YearsInPlan = (byte)p.Count() });
+        return _dataContextFactory.UseReadOnlyContext(context =>
+        {
+            return context.PayProfits
+                .Include(p => p.Demographic)
+                .Where(p => badgeNumber.Contains(p.Demographic!.EmployeeId))
+                .GroupBy(p => p.Demographic!.EmployeeId)
+                .Select(p => new { BadgeNumber = p.Key, ContributionYears = p.Count() })
+                .ToDictionaryAsync(arg => arg.BadgeNumber, arg => arg.ContributionYears);
+        });
     }
 
     internal static IQueryable<Demographic> GetEligibleEmployees(IProfitSharingDbContext ctx, short profitYear, DateOnly asOfDate)
@@ -57,21 +61,21 @@ public static class ContributionService
 
 
         var demoQuery = ctx.Demographics
-            .Select(d => new { d.OracleHcmId, d.BadgeNumber, d.Ssn });
+            .Select(d => new { d.OracleHcmId, d.EmployeeId, d.Ssn });
 
         var query = from d in demoQuery
-            join r in pdQuery on d.Ssn equals r.Ssn
-            select new InternalProfitDetailDto
-            {
-                OracleHcmId = d.OracleHcmId,
-                BadgeNumber = d.BadgeNumber,
-                TotalContributions = r.TotalContributions,
-                TotalEarnings = r.TotalEarnings,
-                TotalForfeitures = r.TotalForfeitures,
-                TotalPayments = r.TotalPayments,
-                TotalFederalTaxes = r.TotalFedTaxes,
-                TotalStateTaxes = r.TotalStateTaxes
-            };
+                    join r in pdQuery on d.Ssn equals r.Ssn
+                    select new InternalProfitDetailDto
+                    {
+                        OracleHcmId = d.OracleHcmId,
+                        BadgeNumber = d.EmployeeId,
+                        TotalContributions = r.TotalContributions,
+                        TotalEarnings = r.TotalEarnings,
+                        TotalForfeitures = r.TotalForfeitures,
+                        TotalPayments = r.TotalPayments,
+                        TotalFederalTaxes = r.TotalFedTaxes,
+                        TotalStateTaxes = r.TotalStateTaxes
+                    };
         return query;
     }
 

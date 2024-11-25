@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Demoulas.ProfitSharing.Common.Contracts.Services;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Services;
 public class ParticipantTotalDto
 {
-    public required long Ssn { get; set; }
+    public required int Ssn { get; set; }
     public required decimal Total { get; set; }
 }
