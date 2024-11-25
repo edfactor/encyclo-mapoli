@@ -74,9 +74,9 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
     private static async Task<IQueryable<MemberSlice>> GetEmployeesWithContributions(ProfitSharingReadOnlyDbContext ctx, ProfitYearRequest request,
         IQueryable<TerminatedEmployeeDto> terminatedEmployees, CancellationToken cancellationToken)
     {
-        var demKeyList = await terminatedEmployees.Select(e => new { e.Demographic.Id, e.Demographic.BadgeNumber }).ToListAsync(cancellationToken);
+        var demKeyList = await terminatedEmployees.Select(e => new { e.Demographic.Id, e.Demographic.EmployeeId }).ToListAsync(cancellationToken);
         var idList = demKeyList.Select(e => e.Id).ToHashSet();
-        var badgeNumbers = demKeyList.Select(e => e.BadgeNumber).ToHashSet();
+        var badgeNumbers = demKeyList.Select(e => e.EmployeeId).ToHashSet();
 
         var contributionYearsQuery = ContributionService.GetContributionYearsQuery(ctx, request.ProfitYear, badgeNumbers);
 
@@ -88,12 +88,12 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                         && validEnrollmentIds.Contains(p.EnrollmentId));
 
         var query = from employee in terminatedEmployees
-            join contribution in contributionYearsQuery on employee.Demographic.BadgeNumber equals contribution.BadgeNumber
+            join contribution in contributionYearsQuery on employee.Demographic.EmployeeId equals contribution.BadgeNumber
             join payProfit in payProfitsQuery on employee.Demographic.Id equals payProfit.DemographicId
             select new MemberSlice
             {
                 PsnSuffix = 0,
-                BadgeNumber = employee.Demographic.BadgeNumber,
+                BadgeNumber = employee.Demographic.EmployeeId,
                 Ssn = employee.Demographic.Ssn,
                 BirthDate = employee.Demographic.DateOfBirth,
                 HoursCurrentYear = payProfit.CurrentHoursYear,
@@ -132,7 +132,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             .Select(x => new MemberSlice
             {
                 PsnSuffix = x.Beneficiary.PsnSuffix,
-                BadgeNumber = x.Beneficiary!.BadgeNumber,
+                BadgeNumber = x.Beneficiary!.EmployeeId,
                 Ssn = x.Beneficiary.Contact!.Ssn,
                 BirthDate = x.Beneficiary.Contact!.DateOfBirth,
                 HoursCurrentYear = 0, // Placeholder logic for hours

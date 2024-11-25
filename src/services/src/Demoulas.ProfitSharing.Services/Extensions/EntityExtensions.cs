@@ -12,7 +12,7 @@ internal static class EntityExtensions
     /// </returns>
     public static long GetPsn(this Beneficiary beneficiary)
     {
-        long.TryParse($"{beneficiary.BadgeNumber}{beneficiary.PsnSuffix:D4}", out long psn);
+        long.TryParse($"{beneficiary.EmployeeId}{beneficiary.PsnSuffix:D4}", out long psn);
         return psn;
     }
 }
