@@ -80,7 +80,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         var idList = demKeyList.Select(e => e.Id).ToHashSet();
         var badgeNumbers = demKeyList.Select(e => e.EmployeeId).ToHashSet();
 
-        var contributionYearsQuery = _contributionService.GetContributionYears(badgeNumbers);
+        var contributionYearsQuery = await _contributionService.GetContributionYears(badgeNumbers);
 
         var validEnrollmentIds = GetValidEnrollmentIds();
 
