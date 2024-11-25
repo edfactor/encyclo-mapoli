@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
+﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.ReportFormatters;
 
 using static Utils;
 

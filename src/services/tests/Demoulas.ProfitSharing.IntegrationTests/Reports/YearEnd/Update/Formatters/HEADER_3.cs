@@ -1,8 +1,9 @@
-﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
+﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.ReportFormatters;
 
 using static Utils;
 
-public class HEADER_3 {
+public class HEADER_3
+{
     public string? FILLER0 { get; set; } = " NUMBER"; // PIC X(07)
     public string? FILLER1 { get; set; } // PIC X(06)
     public string? FILLER2 { get; set; } = "NAME"; // PIC X(04)
@@ -23,29 +24,30 @@ public class HEADER_3 {
     public string? FILLER17 { get; set; } // PIC X(03)
     public string? FILLER18 { get; set; } = "BALANCE"; // PIC X(08)
 
-    public override string ToString(){
-            return
-            rformat(FILLER0,"string?","X(07)")
-            + rformat(FILLER1,"string?","X(06)")
-            + rformat(FILLER2,"string?","X(04)")
-            + rformat(FILLER3,"string?","X(20)")
-            + rformat(FILLER4,"string?","X(07)")
-            + rformat(FILLER5,"string?","X(05)")
-            + rformat(FILLER6,"string?","X(07)")
-            + rformat(FILLER7,"string?","X(04)")
-            + rformat(FILLER8,"string?","X(08)")
-            + rformat(FILLER9,"string?","X(03)")
-            + rformat(FILLER10,"string?","X(09)")
-            + rformat(FILLER11,"string?","X(03)")
-            + rformat(FILLER12,"string?","X(08)")
-            + rformat(FILLER13,"string?","X(05)")
-            + rformat(FILLER14,"string?","X(07)")
-            + rformat(FILLER15,"string?","X(03)")
-            + rformat(FILLER16,"string?","X(10)")
-            + rformat(FILLER17,"string?","X(03)")
-            + rformat(FILLER18,"string?","X(07)")
-                ;
-     }
+    public override string ToString()
+    {
+        return
+        rformat(FILLER0, "string?", "X(07)")
+        + rformat(FILLER1, "string?", "X(06)")
+        + rformat(FILLER2, "string?", "X(04)")
+        + rformat(FILLER3, "string?", "X(20)")
+        + rformat(FILLER4, "string?", "X(07)")
+        + rformat(FILLER5, "string?", "X(05)")
+        + rformat(FILLER6, "string?", "X(07)")
+        + rformat(FILLER7, "string?", "X(04)")
+        + rformat(FILLER8, "string?", "X(08)")
+        + rformat(FILLER9, "string?", "X(03)")
+        + rformat(FILLER10, "string?", "X(09)")
+        + rformat(FILLER11, "string?", "X(03)")
+        + rformat(FILLER12, "string?", "X(08)")
+        + rformat(FILLER13, "string?", "X(05)")
+        + rformat(FILLER14, "string?", "X(07)")
+        + rformat(FILLER15, "string?", "X(03)")
+        + rformat(FILLER16, "string?", "X(10)")
+        + rformat(FILLER17, "string?", "X(03)")
+        + rformat(FILLER18, "string?", "X(07)")
+            ;
+    }
 }
 /*
 

@@ -1,6 +1,7 @@
-﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
+﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.ReportFormatters;
 
-public class HEADER_5 {
+public class HEADER_5
+{
     public string? FILLER0 { get; set; } // PIC X(04)
     public string? FILLER1 { get; set; } // PIC X(08)
     public string? FILLER2 { get; set; } // PIC X(12)

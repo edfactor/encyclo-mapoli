@@ -11,6 +11,8 @@ public class POINT_VALUES {
     public decimal PV_ADJ_EARN2 { get; set; } // PIC S999V99
     public decimal PV_ADJ_FORFEIT { get; set; } // PIC S999V99
     public decimal PV_ADJ_CONTRIB { get; set; } // PIC S9(8)V99
+
+
     public long SV_SSN { get; set; } // PIC 9(9)
     public decimal SV_FORF_AMT { get; set; } // PIC S9(8)V99
     public decimal SV_FORF_ADJUSTED { get; set; } // PIC S9(8)V99

@@ -1,6 +1,7 @@
-﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
+﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.ReportFormatters;
 
-public class GRAND_TOT {
+public class GRAND_TOT
+{
     public string? FILLER0 { get; set; } // PIC X(5)
     public decimal BEG_BAL_GRTOT { get; set; } // PIC Z,ZZZ,ZZZ,ZZZ.99-.
     public string? FILLER1 { get; set; } // PIC X

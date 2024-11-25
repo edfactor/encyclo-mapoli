@@ -1,24 +1,25 @@
-﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
+﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.ReportFormatters;
 
 using static Utils;
 
-public class TOTAL_HEADER_3 {
+public class TOTAL_HEADER_3
+{
     public string? FILLER0 { get; set; } // PIC X(11)
-    public string? FILLER1 { get; set; } =  "BALANCE"; // PIC X(07)
+    public string? FILLER1 { get; set; } = "BALANCE"; // PIC X(07)
     public string? FILLER2 { get; set; } // PIC X(09)
     public string? FILLER3 { get; set; } = "CONTRIB"; // PIC X(07)
     public string? FILLER4 { get; set; } // PIC X(06)
-    public string? FILLER5 { get; set; } =  "EARNINGS"; // PIC X(08)
+    public string? FILLER5 { get; set; } = "EARNINGS"; // PIC X(08)
     public string? FILLER6 { get; set; } // PIC X(08)
-    public string? FILLER7 { get; set; } =  "EARNINGS2"; // PIC X(09)
+    public string? FILLER7 { get; set; } = "EARNINGS2"; // PIC X(09)
     public string? FILLER8 { get; set; } // PIC X(06)
-    public string? FILLER9 { get; set; } =  "FORFEITS"; // PIC X(08)
+    public string? FILLER9 { get; set; } = "FORFEITS"; // PIC X(08)
     public string? FILLER10 { get; set; } // PIC X(12)
-    public string? FILLER11 { get; set; } =  "DISTRIB"; // PIC X(07)
+    public string? FILLER11 { get; set; } = "DISTRIB"; // PIC X(07)
     public string? FILLER12 { get; set; } // PIC X(08)
     public string? FILLER13 { get; set; } = "PAID ALLOC"; // PIC X(10)
     public string? FILLER14 { get; set; } // PIC X(03)
-    public string? FILLER15 { get; set; } =  "BALANCE"; // PIC X(08)
+    public string? FILLER15 { get; set; } = "BALANCE"; // PIC X(08)
 
     /*
 
@@ -51,26 +52,27 @@ public class TOTAL_HEADER_3 {
 */
 
 
-    public override string ToString(){
-            return
-            rformat(FILLER0,"string?","X(11)")
-            + rformat(FILLER1,"string?","X(07)")
-            + rformat(FILLER2,"string?","X(09)") 
-            + rformat(FILLER3,"string?","X(07)")
-            + rformat(FILLER4,"string?","X(06)")
-            + rformat(FILLER5,"string?","X(08)")
-            + rformat(FILLER6,"string?","X(08)")
-            + rformat(FILLER7,"string?","X(09)")
-            + rformat(FILLER8,"string?","X(06)")
-            + rformat(FILLER9,"string?","X(08)")
-            + rformat(FILLER10,"string?","X(12)")
-            + rformat(FILLER11,"string?","X(07)")
-            + rformat(FILLER12,"string?","X(08)")
-            + rformat(FILLER13,"string?","X(10)")
-            + rformat(FILLER14,"string?","X(03)")
-            + rformat(FILLER15,"string?","X(07)")
-                ;
-     }
+    public override string ToString()
+    {
+        return
+        rformat(FILLER0, "string?", "X(11)")
+        + rformat(FILLER1, "string?", "X(07)")
+        + rformat(FILLER2, "string?", "X(09)")
+        + rformat(FILLER3, "string?", "X(07)")
+        + rformat(FILLER4, "string?", "X(06)")
+        + rformat(FILLER5, "string?", "X(08)")
+        + rformat(FILLER6, "string?", "X(08)")
+        + rformat(FILLER7, "string?", "X(09)")
+        + rformat(FILLER8, "string?", "X(06)")
+        + rformat(FILLER9, "string?", "X(08)")
+        + rformat(FILLER10, "string?", "X(12)")
+        + rformat(FILLER11, "string?", "X(07)")
+        + rformat(FILLER12, "string?", "X(08)")
+        + rformat(FILLER13, "string?", "X(10)")
+        + rformat(FILLER14, "string?", "X(03)")
+        + rformat(FILLER15, "string?", "X(07)")
+            ;
+    }
 }
 /*
 

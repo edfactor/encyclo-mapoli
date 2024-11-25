@@ -1,8 +1,9 @@
-﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
+﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.ReportFormatters;
 
 using static Utils;
 
-public class REPORT_LINE {
+public class REPORT_LINE
+{
     public string? FILLER0 { get; set; } // PIC X(04)
     public long BADGE_NBR { get; set; } // PIC 9(07)
     public string? FILLER1 { get; set; } // PIC X(01)
@@ -18,24 +19,25 @@ public class REPORT_LINE {
     public decimal END_BAL { get; set; } // PIC ZZZZ,ZZZ.99-
     public string? PR_NEWEMP { get; set; } // PIC X(3)
 
-    public override string ToString(){
-            return
-            rformat(FILLER0,"string?","X(04)")
-            + rformat(BADGE_NBR,"long","9(07)")
-            + rformat(FILLER1,"string?","X(01)")
-            + rformat(EMP_NAME,"string?","X(22)")
-            + rformat(FILLER2,"string?","X(01)")
-            + rformat(BEG_BAL,"decimal","ZZZZ,ZZZ.99-")
-            + rformat(PR_CONT,"decimal","ZZZZ,ZZZ.99-")
-            + rformat(PR_EARN,"decimal","ZZZZ,ZZZ.99-")
-            + rformat(PR_EARN2,"decimal","ZZZ,ZZZ.99-")
-            + rformat(PR_FORF,"decimal","ZZZZ,ZZZ.99-")
-            + rformat(PR_DIST1,"decimal","ZZZZ,ZZZ.99-")
-            + rformat(PR_MIL,"decimal","ZZZ,ZZZ.99-")
-            + rformat(END_BAL,"decimal","ZZZZ,ZZZ.99-")
-            + rformat(PR_NEWEMP,"string?","X(3)")
-                ;
-     }
+    public override string ToString()
+    {
+        return
+        rformat(FILLER0, "string?", "X(04)")
+        + rformat(BADGE_NBR, "long", "9(07)")
+        + rformat(FILLER1, "string?", "X(01)")
+        + rformat(EMP_NAME, "string?", "X(22)")
+        + rformat(FILLER2, "string?", "X(01)")
+        + rformat(BEG_BAL, "decimal", "ZZZZ,ZZZ.99-")
+        + rformat(PR_CONT, "decimal", "ZZZZ,ZZZ.99-")
+        + rformat(PR_EARN, "decimal", "ZZZZ,ZZZ.99-")
+        + rformat(PR_EARN2, "decimal", "ZZZ,ZZZ.99-")
+        + rformat(PR_FORF, "decimal", "ZZZZ,ZZZ.99-")
+        + rformat(PR_DIST1, "decimal", "ZZZZ,ZZZ.99-")
+        + rformat(PR_MIL, "decimal", "ZZZ,ZZZ.99-")
+        + rformat(END_BAL, "decimal", "ZZZZ,ZZZ.99-")
+        + rformat(PR_NEWEMP, "string?", "X(3)")
+            ;
+    }
 }
 /*
 

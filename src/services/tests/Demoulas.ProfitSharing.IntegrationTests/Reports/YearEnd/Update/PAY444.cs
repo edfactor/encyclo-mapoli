@@ -1,4 +1,5 @@
-﻿using Oracle.ManagedDataAccess.Client;
+﻿using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.ReportFormatters;
+using Oracle.ManagedDataAccess.Client;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
@@ -22,7 +23,6 @@ public class PAY444
     private readonly List<PRFT> prfts = new();
     private readonly PRINT_ADJ_LINE1 print_adj_line1 = new();
     private readonly PROFIT_DETAIL profit_detail = new();
-    private readonly PROFIT_SS_DETAIL profit_ss_detail = new();
     private readonly REPORT_LINE report_line = new();
     private readonly REPORT_LINE_2 report_line_2 = new();
     private readonly RERUN_TOT rerun_tot = new();
@@ -471,7 +471,7 @@ public class PAY444
         intermediate_values = new INTERMEDIATE_VALUES();
 
         payprof_rec.PAYPROF_SSN = payben_rec.PYBEN_PAYSSN;
-
+            
         ws_payprofit.WS_PS_AMT = payben_rec.PYBEN_PSAMT;
 
         ws_compute_totals.WS_POINTS_DOLLARS = 0m;
@@ -495,11 +495,12 @@ public class PAY444
         }
 
         ws_compute_totals.WS_POINTS_DOLLARS =
-            ALLOCATION_TOTAL + (ws_payprofit.WS_PS_AMT - FORFEIT_TOTAL - PALLOCATION_TOTAL) - DIST_TOTAL;
+            Round2(ALLOCATION_TOTAL + (ws_payprofit.WS_PS_AMT - FORFEIT_TOTAL - PALLOCATION_TOTAL) - DIST_TOTAL);
 
         ws_compute_totals.WS_EARN_POINTS = (long)Round(ws_compute_totals.WS_POINTS_DOLLARS / 100);
 
         l220_CONTINUE:
+
         if (ALLOCATION_TOTAL != 0)
         {
             payprof_rec.PY_PROF_NEWEMP = 2;
@@ -699,6 +700,7 @@ public class PAY444
             payben_rec.PYBEN_PROF_EARN = 0m;
             payprof_rec.PY_PROF_ETVA2 = 0m;
             payben_rec.PYBEN_PROF_EARN2 = 0m;
+
             goto l250_EXIT;
         }
 
@@ -857,22 +859,8 @@ public class PAY444
         {
             dbStatus = m520TotalUpDetails();
         }
-
-        dbStatus = MSTR_FIND_WITHIN_PR_SS_D_S();
-
-
-        while (dbStatus == 0)
-        {
-            dbStatus = m530TotalUpSsDetails();
-        }
     }
 
-    private int MSTR_FIND_WITHIN_PR_SS_D_S()
-    {
-        // throw new NotImplementedException();
-        // Debug.WriteLine("WARNING: READING PROFIT_SS_DETAILS IS DISABLED.");
-        return 77; // BOBH THIS IS DISABLED!!!
-    }
 
     private int MSTR_FIND_WITHIN_PR_DET_S()
     {
@@ -946,28 +934,6 @@ public class PAY444
         int dbStatus = MSTR_FIND_WITHIN_PR_DET_S();
         return dbStatus;
     }
-
-    public int m530TotalUpSsDetails()
-    {
-        // MSTR_GET_REC(IDS2_REC_NAME); 
-
-        long WS_PROFIT_YEAR_FIRST_4 = (long)profit_ss_detail.PROFIT_SS_YEAR;
-        string[] parts = profit_ss_detail.PROFIT_SS_YEAR.ToString().Split('.');
-        long WS_PROFIT_YEAR_EXTENSION = parts.Length > 1 ? long.Parse(parts[1]) : 0;
-
-        if (WS_PROFIT_YEAR_FIRST_4 == EffectiveYear)
-        {
-            if (profit_ss_detail.PROFIT_SS_CODE == "1" || profit_ss_detail.PROFIT_SS_CODE == "3" ||
-                profit_ss_detail.PROFIT_SS_CODE == "9")
-            {
-                DIST_TOTAL += profit_ss_detail.PROFIT_SS_FORT;
-            }
-        }
-
-        int dbStatus = MSTR_FIND_WITHIN_PR_SS_D_S();
-        return dbStatus;
-    }
-
 
     public void m805PrintSequence()
     {
@@ -1066,7 +1032,7 @@ public class PAY444
             report_line.PR_EARN2 = sd_prft.SD_EARN2;
             report_line.PR_EARN2 = sd_prft.SD_CAF;
         }
-
+        
         ws_ending_balance.WS_ENDBAL = sd_prft.SD_AMT + sd_prft.SD_CONT + sd_prft.SD_EARN + sd_prft.SD_EARN2 +
             sd_prft.SD_FORF + sd_prft.SD_MIL + sd_prft.SD_CAF - sd_prft.SD_DIST1;
         report_line.END_BAL = ws_ending_balance.WS_ENDBAL;
