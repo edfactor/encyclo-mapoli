@@ -7,15 +7,14 @@ using FastEndpoints;
 using JetBrains.Annotations;
 using Demoulas.ProfitSharing.UnitTests.Base;
 using Demoulas.ProfitSharing.Api;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ExecutiveHoursAndDollars;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Extensions;
+using Demoulas.ProfitSharing.Data.Entities;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
-[TestSubject(typeof(DistributionsByAgeEndpoint))]
-public class DistributionsByAgeEndpointTest : ApiTestBase<Program>
+[TestSubject(typeof(ContributionsByAgeEndpoint))]
+public class ContributionsByAgeEndpointTest : ApiTestBase<Program>
 {
 
     [Fact]
@@ -27,12 +26,12 @@ public class DistributionsByAgeEndpointTest : ApiTestBase<Program>
 
         // Act
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
-        TestResult<DistributionsByAge> response = await ApiClient
-            .GETAsync<DistributionsByAgeEndpoint, FrozenReportsByAgeRequest, DistributionsByAge>(request);
+        TestResult<ContributionsByAge> response = await ApiClient
+            .GETAsync<ContributionsByAgeEndpoint, FrozenReportsByAgeRequest, ContributionsByAge>(request);
 
         // Assert
         response.Should().NotBeNull();
-        response.Result.ReportName.Should().Be("PROFIT SHARING DISTRIBUTIONS BY AGE");
+        response.Result.ReportName.Should().Be("PROFIT SHARING CONTRIBUTIONS BY AGE");
         response.Result.ReportType.Should().Be(request.ReportType);
     }
 
@@ -45,16 +44,15 @@ public class DistributionsByAgeEndpointTest : ApiTestBase<Program>
         // Act
         DownloadClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         TestResult<StreamContent> response = await DownloadClient
-            .GETAsync<DistributionsByAgeEndpoint, FrozenReportsByAgeRequest, StreamContent>(request);
+            .GETAsync<ContributionsByAgeEndpoint, FrozenReportsByAgeRequest, StreamContent>(request);
 
             
         string content = await response.Response.Content.ReadAsStringAsync();
         content.Should().Contain("AGE,EMPS,AMOUNT");
-        content.Should().Contain("HARDSHIP,");
         content.Should().Contain("DIST TTL,,");
     }
 
-    [Fact(DisplayName = "PS-401: Check to ensure unauthorized")]
+    [Fact(DisplayName = "PS-502: Check to ensure unauthorized")]
     public async Task Unauthorized()
     {
 
@@ -63,8 +61,8 @@ public class DistributionsByAgeEndpointTest : ApiTestBase<Program>
 
 
         // Act
-        TestResult<DistributionsByAge> response = await ApiClient
-            .GETAsync<DistributionsByAgeEndpoint, FrozenReportsByAgeRequest, DistributionsByAge>(request);
+        TestResult<ContributionsByAge> response = await ApiClient
+            .GETAsync<ContributionsByAgeEndpoint, FrozenReportsByAgeRequest, ContributionsByAge>(request);
 
         response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }

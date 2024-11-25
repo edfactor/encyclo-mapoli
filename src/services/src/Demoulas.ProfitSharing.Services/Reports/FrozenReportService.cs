@@ -180,13 +180,13 @@ public class FrozenReportService : IFrozenReportService
         }
 
         var details = queryResult.Select(x => new
-        {
-            Age = x.DateOfBirth.Age(),
-            x.EmploymentType,
-            x.EmployeeId,
-            x.Amount,
-            x.CommentTypeId
-        })
+            {
+                Age = x.DateOfBirth.Age(),
+                x.EmploymentType,
+                x.EmployeeId,
+                x.Amount,
+                x.CommentTypeId
+            })
             .GroupBy(x => new { x.Age, x.EmploymentType })
             .Select(g => new DistributionsByAgeDetail
             {
@@ -232,17 +232,17 @@ public class FrozenReportService : IFrozenReportService
         var queryResult = await _dataContextFactory.UseReadOnlyContext(ctx =>
         {
             var query = (from pd in ctx.ProfitDetails
-                         join d in ctx.Demographics on pd.Ssn equals d.Ssn
-                         where pd.ProfitYear == req.ProfitYear
-                               && pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions
-                               && pd.Contribution > 0
-                         select new
-                         {
-                             d.DateOfBirth,
-                             EmploymentType = d.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT,
-                             d.EmployeeId,
-                             Amount = pd.Contribution
-                         });
+                join d in ctx.Demographics on pd.Ssn equals d.Ssn
+                where pd.ProfitYear == req.ProfitYear
+                      && pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions
+                      && pd.Contribution > 0
+                select new
+                {
+                    d.DateOfBirth,
+                    EmploymentType = d.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT,
+                    d.EmployeeId,
+                    Amount = pd.Contribution
+                });
 
             query = req.ReportType switch
             {
@@ -257,15 +257,15 @@ public class FrozenReportService : IFrozenReportService
 
 
         var details = queryResult.Select(x => new
-        {
-            Age = x.DateOfBirth.Age(),
-            x.EmployeeId,
-            x.Amount
-        })
+            {
+                Age = x.DateOfBirth.Age(),
+                x.EmployeeId,
+                x.Amount
+            })
             .GroupBy(x => new { x.Age })
             .Select(g => new ContributionsByAgeDetail
             {
-                Age = g.Key.Age,
+                Age = g.Key.Age, 
                 EmployeeCount = g.Select(x => x.EmployeeId).Distinct().Count(),
                 Amount = g.Sum(x => x.Amount),
             })

@@ -1,12 +1,13 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
+  ContributionsByAge,
   DemographicBadgesNotInPayprofit,
-  DistributionByAgeReportType,
   DistributionsAndForfeitures,
   DuplicateNameAndBirthday,
   DuplicateSSNDetail,
   EligibleEmployeeResponseDto,
   ExecutiveHoursAndDollars,
+  FrozenReportsByAgeRequestType,
   MasterInquiryDetail,
   MilitaryAndRehire,
   MilitaryAndRehireForfeiture,
@@ -34,6 +35,9 @@ export interface YearsEndState {
   distributionsByAgeTotal: ProfitSharingDistributionsByAge | null;
   distributionsByAgeFullTime: ProfitSharingDistributionsByAge | null;
   distributionsByAgePartTime: ProfitSharingDistributionsByAge | null;
+  contributionsByAgeTotal: ContributionsByAge | null;
+  contributionsByAgeFullTime: ContributionsByAge | null;
+  contributionsByAgePartTime: ContributionsByAge | null;
 }
 
 const initialState: YearsEndState = {
@@ -51,7 +55,10 @@ const initialState: YearsEndState = {
   masterInquiryData: null,
   distributionsByAgeTotal: null,
   distributionsByAgeFullTime: null,
-  distributionsByAgePartTime: null
+  distributionsByAgePartTime: null,
+  contributionsByAgeTotal: null,
+  contributionsByAgeFullTime: null,
+  contributionsByAgePartTime: null
 };
 
 export const yearsEndSlice = createSlice({
@@ -106,28 +113,36 @@ export const yearsEndSlice = createSlice({
     setEligibleEmployees: (state, action: PayloadAction<EligibleEmployeeResponseDto>) => {
       state.eligibleEmployees = action.payload;
     },
-    setMasterInquiryData: (
-      state,
-      action: PayloadAction<Paged<MasterInquiryDetail>>
-    ) => {
+    setMasterInquiryData: (state, action: PayloadAction<Paged<MasterInquiryDetail>>) => {
       state.masterInquiryData = action.payload;
     },
-    clearMasterInquiryData: (
-      state
-    ) => {
+    clearMasterInquiryData: (state) => {
       state.masterInquiryData = null;
     },
     setDistributionsByAge: (state, action: PayloadAction<ProfitSharingDistributionsByAge>) => {
-      if (action.payload.reportType == DistributionByAgeReportType.Total) {
+      if (action.payload.reportType == FrozenReportsByAgeRequestType.Total) {
         state.distributionsByAgeTotal = action.payload;
       }
 
-      if (action.payload.reportType == DistributionByAgeReportType.FullTime) {
+      if (action.payload.reportType == FrozenReportsByAgeRequestType.FullTime) {
         state.distributionsByAgeFullTime = action.payload;
       }
 
-      if (action.payload.reportType == DistributionByAgeReportType.PartTime) {
+      if (action.payload.reportType == FrozenReportsByAgeRequestType.PartTime) {
         state.distributionsByAgePartTime = action.payload;
+      }
+    },
+    setContributionsByAge: (state, action: PayloadAction<ContributionsByAge>) => {
+      if (action.payload.reportType == FrozenReportsByAgeRequestType.Total) {
+        state.contributionsByAgeTotal = action.payload;
+      }
+
+      if (action.payload.reportType == FrozenReportsByAgeRequestType.FullTime) {
+        state.contributionsByAgeFullTime = action.payload;
+      }
+
+      if (action.payload.reportType == FrozenReportsByAgeRequestType.PartTime) {
+        state.contributionsByAgePartTime = action.payload;
       }
     }
   }
@@ -147,6 +162,7 @@ export const {
   setEligibleEmployees,
   setMasterInquiryData,
   clearMasterInquiryData,
-  setDistributionsByAge
+  setDistributionsByAge,
+  setContributionsByAge
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

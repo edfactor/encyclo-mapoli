@@ -16,7 +16,8 @@ const yearEndReports: RouteCategory = {
     { caption: "Manage Executive Hours and Dollars", route: "/manage-executive-hours-and-dolars"},
     { caption: "Get Eligible Employees", route: "/eligible-employees" },
     { caption: "Master Inquiry", route: "/master-inquiry" },
-    { caption: "Get Distributions by Age", route: "/distributions-by-age" }
+    { caption: "Get Distributions by Age", route: "/distributions-by-age" },
+    { caption: "Get Contributions by Age", route: "/contributions-by-age" }
   ]
 };
 

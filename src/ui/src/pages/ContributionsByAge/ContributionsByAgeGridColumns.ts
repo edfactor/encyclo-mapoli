@@ -2,12 +2,12 @@ import { formattingUtils } from "smart-ui-library";
 import { FrozenReportsByAgeRequestType } from "../../reduxstore/types";
 import { ColDef } from "ag-grid-community";
 
-export interface IDistributionByAgeGridColumns {
+export interface IContributionByAgeGridColumns {
   headerName: string;
   children?: ColDef[];
 }
 
-export const GetDistributionsByAgeColumns = (  reportType: FrozenReportsByAgeRequestType): IDistributionByAgeGridColumns => {
+export const GetContributionsByAgeColumns = (  reportType: FrozenReportsByAgeRequestType): IContributionByAgeGridColumns => {
   return {
     headerName: reportType,
     children: [

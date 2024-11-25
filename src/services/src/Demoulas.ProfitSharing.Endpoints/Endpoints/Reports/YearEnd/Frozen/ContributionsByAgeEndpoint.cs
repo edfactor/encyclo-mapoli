@@ -6,35 +6,35 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
-using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen.DistributionsByAgeEndpoint;
+using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen.ContributionsByAgeEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
 
-public class DistributionsByAgeEndpoint : EndpointWithCsvTotalsBase<FrozenReportsByAgeRequest, DistributionsByAge, DistributionsByAgeDetail, ProfitSharingDistributionsByAgeMapper>
+public class ContributionsByAgeEndpoint : EndpointWithCsvTotalsBase<FrozenReportsByAgeRequest, ContributionsByAge, ContributionsByAgeDetail, ProfitSharingContributionsByAgeMapper>
 {
     private readonly IFrozenReportService _frozenReportService;
 
-    public DistributionsByAgeEndpoint(IFrozenReportService frozenReportService)
+    public ContributionsByAgeEndpoint(IFrozenReportService frozenReportService)
     {
         _frozenReportService = frozenReportService;
     }
 
-    public override string ReportFileName => "PROFIT SHARING DISTRIBUTIONS BY AGE";
+    public override string ReportFileName => "PROFIT SHARING CONTRIBUTIONS BY AGE";
 
     public override void Configure()
     {
-        Get("frozen/distributions-by-age");
+        Get("frozen/contributions-by-age");
         Summary(s =>
         {
             s.Summary = ReportFileName;
             s.Description =
-                "This report produces a list of members showing their distribution over the year grouped by age and aggregated to separate regular from hardships";
+                "This report produces a list of members showing their contributions over the year grouped by age";
 
             s.ExampleRequest = FrozenReportsByAgeRequest.RequestExample();
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
-                    200, DistributionsByAge.ResponseExample()
+                    200, ContributionsByAge.ResponseExample()
                 }
             };
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
@@ -43,27 +43,17 @@ public class DistributionsByAgeEndpoint : EndpointWithCsvTotalsBase<FrozenReport
         base.Configure();
     }
 
-    public override Task<DistributionsByAge> GetResponse(FrozenReportsByAgeRequest req, CancellationToken ct)
+    public override Task<ContributionsByAge> GetResponse(FrozenReportsByAgeRequest req, CancellationToken ct)
     {
-        return _frozenReportService.GetDistributionsByAgeYear(req, ct);
+        return _frozenReportService.GetContributionsByAgeYear(req, ct);
     }
 
-    protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, DistributionsByAge report, CancellationToken cancellationToken)
+    protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, ContributionsByAge report, CancellationToken cancellationToken)
     {
         // Register the class map for the main member data
-        csvWriter.Context.RegisterClassMap<ProfitSharingDistributionsByAgeMapper>();
+        csvWriter.Context.RegisterClassMap<ProfitSharingContributionsByAgeMapper>();
 
         await base.GenerateCsvContent(csvWriter, report, cancellationToken);
-
-        // Write out totals
-        await csvWriter.NextRecordAsync();
-        csvWriter.WriteField("");
-        csvWriter.WriteField(report.RegularTotalEmployees);
-
-        await csvWriter.NextRecordAsync();
-        csvWriter.WriteField("HARDSHIP");
-        csvWriter.WriteField(report.HardshipTotalEmployees);
-        csvWriter.WriteField(report.HardshipTotalAmount);
 
         await csvWriter.NextRecordAsync();
         csvWriter.WriteField("DIST TTL");
@@ -73,16 +63,16 @@ public class DistributionsByAgeEndpoint : EndpointWithCsvTotalsBase<FrozenReport
         await csvWriter.NextRecordAsync();
 
         // Write the headers
-        csvWriter.WriteHeader<DistributionsByAgeDetail>();
+        csvWriter.WriteHeader<ContributionsByAgeDetail>();
         await csvWriter.NextRecordAsync();
 
        
     }
   
 
-    public class ProfitSharingDistributionsByAgeMapper : ClassMap<DistributionsByAgeDetail>
+    public class ProfitSharingContributionsByAgeMapper : ClassMap<ContributionsByAgeDetail>
     {
-        public ProfitSharingDistributionsByAgeMapper()
+        public ProfitSharingContributionsByAgeMapper()
         {
             Map(m => m.Age).Index(0).Name("AGE");
             Map(m => m.EmployeeCount).Index(1).Name("EMPS");

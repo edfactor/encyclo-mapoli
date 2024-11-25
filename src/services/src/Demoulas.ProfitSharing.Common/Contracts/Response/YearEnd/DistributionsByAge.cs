@@ -13,7 +13,7 @@ public sealed record DistributionsByAge : ReportResponseBase<DistributionsByAgeD
         ReportDate = DateTimeOffset.Now;
     }
 
-    public DistributionsByAgeRequest.Report ReportType { get; set; }
+    public FrozenReportsByAgeRequest.Report ReportType { get; set; }
 
     public short HardshipTotalEmployees { get; set; }
     public decimal RegularTotalAmount { get; set; }
