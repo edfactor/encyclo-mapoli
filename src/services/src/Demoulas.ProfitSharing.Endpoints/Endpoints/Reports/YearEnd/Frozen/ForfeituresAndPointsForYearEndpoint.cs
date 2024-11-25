@@ -24,7 +24,7 @@ public class ForfeituresAndPointsForYearEndpoint:EndpointWithCsvBase<ProfitYearR
         Get("frozen/forfeitures-and-points");
         Summary(s =>
         {
-            s.Summary = "Forfeitures and Points for Year";
+            s.Summary = ReportFileName;
             s.Description =
                 "This report produces a list of members showing their points, and any forfeitures over the year";
 
