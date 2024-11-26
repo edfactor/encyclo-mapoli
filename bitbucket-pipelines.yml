@@ -112,6 +112,9 @@ definitions:
         # Run the build process for the specified environment
         - C:\nvm\v20.4.0\npm.cmd run build:${env:ENV}
 
+        - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
+        - Copy-Item -Path ".buildinfo.json" -Destination "..\..\src\UI\build"
+
         # Copy the web.config file to the build directory
         - Copy-Item -Path ".\src\web.config" -Destination "..\..\src\UI\build" -Force
 
