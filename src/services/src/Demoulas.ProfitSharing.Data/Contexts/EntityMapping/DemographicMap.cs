@@ -21,7 +21,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
 
 
         _ = builder.Property(e => e.Id)
-            .HasPrecision(11)
+            .HasPrecision(9)
             .ValueGeneratedOnAdd()
             .HasColumnName("ID");
 
@@ -203,6 +203,9 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
 
         _ = builder.HasMany(d => d.Checks)
             .WithOne()
+            .HasForeignKey(p => p.DemographicId);
+
+        builder.HasMany(d => d.DistributionRequests).WithOne()
             .HasForeignKey(p => p.DemographicId);
     }
 }

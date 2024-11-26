@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Demoulas.ProfitSharing.Security;
 using System.Net;
 using Demoulas.Common.Api.Groups;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Endpoints.Groups;
 

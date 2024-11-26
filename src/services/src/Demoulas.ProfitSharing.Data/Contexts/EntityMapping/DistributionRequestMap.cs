@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.Common.Data.Contexts.ValueConverters;
@@ -16,10 +11,11 @@ internal sealed class DistributionRequestMap : IEntityTypeConfiguration<Distribu
     {
         builder.ToTable("DISTRIBUTION_REQUEST");
         builder.HasKey(d => d.Id);
-        builder.Property(d => d.Id).ValueGeneratedOnAdd();
-        builder.Property(c => c.PSN).HasPrecision(11);
+        builder.Property(d => d.Id).HasPrecision(9).HasColumnName("ID").ValueGeneratedOnAdd();
+        builder.Property(c => c.DemographicId).HasPrecision(9).HasColumnName("DEMOGRAPHIC_ID");
         builder.Property(c => c.ReasonId).HasColumnName("REASON_ID");
         builder.Property(c => c.StatusId).HasColumnName("STATUS_ID");
+        builder.Property(c => c.TaxCodeId).HasColumnName("TAX_CODE_ID");
         builder.Property(c => c.TypeId).HasColumnName("TYPE_ID");
         builder.Property(d => d.ReasonText).HasColumnName("REASON_TEXT").HasMaxLength(250);
         builder.Property(d => d.ReasonOtherText).HasColumnName("REASON_OTHER").HasMaxLength(500);
@@ -31,5 +27,6 @@ internal sealed class DistributionRequestMap : IEntityTypeConfiguration<Distribu
         builder.HasOne(e => e.Reason).WithMany().HasForeignKey(p => p.ReasonId);
         builder.HasOne(e => e.Status).WithMany().HasForeignKey(p => p.StatusId);
         builder.HasOne(e => e.Type).WithMany().HasForeignKey(p => p.TypeId);
+        builder.HasOne(e => e.TaxCode).WithMany().HasForeignKey(p=> p.TaxCodeId);
     }
 }

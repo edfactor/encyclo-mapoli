@@ -28,8 +28,8 @@ public class TotalBalanceEndpoint:Endpoint<BalanceEndpointRequest, BalanceEndpoi
         Group<BalanceGroup>();
     }
 
-    public override async Task<BalanceEndpointResponse?> ExecuteAsync(BalanceEndpointRequest req, CancellationToken ct)
+    public override Task<BalanceEndpointResponse?> ExecuteAsync(BalanceEndpointRequest req, CancellationToken ct)
     {
-        return await _totalService.GetVestingBalanceForSingleMember(req.SearchType, req.Id, req.ProfitYear);
+        return _totalService.GetVestingBalanceForSingleMember(req.SearchType, req.Id, req.ProfitYear);
     }
 }

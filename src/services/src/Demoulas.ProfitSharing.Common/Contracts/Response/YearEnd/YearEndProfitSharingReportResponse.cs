@@ -14,7 +14,7 @@ public sealed record YearEndProfitSharingReportResponse
     public required bool IsUnder21 { get; set; }
     public required bool IsNew { get; set; }
     public char? EmployeeStatus { get; set; }
-    public required Decimal Balance { get; set; }
+    public required decimal Balance { get; set; }
     public required short YearsInPlan { get; set; }
 
     public static YearEndProfitSharingReportResponse ResponseExample()

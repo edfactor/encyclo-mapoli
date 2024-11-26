@@ -10,7 +10,7 @@ using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen.D
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
 
-public class DistributionsByAgeEndpoint : EndpointWithCsvTotalsBase<DistributionsByAgeRequest, DistributionsByAge, DistributionsByAgeDetail, ProfitSharingDistributionsByAgeMapper>
+public class DistributionsByAgeEndpoint : EndpointWithCsvTotalsBase<FrozenReportsByAgeRequest, DistributionsByAge, DistributionsByAgeDetail, ProfitSharingDistributionsByAgeMapper>
 {
     private readonly IFrozenReportService _frozenReportService;
 
@@ -26,11 +26,11 @@ public class DistributionsByAgeEndpoint : EndpointWithCsvTotalsBase<Distribution
         Get("frozen/distributions-by-age");
         Summary(s =>
         {
-            s.Summary = "PROFIT SHARING DISTRIBUTIONS BY AGE";
+            s.Summary = ReportFileName;
             s.Description =
-                "This report produces a list of members showing their points, and any forfeitures over the year";
+                "This report produces a list of members showing their distribution over the year grouped by age and aggregated to separate regular from hardships";
 
-            s.ExampleRequest = DistributionsByAgeRequest.RequestExample();
+            s.ExampleRequest = FrozenReportsByAgeRequest.RequestExample();
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
@@ -43,7 +43,7 @@ public class DistributionsByAgeEndpoint : EndpointWithCsvTotalsBase<Distribution
         base.Configure();
     }
 
-    public override Task<DistributionsByAge> GetResponse(DistributionsByAgeRequest req, CancellationToken ct)
+    public override Task<DistributionsByAge> GetResponse(FrozenReportsByAgeRequest req, CancellationToken ct)
     {
         return _frozenReportService.GetDistributionsByAgeYear(req, ct);
     }

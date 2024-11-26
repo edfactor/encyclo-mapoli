@@ -6,7 +6,7 @@ import {
   DemographicBadgesNotInPayprofitResponse,
   DistributionsAndForfeitures,
   DistributionsAndForfeituresRequestDto,
-  DistributionsByAgeRequest,
+  FrozenReportsByAgeRequest,
   DuplicateNameAndBirthday,
   DuplicateNameAndBirthdayRequestDto,
   DuplicateSSNDetail,
@@ -28,12 +28,16 @@ import {
   NegativeEtvaForSSNsOnPayProfit,
   NegativeEtvaForSSNsOnPayprofitRequestDto,
   PagedReportResponse,
-  ProfitSharingDistributionsByAge
+  ProfitSharingDistributionsByAge,
+  ContributionsByAge,
+  ForfeituresByAge
 } from "reduxstore/types";
 import {
   setDemographicBadgesNotInPayprofitData,
   setDistributionsAndForfeitures,
   setDistributionsByAge,
+  setContributionsByAge,
+  setForfeituresByAge,
   setDuplicateNamesAndBirthdays,
   setDuplicateSSNsData,
   setEligibleEmployees,
@@ -368,7 +372,7 @@ export const YearsEndApi = createApi({
       }
     }),
 
-    getDistributionsByAge: builder.query<ProfitSharingDistributionsByAge, DistributionsByAgeRequest>({
+    getDistributionsByAge: builder.query<ProfitSharingDistributionsByAge, FrozenReportsByAgeRequest>({
       query: (params) => ({
         url: "yearend/frozen/distributions-by-age",
         method: "GET",
@@ -381,6 +385,42 @@ export const YearsEndApi = createApi({
         try {
           const { data } = await queryFulfilled;
           dispatch(setDistributionsByAge(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
+     getContributionsByAge: builder.query<ContributionsByAge, FrozenReportsByAgeRequest>({
+      query: (params) => ({
+        url: "yearend/frozen/contributions-by-age",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          reportType: params.reportType
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setContributionsByAge(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
+    getForfeituresByAge: builder.query<ForfeituresByAge, FrozenReportsByAgeRequest>({
+      query: (params) => ({
+        url: "yearend/frozen/forfeitures-by-age",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          reportType: params.reportType
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setForfeituresByAge(data));
         } catch (err) {
           console.log("Err: " + err);
         }
@@ -435,5 +475,7 @@ export const {
   useLazyGetExecutiveHoursAndDollarsQuery,
   useLazyGetEligibleEmployeesQuery,
   useLazyGetDistributionsByAgeQuery,
+  useLazyGetContributionsByAgeQuery,
+  useLazyGetForfeituresByAgeQuery,
   useLazyGetProfitMasterInquiryQuery
 } = YearsEndApi;

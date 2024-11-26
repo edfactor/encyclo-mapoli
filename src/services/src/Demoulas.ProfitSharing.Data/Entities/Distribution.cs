@@ -9,7 +9,7 @@ public sealed class Distribution
 {
     public long Id { get; set; } 
     
-    public required long Ssn { get; set; }
+    public required int Ssn { get; set; }
     public required byte PaymentSequence{ get; set; }
     
     public required string EmployeeName { get; set; }

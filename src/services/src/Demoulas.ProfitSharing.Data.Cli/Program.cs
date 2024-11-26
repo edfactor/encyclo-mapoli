@@ -12,7 +12,7 @@ namespace Demoulas.ProfitSharing.Data.Cli;
 public class Program
 #pragma warning restore S1118
 {
-    public static async Task<int> Main(string[] args)
+    public static Task<int> Main(string[] args)
     {
 #pragma warning disable S3928
         // Setup configuration to include command-line arguments
@@ -126,7 +126,7 @@ public class Program
 
         
         // Invoke the root command
-        return await rootCommand.InvokeAsync(args);
+        return rootCommand.InvokeAsync(args);
 #pragma warning restore S3928
     }
 

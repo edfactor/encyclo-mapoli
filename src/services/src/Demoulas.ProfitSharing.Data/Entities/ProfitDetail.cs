@@ -3,7 +3,7 @@
 public class ProfitDetail
 {
     public int Id { get; set; }
-    public long Ssn { get; set; }
+    public int Ssn { get; set; }
     public short ProfitYear { get; set; }
     public byte ProfitYearIteration { get; set; }
     public int DistributionSequence { get; set; }
@@ -23,7 +23,7 @@ public class ProfitDetail
     public char? TaxCodeId { get; set; }
     public byte? CommentTypeId { get; set; }
     public CommentType? CommentType { get; set; }
-    public int? CommentRelatedCheckNumber { get; set; }
+    public string? CommentRelatedCheckNumber { get; set; }
     public string? CommentRelatedState { get; set; }
     public long? CommentRelatedOracleHcmId { get; set; }
     public short? CommentRelatedPsnSuffix { get; set; }

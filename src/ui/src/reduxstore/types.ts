@@ -281,23 +281,23 @@ export interface MasterInquryRequest extends ImpersonationRequest {
   comment?: string
   pagination: PaginationParams;
 }
-export enum DistributionByAgeReportType {
+export enum FrozenReportsByAgeRequestType {
   Total = "Total",
   FullTime = "FullTime",
   PartTime = "PartTime",
 }
 
 
-export interface DistributionsByAgeRequest extends ImpersonationRequest {
+export interface FrozenReportsByAgeRequest extends ImpersonationRequest {
   profitYear: number;
   pagination: PaginationParams;
-  reportType: DistributionByAgeReportType;
+  reportType: FrozenReportsByAgeRequestType;
 }
 
 export interface ProfitSharingDistributionsByAge {
   reportName: string;
   reportDate: string;
-  reportType: DistributionByAgeReportType;
+  reportType: FrozenReportsByAgeRequestType;
   hardshipTotalEmployees: number;
   regularTotalAmount:number;
   regularTotalEmployees: number;
@@ -312,4 +312,34 @@ export interface ProfitSharingDistributionsByAgeResponse {
   amount: number;
   employmentType: string;
   commentTypeId: number | null;
+}
+
+export interface ContributionsByAge {
+  reportName: string;
+  reportDate: string;
+  reportType: FrozenReportsByAgeRequestType;
+  totalEmployees: number;
+  distributionTotalAmount: number;
+  response: Paged<ContributionsByAgeDetail>;
+}
+
+export interface ContributionsByAgeDetail {
+  age: number;
+  employeeCount: number;
+  amount: number;
+}
+
+export interface ForfeituresByAge {
+  reportName: string;
+  reportDate: string;
+  reportType: FrozenReportsByAgeRequestType;
+  totalEmployees: number;
+  distributionTotalAmount: number;
+  response: Paged<ForfeituresByAgeDetail>;
+}
+
+export interface ForfeituresByAgeDetail {
+  age: number;
+  employeeCount: number;
+  amount: number;
 }

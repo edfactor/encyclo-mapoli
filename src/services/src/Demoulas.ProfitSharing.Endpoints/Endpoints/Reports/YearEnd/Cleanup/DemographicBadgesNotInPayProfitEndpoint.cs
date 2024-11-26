@@ -83,9 +83,9 @@ public class DemographicBadgesNotInPayProfitEndpoint : EndpointWithCsvBase<Pagin
 
     public override string ReportFileName => "DEMOGRAPHIC-WITHOUT-DEMOGRAPHICS";
 
-    public override async Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetResponse(PaginationRequestDto req, CancellationToken ct)
+    public override Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetResponse(PaginationRequestDto req, CancellationToken ct)
     {
-        return await _cleanupReportService.GetDemographicBadgesNotInPayProfit(req, ct);
+        return _cleanupReportService.GetDemographicBadgesNotInPayProfit(req, ct);
     }
 
     public sealed class DemographicBadgesNotInPayProfitResponseMap : ClassMap<DemographicBadgesNotInPayProfitResponse>

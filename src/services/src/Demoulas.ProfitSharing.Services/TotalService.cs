@@ -5,7 +5,6 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services;
@@ -205,7 +204,7 @@ public sealed class TotalService : ITotalService
                 });
 
             default: //SSN
-                var ssn = Convert.ToInt64(id);
+                var ssn = Convert.ToInt32(id);
                 return await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
                 {
                     var rslt = await (from t in TotalVestingBalance(ctx, profitYear, calendarInfo.FiscalEndDate) where t.Ssn == ssn 

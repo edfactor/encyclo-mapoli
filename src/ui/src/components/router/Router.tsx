@@ -18,6 +18,8 @@ import ManageExecutiveHoursAndDollars from "pages/ManageExecutiveHoursAndDollars
 import EligibleEmployees from "pages/EligibleEmployees/EligibleEmployees";
 import MasterInquiry from "pages/MasterInquiry/MasterInquiry";
 import DistributionByAge from "../../pages/DistributionByAge/DistributionByAge";
+import ContributionsByAge from "../../pages/ContributionsByAge/ContributionsByAge";
+import ForfeituresByAge from "../../pages/ForfeituresByAge/ForfeituresByAge";
 
 const Router = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -62,18 +64,24 @@ const Router = () => {
         <Route
           path="distributions-and-forfeitures"
           element={<DistributionsAndForfeitures />}></Route>
-          <Route
+        <Route
           path="manage-executive-hours-and-dolars"
           element={<ManageExecutiveHoursAndDollars />}></Route>
-          <Route
+        <Route
           path="eligible-employees"
           element={<EligibleEmployees />}></Route>
-          <Route
+        <Route
           path="master-inquiry"
           element={<MasterInquiry />}></Route>
-         <Route
+        <Route
           path="distributions-by-age"
           element={<DistributionByAge />}></Route>
+        <Route
+          path="contributions-by-age"
+          element={<ContributionsByAge />}></Route>
+         <Route
+          path="forfeitures-by-age"
+          element={<ForfeituresByAge />}></Route>
       </RouteSecurity>
     </BrowserRouter>
   );

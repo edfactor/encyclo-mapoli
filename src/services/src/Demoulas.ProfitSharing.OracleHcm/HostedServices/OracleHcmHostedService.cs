@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-using Demoulas.ProfitSharing.Common.Configuration;
+using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Jobs;
 using Microsoft.Extensions.Hosting;
 using Quartz;

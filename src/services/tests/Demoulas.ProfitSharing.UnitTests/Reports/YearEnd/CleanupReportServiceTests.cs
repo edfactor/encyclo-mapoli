@@ -59,10 +59,10 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
     }   
 
     [Fact(DisplayName = "PS-151: Demographic badges without payprofit (JSON)")]
-    public async Task GetDemographicBadgesWithoutPayProfitTests()
+    public Task GetDemographicBadgesWithoutPayProfitTests()
     {
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        await MockDbContextFactory.UseWritableContext(async c =>
+        return MockDbContextFactory.UseWritableContext(async c =>
         {
             var response = await _cleanupReportClient.GetDemographicBadgesNotInPayProfit(_paginationRequest, CancellationToken.None);
             response.Should().NotBeNull();
@@ -96,10 +96,10 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
     }
 
     [Fact(DisplayName = "PS-151: Demographic badges without payprofit (CSV)")]
-    public async Task GetDemographicBadgesWithoutPayProfitTestsCsv()
+    public Task GetDemographicBadgesWithoutPayProfitTestsCsv()
     {
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        await MockDbContextFactory.UseWritableContext(async c =>
+        return MockDbContextFactory.UseWritableContext(async c =>
         {
 
             byte mismatchedValues = 5;
@@ -129,10 +129,10 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
     }
 
     [Fact(DisplayName ="PS-153: Names without commas (JSON)")]
-    public async Task GetNamesWithoutCommas()
+    public Task GetNamesWithoutCommas()
     {
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        await MockDbContextFactory.UseWritableContext(async ctx =>
+        return MockDbContextFactory.UseWritableContext(async ctx =>
         {
             var request = new PaginationRequestDto() { Skip = 0, Take = 1000 };
             var response = await _cleanupReportClient.GetNamesMissingComma(request, CancellationToken.None);
@@ -165,10 +165,10 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
     }
 
     [Fact(DisplayName = "PS-153: Names without commas (CSV)")]
-    public async Task GetNamesWithoutCommasCsv()
+    public Task GetNamesWithoutCommasCsv()
     {
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        await MockDbContextFactory.UseWritableContext(async ctx =>
+        return MockDbContextFactory.UseWritableContext(async ctx =>
         {
             byte disruptedNameCount = 10;
             await ctx.Demographics.Take(disruptedNameCount).ForEachAsync(dem =>
@@ -193,11 +193,11 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
     }
 
     [Fact(DisplayName = "PS-145 : Negative ETVA for SSNs on PayProfit (JSON)")]
-    public async Task GetNegativeEtvaReportJson()
+    public Task GetNegativeEtvaReportJson()
     {
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         byte negativeValues = 5;
-        await MockDbContextFactory.UseWritableContext(async c =>
+        return MockDbContextFactory.UseWritableContext(async c =>
         {
             await c.PayProfits.Take(negativeValues).ForEachAsync(pp =>
             {
@@ -625,9 +625,9 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
     }
 
     [Fact(DisplayName = "CleanupReportService auth check")]
-    public async Task YearEndServiceAuthCheck()
+    public Task YearEndServiceAuthCheck()
     {
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.HARDSHIPADMINISTRATOR);
-        await Assert.ThrowsAsync<HttpRequestException>(async () => { _ = await _cleanupReportClient.GetDemographicBadgesNotInPayProfit(_paginationRequest, CancellationToken.None); });
+        return Assert.ThrowsAsync<HttpRequestException>(async () => { _ = await _cleanupReportClient.GetDemographicBadgesNotInPayProfit(_paginationRequest, CancellationToken.None); });
     }
 }

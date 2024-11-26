@@ -6,11 +6,11 @@ import { useLazyGetDistributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { ImpersonationRoles, DistributionByAgeReportType } from "reduxstore/types";
+import { ImpersonationRoles, FrozenReportsByAgeRequestType } from "reduxstore/types";
 
 interface DistributionByAgeSearch {
   profitYear: number;
-  reportType?: DistributionByAgeReportType;
+  reportType?: FrozenReportsByAgeRequestType;
 }
 
 const schema = yup.object().shape({
@@ -18,7 +18,7 @@ const schema = yup.object().shape({
     .number()
     .typeError("Year must be a number")
     .integer("Year must be an integer")
-    .min(1900, "Year must be 1900 or later")
+    .min(2000, "Year must be 2000 or later")
     .max(2100, "Year must be 2100 or earlier")
     .required("Year is required")
 });
@@ -47,7 +47,7 @@ const DistributionByAgeSearchFilter = () => {
       triggerSearch(
         {
           profitYear: data.profitYear,
-          reportType: DistributionByAgeReportType.Total,
+          reportType: FrozenReportsByAgeRequestType.Total,
           pagination: { skip: 0, take: 255 },
           impersonation: ImpersonationRoles.ProfitSharingAdministrator
         },
@@ -56,7 +56,7 @@ const DistributionByAgeSearchFilter = () => {
       triggerSearch(
         {
           profitYear: data.profitYear,
-          reportType: DistributionByAgeReportType.FullTime,
+          reportType: FrozenReportsByAgeRequestType.FullTime,
           pagination: { skip: 0, take: 255 },
           impersonation: ImpersonationRoles.ProfitSharingAdministrator
         },
@@ -65,7 +65,7 @@ const DistributionByAgeSearchFilter = () => {
       triggerSearch(
         {
           profitYear: data.profitYear,
-          reportType: DistributionByAgeReportType.PartTime,
+          reportType: FrozenReportsByAgeRequestType.PartTime,
           pagination: { skip: 0, take: 255 },
           impersonation: ImpersonationRoles.ProfitSharingAdministrator
         },

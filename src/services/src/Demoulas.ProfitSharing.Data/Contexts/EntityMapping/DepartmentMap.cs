@@ -12,6 +12,7 @@ internal sealed class DepartmentMap : IEntityTypeConfiguration<Department>
         builder.HasKey(e => e.Id);
 
         builder.Property(e => e.Id)
+            .HasPrecision(2)
             .ValueGeneratedNever()
             .HasColumnName("ID")
             .IsRequired();
