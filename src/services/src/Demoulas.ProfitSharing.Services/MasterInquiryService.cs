@@ -1,4 +1,4 @@
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -116,7 +116,7 @@ public class MasterInquiryService : IMasterInquiryService
                 .OrderByDescending(x => x.ProfitYear)
                 .ToPaginationResultsAsync(req, cancellationToken);
 
-                _logger.LogWarning("Returned {Results} records", results.Results.Count());
+                _logger.LogInformation("Returned {Results} records", results.Results.Count());
                 return results;
             });
 
