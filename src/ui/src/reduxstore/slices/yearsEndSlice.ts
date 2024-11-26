@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
   ContributionsByAge,
+  ForfeituresByAge,
   DemographicBadgesNotInPayprofit,
   DistributionsAndForfeitures,
   DuplicateNameAndBirthday,
@@ -38,6 +39,9 @@ export interface YearsEndState {
   contributionsByAgeTotal: ContributionsByAge | null;
   contributionsByAgeFullTime: ContributionsByAge | null;
   contributionsByAgePartTime: ContributionsByAge | null;
+  forfeituresByAgeTotal: ForfeituresByAge | null;
+  forfeituresByAgeFullTime: ForfeituresByAge | null;
+  forfeituresByAgePartTime: ForfeituresByAge | null;
 }
 
 const initialState: YearsEndState = {
@@ -58,7 +62,10 @@ const initialState: YearsEndState = {
   distributionsByAgePartTime: null,
   contributionsByAgeTotal: null,
   contributionsByAgeFullTime: null,
-  contributionsByAgePartTime: null
+  contributionsByAgePartTime: null,
+  forfeituresByAgeTotal: null,
+  forfeituresByAgeFullTime: null,
+  forfeituresByAgePartTime: null
 };
 
 export const yearsEndSlice = createSlice({
@@ -144,6 +151,19 @@ export const yearsEndSlice = createSlice({
       if (action.payload.reportType == FrozenReportsByAgeRequestType.PartTime) {
         state.contributionsByAgePartTime = action.payload;
       }
+    },
+    setForfeituresByAge: (state, action: PayloadAction<ForfeituresByAge>) => {
+      if (action.payload.reportType == FrozenReportsByAgeRequestType.Total) {
+        state.forfeituresByAgeTotal = action.payload;
+      }
+
+      if (action.payload.reportType == FrozenReportsByAgeRequestType.FullTime) {
+        state.forfeituresByAgeFullTime = action.payload;
+      }
+
+      if (action.payload.reportType == FrozenReportsByAgeRequestType.PartTime) {
+        state.forfeituresByAgePartTime = action.payload;
+      }
     }
   }
 });
@@ -163,6 +183,7 @@ export const {
   setMasterInquiryData,
   clearMasterInquiryData,
   setDistributionsByAge,
-  setContributionsByAge
+  setContributionsByAge,
+  setForfeituresByAge
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

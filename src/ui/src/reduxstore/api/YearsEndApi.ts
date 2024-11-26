@@ -28,13 +28,16 @@ import {
   NegativeEtvaForSSNsOnPayProfit,
   NegativeEtvaForSSNsOnPayprofitRequestDto,
   PagedReportResponse,
-  ProfitSharingDistributionsByAge, ContributionsByAge
+  ProfitSharingDistributionsByAge,
+  ContributionsByAge,
+  ForfeituresByAge
 } from "reduxstore/types";
 import {
   setDemographicBadgesNotInPayprofitData,
   setDistributionsAndForfeitures,
   setDistributionsByAge,
   setContributionsByAge,
+  setForfeituresByAge,
   setDuplicateNamesAndBirthdays,
   setDuplicateSSNsData,
   setEligibleEmployees,
@@ -405,6 +408,24 @@ export const YearsEndApi = createApi({
         }
       }
     }),
+    getForfeituresByAge: builder.query<ForfeituresByAge, FrozenReportsByAgeRequest>({
+      query: (params) => ({
+        url: "yearend/frozen/forfeitures-by-age",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          reportType: params.reportType
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setForfeituresByAge(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
     getProfitMasterInquiry: builder.query<Paged<MasterInquiryDetail>, MasterInquryRequest>({
       query: (params) => ({
         url: "yearend/master-inquiry",
@@ -455,5 +476,6 @@ export const {
   useLazyGetEligibleEmployeesQuery,
   useLazyGetDistributionsByAgeQuery,
   useLazyGetContributionsByAgeQuery,
+  useLazyGetForfeituresByAgeQuery,
   useLazyGetProfitMasterInquiryQuery
 } = YearsEndApi;

@@ -320,10 +320,25 @@ export interface ContributionsByAge {
   reportType: FrozenReportsByAgeRequestType;
   totalEmployees: number;
   distributionTotalAmount: number;
-  response: Paged<ProfitSharingDistributionsByAgeResponse>;
+  response: Paged<ContributionsByAgeDetail>;
 }
 
 export interface ContributionsByAgeDetail {
+  age: number;
+  employeeCount: number;
+  amount: number;
+}
+
+export interface ForfeituresByAge {
+  reportName: string;
+  reportDate: string;
+  reportType: FrozenReportsByAgeRequestType;
+  totalEmployees: number;
+  distributionTotalAmount: number;
+  response: Paged<ForfeituresByAgeDetail>;
+}
+
+export interface ForfeituresByAgeDetail {
   age: number;
   employeeCount: number;
   amount: number;

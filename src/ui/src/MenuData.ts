@@ -17,7 +17,8 @@ const yearEndReports: RouteCategory = {
     { caption: "Get Eligible Employees", route: "/eligible-employees" },
     { caption: "Master Inquiry", route: "/master-inquiry" },
     { caption: "Get Distributions by Age", route: "/distributions-by-age" },
-    { caption: "Get Contributions by Age", route: "/contributions-by-age" }
+    { caption: "Get Contributions by Age", route: "/contributions-by-age" },
+    { caption: "Get Forfeitures by Age", route: "/forfeitures-by-age" }
   ]
 };
 
