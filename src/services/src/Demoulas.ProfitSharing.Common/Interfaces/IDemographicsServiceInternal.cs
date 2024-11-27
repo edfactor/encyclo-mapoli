@@ -7,6 +7,4 @@ public interface IDemographicsServiceInternal
 {
     Task AddDemographicsStream(IAsyncEnumerable<DemographicsRequest> employees, byte batchSize = byte.MaxValue,
         CancellationToken cancellationToken = default);
-
-    Task<DateTime?> GetLastOracleHcmSyncDate(CancellationToken cancellationToken = default);
 }

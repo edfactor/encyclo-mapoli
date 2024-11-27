@@ -1,6 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Services;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Extensions;
@@ -78,19 +79,7 @@ public sealed class TotalService : ITotalService
         );
     }
 
-    public IQueryable<ParticipantTotalDto> GetGrossAmount(IProfitSharingDbContext ctx, short profitYear)
-    {
-        return (
-            from ds in ctx.Distributions
-            group ds by ds.Ssn into ds_g
-            select new ParticipantTotalDto()
-            {
-                Ssn = ds_g.Key,
-                Total = ds_g.Where(x => x.StatusId != DistributionStatus.Constants.PurgeRecord && x.StatusId != DistributionStatus.Constants.PaymentMade).Sum(x => x.GrossAmount)
-            }
-        );
-    }
-
+   
     public IQueryable<ParticipantTotalYearsDto> GetYearsOfService(IProfitSharingDbContext ctx, short profitYear)
     {
         return (from pd in ctx.ProfitDetails
@@ -187,28 +176,26 @@ public sealed class TotalService : ITotalService
         );
     }
 
-    public async Task<BalanceEndpointResponse?> GetVestingBalanceForSingleMember(SearchBy searchBy, string id, short profitYear)
+    public async Task<BalanceEndpointResponse?> GetVestingBalanceForSingleMember(SearchBy searchBy, int employeeIdOrSsn, short profitYear)
     {
         var calendarInfo = await _calendarService.GetYearStartAndEndAccountingDates(profitYear);
         switch (searchBy)
         {
             case SearchBy.EmployeeId:
-                var employeeId = Convert.ToInt32(id);
                 return await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
                 {
                     var rslt = await (from t in TotalVestingBalance(ctx, profitYear, calendarInfo.FiscalEndDate)
                                       join d in ctx.Demographics on t.Ssn equals d.Ssn
-                                      where d.EmployeeId == employeeId
-                                      select new BalanceEndpointResponse { Id = id, Ssn = t.Ssn.MaskSsn(), CurrentBalance = t.CurrentBalance, Etva = t.Etva, TotalDistributions = t.TotalDistributions, VestedBalance = t.VestedBalance, VestingPercent = t.VestingPercent }).FirstOrDefaultAsync();
+                                      where d.EmployeeId == employeeIdOrSsn
+                                      select new BalanceEndpointResponse { Id = employeeIdOrSsn, Ssn = t.Ssn.MaskSsn(), CurrentBalance = t.CurrentBalance, Etva = t.Etva, TotalDistributions = t.TotalDistributions, VestedBalance = t.VestedBalance, VestingPercent = t.VestingPercent }).FirstOrDefaultAsync();
                     return rslt;
                 });
 
             default: //SSN
-                var ssn = Convert.ToInt32(id);
                 return await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
                 {
-                    var rslt = await (from t in TotalVestingBalance(ctx, profitYear, calendarInfo.FiscalEndDate) where t.Ssn == ssn 
-                                      select new BalanceEndpointResponse { Id = id, Ssn = t.Ssn.MaskSsn(), CurrentBalance = t.CurrentBalance, Etva = t.Etva, TotalDistributions = t.TotalDistributions, VestedBalance =  t.VestedBalance, VestingPercent = t.VestingPercent}).FirstOrDefaultAsync();
+                    var rslt = await (from t in TotalVestingBalance(ctx, profitYear, calendarInfo.FiscalEndDate) where t.Ssn == employeeIdOrSsn
+                                      select new BalanceEndpointResponse { Id = employeeIdOrSsn, Ssn = t.Ssn.MaskSsn(), CurrentBalance = t.CurrentBalance, Etva = t.Etva, TotalDistributions = t.TotalDistributions, VestedBalance =  t.VestedBalance, VestingPercent = t.VestingPercent}).FirstOrDefaultAsync();
                     return rslt;
                 });
                 

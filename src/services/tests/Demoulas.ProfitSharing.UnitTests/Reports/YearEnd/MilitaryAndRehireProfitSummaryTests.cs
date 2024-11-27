@@ -19,6 +19,7 @@ using CsvHelper.Configuration;
 using CsvHelper;
 using System.Globalization;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
