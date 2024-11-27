@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 public sealed record ContributionsByAgeDetail
 {
     public required int Age { get; init; }
@@ -9,9 +9,9 @@ public sealed record ContributionsByAgeDetail
     {
         return new ContributionsByAgeDetail
         {
-           Age = 32,
-           Amount = (decimal)159_451.46,
-           EmployeeCount = 7
+            Age = 32,
+            Amount = (decimal)159_451.46,
+            EmployeeCount = 7
         };
     }
 }

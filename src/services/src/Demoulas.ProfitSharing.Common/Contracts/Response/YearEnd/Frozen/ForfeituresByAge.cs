@@ -3,7 +3,7 @@ using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 
-namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 
 public sealed record ForfeituresByAge : ReportResponseBase<ForfeituresByAgeDetail>
 {
@@ -30,7 +30,7 @@ public sealed record ForfeituresByAge : ReportResponseBase<ForfeituresByAgeDetai
             ReportDate = DateTimeOffset.Now,
             DistributionTotalAmount = (decimal)1_855_156.09,
             TotalEmployees = 63,
-            
+
             Response = new PaginatedResponseDto<ForfeituresByAgeDetail>(new PaginationRequestDto())
             {
                 Results = new List<ForfeituresByAgeDetail> { ForfeituresByAgeDetail.ResponseExample() }

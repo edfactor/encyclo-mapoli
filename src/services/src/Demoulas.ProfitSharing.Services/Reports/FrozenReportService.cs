@@ -1,9 +1,10 @@
 ﻿using System.Diagnostics;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -351,9 +352,12 @@ public class FrozenReportService : IFrozenReportService
         };
     }
 
-    public async Task<ForfeituresByAge> GetBalanceByAgeYear(FrozenReportsByAgeRequest req, CancellationToken cancellationToken = default)
+    public async Task<BalanceByAge> GetBalanceByAgeYear(FrozenReportsByAgeRequest req, CancellationToken cancellationToken = default)
     {
-       var list =  await _dataContextFactory.UseReadOnlyContext(ctx =>
+        const string FT = "FullTime";
+        const string PT = "PartTime";
+
+        var list = await _dataContextFactory.UseReadOnlyContext(ctx =>
         {
             var query = _totalService.GetTotalBalanceSet(ctx, req.ProfitYear);
 
@@ -380,7 +384,13 @@ public class FrozenReportService : IFrozenReportService
                     {
                         temp.q,
                         Demographic = temp.demographic,
-                        BeneficiaryContact = beneficiaryContact
+                        BeneficiaryContact = beneficiaryContact,
+                        EmploymentType = temp.demographic != null
+#pragma warning disable S3358
+                            ? (temp.demographic.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT)
+#pragma warning restore S3358
+                            : null,
+                        IsBeneficiary = temp.demographic == null && beneficiaryContact != null
                     }
                 )
                 .Where(item => item.Demographic != null || item.BeneficiaryContact != null)
@@ -395,34 +405,49 @@ public class FrozenReportService : IFrozenReportService
                     Entries = group.ToList()
                 });
 
-
-
-
+            // Fixing the filtering logic to avoid unsupported operations in EF Core.
+            result = req.ReportType switch
+            {
+                FrozenReportsByAgeRequest.Report.FullTime => result
+                    .Where(q => q.Entries.Any(e => e.EmploymentType == FT)),
+                FrozenReportsByAgeRequest.Report.PartTime => result
+                    .Where(q => q.Entries.Any(e => e.EmploymentType == PT)),
+                _ => result
+            };
 
             return result.ToListAsync(cancellationToken);
         });
 
-        var grouped = list
+        var details = list
             .Select(l => new { Age = l.DateOfBirth.Age(), l.Entries })
             .GroupBy(l => l.Age)
-            .Select(g => new
+            .Select(g => new BalanceByAgeDetail
             {
                 Age = g.Key,
-                Amount = g.Sum(p => p.Entries.Sum(e => e.q.Total))
+                Amount = g.Sum(p => p.Entries.Sum(e => e.q.Total)),
+                BeneficiaryCount = g.Sum(p => p.Entries.Count(e => e.IsBeneficiary)),
+                EmployeeCount = g.Sum(p => p.Entries.Count(e => !e.IsBeneficiary))
             })
-            .Where(l=> l.Amount > 0)
+            .Where(l => l.Amount > 0)
             .ToList();
 
-        Debug.WriteLine(grouped);
+        req = req with { Take = details.Count + 1 };
 
-        return new ForfeituresByAge
+        return new BalanceByAge
         {
-            ReportName = "PROFIT SHARING FORFEITURES BY AGE",
+            ReportName = "PROFIT SHARING BALANCE BY AGE",
             ReportDate = DateTimeOffset.Now,
             ReportType = req.ReportType,
-            TotalEmployees = 0,
-            DistributionTotalAmount = 0,
-            Response = new PaginatedResponseDto<ForfeituresByAgeDetail>(req) { }
+            BalanceTotalAmount = details.Sum(d => d.Amount),
+            TotalMembers = (short)details.Sum(d => d.EmployeeCount + d.BeneficiaryCount),
+            TotalBeneficiaries = (short)details.Sum(d => d.BeneficiaryCount),
+            TotalNonBeneficiaries = (short)details.Sum(d => d.EmployeeCount),
+            Response = new PaginatedResponseDto<BalanceByAgeDetail>(req)
+            {
+                Results = details,
+                Total = details.Count
+            }
         };
+
     }
 }
