@@ -354,6 +354,9 @@ public class FrozenReportService : IFrozenReportService
 
     public async Task<BalanceByAge> GetBalanceByAgeYear(FrozenReportsByAgeRequest req, CancellationToken cancellationToken = default)
     {
+        const string FT = "FullTime";
+        const string PT = "PartTime";
+        
         var rawResult = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var query = _totalService.GetTotalBalanceSet(ctx, req.ProfitYear);
@@ -370,8 +373,8 @@ public class FrozenReportService : IFrozenReportService
                                   Demographic = demographic,
                                   BeneficiaryContact = beneficiary,
                                   EmploymentType = demographic != null && demographic.EmploymentTypeId == EmploymentType.Constants.PartTime
-                                      ? "PartTime"
-                                      : "FullTime",
+                                      ? PT
+                                      : FT,
                                   IsBeneficiary = demographic == null && beneficiary != null,
                                   DateOfBirth = demographic != null
                                       ? demographic.DateOfBirth
@@ -383,16 +386,16 @@ public class FrozenReportService : IFrozenReportService
 
         // Client-side processing for grouping and filtering
         var groupedResult = rawResult
-            .GroupBy(item => item.DateOfBirth)
+            .GroupBy(item => item.DateOfBirth.Age())
             .Select(g => new
             {
-                DateOfBirth = g.Key,
+                Age = g.Key,
                 Entries = g.ToList()
             })
             .Where(g => req.ReportType switch
             {
-                FrozenReportsByAgeRequest.Report.FullTime => g.Entries.All(e => e.EmploymentType == "FullTime"),
-                FrozenReportsByAgeRequest.Report.PartTime => g.Entries.All(e => e.EmploymentType == "PartTime"),
+                FrozenReportsByAgeRequest.Report.FullTime => g.Entries.All(e => e.EmploymentType == FT),
+                FrozenReportsByAgeRequest.Report.PartTime => g.Entries.All(e => e.EmploymentType == PT),
                 _ => true
             })
             .ToList();
@@ -401,12 +404,13 @@ public class FrozenReportService : IFrozenReportService
         var details = groupedResult
             .Select(group => new BalanceByAgeDetail
             {
-                Age = group.DateOfBirth.Age(),
+                Age = group.Age,
                 Amount = group.Entries.Sum(e => e.q.Total),
                 BeneficiaryCount = group.Entries.Count(e => e.IsBeneficiary),
                 EmployeeCount = group.Entries.Count(e => !e.IsBeneficiary)
             })
             .Where(detail => detail.Amount > 0)
+            .OrderBy(e=> e.Age)
             .ToList();
 
         // Build the final response
