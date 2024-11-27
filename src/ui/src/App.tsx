@@ -15,7 +15,7 @@ const App = () => {
         onClick={onClick}
         appTitle="Profit Sharing"
         Logout={<Logout />}
-        buildInfo={{ versionNumber: `${buildInfo.BuildNumber}.${buildInfo.BuildId}` }}
+        versionNmber={`${buildInfo.BuildNumber}.${buildInfo.BuildId}`}
         username={"TEST"}>
         <Router />
       </DSMLayout>
