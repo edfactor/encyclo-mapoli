@@ -13,34 +13,37 @@ public class ProftShareUpdateTests
     public void BasicReport()
     {
         // Arrange
+        short profitYear = 2023;
+        PAY444 pay444 = createPay444(profitYear);
 
-        using OracleConnection connection = GetOracleConnection();
-        connection.Open();
-        PAY444 pay444 = new(connection);
-        short year = 2023;
-        pay444.connection = connection;
         string reportName = "psupdate-pay444-r1.txt";
         pay444.TodaysDateTime = new DateTime(2024, 11, 12, 9, 43, 0); // time report was generated
 
         // Act
-        pay444.m015MainProcessing(year, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        pay444.m015MainProcessing(profitYear, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
         // Assert
         string actual = CollectLines(pay444.outputLines);
-        string expected = LoadExpectedReport(reportName).Replace("\r", "");
+        string expected = LoadExpectedReport(reportName);
 
         AssertReportsAreEquivalent(expected, actual);
+    }
+
+    private PAY444 createPay444(short profitYear)
+    {
+        OracleConnection connection = GetOracleConnection();
+        connection.Open();
+        PAY444 pay444 = new(connection);
+        return pay444;
     }
 
     [Fact]
     public void ReportWithUpdates()
     {
         // Arrange
-        using OracleConnection connection = GetOracleConnection();
-        connection.Open();
-
-        PAY444 pay444 = new(connection);
         short year = 2024;
+        PAY444 pay444 = createPay444(year);
+
         string reportName = "psupdate-pay444-r2.txt";
         pay444.TodaysDateTime = new DateTime(2024, 11, 14, 10, 35, 0); // time report was generated
 
@@ -48,7 +51,7 @@ public class ProftShareUpdateTests
         pay444.m015MainProcessing(year, 15, 1, 2, 0, 0, 0, 0, 0, 0, 0, 30000);
 
         // Assert
-        string expected = LoadExpectedReport(reportName).Replace("\r", "");
+        string expected = LoadExpectedReport(reportName);
         string actual = CollectLines(pay444.outputLines);
 
         AssertReportsAreEquivalent(expected, actual);
@@ -58,10 +61,8 @@ public class ProftShareUpdateTests
     public void EnsureUpdateWithValues_andEmployeeAdjustment_MatchesReady()
     {
         // Arrange
-        using OracleConnection connection = GetOracleConnection();
-        connection.Open();
-        PAY444 pay444 = new(connection);
         short year = 2024;
+        PAY444 pay444 = createPay444(year);
         string reportName = "psupdate-pay444-r3.txt";
         pay444.TodaysDateTime = new DateTime(2024, 11, 19, 19, 18, 0); // time report was generated
 
@@ -75,6 +76,10 @@ public class ProftShareUpdateTests
         AssertReportsAreEquivalent(expected, actual);
     }
 
+#if false
+// Pending outcome of Secondary earnings clarification
+
+    /** TBD: change this to test the Earnings override for an individual only */
     [Fact]
     public void with_secondary_earnings_and_employee_and_member_overrides()
     {
@@ -99,11 +104,9 @@ public class ProftShareUpdateTests
         string expected = LoadExpectedReport(reportName);
         string actual = CollectLines(pay444.outputLines);
 
-#if false
-// Pending outcome of Secondary earnings clarification
         AssertReportsAreEquivalent(expected, actual);
-#endif
     }
+#endif
 
 
     private static OracleConnection GetOracleConnection()

@@ -1,7 +1,7 @@
 ﻿using Elastic.Clients.Elasticsearch.Graph;
 using Oracle.ManagedDataAccess.Client;
 
-namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
+namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.DbHelpers;
 
 public class PayProfRecTableHelper
 {

@@ -1,14 +1,13 @@
 ﻿using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 using Oracle.ManagedDataAccess.Client;
 
-namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
+namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.DbHelpers;
 
 public class ProfitDetailTableHelper
 {
 #pragma warning disable S2933
 
-    private  List<PROFIT_DETAIL> records = new();
+    private List<PROFIT_DETAIL> records = new();
     public long ssn;
     private int pos;
     private OracleConnection connection;

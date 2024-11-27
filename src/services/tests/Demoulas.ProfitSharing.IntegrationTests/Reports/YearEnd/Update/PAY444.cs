@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.ReportFormatters;
+﻿using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.DbHelpers;
+using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.ReportFormatters;
 using Oracle.ManagedDataAccess.Client;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
@@ -21,8 +22,6 @@ public class PAY444
 
     private readonly Counters _counters = new();
 
-    public OracleConnection connection = null;
-
     private long holdBadge;
     private INTERMEDIATE_VALUES intermediate_values = new();
 
@@ -41,12 +40,9 @@ public class PAY444
     public string? PAYBEN_FILE_STATUS { get; set; }
     public string? DEMO_PROFSHARE_FILE_STATUS { get; set; } = "00";
 
-    public long YEARS { get; set; }
-    public long AGE { get; set; }
     public long FIRST_REC { get; set; }
     public long HOLD_SSN { get; set; }
     public long HOLD_PAYSSN { get; set; }
-    public long INVALID_CNT { get; set; }
 
     public long WS_REWRITE_WHICH { get; set; }
     public long WS_ERROR { get; set; }
@@ -63,23 +59,22 @@ public class PAY444
 
     public long EffectiveYear { get; set; } // PIC 9(4)
 
-    public int SOC_SEC_NUMBER { get; set; }
     public DateTime TodaysDateTime { get; set; } = DateTime.Now;
 
 
     // Data Helpers
     private ProfitDetailTableHelper profitDetailTable;
     private DemRecTableHelper DemRecTableHelper;
-    private  PayBenReader PAYBEN1;
-    private  PayProfRecTableHelper PAYPROFIT_FILE;
+    private PayBenReader PAYBEN1;
+    private PayProfRecTableHelper PAYPROFIT_FILE;
 
 
     public PAY444(OracleConnection connection)
     {
         profitDetailTable = new ProfitDetailTableHelper(connection);
         DemRecTableHelper = new DemRecTableHelper(connection, dem_rec);
-         PAYBEN1 = new PayBenReader(connection);
-         PAYPROFIT_FILE = new PayProfRecTableHelper(connection);
+        PAYBEN1 = new PayBenReader(connection);
+        PAYPROFIT_FILE = new PayProfRecTableHelper(connection);
     }
 
     // It is annoying that forfeit proceeds earnings, but that is the way the Cobol prompts for them.  
@@ -352,11 +347,6 @@ public class PAY444
 
     private string? READ_KEY_DEMO_PROFSHARE(DEM_REC dem_rec)
     {
-        if (DemRecTableHelper == null)
-        {
-            DemRecTableHelper = new DemRecTableHelper(connection, dem_rec);
-        }
-
         return DemRecTableHelper.getByBadge(dem_rec);
     }
 
@@ -391,10 +381,7 @@ public class PAY444
         PAYBEN_FILE_STATUS = READ_KEY_PAYBEN(payben_rec);
         if (PAYBEN_FILE_STATUS != "00")
         {
-            INVALID_CNT += 1;
-            DISPLAY(
-                $"{PAYBEN_FILE_STATUS} {payben_rec.PYBEN_PSN} {payben_rec.PYBEN_PAYSSN} = INVALID PAYBEN RECORD NOT UPDATED");
-            goto l220_EXIT;
+            throw new IOException("STAT:{PAYBEN_FILE_STATUS} PSN:{payben_rec.PYBEN_PSN} SSN:{payben_rec.PYBEN_PAYSSN} = INVALID PAYBEN RECORD NOT UPDATED");
         }
 
         WS_REWRITE_WHICH = 2;
@@ -489,7 +476,6 @@ public class PAY444
             m430RewritePayben();
         }
 
-    l220_EXIT:;
     }
 
     private string? READ_KEY_PAYBEN(PAYBEN_REC payben_rec)
@@ -743,36 +729,21 @@ public class PAY444
         ALLOCATION_TOTAL = 0m;
         PALLOCATION_TOTAL = 0m;
 
-        SOC_SEC_NUMBER = payprof_rec.PAYPROF_SSN;
-        m510GetDetails();
+        m510GetDetails(payprof_rec.PAYPROF_SSN);
     }
 
-    public void m510GetDetails()
+    public void m510GetDetails(int ssn)
     {
-        int dbStatus = MSTR_FIND_WITHIN_PR_DET_S();
+        int dbStatus = profitDetailTable.LoadNextRecord(ssn, profit_detail);
 
         while (dbStatus == 0)
         {
-            dbStatus = m520TotalUpDetails();
+            dbStatus = m520TotalUpDetails(ssn);
         }
     }
 
 
-    private int MSTR_FIND_WITHIN_PR_DET_S()
-    {
-/*
-        if (profitDetailTable == null || profitDetailTable.ssn != SOC_SEC_NUMBER)
-        {
-            profitDetailTable = new ProfitDetailTableHelper(connection, profit_detail, SOC_SEC_NUMBER);
-        }
-*/
-
-        // Load profit_detail using SOC_SEC_NUMBER;
-        return profitDetailTable.LoadNextRecord(SOC_SEC_NUMBER, profit_detail);
-    }
-
-
-    public int m520TotalUpDetails()
+    public int m520TotalUpDetails(int ssn)
     {
         // not needed?   DB_STATUS = MSTR_GET_REC(IDS2_REC_NAME);
 
@@ -829,7 +800,7 @@ public class PAY444
             }
         }
 
-        int dbStatus = MSTR_FIND_WITHIN_PR_DET_S();
+        int dbStatus = profitDetailTable.LoadNextRecord(ssn, profit_detail);
         return dbStatus;
     }
 
