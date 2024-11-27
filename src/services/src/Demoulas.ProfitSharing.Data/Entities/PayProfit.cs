@@ -93,6 +93,11 @@ public sealed class PayProfit
     /// </summary>
     public decimal? PointsEarned { get; set; }
 
+    /// <summary>
+    /// Total number of years a member was in the plan.
+    /// </summary>
+    public byte YearsInPlan { get; set; }
+
 
     public Demographic? Demographic { get; set; }
 }
