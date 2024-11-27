@@ -49,8 +49,8 @@ const BalanceByAgeGrid = () => {
                   pinnedTopRowData: [
                     {
                       age: "FORF  TTL",
-                      employeeCount: (balanceByAgeTotal?.totalEmployees || 0),
-                      amount: balanceByAgeTotal?.distributionTotalAmount
+                      employeeCount: (balanceByAgeTotal?.totalMembers || 0),
+                      amount: balanceByAgeTotal?.balanceTotalAmount
                     }
                   ],
                   columnDefs: [
@@ -72,8 +72,8 @@ const BalanceByAgeGrid = () => {
                   pinnedTopRowData: [
                     {
                      age: "FORF  TTL",
-                      employeeCount: (balanceByAgeTotal?.totalEmployees || 0),
-                      amount: balanceByAgeTotal?.distributionTotalAmount
+                      employeeCount: (balanceByAgeTotal?.totalMembers || 0),
+                      amount: balanceByAgeTotal?.balanceTotalAmount
                     }
                   ],
                   columnDefs: [
@@ -95,8 +95,8 @@ const BalanceByAgeGrid = () => {
                   pinnedTopRowData: [
                     {
                      age: "FORF  TTL",
-                      employeeCount: (balanceByAgeTotal?.totalEmployees || 0),
-                      amount: balanceByAgeTotal?.distributionTotalAmount
+                      employeeCount: (balanceByAgeTotal?.totalMembers || 0),
+                      amount: balanceByAgeTotal?.balanceTotalAmount
                     }
                   ],
                   columnDefs: [

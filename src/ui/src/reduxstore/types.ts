@@ -348,8 +348,10 @@ export interface BalanceByAge {
   reportName: string;
   reportDate: string;
   reportType: FrozenReportsByAgeRequestType;
-  totalEmployees: number;
-  distributionTotalAmount: number;
+  balanceTotalAmount: number;
+  totalMembers: number;
+  totalBeneficiaries: number;
+  totalNonBeneficiaries: number;
   response: Paged<BalanceByAgeDetail>;
 }
 
@@ -357,4 +359,5 @@ export interface BalanceByAgeDetail {
   age: number;
   employeeCount: number;
   amount: number;
+  beneficiaryCount : number;
 }
