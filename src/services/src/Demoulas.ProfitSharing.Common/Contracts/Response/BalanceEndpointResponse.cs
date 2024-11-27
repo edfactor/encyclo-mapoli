@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Demoulas.ProfitSharing.Common.Contracts.Response;
-public sealed class BalanceEndpointResponse
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response;
+public sealed record BalanceEndpointResponse
 {
-    public required string Id { get; set; }
+    public required int Id { get; set; }
     public required string Ssn { get; set; }
     public decimal VestedBalance { get; set; }
     public decimal TotalDistributions { get; set; }
@@ -16,9 +10,9 @@ public sealed class BalanceEndpointResponse
     public decimal CurrentBalance { get; set; }
 
     public static BalanceEndpointResponse ResponseExample() {
-        return new BalanceEndpointResponse()
+        return new BalanceEndpointResponse
         {
-            Id = "123456789",
+            Id = 123456789,
             Ssn = "xxx-xx-6789",
             VestedBalance = 2030,
             TotalDistributions = 200,

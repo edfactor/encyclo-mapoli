@@ -1,5 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
@@ -30,6 +31,11 @@ public class TotalBalanceEndpoint:Endpoint<BalanceEndpointRequest, BalanceEndpoi
 
     public override Task<BalanceEndpointResponse?> ExecuteAsync(BalanceEndpointRequest req, CancellationToken ct)
     {
-        return _totalService.GetVestingBalanceForSingleMember(req.SearchType, req.Id, req.ProfitYear);
+        if (int.TryParse(req.Id, out int employeeIdOrSsn))
+        {
+            employeeIdOrSsn = req.Id.ConvertSsnToInt();
+        }
+   
+        return _totalService.GetVestingBalanceForSingleMember(req.SearchType, employeeIdOrSsn, req.ProfitYear);
     }
 }

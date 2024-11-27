@@ -29,13 +29,13 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IMilitaryAndRehireService, MilitaryAndRehireService>();
         _ = builder.Services.AddScoped<ITotalService, TotalService>();
         _ = builder.Services.AddScoped<IWagesService, WagesService>();
-        
+
+        _ = builder.Services.AddScoped<TotalService>();
         _ = builder.Services.AddScoped<ContributionService>();
         
 
         _ = builder.Services.AddSingleton<IDemographicsServiceInternal, DemographicsService>();
         _ = builder.Services.AddSingleton<IStoreService, StoreService>();
-        _ = builder.Services.AddSingleton<TotalService>();
         _ = builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
         _ = builder.Services.AddSingleton<ICalendarService, CalendarService>();
 

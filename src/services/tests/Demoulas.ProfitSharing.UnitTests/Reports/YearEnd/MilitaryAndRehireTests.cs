@@ -4,6 +4,7 @@ using FluentAssertions;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Extensions;
 using JetBrains.Annotations;
 using Demoulas.ProfitSharing.UnitTests.Base;
 using Demoulas.ProfitSharing.Data.Entities;

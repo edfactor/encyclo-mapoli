@@ -9,4 +9,5 @@ public interface IFrozenReportService
     Task<DistributionsByAge> GetDistributionsByAgeYear(FrozenReportsByAgeRequest req, CancellationToken cancellationToken = default);
     Task<ContributionsByAge> GetContributionsByAgeYear(FrozenReportsByAgeRequest req, CancellationToken cancellationToken = default);
     Task<ForfeituresByAge> GetForfeituresByAgeYear(FrozenReportsByAgeRequest req, CancellationToken cancellationToken = default);
+    Task<ForfeituresByAge> GetBalanceByAgeYear(FrozenReportsByAgeRequest req, CancellationToken cancellationToken = default);
 }
