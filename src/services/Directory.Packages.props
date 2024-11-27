@@ -18,7 +18,7 @@
     <PackageVersion Include="Demoulas.Security" Version="3.3.5" />
     <PackageVersion Include="Demoulas.Common.Caching" Version="2.0.4" />
     <PackageVersion Include="Demoulas.Common.Contracts" Version="2.3.7" />
-    <PackageVersion Include="EFCore.NamingConventions" Version="8.0.3" />
+    <PackageVersion Include="EFCore.NamingConventions" Version="[8.0.3,9.0.0)" />
     <PackageVersion Include="FastEndpoints.Security" Version="5.31.0" />
     <PackageVersion Include="FluentValidation" Version="11.9.1" />
     <PackageVersion Include="MassTransit" Version="8.3.2" />
@@ -88,13 +88,11 @@
     <PackageVersion Include="Roslynator.Analyzers" Version="4.12.9" />
     <PackageVersion Include="Roslynator.Formatting.Analyzers" Version="4.12.9" />
     <PackageVersion Include="AsyncAwaitBestPractices" Version="9.0.0" />
-    <PackageVersion Include="SonarAnalyzer.CSharp" Version="9.32.0.97167" />
+    <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.3.0.106239" />
     <PackageVersion Include="Microsoft.SourceLink.Bitbucket.Git" Version="8.0.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Analyzers" Version="9.0.0" />
     <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.12.19" />
     <PackageVersion Include="AsyncFixer" Version="1.6.0" />
-    
   </ItemGroup>
-
 </Project>

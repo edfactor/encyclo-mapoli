@@ -354,83 +354,62 @@ public class FrozenReportService : IFrozenReportService
 
     public async Task<BalanceByAge> GetBalanceByAgeYear(FrozenReportsByAgeRequest req, CancellationToken cancellationToken = default)
     {
-        const string FT = "FullTime";
-        const string PT = "PartTime";
-
-        var list = await _dataContextFactory.UseReadOnlyContext(ctx =>
+        var rawResult = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var query = _totalService.GetTotalBalanceSet(ctx, req.ProfitYear);
 
-            var result = query
-                .GroupJoin(
-                    ctx.Demographics,
-                    q => q.Ssn,
-                    d => d.Ssn,
-                    (q, demographics) => new { q, demographics }
-                )
-                .SelectMany(
-                    temp => temp.demographics.DefaultIfEmpty(),
-                    (temp, demographic) => new { temp.q, demographic }
-                )
-                .GroupJoin(
-                    ctx.BeneficiaryContacts,
-                    temp => temp.q.Ssn,
-                    bc => bc.Ssn,
-                    (temp, beneficiaryContacts) => new { temp.q, temp.demographic, beneficiaryContacts }
-                )
-                .SelectMany(
-                    temp => temp.beneficiaryContacts.DefaultIfEmpty(),
-                    (temp, beneficiaryContact) => new
-                    {
-                        temp.q,
-                        Demographic = temp.demographic,
-                        BeneficiaryContact = beneficiaryContact,
-                        EmploymentType = temp.demographic != null
-#pragma warning disable S3358
-                            ? (temp.demographic.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT)
-#pragma warning restore S3358
-                            : null,
-                        IsBeneficiary = temp.demographic == null && beneficiaryContact != null
-                    }
-                )
-                .Where(item => item.Demographic != null || item.BeneficiaryContact != null)
-                .GroupBy(item =>
-                    item.Demographic != null
-                        ? item.Demographic.DateOfBirth
-                        : item.BeneficiaryContact!.DateOfBirth
-                )
-                .Select(group => new
-                {
-                    DateOfBirth = group.Key,
-                    Entries = group.ToList()
-                });
+            var joinedQuery = from q in query
+                              join d in ctx.Demographics on q.Ssn equals d.Ssn into demographics
+                              from demographic in demographics.DefaultIfEmpty()
+                              join b in ctx.BeneficiaryContacts on q.Ssn equals b.Ssn into beneficiaries
+                              from beneficiary in beneficiaries.DefaultIfEmpty()
+                              where demographic != null || beneficiary != null
+                              select new
+                              {
+                                  q,
+                                  Demographic = demographic,
+                                  BeneficiaryContact = beneficiary,
+                                  EmploymentType = demographic != null && demographic.EmploymentTypeId == EmploymentType.Constants.PartTime
+                                      ? "PartTime"
+                                      : "FullTime",
+                                  IsBeneficiary = demographic == null && beneficiary != null,
+                                  DateOfBirth = demographic != null
+                                      ? demographic.DateOfBirth
+                                      : (beneficiary!.DateOfBirth)
+                              };
 
-            // Fixing the filtering logic to avoid unsupported operations in EF Core.
-            result = req.ReportType switch
-            {
-                FrozenReportsByAgeRequest.Report.FullTime => result
-                    .Where(q => q.Entries.Any(e => e.EmploymentType == FT)),
-                FrozenReportsByAgeRequest.Report.PartTime => result
-                    .Where(q => q.Entries.Any(e => e.EmploymentType == PT)),
-                _ => result
-            };
-
-            return result.ToListAsync(cancellationToken);
+            return await joinedQuery.ToListAsync(cancellationToken);
         });
 
-        var details = list
-            .Select(l => new { Age = l.DateOfBirth.Age(), l.Entries })
-            .GroupBy(l => l.Age)
-            .Select(g => new BalanceByAgeDetail
+        // Client-side processing for grouping and filtering
+        var groupedResult = rawResult
+            .GroupBy(item => item.DateOfBirth)
+            .Select(g => new
             {
-                Age = g.Key,
-                Amount = g.Sum(p => p.Entries.Sum(e => e.q.Total)),
-                BeneficiaryCount = g.Sum(p => p.Entries.Count(e => e.IsBeneficiary)),
-                EmployeeCount = g.Sum(p => p.Entries.Count(e => !e.IsBeneficiary))
+                DateOfBirth = g.Key,
+                Entries = g.ToList()
             })
-            .Where(l => l.Amount > 0)
+            .Where(g => req.ReportType switch
+            {
+                FrozenReportsByAgeRequest.Report.FullTime => g.Entries.All(e => e.EmploymentType == "FullTime"),
+                FrozenReportsByAgeRequest.Report.PartTime => g.Entries.All(e => e.EmploymentType == "PartTime"),
+                _ => true
+            })
             .ToList();
 
+        // Final transformation to BalanceByAgeDetail
+        var details = groupedResult
+            .Select(group => new BalanceByAgeDetail
+            {
+                Age = group.DateOfBirth.Age(),
+                Amount = group.Entries.Sum(e => e.q.Total),
+                BeneficiaryCount = group.Entries.Count(e => e.IsBeneficiary),
+                EmployeeCount = group.Entries.Count(e => !e.IsBeneficiary)
+            })
+            .Where(detail => detail.Amount > 0)
+            .ToList();
+
+        // Build the final response
         req = req with { Take = details.Count + 1 };
 
         return new BalanceByAge
