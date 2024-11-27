@@ -19,6 +19,7 @@ public sealed record BalanceByAge : ReportResponseBase<BalanceByAgeDetail>
     public required decimal BalanceTotalAmount { get; init; }
     public required short TotalBeneficiaries { get; set; }
     public required short TotalNonBeneficiaries { get; set; }
+    public decimal VestedTotalAmount { get; set; }
 
 
     public static BalanceByAge ResponseExample()

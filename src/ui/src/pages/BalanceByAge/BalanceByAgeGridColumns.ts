@@ -32,9 +32,19 @@ export const GetBalanceByAgeColumns = (  reportType: FrozenReportsByAgeRequestTy
         resizable: true
       },
       {
-        headerName: "Amount",
-        field: "amount",
-        colId: "amount",
+        headerName: "Balance",
+        field: "currentBalance",
+        colId: "currentBalance",
+        minWidth: 150,
+        headerClass: "left-align",
+        cellClass: "left-align",
+        resizable: true,
+        valueFormatter: agGridNumberToCurrency
+      },
+      {
+        headerName: "Vested",
+        field: "vestedBalance",
+        colId: "vestedBalance",
         minWidth: 150,
         headerClass: "left-align",
         cellClass: "left-align",

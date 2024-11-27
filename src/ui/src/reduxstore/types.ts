@@ -349,6 +349,7 @@ export interface BalanceByAge {
   reportDate: string;
   reportType: FrozenReportsByAgeRequestType;
   balanceTotalAmount: number;
+  vestedTotalAmount : number;
   totalMembers: number;
   totalBeneficiaries: number;
   totalNonBeneficiaries: number;
@@ -358,6 +359,7 @@ export interface BalanceByAge {
 export interface BalanceByAgeDetail {
   age: number;
   employeeCount: number;
-  amount: number;
+  currentBalance: number;
+  vestedBalance: number;
   beneficiaryCount : number;
 }

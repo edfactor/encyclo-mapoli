@@ -77,7 +77,7 @@ public class BalanceByAgeEndpoint : EndpointWithCsvTotalsBase<FrozenReportsByAge
         {
             Map(m => m.Age).Index(0).Name("AGE");
             Map(m => m.EmployeeCount).Index(1).Name("EMPS");
-            Map(m => m.Amount).Index(2).Name("AMOUNT");
+            Map(m => m.CurrentBalance).Index(2).Name("AMOUNT");
         }
     }
 }

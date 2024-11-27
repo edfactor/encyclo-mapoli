@@ -21,18 +21,21 @@ public class FrozenReportService : IFrozenReportService
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ContributionService _contributionService;
     private readonly TotalService _totalService;
+    private readonly ICalendarService _calendarService;
     private readonly ILogger _logger;
 
     public FrozenReportService(
         IProfitSharingDataContextFactory dataContextFactory,
         ILoggerFactory loggerFactory,
         ContributionService contributionService,
-        TotalService totalService
+        TotalService totalService,
+        ICalendarService calendarService
     )
     {
         _dataContextFactory = dataContextFactory;
         _contributionService = contributionService;
         _totalService = totalService;
+        _calendarService = calendarService;
         _logger = loggerFactory.CreateLogger<FrozenReportService>();
     }
 
@@ -356,10 +359,12 @@ public class FrozenReportService : IFrozenReportService
     {
         const string FT = "FullTime";
         const string PT = "PartTime";
-        
+
+        var startEnd = await _calendarService.GetYearStartAndEndAccountingDates(req.ProfitYear, cancellationToken);
+
         var rawResult = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var query = _totalService.GetTotalBalanceSet(ctx, req.ProfitYear);
+            var query = _totalService.TotalVestingBalance(ctx, req.ProfitYear, startEnd.FiscalEndDate);
 
             var joinedQuery = from q in query
                               join d in ctx.Demographics on q.Ssn equals d.Ssn into demographics
@@ -405,11 +410,12 @@ public class FrozenReportService : IFrozenReportService
             .Select(group => new BalanceByAgeDetail
             {
                 Age = group.Age,
-                Amount = group.Entries.Sum(e => e.q.Total),
+                CurrentBalance = group.Entries.Sum(e => e.q.CurrentBalance),
+                VestedBalance = group.Entries.Sum(e => e.q.VestedBalance),
                 BeneficiaryCount = group.Entries.Count(e => e.IsBeneficiary),
                 EmployeeCount = group.Entries.Count(e => !e.IsBeneficiary)
             })
-            .Where(detail => detail.Amount > 0)
+            .Where(detail => detail.CurrentBalance > 0)
             .OrderBy(e=> e.Age)
             .ToList();
 
@@ -421,7 +427,8 @@ public class FrozenReportService : IFrozenReportService
             ReportName = "PROFIT SHARING BALANCE BY AGE",
             ReportDate = DateTimeOffset.Now,
             ReportType = req.ReportType,
-            BalanceTotalAmount = details.Sum(d => d.Amount),
+            BalanceTotalAmount = details.Sum(d => d.CurrentBalance),
+            VestedTotalAmount = details.Sum(d => d.VestedBalance),
             TotalMembers = (short)details.Sum(d => d.EmployeeCount + d.BeneficiaryCount),
             TotalBeneficiaries = (short)details.Sum(d => d.BeneficiaryCount),
             TotalNonBeneficiaries = (short)details.Sum(d => d.EmployeeCount),
