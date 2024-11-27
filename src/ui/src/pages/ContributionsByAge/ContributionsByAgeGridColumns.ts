@@ -1,4 +1,5 @@
-import { formattingUtils } from "smart-ui-library";
+
+import { agGridNumberToCurrency } from "smart-ui-library";
 import { FrozenReportsByAgeRequestType } from "../../reduxstore/types";
 import { ColDef } from "ag-grid-community";
 
@@ -39,7 +40,7 @@ export const GetContributionsByAgeColumns = (  reportType: FrozenReportsByAgeReq
         headerClass: "left-align",
         cellClass: "left-align",
         resizable: true,
-        valueFormatter: formattingUtils.agGridNumberToCurrency
+        valueFormatter: agGridNumberToCurrency
       }
     ]
   };

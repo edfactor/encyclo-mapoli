@@ -1,5 +1,5 @@
 import { ColDef } from "ag-grid-community";
-import { dateUtils } from "smart-ui-library";
+import { yyyyMMDDToMMDDYYYY } from "smart-ui-library";
 
 export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
   return [
@@ -39,7 +39,7 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      valueFormatter: (params) => (params.value ? dateUtils.yyyyMMDDToMMDDYYYY(params.value) : "")
+      valueFormatter: (params) => (params.value ? yyyyMMDDToMMDDYYYY(params.value) : "")
     },
     {
       headerName: "Distribution",

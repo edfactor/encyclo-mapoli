@@ -1,5 +1,5 @@
 import { ColDef } from "ag-grid-community";
-import { dateUtils } from "smart-ui-library";
+import { yyyyMMDDToMMDDYYYY } from "smart-ui-library";
 
 export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
     return [
@@ -72,7 +72,7 @@ export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
         headerClass: "left-align",
         cellClass: "left-align",
         resizable: true,
-        valueFormatter: (params) => params.value ? dateUtils.yyyyMMDDToMMDDYYYY(params.value) : ""
+        valueFormatter: (params) => params.value ? yyyyMMDDToMMDDYYYY(params.value) : ""
       },
       {
         headerName: "Rehire",
@@ -82,7 +82,7 @@ export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
         headerClass: "left-align",
         cellClass: "left-align",
         resizable: true,
-        valueFormatter: (params) => params.value ? dateUtils.yyyyMMDDToMMDDYYYY(params.value) : ""
+        valueFormatter: (params) => params.value ? yyyyMMDDToMMDDYYYY(params.value) : ""
       },
       {
         headerName: "St",

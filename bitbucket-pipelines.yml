@@ -69,11 +69,10 @@ definitions:
         - ${env:ENV} = "qa"
         - cd .\src\UI
         - |
-          @"
-          registry=https://registry.npmjs.org/
-          smart-ui-library:registry=https://demoulas.jfrog.io/artifactory/api/npm/npm-smart-registry-local/
-          //demoulas.jfrog.io/artifactory/api/npm/npm-smart-registry-local/:_authToken=$env:JFROG_WORKSPACE_VARIABLE
-          "@ | Out-File -FilePath .npmrc -Encoding ASCII
+            @"
+            registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
+            //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=$env:JFROG_WORKSPACE_VARIABLE
+            "@ | Out-File -FilePath .npmrc -Encoding ASCII
         - C:\nvm\v20.4.0\npm.cmd install --legacy-peer-deps;
         - C:\nvm\v20.4.0\npm.cmd run build:${env:ENV}
         
@@ -101,9 +100,8 @@ definitions:
         # Create and configure .npmrc file
         - |
             @"
-            registry=https://registry.npmjs.org/
-            smart-ui-library:registry=https://demoulas.jfrog.io/artifactory/api/npm/npm-smart-registry-local/
-            //demoulas.jfrog.io/artifactory/api/npm/npm-smart-registry-local/:_authToken=$env:JFROG_WORKSPACE_VARIABLE
+            registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
+            //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=$env:JFROG_WORKSPACE_VARIABLE
             "@ | Out-File -FilePath .npmrc -Encoding ASCII
 
         # Install dependencies with legacy peer deps
@@ -111,6 +109,9 @@ definitions:
 
         # Run the build process for the specified environment
         - C:\nvm\v20.4.0\npm.cmd run build:${env:ENV}
+
+        - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
+        - Copy-Item -Path ".buildinfo.json" -Destination "..\..\src\UI\build"
 
         # Copy the web.config file to the build directory
         - Copy-Item -Path ".\src\web.config" -Destination "..\..\src\UI\build" -Force
