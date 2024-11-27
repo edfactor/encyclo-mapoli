@@ -23,16 +23,15 @@ public class PAY444
     // Collection of modified payprofit data
     private readonly List<PRFT> prfts = new();
 
-    
+
     private readonly Counters _counters = new();
 
     public OracleConnection connection = null;
-    
+
     private long holdBadge;
     private INTERMEDIATE_VALUES intermediate_values = new();
 
     // new structures
-    private Dictionary<int, int> META_SW = new();
     public List<string> outputLines = new();
     private PAYPROF_REC payprof_rec1 = new();
     private PRFT prft = new();
@@ -74,7 +73,7 @@ public class PAY444
     public DateTime TodaysDateTime { get; set; } = DateTime.Now;
 
     // It is annoying that forfeit proceeds earnings, but that is the way the Cobol prompts for them.  
-    public void m015MainProcessing(Dictionary<int, int> META_SW, long year, decimal conributionPercent,
+    public void m015MainProcessing(short profitYear, decimal contributionPercent,
         decimal incomingForfeitPercent, decimal earningsPercent, decimal secondaryEarningsPercent,
         long adjustBadge, decimal adjustContrib, decimal adjustForfeit, decimal adjustEarnings,
         long adjustBadgeSecondary, decimal adjustEarningsSecondary, long maxContribution)
@@ -83,41 +82,18 @@ public class PAY444
         PAYBEN1.Connection = connection;
         PAYPROFIT_FILE.connection = connection;
 
-        this.META_SW = META_SW;
-
-        EffectiveYear = year;
-        if (META_SW[3] == 0) // Do not ask for input values
-        {
-            point_values.PV_CONT_01 = conributionPercent;
-            point_values.PV_FORF_01 = incomingForfeitPercent;
-            point_values.PV_EARN_01 = earningsPercent;
-
-            if (META_SW[5] == 1) // Secondary Earnings Flag
-            {
-                point_values.PV_EARN2_01 = secondaryEarningsPercent; // Gather Input from User
-
-                if (point_values.PV_EARN2_01 == 0)
-                {
-                    META_SW[5] = 0;
-                }
-            }
-
-            if (META_SW[4] == 0) // Suppress Manual Adjustments Flag
-            {
-                point_values.PV_ADJUST_BADGE = adjustBadge; // badge to adjust
-                point_values.PV_ADJ_CONTRIB = adjustContrib; // amount to adjust employee
-                point_values.PV_ADJ_FORFEIT = adjustForfeit;
-                point_values.PV_ADJ_EARN = adjustEarnings;
-
-                if (META_SW[5] == 1) // Secondary Earnings Flag
-                {
-                    point_values.PV_ADJUST_BADGE2 = adjustBadgeSecondary;
-                    point_values.PV_ADJ_EARN2 = adjustEarningsSecondary;
-                }
-            }
-
-            WS_CONTR_MAX = maxContribution;
-        }
+        EffectiveYear = profitYear;
+        point_values.PV_CONT_01 = contributionPercent;
+        point_values.PV_FORF_01 = incomingForfeitPercent;
+        point_values.PV_EARN_01 = earningsPercent;
+        point_values.PV_EARN2_01 = secondaryEarningsPercent; // Gather Input from User
+        point_values.PV_ADJUST_BADGE = adjustBadge; // badge to adjust
+        point_values.PV_ADJ_CONTRIB = adjustContrib; // amount to adjust employee
+        point_values.PV_ADJ_FORFEIT = adjustForfeit;
+        point_values.PV_ADJ_EARN = adjustEarnings;
+        point_values.PV_ADJUST_BADGE2 = adjustBadgeSecondary;
+        point_values.PV_ADJ_EARN2 = adjustEarningsSecondary;
+        WS_CONTR_MAX = maxContribution;
 
         HOLD_PAYSSN = 0;
         m201ProcessPayProfit();
@@ -137,7 +113,7 @@ public class PAY444
 
     public void m201ProcessPayProfit()
     {
-        l201_PROCESS_PAYPROFIT:
+    l201_PROCESS_PAYPROFIT:
         payprof_rec1 = PAYPROFIT_FILE.Read();
         if (PAYPROFIT_FILE.isEOF())
         {
@@ -181,13 +157,13 @@ public class PAY444
         ws_payprofit.WS_PROF_POINTS = ws_payprofit.WS_PROF_POINTS + payprof_rec1.PY_PROF_POINTS;
         holdBadge = payprof_rec1.PAYPROF_BADGE;
         goto l201_PROCESS_PAYPROFIT;
-        l201_EXIT: ;
+    l201_EXIT:;
     }
 
 
     private void m202_PROCESS_PAYBEN()
     {
-        l202_PROCESS_PAYBEN:
+    l202_PROCESS_PAYBEN:
         PAYBEN1.Read(payben1_rec);
         if (PAYBEN1.isEOF())
         {
@@ -216,7 +192,7 @@ public class PAY444
 
         goto l202_PROCESS_PAYBEN;
 
-        l202_EXIT: ;
+    l202_EXIT:;
     }
 
 
@@ -288,12 +264,6 @@ public class PAY444
 
         prft = new PRFT();
 
-        payprof_rec.PY_PROF_MAXCONT = 0;
-        if (payprof_rec.PY_PROF_MAXCONT == 1 || META_SW[2] == 1) // Special Run 
-        {
-            m410LoadProfit();
-            return;
-        }
 
         m230ComputeContribution();
         m240ComputeForfeitures();
@@ -317,7 +287,7 @@ public class PAY444
 
         ws_compute_totals.WS_EARN_POINTS = (long)Round(ws_compute_totals.WS_POINTS_DOLLARS / 100);
 
-        l210_CONTINUE:
+    l210_CONTINUE:
 
         intermediate_values.WS_FD_BADGE = payprof_rec.PAYPROF_BADGE;
         intermediate_values.WS_FD_NAME = dem_rec.PY_NAM;
@@ -356,7 +326,7 @@ public class PAY444
 
         m400LoadPayprofit();
         m410LoadProfit();
-        if (META_SW[8] == 0)
+        if (false/*rewrites are off*/)
         {
             m420RewritePayprofit();
         }
@@ -386,36 +356,22 @@ public class PAY444
     private string? READ_KEY_PAYPROFIT(PAYPROF_REC payprof_rec)
     {
         PAYPROF_REC one = PAYPROFIT_FILE.findByBadge(payprof_rec.PAYPROF_BADGE);
+
         payprof_rec.PAYPROF_BADGE = one.PAYPROF_BADGE;
         payprof_rec.PAYPROF_SSN = one.PAYPROF_SSN;
-        payprof_rec.PY_PH = one.PY_PH;
-        payprof_rec.PY_PD = one.PY_PD;
-        payprof_rec.PY_WEEKS_WORK = one.PY_WEEKS_WORK;
-        payprof_rec.PY_PROF_CERT = one.PY_PROF_CERT;
         payprof_rec.PY_PS_ENROLLED = one.PY_PS_ENROLLED;
         payprof_rec.PY_PS_YEARS = one.PY_PS_YEARS;
-        payprof_rec.PY_PROF_BENEFICIARY = one.PY_PROF_BENEFICIARY;
-        payprof_rec.PY_PROF_INITIAL_CONT = one.PY_PROF_INITIAL_CONT;
         payprof_rec.PY_PS_AMT = one.PY_PS_AMT;
-        payprof_rec.PY_PS_VAMT = one.PY_PS_VAMT;
-        payprof_rec.PY_PH_LASTYR = one.PY_PH_LASTYR;
-        payprof_rec.PY_PD_LASTYR = one.PY_PD_LASTYR;
         payprof_rec.PY_PROF_NEWEMP = one.PY_PROF_NEWEMP;
         payprof_rec.PY_PROF_POINTS = one.PY_PROF_POINTS;
         payprof_rec.PY_PROF_CONT = one.PY_PROF_CONT;
         payprof_rec.PY_PROF_FORF = one.PY_PROF_FORF;
-        payprof_rec.PY_VESTED_FLAG = one.PY_VESTED_FLAG;
-        payprof_rec.PY_PROF_MAXCONT = one.PY_PROF_MAXCONT;
-        payprof_rec.PY_PROF_ZEROCONT = one.PY_PROF_ZEROCONT;
-        payprof_rec.PY_WEEKS_WORK_LAST = one.PY_WEEKS_WORK_LAST;
         payprof_rec.PY_PROF_EARN = one.PY_PROF_EARN;
         payprof_rec.PY_PS_ETVA = one.PY_PS_ETVA;
         payprof_rec.PY_PRIOR_ETVA = one.PY_PRIOR_ETVA;
         payprof_rec.PY_PROF_ETVA = one.PY_PROF_ETVA;
         payprof_rec.PY_PROF_EARN2 = one.PY_PROF_EARN2;
         payprof_rec.PY_PROF_ETVA2 = one.PY_PROF_ETVA2;
-        payprof_rec.PY_PH_EXEC = one.PY_PH_EXEC;
-        payprof_rec.PY_PD_EXEC = one.PY_PD_EXEC;
 
         return "00";
     }
@@ -467,7 +423,7 @@ public class PAY444
 
         ws_compute_totals.WS_EARN_POINTS = (long)Round(ws_compute_totals.WS_POINTS_DOLLARS / 100);
 
-        l220_CONTINUE:
+    l220_CONTINUE:
 
         if (ALLOCATION_TOTAL != 0)
         {
@@ -521,12 +477,12 @@ public class PAY444
 
         m410LoadProfit();
 
-        if (META_SW[8] == 0)
+        if (false/*rewrites are off*/)
         {
             m430RewritePayben();
         }
 
-        l220_EXIT: ;
+    l220_EXIT:;
     }
 
     private string? READ_KEY_PAYBEN(PAYBEN_REC payben_rec)
@@ -547,14 +503,7 @@ public class PAY444
             point_values.SV_CONT_ADJUSTED = ws_compute_totals.WS_CONT_AMT;
         }
 
-        if (META_SW[2] == 1) // Special Run
-        {
-            ws_payprofit.WS_PROF_CONT += ws_compute_totals.WS_CONT_AMT;
-        }
-        else
-        {
-            ws_payprofit.WS_PROF_CONT = ws_compute_totals.WS_CONT_AMT;
-        }
+        ws_payprofit.WS_PROF_CONT = ws_compute_totals.WS_CONT_AMT;
     }
 
 
@@ -568,23 +517,11 @@ public class PAY444
             point_values.SV_FORF_ADJUSTED = ws_compute_totals.WS_FORF_AMT;
         }
 
-        if (META_SW[2] == 1)
-        {
-            ws_payprofit.WS_PROF_FORF += ws_compute_totals.WS_FORF_AMT;
-        }
-        else
-        {
-            ws_payprofit.WS_PROF_FORF = ws_compute_totals.WS_FORF_AMT;
-        }
+        ws_payprofit.WS_PROF_FORF = ws_compute_totals.WS_FORF_AMT;
     }
 
     public void m250ComputeEarnings()
     {
-        if (META_SW[2] == 1)
-        {
-            goto l250_EXIT;
-        }
-
         if (ws_compute_totals.WS_EARN_POINTS > 0 || WS_REWRITE_WHICH == 2)
         {
         }
@@ -612,19 +549,12 @@ public class PAY444
                 point_values.SV_EARN_ADJUSTED = ws_compute_totals.WS_EARN_AMT;
             }
 
-            if (META_SW[5] == 1) // Secondary Earnings
+            ws_compute_totals.WS_EARN2_AMT = Round2(point_values.PV_EARN2_01 * ws_compute_totals.WS_EARN_POINTS);
+            if (point_values.PV_ADJUST_BADGE2 > 0 && point_values.PV_ADJUST_BADGE2 == holdBadge)
             {
-                ws_compute_totals.WS_EARN2_AMT = Round2(point_values.PV_EARN2_01 * ws_compute_totals.WS_EARN_POINTS);
-                if (point_values.PV_ADJUST_BADGE2 > 0 && point_values.PV_ADJUST_BADGE2 == holdBadge)
-                {
-                    point_values.SV_EARN2_AMT = ws_compute_totals.WS_EARN2_AMT;
-                    ws_compute_totals.WS_EARN2_AMT += point_values.PV_ADJ_EARN2;
-                    point_values.SV_EARN2_ADJUSTED = ws_compute_totals.WS_EARN2_AMT;
-                }
-            }
-            else
-            {
-                ws_compute_totals.WS_EARN2_AMT = 0m;
+                point_values.SV_EARN2_AMT = ws_compute_totals.WS_EARN2_AMT;
+                ws_compute_totals.WS_EARN2_AMT += point_values.PV_ADJ_EARN2;
+                point_values.SV_EARN2_ADJUSTED = ws_compute_totals.WS_EARN2_AMT;
             }
         }
 
@@ -655,14 +585,7 @@ public class PAY444
         else
         {
             payprof_rec.PY_PROF_EARN = ws_compute_totals.WS_EARN_AMT;
-            if (META_SW[5] == 1) // Secondary earnings
-            {
-                payprof_rec.PY_PROF_EARN2 = ws_compute_totals.WS_EARN2_AMT;
-            }
-            else
-            {
-                payprof_rec.PY_PROF_EARN2 = 0m;
-            }
+            payprof_rec.PY_PROF_EARN2 = 0m;
 
             payprof_rec.PY_PROF_ETVA = 0m;
             payben_rec.PYBEN_PROF_EARN = 0m;
@@ -692,7 +615,7 @@ public class PAY444
             payben_rec.PYBEN_PROF_EARN = ws_compute_totals.WS_EARN_AMT;
         }
 
-        if (META_SW[5] == 1) // Secondary Earnings
+        if (point_values.PV_EARN2_01 != 0m) // Secondary Earnings
         {
             WS_ETVA2_AMT = Round2(ws_compute_totals.WS_EARN2_AMT * WS_ETVA_PERCENT);
             ws_compute_totals.WS_EARN2_AMT -= WS_ETVA2_AMT;
@@ -704,7 +627,7 @@ public class PAY444
             }
         }
 
-        l250_EXIT: ;
+    l250_EXIT:;
     }
 
 
@@ -724,7 +647,6 @@ public class PAY444
 
         prft.FD_MAXOVER = ws_maxcont_totals.WS_OVER;
         prft.FD_MAXPOINTS = ws_payprofit.WS_PROF_POINTS;
-        payprof_rec.PY_PROF_MAXCONT = 1;
         rerunNeeded = true;
     }
 
@@ -788,9 +710,9 @@ public class PAY444
 
     public void m430RewritePayben()
     {
-        if (payben_rec.PYBEN_PROF_EARN == 0 && payben_rec.PYBEN_PROF_EARN2 == 0 || META_SW[8] == 1)
+        if (payben_rec.PYBEN_PROF_EARN == 0 && payben_rec.PYBEN_PROF_EARN2 == 0)
         {
-            goto l430_EXIT;
+            return; // humm, dont save the zeros?
         }
 
         PAYBEN_FILE_STATUS = REWRITE_KEY_PAYBEN(payben_rec);
@@ -799,7 +721,6 @@ public class PAY444
             throw new IOException($"BAD REWRITE OF PAYBEN EMPLOYEE PSN # {payben_rec.PYBEN_PSN}");
         }
 
-        l430_EXIT: ;
     }
 
     private string? REWRITE_KEY_PAYBEN(PAYBEN_REC payben_rec)
@@ -1088,7 +1009,7 @@ public class PAY444
         _counters.LineCounter = 4;
     }
 
-  
+
     public void m850PrintTotals()
     {
         ClientTot client_tot = new();
@@ -1158,7 +1079,7 @@ public class PAY444
         employee_count_tot.PR_TOT_EMPLOYEE_COUNT = _counters.EmployeeCounter;
         WRITE("");
         WRITE(employee_count_tot);
-        EMPLOYEE_COUNT_TOT_PAYBEN employee_count_tot_payben = new ();
+        EMPLOYEE_COUNT_TOT_PAYBEN employee_count_tot_payben = new();
         employee_count_tot_payben.PB_TOT_EMPLOYEE_COUNT = _counters.BeneficiaryCounter;
         WRITE("");
         WRITE(employee_count_tot_payben);

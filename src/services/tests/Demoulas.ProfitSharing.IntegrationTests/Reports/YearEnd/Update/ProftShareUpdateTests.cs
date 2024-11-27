@@ -13,22 +13,17 @@ public class ProftShareUpdateTests
     public void BasicReport()
     {
         // Arrange
-        Dictionary<int, int> metaSw = new();
-        metaSw[2] = 0; // Special Run
-        metaSw[3] = 1; // Do NOT ask for Input Values.
-        metaSw[4] = 0; // Manual Adjustments
-        metaSw[5] = 0; // Secondary Earnings
-        metaSw[8] = 1; // Do NOT update PAYR/PAYBEN
+
         using OracleConnection connection = GetOracleConnection();
         connection.Open();
         PAY444 pay444 = new();
-        int year = 2023;
+        short year = 2023;
         pay444.connection = connection;
         string reportName = "psupdate-pay444-r1.txt";
         pay444.TodaysDateTime = new DateTime(2024, 11, 12, 9, 43, 0); // time report was generated
 
         // Act
-        pay444.m015MainProcessing(metaSw, year, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        pay444.m015MainProcessing(year, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
         // Assert
         string actual = CollectLines(pay444.outputLines);
@@ -43,15 +38,9 @@ public class ProftShareUpdateTests
         // Arrange
         using OracleConnection connection = GetOracleConnection();
         connection.Open();
-        Dictionary<int, int> metaSw = new();
-        metaSw[2] = 0; // Special Run
-        metaSw[3] = 0; // Do NOT ask for Input Values.
-        metaSw[4] = 0; // Manual Adjustments
-        metaSw[5] = 0; // Secondary Earnings
-        metaSw[8] = 1; // Do NOT update PAYR/PAYBEN
 
         PAY444 pay444 = new();
-        int year = 2024;
+        short year = 2024;
         string reportName = "psupdate-pay444-r2.txt";
         pay444.TodaysDateTime = new DateTime(2024, 11, 14, 10, 35, 0); // time report was generated
 
@@ -59,7 +48,7 @@ public class ProftShareUpdateTests
         pay444.connection = connection;
 
         // Act
-        pay444.m015MainProcessing(metaSw, year, 15, 1, 2, 0, 0, 0, 0, 0, 0, 0, 30000);
+        pay444.m015MainProcessing(year, 15, 1, 2, 0, 0, 0, 0, 0, 0, 0, 30000);
 
         // Assert
         string expected = LoadExpectedReport(reportName).Replace("\r", "");
@@ -72,16 +61,10 @@ public class ProftShareUpdateTests
     public void EnsureUpdateWithValues_andEmployeeAdjustment_MatchesReady()
     {
         // Arrange
-        Dictionary<int, int> metaSw = new();
-        metaSw[2] = 0; // Special Run
-        metaSw[3] = 0; // Do NOT ask for Input Values.
-        metaSw[4] = 0; // Suppress Manual Adjustments
-        metaSw[5] = 0; // Secondary Earnings
-        metaSw[8] = 1; // Do NOT update PAYR/PAYBEN
         using OracleConnection connection = GetOracleConnection();
         connection.Open();
         PAY444 pay444 = new();
-        int year = 2024;
+        short year = 2024;
         string reportName = "psupdate-pay444-r3.txt";
         pay444.TodaysDateTime = new DateTime(2024, 11, 19, 19, 18, 0); // time report was generated
 
@@ -89,7 +72,7 @@ public class ProftShareUpdateTests
         pay444.connection = connection;
 
         // Act
-        pay444.m015MainProcessing(metaSw, year, 15, 1, 2, 0, 700174, 44.77m, 18.16m, 22.33m, 0, 0, 30000);
+        pay444.m015MainProcessing(year, 15, 1, 2, 0, 700174, 44.77m, 18.16m, 22.33m, 0, 0, 30000);
 
         // Assert
         string expected = LoadExpectedReport(reportName);
@@ -102,16 +85,10 @@ public class ProftShareUpdateTests
     public void with_secondary_earnings_and_employee_and_member_overrides()
     {
         // Arrange
-        Dictionary<int, int> metaSw = new();
-        metaSw[2] = 0; // Special Run
-        metaSw[3] = 0; // Do NOT ask for Input Values.
-        metaSw[4] = 0; // Suppress Manual Adjustments
-        metaSw[5] = 1; // Secondary Earnings
-        metaSw[8] = 1; // Do NOT update PAYR/PAYBEN
         using OracleConnection connection = GetOracleConnection();
         connection.Open();
         PAY444 pay444 = new();
-        int year = 2024;
+        short year = 2024;
         string reportName = "psupdate-pay444-r4.txt";
 
         pay444.TodaysDateTime = new DateTime(2024, 11, 22, 13, 18, 0); // time report was generated
@@ -120,7 +97,7 @@ public class ProftShareUpdateTests
         pay444.connection = connection;
 
         // Act
-        pay444.m015MainProcessing(metaSw, year, 17, 2.75m, 7.95m, 3.74m,
+        pay444.m015MainProcessing(year, 17, 2.75m, 7.95m, 3.74m,
             700196, 1.11m, 3.33m, 2.22m,
             700417, 4.44m, 30000);
 
@@ -138,7 +115,7 @@ public class ProftShareUpdateTests
     private static OracleConnection GetOracleConnection()
     {
         IConfigurationRoot configuration = new ConfigurationBuilder().AddUserSecrets<ProftShareUpdateTests>().Build();
-        string connectionString = configuration["ConnectionStrings:ProfitSharing-ObfuscatedPristine"]!;
+        string connectionString = configuration["ConnectionStrings:ProfitSharing"]!;
         return new OracleConnection(connectionString);
     }
 

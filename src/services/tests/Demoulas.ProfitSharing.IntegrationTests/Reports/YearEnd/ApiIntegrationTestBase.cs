@@ -51,7 +51,7 @@ public class ApiIntegrationTestBase<TStartup> where TStartup : class
     {
         // We get a connection to the SMART obfuscated pristine database.
         var configuration = new ConfigurationBuilder().AddUserSecrets<TStartup>().Build();
-        string connectionString = configuration["ConnectionStrings:ProfitSharing-ObfuscatedPristine"]!;
+        string connectionString = configuration["ConnectionStrings:ProfitSharing"]!;
         var options = new DbContextOptionsBuilder<ProfitSharingReadOnlyDbContext>().UseOracle(connectionString).EnableSensitiveDataLogging().Options;
         var ctx = new ProfitSharingReadOnlyDbContext(options);
 

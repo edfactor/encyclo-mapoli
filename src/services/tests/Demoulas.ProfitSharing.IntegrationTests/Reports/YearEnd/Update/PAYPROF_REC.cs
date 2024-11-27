@@ -4,34 +4,19 @@ public class PAYPROF_REC
 {
     public long PAYPROF_BADGE { get; set; } // PIC 9(7).
     public long PAYPROF_SSN { get; set; } // PIC 9(9).
-    public decimal PY_PH { get; set; } // PIC 9(4)V99.
-    public decimal PY_PD { get; set; } // PIC 9(6)V99.
-    public long PY_WEEKS_WORK { get; set; } // PIC 99.
-    public string? PY_PROF_CERT { get; set; } // PIC X.
     public long PY_PS_ENROLLED { get; set; } // PIC 99.
     public long PY_PS_YEARS { get; set; } // PIC 99.
-    public long PY_PROF_BENEFICIARY { get; set; } // PIC 9(1).
-    public long PY_PROF_INITIAL_CONT { get; set; } // PIC 9(4)v9.
     public decimal PY_PS_AMT { get; set; } // PIC S9(7)V99.
-    public decimal PY_PS_VAMT { get; set; } // PIC S9(7)V99.
-    public decimal PY_PH_LASTYR { get; set; } // PIC S9(5)V99.
-    public decimal PY_PD_LASTYR { get; set; } // PIC S9(6)V99.
     public long PY_PROF_NEWEMP { get; set; } // PIC 99.
     public long PY_PROF_POINTS { get; set; } // PIC S9(5).
     public decimal PY_PROF_CONT { get; set; } // PIC S9(7)V99.
     public decimal PY_PROF_FORF { get; set; } // PIC S9(7)V99.
-    public string? PY_VESTED_FLAG { get; set; } // PIC X.
-    public long PY_PROF_MAXCONT { get; set; } // PIC 99.
-    public long PY_PROF_ZEROCONT { get; set; } // PIC 99.
-    public long PY_WEEKS_WORK_LAST { get; set; } // PIC 99.
     public decimal PY_PROF_EARN { get; set; } // PIC S9(7)V99.
     public decimal PY_PS_ETVA { get; set; } // PIC S9(8)V99.
     public decimal PY_PRIOR_ETVA { get; set; } // PIC S9(8)V99.
     public decimal PY_PROF_ETVA { get; set; } // PIC S9(7)V99.
     public decimal PY_PROF_EARN2 { get; set; } // PIC S9(7)V99.
     public decimal PY_PROF_ETVA2 { get; set; } // PIC S9(7)V99.
-    public long PY_PH_EXEC { get; set; } // PIC 9(4)v99.
-    public decimal PY_PD_EXEC { get; set; } // PIC 9(6)V99.
 }
 /*
 
