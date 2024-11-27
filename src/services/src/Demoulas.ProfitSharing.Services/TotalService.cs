@@ -93,12 +93,9 @@ public sealed class TotalService : ITotalService
 
     public IQueryable<ParticipantTotalYearsDto> GetYearsOfService(IProfitSharingDbContext ctx, short profitYear)
     {
-        return (from pd in ctx.ProfitDetails
-                where pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions &&
-                      pd.ProfitYearIteration == 0 &&
-                      pd.ProfitYear <= profitYear
-                group pd by pd.Ssn into g
-                select new ParticipantTotalYearsDto { Ssn = g.Key, Years = (short)g.Count() }); //Need to verify logic here
+        return (from pp in ctx.PayProfits.Include(p=>p.Demographic)
+                where pp.ProfitYear == profitYear
+                select new ParticipantTotalYearsDto { Ssn = pp.Demographic!.Ssn, Years = pp.YearsInPlan }); //Need to verify logic here
     }
 
     public IQueryable<ParticipantTotalRatioDto> GetVestingRatio(IProfitSharingDbContext ctx, short profitYear, DateOnly asOfDate)

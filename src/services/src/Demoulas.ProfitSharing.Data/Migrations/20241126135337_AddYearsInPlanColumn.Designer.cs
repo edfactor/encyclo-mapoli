@@ -3,6 +3,7 @@ using System;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 
@@ -11,9 +12,11 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    partial class ProfitSharingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241126135337_AddYearsInPlanColumn")]
+    partial class AddYearsInPlanColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28080,9 +28083,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(1)")
                         .HasColumnName("COMMENT_IS_PARTIAL_TRANSACTION");
 
-                    b.Property<string>("CommentRelatedCheckNumber")
-                        .HasMaxLength(9)
-                        .HasColumnType("NVARCHAR2(9)")
+                    b.Property<int?>("CommentRelatedCheckNumber")
+                        .HasColumnType("NUMBER(10)")
                         .HasColumnName("COMMENT_RELATED_CHECK_NUMBER");
 
                     b.Property<long?>("CommentRelatedOracleHcmId")
