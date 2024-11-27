@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Common.Contracts.Response;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 
 public sealed record MasterInquiryResponseDto
 {
@@ -19,7 +19,7 @@ public sealed record MasterInquiryResponseDto
     public decimal StateTaxes { get; set;}
     public char? TaxCodeId { get; set; }
     public int? CommentTypeId { get; set; }
-    public int? CommentRelatedCheckNumber { get; set; }
+    public string? CommentRelatedCheckNumber { get; set; }
     public string? CommentRelatedState { get; set; }
     public long? CommentRelatedOracleHcmId { get; set; }
     public short? CommentRelatedPsnSuffix { get; set; }
