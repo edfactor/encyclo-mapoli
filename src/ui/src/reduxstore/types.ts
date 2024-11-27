@@ -343,3 +343,18 @@ export interface ForfeituresByAgeDetail {
   employeeCount: number;
   amount: number;
 }
+
+export interface BalanceByAge {
+  reportName: string;
+  reportDate: string;
+  reportType: FrozenReportsByAgeRequestType;
+  totalEmployees: number;
+  distributionTotalAmount: number;
+  response: Paged<BalanceByAgeDetail>;
+}
+
+export interface BalanceByAgeDetail {
+  age: number;
+  employeeCount: number;
+  amount: number;
+}

@@ -18,7 +18,8 @@ const yearEndReports: RouteCategory = {
     { caption: "Master Inquiry", route: "/master-inquiry" },
     { caption: "Get Distributions by Age", route: "/distributions-by-age" },
     { caption: "Get Contributions by Age", route: "/contributions-by-age" },
-    { caption: "Get Forfeitures by Age", route: "/forfeitures-by-age" }
+    { caption: "Get Forfeitures by Age", route: "/forfeitures-by-age" },
+    { caption: "Get Balance by Age", route: "/balance-by-age" }
   ]
 };
 

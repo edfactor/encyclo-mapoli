@@ -2,13 +2,13 @@ import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { useLazyGetForfeituresByAgeQuery } from "reduxstore/api/YearsEndApi";
+import { useLazyGetBalanceByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { ImpersonationRoles, FrozenReportsByAgeRequestType } from "reduxstore/types";
 
-interface ForfeituresByAgeSearch {
+interface BalanceByAgeSearch {
   profitYear: number;
   reportType?: FrozenReportsByAgeRequestType;
 }
@@ -23,17 +23,17 @@ const schema = yup.object().shape({
     .required("Year is required")
 });
 
-const ForfeituresByAgeSearchFilter = () => {
+const BalanceByAgeSearchFilter = () => {
   const [isFetching, setIsFetching] = useState(false);
 
-  const [triggerSearch] = useLazyGetForfeituresByAgeQuery();
+  const [triggerSearch] = useLazyGetBalanceByAgeQuery();
 
   const {
     control,
     handleSubmit,
     formState: { errors, isValid },
     reset
-  } = useForm<ForfeituresByAgeSearch>({
+  } = useForm<BalanceByAgeSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
       profitYear: undefined,
@@ -126,4 +126,4 @@ const ForfeituresByAgeSearchFilter = () => {
   );
 };
 
-export default ForfeituresByAgeSearchFilter;
+export default BalanceByAgeSearchFilter;
