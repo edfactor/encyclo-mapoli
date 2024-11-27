@@ -1,4 +1,6 @@
-﻿using Oracle.ManagedDataAccess.Client;
+﻿using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
+using Oracle.ManagedDataAccess.Client;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
@@ -6,14 +8,20 @@ public class ProfitDetailTableHelper
 {
 #pragma warning disable S2933
 
-    private readonly List<PROFIT_DETAIL> records = new();
-    private readonly PROFIT_DETAIL profit_detail;
+    private  List<PROFIT_DETAIL> records = new();
     public long ssn;
     private int pos;
+    private OracleConnection connection;
 
-    public ProfitDetailTableHelper(OracleConnection connection, PROFIT_DETAIL profit_detail, long ssn)
+    public ProfitDetailTableHelper(OracleConnection connection)
     {
-        this.profit_detail = profit_detail;
+        this.connection = connection;
+    }
+
+    public void loadAllRecordsFor(long ssn)
+    {
+        records = new();
+        pos = 0;
         this.ssn = ssn;
 
         string query = $"SELECT * FROM PROFITSHARE.profit_detail where PR_DET_S_SEC_NUMBER = {ssn}";
@@ -53,8 +61,12 @@ public class ProfitDetailTableHelper
         }
     }
 
-    public int LoadNextRecord()
+    public int LoadNextRecord(int ssn, PROFIT_DETAIL profit_detail)
     {
+        if (ssn != this.ssn)
+        {
+            loadAllRecordsFor(ssn);
+        }
         if (pos < records.Count)
         {
             PROFIT_DETAIL shared = profit_detail;

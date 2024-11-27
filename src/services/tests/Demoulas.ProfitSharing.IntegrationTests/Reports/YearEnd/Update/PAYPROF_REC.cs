@@ -3,7 +3,7 @@
 public class PAYPROF_REC
 {
     public long PAYPROF_BADGE { get; set; } // PIC 9(7).
-    public long PAYPROF_SSN { get; set; } // PIC 9(9).
+    public int PAYPROF_SSN { get; set; } // PIC 9(9).
     public long PY_PS_ENROLLED { get; set; } // PIC 99.
     public long PY_PS_YEARS { get; set; } // PIC 99.
     public decimal PY_PS_AMT { get; set; } // PIC S9(7)V99.

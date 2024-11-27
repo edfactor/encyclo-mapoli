@@ -3,7 +3,7 @@
 public class PAYBEN_REC
 {
     public long PYBEN_PSN { get; set; } // PIC 9(11).
-    public long PYBEN_PAYSSN { get; set; } // PIC 9(9).
+    public int PYBEN_PAYSSN { get; set; } // PIC 9(9).
     public string? PYBEN_TYPE { get; set; } // PIC X.
     public long PYBEN_PERCENT { get; set; } // PIC 9(3).
     public string? PYBEN_NAME { get; set; } // PIC X(25).

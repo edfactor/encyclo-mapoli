@@ -32,7 +32,7 @@ public class SD_PRFT
 
     public long SD_BADGE { get; set; } // PIC 9(7).
     public string? SD_NAME { get; set; } // PIC X(25).
-    public long SD_SSN { get; set; } // PIC 9(9)
+    public int SD_SSN { get; set; } // PIC 9(9)
     public decimal SD_AMT { get; set; } // PIC S9(8)V99
     public decimal SD_DIST1 { get; set; } // PIC S9(8)V99
     public decimal SD_MIL { get; set; } // PIC S9(8)V99

@@ -12,17 +12,12 @@ public class PAY444
     private readonly PAYPROF_REC payprof_rec = new();
     private readonly PROFIT_DETAIL profit_detail = new();
 
-    // Utilities for reading /writing data
-    public DemRecTableHelper DemRecTableHelper;
-    private readonly PayBenReader PAYBEN1 = new();
-    private readonly PayProfRecTableHelper PAYPROFIT_FILE = new();
 
     // Where input values are stored
     private readonly POINT_VALUES point_values = new();
 
     // Collection of modified payprofit data
     private readonly List<PRFT> prfts = new();
-
 
     private readonly Counters _counters = new();
 
@@ -35,7 +30,6 @@ public class PAY444
     public List<string> outputLines = new();
     private PAYPROF_REC payprof_rec1 = new();
     private PRFT prft = new();
-    private ProfitDetailTableHelper profitDetailTable; // initialized on demand
     private bool rerunNeeded;
     private SD_PRFT sd_prft = new();
     private WS_CLIENT_TOTALS ws_client_totals = new();
@@ -69,8 +63,24 @@ public class PAY444
 
     public long EffectiveYear { get; set; } // PIC 9(4)
 
-    public long SOC_SEC_NUMBER { get; set; }
+    public int SOC_SEC_NUMBER { get; set; }
     public DateTime TodaysDateTime { get; set; } = DateTime.Now;
+
+
+    // Data Helpers
+    private ProfitDetailTableHelper profitDetailTable;
+    private DemRecTableHelper DemRecTableHelper;
+    private  PayBenReader PAYBEN1;
+    private  PayProfRecTableHelper PAYPROFIT_FILE;
+
+
+    public PAY444(OracleConnection connection)
+    {
+        profitDetailTable = new ProfitDetailTableHelper(connection);
+        DemRecTableHelper = new DemRecTableHelper(connection, dem_rec);
+         PAYBEN1 = new PayBenReader(connection);
+         PAYPROFIT_FILE = new PayProfRecTableHelper(connection);
+    }
 
     // It is annoying that forfeit proceeds earnings, but that is the way the Cobol prompts for them.  
     public void m015MainProcessing(short profitYear, decimal contributionPercent,
@@ -78,9 +88,6 @@ public class PAY444
         long adjustBadge, decimal adjustContrib, decimal adjustForfeit, decimal adjustEarnings,
         long adjustBadgeSecondary, decimal adjustEarningsSecondary, long maxContribution)
     {
-        // This connection is bound late.
-        PAYBEN1.Connection = connection;
-        PAYPROFIT_FILE.connection = connection;
 
         EffectiveYear = profitYear;
         point_values.PV_CONT_01 = contributionPercent;
@@ -753,13 +760,15 @@ public class PAY444
 
     private int MSTR_FIND_WITHIN_PR_DET_S()
     {
+/*
         if (profitDetailTable == null || profitDetailTable.ssn != SOC_SEC_NUMBER)
         {
             profitDetailTable = new ProfitDetailTableHelper(connection, profit_detail, SOC_SEC_NUMBER);
         }
+*/
 
         // Load profit_detail using SOC_SEC_NUMBER;
-        return profitDetailTable.LoadNextRecord();
+        return profitDetailTable.LoadNextRecord(SOC_SEC_NUMBER, profit_detail);
     }
 
 

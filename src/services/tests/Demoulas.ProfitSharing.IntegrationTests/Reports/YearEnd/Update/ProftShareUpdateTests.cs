@@ -16,7 +16,7 @@ public class ProftShareUpdateTests
 
         using OracleConnection connection = GetOracleConnection();
         connection.Open();
-        PAY444 pay444 = new();
+        PAY444 pay444 = new(connection);
         short year = 2023;
         pay444.connection = connection;
         string reportName = "psupdate-pay444-r1.txt";
@@ -39,13 +39,10 @@ public class ProftShareUpdateTests
         using OracleConnection connection = GetOracleConnection();
         connection.Open();
 
-        PAY444 pay444 = new();
+        PAY444 pay444 = new(connection);
         short year = 2024;
         string reportName = "psupdate-pay444-r2.txt";
         pay444.TodaysDateTime = new DateTime(2024, 11, 14, 10, 35, 0); // time report was generated
-
-        // We should pass in the point values, but ATM they are hard coded.
-        pay444.connection = connection;
 
         // Act
         pay444.m015MainProcessing(year, 15, 1, 2, 0, 0, 0, 0, 0, 0, 0, 30000);
@@ -63,13 +60,10 @@ public class ProftShareUpdateTests
         // Arrange
         using OracleConnection connection = GetOracleConnection();
         connection.Open();
-        PAY444 pay444 = new();
+        PAY444 pay444 = new(connection);
         short year = 2024;
         string reportName = "psupdate-pay444-r3.txt";
         pay444.TodaysDateTime = new DateTime(2024, 11, 19, 19, 18, 0); // time report was generated
-
-        // We should pass in the point values, but ATM they are hard coded.
-        pay444.connection = connection;
 
         // Act
         pay444.m015MainProcessing(year, 15, 1, 2, 0, 700174, 44.77m, 18.16m, 22.33m, 0, 0, 30000);
@@ -87,7 +81,7 @@ public class ProftShareUpdateTests
         // Arrange
         using OracleConnection connection = GetOracleConnection();
         connection.Open();
-        PAY444 pay444 = new();
+        PAY444 pay444 = new(connection);
         short year = 2024;
         string reportName = "psupdate-pay444-r4.txt";
 

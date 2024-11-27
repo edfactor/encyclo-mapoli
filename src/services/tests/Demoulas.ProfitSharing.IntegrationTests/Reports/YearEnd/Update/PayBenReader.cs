@@ -6,9 +6,13 @@ namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
 internal sealed class PayBenReader
 {
+    public PayBenReader(OracleConnection connection)
+    {
+        Connection = connection;
+    }
     private readonly List<PAYBEN1_REC> benes = new();
     private int pos = -1;
-    public OracleConnection Connection { get; set; }
+    private OracleConnection Connection;
 
     public void dataload()
     {
@@ -22,7 +26,7 @@ internal sealed class PayBenReader
                     PAYBEN1_REC record = new PAYBEN1_REC
                     {
                         PYBEN_PSN1 = reader.GetInt64(reader.GetOrdinal("PYBEN_PSN")),
-                        PYBEN_PAYSSN1 = reader.GetInt64(reader.GetOrdinal("PYBEN_PAYSSN")),
+                        PYBEN_PAYSSN1 = reader.GetInt32(reader.GetOrdinal("PYBEN_PAYSSN")),
                         PYBEN_TYPE1 = reader.IsDBNull(reader.GetOrdinal("PYBEN_TYPE"))
                             ? null
                             : reader.GetString(reader.GetOrdinal("PYBEN_TYPE")),

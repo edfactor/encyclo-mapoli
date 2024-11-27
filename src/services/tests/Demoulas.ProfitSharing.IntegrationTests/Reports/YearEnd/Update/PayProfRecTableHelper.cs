@@ -1,14 +1,20 @@
-﻿using Oracle.ManagedDataAccess.Client;
+﻿using Elastic.Clients.Elasticsearch.Graph;
+using Oracle.ManagedDataAccess.Client;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
 public class PayProfRecTableHelper
 {
+    public PayProfRecTableHelper(OracleConnection connection)
+    {
+        Connection = connection;
+    }
+
     private bool eof;
     private bool hasRead;
     private int reads;
     public List<PAYPROF_REC> rows { get; set; } = new();
-    public OracleConnection connection { get; set; }
+    public OracleConnection Connection;
 
     internal bool isEOF()
     {
@@ -40,7 +46,7 @@ public class PayProfRecTableHelper
         List<PAYPROF_REC> payProfRecords = new List<PAYPROF_REC>();
         string query = "SELECT * FROM PROFITSHARE.PAYPROFIT";
 
-        using (OracleCommand command = new OracleCommand(query, connection))
+        using (OracleCommand command = new OracleCommand(query, Connection))
         {
             using (OracleDataReader? reader = command.ExecuteReader())
             {
@@ -49,7 +55,7 @@ public class PayProfRecTableHelper
                     PAYPROF_REC record = new PAYPROF_REC
                     {
                         PAYPROF_BADGE = reader.GetInt64(reader.GetOrdinal("PAYPROF_BADGE")),
-                        PAYPROF_SSN = reader.GetInt64(reader.GetOrdinal("PAYPROF_SSN")),
+                        PAYPROF_SSN = reader.GetInt32(reader.GetOrdinal("PAYPROF_SSN")),
                         PY_PS_ENROLLED = reader.GetInt64(reader.GetOrdinal("PY_PS_ENROLLED")),
                         PY_PS_YEARS = reader.GetInt64(reader.GetOrdinal("PY_PS_YEARS")),
                         PY_PS_AMT = reader.GetDecimal(reader.GetOrdinal("PY_PS_AMT")),
