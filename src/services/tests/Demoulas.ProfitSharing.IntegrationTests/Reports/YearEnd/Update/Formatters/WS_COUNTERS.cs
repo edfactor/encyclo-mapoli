@@ -7,4 +7,3 @@ public class Counters
     public long EmployeeCounter { get; set; } // PIC 9(06)
     public long BeneficiaryCounter { get; set; } // PIC 9(06)
 }
-

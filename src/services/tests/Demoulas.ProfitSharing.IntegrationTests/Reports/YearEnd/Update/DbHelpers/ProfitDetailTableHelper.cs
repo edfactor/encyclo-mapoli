@@ -1,5 +1,4 @@
-﻿using Demoulas.ProfitSharing.Data.Entities;
-using Oracle.ManagedDataAccess.Client;
+﻿using Oracle.ManagedDataAccess.Client;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.DbHelpers;
 
@@ -10,7 +9,7 @@ public class ProfitDetailTableHelper
     private List<PROFIT_DETAIL> records = new();
     public long ssn;
     private int pos;
-    private OracleConnection connection;
+    private readonly OracleConnection connection;
 
     public ProfitDetailTableHelper(OracleConnection connection)
     {
@@ -19,18 +18,18 @@ public class ProfitDetailTableHelper
 
     public void loadAllRecordsFor(long ssn)
     {
-        records = new();
+        records = new List<PROFIT_DETAIL>();
         pos = 0;
         this.ssn = ssn;
 
         string query = $"SELECT * FROM PROFITSHARE.profit_detail where PR_DET_S_SEC_NUMBER = {ssn}";
-        using (OracleCommand command = new OracleCommand(query, connection))
+        using (OracleCommand command = new(query, connection))
         {
             using (OracleDataReader? reader = command.ExecuteReader())
             {
                 while (reader.Read())
                 {
-                    PROFIT_DETAIL record = new PROFIT_DETAIL
+                    PROFIT_DETAIL record = new()
                     {
                         PROFIT_YEAR = reader.GetDecimal(reader.GetOrdinal("PROFIT_YEAR")),
                         PROFIT_CLIENT = reader.GetInt64(reader.GetOrdinal("PROFIT_CLIENT")),
@@ -66,6 +65,7 @@ public class ProfitDetailTableHelper
         {
             loadAllRecordsFor(ssn);
         }
+
         if (pos < records.Count)
         {
             PROFIT_DETAIL shared = profit_detail;

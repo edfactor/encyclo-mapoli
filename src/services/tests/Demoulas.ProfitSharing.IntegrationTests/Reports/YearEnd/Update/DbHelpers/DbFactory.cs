@@ -1,23 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.Common.Data.Services.Entities.Contexts;
+﻿using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Interfaces;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.DbHelpers;
- internal sealed class DbFactory  :IProfitSharingDataContextFactory
+
+internal sealed class DbFactory : IProfitSharingDataContextFactory
 {
-    ProfitSharingReadOnlyDbContext ro;
+    private readonly ProfitSharingReadOnlyDbContext ro;
 
     public DbFactory(ProfitSharingReadOnlyDbContext ro)
     {
         this.ro = ro;
     }
 
-    public Task<T> UseWritableContext<T>(Func<ProfitSharingDbContext, Task<T>> func, CancellationToken cancellationToken = new CancellationToken())
+    public Task<T> UseWritableContext<T>(Func<ProfitSharingDbContext, Task<T>> func,
+        CancellationToken cancellationToken = new())
     {
         throw new NotImplementedException();
     }
@@ -27,7 +24,8 @@ namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.DbHelpe
         return func(ro);
     }
 
-    public Task UseWritableContext(Func<ProfitSharingDbContext, Task> func, CancellationToken cancellationToken = default)
+    public Task UseWritableContext(Func<ProfitSharingDbContext, Task> func,
+        CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }

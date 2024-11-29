@@ -6,26 +6,26 @@ namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.DbHelpe
 
 internal sealed class PayBenDbHelper
 {
+    public readonly List<PAYBEN1_REC> rows = new();
+    private readonly OracleConnection Connection;
+    private int pos;
+
     public PayBenDbHelper(OracleConnection connection)
     {
         Connection = connection;
         loadData();
     }
 
-    public readonly List<PAYBEN1_REC> rows = new();
-    private int pos = 0;
-    private OracleConnection Connection;
-
     public void loadData()
     {
         string query = "SELECT * FROM PROFITSHARE.PAYBEN";
-        using (OracleCommand command = new OracleCommand(query, Connection))
+        using (OracleCommand command = new(query, Connection))
         {
             using (OracleDataReader? reader = command.ExecuteReader())
             {
                 while (reader.Read())
                 {
-                    PAYBEN1_REC record = new PAYBEN1_REC
+                    PAYBEN1_REC record = new()
                     {
                         PYBEN_PSN1 = reader.GetInt64(reader.GetOrdinal("PYBEN_PSN")),
                         PYBEN_PAYSSN1 = reader.GetInt32(reader.GetOrdinal("PYBEN_PAYSSN")),

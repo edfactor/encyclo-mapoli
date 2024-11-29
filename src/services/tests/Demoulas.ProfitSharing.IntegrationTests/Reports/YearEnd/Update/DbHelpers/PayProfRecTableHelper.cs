@@ -1,6 +1,4 @@
-﻿using Elastic.Clients.Elasticsearch.Graph;
-using Oracle.ManagedDataAccess.Client;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+﻿using Oracle.ManagedDataAccess.Client;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.DbHelpers;
 
@@ -8,7 +6,6 @@ public class PayProfRecTableHelper
 {
     public PayProfRecTableHelper(OracleConnection connection)
     {
-      
         loadData(connection);
     }
 
@@ -17,16 +14,16 @@ public class PayProfRecTableHelper
 
     public void loadData(OracleConnection connection)
     {
-        List<PAYPROF_REC> payProfRecords = new List<PAYPROF_REC>();
+        List<PAYPROF_REC> payProfRecords = new();
         string query = "SELECT * FROM PROFITSHARE.PAYPROFIT";
 
-        using (OracleCommand command = new OracleCommand(query, connection))
+        using (OracleCommand command = new(query, connection))
         {
             using (OracleDataReader? reader = command.ExecuteReader())
             {
                 while (reader.Read())
                 {
-                    PAYPROF_REC record = new PAYPROF_REC
+                    PAYPROF_REC record = new()
                     {
                         PAYPROF_BADGE = reader.GetInt64(reader.GetOrdinal("PAYPROF_BADGE")),
                         PAYPROF_SSN = reader.GetInt32(reader.GetOrdinal("PAYPROF_SSN")),
@@ -40,8 +37,7 @@ public class PayProfRecTableHelper
                         PY_PRIOR_ETVA = reader.GetDecimal(reader.GetOrdinal("PY_PRIOR_ETVA")),
                         PY_PROF_ETVA = reader.GetDecimal(reader.GetOrdinal("PY_PROF_ETVA")),
                         PY_PROF_EARN2 = reader.GetDecimal(reader.GetOrdinal("PY_PROF_EARN2")),
-                        PY_PROF_ETVA2 = reader.GetDecimal(reader.GetOrdinal("PY_PROF_ETVA2")),
-
+                        PY_PROF_ETVA2 = reader.GetDecimal(reader.GetOrdinal("PY_PROF_ETVA2"))
                     };
                     rows.Add(record);
                 }

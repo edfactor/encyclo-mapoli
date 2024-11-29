@@ -7,12 +7,19 @@ namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
 public class PAY444
 {
+    private readonly Counters _counters = new();
+
     // Data records
     private readonly DEM_REC dem_rec = new();
+    private readonly DemRecTableHelper DemRecTableHelper;
     private readonly PAYBEN_REC payben_rec = new();
+
+    // Data Helpers
+    private readonly PayBenDbHelper payBenDbHelper;
+
     //private readonly PAYBEN1_REC payben1_rec = new();
-    private PAYPROF_REC payprof_rec = new();
-    private readonly PROFIT_DETAIL profit_detail = new();
+    private readonly PAYPROF_REC payprof_rec = new();
+    private readonly PayProfRecTableHelper payProfitDbHelper;
 
 
     // Where input values are stored
@@ -20,8 +27,8 @@ public class PAY444
 
     // Collection of modified payprofit data
     private readonly List<PRFT> prfts = new();
-
-    private readonly Counters _counters = new();
+    private readonly PROFIT_DETAIL profit_detail = new();
+    private readonly ProfitDetailTableHelper profitDetailTable;
 
     private long holdBadge;
     private INTERMEDIATE_VALUES intermediate_values = new();
@@ -35,6 +42,14 @@ public class PAY444
     private WS_COMPUTE_TOTALS ws_compute_totals = new();
     private WS_MAXCONT_TOTALS ws_maxcont_totals = new();
     private WS_PAYPROFIT ws_payprofit = new();
+
+    public PAY444(OracleConnection connection, IProfitSharingDataContextFactory dbContextFactory)
+    {
+        payProfitDbHelper = new PayProfRecTableHelper(connection);
+        payBenDbHelper = new PayBenDbHelper(connection);
+        DemRecTableHelper = new DemRecTableHelper(connection, dem_rec);
+        profitDetailTable = new ProfitDetailTableHelper(connection);
+    }
 
     public string? PAYPROFIT_FILE_STATUS { get; set; }
     public string? PAYBEN_FILE_STATUS { get; set; }
@@ -60,27 +75,12 @@ public class PAY444
 
     public DateTime TodaysDateTime { get; set; } = DateTime.Now;
 
-    // Data Helpers
-    private PayBenDbHelper payBenDbHelper;
-    private PayProfRecTableHelper payProfitDbHelper;
-    private DemRecTableHelper DemRecTableHelper;
-    private ProfitDetailTableHelper profitDetailTable;
-
-    public PAY444(OracleConnection connection, IProfitSharingDataContextFactory dbContextFactory)
-    {
-        payProfitDbHelper = new PayProfRecTableHelper(connection);
-        payBenDbHelper = new PayBenDbHelper(connection);
-        DemRecTableHelper = new DemRecTableHelper(connection, dem_rec);
-        profitDetailTable = new ProfitDetailTableHelper(connection);
-    }
-
     // It is annoying that forfeit proceeds earnings, but that is the way the Cobol prompts for them.  
     public void m015MainProcessing(short profitYear, decimal contributionPercent,
         decimal incomingForfeitPercent, decimal earningsPercent, decimal secondaryEarningsPercent,
         long adjustBadge, decimal adjustContrib, decimal adjustForfeit, decimal adjustEarnings,
         long adjustBadgeSecondary, decimal adjustEarningsSecondary, long maxContribution)
     {
-
         EffectiveYear = profitYear;
         point_values.PV_CONT_01 = contributionPercent;
         point_values.PV_FORF_01 = incomingForfeitPercent;
@@ -112,8 +112,7 @@ public class PAY444
 
     public void m201ProcessPayProfit()
     {
-
-        foreach (var pp in payProfitDbHelper.rows)
+        foreach (PAYPROF_REC pp in payProfitDbHelper.rows)
         {
             ws_compute_totals = new WS_COMPUTE_TOTALS();
             ws_payprofit = new WS_PAYPROFIT();
@@ -131,7 +130,7 @@ public class PAY444
 
     private void m202ProcessPayBen()
     {
-        foreach (var bene in payBenDbHelper.rows)
+        foreach (PAYBEN1_REC bene in payBenDbHelper.rows)
         {
             HOLD_PAYSSN = bene.PYBEN_PAYSSN1;
             // is already handled as an employee
@@ -143,9 +142,7 @@ public class PAY444
             ws_compute_totals = new WS_COMPUTE_TOTALS();
             ws_payprofit = new WS_PAYPROFIT();
             m220PaybenComputation(bene.PYBEN_PSN1);
-
         }
-        
     }
 
     public void m210PayprofitComputation()
@@ -214,7 +211,7 @@ public class PAY444
 
         ws_compute_totals.WS_EARN_POINTS = (long)Round(ws_compute_totals.WS_POINTS_DOLLARS / 100);
 
-    l210_CONTINUE:
+        l210_CONTINUE:
 
         intermediate_values.WS_FD_BADGE = payprof_rec.PAYPROF_BADGE;
         intermediate_values.WS_FD_NAME = dem_rec.PY_NAM;
@@ -253,7 +250,7 @@ public class PAY444
 
         m400LoadPayprofit();
         m410LoadProfit();
-        if (false/*rewrites are off*/)
+        if (false /*rewrites are off*/)
         {
             m420RewritePayprofit();
         }
@@ -306,7 +303,8 @@ public class PAY444
         PAYBEN_FILE_STATUS = READ_KEY_PAYBEN(payben_rec);
         if (PAYBEN_FILE_STATUS != "00")
         {
-            throw new IOException("STAT:{PAYBEN_FILE_STATUS} PSN:{payben_rec.PYBEN_PSN} SSN:{payben_rec.PYBEN_PAYSSN} = INVALID PAYBEN RECORD NOT UPDATED");
+            throw new IOException(
+                "STAT:{PAYBEN_FILE_STATUS} PSN:{payben_rec.PYBEN_PSN} SSN:{payben_rec.PYBEN_PAYSSN} = INVALID PAYBEN RECORD NOT UPDATED");
         }
 
         WS_REWRITE_WHICH = 2;
@@ -342,7 +340,7 @@ public class PAY444
 
         ws_compute_totals.WS_EARN_POINTS = (long)Round(ws_compute_totals.WS_POINTS_DOLLARS / 100);
 
-    l220_CONTINUE:
+        l220_CONTINUE:
 
         if (ALLOCATION_TOTAL != 0)
         {
@@ -396,11 +394,10 @@ public class PAY444
 
         m410LoadProfit();
 
-        if (false/*rewrites are off*/)
+        if (false /*rewrites are off*/)
         {
             m430RewritePayben();
         }
-
     }
 
     private string? READ_KEY_PAYBEN(PAYBEN_REC payben_rec)
@@ -545,7 +542,7 @@ public class PAY444
             }
         }
 
-    l250_EXIT:;
+        l250_EXIT: ;
     }
 
 
@@ -638,7 +635,6 @@ public class PAY444
         {
             throw new IOException($"BAD REWRITE OF PAYBEN EMPLOYEE PSN # {payben_rec.PYBEN_PSN}");
         }
-
     }
 
     private string? REWRITE_KEY_PAYBEN(PAYBEN_REC payben_rec)
@@ -755,7 +751,6 @@ public class PAY444
         }
 
         m850PrintTotals();
-
     }
 
     private void WRITE(object obj)
@@ -793,7 +788,6 @@ public class PAY444
                 {
                     report_line.PR_NEWEMP = "BEN";
                 }
-
             }
             else
             {
@@ -899,7 +893,6 @@ public class PAY444
             }
 
             _counters.LineCounter += 1;
-
         }
     }
 
@@ -992,7 +985,7 @@ public class PAY444
         ws_compute_totals = new WS_COMPUTE_TOTALS();
         ws_client_totals = new WS_CLIENT_TOTALS();
 
-        RERUN_TOT rerun_tot = new RERUN_TOT();
+        RERUN_TOT rerun_tot = new();
         rerun_tot.RERUN_OVER = ws_maxcont_totals.WS_TOT_OVER;
         rerun_tot.RERUN_POINTS = ws_maxcont_totals.WS_TOT_POINTS;
         rerun_tot.RERUN_MAX = WS_CONTR_MAX;

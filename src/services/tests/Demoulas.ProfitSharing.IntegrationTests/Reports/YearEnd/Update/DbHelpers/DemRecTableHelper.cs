@@ -14,13 +14,13 @@ public class DemRecTableHelper
         this.dem_rec = dem_rec;
 
         string query = "SELECT * FROM PROFITSHARE.DEMOGRAPHICS";
-        using (OracleCommand command = new OracleCommand(query, connection))
+        using (OracleCommand command = new(query, connection))
         {
             using (OracleDataReader? reader = command.ExecuteReader())
             {
                 while (reader.Read())
                 {
-                    DEM_REC record = new DEM_REC
+                    DEM_REC record = new()
                     {
                         DEM_BADGE = reader.GetInt64(reader.GetOrdinal("DEM_BADGE")),
                         DEM_SSN = reader.GetInt64(reader.GetOrdinal("DEM_SSN")),

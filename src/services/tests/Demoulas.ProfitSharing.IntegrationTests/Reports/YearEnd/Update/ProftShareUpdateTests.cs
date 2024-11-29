@@ -37,11 +37,12 @@ public class ProftShareUpdateTests
     {
         OracleConnection connection = GetOracleConnection();
 
-        var configuration = new ConfigurationBuilder().AddUserSecrets<ProftShareUpdateTests>().Build();
+        IConfigurationRoot configuration = new ConfigurationBuilder().AddUserSecrets<ProftShareUpdateTests>().Build();
         string connectionString = configuration["ConnectionStrings:ProfitSharing"]!;
-        var options = new DbContextOptionsBuilder<ProfitSharingReadOnlyDbContext>().UseOracle(connectionString)
-            .EnableSensitiveDataLogging().Options;
-        var ctx = new ProfitSharingReadOnlyDbContext(options);
+        DbContextOptions<ProfitSharingReadOnlyDbContext> options =
+            new DbContextOptionsBuilder<ProfitSharingReadOnlyDbContext>().UseOracle(connectionString)
+                .EnableSensitiveDataLogging().Options;
+        ProfitSharingReadOnlyDbContext ctx = new ProfitSharingReadOnlyDbContext(options);
 
         IProfitSharingDataContextFactory dbFactory = new DbFactory(ctx);
 
