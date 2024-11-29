@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.DbHelpers;
+﻿using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.DbHelpers;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.ReportFormatters;
 using Oracle.ManagedDataAccess.Client;
 
@@ -10,7 +11,7 @@ public class PAY444
     private readonly DEM_REC dem_rec = new();
     private readonly PAYBEN_REC payben_rec = new();
     private readonly PAYBEN1_REC payben1_rec = new();
-    private readonly PAYPROF_REC payprof_rec = new();
+    private PAYPROF_REC payprof_rec = new();
     private readonly PROFIT_DETAIL profit_detail = new();
 
 
@@ -27,7 +28,6 @@ public class PAY444
 
     // new structures
     public List<string> outputLines = new();
-    private PAYPROF_REC payprof_rec1 = new();
     private PRFT prft = new();
     private bool rerunNeeded;
     private SD_PRFT sd_prft = new();
@@ -40,7 +40,6 @@ public class PAY444
     public string? PAYBEN_FILE_STATUS { get; set; }
     public string? DEMO_PROFSHARE_FILE_STATUS { get; set; } = "00";
 
-    public long FIRST_REC { get; set; }
     public long HOLD_SSN { get; set; }
     public long HOLD_PAYSSN { get; set; }
 
@@ -61,20 +60,18 @@ public class PAY444
 
     public DateTime TodaysDateTime { get; set; } = DateTime.Now;
 
-
     // Data Helpers
-    private ProfitDetailTableHelper profitDetailTable;
+    private PayBenReader payBenDbHelper;
+    private PayProfRecTableHelper payProfitDbHelper;
     private DemRecTableHelper DemRecTableHelper;
-    private PayBenReader PAYBEN1;
-    private PayProfRecTableHelper PAYPROFIT_FILE;
+    private ProfitDetailTableHelper profitDetailTable;
 
-
-    public PAY444(OracleConnection connection)
+    public PAY444(OracleConnection connection, IProfitSharingDataContextFactory dbContextFactory)
     {
-        profitDetailTable = new ProfitDetailTableHelper(connection);
+        payProfitDbHelper = new PayProfRecTableHelper(connection);
+        payBenDbHelper = new PayBenReader(connection);
         DemRecTableHelper = new DemRecTableHelper(connection, dem_rec);
-        PAYBEN1 = new PayBenReader(connection);
-        PAYPROFIT_FILE = new PayProfRecTableHelper(connection);
+        profitDetailTable = new ProfitDetailTableHelper(connection);
     }
 
     // It is annoying that forfeit proceeds earnings, but that is the way the Cobol prompts for them.  
@@ -99,7 +96,7 @@ public class PAY444
 
         HOLD_PAYSSN = 0;
         m201ProcessPayProfit();
-        m202_PROCESS_PAYBEN();
+        m202ProcessPayBen();
 
         if (rerunNeeded)
         {
@@ -115,59 +112,28 @@ public class PAY444
 
     public void m201ProcessPayProfit()
     {
-    l201_PROCESS_PAYPROFIT:
-        payprof_rec1 = PAYPROFIT_FILE.Read();
-        if (PAYPROFIT_FILE.isEOF())
-        {
-            payprof_rec.PAYPROF_BADGE = holdBadge;
-            if (FIRST_REC != 0) // BOBH
-            {
-                m210PayprofitComputation();
-            }
 
-            prft.FD_MAXOVER = 0;
-            prft.FD_MAXPOINTS = 0;
-            ws_payprofit.WS_PROF_POINTS = 0;
-            ws_maxcont_totals.WS_OVER = 0;
-            goto l201_EXIT;
-        }
-
-        if (FIRST_REC == 0)
+        foreach (var pp in payProfitDbHelper.rows)
         {
             ws_compute_totals = new WS_COMPUTE_TOTALS();
             ws_payprofit = new WS_PAYPROFIT();
-            FIRST_REC = 1;
-            HOLD_SSN = payprof_rec1.PAYPROF_SSN;
-        }
+            ws_payprofit.WS_PS_AMT = ws_payprofit.WS_PS_AMT + pp.PY_PS_AMT;
+            ws_payprofit.WS_PROF_POINTS = ws_payprofit.WS_PROF_POINTS + pp.PY_PROF_POINTS;
 
-        if (payprof_rec1.PAYPROF_SSN != HOLD_SSN)
-        {
-            payprof_rec.PAYPROF_BADGE = holdBadge;
+            HOLD_SSN = pp.PAYPROF_SSN;
+            holdBadge = pp.PAYPROF_BADGE;
+            payprof_rec.PAYPROF_BADGE = pp.PAYPROF_BADGE;
+
             m210PayprofitComputation();
-            ws_compute_totals = new WS_COMPUTE_TOTALS();
-            ws_payprofit = new WS_PAYPROFIT();
-            HOLD_SSN = payprof_rec1.PAYPROF_SSN;
         }
-
-        if (DEMO_PROFSHARE_FILE_STATUS != "00")
-        {
-            holdBadge = payprof_rec1.PAYPROF_BADGE;
-            goto l201_PROCESS_PAYPROFIT;
-        }
-
-        ws_payprofit.WS_PS_AMT = ws_payprofit.WS_PS_AMT + payprof_rec1.PY_PS_AMT;
-        ws_payprofit.WS_PROF_POINTS = ws_payprofit.WS_PROF_POINTS + payprof_rec1.PY_PROF_POINTS;
-        holdBadge = payprof_rec1.PAYPROF_BADGE;
-        goto l201_PROCESS_PAYPROFIT;
-    l201_EXIT:;
     }
 
 
-    private void m202_PROCESS_PAYBEN()
+    private void m202ProcessPayBen()
     {
     l202_PROCESS_PAYBEN:
-        PAYBEN1.Read(payben1_rec);
-        if (PAYBEN1.isEOF())
+        payBenDbHelper.Read(payben1_rec);
+        if (payBenDbHelper.isEOF())
         {
             goto l202_EXIT;
         }
@@ -214,7 +180,7 @@ public class PAY444
 
     private string? READ_ALT_KEY_PAYPROFIT(PAYPROF_REC payprof_rec)
     {
-        if (PAYPROFIT_FILE.HasRecordBySsn(payprof_rec.PAYPROF_SSN))
+        if (payProfitDbHelper.HasRecordBySsn(payprof_rec.PAYPROF_SSN))
         {
             return "00";
         }
@@ -352,7 +318,7 @@ public class PAY444
 
     private string? READ_KEY_PAYPROFIT(PAYPROF_REC payprof_rec)
     {
-        PAYPROF_REC one = PAYPROFIT_FILE.findByBadge(payprof_rec.PAYPROF_BADGE);
+        PAYPROF_REC one = payProfitDbHelper.findByBadge(payprof_rec.PAYPROF_BADGE);
 
         payprof_rec.PAYPROF_BADGE = one.PAYPROF_BADGE;
         payprof_rec.PAYPROF_SSN = one.PAYPROF_SSN;
@@ -480,7 +446,7 @@ public class PAY444
 
     private string? READ_KEY_PAYBEN(PAYBEN_REC payben_rec)
     {
-        return PAYBEN1.findByPSN(payben_rec);
+        return payBenDbHelper.findByPSN(payben_rec);
     }
 
 

@@ -1,7 +1,11 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
 using System.Text;
+using Demoulas.ProfitSharing.Data.Contexts;
+using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.DbHelpers;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Oracle.ManagedDataAccess.Client;
 
@@ -32,8 +36,17 @@ public class ProftShareUpdateTests
     private PAY444 createPay444(short profitYear)
     {
         OracleConnection connection = GetOracleConnection();
+
+        var configuration = new ConfigurationBuilder().AddUserSecrets<ProftShareUpdateTests>().Build();
+        string connectionString = configuration["ConnectionStrings:ProfitSharing"]!;
+        var options = new DbContextOptionsBuilder<ProfitSharingReadOnlyDbContext>().UseOracle(connectionString)
+            .EnableSensitiveDataLogging().Options;
+        var ctx = new ProfitSharingReadOnlyDbContext(options);
+
+        IProfitSharingDataContextFactory dbFactory = new DbFactory(ctx);
+
         connection.Open();
-        PAY444 pay444 = new(connection);
+        PAY444 pay444 = new(connection, dbFactory);
         return pay444;
     }
 
@@ -135,7 +148,13 @@ public class ProftShareUpdateTests
 
     private static void AssertReportsAreEquivalent(string expected, string actual)
     {
-        if (!File.Exists("x/Program Files/Meld/Meld.exe"))
+        if (!File.Exists("/Program Files/Meld/Meld.exe"))
+        {
+            actual.Should().Be(expected);
+            return;
+        }
+
+        if (actual == expected)
         {
             actual.Should().Be(expected);
             return;

@@ -8,6 +8,7 @@ public class PayProfRecTableHelper
     public PayProfRecTableHelper(OracleConnection connection)
     {
         Connection = connection;
+        loadData();
     }
 
     private bool eof;
@@ -23,12 +24,6 @@ public class PayProfRecTableHelper
 
     internal PAYPROF_REC Read()
     {
-        if (!hasRead)
-        {
-            hasRead = true;
-            loadData();
-        }
-
         if (reads < rows.Count)
         {
             PAYPROF_REC record = rows[reads];
