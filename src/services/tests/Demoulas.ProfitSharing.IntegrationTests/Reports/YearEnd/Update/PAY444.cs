@@ -10,7 +10,7 @@ public class PAY444
     // Data records
     private readonly DEM_REC dem_rec = new();
     private readonly PAYBEN_REC payben_rec = new();
-    private readonly PAYBEN1_REC payben1_rec = new();
+    //private readonly PAYBEN1_REC payben1_rec = new();
     private PAYPROF_REC payprof_rec = new();
     private readonly PROFIT_DETAIL profit_detail = new();
 
@@ -61,7 +61,7 @@ public class PAY444
     public DateTime TodaysDateTime { get; set; } = DateTime.Now;
 
     // Data Helpers
-    private PayBenReader payBenDbHelper;
+    private PayBenDbHelper payBenDbHelper;
     private PayProfRecTableHelper payProfitDbHelper;
     private DemRecTableHelper DemRecTableHelper;
     private ProfitDetailTableHelper profitDetailTable;
@@ -69,7 +69,7 @@ public class PAY444
     public PAY444(OracleConnection connection, IProfitSharingDataContextFactory dbContextFactory)
     {
         payProfitDbHelper = new PayProfRecTableHelper(connection);
-        payBenDbHelper = new PayBenReader(connection);
+        payBenDbHelper = new PayBenDbHelper(connection);
         DemRecTableHelper = new DemRecTableHelper(connection, dem_rec);
         profitDetailTable = new ProfitDetailTableHelper(connection);
     }
@@ -131,63 +131,22 @@ public class PAY444
 
     private void m202ProcessPayBen()
     {
-    l202_PROCESS_PAYBEN:
-        payBenDbHelper.Read(payben1_rec);
-        if (payBenDbHelper.isEOF())
+        foreach (var bene in payBenDbHelper.rows)
         {
-            goto l202_EXIT;
+            HOLD_PAYSSN = bene.PYBEN_PAYSSN1;
+            // is already handled as an employee
+            if (payProfitDbHelper.HasRecordBySsn(bene.PYBEN_PAYSSN1))
+            {
+                continue;
+            }
+
+            ws_compute_totals = new WS_COMPUTE_TOTALS();
+            ws_payprofit = new WS_PAYPROFIT();
+            m220PaybenComputation(bene.PYBEN_PSN1);
+
         }
-
-        if (payben1_rec.PYBEN_PAYSSN1 == HOLD_PAYSSN)
-        {
-            goto l202_PROCESS_PAYBEN;
-        }
-
-        HOLD_PAYSSN = payben1_rec.PYBEN_PAYSSN1;
-        m208CheckPayprofitFromPayben();
-        if (WS_ERROR == 1)
-        {
-            goto l202_PROCESS_PAYBEN;
-        }
-
-        ws_compute_totals = new WS_COMPUTE_TOTALS();
-        ws_payprofit = new WS_PAYPROFIT();
-
-        m220PaybenComputation();
-
-        ws_compute_totals = new WS_COMPUTE_TOTALS();
-        ws_payprofit = new WS_PAYPROFIT();
-
-        goto l202_PROCESS_PAYBEN;
-
-    l202_EXIT:;
+        
     }
-
-
-    public void m208CheckPayprofitFromPayben()
-    {
-        payprof_rec.PAYPROF_SSN = payben1_rec.PYBEN_PAYSSN1;
-        PAYPROFIT_FILE_STATUS = READ_ALT_KEY_PAYPROFIT(payprof_rec);
-        WS_ERROR = 0;
-
-        if (PAYPROFIT_FILE_STATUS == "00")
-        {
-            WS_ERROR = 1;
-            // Indicates that an employee is also a bene
-            payprof_rec.PY_PROF_NEWEMP = 2;
-        }
-    }
-
-    private string? READ_ALT_KEY_PAYPROFIT(PAYPROF_REC payprof_rec)
-    {
-        if (payProfitDbHelper.HasRecordBySsn(payprof_rec.PAYPROF_SSN))
-        {
-            return "00";
-        }
-
-        return "Something else";
-    }
-
 
     public void m210PayprofitComputation()
     {
@@ -340,10 +299,10 @@ public class PAY444
     }
 
 
-    public void m220PaybenComputation()
+    public void m220PaybenComputation(long psn)
     {
         // <same key> PSKEY = payben1_rec.PYBEN_PSN1;
-        payben_rec.PYBEN_PSN = payben1_rec.PYBEN_PSN1;
+        payben_rec.PYBEN_PSN = psn;
         PAYBEN_FILE_STATUS = READ_KEY_PAYBEN(payben_rec);
         if (PAYBEN_FILE_STATUS != "00")
         {

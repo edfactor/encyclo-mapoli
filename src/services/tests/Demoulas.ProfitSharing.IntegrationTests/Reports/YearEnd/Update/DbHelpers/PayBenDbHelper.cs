@@ -4,17 +4,19 @@ namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.DbHelpe
 
 #pragma warning disable S2933
 
-internal sealed class PayBenReader
+internal sealed class PayBenDbHelper
 {
-    public PayBenReader(OracleConnection connection)
+    public PayBenDbHelper(OracleConnection connection)
     {
         Connection = connection;
+        loadData();
     }
-    private readonly List<PAYBEN1_REC> benes = new();
-    private int pos = -1;
+
+    public readonly List<PAYBEN1_REC> rows = new();
+    private int pos = 0;
     private OracleConnection Connection;
 
-    public void dataload()
+    public void loadData()
     {
         string query = "SELECT * FROM PROFITSHARE.PAYBEN";
         using (OracleCommand command = new OracleCommand(query, Connection))
@@ -53,7 +55,7 @@ internal sealed class PayBenReader
                         PYBEN_PROF_EARN1 = reader.GetDecimal(reader.GetOrdinal("PYBEN_PROF_EARN")),
                         PYBEN_PROF_EARN21 = reader.GetDecimal(reader.GetOrdinal("PYBEN_PROF_EARN2"))
                     };
-                    benes.Add(record);
+                    rows.Add(record);
                 }
             }
         }
@@ -61,15 +63,9 @@ internal sealed class PayBenReader
 
     public string Read(PAYBEN1_REC pbrec)
     {
-        if (pos == -1)
+        if (pos < rows.Count)
         {
-            dataload();
-            pos = 0;
-        }
-
-        if (pos < benes.Count)
-        {
-            PAYBEN1_REC l = benes[pos];
+            PAYBEN1_REC l = rows[pos];
             pbrec.PYBEN_PSN1 = l.PYBEN_PSN1;
             pbrec.PYBEN_PAYSSN1 = l.PYBEN_PAYSSN1;
             pbrec.PYBEN_TYPE1 = l.PYBEN_TYPE1;
@@ -94,12 +90,12 @@ internal sealed class PayBenReader
 
     public bool isEOF()
     {
-        return pos >= benes.Count;
+        return pos >= rows.Count;
     }
 
     public string? findByPSN(PAYBEN_REC pbrec)
     {
-        PAYBEN1_REC l = benes.Where(b => b.PYBEN_PSN1 == pbrec.PYBEN_PSN).First();
+        PAYBEN1_REC l = rows.Where(b => b.PYBEN_PSN1 == pbrec.PYBEN_PSN).First();
         pbrec.PYBEN_PSN = l.PYBEN_PSN1;
         pbrec.PYBEN_PAYSSN = l.PYBEN_PAYSSN1;
         pbrec.PYBEN_TYPE = l.PYBEN_TYPE1;

@@ -12,7 +12,6 @@ public class PayProfRecTableHelper
     }
 
     private bool eof;
-    private bool hasRead;
     private int reads;
     public List<PAYPROF_REC> rows { get; set; } = new();
     public OracleConnection Connection;
