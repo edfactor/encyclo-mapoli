@@ -11,11 +11,6 @@ public class DEM_REC
     public long PY_STOR { get; set; } // PIC 9(3).
     public long PY_DP { get; set; } // PIC 9(1).
     public long PY_CLA { get; set; } // PIC 9(3).
-    public string? PY_ADD { get; set; } // PIC X(30).
-    public string? PY_ADD2 { get; set; } // PIC X(30).
-    public string? PY_CITY { get; set; } // PIC X(25).
-    public string? PY_STATE { get; set; } // PIC X(2).
-    public long PY_ZIP { get; set; } // PIC 9(5).
     public long PY_DOB { get; set; } // PIC 9(8).
     public string? PY_FUL { get; set; } // PIC X(2).
     public string? PY_FREQ { get; set; } // PIC X(1).
@@ -26,16 +21,9 @@ public class DEM_REC
     public DateOnly? PY_REHIRE_DT { get; set; } // PIC 9(8).
     public DateOnly? PY_TERM_DT { get; set; } // PIC 9(8).
     public string? PY_TERM { get; set; } // PIC X(1).
-    public long PY_ASSIGN_ID { get; set; } // PIC 9(15).
-    public string? PY_ASSIGN_DESC { get; set; } // PIC X(15).
     public string? PY_NEW_EMP { get; set; } // PIC X(1).
-    public string? PY_GENDER { get; set; } // PIC X(1).
-    public long PY_EMP_TELNO { get; set; } // PIC 9(10).
     public decimal PY_SHOUR { get; set; } // PIC 9(3)V99.
-    public string? PY_SET_PWD { get; set; } // PIC X(1).
-    public string? PY_SET_PWD_DT { get; set; } // PIC X(14).
     public DateOnly? PY_CLASS_DT { get; set; } // PIC 9(8).
-    public string? PY_GUID { get; set; } // PIC X(256).
 }
 
 /*

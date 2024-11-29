@@ -1,5 +1,6 @@
 ﻿using Elastic.Clients.Elasticsearch.Graph;
 using Oracle.ManagedDataAccess.Client;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.DbHelpers;
 
@@ -7,40 +8,19 @@ public class PayProfRecTableHelper
 {
     public PayProfRecTableHelper(OracleConnection connection)
     {
-        Connection = connection;
-        loadData();
+      
+        loadData(connection);
     }
 
-    private bool eof;
-    private int reads;
     public List<PAYPROF_REC> rows { get; set; } = new();
-    public OracleConnection Connection;
 
-    internal bool isEOF()
-    {
-        return eof;
-    }
 
-    internal PAYPROF_REC Read()
-    {
-        if (reads < rows.Count)
-        {
-            PAYPROF_REC record = rows[reads];
-            reads++;
-            return record;
-        }
-
-        Console.WriteLine("Hit EOF");
-        eof = true;
-        return null;
-    }
-
-    public void loadData()
+    public void loadData(OracleConnection connection)
     {
         List<PAYPROF_REC> payProfRecords = new List<PAYPROF_REC>();
         string query = "SELECT * FROM PROFITSHARE.PAYPROFIT";
 
-        using (OracleCommand command = new OracleCommand(query, Connection))
+        using (OracleCommand command = new OracleCommand(query, connection))
         {
             using (OracleDataReader? reader = command.ExecuteReader())
             {
