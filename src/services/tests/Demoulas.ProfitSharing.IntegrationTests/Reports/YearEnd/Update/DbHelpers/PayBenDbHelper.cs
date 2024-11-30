@@ -1,4 +1,7 @@
-﻿using Oracle.ManagedDataAccess.Client;
+﻿using Demoulas.ProfitSharing.Data.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using Oracle.ManagedDataAccess.Client;
+
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.DbHelpers;
 
@@ -7,19 +10,32 @@ namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.DbHelpe
 internal sealed class PayBenDbHelper
 {
     public readonly List<PAYBEN1_REC> rows = new();
-    private readonly OracleConnection Connection;
-    private int pos;
+    public List<PAYBEN1_REC> rows2 = new();
 
-    public PayBenDbHelper(OracleConnection connection)
+    private IProfitSharingDataContextFactory dbContextFactory;
+
+    public PayBenDbHelper(OracleConnection connection, IProfitSharingDataContextFactory dbContextFactory)
     {
-        Connection = connection;
-        loadData();
+        loadData(connection);
+        loadData2(dbContextFactory);
+
+        // Ensure SmartDB Matches ReadyDB
+        if (!rows.SequenceEqual(rows2))
+        {
+            for (int i = 0; i < rows.Count; i++)
+            {
+                if (!rows[i].Equals(rows2[i]))
+                {
+                    throw new IOException("Smart data does not match Ready data!!");
+                }
+            }
+        }
     }
 
-    public void loadData()
+    public void loadData(OracleConnection connection)
     {
-        string query = "SELECT * FROM PROFITSHARE.PAYBEN";
-        using (OracleCommand command = new(query, Connection))
+        string query = "SELECT * FROM PROFITSHARE.PAYBEN order by PYBEN_NAME, PYBEN_PSN desc";
+        using (OracleCommand command = new(query, connection))
         {
             using (OracleDataReader? reader = command.ExecuteReader())
             {
@@ -31,7 +47,7 @@ internal sealed class PayBenDbHelper
                         PYBEN_PAYSSN1 = reader.GetInt32(reader.GetOrdinal("PYBEN_PAYSSN")),
                         PYBEN_NAME1 = reader.IsDBNull(reader.GetOrdinal("PYBEN_NAME"))
                             ? null
-                            : reader.GetString(reader.GetOrdinal("PYBEN_NAME")),
+                            : reader.GetString(reader.GetOrdinal("PYBEN_NAME")).Trim(),
                         PYBEN_PSDISB1 = reader.GetDecimal(reader.GetOrdinal("PYBEN_PSDISB")),
                         PYBEN_PSAMT1 = reader.GetDecimal(reader.GetOrdinal("PYBEN_PSAMT")),
                         PYBEN_PROF_EARN1 = reader.GetDecimal(reader.GetOrdinal("PYBEN_PROF_EARN")),
@@ -43,29 +59,22 @@ internal sealed class PayBenDbHelper
         }
     }
 
-    public string Read(PAYBEN1_REC pbrec)
+    public void loadData2(IProfitSharingDataContextFactory dbContextFactory)
     {
-        if (pos < rows.Count)
-        {
-            PAYBEN1_REC l = rows[pos];
-            pbrec.PYBEN_PSN1 = l.PYBEN_PSN1;
-            pbrec.PYBEN_PAYSSN1 = l.PYBEN_PAYSSN1;
-            pbrec.PYBEN_NAME1 = l.PYBEN_NAME1;
-            pbrec.PYBEN_PSDISB1 = l.PYBEN_PSDISB1;
-            pbrec.PYBEN_PSAMT1 = l.PYBEN_PSAMT1;
-            pbrec.PYBEN_PROF_EARN1 = l.PYBEN_PROF_EARN1;
-            pbrec.PYBEN_PROF_EARN21 = l.PYBEN_PROF_EARN21;
-            pos++;
-            return "00";
-        }
-
-        return "NOT FOUND";
+        rows2 = dbContextFactory.UseReadOnlyContext(ctx =>
+            ctx.Beneficiaries.OrderBy(b=>b.Contact.ContactInfo.FullName).ThenByDescending(b=>b.EmployeeId*10000+b.PsnSuffix).Select(b => new PAYBEN1_REC
+                {
+                    PYBEN_PSN1 = Convert.ToInt64(b.Psn),
+                    PYBEN_PAYSSN1 = b.Contact.Ssn,
+                    PYBEN_NAME1 = b.Contact.ContactInfo.FullName,
+                    PYBEN_PSDISB1 = b.Distribution,
+                    PYBEN_PSAMT1 = b.Amount,
+                    PYBEN_PROF_EARN1 = b.Earnings,
+                    PYBEN_PROF_EARN21 = b.SecondaryEarnings
+                }).ToListAsync()
+        ).GetAwaiter().GetResult();
     }
 
-    public bool isEOF()
-    {
-        return pos >= rows.Count;
-    }
 
     public string? findByPSN(PAYBEN_REC pbrec)
     {

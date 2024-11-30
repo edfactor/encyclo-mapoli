@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Data.Interfaces;
+﻿using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.DbHelpers;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.ReportFormatters;
 using Oracle.ManagedDataAccess.Client;
@@ -43,12 +44,13 @@ public class PAY444
     private WS_MAXCONT_TOTALS ws_maxcont_totals = new();
     private WS_PAYPROFIT ws_payprofit = new();
 
-    public PAY444(OracleConnection connection, IProfitSharingDataContextFactory dbContextFactory)
+    public PAY444(OracleConnection connection, IProfitSharingDataContextFactory dbContextFactory, short profitYear)
     {
         payProfitDbHelper = new PayProfRecTableHelper(connection);
-        payBenDbHelper = new PayBenDbHelper(connection);
+        payBenDbHelper = new PayBenDbHelper(connection,dbContextFactory);
         DemRecTableHelper = new DemRecTableHelper(connection, dem_rec);
-        profitDetailTable = new ProfitDetailTableHelper(connection);
+        profitDetailTable = new ProfitDetailTableHelper(connection, dbContextFactory, profitYear);
+        EffectiveYear = profitYear;
     }
 
     public string? PAYPROFIT_FILE_STATUS { get; set; }
@@ -76,12 +78,11 @@ public class PAY444
     public DateTime TodaysDateTime { get; set; } = DateTime.Now;
 
     // It is annoying that forfeit proceeds earnings, but that is the way the Cobol prompts for them.  
-    public void m015MainProcessing(short profitYear, decimal contributionPercent,
+    public void m015MainProcessing(decimal contributionPercent,
         decimal incomingForfeitPercent, decimal earningsPercent, decimal secondaryEarningsPercent,
         long adjustBadge, decimal adjustContrib, decimal adjustForfeit, decimal adjustEarnings,
         long adjustBadgeSecondary, decimal adjustEarningsSecondary, long maxContribution)
     {
-        EffectiveYear = profitYear;
         point_values.PV_CONT_01 = contributionPercent;
         point_values.PV_FORF_01 = incomingForfeitPercent;
         point_values.PV_EARN_01 = earningsPercent;
@@ -287,7 +288,6 @@ public class PAY444
         payprof_rec.PY_PROF_FORF = one.PY_PROF_FORF;
         payprof_rec.PY_PROF_EARN = one.PY_PROF_EARN;
         payprof_rec.PY_PS_ETVA = one.PY_PS_ETVA;
-        payprof_rec.PY_PRIOR_ETVA = one.PY_PRIOR_ETVA;
         payprof_rec.PY_PROF_ETVA = one.PY_PROF_ETVA;
         payprof_rec.PY_PROF_EARN2 = one.PY_PROF_EARN2;
         payprof_rec.PY_PROF_ETVA2 = one.PY_PROF_ETVA2;
@@ -675,12 +675,12 @@ public class PAY444
 
         if (WS_PROFIT_YEAR_FIRST_4 == EffectiveYear)
         {
-            if (profit_detail.PROFIT_CODE == "1" || profit_detail.PROFIT_CODE == "3")
+            if (profit_detail.PROFIT_CODE == ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal/*1*/ || profit_detail.PROFIT_CODE == ProfitCode.Constants.OutgoingDirectPayments /*3*/)
             {
                 DIST_TOTAL = DIST_TOTAL + profit_detail.PROFIT_FORT;
             }
 
-            if (profit_detail.PROFIT_CODE == "9")
+            if (profit_detail.PROFIT_CODE == ProfitCode.Constants.Outgoing100PercentVestedPayment /*9*/)
             {
                 if (profit_detail.PROFIT_CMNT![..6] == "XFER >" ||
                     profit_detail.PROFIT_CMNT[..6] == "QDRO >" ||
@@ -695,17 +695,17 @@ public class PAY444
                 }
             }
 
-            if (profit_detail.PROFIT_CODE == "2")
+            if (profit_detail.PROFIT_CODE == ProfitCode.Constants.OutgoingForfeitures /*2*/)
             {
                 FORFEIT_TOTAL = FORFEIT_TOTAL + profit_detail.PROFIT_FORT;
             }
 
-            if (profit_detail.PROFIT_CODE == "5")
+            if (profit_detail.PROFIT_CODE == ProfitCode.Constants.OutgoingXferBeneficiary /*5*/)
             {
                 PALLOCATION_TOTAL = PALLOCATION_TOTAL + profit_detail.PROFIT_FORT;
             }
 
-            if (profit_detail.PROFIT_CODE == "6")
+            if (profit_detail.PROFIT_CODE == ProfitCode.Constants.IncomingQdroBeneficiary /*6*/)
             {
                 ALLOCATION_TOTAL = ALLOCATION_TOTAL + profit_detail.PROFIT_CONT;
             }
@@ -741,7 +741,16 @@ public class PAY444
         prfts.Sort((a, b) =>
         {
             int nameComparison = StringComparer.Ordinal.Compare(a.FD_NAME, b.FD_NAME);
-            return nameComparison != 0 ? nameComparison : StringComparer.Ordinal.Compare(a.FD_BADGE, b.FD_BADGE);
+            if (nameComparison != 0)
+            {
+                return nameComparison;
+            }
+            // This is so we converge on a consistant sort.  This effectively matches Ready's order.
+            long aBadge = Convert.ToInt64(a.FD_BADGE);
+            long bBadge = Convert.ToInt64(b.FD_BADGE);
+            aBadge = aBadge == 0 ? a.FD_PSN : aBadge;
+            bBadge = bBadge == 0 ? b.FD_PSN : bBadge;
+            return aBadge < bBadge ? -1 : 1;
         });
 
         foreach (SD_PRFT sd_sorted in prfts.Select(p => new SD_PRFT(p)).ToList())
