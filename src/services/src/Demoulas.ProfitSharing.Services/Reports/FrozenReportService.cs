@@ -436,6 +436,8 @@ public class FrozenReportService : IFrozenReportService
             TotalBeneficiariesAmount = details.Sum(d => d.CurrentBeneficiaryBalance),
             TotalBeneficiariesVestedAmount = details.Sum(d => d.CurrentBeneficiaryVestedBalance),
             TotalNonBeneficiaries = (short)details.Sum(d => d.EmployeeCount),
+            TotalNonBeneficiariesAmount = details.Sum(d => d.CurrentBalance - d.CurrentBeneficiaryBalance),
+            TotalNonBeneficiariesVestedAmount = details.Sum(d => d.VestedBalance - d.CurrentBeneficiaryVestedBalance),
             Response = new PaginatedResponseDto<BalanceByAgeDetail>(req)
             {
                 Results = details,

@@ -92,8 +92,8 @@ const BalanceByAgeGrid = () => {
                     {
                       age: "NON-BEN",
                       employeeCount: balanceByAgeFullTime?.totalNonBeneficiaries || 0,
-                      currentBalance: balanceByAgeFullTime?.balanceTotalAmount,
-                      vestedBalance: balanceByAgeFullTime?.vestedTotalAmount
+                       currentBalance: balanceByAgeFullTime?.totalNonBeneficiariesAmount,
+                      vestedBalance: balanceByAgeFullTime?.totalNonBeneficiariesVestedAmount
                     },
                     {
                       age: "TOTAL",
@@ -128,8 +128,8 @@ const BalanceByAgeGrid = () => {
                     {
                       age: "NON-BEN",
                       employeeCount: balanceByAgePartTime?.totalNonBeneficiaries || 0,
-                      currentBalance: balanceByAgePartTime?.balanceTotalAmount,
-                      vestedBalance: balanceByAgePartTime?.vestedTotalAmount
+                      currentBalance: balanceByAgePartTime?.totalNonBeneficiariesAmount,
+                      vestedBalance: balanceByAgePartTime?.totalNonBeneficiariesVestedAmount
                     },
                     {
                       age: "TOTAL",

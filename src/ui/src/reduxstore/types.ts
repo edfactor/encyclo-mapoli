@@ -355,6 +355,8 @@ export interface BalanceByAge {
   totalBeneficiariesAmount : number;
   totalBeneficiariesVestedAmount : number;
   totalNonBeneficiaries: number;
+  totalNonBeneficiariesAmount: number;
+  totalNonBeneficiariesVestedAmount : number;
   response: Paged<BalanceByAgeDetail>;
 }
 
