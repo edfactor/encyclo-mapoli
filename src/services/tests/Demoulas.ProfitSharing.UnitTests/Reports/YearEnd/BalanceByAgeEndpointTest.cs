@@ -47,8 +47,8 @@ public class BalanceByAgeEndpointTest : ApiTestBase<Program>
 
             
         string content = await response.Response.Content.ReadAsStringAsync();
-        content.Should().Contain("AGE,EMPS,AMOUNT");
-        content.Should().Contain("FORF TTL,,");
+        content.Should().Contain("AGE,EMPS,BALANCE,VESTED");
+        content.Should().Contain("BEN");
     }
 
     [Fact(DisplayName = "PS-502: Check to ensure unauthorized")]

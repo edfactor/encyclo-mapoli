@@ -56,10 +56,19 @@ public class BalanceByAgeEndpoint : EndpointWithCsvTotalsBase<FrozenReportsByAge
 
         await base.GenerateCsvContent(csvWriter, report, cancellationToken);
 
+        // Write out totals
         await csvWriter.NextRecordAsync();
-        csvWriter.WriteField("FORF TTL");
+        csvWriter.WriteField("BEN");
+        csvWriter.WriteField(report.TotalBeneficiaries);
+        csvWriter.WriteField(report.TotalBeneficiariesAmount);
+        csvWriter.WriteField(report.TotalBeneficiariesVestedAmount);
+
+        await csvWriter.NextRecordAsync();
         csvWriter.WriteField("");
-        csvWriter.WriteField(report.BalanceTotalAmount);
+        csvWriter.WriteField(report.TotalNonBeneficiaries);
+        csvWriter.WriteField(report.TotalNonBeneficiariesAmount);
+        csvWriter.WriteField(report.TotalNonBeneficiariesVestedAmount);
+
 
         await csvWriter.NextRecordAsync();
 
@@ -77,7 +86,8 @@ public class BalanceByAgeEndpoint : EndpointWithCsvTotalsBase<FrozenReportsByAge
         {
             Map(m => m.Age).Index(0).Name("AGE");
             Map(m => m.EmployeeCount).Index(1).Name("EMPS");
-            Map(m => m.CurrentBalance).Index(2).Name("AMOUNT");
+            Map(m => m.CurrentBalance).Index(2).Name("BALANCE");
+            Map(m => m.VestedBalance).Index(2).Name("VESTED");
         }
     }
 }
