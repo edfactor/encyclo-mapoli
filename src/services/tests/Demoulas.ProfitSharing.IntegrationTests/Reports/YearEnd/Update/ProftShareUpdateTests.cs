@@ -33,23 +33,6 @@ public class ProftShareUpdateTests
         AssertReportsAreEquivalent(expected, actual);
     }
 
-    private PAY444 createPay444(short profitYear)
-    {
-        OracleConnection connection = GetOracleConnection();
-
-        IConfigurationRoot configuration = new ConfigurationBuilder().AddUserSecrets<ProftShareUpdateTests>().Build();
-        string connectionString = configuration["ConnectionStrings:ProfitSharing"]!;
-        DbContextOptions<ProfitSharingReadOnlyDbContext> options =
-            new DbContextOptionsBuilder<ProfitSharingReadOnlyDbContext>().UseOracle(connectionString)
-                .EnableSensitiveDataLogging().Options;
-        ProfitSharingReadOnlyDbContext ctx = new ProfitSharingReadOnlyDbContext(options);
-
-        IProfitSharingDataContextFactory dbFactory = new DbFactory(ctx);
-
-        connection.Open();
-        PAY444 pay444 = new(connection, dbFactory, profitYear);
-        return pay444;
-    }
 
     [Fact]
     public void ReportWithUpdates()
@@ -122,6 +105,24 @@ public class ProftShareUpdateTests
     }
 #endif
 
+
+    private PAY444 createPay444(short profitYear)
+    {
+        OracleConnection connection = GetOracleConnection();
+
+        IConfigurationRoot configuration = new ConfigurationBuilder().AddUserSecrets<ProftShareUpdateTests>().Build();
+        string connectionString = configuration["ConnectionStrings:ProfitSharing"]!;
+        DbContextOptions<ProfitSharingReadOnlyDbContext> options =
+            new DbContextOptionsBuilder<ProfitSharingReadOnlyDbContext>().UseOracle(connectionString)
+                .EnableSensitiveDataLogging().Options;
+        ProfitSharingReadOnlyDbContext ctx = new ProfitSharingReadOnlyDbContext(options);
+
+        IProfitSharingDataContextFactory dbFactory = new DbFactory(ctx);
+
+        connection.Open();
+        PAY444 pay444 = new(connection, dbFactory, profitYear);
+        return pay444;
+    }
 
     private static OracleConnection GetOracleConnection()
     {

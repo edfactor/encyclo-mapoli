@@ -1,6 +1,6 @@
 ﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
-public class PAYPROF_REC
+public record PAYPROF_REC
 {
     public long PAYPROF_BADGE { get; set; } // PIC 9(7).
     public int PAYPROF_SSN { get; set; } // PIC 9(9).

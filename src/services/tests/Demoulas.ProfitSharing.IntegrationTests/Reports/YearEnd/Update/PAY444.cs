@@ -46,7 +46,7 @@ public class PAY444
 
     public PAY444(OracleConnection connection, IProfitSharingDataContextFactory dbContextFactory, short profitYear)
     {
-        payProfitDbHelper = new PayProfRecTableHelper(connection);
+        payProfitDbHelper = new PayProfRecTableHelper(connection, dbContextFactory, profitYear);
         payBenDbHelper = new PayBenDbHelper(connection,dbContextFactory);
         DemRecTableHelper = new DemRecTableHelper(connection, dem_rec);
         profitDetailTable = new ProfitDetailTableHelper(connection, dbContextFactory, profitYear);
