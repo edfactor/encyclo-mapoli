@@ -17,12 +17,14 @@ public class PAY444
     private readonly PayBenDbHelper payBenDbHelper;
 
     //private readonly PAYBEN1_REC payben1_rec = new();
-    private readonly PAYPROF_REC payprof_rec = new();
+    private readonly EmployeeFinancials payprof_rec = new();
     private readonly PayProfRecTableHelper payProfitDbHelper;
 
 
     // Where input values are stored
     private readonly POINT_VALUES point_values = new();
+    private readonly AdjustmentReport adjustmentReportValues = new AdjustmentReport();
+
 
     // Collection of modified payprofit data
     private readonly List<PRFT> prfts = new();
@@ -108,16 +110,16 @@ public class PAY444
 
     public void m201ProcessPayProfit()
     {
-        foreach (PAYPROF_REC pp in payProfitDbHelper.rows)
+        foreach (EmployeeFinancials pp in payProfitDbHelper.rows)
         {
             ws_compute_totals = new WS_COMPUTE_TOTALS();
             ws_payprofit = new WS_PAYPROFIT();
-            ws_payprofit.WS_PS_AMT = ws_payprofit.WS_PS_AMT + pp.PY_PS_AMT;
-            ws_payprofit.WS_PROF_POINTS = ws_payprofit.WS_PROF_POINTS + pp.PY_PROF_POINTS;
+            ws_payprofit.WS_PS_AMT = ws_payprofit.WS_PS_AMT + pp.CurrentAmount;
+            ws_payprofit.WS_PROF_POINTS = ws_payprofit.WS_PROF_POINTS + pp.PointsEarned;
 
-            HOLD_SSN = pp.PAYPROF_SSN;
-            holdBadge = pp.PAYPROF_BADGE;
-            payprof_rec.PAYPROF_BADGE = pp.PAYPROF_BADGE;
+            HOLD_SSN = pp.Ssn;
+            holdBadge = pp.EmployeeId;
+            payprof_rec.EmployeeId = pp.EmployeeId;
 
             m210PayprofitComputation();
         }
@@ -146,22 +148,22 @@ public class PAY444
         PAYPROFIT_FILE_STATUS = READ_KEY_PAYPROFIT(payprof_rec);
         if (PAYPROFIT_FILE_STATUS != "00")
         {
-            throw new IOException($"{payprof_rec.PAYPROF_BADGE} = INVALID PAYPROFIT RECORD NOT UPDATED");
+            throw new IOException($"{payprof_rec.EmployeeId} = INVALID PAYPROFIT RECORD NOT UPDATED");
         }
 
         //* If an employee has an ETVA amount and no years on the plan, employee is a
         //* beneficiary and should get earnings on the etva amt(8 record)
-        if (payprof_rec.PY_PROF_NEWEMP == 0)
+        if (payprof_rec.EmployeeTypeId == 0)
         {
-            if (payprof_rec.PY_PS_ETVA > 0 && payprof_rec.PY_PS_AMT == 0)
+            if (payprof_rec.EtvaAfterVestingRules > 0 && payprof_rec.CurrentAmount == 0)
             {
-                payprof_rec.PY_PROF_NEWEMP = 2;
+                payprof_rec.EmployeeTypeId = 2;
             }
         }
 
-        if (payprof_rec.PY_PS_ENROLLED > 0 ||
-            payprof_rec.PY_PROF_NEWEMP > 0 ||
-            ws_payprofit.WS_PS_AMT > 0 || payprof_rec.PY_PS_YEARS > 0)
+        if (payprof_rec.EnrolledId > 0 ||
+            payprof_rec.EmployeeTypeId > 0 ||
+            ws_payprofit.WS_PS_AMT > 0 || payprof_rec.YearsInPlan > 0)
         {
         }
         else
@@ -202,10 +204,10 @@ public class PAY444
 
         l210_CONTINUE:
 
-        intermediate_values.WS_FD_BADGE = payprof_rec.PAYPROF_BADGE;
+        intermediate_values.WS_FD_BADGE = payprof_rec.EmployeeId;
         intermediate_values.WS_FD_NAME = payprof_rec.Name;
-        intermediate_values.WS_FD_SSN = payprof_rec.PAYPROF_SSN;
-        intermediate_values.WS_FD_PSN = payprof_rec.PAYPROF_BADGE;
+        intermediate_values.WS_FD_SSN = payprof_rec.Ssn;
+        intermediate_values.WS_FD_PSN = payprof_rec.EmployeeId;
 
         m250ComputeEarnings();
 
@@ -215,16 +217,16 @@ public class PAY444
         intermediate_values.WS_FD_DIST1 = DIST_TOTAL;
         intermediate_values.WS_FD_MIL = ws_payprofit.WS_PROF_MIL;
         intermediate_values.WS_FD_CAF = ws_payprofit.WS_PROF_CAF;
-        intermediate_values.WS_FD_NEWEMP = payprof_rec.PY_PROF_NEWEMP;
+        intermediate_values.WS_FD_NEWEMP = payprof_rec.EmployeeTypeId;
         intermediate_values.WS_FD_POINTS = ws_payprofit.WS_PROF_POINTS;
         intermediate_values.WS_FD_POINTS_EARN = ws_compute_totals.WS_EARN_POINTS;
         intermediate_values.WS_FD_CONT = ws_payprofit.WS_PROF_CONT;
         intermediate_values.WS_FD_FORF = ws_payprofit.WS_PROF_FORF;
         intermediate_values.WS_FD_FORF = intermediate_values.WS_FD_FORF - FORFEIT_TOTAL;
-        intermediate_values.WS_FD_EARN = payprof_rec.PY_PROF_EARN;
-        intermediate_values.WS_FD_EARN += payprof_rec.PY_PROF_ETVA;
-        intermediate_values.WS_FD_EARN2 = payprof_rec.PY_PROF_EARN2;
-        intermediate_values.WS_FD_EARN2 += payprof_rec.PY_PROF_ETVA2;
+        intermediate_values.WS_FD_EARN = payprof_rec.Earnings;
+        intermediate_values.WS_FD_EARN += payprof_rec.EarningsOnEtva;
+        intermediate_values.WS_FD_EARN2 = payprof_rec.SecondaryEarnings;
+        intermediate_values.WS_FD_EARN2 += payprof_rec.SecondaryEtvaEarnings;
 
         ws_maxcont_totals.WS_MAX = ws_payprofit.WS_PROF_CONT + ws_payprofit.WS_PROF_MIL + ws_payprofit.WS_PROF_FORF;
 
@@ -255,25 +257,25 @@ public class PAY444
         return Math.Round(v, 2, MidpointRounding.AwayFromZero);
     }
 
-    private string? READ_KEY_PAYPROFIT(PAYPROF_REC payprof_rec)
+    private string? READ_KEY_PAYPROFIT(EmployeeFinancials payprof_rec)
     {
-        PAYPROF_REC one = payProfitDbHelper.findByBadge(payprof_rec.PAYPROF_BADGE);
+        EmployeeFinancials one = payProfitDbHelper.findByBadge(payprof_rec.EmployeeId);
 
         payprof_rec.Name = one.Name;
-        payprof_rec.PAYPROF_BADGE = one.PAYPROF_BADGE;
-        payprof_rec.PAYPROF_SSN = one.PAYPROF_SSN;
-        payprof_rec.PY_PS_ENROLLED = one.PY_PS_ENROLLED;
-        payprof_rec.PY_PS_YEARS = one.PY_PS_YEARS;
-        payprof_rec.PY_PS_AMT = one.PY_PS_AMT;
-        payprof_rec.PY_PROF_NEWEMP = one.PY_PROF_NEWEMP;
-        payprof_rec.PY_PROF_POINTS = one.PY_PROF_POINTS;
-        payprof_rec.PY_PROF_CONT = one.PY_PROF_CONT;
-        payprof_rec.PY_PROF_FORF = one.PY_PROF_FORF;
-        payprof_rec.PY_PROF_EARN = one.PY_PROF_EARN;
-        payprof_rec.PY_PS_ETVA = one.PY_PS_ETVA;
-        payprof_rec.PY_PROF_ETVA = one.PY_PROF_ETVA;
-        payprof_rec.PY_PROF_EARN2 = one.PY_PROF_EARN2;
-        payprof_rec.PY_PROF_ETVA2 = one.PY_PROF_ETVA2;
+        payprof_rec.EmployeeId = one.EmployeeId;
+        payprof_rec.Ssn = one.Ssn;
+        payprof_rec.EnrolledId = one.EnrolledId;
+        payprof_rec.YearsInPlan = one.YearsInPlan;
+        payprof_rec.CurrentAmount = one.CurrentAmount;
+        payprof_rec.EmployeeTypeId = one.EmployeeTypeId;
+        payprof_rec.PointsEarned = one.PointsEarned;
+        payprof_rec.Contributions = one.Contributions;
+        payprof_rec.IncomeForfeiture = one.IncomeForfeiture;
+        payprof_rec.Earnings = one.Earnings;
+        payprof_rec.EtvaAfterVestingRules = one.EtvaAfterVestingRules;
+        payprof_rec.EarningsOnEtva = one.EarningsOnEtva;
+        payprof_rec.SecondaryEarnings = one.SecondaryEarnings;
+        payprof_rec.SecondaryEtvaEarnings = one.SecondaryEtvaEarnings;
 
         return "00";
     }
@@ -294,14 +296,14 @@ public class PAY444
 
         intermediate_values = new INTERMEDIATE_VALUES();
 
-        payprof_rec.PAYPROF_SSN = payben_rec.Ssn;
+        payprof_rec.Ssn = payben_rec.Ssn;
 
         ws_payprofit.WS_PS_AMT = payben_rec.CurrentAmount;
 
         ws_compute_totals.WS_POINTS_DOLLARS = 0m;
         ws_compute_totals.WS_EARNINGS_BALANCE = 0m;
         ws_compute_totals.WS_EARN_POINTS = 0;
-        payprof_rec.PAYPROF_BADGE = 0;
+        payprof_rec.EmployeeId = 0;
 
         m500GetDbInfo();
 
@@ -327,14 +329,14 @@ public class PAY444
 
         if (ALLOCATION_TOTAL != 0)
         {
-            payprof_rec.PY_PROF_NEWEMP = 2;
-            if (payprof_rec.PY_PROF_ETVA == 0)
+            payprof_rec.EmployeeTypeId = 2;
+            if (payprof_rec.EarningsOnEtva == 0)
             {
-                payprof_rec.PY_PROF_ETVA = 0.01m;
+                payprof_rec.EarningsOnEtva = 0.01m;
             }
         }
 
-        payprof_rec.PAYPROF_BADGE = 0;
+        payprof_rec.EmployeeId = 0;
         m250ComputeEarnings();
 
         intermediate_values.WS_FD_BADGE = 0;
@@ -394,10 +396,9 @@ public class PAY444
 
         if (point_values.PV_ADJUST_BADGE > 0 && point_values.PV_ADJUST_BADGE == holdBadge)
         {
-            point_values.SV_SSN = HOLD_SSN;
-            point_values.SV_CONT_AMT = ws_compute_totals.WS_CONT_AMT;
+            adjustmentReportValues.SV_CONT_AMT = ws_compute_totals.WS_CONT_AMT;
             ws_compute_totals.WS_CONT_AMT += point_values.PV_ADJ_CONTRIB;
-            point_values.SV_CONT_ADJUSTED = ws_compute_totals.WS_CONT_AMT;
+            adjustmentReportValues.SV_CONT_ADJUSTED = ws_compute_totals.WS_CONT_AMT;
         }
 
         ws_payprofit.WS_PROF_CONT = ws_compute_totals.WS_CONT_AMT;
@@ -409,9 +410,9 @@ public class PAY444
         ws_compute_totals.WS_FORF_AMT = Round2(point_values.PV_FORF_01 * ws_payprofit.WS_PROF_POINTS);
         if (point_values.PV_ADJUST_BADGE > 0 && point_values.PV_ADJUST_BADGE == holdBadge)
         {
-            point_values.SV_FORF_AMT = ws_compute_totals.WS_FORF_AMT;
+            adjustmentReportValues.SV_FORF_AMT = ws_compute_totals.WS_FORF_AMT;
             ws_compute_totals.WS_FORF_AMT += point_values.PV_ADJ_FORFEIT;
-            point_values.SV_FORF_ADJUSTED = ws_compute_totals.WS_FORF_AMT;
+            adjustmentReportValues.SV_FORF_ADJUSTED = ws_compute_totals.WS_FORF_AMT;
         }
 
         ws_payprofit.WS_PROF_FORF = ws_compute_totals.WS_FORF_AMT;
@@ -427,10 +428,10 @@ public class PAY444
             if (ws_compute_totals.WS_EARN_POINTS <= 0)
             {
                 ws_compute_totals.WS_EARN_POINTS = 0;
-                payprof_rec.PY_PROF_EARN = 0;
+                payprof_rec.Earnings = 0;
                 ws_compute_totals.WS_EARN_AMT = 0;
                 payben_rec.Earnings = 0;
-                payprof_rec.PY_PROF_EARN2 = 0;
+                payprof_rec.SecondaryEarnings = 0;
                 ws_compute_totals.WS_EARN2_AMT = 0;
                 payben_rec.SecondaryEarnings = 0;
             }
@@ -441,17 +442,17 @@ public class PAY444
             ws_compute_totals.WS_EARN_AMT = Round2(point_values.PV_EARN_01 * ws_compute_totals.WS_EARN_POINTS);
             if (point_values.PV_ADJUST_BADGE > 0 && point_values.PV_ADJUST_BADGE == holdBadge)
             {
-                point_values.SV_EARN_AMT = ws_compute_totals.WS_EARN_AMT;
+                adjustmentReportValues.SV_EARN_AMT = ws_compute_totals.WS_EARN_AMT;
                 ws_compute_totals.WS_EARN_AMT += point_values.PV_ADJ_EARN;
-                point_values.SV_EARN_ADJUSTED = ws_compute_totals.WS_EARN_AMT;
+                adjustmentReportValues.SV_EARN_ADJUSTED = ws_compute_totals.WS_EARN_AMT;
             }
 
             ws_compute_totals.WS_EARN2_AMT = Round2(point_values.PV_EARN2_01 * ws_compute_totals.WS_EARN_POINTS);
             if (point_values.PV_ADJUST_BADGE2 > 0 && point_values.PV_ADJUST_BADGE2 == holdBadge)
             {
-                point_values.SV_EARN2_AMT = ws_compute_totals.WS_EARN2_AMT;
+                adjustmentReportValues.SV_EARN2_AMT = ws_compute_totals.WS_EARN2_AMT;
                 ws_compute_totals.WS_EARN2_AMT += point_values.PV_ADJ_EARN2;
-                point_values.SV_EARN2_ADJUSTED = ws_compute_totals.WS_EARN2_AMT;
+                adjustmentReportValues.SV_EARN2_ADJUSTED = ws_compute_totals.WS_EARN2_AMT;
             }
         }
 
@@ -464,15 +465,15 @@ public class PAY444
         //* PY - PS - YEARS < 6.
 
         WS_PY_PS_ETVA = 0;
-        if (payprof_rec.PY_PS_ETVA > 0)
+        if (payprof_rec.EtvaAfterVestingRules > 0)
         {
-            if (payprof_rec.PY_PS_YEARS < 6)
+            if (payprof_rec.YearsInPlan < 6)
             {
-                WS_PY_PS_ETVA = payprof_rec.PY_PS_ETVA - ws_payprofit.WS_PROF_CAF;
+                WS_PY_PS_ETVA = payprof_rec.EtvaAfterVestingRules - ws_payprofit.WS_PROF_CAF;
             }
             else
             {
-                payprof_rec.PY_PS_ETVA = WS_PY_PS_ETVA;
+                payprof_rec.EtvaAfterVestingRules = WS_PY_PS_ETVA;
             }
         }
 
@@ -481,12 +482,12 @@ public class PAY444
         }
         else
         {
-            payprof_rec.PY_PROF_EARN = ws_compute_totals.WS_EARN_AMT;
-            payprof_rec.PY_PROF_EARN2 = 0m;
+            payprof_rec.Earnings = ws_compute_totals.WS_EARN_AMT;
+            payprof_rec.SecondaryEarnings = 0m;
 
-            payprof_rec.PY_PROF_ETVA = 0m;
+            payprof_rec.EarningsOnEtva = 0m;
             payben_rec.Earnings = 0m;
-            payprof_rec.PY_PROF_ETVA2 = 0m;
+            payprof_rec.SecondaryEtvaEarnings = 0m;
             payben_rec.SecondaryEarnings = 0m;
 
             goto l250_EXIT;
@@ -502,8 +503,8 @@ public class PAY444
             ws_compute_totals.WS_EARN_AMT = ws_compute_totals.WS_EARN_AMT - WS_ETVA_AMT;
 
             // Sets Earn and ETVA amounts
-            payprof_rec.PY_PROF_EARN = ws_compute_totals.WS_EARN_AMT;
-            payprof_rec.PY_PROF_ETVA = WS_ETVA_AMT;
+            payprof_rec.Earnings = ws_compute_totals.WS_EARN_AMT;
+            payprof_rec.EarningsOnEtva = WS_ETVA_AMT;
         }
 
         if (WS_REWRITE_WHICH == 2)
@@ -516,8 +517,8 @@ public class PAY444
         {
             WS_ETVA2_AMT = Round2(ws_compute_totals.WS_EARN2_AMT * WS_ETVA_PERCENT);
             ws_compute_totals.WS_EARN2_AMT -= WS_ETVA2_AMT;
-            payprof_rec.PY_PROF_EARN2 = ws_compute_totals.WS_EARN2_AMT;
-            payprof_rec.PY_PROF_ETVA2 = WS_ETVA2_AMT;
+            payprof_rec.SecondaryEarnings = ws_compute_totals.WS_EARN2_AMT;
+            payprof_rec.SecondaryEtvaEarnings = WS_ETVA2_AMT;
             if (WS_REWRITE_WHICH == 2)
             {
                 payben_rec.SecondaryEarnings = WS_ETVA2_AMT;
@@ -555,8 +556,8 @@ public class PAY444
 
     public void m400LoadPayprofit()
     {
-        payprof_rec.PY_PROF_CONT = ws_payprofit.WS_PROF_CONT;
-        payprof_rec.PY_PROF_FORF = ws_payprofit.WS_PROF_FORF;
+        payprof_rec.Contributions = ws_payprofit.WS_PROF_CONT;
+        payprof_rec.IncomeForfeiture = ws_payprofit.WS_PROF_FORF;
     }
 
     public void m410LoadProfit()
@@ -587,19 +588,19 @@ public class PAY444
 
     public void m420RewritePayprofit()
     {
-        if (payprof_rec.PY_PROF_NEWEMP == 2)
+        if (payprof_rec.EmployeeTypeId == 2)
         {
-            payprof_rec.PY_PROF_NEWEMP = 0;
+            payprof_rec.EmployeeTypeId = 0;
         }
 
         PAYPROFIT_FILE_STATUS = REWRITE_KEY_PAYPROFIT(payprof_rec);
         if (PAYPROFIT_FILE_STATUS != "00")
         {
-            throw new IOException($"BAD REWRITE OF PAYPROFIT EMPLOYEE BADGE # {payprof_rec.PAYPROF_BADGE}");
+            throw new IOException($"BAD REWRITE OF PAYPROFIT EMPLOYEE BADGE # {payprof_rec.EmployeeId}");
         }
     }
 
-    private string? REWRITE_KEY_PAYPROFIT(PAYPROF_REC payprof_rec)
+    private string? REWRITE_KEY_PAYPROFIT(EmployeeFinancials payprof_rec)
     {
         throw new NotImplementedException();
     }
@@ -632,7 +633,7 @@ public class PAY444
         ALLOCATION_TOTAL = 0m;
         PALLOCATION_TOTAL = 0m;
 
-        m510GetDetails(payprof_rec.PAYPROF_SSN);
+        m510GetDetails(payprof_rec.Ssn);
     }
 
     public void m510GetDetails(int ssn)
@@ -1009,10 +1010,10 @@ public class PAY444
         PRINT_ADJ_LINE1 print_adj_line1 = new();
         print_adj_line1.PL_ADJUST_BADGE = point_values.PV_ADJUST_BADGE;
         print_adj_line1.PL_ADJ_DESC = "INITIAL";
-        print_adj_line1.PL_CONT_AMT = point_values.SV_CONT_AMT;
-        print_adj_line1.PL_FORF_AMT = point_values.SV_FORF_AMT;
-        print_adj_line1.PL_EARN_AMT = point_values.SV_EARN_AMT;
-        print_adj_line1.PL_EARN2_AMT = point_values.SV_EARN2_AMT;
+        print_adj_line1.PL_CONT_AMT = adjustmentReportValues.SV_CONT_AMT;
+        print_adj_line1.PL_FORF_AMT = adjustmentReportValues.SV_FORF_AMT;
+        print_adj_line1.PL_EARN_AMT = adjustmentReportValues.SV_EARN_AMT;
+        print_adj_line1.PL_EARN2_AMT = adjustmentReportValues.SV_EARN2_AMT;
         WRITE2_advance2(print_adj_line1);
 
         print_adj_line1.PL_ADJUST_BADGE = 0;
@@ -1024,16 +1025,16 @@ public class PAY444
         WRITE2_advance2(print_adj_line1);
 
         print_adj_line1.PL_ADJ_DESC = "FINAL";
-        print_adj_line1.PL_CONT_AMT = point_values.SV_CONT_ADJUSTED;
-        print_adj_line1.PL_FORF_AMT = point_values.SV_FORF_ADJUSTED;
-        print_adj_line1.PL_EARN_AMT = point_values.SV_EARN_ADJUSTED;
-        print_adj_line1.PL_EARN2_AMT = point_values.SV_EARN2_ADJUSTED;
+        print_adj_line1.PL_CONT_AMT = adjustmentReportValues.SV_CONT_ADJUSTED;
+        print_adj_line1.PL_FORF_AMT = adjustmentReportValues.SV_FORF_ADJUSTED;
+        print_adj_line1.PL_EARN_AMT = adjustmentReportValues.SV_EARN_ADJUSTED;
+        print_adj_line1.PL_EARN2_AMT = adjustmentReportValues.SV_EARN2_ADJUSTED;
 
         WRITE2_advance2(print_adj_line1);
 
-        if (point_values.SV_FORF_AMT == 0 && point_values.SV_EARN_AMT == 0)
+        if (adjustmentReportValues.SV_FORF_AMT == 0 && adjustmentReportValues.SV_EARN_AMT == 0)
         {
-            WRITE2_advance2(print_adj_line1);
+            WRITE2_advance2("No adjustment - employee not found.");  
         }
     }
 

@@ -31,7 +31,7 @@ public class PayProfRecTableHelper
 
     }
 
-    private List<PAYPROF_REC> loadData2(IProfitSharingDataContextFactory dbContextFactory, short profitYear)
+    private List<EmployeeFinancials> loadData2(IProfitSharingDataContextFactory dbContextFactory, short profitYear)
     {
         TotalService totalService = new TotalService(null, null);
 
@@ -48,40 +48,40 @@ public class PayProfRecTableHelper
                 .Where(pp => pp.ProfitYear == profitYear - 1) 
                 .Include(pp => pp.Demographic)
                 .OrderBy(pp => pp.Demographic.EmployeeId)
-                .Select(pp => new PAYPROF_REC
+                .Select(pp => new EmployeeFinancials
                 {
-                    PAYPROF_BADGE = pp.Demographic.EmployeeId,
-                    PAYPROF_SSN = pp.Demographic.Ssn,
-                    PY_PS_ENROLLED = pp.EnrollmentId,
-                    PY_PS_YEARS = pp.YearsInPlan,
-                    PY_PS_AMT = 0m,
-                    PY_PROF_NEWEMP = pp.EmployeeTypeId,
-                    PY_PROF_POINTS = (long)pp.PointsEarned, // PointsEarned should be a whole number
-                    PY_PROF_CONT = 0,
-                    PY_PROF_FORF = 0,
-                    PY_PROF_EARN = 0,
-                    PY_PS_ETVA = 0,
-                    PY_PROF_ETVA = 0,
-                    PY_PROF_EARN2 = 0,
-                    PY_PROF_ETVA2 = 0
+                    EmployeeId = pp.Demographic.EmployeeId,
+                    Ssn = pp.Demographic.Ssn,
+                    EnrolledId = pp.EnrollmentId,
+                    YearsInPlan = pp.YearsInPlan,
+                    CurrentAmount = 0m,
+                    EmployeeTypeId = pp.EmployeeTypeId,
+                    PointsEarned = (long)pp.PointsEarned, // PointsEarned should be a whole number
+                    Contributions = 0,
+                    IncomeForfeiture = 0,
+                    Earnings = 0,
+                    EtvaAfterVestingRules = 0,
+                    EarningsOnEtva = 0,
+                    SecondaryEarnings = 0,
+                    SecondaryEtvaEarnings = 0
                 }).ToListAsync();
         }).GetAwaiter().GetResult();
 
         foreach (var pp in pps)
         {
-            pp.PY_PS_AMT = bals[pp.PAYPROF_SSN].CurrentBalance;
+            pp.CurrentAmount = bals[pp.Ssn].CurrentBalance;
         }
 
         return pps;
 
     }
 
-    public List<PAYPROF_REC> rows { get; set; } = new();
+    public List<EmployeeFinancials> rows { get; set; } = new();
 
 
     public void loadData(OracleConnection connection)
     {
-        List<PAYPROF_REC> payProfRecords = new();
+        List<EmployeeFinancials> payProfRecords = new();
         string query = "SELECT * FROM PROFITSHARE.PAYPROFIT pp join PROFITSHARE.Demographics d on d.dem_badge = pp.PAYPROF_BADGE order by PAYPROF_BADGE";
 
         using (OracleCommand command = new(query, connection))
@@ -90,23 +90,23 @@ public class PayProfRecTableHelper
             {
                 while (reader.Read())
                 {
-                    PAYPROF_REC record = new()
+                    EmployeeFinancials record = new()
                     {
                         Name = reader.GetString(reader.GetOrdinal("PY_NAM")),
-                        PAYPROF_BADGE = reader.GetInt64(reader.GetOrdinal("PAYPROF_BADGE")),
-                        PAYPROF_SSN = reader.GetInt32(reader.GetOrdinal("PAYPROF_SSN")),
-                        PY_PS_ENROLLED = reader.GetInt64(reader.GetOrdinal("PY_PS_ENROLLED")),
-                        PY_PS_YEARS = reader.GetInt64(reader.GetOrdinal("PY_PS_YEARS")),
-                        PY_PS_AMT = reader.GetDecimal(reader.GetOrdinal("PY_PS_AMT")),
-                        PY_PS_ETVA = reader.GetDecimal(reader.GetOrdinal("PY_PS_ETVA")),
-                        PY_PROF_NEWEMP = reader.GetInt64(reader.GetOrdinal("PY_PROF_NEWEMP")),
-                        PY_PROF_POINTS = reader.GetInt64(reader.GetOrdinal("PY_PROF_POINTS")),
+                        EmployeeId = reader.GetInt64(reader.GetOrdinal("PAYPROF_BADGE")),
+                        Ssn = reader.GetInt32(reader.GetOrdinal("PAYPROF_SSN")),
+                        EnrolledId = reader.GetInt64(reader.GetOrdinal("PY_PS_ENROLLED")),
+                        YearsInPlan = reader.GetInt64(reader.GetOrdinal("PY_PS_YEARS")),
+                        CurrentAmount = reader.GetDecimal(reader.GetOrdinal("PY_PS_AMT")),
+                        EtvaAfterVestingRules = reader.GetDecimal(reader.GetOrdinal("PY_PS_ETVA")),
+                        EmployeeTypeId = reader.GetInt64(reader.GetOrdinal("PY_PROF_NEWEMP")),
+                        PointsEarned = reader.GetInt64(reader.GetOrdinal("PY_PROF_POINTS")),
 
-                        PY_PROF_ETVA = reader.GetDecimal(reader.GetOrdinal("PY_PROF_ETVA")), // Earnings on ETVA
+                        EarningsOnEtva = reader.GetDecimal(reader.GetOrdinal("PY_PROF_ETVA")), // Earnings on ETVA
 
-                        PY_PROF_EARN = 0m, // reader.GetDecimal(reader.GetOrdinal("PY_PROF_EARN")),
-                        PY_PROF_EARN2 = 0m, // reader.GetDecimal(reader.GetOrdinal("PY_PROF_EARN2")),
-                        PY_PROF_ETVA2 = 0m, //reader.GetDecimal(reader.GetOrdinal("PY_PROF_ETVA2"))
+                        Earnings = 0m, // reader.GetDecimal(reader.GetOrdinal("PY_PROF_EARN")),
+                        SecondaryEarnings = 0m, // reader.GetDecimal(reader.GetOrdinal("PY_PROF_EARN2")),
+                        SecondaryEtvaEarnings = 0m, //reader.GetDecimal(reader.GetOrdinal("PY_PROF_ETVA2"))
                     };
                     rows.Add(record);
                 }
@@ -114,13 +114,13 @@ public class PayProfRecTableHelper
         }
     }
 
-    public PAYPROF_REC findByBadge(long payprofBadge)
+    public EmployeeFinancials findByBadge(long payprofBadge)
     {
-        return rows.Where(r => r.PAYPROF_BADGE == payprofBadge).First();
+        return rows.Where(r => r.EmployeeId == payprofBadge).First();
     }
 
     public bool HasRecordBySsn(long payprofSsn)
     {
-        return rows.Where(r => r.PAYPROF_SSN == payprofSsn).Count() != 0;
+        return rows.Where(r => r.Ssn == payprofSsn).Count() != 0;
     }
 }
