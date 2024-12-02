@@ -11,7 +11,7 @@ public class PAY444
     private readonly Counters _counters = new();
 
     // Data records
-    private readonly PAYBEN_REC payben_rec = new();
+    private readonly BeneficiaryFinancials payben_rec = new();
 
     // Data Helpers
     private readonly PayBenDbHelper payBenDbHelper;
@@ -57,7 +57,6 @@ public class PAY444
     public long HOLD_PAYSSN { get; set; }
 
     public long WS_REWRITE_WHICH { get; set; }
-    public long WS_ERROR { get; set; }
     public long WS_CONTR_MAX { get; set; }
     public decimal WS_PY_PS_ETVA { get; set; }
     public decimal WS_ETVA_PERCENT { get; set; }
@@ -127,18 +126,18 @@ public class PAY444
 
     private void m202ProcessPayBen()
     {
-        foreach (PAYBEN1_REC bene in payBenDbHelper.rows)
+        foreach (var bene in payBenDbHelper.rows)
         {
-            HOLD_PAYSSN = bene.PYBEN_PAYSSN1;
-            // is already handled as an employee
-            if (payProfitDbHelper.HasRecordBySsn(bene.PYBEN_PAYSSN1))
+            HOLD_PAYSSN = bene.Ssn;
+            // is already handled as an employee?
+            if (payProfitDbHelper.HasRecordBySsn(bene.Ssn))
             {
                 continue;
             }
 
             ws_compute_totals = new WS_COMPUTE_TOTALS();
             ws_payprofit = new WS_PAYPROFIT();
-            m220PaybenComputation(bene.PYBEN_PSN1);
+            m220PaybenComputation(bene.Psn);
         }
     }
 
@@ -283,7 +282,7 @@ public class PAY444
     public void m220PaybenComputation(long psn)
     {
         // <same key> PSKEY = payben1_rec.PYBEN_PSN1;
-        payben_rec.PYBEN_PSN = psn;
+        payben_rec.Psn = psn;
         PAYBEN_FILE_STATUS = READ_KEY_PAYBEN(payben_rec);
         if (PAYBEN_FILE_STATUS != "00")
         {
@@ -295,9 +294,9 @@ public class PAY444
 
         intermediate_values = new INTERMEDIATE_VALUES();
 
-        payprof_rec.PAYPROF_SSN = payben_rec.PYBEN_PAYSSN;
+        payprof_rec.PAYPROF_SSN = payben_rec.Ssn;
 
-        ws_payprofit.WS_PS_AMT = payben_rec.PYBEN_PSAMT;
+        ws_payprofit.WS_PS_AMT = payben_rec.CurrentAmount;
 
         ws_compute_totals.WS_POINTS_DOLLARS = 0m;
         ws_compute_totals.WS_EARNINGS_BALANCE = 0m;
@@ -339,9 +338,9 @@ public class PAY444
         m250ComputeEarnings();
 
         intermediate_values.WS_FD_BADGE = 0;
-        intermediate_values.WS_FD_NAME = payben_rec.PYBEN_NAME;
-        intermediate_values.WS_FD_SSN = payben_rec.PYBEN_PAYSSN;
-        intermediate_values.WS_FD_PSN = payben_rec.PYBEN_PSN;
+        intermediate_values.WS_FD_NAME = payben_rec.Name;
+        intermediate_values.WS_FD_SSN = payben_rec.Ssn;
+        intermediate_values.WS_FD_PSN = payben_rec.Psn;
         intermediate_values.WS_FD_DIST1 = DIST_TOTAL;
         intermediate_values.WS_FD_MIL = 0;
         intermediate_values.WS_FD_NEWEMP = 0;
@@ -365,8 +364,8 @@ public class PAY444
         intermediate_values.WS_FD_POINTS_EARN = ws_compute_totals.WS_EARN_POINTS;
         intermediate_values.WS_FD_FORF = intermediate_values.WS_FD_FORF - FORFEIT_TOTAL;
 
-        intermediate_values.WS_FD_EARN = payben_rec.PYBEN_PROF_EARN;
-        intermediate_values.WS_FD_EARN2 = payben_rec.PYBEN_PROF_EARN2;
+        intermediate_values.WS_FD_EARN = payben_rec.Earnings;
+        intermediate_values.WS_FD_EARN2 = payben_rec.SecondaryEarnings;
 
         ws_maxcont_totals.WS_MAX = ws_payprofit.WS_PROF_CONT + ws_payprofit.WS_PROF_MIL + ws_payprofit.WS_PROF_FORF;
 
@@ -383,7 +382,7 @@ public class PAY444
         }
     }
 
-    private string? READ_KEY_PAYBEN(PAYBEN_REC payben_rec)
+    private string? READ_KEY_PAYBEN(BeneficiaryFinancials payben_rec)
     {
         return payBenDbHelper.findByPSN(payben_rec);
     }
@@ -430,10 +429,10 @@ public class PAY444
                 ws_compute_totals.WS_EARN_POINTS = 0;
                 payprof_rec.PY_PROF_EARN = 0;
                 ws_compute_totals.WS_EARN_AMT = 0;
-                payben_rec.PYBEN_PROF_EARN = 0;
+                payben_rec.Earnings = 0;
                 payprof_rec.PY_PROF_EARN2 = 0;
                 ws_compute_totals.WS_EARN2_AMT = 0;
-                payben_rec.PYBEN_PROF_EARN2 = 0;
+                payben_rec.SecondaryEarnings = 0;
             }
         }
 
@@ -486,9 +485,9 @@ public class PAY444
             payprof_rec.PY_PROF_EARN2 = 0m;
 
             payprof_rec.PY_PROF_ETVA = 0m;
-            payben_rec.PYBEN_PROF_EARN = 0m;
+            payben_rec.Earnings = 0m;
             payprof_rec.PY_PROF_ETVA2 = 0m;
-            payben_rec.PYBEN_PROF_EARN2 = 0m;
+            payben_rec.SecondaryEarnings = 0m;
 
             goto l250_EXIT;
         }
@@ -509,8 +508,8 @@ public class PAY444
 
         if (WS_REWRITE_WHICH == 2)
         {
-            payben_rec.PYBEN_PROF_EARN = 0m;
-            payben_rec.PYBEN_PROF_EARN = ws_compute_totals.WS_EARN_AMT;
+            payben_rec.Earnings = 0m;
+            payben_rec.Earnings = ws_compute_totals.WS_EARN_AMT;
         }
 
         if (point_values.PV_EARN2_01 != 0m) // Secondary Earnings
@@ -521,7 +520,7 @@ public class PAY444
             payprof_rec.PY_PROF_ETVA2 = WS_ETVA2_AMT;
             if (WS_REWRITE_WHICH == 2)
             {
-                payben_rec.PYBEN_PROF_EARN2 = WS_ETVA2_AMT;
+                payben_rec.SecondaryEarnings = WS_ETVA2_AMT;
             }
         }
 
@@ -608,7 +607,7 @@ public class PAY444
 
     public void m430RewritePayben()
     {
-        if (payben_rec.PYBEN_PROF_EARN == 0 && payben_rec.PYBEN_PROF_EARN2 == 0)
+        if (payben_rec.Earnings == 0 && payben_rec.SecondaryEarnings == 0)
         {
             return; // humm, dont save the zeros?
         }
@@ -616,11 +615,11 @@ public class PAY444
         PAYBEN_FILE_STATUS = REWRITE_KEY_PAYBEN(payben_rec);
         if (PAYBEN_FILE_STATUS != "00")
         {
-            throw new IOException($"BAD REWRITE OF PAYBEN EMPLOYEE PSN # {payben_rec.PYBEN_PSN}");
+            throw new IOException($"BAD REWRITE OF PAYBEN EMPLOYEE PSN # {payben_rec.Psn}");
         }
     }
 
-    private string? REWRITE_KEY_PAYBEN(PAYBEN_REC payben_rec)
+    private string? REWRITE_KEY_PAYBEN(BeneficiaryFinancials payben_rec)
     {
         throw new NotImplementedException();
     }
@@ -774,7 +773,7 @@ public class PAY444
             }
             else if (sd_prft.SD_NEWEMP == 2)
             {
-                payben_rec.PYBEN_PAYSSN = sd_prft.SD_SSN;
+                payben_rec.Ssn = sd_prft.SD_SSN;
                 PAYBEN_FILE_STATUS = READ_ALT_KEY_PAYBEN(payben_rec);
                 if (PAYBEN_FILE_STATUS == "00")
                 {
@@ -1049,7 +1048,7 @@ public class PAY444
     }
 
 
-    private string? READ_ALT_KEY_PAYBEN(PAYBEN_REC payben_rec)
+    private string? READ_ALT_KEY_PAYBEN(BeneficiaryFinancials payben_rec)
     {
         throw new NotImplementedException();
     }
