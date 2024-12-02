@@ -6,6 +6,8 @@ public sealed record BalanceByAgeDetail
     public required decimal CurrentBalance { get; init; }
     public int BeneficiaryCount { get; set; }
     public decimal VestedBalance { get; set; }
+    public decimal CurrentBeneficiaryBalance { get; set; }
+    public decimal CurrentBeneficiaryVestedBalance { get; set; }
 
     public static BalanceByAgeDetail ResponseExample()
     {

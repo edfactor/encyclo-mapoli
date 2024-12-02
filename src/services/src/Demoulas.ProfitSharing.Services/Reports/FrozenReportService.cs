@@ -411,11 +411,13 @@ public class FrozenReportService : IFrozenReportService
             {
                 Age = group.Age,
                 CurrentBalance = group.Entries.Sum(e => e.q.CurrentBalance),
+                CurrentBeneficiaryBalance = group.Entries.Sum(e => e.IsBeneficiary ? 0 : e.q.CurrentBalance),
+                CurrentBeneficiaryVestedBalance = group.Entries.Sum(e => e.IsBeneficiary ? 0 : e.q.VestedBalance),
                 VestedBalance = group.Entries.Sum(e => e.q.VestedBalance),
                 BeneficiaryCount = group.Entries.Count(e => e.IsBeneficiary),
                 EmployeeCount = group.Entries.Count(e => !e.IsBeneficiary)
             })
-            .Where(detail => detail.CurrentBalance > 0)
+            .Where(detail => (detail.CurrentBalance > 0 || detail.VestedBalance > 0))
             .OrderBy(e=> e.Age)
             .ToList();
 
@@ -431,6 +433,8 @@ public class FrozenReportService : IFrozenReportService
             VestedTotalAmount = details.Sum(d => d.VestedBalance),
             TotalMembers = (short)details.Sum(d => d.EmployeeCount + d.BeneficiaryCount),
             TotalBeneficiaries = (short)details.Sum(d => d.BeneficiaryCount),
+            TotalBeneficiariesAmount = details.Sum(d => d.CurrentBeneficiaryBalance),
+            TotalBeneficiariesVestedAmount = details.Sum(d => d.CurrentBeneficiaryVestedBalance),
             TotalNonBeneficiaries = (short)details.Sum(d => d.EmployeeCount),
             Response = new PaginatedResponseDto<BalanceByAgeDetail>(req)
             {

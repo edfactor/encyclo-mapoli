@@ -48,8 +48,20 @@ const BalanceByAgeGrid = () => {
                   rowData: balanceByAgeTotal?.response.results,
                   pinnedTopRowData: [
                     {
-                      age: "FORF  TTL",
-                      employeeCount: (balanceByAgeTotal?.totalMembers || 0),
+                      age: "BEN",
+                      employeeCount: balanceByAgeTotal?.totalBeneficiaries || 0,
+                      currentBalance: balanceByAgeTotal?.totalBeneficiariesAmount,
+                      vestedBalance: balanceByAgeTotal?.totalBeneficiariesVestedAmount
+                    },
+                    {
+                      age: "NON-BEN",
+                      employeeCount: balanceByAgeTotal?.totalNonBeneficiaries || 0,
+                      currentBalance: balanceByAgeTotal?.balanceTotalAmount,
+                      vestedBalance: balanceByAgeTotal?.vestedTotalAmount
+                    },
+                    {
+                      age: "TOTAL",
+                      employeeCount: balanceByAgeTotal?.totalMembers || 0,
                       currentBalance: balanceByAgeTotal?.balanceTotalAmount,
                       vestedBalance: balanceByAgeTotal?.vestedTotalAmount
                     }
@@ -72,10 +84,22 @@ const BalanceByAgeGrid = () => {
                   rowData: balanceByAgeFullTime?.response.results,
                   pinnedTopRowData: [
                     {
-                     age: "FORF  TTL",
-                      employeeCount: (balanceByAgeTotal?.totalMembers || 0),
-                     currentBalance: balanceByAgeTotal?.balanceTotalAmount,
-                      vestedBalance: balanceByAgeTotal?.vestedTotalAmount
+                      age: "BEN",
+                      employeeCount: balanceByAgeFullTime?.totalBeneficiaries || 0,
+                      currentBalance: balanceByAgeFullTime?.totalBeneficiariesAmount,
+                      vestedBalance: balanceByAgeFullTime?.totalBeneficiariesVestedAmount
+                    },
+                    {
+                      age: "NON-BEN",
+                      employeeCount: balanceByAgeFullTime?.totalNonBeneficiaries || 0,
+                      currentBalance: balanceByAgeFullTime?.balanceTotalAmount,
+                      vestedBalance: balanceByAgeFullTime?.vestedTotalAmount
+                    },
+                    {
+                      age: "TOTAL",
+                      employeeCount: balanceByAgeFullTime?.totalMembers || 0,
+                      currentBalance: balanceByAgeFullTime?.balanceTotalAmount,
+                      vestedBalance: balanceByAgeFullTime?.vestedTotalAmount
                     }
                   ],
                   columnDefs: [
@@ -96,10 +120,22 @@ const BalanceByAgeGrid = () => {
                   rowData: balanceByAgePartTime?.response.results,
                   pinnedTopRowData: [
                     {
-                     age: "FORF  TTL",
-                      employeeCount: (balanceByAgeTotal?.totalMembers || 0),
-                      currentBalance: balanceByAgeTotal?.balanceTotalAmount,
-                      vestedBalance: balanceByAgeTotal?.vestedTotalAmount
+                      age: "BEN",
+                      employeeCount: balanceByAgePartTime?.totalBeneficiaries || 0,
+                      currentBalance: balanceByAgePartTime?.totalBeneficiariesAmount,
+                      vestedBalance: balanceByAgePartTime?.totalBeneficiariesVestedAmount
+                    },
+                    {
+                      age: "NON-BEN",
+                      employeeCount: balanceByAgePartTime?.totalNonBeneficiaries || 0,
+                      currentBalance: balanceByAgePartTime?.balanceTotalAmount,
+                      vestedBalance: balanceByAgePartTime?.vestedTotalAmount
+                    },
+                    {
+                      age: "TOTAL",
+                      employeeCount: balanceByAgePartTime?.totalMembers || 0,
+                      currentBalance: balanceByAgePartTime?.balanceTotalAmount,
+                      vestedBalance: balanceByAgePartTime?.vestedTotalAmount
                     }
                   ],
                   columnDefs: [
