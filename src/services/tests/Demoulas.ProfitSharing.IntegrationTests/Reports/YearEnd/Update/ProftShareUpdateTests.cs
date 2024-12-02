@@ -27,7 +27,7 @@ public class ProftShareUpdateTests
         pay444.m015MainProcessing( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
         // Assert
-        string actual = CollectLines(pay444.outputLines);
+        string actual = CollectLines(pay444.reportLines);
         string expected = LoadExpectedReport(reportName);
 
         AssertReportsAreEquivalent(expected, actual);
@@ -49,7 +49,7 @@ public class ProftShareUpdateTests
 
         // Assert
         string expected = LoadExpectedReport(reportName);
-        string actual = CollectLines(pay444.outputLines);
+        string actual = CollectLines(pay444.reportLines);
 
         AssertReportsAreEquivalent(expected, actual);
     }
@@ -68,7 +68,7 @@ public class ProftShareUpdateTests
 
         // Assert
         string expected = LoadExpectedReport(reportName);
-        string actual = CollectLines(pay444.outputLines);
+        string actual = CollectLines(pay444.reportLines);
 
         AssertReportsAreEquivalent(expected, actual);
     }
