@@ -50,8 +50,8 @@ const BalanceByAgeGrid = () => {
                     {
                       age: "FORF  TTL",
                       employeeCount: (balanceByAgeTotal?.totalMembers || 0),
-                      amount: balanceByAgeTotal?.balanceTotalAmount,
-                      vested: balanceByAgeTotal?.vestedTotalAmount
+                      currentBalance: balanceByAgeTotal?.balanceTotalAmount,
+                      vestedBalance: balanceByAgeTotal?.vestedTotalAmount
                     }
                   ],
                   columnDefs: [
@@ -74,8 +74,8 @@ const BalanceByAgeGrid = () => {
                     {
                      age: "FORF  TTL",
                       employeeCount: (balanceByAgeTotal?.totalMembers || 0),
-                      amount: balanceByAgeTotal?.balanceTotalAmount,
-                      vested: balanceByAgeTotal?.vestedTotalAmount
+                     currentBalance: balanceByAgeTotal?.balanceTotalAmount,
+                      vestedBalance: balanceByAgeTotal?.vestedTotalAmount
                     }
                   ],
                   columnDefs: [
@@ -98,8 +98,8 @@ const BalanceByAgeGrid = () => {
                     {
                      age: "FORF  TTL",
                       employeeCount: (balanceByAgeTotal?.totalMembers || 0),
-                      amount: balanceByAgeTotal?.balanceTotalAmount,
-                      vested: balanceByAgeTotal?.vestedTotalAmount
+                      currentBalance: balanceByAgeTotal?.balanceTotalAmount,
+                      vestedBalance: balanceByAgeTotal?.vestedTotalAmount
                     }
                   ],
                   columnDefs: [
