@@ -82,7 +82,7 @@ public class PayProfRecTableHelper
     public void loadData(OracleConnection connection)
     {
         List<PAYPROF_REC> payProfRecords = new();
-        string query = "SELECT * FROM PROFITSHARE.PAYPROFIT order by PAYPROF_BADGE";
+        string query = "SELECT * FROM PROFITSHARE.PAYPROFIT pp join PROFITSHARE.Demographics d on d.dem_badge = pp.PAYPROF_BADGE order by PAYPROF_BADGE";
 
         using (OracleCommand command = new(query, connection))
         {
@@ -92,6 +92,7 @@ public class PayProfRecTableHelper
                 {
                     PAYPROF_REC record = new()
                     {
+                        Name = reader.GetString(reader.GetOrdinal("PY_NAM")),
                         PAYPROF_BADGE = reader.GetInt64(reader.GetOrdinal("PAYPROF_BADGE")),
                         PAYPROF_SSN = reader.GetInt32(reader.GetOrdinal("PAYPROF_SSN")),
                         PY_PS_ENROLLED = reader.GetInt64(reader.GetOrdinal("PY_PS_ENROLLED")),
@@ -101,7 +102,7 @@ public class PayProfRecTableHelper
                         PY_PROF_NEWEMP = reader.GetInt64(reader.GetOrdinal("PY_PROF_NEWEMP")),
                         PY_PROF_POINTS = reader.GetInt64(reader.GetOrdinal("PY_PROF_POINTS")),
 
-                        PY_PROF_ETVA = 0m, // reader.GetDecimal(reader.GetOrdinal("PY_PROF_ETVA")), // Earnings on ETVA
+                        PY_PROF_ETVA = reader.GetDecimal(reader.GetOrdinal("PY_PROF_ETVA")), // Earnings on ETVA
 
                         PY_PROF_EARN = 0m, // reader.GetDecimal(reader.GetOrdinal("PY_PROF_EARN")),
                         PY_PROF_EARN2 = 0m, // reader.GetDecimal(reader.GetOrdinal("PY_PROF_EARN2")),

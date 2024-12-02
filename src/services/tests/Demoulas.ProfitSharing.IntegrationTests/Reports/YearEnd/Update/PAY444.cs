@@ -11,8 +11,6 @@ public class PAY444
     private readonly Counters _counters = new();
 
     // Data records
-    private readonly DEM_REC dem_rec = new();
-    private readonly DemRecTableHelper DemRecTableHelper;
     private readonly PAYBEN_REC payben_rec = new();
 
     // Data Helpers
@@ -48,14 +46,12 @@ public class PAY444
     {
         payProfitDbHelper = new PayProfRecTableHelper(connection, dbContextFactory, profitYear);
         payBenDbHelper = new PayBenDbHelper(connection,dbContextFactory);
-        DemRecTableHelper = new DemRecTableHelper(connection, dem_rec);
         profitDetailTable = new ProfitDetailTableHelper(connection, dbContextFactory, profitYear);
         EffectiveYear = profitYear;
     }
 
     public string? PAYPROFIT_FILE_STATUS { get; set; }
     public string? PAYBEN_FILE_STATUS { get; set; }
-    public string? DEMO_PROFSHARE_FILE_STATUS { get; set; } = "00";
 
     public long HOLD_SSN { get; set; }
     public long HOLD_PAYSSN { get; set; }
@@ -174,13 +170,6 @@ public class PAY444
             return;
         }
 
-        dem_rec.DEM_BADGE = payprof_rec.PAYPROF_BADGE;
-        DEMO_PROFSHARE_FILE_STATUS = READ_KEY_DEMO_PROFSHARE(dem_rec);
-        if (DEMO_PROFSHARE_FILE_STATUS != "00")
-        {
-            return;
-        }
-
         WS_REWRITE_WHICH = 1;
 
         intermediate_values = new INTERMEDIATE_VALUES();
@@ -215,7 +204,7 @@ public class PAY444
         l210_CONTINUE:
 
         intermediate_values.WS_FD_BADGE = payprof_rec.PAYPROF_BADGE;
-        intermediate_values.WS_FD_NAME = dem_rec.PY_NAM;
+        intermediate_values.WS_FD_NAME = payprof_rec.Name;
         intermediate_values.WS_FD_SSN = payprof_rec.PAYPROF_SSN;
         intermediate_values.WS_FD_PSN = payprof_rec.PAYPROF_BADGE;
 
@@ -267,16 +256,11 @@ public class PAY444
         return Math.Round(v, 2, MidpointRounding.AwayFromZero);
     }
 
-
-    private string? READ_KEY_DEMO_PROFSHARE(DEM_REC dem_rec)
-    {
-        return DemRecTableHelper.getByBadge(dem_rec);
-    }
-
     private string? READ_KEY_PAYPROFIT(PAYPROF_REC payprof_rec)
     {
         PAYPROF_REC one = payProfitDbHelper.findByBadge(payprof_rec.PAYPROF_BADGE);
 
+        payprof_rec.Name = one.Name;
         payprof_rec.PAYPROF_BADGE = one.PAYPROF_BADGE;
         payprof_rec.PAYPROF_SSN = one.PAYPROF_SSN;
         payprof_rec.PY_PS_ENROLLED = one.PY_PS_ENROLLED;
@@ -351,7 +335,6 @@ public class PAY444
             }
         }
 
-        dem_rec.PY_NAM = payben_rec.PYBEN_NAME;
         payprof_rec.PAYPROF_BADGE = 0;
         m250ComputeEarnings();
 
@@ -710,12 +693,12 @@ public class PAY444
                 ALLOCATION_TOTAL = ALLOCATION_TOTAL + profit_detail.PROFIT_CONT;
             }
 
-            if (WS_PROFIT_YEAR_EXTENSION == 1)
+            if (WS_PROFIT_YEAR_EXTENSION == 1 /*Military*/)
             {
                 ws_payprofit.WS_PROF_MIL = ws_payprofit.WS_PROF_MIL + profit_detail.PROFIT_CONT;
             }
 
-            if (WS_PROFIT_YEAR_EXTENSION == 2)
+            if (WS_PROFIT_YEAR_EXTENSION == 2 /*Class Action Fund*/)
             {
                 ws_payprofit.WS_PROF_CAF = ws_payprofit.WS_PROF_CAF + profit_detail.PROFIT_EARN;
             }

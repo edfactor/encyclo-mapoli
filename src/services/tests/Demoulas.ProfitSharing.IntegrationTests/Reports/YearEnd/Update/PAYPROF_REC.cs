@@ -2,6 +2,7 @@
 
 public record PAYPROF_REC
 {
+    public string Name { get; set; }
     public long PAYPROF_BADGE { get; set; } // PIC 9(7).
     public int PAYPROF_SSN { get; set; } // PIC 9(9).
     public long PY_PS_ENROLLED { get; set; } // PIC 99.
