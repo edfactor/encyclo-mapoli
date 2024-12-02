@@ -79,19 +79,19 @@ public sealed class TotalService : ITotalService
         );
     }
 
-   
+
     public IQueryable<ParticipantTotalYearsDto> GetYearsOfService(IProfitSharingDbContext ctx, short profitYear)
     {
-        return (from pp in ctx.PayProfits.Include(p=>p.Demographic)
-                where pp.ProfitYear == profitYear
-                select new ParticipantTotalYearsDto { Ssn = pp.Demographic!.Ssn, Years = pp.YearsInPlan }); //Need to verify logic here
+        return (from pp in ctx.PayProfits.Include(p => p.Demographic)
+            where pp.ProfitYear == profitYear
+            select new ParticipantTotalYearsDto { Ssn = pp.Demographic!.Ssn, Years = pp.YearsInPlan }); //Need to verify logic here
     }
 
     public IQueryable<ParticipantTotalRatioDto> GetVestingRatio(IProfitSharingDbContext ctx, short profitYear, DateOnly asOfDate)
     {
 
-        var BirthDate65 = asOfDate.AddYears(-65);
-        var BeginningOfYear = asOfDate.AddYears(-1).AddDays(1);
+        var birthDate65 = asOfDate.AddYears(-65);
+        var beginningOfYear = asOfDate.AddYears(-1).AddDays(1);
 
         var demoInfo = (
             from d in ctx.Demographics
@@ -139,7 +139,7 @@ public sealed class TotalService : ITotalService
             {
                 Ssn = db.Ssn,
                 Ratio = db.FromBeneficiary == 1 ? 1.0m :
-                        db.DateOfBirth <= BirthDate65 && (db.TerminationDate == null || db.TerminationDate < BeginningOfYear) ? 1m :
+                        db.DateOfBirth <= birthDate65 && (db.TerminationDate == null || db.TerminationDate < beginningOfYear) ? 1m :
                         db.EnrollmentId == 3 || db.EnrollmentId == 4 ? 1m :
                         db.TerminationCodeId == 'Z' ? 1m :
                         db.ZeroContributionReasonId == 6 ? 1m :
