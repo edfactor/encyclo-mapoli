@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using FluentAssertions;
 using FastEndpoints;
 using JetBrains.Annotations;
@@ -10,6 +9,7 @@ using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Extensions;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 

@@ -360,3 +360,26 @@ export interface EmployeeDetails {
 	employeeId: string;
 	badgeNumber: string;
 }
+export interface BalanceByAge {
+  reportName: string;
+  reportDate: string;
+  reportType: FrozenReportsByAgeRequestType;
+  balanceTotalAmount: number;
+  vestedTotalAmount : number;
+  totalMembers: number;
+  totalBeneficiaries: number;
+  totalBeneficiariesAmount : number;
+  totalBeneficiariesVestedAmount : number;
+  totalNonBeneficiaries: number;
+  totalNonBeneficiariesAmount: number;
+  totalNonBeneficiariesVestedAmount : number;
+  response: Paged<BalanceByAgeDetail>;
+}
+
+export interface BalanceByAgeDetail {
+  age: number;
+  employeeCount: number;
+  currentBalance: number;
+  vestedBalance: number;
+  beneficiaryCount : number;
+}

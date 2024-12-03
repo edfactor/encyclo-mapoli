@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
   ContributionsByAge,
   ForfeituresByAge,
+  BalanceByAge,
   DemographicBadgesNotInPayprofit,
   DistributionsAndForfeitures,
   DuplicateNameAndBirthday,
@@ -42,6 +43,9 @@ export interface YearsEndState {
   forfeituresByAgeTotal: ForfeituresByAge | null;
   forfeituresByAgeFullTime: ForfeituresByAge | null;
   forfeituresByAgePartTime: ForfeituresByAge | null;
+  balanceByAgeTotal: BalanceByAge | null;
+  balanceByAgeFullTime: BalanceByAge | null;
+  balanceByAgePartTime: BalanceByAge | null;
 }
 
 const initialState: YearsEndState = {
@@ -65,7 +69,10 @@ const initialState: YearsEndState = {
   contributionsByAgePartTime: null,
   forfeituresByAgeTotal: null,
   forfeituresByAgeFullTime: null,
-  forfeituresByAgePartTime: null
+  forfeituresByAgePartTime: null,
+  balanceByAgeTotal: null,
+  balanceByAgeFullTime: null,
+  balanceByAgePartTime: null
 };
 
 export const yearsEndSlice = createSlice({
@@ -164,6 +171,19 @@ export const yearsEndSlice = createSlice({
       if (action.payload.reportType == FrozenReportsByAgeRequestType.PartTime) {
         state.forfeituresByAgePartTime = action.payload;
       }
+    },
+    setBalanceByAge: (state, action: PayloadAction<BalanceByAge>) => {
+      if (action.payload.reportType == FrozenReportsByAgeRequestType.Total) {
+        state.balanceByAgeTotal = action.payload;
+      }
+
+      if (action.payload.reportType == FrozenReportsByAgeRequestType.FullTime) {
+        state.balanceByAgeFullTime = action.payload;
+      }
+
+      if (action.payload.reportType == FrozenReportsByAgeRequestType.PartTime) {
+        state.balanceByAgePartTime = action.payload;
+      }
     }
   }
 });
@@ -184,6 +204,7 @@ export const {
   clearMasterInquiryData,
   setDistributionsByAge,
   setContributionsByAge,
-  setForfeituresByAge
+  setForfeituresByAge,
+  setBalanceByAge
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;
