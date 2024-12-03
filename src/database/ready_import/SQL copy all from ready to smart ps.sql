@@ -261,6 +261,36 @@ LEFT JOIN {SOURCE_PROFITSHARE_SCHEMA}.PAYREL ON PYBEN.PYBEN_PSN = PAYREL.PYREL_P
 
 --------------------------------------------------------------------------------------------------
 
+-- Simple BENEFICIARY validation
+DECLARE
+    v_sum_psdisb       NUMBER;
+    v_sum_psamt        NUMBER;
+    v_sum_prof_earn    NUMBER;
+    v_sum_distribution NUMBER;
+    v_sum_amount       NUMBER;
+    v_sum_earnings     NUMBER;
+BEGIN
+    -- Fetch values from PAYBEN table
+    SELECT SUM(PYBEN_PSDISB), SUM(PYBEN_PSAMT), SUM(PYBEN_PROF_EARN)
+    INTO v_sum_psdisb, v_sum_psamt, v_sum_prof_earn
+    FROM {SOURCE_PROFITSHARE_SCHEMA}.PAYBEN;
+
+    -- Fetch values from BENEFICIARY table
+    SELECT SUM(DISTRIBUTION), SUM(AMOUNT), SUM(EARNINGS)
+    INTO v_sum_distribution, v_sum_amount, v_sum_earnings
+    FROM BENEFICIARY;
+
+    -- Compare the sums and raise an error if there is a mismatch
+    IF v_sum_psdisb != v_sum_distribution OR
+       v_sum_psamt != v_sum_amount OR
+       v_sum_prof_earn != v_sum_earnings THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Mismatch detected between PAYBEN and BENEFICIARY tables.');
+    END IF;
+
+    DBMS_OUTPUT.PUT_LINE('All sums match successfully.');
+END;
+
+
  
 
 -------------------------------------------------------------------------------
