@@ -366,7 +366,6 @@ public class FrozenReportService : IFrozenReportService
         {
             var query = _totalService.TotalVestingBalance(ctx, req.ProfitYear, startEnd.FiscalEndDate);
 
-            var todayDayNumber = DateOnly.FromDateTime(DateTime.Now).DayNumber;
             var joinedQuery = from q in query
                               join d in ctx.Demographics on q.Ssn equals d.Ssn into demographics
                               from demographic in demographics.DefaultIfEmpty()
@@ -375,52 +374,52 @@ public class FrozenReportService : IFrozenReportService
                               where demographic != null || beneficiary != null
                               select new
                               {
-                                  q,
-                                  Demographic = demographic,
-                                  BeneficiaryContact = beneficiary,
+                                  q.CurrentBalance,
+                                  q.VestedBalance,
                                   EmploymentType = 
                                       demographic != null && demographic.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT,
                                   IsBeneficiary = demographic == null && beneficiary != null,
                                   DateOfBirth = demographic != null
                                       ? demographic.DateOfBirth
                                       : (beneficiary!.DateOfBirth),
-                                  Age = (byte)(Math.Floor((todayDayNumber - (demographic != null
-                                      ? demographic.DateOfBirth.DayNumber
-                                      : beneficiary!.DateOfBirth.DayNumber)) / 365.2499))
                               };
 
             joinedQuery = req.ReportType switch
             {
-                FrozenReportsByAgeRequest.Report.FullTime => joinedQuery.Where(g => g.EmploymentType == FT),
-                FrozenReportsByAgeRequest.Report.PartTime => joinedQuery.Where(g => g.EmploymentType == PT),
+                FrozenReportsByAgeRequest.Report.FullTime => joinedQuery.Where(g => !g.IsBeneficiary && g.EmploymentType == FT),
+                FrozenReportsByAgeRequest.Report.PartTime => joinedQuery.Where(g => !g.IsBeneficiary && g.EmploymentType == PT),
                 _ => joinedQuery
             };
 
             return joinedQuery
-                .GroupBy(item => item.Age)
-                .Select(g => new
-                {
-                    Age = g.Key,
-                    Entries = g.ToList()
-                })
+                .Where(detail => (detail.CurrentBalance > 0 || detail.VestedBalance > 0))
                 .ToListAsync(cancellationToken);
         });
 
-       
+        // Client-side processing for grouping and filtering
+        var groupedResult = rawResult
+            .GroupBy(item => item.DateOfBirth.Age())
+            .Select(g => new
+            {
+                Age = g.Key,
+                Entries = g.ToList()
+            })
+            .ToList();
 
         // Final transformation to BalanceByAgeDetail
-        var details = rawResult
+        var details = groupedResult
             .Select(group => new BalanceByAgeDetail
             {
                 Age = group.Age,
-                CurrentBalance = group.Entries.Sum(e => e.q.CurrentBalance),
-                CurrentBeneficiaryBalance = group.Entries.Sum(e => e.IsBeneficiary ? e.q.CurrentBalance : 0),
-                CurrentBeneficiaryVestedBalance = group.Entries.Sum(e => e.IsBeneficiary ? e.q.VestedBalance : 0),
-                VestedBalance = group.Entries.Sum(e => e.q.VestedBalance),
+                CurrentBalance = group.Entries.Sum(e => e.CurrentBalance),
+                CurrentBeneficiaryBalance = group.Entries.Sum(e => e.IsBeneficiary ? e.CurrentBalance : 0),
+                CurrentBeneficiaryVestedBalance = group.Entries.Sum(e => e.IsBeneficiary ? e.VestedBalance : 0),
+                VestedBalance = group.Entries.Sum(e => e.VestedBalance),
                 BeneficiaryCount = group.Entries.Count(e => e.IsBeneficiary),
-                EmployeeCount = group.Entries.Count(e => !e.IsBeneficiary)
-            })
-            .Where(detail => (detail.CurrentBalance > 0 || detail.VestedBalance > 0))
+                EmployeeCount = group.Entries.Count(e => !e.IsBeneficiary),
+                FullTimeCount = group.Entries.Count(e => e.EmploymentType == FT),
+                PartTimeCount = group.Entries.Count(e => e.EmploymentType == PT)
+            })            
             .OrderBy(e=> e.Age)
             .ToList();
 
@@ -438,6 +437,8 @@ public class FrozenReportService : IFrozenReportService
             TotalBeneficiaries = (short)details.Sum(d => d.BeneficiaryCount),
             TotalBeneficiariesAmount = details.Sum(d => d.CurrentBeneficiaryBalance),
             TotalBeneficiariesVestedAmount = details.Sum(d => d.CurrentBeneficiaryVestedBalance),
+            TotalFullTimeCount = details.Sum(d => d.FullTimeCount),
+            TotalPartTimeCount = details.Sum(d => d.PartTimeCount),
             Response = new PaginatedResponseDto<BalanceByAgeDetail>(req)
             {
                 Results = details,

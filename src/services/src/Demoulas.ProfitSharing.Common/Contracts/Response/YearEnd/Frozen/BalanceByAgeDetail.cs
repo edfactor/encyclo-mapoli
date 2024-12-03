@@ -8,6 +8,8 @@ public sealed record BalanceByAgeDetail
     public decimal VestedBalance { get; set; }
     public decimal CurrentBeneficiaryBalance { get; set; }
     public decimal CurrentBeneficiaryVestedBalance { get; set; }
+    public int FullTimeCount { get; set; }
+    public int PartTimeCount { get; set; }
 
     public static BalanceByAgeDetail ResponseExample()
     {

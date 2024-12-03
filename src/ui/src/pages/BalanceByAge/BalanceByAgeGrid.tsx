@@ -56,8 +56,8 @@ const BalanceByAgeGrid = () => {
                     {
                       age: "NON-BEN",
                       employeeCount: balanceByAgeTotal?.totalNonBeneficiaries || 0,
-                      currentBalance: balanceByAgeTotal?.balanceTotalAmount,
-                      vestedBalance: balanceByAgeTotal?.vestedTotalAmount
+                      currentBalance: balanceByAgeTotal?.totalNonBeneficiariesAmount,
+                      vestedBalance: balanceByAgeTotal?.totalNonBeneficiariesVestedAmount
                     },
                     {
                       age: "TOTAL",

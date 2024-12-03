@@ -35,6 +35,9 @@ public sealed record BalanceByAge : ReportResponseBase<BalanceByAgeDetail>
         get { return VestedTotalAmount - TotalBeneficiariesVestedAmount; }
     }
 
+    public int TotalFullTimeCount { get; set; }
+    public int TotalPartTimeCount { get; set; }
+
 
     public static BalanceByAge ResponseExample()
     {
