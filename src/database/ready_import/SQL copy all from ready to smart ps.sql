@@ -358,7 +358,7 @@ END;
         POINTS_EARNED,
         YEARS_IN_PLAN)
     SELECT
-        (select ID from DEMOGRAPHIC where EMPLOYEE_ID = PAYPROF_BADGE) AS DEMOGRAPHIC_ID,
+        (SELECT ID FROM DEMOGRAPHIC WHERE EMPLOYEE_ID = PAYPROF_BADGE) AS DEMOGRAPHIC_ID,
         last_year AS PROFIT_YEAR,
         PY_PH_LASTYR AS CURRENT_HOURS_YEAR,
         PY_PD_LASTYR AS CURRENT_INCOME_YEAR,
@@ -366,21 +366,25 @@ END;
         0 AS SECONDARY_EARNINGS, -- History not previously tracked
         0 AS SECONDARY_ETVA_EARNINGS, -- History not previously tracked
         PY_WEEKS_WORK_LAST AS WEEKS_WORKED_YEAR,
-        null AS PS_CERTIFICATE_ISSUED_DATE,
+        NULL AS PS_CERTIFICATE_ISSUED_DATE,
         9 AS ENROLLMENT_ID, -- 9/History not previously tracked
         PY_PROF_BENEFICIARY AS BENEFICIARY_ID,
-         CASE
-            WHEN PY_PROF_NEWEMP  = '1' THEN
-                0
+        CASE
+            WHEN PY_PROF_NEWEMP = '1' THEN 0
             ELSE 0
         END AS EMPLOYEE_TYPE_ID,
         8 AS ZERO_CONTRIBUTION_REASON_ID, -- 8/History not previously tracked (Unknown)
         0 AS HOURS_EXECUTIVE, -- History not previously tracked
         0 AS INCOME_EXECUTIVE, -- History not previously tracked
-        PY_PROF_POINTS  as POINTS_EARNED,
-        PY_PS_YEARS - 1 as YEARS_IN_PLAN
-    FROM {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT
-    where PAYPROF_BADGE in ( select EMPLOYEE_ID from DEMOGRAPHIC  );
+        PY_PROF_POINTS AS POINTS_EARNED,
+        CASE WHEN d.PY_TERM_DT = 0 THEN  PY_PS_YEARS - 1
+            ELSE PY_PS_YEARS
+        END AS YEARS_IN_PLAN
+    FROM
+        {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT pp
+        LEFT JOIN {SOURCE_PROFITSHARE_SCHEMA}.DEMOGRAPHICS d on d.DEM_BADGE = pp.PAYPROF_BADGE
+    WHERE
+        PAYPROF_BADGE IN (SELECT EMPLOYEE_ID FROM DEMOGRAPHIC);
 
 ---------------------------------------------------------------
 
