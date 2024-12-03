@@ -87,4 +87,9 @@ internal sealed class PayBenDbHelper
         pbrec.SecondaryEarnings = l.SecondaryEarnings;
         return "00";
     }
+
+    public BeneficiaryFinancials findByPSN(long psn)
+    {
+      return rows.Where(b => b.Psn == psn).First();
+    }
 }

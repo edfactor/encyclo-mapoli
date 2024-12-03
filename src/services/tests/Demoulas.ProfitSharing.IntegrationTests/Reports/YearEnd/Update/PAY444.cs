@@ -9,19 +9,16 @@ namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
 public class PAY444
 {
-    private readonly Counters _counters = new();
+    private readonly PointValues PointValues = new();
 
     // Data records
-    private readonly BeneficiaryFinancials payben_rec = new();
-
+    
     // Data Helpers
     private readonly PayBenDbHelper payBenDbHelper;
 
     private readonly EmployeeFinancials payprof_rec = new();
     private readonly PayProfRecTableHelper payProfitDbHelper;
 
-    // Where input values are stored
-    private readonly POINT_VALUES point_values = new();
     private readonly AdjustmentReportData _adjustmentReportDataValues = new AdjustmentReportData();
 
 
@@ -46,7 +43,7 @@ public class PAY444
     public PAY444(OracleConnection connection, IProfitSharingDataContextFactory dbContextFactory, short profitYear)
     {
         payProfitDbHelper = new PayProfRecTableHelper(connection, dbContextFactory, profitYear);
-        payBenDbHelper = new PayBenDbHelper(connection,dbContextFactory);
+        payBenDbHelper = new PayBenDbHelper(connection, dbContextFactory);
         EffectiveYear = profitYear;
         this.dbContextFactory = dbContextFactory;
     }
@@ -79,16 +76,16 @@ public class PAY444
         long adjustBadge, decimal adjustContrib, decimal adjustForfeit, decimal adjustEarnings,
         long adjustBadgeSecondary, decimal adjustEarningsSecondary, long maxContribution)
     {
-        point_values.PV_CONT_01 = contributionPercent;
-        point_values.PV_FORF_01 = incomingForfeitPercent;
-        point_values.PV_EARN_01 = earningsPercent;
-        point_values.PV_EARN2_01 = secondaryEarningsPercent; // Gather Input from User
-        point_values.PV_ADJUST_BADGE = adjustBadge; // badge to adjust
-        point_values.PV_ADJ_CONTRIB = adjustContrib; // amount to adjust employee
-        point_values.PV_ADJ_FORFEIT = adjustForfeit;
-        point_values.PV_ADJ_EARN = adjustEarnings;
-        point_values.PV_ADJUST_BADGE2 = adjustBadgeSecondary;
-        point_values.PV_ADJ_EARN2 = adjustEarningsSecondary;
+        PointValues.PV_CONT_01 = contributionPercent;
+        PointValues.PV_FORF_01 = incomingForfeitPercent;
+        PointValues.PV_EARN_01 = earningsPercent;
+        PointValues.PV_EARN2_01 = secondaryEarningsPercent; // Gather Input from User
+        PointValues.PV_ADJUST_BADGE = adjustBadge; // badge to adjust
+        PointValues.PV_ADJ_CONTRIB = adjustContrib; // amount to adjust employee
+        PointValues.PV_ADJ_FORFEIT = adjustForfeit;
+        PointValues.PV_ADJ_EARN = adjustEarnings;
+        PointValues.PV_ADJUST_BADGE2 = adjustBadgeSecondary;
+        PointValues.PV_ADJ_EARN2 = adjustEarningsSecondary;
         WS_CONTR_MAX = maxContribution;
 
         HOLD_PAYSSN = 0;
@@ -200,7 +197,7 @@ public class PAY444
 
         ws_compute_totals.WS_EARN_POINTS = (long)Math.Round(ws_compute_totals.WS_POINTS_DOLLARS / 100, MidpointRounding.AwayFromZero);
 
-        l210_CONTINUE:
+    l210_CONTINUE:
 
         memberFinancials.EmployeeId = payprof_rec.EmployeeId;
         memberFinancials.Psn = payprof_rec.EmployeeId;
@@ -208,7 +205,7 @@ public class PAY444
         memberFinancials.Name = payprof_rec.Name;
         memberFinancials.Ssn = payprof_rec.Ssn;
 
-        m250ComputeEarnings();
+        m250ComputeEarnings(null);
 
         memberFinancials.Xfer = ALLOCATION_TOTAL;
         memberFinancials.Pxfer = PALLOCATION_TOTAL;
@@ -240,7 +237,8 @@ public class PAY444
 
         m400LoadPayprofit();
         membersFinancials.Add(memberFinancials);
-        if (false /*rewrites are off ... the destination columns no longer exist in payprofit*/){
+        if (false /*rewrites are off ... the destination columns no longer exist in payprofit*/)
+        {
             m420RewritePayprofit();
         }
     }
@@ -271,21 +269,12 @@ public class PAY444
 
     public void m220PaybenComputation(long psn)
     {
-        // <same key> PSKEY = payben1_rec.PYBEN_PSN1;
-        payben_rec.Psn = psn;
-        PAYBEN_FILE_STATUS = READ_KEY_PAYBEN(payben_rec);
-        if (PAYBEN_FILE_STATUS != "00")
-        {
-            throw new IOException(
-                "STAT:{PAYBEN_FILE_STATUS} PSN:{payben_rec.PYBEN_PSN} SSN:{payben_rec.PYBEN_PAYSSN} = INVALID PAYBEN RECORD NOT UPDATED");
-        }
-
+        BeneficiaryFinancials bene = payBenDbHelper.findByPSN(psn);
         WS_REWRITE_WHICH = 2;
 
+        payprof_rec.Ssn = bene.Ssn;
 
-        payprof_rec.Ssn = payben_rec.Ssn;
-
-        ws_payprofit.WS_PS_AMT = payben_rec.CurrentAmount;
+        ws_payprofit.WS_PS_AMT = bene.CurrentAmount;
 
         ws_compute_totals.WS_POINTS_DOLLARS = 0m;
         ws_compute_totals.WS_EARNINGS_BALANCE = 0m;
@@ -304,15 +293,17 @@ public class PAY444
         {
             ws_compute_totals.WS_EARN_POINTS = 0;
             ws_compute_totals.WS_POINTS_DOLLARS = 0;
-            goto l220_CONTINUE;
         }
+        else
+        {
+        
+            ws_compute_totals.WS_POINTS_DOLLARS =
+                Math.Round(ALLOCATION_TOTAL + (ws_payprofit.WS_PS_AMT - FORFEIT_TOTAL - PALLOCATION_TOTAL) - DIST_TOTAL,
+                    2, MidpointRounding.AwayFromZero);
 
-        ws_compute_totals.WS_POINTS_DOLLARS =
-            Math.Round(ALLOCATION_TOTAL + (ws_payprofit.WS_PS_AMT - FORFEIT_TOTAL - PALLOCATION_TOTAL) - DIST_TOTAL, 2, MidpointRounding.AwayFromZero);
-
-        ws_compute_totals.WS_EARN_POINTS = (long)Math.Round(ws_compute_totals.WS_POINTS_DOLLARS / 100, MidpointRounding.AwayFromZero);
-
-        l220_CONTINUE:
+            ws_compute_totals.WS_EARN_POINTS = (long)Math.Round(ws_compute_totals.WS_POINTS_DOLLARS / 100,
+                MidpointRounding.AwayFromZero);
+        }
 
         if (ALLOCATION_TOTAL != 0)
         {
@@ -324,13 +315,13 @@ public class PAY444
         }
 
         payprof_rec.EmployeeId = 0;
-        m250ComputeEarnings();
+        m250ComputeEarnings(bene);
 
         MemberFinancials memberFinancials = new MemberFinancials();
         memberFinancials.EmployeeId = 0;
-        memberFinancials.Name = payben_rec.Name;
-        memberFinancials.Ssn = payben_rec.Ssn;
-        memberFinancials.Psn = payben_rec.Psn;
+        memberFinancials.Name = bene.Name;
+        memberFinancials.Ssn = bene.Ssn;
+        memberFinancials.Psn = bene.Psn;
         memberFinancials.Distributions = DIST_TOTAL;
         memberFinancials.Military = 0;
         memberFinancials.EmployeeTypeId = 0;
@@ -354,8 +345,8 @@ public class PAY444
         memberFinancials.EarningPoints = ws_compute_totals.WS_EARN_POINTS;
         memberFinancials.IncomingForfeitures = memberFinancials.IncomingForfeitures - FORFEIT_TOTAL;
 
-        memberFinancials.Earnings = payben_rec.Earnings;
-        memberFinancials.SecondaryEarnings = payben_rec.SecondaryEarnings;
+        memberFinancials.Earnings = bene.Earnings;
+        memberFinancials.SecondaryEarnings = bene.SecondaryEarnings;
 
         ws_maxcont_totals.WS_MAX = ws_payprofit.WS_PROF_CONT + ws_payprofit.WS_PROF_MIL + ws_payprofit.WS_PROF_FORF;
 
@@ -368,24 +359,19 @@ public class PAY444
 
         if (false /*rewrites are off ... the destination columns no longer exist in payprofit*/)
         {
-            m430RewritePayben();
+            m430RewritePayben(bene);
         }
-    }
-
-    private string? READ_KEY_PAYBEN(BeneficiaryFinancials payben_rec)
-    {
-        return payBenDbHelper.findByPSN(payben_rec);
     }
 
 
     public void m230ComputeContribution()
     {
-        ws_compute_totals.WS_CONT_AMT = Math.Round(point_values.PV_CONT_01 * ws_payprofit.WS_PROF_POINTS, 2, MidpointRounding.AwayFromZero);
+        ws_compute_totals.WS_CONT_AMT = Math.Round(PointValues.PV_CONT_01 * ws_payprofit.WS_PROF_POINTS, 2, MidpointRounding.AwayFromZero);
 
-        if (point_values.PV_ADJUST_BADGE > 0 && point_values.PV_ADJUST_BADGE == holdBadge)
+        if (PointValues.PV_ADJUST_BADGE > 0 && PointValues.PV_ADJUST_BADGE == holdBadge)
         {
             _adjustmentReportDataValues.SV_CONT_AMT = ws_compute_totals.WS_CONT_AMT;
-            ws_compute_totals.WS_CONT_AMT += point_values.PV_ADJ_CONTRIB;
+            ws_compute_totals.WS_CONT_AMT += PointValues.PV_ADJ_CONTRIB;
             _adjustmentReportDataValues.SV_CONT_ADJUSTED = ws_compute_totals.WS_CONT_AMT;
         }
 
@@ -395,51 +381,52 @@ public class PAY444
 
     public void m240ComputeForfeitures()
     {
-        ws_compute_totals.WS_FORF_AMT = Math.Round(point_values.PV_FORF_01 * ws_payprofit.WS_PROF_POINTS, 2, MidpointRounding.AwayFromZero);
-        if (point_values.PV_ADJUST_BADGE > 0 && point_values.PV_ADJUST_BADGE == holdBadge)
+        ws_compute_totals.WS_FORF_AMT = Math.Round(PointValues.PV_FORF_01 * ws_payprofit.WS_PROF_POINTS, 2, MidpointRounding.AwayFromZero);
+        if (PointValues.PV_ADJUST_BADGE > 0 && PointValues.PV_ADJUST_BADGE == holdBadge)
         {
             _adjustmentReportDataValues.SV_FORF_AMT = ws_compute_totals.WS_FORF_AMT;
-            ws_compute_totals.WS_FORF_AMT += point_values.PV_ADJ_FORFEIT;
+            ws_compute_totals.WS_FORF_AMT += PointValues.PV_ADJ_FORFEIT;
             _adjustmentReportDataValues.SV_FORF_ADJUSTED = ws_compute_totals.WS_FORF_AMT;
         }
 
         ws_payprofit.WS_PROF_FORF = ws_compute_totals.WS_FORF_AMT;
     }
 
-    public void m250ComputeEarnings()
+    public void m250ComputeEarnings(BeneficiaryFinancials? bene)
     {
-        if (ws_compute_totals.WS_EARN_POINTS > 0 || WS_REWRITE_WHICH == 2)
-        {
-        }
-        else
+        if (ws_compute_totals.WS_EARN_POINTS <= 0 && WS_REWRITE_WHICH != 2)
         {
             if (ws_compute_totals.WS_EARN_POINTS <= 0)
             {
                 ws_compute_totals.WS_EARN_POINTS = 0;
                 payprof_rec.Earnings = 0;
                 ws_compute_totals.WS_EARN_AMT = 0;
-                payben_rec.Earnings = 0;
                 payprof_rec.SecondaryEarnings = 0;
                 ws_compute_totals.WS_EARN2_AMT = 0;
-                payben_rec.SecondaryEarnings = 0;
+                if (bene != null)
+                {
+                    bene.Earnings = 0;
+                    bene.SecondaryEarnings = 0;
+                }
             }
         }
+     
 
         if (WS_REWRITE_WHICH == 1 || WS_REWRITE_WHICH == 2)
         {
-            ws_compute_totals.WS_EARN_AMT = Math.Round(point_values.PV_EARN_01 * ws_compute_totals.WS_EARN_POINTS, 2, MidpointRounding.AwayFromZero);
-            if (point_values.PV_ADJUST_BADGE > 0 && point_values.PV_ADJUST_BADGE == holdBadge)
+            ws_compute_totals.WS_EARN_AMT = Math.Round(PointValues.PV_EARN_01 * ws_compute_totals.WS_EARN_POINTS, 2, MidpointRounding.AwayFromZero);
+            if (PointValues.PV_ADJUST_BADGE > 0 && PointValues.PV_ADJUST_BADGE == holdBadge)
             {
                 _adjustmentReportDataValues.SV_EARN_AMT = ws_compute_totals.WS_EARN_AMT;
-                ws_compute_totals.WS_EARN_AMT += point_values.PV_ADJ_EARN;
+                ws_compute_totals.WS_EARN_AMT += PointValues.PV_ADJ_EARN;
                 _adjustmentReportDataValues.SV_EARN_ADJUSTED = ws_compute_totals.WS_EARN_AMT;
             }
 
-            ws_compute_totals.WS_EARN2_AMT = Math.Round(point_values.PV_EARN2_01 * ws_compute_totals.WS_EARN_POINTS, 2, MidpointRounding.AwayFromZero);
-            if (point_values.PV_ADJUST_BADGE2 > 0 && point_values.PV_ADJUST_BADGE2 == holdBadge)
+            ws_compute_totals.WS_EARN2_AMT = Math.Round(PointValues.PV_EARN2_01 * ws_compute_totals.WS_EARN_POINTS, 2, MidpointRounding.AwayFromZero);
+            if (PointValues.PV_ADJUST_BADGE2 > 0 && PointValues.PV_ADJUST_BADGE2 == holdBadge)
             {
                 _adjustmentReportDataValues.SV_EARN2_AMT = ws_compute_totals.WS_EARN2_AMT;
-                ws_compute_totals.WS_EARN2_AMT += point_values.PV_ADJ_EARN2;
+                ws_compute_totals.WS_EARN2_AMT += PointValues.PV_ADJ_EARN2;
                 _adjustmentReportDataValues.SV_EARN2_ADJUSTED = ws_compute_totals.WS_EARN2_AMT;
             }
         }
@@ -465,21 +452,22 @@ public class PAY444
             }
         }
 
-        if (WS_PY_PS_ETVA > 0 || WS_REWRITE_WHICH == 2)
-        {
-        }
-        else
+        if (WS_PY_PS_ETVA <= 0 && WS_REWRITE_WHICH != 2)
         {
             payprof_rec.Earnings = ws_compute_totals.WS_EARN_AMT;
             payprof_rec.SecondaryEarnings = 0m;
 
             payprof_rec.EarningsOnEtva = 0m;
-            payben_rec.Earnings = 0m;
             payprof_rec.SecondaryEtvaEarnings = 0m;
-            payben_rec.SecondaryEarnings = 0m;
+            if (bene != null)
+            {
+                bene.Earnings = 0m;
+                bene.SecondaryEarnings = 0m;
+            }
 
-            goto l250_EXIT;
+            return;
         }
+
 
         if (WS_REWRITE_WHICH == 1 && ws_compute_totals.WS_POINTS_DOLLARS > 0)
         {
@@ -495,25 +483,24 @@ public class PAY444
             payprof_rec.EarningsOnEtva = WS_ETVA_AMT;
         }
 
-        if (WS_REWRITE_WHICH == 2)
+        if (WS_REWRITE_WHICH == 2 && bene != null)
         {
-            payben_rec.Earnings = 0m;
-            payben_rec.Earnings = ws_compute_totals.WS_EARN_AMT;
+            bene.Earnings = 0m;
+            bene.Earnings = ws_compute_totals.WS_EARN_AMT;
         }
 
-        if (point_values.PV_EARN2_01 != 0m) // Secondary Earnings
+        if (PointValues.PV_EARN2_01 != 0m) // Secondary Earnings
         {
             WS_ETVA2_AMT = Math.Round(ws_compute_totals.WS_EARN2_AMT * WS_ETVA_PERCENT, 2, MidpointRounding.AwayFromZero);
             ws_compute_totals.WS_EARN2_AMT -= WS_ETVA2_AMT;
             payprof_rec.SecondaryEarnings = ws_compute_totals.WS_EARN2_AMT;
             payprof_rec.SecondaryEtvaEarnings = WS_ETVA2_AMT;
-            if (WS_REWRITE_WHICH == 2)
+            if (WS_REWRITE_WHICH == 2 && bene != null)
             {
-                payben_rec.SecondaryEarnings = WS_ETVA2_AMT;
+                bene.SecondaryEarnings = WS_ETVA2_AMT;
             }
         }
 
-        l250_EXIT: ;
     }
 
 
@@ -569,23 +556,14 @@ public class PAY444
     }
 
 
-    public void m430RewritePayben()
+    public void m430RewritePayben(BeneficiaryFinancials bene)
     {
-        if (payben_rec.Earnings == 0 && payben_rec.SecondaryEarnings == 0)
+        if (bene.Earnings == 0 && bene.SecondaryEarnings == 0)
         {
-            return; // humm, dont save the zeros?
+            return; // humm, dont save the zeros? 
         }
 
-        PAYBEN_FILE_STATUS = REWRITE_KEY_PAYBEN(payben_rec);
-        if (PAYBEN_FILE_STATUS != "00")
-        {
-            throw new IOException($"BAD REWRITE OF PAYBEN EMPLOYEE PSN # {payben_rec.Psn}");
-        }
-    }
-
-    private string? REWRITE_KEY_PAYBEN(BeneficiaryFinancials payben_rec)
-    {
-        throw new NotImplementedException();
+        // BOBH use ben to update Beneficiary.
     }
 
 
@@ -696,12 +674,16 @@ public class PAY444
             return aBadge < bBadge ? -1 : 1;
         });
 
-        foreach (var prft in membersFinancials)
+      
+        Counters counters = new();
+
+
+        foreach (var memberFinancials in membersFinancials)
         {
-            m810WriteReport(header_1, prft);
+            m810WriteReport(counters, header_1, memberFinancials);
         }
 
-        m850PrintTotals();
+        m850PrintTotals(counters);
     }
 
     private void WRITE(object obj)
@@ -710,11 +692,11 @@ public class PAY444
     }
 
 
-    public void m810WriteReport(HEADER_1 header_1, MemberFinancials memberFinancials)
+    public void m810WriteReport(Counters counters, HEADER_1 header_1, MemberFinancials memberFinancials)
     {
-        if (_counters.LineCounter > 60)
+        if (counters.LineCounter > 60)
         {
-            m830PrintHeader(header_1);
+            m830PrintHeader(counters, header_1);
         }
 
         REPORT_LINE report_line = new();
@@ -733,12 +715,15 @@ public class PAY444
             }
             else if (memberFinancials.EmployeeTypeId == 2)
             {
-                payben_rec.Ssn = memberFinancials.Ssn;
-                PAYBEN_FILE_STATUS = READ_ALT_KEY_PAYBEN(payben_rec);
-                if (PAYBEN_FILE_STATUS == "00")
-                {
-                    report_line.PR_NEWEMP = "BEN";
-                }
+                // This is checking to see if an employee also a bene, and they are a new employee, so not yet vested but they 
+                throw new IOException("BOBH: this never happens.");
+                // see if member is also a bene.
+                // payben_rec.Ssn = memberFinancials.Ssn;
+                // PAYBEN_FILE_STATUS = READ_ALT_KEY_PAYBEN(payben_rec);
+                // if (PAYBEN_FILE_STATUS == "00")
+                // {
+                //    report_line.PR_NEWEMP = "BEN";
+                //}
             }
             else
             {
@@ -833,33 +818,33 @@ public class PAY444
         {
             if (memberFinancials.EmployeeId > 0)
             {
-                _counters.EmployeeCounter += 1;
+                counters.EmployeeCounter += 1;
                 WRITE(report_line);
             }
 
             if (memberFinancials.EmployeeId == 0)
             {
-                _counters.BeneficiaryCounter += 1;
+                counters.BeneficiaryCounter += 1;
                 WRITE(report_line_2);
             }
 
-            _counters.LineCounter += 1;
+            counters.LineCounter += 1;
         }
     }
 
-    public void m830PrintHeader(HEADER_1 header_1)
+    public void m830PrintHeader(Counters counters, HEADER_1 header_1)
     {
-        _counters.PageCounter += 1;
-        header_1.HDR1_PAGE = _counters.PageCounter;
+        counters.PageCounter += 1;
+        header_1.HDR1_PAGE = counters.PageCounter;
         WRITE("\f" + header_1);
         WRITE("");
         WRITE(new HEADER_2());
         WRITE(new HEADER_3());
-        _counters.LineCounter = 4;
+        counters.LineCounter = 4;
     }
 
 
-    public void m850PrintTotals()
+    public void m850PrintTotals(Counters counters)
     {
         ClientTot client_tot = new();
         client_tot.BEG_BAL_TOT = ws_client_totals.WS_TOT_BEGBAL;
@@ -925,11 +910,11 @@ public class PAY444
         WRITE(client_tot);
 
         EMPLOYEE_COUNT_TOT employee_count_tot = new();
-        employee_count_tot.PR_TOT_EMPLOYEE_COUNT = _counters.EmployeeCounter;
+        employee_count_tot.PR_TOT_EMPLOYEE_COUNT = counters.EmployeeCounter;
         WRITE("");
         WRITE(employee_count_tot);
         EMPLOYEE_COUNT_TOT_PAYBEN employee_count_tot_payben = new();
-        employee_count_tot_payben.PB_TOT_EMPLOYEE_COUNT = _counters.BeneficiaryCounter;
+        employee_count_tot_payben.PB_TOT_EMPLOYEE_COUNT = counters.BeneficiaryCounter;
         WRITE("");
         WRITE(employee_count_tot_payben);
 
@@ -950,7 +935,7 @@ public class PAY444
 
     public void m1000AdjustmentReport()
     {
-        if (point_values.PV_ADJUST_BADGE == 0)
+        if (PointValues.PV_ADJUST_BADGE == 0)
         {
             return;
         }
@@ -967,7 +952,7 @@ public class PAY444
         WRITE2_advance2(header_5);
 
         PRINT_ADJ_LINE1 print_adj_line1 = new();
-        print_adj_line1.PL_ADJUST_BADGE = point_values.PV_ADJUST_BADGE;
+        print_adj_line1.PL_ADJUST_BADGE = PointValues.PV_ADJUST_BADGE;
         print_adj_line1.PL_ADJ_DESC = "INITIAL";
         print_adj_line1.PL_CONT_AMT = _adjustmentReportDataValues.SV_CONT_AMT;
         print_adj_line1.PL_FORF_AMT = _adjustmentReportDataValues.SV_FORF_AMT;
@@ -977,10 +962,10 @@ public class PAY444
 
         print_adj_line1.PL_ADJUST_BADGE = 0;
         print_adj_line1.PL_ADJ_DESC = "ADJUSTMENT";
-        print_adj_line1.PL_CONT_AMT = point_values.PV_ADJ_CONTRIB;
-        print_adj_line1.PL_EARN_AMT = point_values.PV_ADJ_EARN;
-        print_adj_line1.PL_EARN2_AMT = point_values.PV_ADJ_EARN2;
-        print_adj_line1.PL_FORF_AMT = point_values.PV_ADJ_FORFEIT;
+        print_adj_line1.PL_CONT_AMT = PointValues.PV_ADJ_CONTRIB;
+        print_adj_line1.PL_EARN_AMT = PointValues.PV_ADJ_EARN;
+        print_adj_line1.PL_EARN2_AMT = PointValues.PV_ADJ_EARN2;
+        print_adj_line1.PL_FORF_AMT = PointValues.PV_ADJ_FORFEIT;
         WRITE2_advance2(print_adj_line1);
 
         print_adj_line1.PL_ADJ_DESC = "FINAL";
@@ -993,23 +978,21 @@ public class PAY444
 
         if (_adjustmentReportDataValues.SV_FORF_AMT == 0 && _adjustmentReportDataValues.SV_EARN_AMT == 0)
         {
-            WRITE2_advance2("No adjustment - employee not found.");  
+            WRITE2_advance2("No adjustment - employee not found.");
         }
     }
 
     private void WRITE2_advance2(object header4)
     {
+        // We dont currently support this second report.    We may have to.
         //throw new NotImplementedException();
     }
 
     private void WRITE2_afterPage(HEADER_1 header1)
     {
+        // We dont currently support this second report.    We may have to.
         // throw new NotImplementedException();
     }
 
 
-    private string? READ_ALT_KEY_PAYBEN(BeneficiaryFinancials payben_rec)
-    {
-        throw new NotImplementedException();
-    }
 }
