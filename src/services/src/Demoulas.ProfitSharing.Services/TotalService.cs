@@ -31,15 +31,16 @@ public sealed class TotalService : ITotalService
 
 #pragma warning disable S3358 // Ternary operators should not be nested
         return (from pd in ctx.ProfitDetails
-                where pd.ProfitYear <= profitYear
-                group pd by pd.Ssn into pd_g
-                select new ParticipantTotalDto
-                {
-                    Ssn = pd_g.Key,
-                    Total = pd_g.Sum(x => x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment ? x.Forfeiture * -1 : //Just look at forfeiture
-                                          sumAllFieldProfitCodeTypes.Contains(x.ProfitCodeId) ? -x.Forfeiture + x.Contribution + x.Earnings : //Invert forfeiture, and add columns
-                                          x.Contribution + x.Earnings + x.Forfeiture) //Just add the columns
-                });
+            where pd.ProfitYear <= profitYear
+            group pd by pd.Ssn
+            into pd_g
+            select new ParticipantTotalDto
+            {
+                Ssn = pd_g.Key,
+                Total = pd_g.Sum(x => x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id ? x.Forfeiture * -1 : //Just look at forfeiture
+                    sumAllFieldProfitCodeTypes.Contains(x.ProfitCodeId) ? -x.Forfeiture + x.Contribution + x.Earnings : //Invert forfeiture, and add columns
+                    x.Contribution + x.Earnings + x.Forfeiture) //Just add the columns
+            });
 #pragma warning restore S3358 // Ternary operators should not be nested
     }
 
@@ -52,7 +53,7 @@ public sealed class TotalService : ITotalService
             select new ParticipantTotalDto
             {
                 Ssn = pd_g.Key,
-                Total = pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary).Sum(x => x.Contribution) +
+                Total = pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary.Id).Sum(x => x.Contribution) +
                        pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.Incoming100PercentVestedEarnings.Id).Sum(x => x.Earnings) +
                        pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id).Sum(x => x.Forfeiture)
             }
@@ -179,9 +180,9 @@ public sealed class TotalService : ITotalService
         switch (searchBy)
         {
             case SearchBy.EmployeeId:
-                return await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
+                return await _profitSharingDataContextFactory.UseReadOnlyContext(ctx =>
                 {
-                    var rslt = await (from t in TotalVestingBalance(ctx, profitYear, calendarInfo.FiscalEndDate)
+                    var rslt = (from t in TotalVestingBalance(ctx, profitYear, calendarInfo.FiscalEndDate)
                                       join d in ctx.Demographics on t.Ssn equals d.Ssn
                                       where d.EmployeeId == employeeIdOrSsn
                                       select new BalanceEndpointResponse { Id = employeeIdOrSsn, Ssn = t.Ssn.MaskSsn(), CurrentBalance = t.CurrentBalance, Etva = t.Etva, TotalDistributions = t.TotalDistributions, VestedBalance = t.VestedBalance, VestingPercent = t.VestingPercent }).FirstOrDefaultAsync();
@@ -189,9 +190,9 @@ public sealed class TotalService : ITotalService
                 });
 
             default: //SSN
-                return await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
+                return await _profitSharingDataContextFactory.UseReadOnlyContext(ctx =>
                 {
-                    var rslt = await (from t in TotalVestingBalance(ctx, profitYear, calendarInfo.FiscalEndDate) where t.Ssn == employeeIdOrSsn
+                    var rslt = (from t in TotalVestingBalance(ctx, profitYear, calendarInfo.FiscalEndDate) where t.Ssn == employeeIdOrSsn
                                       select new BalanceEndpointResponse { Id = employeeIdOrSsn, Ssn = t.Ssn.MaskSsn(), CurrentBalance = t.CurrentBalance, Etva = t.Etva, TotalDistributions = t.TotalDistributions, VestedBalance =  t.VestedBalance, VestingPercent = t.VestingPercent}).FirstOrDefaultAsync();
                     return rslt;
                 });

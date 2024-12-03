@@ -362,10 +362,11 @@ public class FrozenReportService : IFrozenReportService
 
         var startEnd = await _calendarService.GetYearStartAndEndAccountingDates(req.ProfitYear, cancellationToken);
 
-        var rawResult = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        var rawResult = await _dataContextFactory.UseReadOnlyContext(ctx =>
         {
             var query = _totalService.TotalVestingBalance(ctx, req.ProfitYear, startEnd.FiscalEndDate);
 
+            var todayDayNumber = DateOnly.FromDateTime(DateTime.Now).DayNumber;
             var joinedQuery = from q in query
                               join d in ctx.Demographics on q.Ssn equals d.Ssn into demographics
                               from demographic in demographics.DefaultIfEmpty()
@@ -377,13 +378,15 @@ public class FrozenReportService : IFrozenReportService
                                   q,
                                   Demographic = demographic,
                                   BeneficiaryContact = beneficiary,
-                                  EmploymentType = demographic != null && demographic.EmploymentTypeId == EmploymentType.Constants.PartTime
-                                      ? PT
-                                      : FT,
+                                  EmploymentType = 
+                                      demographic != null && demographic.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT,
                                   IsBeneficiary = demographic == null && beneficiary != null,
                                   DateOfBirth = demographic != null
                                       ? demographic.DateOfBirth
-                                      : (beneficiary!.DateOfBirth)
+                                      : (beneficiary!.DateOfBirth),
+                                  Age = (byte)(Math.Floor((todayDayNumber - (demographic != null
+                                      ? demographic.DateOfBirth.DayNumber
+                                      : beneficiary!.DateOfBirth.DayNumber)) / 365.2499))
                               };
 
             joinedQuery = req.ReportType switch
@@ -393,21 +396,20 @@ public class FrozenReportService : IFrozenReportService
                 _ => joinedQuery
             };
 
-            return await joinedQuery.ToListAsync(cancellationToken);
+            return joinedQuery
+                .GroupBy(item => item.Age)
+                .Select(g => new
+                {
+                    Age = g.Key,
+                    Entries = g.ToList()
+                })
+                .ToListAsync(cancellationToken);
         });
 
-        // Client-side processing for grouping and filtering
-        var groupedResult = rawResult
-            .GroupBy(item => item.DateOfBirth.Age())
-            .Select(g => new
-            {
-                Age = g.Key,
-                Entries = g.ToList()
-            })
-            .ToList();
+       
 
         // Final transformation to BalanceByAgeDetail
-        var details = groupedResult
+        var details = rawResult
             .Select(group => new BalanceByAgeDetail
             {
                 Age = group.Age,

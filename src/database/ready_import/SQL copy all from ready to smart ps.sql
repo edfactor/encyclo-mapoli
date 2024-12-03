@@ -378,7 +378,7 @@ END;
         0 AS HOURS_EXECUTIVE, -- History not previously tracked
         0 AS INCOME_EXECUTIVE, -- History not previously tracked
         PY_PROF_POINTS  as POINTS_EARNED,
-        0 as YEARS_IN_PLAN -- History not previously tracked
+        PY_PS_YEARS - 1 as YEARS_IN_PLAN
     FROM {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT
     where PAYPROF_BADGE in ( select EMPLOYEE_ID from DEMOGRAPHIC  );
 
