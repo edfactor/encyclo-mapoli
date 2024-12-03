@@ -1,5 +1,4 @@
-﻿using System.Collections.Frozen;
-using Demoulas.Common.Contracts.Contracts.Request;
+﻿using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 

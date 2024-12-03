@@ -432,7 +432,6 @@ public class FrozenReportService : IFrozenReportService
             ReportType = req.ReportType,
             BalanceTotalAmount = details.Sum(d => d.CurrentBalance),
             VestedTotalAmount = details.Sum(d => d.VestedBalance),
-            TotalEmployees = (short)details.Sum(d => d.EmployeeCount),
             TotalMembers = (short)details.Sum(d => d.EmployeeCount + d.BeneficiaryCount),
             TotalBeneficiaries = (short)details.Sum(d => d.BeneficiaryCount),
             TotalBeneficiariesAmount = details.Sum(d => d.CurrentBeneficiaryBalance),
