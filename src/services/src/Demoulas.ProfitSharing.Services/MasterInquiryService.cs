@@ -172,7 +172,6 @@ public class MasterInquiryService : IMasterInquiryService
                             Ssn = demographicData.Ssn,
                             YearToDateProfitSharingHours = demographicData.LatestPayProfit?.CurrentHoursYear ?? 0,
                             YearsInPlan = demographicData.LatestPayProfit?.YearsInPlan ?? 0,
-                            BadgeNumber = demographicData.DemographicId.ToString(),
                             HireDate = demographicData.HireDate,
                             ReHireDate = demographicData.ReHireDate,
                             TerminationDate = demographicData.TerminationDate,
