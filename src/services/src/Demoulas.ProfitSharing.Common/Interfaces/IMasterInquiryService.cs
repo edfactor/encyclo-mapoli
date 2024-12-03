@@ -6,5 +6,5 @@ using Demoulas.Common.Contracts.Contracts.Response;
 namespace Demoulas.ProfitSharing.Common.Interfaces;
 public interface IMasterInquiryService
 {
-    public Task<PaginatedResponseDto<MasterInquiryResponseDto>> GetMasterInquiry(MasterInquiryRequest req, CancellationToken cancellationToken = default);
+    public Task<MasterInquiryWithDetailsResponseDto> GetMasterInquiry(MasterInquiryRequest req, CancellationToken cancellationToken = default);
 }
