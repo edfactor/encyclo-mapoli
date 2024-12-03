@@ -19,7 +19,7 @@ const schema = yup.object().shape({
     .number()
     .typeError("Year must be a number")
     .integer("Year must be an integer")
-    .min(1900, "Year must be 1900 or later")
+    .min(2020, "Year must be 2020 or later")
     .max(2100, "Year must be 2100 or earlier")
     .required("Year is required")
 });

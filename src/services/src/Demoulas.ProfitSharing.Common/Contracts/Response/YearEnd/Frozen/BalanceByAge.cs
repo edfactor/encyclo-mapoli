@@ -1,5 +1,4 @@
-﻿using System.Collections.Frozen;
-using Demoulas.Common.Contracts.Contracts.Request;
+﻿using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 
@@ -18,12 +17,26 @@ public sealed record BalanceByAge : ReportResponseBase<BalanceByAgeDetail>
     public required short TotalMembers { get; init; }
     public required decimal BalanceTotalAmount { get; init; }
     public required short TotalBeneficiaries { get; set; }
-    public required short TotalNonBeneficiaries { get; set; }
     public decimal VestedTotalAmount { get; set; }
     public decimal TotalBeneficiariesAmount { get; set; }
     public decimal TotalBeneficiariesVestedAmount { get; set; }
-    public decimal TotalNonBeneficiariesAmount { get; set; }
-    public decimal TotalNonBeneficiariesVestedAmount { get; set; }
+
+    public short TotalNonBeneficiaries
+    {
+        get { return (short)(TotalMembers - TotalBeneficiaries); }
+    }
+    public decimal TotalNonBeneficiariesAmount
+    {
+        get { return BalanceTotalAmount - TotalBeneficiariesAmount; }
+    }
+
+    public decimal TotalNonBeneficiariesVestedAmount
+    {
+        get { return VestedTotalAmount - TotalBeneficiariesVestedAmount; }
+    }
+
+    public int TotalFullTimeCount { get; set; }
+    public int TotalPartTimeCount { get; set; }
 
 
     public static BalanceByAge ResponseExample()
@@ -35,7 +48,6 @@ public sealed record BalanceByAge : ReportResponseBase<BalanceByAgeDetail>
             BalanceTotalAmount = (decimal)1_855_156.09,
             TotalMembers = 63,
             TotalBeneficiaries = 13,
-            TotalNonBeneficiaries = 50,
 
             Response = new PaginatedResponseDto<BalanceByAgeDetail>(new PaginationRequestDto())
             {
