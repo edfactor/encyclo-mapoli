@@ -343,3 +343,20 @@ export interface ForfeituresByAgeDetail {
   employeeCount: number;
   amount: number;
 }
+
+export interface EmployeeDetails {
+	firstName: string;
+	lastName: string;
+	addressCity: string;
+	addressState: string;
+	addressZipCode: string;
+	dateOfBirth: string;
+	ssn: string;
+	yearToDateProfitSharingHours: number;
+	yearsInPlan: number;
+	percentageVested: string;
+	contributionsLastYear: boolean;
+	enrolled: boolean;
+	employeeId: string;
+	badgeNumber: string;
+}
