@@ -386,6 +386,13 @@ public class FrozenReportService : IFrozenReportService
                                       : (beneficiary!.DateOfBirth)
                               };
 
+            joinedQuery = req.ReportType switch
+            {
+                FrozenReportsByAgeRequest.Report.FullTime => joinedQuery.Where(g => g.EmploymentType == FT),
+                FrozenReportsByAgeRequest.Report.PartTime => joinedQuery.Where(g => g.EmploymentType == PT),
+                _ => joinedQuery
+            };
+
             return await joinedQuery.ToListAsync(cancellationToken);
         });
 
@@ -397,12 +404,6 @@ public class FrozenReportService : IFrozenReportService
                 Age = g.Key,
                 Entries = g.ToList()
             })
-            .Where(g => req.ReportType switch
-            {
-                FrozenReportsByAgeRequest.Report.FullTime => g.Entries.All(e => e.EmploymentType == FT),
-                FrozenReportsByAgeRequest.Report.PartTime => g.Entries.All(e => e.EmploymentType == PT),
-                _ => true
-            })
             .ToList();
 
         // Final transformation to BalanceByAgeDetail
@@ -411,8 +412,8 @@ public class FrozenReportService : IFrozenReportService
             {
                 Age = group.Age,
                 CurrentBalance = group.Entries.Sum(e => e.q.CurrentBalance),
-                CurrentBeneficiaryBalance = group.Entries.Sum(e => e.IsBeneficiary ? 0 : e.q.CurrentBalance),
-                CurrentBeneficiaryVestedBalance = group.Entries.Sum(e => e.IsBeneficiary ? 0 : e.q.VestedBalance),
+                CurrentBeneficiaryBalance = group.Entries.Sum(e => e.IsBeneficiary ? e.q.CurrentBalance : 0),
+                CurrentBeneficiaryVestedBalance = group.Entries.Sum(e => e.IsBeneficiary ? e.q.VestedBalance : 0),
                 VestedBalance = group.Entries.Sum(e => e.q.VestedBalance),
                 BeneficiaryCount = group.Entries.Count(e => e.IsBeneficiary),
                 EmployeeCount = group.Entries.Count(e => !e.IsBeneficiary)
@@ -431,13 +432,11 @@ public class FrozenReportService : IFrozenReportService
             ReportType = req.ReportType,
             BalanceTotalAmount = details.Sum(d => d.CurrentBalance),
             VestedTotalAmount = details.Sum(d => d.VestedBalance),
+            TotalEmployees = (short)details.Sum(d => d.EmployeeCount),
             TotalMembers = (short)details.Sum(d => d.EmployeeCount + d.BeneficiaryCount),
             TotalBeneficiaries = (short)details.Sum(d => d.BeneficiaryCount),
             TotalBeneficiariesAmount = details.Sum(d => d.CurrentBeneficiaryBalance),
             TotalBeneficiariesVestedAmount = details.Sum(d => d.CurrentBeneficiaryVestedBalance),
-            TotalNonBeneficiaries = (short)details.Sum(d => d.EmployeeCount),
-            TotalNonBeneficiariesAmount = details.Sum(d => d.CurrentBalance - d.CurrentBeneficiaryBalance),
-            TotalNonBeneficiariesVestedAmount = details.Sum(d => d.VestedBalance - d.CurrentBeneficiaryVestedBalance),
             Response = new PaginatedResponseDto<BalanceByAgeDetail>(req)
             {
                 Results = details,

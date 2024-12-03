@@ -23,7 +23,7 @@ export const GetBalanceByAgeColumns = (  reportType: FrozenReportsByAgeRequestTy
         cellDataType: "text"
       },
       {
-        headerName: "EMPS",
+        headerName: "Count",
         field: "employeeCount",
         colId: "employeeCount",
         minWidth: 100,
