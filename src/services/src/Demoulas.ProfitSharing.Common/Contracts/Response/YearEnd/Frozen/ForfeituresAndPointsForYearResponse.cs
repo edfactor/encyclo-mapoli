@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 public sealed record ForfeituresAndPointsForYearResponse
 {
     public required long EmployeeBadgeNumber { get; set; }

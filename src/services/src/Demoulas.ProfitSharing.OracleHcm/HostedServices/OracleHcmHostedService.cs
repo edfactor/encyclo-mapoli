@@ -25,6 +25,11 @@ internal sealed class OracleHcmHostedService : IHostedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
+        if (!_oracleHcmConfig.EnableSync)
+        {
+            return;
+        }
+
         _scheduler = await _schedulerFactory.GetScheduler(cancellationToken);
         _scheduler.JobFactory = _jobFactory;
 

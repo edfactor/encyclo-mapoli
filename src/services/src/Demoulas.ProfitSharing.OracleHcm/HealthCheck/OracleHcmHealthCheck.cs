@@ -21,9 +21,10 @@ public class OracleHcmHealthCheck : IHealthCheck
         HealthCheckContext context,
         CancellationToken cancellationToken = default)
     {
+        string url = string.Empty; // Declare the URL outside the try block
         try
         {
-            string url = await BuildUrl(cancellationToken);
+            url = await BuildUrl(cancellationToken);
             using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
             using HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken);
 
@@ -32,13 +33,17 @@ public class OracleHcmHealthCheck : IHealthCheck
                 return HealthCheckResult.Healthy("Oracle HCM is available.");
             }
 
-            return HealthCheckResult.Degraded("Oracle HCM is not available.");
+            return HealthCheckResult.Degraded($"Oracle HCM is not available : Response Status Code {response.StatusCode}");
         }
         catch (Exception ex)
         {
-            return HealthCheckResult.Degraded($"Oracle HCM check failed: {ex.Message}");
+            return HealthCheckResult.Degraded($"Oracle HCM check failed: {ex.Message}", ex, new Dictionary<string, object>
+            {
+                { "url", url }
+            });
         }
     }
+
 
     private async Task<string> BuildUrl( CancellationToken cancellationToken = default)
     {

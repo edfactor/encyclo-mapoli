@@ -209,7 +209,7 @@ SELECT
                 )
             )
         THEN TO_DATE(PYBEN.PYBEN_DOBIRTH, 'YYYYMMDD')
-        ELSE DATE '1800-01-01'
+        ELSE DATE '1900-01-01'
     END AS DATE_OF_BIRTH,
     PYBEN.PYBEN_ADD AS STREET,
     PYBEN.PYBEN_CITY AS CITY,
@@ -261,6 +261,36 @@ LEFT JOIN {SOURCE_PROFITSHARE_SCHEMA}.PAYREL ON PYBEN.PYBEN_PSN = PAYREL.PYREL_P
 
 --------------------------------------------------------------------------------------------------
 
+-- Simple BENEFICIARY validation
+DECLARE
+    v_sum_psdisb       NUMBER;
+    v_sum_psamt        NUMBER;
+    v_sum_prof_earn    NUMBER;
+    v_sum_distribution NUMBER;
+    v_sum_amount       NUMBER;
+    v_sum_earnings     NUMBER;
+BEGIN
+    -- Fetch values from PAYBEN table
+    SELECT SUM(PYBEN_PSDISB), SUM(PYBEN_PSAMT), SUM(PYBEN_PROF_EARN)
+    INTO v_sum_psdisb, v_sum_psamt, v_sum_prof_earn
+    FROM {SOURCE_PROFITSHARE_SCHEMA}.PAYBEN;
+
+    -- Fetch values from BENEFICIARY table
+    SELECT SUM(DISTRIBUTION), SUM(AMOUNT), SUM(EARNINGS)
+    INTO v_sum_distribution, v_sum_amount, v_sum_earnings
+    FROM BENEFICIARY;
+
+    -- Compare the sums and raise an error if there is a mismatch
+    IF v_sum_psdisb != v_sum_distribution OR
+       v_sum_psamt != v_sum_amount OR
+       v_sum_prof_earn != v_sum_earnings THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Mismatch detected between PAYBEN and BENEFICIARY tables.');
+    END IF;
+
+    DBMS_OUTPUT.PUT_LINE('All sums match successfully.');
+END;
+
+
  
 
 -------------------------------------------------------------------------------
@@ -281,7 +311,8 @@ LEFT JOIN {SOURCE_PROFITSHARE_SCHEMA}.PAYREL ON PYBEN.PYBEN_PSN = PAYREL.PYREL_P
         ZERO_CONTRIBUTION_REASON_ID,
         HOURS_EXECUTIVE,
         INCOME_EXECUTIVE,
-        POINTS_EARNED)
+        POINTS_EARNED,
+        YEARS_IN_PLAN)
     SELECT
         (select ID from DEMOGRAPHIC where EMPLOYEE_ID = PAYPROF_BADGE) AS DEMOGRAPHIC_ID,
         this_year AS PROFIT_YEAR,
@@ -302,7 +333,8 @@ LEFT JOIN {SOURCE_PROFITSHARE_SCHEMA}.PAYREL ON PYBEN.PYBEN_PSN = PAYREL.PYREL_P
         PY_PROF_ZEROCONT AS ZERO_CONTRIBUTION_REASON_ID,
         NVL(PY_PH_EXEC, 0) AS HOURS_EXECUTIVE,
         NVL(PY_PD_EXEC, 0) AS INCOME_EXECUTIVE,
-        0 -- Field in current system is for prior year, not current
+        0, -- Field in current system is for prior year, not current
+        PY_PS_YEARS as YEARS_IN_PLAN
     FROM {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT
     where PAYPROF_BADGE in ( select EMPLOYEE_ID from DEMOGRAPHIC  );
 
@@ -323,9 +355,10 @@ LEFT JOIN {SOURCE_PROFITSHARE_SCHEMA}.PAYREL ON PYBEN.PYBEN_PSN = PAYREL.PYREL_P
         ZERO_CONTRIBUTION_REASON_ID,
         HOURS_EXECUTIVE,
         INCOME_EXECUTIVE,
-        POINTS_EARNED)
+        POINTS_EARNED,
+        YEARS_IN_PLAN)
     SELECT
-        (select ID from DEMOGRAPHIC where EMPLOYEE_ID = PAYPROF_BADGE) AS DEMOGRAPHIC_ID,
+        (SELECT ID FROM DEMOGRAPHIC WHERE EMPLOYEE_ID = PAYPROF_BADGE) AS DEMOGRAPHIC_ID,
         last_year AS PROFIT_YEAR,
         PY_PH_LASTYR AS CURRENT_HOURS_YEAR,
         PY_PD_LASTYR AS CURRENT_INCOME_YEAR,
@@ -333,20 +366,25 @@ LEFT JOIN {SOURCE_PROFITSHARE_SCHEMA}.PAYREL ON PYBEN.PYBEN_PSN = PAYREL.PYREL_P
         0 AS SECONDARY_EARNINGS, -- History not previously tracked
         0 AS SECONDARY_ETVA_EARNINGS, -- History not previously tracked
         PY_WEEKS_WORK_LAST AS WEEKS_WORKED_YEAR,
-        null AS PS_CERTIFICATE_ISSUED_DATE,
+        NULL AS PS_CERTIFICATE_ISSUED_DATE,
         9 AS ENROLLMENT_ID, -- 9/History not previously tracked
         PY_PROF_BENEFICIARY AS BENEFICIARY_ID,
-         CASE
-            WHEN PY_PROF_NEWEMP  = '1' THEN
-                0
+        CASE
+            WHEN PY_PROF_NEWEMP = '1' THEN 0
             ELSE 0
         END AS EMPLOYEE_TYPE_ID,
         8 AS ZERO_CONTRIBUTION_REASON_ID, -- 8/History not previously tracked (Unknown)
         0 AS HOURS_EXECUTIVE, -- History not previously tracked
         0 AS INCOME_EXECUTIVE, -- History not previously tracked
-        PY_PROF_POINTS  as POINTS_EARNED
-    FROM {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT
-    where PAYPROF_BADGE in ( select EMPLOYEE_ID from DEMOGRAPHIC  );
+        PY_PROF_POINTS AS POINTS_EARNED,
+        CASE WHEN d.PY_TERM_DT = 0 THEN  PY_PS_YEARS - 1
+            ELSE PY_PS_YEARS
+        END AS YEARS_IN_PLAN
+    FROM
+        {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT pp
+        LEFT JOIN {SOURCE_PROFITSHARE_SCHEMA}.DEMOGRAPHICS d on d.DEM_BADGE = pp.PAYPROF_BADGE
+    WHERE
+        PAYPROF_BADGE IN (SELECT EMPLOYEE_ID FROM DEMOGRAPHIC);
 
 ---------------------------------------------------------------
 

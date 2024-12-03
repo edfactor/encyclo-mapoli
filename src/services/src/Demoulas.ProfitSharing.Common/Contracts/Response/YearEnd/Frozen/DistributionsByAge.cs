@@ -3,7 +3,7 @@ using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 
-namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 
 public sealed record DistributionsByAge : ReportResponseBase<DistributionsByAgeDetail>
 {
@@ -29,9 +29,9 @@ public sealed record DistributionsByAge : ReportResponseBase<DistributionsByAgeD
     }
 
 
-    
 
-    
+
+
     public static DistributionsByAge ResponseExample()
     {
         return new DistributionsByAge
@@ -42,7 +42,7 @@ public sealed record DistributionsByAge : ReportResponseBase<DistributionsByAgeD
             HardshipTotalEmployees = 18,
             RegularTotalAmount = (decimal)1_855_156.09,
             HardshipTotalAmount = (decimal)386_243.46,
-            
+
             Response = new PaginatedResponseDto<DistributionsByAgeDetail>(new PaginationRequestDto())
             {
                 Results = new List<DistributionsByAgeDetail> { DistributionsByAgeDetail.ResponseExample() }

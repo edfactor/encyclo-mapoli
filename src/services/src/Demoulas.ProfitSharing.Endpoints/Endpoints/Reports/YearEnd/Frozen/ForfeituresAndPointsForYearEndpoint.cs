@@ -2,7 +2,7 @@
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;

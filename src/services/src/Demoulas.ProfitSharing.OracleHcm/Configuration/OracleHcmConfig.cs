@@ -1,6 +1,8 @@
 ﻿namespace Demoulas.ProfitSharing.OracleHcm.Configuration;
+
 public sealed record OracleHcmConfig
 {
+    public bool EnableSync { get; set; } = true;
     public required string BaseAddress { get; set; }
     public required string DemographicUrl { get; set; }
     public string? PayrollUrl { get; set; }

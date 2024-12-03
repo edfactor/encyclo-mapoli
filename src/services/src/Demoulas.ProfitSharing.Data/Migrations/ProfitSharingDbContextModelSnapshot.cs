@@ -27965,6 +27965,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(2)")
                         .HasColumnName("WEEKS_WORKED_YEAR");
 
+                    b.Property<byte>("YearsInPlan")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(3)")
+                        .HasDefaultValue((byte)0)
+                        .HasColumnName("YEARS_IN_PLAN");
+
                     b.Property<byte?>("ZeroContributionReasonId")
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("ZERO_CONTRIBUTION_REASON_ID");

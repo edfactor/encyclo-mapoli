@@ -149,7 +149,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
                 DateOfBirth = employee.DateOfBirth,
                 HireDate = employee.WorkRelationship?.StartDate ?? SqlDateTime.MinValue.Value.ToDateOnly(),
                 TerminationDate = employee.WorkRelationship?.TerminationDate,
-                Ssn = (employee.NationalIdentifier?.NationalIdentifierNumber ?? faker.Person.Ssn()).ConvertSsnToInt() ?? 0,
+                Ssn = (employee.NationalIdentifier?.NationalIdentifierNumber ?? faker.Person.Ssn()).ConvertSsnToInt(),
                 StoreNumber = employee.WorkRelationship?.Assignment.LocationCode ?? 0,
                 DepartmentId = employee.WorkRelationship?.Assignment.GetDepartmentId() ?? 0,
                 PayClassificationId = employee.WorkRelationship?.Assignment.JobCode ?? 0,
