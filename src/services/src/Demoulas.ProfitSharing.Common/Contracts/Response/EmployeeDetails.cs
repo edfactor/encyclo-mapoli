@@ -12,7 +12,7 @@ public sealed record EmployeeDetails
     public int Ssn { get; init; }
     public decimal YearToDateProfitSharingHours { get; init; }
     public int YearsInPlan { get; init; }
-    public string PercentageVested { get; init; } = string.Empty;
+    public decimal PercentageVested { get; init; }
     public bool ContributionsLastYear { get; init; }
     public bool Enrolled { get; init; }
     public string EmployeeId { get; init; } = string.Empty;
