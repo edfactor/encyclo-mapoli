@@ -1,6 +1,6 @@
 ﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
-public class AdjustmentReportData {
+public class EmployeeAdjustmentApplied {
    
     public decimal SV_FORF_AMT { get; set; } 
     public decimal SV_FORF_ADJUSTED { get; set; } 

@@ -1,6 +1,6 @@
-﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
+﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.Formatters;
 
-public class Counters
+public class ReportCounters
 {
     public long PageCounter { get; set; } // PIC 9(05)
     public long LineCounter { get; set; } = 99; // PIC 99

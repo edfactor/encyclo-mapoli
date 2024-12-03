@@ -2,7 +2,7 @@
 
 using static FormatUtils;
 
-public class REPORT_LINE_2
+public class ReportLine2
 {
     public long PR2_PSN { get; set; } // PIC 9(11)
     public string? FILLER0 { get; set; } // PIC X

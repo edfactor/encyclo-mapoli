@@ -3,7 +3,7 @@
 /// <summary>
 /// Values provided externally used to guide how to award Earnings,Contributions and forfeiture points 
 /// </summary>
-public class PointValues
+public class AdjustmentAmounts
 {
     public decimal PV_CONT_01 { get; set; }
 
