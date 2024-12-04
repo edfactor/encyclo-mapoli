@@ -30,7 +30,8 @@ import {
   PagedReportResponse,
   ProfitSharingDistributionsByAge,
   ContributionsByAge,
-  ForfeituresByAge, BalanceByAge
+  ForfeituresByAge, BalanceByAge,
+  MasterInquiryResponseType
 } from "reduxstore/types";
 import {
   setDemographicBadgesNotInPayprofitData,
@@ -445,7 +446,7 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getProfitMasterInquiry: builder.query<Paged<MasterInquiryDetail>, MasterInquryRequest>({
+    getProfitMasterInquiry: builder.query<MasterInquiryResponseType, MasterInquryRequest>({
       query: (params) => ({
         url: "yearend/master-inquiry",
         method: "GET",
