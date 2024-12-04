@@ -3,7 +3,7 @@
 
 public class MemberFinancials
 {
-    public long EmployeeId { get; set; } 
+    public long EmployeeId { get; set; }
     public string? Name { get; set; } 
     public int Ssn { get; set; } 
     public decimal CurrentAmount { get; set; } 
