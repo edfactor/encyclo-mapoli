@@ -19,18 +19,23 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 {
     private readonly IProfitSharingDataContextFactory _factory;
     private readonly ICalendarService _calendarService;
+    private readonly ITotalService _totalService;
     private readonly ContributionService _contributionService;
 
-    public TerminatedEmployeeAndBeneficiaryReport(IProfitSharingDataContextFactory factory, ICalendarService calendarService, ContributionService contributionService)
+    public TerminatedEmployeeAndBeneficiaryReport(IProfitSharingDataContextFactory factory, 
+        ICalendarService calendarService,
+        ITotalService totalService,
+        ContributionService contributionService)
     {
         _factory = factory;
         _calendarService = calendarService;
+        _totalService = totalService;
         _contributionService = contributionService;
     }
 
-    public async Task<TerminatedEmployeeAndBeneficiaryResponse> CreateData(ProfitYearRequest req, CancellationToken cancellationToken)
+    public Task<TerminatedEmployeeAndBeneficiaryResponse> CreateDataAsync(ProfitYearRequest req, CancellationToken cancellationToken)
     {
-        return await _factory.UseReadOnlyContext(async ctx =>
+        return _factory.UseReadOnlyContext(async ctx =>
         {
             IAsyncEnumerable<MemberSlice> memberSliceUnion = await RetrieveMemberSlices(ctx, req, cancellationToken);
             var fullResponse = await MergeAndCreateDataset(ctx, req, memberSliceUnion, cancellationToken);
@@ -80,7 +85,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         var idList = demKeyList.Select(e => e.Id).ToHashSet();
         var badgeNumbers = demKeyList.Select(e => e.EmployeeId).ToHashSet();
 
-        var contributionYearsQuery = await _contributionService.GetContributionYears(badgeNumbers);
+        var contributionYearsQuery = _contributionService.GetContributionYears(ctx, badgeNumbers);
 
         var validEnrollmentIds = GetValidEnrollmentIds();
 
@@ -90,7 +95,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                         && validEnrollmentIds.Contains(p.EnrollmentId));
 
         var query = from employee in terminatedEmployees
-            join contribution in contributionYearsQuery on employee.Demographic.EmployeeId equals contribution.BadgeNumber
+            join contribution in contributionYearsQuery on employee.Demographic.EmployeeId equals contribution.EmployeeId
             join payProfit in payProfitsQuery on employee.Demographic.Id equals payProfit.DemographicId
             select new MemberSlice
             {
@@ -199,9 +204,9 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
             InternalProfitDetailDto profitDetailSummary = RetrieveProfitDetail(profitDetails, req.ProfitYear);
 
-            int vestingPercent = _contributionService.LookupVestingPercent(memberSlice.EnrollmentId, memberSlice.ZeroCont, memberSlice.YearsInPs);
+            int vestingPercent = _totalService.LookupVestingPercent(memberSlice.EnrollmentId, memberSlice.ZeroCont, memberSlice.YearsInPs);
 
-            var currentVestedAmount = _contributionService.CalculateCurrentVested(profitDetails, profitDetailSummary.CurrentAmount, vestingPercent);
+            var currentVestedAmount = _totalService.CalculateCurrentVested(profitDetails, profitDetailSummary.CurrentAmount, vestingPercent);
 
             var beneficiaryAllocation = profitDetailSummary.BeneficiaryAllocation;
 

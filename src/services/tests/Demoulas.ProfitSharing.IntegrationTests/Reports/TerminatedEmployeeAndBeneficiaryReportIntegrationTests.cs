@@ -36,7 +36,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : TestClassB
         };
         Stopwatch stopwatch = Stopwatch.StartNew();
         stopwatch.Start();
-        TerminatedEmployeeAndBeneficiaryResponse data = await terminatedEmployeeAndBeneficiaryReport.CreateData(req, CancellationToken.None);
+        TerminatedEmployeeAndBeneficiaryResponse data = await terminatedEmployeeAndBeneficiaryReport.CreateDataAsync(req, CancellationToken.None);
         string actualText = CreateTextReport(effectiveDateOfTestData, startDate, endDate, profitSharingYear, data);
         stopwatch.Stop();
         _testOutputHelper.WriteLine("Took: " + stopwatch.ElapsedMilliseconds);
