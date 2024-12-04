@@ -126,7 +126,6 @@ const MasterInquirySearchFilter = () => {
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
-      console.log("Fetching...");
       setIsFetching(true);
       const searchParams: MasterInquryRequest = {
         pagination: { skip: 0, take: 25 },
@@ -150,8 +149,6 @@ const MasterInquirySearchFilter = () => {
 
       triggerSearch(searchParams, false);
       setIsFetching(false);
-    } else {
-      console.log("not valid");
     }
   });
 

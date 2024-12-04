@@ -49,7 +49,6 @@ const Router = () => {
               ]}
               currentRoles={impersonating ? [impersonating] : []}
               setCurrentRoles={(value: string[]) => {
-                console.log("@D " + JSON.stringify(value));
                 switch (value[0]) {
                   case ImpersonationRoles.FinanceManager:
                     dispatch(setImpersonating(ImpersonationRoles.FinanceManager));
