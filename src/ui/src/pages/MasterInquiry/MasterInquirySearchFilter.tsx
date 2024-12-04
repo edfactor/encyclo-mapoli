@@ -17,7 +17,7 @@ import {
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { ImpersonationRoles, MasterInquryRequest } from "reduxstore/types";
+import { MasterInquryRequest } from "reduxstore/types";
 import { clearMasterInquiryData } from "reduxstore/slices/yearsEndSlice";
 import { useDispatch } from "react-redux";
 
@@ -145,7 +145,7 @@ const MasterInquirySearchFilter = () => {
         ...(!!data.forfeiture && { forfeiture: data.forfeiture }),
         ...(!!data.payment && { payment: data.payment }),
         ...(!!data.voids && { voids: data.voids }),
-        impersonation: ImpersonationRoles.ProfitSharingAdministrator
+        
       };
 
       triggerSearch(searchParams, false);

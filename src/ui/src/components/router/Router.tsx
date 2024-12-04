@@ -1,10 +1,9 @@
 import { BrowserRouter, Route } from "react-router-dom";
 import RouteSecurity from "./RouteSecurity";
 import LandingPage from "./LandingPage";
-import { MenuBar } from "smart-ui-library";
+import { ImpersonationMultiSelect, MenuBar } from "smart-ui-library";
 import MenuData from "../../MenuData";
 
-import ImpersonationMultiSelect from "components/MenuBar/ImpersonationMultiSelect";
 import DemographicBadgesNotInPayprofit from "pages/DemographicBadgesNotInPayprofit/DemographicBadgesNotInPayprofit";
 import DuplicateSSNsOnDemographics from "pages/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographics";
 import NegativeEtvaForSSNsOnPayprofit from "pages/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofit";
@@ -21,6 +20,10 @@ import DistributionByAge from "../../pages/DistributionByAge/DistributionByAge";
 import ContributionsByAge from "../../pages/ContributionsByAge/ContributionsByAge";
 import ForfeituresByAge from "../../pages/ForfeituresByAge/ForfeituresByAge";
 import BalanceByAge from "../../pages/BalanceByAge/BalanceByAge";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "reduxstore/store";
+import { setImpersonating } from "reduxstore/slices/securitySlice";
+import { ImpersonationRoles } from "reduxstore/types";
 
 const Router = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -28,11 +31,47 @@ const Router = () => {
   const hasImpersonationRole = true;
   const showImpersonation = hasImpersonationRole && !isProduction;
 
+  const { impersonating } = useSelector((state: RootState) => state.security);
+  const dispatch = useDispatch();
+
   return (
     <BrowserRouter>
       <MenuBar
         menuInfo={MenuData}
-        impersonationMultiSelect={showImpersonation && <ImpersonationMultiSelect />}
+        impersonationMultiSelect={
+          showImpersonation ? (
+            <ImpersonationMultiSelect
+              impersonationRoles={[
+                "Finance-Manager",
+                "Distributions-Clerk",
+                "Hardship-Administrator",
+                "Profit-Sharing-Administrator"
+              ]}
+              currentRoles={impersonating ? [impersonating] : []}
+              setCurrentRoles={(value: string[]) => {
+                console.log("@D " + JSON.stringify(value));
+                switch (value[0]) {
+                  case ImpersonationRoles.FinanceManager:
+                    dispatch(setImpersonating(ImpersonationRoles.FinanceManager));
+                    break;
+                  case ImpersonationRoles.DistributionsClerk:
+                    dispatch(setImpersonating(ImpersonationRoles.DistributionsClerk));
+                    break;
+                  case ImpersonationRoles.HardshipAdministrator:
+                    dispatch(setImpersonating(ImpersonationRoles.HardshipAdministrator));
+                    break;
+                  case ImpersonationRoles.ProfitSharingAdministrator:
+                    dispatch(setImpersonating(ImpersonationRoles.ProfitSharingAdministrator));
+                    break;
+                  default:
+                    dispatch(setImpersonating(null));
+                }
+              }}
+            />
+          ) : (
+            <></>
+          )
+        }
       />
       <RouteSecurity oktaEnabled={oktaEnabled}>
         <Route
@@ -80,7 +119,7 @@ const Router = () => {
         <Route
           path="contributions-by-age"
           element={<ContributionsByAge />}></Route>
-         <Route
+        <Route
           path="forfeitures-by-age"
           element={<ForfeituresByAge />}></Route>
         <Route

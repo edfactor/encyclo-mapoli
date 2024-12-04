@@ -6,7 +6,7 @@ import { useLazyGetBalanceByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { ImpersonationRoles, FrozenReportsByAgeRequestType } from "reduxstore/types";
+import { FrozenReportsByAgeRequestType } from "reduxstore/types";
 
 interface BalanceByAgeSearch {
   profitYear: number;
@@ -48,8 +48,7 @@ const BalanceByAgeSearchFilter = () => {
         {
           profitYear: data.profitYear,
           reportType: FrozenReportsByAgeRequestType.Total,
-          pagination: { skip: 0, take: 255 },
-          impersonation: ImpersonationRoles.ProfitSharingAdministrator
+          pagination: { skip: 0, take: 255 }
         },
         false
       );
@@ -57,8 +56,7 @@ const BalanceByAgeSearchFilter = () => {
         {
           profitYear: data.profitYear,
           reportType: FrozenReportsByAgeRequestType.FullTime,
-          pagination: { skip: 0, take: 255 },
-          impersonation: ImpersonationRoles.ProfitSharingAdministrator
+          pagination: { skip: 0, take: 255 }
         },
         false
       );
@@ -66,8 +64,7 @@ const BalanceByAgeSearchFilter = () => {
         {
           profitYear: data.profitYear,
           reportType: FrozenReportsByAgeRequestType.PartTime,
-          pagination: { skip: 0, take: 255 },
-          impersonation: ImpersonationRoles.ProfitSharingAdministrator
+          pagination: { skip: 0, take: 255 }
         },
         false
       );
