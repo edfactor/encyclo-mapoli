@@ -3,13 +3,13 @@
 public record DetailTotals
 {
 
-    public decimal DIST_TOTAL { get; set; }
-    public decimal FORFEIT_TOTAL { get; set; }
-    public decimal ALLOCATION_TOTAL { get; set; }
-    public decimal PALLOCATION_TOTAL { get; set; }
+    public decimal DistributionsTotal { get; set; }
+    public decimal ForfeitsTotal { get; set; }
+    public decimal AllocationsTotal { get; set; }
+    public decimal PaidAllocationsTotal { get; set; }
 
-    public decimal WS_PROF_MIL { get; set; }
-    public decimal WS_PROF_CAF { get; set; }
+    public decimal MilitaryTotal { get; set; }
+    public decimal ClassActionFundTotal { get; set; }
 
 
 }

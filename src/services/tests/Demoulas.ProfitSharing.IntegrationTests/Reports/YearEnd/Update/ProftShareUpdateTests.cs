@@ -45,7 +45,7 @@ public class ProftShareUpdateTests
         pay444.TodaysDateTime = new DateTime(2024, 11, 14, 10, 35, 0); // time report was generated
 
         // Act
-        pay444.m015MainProcessing( 15, 1, 2, 0, 0, 0, 0, 0, 0, 0, 30000);
+        pay444.m015MainProcessing( 15, 1, 2, 0, 0, 0, 0, 0, 0, 0, 30_000);
 
         // Assert
         string expected = LoadExpectedReport(reportName);
@@ -64,7 +64,7 @@ public class ProftShareUpdateTests
         pay444.TodaysDateTime = new DateTime(2024, 11, 19, 19, 18, 0); // time report was generated
 
         // Act
-        pay444.m015MainProcessing( 15, 1, 2, 0, 700174, 44.77m, 18.16m, 22.33m, 0, 0, 30000);
+        pay444.m015MainProcessing( 15, 1, 2, 0, 700174, 44.77m, 18.16m, 22.33m, 0, 0, 30_000);
 
         // Assert
         string expected = LoadExpectedReport(reportName);
