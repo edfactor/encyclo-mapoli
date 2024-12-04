@@ -17,7 +17,9 @@ import {
   MissingCommasInPYName,
   NegativeEtvaForSSNsOnPayProfit,
   PagedReportResponse,
-  ProfitSharingDistributionsByAge
+  ProfitSharingDistributionsByAge,
+  EmployeeDetails,
+  MasterInquiryResponseType
 } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
 
@@ -34,6 +36,7 @@ export interface YearsEndState {
   executiveHoursAndDollars: PagedReportResponse<ExecutiveHoursAndDollars> | null;
   eligibleEmployees: EligibleEmployeeResponseDto | null;
   masterInquiryData: Paged<MasterInquiryDetail> | null;
+  masterInquiryEmployeeDetails: EmployeeDetails | null;
   distributionsByAgeTotal: ProfitSharingDistributionsByAge | null;
   distributionsByAgeFullTime: ProfitSharingDistributionsByAge | null;
   distributionsByAgePartTime: ProfitSharingDistributionsByAge | null;
@@ -61,6 +64,7 @@ const initialState: YearsEndState = {
   executiveHoursAndDollars: null,
   eligibleEmployees: null,
   masterInquiryData: null,
+  masterInquiryEmployeeDetails: null,
   distributionsByAgeTotal: null,
   distributionsByAgeFullTime: null,
   distributionsByAgePartTime: null,
@@ -127,11 +131,16 @@ export const yearsEndSlice = createSlice({
     setEligibleEmployees: (state, action: PayloadAction<EligibleEmployeeResponseDto>) => {
       state.eligibleEmployees = action.payload;
     },
-    setMasterInquiryData: (state, action: PayloadAction<Paged<MasterInquiryDetail>>) => {
-      state.masterInquiryData = action.payload;
+    setMasterInquiryData: (state, action: PayloadAction<MasterInquiryResponseType>) => {
+      state.masterInquiryData = action.payload.inquiryResults;
+      
+      if (action.payload.employeeDetails) {
+        state.masterInquiryEmployeeDetails = action.payload.employeeDetails;
+      }
     },
     clearMasterInquiryData: (state) => {
       state.masterInquiryData = null;
+      state.masterInquiryEmployeeDetails = null;
     },
     setDistributionsByAge: (state, action: PayloadAction<ProfitSharingDistributionsByAge>) => {
       if (action.payload.reportType == FrozenReportsByAgeRequestType.Total) {

@@ -347,6 +347,7 @@ export interface ForfeituresByAgeDetail {
 export interface EmployeeDetails {
 	firstName: string;
 	lastName: string;
+  address: string;
 	addressCity: string;
 	addressState: string;
 	addressZipCode: string;
@@ -354,11 +355,23 @@ export interface EmployeeDetails {
 	ssn: string;
 	yearToDateProfitSharingHours: number;
 	yearsInPlan: number;
-	percentageVested: string;
+	percentageVested: number;
 	contributionsLastYear: boolean;
 	enrolled: boolean;
 	employeeId: string;
-	badgeNumber: string;
+  hireDate: string;
+  terminationDate: string | null;
+  reHireDate: string | null;
+  storeNumber: number;
+  beginPSAmount: number;
+  currentPSAmount: number;
+  beginVestedAmount: number;
+  currentVestedAmount: number;
+}
+
+export interface MasterInquiryResponseType {
+  employeeDetails: EmployeeDetails | null;
+  inquiryResults: Paged<MasterInquiryDetail>;
 }
 export interface BalanceByAge {
   reportName: string;
