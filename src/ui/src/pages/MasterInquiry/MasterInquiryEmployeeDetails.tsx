@@ -102,12 +102,12 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
               data={employeeSection}
             />
           </Grid2>
-          <Grid2 xs={3}>
+          <Grid2 xs={2}>
             <LabelValueSection
               data={hireSection}
             />
           </Grid2>
-          <Grid2 xs={2}>
+          <Grid2 xs={3}>
             <LabelValueSection
               data={amountsSection}
             />
