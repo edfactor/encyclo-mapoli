@@ -33,12 +33,12 @@ internal sealed class BeneficiaryContactFaker : Faker<BeneficiaryContact>
                 PostalCode = f.Address.ZipCode(),
                 CountryIso = Country.Constants.Us
             });
-        RuleFor(ci => ci.PhoneNumber, f => f.Phone.PhoneNumber("###-###-####"))
-            .RuleFor(ci => ci.MobileNumber, f => f.Phone.PhoneNumber("###-###-####"))
-            .RuleFor(ci => ci.EmailAddress, f => f.Internet.Email())
-            .RuleFor(ci => ci.FirstName, f => f.Name.FirstName())
-            .RuleFor(ci => ci.MiddleName, f => f.Name.FirstName().OrNull(f))
-            .RuleFor(ci => ci.LastName, f => f.Name.LastName())
-            .RuleFor(d => d.FullName, (f, d) => $"{d.LastName}, {d.FirstName}");
+        RuleFor(ci => ci.ContactInfo.PhoneNumber, f => f.Phone.PhoneNumber("###-###-####"))
+            .RuleFor(ci => ci.ContactInfo.MobileNumber, f => f.Phone.PhoneNumber("###-###-####"))
+            .RuleFor(ci => ci.ContactInfo.EmailAddress, f => f.Internet.Email())
+            .RuleFor(ci => ci.ContactInfo.FirstName, f => f.Name.FirstName())
+            .RuleFor(ci => ci.ContactInfo.MiddleName, f => f.Name.FirstName().OrNull(f))
+            .RuleFor(ci => ci.ContactInfo.LastName, f => f.Name.LastName())
+            .RuleFor(d => d.ContactInfo.FullName, (f, d) => $"{d.ContactInfo.LastName}, {d.ContactInfo.FirstName}");
     }
 }

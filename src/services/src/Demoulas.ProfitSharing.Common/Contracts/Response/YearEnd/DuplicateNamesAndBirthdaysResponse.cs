@@ -6,7 +6,7 @@ public sealed record DuplicateNamesAndBirthdaysResponse
     public string? Name { get; set; }
     public required DateOnly DateOfBirth { get; set; }
     public required AddressResponseDto Address { get; set; }
-    public short Years { get; set; }
+    public byte Years { get; set; }
     public DateOnly HireDate { get; set; }
     public DateOnly? TerminationDate { get; set; }
     public required char Status { get; set; }

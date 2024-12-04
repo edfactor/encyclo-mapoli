@@ -3,19 +3,24 @@ using System.Reflection;
 using Demoulas.AccountsReceivable.Tests.Common.Fixtures;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.IntegrationTests.Helpers;
+using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports;
 public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : TestClassBase
 {
     private readonly ITestOutputHelper _testOutputHelper;
+    private readonly IntegrationTestsFixture _fixture;
 
     public TerminatedEmployeeAndBeneficiaryReportIntegrationTests(ITestOutputHelper testOutputHelper, IntegrationTestsFixture fixture) : base(testOutputHelper, fixture)
     {
         _testOutputHelper = testOutputHelper;
+        _fixture = fixture;
     }
 
     [Fact]
@@ -29,14 +34,17 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : TestClassB
 
 
         DateOnly effectiveDateOfTestData = new DateOnly(2024, 9, 17);
-        TerminatedEmployeeAndBeneficiaryReport terminatedEmployeeAndBeneficiaryReport = new TerminatedEmployeeAndBeneficiaryReport(ProfitSharingDataContextFactory);
-        ProfitYearRequest req = new()
-        {
-            ProfitYear = profitSharingYear,
-        };
+
+        var calendarService = _fixture.Services.GetRequiredService<ICalendarService>()!;
+        var totalService = _fixture.Services.GetRequiredService<TotalService>()!;
+        var contributionService = _fixture.Services.GetRequiredService<ContributionService>()!;
+        TerminatedEmployeeAndBeneficiaryReportService mockService =
+            new TerminatedEmployeeAndBeneficiaryReportService(ProfitSharingDataContextFactory, calendarService, totalService, contributionService);
+       
         Stopwatch stopwatch = Stopwatch.StartNew();
         stopwatch.Start();
-        TerminatedEmployeeAndBeneficiaryResponse data = await terminatedEmployeeAndBeneficiaryReport.CreateDataAsync(req, CancellationToken.None);
+        var data = await mockService.GetReport(new ProfitYearRequest { ProfitYear = profitSharingYear }, CancellationToken.None);
+
         string actualText = CreateTextReport(effectiveDateOfTestData, startDate, endDate, profitSharingYear, data);
         stopwatch.Stop();
         _testOutputHelper.WriteLine("Took: " + stopwatch.ElapsedMilliseconds);

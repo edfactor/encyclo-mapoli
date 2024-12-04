@@ -9,17 +9,25 @@ public class TerminatedEmployeeAndBeneficiaryReportService : ITerminatedEmployee
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ICalendarService _calendarService;
+    private readonly TotalService _totalService;
+    private readonly ContributionService _contributionService;
 
-    public TerminatedEmployeeAndBeneficiaryReportService(IProfitSharingDataContextFactory dataContextFactory, ICalendarService calendarService)
+    public TerminatedEmployeeAndBeneficiaryReportService(IProfitSharingDataContextFactory dataContextFactory, 
+        ICalendarService calendarService,
+        TotalService totalService,
+        ContributionService contributionService)
     {
         _dataContextFactory = dataContextFactory;
         _calendarService = calendarService;
+        _totalService = totalService;
+        _contributionService = contributionService;
     }
 
 
     public Task<TerminatedEmployeeAndBeneficiaryResponse> GetReport(ProfitYearRequest req, CancellationToken ct)
     {
-        TerminatedEmployeeAndBeneficiaryReport reportGenerator = new TerminatedEmployeeAndBeneficiaryReport(_dataContextFactory, _calendarService);
+        TerminatedEmployeeAndBeneficiaryReport reportGenerator =
+            new TerminatedEmployeeAndBeneficiaryReport(_dataContextFactory, _calendarService, _totalService, _contributionService);
         return reportGenerator.CreateDataAsync(req, ct);
     }
 }

@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.TerminatedEmployeeAndBeneficiary;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 using Demoulas.ProfitSharing.UnitTests.Base;
 using Demoulas.ProfitSharing.UnitTests.Extensions;
@@ -24,8 +25,10 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
     public TerminatedEmployeeAndBeneficiaryTests()
     {
         var calendarService = ServiceProvider?.GetRequiredService<ICalendarService>()!;
+        var totalService = ServiceProvider?.GetRequiredService<TotalService>()!;
+        var contributionService = ServiceProvider?.GetRequiredService<ContributionService>()!;
         TerminatedEmployeeAndBeneficiaryReportService mockService =
-            new TerminatedEmployeeAndBeneficiaryReportService(MockDbContextFactory, calendarService);
+            new TerminatedEmployeeAndBeneficiaryReportService(MockDbContextFactory, calendarService, totalService, contributionService);
         _endpoint = new TerminatedEmployeeAndBeneficiaryDataEndpoint(mockService);
     }
 
@@ -48,13 +51,13 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
     }
 
     [Fact(DisplayName = "Test Single Terminated Employee")]
-    public async Task TerminatedEmployee()
+    public Task TerminatedEmployee()
     {
-        await MockDbContextFactory.UseWritableContext(async c =>
+        return MockDbContextFactory.UseWritableContext(async c =>
         {
             // Arrange
             var demo = await c.Demographics.Include(demographic => demographic.ContactInfo).FirstAsync();
-            demo.BadgeNumber = 9988;
+            demo.EmployeeId = 9988;
             demo.TerminationCodeId = TerminationCode.Constants.AnotherJob;
             demo.EmploymentStatusId = EmploymentStatus.Constants.Terminated;
             demo.TerminationDate = new DateOnly(2023, 6, 1);
@@ -121,21 +124,22 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
     }
 
     [Fact(DisplayName = "PS-300 | Test Single Beneficiary")]
-    public async Task SingleBeneficiary()
+    public Task SingleBeneficiary()
     {
-        await MockDbContextFactory.UseWritableContext(async c =>
+        return MockDbContextFactory.UseWritableContext(async c =>
         {
             // Arrange
             var bene = await c.Beneficiaries
                 .Include(beneficiary => beneficiary.Contact)
                 .ThenInclude(beneficiaryContact => beneficiaryContact!)
+                .ThenInclude(beneficiaryContact => beneficiaryContact.ContactInfo)
                 .Include(beneficiary => beneficiary.Demographic)
                 .ThenInclude(d => d!.PayProfits)
                 .FirstAsync();
             bene.Amount = 379.44m;
-            bene.Contact!.FirstName = "Rogue";
-            bene.Contact.LastName = "One";
-            bene.Contact.MiddleName = "I";
+            bene.Contact!.ContactInfo!.FirstName = "Rogue";
+            bene.Contact.ContactInfo.LastName = "One";
+            bene.Contact.ContactInfo.MiddleName = "I";
             bene.Contact.DateOfBirth = new DateOnly(1990, 1, 1);
             if (bene.Demographic!.PayProfits.TrueForAll(pp => pp.ProfitYear != 2023))
             {

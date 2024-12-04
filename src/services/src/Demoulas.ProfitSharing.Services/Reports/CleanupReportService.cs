@@ -262,8 +262,8 @@ public class CleanupReportService : ICleanupReportService
 
             foreach (DuplicateNamesAndBirthdaysResponse dup in results.Results)
             {
-                _ = dict.TryGetValue(dup.BadgeNumber, out int years);
-                dup.Years = (short)years;
+                _ = dict.TryGetValue(dup.BadgeNumber, out byte years);
+                dup.Years = years;
 
                 balanceDict.TryGetValue(dup.BadgeNumber, out var balance);
                 dup.NetBalance = balance?.TotalEarnings ?? 0;
