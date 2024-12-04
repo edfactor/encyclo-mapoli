@@ -1,6 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Services.InternalDto;
+using Demoulas.ProfitSharing.Services.ServiceDto;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services;

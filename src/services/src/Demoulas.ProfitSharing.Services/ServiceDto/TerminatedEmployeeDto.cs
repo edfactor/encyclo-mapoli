@@ -1,6 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Data.Entities;
 
-namespace Demoulas.ProfitSharing.Services.InternalDto;
+namespace Demoulas.ProfitSharing.Services.ServiceDto;
 public sealed record TerminatedEmployeeDto
 {
     public required Demographic Demographic { get; set; }

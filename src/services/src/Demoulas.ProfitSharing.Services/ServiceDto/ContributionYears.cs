@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Services.InternalDto;
+﻿namespace Demoulas.ProfitSharing.Services.ServiceDto;
 internal sealed record ContributionYears
 {
     public int EmployeeId { get; init; }

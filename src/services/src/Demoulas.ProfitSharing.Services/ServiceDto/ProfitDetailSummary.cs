@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Services.InternalDto;
+﻿namespace Demoulas.ProfitSharing.Services.ServiceDto;
 
 /// <summary>
 /// The summary of PROFIT_DETAIL rows for a given individual identified by SSN.

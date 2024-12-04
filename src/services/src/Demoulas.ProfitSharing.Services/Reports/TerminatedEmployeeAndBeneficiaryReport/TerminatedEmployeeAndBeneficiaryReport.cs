@@ -6,7 +6,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Services.InternalDto;
+using Demoulas.ProfitSharing.Services.ServiceDto;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,12 +19,12 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 {
     private readonly IProfitSharingDataContextFactory _factory;
     private readonly ICalendarService _calendarService;
-    private readonly ITotalService _totalService;
+    private readonly TotalService _totalService;
     private readonly ContributionService _contributionService;
 
     public TerminatedEmployeeAndBeneficiaryReport(IProfitSharingDataContextFactory factory, 
         ICalendarService calendarService,
-        ITotalService totalService,
+        TotalService totalService,
         ContributionService contributionService)
     {
         _factory = factory;
@@ -204,7 +204,8 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
             InternalProfitDetailDto profitDetailSummary = RetrieveProfitDetail(profitDetails, req.ProfitYear);
 
-            int vestingPercent = _totalService.LookupVestingPercent(memberSlice.EnrollmentId, memberSlice.ZeroCont, memberSlice.YearsInPs);
+            var vesting = await _totalService.GetVestingBalanceForSingleMember(SearchBy.EmployeeId, memberSlice.EnrollmentId, req.ProfitYear);
+            var vestingPercent = vesting?.VestingPercent ?? 0;
 
             var currentVestedAmount = _totalService.CalculateCurrentVested(profitDetails, profitDetailSummary.CurrentAmount, vestingPercent);
 

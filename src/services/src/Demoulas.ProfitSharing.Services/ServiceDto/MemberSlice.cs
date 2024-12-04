@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Services.InternalDto;
+﻿namespace Demoulas.ProfitSharing.Services.ServiceDto;
 
 /// <summary>
 /// A slice of a member in the profit sharing system. An instance of this slice is either employee

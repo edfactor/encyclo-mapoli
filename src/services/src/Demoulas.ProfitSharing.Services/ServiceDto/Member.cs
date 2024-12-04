@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Services.InternalDto;
+﻿namespace Demoulas.ProfitSharing.Services.ServiceDto;
 
 /// <summary>
 /// A member in the profit sharing system.   Can be an employee a beneficiary or both.

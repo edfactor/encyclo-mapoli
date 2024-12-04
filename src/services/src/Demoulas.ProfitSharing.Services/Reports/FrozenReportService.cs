@@ -8,7 +8,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Services.InternalDto;
+using Demoulas.ProfitSharing.Services.ServiceDto;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;

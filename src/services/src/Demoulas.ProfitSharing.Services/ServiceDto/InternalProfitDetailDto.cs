@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Services.InternalDto;
+﻿namespace Demoulas.ProfitSharing.Services.ServiceDto;
 internal sealed record InternalProfitDetailDto
 {
     public long OracleHcmId { get; set; }
