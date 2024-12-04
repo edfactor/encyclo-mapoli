@@ -1,7 +1,5 @@
-﻿using System.Diagnostics;
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
-using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
@@ -11,7 +9,6 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.InternalDto;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
@@ -303,7 +300,7 @@ public class FrozenReportService : IFrozenReportService
             var query = (from pd in ctx.ProfitDetails
                          join d in ctx.Demographics on pd.Ssn equals d.Ssn
                          where pd.ProfitYear == req.ProfitYear
-                               && pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions
+                               && pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id
                                && pd.Forfeiture > 0
                          select new
                          {

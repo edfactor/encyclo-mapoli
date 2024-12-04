@@ -21,16 +21,16 @@ public sealed record BalanceByAge : ReportResponseBase<BalanceByAgeDetail>
     public decimal TotalBeneficiariesAmount { get; set; }
     public decimal TotalBeneficiariesVestedAmount { get; set; }
 
-    public short TotalNonBeneficiaries
+    public short TotalEmployee
     {
         get { return (short)(TotalMembers - TotalBeneficiaries); }
     }
-    public decimal TotalNonBeneficiariesAmount
+    public decimal TotalEmployeeAmount
     {
         get { return BalanceTotalAmount - TotalBeneficiariesAmount; }
     }
 
-    public decimal TotalNonBeneficiariesVestedAmount
+    public decimal TotalEmployeesVestedAmount
     {
         get { return VestedTotalAmount - TotalBeneficiariesVestedAmount; }
     }
