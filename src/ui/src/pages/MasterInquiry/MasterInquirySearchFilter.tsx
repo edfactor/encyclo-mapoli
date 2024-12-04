@@ -44,14 +44,14 @@ const schema = yup.object().shape({
     .number()
     .typeError("Beginning Year must be a number")
     .integer("Beginning Year must be an integer")
-    .min(1900, "Beginning Year must be 1900 or later")
+    .min(2020, "Year must be 2020 or later")
     .max(2100, "Beginning Year must be 2100 or earlier")
     .nullable(),
   endProfitYear: yup
     .number()
     .typeError("Ending Year must be a number")
     .integer("Ending Year must be an integer")
-    .min(1900, "Ending Year must be 1900 or later")
+    .min(2020, "Year must be 2020 or later")
     .max(2100, "Ending Year must be 2100 or earlier")
     .nullable(),
   startProfitMonth: yup

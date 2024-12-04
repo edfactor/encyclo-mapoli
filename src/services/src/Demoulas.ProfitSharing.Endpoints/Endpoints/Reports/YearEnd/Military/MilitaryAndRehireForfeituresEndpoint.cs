@@ -55,9 +55,9 @@ public class MilitaryAndRehireForfeituresEndpoint :
 
     public override string ReportFileName => "REHIRE'S PROFIT SHARING DATA";
 
-    public override async Task<ReportResponseBase<MilitaryAndRehireForfeituresResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
+    public override Task<ReportResponseBase<MilitaryAndRehireForfeituresResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
-        return await _reportService.FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYears(req, ct);
+        return _reportService.FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYears(req, ct);
     }
 
     protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, ReportResponseBase<MilitaryAndRehireForfeituresResponse> report, CancellationToken cancellationToken)

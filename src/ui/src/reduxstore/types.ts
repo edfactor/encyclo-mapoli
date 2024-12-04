@@ -320,11 +320,79 @@ export interface ContributionsByAge {
   reportType: FrozenReportsByAgeRequestType;
   totalEmployees: number;
   distributionTotalAmount: number;
-  response: Paged<ProfitSharingDistributionsByAgeResponse>;
+  response: Paged<ContributionsByAgeDetail>;
 }
 
 export interface ContributionsByAgeDetail {
   age: number;
   employeeCount: number;
   amount: number;
+}
+
+export interface ForfeituresByAge {
+  reportName: string;
+  reportDate: string;
+  reportType: FrozenReportsByAgeRequestType;
+  totalEmployees: number;
+  distributionTotalAmount: number;
+  response: Paged<ForfeituresByAgeDetail>;
+}
+
+export interface ForfeituresByAgeDetail {
+  age: number;
+  employeeCount: number;
+  amount: number;
+}
+
+export interface EmployeeDetails {
+	firstName: string;
+	lastName: string;
+  address: string;
+	addressCity: string;
+	addressState: string;
+	addressZipCode: string;
+	dateOfBirth: string;
+	ssn: string;
+	yearToDateProfitSharingHours: number;
+	yearsInPlan: number;
+	percentageVested: number;
+	contributionsLastYear: boolean;
+	enrolled: boolean;
+	employeeId: string;
+  hireDate: string;
+  terminationDate: string | null;
+  reHireDate: string | null;
+  storeNumber: number;
+  beginPSAmount: number;
+  currentPSAmount: number;
+  beginVestedAmount: number;
+  currentVestedAmount: number;
+}
+
+export interface MasterInquiryResponseType {
+  employeeDetails: EmployeeDetails | null;
+  inquiryResults: Paged<MasterInquiryDetail>;
+}
+export interface BalanceByAge {
+  reportName: string;
+  reportDate: string;
+  reportType: FrozenReportsByAgeRequestType;
+  balanceTotalAmount: number;
+  vestedTotalAmount : number;
+  totalMembers: number;
+  totalBeneficiaries: number;
+  totalBeneficiariesAmount : number;
+  totalBeneficiariesVestedAmount : number;
+  totalNonBeneficiaries: number;
+  totalNonBeneficiariesAmount: number;
+  totalNonBeneficiariesVestedAmount : number;
+  response: Paged<BalanceByAgeDetail>;
+}
+
+export interface BalanceByAgeDetail {
+  age: number;
+  employeeCount: number;
+  currentBalance: number;
+  vestedBalance: number;
+  beneficiaryCount : number;
 }

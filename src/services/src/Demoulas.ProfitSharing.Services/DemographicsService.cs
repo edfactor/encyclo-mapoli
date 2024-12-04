@@ -1,6 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.ActivitySources;
 using System.Diagnostics;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.MassTransit;
@@ -81,12 +82,12 @@ public class DemographicsService : IDemographicsServiceInternal
    /// This method ensures that demographic records are either inserted as new entries or updated if they already exist in the database.
    /// The operation is performed within a writable database context to maintain data integrity.
    /// </remarks>
-    private async Task UpsertDemographicsAsync(IEnumerable<DemographicsRequest> demographicsRequests, CancellationToken cancellationToken)
+    private Task UpsertDemographicsAsync(IEnumerable<DemographicsRequest> demographicsRequests, CancellationToken cancellationToken)
     {
         DateTime currentModificationDate = DateTime.Now;
 
         // Use writable context for the upsert operation
-        await _dataContextFactory.UseWritableContext(async context =>
+        return _dataContextFactory.UseWritableContext(async context =>
         {
             // Map incoming demographic requests to entity models
             List<Demographic> demographicsEntities = _mapper.Map(demographicsRequests).ToList();

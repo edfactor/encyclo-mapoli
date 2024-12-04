@@ -28,13 +28,18 @@ import {
   NegativeEtvaForSSNsOnPayProfit,
   NegativeEtvaForSSNsOnPayprofitRequestDto,
   PagedReportResponse,
-  ProfitSharingDistributionsByAge, ContributionsByAge
+  ProfitSharingDistributionsByAge,
+  ContributionsByAge,
+  ForfeituresByAge, BalanceByAge,
+  MasterInquiryResponseType
 } from "reduxstore/types";
 import {
   setDemographicBadgesNotInPayprofitData,
   setDistributionsAndForfeitures,
   setDistributionsByAge,
   setContributionsByAge,
+  setForfeituresByAge,
+  setBalanceByAge,
   setDuplicateNamesAndBirthdays,
   setDuplicateSSNsData,
   setEligibleEmployees,
@@ -405,7 +410,43 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getProfitMasterInquiry: builder.query<Paged<MasterInquiryDetail>, MasterInquryRequest>({
+    getForfeituresByAge: builder.query<ForfeituresByAge, FrozenReportsByAgeRequest>({
+      query: (params) => ({
+        url: "yearend/frozen/forfeitures-by-age",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          reportType: params.reportType
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setForfeituresByAge(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
+     getBalanceByAge: builder.query<BalanceByAge, FrozenReportsByAgeRequest>({
+      query: (params) => ({
+        url: "yearend/frozen/balance-by-age",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          reportType: params.reportType
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setBalanceByAge(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
+    getProfitMasterInquiry: builder.query<MasterInquiryResponseType, MasterInquryRequest>({
       query: (params) => ({
         url: "yearend/master-inquiry",
         method: "GET",
@@ -444,16 +485,14 @@ export const {
   useLazyGetMilitaryAndRehireForfeituresQuery,
   useLazyGetMilitaryAndRehireProfitSummaryQuery,
   useLazyGetMilitaryAndRehireQuery,
-  useLazyGetMismatchedSSNsPayprofitAndDemoOnSameBadgeQuery,
-  useLazyGetWagesCurrentYearQuery,
   useLazyGetNamesMissingCommasQuery,
   useLazyGetNegativeEVTASSNQuery,
-  useLazyGetPayprofitBadgeWithoutDemographicsQuery,
-  useLazyGetWagesPreviousYearQuery,
   useLazyGetDistributionsAndForfeituresQuery,
   useLazyGetExecutiveHoursAndDollarsQuery,
   useLazyGetEligibleEmployeesQuery,
   useLazyGetDistributionsByAgeQuery,
   useLazyGetContributionsByAgeQuery,
+  useLazyGetForfeituresByAgeQuery,
+  useLazyGetBalanceByAgeQuery,
   useLazyGetProfitMasterInquiryQuery
 } = YearsEndApi;

@@ -1,7 +1,7 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
@@ -56,7 +56,7 @@ public class ContributionsByAgeEndpoint : EndpointWithCsvTotalsBase<FrozenReport
         await base.GenerateCsvContent(csvWriter, report, cancellationToken);
 
         await csvWriter.NextRecordAsync();
-        csvWriter.WriteField("DIST TTL");
+        csvWriter.WriteField("CONT TTL");
         csvWriter.WriteField("");
         csvWriter.WriteField(report.DistributionTotalAmount);
 

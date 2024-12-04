@@ -2,10 +2,7 @@ import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import {
-  useLazyGetMilitaryAndRehireForfeituresQuery,
-  useLazyGetNegativeEVTASSNQuery
-} from "reduxstore/api/YearsEndApi";
+import {  useLazyGetMilitaryAndRehireForfeituresQuery} from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -21,7 +18,7 @@ const schema = yup.object().shape({
     .number()
     .typeError("Profit Year must be a number")
     .integer("Profit Year must be an integer")
-    .min(1900, "Profit Year must be 1900 or later")
+    .min(2020, "Year must be 2020 or later")
     .max(2100, "Profit Year must be 2100 or earlier")
     .required("Profit Year is required"),
   reportingYear: yup

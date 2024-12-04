@@ -1,10 +1,11 @@
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services;
@@ -12,16 +13,19 @@ public class MasterInquiryService : IMasterInquiryService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ILogger _logger;
+    private readonly ITotalService _totalService;
     public MasterInquiryService(
         IProfitSharingDataContextFactory dataContextFactory,
+        ITotalService totalService,
         ILoggerFactory loggerFactory
     )
     {
         _dataContextFactory = dataContextFactory;
+        _totalService = totalService;
         _logger = loggerFactory.CreateLogger<MasterInquiryService>();
     }
 
-    public async Task<PaginatedResponseDto<MasterInquiryResponseDto>> GetMasterInquiry(MasterInquiryRequest req, CancellationToken cancellationToken = default)
+    public async Task<MasterInquiryWithDetailsResponseDto> GetMasterInquiry(MasterInquiryRequest req, CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("REQUEST MASTER INQUIRY"))
         {
@@ -116,8 +120,79 @@ public class MasterInquiryService : IMasterInquiryService
                 .OrderByDescending(x => x.ProfitYear)
                 .ToPaginationResultsAsync(req, cancellationToken);
 
-                _logger.LogWarning("Returned {Results} records", results.Results.Count());
-                return results;
+                _logger.LogInformation("Returned {Results} records", results.Results.Count());
+
+                var uniqueSsns = results.Results.Select(r => r.Ssn).Distinct().ToList();
+                EmployeeDetails? employeeDetails = null;
+
+                if (uniqueSsns.Count == 1)
+                {
+                    int ssn = (int) uniqueSsns[0];
+                    short currentYear = (short) DateTime.Today.Year;
+                    short previousYear = (short) (currentYear - 1);
+
+                    var previousBalance = await _totalService.GetVestingBalanceForSingleMember(SearchBy.Ssn, ssn, previousYear);
+                    var currentBalance = await _totalService.GetVestingBalanceForSingleMember(SearchBy.Ssn, ssn, currentYear);
+
+                    var demographicData = await ctx.Demographics
+                     .Where(d => d.Ssn == uniqueSsns[0])
+                     .Select(d => new
+                     {
+                         d.ContactInfo.FirstName,
+                         d.ContactInfo.LastName,
+                         d.Address.City,
+                         d.Address.State,
+                         Address = d.Address.Street,
+                         d.Address.PostalCode,
+                         d.DateOfBirth,
+                         d.Ssn,
+                         d.EmployeeId,
+                         d.ReHireDate,
+                         d.HireDate,
+                         d.TerminationDate,
+                         d.StoreNumber,
+                         DemographicId = d.Id,
+                         LatestPayProfit = d.PayProfits
+                             .OrderByDescending(p => p.ProfitYear)
+                             .FirstOrDefault()
+                     })
+                     .FirstOrDefaultAsync(cancellationToken);
+
+                    if (demographicData != null)
+                    {
+                        employeeDetails = new EmployeeDetails
+                        {
+                            FirstName = demographicData.FirstName,
+                            LastName = demographicData.LastName,
+                            AddressCity = demographicData.City!,
+                            AddressState = demographicData.State!,
+                            Address = demographicData.Address,
+                            AddressZipCode = demographicData.PostalCode!,
+                            DateOfBirth = demographicData.DateOfBirth,
+                            Ssn = demographicData.Ssn,
+                            YearToDateProfitSharingHours = demographicData.LatestPayProfit?.CurrentHoursYear ?? 0,
+                            YearsInPlan = demographicData.LatestPayProfit?.YearsInPlan ?? 0,
+                            HireDate = demographicData.HireDate,
+                            ReHireDate = demographicData.ReHireDate,
+                            TerminationDate = demographicData.TerminationDate,
+                            StoreNumber = demographicData.StoreNumber,
+                            PercentageVested = currentBalance?.VestingPercent ?? 0,
+                            ContributionsLastYear = previousBalance != null && previousBalance.CurrentBalance > 0,
+                            Enrolled = demographicData.LatestPayProfit?.EnrollmentId != 0,
+                            EmployeeId = demographicData.EmployeeId.ToString(),
+                            BeginPSAmount = (long) (previousBalance?.CurrentBalance ?? 0),
+                            CurrentPSAmount = (long) (currentBalance?.CurrentBalance ?? 0),
+                            BeginVestedAmount = (long) (previousBalance?.VestedBalance ?? 0),
+                            CurrentVestedAmount = (long) (currentBalance?.VestedBalance ?? 0)
+                        };
+                    }
+                }
+
+                return new MasterInquiryWithDetailsResponseDto
+                {
+                    EmployeeDetails = employeeDetails,
+                    InquiryResults = results
+                };
             });
 
             return rslt;

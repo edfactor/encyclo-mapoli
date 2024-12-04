@@ -48,7 +48,7 @@ const ContributionsByAgeGrid = () => {
                   rowData: contributionsByAgeTotal?.response.results,
                   pinnedTopRowData: [
                     {
-                      age: "Dist Total",
+                      age: "CONT TTL",
                       employeeCount: (contributionsByAgeTotal?.totalEmployees || 0),
                       amount: contributionsByAgeTotal?.distributionTotalAmount
                     }
@@ -71,7 +71,7 @@ const ContributionsByAgeGrid = () => {
                   rowData: contributionsByAgeFullTime?.response.results,
                   pinnedTopRowData: [
                     {
-                     age: "Dist Total",
+                     age: "CONT TTL",
                       employeeCount: (contributionsByAgeTotal?.totalEmployees || 0),
                       amount: contributionsByAgeTotal?.distributionTotalAmount
                     }
@@ -94,7 +94,7 @@ const ContributionsByAgeGrid = () => {
                   rowData: contributionsByAgePartTime?.response.results,
                   pinnedTopRowData: [
                     {
-                      age: "Dist Total",
+                      age: "CONT TTL",
                       employeeCount: (contributionsByAgeTotal?.totalEmployees || 0),
                       amount: contributionsByAgeTotal?.distributionTotalAmount
                     }

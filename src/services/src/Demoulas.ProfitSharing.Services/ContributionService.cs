@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.InternalDto;
 using Microsoft.EntityFrameworkCore;
@@ -31,20 +26,6 @@ public sealed class ContributionService
                 .Select(p => new { BadgeNumber = p.Key, ContributionYears = p.Count() })
                 .ToDictionaryAsync(arg => arg.BadgeNumber, arg => arg.ContributionYears);
         });
-    }
-
-    internal static IQueryable<Demographic> GetEligibleEmployees(IProfitSharingDbContext ctx, short profitYear, DateOnly asOfDate)
-    {
-        var birthDate21Years = asOfDate.AddYears(-21);
-        return (
-            from d in ctx.Demographics
-            join pp in ctx.PayProfits on d.Id equals pp.DemographicId
-            where pp.ProfitYear == profitYear
-              && (pp.HoursExecutive + pp.CurrentHoursYear) >= 1000
-              && d.DateOfBirth < birthDate21Years
-              && (d.TerminationDate == null || d.TerminationDate < asOfDate)
-            select d
-        );
     }
 
     internal IQueryable<InternalProfitDetailDto> GetNetBalanceQuery(short profitYear, IProfitSharingDbContext ctx)

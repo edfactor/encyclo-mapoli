@@ -51,9 +51,9 @@ public class NegativeEtvaForSsNsOnPayProfitEndPoint : EndpointWithCsvBase<Profit
         base.Configure();
     }
 
-    public override async Task<ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
+    public override Task<ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
-        return await _reportService.GetNegativeETVAForSSNsOnPayProfitResponse(req, ct);
+        return _reportService.GetNegativeETVAForSSNsOnPayProfitResponse(req, ct);
     }
 
     public override string ReportFileName => "ETVA-LESS-THAN-ZERO";

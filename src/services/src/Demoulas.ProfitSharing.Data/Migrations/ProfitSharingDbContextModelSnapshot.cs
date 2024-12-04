@@ -27965,6 +27965,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(2)")
                         .HasColumnName("WEEKS_WORKED_YEAR");
 
+                    b.Property<byte>("YearsInPlan")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(3)")
+                        .HasDefaultValue((byte)0)
+                        .HasColumnName("YEARS_IN_PLAN");
+
                     b.Property<byte?>("ZeroContributionReasonId")
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("ZERO_CONTRIBUTION_REASON_ID");
@@ -28074,8 +28080,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(1)")
                         .HasColumnName("COMMENT_IS_PARTIAL_TRANSACTION");
 
-                    b.Property<int?>("CommentRelatedCheckNumber")
-                        .HasColumnType("NUMBER(10)")
+                    b.Property<string>("CommentRelatedCheckNumber")
+                        .HasMaxLength(9)
+                        .HasColumnType("NVARCHAR2(9)")
                         .HasColumnName("COMMENT_RELATED_CHECK_NUMBER");
 
                     b.Property<long?>("CommentRelatedOracleHcmId")
@@ -28276,7 +28283,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<string>("TaxCodeId")
                         .IsRequired()
                         .HasColumnType("NVARCHAR2(1)")
-                        .HasColumnName("TAXCODEID");
+                        .HasColumnName("TAX_CODE_ID");
 
                     b.Property<DateTime?>("VoidDate")
                         .HasColumnType("DATE")
@@ -28298,9 +28305,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasIndex(new[] { "CheckNumber", "IsVoided" }, "IX_CheckNumber_IsVoided")
                         .HasDatabaseName("IX_PROFIT_SHARE_CHECK_CHECKNUMBER_ISVOIDED");
 
-                    b.HasIndex(new[] { "PscCheckId" }, "IX_PscCheckId")
+                    b.HasIndex(new[] { "PscCheckId" }, "IX_PSC_CHECKID")
                         .IsUnique()
                         .HasDatabaseName("IX_PROFIT_SHARE_CHECK_PSCCHECKID");
+
+                    b.HasIndex(new[] { "Ssn" }, "IX_SSN")
+                        .HasDatabaseName("IX_PROFIT_SHARE_CHECK_SSN");
 
                     b.ToTable("PROFIT_SHARE_CHECK", (string)null);
                 });

@@ -1,5 +1,5 @@
 import { ColDef } from "ag-grid-community";
-import { formattingUtils } from "smart-ui-library";
+import { agGridNumberToCurrency } from "smart-ui-library";
 
 export const GetMasterInquiryGridColumns = (): ColDef[] => {
   return [
@@ -59,7 +59,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       minWidth: 120,
       headerClass: "right-align",
       cellClass: "right-align",
-      valueFormatter: formattingUtils.agGridNumberToCurrency,
+      valueFormatter: agGridNumberToCurrency,
       resizable: true
     },
     {
@@ -68,7 +68,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       minWidth: 120,
       headerClass: "right-align",
       cellClass: "right-align",
-      valueFormatter: formattingUtils.agGridNumberToCurrency,
+      valueFormatter: agGridNumberToCurrency,
       resizable: true
     },
     {
@@ -77,7 +77,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       minWidth: 120,
       headerClass: "right-align",
       cellClass: "right-align",
-      valueFormatter: formattingUtils.agGridNumberToCurrency,
+      valueFormatter: agGridNumberToCurrency,
       resizable: true
     },
     {
@@ -86,7 +86,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       minWidth: 120,
       headerClass: "right-align",
       cellClass: "right-align",
-      valueFormatter: formattingUtils.agGridNumberToCurrency,
+      valueFormatter: agGridNumberToCurrency,
       resizable: true
     },
     {
@@ -95,7 +95,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       minWidth: 120,
       headerClass: "right-align",
       cellClass: "right-align",
-      valueFormatter: formattingUtils.agGridNumberToCurrency,
+      valueFormatter: agGridNumberToCurrency,
       resizable: true
     },
     {

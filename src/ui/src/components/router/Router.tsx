@@ -19,6 +19,8 @@ import EligibleEmployees from "pages/EligibleEmployees/EligibleEmployees";
 import MasterInquiry from "pages/MasterInquiry/MasterInquiry";
 import DistributionByAge from "../../pages/DistributionByAge/DistributionByAge";
 import ContributionsByAge from "../../pages/ContributionsByAge/ContributionsByAge";
+import ForfeituresByAge from "../../pages/ForfeituresByAge/ForfeituresByAge";
+import BalanceByAge from "../../pages/BalanceByAge/BalanceByAge";
 
 const Router = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -78,6 +80,12 @@ const Router = () => {
         <Route
           path="contributions-by-age"
           element={<ContributionsByAge />}></Route>
+         <Route
+          path="forfeitures-by-age"
+          element={<ForfeituresByAge />}></Route>
+        <Route
+          path="balance-by-age"
+          element={<BalanceByAge />}></Route>
       </RouteSecurity>
     </BrowserRouter>
   );

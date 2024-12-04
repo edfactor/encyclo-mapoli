@@ -3,11 +3,11 @@ using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 
-namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 
-public sealed record ContributionsByAge : ReportResponseBase<ContributionsByAgeDetail>
+public sealed record ForfeituresByAge : ReportResponseBase<ForfeituresByAgeDetail>
 {
-    public ContributionsByAge()
+    public ForfeituresByAge()
     {
         ReportName = "PROFIT SHARING CONTRIBUTIONS BY AGE";
         ReportDate = DateTimeOffset.Now;
@@ -22,18 +22,18 @@ public sealed record ContributionsByAge : ReportResponseBase<ContributionsByAgeD
 
 
 
-    public static ContributionsByAge ResponseExample()
+    public static ForfeituresByAge ResponseExample()
     {
-        return new ContributionsByAge
+        return new ForfeituresByAge
         {
-            ReportName = "PROFIT SHARING CONTRIBUTIONS BY AGE",
+            ReportName = "PROFIT SHARING FORFEITURES BY AGE",
             ReportDate = DateTimeOffset.Now,
             DistributionTotalAmount = (decimal)1_855_156.09,
             TotalEmployees = 63,
-            
-            Response = new PaginatedResponseDto<ContributionsByAgeDetail>(new PaginationRequestDto())
+
+            Response = new PaginatedResponseDto<ForfeituresByAgeDetail>(new PaginationRequestDto())
             {
-                Results = new List<ContributionsByAgeDetail> { ContributionsByAgeDetail.ResponseExample() }
+                Results = new List<ForfeituresByAgeDetail> { ForfeituresByAgeDetail.ResponseExample() }
             }
         };
     }
