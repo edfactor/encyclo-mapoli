@@ -65,9 +65,9 @@ public class BalanceByAgeEndpoint : EndpointWithCsvTotalsBase<FrozenReportsByAge
 
         await csvWriter.NextRecordAsync();
         csvWriter.WriteField("");
-        csvWriter.WriteField(report.TotalNonBeneficiaries);
-        csvWriter.WriteField(report.TotalNonBeneficiariesAmount);
-        csvWriter.WriteField(report.TotalNonBeneficiariesVestedAmount);
+        csvWriter.WriteField(report.TotalEmployee);
+        csvWriter.WriteField(report.TotalEmployeeAmount);
+        csvWriter.WriteField(report.TotalEmployeesVestedAmount);
 
 
         await csvWriter.NextRecordAsync();
