@@ -376,11 +376,11 @@ export interface BalanceByAge {
   vestedTotalAmount: number;
   totalMembers: number;
   totalBeneficiaries: number;
-  totalBeneficiariesAmount: number;
-  totalBeneficiariesVestedAmount: number;
-  totalNonBeneficiaries: number;
-  totalNonBeneficiariesAmount: number;
-  totalNonBeneficiariesVestedAmount: number;
+  totalBeneficiariesAmount : number;
+  totalBeneficiariesVestedAmount : number;
+  totalEmployee: number;
+  totalEmployeeAmount: number;
+  totalEmployeesVestedAmount : number;
   response: Paged<BalanceByAgeDetail>;
 }
 
