@@ -99,7 +99,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             select new MemberSlice
             {
                 PsnSuffix = 0,
-                BadgeNumber = employee.Demographic.EmployeeId,
+                EmployeeId = employee.Demographic.EmployeeId,
                 Ssn = employee.Demographic.Ssn,
                 BirthDate = employee.Demographic.DateOfBirth,
                 HoursCurrentYear = payProfit.CurrentHoursYear,
@@ -138,7 +138,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             .Select(x => new MemberSlice
             {
                 PsnSuffix = x.Beneficiary.PsnSuffix,
-                BadgeNumber = x.Beneficiary!.EmployeeId,
+                EmployeeId = x.Beneficiary!.EmployeeId,
                 Ssn = x.Beneficiary.Contact!.Ssn,
                 BirthDate = x.Beneficiary.Contact!.DateOfBirth,
                 HoursCurrentYear = 0, // Placeholder logic for hours
@@ -198,12 +198,11 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
         await foreach (var memberSlice in memberSliceUnion.WithCancellation(cancellationToken))
         {
-            var profitDetails = await ctx.ProfitDetails.Where(pd => pd.ProfitYear <= req.ProfitYear && pd.Ssn == memberSlice.Ssn)
-                .ToListAsync(cancellationToken);
+            IQueryable<ProfitDetail> profitDetails = ctx.ProfitDetails.Where(pd => pd.ProfitYear <= req.ProfitYear && pd.Ssn == memberSlice.Ssn);
 
-            InternalProfitDetailDto profitDetailSummary = RetrieveProfitDetail(profitDetails, req.ProfitYear);
+            InternalProfitDetailDto profitDetailSummary = await RetrieveProfitDetail(profitDetails, cancellationToken);
 
-            var vesting = await _totalService.GetVestingBalanceForSingleMember(SearchBy.EmployeeId, memberSlice.EnrollmentId, req.ProfitYear);
+            var vesting = await _totalService.GetVestingBalanceForSingleMember(SearchBy.EmployeeId, memberSlice.EnrollmentId, req.ProfitYear, cancellationToken);
             var vestingPercent = vesting?.VestingPercent ?? 0;
             var currentVestedAmount = vesting?.VestedBalance ?? 0;
 
@@ -216,7 +215,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
             var member = new Member
             {
-                Psn = memberSlice.PsnSuffix > 0 ? $"{memberSlice.BadgeNumber}{memberSlice.PsnSuffix}" : memberSlice.BadgeNumber.ToString(),
+                Psn = memberSlice.PsnSuffix > 0 ? $"{memberSlice.EmployeeId}{memberSlice.PsnSuffix}" : memberSlice.EmployeeId.ToString(),
                 FullName = memberSlice.FullName,
                 FirstName = memberSlice.FirstName,
                 LastName = memberSlice.LastName,
@@ -314,15 +313,9 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         };
     }
 
-    private static InternalProfitDetailDto RetrieveProfitDetail(List<ProfitDetail> profitDetails, short profitYear)
+    private static async Task<InternalProfitDetailDto> RetrieveProfitDetail(IQueryable<ProfitDetail> profitDetails, CancellationToken cancellationToken)
     {
-        if (profitDetails.Count == 0)
-        {
-            return new InternalProfitDetailDto();
-        }
-
-#pragma warning disable S1481
-        var currentBalance = profitDetails
+        var currentBalance = await profitDetails
             .GroupBy(details => details.Ssn)
             .Select(g => new
             {
@@ -331,37 +324,30 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 TotalForfeitures = g.Sum(x => x.ProfitCodeId == ProfitCode.Constants.IncomingContributions ? x.Forfeiture : 0),
                 TotalPayments = g.Sum(x => x.ProfitCodeId != ProfitCode.Constants.IncomingContributions ? x.Forfeiture : 0),
             })
-            .Select(r =>  r.TotalContributions + r.TotalEarnings + r.TotalForfeitures - r.TotalPayments).First();
+            .Select(r =>  r.TotalContributions + r.TotalEarnings + r.TotalForfeitures - r.TotalPayments).FirstAsync(cancellationToken: cancellationToken);
 
 
         
 #pragma warning disable S3358
 
-        if (!profitDetails.Exists(pd => pd.ProfitYear == profitYear))
-        {
-           return new InternalProfitDetailDto { CurrentAmount = currentBalance };
-        }
-
-
         var pdQuery = profitDetails
-            .Where(pd => pd.ProfitYear == profitYear)
             .GroupBy(details => details.Ssn)
             .Select(g => new
             {
                 TotalContributions = g.Sum(x => x.Contribution),
                 TotalEarnings = g.Sum(x => x.Earnings),
                 TotalForfeitures = g.Sum(x =>
-                    x.ProfitCodeId == ProfitCode.Constants.IncomingContributions ? x.Forfeiture
-                        : (x.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures ? -x.Forfeiture : 0)),
-                TotalPayments = g.Sum(x => x.ProfitCodeId != ProfitCode.Constants.IncomingContributions ? x.Forfeiture : 0),
+                    x.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture
+                        : (x.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id ? -x.Forfeiture : 0)),
+                TotalPayments = g.Sum(x => x.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0),
                 Distribution = g.Sum(x =>
-                    (x.ProfitCodeId == ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal ||
-                     x.ProfitCodeId == ProfitCode.Constants.OutgoingDirectPayments || x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment)
+                    (x.ProfitCodeId == ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id ||
+                     x.ProfitCodeId == ProfitCode.Constants.OutgoingDirectPayments.Id || x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id)
                         ? -x.Forfeiture
                         : 0),
-                BeneficiaryAllocation = g.Sum(x => (x.ProfitCodeId == ProfitCode.Constants.OutgoingXferBeneficiary)
+                BeneficiaryAllocation = g.Sum(x => (x.ProfitCodeId == ProfitCode.Constants.OutgoingXferBeneficiary.Id)
                     ? -x.Forfeiture
-                    : (x.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary)
+                    : (x.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary.Id)
                         ? x.Contribution
                         : 0)
             })
@@ -374,12 +360,11 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 CurrentAmount = currentBalance,
                 Distribution = r.Distribution,
                 BeneficiaryAllocation = r.BeneficiaryAllocation
-            }).First();
+            }).FirstAsync(cancellationToken);
 #pragma warning restore S3358
-#pragma warning restore S1481
 
 
-        return pdQuery;
+        return await pdQuery;
     }
 }
 

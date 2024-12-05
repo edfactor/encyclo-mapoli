@@ -131,8 +131,8 @@ public class MasterInquiryService : IMasterInquiryService
                     short currentYear = (short) DateTime.Today.Year;
                     short previousYear = (short) (currentYear - 1);
 
-                    var previousBalance = await _totalService.GetVestingBalanceForSingleMember(SearchBy.Ssn, ssn, previousYear);
-                    var currentBalance = await _totalService.GetVestingBalanceForSingleMember(SearchBy.Ssn, ssn, currentYear);
+                    var previousBalance = await _totalService.GetVestingBalanceForSingleMember(SearchBy.Ssn, ssn, previousYear, cancellationToken);
+                    var currentBalance = await _totalService.GetVestingBalanceForSingleMember(SearchBy.Ssn, ssn, currentYear, cancellationToken);
 
                     var demographicData = await ctx.Demographics
                      .Where(d => d.Ssn == uniqueSsns[0])

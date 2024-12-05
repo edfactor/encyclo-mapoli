@@ -7,7 +7,7 @@
 internal sealed record MemberSlice
 {
     public short PsnSuffix { get; init; }
-    public required int BadgeNumber { get; init; }
+    public required int EmployeeId { get; init; }
     public long Ssn { get; init; }
     public decimal HoursCurrentYear { get; init; }
     public char EmploymentStatusCode { get; init; }
