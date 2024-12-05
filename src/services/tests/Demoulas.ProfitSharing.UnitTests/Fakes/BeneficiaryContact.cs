@@ -18,6 +18,8 @@ internal sealed class BeneficiaryContactFaker : Faker<BeneficiaryContact>
     /// </summary>
     internal BeneficiaryContactFaker()
     {
+        ContactInfoFaker contactInfoFaker = new ContactInfoFaker();
+
         RuleFor(d => d.Id, f => _iDCounter++);
         RuleFor(b => b.Ssn, f => f.Person.Ssn().ConvertSsnToInt());
         RuleFor(b => b.DateOfBirth, f => f.Date.Past(50, DateTime.Now.AddYears(-18)).ToDateOnly());
@@ -33,12 +35,6 @@ internal sealed class BeneficiaryContactFaker : Faker<BeneficiaryContact>
                 PostalCode = f.Address.ZipCode(),
                 CountryIso = Country.Constants.Us
             });
-        RuleFor(ci => ci.ContactInfo.PhoneNumber, f => f.Phone.PhoneNumber("###-###-####"))
-            .RuleFor(ci => ci.ContactInfo.MobileNumber, f => f.Phone.PhoneNumber("###-###-####"))
-            .RuleFor(ci => ci.ContactInfo.EmailAddress, f => f.Internet.Email())
-            .RuleFor(ci => ci.ContactInfo.FirstName, f => f.Name.FirstName())
-            .RuleFor(ci => ci.ContactInfo.MiddleName, f => f.Name.FirstName().OrNull(f))
-            .RuleFor(ci => ci.ContactInfo.LastName, f => f.Name.LastName())
-            .RuleFor(d => d.ContactInfo.FullName, (f, d) => $"{d.ContactInfo.LastName}, {d.ContactInfo.FirstName}");
+        RuleFor(d => d.ContactInfo, f => contactInfoFaker.Generate());
     }
 }

@@ -15,7 +15,7 @@ internal sealed class BeneficiaryFaker : Faker<Beneficiary>
     /// </summary>
     internal BeneficiaryFaker(IList<Demographic> demographicFakes)
     {
-        var contact = new BeneficiaryContactFaker().Generate();
+        BeneficiaryContactFaker contactFaker = new BeneficiaryContactFaker();
 
         var demographicQueue = new Queue<Demographic>(demographicFakes);
 
@@ -52,9 +52,17 @@ internal sealed class BeneficiaryFaker : Faker<Beneficiary>
                 new BeneficiaryKind { Id = BeneficiaryKind.Constants.Secondary, Name = "Secondary", }
             }));
 
-        RuleFor(b => b.Contact, f => contact);
+        RuleFor(b => b.Contact, f =>
+        {
+            var contact = contactFaker.Generate();
+            return contact;
+        });
 
         // Move the setting of BeneficiaryContactId to its own RuleFor block
-        RuleFor(b => b.BeneficiaryContactId, f => contact.Id);
+        RuleFor(b => b.BeneficiaryContactId, f =>
+        {
+            var contact = contactFaker.Generate();
+            return contact.Id;
+        });
     }
 }
