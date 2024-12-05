@@ -13,8 +13,7 @@ public class PAY444
     public long EffectiveYear { get; set; } // PIC 9(4)
     public DateTime TodaysDateTime { get; set; } = DateTime.Now;
 
-
-    // We are currently hooked up to the PROFITSHARE database for employees because we dont yet have a way to correctly calculate ETVA
+    // We are currently hooked up to the PROFITSHARE database for employees because we do not yet have a way to correctly calculate ETVA
     private readonly EmployeeDataHelper _employeeDataHelper;
 
     private readonly IProfitSharingDataContextFactory dbContextFactory;
@@ -67,7 +66,6 @@ public class PAY444
         }
 
         m805PrintSequence(members, maxAllowedContributions);
-
         m1000AdjustmentReport(adjustmentAmounts, adjustmentsApplied);
     }
 
@@ -120,7 +118,7 @@ public class PAY444
         ws_payprofit.WS_PROF_POINTS = empl.PointsEarned;
 
         //* If an employee has an ETVA amount and no years on the plan, employee is a
-        //* beneficiary and should get earnings on the etva amt(8 record)
+        //* beneficiary and should get earnings on the etva amt (8 record)
         if (empl.EmployeeTypeId == 0) // 0 = not new, 1 == new in plan
         {
             if (empl.EtvaAfterVestingRules > 0 && empl.CurrentAmount == 0)
@@ -129,7 +127,7 @@ public class PAY444
             }
         }
 
-        if (empl.EnrolledId <= 0 && empl.EmployeeTypeId <= 0 && ws_payprofit.WS_PS_AMT <= 0 && empl.YearsInPlan <= 0)
+        if (empl.EnrolledId <= Enrollment.Constants.NotEnrolled && empl.EmployeeTypeId <= 0 && ws_payprofit.WS_PS_AMT <= 0 && empl.YearsInPlan <= 0)
         {
             return null;
         }
@@ -141,7 +139,6 @@ public class PAY444
 
         ComputeContribution(ws_payprofit, membTot, empl.EmployeeId, adjustmentAmounts, adjustmentsApplied);
         ComputeForfeitures(ws_payprofit, membTot, empl.EmployeeId, adjustmentAmounts, adjustmentsApplied);
-
 
         membTot.EarningsBalance = detailTotals.AllocationsTotal + detailTotals.ClassActionFundTotal +
             (ws_payprofit.WS_PS_AMT - detailTotals.ForfeitsTotal - detailTotals.PaidAllocationsTotal) - detailTotals.DistributionsTotal;
@@ -158,19 +155,16 @@ public class PAY444
             membTot.PointsDollars =
                 detailTotals.AllocationsTotal + (ws_payprofit.WS_PS_AMT - detailTotals.ForfeitsTotal - detailTotals.PaidAllocationsTotal) - detailTotals.DistributionsTotal;
 
-            membTot.EarnPoints = (long)Math.Round(membTot.PointsDollars / 100,
-                MidpointRounding.AwayFromZero);
+            membTot.EarnPoints = (long)Math.Round(membTot.PointsDollars / 100, MidpointRounding.AwayFromZero);
         }
+
+        ComputeEarnings(membTot, null, empl, adjustmentAmounts, adjustmentsApplied, detailTotals.ClassActionFundTotal);
 
         MemberFinancials memb = new();
         memb.EmployeeId = empl.EmployeeId;
         memb.Psn = empl.EmployeeId;
-
         memb.Name = empl.Name;
         memb.Ssn = empl.Ssn;
-
-        ComputeEarnings(membTot, null, empl, adjustmentAmounts, adjustmentsApplied, detailTotals.ClassActionFundTotal);
-
         memb.Xfer = detailTotals.AllocationsTotal;
         memb.Pxfer = detailTotals.PaidAllocationsTotal;
         memb.CurrentAmount = ws_payprofit.WS_PS_AMT;
@@ -182,14 +176,13 @@ public class PAY444
         memb.EarningPoints = membTot.EarnPoints;
         memb.Contributions = ws_payprofit.WS_PROF_CONT;
         memb.IncomingForfeitures = ws_payprofit.WS_PROF_FORF;
-        memb.IncomingForfeitures = memb.IncomingForfeitures - detailTotals.ForfeitsTotal;
+        memb.IncomingForfeitures -= detailTotals.ForfeitsTotal;
         memb.Earnings = empl.Earnings;
         memb.Earnings += empl.EarningsOnEtva;
         memb.SecondaryEarnings = empl.SecondaryEarnings;
         memb.SecondaryEarnings += empl.SecondaryEtvaEarnings;
 
         decimal memberTotalContribution = ws_payprofit.WS_PROF_CONT + detailTotals.MilitaryTotal + ws_payprofit.WS_PROF_FORF;
-
         if (memberTotalContribution > adjustmentAmounts.MaxAllowedContributions)
         {
             m260Maxcont(memberTotalContribution, ws_payprofit, memb, empl.EmployeeId, adjustmentAmounts.MaxAllowedContributions);
@@ -214,12 +207,6 @@ public class PAY444
     public MemberFinancials ProcessBeneficiary(BeneficiaryFinancials bene, AdjustmentAmounts adjustmentAmounts)
     {
         WS_PAYPROFIT ws_payprofit = new WS_PAYPROFIT();
-
-        EmployeeFinancials payprof_rec = new(); // <--- uh what! BOBH UHWHAT
-
-        payprof_rec.Ssn = bene.Ssn;
-        payprof_rec.EmployeeId = 0;
-
         ws_payprofit.WS_PS_AMT = bene.CurrentAmount;
 
         MemberTotals membTot = new();
@@ -249,17 +236,6 @@ public class PAY444
                 MidpointRounding.AwayFromZero);
         }
 
-        //* Payben people are py-prof-newemp = 2 and need ETVA and an Allocation this year
-        if (detailTotals.AllocationsTotal != 0)
-        {
-            payprof_rec.EmployeeTypeId = 2;
-            if (payprof_rec.EarningsOnEtva == 0)
-            {
-                payprof_rec.EarningsOnEtva = 0.01m;
-            }
-        }
-
-        payprof_rec.EmployeeId = 0;
         ComputeEarnings(membTot, bene, null, adjustmentAmounts, null, detailTotals.ClassActionFundTotal);
 
         MemberFinancials memb = new();
@@ -267,7 +243,6 @@ public class PAY444
         memb.Ssn = bene.Ssn;
         memb.Psn = bene.Psn;
         memb.Distributions = detailTotals.DistributionsTotal;
-
         if (detailTotals.ClassActionFundTotal > 0)
         {
             memb.Caf = detailTotals.ClassActionFundTotal;
@@ -276,20 +251,16 @@ public class PAY444
         {
             memb.Caf = 0;
         }
-
         memb.Xfer = detailTotals.AllocationsTotal;
         memb.Pxfer = detailTotals.PaidAllocationsTotal;
-
         memb.CurrentAmount = ws_payprofit.WS_PS_AMT;
         memb.EarningPoints = membTot.EarnPoints;
-        memb.IncomingForfeitures = memb.IncomingForfeitures - detailTotals.ForfeitsTotal;
-
+        memb.IncomingForfeitures -= detailTotals.ForfeitsTotal;
         memb.Earnings = bene.Earnings;
         memb.SecondaryEarnings = bene.SecondaryEarnings;
 
         // BOBH Does this make sense, do bene's hit the max here?
         decimal memberContributionTotal = ws_payprofit.WS_PROF_CONT + detailTotals.MilitaryTotal + ws_payprofit.WS_PROF_FORF;
-
         if (memberContributionTotal > adjustmentAmounts.MaxAllowedContributions)
         {
             m260Maxcont(memberContributionTotal, ws_payprofit, memb, 0, adjustmentAmounts.MaxAllowedContributions);
@@ -322,8 +293,7 @@ public class PAY444
 
     public void ComputeForfeitures(WS_PAYPROFIT ws_payprofit, MemberTotals memberTotals, long badge, AdjustmentAmounts adjustmentAmounts, AdjustmentsApplied adjustmentsApplied)
     {
-        memberTotals.IncomingForfeitureAmount = Math.Round(adjustmentAmounts.IncomingForfeitPercent * ws_payprofit.WS_PROF_POINTS, 2,
-            MidpointRounding.AwayFromZero);
+        memberTotals.IncomingForfeitureAmount = Math.Round(adjustmentAmounts.IncomingForfeitPercent * ws_payprofit.WS_PROF_POINTS, 2, MidpointRounding.AwayFromZero);
         if (adjustmentAmounts.BadgeToAdjust > 0 && adjustmentAmounts.BadgeToAdjust == badge)
         {
             adjustmentsApplied.IncomingForfeitureAmountUnadjusted = memberTotals.IncomingForfeitureAmount;
@@ -344,7 +314,6 @@ public class PAY444
             empl.Earnings = 0;
             empl.SecondaryEarnings = 0;
         }
-
 
         memberTotals.EarningsAmount = Math.Round(adjustmentAmounts.EarningsPercent * memberTotals.EarnPoints,
             2, MidpointRounding.AwayFromZero);
@@ -910,3 +879,4 @@ public class PAY444
         // throw new NotImplementedException();
     }
 }
+
