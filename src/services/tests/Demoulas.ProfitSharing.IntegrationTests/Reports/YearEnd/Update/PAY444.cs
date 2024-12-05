@@ -147,9 +147,7 @@ public class PAY444
         }
         else
         {
-            memberTotals.PointsDollars =
-                detailTotals.AllocationsTotal + (empl.CurrentAmount - detailTotals.ForfeitsTotal - detailTotals.PaidAllocationsTotal) - detailTotals.DistributionsTotal;
-
+            memberTotals.PointsDollars = Math.Round(memberTotals.EarningsBalance, 2, MidpointRounding.AwayFromZero);
             memberTotals.EarnPoints = (long)Math.Round(memberTotals.PointsDollars / 100, MidpointRounding.AwayFromZero);
         }
 
@@ -211,65 +209,36 @@ public class PAY444
 
     public MemberFinancials ProcessBeneficiary(BeneficiaryFinancials bene, AdjustmentAmounts adjustmentAmounts)
     {
-        WS_PAYPROFIT ws_payprofit = new WS_PAYPROFIT();
-        ws_payprofit.WS_PS_AMT = bene.CurrentAmount;
-
-        MemberTotals membTot = new();
-        membTot.PointsDollars = 0m;
-        membTot.EarningsBalance = 0m;
-        membTot.EarnPoints = 0;
 
         var detailTotals = GetDetailTotals(bene.Ssn);
 
-        membTot.EarningsBalance = detailTotals.AllocationsTotal + detailTotals.ClassActionFundTotal +
-            (ws_payprofit.WS_PS_AMT - detailTotals.ForfeitsTotal - detailTotals.PaidAllocationsTotal) - detailTotals.DistributionsTotal;
+        // Yea, this adding and removing ClassActionFundTotal is strange
+        MemberTotals memberTotals = new();
+        memberTotals.EarningsBalance = detailTotals.AllocationsTotal + detailTotals.ClassActionFundTotal +
+            (bene.CurrentAmount - detailTotals.ForfeitsTotal - detailTotals.PaidAllocationsTotal) - detailTotals.DistributionsTotal;
+        memberTotals.EarningsBalance -= detailTotals.ClassActionFundTotal;
 
-        membTot.EarningsBalance -= detailTotals.ClassActionFundTotal;
-
-        if (membTot.EarningsBalance <= 0)
+        if (memberTotals.EarningsBalance > 0)
         {
-            membTot.EarnPoints = 0;
-            membTot.PointsDollars = 0;
-        }
-        else
-        {
-            membTot.PointsDollars =
-                Math.Round(detailTotals.AllocationsTotal + (ws_payprofit.WS_PS_AMT - detailTotals.ForfeitsTotal - detailTotals.PaidAllocationsTotal) - detailTotals.DistributionsTotal,
-                    2, MidpointRounding.AwayFromZero);
-
-            membTot.EarnPoints = (long)Math.Round(membTot.PointsDollars / 100,
-                MidpointRounding.AwayFromZero);
+            memberTotals.PointsDollars = Math.Round(memberTotals.EarningsBalance, 2, MidpointRounding.AwayFromZero);
+            memberTotals.EarnPoints = (long)Math.Round(memberTotals.PointsDollars / 100, MidpointRounding.AwayFromZero);
         }
 
-        ComputeEarnings(membTot, bene, null, adjustmentAmounts, null, detailTotals.ClassActionFundTotal);
+        ComputeEarnings(memberTotals, bene, null, adjustmentAmounts, null, detailTotals.ClassActionFundTotal);
 
         MemberFinancials memb = new();
         memb.Name = bene.Name;
         memb.Ssn = bene.Ssn;
         memb.Psn = bene.Psn;
         memb.Distributions = detailTotals.DistributionsTotal;
-        if (detailTotals.ClassActionFundTotal > 0)
-        {
-            memb.Caf = detailTotals.ClassActionFundTotal;
-        }
-        else
-        {
-            memb.Caf = 0;
-        }
+        memb.Caf = detailTotals.ClassActionFundTotal > 0 ? detailTotals.ClassActionFundTotal : 0;
         memb.Xfer = detailTotals.AllocationsTotal;
         memb.Pxfer = detailTotals.PaidAllocationsTotal;
-        memb.CurrentAmount = ws_payprofit.WS_PS_AMT;
-        memb.EarningPoints = membTot.EarnPoints;
+        memb.CurrentAmount = bene.CurrentAmount;
+        memb.EarningPoints = memberTotals.EarnPoints;
         memb.IncomingForfeitures -= detailTotals.ForfeitsTotal;
         memb.Earnings = bene.Earnings;
         memb.SecondaryEarnings = bene.SecondaryEarnings;
-
-        // BOBH Does this make sense, do bene's hit the max here?
-        decimal memberContributionTotal = ws_payprofit.WS_PROF_CONT + detailTotals.MilitaryTotal + ws_payprofit.WS_PROF_FORF;
-        if (memberContributionTotal > adjustmentAmounts.MaxAllowedContributions)
-        {
-            m260Maxcont(memberContributionTotal, ws_payprofit, memb, 0, adjustmentAmounts.MaxAllowedContributions);
-        }
 
         if (false /*rewrites are off ... the destination columns no longer exist in payprofit*/)
         {
@@ -280,7 +249,7 @@ public class PAY444
     }
 
 
-    public decimal ComputeContribution(long ws_payprofit, long badge, AdjustmentAmounts adjustmentAmounts, AdjustmentsApplied adjustmentsApplied)
+    private static decimal ComputeContribution(long ws_payprofit, long badge, AdjustmentAmounts adjustmentAmounts, AdjustmentsApplied adjustmentsApplied)
     {
         decimal contributionAmount = Math.Round(adjustmentAmounts.ContributionPercent * ws_payprofit, 2,
             MidpointRounding.AwayFromZero);
@@ -296,7 +265,7 @@ public class PAY444
     }
 
 
-    public decimal ComputeForfeitures(long ws_payprofit, long badge, AdjustmentAmounts adjustmentAmounts, AdjustmentsApplied adjustmentsApplied)
+    private static decimal ComputeForfeitures(long ws_payprofit, long badge, AdjustmentAmounts adjustmentAmounts, AdjustmentsApplied adjustmentsApplied)
     {
         decimal incomingForfeitureAmount = Math.Round(adjustmentAmounts.IncomingForfeitPercent * ws_payprofit, 2, MidpointRounding.AwayFromZero);
         if (adjustmentAmounts.BadgeToAdjust > 0 && adjustmentAmounts.BadgeToAdjust == badge)
@@ -320,20 +289,16 @@ public class PAY444
             empl.SecondaryEarnings = 0;
         }
 
-        memberTotals.EarningsAmount = Math.Round(adjustmentAmounts.EarningsPercent * memberTotals.EarnPoints,
-            2, MidpointRounding.AwayFromZero);
+        memberTotals.EarningsAmount = Math.Round(adjustmentAmounts.EarningsPercent * memberTotals.EarnPoints, 2, MidpointRounding.AwayFromZero);
         if (adjustmentAmounts.BadgeToAdjust > 0 && adjustmentAmounts.BadgeToAdjust == (empl?.EmployeeId ?? 0))
         {
-            adjustmentsApplied.SV_EARN_AMT = memberTotals.EarningsAmount;
+            adjustmentsApplied.EarningsAmountUnadjusted = memberTotals.EarningsAmount;
             memberTotals.EarningsAmount += adjustmentAmounts.AdjustEarningsAmount;
-            adjustmentsApplied.SV_EARN_ADJUSTED = memberTotals.EarningsAmount;
+            adjustmentsApplied.EarningsAmountAdjusted = memberTotals.EarningsAmount;
         }
 
-        memberTotals.SecondaryEarningsAmount =
-            Math.Round(adjustmentAmounts.SecondaryEarningsPercent * memberTotals.EarnPoints, 2,
-                MidpointRounding.AwayFromZero);
-        if (adjustmentAmounts.BadgeToAdjust2 > 0 &&
-            adjustmentAmounts.BadgeToAdjust2 == (empl?.EmployeeId ?? 0))
+        memberTotals.SecondaryEarningsAmount = Math.Round(adjustmentAmounts.SecondaryEarningsPercent * memberTotals.EarnPoints, 2,  MidpointRounding.AwayFromZero);
+        if (adjustmentAmounts.BadgeToAdjust2 > 0 && adjustmentAmounts.BadgeToAdjust2 == (empl?.EmployeeId ?? 0))
         {
             adjustmentsApplied.SecondaryEarningsAmountUnadjusted = memberTotals.SecondaryEarningsAmount;
             memberTotals.SecondaryEarningsAmount += adjustmentAmounts.AdjustEarningsSecondaryAmount;
@@ -364,7 +329,7 @@ public class PAY444
         if (EtvaAfterVestingRulesAdjustedByCAF <= 0 && empl != null)
         {
             empl.Earnings = memberTotals.EarningsAmount;
-            empl.SecondaryEarnings = 0m;
+            empl.SecondaryEarnings = memberTotals.SecondaryEarningsAmount;
             empl.EarningsOnEtva = 0m;
             empl.SecondaryEtvaEarnings = 0m;
             return;
@@ -374,15 +339,15 @@ public class PAY444
         if (empl != null && memberTotals.PointsDollars > 0)
         {
             // Computes the ETVA amount
-            decimal WS_ETVA_PERCENT = EtvaAfterVestingRulesAdjustedByCAF / memberTotals.PointsDollars;
-            decimal WS_ETVA_AMT = Math.Round(memberTotals.EarningsAmount * WS_ETVA_PERCENT, 2, MidpointRounding.AwayFromZero);
+            decimal EtvaScaled = EtvaAfterVestingRulesAdjustedByCAF / memberTotals.PointsDollars;
+            decimal EtvaScaledAmount = Math.Round(memberTotals.EarningsAmount * EtvaScaled, 2, MidpointRounding.AwayFromZero);
 
             // subtracts that amount from the members total earnings
-            memberTotals.EarningsAmount = memberTotals.EarningsAmount - WS_ETVA_AMT;
+            memberTotals.EarningsAmount = memberTotals.EarningsAmount - EtvaScaledAmount;
 
             // Sets Earn and ETVA amounts
             empl!.Earnings = memberTotals.EarningsAmount;
-            empl.EarningsOnEtva = WS_ETVA_AMT;
+            empl.EarningsOnEtva = EtvaScaledAmount;
         }
 
         if (bene != null)
@@ -393,41 +358,20 @@ public class PAY444
 
         if (adjustmentAmounts.SecondaryEarningsPercent != 0m) // Secondary Earnings
         {
-            decimal WS_ETVA_PERCENT = EtvaAfterVestingRulesAdjustedByCAF / memberTotals.PointsDollars;
-            decimal WS_ETVA2_AMT = Math.Round(memberTotals.SecondaryEarningsAmount * WS_ETVA_PERCENT, 2,
-                MidpointRounding.AwayFromZero);
-            memberTotals.SecondaryEarningsAmount -= WS_ETVA2_AMT;
+            decimal EtvaScaled = EtvaAfterVestingRulesAdjustedByCAF / memberTotals.PointsDollars;
+            decimal EtvaSecondaryScaledAmount = Math.Round(memberTotals.SecondaryEarningsAmount * EtvaScaled, 2, MidpointRounding.AwayFromZero);
+            memberTotals.SecondaryEarningsAmount -= EtvaSecondaryScaledAmount;
             if (empl != null)
             {
                 empl.SecondaryEarnings = memberTotals.SecondaryEarningsAmount;
-                empl.SecondaryEtvaEarnings = WS_ETVA2_AMT;
+                empl.SecondaryEtvaEarnings = EtvaSecondaryScaledAmount;
             }
 
             if (bene != null)
             {
-                bene.SecondaryEarnings = WS_ETVA2_AMT;
+                bene.SecondaryEarnings = EtvaSecondaryScaledAmount;
             }
         }
-    }
-
-
-    public void m260Maxcont(decimal memberTotalContribution, WS_PAYPROFIT ws_payprofit, MemberFinancials memberFinancials, long badge, long maxAllowedContribution)
-    {
-        decimal overContribution = memberTotalContribution - maxAllowedContribution;
-
-        if (overContribution < ws_payprofit.WS_PROF_FORF)
-        {
-            ws_payprofit.WS_PROF_FORF -= overContribution;
-        }
-        else
-        {
-            DISPLAY($"FORFEITURES NOT ENOUGH FOR AMOUNT OVER MAX FOR EMPLOYEE BADGE #{badge}");
-            ws_payprofit.WS_PROF_FORF = 0;
-        }
-
-        memberFinancials.MaxOver = overContribution;
-        memberFinancials.MaxPoints = ws_payprofit.WS_PROF_POINTS;
-        _rerunNeeded = true;
     }
 
     private void DISPLAY(string v)
@@ -846,7 +790,7 @@ public class PAY444
         print_adj_line1.PL_ADJ_DESC = "INITIAL";
         print_adj_line1.PL_CONT_AMT = adjustmentsApplied.ContributionAmountUnadjusted;
         print_adj_line1.PL_FORF_AMT = adjustmentsApplied.IncomingForfeitureAmountUnadjusted;
-        print_adj_line1.PL_EARN_AMT = adjustmentsApplied.SV_EARN_AMT;
+        print_adj_line1.PL_EARN_AMT = adjustmentsApplied.EarningsAmountUnadjusted;
         print_adj_line1.PL_EARN2_AMT = adjustmentsApplied.SecondaryEarningsAmountUnadjusted;
         WRITE2_advance2(print_adj_line1);
 
@@ -861,12 +805,12 @@ public class PAY444
         print_adj_line1.PL_ADJ_DESC = "FINAL";
         print_adj_line1.PL_CONT_AMT = adjustmentsApplied.ContributionAmountAdjusted;
         print_adj_line1.PL_FORF_AMT = adjustmentsApplied.IncomingForfeitureAmountAdjusted;
-        print_adj_line1.PL_EARN_AMT = adjustmentsApplied.SV_EARN_ADJUSTED;
+        print_adj_line1.PL_EARN_AMT = adjustmentsApplied.EarningsAmountAdjusted;
         print_adj_line1.PL_EARN2_AMT = adjustmentsApplied.SecondaryEarningsAmountAdjusted;
 
         WRITE2_advance2(print_adj_line1);
 
-        if (adjustmentsApplied.IncomingForfeitureAmountUnadjusted == 0 && adjustmentsApplied.SV_EARN_AMT == 0)
+        if (adjustmentsApplied.IncomingForfeitureAmountUnadjusted == 0 && adjustmentsApplied.EarningsAmountUnadjusted == 0)
         {
             WRITE2_advance2("No adjustment - employee not found.");
         }
