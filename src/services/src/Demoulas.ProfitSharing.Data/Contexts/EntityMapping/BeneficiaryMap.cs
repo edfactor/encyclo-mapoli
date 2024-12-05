@@ -13,8 +13,6 @@ public sealed class BeneficiaryMap : IEntityTypeConfiguration<Beneficiary>
 
         _ = builder.Property(d => d.Id).HasColumnName("ID").ValueGeneratedOnAdd();
 
-        _ = builder.Ignore(d => d.Psn);
-
         _ = builder.HasIndex(e => e.PsnSuffix, "IX_PsnSuffix");
         _ = builder.Property(e => e.PsnSuffix)
             .HasPrecision(5)

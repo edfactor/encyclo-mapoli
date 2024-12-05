@@ -1,7 +1,5 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Data.Extensions;
 using Riok.Mapperly.Abstractions;
 
 namespace Demoulas.ProfitSharing.Services.Mappers;

@@ -8,14 +8,23 @@
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <Configurations>Debug;Release;Russ</Configurations>
+    <IntegraionTest>true</IntegraionTest>
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Base\**" />
+    <EmbeddedResource Remove="Base\**" />
+    <None Remove="Base\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Resources\ExecutiveHoursAndDollars year=this.csv" />
+    <None Remove="Resources\terminatedEmployeeAndBeneficiaryReport-correct.txt" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Resources\ExecutiveHoursAndDollars year=this.csv" />
+    <EmbeddedResource Include="Resources\terminatedEmployeeAndBeneficiaryReport-correct.txt" />
   </ItemGroup>
 
   <ItemGroup>
@@ -71,10 +80,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Base\" />
   </ItemGroup>
 
 </Project>

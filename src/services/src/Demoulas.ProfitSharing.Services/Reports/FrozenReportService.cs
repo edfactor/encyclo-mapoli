@@ -6,7 +6,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Services.InternalDto;
+using Demoulas.ProfitSharing.Services.ServiceDto;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -75,31 +75,31 @@ public class FrozenReportService : IFrozenReportService
                 var totals = await _contributionService.GetNetBalance((req.ProfitYear), badges, cancellationToken);
 
                 var currentYear = await (from pd in ctx.ProfitDetails
-                    join d in ctx.Demographics on pd.Ssn equals d.Ssn
-                    where pd.ProfitYear == req.ProfitYear
-                          && badges.Contains(d.EmployeeId)
-                    group pd by new { pd.Ssn, d.EmployeeId }
+                                         join d in ctx.Demographics on pd.Ssn equals d.Ssn
+                                         where pd.ProfitYear == req.ProfitYear
+                                               && badges.Contains(d.EmployeeId)
+                                         group pd by new { pd.Ssn, d.EmployeeId }
                     into pd_g
-                    select new
-                    {
-                        pd_g.Key.EmployeeId,
-                        pd_g.Key.Ssn,
-                        loan1Total =
-                            pd_g.Where(x =>
-                                new[] { ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id, ProfitCode.Constants.OutgoingDirectPayments.Id }
-                                    .Contains(x.ProfitCodeId) ||
-                                (x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment) &&
-                                x.CommentTypeId != CommentType.Constants.TransferOut).Sum(x => x.Forfeiture),
-                        forfeitTotal = pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures).Sum(x => x.Forfeiture),
-                        loan2Total = pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.OutgoingXferBeneficiary).Sum(x => x.Forfeiture),
-                        allocationTotal = pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary).Sum(x => x.Contribution)
-                    }).ToListAsync(cancellationToken);
+                                         select new
+                                         {
+                                             pd_g.Key.EmployeeId,
+                                             pd_g.Key.Ssn,
+                                             loan1Total =
+                                                 pd_g.Where(x =>
+                                                     new[] { ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id, ProfitCode.Constants.OutgoingDirectPayments.Id }
+                                                         .Contains(x.ProfitCodeId) ||
+                                                     (x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment) &&
+                                                     x.CommentTypeId != CommentType.Constants.TransferOut).Sum(x => x.Forfeiture),
+                                             forfeitTotal = pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures).Sum(x => x.Forfeiture),
+                                             loan2Total = pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.OutgoingXferBeneficiary).Sum(x => x.Forfeiture),
+                                             allocationTotal = pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary).Sum(x => x.Contribution)
+                                         }).ToListAsync(cancellationToken);
 
                 var lastYearPayProfits = await (from pp in ctx.PayProfits
-                        join d in ctx.Demographics on pp.DemographicId equals d.Id
-                        where pp.ProfitYear == req.ProfitYear - 1 && badges.Contains(d.EmployeeId)
-                                                                  && (pp.HoursExecutive + pp.CurrentHoursYear) >= 1000
-                        select new { d.EmployeeId, pp.CurrentIncomeYear }
+                                                join d in ctx.Demographics on pp.DemographicId equals d.Id
+                                                where pp.ProfitYear == req.ProfitYear - 1 && badges.Contains(d.EmployeeId)
+                                                                                          && (pp.HoursExecutive + pp.CurrentHoursYear) >= 1000
+                                                select new { d.EmployeeId, pp.CurrentIncomeYear }
                     ).ToListAsync(cancellationToken);
 
                 foreach (var rec in recs.Results.Where(rec => totals.ContainsKey((int)rec.EmployeeBadgeNumber)))
@@ -130,7 +130,9 @@ public class FrozenReportService : IFrozenReportService
 
             return new ReportResponseBase<ForfeituresAndPointsForYearResponse>
             {
-                ReportDate = DateTimeOffset.Now, ReportName = $"PROFIT  SHARING  FORFEITURES  AND  POINTS  FOR  {req.ProfitYear}", Response = rslt
+                ReportDate = DateTimeOffset.Now,
+                ReportName = $"PROFIT  SHARING  FORFEITURES  AND  POINTS  FOR  {req.ProfitYear}",
+                Response = rslt
             };
         }
     }
@@ -150,16 +152,16 @@ public class FrozenReportService : IFrozenReportService
         var queryResult = await _dataContextFactory.UseReadOnlyContext(ctx =>
         {
             var query = (from pd in ctx.ProfitDetails
-                join d in ctx.Demographics on pd.Ssn equals d.Ssn
-                where pd.ProfitYear == req.ProfitYear && codes.Contains(pd.ProfitCodeId)
-                select new
-                {
-                    d.DateOfBirth,
-                    EmploymentType = d.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT,
-                    d.EmployeeId,
-                    Amount = pd.Forfeiture,
-                    pd.CommentTypeId
-                });
+                         join d in ctx.Demographics on pd.Ssn equals d.Ssn
+                         where pd.ProfitYear == req.ProfitYear && codes.Contains(pd.ProfitCodeId)
+                         select new
+                         {
+                             d.DateOfBirth,
+                             EmploymentType = d.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT,
+                             d.EmployeeId,
+                             Amount = pd.Forfeiture,
+                             pd.CommentTypeId
+                         });
 
             query = req.ReportType switch
             {

@@ -1,6 +1,5 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
-using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -28,7 +27,7 @@ public class MilitaryAndRehireForfeituresEndpoint :
         Get("military-and-rehire-forfeitures/{reportingYear}");
         Summary(s =>
         {
-            s.Summary = "Military and Rehire Profit Sharing Data Report Endpoint";
+            s.Summary = "Military and Rehire Forfeitures Report Endpoint";
             s.Description =
                 "The Military and Rehire Profit Sharing Data endpoint produces a comprehensive report on employees who are either currently on military leave or have been rehired, focusing on their eligibility for forfeiture adjustments in profit-sharing. The report contains employee information, such as badge number, rehire date, and current year-to-date hours, along with profit-sharing records, including profit year, forfeiture amounts, and comments. This report supports multiple executions and is primarily used to address forfeiture discrepancies before profit sharing is finalized.";
 

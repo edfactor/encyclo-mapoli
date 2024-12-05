@@ -1,10 +1,13 @@
 ﻿using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Services.InternalDto;
+using Demoulas.ProfitSharing.Services.ServiceDto;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services;
 
+/// <summary>
+/// Provides services related to profit sharing contributions.
+/// </summary>
 public sealed class ContributionService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
@@ -15,17 +18,35 @@ public sealed class ContributionService
     }
 
 
-    internal Task<Dictionary<int, int>> GetContributionYears(ISet<int> badgeNumber)
+    internal Task<Dictionary<int, byte>> GetContributionYears(ISet<int> employeeId)
     {
         return _dataContextFactory.UseReadOnlyContext(context =>
         {
-            return context.PayProfits
-                .Include(p => p.Demographic)
-                .Where(p => badgeNumber.Contains(p.Demographic!.EmployeeId))
-                .GroupBy(p => p.Demographic!.EmployeeId)
-                .Select(p => new { BadgeNumber = p.Key, ContributionYears = p.Count() })
-                .ToDictionaryAsync(arg => arg.BadgeNumber, arg => arg.ContributionYears);
+            return GetContributionYears(context, employeeId)
+                .ToDictionaryAsync(arg => arg.EmployeeId, arg => arg.YearsInPlan);
         });
+    }
+
+    /// <summary>
+    /// Retrieves the contribution years for a set of employees.
+    /// </summary>
+    /// <param name="context">
+    /// The database context used to access profit sharing data.
+    /// </param>
+    /// <param name="employeeId">
+    /// A set of employee IDs for which to retrieve contribution years.
+    /// </param>
+    /// <returns>
+    /// An <see cref="IQueryable{T}"/> of <see cref="ContributionYears"/> representing the contribution years
+    /// for each employee in the specified set.
+    /// </returns>
+    internal IQueryable<ContributionYears> GetContributionYears(IProfitSharingDbContext context, ISet<int> employeeId)
+    {
+        return context.PayProfits
+            .Include(p => p.Demographic)
+            .Where(p => employeeId.Contains(p.Demographic!.EmployeeId))
+            .GroupBy(p => p.Demographic!.EmployeeId)
+            .Select(p => new ContributionYears { EmployeeId = p.Key,YearsInPlan = (byte)p.Count() });
     }
 
     internal IQueryable<InternalProfitDetailDto> GetNetBalanceQuery(short profitYear, IProfitSharingDbContext ctx)
@@ -70,7 +91,7 @@ public sealed class ContributionService
         {
             var query = from d in GetNetBalanceQuery(profitYear, ctx).Where(x => badgeNumbers.Contains(x.BadgeNumber)) select d;
 
-            return query.ToDictionaryAsync(d=> d.BadgeNumber, cancellationToken);
+            return query.ToDictionaryAsync(d => d.BadgeNumber, cancellationToken);
         });
     }
 }

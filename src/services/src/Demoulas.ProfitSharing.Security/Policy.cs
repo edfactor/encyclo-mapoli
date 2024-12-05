@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Demoulas.ProfitSharing.Security;
+﻿namespace Demoulas.ProfitSharing.Security;
 public static class Policy
 {
     public static readonly string CanViewYearEndReports = "CAN_VIEW_YEAR_END_REPORTS";

@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Services.InternalDto;
+﻿namespace Demoulas.ProfitSharing.Services.ServiceDto;
 internal sealed record InternalProfitDetailDto
 {
     public long OracleHcmId { get; set; }
@@ -10,5 +10,7 @@ internal sealed record InternalProfitDetailDto
     public decimal TotalPayments { get; set; }
     public decimal TotalFederalTaxes { get; set; }
     public decimal TotalStateTaxes { get; set; }
-
+    public decimal CurrentAmount { get; set; }
+    public decimal Distribution { get; set; }
+    public decimal BeneficiaryAllocation { get; set; }
 }

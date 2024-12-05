@@ -11,6 +11,6 @@ public sealed class BeneficiaryContact
     public required ContactInfo ContactInfo { get; set; }
 
     public required DateOnly CreatedDate { get; set; }
-    
+
     public List<Beneficiary>? Beneficiaries { get; set; }
 }

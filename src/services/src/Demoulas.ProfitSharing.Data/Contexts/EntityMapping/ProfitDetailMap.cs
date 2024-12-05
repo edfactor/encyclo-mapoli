@@ -18,7 +18,7 @@ internal sealed class ProfitDetailMap : IEntityTypeConfiguration<ProfitDetail>
         _ = builder.Property(x => x.ProfitYearIteration).IsRequired().HasColumnName("PROFIT_YEAR_ITERATION");
         _ = builder.Property(x => x.ProfitCodeId).IsRequired().HasColumnName("PROFIT_CODE_ID");
         _ = builder.HasOne(x => x.ProfitCode).WithMany().HasForeignKey(x => x.ProfitCodeId);
-        _ = builder.Property(x => x.Contribution).IsRequired().HasPrecision(9, 2).HasColumnName("CONTRIBUTION");
+        _ = builder.Property(x => x.Contribution).IsRequired().HasPrecision(9, 2).HasColumnName("CONTRIBUTION").HasComment("Contribution to plan from DMB");
         _ = builder.Property(x => x.Earnings).IsRequired().HasPrecision(9, 2).HasColumnName("EARNINGS");
         _ = builder.Property(x => x.Forfeiture).IsRequired().HasPrecision(9, 2).HasColumnName("FORFEITURE");
         _ = builder.Property(x => x.MonthToDate).IsRequired().HasPrecision(2, 0).HasColumnName("MONTH_TO_DATE");
@@ -42,6 +42,7 @@ internal sealed class ProfitDetailMap : IEntityTypeConfiguration<ProfitDetail>
 
         _ = builder.HasOne(x => x.CommentType).WithMany().HasForeignKey(x => x.CommentTypeId);
         _ = builder.HasOne(x => x.TaxCode).WithMany().HasForeignKey(t => t.TaxCodeId);
+        _ = builder.HasOne(x => x.ProfitCode).WithMany().HasForeignKey(x => x.ProfitCodeId);
 
         _ = builder.HasOne(d => d.ZeroContributionReason)
             .WithMany()

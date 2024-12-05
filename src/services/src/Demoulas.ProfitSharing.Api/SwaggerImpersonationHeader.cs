@@ -1,9 +1,10 @@
-﻿using NJsonSchema;
-using NSwag.Generation.Processors.Contexts;
-using NSwag.Generation.Processors;
+﻿using Demoulas.ProfitSharing.Security;
+using NJsonSchema;
 using NSwag;
+using NSwag.Generation.Processors;
+using NSwag.Generation.Processors.Contexts;
 
-namespace Demoulas.ProfitSharing.Security;
+namespace Demoulas.ProfitSharing.Api;
 public class SwaggerImpersonationHeader : IOperationProcessor
 {
     public bool Process(OperationProcessorContext context)
