@@ -6,7 +6,6 @@ import { useLazyGetMilitaryAndRehireProfitSummaryQuery, useLazyGetNegativeEVTASS
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { ImpersonationRoles } from "reduxstore/types";
 
 interface MilitaryAndRehireProfitSummarySearch {
   profitYear: number;
@@ -53,7 +52,6 @@ const MilitaryAndRehireProfitSummarySearchFilter = () => {
           reportingYear: data.reportingYear,
           profitYear: data.profitYear,
           pagination: { skip: 0, take: 25 },
-          impersonation: ImpersonationRoles.ProfitSharingAdministrator
         },
         false
       );
