@@ -45,17 +45,16 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
     private async Task<IAsyncEnumerable<MemberSlice>> RetrieveMemberSlices(IProfitSharingDbContext ctx, ProfitYearRequest request,
         CancellationToken cancellationToken)
     {
-        var terminatedEmployees = await GetTerminatedEmployees(ctx, request, cancellationToken);
+        CalendarResponseDto startEnd = await _calendarService.GetYearStartAndEndAccountingDates(request.ProfitYear, cancellationToken);
+        var terminatedEmployees = GetTerminatedEmployees(ctx, request, startEnd);
         var terminatedWithContributions = await GetEmployeesWithContributions(ctx, request, terminatedEmployees, cancellationToken);
         var beneficiaries = GetBeneficiaries(ctx, request);
         return CombineEmployeeAndBeneficiarySlices(terminatedWithContributions, beneficiaries, request.Skip);
     }
 
-    private async Task<IQueryable<TerminatedEmployeeDto>> GetTerminatedEmployees(IProfitSharingDbContext ctx, ProfitYearRequest request,
-        CancellationToken cancellationToken)
+    private IQueryable<TerminatedEmployeeDto> GetTerminatedEmployees(IProfitSharingDbContext ctx, ProfitYearRequest request,
+        CalendarResponseDto startEnd)
     {
-        var startEnd = await _calendarService.GetYearStartAndEndAccountingDates(request.ProfitYear, cancellationToken);
-
         var queryable = ctx.Demographics
             .Include(d => d.PayProfits)
             .Include(d => d.ContactInfo)
@@ -79,44 +78,39 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         IQueryable<TerminatedEmployeeDto> terminatedEmployees, CancellationToken cancellationToken)
     {
         var demKeyList = await terminatedEmployees.Select(e => new { e.Demographic.Id, e.Demographic.EmployeeId }).ToListAsync(cancellationToken);
-        var idList = demKeyList.Select(e => e.Id).ToHashSet();
-        var badgeNumbers = demKeyList.Select(e => e.EmployeeId).ToHashSet();
+        var employeeIds = demKeyList.Select(e => e.EmployeeId).ToHashSet();
 
-        var contributionYearsQuery = _contributionService.GetContributionYears(ctx, badgeNumbers);
+        var contributionYearsQuery = _contributionService.GetContributionYears(ctx, employeeIds);
 
         var validEnrollmentIds = GetValidEnrollmentIds();
 
-        var payProfitsQuery = ctx.PayProfits
-            .Where(p => p.ProfitYear == request.ProfitYear
-                        && idList.Contains(p.DemographicId)
-                        && validEnrollmentIds.Contains(p.EnrollmentId));
-
         var query = from employee in terminatedEmployees
-            join contribution in contributionYearsQuery on employee.Demographic.EmployeeId equals contribution.EmployeeId
-            join payProfit in payProfitsQuery on employee.Demographic.Id equals payProfit.DemographicId
-            select new MemberSlice
-            {
-                PsnSuffix = 0,
-                EmployeeId = employee.Demographic.EmployeeId,
-                Ssn = employee.Demographic.Ssn,
-                BirthDate = employee.Demographic.DateOfBirth,
-                HoursCurrentYear = payProfit.CurrentHoursYear,
-                EmploymentStatusCode = employee.Demographic.EmploymentStatusId,
-                FullName = employee.Demographic.ContactInfo.FullName,
-                FirstName = employee.Demographic.ContactInfo.FirstName,
-                MiddleInitial = employee.Demographic.ContactInfo.MiddleName,
-                LastName = employee.Demographic.ContactInfo.LastName,
-                YearsInPs = contribution.YearsInPlan,
-                TerminationDate = employee.Demographic.TerminationDate,
-                IncomeRegAndExecCurrentYear = payProfit.CurrentIncomeYear + payProfit.IncomeExecutive,
-                TerminationCode = employee.Demographic.TerminationCodeId,
-                ZeroCont = (employee.Demographic.TerminationCodeId == TerminationCode.Constants.Deceased
-                    ? ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested
-                    : payProfit.ZeroContributionReasonId ?? 0),
-                EnrollmentId = payProfit.EnrollmentId,
-                Etva = payProfit.EarningsEtvaValue,
-                BeneficiaryAllocation = 0
-            };
+                    join contribution in contributionYearsQuery on employee.Demographic.EmployeeId equals contribution.EmployeeId
+                    join payProfit in ctx.PayProfits on employee.Demographic.Id equals payProfit.DemographicId
+                    where payProfit.ProfitYear == request.ProfitYear && validEnrollmentIds.Contains(payProfit.EnrollmentId)
+                    select new MemberSlice
+                    {
+                        PsnSuffix = 0,
+                        EmployeeId = employee.Demographic.EmployeeId,
+                        Ssn = employee.Demographic.Ssn,
+                        BirthDate = employee.Demographic.DateOfBirth,
+                        HoursCurrentYear = payProfit.CurrentHoursYear,
+                        EmploymentStatusCode = employee.Demographic.EmploymentStatusId,
+                        FullName = employee.Demographic.ContactInfo.FullName,
+                        FirstName = employee.Demographic.ContactInfo.FirstName,
+                        MiddleInitial = employee.Demographic.ContactInfo.MiddleName,
+                        LastName = employee.Demographic.ContactInfo.LastName,
+                        YearsInPs = contribution.YearsInPlan,
+                        TerminationDate = employee.Demographic.TerminationDate,
+                        IncomeRegAndExecCurrentYear = payProfit.CurrentIncomeYear + payProfit.IncomeExecutive,
+                        TerminationCode = employee.Demographic.TerminationCodeId,
+                        ZeroCont = (employee.Demographic.TerminationCodeId == TerminationCode.Constants.Deceased
+                            ? ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested
+                            : payProfit.ZeroContributionReasonId ?? 0),
+                        EnrollmentId = payProfit.EnrollmentId,
+                        Etva = payProfit.EarningsEtvaValue,
+                        BeneficiaryAllocation = 0
+                    };
 
         return query;
     }

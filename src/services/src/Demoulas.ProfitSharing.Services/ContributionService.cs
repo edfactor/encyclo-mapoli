@@ -42,7 +42,6 @@ public sealed class ContributionService
     /// </returns>
     internal IQueryable<ContributionYears> GetContributionYears(IProfitSharingDbContext context, ISet<int> employeeId)
     {
-
         return context.PayProfits
             .Include(p => p.Demographic)
             .Where(p => employeeId.Contains(p.Demographic!.EmployeeId))

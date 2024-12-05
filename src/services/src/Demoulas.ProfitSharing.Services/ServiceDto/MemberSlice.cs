@@ -6,7 +6,7 @@
 /// </summary>
 internal sealed record MemberSlice
 {
-    public short PsnSuffix { get; init; }
+    public int PsnSuffix { get; init; }
     public required int EmployeeId { get; init; }
     public long Ssn { get; init; }
     public decimal HoursCurrentYear { get; init; }
