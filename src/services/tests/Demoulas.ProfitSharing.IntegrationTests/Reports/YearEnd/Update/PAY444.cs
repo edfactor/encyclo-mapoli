@@ -113,10 +113,6 @@ public class PAY444
 
     public MemberFinancials? ProcessEmployee(EmployeeFinancials empl, AdjustmentAmounts adjustmentAmounts, AdjustmentsApplied adjustmentsApplied)
     {
-        WS_PAYPROFIT ws_payprofit = new WS_PAYPROFIT();
-        ws_payprofit.WS_PS_AMT = empl.CurrentAmount;
-        ws_payprofit.WS_PROF_POINTS = empl.PointsEarned;
-
         //* If an employee has an ETVA amount and no years on the plan, employee is a
         //* beneficiary and should get earnings on the etva amt (8 record)
         if (empl.EmployeeTypeId == 0) // 0 = not new, 1 == new in plan
@@ -127,38 +123,37 @@ public class PAY444
             }
         }
 
-        if (empl.EnrolledId <= Enrollment.Constants.NotEnrolled && empl.EmployeeTypeId <= 0 && ws_payprofit.WS_PS_AMT <= 0 && empl.YearsInPlan <= 0)
+        if (empl.EnrolledId <= Enrollment.Constants.NotEnrolled && empl.EmployeeTypeId <= 0 && empl.CurrentAmount <= 0 && empl.YearsInPlan <= 0)
         {
             return null;
         }
 
         var detailTotals = GetDetailTotals(empl.Ssn);
 
+        MemberTotals memberTotals = new MemberTotals();
+        memberTotals.ContributionAmount = ComputeContribution(empl.PointsEarned, empl.EmployeeId, adjustmentAmounts, adjustmentsApplied);
+        memberTotals.IncomingForfeitureAmount = ComputeForfeitures(empl.PointsEarned, empl.EmployeeId, adjustmentAmounts, adjustmentsApplied);
 
-        MemberTotals membTot = new MemberTotals();
 
-        ComputeContribution(ws_payprofit, membTot, empl.EmployeeId, adjustmentAmounts, adjustmentsApplied);
-        ComputeForfeitures(ws_payprofit, membTot, empl.EmployeeId, adjustmentAmounts, adjustmentsApplied);
+        memberTotals.EarningsBalance = detailTotals.AllocationsTotal + detailTotals.ClassActionFundTotal +
+            (empl.CurrentAmount - detailTotals.ForfeitsTotal - detailTotals.PaidAllocationsTotal) - detailTotals.DistributionsTotal;
 
-        membTot.EarningsBalance = detailTotals.AllocationsTotal + detailTotals.ClassActionFundTotal +
-            (ws_payprofit.WS_PS_AMT - detailTotals.ForfeitsTotal - detailTotals.PaidAllocationsTotal) - detailTotals.DistributionsTotal;
+        memberTotals.EarningsBalance -= detailTotals.ClassActionFundTotal;
 
-        membTot.EarningsBalance -= detailTotals.ClassActionFundTotal;
-
-        if (membTot.EarningsBalance <= 0)
+        if (memberTotals.EarningsBalance <= 0)
         {
-            membTot.EarnPoints = 0;
-            membTot.PointsDollars = 0;
+            memberTotals.EarnPoints = 0;
+            memberTotals.PointsDollars = 0;
         }
         else
         {
-            membTot.PointsDollars =
-                detailTotals.AllocationsTotal + (ws_payprofit.WS_PS_AMT - detailTotals.ForfeitsTotal - detailTotals.PaidAllocationsTotal) - detailTotals.DistributionsTotal;
+            memberTotals.PointsDollars =
+                detailTotals.AllocationsTotal + (empl.CurrentAmount - detailTotals.ForfeitsTotal - detailTotals.PaidAllocationsTotal) - detailTotals.DistributionsTotal;
 
-            membTot.EarnPoints = (long)Math.Round(membTot.PointsDollars / 100, MidpointRounding.AwayFromZero);
+            memberTotals.EarnPoints = (long)Math.Round(memberTotals.PointsDollars / 100, MidpointRounding.AwayFromZero);
         }
 
-        ComputeEarnings(membTot, null, empl, adjustmentAmounts, adjustmentsApplied, detailTotals.ClassActionFundTotal);
+        ComputeEarnings(memberTotals, null, empl, adjustmentAmounts, adjustmentsApplied, detailTotals.ClassActionFundTotal);
 
         MemberFinancials memb = new();
         memb.EmployeeId = empl.EmployeeId;
@@ -167,33 +162,43 @@ public class PAY444
         memb.Ssn = empl.Ssn;
         memb.Xfer = detailTotals.AllocationsTotal;
         memb.Pxfer = detailTotals.PaidAllocationsTotal;
-        memb.CurrentAmount = ws_payprofit.WS_PS_AMT;
+        memb.CurrentAmount = empl.CurrentAmount;
         memb.Distributions = detailTotals.DistributionsTotal;
         memb.Military = detailTotals.MilitaryTotal;
         memb.Caf = detailTotals.ClassActionFundTotal;
         memb.EmployeeTypeId = empl.EmployeeTypeId;
-        memb.ContributionPoints = ws_payprofit.WS_PROF_POINTS;
-        memb.EarningPoints = membTot.EarnPoints;
-        memb.Contributions = ws_payprofit.WS_PROF_CONT;
-        memb.IncomingForfeitures = ws_payprofit.WS_PROF_FORF;
+        memb.ContributionPoints = empl.PointsEarned;
+        memb.EarningPoints = memberTotals.EarnPoints;
+        memb.Contributions = memberTotals.ContributionAmount;
+        memb.IncomingForfeitures = memberTotals.IncomingForfeitureAmount;
         memb.IncomingForfeitures -= detailTotals.ForfeitsTotal;
         memb.Earnings = empl.Earnings;
         memb.Earnings += empl.EarningsOnEtva;
         memb.SecondaryEarnings = empl.SecondaryEarnings;
         memb.SecondaryEarnings += empl.SecondaryEtvaEarnings;
 
-        decimal memberTotalContribution = ws_payprofit.WS_PROF_CONT + detailTotals.MilitaryTotal + ws_payprofit.WS_PROF_FORF;
+        decimal memberTotalContribution = memberTotals.ContributionAmount + detailTotals.MilitaryTotal + memberTotals.IncomingForfeitureAmount;
         if (memberTotalContribution > adjustmentAmounts.MaxAllowedContributions)
         {
-            m260Maxcont(memberTotalContribution, ws_payprofit, memb, empl.EmployeeId, adjustmentAmounts.MaxAllowedContributions);
-        }
-        else
-        {
-            memb.MaxOver = 0;
+            decimal overContribution = memberTotalContribution - adjustmentAmounts.MaxAllowedContributions;
+
+            if (overContribution < memberTotals.IncomingForfeitureAmount)
+            {
+                memb.IncomingForfeitures -= overContribution;
+            }
+            else
+            {
+                DISPLAY($"FORFEITURES NOT ENOUGH FOR AMOUNT OVER MAX FOR EMPLOYEE BADGE #{empl.EmployeeId}");
+                memb.IncomingForfeitures = 0;
+            }
+
+            memb.MaxOver = overContribution;
+            memb.MaxPoints = memb.ContributionPoints;
+            _rerunNeeded = true;
         }
 
-        empl.Contributions = ws_payprofit.WS_PROF_CONT;
-        empl.IncomeForfeiture = ws_payprofit.WS_PROF_FORF;
+        empl.Contributions = memberTotals.ContributionAmount;
+        empl.IncomeForfeiture = memberTotals.IncomingForfeitureAmount;
 
         if (false /*rewrites are off ... the destination columns no longer exist in payprofit*/)
         {
@@ -275,33 +280,33 @@ public class PAY444
     }
 
 
-    public void ComputeContribution(WS_PAYPROFIT ws_payprofit, MemberTotals memberTotals, long badge, AdjustmentAmounts adjustmentAmounts, AdjustmentsApplied adjustmentsApplied)
+    public decimal ComputeContribution(long ws_payprofit, long badge, AdjustmentAmounts adjustmentAmounts, AdjustmentsApplied adjustmentsApplied)
     {
-        memberTotals.ContributionAmount = Math.Round(adjustmentAmounts.ContributionPercent * ws_payprofit.WS_PROF_POINTS, 2,
+        decimal contributionAmount = Math.Round(adjustmentAmounts.ContributionPercent * ws_payprofit, 2,
             MidpointRounding.AwayFromZero);
 
         if (adjustmentAmounts.BadgeToAdjust > 0 && adjustmentAmounts.BadgeToAdjust == badge)
         {
-            adjustmentsApplied.ContributionAmountUnadjusted = memberTotals.ContributionAmount;
-            memberTotals.ContributionAmount += adjustmentAmounts.AdjustContributionAmount;
-            adjustmentsApplied.ContributionAmountAdjusted = memberTotals.ContributionAmount;
+            adjustmentsApplied.ContributionAmountUnadjusted = contributionAmount;
+            contributionAmount += adjustmentAmounts.AdjustContributionAmount;
+            adjustmentsApplied.ContributionAmountAdjusted = contributionAmount;
         }
 
-        ws_payprofit.WS_PROF_CONT = memberTotals.ContributionAmount;
+        return contributionAmount;
     }
 
 
-    public void ComputeForfeitures(WS_PAYPROFIT ws_payprofit, MemberTotals memberTotals, long badge, AdjustmentAmounts adjustmentAmounts, AdjustmentsApplied adjustmentsApplied)
+    public decimal ComputeForfeitures(long ws_payprofit, long badge, AdjustmentAmounts adjustmentAmounts, AdjustmentsApplied adjustmentsApplied)
     {
-        memberTotals.IncomingForfeitureAmount = Math.Round(adjustmentAmounts.IncomingForfeitPercent * ws_payprofit.WS_PROF_POINTS, 2, MidpointRounding.AwayFromZero);
+        decimal incomingForfeitureAmount = Math.Round(adjustmentAmounts.IncomingForfeitPercent * ws_payprofit, 2, MidpointRounding.AwayFromZero);
         if (adjustmentAmounts.BadgeToAdjust > 0 && adjustmentAmounts.BadgeToAdjust == badge)
         {
-            adjustmentsApplied.IncomingForfeitureAmountUnadjusted = memberTotals.IncomingForfeitureAmount;
-            memberTotals.IncomingForfeitureAmount += adjustmentAmounts.AdjustIncomingForfeitAmount;
-            adjustmentsApplied.IncomingForfeitureAmountAdjusted = memberTotals.IncomingForfeitureAmount;
+            adjustmentsApplied.IncomingForfeitureAmountUnadjusted = incomingForfeitureAmount;
+            incomingForfeitureAmount += adjustmentAmounts.AdjustIncomingForfeitAmount;
+            adjustmentsApplied.IncomingForfeitureAmountAdjusted = incomingForfeitureAmount;
         }
 
-        ws_payprofit.WS_PROF_FORF = memberTotals.IncomingForfeitureAmount;
+        return incomingForfeitureAmount;
     }
 
     public void ComputeEarnings(MemberTotals memberTotals, BeneficiaryFinancials? bene, EmployeeFinancials? empl, AdjustmentAmounts adjustmentAmounts, AdjustmentsApplied? adjustmentsApplied, decimal ClassActionFundTotal)
