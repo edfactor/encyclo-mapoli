@@ -15,4 +15,7 @@ public class CollectTotals
     public decimal WS_TOT_CAF { get; set; }
     public long WS_PROF_PTS_TOTAL { get; set; }
     public long WS_EARN_PTS_TOTAL { get; set; }
+
+    public decimal MaxOverTotal { get; set; }
+    public long MaxPointsTotal { get; set; }
 }

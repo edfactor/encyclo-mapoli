@@ -6,9 +6,9 @@ using Oracle.ManagedDataAccess.Client;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.DbHelpers;
 
-public class PayProfRecTableHelper
+public class EmployeeDataHelper
 {
-    public PayProfRecTableHelper(OracleConnection connection, IProfitSharingDataContextFactory dbContextFactory, short profitYear)
+    public EmployeeDataHelper(OracleConnection connection, IProfitSharingDataContextFactory dbContextFactory, short profitYear)
     {
         loadData(connection);
         /**

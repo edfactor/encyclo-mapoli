@@ -24,10 +24,10 @@ public class ProftShareUpdateTests
         pay444.TodaysDateTime = new DateTime(2024, 11, 12, 9, 43, 0); // time report was generated
 
         // Act
-        pay444.m015MainProcessing( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        pay444.ApplyAdjustments( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
         // Assert
-        string actual = CollectLines(pay444.reportLines);
+        string actual = CollectLines(pay444.ReportLines);
         string expected = LoadExpectedReport(reportName);
 
         AssertReportsAreEquivalent(expected, actual);
@@ -45,11 +45,11 @@ public class ProftShareUpdateTests
         pay444.TodaysDateTime = new DateTime(2024, 11, 14, 10, 35, 0); // time report was generated
 
         // Act
-        pay444.m015MainProcessing( 15, 1, 2, 0, 0, 0, 0, 0, 0, 0, 30_000);
+        pay444.ApplyAdjustments( 15, 1, 2, 0, 0, 0, 0, 0, 0, 0, 30_000);
 
         // Assert
         string expected = LoadExpectedReport(reportName);
-        string actual = CollectLines(pay444.reportLines);
+        string actual = CollectLines(pay444.ReportLines);
 
         AssertReportsAreEquivalent(expected, actual);
     }
@@ -64,11 +64,11 @@ public class ProftShareUpdateTests
         pay444.TodaysDateTime = new DateTime(2024, 11, 19, 19, 18, 0); // time report was generated
 
         // Act
-        pay444.m015MainProcessing( 15, 1, 2, 0, 700174, 44.77m, 18.16m, 22.33m, 0, 0, 30_000);
+        pay444.ApplyAdjustments( 15, 1, 2, 0, 700174, 44.77m, 18.16m, 22.33m, 0, 0, 30_000);
 
         // Assert
         string expected = LoadExpectedReport(reportName);
-        string actual = CollectLines(pay444.reportLines);
+        string actual = CollectLines(pay444.ReportLines);
 
         AssertReportsAreEquivalent(expected, actual);
     }

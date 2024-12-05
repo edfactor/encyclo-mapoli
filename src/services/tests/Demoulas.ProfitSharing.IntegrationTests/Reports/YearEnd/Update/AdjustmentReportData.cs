@@ -2,12 +2,12 @@
 
 public class AdjustmentsApplied {
    
-    public decimal SV_FORF_AMT { get; set; } 
-    public decimal SV_FORF_ADJUSTED { get; set; } 
+    public decimal IncomingForfeitureAmountUnadjusted { get; set; } 
+    public decimal IncomingForfeitureAmountAdjusted { get; set; } 
     public decimal SV_EARN_AMT { get; set; } 
     public decimal SV_EARN_ADJUSTED { get; set; } 
-    public decimal SV_EARN2_AMT { get; set; } 
-    public decimal SV_EARN2_ADJUSTED { get; set; } 
-    public decimal SV_CONT_AMT { get; set; } 
-    public decimal SV_CONT_ADJUSTED { get; set; } 
+    public decimal SecondaryEarningsAmountUnadjusted { get; set; } 
+    public decimal SecondaryEarningsAmountAdjusted { get; set; } 
+    public decimal ContributionAmountUnadjusted { get; set; } 
+    public decimal ContributionAmountAdjusted { get; set; } 
 }
