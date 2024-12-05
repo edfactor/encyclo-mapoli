@@ -6,7 +6,6 @@ import { useLazyGetExecutiveHoursAndDollarsQuery } from "reduxstore/api/YearsEnd
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { ImpersonationRoles } from "reduxstore/types";
 
 interface ExecutiveHoursAndDollarsSearch {
   profitYear: number;
@@ -62,8 +61,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter = () => {
           profitYear: data.profitYear,
           ...(!!data.badgeNumber && { badgeNumber: data.badgeNumber }),
           hasExecutiveHoursAndDollars: data.hasExecutiveHoursAndDollars ?? false,
-          ...(!!data.fullNameContains && { fullNameContains: data.fullNameContains }),
-          impersonation: ImpersonationRoles.ProfitSharingAdministrator
+          ...(!!data.fullNameContains && { fullNameContains: data.fullNameContains })
         },
         false
       );

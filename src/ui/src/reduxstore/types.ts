@@ -2,13 +2,9 @@ import { Paged, PaginationParams } from "smart-ui-library";
 
 export enum ImpersonationRoles {
   FinanceManager = "Finance-Manager",
-  DistributionsClerk = "Distribution-Clerk",
+  DistributionsClerk = "Distributions-Clerk",
   HardshipAdministrator = "Hardship-Administrator",
   ProfitSharingAdministrator = "Profit-Sharing-Administrator"
-}
-
-interface ImpersonationRequest {
-  impersonation: ImpersonationRoles;
 }
 
 export interface DemographicBadgesNotInPayprofitResponse {
@@ -25,7 +21,7 @@ export interface DemographicBadgesNotInPayprofit {
   status: string;
 }
 
-export interface DemographicBadgesNotInPayprofitRequestDto extends ImpersonationRequest {
+export interface DemographicBadgesNotInPayprofitRequestDto {
   pagination: PaginationParams;
 }
 
@@ -35,7 +31,7 @@ export interface PagedReportResponse<T> {
   response: Paged<T>;
 }
 
-export interface DistributionsAndForfeituresRequestDto extends ImpersonationRequest {
+export interface DistributionsAndForfeituresRequestDto {
   startMonth?: number;
   endMonth?: number;
   includeOutgoingForfeitures?: boolean;
@@ -84,12 +80,12 @@ export interface DuplicateSSNDetail {
   incomeCurrentYear: number;
 }
 
-export interface DuplicateSSNsRequestDto extends ImpersonationRequest {
+export interface DuplicateSSNsRequestDto {
   profitYear: number;
   pagination: PaginationParams;
 }
 
-export interface MissingCommasInPYNameRequestDto extends ImpersonationRequest {
+export interface MissingCommasInPYNameRequestDto {
   pagination: PaginationParams;
 }
 
@@ -99,12 +95,12 @@ export interface MissingCommasInPYName {
   employeeName: string;
 }
 
-export interface DuplicateNameAndBirthdayRequestDto extends ImpersonationRequest {
+export interface DuplicateNameAndBirthdayRequestDto {
   profitYear: number;
   pagination: PaginationParams;
 }
 
-export interface NegativeEtvaForSSNsOnPayprofitRequestDto extends ImpersonationRequest {
+export interface NegativeEtvaForSSNsOnPayprofitRequestDto {
   profitYear: number;
   pagination: PaginationParams;
 }
@@ -141,7 +137,7 @@ export interface NegativeEtvaForSSNsOnPayProfit {
   etvaValue: number;
 }
 
-export interface MilitaryAndRehireRequestDto extends ImpersonationRequest {
+export interface MilitaryAndRehireRequestDto {
   pagination: PaginationParams;
 }
 
@@ -154,7 +150,7 @@ export interface MilitaryAndRehire {
   terminationDate: string;
 }
 
-export interface MilitaryAndRehireForfeituresRequestDto extends ImpersonationRequest {
+export interface MilitaryAndRehireForfeituresRequestDto {
   reportingYear: string;
   profitYear: number;
   pagination: PaginationParams;
@@ -176,7 +172,7 @@ export interface MilitaryAndRehireForfeiture {
   details: ForfeitureDetail[];
 }
 
-export interface MilitaryAndRehireProfitSummaryRequestDto extends ImpersonationRequest {
+export interface MilitaryAndRehireProfitSummaryRequestDto {
   reportingYear: string;
   profitYear: number;
   pagination: PaginationParams;
@@ -202,7 +198,7 @@ export interface MilitaryAndRehireProfitSummary {
   profitCodeId: number;
 }
 
-export interface ExecutiveHoursAndDollarsRequestDto extends ImpersonationRequest {
+export interface ExecutiveHoursAndDollarsRequestDto {
   badgeNumber?: number;
   fullNameContains?: string;
   profitYear: number;
@@ -222,7 +218,7 @@ export interface ExecutiveHoursAndDollars {
   employmentStatusId: string;
 }
 
-export interface EligibleEmployeesRequestDto extends ImpersonationRequest {
+export interface EligibleEmployeesRequestDto {
   profitYear: number;
   pagination: PaginationParams;
 }
@@ -267,7 +263,7 @@ export interface MasterInquiryDetail {
   commentIsPartialTransaction?: boolean;
 }
 
-export interface MasterInquryRequest extends ImpersonationRequest {
+export interface MasterInquryRequest {
   startProfitYear?: number;
   endProfitYear?: number;
   startProfitMonth?: number;
@@ -278,17 +274,16 @@ export interface MasterInquryRequest extends ImpersonationRequest {
   forfeitureAmount?: number;
   paymentAmount?: number;
   socialSecurity?: number;
-  comment?: string
+  comment?: string;
   pagination: PaginationParams;
 }
 export enum FrozenReportsByAgeRequestType {
   Total = "Total",
   FullTime = "FullTime",
-  PartTime = "PartTime",
+  PartTime = "PartTime"
 }
 
-
-export interface FrozenReportsByAgeRequest extends ImpersonationRequest {
+export interface FrozenReportsByAgeRequest {
   profitYear: number;
   pagination: PaginationParams;
   reportType: FrozenReportsByAgeRequestType;
@@ -299,7 +294,7 @@ export interface ProfitSharingDistributionsByAge {
   reportDate: string;
   reportType: FrozenReportsByAgeRequestType;
   hardshipTotalEmployees: number;
-  regularTotalAmount:number;
+  regularTotalAmount: number;
   regularTotalEmployees: number;
   hardshipTotalAmount: number;
   distributionTotalAmount: number;
@@ -345,20 +340,20 @@ export interface ForfeituresByAgeDetail {
 }
 
 export interface EmployeeDetails {
-	firstName: string;
-	lastName: string;
+  firstName: string;
+  lastName: string;
   address: string;
-	addressCity: string;
-	addressState: string;
-	addressZipCode: string;
-	dateOfBirth: string;
-	ssn: string;
-	yearToDateProfitSharingHours: number;
-	yearsInPlan: number;
-	percentageVested: number;
-	contributionsLastYear: boolean;
-	enrolled: boolean;
-	employeeId: string;
+  addressCity: string;
+  addressState: string;
+  addressZipCode: string;
+  dateOfBirth: string;
+  ssn: string;
+  yearToDateProfitSharingHours: number;
+  yearsInPlan: number;
+  percentageVested: number;
+  contributionsLastYear: boolean;
+  enrolled: boolean;
+  employeeId: string;
   hireDate: string;
   terminationDate: string | null;
   reHireDate: string | null;
@@ -378,7 +373,7 @@ export interface BalanceByAge {
   reportDate: string;
   reportType: FrozenReportsByAgeRequestType;
   balanceTotalAmount: number;
-  vestedTotalAmount : number;
+  vestedTotalAmount: number;
   totalMembers: number;
   totalBeneficiaries: number;
   totalBeneficiariesAmount : number;
@@ -394,5 +389,5 @@ export interface BalanceByAgeDetail {
   employeeCount: number;
   currentBalance: number;
   vestedBalance: number;
-  beneficiaryCount : number;
+  beneficiaryCount: number;
 }

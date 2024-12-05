@@ -1,4 +1,5 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { ImpersonationRoles } from "reduxstore/types";
 
 export interface SeucrityState {
   token: string | null;
@@ -7,6 +8,7 @@ export interface SeucrityState {
   username: string;
   performLogout: boolean;
   appUser: AppUser | null;
+  impersonating: ImpersonationRoles | null;
 }
 
 export type AppUser = {
@@ -24,7 +26,8 @@ const initialState: SeucrityState = {
   userPermissions: [],
   username: "",
   performLogout: false,
-  appUser: null
+  appUser: null,
+  impersonating: null
 };
 
 export const securitySlice = createSlice({
@@ -48,9 +51,12 @@ export const securitySlice = createSlice({
     },
     setUserInfo: (state, action: PayloadAction<AppUser>) => {
       state.appUser = action.payload;
-    }
+    },
+    setImpersonating: (state, action: PayloadAction<ImpersonationRoles | null>) => {
+      state.impersonating = action.payload;
+    },
   }
 });
 
-export const { setToken, setUserPermissions, setUserRoles, setUsername, setPerformLogout } = securitySlice.actions;
+export const { setToken, setUserPermissions, setUserRoles, setUsername, setPerformLogout, setImpersonating } = securitySlice.actions;
 export default securitySlice.reducer;
