@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.UnitTests.Base;
 using Demoulas.ProfitSharing.UnitTests.Extensions;
 using FastEndpoints;
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
@@ -64,13 +65,12 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
         // Act
-        var response =
+        var exception = await Assert.ThrowsAsync<BadHttpRequestException>(async () =>
             await ApiClient
-                .PUTAsync<SetExecutiveHoursAndDollarsEndpoint, SetExecutiveHoursAndDollarsRequest, HttpResponseMessage>(request);
-        response.Response.StatusCode.ShouldBeEquivalentTo(HttpStatusCode.BadRequest);
+                .PUTAsync<SetExecutiveHoursAndDollarsEndpoint, SetExecutiveHoursAndDollarsRequest, HttpResponseMessage>(request));
 
         // Assert
-        await ErrorMessageShouldBe(response, "", "Year 0 is not valid.");
+        Assert.Equal("Year 0 is not valid.", exception.Message);
     }
 
     [Fact]
