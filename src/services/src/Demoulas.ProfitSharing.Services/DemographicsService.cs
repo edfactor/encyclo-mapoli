@@ -1,6 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.ActivitySources;
-using System.Diagnostics;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -8,7 +6,6 @@ using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Mappers;
 using Microsoft.EntityFrameworkCore;
-using Demoulas.ProfitSharing.Data.Extensions;
 using Microsoft.Extensions.Logging;
 using Oracle.ManagedDataAccess.Client;
 using EntityFramework.Exceptions.Common;

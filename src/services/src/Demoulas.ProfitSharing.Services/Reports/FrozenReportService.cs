@@ -10,7 +10,6 @@ using Demoulas.ProfitSharing.Services.ServiceDto;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 
@@ -444,5 +443,97 @@ public class FrozenReportService : IFrozenReportService
             }
         };
 
+    }
+
+    public async Task<VestedAmountsByAge> GetVestedAmountsByAgeYearAsync(FrozenReportsByAgeRequest req, CancellationToken cancellationToken = default)
+    {
+        const string FT = "FullTime";
+        const string PT = "PartTime";
+
+        var startEnd = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
+
+        var rawResult = await _dataContextFactory.UseReadOnlyContext(ctx =>
+        {
+            var query = _totalService.TotalVestingBalance(ctx, req.ProfitYear, startEnd.FiscalEndDate);
+
+            var joinedQuery = from q in query
+                              join d in ctx.Demographics on q.Ssn equals d.Ssn into demographics
+                              from demographic in demographics.DefaultIfEmpty()
+                              join b in ctx.BeneficiaryContacts on q.Ssn equals b.Ssn into beneficiaries
+                              from beneficiary in beneficiaries.DefaultIfEmpty()
+                              where demographic != null || beneficiary != null
+                              select new
+                              {
+                                  q.CurrentBalance,
+                                  q.VestedBalance,
+                                  EmploymentType =
+                                      demographic != null && demographic.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT,
+                                  IsBeneficiary = demographic == null && beneficiary != null,
+                                  DateOfBirth = demographic != null
+                                      ? demographic.DateOfBirth
+                                      : (beneficiary!.DateOfBirth),
+                              };
+
+            joinedQuery = req.ReportType switch
+            {
+                FrozenReportsByAgeRequest.Report.FullTime => joinedQuery.Where(g => !g.IsBeneficiary && g.EmploymentType == FT),
+                FrozenReportsByAgeRequest.Report.PartTime => joinedQuery.Where(g => !g.IsBeneficiary && g.EmploymentType == PT),
+                _ => joinedQuery
+            };
+
+            return joinedQuery
+                .Where(detail => (detail.CurrentBalance > 0 || detail.VestedBalance > 0))
+                .ToListAsync(cancellationToken);
+        });
+
+        // Client-side processing for grouping and filtering
+        var groupedResult = rawResult
+            .GroupBy(item => item.DateOfBirth.Age())
+            .Select(g => new
+            {
+                Age = g.Key,
+                Entries = g.ToList()
+            })
+            .ToList();
+
+        // Final transformation to VestedAmountsByAgeDetail
+        var details = groupedResult
+            .Select(group => new VestedAmountsByAgeDetail
+            {
+                Age = (byte)group.Age,
+                FullTimeCount = (short)group.Entries.Count(e => e.EmploymentType == FT && e.VestedBalance == e.CurrentBalance),
+                FullTimeAmount = group.Entries.Where(e => e.EmploymentType == FT && e.VestedBalance == e.CurrentBalance).Sum(e => e.CurrentBalance),
+                NotVestedCount = (short)group.Entries.Count(e => e.VestedBalance == 0),
+                NotVestedAmount = group.Entries.Where(e => e.VestedBalance == 0).Sum(e => e.CurrentBalance),
+                PartialVestedCount = (short)group.Entries.Count(e => e.VestedBalance > 0 && e.VestedBalance < e.CurrentBalance),
+                PartialVestedAmount = group.Entries.Where(e => e.VestedBalance > 0 && e.VestedBalance < e.CurrentBalance).Sum(e => e.VestedBalance),
+                BeneficiaryCount = (short)group.Entries.Count(e => e.IsBeneficiary),
+                BeneficiaryAmount = group.Entries.Where(e => e.IsBeneficiary).Sum(e => e.CurrentBalance)
+            })
+            .OrderBy(e => e.Age)
+            .ToList();
+
+        // Build the final response
+        req = req with { Take = details.Count + 1 };
+
+        return new VestedAmountsByAge
+        {
+            ReportName = "PROFIT SHARING VESTED AMOUNTS BY AGE",
+            ReportDate = DateTimeOffset.Now,
+            ReportType = req.ReportType,
+            TotalFullTimeAmount = details.Sum(d => d.FullTimeAmount),
+            TotalNotVestedAmount = details.Sum(d => d.NotVestedAmount),
+            TotalPartialVestedAmount = details.Sum(d => d.PartialVestedAmount),
+            TotalBeneficiaryAmount = details.Sum(d => d.BeneficiaryAmount),
+            TotalFullTimeCount = (short)details.Sum(d => d.FullTimeCount),
+            TotalNotVestedCount = (short)details.Sum(d => d.NotVestedCount),
+            TotalPartialVestedCount = (short)details.Sum(d => d.PartialVestedCount),
+            TotalBeneficiaryCount = (short)details.Sum(d => d.BeneficiaryCount),
+            Response = new PaginatedResponseDto<VestedAmountsByAgeDetail>(req)
+            {
+                Results = details,
+                Total = details.Count
+            }
+        };
     }
 }
