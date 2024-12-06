@@ -85,7 +85,7 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
             {
                 throw new BadHttpRequestException($"Year {profitYear} is not valid.");
             }
-            var badges = executiveHoursAndDollarsDtos.Select(dto => dto.BadgeNumber).ToList();
+            var badges = executiveHoursAndDollarsDtos.Select(dto => dto.EmployeeId).ToList();
 
             var ppQuery = await ctx.PayProfits
                 .Include(p => p.Demographic)
@@ -100,7 +100,7 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
 
             foreach (var pp in ppQuery)
             {
-                var dto = executiveHoursAndDollarsDtos.First(x => x.BadgeNumber == pp.Demographic!.EmployeeId);
+                var dto = executiveHoursAndDollarsDtos.First(x => x.EmployeeId == pp.Demographic!.EmployeeId);
                 pp.HoursExecutive = dto.ExecutiveHours;
                 pp.IncomeExecutive = dto.ExecutiveDollars;
             }
