@@ -59,7 +59,7 @@ public class ForfeituresAndPointsForYearEndpoint:EndpointWithCsvBase<ProfitYearR
     {
         public ForfeituresAndPointsForYearEndpointMapper()
         {
-            Map(m => m.EmployeeBadgeNumber).Index(0).Name("EMPLOYEE_BADGE");
+            Map(m => m.EmployeeId).Index(0).Name("EMPLOYEE_BADGE");
             Map(m => m.EmployeeName).Index(1).Name("EMPLOYEE_NAME");
             Map(m => m.EmployeeSsn).Index(2).Name("EMPLOYEE_SSN");
             Map(m => m.Forfeitures).Index(3).Name("FORFEITURES");
