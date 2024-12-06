@@ -5,7 +5,7 @@
 /// </summary>
 public record EmployeeFinancials
 {
-    public string Name { get; set; }
+    public string? Name { get; set; }
     public long EmployeeId { get; set; }
     public int Ssn { get; set; }
     public long EnrolledId { get; set; }
@@ -16,7 +16,7 @@ public record EmployeeFinancials
     public decimal Contributions { get; set; }
     public decimal IncomeForfeiture { get; set; }
     public decimal Earnings { get; set; }
-    public decimal EtvaAfterVestingRules { get; set; } // Correponds to PAYPROFIT.PY_PS_ETVA
+    public decimal EtvaAfterVestingRules { get; set; } // Coreponds to PAYPROFIT.PY_PS_ETVA
     public decimal EarningsOnEtva { get; set; }
     public decimal SecondaryEarnings { get; set; }
     public decimal SecondaryEtvaEarnings { get; set; }

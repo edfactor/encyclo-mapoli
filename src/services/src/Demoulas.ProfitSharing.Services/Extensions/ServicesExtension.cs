@@ -10,6 +10,7 @@ using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Caching;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
+using Demoulas.ProfitSharing.Services.Reports.ProfitShareUpdate;
 
 namespace Demoulas.ProfitSharing.Services.Extensions;
 
@@ -39,7 +40,7 @@ public static class ServicesExtension
         _ = builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
         _ = builder.Services.AddSingleton<ICalendarService, CalendarService>();
 
-
+        _ = builder.Services.AddSingleton<ProfitShareUpdateService>();
 
         _ = builder.Services.AddKeyedSingleton<IBaseCacheService<LookupTableCache<byte>>, PayClassificationHostedService>(nameof(PayClassificationHostedService));
         _ = builder.Services.AddKeyedSingleton<IBaseCacheService<LookupTableCache<byte>>, DepartmentHostedService>(nameof(DepartmentHostedService));

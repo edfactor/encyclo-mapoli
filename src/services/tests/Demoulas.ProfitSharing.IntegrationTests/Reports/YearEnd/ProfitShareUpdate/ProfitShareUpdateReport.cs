@@ -13,50 +13,38 @@ namespace Demoulas.ProfitSharing.Services.Reports.YearEnd.ProfitShareUpdate;
 /// <summary>
 /// A testing layer which generates Ready style reports.
 /// </summary>
-internal sealed class ProfitShareUpdateReport(OracleConnection connection,  IProfitSharingDataContextFactory dbFactory)
+internal sealed class ProfitShareUpdateReport
 {
     public DateTime TodaysDateTime { get; set; }
-    public List<string> ReportLines { get; set; } 
+    public List<string> ReportLines { get; set; }
     private short profitYear;
+    private readonly IProfitSharingDataContextFactory _dbFactory;
+    private readonly TotalService totalService;
+    private readonly CalendarService calendarService;
 
-    public void ApplyAdjustments(short profitYear, decimal contributionPercent,
-        decimal incomingForfeitPercent, decimal earningsPercent, decimal secondaryEarningsPercent,
-        long badgeToAdjust, decimal adjustContributionAmount, decimal adjustIncomingForfeitAmount,
-        decimal adjustEarningsAmount,
-        long badgeToAdjust2, decimal adjustEarningsSecondary, long maxAllowedContributions)
+    /// <summary>
+    /// A testing layer which generates Ready style reports.
+    /// </summary>
+    public ProfitShareUpdateReport(IProfitSharingDataContextFactory dbFactory, TotalService totalService, CalendarService calendarService)
+    {
+        _dbFactory = dbFactory;
+        this.totalService = totalService;
+        this.calendarService = calendarService;
+    }
+
+    public void ApplyAdjustments(short profitYear, AdjustmentAmounts adjustmentAmounts)
     {
         ReportLines = [];
 
-        LoggerFactory lf = new LoggerFactory();
+        LoggerFactory loggerFactory = new LoggerFactory();
 
-        ProfitShareUpdateService psu = new(connection, dbFactory, lf);
+        ProfitShareUpdateService psu = new(_dbFactory, loggerFactory, totalService, calendarService);
         this.profitYear = profitYear;
 
-        psu.TodaysDateTime = TodaysDateTime;
 
-        var (members, adjustmentsApplied, rerunNeeded) = psu.ApplyAdjustments(profitYear, contributionPercent,
-            incomingForfeitPercent, earningsPercent, secondaryEarningsPercent,
-            badgeToAdjust, adjustContributionAmount, adjustIncomingForfeitAmount,
-            adjustEarningsAmount,
-            badgeToAdjust2, adjustEarningsSecondary, maxAllowedContributions
-        );
+        var (members, adjustmentsApplied, rerunNeeded) = psu.ApplyAdjustments(profitYear, adjustmentAmounts).GetAwaiter().GetResult();
 
-        // Should AdjustmentAmounts be a request DTO?
-        var adjustmentAmounts = new AdjustmentAmounts(
-            contributionPercent,
-            incomingForfeitPercent,
-            earningsPercent,
-            secondaryEarningsPercent,
-            BadgeToAdjust: badgeToAdjust,
-            AdjustContributionAmount: adjustContributionAmount,
-            AdjustIncomingForfeitAmount: adjustIncomingForfeitAmount,
-            AdjustEarningsAmount: adjustEarningsAmount,
-            BadgeToAdjust2: badgeToAdjust2,
-            AdjustEarningsSecondaryAmount: adjustEarningsSecondary,
-            MaxAllowedContributions: maxAllowedContributions
-        );
-
-        m805PrintSequence(members, maxAllowedContributions);
+        m805PrintSequence(members, adjustmentAmounts.MaxAllowedContributions);
         m1000AdjustmentReport(adjustmentAmounts, adjustmentsApplied);
 
     }
@@ -131,18 +119,6 @@ internal sealed class ProfitShareUpdateReport(OracleConnection connection,  IPro
             {
                 report_line.PR_NEWEMP = "NEW";
             }
-            else if (memberFinancials.EmployeeTypeId == 2)
-            {
-                // This is checking to see if an employee also a bene, and they are a new employee, so not yet vested but they 
-                throw new IOException("BOBH: this never happens.");
-                // see if member is also a bene.
-                // payben_rec.Ssn = memberFinancials.Ssn;
-                // PAYBEN_FILE_STATUS = READ_ALT_KEY_PAYBEN(payben_rec);
-                // if (PAYBEN_FILE_STATUS == "00")
-                // {
-                //    report_line.PR_NEWEMP = "BEN";
-                //}
-            }
             else
             {
                 report_line.PR_NEWEMP = " ";
@@ -178,7 +154,7 @@ internal sealed class ProfitShareUpdateReport(OracleConnection connection,  IPro
                                 memberFinancials.IncomingForfeitures + memberFinancials.Military +
                                 memberFinancials.Caf -
                                 memberFinancials.Distributions;
-        report_line.END_BAL = endingBalance;
+            report_line.END_BAL = endingBalance;
 
         if (memberFinancials.EmployeeId == 0)
         {

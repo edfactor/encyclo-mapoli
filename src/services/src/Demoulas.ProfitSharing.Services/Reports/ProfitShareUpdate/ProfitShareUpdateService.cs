@@ -1,8 +1,11 @@
-﻿using Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Services;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Oracle.ManagedDataAccess.Client;
+using static MassTransit.ValidationResultExtensions;
 
 namespace Demoulas.ProfitSharing.Services.Reports.ProfitShareUpdate;
 
@@ -13,75 +16,74 @@ namespace Demoulas.ProfitSharing.Services.Reports.ProfitShareUpdate;
 /// </summary>
 public class ProfitShareUpdateService
 {
-    // We are currently hooked up to the PROFITSHARE database for employees because we do not yet have a way to correctly calculate ETVA
-    private EmployeeDataHelper _employeeDataHelper;
 
-    private readonly IProfitSharingDataContextFactory dbContextFactory;
+    private readonly IProfitSharingDataContextFactory _dbContextFactory;
     private readonly ILogger<ProfitShareUpdateService> _logger;
+    private readonly CalendarService _calendarService;
+    private readonly TotalService _totalService;
 
-    // Need to ensure this is surfaced correctly
+
+    // Indicates that MaxContributions were exceeded.   Adjustments need be made and this update should be rerun.
+    // TBD This needs to be evolved to return the list of employees who have exceeded the max contribution.
     private bool _rerunNeeded;
 
-    private readonly OracleConnection connection;
+    public short ProfitYear { get; set; }
 
-    public ProfitShareUpdateService(OracleConnection connection, IProfitSharingDataContextFactory dbContextFactory, ILoggerFactory loggerFactory)
+    public ProfitShareUpdateService(IProfitSharingDataContextFactory dbContextFactory, ILoggerFactory loggerFactory, TotalService totalService, CalendarService calendarService)
     {
-        this.dbContextFactory = dbContextFactory;
-        this.connection = connection;
-        this._logger = loggerFactory.CreateLogger<ProfitShareUpdateService>();
+        _dbContextFactory = dbContextFactory;
+        _totalService = totalService;
+        _logger = loggerFactory.CreateLogger<ProfitShareUpdateService>();
+        _calendarService = calendarService;
     }
 
-    public long ProfitYear { get; set; }
 
-    public DateTime TodaysDateTime { get; set; } = DateTime.Now;
-
-    public (List<MemberFinancials>, AdjustmentsApplied, bool) ApplyAdjustments(short profitYear, decimal contributionPercent,
-        decimal incomingForfeitPercent, decimal earningsPercent, decimal secondaryEarningsPercent,
-        long badgeToAdjust, decimal adjustContributionAmount, decimal adjustIncomingForfeitAmount,
-        decimal adjustEarningsAmount,
-        long badgeToAdjust2, decimal adjustEarningsSecondary, long maxAllowedContributions)
+    public async Task<(List<MemberFinancials>, AdjustmentsApplied, bool)> ApplyAdjustments(short profitYear, AdjustmentAmounts adjustmentAmounts)
     {
-        // Temporary until PY_PROF_ETVA lookup is fixed.
-        _employeeDataHelper = new EmployeeDataHelper(connection, dbContextFactory, profitYear);
-
-        // Should AdjustmentAmounts be a request DTO?
-        AdjustmentAmounts adjustmentAmounts = new AdjustmentAmounts(
-            contributionPercent,
-            incomingForfeitPercent,
-            earningsPercent,
-            secondaryEarningsPercent,
-            BadgeToAdjust: badgeToAdjust,
-            AdjustContributionAmount: adjustContributionAmount,
-            AdjustIncomingForfeitAmount: adjustIncomingForfeitAmount,
-            AdjustEarningsAmount: adjustEarningsAmount,
-            BadgeToAdjust2: badgeToAdjust2,
-            AdjustEarningsSecondaryAmount: adjustEarningsSecondary,
-            MaxAllowedContributions: maxAllowedContributions
-        );
-
         // Values collected for an "Adjustment Report" that we do not yet generate
         AdjustmentsApplied adjustmentsApplied = new();
 
-        this.ProfitYear = profitYear;
-
+        ProfitYear = profitYear;
 
         List<MemberFinancials> members = new();
-        ProcessEmployees(members, adjustmentAmounts, adjustmentsApplied);
-        ProcessBeneficiaries(members, adjustmentAmounts);
-
-        if (_rerunNeeded)
-        {
-            // BOBH This needs to get back to the user - so they can make adjustments for MAX_CONTRIBUTIONS?
-            _logger.LogError("Rerun of PAY444 is required.  See output for issues.");
-        }
+        await ProcessEmployees(members, adjustmentAmounts, adjustmentsApplied);
+        await ProcessBeneficiaries(members, adjustmentAmounts);
 
         return (members, adjustmentsApplied, _rerunNeeded);
     }
 
-    public void ProcessEmployees(List<MemberFinancials> members, AdjustmentAmounts adjustmentAmounts,
-        AdjustmentsApplied adjustmentsApplied)
+    public async Task ProcessEmployees(List<MemberFinancials> members, AdjustmentAmounts adjustmentAmounts, AdjustmentsApplied adjustmentsApplied)
     {
-        foreach (EmployeeFinancials empl in _employeeDataHelper.rows)
+        var fiscalDates = await _calendarService.GetYearStartAndEndAccountingDates(ProfitYear, CancellationToken.None);
+        var employeeFinancialsList = await _dbContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            var totalVestingBalances = _totalService.TotalVestingBalance(ctx, (short)(ProfitYear - 1), fiscalDates.FiscalEndDate);
+
+            var query = ctx.PayProfits
+                .Where(pp => pp.ProfitYear == ProfitYear - 1)
+                .Join(
+                    totalVestingBalances,
+                    pp => pp.Demographic.Ssn,
+                    tvb => tvb.Ssn,
+                    (pp, tvb) => new EmployeeFinancials
+                    {
+                        EmployeeId = pp.Demographic!.EmployeeId,
+                        Ssn = pp.Demographic.Ssn,
+                        Name = pp.Demographic.ContactInfo!.FullName,
+                        EnrolledId = pp.EnrollmentId,
+                        YearsInPlan = pp.YearsInPlan,
+                        CurrentAmount = tvb.CurrentBalance,
+                        EmployeeTypeId = pp.EmployeeTypeId,
+                        PointsEarned = (long)pp.PointsEarned,
+                        EtvaAfterVestingRules = tvb.Etva
+                    }
+                )
+                .OrderBy(ef => ef.EmployeeId);
+
+            return await query.ToListAsync();
+        });
+
+        foreach (EmployeeFinancials empl in employeeFinancialsList)
         {
             MemberFinancials? memb = ProcessEmployee(empl, adjustmentAmounts, adjustmentsApplied);
             if (memb != null)
@@ -91,9 +93,9 @@ public class ProfitShareUpdateService
         }
     }
 
-    private void ProcessBeneficiaries(List<MemberFinancials> members, AdjustmentAmounts adjustmentAmounts)
+    private async Task ProcessBeneficiaries(List<MemberFinancials> members, AdjustmentAmounts adjustmentAmounts)
     {
-        List<BeneficiaryFinancials> benes = dbContextFactory.UseReadOnlyContext(ctx =>
+        List<BeneficiaryFinancials> benes = await _dbContextFactory.UseReadOnlyContext(ctx =>
             ctx.Beneficiaries.OrderBy(b => b.Contact.ContactInfo.FullName)
                 .ThenByDescending(b => b.EmployeeId * 10000 + b.PsnSuffix).Select(b =>
                     new BeneficiaryFinancials
@@ -105,12 +107,12 @@ public class ProfitShareUpdateService
                         Earnings = b.Earnings,
                         SecondaryEarnings = b.SecondaryEarnings
                     }).ToListAsync()
-        ).GetAwaiter().GetResult();
+        );
 
         foreach (BeneficiaryFinancials bene in benes)
         {
             // is already handled as an employee?
-            if (_employeeDataHelper.HasRecordBySsn(bene.Ssn))
+            if (members.Any(m => m.Ssn == bene.Ssn))
             {
                 continue;
             }
@@ -142,30 +144,34 @@ public class ProfitShareUpdateService
             return null;
         }
 
+        // Gets this years profit sharing transactions, aka Distributions - hardships
         DetailTotals detailTotals = GetDetailTotals(empl.Ssn);
 
+        // Holds newly computed values, not old values
         MemberTotals memberTotals = new();
+
         memberTotals.ContributionAmount =
             ComputeContribution(empl.PointsEarned, empl.EmployeeId, adjustmentAmounts, adjustmentsApplied);
         memberTotals.IncomingForfeitureAmount =
             ComputeForfeitures(empl.PointsEarned, empl.EmployeeId, adjustmentAmounts, adjustmentsApplied);
 
-
-        memberTotals.EarningsBalance = detailTotals.AllocationsTotal + detailTotals.ClassActionFundTotal +
+        // Note that CAF gets added...
+        // This "EarningsBalance" is actually the new Current Balance.  Consider changing the name
+        memberTotals.NewCurrentAmount = detailTotals.AllocationsTotal + detailTotals.ClassActionFundTotal +
                                        (empl.CurrentAmount - detailTotals.ForfeitsTotal -
                                         detailTotals.PaidAllocationsTotal) -
                                        detailTotals.DistributionsTotal;
+        // Caf gets removed.  This seems odd.
+        memberTotals.NewCurrentAmount -= detailTotals.ClassActionFundTotal;
 
-        memberTotals.EarningsBalance -= detailTotals.ClassActionFundTotal;
-
-        if (memberTotals.EarningsBalance <= 0)
+        if (memberTotals.NewCurrentAmount <= 0)
         {
             memberTotals.EarnPoints = 0;
             memberTotals.PointsDollars = 0;
         }
         else
         {
-            memberTotals.PointsDollars = Math.Round(memberTotals.EarningsBalance, 2, MidpointRounding.AwayFromZero);
+            memberTotals.PointsDollars = Math.Round(memberTotals.NewCurrentAmount, 2, MidpointRounding.AwayFromZero);
             memberTotals.EarnPoints = (long)Math.Round(memberTotals.PointsDollars / 100, MidpointRounding.AwayFromZero);
         }
 
@@ -226,15 +232,15 @@ public class ProfitShareUpdateService
 
         // Yea, this adding and removing ClassActionFundTotal is strange
         MemberTotals memberTotals = new();
-        memberTotals.EarningsBalance = detailTotals.AllocationsTotal + detailTotals.ClassActionFundTotal +
+        memberTotals.NewCurrentAmount = detailTotals.AllocationsTotal + detailTotals.ClassActionFundTotal +
                                        (bene.CurrentAmount - detailTotals.ForfeitsTotal -
                                         detailTotals.PaidAllocationsTotal) -
                                        detailTotals.DistributionsTotal;
-        memberTotals.EarningsBalance -= detailTotals.ClassActionFundTotal;
+        memberTotals.NewCurrentAmount -= detailTotals.ClassActionFundTotal;
 
-        if (memberTotals.EarningsBalance > 0)
+        if (memberTotals.NewCurrentAmount > 0)
         {
-            memberTotals.PointsDollars = Math.Round(memberTotals.EarningsBalance, 2, MidpointRounding.AwayFromZero);
+            memberTotals.PointsDollars = Math.Round(memberTotals.NewCurrentAmount, 2, MidpointRounding.AwayFromZero);
             memberTotals.EarnPoints = (long)Math.Round(memberTotals.PointsDollars / 100, MidpointRounding.AwayFromZero);
         }
 
@@ -400,7 +406,7 @@ public class ProfitShareUpdateService
         decimal militaryTotal = 0;
         decimal classActionFundTotal = 0;
 
-        List<ProfitDetail> pds = dbContextFactory.UseReadOnlyContext(ctx =>
+        List<ProfitDetail> pds = _dbContextFactory.UseReadOnlyContext(ctx =>
             ctx.ProfitDetails.Where(pd => pd.Ssn == ssn && pd.ProfitYear == ProfitYear)
                 .OrderBy(pd => pd.ProfitYear).ThenBy(pd => pd.ProfitYearIteration).ThenBy(pd => pd.MonthToDate)
                 .ThenBy(pd => pd.FederalTaxes)

@@ -1,7 +1,7 @@
 ﻿namespace Demoulas.ProfitSharing.Services.Reports.ProfitShareUpdate;
 
 /// <summary>
-///     Values provided externally used to guide how to award Earnings,Contributions and forfeiture points
+///     Values provided by user to guide how to award Earnings,Contributions and forfeiture points are updated for the new PS year
 /// </summary>
 public record AdjustmentAmounts(
     decimal ContributionPercent,
@@ -11,7 +11,8 @@ public record AdjustmentAmounts(
     long MaxAllowedContributions,
     long BadgeToAdjust,
     long BadgeToAdjust2,
+    decimal AdjustContributionAmount,
     decimal AdjustEarningsAmount,
-    decimal AdjustEarningsSecondaryAmount,
     decimal AdjustIncomingForfeitAmount,
-    decimal AdjustContributionAmount);
+    decimal AdjustEarningsSecondaryAmount
+    );

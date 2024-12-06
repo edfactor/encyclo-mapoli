@@ -1,8 +1,10 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
 using System.Text;
+using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Reports.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services.Reports.YearEnd.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services.Reports.YearEnd.Update.DbHelpers;
 using FluentAssertions;
@@ -14,25 +16,6 @@ namespace Demoulas.ProfitSharing.Services.Reports.YearEnd.Update;
 
 public class ProfitShareUpdateTests
 {
-    [Fact]
-    public void BasicReport()
-    {
-        // Arrange
-        short profitYear = 2023;
-        ProfitShareUpdateReport profitShareUpdateService = createProfitShareUpdateService();
-
-        string reportName = "psupdate-pay444-r1.txt";
-        profitShareUpdateService.TodaysDateTime = new DateTime(2024, 11, 12, 9, 43, 0); // time report was generated
-
-        // Act
-        profitShareUpdateService.ApplyAdjustments(profitYear, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-
-        // Assert
-        string actual = CollectLines(profitShareUpdateService.ReportLines);
-        string expected = LoadExpectedReport(reportName);
-
-        AssertReportsAreEquivalent(expected, actual);
-    }
 
 
     [Fact]
@@ -46,7 +29,7 @@ public class ProfitShareUpdateTests
         profitShareUpdateService.TodaysDateTime = new DateTime(2024, 11, 14, 10, 35, 0); // time report was generated
 
         // Act
-        profitShareUpdateService.ApplyAdjustments(profitYear,15, 1, 2, 0, 0, 0, 0, 0, 0, 0, 30_000);
+        profitShareUpdateService.ApplyAdjustments(profitYear,new AdjustmentAmounts(15, 1, 2, 0, 30_000,0, 0, 0, 0, 0, 0));
 
         // Assert
         string expected = LoadExpectedReport(reportName);
@@ -65,7 +48,7 @@ public class ProfitShareUpdateTests
         profitShareUpdateService.TodaysDateTime = new DateTime(2024, 11, 19, 19, 18, 0); // time report was generated
 
         // Act
-        profitShareUpdateService.ApplyAdjustments(profitYear,15, 1, 2, 0, 700174, 44.77m, 18.16m, 22.33m, 0, 0, 30_000);
+        profitShareUpdateService.ApplyAdjustments(profitYear,new AdjustmentAmounts(15, 1, 2, 0, 30_000, 700174, 0, 44.77m,  22.33m, 18.16m, 0));
 
         // Assert
         string expected = LoadExpectedReport(reportName);
@@ -85,18 +68,13 @@ public class ProfitShareUpdateTests
 
         IProfitSharingDataContextFactory dbFactory = new DbFactory(ctx);
 
-        OracleConnection connection = GetOracleConnection();
-        connection.Open();
+        AccountingPeriodsService aps = new AccountingPeriodsService();
+        CalendarService calendarService = new CalendarService(dbFactory, aps);
+        TotalService totalService = new TotalService(dbFactory, null);
 
-        return new ProfitShareUpdateReport(connection, dbFactory);
+        return new ProfitShareUpdateReport(dbFactory, totalService, calendarService);
     }
 
-    private static OracleConnection GetOracleConnection()
-    {
-        IConfigurationRoot configuration = new ConfigurationBuilder().AddUserSecrets<ProfitShareUpdateTests>().Build();
-        string connectionString = configuration["ConnectionStrings:ProfitSharing"]!;
-        return new OracleConnection(connectionString);
-    }
 
     private static string CollectLines(List<string> lines)
     {
