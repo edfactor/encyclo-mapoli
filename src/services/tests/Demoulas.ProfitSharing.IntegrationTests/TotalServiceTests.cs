@@ -13,7 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Oracle.ManagedDataAccess.Client;
 using Xunit.Abstractions;
 
-namespace Demoulas.ProfitSharing.IntegrationTests;
+namespace Demoulas.ProfitSharing.Services;
 
 
 public class TotalServiceIntegrationTests

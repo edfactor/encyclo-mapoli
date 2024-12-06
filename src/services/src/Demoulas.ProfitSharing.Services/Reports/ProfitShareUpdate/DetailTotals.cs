@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
+﻿namespace Demoulas.ProfitSharing.Services.Reports.ProfitShareUpdate;
 
 /// <summary>
 /// Totals extracted from Profit Detail records

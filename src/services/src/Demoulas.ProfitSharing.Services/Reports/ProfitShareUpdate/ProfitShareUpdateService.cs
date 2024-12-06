@@ -1,14 +1,11 @@
 ﻿using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.DbHelpers;
-using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.Formatters;
-using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.ReportFormatters;
-using Demoulas.ProfitSharing.Services.Reports;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Oracle.ManagedDataAccess.Client;
 
-namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
+namespace Demoulas.ProfitSharing.Services.Reports.ProfitShareUpdate;
+
 
 /// <summary>
 ///     Does the Year And application of Earnings and Contributions to all employees and beneficiaries.
@@ -25,7 +22,7 @@ public class ProfitShareUpdateService
     // Need to ensure this is surfaced correctly
     private bool _rerunNeeded;
 
-    private OracleConnection connection;
+    private readonly OracleConnection connection;
 
     public ProfitShareUpdateService(OracleConnection connection, IProfitSharingDataContextFactory dbContextFactory, ILoggerFactory loggerFactory)
     {
@@ -74,6 +71,7 @@ public class ProfitShareUpdateService
 
         if (_rerunNeeded)
         {
+            // BOBH This needs to get back to the user - so they can make adjustments for MAX_CONTRIBUTIONS?
             _logger.LogError("Rerun of PAY444 is required.  See output for issues.");
         }
 
@@ -171,8 +169,7 @@ public class ProfitShareUpdateService
             memberTotals.EarnPoints = (long)Math.Round(memberTotals.PointsDollars / 100, MidpointRounding.AwayFromZero);
         }
 
-        ComputeEarnings(memberTotals, null, empl, adjustmentAmounts, adjustmentsApplied,
-            detailTotals.ClassActionFundTotal);
+        ComputeEarnings(memberTotals, null, empl, adjustmentAmounts, adjustmentsApplied, detailTotals.ClassActionFundTotal);
 
         MemberFinancials memb = new();
         memb.EmployeeId = empl.EmployeeId;

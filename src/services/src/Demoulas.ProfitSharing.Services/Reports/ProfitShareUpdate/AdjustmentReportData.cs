@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
+﻿namespace Demoulas.ProfitSharing.Services.Reports.ProfitShareUpdate;
 
 /// <summary>
 ///     Used to collect data about adjustments made to employees.  This data is later used in the Adjustment Report.

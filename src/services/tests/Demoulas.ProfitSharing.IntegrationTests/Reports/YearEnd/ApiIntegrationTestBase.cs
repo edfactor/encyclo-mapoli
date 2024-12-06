@@ -10,7 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 
-namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
+namespace Demoulas.ProfitSharing.Services.Reports.YearEnd;
 
 /**
  * WARNING - needs a refactor.   It is locked to the ExecutiveHoursAndDollarsResponse type at the moment.

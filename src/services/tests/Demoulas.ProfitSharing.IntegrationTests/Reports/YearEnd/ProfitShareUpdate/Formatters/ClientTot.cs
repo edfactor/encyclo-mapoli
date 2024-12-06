@@ -1,6 +1,6 @@
 ﻿using static FormatUtils;
 
-namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.ReportFormatters;
+namespace Demoulas.ProfitSharing.Services.Reports.YearEnd.Update.ReportFormatters;
 
 public class ClientTot
 {

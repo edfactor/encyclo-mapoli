@@ -3,7 +3,7 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using FluentAssertions;
 
-namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
+namespace Demoulas.ProfitSharing.Services.Reports.YearEnd;
 
 /*
  * Compares two CSVs despite numeric fields having leading zeros, spaces around quoted string fields, and case insensitivity.

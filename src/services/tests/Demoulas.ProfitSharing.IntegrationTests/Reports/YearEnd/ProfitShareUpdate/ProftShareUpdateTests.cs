@@ -3,16 +3,16 @@ using System.Reflection;
 using System.Text;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
-using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.DbHelpers;
+using Demoulas.ProfitSharing.Services.Reports.YearEnd.ProfitShareUpdate;
+using Demoulas.ProfitSharing.Services.Reports.YearEnd.Update.DbHelpers;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Oracle.ManagedDataAccess.Client;
 
-namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
+namespace Demoulas.ProfitSharing.Services.Reports.YearEnd.Update;
 
-public class ProftShareUpdateTests
+public class ProfitShareUpdateTests
 {
     [Fact]
     public void BasicReport()
@@ -76,7 +76,7 @@ public class ProftShareUpdateTests
 
     private ProfitShareUpdateReport createProfitShareUpdateService()
     {
-        IConfigurationRoot configuration = new ConfigurationBuilder().AddUserSecrets<ProftShareUpdateTests>().Build();
+        IConfigurationRoot configuration = new ConfigurationBuilder().AddUserSecrets<ProfitShareUpdateTests>().Build();
         string connectionString = configuration["ConnectionStrings:ProfitSharing"]!;
         DbContextOptions<ProfitSharingReadOnlyDbContext> options =
             new DbContextOptionsBuilder<ProfitSharingReadOnlyDbContext>().UseOracle(connectionString)
@@ -93,7 +93,7 @@ public class ProftShareUpdateTests
 
     private static OracleConnection GetOracleConnection()
     {
-        IConfigurationRoot configuration = new ConfigurationBuilder().AddUserSecrets<ProftShareUpdateTests>().Build();
+        IConfigurationRoot configuration = new ConfigurationBuilder().AddUserSecrets<ProfitShareUpdateTests>().Build();
         string connectionString = configuration["ConnectionStrings:ProfitSharing"]!;
         return new OracleConnection(connectionString);
     }

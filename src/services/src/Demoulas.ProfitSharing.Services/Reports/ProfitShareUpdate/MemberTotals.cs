@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
+﻿namespace Demoulas.ProfitSharing.Services.Reports.ProfitShareUpdate;
 
 /// <summary>
 ///     Newly computed (after applying the adjustments from the user) values for a member.

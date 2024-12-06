@@ -1,12 +1,13 @@
 ﻿using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
-using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.Formatters;
-using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.ReportFormatters;
+using Demoulas.ProfitSharing.Services.Reports.YearEnd.Update;
+using Demoulas.ProfitSharing.Services.Reports.YearEnd.Update.Formatters;
+using Demoulas.ProfitSharing.Services.Reports.YearEnd.Update.ReportFormatters;
+using Demoulas.ProfitSharing.Services.Reports.ProfitShareUpdate;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Oracle.ManagedDataAccess.Client;
 
-namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
+namespace Demoulas.ProfitSharing.Services.Reports.YearEnd.ProfitShareUpdate;
 
 
 /// <summary>
@@ -41,7 +42,7 @@ internal sealed class ProfitShareUpdateReport(OracleConnection connection,  IPro
         );
 
         // Should AdjustmentAmounts be a request DTO?
-        AdjustmentAmounts adjustmentAmounts = new AdjustmentAmounts(
+        var adjustmentAmounts = new AdjustmentAmounts(
             contributionPercent,
             incomingForfeitPercent,
             earningsPercent,

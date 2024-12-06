@@ -47,8 +47,4 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Reports\ProfitShareUpdate\" />
-  </ItemGroup>
-
 </Project>

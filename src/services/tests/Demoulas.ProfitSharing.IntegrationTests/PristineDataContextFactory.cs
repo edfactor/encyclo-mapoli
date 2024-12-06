@@ -3,7 +3,7 @@ using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace Demoulas.ProfitSharing.IntegrationTests;
+namespace Demoulas.ProfitSharing.Services;
 
 /**
  * Used to connect to the live/qa/testing database context.  Ideally one that is kept in a pristine condition, so integration tests

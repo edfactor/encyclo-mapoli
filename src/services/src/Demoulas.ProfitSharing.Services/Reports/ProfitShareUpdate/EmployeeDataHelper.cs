@@ -1,11 +1,13 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Services;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Services;
-using Demoulas.ProfitSharing.Services.Reports.ProfitShareUpdate;
 using Microsoft.EntityFrameworkCore;
 using Oracle.ManagedDataAccess.Client;
 
-namespace Demoulas.ProfitSharing.Services.Reports.YearEnd.Update.DbHelpers;
+namespace Demoulas.ProfitSharing.Services.Reports.ProfitShareUpdate;
+
+/// <summary>
+/// Loads data from the PROFITSHARE Legacy database, until SMART can compute the ETVA for the last year from PROFIT_DETAIL rows.
+/// </summary>
 
 public class EmployeeDataHelper
 {

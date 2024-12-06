@@ -7,7 +7,7 @@ using Demoulas.ProfitSharing.UnitTests.Extensions;
 using FastEndpoints;
 using FluentAssertions;
 
-namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
+namespace Demoulas.ProfitSharing.Services.Reports.YearEnd;
 public class ExecutiveHoursAndDollarsIntegrationTests : ApiIntegrationTestBase<Program>
 {
     // Probably should define these somewhere more global, or be looked up dynamically 

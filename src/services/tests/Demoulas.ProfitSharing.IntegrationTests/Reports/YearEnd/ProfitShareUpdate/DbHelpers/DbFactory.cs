@@ -2,7 +2,7 @@
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Interfaces;
 
-namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.DbHelpers;
+namespace Demoulas.ProfitSharing.Services.Reports.YearEnd.Update.DbHelpers;
 
 internal sealed class DbFactory : IProfitSharingDataContextFactory
 {
