@@ -501,6 +501,11 @@ public class FrozenReportService : IFrozenReportService
             .Select(group => new VestedAmountsByAgeDetail
             {
                 Age = (byte)group.Age,
+
+                FullTimeCount = (short)group.Entries.Count(e => e.EmploymentType == FT && e.VestedBalance == e.CurrentBalance),
+                NotVestedCount = (short)group.Entries.Count(e => e.VestedBalance == 0),
+                PartialVestedCount = (short)group.Entries.Count(e => e.VestedBalance > 0 && e.VestedBalance < e.CurrentBalance),
+                
                 FullTime100PercentCount = (short)group.Entries.Count(e => e.EmploymentType == FT && e.VestedBalance == e.CurrentBalance),
                 FullTime100PercentAmount = group.Entries.Where(e => e.EmploymentType == FT && e.VestedBalance == e.CurrentBalance).Sum(e => e.CurrentBalance),
                 FullTimePartialCount = (short)group.Entries.Count(e => e.EmploymentType == FT && e.VestedBalance > 0 && e.VestedBalance < e.CurrentBalance),
@@ -522,12 +527,11 @@ public class FrozenReportService : IFrozenReportService
             .ToList();
 
         // Calculate totals for all categories
-        TotalFullTimeCount = 50,
-        TotalNotVestedCount = 20,
-        TotalPartialVestedCount = 15,
+        var totalFullTimeCount = (short)details.Sum(d => d.FullTimeCount);
+        var totalNotVestedCount = (short)details.Sum(d => d.NotVestedCount);
+        var totalPartialVestedCount = (short)details.Sum(d => d.PartialVestedCount);
+        var totalBeneficiaryCount = (short)details.Sum(d => d.BeneficiaryCount);
         
-            
-        var totalFullTimeCount = details.Sum(d => d.F);
         var totalFullTime100PercentAmount = details.Sum(d => d.FullTime100PercentAmount);
         var totalFullTimePartialAmount = details.Sum(d => d.FullTimePartialAmount);
         var totalFullTimeNotVestedAmount = details.Sum(d => d.FullTimeNotVestedAmount);
@@ -536,7 +540,6 @@ public class FrozenReportService : IFrozenReportService
         var totalPartTimePartialAmount = details.Sum(d => d.PartTimePartialAmount);
         var totalPartTimeNotVestedAmount = details.Sum(d => d.PartTimeNotVestedAmount);
 
-        var totalBeneficiaryCount = (short)details.Sum(d => d.BeneficiaryCount);
         var totalBeneficiaryAmount = details.Sum(d => d.BeneficiaryAmount);
 
         // Build the final response
@@ -547,6 +550,10 @@ public class FrozenReportService : IFrozenReportService
             ReportName = "PROFIT SHARING VESTED AMOUNTS BY AGE",
             ReportDate = DateTimeOffset.Now,
             ReportType = req.ReportType,
+            TotalFullTimeCount = totalFullTimeCount,
+            TotalNotVestedCount = totalNotVestedCount,
+            TotalPartialVestedCount = totalPartialVestedCount,
+
             TotalFullTime100PercentAmount = totalFullTime100PercentAmount,
             TotalFullTimePartialAmount = totalFullTimePartialAmount,
             TotalFullTimeNotVestedAmount = totalFullTimeNotVestedAmount,

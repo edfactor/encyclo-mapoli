@@ -14,6 +14,9 @@ public sealed record VestedAmountsByAge : ReportResponseBase<VestedAmountsByAgeD
     public decimal TotalPartTimeNotVestedAmount { get; set; }
     public short TotalBeneficiaryCount { get; set; }
     public decimal TotalBeneficiaryAmount { get; set; }
+    public short TotalFullTimeCount { get; set; }
+    public short TotalNotVestedCount { get; set; }
+    public short TotalPartialVestedCount { get; set; }
 
 
     public static VestedAmountsByAge ResponseExample()

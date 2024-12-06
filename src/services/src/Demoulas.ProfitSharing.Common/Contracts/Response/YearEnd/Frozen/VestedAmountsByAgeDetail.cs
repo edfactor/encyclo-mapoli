@@ -16,4 +16,7 @@ public sealed record VestedAmountsByAgeDetail
     public decimal PartTimeNotVestedAmount { get; set; }
     public short BeneficiaryCount { get; set; }
     public decimal BeneficiaryAmount { get; set; }
+    public short FullTimeCount { get; set; }
+    public short NotVestedCount { get; set; }
+    public short PartialVestedCount { get; set; }
 }
