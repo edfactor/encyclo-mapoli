@@ -445,7 +445,7 @@ public class FrozenReportService : IFrozenReportService
 
     }
 
-    public async Task<VestedAmountsByAge> GetVestedAmountsByAgeYearAsync(FrozenReportsByAgeRequest req, CancellationToken cancellationToken = default)
+    public async Task<VestedAmountsByAge> GetVestedAmountsByAgeYearAsync(ProfitYearRequest req, CancellationToken cancellationToken = default)
     {
         const string FT = "FullTime";
         const string PT = "PartTime";
@@ -473,13 +473,6 @@ public class FrozenReportService : IFrozenReportService
                                       ? demographic.DateOfBirth
                                       : (beneficiary!.DateOfBirth),
                               };
-
-            joinedQuery = req.ReportType switch
-            {
-                FrozenReportsByAgeRequest.Report.FullTime => joinedQuery.Where(g => !g.IsBeneficiary && g.EmploymentType == FT),
-                FrozenReportsByAgeRequest.Report.PartTime => joinedQuery.Where(g => !g.IsBeneficiary && g.EmploymentType == PT),
-                _ => joinedQuery
-            };
 
             return joinedQuery
                 .Where(detail => (detail.CurrentBalance > 0 || detail.VestedBalance > 0))
@@ -549,7 +542,6 @@ public class FrozenReportService : IFrozenReportService
         {
             ReportName = "PROFIT SHARING VESTED AMOUNTS BY AGE",
             ReportDate = DateTimeOffset.Now,
-            ReportType = req.ReportType,
             TotalFullTimeCount = totalFullTimeCount,
             TotalNotVestedCount = totalNotVestedCount,
             TotalPartialVestedCount = totalPartialVestedCount,
