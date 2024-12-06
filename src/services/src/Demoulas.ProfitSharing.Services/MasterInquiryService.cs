@@ -36,7 +36,7 @@ public class MasterInquiryService : IMasterInquiryService
                                 pd => pd.Ssn,
                                 d => d.Ssn,
                                 (pd, d) => new { ProfitDetail = pd, Demographics = d })
-                            .Where(x => x.Demographics.PayFrequency!.Id == 1);
+                            .Where(x => x.Demographics.PayFrequencyId == 1);
 
                 if (req.StartProfitYear.HasValue)
                 {
