@@ -39,7 +39,7 @@ definitions:
 
         # Create a Markdown summary for display
         - echo "## Performance Analysis Report" > "$env:REPORTS_PATH/performance-summary.md"
-        - echo "View the performance analysis results in the speedscope file generated at: $env:REPORTS_PATH/performance.speedscope" >> "$env:REPORTS_PATH/performance-summary.md"
+        - echo "View the performance analysis results >> "$env:REPORTS_PATH/performance-summary.md"
 
       artifacts:
         - test-reports/**
@@ -188,8 +188,6 @@ definitions:
         
         - .\output\Demoulas.ProfitSharing.Data.Cli $action --connection-name ProfitSharing --sql-file ".\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-Schema $sourceSchema
 
-
-   
 
 
 pipelines:
