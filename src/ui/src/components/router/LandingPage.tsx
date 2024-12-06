@@ -1,4 +1,5 @@
 import Button from "@mui/material/Button";
+import BuggyComponent from "components/BuggyComponent";
 import { useState } from "react";
 import { useLazyGetDemographicBadgesNotInPayprofitQuery, useLazyGetDuplicateSSNsQuery } from "reduxstore/api/YearsEndApi";
 import { DSMAccordion, SectionTitle, SmartModal } from "smart-ui-library";
@@ -15,6 +16,7 @@ const LandingPage = () => {
         onClick={() => setOpenModal(true)}>
         Open Modal
       </Button>
+      <BuggyComponent />
       <Button
       variant="contained"
       onClick={() => {
