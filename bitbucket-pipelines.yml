@@ -9,40 +9,41 @@
 definitions:
   steps:
     build-and-test-backend: &build-and-test-backend
-          name: Build and Test Backend API
-          runs-on:
-            - windows
-            - self.hosted
-          script:
-            # Set environment variables
-            - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
-            - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}"
-            - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
+      name: Build and Test Backend API
+      runs-on:
+        - windows
+        - self.hosted
+      script:
+        # Set environment variables
+        - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
+        - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}"
+        - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
 
-            # Update .NET workloads
-            - dotnet workload update --source $env:NUGET_ORG
-            
-            # Install dotnet-trace globally
-            - dotnet tool install --global dotnet-trace
+        # Update .NET workloads
+        - dotnet workload update --source $env:NUGET_ORG
 
-            # Add dotnet-trace to PATH
-            - $env:PATH += ";$env:USERPROFILE\\.dotnet\\tools"
+        # Install dotnet-trace globally
+        - dotnet tool install --global dotnet-trace
 
-            # Run tests,  generate JUnit reports and collect performance trace
-            - dotnet trace collect --output trace.nettrace -- dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml" -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
+        # Add dotnet-trace to PATH
+        - $env:PATH += ";$env:USERPROFILE\\.dotnet\\tools"
 
-            # Install speedscope globally (requires Node.js)
-            - npm install -g speedscope
+        # Run tests, generate JUnit reports, and collect performance trace
+        - dotnet trace collect --output "$env:REPORTS_PATH/performance.nettrace" -- dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml" -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
 
-            # Convert .nettrace to speedscope file
-            - speedscope $env:REPORTS_PATH/performance.nettrace --output $env:REPORTS_PATH/performance.speedscope
+        # Install speedscope globally (requires Node.js)
+        - npm install -g speedscope
 
-            # Create a Markdown summary for display
-            - echo "## Performance Analysis Report" > $env:REPORTS_PATH/performance-summary.md
-            - echo "View the performance analysis results in the speedscope file generated at: $env:REPORTS_PATH/performance.speedscope" >> $env:REPORTS_PATH/performance-summary.md
+        # Convert .nettrace to speedscope file
+        - speedscope "$env:REPORTS_PATH/performance.nettrace" --output "$env:REPORTS_PATH/performance.speedscope"
+
+        # Create a Markdown summary for display
+        - echo "## Performance Analysis Report" > "$env:REPORTS_PATH/performance-summary.md"
+        - echo "View the performance analysis results in the speedscope file generated at: $env:REPORTS_PATH/performance.speedscope" >> "$env:REPORTS_PATH/performance-summary.md"
 
       artifacts:
         - test-reports/**
+
 
     test-frontend: &test-frontend
           name:  Build and Test Frontend UI
