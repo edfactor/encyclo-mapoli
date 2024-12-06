@@ -4,6 +4,6 @@ namespace Demoulas.ProfitSharing.Common.Interfaces;
 
 public interface IDemographicsServiceInternal
 {
-    Task AddDemographicsStream(IAsyncEnumerable<DemographicsRequest> employees, byte batchSize = byte.MaxValue,
+    Task AddDemographicsStreamAsync(IAsyncEnumerable<DemographicsRequest> employees, byte batchSize = byte.MaxValue,
         CancellationToken cancellationToken = default);
 }

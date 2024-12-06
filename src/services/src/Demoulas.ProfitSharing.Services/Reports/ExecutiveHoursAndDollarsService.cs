@@ -24,7 +24,7 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
     /// <param name="request">The year and pagination details.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the report response with details of executive hours/dollars</returns>
-    public async Task<ReportResponseBase<ExecutiveHoursAndDollarsResponse>> GetExecutiveHoursAndDollarsReport(ExecutiveHoursAndDollarsRequest request, CancellationToken cancellationToken)
+    public async Task<ReportResponseBase<ExecutiveHoursAndDollarsResponse>> GetExecutiveHoursAndDollarsReportAsync(ExecutiveHoursAndDollarsRequest request, CancellationToken cancellationToken)
     {
         var result = _dataContextFactory.UseReadOnlyContext(c =>
         {
@@ -76,7 +76,7 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
     }
 
 
-    public Task SetExecutiveHoursAndDollars(short profitYear, List<SetExecutiveHoursAndDollarsDto> executiveHoursAndDollarsDtos, CancellationToken cancellationToken)
+    public Task SetExecutiveHoursAndDollarsAsync(short profitYear, List<SetExecutiveHoursAndDollarsDto> executiveHoursAndDollarsDtos, CancellationToken cancellationToken)
     {
         return _dataContextFactory.UseWritableContext(async ctx =>
         {
@@ -85,7 +85,7 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
             {
                 throw new BadHttpRequestException($"Year {profitYear} is not valid.");
             }
-            var badges = executiveHoursAndDollarsDtos.Select(dto => dto.BadgeNumber).ToList();
+            var badges = executiveHoursAndDollarsDtos.Select(dto => dto.EmployeeId).ToList();
 
             var ppQuery = await ctx.PayProfits
                 .Include(p => p.Demographic)
@@ -100,7 +100,7 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
 
             foreach (var pp in ppQuery)
             {
-                var dto = executiveHoursAndDollarsDtos.First(x => x.BadgeNumber == pp.Demographic!.EmployeeId);
+                var dto = executiveHoursAndDollarsDtos.First(x => x.EmployeeId == pp.Demographic!.EmployeeId);
                 pp.HoursExecutive = dto.ExecutiveHours;
                 pp.IncomeExecutive = dto.ExecutiveDollars;
             }

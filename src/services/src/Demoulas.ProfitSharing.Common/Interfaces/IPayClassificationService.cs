@@ -4,5 +4,5 @@ namespace Demoulas.ProfitSharing.Common.Interfaces;
 
 public interface IPayClassificationService
 {
-    Task<ISet<PayClassificationResponseDto>> GetAllPayClassifications(CancellationToken cancellationToken = default);
+    Task<ISet<PayClassificationResponseDto>> GetAllPayClassificationsAsync(CancellationToken cancellationToken = default);
 }

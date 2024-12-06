@@ -57,7 +57,7 @@ public class MilitaryAndRehireForfeituresEndpoint :
 
     public override Task<ReportResponseBase<MilitaryAndRehireForfeituresResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
-        return _reportService.FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYears(req, ct);
+        return _reportService.FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(req, ct);
     }
 
     protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, ReportResponseBase<MilitaryAndRehireForfeituresResponse> report, CancellationToken cancellationToken)

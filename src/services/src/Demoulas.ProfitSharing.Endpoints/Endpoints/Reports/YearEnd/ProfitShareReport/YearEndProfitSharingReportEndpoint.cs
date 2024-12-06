@@ -53,7 +53,7 @@ public class YearEndProfitSharingReportEndpoint: EndpointWithCsvBase<YearEndProf
     }
     public override Task<ReportResponseBase<YearEndProfitSharingReportResponse>> GetResponse(YearEndProfitSharingReportRequest req, CancellationToken ct)
     {
-        return _cleanupReportService.GetYearEndProfitSharingReport(req, ct);
+        return _cleanupReportService.GetYearEndProfitSharingReportAsync(req, ct);
     }
 
     public override string ReportFileName => "yearend-profit-sharing-report";

@@ -27,7 +27,7 @@ public sealed class CalendarService : ICalendarService
     /// <exception cref="ArgumentOutOfRangeException">
     /// Thrown when the <paramref name="dateTime"/> is not within the valid range (between January 1, 2000, and 5 years from today's date).
     /// </exception>
-    public Task<DateOnly> FindWeekendingDateFromDate(DateOnly dateTime, CancellationToken cancellationToken = default)
+    public Task<DateOnly> FindWeekendingDateFromDateAsync(DateOnly dateTime, CancellationToken cancellationToken = default)
     {
         return _dataContextFactory.UseReadOnlyContext(c => _accountingPeriodsService.FindWeekendingDateFromDate(c, dateTime, cancellationToken));
     }
@@ -38,7 +38,7 @@ public sealed class CalendarService : ICalendarService
     /// <param name="calendarYear">The calendar year for which to retrieve the accounting dates.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a tuple with the start and end accounting dates.</returns>
-    public Task<CalendarResponseDto> GetYearStartAndEndAccountingDates(short calendarYear, CancellationToken cancellationToken = default)
+    public Task<CalendarResponseDto> GetYearStartAndEndAccountingDatesAsync(short calendarYear, CancellationToken cancellationToken = default)
     {
         return _dataContextFactory.UseReadOnlyContext(c => _accountingPeriodsService.GetYearStartAndEndAccountingDates(c, calendarYear, cancellationToken));
     }

@@ -174,9 +174,9 @@ public sealed class TotalService : ITotalService
         );
     }
 
-    public async Task<BalanceEndpointResponse?> GetVestingBalanceForSingleMember(SearchBy searchBy, int employeeIdOrSsn, short profitYear, CancellationToken cancellationToken)
+    public async Task<BalanceEndpointResponse?> GetVestingBalanceForSingleMemberAsync(SearchBy searchBy, int employeeIdOrSsn, short profitYear, CancellationToken cancellationToken)
     {
-        var calendarInfo = await _calendarService.GetYearStartAndEndAccountingDates(profitYear, cancellationToken);
+        var calendarInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(profitYear, cancellationToken);
         switch (searchBy)
         {
             case SearchBy.EmployeeId:

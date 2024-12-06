@@ -45,7 +45,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
     private async Task<IAsyncEnumerable<MemberSlice>> RetrieveMemberSlices(IProfitSharingDbContext ctx, ProfitYearRequest request,
         CancellationToken cancellationToken)
     {
-        CalendarResponseDto startEnd = await _calendarService.GetYearStartAndEndAccountingDates(request.ProfitYear, cancellationToken);
+        CalendarResponseDto startEnd = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
         var terminatedEmployees = GetTerminatedEmployees(ctx, request, startEnd);
         var terminatedWithContributions = await GetEmployeesWithContributions(ctx, request, terminatedEmployees, cancellationToken);
         var beneficiaries = GetBeneficiaries(ctx, request);
@@ -194,7 +194,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
             InternalProfitDetailDto profitDetailSummary = await RetrieveProfitDetail(profitDetails, cancellationToken);
 
-            var vesting = await _totalService.GetVestingBalanceForSingleMember(SearchBy.EmployeeId, memberSlice.EnrollmentId, req.ProfitYear,
+            var vesting = await _totalService.GetVestingBalanceForSingleMemberAsync(SearchBy.EmployeeId, memberSlice.EnrollmentId, req.ProfitYear,
                 cancellationToken);
             var vestingPercent = vesting?.VestingPercent ?? 0;
             var currentVestedAmount = vesting?.VestedBalance ?? 0;

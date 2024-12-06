@@ -72,9 +72,9 @@ List<ContextFactoryRequest> list = new List<ContextFactoryRequest>
 };
 
 #if RUSS
-await builder.AddDatabaseServices(list, true, true);
+await builder.AddDatabaseServicesAsync(list, true, true);
 #else
-await builder.AddDatabaseServices(list);
+await builder.AddDatabaseServicesAsync(list);
 #endif
 
 builder.AddCachingServices();
