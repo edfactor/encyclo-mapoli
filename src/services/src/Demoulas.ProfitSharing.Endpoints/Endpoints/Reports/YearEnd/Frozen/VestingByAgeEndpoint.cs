@@ -29,13 +29,13 @@ public class VestingByAgeEndpoint : EndpointWithCsvTotalsBase<FrozenReportsByAge
         {
             s.Summary = ReportFileName;
             s.Description =
-                "This report produces a list of members showing their balances over the year grouped by age";
+                "This report produces a list of members showing their vested balances over the year grouped by age";
 
             s.ExampleRequest = FrozenReportsByAgeRequest.RequestExample();
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
-                    200, ForfeituresByAge.ResponseExample()
+                    200, VestedAmountsByAge.ResponseExample()
                 }
             };
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
