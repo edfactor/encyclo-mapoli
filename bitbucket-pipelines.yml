@@ -14,16 +14,35 @@ definitions:
             - windows
             - self.hosted
           script:
+            # Set environment variables
             - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
-            - $env:REPORTS_PATH="../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}"
-            - $env:NUGET_ORG="https://api.nuget.org/v3/index.json"
+            - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}"
+            - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
+
+            # Update .NET workloads
             - dotnet workload update --source $env:NUGET_ORG
+            
+            # Install dotnet-trace globally
             - dotnet tool install --global dotnet-trace
-            - dotnet restore src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
+
+            # Add dotnet-trace to PATH
+            - $env:PATH += ";$env:USERPROFILE\\.dotnet\\tools"
+
+            # Run tests,  generate JUnit reports and collect performance trace
             - dotnet trace collect --output trace.nettrace -- dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml" -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
-          artifacts:
-            - test-reports/**
-            - build/**
+
+            # Install speedscope globally (requires Node.js)
+            - npm install -g speedscope
+
+            # Convert .nettrace to speedscope file
+            - speedscope $env:REPORTS_PATH/performance.nettrace --output $env:REPORTS_PATH/performance.speedscope
+
+            # Create a Markdown summary for display
+            - echo "## Performance Analysis Report" > $env:REPORTS_PATH/performance-summary.md
+            - echo "View the performance analysis results in the speedscope file generated at: $env:REPORTS_PATH/performance.speedscope" >> $env:REPORTS_PATH/performance-summary.md
+
+      artifacts:
+        - test-reports/**
 
     test-frontend: &test-frontend
           name:  Build and Test Frontend UI
