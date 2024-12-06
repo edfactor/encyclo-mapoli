@@ -1,7 +1,7 @@
 ﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
 /// <summary>
-/// Newly computed (after applying the adjustments from the user) values for a member.
+///     Newly computed (after applying the adjustments from the user) values for a member.
 /// </summary>
 public class MemberTotals
 {
@@ -13,4 +13,3 @@ public class MemberTotals
     public decimal EarningsAmount { get; set; }
     public decimal SecondaryEarningsAmount { get; set; }
 }
-

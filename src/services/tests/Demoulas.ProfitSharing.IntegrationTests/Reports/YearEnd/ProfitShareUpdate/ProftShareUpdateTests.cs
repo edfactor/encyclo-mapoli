@@ -19,13 +19,13 @@ public class ProftShareUpdateTests
     {
         // Arrange
         short profitYear = 2023;
-        ProfitShareUpdateReport profitShareUpdateService = createProfitShareUpdateService(profitYear);
+        ProfitShareUpdateReport profitShareUpdateService = createProfitShareUpdateService();
 
         string reportName = "psupdate-pay444-r1.txt";
         profitShareUpdateService.TodaysDateTime = new DateTime(2024, 11, 12, 9, 43, 0); // time report was generated
 
         // Act
-        profitShareUpdateService.ApplyAdjustments( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        profitShareUpdateService.ApplyAdjustments(profitYear, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
         // Assert
         string actual = CollectLines(profitShareUpdateService.ReportLines);
@@ -39,14 +39,14 @@ public class ProftShareUpdateTests
     public void ReportWithUpdates()
     {
         // Arrange
-        short year = 2024;
-        ProfitShareUpdateReport profitShareUpdateService = createProfitShareUpdateService(year);
+        short profitYear = 2024;
+        ProfitShareUpdateReport profitShareUpdateService = createProfitShareUpdateService();
 
         string reportName = "psupdate-pay444-r2.txt";
         profitShareUpdateService.TodaysDateTime = new DateTime(2024, 11, 14, 10, 35, 0); // time report was generated
 
         // Act
-        profitShareUpdateService.ApplyAdjustments( 15, 1, 2, 0, 0, 0, 0, 0, 0, 0, 30_000);
+        profitShareUpdateService.ApplyAdjustments(profitYear,15, 1, 2, 0, 0, 0, 0, 0, 0, 0, 30_000);
 
         // Assert
         string expected = LoadExpectedReport(reportName);
@@ -59,13 +59,13 @@ public class ProftShareUpdateTests
     public void EnsureUpdateWithValues_andEmployeeAdjustment_MatchesReady()
     {
         // Arrange
-        short year = 2024;
-        ProfitShareUpdateReport profitShareUpdateService = createProfitShareUpdateService(year);
+        short profitYear = 2024;
+        ProfitShareUpdateReport profitShareUpdateService = createProfitShareUpdateService();
         string reportName = "psupdate-pay444-r3.txt";
         profitShareUpdateService.TodaysDateTime = new DateTime(2024, 11, 19, 19, 18, 0); // time report was generated
 
         // Act
-        profitShareUpdateService.ApplyAdjustments( 15, 1, 2, 0, 700174, 44.77m, 18.16m, 22.33m, 0, 0, 30_000);
+        profitShareUpdateService.ApplyAdjustments(profitYear,15, 1, 2, 0, 700174, 44.77m, 18.16m, 22.33m, 0, 0, 30_000);
 
         // Assert
         string expected = LoadExpectedReport(reportName);
@@ -74,26 +74,21 @@ public class ProftShareUpdateTests
         AssertReportsAreEquivalent(expected, actual);
     }
 
-    private ProfitShareUpdateReport createProfitShareUpdateService(short profitYear)
+    private ProfitShareUpdateReport createProfitShareUpdateService()
     {
-
         IConfigurationRoot configuration = new ConfigurationBuilder().AddUserSecrets<ProftShareUpdateTests>().Build();
         string connectionString = configuration["ConnectionStrings:ProfitSharing"]!;
         DbContextOptions<ProfitSharingReadOnlyDbContext> options =
             new DbContextOptionsBuilder<ProfitSharingReadOnlyDbContext>().UseOracle(connectionString)
                 .EnableSensitiveDataLogging().Options;
-        ProfitSharingReadOnlyDbContext ctx = new ProfitSharingReadOnlyDbContext(options);
+        ProfitSharingReadOnlyDbContext ctx = new(options);
 
         IProfitSharingDataContextFactory dbFactory = new DbFactory(ctx);
 
         OracleConnection connection = GetOracleConnection();
         connection.Open();
-        ProfitShareUpdateService profitShareUpdateService = new(connection, dbFactory, profitYear);
 
-        var psur = new ProfitShareUpdateReport(connection, dbFactory, profitYear);
-
-
-        return psur;
+        return new ProfitShareUpdateReport(connection, dbFactory);
     }
 
     private static OracleConnection GetOracleConnection()

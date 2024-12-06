@@ -1,5 +1,8 @@
 ﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
+/// <summary>
+/// Totals extracted from Profit Detail records
+/// </summary>
 public record DetailTotals(
     decimal DistributionsTotal,
     decimal ForfeitsTotal,

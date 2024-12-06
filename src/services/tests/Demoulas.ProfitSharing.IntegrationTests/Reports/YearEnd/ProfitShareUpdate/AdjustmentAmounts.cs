@@ -1,7 +1,7 @@
 ﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
 /// <summary>
-/// Values provided externally used to guide how to award Earnings,Contributions and forfeiture points 
+///     Values provided externally used to guide how to award Earnings,Contributions and forfeiture points
 /// </summary>
 public record AdjustmentAmounts(
     decimal ContributionPercent,

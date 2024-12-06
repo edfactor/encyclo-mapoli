@@ -1,7 +1,7 @@
 ﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
 /// <summary>
-/// A summary of financial information about a Beneficiary
+///     A summary of financial information about a Beneficiary
 /// </summary>
 public record BeneficiaryFinancials
 {
