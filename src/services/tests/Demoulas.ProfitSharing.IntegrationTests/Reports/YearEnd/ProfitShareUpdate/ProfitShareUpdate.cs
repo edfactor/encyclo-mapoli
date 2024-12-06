@@ -8,7 +8,12 @@ using Oracle.ManagedDataAccess.Client;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
-public class PAY444
+/// <summary>
+/// Does the Year And application of Earnings and Contributions to all employees and beneficiaries.
+///
+/// Modeled very closely after Pay444
+/// </summary>
+public class ProfitShareUpdateService
 {
     public long EffectiveYear { get; set; } // PIC 9(4)
     public DateTime TodaysDateTime { get; set; } = DateTime.Now;
@@ -24,7 +29,7 @@ public class PAY444
     // Need to ensure this is surfaced correctly
     private bool _rerunNeeded;
 
-    public PAY444(OracleConnection connection, IProfitSharingDataContextFactory dbContextFactory, short profitYear)
+    public ProfitShareUpdateService(OracleConnection connection, IProfitSharingDataContextFactory dbContextFactory, short profitYear)
     {
         _employeeDataHelper = new EmployeeDataHelper(connection, dbContextFactory, profitYear);
         EffectiveYear = profitYear;

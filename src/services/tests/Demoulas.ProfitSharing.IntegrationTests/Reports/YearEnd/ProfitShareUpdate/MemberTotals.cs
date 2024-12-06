@@ -1,5 +1,8 @@
 ﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
+/// <summary>
+/// Newly computed (after applying the adjustments from the user) values for a member.
+/// </summary>
 public class MemberTotals
 {
     public decimal PointsDollars { get; set; }

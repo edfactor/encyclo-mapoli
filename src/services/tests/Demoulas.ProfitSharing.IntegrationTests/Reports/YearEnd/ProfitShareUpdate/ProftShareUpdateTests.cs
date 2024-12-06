@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Text;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.DbHelpers;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
@@ -18,16 +19,16 @@ public class ProftShareUpdateTests
     {
         // Arrange
         short profitYear = 2023;
-        PAY444 pay444 = createPay444(profitYear);
+        ProfitShareUpdateReport profitShareUpdateService = createProfitShareUpdateService(profitYear);
 
         string reportName = "psupdate-pay444-r1.txt";
-        pay444.TodaysDateTime = new DateTime(2024, 11, 12, 9, 43, 0); // time report was generated
+        profitShareUpdateService.TodaysDateTime = new DateTime(2024, 11, 12, 9, 43, 0); // time report was generated
 
         // Act
-        pay444.ApplyAdjustments( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        profitShareUpdateService.ApplyAdjustments( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
         // Assert
-        string actual = CollectLines(pay444.ReportLines);
+        string actual = CollectLines(profitShareUpdateService.ReportLines);
         string expected = LoadExpectedReport(reportName);
 
         AssertReportsAreEquivalent(expected, actual);
@@ -39,17 +40,17 @@ public class ProftShareUpdateTests
     {
         // Arrange
         short year = 2024;
-        PAY444 pay444 = createPay444(year);
+        ProfitShareUpdateReport profitShareUpdateService = createProfitShareUpdateService(year);
 
         string reportName = "psupdate-pay444-r2.txt";
-        pay444.TodaysDateTime = new DateTime(2024, 11, 14, 10, 35, 0); // time report was generated
+        profitShareUpdateService.TodaysDateTime = new DateTime(2024, 11, 14, 10, 35, 0); // time report was generated
 
         // Act
-        pay444.ApplyAdjustments( 15, 1, 2, 0, 0, 0, 0, 0, 0, 0, 30_000);
+        profitShareUpdateService.ApplyAdjustments( 15, 1, 2, 0, 0, 0, 0, 0, 0, 0, 30_000);
 
         // Assert
         string expected = LoadExpectedReport(reportName);
-        string actual = CollectLines(pay444.ReportLines);
+        string actual = CollectLines(profitShareUpdateService.ReportLines);
 
         AssertReportsAreEquivalent(expected, actual);
     }
@@ -59,56 +60,22 @@ public class ProftShareUpdateTests
     {
         // Arrange
         short year = 2024;
-        PAY444 pay444 = createPay444(year);
+        ProfitShareUpdateReport profitShareUpdateService = createProfitShareUpdateService(year);
         string reportName = "psupdate-pay444-r3.txt";
-        pay444.TodaysDateTime = new DateTime(2024, 11, 19, 19, 18, 0); // time report was generated
+        profitShareUpdateService.TodaysDateTime = new DateTime(2024, 11, 19, 19, 18, 0); // time report was generated
 
         // Act
-        pay444.ApplyAdjustments( 15, 1, 2, 0, 700174, 44.77m, 18.16m, 22.33m, 0, 0, 30_000);
+        profitShareUpdateService.ApplyAdjustments( 15, 1, 2, 0, 700174, 44.77m, 18.16m, 22.33m, 0, 0, 30_000);
 
         // Assert
         string expected = LoadExpectedReport(reportName);
-        string actual = CollectLines(pay444.ReportLines);
+        string actual = CollectLines(profitShareUpdateService.ReportLines);
 
         AssertReportsAreEquivalent(expected, actual);
     }
 
-#if false
-// Pending outcome of Secondary earnings clarification
-
-    /** TBD: change this to test the Earnings override for an individual only */
-    [Fact]
-    public void with_secondary_earnings_and_employee_and_member_overrides()
+    private ProfitShareUpdateReport createProfitShareUpdateService(short profitYear)
     {
-        // Arrange
-        using OracleConnection connection = GetOracleConnection();
-        connection.Open();
-        PAY444 pay444 = new(connection);
-        short year = 2024;
-        string reportName = "psupdate-pay444-r4.txt";
-
-        pay444.TodaysDateTime = new DateTime(2024, 11, 22, 13, 18, 0); // time report was generated
-
-        // We should pass in the point values, but ATM they are hard coded.
-        pay444.connection = connection;
-
-        // Act
-        pay444.m015MainProcessing(year, 17, 2.75m, 7.95m, 3.74m,
-            700196, 1.11m, 3.33m, 2.22m,
-            700417, 4.44m, 30000);
-
-        // Assert
-        string expected = LoadExpectedReport(reportName);
-        string actual = CollectLines(pay444.outputLines);
-
-        AssertReportsAreEquivalent(expected, actual);
-    }
-#endif
-
-
-    private PAY444 createPay444(short profitYear)
-    {
-        OracleConnection connection = GetOracleConnection();
 
         IConfigurationRoot configuration = new ConfigurationBuilder().AddUserSecrets<ProftShareUpdateTests>().Build();
         string connectionString = configuration["ConnectionStrings:ProfitSharing"]!;
@@ -119,9 +86,14 @@ public class ProftShareUpdateTests
 
         IProfitSharingDataContextFactory dbFactory = new DbFactory(ctx);
 
+        OracleConnection connection = GetOracleConnection();
         connection.Open();
-        PAY444 pay444 = new(connection, dbFactory, profitYear);
-        return pay444;
+        ProfitShareUpdateService profitShareUpdateService = new(connection, dbFactory, profitYear);
+
+        var psur = new ProfitShareUpdateReport(connection, dbFactory, profitYear);
+
+
+        return psur;
     }
 
     private static OracleConnection GetOracleConnection()

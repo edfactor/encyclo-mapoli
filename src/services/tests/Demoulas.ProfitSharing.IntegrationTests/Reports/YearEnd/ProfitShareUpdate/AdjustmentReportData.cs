@@ -1,5 +1,8 @@
 ﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
+/// <summary>
+/// Used to collect data about adjustments made to employees.  This data is later used in the Adjustment Report.
+/// </summary>
 public class AdjustmentsApplied {
    
     public decimal IncomingForfeitureAmountUnadjusted { get; set; } 

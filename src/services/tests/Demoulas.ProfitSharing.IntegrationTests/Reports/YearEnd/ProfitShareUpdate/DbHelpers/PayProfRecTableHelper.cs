@@ -8,7 +8,8 @@ namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update.DbHelpe
 
 public class EmployeeDataHelper
 {
-    public EmployeeDataHelper(OracleConnection connection, IProfitSharingDataContextFactory dbContextFactory, short profitYear)
+    public EmployeeDataHelper(OracleConnection connection, IProfitSharingDataContextFactory dbContextFactory,
+        short profitYear)
     {
         loadData(connection);
         /**
@@ -27,25 +28,25 @@ public class EmployeeDataHelper
             }
         }
          */
-
-
     }
+
+    public List<EmployeeFinancials> rows { get; set; } = new();
 
     private List<EmployeeFinancials> loadData2(IProfitSharingDataContextFactory dbContextFactory, short profitYear)
     {
-        TotalService totalService = new TotalService(null, null);
+        TotalService totalService = new(null, null);
 
-        var bals = dbContextFactory.UseReadOnlyContext(ctx =>
-            totalService.TotalVestingBalance(ctx, (short)(profitYear-1), new DateOnly(2024, 1, 1)) 
+        Dictionary<int, ParticipantTotalVestingBalanceDto> bals = dbContextFactory.UseReadOnlyContext(ctx =>
+            totalService.TotalVestingBalance(ctx, (short)(profitYear - 1), new DateOnly(2024, 1, 1))
                 .ToDictionaryAsync(
-                    keySelector: p => p.Ssn,
-                    elementSelector: p => p)).GetAwaiter().GetResult();
+                    p => p.Ssn,
+                    p => p)).GetAwaiter().GetResult();
 
 
-        var pps =  dbContextFactory.UseReadOnlyContext(ctx =>
+        List<EmployeeFinancials> pps = dbContextFactory.UseReadOnlyContext(ctx =>
         {
             return ctx.PayProfits
-                .Where(pp => pp.ProfitYear == profitYear - 1) 
+                .Where(pp => pp.ProfitYear == profitYear - 1)
                 .Include(pp => pp.Demographic)
                 .OrderBy(pp => pp.Demographic.EmployeeId)
                 .Select(pp => new EmployeeFinancials
@@ -67,22 +68,20 @@ public class EmployeeDataHelper
                 }).ToListAsync();
         }).GetAwaiter().GetResult();
 
-        foreach (var pp in pps)
+        foreach (EmployeeFinancials pp in pps)
         {
             pp.CurrentAmount = bals[pp.Ssn].CurrentBalance;
         }
 
         return pps;
-
     }
-
-    public List<EmployeeFinancials> rows { get; set; } = new();
 
 
     public void loadData(OracleConnection connection)
     {
         List<EmployeeFinancials> payProfRecords = new();
-        string query = "SELECT * FROM PROFITSHARE.PAYPROFIT pp join PROFITSHARE.Demographics d on d.dem_badge = pp.PAYPROF_BADGE order by PAYPROF_BADGE";
+        string query =
+            "SELECT * FROM PROFITSHARE.PAYPROFIT pp join PROFITSHARE.Demographics d on d.dem_badge = pp.PAYPROF_BADGE order by PAYPROF_BADGE";
 
         using (OracleCommand command = new(query, connection))
         {
@@ -101,12 +100,11 @@ public class EmployeeDataHelper
                         EtvaAfterVestingRules = reader.GetDecimal(reader.GetOrdinal("PY_PS_ETVA")),
                         EmployeeTypeId = reader.GetInt64(reader.GetOrdinal("PY_PROF_NEWEMP")),
                         PointsEarned = reader.GetInt64(reader.GetOrdinal("PY_PROF_POINTS")),
-
                         EarningsOnEtva = reader.GetDecimal(reader.GetOrdinal("PY_PROF_ETVA")), // Earnings on ETVA
 
                         Earnings = 0m, // reader.GetDecimal(reader.GetOrdinal("PY_PROF_EARN")),
                         SecondaryEarnings = 0m, // reader.GetDecimal(reader.GetOrdinal("PY_PROF_EARN2")),
-                        SecondaryEtvaEarnings = 0m, //reader.GetDecimal(reader.GetOrdinal("PY_PROF_ETVA2"))
+                        SecondaryEtvaEarnings = 0m //reader.GetDecimal(reader.GetOrdinal("PY_PROF_ETVA2"))
                     };
                     rows.Add(record);
                 }

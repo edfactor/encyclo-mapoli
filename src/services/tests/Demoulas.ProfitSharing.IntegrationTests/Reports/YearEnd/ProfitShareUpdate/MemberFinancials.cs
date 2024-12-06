@@ -1,6 +1,8 @@
 ﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Update;
 
-
+/// <summary>
+/// A summary of financial information about a Member
+/// </summary>
 public class MemberFinancials
 {
     public long EmployeeId { get; set; }

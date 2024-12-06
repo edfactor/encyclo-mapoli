@@ -1,14 +1,6 @@
-﻿
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.Common.Data.Services.Entities.Contexts;
+﻿using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using global::Demoulas.Common.Data.Services.Entities.Contexts;
-using global::Demoulas.ProfitSharing.Data.Contexts;
-using global::Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.IntegrationTests;
@@ -17,7 +9,7 @@ namespace Demoulas.ProfitSharing.IntegrationTests;
  * Used to connect to the live/qa/testing database context.  Ideally one that is kept in a pristine condition, so integration tests
  * can find a reliable place to start from.  Here pristine means the obfuscated data is imported w/o additional database changes.
  */
-sealed class PristineDataContextFactory : IProfitSharingDataContextFactory
+internal sealed class PristineDataContextFactory : IProfitSharingDataContextFactory
 {
     private readonly ProfitSharingReadOnlyDbContext _readOnlyCtx;
 
@@ -27,15 +19,18 @@ sealed class PristineDataContextFactory : IProfitSharingDataContextFactory
         //.LogTo(_output.WriteLine).Options
         //var ctx = new ProfitSharingDbContext(options)
 
-        var readOnlyOptions = new DbContextOptionsBuilder<ProfitSharingReadOnlyDbContext>().UseOracle(connectionString).Options; // .EnableSensitiveDataLogging()
+        DbContextOptions<ProfitSharingReadOnlyDbContext> readOnlyOptions =
+            new DbContextOptionsBuilder<ProfitSharingReadOnlyDbContext>().UseOracle(connectionString)
+                .Options; // .EnableSensitiveDataLogging()
         //.LogTo(_output.WriteLine).Options
 
-        var readOnlyCtx = new ProfitSharingReadOnlyDbContext(readOnlyOptions);
+        ProfitSharingReadOnlyDbContext readOnlyCtx = new ProfitSharingReadOnlyDbContext(readOnlyOptions);
 
         _readOnlyCtx = readOnlyCtx;
     }
 
-    public Task<T> UseWritableContext<T>(Func<ProfitSharingDbContext, Task<T>> func, CancellationToken cancellationToken = new CancellationToken())
+    public Task<T> UseWritableContext<T>(Func<ProfitSharingDbContext, Task<T>> func,
+        CancellationToken cancellationToken = new())
     {
         throw new NotImplementedException();
     }
@@ -45,7 +40,8 @@ sealed class PristineDataContextFactory : IProfitSharingDataContextFactory
         return func(_readOnlyCtx);
     }
 
-    public Task UseWritableContext(Func<ProfitSharingDbContext, Task> func, CancellationToken cancellationToken = default)
+    public Task UseWritableContext(Func<ProfitSharingDbContext, Task> func,
+        CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
@@ -54,4 +50,4 @@ sealed class PristineDataContextFactory : IProfitSharingDataContextFactory
     {
         throw new NotImplementedException();
     }
-};
+}
