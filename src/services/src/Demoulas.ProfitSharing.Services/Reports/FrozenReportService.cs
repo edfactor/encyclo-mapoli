@@ -486,7 +486,7 @@ public class FrozenReportService : IFrozenReportService
                 .ToListAsync(cancellationToken);
         });
 
-        // Client-side processing for grouping and filtering
+        // Client-side grouping and aggregation
         var groupedResult = rawResult
             .GroupBy(item => item.DateOfBirth.Age())
             .Select(g => new
@@ -496,22 +496,48 @@ public class FrozenReportService : IFrozenReportService
             })
             .ToList();
 
-        // Final transformation to VestedAmountsByAgeDetail
+        // Transform into detailed report format
         var details = groupedResult
             .Select(group => new VestedAmountsByAgeDetail
             {
                 Age = (byte)group.Age,
-                FullTimeCount = (short)group.Entries.Count(e => e.EmploymentType == FT && e.VestedBalance == e.CurrentBalance),
-                FullTimeAmount = group.Entries.Where(e => e.EmploymentType == FT && e.VestedBalance == e.CurrentBalance).Sum(e => e.CurrentBalance),
-                NotVestedCount = (short)group.Entries.Count(e => e.VestedBalance == 0),
-                NotVestedAmount = group.Entries.Where(e => e.VestedBalance == 0).Sum(e => e.CurrentBalance),
-                PartialVestedCount = (short)group.Entries.Count(e => e.VestedBalance > 0 && e.VestedBalance < e.CurrentBalance),
-                PartialVestedAmount = group.Entries.Where(e => e.VestedBalance > 0 && e.VestedBalance < e.CurrentBalance).Sum(e => e.VestedBalance),
+                FullTime100PercentCount = (short)group.Entries.Count(e => e.EmploymentType == FT && e.VestedBalance == e.CurrentBalance),
+                FullTime100PercentAmount = group.Entries.Where(e => e.EmploymentType == FT && e.VestedBalance == e.CurrentBalance).Sum(e => e.CurrentBalance),
+                FullTimePartialCount = (short)group.Entries.Count(e => e.EmploymentType == FT && e.VestedBalance > 0 && e.VestedBalance < e.CurrentBalance),
+                FullTimePartialAmount = group.Entries.Where(e => e.EmploymentType == FT && e.VestedBalance > 0 && e.VestedBalance < e.CurrentBalance).Sum(e => e.VestedBalance),
+                FullTimeNotVestedCount = (short)group.Entries.Count(e => e.EmploymentType == FT && e.VestedBalance == 0),
+                FullTimeNotVestedAmount = group.Entries.Where(e => e.EmploymentType == FT && e.VestedBalance == 0).Sum(e => e.CurrentBalance),
+
+                PartTime100PercentCount = (short)group.Entries.Count(e => e.EmploymentType == PT && e.VestedBalance == e.CurrentBalance),
+                PartTime100PercentAmount = group.Entries.Where(e => e.EmploymentType == PT && e.VestedBalance == e.CurrentBalance).Sum(e => e.CurrentBalance),
+                PartTimePartialCount = (short)group.Entries.Count(e => e.EmploymentType == PT && e.VestedBalance > 0 && e.VestedBalance < e.CurrentBalance),
+                PartTimePartialAmount = group.Entries.Where(e => e.EmploymentType == PT && e.VestedBalance > 0 && e.VestedBalance < e.CurrentBalance).Sum(e => e.VestedBalance),
+                PartTimeNotVestedCount = (short)group.Entries.Count(e => e.EmploymentType == PT && e.VestedBalance == 0),
+                PartTimeNotVestedAmount = group.Entries.Where(e => e.EmploymentType == PT && e.VestedBalance == 0).Sum(e => e.CurrentBalance),
+
                 BeneficiaryCount = (short)group.Entries.Count(e => e.IsBeneficiary),
-                BeneficiaryAmount = group.Entries.Where(e => e.IsBeneficiary).Sum(e => e.CurrentBalance)
+                BeneficiaryAmount = group.Entries.Where(e => e.IsBeneficiary).Sum(e => e.CurrentBalance),
             })
             .OrderBy(e => e.Age)
             .ToList();
+
+        // Calculate totals for all categories
+        TotalFullTimeCount = 50,
+        TotalNotVestedCount = 20,
+        TotalPartialVestedCount = 15,
+        
+            
+        var totalFullTimeCount = details.Sum(d => d.F);
+        var totalFullTime100PercentAmount = details.Sum(d => d.FullTime100PercentAmount);
+        var totalFullTimePartialAmount = details.Sum(d => d.FullTimePartialAmount);
+        var totalFullTimeNotVestedAmount = details.Sum(d => d.FullTimeNotVestedAmount);
+
+        var totalPartTime100PercentAmount = details.Sum(d => d.PartTime100PercentAmount);
+        var totalPartTimePartialAmount = details.Sum(d => d.PartTimePartialAmount);
+        var totalPartTimeNotVestedAmount = details.Sum(d => d.PartTimeNotVestedAmount);
+
+        var totalBeneficiaryCount = (short)details.Sum(d => d.BeneficiaryCount);
+        var totalBeneficiaryAmount = details.Sum(d => d.BeneficiaryAmount);
 
         // Build the final response
         req = req with { Take = details.Count + 1 };
@@ -521,14 +547,14 @@ public class FrozenReportService : IFrozenReportService
             ReportName = "PROFIT SHARING VESTED AMOUNTS BY AGE",
             ReportDate = DateTimeOffset.Now,
             ReportType = req.ReportType,
-            TotalFullTimeAmount = details.Sum(d => d.FullTimeAmount),
-            TotalNotVestedAmount = details.Sum(d => d.NotVestedAmount),
-            TotalPartialVestedAmount = details.Sum(d => d.PartialVestedAmount),
-            TotalBeneficiaryAmount = details.Sum(d => d.BeneficiaryAmount),
-            TotalFullTimeCount = (short)details.Sum(d => d.FullTimeCount),
-            TotalNotVestedCount = (short)details.Sum(d => d.NotVestedCount),
-            TotalPartialVestedCount = (short)details.Sum(d => d.PartialVestedCount),
-            TotalBeneficiaryCount = (short)details.Sum(d => d.BeneficiaryCount),
+            TotalFullTime100PercentAmount = totalFullTime100PercentAmount,
+            TotalFullTimePartialAmount = totalFullTimePartialAmount,
+            TotalFullTimeNotVestedAmount = totalFullTimeNotVestedAmount,
+            TotalPartTime100PercentAmount = totalPartTime100PercentAmount,
+            TotalPartTimePartialAmount = totalPartTimePartialAmount,
+            TotalPartTimeNotVestedAmount = totalPartTimeNotVestedAmount,
+            TotalBeneficiaryCount = totalBeneficiaryCount,
+            TotalBeneficiaryAmount = totalBeneficiaryAmount,
             Response = new PaginatedResponseDto<VestedAmountsByAgeDetail>(req)
             {
                 Results = details,

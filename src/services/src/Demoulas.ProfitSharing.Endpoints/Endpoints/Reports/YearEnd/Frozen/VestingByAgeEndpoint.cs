@@ -60,12 +60,12 @@ public class VestingByAgeEndpoint : EndpointWithCsvTotalsBase<FrozenReportsByAge
         await csvWriter.NextRecordAsync();
         csvWriter.WriteField("BEN");
         csvWriter.WriteField(report.TotalBeneficiaryCount);
-        csvWriter.WriteField(report.TotalBeneficiaryAmount);
+        csvWriter.WriteField(report.TotalPartTime100PercentAmount);
 
         await csvWriter.NextRecordAsync();
         csvWriter.WriteField("");
         csvWriter.WriteField(report.TotalFullTimeCount);
-        csvWriter.WriteField(report.TotalFullTimeAmount);
+        csvWriter.WriteField(report.TotalFullTime100PercentAmount);
 
 
         await csvWriter.NextRecordAsync();
