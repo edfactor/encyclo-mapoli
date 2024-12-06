@@ -35,7 +35,7 @@ public class CleanupReportService : ICleanupReportService
 
     }
 
-    public Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsNs(ProfitYearRequest req, CancellationToken ct)
+    public Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsnAsync(ProfitYearRequest req, CancellationToken ct)
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
@@ -94,7 +94,7 @@ public class CleanupReportService : ICleanupReportService
         });
     }
 
-    public async Task<ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>> GetNegativeETVAForSSNsOnPayProfitResponse(ProfitYearRequest req,
+    public async Task<ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>> GetNegativeETVAForSSNsOnPayProfitResponseAsync(ProfitYearRequest req,
         CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("Request NEGATIVE ETVA FOR SSNs ON PAYPROFIT"))
@@ -132,7 +132,7 @@ public class CleanupReportService : ICleanupReportService
         }
     }
 
-    public async Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfit(PaginationRequestDto req,
+    public async Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfitAsync(PaginationRequestDto req,
         CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("Request BEGIN DEMOGRAPHIC BADGES NOT IN PAY PROFIT"))
@@ -163,7 +163,7 @@ public class CleanupReportService : ICleanupReportService
         }
     }
 
-    public async Task<ReportResponseBase<NamesMissingCommaResponse>> GetNamesMissingComma(PaginationRequestDto req,
+    public async Task<ReportResponseBase<NamesMissingCommaResponse>> GetNamesMissingCommaAsync(PaginationRequestDto req,
         CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("Request BEGIN DEMOGRAPHIC BADGES NOT IN PAY PROFIT"))
@@ -189,7 +189,7 @@ public class CleanupReportService : ICleanupReportService
         }
     }
 
-    public async Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetDuplicateNamesAndBirthdays(ProfitYearRequest req,
+    public async Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetDuplicateNamesAndBirthdaysAsync(ProfitYearRequest req,
         CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("Request BEGIN DUPLICATE NAMES AND BIRTHDAYS"))
@@ -278,7 +278,7 @@ public class CleanupReportService : ICleanupReportService
         }
     }
 
-    public async Task<ReportResponseBase<DistributionsAndForfeitureResponse>> GetDistributionsAndForfeiture(DistributionsAndForfeituresRequest req,
+    public async Task<ReportResponseBase<DistributionsAndForfeitureResponse>> GetDistributionsAndForfeitureAsync(DistributionsAndForfeituresRequest req,
         CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("Request BEGIN DISTRIBUTIONS AND FORFEITURES"))
@@ -359,9 +359,9 @@ public class CleanupReportService : ICleanupReportService
         }
     }
 
-    public async Task<ReportResponseBase<YearEndProfitSharingReportResponse>> GetYearEndProfitSharingReport(YearEndProfitSharingReportRequest req, CancellationToken cancellationToken = default)
+    public async Task<ReportResponseBase<YearEndProfitSharingReportResponse>> GetYearEndProfitSharingReportAsync(YearEndProfitSharingReportRequest req, CancellationToken cancellationToken = default)
     {
-        var response = await _calendarService.GetYearStartAndEndAccountingDates(req.ProfitYear, cancellationToken);
+        var response = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
         var over18BirthDate = response.FiscalEndDate.AddYears(-18);
         var rslt = await _dataContextFactory.UseReadOnlyContext(ctx =>
         {

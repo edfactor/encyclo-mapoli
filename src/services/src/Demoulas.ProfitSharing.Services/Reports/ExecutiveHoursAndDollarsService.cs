@@ -24,7 +24,7 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
     /// <param name="request">The year and pagination details.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the report response with details of executive hours/dollars</returns>
-    public async Task<ReportResponseBase<ExecutiveHoursAndDollarsResponse>> GetExecutiveHoursAndDollarsReport(ExecutiveHoursAndDollarsRequest request, CancellationToken cancellationToken)
+    public async Task<ReportResponseBase<ExecutiveHoursAndDollarsResponse>> GetExecutiveHoursAndDollarsReportAsync(ExecutiveHoursAndDollarsRequest request, CancellationToken cancellationToken)
     {
         var result = _dataContextFactory.UseReadOnlyContext(c =>
         {
@@ -76,7 +76,7 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
     }
 
 
-    public Task SetExecutiveHoursAndDollars(short profitYear, List<SetExecutiveHoursAndDollarsDto> executiveHoursAndDollarsDtos, CancellationToken cancellationToken)
+    public Task SetExecutiveHoursAndDollarsAsync(short profitYear, List<SetExecutiveHoursAndDollarsDto> executiveHoursAndDollarsDtos, CancellationToken cancellationToken)
     {
         return _dataContextFactory.UseWritableContext(async ctx =>
         {

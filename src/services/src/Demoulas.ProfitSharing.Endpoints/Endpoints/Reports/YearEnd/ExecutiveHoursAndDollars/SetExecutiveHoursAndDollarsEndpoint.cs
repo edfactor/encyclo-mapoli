@@ -39,7 +39,7 @@ public class SetExecutiveHoursAndDollarsEndpoint : Endpoint<SetExecutiveHoursAnd
     public override async Task<object?> ExecuteAsync(SetExecutiveHoursAndDollarsRequest req, CancellationToken ct)
     {
         // Effect the change
-        await ExecutiveHoursAndDollarsService.SetExecutiveHoursAndDollars(req.ProfitYear, req.ExecutiveHoursAndDollars, ct);
+        await ExecutiveHoursAndDollarsService.SetExecutiveHoursAndDollarsAsync(req.ProfitYear, req.ExecutiveHoursAndDollars, ct);
         // Tell the Client everything good.
         // The Client gets a http status 204 (HttpStatusCode.NoContent), which means everything was peachy but there is no data in the response, which is fine for a PUT
         await SendNoContentAsync(ct);

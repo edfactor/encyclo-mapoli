@@ -76,7 +76,7 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYear
 
     public override Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
-        return _cleanupReportService.GetDuplicateNamesAndBirthdays(req, ct);
+        return _cleanupReportService.GetDuplicateNamesAndBirthdaysAsync(req, ct);
     }
 
     public sealed class DuplicateNamesAndBirthdaysResponseMap : ClassMap<DuplicateNamesAndBirthdaysResponse>

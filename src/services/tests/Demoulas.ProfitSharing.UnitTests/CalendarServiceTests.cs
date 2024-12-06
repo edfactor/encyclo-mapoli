@@ -46,7 +46,7 @@ public class CalendarServiceTests : ApiTestBase<Api.Program>
         var date = DateOnly.ParseExact(sDate, "yyMMdd", CultureInfo.InvariantCulture);
         var calendarService = ServiceProvider?.GetRequiredService<ICalendarService>()!;
 
-        var weekEndingDate = await calendarService.FindWeekendingDateFromDate(date);
+        var weekEndingDate = await calendarService.FindWeekendingDateFromDateAsync(date);
 
         weekEndingDate.Should().BeOnOrAfter(date);
 
@@ -59,7 +59,7 @@ public class CalendarServiceTests : ApiTestBase<Api.Program>
     {
         var invalidDate = DateOnly.MaxValue;
         var calendarService = ServiceProvider?.GetRequiredService<ICalendarService>()!;
-        Func<Task> act = async () => await calendarService.FindWeekendingDateFromDate(invalidDate);
+        Func<Task> act = async () => await calendarService.FindWeekendingDateFromDateAsync(invalidDate);
         return act.Should().ThrowAsync<Exception>();
     }
 
@@ -69,7 +69,7 @@ public class CalendarServiceTests : ApiTestBase<Api.Program>
     {
         var futureDate = DateOnly.FromDateTime(DateTime.Now.AddYears(6));
         var calendarService = ServiceProvider?.GetRequiredService<ICalendarService>()!;
-        Func<Task> act = async () => await calendarService.FindWeekendingDateFromDate(futureDate);
+        Func<Task> act = async () => await calendarService.FindWeekendingDateFromDateAsync(futureDate);
         return act.Should().ThrowAsync<ArgumentOutOfRangeException>()
             .WithMessage($"{AccountingPeriodsService.InvalidDateError} (Parameter 'dateTime')");
     }
@@ -80,7 +80,7 @@ public class CalendarServiceTests : ApiTestBase<Api.Program>
     {
         var validDate = DateOnly.ParseExact("230101", "yyMMdd", CultureInfo.InvariantCulture);
         var calendarService = ServiceProvider?.GetRequiredService<ICalendarService>()!;
-        var weekEndingDate = await calendarService.FindWeekendingDateFromDate(validDate);
+        var weekEndingDate = await calendarService.FindWeekendingDateFromDateAsync(validDate);
         weekEndingDate.Should().BeOnOrAfter(validDate);
         weekEndingDate.DayOfWeek.Should().Be(DayOfWeek.Saturday);
     }

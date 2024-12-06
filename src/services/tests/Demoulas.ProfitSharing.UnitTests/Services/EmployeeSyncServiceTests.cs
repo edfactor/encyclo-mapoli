@@ -42,9 +42,9 @@ public class EmployeeSyncServiceTests : IClassFixture<ApiTestBase<Program>>
         // Arrange
         var cancellationToken = new CancellationToken();
         // Act
-        await _employeeSyncService.SynchronizeEmployees("Unit Test", cancellationToken);
+        await _employeeSyncService.SynchronizeEmployeesAsync("Unit Test", cancellationToken);
         // Assert
-        _mockDemographicsService.Verify(d => d.AddDemographicsStream(It.IsAny<IAsyncEnumerable<DemographicsRequest>>(), It.IsAny<byte>(), cancellationToken),
+        _mockDemographicsService.Verify(d => d.AddDemographicsStreamAsync(It.IsAny<IAsyncEnumerable<DemographicsRequest>>(), It.IsAny<byte>(), cancellationToken),
             Times.Once);
     }
 }

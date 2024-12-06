@@ -34,7 +34,7 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
         _options = Constants.GetJsonSerializerOptions();
     }
 
-    public Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsNs(ProfitYearRequest req, CancellationToken ct)
+    public Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsnAsync(ProfitYearRequest req, CancellationToken ct)
     {
         return CallReportEndpoint<PayrollDuplicateSsnResponseDto, ProfitYearRequest>(req, "duplicate-ssns", ct);
     }
@@ -44,7 +44,7 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
         return DownloadCsvReport(profitYear,"duplicate-ssns", cancellationToken);
     }
 
-    public Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfit(PaginationRequestDto req, CancellationToken cancellationToken = default)
+    public Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfitAsync(PaginationRequestDto req, CancellationToken cancellationToken = default)
     {
         return CallReportEndpoint<DemographicBadgesNotInPayProfitResponse, PaginationRequestDto>(req, "demographic-badges-not-in-payprofit", cancellationToken);
     }
@@ -56,7 +56,7 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
 
     #region Negative ETVA For SSNs On PayProfit
 
-    public Task<ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>> GetNegativeETVAForSSNsOnPayProfitResponse(ProfitYearRequest req, CancellationToken cancellationToken = default)
+    public Task<ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>> GetNegativeETVAForSSNsOnPayProfitResponseAsync(ProfitYearRequest req, CancellationToken cancellationToken = default)
     {
         return CallReportEndpoint<NegativeEtvaForSsNsOnPayProfitResponse, ProfitYearRequest>(req, "negative-evta-ssn", cancellationToken);
     }
@@ -69,7 +69,7 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
     #endregion
     
 
-    public Task<ReportResponseBase<NamesMissingCommaResponse>> GetNamesMissingComma(PaginationRequestDto req, CancellationToken cancellationToken = default)
+    public Task<ReportResponseBase<NamesMissingCommaResponse>> GetNamesMissingCommaAsync(PaginationRequestDto req, CancellationToken cancellationToken = default)
     {
         return CallReportEndpoint<NamesMissingCommaResponse, PaginationRequestDto>(req, "names-missing-commas", cancellationToken);
     }
@@ -79,7 +79,7 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
         return DownloadCsvReport(0, "names-missing-commas", cancellationToken);
     }
 
-    public Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetDuplicateNamesAndBirthdays(ProfitYearRequest req, CancellationToken cancellationToken = default)
+    public Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetDuplicateNamesAndBirthdaysAsync(ProfitYearRequest req, CancellationToken cancellationToken = default)
     {
         return CallReportEndpoint<DuplicateNamesAndBirthdaysResponse, ProfitYearRequest>(req, "duplicate-names-and-birthdays", cancellationToken);
     }
@@ -89,12 +89,12 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
         return DownloadCsvReport(profitYear, "duplicate-names-and-birthdays", cancellationToken);
     }
 
-    public Task<ReportResponseBase<DistributionsAndForfeitureResponse>> GetDistributionsAndForfeiture(DistributionsAndForfeituresRequest req, CancellationToken cancellationToken = default)
+    public Task<ReportResponseBase<DistributionsAndForfeitureResponse>> GetDistributionsAndForfeitureAsync(DistributionsAndForfeituresRequest req, CancellationToken cancellationToken = default)
     {
         return CallReportEndpoint<DistributionsAndForfeitureResponse, DistributionsAndForfeituresRequest>(req, "distributions-and-forfeitures", cancellationToken);
     }
 
-    public Task<ReportResponseBase<YearEndProfitSharingReportResponse>> GetYearEndProfitSharingReport(YearEndProfitSharingReportRequest req, CancellationToken cancellationToken = default)
+    public Task<ReportResponseBase<YearEndProfitSharingReportResponse>> GetYearEndProfitSharingReportAsync(YearEndProfitSharingReportRequest req, CancellationToken cancellationToken = default)
     {
         return CallReportEndpoint<YearEndProfitSharingReportResponse, YearEndProfitSharingReportRequest>(req, "yearend-profit-sharing-report", cancellationToken);
     }

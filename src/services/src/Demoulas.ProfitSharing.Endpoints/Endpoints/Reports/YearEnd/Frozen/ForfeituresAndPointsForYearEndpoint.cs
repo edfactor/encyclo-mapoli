@@ -52,7 +52,7 @@ public class ForfeituresAndPointsForYearEndpoint:EndpointWithCsvBase<ProfitYearR
 
     public override Task<ReportResponseBase<ForfeituresAndPointsForYearResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
-        return _frozenReportService.GetForfeituresAndPointsForYear(req, ct);
+        return _frozenReportService.GetForfeituresAndPointsForYearAsync(req, ct);
     }
 
     public class ForfeituresAndPointsForYearEndpointMapper:ClassMap<ForfeituresAndPointsForYearResponse>

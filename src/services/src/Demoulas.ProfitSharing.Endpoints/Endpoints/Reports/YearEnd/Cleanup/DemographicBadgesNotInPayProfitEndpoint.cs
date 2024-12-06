@@ -85,7 +85,7 @@ public class DemographicBadgesNotInPayProfitEndpoint : EndpointWithCsvBase<Pagin
 
     public override Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetResponse(PaginationRequestDto req, CancellationToken ct)
     {
-        return _cleanupReportService.GetDemographicBadgesNotInPayProfit(req, ct);
+        return _cleanupReportService.GetDemographicBadgesNotInPayProfitAsync(req, ct);
     }
 
     public sealed class DemographicBadgesNotInPayProfitResponseMap : ClassMap<DemographicBadgesNotInPayProfitResponse>

@@ -54,7 +54,7 @@ public class CurrentYearWagesEndpoint : EndpointWithCsvBase<ProfitYearRequest, W
 
     public override Task<ReportResponseBase<WagesCurrentYearResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
-        return _reportService.GetWagesReport(req, ct);
+        return _reportService.GetWagesReportAsync(req, ct);
     }
 
 

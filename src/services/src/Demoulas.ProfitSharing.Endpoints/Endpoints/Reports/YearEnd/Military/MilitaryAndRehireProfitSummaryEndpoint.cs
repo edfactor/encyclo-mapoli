@@ -56,7 +56,7 @@ public class MilitaryAndRehireProfitSummaryEndpoint :
 
     public override Task<ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
-        return _reportService.GetMilitaryAndRehireProfitSummaryReport(req, ct);
+        return _reportService.GetMilitaryAndRehireProfitSummaryReportAsync(req, ct);
     }
 
     public sealed class MilitaryRehireProfitSharingResponseMap : ClassMap<MilitaryAndRehireProfitSummaryResponse>

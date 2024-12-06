@@ -36,7 +36,7 @@ public class FrozenReportService : IFrozenReportService
         _logger = loggerFactory.CreateLogger<FrozenReportService>();
     }
 
-    public async Task<ReportResponseBase<ForfeituresAndPointsForYearResponse>> GetForfeituresAndPointsForYear(ProfitYearRequest req,
+    public async Task<ReportResponseBase<ForfeituresAndPointsForYearResponse>> GetForfeituresAndPointsForYearAsync(ProfitYearRequest req,
         CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("Request FORFEITURES AND POINTS FOR YEAR"))
@@ -137,7 +137,7 @@ public class FrozenReportService : IFrozenReportService
         }
     }
 
-    public async Task<DistributionsByAge> GetDistributionsByAgeYear(FrozenReportsByAgeRequest req, CancellationToken cancellationToken = default)
+    public async Task<DistributionsByAge> GetDistributionsByAgeYearAsync(FrozenReportsByAgeRequest req, CancellationToken cancellationToken = default)
     {
         List<byte> codes =
         [
@@ -230,7 +230,7 @@ public class FrozenReportService : IFrozenReportService
     }
 
 
-    public async Task<ContributionsByAge> GetContributionsByAgeYear(FrozenReportsByAgeRequest req, CancellationToken cancellationToken = default)
+    public async Task<ContributionsByAge> GetContributionsByAgeYearAsync(FrozenReportsByAgeRequest req, CancellationToken cancellationToken = default)
     {
         const string FT = "FullTime";
         const string PT = "PartTime";
@@ -292,7 +292,7 @@ public class FrozenReportService : IFrozenReportService
         };
     }
 
-    public async Task<ForfeituresByAge> GetForfeituresByAgeYear(FrozenReportsByAgeRequest req, CancellationToken cancellationToken = default)
+    public async Task<ForfeituresByAge> GetForfeituresByAgeYearAsync(FrozenReportsByAgeRequest req, CancellationToken cancellationToken = default)
     {
         const string FT = "FullTime";
         const string PT = "PartTime";
@@ -354,12 +354,12 @@ public class FrozenReportService : IFrozenReportService
         };
     }
 
-    public async Task<BalanceByAge> GetBalanceByAgeYear(FrozenReportsByAgeRequest req, CancellationToken cancellationToken = default)
+    public async Task<BalanceByAge> GetBalanceByAgeYearAsync(FrozenReportsByAgeRequest req, CancellationToken cancellationToken = default)
     {
         const string FT = "FullTime";
         const string PT = "PartTime";
 
-        var startEnd = await _calendarService.GetYearStartAndEndAccountingDates(req.ProfitYear, cancellationToken);
+        var startEnd = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
 
         var rawResult = await _dataContextFactory.UseReadOnlyContext(ctx =>
         {

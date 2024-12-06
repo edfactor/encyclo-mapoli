@@ -25,7 +25,7 @@ public class MasterInquiryService : IMasterInquiryService
         _logger = loggerFactory.CreateLogger<MasterInquiryService>();
     }
 
-    public async Task<MasterInquiryWithDetailsResponseDto> GetMasterInquiry(MasterInquiryRequest req, CancellationToken cancellationToken = default)
+    public async Task<MasterInquiryWithDetailsResponseDto> GetMasterInquiryAsync(MasterInquiryRequest req, CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("REQUEST MASTER INQUIRY"))
         {
@@ -131,8 +131,8 @@ public class MasterInquiryService : IMasterInquiryService
                     short currentYear = (short) DateTime.Today.Year;
                     short previousYear = (short) (currentYear - 1);
 
-                    var previousBalance = await _totalService.GetVestingBalanceForSingleMember(SearchBy.Ssn, ssn, previousYear, cancellationToken);
-                    var currentBalance = await _totalService.GetVestingBalanceForSingleMember(SearchBy.Ssn, ssn, currentYear, cancellationToken);
+                    var previousBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(SearchBy.Ssn, ssn, previousYear, cancellationToken);
+                    var currentBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(SearchBy.Ssn, ssn, currentYear, cancellationToken);
 
                     var demographicData = await ctx.Demographics
                      .Where(d => d.Ssn == uniqueSsns[0])

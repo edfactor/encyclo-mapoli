@@ -20,9 +20,9 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
         _calendarService = calendarService;
     }
 
-    public async Task<GetEligibleEmployeesResponse> GetEligibleEmployees(ProfitYearRequest request, CancellationToken cancellationToken)
+    public async Task<GetEligibleEmployeesResponse> GetEligibleEmployeesAsync(ProfitYearRequest request, CancellationToken cancellationToken)
     {
-        var response = await _calendarService.GetYearStartAndEndAccountingDates(request.ProfitYear, cancellationToken);
+        var response = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
         var birthDateOfExactly21YearsOld = response.FiscalEndDate.AddYears(-21);
 
         return  await _dataContextFactory.UseReadOnlyContext(async c =>

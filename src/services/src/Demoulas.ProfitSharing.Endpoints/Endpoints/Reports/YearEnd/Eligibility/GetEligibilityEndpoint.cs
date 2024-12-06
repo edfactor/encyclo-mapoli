@@ -37,7 +37,7 @@ public class GetEligibleEmployeesEndpoint : EndpointWithCsvTotalsBase<ProfitYear
 
     public override Task<GetEligibleEmployeesResponse> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
-        return _getEligibleEmployeesService.GetEligibleEmployees(req, ct);
+        return _getEligibleEmployeesService.GetEligibleEmployeesAsync(req, ct);
     }
 
     protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, GetEligibleEmployeesResponse responseWithTotals, CancellationToken cancellationToken)
