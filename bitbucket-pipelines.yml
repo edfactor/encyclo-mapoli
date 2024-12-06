@@ -23,7 +23,7 @@ definitions:
         - dotnet workload update --source $env:NUGET_ORG
 
         # Install dotnet-trace globally
-        - dotnet tool install --global dotnet-trace  --source $env:NUGET_ORG
+        - dotnet tool install --global dotnet-trace  --add-source $env:NUGET_ORG
 
         # Add dotnet-trace to PATH
         - $env:PATH += ";$env:USERPROFILE\\.dotnet\\tools"
