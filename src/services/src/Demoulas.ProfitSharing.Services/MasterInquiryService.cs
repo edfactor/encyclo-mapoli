@@ -60,7 +60,7 @@ public class MasterInquiryService : IMasterInquiryService
 
                 if (req.ProfitCode.HasValue)
                 {
-                    query = query.Where(x => x.ProfitDetail.ProfitCode.Id == req.ProfitCode);
+                    query = query.Where(x => x.ProfitDetail.ProfitCodeId == req.ProfitCode);
                 }
 
                 if (req.ContributionAmount.HasValue)
@@ -81,14 +81,14 @@ public class MasterInquiryService : IMasterInquiryService
                 if (req.ForfeitureAmount.HasValue)
                 {
                     query = query.Where(x =>
-                        x.ProfitDetail.ProfitCode.Id == ProfitCode.Constants.IncomingContributions.Id &&
+                        x.ProfitDetail.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id &&
                         x.ProfitDetail.Forfeiture == req.ForfeitureAmount);
                 }
 
                 if (req.PaymentAmount.HasValue)
                 {
                     query = query.Where(x =>
-                        x.ProfitDetail.ProfitCode.Id != ProfitCode.Constants.IncomingContributions.Id &&
+                        x.ProfitDetail.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id &&
                         x.ProfitDetail.Forfeiture == req.PaymentAmount);
                 }
                 var results = await query
