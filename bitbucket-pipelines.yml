@@ -22,8 +22,9 @@ definitions:
           # Ensure the REPORTS_PATH directory exists
           - mkdir -Force -Path $env:REPORTS_PATH
 
-          # Update .NET workloads
-          - dotnet workload update --source $env:NUGET_ORG
+           # Run tests and generate JUnit reports
+          - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml" -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
+
 
           # Install dotnet-trace globally
           - dotnet tool install --global dotnet-trace  --add-source $env:NUGET_ORG
@@ -31,8 +32,8 @@ definitions:
           # Add dotnet-trace to PATH
           - $env:PATH += ";$env:USERPROFILE\\.dotnet\\tools"
 
-          # Run tests, generate JUnit reports, and collect performance trace
-          - dotnet trace collect --output "$env:REPORTS_PATH/performance.nettrace" -- dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml" -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
+          # Collect performance trace
+          - dotnet trace collect --output "$env:REPORTS_PATH/performance.nettrace" -- dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --no-build
 
           # Install speedscope globally (requires Node.js)
           - npm install -g speedscope
