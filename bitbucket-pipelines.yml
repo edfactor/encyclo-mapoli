@@ -24,6 +24,26 @@ definitions:
 
            # Run tests and generate JUnit reports
           - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml" -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
+          
+      artifacts:
+        - test-reports/**
+
+    nightly-dotnet-trace: &nightly-dotnet-trace
+      name: Nightly Dotnet Trace
+      runs-on:
+        - windows
+        - self.hosted
+      script:
+          # Set environment variables
+          - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
+          - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}"
+          - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
+
+          # Ensure the REPORTS_PATH directory exists
+          - mkdir -Force -Path $env:REPORTS_PATH
+
+           # Run tests and generate JUnit reports
+          - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml" -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
 
 
           # Install dotnet-trace globally
@@ -45,10 +65,8 @@ definitions:
           - echo "## Performance Analysis Report" > "$env:REPORTS_PATH/performance-summary.md"
           - echo "View the performance analysis results >> "$env:REPORTS_PATH/performance-summary.md"
 
-
       artifacts:
         - test-reports/**
-
 
     test-frontend: &test-frontend
           name:  Build and Test Frontend UI
@@ -260,4 +278,7 @@ pipelines:
                         - drop-recreate-db
                         - import-from-ready                        
         - step: *upgrade-database
+  
+      nightly:
+        - step: *nightly-dotnet-trace
 
