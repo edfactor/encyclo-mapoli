@@ -24,4 +24,5 @@ public class MemberFinancials
     public long MaxPoints { get; set; }
     public long Psn { get; set; }
     public decimal Caf { get; set; }
+    public decimal EndingBalance { get; set; }
 }

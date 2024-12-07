@@ -103,6 +103,15 @@ internal sealed class ProfitShareUpdateReport
             m830PrintHeader(reportCounters, header_1);
         }
 
+        if (memberFinancials.Xfer != 0)
+        {
+            memberFinancials.Contributions = memberFinancials.Contributions + memberFinancials.Xfer;
+        }
+        if (memberFinancials.Pxfer != 0)
+        {
+            memberFinancials.Military = memberFinancials.Military - memberFinancials.Pxfer;
+        }
+
         ReportLine report_line = new();
         ReportLine2 report_line_2 = new();
         if (memberFinancials.EmployeeId > 0)
@@ -124,16 +133,7 @@ internal sealed class ProfitShareUpdateReport
                 report_line.PR_NEWEMP = " ";
             }
 
-            if (memberFinancials.Xfer != 0)
-            {
-                memberFinancials.Contributions = memberFinancials.Contributions + memberFinancials.Xfer;
-            }
-
-            if (memberFinancials.Pxfer != 0)
-            {
-                memberFinancials.Military = memberFinancials.Military - memberFinancials.Pxfer;
-            }
-
+       
             report_line.PR_CONT = memberFinancials.Contributions;
             report_line.PR_MIL = memberFinancials.Military;
             report_line.PR_FORF = memberFinancials.IncomingForfeitures;
@@ -146,15 +146,10 @@ internal sealed class ProfitShareUpdateReport
 
             report_line.PR_EARN2 = memberFinancials.SecondaryEarnings;
             report_line.PR_EARN2 = memberFinancials.Caf;
+
+            report_line.END_BAL = memberFinancials.EndingBalance;
         }
 
-
-        decimal endingBalance = memberFinancials.CurrentAmount + memberFinancials.Contributions +
-                                memberFinancials.Earnings + memberFinancials.SecondaryEarnings +
-                                memberFinancials.IncomingForfeitures + memberFinancials.Military +
-                                memberFinancials.Caf -
-                                memberFinancials.Distributions;
-            report_line.END_BAL = endingBalance;
 
         if (memberFinancials.EmployeeId == 0)
         {
@@ -164,7 +159,6 @@ internal sealed class ProfitShareUpdateReport
             report_line_2.PR2_BEG_BAL = memberFinancials.CurrentAmount;
             report_line_2.PR2_DIST1 = memberFinancials.Distributions;
             report_line_2.PR2_NEWEMP = "BEN";
-            memberFinancials.Contributions += memberFinancials.Xfer;
             report_line_2.PR2_CONT = memberFinancials.Contributions;
             report_line_2.PR2_MIL = memberFinancials.Military;
             report_line_2.PR2_FORF = memberFinancials.IncomingForfeitures;
@@ -172,11 +166,7 @@ internal sealed class ProfitShareUpdateReport
             report_line_2.PR2_EARN2 = memberFinancials.SecondaryEarnings;
             report_line_2.PR2_EARN2 = memberFinancials.Caf;
 
-            endingBalance = memberFinancials.CurrentAmount + memberFinancials.Contributions +
-                            memberFinancials.Earnings + memberFinancials.SecondaryEarnings +
-                            memberFinancials.IncomingForfeitures + memberFinancials.Military + memberFinancials.Caf -
-                            memberFinancials.Distributions;
-            report_line_2.PR2_END_BAL = endingBalance;
+            report_line_2.PR2_END_BAL = memberFinancials.EndingBalance;
         }
 
         collectTotals.WS_TOT_BEGBAL += memberFinancials.CurrentAmount;
@@ -196,7 +186,7 @@ internal sealed class ProfitShareUpdateReport
         collectTotals.WS_TOT_FORF += memberFinancials.IncomingForfeitures;
         collectTotals.WS_TOT_EARN += memberFinancials.Earnings;
         collectTotals.WS_TOT_EARN2 += memberFinancials.SecondaryEarnings;
-        collectTotals.WS_TOT_ENDBAL += endingBalance;
+        collectTotals.WS_TOT_ENDBAL += memberFinancials.EndingBalance;
         collectTotals.WS_TOT_XFER += memberFinancials.Xfer;
         collectTotals.WS_TOT_PXFER -= memberFinancials.Pxfer;
         collectTotals.WS_EARN_PTS_TOTAL += memberFinancials.EarningPoints;

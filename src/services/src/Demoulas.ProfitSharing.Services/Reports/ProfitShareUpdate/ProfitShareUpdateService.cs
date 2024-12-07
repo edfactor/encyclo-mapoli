@@ -16,15 +16,13 @@ namespace Demoulas.ProfitSharing.Services.Reports.ProfitShareUpdate;
 /// </summary>
 public class ProfitShareUpdateService
 {
-
     private readonly IProfitSharingDataContextFactory _dbContextFactory;
     private readonly ILogger<ProfitShareUpdateService> _logger;
     private readonly CalendarService _calendarService;
     private readonly TotalService _totalService;
 
-
-    // Indicates that MaxContributions were exceeded.   Adjustments need be made and this update should be rerun.
-    // TBD This needs to be evolved to return the list of employees who have exceeded the max contribution.
+    // Indicates that MaxContributions were exceeded.   Adjustments need be made and the update should be rerun.
+    // TODO This needs to be evolved to return the list of employees who have exceeded the max contribution.
     private bool _rerunNeeded;
 
     public short ProfitYear { get; set; }
@@ -37,7 +35,16 @@ public class ProfitShareUpdateService
         _calendarService = calendarService;
     }
 
-
+    /// <summary>
+    /// Apply updates to profit sharing system.
+    /// </summary>
+    /// <param name="profitYear"></param>
+    /// <param name="adjustmentAmounts"></param>
+    /// <returns>
+    /// member financials - a summary of members who have been updated
+    /// adjustments applied - the before and after values for a single adjusted badge
+    /// bool - true indicates that one or more employees over the max contribution for the year
+    /// </returns>
     public async Task<(List<MemberFinancials>, AdjustmentsApplied, bool)> ApplyAdjustments(short profitYear, AdjustmentAmounts adjustmentAmounts)
     {
         // Values collected for an "Adjustment Report" that we do not yet generate
@@ -49,6 +56,17 @@ public class ProfitShareUpdateService
         await ProcessEmployees(members, adjustmentAmounts, adjustmentsApplied);
         await ProcessBeneficiaries(members, adjustmentAmounts);
 
+        foreach (var memberFinancials in members)
+        {
+
+            memberFinancials.EndingBalance = memberFinancials.CurrentAmount + memberFinancials.Contributions +
+                                             memberFinancials.Xfer - memberFinancials.Pxfer +
+                                             memberFinancials.Earnings + memberFinancials.SecondaryEarnings +
+                                             memberFinancials.IncomingForfeitures + memberFinancials.Military +
+                                             memberFinancials.Caf -
+                                             memberFinancials.Distributions;
+        }
+
         return (members, adjustmentsApplied, _rerunNeeded);
     }
 
@@ -59,7 +77,7 @@ public class ProfitShareUpdateService
         {
             var totalVestingBalances = _totalService.TotalVestingBalance(ctx, (short)(ProfitYear - 1), fiscalDates.FiscalEndDate);
 
-            var query = ctx.PayProfits
+            return await ctx.PayProfits
                 .Where(pp => pp.ProfitYear == ProfitYear - 1)
                 .Join(
                     totalVestingBalances,
@@ -78,9 +96,8 @@ public class ProfitShareUpdateService
                         EtvaAfterVestingRules = tvb.Etva
                     }
                 )
-                .OrderBy(ef => ef.EmployeeId);
-
-            return await query.ToListAsync();
+                .OrderBy(ef => ef.EmployeeId)
+                .ToListAsync();
         });
 
         foreach (EmployeeFinancials empl in employeeFinancialsList)
@@ -128,16 +145,6 @@ public class ProfitShareUpdateService
     public MemberFinancials? ProcessEmployee(EmployeeFinancials empl, AdjustmentAmounts adjustmentAmounts,
         AdjustmentsApplied adjustmentsApplied)
     {
-        //* If an employee has an ETVA amount and no years on the plan, employee is a
-        //* beneficiary and should get earnings on the etva amt (8 record)
-        if (empl.EmployeeTypeId == 0) // 0 = not new, 1 == new in plan
-        {
-            if (empl.EtvaAfterVestingRules > 0 && empl.CurrentAmount == 0)
-            {
-                empl.EmployeeTypeId = 2; // empl is bene and gets earning on ETVA
-            }
-        }
-
         if (empl.EnrolledId <= Enrollment.Constants.NotEnrolled && empl.EmployeeTypeId <= 0 &&
             empl.CurrentAmount <= 0 && empl.YearsInPlan <= 0)
         {
@@ -147,7 +154,7 @@ public class ProfitShareUpdateService
         // Gets this years profit sharing transactions, aka Distributions - hardships
         DetailTotals detailTotals = GetDetailTotals(empl.Ssn);
 
-        // Holds newly computed values, not old values
+        // MemeberTotals holds newly computed values, not old values
         MemberTotals memberTotals = new();
 
         memberTotals.ContributionAmount =
@@ -155,13 +162,12 @@ public class ProfitShareUpdateService
         memberTotals.IncomingForfeitureAmount =
             ComputeForfeitures(empl.PointsEarned, empl.EmployeeId, adjustmentAmounts, adjustmentsApplied);
 
-        // Note that CAF gets added...
         // This "EarningsBalance" is actually the new Current Balance.  Consider changing the name
+        // Note that CAF gets added here, but subtracted in the next line.   Odd.
         memberTotals.NewCurrentAmount = detailTotals.AllocationsTotal + detailTotals.ClassActionFundTotal +
-                                       (empl.CurrentAmount - detailTotals.ForfeitsTotal -
-                                        detailTotals.PaidAllocationsTotal) -
-                                       detailTotals.DistributionsTotal;
-        // Caf gets removed.  This seems odd.
+                                        (empl.CurrentAmount - detailTotals.ForfeitsTotal -
+                                         detailTotals.PaidAllocationsTotal) -
+                                        detailTotals.DistributionsTotal;
         memberTotals.NewCurrentAmount -= detailTotals.ClassActionFundTotal;
 
         if (memberTotals.NewCurrentAmount <= 0)
@@ -177,52 +183,55 @@ public class ProfitShareUpdateService
 
         ComputeEarnings(memberTotals, null, empl, adjustmentAmounts, adjustmentsApplied, detailTotals.ClassActionFundTotal);
 
-        MemberFinancials memb = new();
-        memb.EmployeeId = empl.EmployeeId;
-        memb.Psn = empl.EmployeeId;
-        memb.Name = empl.Name;
-        memb.Ssn = empl.Ssn;
-        memb.Xfer = detailTotals.AllocationsTotal;
-        memb.Pxfer = detailTotals.PaidAllocationsTotal;
-        memb.CurrentAmount = empl.CurrentAmount;
-        memb.Distributions = detailTotals.DistributionsTotal;
-        memb.Military = detailTotals.MilitaryTotal;
-        memb.Caf = detailTotals.ClassActionFundTotal;
-        memb.EmployeeTypeId = empl.EmployeeTypeId;
-        memb.ContributionPoints = empl.PointsEarned;
-        memb.EarningPoints = memberTotals.EarnPoints;
-        memb.Contributions = memberTotals.ContributionAmount;
-        memb.IncomingForfeitures = memberTotals.IncomingForfeitureAmount;
-        memb.IncomingForfeitures -= detailTotals.ForfeitsTotal;
-        memb.Earnings = empl.Earnings;
-        memb.Earnings += empl.EarningsOnEtva;
-        memb.SecondaryEarnings = empl.SecondaryEarnings;
-        memb.SecondaryEarnings += empl.SecondaryEtvaEarnings;
+        MemberFinancials memberFinancials = new();
+        memberFinancials.EmployeeId = empl.EmployeeId;
+        memberFinancials.Psn = empl.EmployeeId;
+        memberFinancials.Name = empl.Name;
+        memberFinancials.Ssn = empl.Ssn;
+        memberFinancials.Xfer = detailTotals.AllocationsTotal;
+        memberFinancials.Pxfer = detailTotals.PaidAllocationsTotal;
+        memberFinancials.CurrentAmount = empl.CurrentAmount;
+        memberFinancials.Distributions = detailTotals.DistributionsTotal;
+        memberFinancials.Military = detailTotals.MilitaryTotal;
+        memberFinancials.Caf = detailTotals.ClassActionFundTotal;
+        memberFinancials.EmployeeTypeId = empl.EmployeeTypeId;
+        memberFinancials.ContributionPoints = empl.PointsEarned;
+        memberFinancials.EarningPoints = memberTotals.EarnPoints;
+        memberFinancials.Contributions = memberTotals.ContributionAmount;
+        memberFinancials.IncomingForfeitures = memberTotals.IncomingForfeitureAmount;
+        memberFinancials.IncomingForfeitures -= detailTotals.ForfeitsTotal;
+        memberFinancials.Earnings = empl.Earnings;
+        memberFinancials.Earnings += empl.EarningsOnEtva;
+        memberFinancials.SecondaryEarnings = empl.SecondaryEarnings;
+        memberFinancials.SecondaryEarnings += empl.SecondaryEtvaEarnings;
 
+        //   --- Max Contribution Concerns --- 
         decimal memberTotalContribution = memberTotals.ContributionAmount + detailTotals.MilitaryTotal +
                                           memberTotals.IncomingForfeitureAmount;
+
         if (memberTotalContribution > adjustmentAmounts.MaxAllowedContributions)
         {
             decimal overContribution = memberTotalContribution - adjustmentAmounts.MaxAllowedContributions;
 
             if (overContribution < memberTotals.IncomingForfeitureAmount)
             {
-                memb.IncomingForfeitures -= overContribution;
+                memberFinancials.IncomingForfeitures -= overContribution;
             }
             else
             {
                 _logger.LogError($"FORFEITURES NOT ENOUGH FOR AMOUNT OVER MAX FOR EMPLOYEE BADGE #{empl.EmployeeId}");
-                memb.IncomingForfeitures = 0;
+                memberFinancials.IncomingForfeitures = 0;
             }
 
-            memb.MaxOver = overContribution;
-            memb.MaxPoints = memb.ContributionPoints;
+            memberFinancials.MaxOver = overContribution;
+            memberFinancials.MaxPoints = memberFinancials.ContributionPoints;
             _rerunNeeded = true;
         }
+        // --- End Max Contribution
 
         empl.Contributions = memberTotals.ContributionAmount;
         empl.IncomeForfeiture = memberTotals.IncomingForfeitureAmount;
-        return memb;
+        return memberFinancials;
     }
 
 
@@ -230,12 +239,12 @@ public class ProfitShareUpdateService
     {
         DetailTotals detailTotals = GetDetailTotals(bene.Ssn);
 
-        // Yea, this adding and removing ClassActionFundTotal is strange
         MemberTotals memberTotals = new();
+        // Yea, this adding and removing ClassActionFundTotal is strange
         memberTotals.NewCurrentAmount = detailTotals.AllocationsTotal + detailTotals.ClassActionFundTotal +
-                                       (bene.CurrentAmount - detailTotals.ForfeitsTotal -
-                                        detailTotals.PaidAllocationsTotal) -
-                                       detailTotals.DistributionsTotal;
+                                        (bene.CurrentAmount - detailTotals.ForfeitsTotal -
+                                         detailTotals.PaidAllocationsTotal) -
+                                        detailTotals.DistributionsTotal;
         memberTotals.NewCurrentAmount -= detailTotals.ClassActionFundTotal;
 
         if (memberTotals.NewCurrentAmount > 0)
@@ -301,8 +310,6 @@ public class ProfitShareUpdateService
         if (memberTotals.EarnPoints <= 0 && empl != null)
         {
             memberTotals.EarnPoints = 0;
-            memberTotals.EarningsAmount = 0;
-            memberTotals.SecondaryEarningsAmount = 0;
             empl.Earnings = 0;
             empl.SecondaryEarnings = 0;
         }
@@ -356,7 +363,6 @@ public class ProfitShareUpdateService
             return;
         }
 
-
         if (empl != null && memberTotals.PointsDollars > 0)
         {
             // Computes the ETVA amount
@@ -397,6 +403,9 @@ public class ProfitShareUpdateService
         }
     }
 
+    // Fetches PROFIT_DETAIL Totals for an SSN.
+    // processes only the current profit year.  Ignores profit code = 0.
+    // Special handling for CAF and Military. 
     public DetailTotals GetDetailTotals(int ssn)
     {
         decimal distributionsTotal = 0;
