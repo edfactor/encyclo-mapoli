@@ -20,7 +20,7 @@ public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitShar
     public ProfitSharingReadOnlyDbContext(DbContextOptions<ProfitSharingReadOnlyDbContext> options)
         : base(options)
     {
-
+        ChangeTracker.LazyLoadingEnabled = false;
     }
 
     public virtual DbSet<Demographic> Demographics { get; set; }
