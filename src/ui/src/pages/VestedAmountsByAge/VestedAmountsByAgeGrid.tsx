@@ -4,11 +4,11 @@ import { useSelector } from "react-redux";
 import { useLazyGetBalanceByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams } from "smart-ui-library";
-import { GetBalanceByAgeColumns } from "./BalanceByAgeGridColumns";
+import { GetBalanceByAgeColumns } from "./VestedAmountsByAgeGridColumns";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { FrozenReportsByAgeRequestType } from "../../reduxstore/types";
 
-const BalanceByAgeGrid = () => {
+const VestedAmountsByAgeGrid = () => {
   const [_discard0, setSortParams] = useState<ISortParams>({
     sortBy: "Badge",
     isSortDescending: false
@@ -154,4 +154,4 @@ const BalanceByAgeGrid = () => {
   );
 };
 
-export default BalanceByAgeGrid;
+export default VestedAmountsByAgeGrid;

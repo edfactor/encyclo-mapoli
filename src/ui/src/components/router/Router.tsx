@@ -24,6 +24,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { setImpersonating } from "reduxstore/slices/securitySlice";
 import { ImpersonationRoles } from "reduxstore/types";
+import VestedAmountsByAge from "../../pages/VestedAmountsByAge/VestedAmountsByAge";
 
 const Router = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -124,6 +125,9 @@ const Router = () => {
         <Route
           path="balance-by-age"
           element={<BalanceByAge />}></Route>
+        <Route
+          path="vested-amounts-by-age"
+          element={<VestedAmountsByAge />}></Route>
       </RouteSecurity>
     </BrowserRouter>
   );

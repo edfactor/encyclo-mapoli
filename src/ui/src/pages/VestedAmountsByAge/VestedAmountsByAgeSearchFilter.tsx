@@ -23,7 +23,7 @@ const schema = yup.object().shape({
     .required("Year is required")
 });
 
-const BalanceByAgeSearchFilter = () => {
+const VestedAmountsByAgeSearchFilter = () => {
   const [isFetching, setIsFetching] = useState(false);
 
   const [triggerSearch] = useLazyGetBalanceByAgeQuery();
@@ -123,4 +123,4 @@ const BalanceByAgeSearchFilter = () => {
   );
 };
 
-export default BalanceByAgeSearchFilter;
+export default VestedAmountsByAgeSearchFilter;

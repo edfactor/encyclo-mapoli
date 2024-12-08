@@ -24,7 +24,7 @@ public class VestingByAgeEndpoint : EndpointWithCsvTotalsBase<ProfitYearRequest,
 
     public override void Configure()
     {
-        Get("frozen/vesting-by-age");
+        Get("frozen/vested-amounts-by-age");
         Summary(s =>
         {
             s.Summary = ReportFileName;

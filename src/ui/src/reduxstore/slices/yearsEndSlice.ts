@@ -19,7 +19,7 @@ import {
   PagedReportResponse,
   ProfitSharingDistributionsByAge,
   EmployeeDetails,
-  MasterInquiryResponseType
+  MasterInquiryResponseType, VestedAmountsByAge
 } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
 
@@ -49,6 +49,7 @@ export interface YearsEndState {
   balanceByAgeTotal: BalanceByAge | null;
   balanceByAgeFullTime: BalanceByAge | null;
   balanceByAgePartTime: BalanceByAge | null;
+  vestedAmountsByAge: VestedAmountsByAge | null;
 }
 
 const initialState: YearsEndState = {
@@ -76,7 +77,8 @@ const initialState: YearsEndState = {
   forfeituresByAgePartTime: null,
   balanceByAgeTotal: null,
   balanceByAgeFullTime: null,
-  balanceByAgePartTime: null
+  balanceByAgePartTime: null,
+  vestedAmountsByAge : null
 };
 
 export const yearsEndSlice = createSlice({
@@ -193,6 +195,9 @@ export const yearsEndSlice = createSlice({
       if (action.payload.reportType == FrozenReportsByAgeRequestType.PartTime) {
         state.balanceByAgePartTime = action.payload;
       }
+    },
+    setVestingAmountByAge: (state, action: PayloadAction<VestedAmountsByAge>) => {
+        state.vestedAmountsByAge = action.payload;
     }
   }
 });
@@ -214,6 +219,7 @@ export const {
   setDistributionsByAge,
   setContributionsByAge,
   setForfeituresByAge,
-  setBalanceByAge
+  setBalanceByAge,
+  setVestingAmountByAge
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;
