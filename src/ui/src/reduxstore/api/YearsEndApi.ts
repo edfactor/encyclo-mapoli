@@ -476,7 +476,7 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getVestingAmountByAgeInquiry: builder.query<ProfitYearRequest, VestedAmountsByAge>({
+    getVestingAmountByAgeInquiry: builder.query<VestedAmountsByAge, ProfitYearRequest>({
       query: (params) => ({
         url: "yearend/frozen/vested-amounts-by-age",
         method: "GET",
@@ -513,5 +513,5 @@ export const {
   useLazyGetForfeituresByAgeQuery,
   useLazyGetBalanceByAgeQuery,
   useLazyGetProfitMasterInquiryQuery,
-  getVestingAmountByAgeInquiry
+  useLazyVestingAmountByAgeInquiry
 } = YearsEndApi;

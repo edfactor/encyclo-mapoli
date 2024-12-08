@@ -1,7 +1,7 @@
 import { Typography } from "@mui/material";
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { useLazyGetBalanceByAgeQuery } from "reduxstore/api/YearsEndApi";
+import { useLazyVestingAmountByAgeInquiry } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams } from "smart-ui-library";
 import { GetBalanceByAgeColumns } from "./VestedAmountsByAgeGridColumns";
@@ -17,7 +17,7 @@ const VestedAmountsByAgeGrid = () => {
   const { balanceByAgeTotal, balanceByAgeFullTime, balanceByAgePartTime } = useSelector(
     (state: RootState) => state.yearsEnd
   );
-  const [_discard1, { isLoading }] = useLazyGetBalanceByAgeQuery();
+  const [_discard1, { isLoading }] = useLazyVestingAmountByAgeInquiry();
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
