@@ -22,35 +22,59 @@ const VestedAmountsByAgeGrid = () => {
   const columnDefsTotal = GetVestedAmountsByAgeColumns();
 
   const createSummaryRows = (data: VestedAmountsByAge) => [
-    {
-      age: "TOTAL",
-      employeeCount: data?.totalFullTimeCount || 0,
-      currentBalance: data?.totalFullTime100PercentAmount || 0,
-      vestedBalance: data?.totalFullTimePartialAmount || 0,
-    },
+  {
+    reportName: data?.reportName || "Summary",
+    totalFullTime100PercentAmount: data?.totalFullTime100PercentAmount || 0,
+    totalFullTimePartialAmount: data?.totalFullTimePartialAmount || 0,
+    totalFullTimeNotVestedAmount: data?.totalFullTimeNotVestedAmount || 0,
+    totalPartTime100PercentAmount: data?.totalPartTime100PercentAmount || 0,
+    totalPartTimePartialAmount: data?.totalPartTimePartialAmount || 0,
+    totalPartTimeNotVestedAmount: data?.totalPartTimeNotVestedAmount || 0,
+    totalBeneficiaryCount: data?.totalBeneficiaryCount || 0,
+    totalBeneficiaryAmount: data?.totalBeneficiaryAmount || 0,
+    totalFullTimeCount: data?.totalFullTimeCount || 0,
+    totalNotVestedCount: data?.totalNotVestedCount || 0,
+    totalPartialVestedCount: data?.totalPartialVestedCount || 0,
+    reportDate: data?.reportDate || "N/A",
+  },
   ];
 
   const renderDSMGrid = (data: VestedAmountsByAge, columns: ReturnType<typeof GetVestedAmountsByAgeColumns>, key: string) => {
     const summaryRows = createSummaryRows(data);
 
-    return (
-      <DSMGrid
-        preferenceKey={key}
-        isLoading={isLoading}
-        handleSortChanged={sortEventHandler}
-        providedOptions={{
-          rowData: [...summaryRows, ...(data.response?.results || [])],
-          pinnedTopRowData: summaryRows,
-          columnDefs: [
-            {
-              headerName: "columns.headerName",
-              children: columns,
-            },
-          ],
-        }}
-      />
-    );
-  };
+ return (
+    <DSMGrid
+      preferenceKey={key}
+      isLoading={isLoading}
+      handleSortChanged={sortEventHandler}
+      providedOptions={{
+        rowData: [...summaryRows, ...(data.response?.results || [])],
+        pinnedTopRowData: summaryRows,
+        columnDefs: [
+          ...columns,
+          {
+            headerName: "Summary",
+            children: [
+              { headerName: "Report Name", field: "reportName" },
+              { headerName: "Report Date", field: "reportDate" },
+              { headerName: "FT 100% Vested Amount", field: "totalFullTime100PercentAmount" },
+              { headerName: "FT Partial Vested Amount", field: "totalFullTimePartialAmount" },
+              { headerName: "FT Not Vested Amount", field: "totalFullTimeNotVestedAmount" },
+              { headerName: "PT 100% Vested Amount", field: "totalPartTime100PercentAmount" },
+              { headerName: "PT Partial Vested Amount", field: "totalPartTimePartialAmount" },
+              { headerName: "PT Not Vested Amount", field: "totalPartTimeNotVestedAmount" },
+              { headerName: "Beneficiary Count", field: "totalBeneficiaryCount" },
+              { headerName: "Beneficiary Amount", field: "totalBeneficiaryAmount" },
+              { headerName: "FT Total Count", field: "totalFullTimeCount" },
+              { headerName: "Not Vested Count", field: "totalNotVestedCount" },
+              { headerName: "Partial Vested Count", field: "totalPartialVestedCount" },
+            ],
+          },
+        ],
+      }}
+    />
+  );
+};
 
   return (
     <>
