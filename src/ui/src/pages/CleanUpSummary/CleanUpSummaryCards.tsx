@@ -81,7 +81,7 @@ const CleanUpSummaryCards: React.FC<CleanUpSummaryCardsProps> = ({ setSelectedTa
               title="Negatibe ETVA for SSNs on Payprofit"
               valid={negativeEtvaForSSNsOnPayprofit.response.total == 0}
               data={{
-                "Count": negativeEtvaForSSNsOnPayprofit.response.total.toString()
+                Count: negativeEtvaForSSNsOnPayprofit.response.total.toString()
               }}
             />
           )}
@@ -97,7 +97,7 @@ const CleanUpSummaryCards: React.FC<CleanUpSummaryCardsProps> = ({ setSelectedTa
               handleClick={() => setSelectedTab(2)}
               valid={duplicateSSNsData.response.total == 0}
               data={{
-                "Count": duplicateSSNsData.response.total.toString()
+                Count: duplicateSSNsData.response.total.toString()
               }}
             />
           )}
@@ -113,7 +113,7 @@ const CleanUpSummaryCards: React.FC<CleanUpSummaryCardsProps> = ({ setSelectedTa
               handleClick={() => setSelectedTab(3)}
               valid={demographicBadges.response.total == 0}
               data={{
-                "Count": demographicBadges.response.total.toString()
+                Count: demographicBadges.response.total.toString()
               }}
             />
           )}
@@ -129,7 +129,7 @@ const CleanUpSummaryCards: React.FC<CleanUpSummaryCardsProps> = ({ setSelectedTa
               handleClick={() => setSelectedTab(4)}
               valid={duplicateNamesAndBirthday.response.total == 0}
               data={{
-                "Count": duplicateNamesAndBirthday.response.total.toString()
+                Count: duplicateNamesAndBirthday.response.total.toString()
               }}
             />
           )}

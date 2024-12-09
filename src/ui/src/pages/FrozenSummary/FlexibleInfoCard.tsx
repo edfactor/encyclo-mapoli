@@ -40,8 +40,8 @@ export const FlexibleInfoCard: FC<FlexibleInfoCardProps> = ({
     <Card
       sx={{
         padding: "12px",
-        background: valid ? "var(--grey-50, #FAFAFA)" : '#DB153215',
-        borderRadius: "2px",
+        background: valid ? "var(--grey-50, #FAFAFA)" : "#DB153215",
+        borderRadius: "2px"
       }}
       variant="outlined">
       <Box

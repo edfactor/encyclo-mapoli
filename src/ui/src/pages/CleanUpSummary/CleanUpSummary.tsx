@@ -5,25 +5,30 @@ import { Page } from "smart-ui-library";
 import CleanUpSummaryCards from "./CleanUpSummaryCards";
 import CleanUpSummaryGrids from "./CleanUpSummaryGrids";
 
-
 const CleanUpSummary = () => {
-    const [selectedTab, setSelectedTab] = useState(0);
+  const [selectedTab, setSelectedTab] = useState(0);
 
-    const tabs = ["Summary", "Negative ETVA", "Payroll Duplicate SSNs on Demographics", "Demographic Badges Not On Payprofit",  "Duplicate Names and Birthdays"]
+  const tabs = [
+    "Summary",
+    "Negative ETVA",
+    "Payroll Duplicate SSNs on Demographics",
+    "Demographic Badges Not On Payprofit",
+    "Duplicate Names and Birthdays"
+  ];
 
-    const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-        setSelectedTab(newValue);
-    };
-    
-    return <Page
-    label="Clean Up Process Summary">
-    <Grid2
-      container
-      width="100%"
-      rowSpacing="24px">
-      <Grid2 width="100%">
-        <Divider />
-      </Grid2>
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setSelectedTab(newValue);
+  };
+
+  return (
+    <Page label="Clean Up Process Summary">
+      <Grid2
+        container
+        width="100%"
+        rowSpacing="24px">
+        <Grid2 width="100%">
+          <Divider />
+        </Grid2>
         <Grid2
           container
           width="100%"
@@ -49,8 +54,9 @@ const CleanUpSummary = () => {
             )}
           </Grid2>
         </Grid2>
-    </Grid2>
-  </Page>
+      </Grid2>
+    </Page>
+  );
 };
 
 export default CleanUpSummary;

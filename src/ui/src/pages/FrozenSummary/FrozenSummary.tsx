@@ -5,25 +5,24 @@ import { Page } from "smart-ui-library";
 import CleanUpSummaryCards from "./FrozenSummaryCards";
 import CleanUpSummaryGrids from "./FrozenSummaryGrids";
 
-
 const FrozenSummary = () => {
-    const [selectedTab, setSelectedTab] = useState(0);
+  const [selectedTab, setSelectedTab] = useState(0);
 
-    const tabs = ["Summary", "Distributions", "Contributions", "Forfeitures",  "Balance"]
+  const tabs = ["Summary", "Distributions", "Contributions", "Forfeitures", "Balance"];
 
-    const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-        setSelectedTab(newValue);
-    };
-    
-    return <Page
-    label="Frozen Process Summary">
-    <Grid2
-      container
-      width="100%"
-      rowSpacing="24px">
-      <Grid2 width="100%">
-        <Divider />
-      </Grid2>
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setSelectedTab(newValue);
+  };
+
+  return (
+    <Page label="Frozen Process Summary">
+      <Grid2
+        container
+        width="100%"
+        rowSpacing="24px">
+        <Grid2 width="100%">
+          <Divider />
+        </Grid2>
         <Grid2
           container
           width="100%"
@@ -49,8 +48,9 @@ const FrozenSummary = () => {
             )}
           </Grid2>
         </Grid2>
-    </Grid2>
-  </Page>
+      </Grid2>
+    </Page>
+  );
 };
 
 export default FrozenSummary;

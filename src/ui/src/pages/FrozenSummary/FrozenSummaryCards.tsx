@@ -198,23 +198,37 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
 
   const balanceTotalChecksOut = useMemo(() => {
     if (!balanceByAgeTotal || !balanceByAgeFullTime || !balanceByAgePartTime) return false;
-  
+
     const totalVerticalChecksOut =
-      (balanceByAgeTotal.totalBeneficiaries || 0) + (balanceByAgeTotal.totalEmployee || 0) === balanceByAgeTotal.totalMembers &&
-      (balanceByAgeTotal.totalBeneficiariesAmount || 0) + (balanceByAgeTotal.totalEmployeeAmount || 0) === balanceByAgeTotal.balanceTotalAmount &&
-      (balanceByAgeTotal.totalBeneficiariesVestedAmount || 0) + (balanceByAgeTotal.totalEmployeesVestedAmount || 0) === balanceByAgeTotal.vestedTotalAmount;
-  
+      (balanceByAgeTotal.totalBeneficiaries || 0) + (balanceByAgeTotal.totalEmployee || 0) ===
+        balanceByAgeTotal.totalMembers &&
+      (balanceByAgeTotal.totalBeneficiariesAmount || 0) + (balanceByAgeTotal.totalEmployeeAmount || 0) ===
+        balanceByAgeTotal.balanceTotalAmount &&
+      (balanceByAgeTotal.totalBeneficiariesVestedAmount || 0) + (balanceByAgeTotal.totalEmployeesVestedAmount || 0) ===
+        balanceByAgeTotal.vestedTotalAmount;
+
     const horizontalChecksOut =
-      (balanceByAgeFullTime.totalBeneficiaries || 0) + (balanceByAgePartTime.totalBeneficiaries || 0) === balanceByAgeTotal.totalBeneficiaries &&
-      (balanceByAgeFullTime.totalBeneficiariesAmount || 0) + (balanceByAgePartTime.totalBeneficiariesAmount || 0) === balanceByAgeTotal.totalBeneficiariesAmount &&
-      (balanceByAgeFullTime.totalBeneficiariesVestedAmount || 0) + (balanceByAgePartTime.totalBeneficiariesVestedAmount || 0) === balanceByAgeTotal.totalBeneficiariesVestedAmount &&
-      (balanceByAgeFullTime.totalEmployee || 0) + (balanceByAgePartTime.totalEmployee || 0) === balanceByAgeTotal.totalEmployee &&
-      (balanceByAgeFullTime.totalEmployeeAmount || 0) + (balanceByAgePartTime.totalEmployeeAmount || 0) === balanceByAgeTotal.totalEmployeeAmount &&
-      (balanceByAgeFullTime.totalEmployeesVestedAmount || 0) + (balanceByAgePartTime.totalEmployeesVestedAmount || 0) === balanceByAgeTotal.totalEmployeesVestedAmount &&
-      (balanceByAgeFullTime.totalMembers || 0) + (balanceByAgePartTime.totalMembers || 0) === balanceByAgeTotal.totalMembers &&
-      (balanceByAgeFullTime.balanceTotalAmount || 0) + (balanceByAgePartTime.balanceTotalAmount || 0) === balanceByAgeTotal.balanceTotalAmount &&
-      (balanceByAgeFullTime.vestedTotalAmount || 0) + (balanceByAgePartTime.vestedTotalAmount || 0) === balanceByAgeTotal.vestedTotalAmount;
-  
+      (balanceByAgeFullTime.totalBeneficiaries || 0) + (balanceByAgePartTime.totalBeneficiaries || 0) ===
+        balanceByAgeTotal.totalBeneficiaries &&
+      (balanceByAgeFullTime.totalBeneficiariesAmount || 0) + (balanceByAgePartTime.totalBeneficiariesAmount || 0) ===
+        balanceByAgeTotal.totalBeneficiariesAmount &&
+      (balanceByAgeFullTime.totalBeneficiariesVestedAmount || 0) +
+        (balanceByAgePartTime.totalBeneficiariesVestedAmount || 0) ===
+        balanceByAgeTotal.totalBeneficiariesVestedAmount &&
+      (balanceByAgeFullTime.totalEmployee || 0) + (balanceByAgePartTime.totalEmployee || 0) ===
+        balanceByAgeTotal.totalEmployee &&
+      (balanceByAgeFullTime.totalEmployeeAmount || 0) + (balanceByAgePartTime.totalEmployeeAmount || 0) ===
+        balanceByAgeTotal.totalEmployeeAmount &&
+      (balanceByAgeFullTime.totalEmployeesVestedAmount || 0) +
+        (balanceByAgePartTime.totalEmployeesVestedAmount || 0) ===
+        balanceByAgeTotal.totalEmployeesVestedAmount &&
+      (balanceByAgeFullTime.totalMembers || 0) + (balanceByAgePartTime.totalMembers || 0) ===
+        balanceByAgeTotal.totalMembers &&
+      (balanceByAgeFullTime.balanceTotalAmount || 0) + (balanceByAgePartTime.balanceTotalAmount || 0) ===
+        balanceByAgeTotal.balanceTotalAmount &&
+      (balanceByAgeFullTime.vestedTotalAmount || 0) + (balanceByAgePartTime.vestedTotalAmount || 0) ===
+        balanceByAgeTotal.vestedTotalAmount;
+
     return totalVerticalChecksOut && horizontalChecksOut;
   }, [balanceByAgeTotal, balanceByAgeFullTime, balanceByAgePartTime]);
 

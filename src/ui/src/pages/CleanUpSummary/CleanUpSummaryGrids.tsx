@@ -16,15 +16,15 @@ interface CleanUpSummaryGridProps {
 const CleanUpSummaryGrids: React.FC<CleanUpSummaryGridProps> = ({ tabIndex }) => {
   switch (tabIndex) {
     case tabs.indexOf(negativeETVA):
-    return <NegativeEtvaTab />
+      return <NegativeEtvaTab />;
     case tabs.indexOf(dupeSsns):
-        return <DupeSsns />
+      return <DupeSsns />;
     case tabs.indexOf(demographicBadges):
       return <DemoBadges />;
     case tabs.indexOf(duplicateNames):
-        return <DupeNames />
+      return <DupeNames />;
     default:
-        return <h1>Grid</h1>
+      return <h1>Grid</h1>;
   }
 };
 

@@ -34,7 +34,7 @@ export const InfoCard: FC<InfoCardProps> = ({
     <Card
       sx={{
         padding: "12px",
-        background: valid ? "var(--grey-50, #FAFAFA)" : '#DB153215',
+        background: valid ? "var(--grey-50, #FAFAFA)" : "#DB153215",
         borderRadius: "2px",
         height: "220px"
       }}
