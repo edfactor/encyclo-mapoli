@@ -6,11 +6,9 @@ import { useLazyGetVestingAmountByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { FrozenReportsByAgeRequestType } from "reduxstore/types";
 
-interface BalanceByAgeSearch {
+interface VestingAmountByAgeSearch {
   profitYear: number;
-  reportType?: FrozenReportsByAgeRequestType;
 }
 
 const schema = yup.object().shape({
@@ -33,11 +31,10 @@ const VestedAmountsByAgeSearchFilter = () => {
     handleSubmit,
     formState: { errors, isValid },
     reset
-  } = useForm<BalanceByAgeSearch>({
+  } = useForm<VestingAmountByAgeSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: undefined,
-      reportType: undefined
+      profitYear: undefined
     }
   });
 
@@ -46,25 +43,7 @@ const VestedAmountsByAgeSearchFilter = () => {
       setIsFetching(true);
       triggerSearch(
         {
-          profitYear: data.profitYear,
-          reportType: FrozenReportsByAgeRequestType.Total,
-          pagination: { skip: 0, take: 255 }
-        },
-        false
-      );
-      triggerSearch(
-        {
-          profitYear: data.profitYear,
-          reportType: FrozenReportsByAgeRequestType.FullTime,
-          pagination: { skip: 0, take: 255 }
-        },
-        false
-      );
-      triggerSearch(
-        {
-          profitYear: data.profitYear,
-          reportType: FrozenReportsByAgeRequestType.PartTime,
-          pagination: { skip: 0, take: 255 }
+          profitYear: data.profitYear
         },
         false
       );
@@ -75,7 +54,6 @@ const VestedAmountsByAgeSearchFilter = () => {
   const handleReset = () => {
     reset({
       profitYear: undefined,
-      reportType: undefined
     });
   };
 

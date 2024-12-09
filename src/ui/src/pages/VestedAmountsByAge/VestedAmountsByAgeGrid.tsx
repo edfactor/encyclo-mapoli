@@ -14,7 +14,7 @@ const VestedAmountsByAgeGrid = () => {
     isSortDescending: false,
   });
 
-  const { balanceByAgeTotal } = useSelector((state: RootState) => state.yearsEnd);
+  const { vestedAmountsByAge } = useSelector((state: RootState) => state.yearsEnd);
   const [_trigger, { isLoading }] = useLazyGetVestingAmountByAgeQuery();
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
@@ -43,7 +43,7 @@ const VestedAmountsByAgeGrid = () => {
           pinnedTopRowData: summaryRows,
           columnDefs: [
             {
-              headerName: columns.headerName,
+              headerName: "columns.headerName",
               children: columns.children,
             },
           ],
@@ -54,16 +54,16 @@ const VestedAmountsByAgeGrid = () => {
 
   return (
     <>
-      {balanceByAgeTotal?.response && (
+      {vestedAmountsByAge?.response && (
         <>
           <div style={{ padding: "0 24px 0 24px" }}>
             <Typography variant="h2" sx={{ color: "#0258A5" }}>
-              {balanceByAgeTotal.reportName}
+              {vestedAmountsByAge.reportName}
             </Typography>
           </div>
           <Grid2 container spacing={2}>
             <Grid2 xs={12}>
-              {renderDSMGrid(balanceByAgeTotal, columnDefsTotal, "Vesting Amounts by Age")}
+              {renderDSMGrid(vestedAmountsByAge, columnDefsTotal, "Vesting Amounts by Age")}
             </Grid2>
           </Grid2>
         </>
