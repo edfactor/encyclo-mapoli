@@ -76,14 +76,14 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
     ///     adjustments applied - the before and after values for a single adjusted badge
     ///     bool - true indicates that one or more employees over the max contribution for the year
     /// </returns>
-    public async Task<(List<MemberFinancials>, AdjustmentsApplied, bool)> ApplyAdjustments(
+    public async Task<(List<MemberFinancials>, AdjustmentReportData, bool)> ApplyAdjustments(
         UpdateAdjustmentAmountsRequest updateAdjustmentAmountsRequest)
     {
         // Values collected for an "Adjustment Report" that we do not yet generate
-        AdjustmentsApplied adjustmentsApplied = new();
+        AdjustmentReportData adjustmentReportData = new();
 
         List<MemberFinancials> members = new();
-        await ProcessEmployees(members, updateAdjustmentAmountsRequest, adjustmentsApplied);
+        await ProcessEmployees(members, updateAdjustmentAmountsRequest, adjustmentReportData);
         await ProcessBeneficiaries(members, updateAdjustmentAmountsRequest);
 
         foreach (MemberFinancials memberFinancials in members)
@@ -96,11 +96,11 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
                                              memberFinancials.Distributions;
         }
 
-        return (members, adjustmentsApplied, _rerunNeeded);
+        return (members, adjustmentReportData, _rerunNeeded);
     }
 
     public async Task ProcessEmployees(List<MemberFinancials> members, UpdateAdjustmentAmountsRequest updateAdjustmentAmountsRequest,
-        AdjustmentsApplied adjustmentsApplied)
+        AdjustmentReportData adjustmentReportData)
     {
         var fiscalDates = await _calendarService.GetYearStartAndEndAccountingDatesAsync(updateAdjustmentAmountsRequest.ProfitYear, CancellationToken.None);
         List<EmployeeFinancials> employeeFinancialsList = await _dbContextFactory.UseReadOnlyContext(async ctx =>
@@ -140,7 +140,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
                 continue;
             }
 
-            MemberFinancials memb = await ProcessEmployee(empl, updateAdjustmentAmountsRequest, adjustmentsApplied);
+            MemberFinancials memb = await ProcessEmployee(empl, updateAdjustmentAmountsRequest, adjustmentReportData);
             members.Add(memb);
         }
     }
@@ -175,7 +175,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
     }
 
     public async Task<MemberFinancials> ProcessEmployee(EmployeeFinancials empl, UpdateAdjustmentAmountsRequest updateAdjustmentAmountsRequest,
-        AdjustmentsApplied adjustmentsApplied)
+        AdjustmentReportData adjustmentReportData)
     {
 
         // Gets this years profit sharing transactions, aka Distributions - hardships
@@ -185,9 +185,9 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
         MemberTotals memberTotals = new();
 
         memberTotals.ContributionAmount =
-            ComputeContribution(empl.PointsEarned, empl.EmployeeId, updateAdjustmentAmountsRequest, adjustmentsApplied);
+            ComputeContribution(empl.PointsEarned, empl.EmployeeId, updateAdjustmentAmountsRequest, adjustmentReportData);
         memberTotals.IncomingForfeitureAmount =
-            ComputeForfeitures(empl.PointsEarned, empl.EmployeeId, updateAdjustmentAmountsRequest, adjustmentsApplied);
+            ComputeForfeitures(empl.PointsEarned, empl.EmployeeId, updateAdjustmentAmountsRequest, adjustmentReportData);
 
         // This "EarningsBalance" is actually the new Current Balance.  Consider changing the name
         // Note that CAF gets added here, but subtracted in the next line.   Odd.
@@ -208,7 +208,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
             memberTotals.EarnPoints = (long)Math.Round(memberTotals.PointsDollars / 100, MidpointRounding.AwayFromZero);
         }
 
-        ComputeEarnings(memberTotals, null, empl, updateAdjustmentAmountsRequest, adjustmentsApplied,
+        ComputeEarnings(memberTotals, null, empl, updateAdjustmentAmountsRequest, adjustmentReportData,
             detailTotals.ClassActionFundTotal);
 
         MemberFinancials memberFinancials = new();
@@ -301,16 +301,16 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
 
 
     private static decimal ComputeContribution(long PointsEarned, long badge, UpdateAdjustmentAmountsRequest updateAdjustmentAmountsRequest,
-        AdjustmentsApplied adjustmentsApplied)
+        AdjustmentReportData adjustmentReportData)
     {
         decimal contributionAmount = Math.Round(updateAdjustmentAmountsRequest.ContributionPercent * PointsEarned, 2,
             MidpointRounding.AwayFromZero);
 
         if (updateAdjustmentAmountsRequest.BadgeToAdjust > 0 && updateAdjustmentAmountsRequest.BadgeToAdjust == badge)
         {
-            adjustmentsApplied.ContributionAmountUnadjusted = contributionAmount;
+            adjustmentReportData.ContributionAmountUnadjusted = contributionAmount;
             contributionAmount += updateAdjustmentAmountsRequest.AdjustContributionAmount;
-            adjustmentsApplied.ContributionAmountAdjusted = contributionAmount;
+            adjustmentReportData.ContributionAmountAdjusted = contributionAmount;
         }
 
         return contributionAmount;
@@ -318,15 +318,15 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
 
 
     private static decimal ComputeForfeitures(long PointsEarned, long badge, UpdateAdjustmentAmountsRequest updateAdjustmentAmountsRequest,
-        AdjustmentsApplied adjustmentsApplied)
+        AdjustmentReportData adjustmentReportData)
     {
         decimal incomingForfeitureAmount = Math.Round(updateAdjustmentAmountsRequest.IncomingForfeitPercent * PointsEarned, 2,
             MidpointRounding.AwayFromZero);
         if (updateAdjustmentAmountsRequest.BadgeToAdjust > 0 && updateAdjustmentAmountsRequest.BadgeToAdjust == badge)
         {
-            adjustmentsApplied.IncomingForfeitureAmountUnadjusted = incomingForfeitureAmount;
+            adjustmentReportData.IncomingForfeitureAmountUnadjusted = incomingForfeitureAmount;
             incomingForfeitureAmount += updateAdjustmentAmountsRequest.AdjustIncomingForfeitAmount;
-            adjustmentsApplied.IncomingForfeitureAmountAdjusted = incomingForfeitureAmount;
+            adjustmentReportData.IncomingForfeitureAmountAdjusted = incomingForfeitureAmount;
         }
 
         return incomingForfeitureAmount;
@@ -334,7 +334,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
 
     // The fact that this method takes either a bene or an empl and has all this conditional logic is not great.
     public static void ComputeEarnings(MemberTotals memberTotals, BeneficiaryFinancials? bene, EmployeeFinancials? empl,
-        UpdateAdjustmentAmountsRequest updateAdjustmentAmountsRequest, AdjustmentsApplied? adjustmentsApplied, decimal ClassActionFundTotal)
+        UpdateAdjustmentAmountsRequest updateAdjustmentAmountsRequest, AdjustmentReportData? adjustmentsApplied, decimal ClassActionFundTotal)
     {
         if (memberTotals.EarnPoints <= 0 && empl != null)
         {

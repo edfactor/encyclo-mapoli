@@ -9,7 +9,7 @@ namespace Demoulas.ProfitSharing.Services.ProfitShareUpdate;
 /// <summary>
 ///     Used to collect data about adjustments made to employees.  This data is later used in the Adjustment Report.
 /// </summary>
-public class AdjustmentsApplied
+public class AdjustmentReportData
 {
     public decimal IncomingForfeitureAmountUnadjusted { get; set; }
     public decimal IncomingForfeitureAmountAdjusted { get; set; }
