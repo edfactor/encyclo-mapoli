@@ -103,6 +103,4 @@ public class MasterServiceTests : ApiTestBase<Program>
         var response = await ApiClient.GETAsync<MasterInquiryEndpoint, MasterInquiryRequest, PaginatedResponseDto<MasterInquiryResponseDto>>(request);
         response.Should().NotBeNull();
     }
-
-
 }

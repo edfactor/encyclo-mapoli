@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Services;
+﻿namespace Demoulas.ProfitSharing.Services.ServiceDto;
 public class ParticipantTotalYearsDto
 {
     public required long Ssn { get; set; }

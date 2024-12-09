@@ -1,5 +1,8 @@
-﻿namespace Demoulas.ProfitSharing.Data.Entities;
+﻿using System.Diagnostics;
 
+namespace Demoulas.ProfitSharing.Data.Entities;
+
+[DebuggerDisplay("Id={DemographicId} ProfitYear={ProfitYear} YearsInPlan={YearsInPlan} EnrollmentId={EnrollmentId}")]
 public sealed class PayProfit
 {
     /// <summary>

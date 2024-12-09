@@ -16,7 +16,7 @@ public class WagesService : IWagesService
         _dataContextFactory = dataContextFactory;
     }
 
-    public async Task<ReportResponseBase<WagesCurrentYearResponse>> GetWagesReport(ProfitYearRequest request, CancellationToken cancellationToken)
+    public async Task<ReportResponseBase<WagesCurrentYearResponse>> GetWagesReportAsync(ProfitYearRequest request, CancellationToken cancellationToken)
     {
         var result = _dataContextFactory.UseReadOnlyContext(c =>
         {

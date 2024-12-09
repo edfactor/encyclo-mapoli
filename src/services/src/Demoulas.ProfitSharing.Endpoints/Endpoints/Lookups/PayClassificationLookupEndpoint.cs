@@ -36,6 +36,6 @@ public class PayClassificationLookupEndpoint : EndpointWithoutRequest<ISet<PayCl
 
     public override Task<ISet<PayClassificationResponseDto>> ExecuteAsync(CancellationToken ct)
     {
-        return _payClassificationService.GetAllPayClassifications(ct);
+        return _payClassificationService.GetAllPayClassificationsAsync(ct);
     }
 }

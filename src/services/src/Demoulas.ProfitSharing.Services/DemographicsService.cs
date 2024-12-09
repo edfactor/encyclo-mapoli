@@ -40,7 +40,7 @@ public class DemographicsService : IDemographicsServiceInternal
     /// <remarks>
     /// This method processes the demographic data in batches to optimize performance and resource usage.
     /// </remarks>
-    public async Task AddDemographicsStream(IAsyncEnumerable<DemographicsRequest> employees, byte batchSize = byte.MaxValue,
+    public async Task AddDemographicsStreamAsync(IAsyncEnumerable<DemographicsRequest> employees, byte batchSize = byte.MaxValue,
         CancellationToken cancellationToken = default)
     {
         var batch = new List<DemographicsRequest>();

@@ -16,9 +16,10 @@ const yearEndReports: RouteCategory = {
     { caption: "Manage Executive Hours and Dollars", route: "/manage-executive-hours-and-dolars"},
     { caption: "Get Eligible Employees", route: "/eligible-employees" },
     { caption: "Master Inquiry", route: "/master-inquiry" },
-    { caption: "Get Distributions by Age", route: "/distributions-by-age" },
-    { caption: "Get Contributions by Age", route: "/contributions-by-age" },
-    { caption: "Get Forfeitures by Age", route: "/forfeitures-by-age" }
+    { caption: "Get Distributions by Age (PROF 130)", route: "/distributions-by-age" },
+    { caption: "Get Contributions by Age (PROF 130)", route: "/contributions-by-age" },
+    { caption: "Get Forfeitures by Age (PROF 130)", route: "/forfeitures-by-age" },
+    { caption: "Get Balance by Age (PROF 130B)", route: "/balance-by-age" }
   ]
 };
 

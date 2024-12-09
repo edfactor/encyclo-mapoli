@@ -1,14 +1,11 @@
-import { FormHelperText, FormLabel, TextField, Typography } from "@mui/material";
+import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { isValid } from "date-fns";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { useDispatch } from "react-redux";
-import { useLazyGetDuplicateNamesAndBirthdaysQuery, useLazyGetDuplicateSSNsQuery } from "reduxstore/api/YearsEndApi";
+import { useLazyGetDuplicateNamesAndBirthdaysQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { ImpersonationRoles } from "reduxstore/types";
 
 interface DuplicateNamesAndBirthdaysSearch {
   profitYear: number;
@@ -19,7 +16,7 @@ const schema = yup.object().shape({
     .number()
     .typeError("Year must be a number")
     .integer("Year must be an integer")
-    .min(1900, "Year must be 1900 or later")
+    .min(2020, "Year must be 2020 or later")
     .max(2100, "Year must be 2100 or earlier")
     .required("Year is required")
 });
@@ -48,8 +45,7 @@ const DuplicateNamesAndBirthdaysSearchFilter = () => {
       triggerSearch(
         {
           profitYear: data.profitYear,
-          pagination: { skip: 0, take: 25 },
-          impersonation: ImpersonationRoles.ProfitSharingAdministrator
+          pagination: { skip: 0, take: 25 }
         },
         false
       );

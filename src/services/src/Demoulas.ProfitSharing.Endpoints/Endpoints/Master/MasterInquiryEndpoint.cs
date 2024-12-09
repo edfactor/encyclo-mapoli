@@ -9,7 +9,7 @@ using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Master;
-public class MasterInquiryEndpoint : Endpoint<MasterInquiryRequest, PaginatedResponseDto<MasterInquiryResponseDto>>
+public class MasterInquiryEndpoint : Endpoint<MasterInquiryRequest, MasterInquiryWithDetailsResponseDto>
 {
     private readonly IMasterInquiryService _masterInquiryService;
 
@@ -31,11 +31,10 @@ public class MasterInquiryEndpoint : Endpoint<MasterInquiryRequest, PaginatedRes
             {
                 {
                     200,
-                    new ReportResponseBase<MasterInquiryResponseDto>
+                    new MasterInquiryWithDetailsResponseDto
                     {
-                        ReportName = "Example Response",
-                        ReportDate = DateTimeOffset.Now,
-                        Response = new PaginatedResponseDto<MasterInquiryResponseDto>
+                        EmployeeDetails = null,
+                        InquiryResults = new PaginatedResponseDto<MasterInquiryResponseDto>
                         {
                             Results = new List<MasterInquiryResponseDto> { MasterInquiryResponseDto.ResponseExample() }
                         }
@@ -47,8 +46,8 @@ public class MasterInquiryEndpoint : Endpoint<MasterInquiryRequest, PaginatedRes
         Group<YearEndGroup>();
     }
 
-    public override Task<PaginatedResponseDto<MasterInquiryResponseDto>> ExecuteAsync(MasterInquiryRequest req, CancellationToken ct)
+    public override Task<MasterInquiryWithDetailsResponseDto> ExecuteAsync(MasterInquiryRequest req, CancellationToken ct)
     {
-        return _masterInquiryService.GetMasterInquiry(req, ct);
+        return _masterInquiryService.GetMasterInquiryAsync(req, ct);
     }
 }

@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Text;
 using Demoulas.Common.Data.Services.Service;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Reports.ProfitShareUpdate;
@@ -29,7 +30,24 @@ public class ProfitShareUpdateTests
         profitShareUpdateService.TodaysDateTime = new DateTime(2024, 11, 14, 10, 35, 0); // time report was generated
 
         // Act
-        profitShareUpdateService.ApplyAdjustments(profitYear,new AdjustmentAmounts(15, 1, 2, 0, 30_000,0, 0, 0, 0, 0, 0));
+        profitShareUpdateService.ApplyAdjustments(profitYear,
+            new UpdateAdjustmentAmountsRequest
+            {
+                Skip = null,
+                Take = null,
+                ProfitYear = profitYear,
+                ContributionPercent = 15,
+                IncomingForfeitPercent = 1,
+                EarningsPercent = 2,
+                SecondaryEarningsPercent = 0,
+                MaxAllowedContributions = 30_000,
+                BadgeToAdjust = 0,
+                BadgeToAdjust2 = 0,
+                AdjustContributionAmount = 0,
+                AdjustEarningsAmount = 0,
+                AdjustIncomingForfeitAmount = 0,
+                AdjustEarningsSecondaryAmount = 0
+            });
 
         // Assert
         string expected = LoadExpectedReport(reportName);
@@ -48,7 +66,24 @@ public class ProfitShareUpdateTests
         profitShareUpdateService.TodaysDateTime = new DateTime(2024, 11, 19, 19, 18, 0); // time report was generated
 
         // Act
-        profitShareUpdateService.ApplyAdjustments(profitYear,new AdjustmentAmounts(15, 1, 2, 0, 30_000, 700174, 0, 44.77m,  22.33m, 18.16m, 0));
+        profitShareUpdateService.ApplyAdjustments(profitYear,
+            new UpdateAdjustmentAmountsRequest
+            {
+                Skip = null,
+                Take = null,
+                ProfitYear = profitYear,
+                ContributionPercent = 15,
+                IncomingForfeitPercent = 1,
+                EarningsPercent = 2,
+                SecondaryEarningsPercent = 0,
+                MaxAllowedContributions = 30_000,
+                BadgeToAdjust = 700174,
+                BadgeToAdjust2 = 0,
+                AdjustContributionAmount = 44.77m,
+                AdjustEarningsAmount = 22.33m,
+                AdjustIncomingForfeitAmount = 18.16m,
+                AdjustEarningsSecondaryAmount = 0
+            });
 
         // Assert
         string expected = LoadExpectedReport(reportName);
@@ -72,7 +107,7 @@ public class ProfitShareUpdateTests
         CalendarService calendarService = new CalendarService(dbFactory, aps);
         TotalService totalService = new TotalService(dbFactory, null);
 
-        return new ProfitShareUpdateReport(dbFactory, totalService, calendarService);
+        return new ProfitShareUpdateReport(dbFactory, calendarService);
     }
 
 

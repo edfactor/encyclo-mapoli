@@ -17,7 +17,7 @@ import {
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { ImpersonationRoles, MasterInquryRequest } from "reduxstore/types";
+import { MasterInquryRequest } from "reduxstore/types";
 import { clearMasterInquiryData } from "reduxstore/slices/yearsEndSlice";
 import { useDispatch } from "react-redux";
 
@@ -44,14 +44,14 @@ const schema = yup.object().shape({
     .number()
     .typeError("Beginning Year must be a number")
     .integer("Beginning Year must be an integer")
-    .min(1900, "Beginning Year must be 1900 or later")
+    .min(2020, "Year must be 2020 or later")
     .max(2100, "Beginning Year must be 2100 or earlier")
     .nullable(),
   endProfitYear: yup
     .number()
     .typeError("Ending Year must be a number")
     .integer("Ending Year must be an integer")
-    .min(1900, "Ending Year must be 1900 or later")
+    .min(2020, "Year must be 2020 or later")
     .max(2100, "Ending Year must be 2100 or earlier")
     .nullable(),
   startProfitMonth: yup
@@ -126,7 +126,6 @@ const MasterInquirySearchFilter = () => {
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
-      console.log("Fetching...");
       setIsFetching(true);
       const searchParams: MasterInquryRequest = {
         pagination: { skip: 0, take: 25 },
@@ -145,13 +144,11 @@ const MasterInquirySearchFilter = () => {
         ...(!!data.forfeiture && { forfeiture: data.forfeiture }),
         ...(!!data.payment && { payment: data.payment }),
         ...(!!data.voids && { voids: data.voids }),
-        impersonation: ImpersonationRoles.ProfitSharingAdministrator
+        
       };
 
       triggerSearch(searchParams, false);
       setIsFetching(false);
-    } else {
-      console.log("not valid");
     }
   });
 

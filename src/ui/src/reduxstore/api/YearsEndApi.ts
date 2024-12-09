@@ -30,7 +30,9 @@ import {
   PagedReportResponse,
   ProfitSharingDistributionsByAge,
   ContributionsByAge,
-  ForfeituresByAge
+  ForfeituresByAge,
+  BalanceByAge,
+  MasterInquiryResponseType
 } from "reduxstore/types";
 import {
   setDemographicBadgesNotInPayprofitData,
@@ -38,6 +40,7 @@ import {
   setDistributionsByAge,
   setContributionsByAge,
   setForfeituresByAge,
+  setBalanceByAge,
   setDuplicateNamesAndBirthdays,
   setDuplicateSSNsData,
   setEligibleEmployees,
@@ -57,11 +60,13 @@ export const YearsEndApi = createApi({
     baseUrl: `${url}/api/`,
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).security.token;
+      const impersonating = (getState() as RootState).security.impersonating;
       if (token) {
         headers.set("authorization", `Bearer ${token}`);
       }
-      headers.set("impersonation", "Profit-Sharing-Administrator");
-
+      if (impersonating) {
+        headers.set("impersonation", impersonating);
+      }
       return headers;
     }
   }),
@@ -74,8 +79,7 @@ export const YearsEndApi = createApi({
         params: {
           take: params.pagination.take,
           skip: params.pagination.skip,
-          profitYear: params.profitYear,
-          impersonation: params.impersonation
+          profitYear: params.profitYear
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -96,8 +100,7 @@ export const YearsEndApi = createApi({
         method: "GET",
         params: {
           take: params.pagination.take,
-          skip: params.pagination.skip,
-          impersonation: params.impersonation
+          skip: params.pagination.skip
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -122,8 +125,7 @@ export const YearsEndApi = createApi({
           startMonth: params.startMonth,
           endMonth: params.endMonth,
           take: params.pagination.take,
-          skip: params.pagination.skip,
-          impersonation: params.impersonation
+          skip: params.pagination.skip
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -390,7 +392,7 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-     getContributionsByAge: builder.query<ContributionsByAge, FrozenReportsByAgeRequest>({
+    getContributionsByAge: builder.query<ContributionsByAge, FrozenReportsByAgeRequest>({
       query: (params) => ({
         url: "yearend/frozen/contributions-by-age",
         method: "GET",
@@ -426,7 +428,25 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getProfitMasterInquiry: builder.query<Paged<MasterInquiryDetail>, MasterInquryRequest>({
+    getBalanceByAge: builder.query<BalanceByAge, FrozenReportsByAgeRequest>({
+      query: (params) => ({
+        url: "yearend/frozen/balance-by-age",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          reportType: params.reportType
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setBalanceByAge(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
+    getProfitMasterInquiry: builder.query<MasterInquiryResponseType, MasterInquryRequest>({
       query: (params) => ({
         url: "yearend/master-inquiry",
         method: "GET",
@@ -454,7 +474,7 @@ export const YearsEndApi = createApi({
           console.log("Err: " + err);
         }
       }
-    }),
+    })
   })
 });
 
@@ -465,17 +485,14 @@ export const {
   useLazyGetMilitaryAndRehireForfeituresQuery,
   useLazyGetMilitaryAndRehireProfitSummaryQuery,
   useLazyGetMilitaryAndRehireQuery,
-  useLazyGetMismatchedSSNsPayprofitAndDemoOnSameBadgeQuery,
-  useLazyGetWagesCurrentYearQuery,
   useLazyGetNamesMissingCommasQuery,
   useLazyGetNegativeEVTASSNQuery,
-  useLazyGetPayprofitBadgeWithoutDemographicsQuery,
-  useLazyGetWagesPreviousYearQuery,
   useLazyGetDistributionsAndForfeituresQuery,
   useLazyGetExecutiveHoursAndDollarsQuery,
   useLazyGetEligibleEmployeesQuery,
   useLazyGetDistributionsByAgeQuery,
   useLazyGetContributionsByAgeQuery,
   useLazyGetForfeituresByAgeQuery,
+  useLazyGetBalanceByAgeQuery,
   useLazyGetProfitMasterInquiryQuery
 } = YearsEndApi;

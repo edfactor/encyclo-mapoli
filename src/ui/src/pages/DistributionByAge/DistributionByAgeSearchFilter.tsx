@@ -6,7 +6,7 @@ import { useLazyGetDistributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { ImpersonationRoles, FrozenReportsByAgeRequestType } from "reduxstore/types";
+import { FrozenReportsByAgeRequestType } from "reduxstore/types";
 
 interface DistributionByAgeSearch {
   profitYear: number;
@@ -18,7 +18,7 @@ const schema = yup.object().shape({
     .number()
     .typeError("Year must be a number")
     .integer("Year must be an integer")
-    .min(2000, "Year must be 2000 or later")
+    .min(2020, "Year must be 2020 or later")
     .max(2100, "Year must be 2100 or earlier")
     .required("Year is required")
 });
@@ -48,8 +48,7 @@ const DistributionByAgeSearchFilter = () => {
         {
           profitYear: data.profitYear,
           reportType: FrozenReportsByAgeRequestType.Total,
-          pagination: { skip: 0, take: 255 },
-          impersonation: ImpersonationRoles.ProfitSharingAdministrator
+          pagination: { skip: 0, take: 255 }
         },
         false
       );
@@ -57,8 +56,7 @@ const DistributionByAgeSearchFilter = () => {
         {
           profitYear: data.profitYear,
           reportType: FrozenReportsByAgeRequestType.FullTime,
-          pagination: { skip: 0, take: 255 },
-          impersonation: ImpersonationRoles.ProfitSharingAdministrator
+          pagination: { skip: 0, take: 255 }
         },
         false
       );
@@ -66,8 +64,7 @@ const DistributionByAgeSearchFilter = () => {
         {
           profitYear: data.profitYear,
           reportType: FrozenReportsByAgeRequestType.PartTime,
-          pagination: { skip: 0, take: 255 },
-          impersonation: ImpersonationRoles.ProfitSharingAdministrator
+          pagination: { skip: 0, take: 255 }
         },
         false
       );

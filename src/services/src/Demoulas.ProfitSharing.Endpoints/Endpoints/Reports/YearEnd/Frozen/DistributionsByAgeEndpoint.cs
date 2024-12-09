@@ -1,7 +1,7 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
@@ -45,7 +45,7 @@ public class DistributionsByAgeEndpoint : EndpointWithCsvTotalsBase<FrozenReport
 
     public override Task<DistributionsByAge> GetResponse(FrozenReportsByAgeRequest req, CancellationToken ct)
     {
-        return _frozenReportService.GetDistributionsByAgeYear(req, ct);
+        return _frozenReportService.GetDistributionsByAgeYearAsync(req, ct);
     }
 
     protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, DistributionsByAge report, CancellationToken cancellationToken)

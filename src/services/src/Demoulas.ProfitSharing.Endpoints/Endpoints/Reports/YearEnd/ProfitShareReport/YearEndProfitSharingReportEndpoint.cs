@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CsvHelper.Configuration;
+﻿using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
@@ -59,7 +53,7 @@ public class YearEndProfitSharingReportEndpoint: EndpointWithCsvBase<YearEndProf
     }
     public override Task<ReportResponseBase<YearEndProfitSharingReportResponse>> GetResponse(YearEndProfitSharingReportRequest req, CancellationToken ct)
     {
-        return _cleanupReportService.GetYearEndProfitSharingReport(req, ct);
+        return _cleanupReportService.GetYearEndProfitSharingReportAsync(req, ct);
     }
 
     public override string ReportFileName => "yearend-profit-sharing-report";

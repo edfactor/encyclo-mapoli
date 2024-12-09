@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
   ContributionsByAge,
   ForfeituresByAge,
+  BalanceByAge,
   DemographicBadgesNotInPayprofit,
   DistributionsAndForfeitures,
   DuplicateNameAndBirthday,
@@ -16,7 +17,9 @@ import {
   MissingCommasInPYName,
   NegativeEtvaForSSNsOnPayProfit,
   PagedReportResponse,
-  ProfitSharingDistributionsByAge
+  ProfitSharingDistributionsByAge,
+  EmployeeDetails,
+  MasterInquiryResponseType
 } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
 
@@ -33,6 +36,7 @@ export interface YearsEndState {
   executiveHoursAndDollars: PagedReportResponse<ExecutiveHoursAndDollars> | null;
   eligibleEmployees: EligibleEmployeeResponseDto | null;
   masterInquiryData: Paged<MasterInquiryDetail> | null;
+  masterInquiryEmployeeDetails: EmployeeDetails | null;
   distributionsByAgeTotal: ProfitSharingDistributionsByAge | null;
   distributionsByAgeFullTime: ProfitSharingDistributionsByAge | null;
   distributionsByAgePartTime: ProfitSharingDistributionsByAge | null;
@@ -42,6 +46,9 @@ export interface YearsEndState {
   forfeituresByAgeTotal: ForfeituresByAge | null;
   forfeituresByAgeFullTime: ForfeituresByAge | null;
   forfeituresByAgePartTime: ForfeituresByAge | null;
+  balanceByAgeTotal: BalanceByAge | null;
+  balanceByAgeFullTime: BalanceByAge | null;
+  balanceByAgePartTime: BalanceByAge | null;
 }
 
 const initialState: YearsEndState = {
@@ -57,6 +64,7 @@ const initialState: YearsEndState = {
   executiveHoursAndDollars: null,
   eligibleEmployees: null,
   masterInquiryData: null,
+  masterInquiryEmployeeDetails: null,
   distributionsByAgeTotal: null,
   distributionsByAgeFullTime: null,
   distributionsByAgePartTime: null,
@@ -65,7 +73,10 @@ const initialState: YearsEndState = {
   contributionsByAgePartTime: null,
   forfeituresByAgeTotal: null,
   forfeituresByAgeFullTime: null,
-  forfeituresByAgePartTime: null
+  forfeituresByAgePartTime: null,
+  balanceByAgeTotal: null,
+  balanceByAgeFullTime: null,
+  balanceByAgePartTime: null
 };
 
 export const yearsEndSlice = createSlice({
@@ -120,11 +131,16 @@ export const yearsEndSlice = createSlice({
     setEligibleEmployees: (state, action: PayloadAction<EligibleEmployeeResponseDto>) => {
       state.eligibleEmployees = action.payload;
     },
-    setMasterInquiryData: (state, action: PayloadAction<Paged<MasterInquiryDetail>>) => {
-      state.masterInquiryData = action.payload;
+    setMasterInquiryData: (state, action: PayloadAction<MasterInquiryResponseType>) => {
+      state.masterInquiryData = action.payload.inquiryResults;
+      
+      if (action.payload.employeeDetails) {
+        state.masterInquiryEmployeeDetails = action.payload.employeeDetails;
+      }
     },
     clearMasterInquiryData: (state) => {
       state.masterInquiryData = null;
+      state.masterInquiryEmployeeDetails = null;
     },
     setDistributionsByAge: (state, action: PayloadAction<ProfitSharingDistributionsByAge>) => {
       if (action.payload.reportType == FrozenReportsByAgeRequestType.Total) {
@@ -164,6 +180,19 @@ export const yearsEndSlice = createSlice({
       if (action.payload.reportType == FrozenReportsByAgeRequestType.PartTime) {
         state.forfeituresByAgePartTime = action.payload;
       }
+    },
+    setBalanceByAge: (state, action: PayloadAction<BalanceByAge>) => {
+      if (action.payload.reportType == FrozenReportsByAgeRequestType.Total) {
+        state.balanceByAgeTotal = action.payload;
+      }
+
+      if (action.payload.reportType == FrozenReportsByAgeRequestType.FullTime) {
+        state.balanceByAgeFullTime = action.payload;
+      }
+
+      if (action.payload.reportType == FrozenReportsByAgeRequestType.PartTime) {
+        state.balanceByAgePartTime = action.payload;
+      }
     }
   }
 });
@@ -184,6 +213,7 @@ export const {
   clearMasterInquiryData,
   setDistributionsByAge,
   setContributionsByAge,
-  setForfeituresByAge
+  setForfeituresByAge,
+  setBalanceByAge
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

@@ -17,7 +17,7 @@ public class SetExecutiveHoursAndDollarsRequestValidator : Validator<SetExecutiv
         RuleFor(req => req.ExecutiveHoursAndDollars.Count)
             .GreaterThan(0)
             .WithMessage("At least one employee must be provided");
-        RuleFor(req => req.ExecutiveHoursAndDollars.Select(d => d.BadgeNumber).Distinct().Count() ==
+        RuleFor(req => req.ExecutiveHoursAndDollars.Select(d => d.EmployeeId).Distinct().Count() ==
                        req.ExecutiveHoursAndDollars.Count)
             .Equal(true)
             .WithMessage("Badge Numbers must be unique.");

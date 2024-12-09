@@ -15,7 +15,7 @@ internal sealed class ProfitDetailFaker : Faker<ProfitDetail>
         var taxCodeFaker = new TaxCodeFaker();
 
         RuleFor(d => d.Id, f => _profitDetailCounter++);
-        
+
         RuleFor(d => d.Ssn, (f, o) =>
         {
             // This code is non-intuitive.   The idea is that when the demographic
@@ -33,8 +33,8 @@ internal sealed class ProfitDetailFaker : Faker<ProfitDetail>
 
             return rslt;
         });
-        
-        RuleFor(pd => pd.ProfitYear, fake => fake.Random.Short(Convert.ToInt16(DateTime.Now.Year-10), Convert.ToInt16(DateTime.Now.Year)))
+
+        RuleFor(pd => pd.ProfitYear, fake => fake.Random.Short(Convert.ToInt16(DateTime.Now.Year - 10), Convert.ToInt16(DateTime.Now.Year)))
             .RuleFor(pd => pd.ProfitYearIteration, fake => fake.Random.Byte(0, 25))
             .RuleFor(pd => pd.DistributionSequence, fake => fake.Random.Int(short.MaxValue, ushort.MaxValue))
             .RuleFor(pd => pd.ProfitCodeId, fake => fake.PickRandom<byte>(ProfitCode.Constants.IncomingContributions.Id,

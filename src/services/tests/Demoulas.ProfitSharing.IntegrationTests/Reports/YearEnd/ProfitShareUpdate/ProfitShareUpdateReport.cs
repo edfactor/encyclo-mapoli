@@ -1,11 +1,11 @@
 ﻿using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Services.Reports.YearEnd.Update;
+using Demoulas.ProfitSharing.Services.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services.Reports.YearEnd.Update.Formatters;
 using Demoulas.ProfitSharing.Services.Reports.YearEnd.Update.ReportFormatters;
 using Demoulas.ProfitSharing.Services.Reports.ProfitShareUpdate;
 using Microsoft.Extensions.Logging;
-using Moq;
-using Oracle.ManagedDataAccess.Client;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
+
 
 namespace Demoulas.ProfitSharing.Services.Reports.YearEnd.ProfitShareUpdate;
 
@@ -19,33 +19,31 @@ internal sealed class ProfitShareUpdateReport
     public List<string> ReportLines { get; set; }
     private short profitYear;
     private readonly IProfitSharingDataContextFactory _dbFactory;
-    private readonly TotalService totalService;
     private readonly CalendarService calendarService;
 
     /// <summary>
     /// A testing layer which generates Ready style reports.
     /// </summary>
-    public ProfitShareUpdateReport(IProfitSharingDataContextFactory dbFactory, TotalService totalService, CalendarService calendarService)
+    public ProfitShareUpdateReport(IProfitSharingDataContextFactory dbFactory, CalendarService calendarService)
     {
         _dbFactory = dbFactory;
-        this.totalService = totalService;
         this.calendarService = calendarService;
     }
 
-    public void ApplyAdjustments(short profitYear, AdjustmentAmounts adjustmentAmounts)
+    public void ApplyAdjustments(short profitYear, UpdateAdjustmentAmountsRequest updateAdjustmentAmountsRequest)
     {
         ReportLines = [];
 
         LoggerFactory loggerFactory = new LoggerFactory();
 
-        ProfitShareUpdateService psu = new(_dbFactory, loggerFactory, totalService, calendarService);
+        ProfitShareUpdateService psu = new(_dbFactory, loggerFactory, calendarService);
         this.profitYear = profitYear;
 
 
-        var (members, adjustmentsApplied, rerunNeeded) = psu.ApplyAdjustments(profitYear, adjustmentAmounts).GetAwaiter().GetResult();
+        var (members, adjustmentsApplied, rerunNeeded) = psu.ApplyAdjustments(updateAdjustmentAmountsRequest).GetAwaiter().GetResult();
 
-        m805PrintSequence(members, adjustmentAmounts.MaxAllowedContributions);
-        m1000AdjustmentReport(adjustmentAmounts, adjustmentsApplied);
+        m805PrintSequence(members, updateAdjustmentAmountsRequest.MaxAllowedContributions);
+        m1000AdjustmentReport(updateAdjustmentAmountsRequest, adjustmentsApplied);
 
     }
 
@@ -318,9 +316,9 @@ internal sealed class ProfitShareUpdateReport
     }
 
 
-    public void m1000AdjustmentReport(AdjustmentAmounts adjustmentAmounts, AdjustmentsApplied adjustmentsApplied)
+    public void m1000AdjustmentReport(UpdateAdjustmentAmountsRequest updateAdjustmentAmountsRequest, AdjustmentReportData adjustmentsApplied)
     {
-        if (adjustmentAmounts.BadgeToAdjust == 0)
+        if (updateAdjustmentAmountsRequest.BadgeToAdjust == 0)
         {
             return;
         }
@@ -337,7 +335,7 @@ internal sealed class ProfitShareUpdateReport
         WRITE2_advance2(header_5);
 
         PRINT_ADJ_LINE1 print_adj_line1 = new();
-        print_adj_line1.PL_ADJUST_BADGE = adjustmentAmounts.BadgeToAdjust;
+        print_adj_line1.PL_ADJUST_BADGE = updateAdjustmentAmountsRequest.BadgeToAdjust;
         print_adj_line1.PL_ADJ_DESC = "INITIAL";
         print_adj_line1.PL_CONT_AMT = adjustmentsApplied.ContributionAmountUnadjusted;
         print_adj_line1.PL_FORF_AMT = adjustmentsApplied.IncomingForfeitureAmountUnadjusted;
@@ -347,10 +345,10 @@ internal sealed class ProfitShareUpdateReport
 
         print_adj_line1.PL_ADJUST_BADGE = 0;
         print_adj_line1.PL_ADJ_DESC = "ADJUSTMENT";
-        print_adj_line1.PL_CONT_AMT = adjustmentAmounts.AdjustContributionAmount;
-        print_adj_line1.PL_EARN_AMT = adjustmentAmounts.AdjustEarningsAmount;
-        print_adj_line1.PL_EARN2_AMT = adjustmentAmounts.AdjustEarningsSecondaryAmount;
-        print_adj_line1.PL_FORF_AMT = adjustmentAmounts.AdjustIncomingForfeitAmount;
+        print_adj_line1.PL_CONT_AMT = updateAdjustmentAmountsRequest.AdjustContributionAmount;
+        print_adj_line1.PL_EARN_AMT = updateAdjustmentAmountsRequest.AdjustEarningsAmount;
+        print_adj_line1.PL_EARN2_AMT = updateAdjustmentAmountsRequest.AdjustEarningsSecondaryAmount;
+        print_adj_line1.PL_FORF_AMT = updateAdjustmentAmountsRequest.AdjustIncomingForfeitAmount;
         WRITE2_advance2(print_adj_line1);
 
         print_adj_line1.PL_ADJ_DESC = "FINAL";

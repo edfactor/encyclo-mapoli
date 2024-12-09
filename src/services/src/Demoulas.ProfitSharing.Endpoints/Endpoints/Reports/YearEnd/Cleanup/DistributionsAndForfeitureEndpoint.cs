@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CsvHelper.Configuration;
+﻿using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -55,7 +50,7 @@ public class DistributionsAndForfeitureEndpoint: EndpointWithCsvBase<Distributio
 
     public override Task<ReportResponseBase<DistributionsAndForfeitureResponse>> GetResponse(DistributionsAndForfeituresRequest req, CancellationToken ct)
     {
-        return _cleanupReportService.GetDistributionsAndForfeiture(req, ct);
+        return _cleanupReportService.GetDistributionsAndForfeitureAsync(req, ct);
     }
 
     public sealed class DistributionsAndForfeitureResponseMap: ClassMap<DistributionsAndForfeitureResponse>

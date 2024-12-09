@@ -1,5 +1,4 @@
 ﻿using CsvHelper.Configuration;
-using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -55,9 +54,8 @@ public class CurrentYearWagesEndpoint : EndpointWithCsvBase<ProfitYearRequest, W
 
     public override Task<ReportResponseBase<WagesCurrentYearResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
-        return _reportService.GetWagesReport(req, ct);
+        return _reportService.GetWagesReportAsync(req, ct);
     }
-
 
 
     public sealed class WagesCurrentYearResponseMap : ClassMap<WagesCurrentYearResponse>

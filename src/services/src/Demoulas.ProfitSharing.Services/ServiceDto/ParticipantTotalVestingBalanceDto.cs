@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Services;
+﻿namespace Demoulas.ProfitSharing.Services.ServiceDto;
 public class ParticipantTotalVestingBalanceDto
 {
     public int Ssn { get; set; }

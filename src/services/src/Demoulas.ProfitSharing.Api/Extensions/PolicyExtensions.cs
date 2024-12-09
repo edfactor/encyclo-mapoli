@@ -1,9 +1,4 @@
-﻿using Demoulas.Common.Contracts.Configuration;
-using Demoulas.Common.Contracts.Interfaces;
-using Demoulas.ProfitSharing.Security;
-using Demoulas.Security;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Okta.AspNetCore;
+﻿using Demoulas.ProfitSharing.Security;
 
 namespace Demoulas.ProfitSharing.Api.Extensions;
 
