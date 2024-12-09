@@ -2,7 +2,7 @@ import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { useLazyGetBalanceByAgeQuery } from "reduxstore/api/YearsEndApi";
+import { useLazyGetVestingAmountByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -26,7 +26,7 @@ const schema = yup.object().shape({
 const VestedAmountsByAgeSearchFilter = () => {
   const [isFetching, setIsFetching] = useState(false);
 
-  const [triggerSearch] = useLazyGetBalanceByAgeQuery();
+  const [triggerSearch] = useLazyGetVestingAmountByAgeQuery();
 
   const {
     control,
