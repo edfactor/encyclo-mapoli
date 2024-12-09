@@ -21,7 +21,6 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
     private readonly IProfitSharingDataContextFactory _dbContextFactory;
     private readonly ILogger<ProfitShareUpdateService> _logger;
     private readonly TotalService _totalService;
-    public short ProfitYear { get; set; }
 
     // Indicates that MaxContributions were exceeded.   Adjustments need be made and the update should be rerun.
     // TBD This needs to be evolved to return the list of employees who have exceeded the max contribution.
@@ -35,7 +34,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
         _calendarService = calendarService;
     }
 
-    
+
     public async Task<ReportResponseBase<MemberFinancialsResponse>> ApplyAdjustmentsPaginated(UpdateAdjustmentAmountsRequest updateAdjustmentAmountsRequest, CancellationToken cancellationToken)
     {
         var outcome = await ApplyAdjustments(updateAdjustmentAmountsRequest);
@@ -71,7 +70,6 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
     /// <summary>
     ///     Apply updates to profit sharing system.
     /// </summary>
-    /// <param name="profitYear"></param>
     /// <param name="updateAdjustmentAmountsRequest"></param>
     /// <returns>
     ///     member financials - a summary of members who have been updated
@@ -83,8 +81,6 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
     {
         // Values collected for an "Adjustment Report" that we do not yet generate
         AdjustmentsApplied adjustmentsApplied = new();
-
-        ProfitYear = updateAdjustmentAmountsRequest.ProfitYear;
 
         List<MemberFinancials> members = new();
         await ProcessEmployees(members, updateAdjustmentAmountsRequest, adjustmentsApplied);
@@ -106,14 +102,15 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
     public async Task ProcessEmployees(List<MemberFinancials> members, UpdateAdjustmentAmountsRequest updateAdjustmentAmountsRequest,
         AdjustmentsApplied adjustmentsApplied)
     {
-        var fiscalDates = await _calendarService.GetYearStartAndEndAccountingDatesAsync(ProfitYear, CancellationToken.None);
+        var fiscalDates = await _calendarService.GetYearStartAndEndAccountingDatesAsync(updateAdjustmentAmountsRequest.ProfitYear, CancellationToken.None);
         List<EmployeeFinancials> employeeFinancialsList = await _dbContextFactory.UseReadOnlyContext(async ctx =>
         {
             IQueryable<ParticipantTotalVestingBalanceDto> totalVestingBalances =
-                _totalService.TotalVestingBalance(ctx, (short)(ProfitYear - 1), fiscalDates.FiscalEndDate);
+                _totalService.TotalVestingBalance(ctx, (short)(updateAdjustmentAmountsRequest.ProfitYear - 1), fiscalDates.FiscalEndDate);
 
             return await ctx.PayProfits
-                .Where(pp => pp.ProfitYear == ProfitYear - 1)
+                .Include(pp => pp.Demographic)
+                .Where(pp => pp.ProfitYear == updateAdjustmentAmountsRequest.ProfitYear - 1)
                 .Join(
                     totalVestingBalances,
                     pp => pp.Demographic!.Ssn,
@@ -137,11 +134,14 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
 
         foreach (EmployeeFinancials empl in employeeFinancialsList)
         {
-            MemberFinancials? memb = await ProcessEmployee(empl, updateAdjustmentAmountsRequest, adjustmentsApplied);
-            if (memb != null)
-            {
-                members.Add(memb);
+            // if employee is not participating 
+            if (empl.EnrolledId == Enrollment.Constants.NotEnrolled && empl.YearsInPlan == 0)
+            {                
+                continue;
             }
+
+            MemberFinancials memb = await ProcessEmployee(empl, updateAdjustmentAmountsRequest, adjustmentsApplied);
+            members.Add(memb);
         }
     }
 
@@ -169,25 +169,17 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
                 continue;
             }
 
-            MemberFinancials? memb = await ProcessBeneficiary(bene, updateAdjustmentAmountsRequest);
-            if (memb != null)
-            {
-                members.Add(memb);
-            }
+            MemberFinancials memb = await ProcessBeneficiary(bene, updateAdjustmentAmountsRequest);
+            members.Add(memb);
         }
     }
 
-    public async Task<MemberFinancials?> ProcessEmployee(EmployeeFinancials empl, UpdateAdjustmentAmountsRequest updateAdjustmentAmountsRequest,
+    public async Task<MemberFinancials> ProcessEmployee(EmployeeFinancials empl, UpdateAdjustmentAmountsRequest updateAdjustmentAmountsRequest,
         AdjustmentsApplied adjustmentsApplied)
     {
-        if (empl.EnrolledId <= Enrollment.Constants.NotEnrolled && empl.EmployeeTypeId <= 0 &&
-            empl.CurrentAmount <= 0 && empl.YearsInPlan <= 0)
-        {
-            return null;
-        }
 
         // Gets this years profit sharing transactions, aka Distributions - hardships
-        DetailTotals detailTotals = await GetDetailTotals(empl.Ssn);
+        DetailTotals detailTotals = await GetDetailTotals(updateAdjustmentAmountsRequest.ProfitYear, empl.Ssn);
 
         // MemberTotals holds newly computed values, not old values
         MemberTotals memberTotals = new();
@@ -273,7 +265,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
 
     public async Task<MemberFinancials> ProcessBeneficiary(BeneficiaryFinancials bene, UpdateAdjustmentAmountsRequest updateAdjustmentAmountsRequest)
     {
-        DetailTotals detailTotals = await GetDetailTotals(bene.Ssn);
+        DetailTotals detailTotals = await GetDetailTotals(updateAdjustmentAmountsRequest.ProfitYear, bene.Ssn);
 
         MemberTotals memberTotals = new();
         // Yea, this adding and removing ClassActionFundTotal is strange
@@ -308,10 +300,10 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
     }
 
 
-    private static decimal ComputeContribution(long ws_payprofit, long badge, UpdateAdjustmentAmountsRequest updateAdjustmentAmountsRequest,
+    private static decimal ComputeContribution(long PointsEarned, long badge, UpdateAdjustmentAmountsRequest updateAdjustmentAmountsRequest,
         AdjustmentsApplied adjustmentsApplied)
     {
-        decimal contributionAmount = Math.Round(updateAdjustmentAmountsRequest.ContributionPercent * ws_payprofit, 2,
+        decimal contributionAmount = Math.Round(updateAdjustmentAmountsRequest.ContributionPercent * PointsEarned, 2,
             MidpointRounding.AwayFromZero);
 
         if (updateAdjustmentAmountsRequest.BadgeToAdjust > 0 && updateAdjustmentAmountsRequest.BadgeToAdjust == badge)
@@ -325,10 +317,10 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
     }
 
 
-    private static decimal ComputeForfeitures(long ws_payprofit, long badge, UpdateAdjustmentAmountsRequest updateAdjustmentAmountsRequest,
+    private static decimal ComputeForfeitures(long PointsEarned, long badge, UpdateAdjustmentAmountsRequest updateAdjustmentAmountsRequest,
         AdjustmentsApplied adjustmentsApplied)
     {
-        decimal incomingForfeitureAmount = Math.Round(updateAdjustmentAmountsRequest.IncomingForfeitPercent * ws_payprofit, 2,
+        decimal incomingForfeitureAmount = Math.Round(updateAdjustmentAmountsRequest.IncomingForfeitPercent * PointsEarned, 2,
             MidpointRounding.AwayFromZero);
         if (updateAdjustmentAmountsRequest.BadgeToAdjust > 0 && updateAdjustmentAmountsRequest.BadgeToAdjust == badge)
         {
@@ -444,7 +436,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
     // Fetches PROFIT_DETAIL Totals for an SSN.
     // processes only the current profit year.  Ignores profit code = 0.
     // Special handling for CAF and Military. 
-    public async Task<DetailTotals> GetDetailTotals(int ssn)
+    public async Task<DetailTotals> GetDetailTotals(short profitYear, int ssn)
     {
         decimal distributionsTotal = 0;
         decimal forfeitsTotal = 0;
@@ -454,7 +446,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
         decimal classActionFundTotal = 0;
 
         List<ProfitDetail> pds = await _dbContextFactory.UseReadOnlyContext(ctx =>
-            ctx.ProfitDetails.Where(pd => pd.Ssn == ssn && pd.ProfitYear == ProfitYear)
+            ctx.ProfitDetails.Where(pd => pd.Ssn == ssn && pd.ProfitYear == profitYear)
                 .OrderBy(pd => pd.ProfitYear).ThenBy(pd => pd.ProfitYearIteration).ThenBy(pd => pd.MonthToDate)
                 .ThenBy(pd => pd.FederalTaxes)
                 .ToListAsync()
