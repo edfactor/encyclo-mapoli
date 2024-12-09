@@ -23,6 +23,22 @@ const yearEndReports: RouteCategory = {
   ]
 };
 
-const MenuData: RouteCategory[] = [yearEndReports];
+const cleanUpReports: RouteCategory = {
+  menuLabel: "Clean Up",
+  parentRoute: "",
+  items: [
+    { caption: "Summary", route: "/clean-up-summary" }
+  ]
+};
+
+const frozenReports: RouteCategory = {
+  menuLabel: "Frozen",
+  parentRoute: "",
+  items: [
+    { caption: "Summary", route: "/frozen-summary" }
+  ]
+};
+
+const MenuData: RouteCategory[] = [cleanUpReports, frozenReports, yearEndReports];
 
 export default MenuData;

@@ -66,6 +66,9 @@ export const YearsEndApi = createApi({
       }
       if (impersonating) {
         headers.set("impersonation", impersonating);
+      } else {
+        const localImpersonation = localStorage.getItem("impersonatingRole");
+        headers.set("impersonation", localImpersonation);
       }
       return headers;
     }

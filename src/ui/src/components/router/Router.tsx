@@ -24,6 +24,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { setImpersonating } from "reduxstore/slices/securitySlice";
 import { ImpersonationRoles } from "reduxstore/types";
+import CleanUpSummary from "pages/CleanUpSummary/CleanUpSummary";
+import { useEffect } from "react";
+import FrozenSummary from "pages/FrozenSummary/FrozenSummary";
 
 const Router = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -33,6 +36,14 @@ const Router = () => {
 
   const { impersonating } = useSelector((state: RootState) => state.security);
   const dispatch = useDispatch();
+
+  const localStorageImpersonating: string | null = localStorage.getItem("impersonatingRole");
+
+  useEffect(() => {
+    if (!!localStorageImpersonating && !impersonating) {
+      dispatch(setImpersonating(localStorageImpersonating as ImpersonationRoles))
+    }
+  }, [impersonating, localStorageImpersonating])
 
   return (
     <BrowserRouter>
@@ -49,6 +60,7 @@ const Router = () => {
               ]}
               currentRoles={impersonating ? [impersonating] : []}
               setCurrentRoles={(value: string[]) => {
+                localStorage.setItem("impersonatingRole", value[0]);
                 switch (value[0]) {
                   case ImpersonationRoles.FinanceManager:
                     dispatch(setImpersonating(ImpersonationRoles.FinanceManager));
@@ -63,6 +75,7 @@ const Router = () => {
                     dispatch(setImpersonating(ImpersonationRoles.ProfitSharingAdministrator));
                     break;
                   default:
+                    localStorage.removeItem("impersonatingRole");
                     dispatch(setImpersonating(null));
                 }
               }}
@@ -124,6 +137,12 @@ const Router = () => {
         <Route
           path="balance-by-age"
           element={<BalanceByAge />}></Route>
+        <Route
+          path="clean-up-summary"
+          element={<CleanUpSummary />}></Route>
+          <Route
+          path="frozen-summary"
+          element={<FrozenSummary />}></Route>
       </RouteSecurity>
     </BrowserRouter>
   );
