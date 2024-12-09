@@ -1,10 +1,10 @@
 import { Typography } from "@mui/material";
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { useLazyVestingAmountByAgeInquiry } from "reduxstore/api/YearsEndApi";
+import { useLazyGetVestingAmountByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams } from "smart-ui-library";
-import { GetBalanceByAgeColumns } from "./VestedAmountsByAgeGridColumns";
+import { GetVestedAmountsByAgeColumns } from "./VestedAmountsByAgeGridColumns";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { FrozenReportsByAgeRequestType } from "../../reduxstore/types";
 
@@ -17,13 +17,13 @@ const VestedAmountsByAgeGrid = () => {
   const { balanceByAgeTotal, balanceByAgeFullTime, balanceByAgePartTime } = useSelector(
     (state: RootState) => state.yearsEnd
   );
-  const [_discard1, { isLoading }] = useLazyVestingAmountByAgeInquiry();
+  const [_discard1, { isLoading }] = useLazyGetVestingAmountByAgeQuery();
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
-  const columnDefsTotal = GetBalanceByAgeColumns(FrozenReportsByAgeRequestType.Total);
-  const columnDefsFullTime = GetBalanceByAgeColumns(FrozenReportsByAgeRequestType.FullTime);
-  const columnDefsPartTime = GetBalanceByAgeColumns(FrozenReportsByAgeRequestType.PartTime);
+  const columnDefsTotal = GetVestedAmountsByAgeColumns(FrozenReportsByAgeRequestType.Total);
+  const columnDefsFullTime = GetVestedAmountsByAgeColumns(FrozenReportsByAgeRequestType.FullTime);
+  const columnDefsPartTime = GetVestedAmountsByAgeColumns(FrozenReportsByAgeRequestType.PartTime);
 
   return (
     <>

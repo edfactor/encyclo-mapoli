@@ -54,7 +54,6 @@ import {
   setNegativeEtvaForSssnsOnPayprofit
 } from "reduxstore/slices/yearsEndSlice";
 import { url } from "./api";
-import { Paged } from "smart-ui-library";
 
 export const YearsEndApi = createApi({
   baseQuery: fetchBaseQuery({
@@ -476,7 +475,7 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getVestingAmountByAgeInquiry: builder.query<VestedAmountsByAge, ProfitYearRequest>({
+    getVestingAmountByAge: builder.query<VestedAmountsByAge, ProfitYearRequest>({
       query: (params) => ({
         url: "yearend/frozen/vested-amounts-by-age",
         method: "GET",
@@ -513,5 +512,5 @@ export const {
   useLazyGetForfeituresByAgeQuery,
   useLazyGetBalanceByAgeQuery,
   useLazyGetProfitMasterInquiryQuery,
-  useLazyVestingAmountByAgeInquiry
+  useLazyGetVestingAmountByAgeQuery
 } = YearsEndApi;

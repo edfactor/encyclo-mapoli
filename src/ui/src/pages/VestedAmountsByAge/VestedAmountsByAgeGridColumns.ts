@@ -7,7 +7,7 @@ export interface IForfeitureByAgeGridColumns {
   children?: ColDef[];
 }
 
-export const GetBalanceByAgeColumns = (  reportType: FrozenReportsByAgeRequestType): IForfeitureByAgeGridColumns => {
+export const GetVestedAmountsByAgeColumns = (reportType: FrozenReportsByAgeRequestType): IForfeitureByAgeGridColumns => {
   return {
     headerName: reportType,
     children: [
