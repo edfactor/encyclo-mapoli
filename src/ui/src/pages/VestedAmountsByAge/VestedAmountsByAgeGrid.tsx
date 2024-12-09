@@ -44,7 +44,7 @@ const VestedAmountsByAgeGrid = () => {
           columnDefs: [
             {
               headerName: "columns.headerName",
-              children: columns.children,
+              children: columns,
             },
           ],
         }}
