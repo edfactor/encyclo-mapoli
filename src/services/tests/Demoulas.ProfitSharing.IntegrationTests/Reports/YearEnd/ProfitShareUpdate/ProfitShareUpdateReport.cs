@@ -33,13 +33,13 @@ internal sealed class ProfitShareUpdateReport
         ReportLines = [];
 
         LoggerFactory loggerFactory = new();
+        TotalService totalService = new TotalService(_dbFactory, calendarService);
 
-        ProfitShareUpdateService psu = new(_dbFactory, loggerFactory, calendarService);
+        ProfitShareUpdateService psu = new(_dbFactory, loggerFactory, totalService, calendarService);
         this.profitYear = profitYear;
 
-
         (List<MemberFinancials> members, AdjustmentReportData adjustmentsApplied, bool rerunNeeded) =
-            psu.ApplyAdjustments(updateAdjustmentAmountsRequest).GetAwaiter().GetResult();
+            psu.ApplyAdjustments(updateAdjustmentAmountsRequest, CancellationToken.None).GetAwaiter().GetResult();
 
         m805PrintSequence(members, updateAdjustmentAmountsRequest.MaxAllowedContributions);
         m1000AdjustmentReport(updateAdjustmentAmountsRequest, adjustmentsApplied);

@@ -5,19 +5,15 @@ using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Services.Reports.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services.Reports.YearEnd.ProfitShareUpdate;
-using Demoulas.ProfitSharing.Services.Reports.YearEnd.Update.DbHelpers;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Oracle.ManagedDataAccess.Client;
 
 namespace Demoulas.ProfitSharing.Services.Reports.YearEnd.Update;
 
 public class ProfitShareUpdateTests
 {
-
     [Fact]
     public void ReportWithUpdates()
     {
@@ -95,16 +91,11 @@ public class ProfitShareUpdateTests
     {
         IConfigurationRoot configuration = new ConfigurationBuilder().AddUserSecrets<ProfitShareUpdateTests>().Build();
         string connectionString = configuration["ConnectionStrings:ProfitSharing"]!;
-        DbContextOptions<ProfitSharingReadOnlyDbContext> options =
-            new DbContextOptionsBuilder<ProfitSharingReadOnlyDbContext>().UseOracle(connectionString)
-                .EnableSensitiveDataLogging().Options;
-        ProfitSharingReadOnlyDbContext ctx = new(options);
+        IProfitSharingDataContextFactory dbFactory = new PristineDataContextFactory(connectionString);
 
-        IProfitSharingDataContextFactory dbFactory = new DbFactory(ctx);
-
-        AccountingPeriodsService aps = new AccountingPeriodsService();
-        CalendarService calendarService = new CalendarService(dbFactory, aps);
-        TotalService totalService = new TotalService(dbFactory, null);
+        AccountingPeriodsService aps = new();
+        CalendarService calendarService = new(dbFactory, aps);
+        TotalService totalService = new(dbFactory, null);
 
         return new ProfitShareUpdateReport(dbFactory, calendarService);
     }
