@@ -18,7 +18,6 @@ namespace Demoulas.ProfitSharing.Services.Reports.YearEnd.Update;
 public class ProfitShareUpdateTests
 {
 
-
     [Fact]
     public void ReportWithUpdates()
     {

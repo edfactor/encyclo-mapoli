@@ -1,28 +1,23 @@
-﻿using Demoulas.ProfitSharing.Data.Interfaces;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services.Reports.YearEnd.Update.Formatters;
 using Demoulas.ProfitSharing.Services.Reports.YearEnd.Update.ReportFormatters;
-using Demoulas.ProfitSharing.Services.Reports.ProfitShareUpdate;
 using Microsoft.Extensions.Logging;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
-
 
 namespace Demoulas.ProfitSharing.Services.Reports.YearEnd.ProfitShareUpdate;
 
-
 /// <summary>
-/// A testing layer which generates Ready style reports.
+///     A testing layer which generates Ready style reports.
 /// </summary>
 internal sealed class ProfitShareUpdateReport
 {
-    public DateTime TodaysDateTime { get; set; }
-    public List<string> ReportLines { get; set; }
-    private short profitYear;
     private readonly IProfitSharingDataContextFactory _dbFactory;
     private readonly CalendarService calendarService;
+    private short profitYear;
 
     /// <summary>
-    /// A testing layer which generates Ready style reports.
+    ///     A testing layer which generates Ready style reports.
     /// </summary>
     public ProfitShareUpdateReport(IProfitSharingDataContextFactory dbFactory, CalendarService calendarService)
     {
@@ -30,21 +25,24 @@ internal sealed class ProfitShareUpdateReport
         this.calendarService = calendarService;
     }
 
+    public DateTime TodaysDateTime { get; set; }
+    public List<string> ReportLines { get; set; }
+
     public void ApplyAdjustments(short profitYear, UpdateAdjustmentAmountsRequest updateAdjustmentAmountsRequest)
     {
         ReportLines = [];
 
-        LoggerFactory loggerFactory = new LoggerFactory();
+        LoggerFactory loggerFactory = new();
 
         ProfitShareUpdateService psu = new(_dbFactory, loggerFactory, calendarService);
         this.profitYear = profitYear;
 
 
-        var (members, adjustmentsApplied, rerunNeeded) = psu.ApplyAdjustments(updateAdjustmentAmountsRequest).GetAwaiter().GetResult();
+        (List<MemberFinancials> members, AdjustmentReportData adjustmentsApplied, bool rerunNeeded) =
+            psu.ApplyAdjustments(updateAdjustmentAmountsRequest).GetAwaiter().GetResult();
 
         m805PrintSequence(members, updateAdjustmentAmountsRequest.MaxAllowedContributions);
         m1000AdjustmentReport(updateAdjustmentAmountsRequest, adjustmentsApplied);
-
     }
 
     public void m805PrintSequence(List<MemberFinancials> members, long maxAllowedContribution)
@@ -105,6 +103,7 @@ internal sealed class ProfitShareUpdateReport
         {
             memberFinancials.Contributions = memberFinancials.Contributions + memberFinancials.Xfer;
         }
+
         if (memberFinancials.Pxfer != 0)
         {
             memberFinancials.Military = memberFinancials.Military - memberFinancials.Pxfer;
@@ -131,7 +130,7 @@ internal sealed class ProfitShareUpdateReport
                 report_line.PR_NEWEMP = " ";
             }
 
-       
+
             report_line.PR_CONT = memberFinancials.Contributions;
             report_line.PR_MIL = memberFinancials.Military;
             report_line.PR_FORF = memberFinancials.IncomingForfeitures;
@@ -139,7 +138,8 @@ internal sealed class ProfitShareUpdateReport
 
             if (memberFinancials.SecondaryEarnings != 0)
             {
-                Console.WriteLine($"badge {memberFinancials.EmployeeId} earnings2 ${memberFinancials.SecondaryEarnings}");
+                Console.WriteLine(
+                    $"badge {memberFinancials.EmployeeId} earnings2 ${memberFinancials.SecondaryEarnings}");
             }
 
             report_line.PR_EARN2 = memberFinancials.SecondaryEarnings;
@@ -316,7 +316,8 @@ internal sealed class ProfitShareUpdateReport
     }
 
 
-    public void m1000AdjustmentReport(UpdateAdjustmentAmountsRequest updateAdjustmentAmountsRequest, AdjustmentReportData adjustmentsApplied)
+    public void m1000AdjustmentReport(UpdateAdjustmentAmountsRequest updateAdjustmentAmountsRequest,
+        AdjustmentReportData adjustmentsApplied)
     {
         if (updateAdjustmentAmountsRequest.BadgeToAdjust == 0)
         {
@@ -377,5 +378,4 @@ internal sealed class ProfitShareUpdateReport
         // We dont currently support this second report.    We may have to.
         // throw new NotImplementedException();
     }
-
 }
