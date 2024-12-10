@@ -21,9 +21,9 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
     private readonly ICalendarService _calendarService;
     private readonly IProfitSharingDataContextFactory _dbContextFactory;
     private readonly ILogger<ProfitShareUpdateService> _logger;
-    private readonly TotalService _totalService;
+    private readonly ITotalService _totalService;
 
-    public ProfitShareUpdateService(IProfitSharingDataContextFactory dbContextFactory, ILoggerFactory loggerFactory, TotalService totalService, ICalendarService calendarService)
+    public ProfitShareUpdateService(IProfitSharingDataContextFactory dbContextFactory, ILoggerFactory loggerFactory, ITotalService totalService, ICalendarService calendarService)
     {
         _dbContextFactory = dbContextFactory;
         _totalService = totalService;
@@ -102,10 +102,12 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
         List<EmployeeFinancials> employeeFinancialsList = await _dbContextFactory.UseReadOnlyContext(async ctx =>
         {
             IQueryable<ParticipantTotalVestingBalanceDto> totalVestingBalances =
-                _totalService.TotalVestingBalance(ctx, (short)(updateAdjustmentAmountsRequest.ProfitYear - 1), fiscalDates.FiscalEndDate);
+                ((TotalService)_totalService).TotalVestingBalance(ctx, (short)(updateAdjustmentAmountsRequest.ProfitYear - 1), fiscalDates.FiscalEndDate);
 
             return await ctx.PayProfits
+                .Where(pp=>pp.Demographic != null)
                 .Include(pp => pp.Demographic)
+                .Where(pp => pp.Demographic != null)
                 .Include(pp => pp.Demographic!.ContactInfo)
                 .Where(pp => pp.ProfitYear == (updateAdjustmentAmountsRequest.ProfitYear - 1))
                 .Join(
@@ -121,7 +123,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
                         YearsInPlan = pp.YearsInPlan,
                         CurrentAmount = tvb.CurrentBalance,
                         EmployeeTypeId = pp.EmployeeTypeId,
-                        PointsEarned = (int)pp.PointsEarned!, // This is supposed to be int in the database.   Database will be updated.
+                        PointsEarned = (int)(pp.PointsEarned ?? 0), // This is supposed to be int in the database.   Database will be updated.
                         EtvaAfterVestingRules = tvb.Etva
                     }
                 )

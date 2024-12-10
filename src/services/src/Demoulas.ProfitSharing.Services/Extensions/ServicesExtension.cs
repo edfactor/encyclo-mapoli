@@ -42,7 +42,7 @@ public static class ServicesExtension
         _ = builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
         _ = builder.Services.AddSingleton<ICalendarService, CalendarService>();
 
-        _ = builder.Services.AddSingleton<IProfitShareUpdateService, ProfitShareUpdateService>();
+        _ = builder.Services.AddScoped<IProfitShareUpdateService, ProfitShareUpdateService>();
 
 
         _ = builder.Services.AddKeyedSingleton<IBaseCacheService<LookupTableCache<byte>>, PayClassificationHostedService>(nameof(PayClassificationHostedService));
