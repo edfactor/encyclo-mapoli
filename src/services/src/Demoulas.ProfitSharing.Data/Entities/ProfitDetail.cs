@@ -2,6 +2,12 @@
 
 public class ProfitDetail
 {
+    public static class Constants
+    {
+        public static byte ProfitYearIterationMilitary = 1;
+        public static byte ProfitYearIterationClassActionFund = 2;
+    }
+
     public int Id { get; set; }
     public int Ssn { get; set; }
     public short ProfitYear { get; set; }

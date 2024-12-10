@@ -13,7 +13,7 @@ public class MemberTotals
 {
     public decimal PointsDollars { get; set; }
     public decimal NewCurrentAmount { get; set; }
-    public long EarnPoints { get; set; }
+    public int EarnPoints { get; set; }
     public decimal IncomingForfeitureAmount { get; set; }
     public decimal ContributionAmount { get; set; }
     public decimal EarningsAmount { get; set; }

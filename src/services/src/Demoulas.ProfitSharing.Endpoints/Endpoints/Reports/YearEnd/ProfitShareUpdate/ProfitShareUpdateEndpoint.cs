@@ -11,8 +11,11 @@ using Demoulas.ProfitSharing.Security;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareUpdate;
 
-public class ProfitShareUpdateEndpoint : EndpointWithCsvBase<UpdateAdjustmentAmountsRequest, MemberFinancialsResponse,
-    ProfitShareUpdateEndpoint.ProfitShareUpdateClassMap>
+public class ProfitShareUpdateEndpoint
+    : EndpointWithCsvTotalsBase<UpdateAdjustmentAmountsRequest,
+        ProfitShareUpdateResponse,
+        MemberFinancialsResponse,
+        ProfitShareUpdateEndpoint.ProfitShareUpdateClassMap>
 {
     private readonly IProfitShareUpdateService _profitShareUpdateService;
 
@@ -31,7 +34,7 @@ public class ProfitShareUpdateEndpoint : EndpointWithCsvBase<UpdateAdjustmentAmo
             s.Summary = "profit sharing update";
             s.Description =
                 "Updates plan members based on points provided.";
-            s.ExampleRequest = UpdateAdjustmentAmountsRequest.Example();
+            s.ExampleRequest = UpdateAdjustmentAmountsRequest.RequestExample();
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
         Group<YearEndGroup>();
@@ -39,7 +42,7 @@ public class ProfitShareUpdateEndpoint : EndpointWithCsvBase<UpdateAdjustmentAmo
         base.Configure();
     }
 
-    public override Task<ReportResponseBase<MemberFinancialsResponse>> GetResponse(UpdateAdjustmentAmountsRequest req,
+    public override Task<ProfitShareUpdateResponse> GetResponse(UpdateAdjustmentAmountsRequest req,
         CancellationToken ct)
     {
         return _profitShareUpdateService.ApplyAdjustmentsPaginated(req, ct);

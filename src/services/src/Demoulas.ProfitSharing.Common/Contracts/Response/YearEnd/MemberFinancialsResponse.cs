@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-public class MemberFinancialsResponse 
+public record MemberFinancialsResponse 
 {
     public long Psn { get; set; }
     public string? Name { get; set; }

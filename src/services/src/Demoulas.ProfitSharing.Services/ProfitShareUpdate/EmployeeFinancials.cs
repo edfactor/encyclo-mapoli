@@ -14,11 +14,11 @@ public record EmployeeFinancials
     public string? Name { get; set; }
     public long EmployeeId { get; set; }
     public int Ssn { get; set; }
-    public long EnrolledId { get; set; }
-    public long YearsInPlan { get; set; }
+    public byte EnrolledId { get; set; }
+    public short YearsInPlan { get; set; }
     public decimal CurrentAmount { get; set; }
-    public long EmployeeTypeId { get; set; }
-    public long PointsEarned { get; set; }
+    public byte EmployeeTypeId { get; set; }
+    public int PointsEarned { get; set; }
     public decimal Contributions { get; set; }
     public decimal IncomeForfeiture { get; set; }
     public decimal Earnings { get; set; }

@@ -10,7 +10,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 namespace Demoulas.ProfitSharing.Common.Interfaces;
 public interface IProfitShareUpdateService
 {
-    public Task<ReportResponseBase<MemberFinancialsResponse>> ApplyAdjustmentsPaginated(UpdateAdjustmentAmountsRequest updateAdjustmentAmountsRequest, CancellationToken cancellationToken);
+    public Task<ProfitShareUpdateResponse> ApplyAdjustmentsPaginated(UpdateAdjustmentAmountsRequest updateAdjustmentAmountsRequest, CancellationToken cancellationToken);
 
 
 }
