@@ -1,8 +1,9 @@
-﻿namespace Demoulas.ProfitSharing.Services.Reports.YearEnd.Update.ReportFormatters;
+﻿
+using static Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate.Formatters.FormatUtils;
 
-using static FormatUtils;
+namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate.Formatters;
 
-public class EMPLOYEE_COUNT_TOT_PAYBEN
+public class BeneficiaryCountTotal
 {
     public string? FILLER0 { get; set; } = "TOTAL # OF BENEFICIARIES = "; // PIC X(27)
     public long PB_TOT_EMPLOYEE_COUNT { get; set; } // PIC ZZZ,ZZ9.

@@ -106,7 +106,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
 
             return await ctx.PayProfits
                 .Include(pp => pp.Demographic)
-                .Include(pp => pp.Demographic.ContactInfo)
+                .Include(pp => pp.Demographic!.ContactInfo)
                 .Where(pp => pp.ProfitYear == (updateAdjustmentAmountsRequest.ProfitYear - 1))
                 .Join(
                     totalVestingBalances,

@@ -1,8 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate.Formatters;
 using Demoulas.ProfitSharing.Services.ProfitShareUpdate;
-using Demoulas.ProfitSharing.Services.Reports.YearEnd.Update.Formatters;
-using Demoulas.ProfitSharing.Services.Reports.YearEnd.Update.ReportFormatters;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.Reports.YearEnd.ProfitShareUpdate;
@@ -26,20 +25,19 @@ internal sealed class ProfitShareUpdateReport
     }
 
     public DateTime TodaysDateTime { get; set; }
-    public List<string> ReportLines { get; set; }
+    public List<string> ReportLines { get; set; } = [];
 
-    public void ApplyAdjustments(short profitYear, UpdateAdjustmentAmountsRequest updateAdjustmentAmountsRequest)
+    public void ApplyAdjustments(UpdateAdjustmentAmountsRequest updateAdjustmentAmountsRequest)
     {
-        ReportLines = [];
-
         LoggerFactory loggerFactory = new();
         TotalService totalService = new TotalService(_dbFactory, calendarService);
-
         ProfitShareUpdateService psu = new(_dbFactory, loggerFactory, totalService, calendarService);
-        this.profitYear = profitYear;
+        this.profitYear = updateAdjustmentAmountsRequest.ProfitYear;
 
-        (List<MemberFinancials> members, AdjustmentReportData adjustmentsApplied, bool rerunNeeded) =
+        (List<MemberFinancials> members, AdjustmentReportData adjustmentsApplied, bool _) =
+#pragma warning disable VSTHRD002
             psu.ApplyAdjustments(updateAdjustmentAmountsRequest, CancellationToken.None).GetAwaiter().GetResult();
+#pragma warning restore VSTHRD002
 
         m805PrintSequence(members, updateAdjustmentAmountsRequest.MaxAllowedContributions);
         m1000AdjustmentReport(updateAdjustmentAmountsRequest, adjustmentsApplied);
@@ -48,7 +46,7 @@ internal sealed class ProfitShareUpdateReport
     public void m805PrintSequence(List<MemberFinancials> members, long maxAllowedContribution)
     {
         WRITE("\fDJDE JDE=PAY426,JDL=PAYROL,END,;");
-        HEADER_1 header_1 = new();
+        Header1 header_1 = new();
         header_1.HDR1_YY = TodaysDateTime.Year - 2000;
         header_1.HDR1_MM = TodaysDateTime.Month;
         header_1.HDR1_DD = TodaysDateTime.Day;
@@ -87,11 +85,11 @@ internal sealed class ProfitShareUpdateReport
 
     private void WRITE(object obj)
     {
-        ReportLines.Add(obj.ToString().TrimEnd());
+        ReportLines.Add(obj.ToString()!.TrimEnd());
     }
 
 
-    public void m810WriteReport(ReportCounters reportCounters, HEADER_1 header_1, MemberFinancials memberFinancials,
+    public void m810WriteReport(ReportCounters reportCounters, Header1 header_1, MemberFinancials memberFinancials,
         CollectTotals collectTotals)
     {
         if (reportCounters.LineCounter > 60)
@@ -219,14 +217,14 @@ internal sealed class ProfitShareUpdateReport
         }
     }
 
-    public void m830PrintHeader(ReportCounters reportCounters, HEADER_1 header_1)
+    public void m830PrintHeader(ReportCounters reportCounters, Header1 header_1)
     {
         reportCounters.PageCounter += 1;
         header_1.HDR1_PAGE = reportCounters.PageCounter;
         WRITE("\f" + header_1);
         WRITE("");
-        WRITE(new HEADER_2());
-        WRITE(new HEADER_3());
+        WRITE(new Header2());
+        WRITE(new Header3());
         reportCounters.LineCounter = 4;
     }
 
@@ -251,7 +249,7 @@ internal sealed class ProfitShareUpdateReport
         client_tot.END_BAL_TOT = ws_client_totals.WS_TOT_ENDBAL;
 
 
-        TOTAL_HEADER_1 total_header_1 = new();
+        TotalHeader1 total_header_1 = new();
         total_header_1.TOT_HDR1_YEAR1 = profitYear;
         total_header_1.TOT_HDR1_DD = TodaysDateTime.Day;
         total_header_1.TOT_HDR1_MM = TodaysDateTime.Month;
@@ -261,8 +259,8 @@ internal sealed class ProfitShareUpdateReport
 
         WRITE("\f" + total_header_1);
         WRITE("");
-        WRITE(new TOTAL_HEADER_2());
-        WRITE(new TOTAL_HEADER_3());
+        WRITE(new TotalHeader2());
+        WRITE(new TotalHeader3());
         WRITE("");
         WRITE(client_tot);
 
@@ -297,22 +295,22 @@ internal sealed class ProfitShareUpdateReport
         WRITE("");
         WRITE(client_tot);
 
-        EMPLOYEE_COUNT_TOT employee_count_tot = new();
-        employee_count_tot.PR_TOT_EMPLOYEE_COUNT = reportCounters.EmployeeCounter;
+        EmployeeCountTotal employeeCountTotal = new();
+        employeeCountTotal.PR_TOT_EMPLOYEE_COUNT = reportCounters.EmployeeCounter;
         WRITE("");
-        WRITE(employee_count_tot);
-        EMPLOYEE_COUNT_TOT_PAYBEN employee_count_tot_payben = new();
-        employee_count_tot_payben.PB_TOT_EMPLOYEE_COUNT = reportCounters.BeneficiaryCounter;
+        WRITE(employeeCountTotal);
+        BeneficiaryCountTotal beneficiaryCountTotPayben = new();
+        beneficiaryCountTotPayben.PB_TOT_EMPLOYEE_COUNT = reportCounters.BeneficiaryCounter;
         WRITE("");
-        WRITE(employee_count_tot_payben);
+        WRITE(beneficiaryCountTotPayben);
 
-        RERUN_TOT rerun_tot = new();
-        rerun_tot.RERUN_OVER = ws_client_totals.MaxOverTotal;
-        rerun_tot.RERUN_POINTS = ws_client_totals.MaxPointsTotal;
-        rerun_tot.RERUN_MAX = maxAllowedContribution;
+        RerunTotals rerunTotals = new();
+        rerunTotals.RERUN_OVER = ws_client_totals.MaxOverTotal;
+        rerunTotals.RERUN_POINTS = ws_client_totals.MaxPointsTotal;
+        rerunTotals.RERUN_MAX = maxAllowedContribution;
 
         ReportLines.Add("\n\n\n\n\n\n\n\n\n");
-        WRITE(rerun_tot);
+        WRITE(rerunTotals);
     }
 
 
@@ -324,9 +322,9 @@ internal sealed class ProfitShareUpdateReport
             return;
         }
 
-        HEADER_1 header_1 = new();
-        HEADER_4 header_4 = new();
-        HEADER_5 header_5 = new();
+        Header1 header_1 = new();
+        Header4 header_4 = new();
+        Header5 header_5 = new();
 
 
         header_1.HDR1_PAGE = 1;
@@ -335,30 +333,30 @@ internal sealed class ProfitShareUpdateReport
         WRITE2_advance2(header_4);
         WRITE2_advance2(header_5);
 
-        PRINT_ADJ_LINE1 print_adj_line1 = new();
-        print_adj_line1.PL_ADJUST_BADGE = updateAdjustmentAmountsRequest.BadgeToAdjust;
-        print_adj_line1.PL_ADJ_DESC = "INITIAL";
-        print_adj_line1.PL_CONT_AMT = adjustmentsApplied.ContributionAmountUnadjusted;
-        print_adj_line1.PL_FORF_AMT = adjustmentsApplied.IncomingForfeitureAmountUnadjusted;
-        print_adj_line1.PL_EARN_AMT = adjustmentsApplied.EarningsAmountUnadjusted;
-        print_adj_line1.PL_EARN2_AMT = adjustmentsApplied.SecondaryEarningsAmountUnadjusted;
-        WRITE2_advance2(print_adj_line1);
+        PrintAdjustLine1 printAdjustLine1 = new();
+        printAdjustLine1.PL_ADJUST_BADGE = updateAdjustmentAmountsRequest.BadgeToAdjust;
+        printAdjustLine1.PL_ADJ_DESC = "INITIAL";
+        printAdjustLine1.PL_CONT_AMT = adjustmentsApplied.ContributionAmountUnadjusted;
+        printAdjustLine1.PL_FORF_AMT = adjustmentsApplied.IncomingForfeitureAmountUnadjusted;
+        printAdjustLine1.PL_EARN_AMT = adjustmentsApplied.EarningsAmountUnadjusted;
+        printAdjustLine1.PL_EARN2_AMT = adjustmentsApplied.SecondaryEarningsAmountUnadjusted;
+        WRITE2_advance2(printAdjustLine1);
 
-        print_adj_line1.PL_ADJUST_BADGE = 0;
-        print_adj_line1.PL_ADJ_DESC = "ADJUSTMENT";
-        print_adj_line1.PL_CONT_AMT = updateAdjustmentAmountsRequest.AdjustContributionAmount;
-        print_adj_line1.PL_EARN_AMT = updateAdjustmentAmountsRequest.AdjustEarningsAmount;
-        print_adj_line1.PL_EARN2_AMT = updateAdjustmentAmountsRequest.AdjustEarningsSecondaryAmount;
-        print_adj_line1.PL_FORF_AMT = updateAdjustmentAmountsRequest.AdjustIncomingForfeitAmount;
-        WRITE2_advance2(print_adj_line1);
+        printAdjustLine1.PL_ADJUST_BADGE = 0;
+        printAdjustLine1.PL_ADJ_DESC = "ADJUSTMENT";
+        printAdjustLine1.PL_CONT_AMT = updateAdjustmentAmountsRequest.AdjustContributionAmount;
+        printAdjustLine1.PL_EARN_AMT = updateAdjustmentAmountsRequest.AdjustEarningsAmount;
+        printAdjustLine1.PL_EARN2_AMT = updateAdjustmentAmountsRequest.AdjustEarningsSecondaryAmount;
+        printAdjustLine1.PL_FORF_AMT = updateAdjustmentAmountsRequest.AdjustIncomingForfeitAmount;
+        WRITE2_advance2(printAdjustLine1);
 
-        print_adj_line1.PL_ADJ_DESC = "FINAL";
-        print_adj_line1.PL_CONT_AMT = adjustmentsApplied.ContributionAmountAdjusted;
-        print_adj_line1.PL_FORF_AMT = adjustmentsApplied.IncomingForfeitureAmountAdjusted;
-        print_adj_line1.PL_EARN_AMT = adjustmentsApplied.EarningsAmountAdjusted;
-        print_adj_line1.PL_EARN2_AMT = adjustmentsApplied.SecondaryEarningsAmountAdjusted;
+        printAdjustLine1.PL_ADJ_DESC = "FINAL";
+        printAdjustLine1.PL_CONT_AMT = adjustmentsApplied.ContributionAmountAdjusted;
+        printAdjustLine1.PL_FORF_AMT = adjustmentsApplied.IncomingForfeitureAmountAdjusted;
+        printAdjustLine1.PL_EARN_AMT = adjustmentsApplied.EarningsAmountAdjusted;
+        printAdjustLine1.PL_EARN2_AMT = adjustmentsApplied.SecondaryEarningsAmountAdjusted;
 
-        WRITE2_advance2(print_adj_line1);
+        WRITE2_advance2(printAdjustLine1);
 
         if (adjustmentsApplied.IncomingForfeitureAmountUnadjusted == 0 &&
             adjustmentsApplied.EarningsAmountUnadjusted == 0)
@@ -370,12 +368,12 @@ internal sealed class ProfitShareUpdateReport
     private void WRITE2_advance2(object header4)
     {
         // We dont currently support this second report.    We may have to.
-        //throw new NotImplementedException();
+        //throw new NotImplementedException()
     }
 
-    private void WRITE2_afterPage(HEADER_1 header1)
+    private void WRITE2_afterPage(Header1 header1)
     {
         // We dont currently support this second report.    We may have to.
-        // throw new NotImplementedException();
+        // throw new NotImplementedException()
     }
 }

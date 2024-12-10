@@ -4,8 +4,8 @@ public class ProfitDetail
 {
     public static class Constants
     {
-        public static byte ProfitYearIterationMilitary = 1;
-        public static byte ProfitYearIterationClassActionFund = 2;
+        public const byte  ProfitYearIterationMilitary = 1;
+        public const byte ProfitYearIterationClassActionFund = 2;
     }
 
     public int Id { get; set; }

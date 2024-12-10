@@ -1,6 +1,9 @@
-﻿using static FormatUtils;
+﻿
+using static Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate.Formatters.FormatUtils;
 
-public class RERUN_TOT
+namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate.Formatters;
+
+public class RerunTotals
 {
     public string? FILLER0 { get; set; } = " TOTAL FORFEITURES ="; // PIC X(20)
     public decimal RERUN_OVER { get; set; } // PIC ZZ,ZZZ,ZZZ.99-.

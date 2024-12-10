@@ -1,6 +1,7 @@
-﻿namespace Demoulas.ProfitSharing.Services.Reports.YearEnd.Update.ReportFormatters;
+﻿
+using static Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate.Formatters.FormatUtils;
 
-using static FormatUtils;
+namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate.Formatters;
 
 public class ReportLine
 {

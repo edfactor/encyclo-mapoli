@@ -90,6 +90,7 @@ public class TotalServiceIntegrationTests
         true.Should().Be(true);
     }
 
+#pragma warning disable AsyncFixer01
     private async Task<Dictionary<int, int>> GetSmartPayProfitData()
     {
 
@@ -130,6 +131,7 @@ public class TotalServiceIntegrationTests
         );
 
     }
+#pragma warning restore AsyncFixer01
 
 
     public class PayProfitReady

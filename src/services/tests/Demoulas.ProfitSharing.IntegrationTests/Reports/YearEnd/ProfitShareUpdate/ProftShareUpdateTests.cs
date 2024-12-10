@@ -22,10 +22,10 @@ public class ProfitShareUpdateTests
         ProfitShareUpdateReport profitShareUpdateService = createProfitShareUpdateService();
 
         string reportName = "psupdate-pay444-r2.txt";
-        profitShareUpdateService.TodaysDateTime = new DateTime(2024, 11, 14, 10, 35, 0); // time report was generated
+        profitShareUpdateService.TodaysDateTime = new DateTime(2024, 11, 14, 10, 35, 0, DateTimeKind.Local); // time report was generated
 
         // Act
-        profitShareUpdateService.ApplyAdjustments(profitYear,
+        profitShareUpdateService.ApplyAdjustments(
             new UpdateAdjustmentAmountsRequest
             {
                 Skip = null,
@@ -58,10 +58,10 @@ public class ProfitShareUpdateTests
         short profitYear = 2024;
         ProfitShareUpdateReport profitShareUpdateService = createProfitShareUpdateService();
         string reportName = "psupdate-pay444-r3.txt";
-        profitShareUpdateService.TodaysDateTime = new DateTime(2024, 11, 19, 19, 18, 0); // time report was generated
+        profitShareUpdateService.TodaysDateTime = new DateTime(2024, 11, 19, 19, 18, 0, DateTimeKind.Local); // time report was generated
 
         // Act
-        profitShareUpdateService.ApplyAdjustments(profitYear,
+        profitShareUpdateService.ApplyAdjustments(
             new UpdateAdjustmentAmountsRequest
             {
                 Skip = null,
@@ -87,7 +87,7 @@ public class ProfitShareUpdateTests
         AssertReportsAreEquivalent(expected, actual);
     }
 
-    private ProfitShareUpdateReport createProfitShareUpdateService()
+    private static ProfitShareUpdateReport createProfitShareUpdateService()
     {
         IConfigurationRoot configuration = new ConfigurationBuilder().AddUserSecrets<ProfitShareUpdateTests>().Build();
         string connectionString = configuration["ConnectionStrings:ProfitSharing"]!;
@@ -95,7 +95,6 @@ public class ProfitShareUpdateTests
 
         AccountingPeriodsService aps = new();
         CalendarService calendarService = new(dbFactory, aps);
-        TotalService totalService = new(dbFactory, null);
 
         return new ProfitShareUpdateReport(dbFactory, calendarService);
     }
@@ -108,7 +107,7 @@ public class ProfitShareUpdateTests
         {
             sb.Append(lines[i]);
             // Cobol is smart enough to not emit a Newline if the next character is a form feed.
-            if (i < lines.Count - 2 && !lines[i + 1].StartsWith("\f"))
+            if (i < lines.Count - 2 && !lines[i + 1].StartsWith('\f'))
             {
                 sb.Append("\n");
             }

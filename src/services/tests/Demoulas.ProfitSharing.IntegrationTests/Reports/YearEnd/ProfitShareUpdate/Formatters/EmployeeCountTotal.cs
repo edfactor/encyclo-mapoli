@@ -1,8 +1,11 @@
-﻿namespace Demoulas.ProfitSharing.Services.Reports.YearEnd.Update.ReportFormatters;
+﻿
+using static Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate.Formatters.FormatUtils;
+
+namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate.Formatters;
 
 using static FormatUtils;
 
-public class EMPLOYEE_COUNT_TOT
+public class EmployeeCountTotal
 {
     public string? FILLER0 { get; set; } = "TOTAL # OF EMPLOYEES =     "; // PIC X(27)
     public long PR_TOT_EMPLOYEE_COUNT { get; set; } // PIC ZZZ,ZZ9.

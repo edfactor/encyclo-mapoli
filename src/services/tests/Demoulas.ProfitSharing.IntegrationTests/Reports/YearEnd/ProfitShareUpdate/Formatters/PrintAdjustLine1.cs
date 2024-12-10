@@ -1,6 +1,8 @@
-﻿namespace Demoulas.ProfitSharing.Services.Reports.YearEnd.Update.ReportFormatters;
+﻿
+using static Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate.Formatters.FormatUtils;
 
-public class PRINT_ADJ_LINE1
+namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate.Formatters;
+public class PrintAdjustLine1
 {
     public string? FILLER0 { get; set; } // PIC X(03)
     public string? PL_ADJ_DESC { get; set; } // PIC X(17)

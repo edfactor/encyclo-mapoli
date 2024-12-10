@@ -25,7 +25,7 @@ public sealed record UpdateAdjustmentAmountsRequest : ProfitYearRequest
     public decimal AdjustIncomingForfeitAmount { get; set; }
     public decimal AdjustEarningsSecondaryAmount { get; set; }
 
-    public static UpdateAdjustmentAmountsRequest RequestExample()
+    public static new UpdateAdjustmentAmountsRequest RequestExample()
     {
         return new UpdateAdjustmentAmountsRequest
         {

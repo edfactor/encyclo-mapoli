@@ -1,8 +1,10 @@
-﻿namespace Demoulas.ProfitSharing.Services.Reports.YearEnd.Update.ReportFormatters;
+﻿
 
-using static FormatUtils;
+using static Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate.Formatters.FormatUtils;
 
-public class HEADER_3
+namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate.Formatters;
+
+public class Header3
 {
     public string? FILLER0 { get; set; } = " NUMBER"; // PIC X(07)
     public string? FILLER1 { get; set; } // PIC X(06)

@@ -1,4 +1,5 @@
-﻿namespace Demoulas.ProfitSharing.Services.Reports.YearEnd.Update.Formatters;
+﻿
+namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate.Formatters;
 
 public class CollectTotals
 {

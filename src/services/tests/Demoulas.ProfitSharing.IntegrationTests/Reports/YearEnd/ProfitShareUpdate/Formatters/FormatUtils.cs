@@ -1,18 +1,20 @@
 ﻿using System.Globalization;
 using System.Text.RegularExpressions;
 
+namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate.Formatters;
+
 public static class FormatUtils
 {
-    public static string rformat(object value, string type, string picClause)
+    public static string rformat(object? value, string type, string picClause)
     {
-        string fmt = "";
+        string fmt;
         switch (type)
         {
             case "decimal":
-                fmt = FormatDecimal((decimal)value, picClause);
+                fmt = FormatDecimal((decimal)value!, picClause);
                 break;
             case "long":
-                fmt = FormatLong((long)value, picClause);
+                fmt = FormatLong((long)value!, picClause);
                 break;
             case "DateOnly?":
                 fmt = FormatDate((DateOnly?)value, picClause);
@@ -94,7 +96,7 @@ public static class FormatUtils
         string numberStr = number.ToString("#,### ;#,###.-");
 
         // if we have three commas remove the first one.
-        if (numberStr.Where(c => c == ',').Count() == 3)
+        if (numberStr.Count(c => c == ',') == 3)
         {
             int cdex = numberStr.IndexOf(",");
             numberStr = numberStr[..cdex] + numberStr[cdex + 1];
@@ -124,7 +126,7 @@ public static class FormatUtils
     private static string FormatString(string? value, string picClause)
     {
         // Strip 'X(' and ')' to get the length from the PIC clause.
-        if (picClause.StartsWith("X(") && picClause.EndsWith(")"))
+        if (picClause.StartsWith("X(") && picClause.EndsWith(')'))
         {
             int length = int.Parse(picClause[2..^1]);
             return (value ?? "").PadRight(length).Substring(0, length);
@@ -160,12 +162,7 @@ public static class FormatUtils
                 : value.ToString(format, CultureInfo.InvariantCulture) + " ";
         }
 
-        //        var wz = formattedValue;
-        // Replace leading zeros with spaces.
-        //        formattedValue = Regex.Replace(formattedValue, @"(?<!\S)0+", new MatchEvaluator(m => new string(' ', m.Length)));
-
         return formattedValue.PadLeft(width);
-        //return format.PadLeft(width);
     }
 
     private static string FormatCobolLong(long value, string format, int width)
