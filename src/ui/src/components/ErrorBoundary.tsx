@@ -42,7 +42,6 @@ const ErrorFallback = ({ error, resetErrorBoundary }: FallbackProps) => {
 
       <Typography
         sx={{
-          color: "text.secondary",
           marginBottom: 4
         }}>
        Error: "{error.message}"
