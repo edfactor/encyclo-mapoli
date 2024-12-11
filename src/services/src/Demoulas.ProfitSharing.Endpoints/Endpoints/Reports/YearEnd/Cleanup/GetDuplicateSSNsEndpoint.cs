@@ -3,7 +3,6 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using CsvHelper.Configuration;
-using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Security;
@@ -55,7 +54,7 @@ public class GetDuplicateSsNsEndpoint : EndpointWithCsvBase<ProfitYearRequest, P
 
     public override Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
-        return _cleanupReportService.GetDuplicateSsNs(req, ct);
+        return _cleanupReportService.GetDuplicateSsnAsync(req, ct);
     }
 
     public sealed class GetDuplicateSsNsResponseMap : ClassMap<PayrollDuplicateSsnResponseDto>

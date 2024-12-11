@@ -48,6 +48,6 @@ public class MasterInquiryEndpoint : Endpoint<MasterInquiryRequest, MasterInquir
 
     public override Task<MasterInquiryWithDetailsResponseDto> ExecuteAsync(MasterInquiryRequest req, CancellationToken ct)
     {
-        return _masterInquiryService.GetMasterInquiry(req, ct);
+        return _masterInquiryService.GetMasterInquiryAsync(req, ct);
     }
 }

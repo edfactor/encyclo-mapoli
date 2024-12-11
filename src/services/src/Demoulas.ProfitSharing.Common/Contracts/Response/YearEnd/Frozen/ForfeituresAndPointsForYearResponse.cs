@@ -1,7 +1,7 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 public sealed record ForfeituresAndPointsForYearResponse
 {
-    public required long EmployeeBadgeNumber { get; set; }
+    public required long EmployeeId { get; set; }
     public string? EmployeeName { get; set; }
     public required string EmployeeSsn { get; set; }
     public decimal? Forfeitures { get; set; }
@@ -13,7 +13,7 @@ public sealed record ForfeituresAndPointsForYearResponse
     {
         return new ForfeituresAndPointsForYearResponse
         {
-            EmployeeBadgeNumber = 1234,
+            EmployeeId = 1234,
             EmployeeName = "Jane Doe",
             EmployeeSsn = "XXX-XX-9295",
             Forfeitures = 200.25m,

@@ -5,7 +5,6 @@ using CsvHelper;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.Util.Extensions;
-using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -19,7 +18,7 @@ namespace Demoulas.ProfitSharing.Endpoints.Base;
 /// <typeparam name="ReqType">Request type of the endpoint.  Can be EmptyRequest</typeparam>
 /// <typeparam name="RespType">Response type of the endpoint.</typeparam>
 /// <typeparam name="MapType">A mapping class that converts from a dto to a CSV format</typeparam>
-public abstract class EndpointWithCsvBase<ReqType, RespType, MapType> : Endpoint<ReqType, ReportResponseBase<RespType>>
+public abstract class EndpointWithCsvBase<ReqType, RespType, MapType> : FastEndpoints.Endpoint<ReqType, ReportResponseBase<RespType>>
     where ReqType : PaginationRequestDto
     where RespType : class
     where MapType : ClassMap<RespType>

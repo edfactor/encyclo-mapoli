@@ -72,11 +72,11 @@ public sealed class BeneficiaryContactMap : IEntityTypeConfiguration<Beneficiary
             contact.Property(a => a.EmailAddress).HasMaxLength(84).HasColumnName("EMAIL_ADDRESS");
         });
 
-     
 
-       _ = builder.HasMany(d => d.Beneficiaries)
-           .WithOne(p => p.Contact)
-           .HasForeignKey(d => d.BeneficiaryContactId)
-           .OnDelete(DeleteBehavior.NoAction);
+
+        _ = builder.HasMany(d => d.Beneficiaries)
+            .WithOne(p => p.Contact)
+            .HasForeignKey(d => d.BeneficiaryContactId)
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }

@@ -1,5 +1,4 @@
 ﻿using CsvHelper.Configuration;
-using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -77,7 +76,7 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYear
 
     public override Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
-        return _cleanupReportService.GetDuplicateNamesAndBirthdays(req, ct);
+        return _cleanupReportService.GetDuplicateNamesAndBirthdaysAsync(req, ct);
     }
 
     public sealed class DuplicateNamesAndBirthdaysResponseMap : ClassMap<DuplicateNamesAndBirthdaysResponse>

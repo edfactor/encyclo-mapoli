@@ -21,7 +21,5 @@ public sealed class Beneficiary
     public decimal Earnings { get; set; }
     public decimal SecondaryEarnings { get; set; }
     public required decimal Percent { get; set; }
-    
     public Demographic? Demographic { get; set; }
-    
 }

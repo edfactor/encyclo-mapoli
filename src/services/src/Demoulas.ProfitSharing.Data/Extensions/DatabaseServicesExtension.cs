@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
-using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Data.Factories;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.Util.Extensions;
@@ -14,7 +13,7 @@ namespace Demoulas.ProfitSharing.Data.Extensions;
 
 public static class DatabaseServicesExtension
 {
-    public static async Task<IHostApplicationBuilder> AddDatabaseServices(this IHostApplicationBuilder builder,
+    public static async Task<IHostApplicationBuilder> AddDatabaseServicesAsync(this IHostApplicationBuilder builder,
         IEnumerable<ContextFactoryRequest> contextFactoryRequests, bool runMigration = false, bool dropAndRecreate = false)
     {
         if (builder.Services.Any(s => s.ServiceType == typeof(IProfitSharingDataContextFactory)))

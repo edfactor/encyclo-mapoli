@@ -3,6 +3,7 @@ using Demoulas.Common.Api.Extensions;
 using Demoulas.Common.Contracts.Configuration;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.Common.Data.Services.Entities.Contexts;
+using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Api.Extensions;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Data.Contexts;
@@ -44,7 +45,7 @@ var rolePermissionService = new RolePermissionService();
 if (!builder.Environment.IsTestEnvironment())
 {
     builder.Services.AddOktaSecurity(builder.Configuration, rolePermissionService);
-} 
+}
 else
 {
     builder.Services.AddTestingSecurity(builder.Configuration, rolePermissionService);
@@ -71,9 +72,9 @@ List<ContextFactoryRequest> list = new List<ContextFactoryRequest>
 };
 
 #if RUSS
-await builder.AddDatabaseServices(list, true, true);
+await builder.AddDatabaseServicesAsync(list, true, true);
 #else
-await builder.AddDatabaseServices(list);
+await builder.AddDatabaseServicesAsync(list);
 #endif
 
 builder.AddCachingServices();

@@ -30,7 +30,8 @@ import {
   PagedReportResponse,
   ProfitSharingDistributionsByAge,
   ContributionsByAge,
-  ForfeituresByAge, BalanceByAge,
+  ForfeituresByAge,
+  BalanceByAge,
   MasterInquiryResponseType
 } from "reduxstore/types";
 import {
@@ -59,11 +60,13 @@ export const YearsEndApi = createApi({
     baseUrl: `${url}/api/`,
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).security.token;
+      const impersonating = (getState() as RootState).security.impersonating;
       if (token) {
         headers.set("authorization", `Bearer ${token}`);
       }
-      headers.set("impersonation", "Profit-Sharing-Administrator");
-
+      if (impersonating) {
+        headers.set("impersonation", impersonating);
+      }
       return headers;
     }
   }),
@@ -76,8 +79,7 @@ export const YearsEndApi = createApi({
         params: {
           take: params.pagination.take,
           skip: params.pagination.skip,
-          profitYear: params.profitYear,
-          impersonation: params.impersonation
+          profitYear: params.profitYear
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -98,8 +100,7 @@ export const YearsEndApi = createApi({
         method: "GET",
         params: {
           take: params.pagination.take,
-          skip: params.pagination.skip,
-          impersonation: params.impersonation
+          skip: params.pagination.skip
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -124,8 +125,7 @@ export const YearsEndApi = createApi({
           startMonth: params.startMonth,
           endMonth: params.endMonth,
           take: params.pagination.take,
-          skip: params.pagination.skip,
-          impersonation: params.impersonation
+          skip: params.pagination.skip
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -392,7 +392,7 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-     getContributionsByAge: builder.query<ContributionsByAge, FrozenReportsByAgeRequest>({
+    getContributionsByAge: builder.query<ContributionsByAge, FrozenReportsByAgeRequest>({
       query: (params) => ({
         url: "yearend/frozen/contributions-by-age",
         method: "GET",
@@ -428,7 +428,7 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-     getBalanceByAge: builder.query<BalanceByAge, FrozenReportsByAgeRequest>({
+    getBalanceByAge: builder.query<BalanceByAge, FrozenReportsByAgeRequest>({
       query: (params) => ({
         url: "yearend/frozen/balance-by-age",
         method: "GET",
@@ -474,7 +474,7 @@ export const YearsEndApi = createApi({
           console.log("Err: " + err);
         }
       }
-    }),
+    })
   })
 });
 

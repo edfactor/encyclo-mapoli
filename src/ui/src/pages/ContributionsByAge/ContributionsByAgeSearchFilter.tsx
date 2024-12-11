@@ -7,6 +7,8 @@ import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { ImpersonationRoles, FrozenReportsByAgeRequestType } from "reduxstore/types";
+import { useSelector } from "react-redux";
+import { RootState } from "reduxstore/store";
 
 interface ContributionsByAgeSearch {
   profitYear: number;
@@ -48,8 +50,7 @@ const ContributionsByAgeSearchFilter = () => {
         {
           profitYear: data.profitYear,
           reportType: FrozenReportsByAgeRequestType.Total,
-          pagination: { skip: 0, take: 255 },
-          impersonation: ImpersonationRoles.ProfitSharingAdministrator
+          pagination: { skip: 0, take: 255 }
         },
         false
       );
@@ -57,8 +58,7 @@ const ContributionsByAgeSearchFilter = () => {
         {
           profitYear: data.profitYear,
           reportType: FrozenReportsByAgeRequestType.FullTime,
-          pagination: { skip: 0, take: 255 },
-          impersonation: ImpersonationRoles.ProfitSharingAdministrator
+          pagination: { skip: 0, take: 255 }
         },
         false
       );
@@ -66,8 +66,7 @@ const ContributionsByAgeSearchFilter = () => {
         {
           profitYear: data.profitYear,
           reportType: FrozenReportsByAgeRequestType.PartTime,
-          pagination: { skip: 0, take: 255 },
-          impersonation: ImpersonationRoles.ProfitSharingAdministrator
+          pagination: { skip: 0, take: 255 }
         },
         false
       );

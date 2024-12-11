@@ -6,7 +6,6 @@ import { useLazyGetDistributionsAndForfeituresQuery } from "reduxstore/api/Years
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { ImpersonationRoles } from "reduxstore/types";
 
 interface DistributionsAndForfeituresSearch {
   profitYear: number;
@@ -70,8 +69,7 @@ const DistributionsAndForfeituresSearchFilter = () => {
           ...(data.startMonth && { startMonth: data.startMonth }),
           ...(data.endMonth && { endMonth: data.endMonth }),
           includeOutgoingForfeitures: data.includeOutgoingForfeitures ?? false,
-          pagination: { skip: 0, take: 25 },
-          impersonation: ImpersonationRoles.ProfitSharingAdministrator
+          pagination: { skip: 0, take: 25 }
         },
         false
       );
@@ -129,7 +127,7 @@ const DistributionsAndForfeituresSearchFilter = () => {
                 variant="outlined"
                 error={!!errors.startMonth}
                 onChange={(e) => {
-                  const parsedValue = e.target.value === "" ? null : Number(e.target.value); 
+                  const parsedValue = e.target.value === "" ? null : Number(e.target.value);
                   field.onChange(parsedValue);
                 }}
                 inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
@@ -153,7 +151,7 @@ const DistributionsAndForfeituresSearchFilter = () => {
                 variant="outlined"
                 error={!!errors.endMonth}
                 onChange={(e) => {
-                  const parsedValue = e.target.value === "" ? null : Number(e.target.value); 
+                  const parsedValue = e.target.value === "" ? null : Number(e.target.value);
                   field.onChange(parsedValue);
                 }}
                 inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
@@ -177,7 +175,9 @@ const DistributionsAndForfeituresSearchFilter = () => {
               />
             )}
           />
-          {errors.includeOutgoingForfeitures && <FormHelperText error>{errors.includeOutgoingForfeitures.message}</FormHelperText>}
+          {errors.includeOutgoingForfeitures && (
+            <FormHelperText error>{errors.includeOutgoingForfeitures.message}</FormHelperText>
+          )}
         </Grid2>
       </Grid2>
       <Grid2
