@@ -26,7 +26,7 @@ public class ProfitShareUpdateTests
 
         // Act
         profitShareUpdateService.ApplyAdjustments(
-            new UpdateAdjustmentAmountsRequest
+            new ProfitSharingUpdateRequest
             {
                 Skip = null,
                 Take = null,
@@ -62,7 +62,7 @@ public class ProfitShareUpdateTests
 
         // Act
         profitShareUpdateService.ApplyAdjustments(
-            new UpdateAdjustmentAmountsRequest
+            new ProfitSharingUpdateRequest
             {
                 Skip = null,
                 Take = null,

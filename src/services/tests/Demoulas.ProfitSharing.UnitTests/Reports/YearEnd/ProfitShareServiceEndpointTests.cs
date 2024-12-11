@@ -21,13 +21,13 @@ public class ProfitShareServiceEndpointTests : ApiTestBase<Program>
     public async Task Unauthorized()
     {
         // Arrange
-        UpdateAdjustmentAmountsRequest req = new() { ProfitYear = 2024 };
+        ProfitSharingUpdateRequest req = new() { ProfitYear = 2024 };
 
         // Act
         TestResult<ProfitShareUpdateResponse> response =
             await ApiClient
                 .GETAsync<ProfitShareUpdateEndpoint,
-                    UpdateAdjustmentAmountsRequest, ProfitShareUpdateResponse>(req);
+                    ProfitSharingUpdateRequest, ProfitShareUpdateResponse>(req);
 
         // Assert
         response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -37,14 +37,14 @@ public class ProfitShareServiceEndpointTests : ApiTestBase<Program>
     public async Task BasicQuery()
     {
         // Arrange
-        UpdateAdjustmentAmountsRequest req = new() { ProfitYear = 2024 };
+        ProfitSharingUpdateRequest req = new() { ProfitYear = 2024 };
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
         // Act
         TestResult<ProfitShareUpdateResponse> response =
             await ApiClient
                 .GETAsync<ProfitShareUpdateEndpoint,
-                    UpdateAdjustmentAmountsRequest, ProfitShareUpdateResponse>(req);
+                    ProfitSharingUpdateRequest, ProfitShareUpdateResponse>(req);
 
         // Assert
         response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -59,8 +59,8 @@ public class ProfitShareServiceEndpointTests : ApiTestBase<Program>
 
            // Arrange
            // ensure we always have an employee with PointsEarned
-           await ModifyAnEmployee(c);
-           UpdateAdjustmentAmountsRequest req = new()
+           await EnsureEmployeeHasPoints(c);
+           ProfitSharingUpdateRequest req = new()
            {
                ProfitYear = 2024,
                AdjustContributionAmount = 20,
@@ -72,7 +72,7 @@ public class ProfitShareServiceEndpointTests : ApiTestBase<Program>
            TestResult<ProfitShareUpdateResponse> response =
                await ApiClient
                    .GETAsync<ProfitShareUpdateEndpoint,
-                       UpdateAdjustmentAmountsRequest, ProfitShareUpdateResponse>(req);
+                       ProfitSharingUpdateRequest, ProfitShareUpdateResponse>(req);
 
            // Assert
            response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -83,7 +83,7 @@ public class ProfitShareServiceEndpointTests : ApiTestBase<Program>
     }
 
 
-    private static async Task<PayProfit> ModifyAnEmployee(ProfitSharingDbContext c)
+    private static async Task<PayProfit> EnsureEmployeeHasPoints(ProfitSharingDbContext c)
     {
         PayProfit pp = await c.PayProfits
             .Include(payProfit => payProfit.Demographic!)

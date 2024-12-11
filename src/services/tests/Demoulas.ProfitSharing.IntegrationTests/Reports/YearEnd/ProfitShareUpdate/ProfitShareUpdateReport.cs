@@ -27,20 +27,20 @@ internal sealed class ProfitShareUpdateReport
     public DateTime TodaysDateTime { get; set; }
     public List<string> ReportLines { get; set; } = [];
 
-    public void ApplyAdjustments(UpdateAdjustmentAmountsRequest updateAdjustmentAmountsRequest)
+    public void ApplyAdjustments(ProfitSharingUpdateRequest profitSharingUpdateRequest)
     {
         LoggerFactory loggerFactory = new();
         TotalService totalService = new TotalService(_dbFactory, calendarService);
         ProfitShareUpdateService psu = new(_dbFactory, loggerFactory, totalService, calendarService);
-        this.profitYear = updateAdjustmentAmountsRequest.ProfitYear;
+        this.profitYear = profitSharingUpdateRequest.ProfitYear;
 
         (List<MemberFinancials> members, AdjustmentReportData adjustmentsApplied, bool _) =
 #pragma warning disable VSTHRD002
-            psu.ApplyAdjustments(updateAdjustmentAmountsRequest, CancellationToken.None).GetAwaiter().GetResult();
+            psu.ProfitSharingUpdatePaginated(profitSharingUpdateRequest, CancellationToken.None).GetAwaiter().GetResult();
 #pragma warning restore VSTHRD002
 
-        m805PrintSequence(members, updateAdjustmentAmountsRequest.MaxAllowedContributions);
-        m1000AdjustmentReport(updateAdjustmentAmountsRequest, adjustmentsApplied);
+        m805PrintSequence(members, profitSharingUpdateRequest.MaxAllowedContributions);
+        m1000AdjustmentReport(profitSharingUpdateRequest, adjustmentsApplied);
     }
 
     public void m805PrintSequence(List<MemberFinancials> members, long maxAllowedContribution)
@@ -314,10 +314,10 @@ internal sealed class ProfitShareUpdateReport
     }
 
 
-    public void m1000AdjustmentReport(UpdateAdjustmentAmountsRequest updateAdjustmentAmountsRequest,
+    public void m1000AdjustmentReport(ProfitSharingUpdateRequest profitSharingUpdateRequest,
         AdjustmentReportData adjustmentsApplied)
     {
-        if (updateAdjustmentAmountsRequest.BadgeToAdjust == 0)
+        if (profitSharingUpdateRequest.BadgeToAdjust == 0)
         {
             return;
         }
@@ -334,7 +334,7 @@ internal sealed class ProfitShareUpdateReport
         WRITE2_advance2(header_5);
 
         PrintAdjustLine1 printAdjustLine1 = new();
-        printAdjustLine1.PL_ADJUST_BADGE = updateAdjustmentAmountsRequest.BadgeToAdjust;
+        printAdjustLine1.PL_ADJUST_BADGE = profitSharingUpdateRequest.BadgeToAdjust;
         printAdjustLine1.PL_ADJ_DESC = "INITIAL";
         printAdjustLine1.PL_CONT_AMT = adjustmentsApplied.ContributionAmountUnadjusted;
         printAdjustLine1.PL_FORF_AMT = adjustmentsApplied.IncomingForfeitureAmountUnadjusted;
@@ -344,10 +344,10 @@ internal sealed class ProfitShareUpdateReport
 
         printAdjustLine1.PL_ADJUST_BADGE = 0;
         printAdjustLine1.PL_ADJ_DESC = "ADJUSTMENT";
-        printAdjustLine1.PL_CONT_AMT = updateAdjustmentAmountsRequest.AdjustContributionAmount;
-        printAdjustLine1.PL_EARN_AMT = updateAdjustmentAmountsRequest.AdjustEarningsAmount;
-        printAdjustLine1.PL_EARN2_AMT = updateAdjustmentAmountsRequest.AdjustEarningsSecondaryAmount;
-        printAdjustLine1.PL_FORF_AMT = updateAdjustmentAmountsRequest.AdjustIncomingForfeitAmount;
+        printAdjustLine1.PL_CONT_AMT = profitSharingUpdateRequest.AdjustContributionAmount;
+        printAdjustLine1.PL_EARN_AMT = profitSharingUpdateRequest.AdjustEarningsAmount;
+        printAdjustLine1.PL_EARN2_AMT = profitSharingUpdateRequest.AdjustEarningsSecondaryAmount;
+        printAdjustLine1.PL_FORF_AMT = profitSharingUpdateRequest.AdjustIncomingForfeitAmount;
         WRITE2_advance2(printAdjustLine1);
 
         printAdjustLine1.PL_ADJ_DESC = "FINAL";
