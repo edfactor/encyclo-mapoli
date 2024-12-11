@@ -22,7 +22,6 @@ const ErrorFallback = ({ error, resetErrorBoundary }: FallbackProps) => {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        padding: 4
       }}>
       <ErrorOutlineIcon
         sx={{
