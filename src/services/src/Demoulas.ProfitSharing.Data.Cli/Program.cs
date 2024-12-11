@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Factories;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Data.Cli;
 
@@ -38,13 +39,11 @@ public class Program
             }
 
             HostApplicationBuilder builder = CreateHostBuilder(args);
-            var list = new List<ContextFactoryRequest>
-            {
-                ContextFactoryRequest.Initialize<ProfitSharingDbContext>(connectionName)
-            };
+            var list = new List<ContextFactoryRequest> { ContextFactoryRequest.Initialize<ProfitSharingDbContext>(connectionName) };
+            _ = DataContextFactory.Initialize(builder, contextFactoryRequests: list);
 
-            var factory = DataContextFactory.Initialize(builder, contextFactoryRequests: list);
-            await factory.UseWritableContext(context => context.Database.MigrateAsync());
+            var context = builder.Services.BuildServiceProvider().GetRequiredService<ProfitSharingDbContext>();
+            await context.Database.MigrateAsync();
         });
 
         // Define and set up "drop-recreate-db" command
@@ -62,17 +61,13 @@ public class Program
             }
 
             HostApplicationBuilder builder = CreateHostBuilder(args);
-            var list = new List<ContextFactoryRequest>
-            {
-                ContextFactoryRequest.Initialize<ProfitSharingDbContext>(connectionName)
-            };
+            var list = new List<ContextFactoryRequest> { ContextFactoryRequest.Initialize<ProfitSharingDbContext>(connectionName) };
+            _ = DataContextFactory.Initialize(builder, contextFactoryRequests: list);
 
-            var factory = DataContextFactory.Initialize(builder, contextFactoryRequests: list);
-            await factory.UseWritableContext(async context =>
-            {
-                await context.Database.EnsureDeletedAsync();
-                await context.Database.MigrateAsync();
-            });
+            var context = builder.Services.BuildServiceProvider().GetRequiredService<ProfitSharingDbContext>();
+            await context.Database.EnsureDeletedAsync();
+            await context.Database.MigrateAsync();
+
         });
 
         // Define and set up "run-sql" command
