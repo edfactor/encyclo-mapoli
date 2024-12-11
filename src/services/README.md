@@ -82,13 +82,12 @@ dotnet tool update --global dotnet-ef
 ### EntityFramework Migrations
 dotnet ef migrations add {migrationName} --context ProfitSharingDbContext
 dotnet ef migrations script --context ProfitSharingDbContext --output {FILE}
-dotnet ef database update --context ProfitSharingDbContext
 
 
-
-
-### EntityFramework scaffold
-dotnet ef dbcontext scaffold "{Data Source}" Oracle.EntityFrameworkCore -o Models -t AR_ACTIVE -t AR_ADJUSTMENT -t AR_DEPOSIT -t AR_DEPOSIT_DETAIL -t AR_TEMP
+### Manage the database
+**In place upgrade**: Demoulas.ProfitSharing.Data.Cli upgrade-db --connection-name ProfitSharing
+**Drop and rebuild schema**: Demoulas.ProfitSharing.Data.Cli drop-recreate-db --connection-name ProfitSharing
+**Import from Ready**: Demoulas.ProfitSharing.Data.Cli $action --connection-name ProfitSharing --sql-file ".\src\database\ready_import\SQL copy all from ready to smart 
 
 
 <hr/>

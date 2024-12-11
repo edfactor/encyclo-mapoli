@@ -52,15 +52,10 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
         SetExecutiveHoursAndDollarsRequest request = new SetExecutiveHoursAndDollarsRequest
         {
             ProfitYear = 0,
-            ExecutiveHoursAndDollars = new List<SetExecutiveHoursAndDollarsDto>
-            {
-                new()
-                {
-                    EmployeeId = 484848,
-                    ExecutiveDollars = 444m,
-                    ExecutiveHours = 555m
-                }
-            }
+            ExecutiveHoursAndDollars =
+            [
+                new() { EmployeeId = 484848, ExecutiveDollars = 444m, ExecutiveHours = 555m }
+            ]
         };
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
@@ -111,7 +106,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
         SetExecutiveHoursAndDollarsRequest request = new SetExecutiveHoursAndDollarsRequest
         {
             ProfitYear = profitYear,
-            ExecutiveHoursAndDollars = new List<SetExecutiveHoursAndDollarsDto> { }
+            ExecutiveHoursAndDollars = []
         };
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 

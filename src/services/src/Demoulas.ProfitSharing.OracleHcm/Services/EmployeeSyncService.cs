@@ -73,7 +73,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
         catch (Exception ex)
         {
             success = false;
-            await AuditError(0, new[] { new FluentValidation.Results.ValidationFailure("Error", ex.Message) }, requestedBy, cancellationToken);
+            await AuditError(0, [new FluentValidation.Results.ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken);
         }
         finally
         {

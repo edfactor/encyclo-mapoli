@@ -52,7 +52,7 @@ public class PayrollSyncClient
     {
         foreach (long personId in personIds)
         {
-            HashSet<int> objectActionIds = new HashSet<int>();
+            HashSet<int> objectActionIds = [];
             bool isSuccessful = false;
 
             try
