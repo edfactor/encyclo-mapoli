@@ -20,6 +20,8 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
     }
     
     public virtual DbSet<Demographic> Demographics { get; set; }
+    public virtual DbSet<DemographicHistory> DemographicHistories { get; set; }
+    public virtual DbSet<FrozenState> FrozenStates { get; set; }
     public virtual DbSet<Country> Countries { get; set; }
     public virtual DbSet<PayClassification> PayClassifications { get; set; }
     public virtual DbSet<ProfitDetail> ProfitDetails { get; set; }

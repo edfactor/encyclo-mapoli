@@ -340,6 +340,10 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
             {
                 dem.EmploymentStatusId = 't';
             }
+            foreach (var demH in ctx.DemographicHistories)
+            {
+                demH.EmploymentStatusId = 't';
+            }
 
             //Prevent any payprofit records from being returned
             foreach (var pp in ctx.PayProfits)
@@ -350,9 +354,12 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
             //Setup employee to be returned
             var payProfit = await ctx.PayProfits.Include(payProfit => payProfit.Demographic).FirstAsync();
             var emp = payProfit.Demographic;
+            var empH = await ctx.DemographicHistories.FirstAsync(x => x.DemographicId == emp!.Id);
 
             emp!.EmploymentStatusId = 'a';
             emp!.DateOfBirth = new DateOnly(DateTime.Now.Year - 28, 9, 21);
+            empH.EmploymentStatusId = emp!.EmploymentStatusId;
+            empH.DateOfBirth = emp!.DateOfBirth;
 
             payProfit.ProfitYear = profitYear;
             payProfit.CurrentHoursYear = testHours;
@@ -391,8 +398,10 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
             //Setup employee to be returned
             var payProfit = await ctx.PayProfits.Include(payProfit => payProfit.Demographic).FirstAsync();
             var emp = payProfit.Demographic;
+            var empH = await ctx.DemographicHistories.FirstAsync(x => x.DemographicId == emp!.Id);
 
             emp!.DateOfBirth = new DateOnly(DateTime.Now.Year - 15, 9, 21);
+            empH.DateOfBirth = emp!.DateOfBirth;
             await ctx.SaveChangesAsync();
         });
         
@@ -440,6 +449,11 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
                 dem.EmploymentStatusId = 'd';
             }
 
+            foreach (var demh in ctx.DemographicHistories)
+            {
+                demh.EmploymentStatusId = 'd';
+            }
+
             //Prevent any payprofit records from being returned
             foreach (var pp in ctx.PayProfits)
             {
@@ -449,9 +463,12 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
             //Setup employee to be returned
             var payProfit = await ctx.PayProfits.Include(payProfit => payProfit.Demographic).FirstAsync();
             var emp = payProfit.Demographic;
+            var empH = await ctx.DemographicHistories.FirstAsync(x => x.DemographicId == emp!.Id);
 
             emp!.EmploymentStatusId = 'a';
             emp!.DateOfBirth = new DateOnly(DateTime.Now.Year - 28, 9, 21);
+            empH.EmploymentStatusId = emp!.EmploymentStatusId;
+            empH.DateOfBirth = emp!.DateOfBirth;
 
             payProfit.ProfitYear = profitYear;
             payProfit.CurrentHoursYear = testHours;

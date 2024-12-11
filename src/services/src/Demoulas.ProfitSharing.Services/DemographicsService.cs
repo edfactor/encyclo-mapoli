@@ -142,6 +142,9 @@ public class DemographicsService : IDemographicsServiceInternal
                     try
                     {
                         context.Demographics.Add(entity);
+                        
+                        var history = DemographicHistory.FromDemographic(entity);
+                        context.DemographicHistories.Add(history);
                     }
                     catch (InvalidOperationException e) when (e.Message.Contains(
                                                                   "When attaching existing entities, ensure that only one entity instance with a given key value is attached."))
@@ -194,7 +197,20 @@ public class DemographicsService : IDemographicsServiceInternal
                     }
 
                     // Update the rest of the entity's fields
+                    var updateHistory = false;
+                    if (!Demographic.DemographicHistoryEqual(existingEntity, incomingEntity))
+                    {
+                        updateHistory = true;
+                    }
                     UpdateEntityValues(existingEntity, incomingEntity, currentModificationDate);
+                    if (updateHistory)
+                    {
+                        var newHistoryRecord = DemographicHistory.FromDemographic(incomingEntity, existingEntity.Id);
+                        var oldHistoryRecord = await context.DemographicHistories.Where(x => x.DemographicId == existingEntity.Id && DateTime.UtcNow >= x.ValidFrom && DateTime.UtcNow < x.ValidTo).FirstAsync();
+                        oldHistoryRecord.ValidTo = DateTime.UtcNow;
+                        newHistoryRecord.ValidFrom = oldHistoryRecord.ValidTo;
+                        context.DemographicHistories.Add(newHistoryRecord);
+                    }
                 }
             }
 
