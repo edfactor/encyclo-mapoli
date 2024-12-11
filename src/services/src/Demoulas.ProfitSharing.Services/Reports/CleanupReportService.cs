@@ -363,6 +363,7 @@ public class CleanupReportService : ICleanupReportService
     {
         var response = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
         var over18BirthDate = response.FiscalEndDate.AddYears(-18);
+
         var rslt = await _dataContextFactory.UseReadOnlyContext(ctx =>
         {
             var qry = ctx.PayProfits.Include(x => x.Demographic).Where(p => p.ProfitYear == req.ProfitYear)
@@ -385,6 +386,34 @@ public class CleanupReportService : ICleanupReportService
                     p.pp.PointsEarned,
                     p.yip.Years
                 });
+
+            if (req.IsYearEnd)
+            {
+                qry = (
+                    from pp in ctx.PayProfits
+                    join d in FrozenService.GetDemographicSnapshot(ctx, req.ProfitYear) on pp.DemographicId equals d.Id
+                    join t in _totalService.GetYearsOfService(ctx, req.ProfitYear) on d.Ssn equals t.Ssn
+                    where pp.ProfitYear == req.ProfitYear
+                    select new
+                    {
+                        d.EmployeeId,
+                        pp.CurrentHoursYear,
+                        pp.HoursExecutive,
+                        d.DateOfBirth,
+                        d.EmploymentStatusId,
+                        d.TerminationDate,
+                        d.Ssn,
+                        d.ContactInfo.LastName,
+                        d.ContactInfo.FirstName,
+                        d.StoreNumber,
+                        d.EmploymentTypeId,
+                        pp.CurrentIncomeYear,
+                        pp.IncomeExecutive,
+                        pp.PointsEarned,
+                        t.Years
+                    }
+                );
+            }
 
             if (req.IncludeBeneficiaries)
             {
@@ -446,7 +475,7 @@ public class CleanupReportService : ICleanupReportService
                 if (req is { IncludeActiveEmployees: true, IncludeEmployeesTerminatedThisYear: false })
                 {
                     qry = qry.Where(p => validStatus.Contains(p.EmploymentStatusId) || p.TerminationDate > response.FiscalEndDate);
-                } 
+                }
                 else if (req.IncludeEmployeesTerminatedThisYear && req is { IncludeActiveEmployees: false, IncludeInactiveEmployees: false })
                 {
                     qry = qry.Where(p => validStatus.Contains(p.EmploymentStatusId) && p.TerminationDate <= response.FiscalEndDate && p.TerminationDate >= response.FiscalBeginDate);
@@ -474,8 +503,6 @@ public class CleanupReportService : ICleanupReportService
             {
                 joinedQry = joinedQry.Where(jq => jq.tot.Total == 0);
             }
-
-            var r = joinedQry.ToListAsync(cancellationToken: cancellationToken);
 
             return joinedQry
                       .OrderBy(p => p.pp.LastName)

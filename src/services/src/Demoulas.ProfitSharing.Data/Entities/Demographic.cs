@@ -66,4 +66,23 @@ public sealed class Demographic : Member
 
     public List<ProfitShareCheck> Checks { get; set; } = [];
     public List<DistributionRequest> DistributionRequests { get; set; } = [];
+
+    public static bool DemographicHistoryEqual(Demographic demo1, Demographic demo2)
+    {
+        return demo1.OracleHcmId == demo2.OracleHcmId &&
+               //The Oracle HCM process seems to have a random SSN.  Until that settles down, not including SSN changes as a reason to create a new history record.  demo1.Ssn == demo2.Ssn &&
+               demo1.EmployeeId == demo2.EmployeeId &&
+               demo1.StoreNumber == demo2.StoreNumber &&
+               demo1.PayClassificationId == demo2.PayClassificationId &&
+               demo1.DateOfBirth == demo2.DateOfBirth &&
+               demo1.HireDate == demo2.HireDate &&
+               demo1.ReHireDate == demo2.ReHireDate &&
+               demo1.TerminationDate == demo2.TerminationDate &&
+               demo1.DepartmentId == demo2.DepartmentId &&
+               demo1.EmploymentTypeId == demo2.EmploymentTypeId &&
+               demo1.PayFrequencyId == demo2.PayFrequencyId &&
+               demo1.TerminationCodeId == demo2.TerminationCodeId &&
+               demo1.EmploymentStatusId == demo2.EmploymentStatusId;
+                
+    }
 }
