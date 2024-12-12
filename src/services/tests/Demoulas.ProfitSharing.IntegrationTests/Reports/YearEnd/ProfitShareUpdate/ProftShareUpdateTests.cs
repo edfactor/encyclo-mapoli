@@ -1,19 +1,40 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
 using System.Text;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services.Reports.YearEnd.ProfitShareUpdate;
+using Demoulas.ProfitSharing.Services.ServiceDto;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.Services.Reports.YearEnd.Update;
 
 public class ProfitShareUpdateTests
 {
+    private readonly AccountingPeriodsService _aps = new();
+    private readonly CalendarService _calendarService;
+    private readonly IProfitSharingDataContextFactory _dbFactory;
+    private readonly ITestOutputHelper _testOutputHelper;
+    private readonly TotalService _totalService;
+
+    public ProfitShareUpdateTests(ITestOutputHelper testOutputHelper)
+    {
+        _testOutputHelper = testOutputHelper;
+
+        IConfigurationRoot configuration = new ConfigurationBuilder().AddUserSecrets<ProfitShareUpdateTests>().Build();
+        string connectionString = configuration["ConnectionStrings:ProfitSharing"]!;
+        _dbFactory = new PristineDataContextFactory(connectionString);
+        _calendarService = new CalendarService(_dbFactory, _aps);
+        _totalService = new TotalService(_dbFactory, _calendarService);
+    }
+
+
     [Fact]
     public void ReportWithUpdates()
     {
@@ -22,7 +43,8 @@ public class ProfitShareUpdateTests
         ProfitShareUpdateReport profitShareUpdateService = createProfitShareUpdateService();
 
         string reportName = "psupdate-pay444-r2.txt";
-        profitShareUpdateService.TodaysDateTime = new DateTime(2024, 11, 14, 10, 35, 0, DateTimeKind.Local); // time report was generated
+        profitShareUpdateService.TodaysDateTime =
+            new DateTime(2024, 11, 14, 10, 35, 0, DateTimeKind.Local); // time report was generated
 
         // Act
         profitShareUpdateService.ApplyAdjustments(
@@ -58,7 +80,8 @@ public class ProfitShareUpdateTests
         short profitYear = 2024;
         ProfitShareUpdateReport profitShareUpdateService = createProfitShareUpdateService();
         string reportName = "psupdate-pay444-r3.txt";
-        profitShareUpdateService.TodaysDateTime = new DateTime(2024, 11, 19, 19, 18, 0, DateTimeKind.Local); // time report was generated
+        profitShareUpdateService.TodaysDateTime =
+            new DateTime(2024, 11, 19, 19, 18, 0, DateTimeKind.Local); // time report was generated
 
         // Act
         profitShareUpdateService.ApplyAdjustments(
@@ -87,16 +110,10 @@ public class ProfitShareUpdateTests
         AssertReportsAreEquivalent(expected, actual);
     }
 
-    private static ProfitShareUpdateReport createProfitShareUpdateService()
+
+    private ProfitShareUpdateReport createProfitShareUpdateService()
     {
-        IConfigurationRoot configuration = new ConfigurationBuilder().AddUserSecrets<ProfitShareUpdateTests>().Build();
-        string connectionString = configuration["ConnectionStrings:ProfitSharing"]!;
-        IProfitSharingDataContextFactory dbFactory = new PristineDataContextFactory(connectionString);
-
-        AccountingPeriodsService aps = new();
-        CalendarService calendarService = new(dbFactory, aps);
-
-        return new ProfitShareUpdateReport(dbFactory, calendarService);
+        return new ProfitShareUpdateReport(_dbFactory, _calendarService);
     }
 
 
@@ -159,5 +176,49 @@ public class ProfitShareUpdateTests
         {
             return reader.ReadToEnd().Replace("\r", "");
         }
+    }
+
+    // This code runs fine on the mock db, but on oracle it throws an exception with the beneficiary part of the TotalService.GetVestingRatio()
+    [Fact]
+    public async Task Bene_problem()
+    {
+        true.Should().Be(true);
+        short profitShare = 2023;
+
+        CalendarResponseDto fiscalDates =
+            await _calendarService.GetYearStartAndEndAccountingDatesAsync(2023, CancellationToken.None);
+        List<EmployeeFinancials> employeeFinancialsList = await _dbFactory.UseReadOnlyContext(async ctx =>
+        {
+            IQueryable<ParticipantTotalVestingBalanceDto> totalVestingBalances =
+                _totalService.TotalVestingBalance(ctx, (short)(profitShare - 1), fiscalDates.FiscalEndDate);
+
+            return await ctx.PayProfits
+                .Include(pp => pp.Demographic)
+                .Include(pp => pp.Demographic!.ContactInfo)
+                .Where(pp => pp.ProfitYear == 2023)
+                .GroupJoin(
+                    totalVestingBalances,
+                    pp => pp.Demographic!.Ssn,
+                    tvb => tvb.Ssn,
+                    (pp, tvbs) => new { PayProfit = pp, TotalVestingBalances = tvbs.DefaultIfEmpty() }
+                )
+                .SelectMany(
+                    x => x.TotalVestingBalances,
+                    (x, tvb) => new EmployeeFinancials
+                    {
+                        EmployeeId = x.PayProfit.Demographic!.EmployeeId,
+                        Ssn = x.PayProfit.Demographic.Ssn,
+                        Name = x.PayProfit.Demographic.ContactInfo!.FullName,
+                        EnrolledId = x.PayProfit.EnrollmentId,
+                        YearsInPlan = x.PayProfit.YearsInPlan,
+                        CurrentAmount = tvb == null ? 0 : tvb.CurrentBalance,
+                        EmployeeTypeId = x.PayProfit.EmployeeTypeId,
+                        PointsEarned = (int)(x.PayProfit.PointsEarned ?? 0),
+                        EtvaAfterVestingRules = tvb == null ? 0 : tvb.Etva
+                    }
+                )
+                .ToListAsync();
+        });
+        _testOutputHelper.WriteLine("Total employees " + employeeFinancialsList.Count);
     }
 }

@@ -37,6 +37,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
         var (memberFinancials, _, isReRunRequired) = await ProfitSharingUpdatePaginated(profitSharingUpdateRequest, cancellationToken);
         var members = memberFinancials.Select(m => new MemberFinancialsResponse
         {
+            Badge = m.Badge,
             Psn = m.Psn,
             Name = m.Name,
             CurrentAmount = m.CurrentAmount,
@@ -102,32 +103,34 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
         List<EmployeeFinancials> employeeFinancialsList = await _dbContextFactory.UseReadOnlyContext(async ctx =>
         {
             IQueryable<ParticipantTotalVestingBalanceDto> totalVestingBalances =
-                ((TotalService)_totalService).TotalVestingBalance(ctx, (short)(profitSharingUpdateRequest.ProfitYear - 1), fiscalDates.FiscalEndDate);
+                ((TotalService)_totalService).TotalVestingBalance(ctx,
+                    (short)(profitSharingUpdateRequest.ProfitYear - 1), fiscalDates.FiscalEndDate);
 
             return await ctx.PayProfits
-                .Where(pp=>pp.Demographic != null)
                 .Include(pp => pp.Demographic)
-                .Where(pp => pp.Demographic != null)
                 .Include(pp => pp.Demographic!.ContactInfo)
-                .Where(pp => pp.ProfitYear == (profitSharingUpdateRequest.ProfitYear - 1))
-                .Join(
+                .Where(pp => pp.ProfitYear == profitSharingUpdateRequest.ProfitYear)
+                .GroupJoin(
                     totalVestingBalances,
                     pp => pp.Demographic!.Ssn,
                     tvb => tvb.Ssn,
-                    (pp, tvb) => new EmployeeFinancials
+                    (pp, tvbs) => new { PayProfit = pp, TotalVestingBalances = tvbs.DefaultIfEmpty() }
+                )
+                .SelectMany(
+                    x => x.TotalVestingBalances,
+                    (x, tvb) => new EmployeeFinancials
                     {
-                        EmployeeId = pp.Demographic!.EmployeeId,
-                        Ssn = pp.Demographic.Ssn,
-                        Name = pp.Demographic.ContactInfo!.FullName,
-                        EnrolledId = pp.EnrollmentId,
-                        YearsInPlan = pp.YearsInPlan,
-                        CurrentAmount = tvb.CurrentBalance,
-                        EmployeeTypeId = pp.EmployeeTypeId,
-                        PointsEarned = (int)(pp.PointsEarned ?? 0), // This is supposed to be int in the database.   Database will be updated.
-                        EtvaAfterVestingRules = tvb.Etva
+                        EmployeeId = x.PayProfit.Demographic!.EmployeeId,
+                        Ssn = x.PayProfit.Demographic.Ssn,
+                        Name = x.PayProfit.Demographic.ContactInfo!.FullName,
+                        EnrolledId = x.PayProfit.EnrollmentId,
+                        YearsInPlan = x.PayProfit.YearsInPlan,
+                        CurrentAmount = tvb == null ? 0 : tvb.CurrentBalance,
+                        EmployeeTypeId = x.PayProfit.EmployeeTypeId,
+                        PointsEarned = (int)(x.PayProfit.PointsEarned ?? 0),
+                        EtvaAfterVestingRules = tvb == null ? 0 : tvb.Etva
                     }
                 )
-                .OrderBy(ef => ef.EmployeeId)
                 .ToListAsync(cancellationToken);
         });
 
@@ -212,7 +215,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
             detailTotals.ClassActionFundTotal);
 
         MemberFinancials memberFinancials = new();
-        memberFinancials.EmployeeId = empl.EmployeeId;
+        memberFinancials.Badge = empl.EmployeeId;
         memberFinancials.Psn = empl.EmployeeId;
         memberFinancials.Name = empl.Name;
         memberFinancials.Ssn = empl.Ssn;
@@ -285,6 +288,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
         ComputeEarnings(memberTotals, bene, null, profitSharingUpdateRequest, null, detailTotals.ClassActionFundTotal);
 
         MemberFinancials memb = new();
+        memb.Badge = 0;
         memb.Name = bene.Name;
         memb.Ssn = bene.Ssn;
         memb.Psn = bene.Psn;

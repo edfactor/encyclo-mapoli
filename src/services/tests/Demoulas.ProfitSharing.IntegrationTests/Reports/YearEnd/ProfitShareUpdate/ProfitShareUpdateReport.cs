@@ -64,8 +64,8 @@ internal sealed class ProfitShareUpdateReport
             }
 
             // This is so we converge on a stable sort.  This effectively matches Ready's order.
-            long aBadge = Convert.ToInt64(a.EmployeeId);
-            long bBadge = Convert.ToInt64(b.EmployeeId);
+            long aBadge = Convert.ToInt64(a.Badge);
+            long bBadge = Convert.ToInt64(b.Badge);
             aBadge = aBadge == 0 ? a.Psn : aBadge;
             bBadge = bBadge == 0 ? b.Psn : bBadge;
             return aBadge < bBadge ? -1 : 1;
@@ -109,9 +109,9 @@ internal sealed class ProfitShareUpdateReport
 
         ReportLine report_line = new();
         ReportLine2 report_line_2 = new();
-        if (memberFinancials.EmployeeId > 0)
+        if (memberFinancials.Badge > 0)
         {
-            report_line.BADGE_NBR = memberFinancials.EmployeeId;
+            report_line.BADGE_NBR = memberFinancials.Badge;
             report_line.EMP_NAME = memberFinancials.Name?.Length > 24
                 ? memberFinancials.Name.Substring(0, 24)
                 : memberFinancials.Name;
@@ -137,7 +137,7 @@ internal sealed class ProfitShareUpdateReport
             if (memberFinancials.SecondaryEarnings != 0)
             {
                 Console.WriteLine(
-                    $"badge {memberFinancials.EmployeeId} earnings2 ${memberFinancials.SecondaryEarnings}");
+                    $"badge {memberFinancials.Badge} earnings2 ${memberFinancials.SecondaryEarnings}");
             }
 
             report_line.PR_EARN2 = memberFinancials.SecondaryEarnings;
@@ -147,7 +147,7 @@ internal sealed class ProfitShareUpdateReport
         }
 
 
-        if (memberFinancials.EmployeeId == 0)
+        if (memberFinancials.Badge == 0)
         {
             report_line_2.PR2_EMP_NAME =
                 memberFinancials.Name?.Length > 24 ? memberFinancials.Name.Substring(0, 24) : memberFinancials.Name;
@@ -201,13 +201,13 @@ internal sealed class ProfitShareUpdateReport
             || memberFinancials.Earnings != 0m
             || memberFinancials.SecondaryEarnings != 0m)
         {
-            if (memberFinancials.EmployeeId > 0)
+            if (memberFinancials.Badge > 0)
             {
                 reportCounters.EmployeeCounter += 1;
                 WRITE(report_line);
             }
 
-            if (memberFinancials.EmployeeId == 0)
+            if (memberFinancials.Badge == 0)
             {
                 reportCounters.BeneficiaryCounter += 1;
                 WRITE(report_line_2);

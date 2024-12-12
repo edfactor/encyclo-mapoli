@@ -10,7 +10,8 @@ namespace Demoulas.ProfitSharing.Services.ProfitShareUpdate;
 /// </summary>
 public class MemberFinancials
 {
-    public long EmployeeId { get; set; }
+    public long Badge { get; set; }
+    public long Psn { get; set; }
     public string? Name { get; set; }
     public int Ssn { get; set; }
     public decimal CurrentAmount { get; set; }
@@ -27,7 +28,6 @@ public class MemberFinancials
     public decimal SecondaryEarnings { get; set; }
     public decimal MaxOver { get; set; }
     public int MaxPoints { get; set; }
-    public long Psn { get; set; }
     public decimal Caf { get; set; }
     public decimal EndingBalance { get; set; }
 }

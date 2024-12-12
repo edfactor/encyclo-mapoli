@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 public record MemberFinancialsResponse 
 {
+    public long Badge { get; set; }
     public long Psn { get; set; }
     public string? Name { get; set; }
     public decimal CurrentAmount { get; set; }
