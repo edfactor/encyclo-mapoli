@@ -80,16 +80,6 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
         bool employeeExceededMaxContribution = await ProcessEmployees(members, profitSharingUpdateRequest, adjustmentReportData, cancellationToken);
         await ProcessBeneficiaries(members, profitSharingUpdateRequest, cancellationToken);
 
-        foreach (MemberFinancials memberFinancials in members)
-        {
-            memberFinancials.EndingBalance = memberFinancials.CurrentAmount + memberFinancials.Contributions +
-                                             memberFinancials.Xfer - memberFinancials.Pxfer +
-                                             memberFinancials.Earnings + memberFinancials.SecondaryEarnings +
-                                             memberFinancials.IncomingForfeitures + memberFinancials.Military +
-                                             memberFinancials.Caf -
-                                             memberFinancials.Distributions;
-        }
-
         return new (members, adjustmentReportData, employeeExceededMaxContribution);
     }
 
@@ -156,9 +146,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
                         Psn = Convert.ToInt64(b.Psn),
                         Ssn = b.Contact!.Ssn,
                         Name = b.Contact.ContactInfo.FullName,
-                        CurrentAmount = b.Amount,
-                        Earnings = b.Earnings,
-                        SecondaryEarnings = b.SecondaryEarnings
+                        CurrentAmount = b.Amount,  // Should be computing this from the ProfitDetail via TotalService
                     }).ToListAsync(cancellationToken)
         );
 
@@ -171,16 +159,18 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
             }
 
             MemberFinancials memb = await ProcessBeneficiary(bene, profitSharingUpdateRequest, cancellationToken);
-            members.Add(memb);
+            if (!memb.IsAllZeros())
+            {
+                members.Add(memb);
+            }
         }
     }
 
     private async Task<(MemberFinancials, bool)> ProcessEmployee(EmployeeFinancials empl, ProfitSharingUpdateRequest profitSharingUpdateRequest,
         AdjustmentReportData adjustmentReportData, CancellationToken cancellationToken)
     {
-
         // Gets this years profit sharing transactions, aka Distributions - hardships
-        DetailTotals detailTotals = await GetDetailTotals(profitSharingUpdateRequest.ProfitYear, empl.Ssn, cancellationToken);
+        ProfitDetailTotals profitDetailTotals = await GetProfitDetailTotals(profitSharingUpdateRequest.ProfitYear, empl.Ssn, cancellationToken);
 
         // MemberTotals holds newly computed values, not old values
         MemberTotals memberTotals = new();
@@ -192,11 +182,11 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
 
         // This "EarningsBalance" is actually the new Current Balance.  Consider changing the name
         // Note that CAF gets added here, but subtracted in the next line.   Odd.
-        memberTotals.NewCurrentAmount = detailTotals.AllocationsTotal + detailTotals.ClassActionFundTotal +
-                                        (empl.CurrentAmount - detailTotals.ForfeitsTotal -
-                                         detailTotals.PaidAllocationsTotal) -
-                                        detailTotals.DistributionsTotal;
-        memberTotals.NewCurrentAmount -= detailTotals.ClassActionFundTotal;
+        memberTotals.NewCurrentAmount = profitDetailTotals.AllocationsTotal + profitDetailTotals.ClassActionFundTotal +
+                                        (empl.CurrentAmount - profitDetailTotals.ForfeitsTotal -
+                                         profitDetailTotals.PaidAllocationsTotal) -
+                                        profitDetailTotals.DistributionsTotal;
+        memberTotals.NewCurrentAmount -= profitDetailTotals.ClassActionFundTotal;
 
         if (memberTotals.NewCurrentAmount > 0)
         {
@@ -205,12 +195,12 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
         }
 
         ComputeEarnings(memberTotals, null, empl, profitSharingUpdateRequest, adjustmentReportData,
-            detailTotals.ClassActionFundTotal);
+            profitDetailTotals.ClassActionFundTotal);
 
-        MemberFinancials memberFinancials = new(empl, detailTotals, memberTotals);
+        MemberFinancials memberFinancials = new(empl, profitDetailTotals, memberTotals);
 
         //   --- Max Contribution Concerns --- 
-        decimal memberTotalContribution = memberTotals.ContributionAmount + detailTotals.MilitaryTotal +
+        decimal memberTotalContribution = memberTotals.ContributionAmount + profitDetailTotals.MilitaryTotal +
                                           memberTotals.IncomingForfeitureAmount;
 
         bool employeeExceededMaxContribution = false;
@@ -241,15 +231,15 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
 
     private async Task<MemberFinancials> ProcessBeneficiary(BeneficiaryFinancials bene, ProfitSharingUpdateRequest profitSharingUpdateRequest, CancellationToken cancellationToken)
     {
-        DetailTotals detailTotals = await GetDetailTotals(profitSharingUpdateRequest.ProfitYear, bene.Ssn, cancellationToken);
+        ProfitDetailTotals profitDetailTotals = await GetProfitDetailTotals(profitSharingUpdateRequest.ProfitYear, bene.Ssn, cancellationToken);
 
         MemberTotals memberTotals = new();
         // Yea, this adding and removing ClassActionFundTotal is strange
-        memberTotals.NewCurrentAmount = detailTotals.AllocationsTotal + detailTotals.ClassActionFundTotal +
-                                        (bene.CurrentAmount - detailTotals.ForfeitsTotal -
-                                         detailTotals.PaidAllocationsTotal) -
-                                        detailTotals.DistributionsTotal;
-        memberTotals.NewCurrentAmount -= detailTotals.ClassActionFundTotal;
+        memberTotals.NewCurrentAmount = profitDetailTotals.AllocationsTotal + profitDetailTotals.ClassActionFundTotal +
+                                        (bene.CurrentAmount - profitDetailTotals.ForfeitsTotal -
+                                         profitDetailTotals.PaidAllocationsTotal) -
+                                        profitDetailTotals.DistributionsTotal;
+        memberTotals.NewCurrentAmount -= profitDetailTotals.ClassActionFundTotal;
 
         if (memberTotals.NewCurrentAmount > 0)
         {
@@ -257,9 +247,9 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
             memberTotals.EarnPoints = (int)Math.Round(memberTotals.PointsDollars / 100, MidpointRounding.AwayFromZero);
         }
 
-        ComputeEarnings(memberTotals, bene, null, profitSharingUpdateRequest, null, detailTotals.ClassActionFundTotal);
+        ComputeEarnings(memberTotals, bene, null, profitSharingUpdateRequest, null, profitDetailTotals.ClassActionFundTotal);
 
-        return new MemberFinancials(bene, detailTotals, memberTotals);
+        return new MemberFinancials(bene, profitDetailTotals, memberTotals);
     }
 
 
@@ -399,7 +389,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
     // Fetches PROFIT_DETAIL Totals for an SSN.
     // processes only the current profit year.  Ignores profit code = 0.
     // Special handling for CAF and Military. 
-    private async Task<DetailTotals> GetDetailTotals(short profitYear, int ssn, CancellationToken cancellationToken)
+    private async Task<ProfitDetailTotals> GetProfitDetailTotals(short profitYear, int ssn, CancellationToken cancellationToken)
     {
         decimal distributionsTotal = 0;
         decimal forfeitsTotal = 0;
@@ -462,7 +452,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
             }
         }
 
-        return new DetailTotals(
+        return new ProfitDetailTotals(
             distributionsTotal,
             forfeitsTotal,
             allocationsTotal,

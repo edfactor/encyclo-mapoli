@@ -19,6 +19,7 @@ namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 public class ProfitShareServiceEndpointTests : ApiTestBase<Program>
 {
     private readonly ProfitShareUpdateEndpoint _endpoint;
+    private const short ProfitYear = 2024;
 
     public ProfitShareServiceEndpointTests()
     {
@@ -30,7 +31,7 @@ public class ProfitShareServiceEndpointTests : ApiTestBase<Program>
     public async Task Unauthorized()
     {
         // Arrange
-        ProfitSharingUpdateRequest req = new() { ProfitYear = 2024 };
+        ProfitSharingUpdateRequest req = new() { ProfitYear = ProfitYear };
 
         // Act
         TestResult<ProfitShareUpdateResponse> response =
@@ -46,7 +47,7 @@ public class ProfitShareServiceEndpointTests : ApiTestBase<Program>
     public async Task BasicQuery()
     {
         // Arrange
-        ProfitSharingUpdateRequest req = new() { ProfitYear = 2024 };
+        ProfitSharingUpdateRequest req = new() { ProfitYear = ProfitYear };
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
         // Act
@@ -68,10 +69,7 @@ public class ProfitShareServiceEndpointTests : ApiTestBase<Program>
             // Arrange
             // ensure we always have an employee with PointsEarned
             await EnsureEmployeeHasPoints(c);
-            ProfitSharingUpdateRequest req = new()
-            {
-                ProfitYear = 2024, AdjustContributionAmount = 20, MaxAllowedContributions = 1
-            };
+            ProfitSharingUpdateRequest req = new() { ProfitYear = ProfitYear, AdjustContributionAmount = 20, MaxAllowedContributions = 1 };
             ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
             // Act
@@ -94,52 +92,124 @@ public class ProfitShareServiceEndpointTests : ApiTestBase<Program>
             .ThenInclude(demographic => demographic.ContactInfo)
             .Include(p => p.Demographic != null)
             .FirstAsync();
-        Demographic demo = pp.Demographic!;
-
-        pp.ProfitYear = 2024;
+        pp.ProfitYear = ProfitYear;
         pp.PointsEarned = 100_000 / 100;
-
         await c.SaveChangesAsync();
         return pp;
     }
 
 #pragma warning disable AsyncFixer01
     [Fact]
-    public async Task Ensure_contribution_is_correct()
+    public async Task Verify_employee_contribution_earnings_and_incomingForfeiture()
     {
-        await MockDbContextFactory.UseWritableContext(async c =>
+        // Arrange
+        const int employeeIncome = 100_000;
+        const int currentBalance = 33_000;
+        const int badge = 77;
+        _ = await SetupEmployee(badge, employeeIncome, currentBalance);
+        ProfitSharingUpdateRequest req = new()
         {
-            // Arange
-            List<PayProfit> ppr = await c.PayProfits
+            ProfitYear = ProfitYear,
+            ContributionPercent = 20,
+            IncomingForfeitPercent = 1.1m,
+            EarningsPercent = 12.7m,
+            MaxAllowedContributions = 30_000
+        };
+
+        // ACT
+        ProfitShareUpdateResponse response = await _endpoint.GetResponse(req, CancellationToken.None);
+
+        // Assert
+        int memberCount = response.Response.Results.Count();
+        memberCount.Should().Be(1); // should be just 1 employee
+        MemberFinancialsResponse memberFinancials = response.Response.Results.First(mf => mf.Badge == badge);
+        memberFinancials.Contributions.Should().Be(employeeIncome * 0.20m);
+        memberFinancials.Earnings.Should().Be(currentBalance * 0.127m);
+        memberFinancials.IncomingForfeitures.Should().Be(employeeIncome * .011m);
+    }
+
+    private async Task<int> SetupEmployee(int badge, decimal employeeIncome, decimal currentBalance)
+    {
+        return await MockDbContextFactory.UseWritableContext(async ctx =>
+        {
+            const int ssn = 7;
+
+            List<PayProfit> ppr = await ctx.PayProfits
                 .Include(payProfit => payProfit.Demographic!)
                 .ThenInclude(demographic => demographic.ContactInfo)
                 .Include(p => p.Demographic != null)
                 .ToListAsync();
+
             // This knocks all the employees out of ProfitSharing
             foreach (PayProfit ppi in ppr)
             {
+                ppi.ProfitYear = 3000;
                 ppi.YearsInPlan = 0;
                 ppi.EnrollmentId = Enrollment.Constants.NotEnrolled; /*0*/
             }
+            // This knocks all the profit details out of the way
+            foreach (var pdx in ctx.ProfitDetails)
+            {
+                pdx.ProfitYear = 3000;
+            }
+
+            // This knocks out all the bene's
+            foreach (var b in ctx.Beneficiaries)
+            {
+                b.Amount = 0;
+            }
+
             // Now we move 1 employee back in.
             Demographic demo = ppr[0].Demographic!;
+            // They have 3 profit sharing rows.
             List<PayProfit> ppx = ppr.Where(p => p.Demographic == demo).ToList();
+
+            // we take the first one and use it for THIS YEAR
             PayProfit pp0 = ppx[0];
-            demo.Ssn = int.MaxValue - 30_000;
-            pp0.ProfitYear = 2024;
-            pp0.PointsEarned = 1_000;
+            pp0.DemographicId.Should().Be(demo.Id);
+            demo.Ssn = ssn;
+            demo.EmployeeId = badge;
+            pp0.ProfitYear = ProfitYear;
+            pp0.PointsEarned = (long)(employeeIncome / 100);
             pp0.EnrollmentId = Enrollment.Constants.NewVestingPlanHasContributions /*2*/;
-            await c.SaveChangesAsync();
 
-            ProfitSharingUpdateRequest req = new() { ProfitYear = 2024, ContributionPercent = 20, MaxAllowedContributions = 30_000 };
+            // for LAST YEAR.  - it is important to have a row, otherwise the vesting calculations joins across an empty row.
+            PayProfit pp1 = ppx[1];
+            pp1.DemographicId.Should().Be(demo.Id);
+            pp1.ProfitYear = ProfitYear -1;
+            pp1.YearsInPlan = 0; // This is important, otherwise we have no Totals
 
-            // ACT
-            ProfitShareUpdateResponse response = await _endpoint.GetResponse(req, CancellationToken.None);
+            // Setup some initial money so the earnings have a number to work with.
+            var pd = await ctx.ProfitDetails.FirstAsync();
+            pd.Ssn = 7;
+            pd.ProfitYear = 2000;
+            pd.ProfitYearIteration = 0;
+            pd.DistributionSequence = 0;
+            pd.ProfitCode = ProfitCode.Constants.IncomingContributions;
+            pd.ProfitCodeId = 0;
+            pd.Contribution = currentBalance;
+            pd.Earnings = 0;
+            pd.Forfeiture = 0;
+            pd.MonthToDate = 1; // Drop this
+            pd.YearToDate = 2000; // Drop this
+            pd.Remark = null;
+            pd.ZeroContributionReasonId = null;
+            pd.ZeroContributionReason = null;
+            pd.FederalTaxes = 0m;
+            pd.StateTaxes = 0m;
+            pd.TaxCode = null;
+            pd.TaxCodeId = null;
+            pd.CommentTypeId = null;
+            pd.CommentType = null;
+            pd.CommentRelatedCheckNumber = null;
+            pd.CommentRelatedState = null;
+            pd.CommentRelatedOracleHcmId = null;
+            pd.CommentRelatedPsnSuffix = null;
+            pd.CommentIsPartialTransaction = null;
 
-            // Assert
-            MemberFinancialsResponse memberFinancials =
-                response.Response.Results.First(mf => mf.Badge == demo.EmployeeId);
-            memberFinancials.Contributions.Should().Be(20000);
+            await ctx.SaveChangesAsync();
+
+            return ssn;
         });
     }
 }

@@ -8,7 +8,7 @@ namespace Demoulas.ProfitSharing.Services.ProfitShareUpdate;
 /// <summary>
 /// Totals extracted from Profit Detail records
 /// </summary>
-public record DetailTotals(
+public record ProfitDetailTotals(
     decimal DistributionsTotal,
     decimal ForfeitsTotal,
     decimal AllocationsTotal,

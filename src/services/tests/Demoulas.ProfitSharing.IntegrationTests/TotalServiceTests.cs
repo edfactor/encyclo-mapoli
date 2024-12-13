@@ -31,7 +31,7 @@ public class TotalServiceIntegrationTests
     {
         _output = output;
         _output.WriteLine("test start");
-        var configuration = new ConfigurationBuilder().AddUserSecrets<DatabaseDataTest>().Build();
+        var configuration = new ConfigurationBuilder().AddUserSecrets<TotalServiceIntegrationTests>().Build();
         string connectionString = configuration["ConnectionStrings:ProfitSharing"]!;
         dataContextFactory = new PristineDataContextFactory(connectionString);
 

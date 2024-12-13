@@ -13,7 +13,7 @@ namespace Demoulas.ProfitSharing.Services.ProfitShareUpdate;
 /// </summary>
 public class MemberFinancials
 {
-    public MemberFinancials(EmployeeFinancials empl, DetailTotals detailTotals, MemberTotals memberTotals)
+    public MemberFinancials(EmployeeFinancials empl, ProfitDetailTotals profitDetailTotals, MemberTotals memberTotals)
     {
         Badge = empl.EmployeeId;
         Psn = empl.EmployeeId;
@@ -24,12 +24,11 @@ public class MemberFinancials
         CurrentAmount = empl.CurrentAmount;
         EmployeeTypeId = empl.EmployeeTypeId;
         ContributionPoints = empl.PointsEarned;
-        
-        Common(detailTotals, memberTotals);
-        IncomingForfeitures = memberTotals.IncomingForfeitureAmount - detailTotals.ForfeitsTotal;
+
+        Common(profitDetailTotals, memberTotals);
     }
 
-    public MemberFinancials(BeneficiaryFinancials bene, DetailTotals detailTotals, MemberTotals memberTotals)
+    public MemberFinancials(BeneficiaryFinancials bene, ProfitDetailTotals profitDetailTotals, MemberTotals memberTotals)
     {
         Badge = 0;
         Name = bene.Name;
@@ -40,19 +39,22 @@ public class MemberFinancials
         Earnings = bene.Earnings;
         
         Trace.Assert(memberTotals.IncomingForfeitureAmount == 0);
-        Common(detailTotals, memberTotals);
-    } 
-    
-    private void Common( DetailTotals detailTotals, MemberTotals memberTotals){
-        Military = detailTotals.MilitaryTotal;
-        Distributions = detailTotals.DistributionsTotal;
-        Caf = detailTotals.ClassActionFundTotal > 0 ? detailTotals.ClassActionFundTotal : 0;
-        Xfer = detailTotals.AllocationsTotal;
-        Pxfer = detailTotals.PaidAllocationsTotal;
-        
+        Common(profitDetailTotals, memberTotals);
+    }
+
+    private void Common(ProfitDetailTotals profitDetailTotals, MemberTotals memberTotals)
+    {
+        Military = profitDetailTotals.MilitaryTotal;
+        Distributions = profitDetailTotals.DistributionsTotal;
+        Caf = profitDetailTotals.ClassActionFundTotal > 0 ? profitDetailTotals.ClassActionFundTotal : 0;
+        Xfer = profitDetailTotals.AllocationsTotal;
+        Pxfer = profitDetailTotals.PaidAllocationsTotal;
+
         Contributions = memberTotals.ContributionAmount;
+        Earnings = memberTotals.EarningsAmount;
         EarningPoints = memberTotals.EarnPoints;
-        IncomingForfeitures = memberTotals.IncomingForfeitureAmount - detailTotals.ForfeitsTotal;
+        IncomingForfeitures = memberTotals.IncomingForfeitureAmount - profitDetailTotals.ForfeitsTotal;
+        
     }
 
     public long Badge { get; set; }
@@ -74,5 +76,23 @@ public class MemberFinancials
     public decimal MaxOver { get; set; }
     public int MaxPoints { get; set; }
     public decimal Caf { get; set; }
-    public decimal EndingBalance { get; set; }
+
+    public decimal EndingBalance =>
+        CurrentAmount + Contributions +
+        Xfer - Pxfer +
+        Earnings + SecondaryEarnings +
+        IncomingForfeitures + Military +
+        Caf -
+        Distributions;
+    
+    public bool IsAllZeros() => CurrentAmount == 0m &&
+                             Distributions == 0m &&
+                             Contributions == 0m &&
+                             Xfer == 0m &&
+                             Pxfer == 0m &&
+                             Military == 0m &&
+                             IncomingForfeitures == 0m &&
+                             Earnings == 0m &&
+                             SecondaryEarnings == 0m &&
+                             EndingBalance == 0m;
 }
