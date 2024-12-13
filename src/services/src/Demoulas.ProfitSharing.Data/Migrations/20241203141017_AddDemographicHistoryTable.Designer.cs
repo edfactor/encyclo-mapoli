@@ -3,6 +3,7 @@ using System;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 
@@ -11,9 +12,11 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    partial class ProfitSharingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241203141017_AddDemographicHistoryTable")]
+    partial class AddDemographicHistoryTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -27292,33 +27295,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             Id = (byte)9,
                             Name = "Previous years enrollment is unknown. (History not previously tracked)"
                         });
-                });
-
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.FrozenState", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("ID");
-
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("AsOfDateTime")
-                        .HasColumnType("TIMESTAMP(7)")
-                        .HasColumnName("AS_OF_DATETIME");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("NUMBER(1)")
-                        .HasColumnName("IS_ACTIVE");
-
-                    b.Property<short>("ProfitYear")
-                        .HasColumnType("NUMBER(5)")
-                        .HasColumnName("PROFIT_YEAR");
-
-                    b.HasKey("Id")
-                        .HasName("PK_FROZEN_STATE");
-
-                    b.ToTable("FROZEN_STATE", (string)null);
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Gender", b =>

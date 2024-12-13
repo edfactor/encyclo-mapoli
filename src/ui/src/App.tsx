@@ -5,6 +5,7 @@ import Logout from "components/Logout/Logout";
 import { createTheme, ThemeProvider } from "@mui/material";
 import "smart-ui-library/dist/smart-ui-library.css";
 import buildInfo from "./.buildinfo.json";
+import AppErrorBoundary from "components/ErrorBoundary";
 
 const App = () => {
   const onClick = (e: any) => {};
@@ -17,7 +18,10 @@ const App = () => {
         Logout={<Logout />}
         versionNmber={`${buildInfo.BuildNumber}.${buildInfo.BuildId}`}
         username={"TEST"}>
-        <Router />
+          <AppErrorBoundary>
+          <Router />
+          </AppErrorBoundary>
+        
       </DSMLayout>
     </ThemeProvider>
   );
