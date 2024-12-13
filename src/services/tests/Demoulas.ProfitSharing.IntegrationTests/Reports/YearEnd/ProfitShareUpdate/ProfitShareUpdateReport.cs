@@ -27,17 +27,14 @@ internal sealed class ProfitShareUpdateReport
     public DateTime TodaysDateTime { get; set; }
     public List<string> ReportLines { get; set; } = [];
 
-    public void ApplyAdjustments(ProfitSharingUpdateRequest profitSharingUpdateRequest)
+    public async Task ProfitSharingUpdatePaginated(ProfitSharingUpdateRequest profitSharingUpdateRequest)
     {
-        LoggerFactory loggerFactory = new();
         TotalService totalService = new TotalService(_dbFactory, calendarService);
-        ProfitShareUpdateService psu = new(_dbFactory, loggerFactory, totalService, calendarService);
+        ProfitShareUpdateService psu = new(_dbFactory, totalService, calendarService);
         this.profitYear = profitSharingUpdateRequest.ProfitYear;
 
         (List<MemberFinancials> members, AdjustmentReportData adjustmentsApplied, bool _) =
-#pragma warning disable VSTHRD002
-            psu.ProfitSharingUpdatePaginated(profitSharingUpdateRequest, CancellationToken.None).GetAwaiter().GetResult();
-#pragma warning restore VSTHRD002
+            await psu.ProfitSharingUpdatePaginated(profitSharingUpdateRequest, CancellationToken.None);
 
         m805PrintSequence(members, profitSharingUpdateRequest.MaxAllowedContributions);
         m1000AdjustmentReport(profitSharingUpdateRequest, adjustmentsApplied);

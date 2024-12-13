@@ -20,21 +20,19 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
 {
     private readonly ICalendarService _calendarService;
     private readonly IProfitSharingDataContextFactory _dbContextFactory;
-    private readonly ILogger<ProfitShareUpdateService> _logger;
     private readonly ITotalService _totalService;
 
-    public ProfitShareUpdateService(IProfitSharingDataContextFactory dbContextFactory, ILoggerFactory loggerFactory, ITotalService totalService, ICalendarService calendarService)
+    public ProfitShareUpdateService(IProfitSharingDataContextFactory dbContextFactory, ITotalService totalService, ICalendarService calendarService)
     {
         _dbContextFactory = dbContextFactory;
         _totalService = totalService;
-        _logger = loggerFactory.CreateLogger<ProfitShareUpdateService>();
         _calendarService = calendarService;
     }
 
 
     public async Task<ProfitShareUpdateResponse> ProfitSharingUpdate(ProfitSharingUpdateRequest profitSharingUpdateRequest, CancellationToken cancellationToken)
     {
-        var (memberFinancials, _, isReRunRequired) = await ProfitSharingUpdatePaginated(profitSharingUpdateRequest, cancellationToken);
+        var (memberFinancials, _, employeeExceededMaxContribution) = await ProfitSharingUpdatePaginated(profitSharingUpdateRequest, cancellationToken);
         var members = memberFinancials.Select(m => new MemberFinancialsResponse
         {
             Badge = m.Badge,
@@ -54,7 +52,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
         }).ToList();
 
         return new ProfitShareUpdateResponse {
-            IsReRunRequired = isReRunRequired,
+            IsReRunRequired = employeeExceededMaxContribution,
             ReportName = "Profit Sharing Update",
             ReportDate = DateTimeOffset.Now,
             Response = new PaginatedResponseDto<MemberFinancialsResponse>
@@ -79,7 +77,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
         AdjustmentReportData adjustmentReportData = new();
 
         List<MemberFinancials> members = new();
-        bool rerunNeeded = await ProcessEmployees(members, profitSharingUpdateRequest, adjustmentReportData, cancellationToken);
+        bool employeeExceededMaxContribution = await ProcessEmployees(members, profitSharingUpdateRequest, adjustmentReportData, cancellationToken);
         await ProcessBeneficiaries(members, profitSharingUpdateRequest, cancellationToken);
 
         foreach (MemberFinancials memberFinancials in members)
@@ -92,13 +90,13 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
                                              memberFinancials.Distributions;
         }
 
-        return new (members, adjustmentReportData, rerunNeeded);
+        return new (members, adjustmentReportData, employeeExceededMaxContribution);
     }
 
     private async Task<bool> ProcessEmployees(List<MemberFinancials> members, ProfitSharingUpdateRequest profitSharingUpdateRequest,
         AdjustmentReportData adjustmentReportData, CancellationToken cancellationToken)
     {
-        var isReRunNeeded = false;
+        var employeeExceededMaxContribution = false;
         var fiscalDates = await _calendarService.GetYearStartAndEndAccountingDatesAsync(profitSharingUpdateRequest.ProfitYear, cancellationToken);
         List<EmployeeFinancials> employeeFinancialsList = await _dbContextFactory.UseReadOnlyContext(async ctx =>
         {
@@ -139,13 +137,13 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
             // if employee is not participating 
             if (empl.EnrolledId != Enrollment.Constants.NotEnrolled || empl.YearsInPlan != 0)
             {
-                var ( memb, isReRun ) = await ProcessEmployee(empl, profitSharingUpdateRequest, adjustmentReportData, cancellationToken);
+                var ( memb, didEmployeeExceededMaxContribution ) = await ProcessEmployee(empl, profitSharingUpdateRequest, adjustmentReportData, cancellationToken);
                 members.Add(memb);
-                isReRunNeeded |= isReRun;
+                employeeExceededMaxContribution |= didEmployeeExceededMaxContribution;
             }
         }
 
-        return isReRunNeeded;
+        return employeeExceededMaxContribution;
     }
 
     private async Task ProcessBeneficiaries(List<MemberFinancials> members, ProfitSharingUpdateRequest profitSharingUpdateRequest, CancellationToken cancellationToken)
@@ -200,12 +198,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
                                         detailTotals.DistributionsTotal;
         memberTotals.NewCurrentAmount -= detailTotals.ClassActionFundTotal;
 
-        if (memberTotals.NewCurrentAmount <= 0)
-        {
-            memberTotals.EarnPoints = 0;
-            memberTotals.PointsDollars = 0;
-        }
-        else
+        if (memberTotals.NewCurrentAmount > 0)
         {
             memberTotals.PointsDollars = Math.Round(memberTotals.NewCurrentAmount, 2, MidpointRounding.AwayFromZero);
             memberTotals.EarnPoints = (int)Math.Round(memberTotals.PointsDollars / 100, MidpointRounding.AwayFromZero);
@@ -214,33 +207,13 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
         ComputeEarnings(memberTotals, null, empl, profitSharingUpdateRequest, adjustmentReportData,
             detailTotals.ClassActionFundTotal);
 
-        MemberFinancials memberFinancials = new();
-        memberFinancials.Badge = empl.EmployeeId;
-        memberFinancials.Psn = empl.EmployeeId;
-        memberFinancials.Name = empl.Name;
-        memberFinancials.Ssn = empl.Ssn;
-        memberFinancials.Xfer = detailTotals.AllocationsTotal;
-        memberFinancials.Pxfer = detailTotals.PaidAllocationsTotal;
-        memberFinancials.CurrentAmount = empl.CurrentAmount;
-        memberFinancials.Distributions = detailTotals.DistributionsTotal;
-        memberFinancials.Military = detailTotals.MilitaryTotal;
-        memberFinancials.Caf = detailTotals.ClassActionFundTotal;
-        memberFinancials.EmployeeTypeId = empl.EmployeeTypeId;
-        memberFinancials.ContributionPoints = empl.PointsEarned;
-        memberFinancials.EarningPoints = memberTotals.EarnPoints;
-        memberFinancials.Contributions = memberTotals.ContributionAmount;
-        memberFinancials.IncomingForfeitures = memberTotals.IncomingForfeitureAmount;
-        memberFinancials.IncomingForfeitures -= detailTotals.ForfeitsTotal;
-        memberFinancials.Earnings = empl.Earnings;
-        memberFinancials.Earnings += empl.EarningsOnEtva;
-        memberFinancials.SecondaryEarnings = empl.SecondaryEarnings;
-        memberFinancials.SecondaryEarnings += empl.SecondaryEtvaEarnings;
+        MemberFinancials memberFinancials = new(empl, detailTotals, memberTotals);
 
         //   --- Max Contribution Concerns --- 
         decimal memberTotalContribution = memberTotals.ContributionAmount + detailTotals.MilitaryTotal +
                                           memberTotals.IncomingForfeitureAmount;
 
-        bool rerunNeeded = false;
+        bool employeeExceededMaxContribution = false;
         if (memberTotalContribution > profitSharingUpdateRequest.MaxAllowedContributions)
         {
             decimal overContribution = memberTotalContribution - profitSharingUpdateRequest.MaxAllowedContributions;
@@ -251,19 +224,18 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
             }
             else
             {
-                _logger.LogError("FORFEITURES NOT ENOUGH FOR AMOUNT OVER MAX FOR EMPLOYEE BADGE {EmployeeId}", empl.EmployeeId);
                 memberFinancials.IncomingForfeitures = 0;
             }
 
             memberFinancials.MaxOver = overContribution;
             memberFinancials.MaxPoints = memberFinancials.ContributionPoints;
-            rerunNeeded = true; 
+            employeeExceededMaxContribution = true; 
         }
         // --- End Max Contribution
 
         empl.Contributions = memberTotals.ContributionAmount;
         empl.IncomeForfeiture = memberTotals.IncomingForfeitureAmount;
-        return (memberFinancials, rerunNeeded);
+        return (memberFinancials, employeeExceededMaxContribution);
     }
 
 
@@ -287,28 +259,14 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
 
         ComputeEarnings(memberTotals, bene, null, profitSharingUpdateRequest, null, detailTotals.ClassActionFundTotal);
 
-        MemberFinancials memb = new();
-        memb.Badge = 0;
-        memb.Name = bene.Name;
-        memb.Ssn = bene.Ssn;
-        memb.Psn = bene.Psn;
-        memb.Distributions = detailTotals.DistributionsTotal;
-        memb.Caf = detailTotals.ClassActionFundTotal > 0 ? detailTotals.ClassActionFundTotal : 0;
-        memb.Xfer = detailTotals.AllocationsTotal;
-        memb.Pxfer = detailTotals.PaidAllocationsTotal;
-        memb.CurrentAmount = bene.CurrentAmount;
-        memb.EarningPoints = memberTotals.EarnPoints;
-        memb.IncomingForfeitures -= detailTotals.ForfeitsTotal;
-        memb.Earnings = bene.Earnings;
-        memb.SecondaryEarnings = bene.SecondaryEarnings;
-        return memb;
+        return new MemberFinancials(bene, detailTotals, memberTotals);
     }
 
 
-    private static decimal ComputeContribution(long PointsEarned, long badge, ProfitSharingUpdateRequest profitSharingUpdateRequest,
+    private static decimal ComputeContribution(long pointsEarned, long badge, ProfitSharingUpdateRequest profitSharingUpdateRequest,
         AdjustmentReportData adjustmentReportData)
     {
-        decimal contributionAmount = Math.Round(profitSharingUpdateRequest.ContributionPercent * PointsEarned, 2,
+        decimal contributionAmount = Math.Round(profitSharingUpdateRequest.ContributionPercent * pointsEarned, 2,
             MidpointRounding.AwayFromZero);
 
         if (profitSharingUpdateRequest.BadgeToAdjust > 0 && profitSharingUpdateRequest.BadgeToAdjust == badge)

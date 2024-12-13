@@ -36,7 +36,7 @@ public class ProfitShareUpdateTests
 
 
     [Fact]
-    public void ReportWithUpdates()
+    public async Task ReportWithUpdates()
     {
         // Arrange
         short profitYear = 2024;
@@ -47,7 +47,7 @@ public class ProfitShareUpdateTests
             new DateTime(2024, 11, 14, 10, 35, 0, DateTimeKind.Local); // time report was generated
 
         // Act
-        profitShareUpdateService.ApplyAdjustments(
+        await profitShareUpdateService.ProfitSharingUpdatePaginated(
             new ProfitSharingUpdateRequest
             {
                 Skip = null,
@@ -74,7 +74,7 @@ public class ProfitShareUpdateTests
     }
 
     [Fact]
-    public void EnsureUpdateWithValues_andEmployeeAdjustment_MatchesReady()
+    public async Task EnsureUpdateWithValues_andEmployeeAdjustment_MatchesReady()
     {
         // Arrange
         short profitYear = 2024;
@@ -84,7 +84,7 @@ public class ProfitShareUpdateTests
             new DateTime(2024, 11, 19, 19, 18, 0, DateTimeKind.Local); // time report was generated
 
         // Act
-        profitShareUpdateService.ApplyAdjustments(
+        await profitShareUpdateService.ProfitSharingUpdatePaginated(
             new ProfitSharingUpdateRequest
             {
                 Skip = null,
