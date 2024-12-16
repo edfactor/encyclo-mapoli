@@ -515,7 +515,7 @@ public class FrozenReportService : IFrozenReportService
 
         var startEnd = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
 
-        var rawResult = await _dataContextFactory.UseReadOnlyContext(ctx =>
+        var details = await _dataContextFactory.UseReadOnlyContext(ctx =>
         {
             var query = _totalService.TotalVestingBalance(ctx, req.ProfitYear, startEnd.FiscalEndDate);
 
@@ -546,31 +546,22 @@ public class FrozenReportService : IFrozenReportService
 
             return joinedQuery
                 .Where(detail => (detail.CurrentBalance > 0 || detail.VestedBalance > 0))
+                .GroupBy(item => item.YearsInPlan)
+                .Select(group => new BalanceByYearsDetail
+                {
+                    Years = group.Key,
+                    CurrentBalance = group.Sum(e => e.CurrentBalance),
+                    CurrentBeneficiaryBalance = group.Sum(e => e.IsBeneficiary ? e.CurrentBalance : 0),
+                    CurrentBeneficiaryVestedBalance = group.Sum(e => e.IsBeneficiary ? e.VestedBalance : 0),
+                    VestedBalance = group.Sum(e => e.VestedBalance),
+                    BeneficiaryCount = group.Count(e => e.IsBeneficiary),
+                    EmployeeCount = group.Count(e => !e.IsBeneficiary),
+                    FullTimeCount = group.Count(e => e.EmploymentType == FT),
+                    PartTimeCount = group.Count(e => e.EmploymentType == PT)
+                })
+                .OrderBy(e => e.Years)
                 .ToListAsync(cancellationToken);
         });
-
-        // Client-side processing for grouping and filtering
-        var groupedResult = rawResult
-            .GroupBy(item => item.YearsInPlan)
-            .Select(g => new { YearsInPlan = g.Key, Entries = g.ToList() })
-            .ToList();
-
-        // Final transformation to BalanceByAgeDetail
-        var details = groupedResult
-            .Select(group => new BalanceByYearsDetail
-            {
-                Years = group.YearsInPlan,
-                CurrentBalance = group.Entries.Sum(e => e.CurrentBalance),
-                CurrentBeneficiaryBalance = group.Entries.Sum(e => e.IsBeneficiary ? e.CurrentBalance : 0),
-                CurrentBeneficiaryVestedBalance = group.Entries.Sum(e => e.IsBeneficiary ? e.VestedBalance : 0),
-                VestedBalance = group.Entries.Sum(e => e.VestedBalance),
-                BeneficiaryCount = group.Entries.Count(e => e.IsBeneficiary),
-                EmployeeCount = group.Entries.Count(e => !e.IsBeneficiary),
-                FullTimeCount = group.Entries.Count(e => e.EmploymentType == FT),
-                PartTimeCount = group.Entries.Count(e => e.EmploymentType == PT)
-            })
-            .OrderBy(e => e.Years)
-            .ToList();
 
         // Build the final response
         req = req with { Take = details.Count + 1 };
