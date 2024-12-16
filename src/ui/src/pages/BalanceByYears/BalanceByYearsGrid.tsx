@@ -48,19 +48,19 @@ const BalanceByYearsGrid = () => {
                   rowData: balanceByYearsTotal?.response.results,
                   pinnedTopRowData: [
                     {
-                      age: "BEN",
+                      years: "BEN",
                       employeeCount: balanceByYearsTotal?.totalBeneficiaries || 0,
                       currentBalance: balanceByYearsTotal?.totalBeneficiariesAmount,
                       vestedBalance: balanceByYearsTotal?.totalBeneficiariesVestedAmount
                     },
                     {
-                      age: "EMPLOYEE",
+                      years: "EMPLOYEE",
                       employeeCount: balanceByYearsTotal?.totalEmployee || 0,
                       currentBalance: balanceByYearsTotal?.totalEmployeeAmount,
                       vestedBalance: balanceByYearsTotal?.totalEmployeesVestedAmount
                     },
                     {
-                      age: "TOTAL",
+                      years: "TOTAL",
                       employeeCount: balanceByYearsTotal?.totalMembers || 0,
                       currentBalance: balanceByYearsTotal?.balanceTotalAmount,
                       vestedBalance: balanceByYearsTotal?.vestedTotalAmount
@@ -84,19 +84,19 @@ const BalanceByYearsGrid = () => {
                   rowData: balanceByYearsFullTime?.response.results,
                   pinnedTopRowData: [
                     {
-                      age: "BEN",
+                      years: "BEN",
                       employeeCount: balanceByYearsFullTime?.totalBeneficiaries || 0,
                       currentBalance: balanceByYearsFullTime?.totalBeneficiariesAmount,
                       vestedBalance: balanceByYearsFullTime?.totalBeneficiariesVestedAmount
                     },
                     {
-                      age: "EMPLOYEE",
+                      years: "EMPLOYEE",
                       employeeCount: balanceByYearsFullTime?.totalEmployee || 0,
                        currentBalance: balanceByYearsFullTime?.totalEmployeeAmount,
                       vestedBalance: balanceByYearsFullTime?.totalEmployeesVestedAmount
                     },
                     {
-                      age: "TOTAL",
+                      years: "TOTAL",
                       employeeCount: balanceByYearsFullTime?.totalMembers || 0,
                       currentBalance: balanceByYearsFullTime?.balanceTotalAmount,
                       vestedBalance: balanceByYearsFullTime?.vestedTotalAmount
@@ -120,19 +120,19 @@ const BalanceByYearsGrid = () => {
                   rowData: balanceByYearsPartTime?.response.results,
                   pinnedTopRowData: [
                     {
-                      age: "BEN",
+                      years: "BEN",
                       employeeCount: balanceByYearsPartTime?.totalBeneficiaries || 0,
                       currentBalance: balanceByYearsPartTime?.totalBeneficiariesAmount,
                       vestedBalance: balanceByYearsPartTime?.totalBeneficiariesVestedAmount
                     },
                     {
-                      age: "EMPLOYEE",
+                      years: "EMPLOYEE",
                       employeeCount: balanceByYearsPartTime?.totalEmployee || 0,
                       currentBalance: balanceByYearsPartTime?.totalEmployeeAmount,
                       vestedBalance: balanceByYearsPartTime?.totalEmployeesVestedAmount
                     },
                     {
-                      age: "TOTAL",
+                      years: "TOTAL",
                       employeeCount: balanceByYearsPartTime?.totalMembers || 0,
                       currentBalance: balanceByYearsPartTime?.balanceTotalAmount,
                       vestedBalance: balanceByYearsPartTime?.vestedTotalAmount
