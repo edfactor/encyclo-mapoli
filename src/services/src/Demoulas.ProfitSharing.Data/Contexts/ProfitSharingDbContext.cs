@@ -16,6 +16,7 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
     public ProfitSharingDbContext(DbContextOptions<ProfitSharingDbContext> options)
     : base(options)
     {
+        ChangeTracker.LazyLoadingEnabled = false;
     }
     
     public virtual DbSet<Demographic> Demographics { get; set; }

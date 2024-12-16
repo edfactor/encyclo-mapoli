@@ -29,7 +29,7 @@ public class ExecutiveHoursAndDollarsIntegrationTests : ApiIntegrationTestBase<P
         string csvData = await response.Response.Content.ReadAsStringAsync();
 
         // Break SVS into lines
-        var lines = csvData.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+        var lines = csvData.Split(["\r\n", "\n"], StringSplitOptions.None);
 
         // Todays date
         lines[0].Should().NotBeEmpty();
@@ -56,7 +56,7 @@ public class ExecutiveHoursAndDollarsIntegrationTests : ApiIntegrationTestBase<P
         string csvData = await response.Response.Content.ReadAsStringAsync();
 
         // Break CVS into lines
-        var lines = csvData.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+        var lines = csvData.Split(["\r\n", "\n"], StringSplitOptions.None);
 
         // Todays date
         lines[0].Should().NotBeEmpty();
