@@ -13,7 +13,8 @@ Install 3rd Party Libraries:
     - Install the "ASP.net and web development", "Azure" workload, and ".NET desktop development" workloads
     - If VS requires any additional workloads or packages, you will be prompted at startup.
 
-2. OPTIONAL - Latest version of Chrome web browser - https://www.google.com/chrome/
+1.1. OPTIONAL: JetBrains Rider 2024.3.2 or higher installed - https://www.jetbrains.com/rider/
+3. OPTIONAL - Latest version of Chrome web browser - https://www.google.com/chrome/
 
 
 ### Build and Test
@@ -87,7 +88,8 @@ dotnet ef migrations script --context ProfitSharingDbContext --output {FILE}
 ### Manage the database
 **In place upgrade**: Demoulas.ProfitSharing.Data.Cli upgrade-db --connection-name ProfitSharing
 **Drop and rebuild schema**: Demoulas.ProfitSharing.Data.Cli drop-recreate-db --connection-name ProfitSharing
-**Import from Ready**: Demoulas.ProfitSharing.Data.Cli $action --connection-name ProfitSharing --sql-file ".\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-Schema "PROFITSHARE"
+**Import from Ready**: Demoulas.ProfitSharing.Data.Cli import-from-ready --connection-name ProfitSharing --sql-file ".\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-Schema "PROFITSHARE"
+ - Second Example: Demoulas.ProfitSharing.Data.Cli import-from-ready --connection-name ProfitSharing --sql-file "..\..\..\..\..\..\..\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-Schema "PROFITSHARE"
 
 
 <hr/>
