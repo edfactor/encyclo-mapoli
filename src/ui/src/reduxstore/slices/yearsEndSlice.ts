@@ -204,16 +204,17 @@ export const yearsEndSlice = createSlice({
       }
     },
     setBalanceByYears: (state, action: PayloadAction<BalanceByYears>) => {
+
       if (action.payload.reportType == FrozenReportsByAgeRequestType.Total) {
-        state.balanceByAgeTotal = action.payload;
+        state.balanceByYearsTotal = action.payload;
       }
 
       if (action.payload.reportType == FrozenReportsByAgeRequestType.FullTime) {
-        state.balanceByAgeFullTime = action.payload;
+        state.balanceByYearsFullTime = action.payload;
       }
 
       if (action.payload.reportType == FrozenReportsByAgeRequestType.PartTime) {
-        state.balanceByAgePartTime = action.payload;
+        state.balanceByYearsPartTime = action.payload;
       }
     },
     setVestingAmountByAge: (state, action: PayloadAction<VestedAmountsByAge>) => {
