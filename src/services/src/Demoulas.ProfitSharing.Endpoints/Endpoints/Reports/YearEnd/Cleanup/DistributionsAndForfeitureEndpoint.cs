@@ -50,7 +50,7 @@ public class DistributionsAndForfeitureEndpoint: EndpointWithCsvBase<Distributio
 
     public override Task<ReportResponseBase<DistributionsAndForfeitureResponse>> GetResponse(DistributionsAndForfeituresRequest req, CancellationToken ct)
     {
-        return _cleanupReportService.GetDistributionsAndForfeiture(req, ct);
+        return _cleanupReportService.GetDistributionsAndForfeitureAsync(req, ct);
     }
 
     public sealed class DistributionsAndForfeitureResponseMap: ClassMap<DistributionsAndForfeitureResponse>

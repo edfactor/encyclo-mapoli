@@ -52,14 +52,14 @@ public class ForfeituresAndPointsForYearEndpoint:EndpointWithCsvBase<ProfitYearR
 
     public override Task<ReportResponseBase<ForfeituresAndPointsForYearResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
-        return _frozenReportService.GetForfeituresAndPointsForYear(req, ct);
+        return _frozenReportService.GetForfeituresAndPointsForYearAsync(req, ct);
     }
 
     public class ForfeituresAndPointsForYearEndpointMapper:ClassMap<ForfeituresAndPointsForYearResponse>
     {
         public ForfeituresAndPointsForYearEndpointMapper()
         {
-            Map(m => m.EmployeeBadgeNumber).Index(0).Name("EMPLOYEE_BADGE");
+            Map(m => m.EmployeeId).Index(0).Name("EMPLOYEE_BADGE");
             Map(m => m.EmployeeName).Index(1).Name("EMPLOYEE_NAME");
             Map(m => m.EmployeeSsn).Index(2).Name("EMPLOYEE_SSN");
             Map(m => m.Forfeitures).Index(3).Name("FORFEITURES");

@@ -46,7 +46,7 @@ public class ExecutiveHoursAndDollarsEndpoint :
 
     public override Task<ReportResponseBase<ExecutiveHoursAndDollarsResponse>> GetResponse(ExecutiveHoursAndDollarsRequest req, CancellationToken ct)
     {
-        return  _reportService.GetExecutiveHoursAndDollarsReport(req, ct);
+        return  _reportService.GetExecutiveHoursAndDollarsReportAsync(req, ct);
     }
 
     public sealed class ExecutiveHoursAndDollarsMap : ClassMap<ExecutiveHoursAndDollarsResponse>

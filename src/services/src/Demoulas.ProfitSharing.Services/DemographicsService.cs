@@ -1,6 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.ActivitySources;
-using System.Diagnostics;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -8,7 +6,6 @@ using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Mappers;
 using Microsoft.EntityFrameworkCore;
-using Demoulas.ProfitSharing.Data.Extensions;
 using Microsoft.Extensions.Logging;
 using Oracle.ManagedDataAccess.Client;
 using EntityFramework.Exceptions.Common;
@@ -40,7 +37,7 @@ public class DemographicsService : IDemographicsServiceInternal
     /// <remarks>
     /// This method processes the demographic data in batches to optimize performance and resource usage.
     /// </remarks>
-    public async Task AddDemographicsStream(IAsyncEnumerable<DemographicsRequest> employees, byte batchSize = byte.MaxValue,
+    public async Task AddDemographicsStreamAsync(IAsyncEnumerable<DemographicsRequest> employees, byte batchSize = byte.MaxValue,
         CancellationToken cancellationToken = default)
     {
         var batch = new List<DemographicsRequest>();
@@ -145,6 +142,9 @@ public class DemographicsService : IDemographicsServiceInternal
                     try
                     {
                         context.Demographics.Add(entity);
+                        
+                        var history = DemographicHistory.FromDemographic(entity);
+                        context.DemographicHistories.Add(history);
                     }
                     catch (InvalidOperationException e) when (e.Message.Contains(
                                                                   "When attaching existing entities, ensure that only one entity instance with a given key value is attached."))
@@ -197,7 +197,20 @@ public class DemographicsService : IDemographicsServiceInternal
                     }
 
                     // Update the rest of the entity's fields
+                    var updateHistory = false;
+                    if (!Demographic.DemographicHistoryEqual(existingEntity, incomingEntity))
+                    {
+                        updateHistory = true;
+                    }
                     UpdateEntityValues(existingEntity, incomingEntity, currentModificationDate);
+                    if (updateHistory)
+                    {
+                        var newHistoryRecord = DemographicHistory.FromDemographic(incomingEntity, existingEntity.Id);
+                        var oldHistoryRecord = await context.DemographicHistories.Where(x => x.DemographicId == existingEntity.Id && DateTime.UtcNow >= x.ValidFrom && DateTime.UtcNow < x.ValidTo).FirstAsync();
+                        oldHistoryRecord.ValidTo = DateTime.UtcNow;
+                        newHistoryRecord.ValidFrom = oldHistoryRecord.ValidTo;
+                        context.DemographicHistories.Add(newHistoryRecord);
+                    }
                 }
             }
 

@@ -46,7 +46,7 @@ public class BalanceByAgeEndpoint : EndpointWithCsvTotalsBase<FrozenReportsByAge
 
     public override Task<BalanceByAge> GetResponse(FrozenReportsByAgeRequest req, CancellationToken ct)
     {
-        return _frozenReportService.GetBalanceByAgeYear(req, ct);
+        return _frozenReportService.GetBalanceByAgeYearAsync(req, ct);
     }
 
     protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, BalanceByAge report, CancellationToken cancellationToken)

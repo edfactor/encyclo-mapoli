@@ -74,7 +74,7 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
 
     public override Task<TerminatedEmployeeAndBeneficiaryResponse> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
-        return _terminatedEmployeeAndBeneficiaryReportService.GetReport(req, ct);
+        return _terminatedEmployeeAndBeneficiaryReportService.GetReportAsync(req, ct);
     }
 
     public override string ReportFileName { get; }

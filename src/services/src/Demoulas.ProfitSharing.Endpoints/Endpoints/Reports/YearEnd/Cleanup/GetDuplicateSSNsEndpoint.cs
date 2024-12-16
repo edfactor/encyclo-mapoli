@@ -54,7 +54,7 @@ public class GetDuplicateSsNsEndpoint : EndpointWithCsvBase<ProfitYearRequest, P
 
     public override Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
-        return _cleanupReportService.GetDuplicateSsNs(req, ct);
+        return _cleanupReportService.GetDuplicateSsnAsync(req, ct);
     }
 
     public sealed class GetDuplicateSsNsResponseMap : ClassMap<PayrollDuplicateSsnResponseDto>

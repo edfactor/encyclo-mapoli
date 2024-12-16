@@ -35,7 +35,7 @@ public class CleanupReportService : ICleanupReportService
 
     }
 
-    public Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsNs(ProfitYearRequest req, CancellationToken ct)
+    public Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsnAsync(ProfitYearRequest req, CancellationToken ct)
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
@@ -94,7 +94,7 @@ public class CleanupReportService : ICleanupReportService
         });
     }
 
-    public async Task<ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>> GetNegativeETVAForSSNsOnPayProfitResponse(ProfitYearRequest req,
+    public async Task<ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>> GetNegativeETVAForSSNsOnPayProfitResponseAsync(ProfitYearRequest req,
         CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("Request NEGATIVE ETVA FOR SSNs ON PAYPROFIT"))
@@ -132,7 +132,7 @@ public class CleanupReportService : ICleanupReportService
         }
     }
 
-    public async Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfit(PaginationRequestDto req,
+    public async Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfitAsync(PaginationRequestDto req,
         CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("Request BEGIN DEMOGRAPHIC BADGES NOT IN PAY PROFIT"))
@@ -163,7 +163,7 @@ public class CleanupReportService : ICleanupReportService
         }
     }
 
-    public async Task<ReportResponseBase<NamesMissingCommaResponse>> GetNamesMissingComma(PaginationRequestDto req,
+    public async Task<ReportResponseBase<NamesMissingCommaResponse>> GetNamesMissingCommaAsync(PaginationRequestDto req,
         CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("Request BEGIN DEMOGRAPHIC BADGES NOT IN PAY PROFIT"))
@@ -189,7 +189,7 @@ public class CleanupReportService : ICleanupReportService
         }
     }
 
-    public async Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetDuplicateNamesAndBirthdays(ProfitYearRequest req,
+    public async Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetDuplicateNamesAndBirthdaysAsync(ProfitYearRequest req,
         CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("Request BEGIN DUPLICATE NAMES AND BIRTHDAYS"))
@@ -278,7 +278,7 @@ public class CleanupReportService : ICleanupReportService
         }
     }
 
-    public async Task<ReportResponseBase<DistributionsAndForfeitureResponse>> GetDistributionsAndForfeiture(DistributionsAndForfeituresRequest req,
+    public async Task<ReportResponseBase<DistributionsAndForfeitureResponse>> GetDistributionsAndForfeitureAsync(DistributionsAndForfeituresRequest req,
         CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("Request BEGIN DISTRIBUTIONS AND FORFEITURES"))
@@ -359,10 +359,11 @@ public class CleanupReportService : ICleanupReportService
         }
     }
 
-    public async Task<ReportResponseBase<YearEndProfitSharingReportResponse>> GetYearEndProfitSharingReport(YearEndProfitSharingReportRequest req, CancellationToken cancellationToken = default)
+    public async Task<ReportResponseBase<YearEndProfitSharingReportResponse>> GetYearEndProfitSharingReportAsync(YearEndProfitSharingReportRequest req, CancellationToken cancellationToken = default)
     {
-        var response = await _calendarService.GetYearStartAndEndAccountingDates(req.ProfitYear, cancellationToken);
+        var response = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
         var over18BirthDate = response.FiscalEndDate.AddYears(-18);
+
         var rslt = await _dataContextFactory.UseReadOnlyContext(ctx =>
         {
             var qry = ctx.PayProfits.Include(x => x.Demographic).Where(p => p.ProfitYear == req.ProfitYear)
@@ -385,6 +386,34 @@ public class CleanupReportService : ICleanupReportService
                     p.pp.PointsEarned,
                     p.yip.Years
                 });
+
+            if (req.IsYearEnd)
+            {
+                qry = (
+                    from pp in ctx.PayProfits
+                    join d in FrozenService.GetDemographicSnapshot(ctx, req.ProfitYear) on pp.DemographicId equals d.Id
+                    join t in _totalService.GetYearsOfService(ctx, req.ProfitYear) on d.Ssn equals t.Ssn
+                    where pp.ProfitYear == req.ProfitYear
+                    select new
+                    {
+                        d.EmployeeId,
+                        pp.CurrentHoursYear,
+                        pp.HoursExecutive,
+                        d.DateOfBirth,
+                        d.EmploymentStatusId,
+                        d.TerminationDate,
+                        d.Ssn,
+                        d.ContactInfo.LastName,
+                        d.ContactInfo.FirstName,
+                        d.StoreNumber,
+                        d.EmploymentTypeId,
+                        pp.CurrentIncomeYear,
+                        pp.IncomeExecutive,
+                        pp.PointsEarned,
+                        t.Years
+                    }
+                );
+            }
 
             if (req.IncludeBeneficiaries)
             {
@@ -446,7 +475,7 @@ public class CleanupReportService : ICleanupReportService
                 if (req is { IncludeActiveEmployees: true, IncludeEmployeesTerminatedThisYear: false })
                 {
                     qry = qry.Where(p => validStatus.Contains(p.EmploymentStatusId) || p.TerminationDate > response.FiscalEndDate);
-                } 
+                }
                 else if (req.IncludeEmployeesTerminatedThisYear && req is { IncludeActiveEmployees: false, IncludeInactiveEmployees: false })
                 {
                     qry = qry.Where(p => validStatus.Contains(p.EmploymentStatusId) && p.TerminationDate <= response.FiscalEndDate && p.TerminationDate >= response.FiscalBeginDate);
@@ -474,8 +503,6 @@ public class CleanupReportService : ICleanupReportService
             {
                 joinedQry = joinedQry.Where(jq => jq.tot.Total == 0);
             }
-
-            var r = joinedQry.ToListAsync(cancellationToken: cancellationToken);
 
             return joinedQry
                       .OrderBy(p => p.pp.LastName)
