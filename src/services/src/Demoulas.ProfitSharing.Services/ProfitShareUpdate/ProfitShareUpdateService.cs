@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Diagnostics;
+using System.Threading;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -29,11 +30,10 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
         _calendarService = calendarService;
     }
 
-
     public async Task<ProfitShareUpdateResponse> ProfitSharingUpdate(ProfitSharingUpdateRequest profitSharingUpdateRequest, CancellationToken cancellationToken)
     {
-        var (memberFinancials, _, employeeExceededMaxContribution) = await ProfitSharingUpdatePaginated(profitSharingUpdateRequest, cancellationToken);
-        var members = memberFinancials.Select(m => new MemberFinancialsResponse
+        (List<MemberFinancials> memberFinancials, _, bool employeeExceededMaxContribution) = await ProfitSharingUpdatePaginated(profitSharingUpdateRequest, cancellationToken);
+        List<MemberFinancialsResponse> members = memberFinancials.Select(m => new MemberFinancialsResponse
         {
             Badge = m.Badge,
             Psn = m.Psn,
@@ -51,26 +51,18 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
             EndingBalance = m.EndingBalance
         }).ToList();
 
-        return new ProfitShareUpdateResponse {
+        return new ProfitShareUpdateResponse
+        {
             IsReRunRequired = employeeExceededMaxContribution,
             ReportName = "Profit Sharing Update",
             ReportDate = DateTimeOffset.Now,
-            Response = new PaginatedResponseDto<MemberFinancialsResponse>
-            {
-                Results = members
-            }
+            Response = new PaginatedResponseDto<MemberFinancialsResponse> { Results = members }
         };
     }
 
     /// <summary>
-    ///     Apply updates to profit sharing system.
+    ///     Applies updates specified in request and returns members with updated Contributions/Earnings/IncomingForfeitures/SecondaryEarnings
     /// </summary>
-    /// <param name="profitSharingUpdateRequest"></param>
-    /// <returns>
-    ///     member financials - a summary of members who have been updated
-    ///     adjustments applied - the before and after values for a single adjusted badge
-    ///     bool - true indicates that one or more employees over the max contribution for the year
-    /// </returns>
     public async Task<ProfitShareUpdateOutcome> ProfitSharingUpdatePaginated(ProfitSharingUpdateRequest profitSharingUpdateRequest, CancellationToken cancellationToken)
     {
         // Values collected for an "Adjustment Report" that we do not yet generate
@@ -80,7 +72,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
         bool employeeExceededMaxContribution = await ProcessEmployees(members, profitSharingUpdateRequest, adjustmentReportData, cancellationToken);
         await ProcessBeneficiaries(members, profitSharingUpdateRequest, cancellationToken);
 
-        return new (members, adjustmentReportData, employeeExceededMaxContribution);
+        return new(members, adjustmentReportData, employeeExceededMaxContribution);
     }
 
     private async Task<bool> ProcessEmployees(List<MemberFinancials> members, ProfitSharingUpdateRequest profitSharingUpdateRequest,
@@ -127,7 +119,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
             // if employee is not participating 
             if (empl.EnrolledId != Enrollment.Constants.NotEnrolled || empl.YearsInPlan != 0)
             {
-                var ( memb, didEmployeeExceededMaxContribution ) = await ProcessEmployee(empl, profitSharingUpdateRequest, adjustmentReportData, cancellationToken);
+                var (memb, didEmployeeExceededMaxContribution) = await ProcessEmployee(empl, profitSharingUpdateRequest, adjustmentReportData, cancellationToken);
                 members.Add(memb);
                 employeeExceededMaxContribution |= didEmployeeExceededMaxContribution;
             }
@@ -146,7 +138,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
                         Psn = Convert.ToInt64(b.Psn),
                         Ssn = b.Contact!.Ssn,
                         Name = b.Contact.ContactInfo.FullName,
-                        CurrentAmount = b.Amount,  // Should be computing this from the ProfitDetail via TotalService
+                        CurrentAmount = b.Amount, // Should be computing this from the ProfitDetail via TotalService
                     }).ToListAsync(cancellationToken)
         );
 
@@ -169,8 +161,9 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
     private async Task<(MemberFinancials, bool)> ProcessEmployee(EmployeeFinancials empl, ProfitSharingUpdateRequest profitSharingUpdateRequest,
         AdjustmentReportData adjustmentReportData, CancellationToken cancellationToken)
     {
-        // Gets this years profit sharing transactions, aka Distributions - hardships
-        ProfitDetailTotals profitDetailTotals = await GetProfitDetailTotals(profitSharingUpdateRequest.ProfitYear, empl.Ssn, cancellationToken);
+        // Gets this year's profit sharing transactions, aka Distributions - hardships - Military - ClassActionFund
+        ProfitDetailTotals profitDetailTotals =
+            await ProfitDetailTotals.GetProfitDetailTotals(_dbContextFactory, profitSharingUpdateRequest.ProfitYear, empl.Ssn, cancellationToken);
 
         // MemberTotals holds newly computed values, not old values
         MemberTotals memberTotals = new();
@@ -194,8 +187,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
             memberTotals.EarnPoints = (int)Math.Round(memberTotals.PointsDollars / 100, MidpointRounding.AwayFromZero);
         }
 
-        ComputeEarnings(memberTotals, null, empl, profitSharingUpdateRequest, adjustmentReportData,
-            profitDetailTotals.ClassActionFundTotal);
+        ComputeEarningsEmployee(empl, memberTotals, profitSharingUpdateRequest, adjustmentReportData, profitDetailTotals.ClassActionFundTotal);
 
         MemberFinancials memberFinancials = new(empl, profitDetailTotals, memberTotals);
 
@@ -219,7 +211,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
 
             memberFinancials.MaxOver = overContribution;
             memberFinancials.MaxPoints = memberFinancials.ContributionPoints;
-            employeeExceededMaxContribution = true; 
+            employeeExceededMaxContribution = true;
         }
         // --- End Max Contribution
 
@@ -228,10 +220,10 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
         return (memberFinancials, employeeExceededMaxContribution);
     }
 
-
     private async Task<MemberFinancials> ProcessBeneficiary(BeneficiaryFinancials bene, ProfitSharingUpdateRequest profitSharingUpdateRequest, CancellationToken cancellationToken)
     {
-        ProfitDetailTotals profitDetailTotals = await GetProfitDetailTotals(profitSharingUpdateRequest.ProfitYear, bene.Ssn, cancellationToken);
+        var profitDetailTotals =
+            await ProfitDetailTotals.GetProfitDetailTotals(_dbContextFactory, profitSharingUpdateRequest.ProfitYear, bene.Ssn, cancellationToken);
 
         MemberTotals memberTotals = new();
         // Yea, this adding and removing ClassActionFundTotal is strange
@@ -247,7 +239,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
             memberTotals.EarnPoints = (int)Math.Round(memberTotals.PointsDollars / 100, MidpointRounding.AwayFromZero);
         }
 
-        ComputeEarnings(memberTotals, bene, null, profitSharingUpdateRequest, null, profitDetailTotals.ClassActionFundTotal);
+        ComputeEarningsBeneficiary(memberTotals, bene, profitSharingUpdateRequest);
 
         return new MemberFinancials(bene, profitDetailTotals, memberTotals);
     }
@@ -270,11 +262,10 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
     }
 
 
-    private static decimal ComputeForfeitures(long PointsEarned, long badge, ProfitSharingUpdateRequest profitSharingUpdateRequest,
+    private static decimal ComputeForfeitures(long pointsEarned, long badge, ProfitSharingUpdateRequest profitSharingUpdateRequest,
         AdjustmentReportData adjustmentReportData)
     {
-        decimal incomingForfeitureAmount = Math.Round(profitSharingUpdateRequest.IncomingForfeitPercent * PointsEarned, 2,
-            MidpointRounding.AwayFromZero);
+        decimal incomingForfeitureAmount = Math.Round(profitSharingUpdateRequest.IncomingForfeitPercent * pointsEarned, 2, MidpointRounding.AwayFromZero);
         if (profitSharingUpdateRequest.BadgeToAdjust > 0 && profitSharingUpdateRequest.BadgeToAdjust == badge)
         {
             adjustmentReportData.IncomingForfeitureAmountUnadjusted = incomingForfeitureAmount;
@@ -286,10 +277,10 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
     }
 
     // The fact that this method takes either a bene or an empl and has all this conditional logic is not great.
-    private static void ComputeEarnings(MemberTotals memberTotals, BeneficiaryFinancials? bene, EmployeeFinancials? empl,
-        ProfitSharingUpdateRequest profitSharingUpdateRequest, AdjustmentReportData? adjustmentsApplied, decimal ClassActionFundTotal)
+    private static void ComputeEarningsEmployee(EmployeeFinancials empl, MemberTotals memberTotals, ProfitSharingUpdateRequest profitSharingUpdateRequest,
+        AdjustmentReportData? adjustmentsApplied, decimal classActionFundTotal)
     {
-        if (memberTotals.EarnPoints <= 0 && empl != null)
+        if (memberTotals.EarnPoints <= 0)
         {
             memberTotals.EarnPoints = 0;
             empl.Earnings = 0;
@@ -315,151 +306,84 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
             adjustmentsApplied.SecondaryEarningsAmountAdjusted = memberTotals.SecondaryEarningsAmount;
         }
 
-        // This comment from cobol helps explain the following if block.  It is related to CAF processing.
-        //* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-        //* ETVA EARNINGS ARE CALCULATED AND WRITTEN TO PY-PROF-ETVA (EtvaAfterVestingRules)
-        //* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-        //* need to subtract CAF out of PY-PS-ETVA (EtvaAfterVestingRules) for people not fully vested
-        //* because  we can't give earnings for 2021 on class action funds -
-        //* they were added in 2021.CAF was added to PY-PS-ETVA (EtvaAfterVestingRules) for
-        //* PY-PS-YEARS < 6.
+        decimal etvaAfterVestingRulesAdjustedByCaf = AdjustEmployeeEarningsForClassActionFund(empl!, memberTotals, classActionFundTotal);
 
-        decimal EtvaAfterVestingRulesAdjustedByCAF = 0;
-        if (empl != null && empl.EtvaAfterVestingRules > 0)
+        if (profitSharingUpdateRequest.SecondaryEarningsPercent == 0m) // Secondary Earnings
         {
-            if (empl.YearsInPlan < 6)
+            return;
+        }
+
+        decimal etvaScaled = etvaAfterVestingRulesAdjustedByCaf / memberTotals.PointsDollars;
+        decimal etvaSecondaryScaledAmount = Math.Round(memberTotals.SecondaryEarningsAmount * etvaScaled, 2,
+            MidpointRounding.AwayFromZero);
+        memberTotals.SecondaryEarningsAmount -= etvaSecondaryScaledAmount;
+        empl!.SecondaryEarnings = memberTotals.SecondaryEarningsAmount;
+        empl.SecondaryEtvaEarnings = etvaSecondaryScaledAmount;
+    }
+
+    private static void ComputeEarningsBeneficiary(MemberTotals memberTotals, BeneficiaryFinancials bene, ProfitSharingUpdateRequest profitSharingUpdateRequest)
+    {
+        memberTotals.EarningsAmount = Math.Round(profitSharingUpdateRequest.EarningsPercent * memberTotals.EarnPoints, 2,
+            MidpointRounding.AwayFromZero);
+
+        bene!.Earnings = memberTotals.EarningsAmount;
+
+        memberTotals.SecondaryEarningsAmount =
+            Math.Round(profitSharingUpdateRequest.SecondaryEarningsPercent * memberTotals.EarnPoints, 2,
+                MidpointRounding.AwayFromZero);
+
+        bene.SecondaryEarnings = memberTotals.SecondaryEarningsAmount;
+    }
+
+    // This comment from cobol helps explain the following method.
+    //* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+    //* ETVA EARNINGS ARE CALCULATED AND WRITTEN TO PY-PROF-ETVA (EtvaAfterVestingRules)
+    //* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+    //* need to subtract CAF out of PY-PS-ETVA (EtvaAfterVestingRules) for people not fully vested
+    //* because  we can't give earnings for 2021 on class action funds -
+    //* they were added in 2021.CAF was added to PY-PS-ETVA (EtvaAfterVestingRules) for
+    //* PY-PS-YEARS < 6.
+    private static decimal AdjustEmployeeEarningsForClassActionFund(EmployeeFinancials empl, MemberTotals memberTotals, decimal classActionFundTotal)
+    {
+        decimal etvaAfterVestingRulesAdjustedByCaf = 0;
+        if (empl.EtvaAfterVestingRules > 0)
+        {
+            if (empl.YearsInPlan < 6) // This 6 is only used here, so it is intentionally not pulled out.  
             {
-                EtvaAfterVestingRulesAdjustedByCAF = empl.EtvaAfterVestingRules - ClassActionFundTotal;
+                etvaAfterVestingRulesAdjustedByCaf = empl.EtvaAfterVestingRules - classActionFundTotal;
             }
             else
             {
-                empl.EtvaAfterVestingRules = EtvaAfterVestingRulesAdjustedByCAF;
+                empl.EtvaAfterVestingRules = etvaAfterVestingRulesAdjustedByCaf;
             }
         }
 
-        if (EtvaAfterVestingRulesAdjustedByCAF <= 0 && empl != null)
+        if (etvaAfterVestingRulesAdjustedByCaf <= 0)
         {
             empl.Earnings = memberTotals.EarningsAmount;
             empl.SecondaryEarnings = memberTotals.SecondaryEarningsAmount;
             empl.EarningsOnEtva = 0m;
             empl.SecondaryEtvaEarnings = 0m;
-            return;
+            return 0;
         }
 
-        if (empl != null && memberTotals.PointsDollars > 0)
+        if (memberTotals.PointsDollars <= 0)
         {
-            // Computes the ETVA amount
-            decimal EtvaScaled = EtvaAfterVestingRulesAdjustedByCAF / memberTotals.PointsDollars;
-            decimal EtvaScaledAmount =
-                Math.Round(memberTotals.EarningsAmount * EtvaScaled, 2, MidpointRounding.AwayFromZero);
-
-            // subtracts that amount from the members total earnings
-            memberTotals.EarningsAmount = memberTotals.EarningsAmount - EtvaScaledAmount;
-
-            // Sets Earn and ETVA amounts
-            empl!.Earnings = memberTotals.EarningsAmount;
-            empl.EarningsOnEtva = EtvaScaledAmount;
+            return etvaAfterVestingRulesAdjustedByCaf;
         }
 
-        if (bene != null)
-        {
-            bene.Earnings = 0m;
-            bene.Earnings = memberTotals.EarningsAmount;
-        }
+        // Computes the ETVA amount
+        decimal etvaScaled = etvaAfterVestingRulesAdjustedByCaf / memberTotals.PointsDollars;
+        decimal etvaScaledAmount =
+            Math.Round(memberTotals.EarningsAmount * etvaScaled, 2, MidpointRounding.AwayFromZero);
 
-        if (profitSharingUpdateRequest.SecondaryEarningsPercent != 0m) // Secondary Earnings
-        {
-            decimal EtvaScaled = EtvaAfterVestingRulesAdjustedByCAF / memberTotals.PointsDollars;
-            decimal EtvaSecondaryScaledAmount = Math.Round(memberTotals.SecondaryEarningsAmount * EtvaScaled, 2,
-                MidpointRounding.AwayFromZero);
-            memberTotals.SecondaryEarningsAmount -= EtvaSecondaryScaledAmount;
-            if (empl != null)
-            {
-                empl.SecondaryEarnings = memberTotals.SecondaryEarningsAmount;
-                empl.SecondaryEtvaEarnings = EtvaSecondaryScaledAmount;
-            }
+        // subtracts that amount from the members total earnings
+        memberTotals.EarningsAmount -= etvaScaledAmount;
 
-            if (bene != null)
-            {
-                bene.SecondaryEarnings = EtvaSecondaryScaledAmount;
-            }
-        }
+        // Sets Earn and ETVA amounts
+        empl!.Earnings = memberTotals.EarningsAmount;
+        empl.EarningsOnEtva = etvaScaledAmount;
+
+        return etvaAfterVestingRulesAdjustedByCaf;
     }
-
-    // Fetches PROFIT_DETAIL Totals for an SSN.
-    // processes only the current profit year.  Ignores profit code = 0.
-    // Special handling for CAF and Military. 
-    private async Task<ProfitDetailTotals> GetProfitDetailTotals(short profitYear, int ssn, CancellationToken cancellationToken)
-    {
-        decimal distributionsTotal = 0;
-        decimal forfeitsTotal = 0;
-        decimal allocationsTotal = 0;
-        decimal paidAllocationsTotal = 0;
-        decimal militaryTotal = 0;
-        decimal classActionFundTotal = 0;
-
-        List<ProfitDetail> pds = await _dbContextFactory.UseReadOnlyContext(ctx =>
-            ctx.ProfitDetails.Where(pd => pd.Ssn == ssn && pd.ProfitYear == profitYear)
-                .OrderBy(pd => pd.ProfitYear).ThenBy(pd => pd.ProfitYearIteration).ThenBy(pd => pd.MonthToDate)
-                .ThenBy(pd => pd.FederalTaxes)
-                .ToListAsync(cancellationToken)
-        );
-
-        foreach (ProfitDetail pd in pds)
-        {
-            if (pd.ProfitCodeId == ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal /*1*/ ||
-                pd.ProfitCodeId == ProfitCode.Constants.OutgoingDirectPayments /*3*/)
-            {
-                distributionsTotal += pd.Forfeiture;
-            }
-
-            if (pd.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment /*9*/)
-            {
-                if (pd.CommentType == CommentType.Constants.TransferOut /* "XFER >" or "XFER>" */  ||
-                    pd.CommentType == CommentType.Constants.QdroOut /* "QDRO >" or "QDRO>" */)
-                {
-                    paidAllocationsTotal += pd.Forfeiture;
-                }
-                else
-                {
-                    distributionsTotal += pd.Forfeiture;
-                }
-            }
-
-            if (pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures /*2*/)
-            {
-                forfeitsTotal += pd.Forfeiture;
-            }
-
-            if (pd.ProfitCodeId == ProfitCode.Constants.OutgoingXferBeneficiary /*5*/)
-            {
-                paidAllocationsTotal += pd.Forfeiture;
-            }
-
-            if (pd.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary /*6*/)
-            {
-                allocationsTotal += pd.Contribution;
-            }
-
-            if (pd.ProfitYearIteration == ProfitDetail.Constants.ProfitYearIterationMilitary /*1*/)
-            {
-                militaryTotal += pd.Contribution;
-            }
-
-            if (pd.ProfitYearIteration == ProfitDetail.Constants.ProfitYearIterationClassActionFund /*2*/)
-            {
-                classActionFundTotal += pd.Earnings;
-            }
-        }
-
-        return new ProfitDetailTotals(
-            distributionsTotal,
-            forfeitsTotal,
-            allocationsTotal,
-            paidAllocationsTotal,
-            militaryTotal,
-            classActionFundTotal);
-    }
-
 }
-
