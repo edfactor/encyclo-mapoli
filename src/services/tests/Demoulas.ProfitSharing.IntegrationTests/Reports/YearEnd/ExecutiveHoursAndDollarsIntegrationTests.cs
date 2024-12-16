@@ -3,6 +3,7 @@ using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ExecutiveHoursAndDollars;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Services.Reports.YearEnd;
 using Demoulas.ProfitSharing.UnitTests.Extensions;
 using FastEndpoints;
 using FluentAssertions;
