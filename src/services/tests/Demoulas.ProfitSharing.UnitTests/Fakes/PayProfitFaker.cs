@@ -12,8 +12,7 @@ internal sealed class PayProfitFaker : Faker<PayProfit>
         var demographicQueue = new Queue<Demographic>(demographicFakes);
         Demographic currentDemographic = demographicQueue.Peek();
 
-        RuleFor(pc => pc.DemographicId, (f, o) => currentDemographic.Id)
-            .RuleFor(d => d.Demographic, (f, o) =>
+            RuleFor(d => d.Demographic, (f, o) =>
             {
                 if (demographicQueue.Any())
                 {
@@ -27,6 +26,7 @@ internal sealed class PayProfitFaker : Faker<PayProfit>
 
                 return currentDemographic;
             })
+            .RuleFor(pc => pc.DemographicId, (f, o) => currentDemographic.Id)
             .RuleFor(pc => pc.ProfitYear, (f, o) =>
             {
                 short profitYear;
