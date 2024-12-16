@@ -7,7 +7,7 @@ using Demoulas.ProfitSharing.UnitTests.Extensions;
 using FastEndpoints;
 using FluentAssertions;
 
-namespace Demoulas.ProfitSharing.Services.Reports.YearEnd;
+namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 public class ExecutiveHoursAndDollarsIntegrationTests : ApiIntegrationTestBase<Program>
 {
     // Probably should define these somewhere more global, or be looked up dynamically 
@@ -60,7 +60,7 @@ public class ExecutiveHoursAndDollarsIntegrationTests : ApiIntegrationTestBase<P
         string csvData = await response.Response.Content.ReadAsStringAsync();
 
         // Break CVS into lines
-        var lines = csvData.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+        var lines = csvData.Split(["\r\n", "\n"], StringSplitOptions.None);
 
         // Todays date
         lines[0].Should().NotBeEmpty();

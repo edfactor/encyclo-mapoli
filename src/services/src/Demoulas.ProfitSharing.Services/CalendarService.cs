@@ -29,7 +29,7 @@ public sealed class CalendarService : ICalendarService
     /// </exception>
     public Task<DateOnly> FindWeekendingDateFromDateAsync(DateOnly dateTime, CancellationToken cancellationToken = default)
     {
-        return _dataContextFactory.UseReadOnlyContext(c => _accountingPeriodsService.FindWeekendingDateFromDate(c, dateTime, cancellationToken));
+        return _dataContextFactory.UseReadOnlyContext(c => _accountingPeriodsService.FindWeekendingDateFromDateAsync(c, dateTime, cancellationToken));
     }
 
     /// <summary>
@@ -40,6 +40,6 @@ public sealed class CalendarService : ICalendarService
     /// <returns>A task that represents the asynchronous operation. The task result contains a tuple with the start and end accounting dates.</returns>
     public Task<CalendarResponseDto> GetYearStartAndEndAccountingDatesAsync(short calendarYear, CancellationToken cancellationToken = default)
     {
-        return _dataContextFactory.UseReadOnlyContext(c => _accountingPeriodsService.GetYearStartAndEndAccountingDates(c, calendarYear, cancellationToken));
+        return _dataContextFactory.UseReadOnlyContext(c => _accountingPeriodsService.GetYearStartAndEndAccountingDatesAsync(c, calendarYear, cancellationToken));
     }
 }

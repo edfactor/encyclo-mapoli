@@ -1,5 +1,4 @@
 ﻿using Demoulas.Common.Caching.Interfaces;
-using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Services.HostedServices;
 using Demoulas.ProfitSharing.Services.Mappers;

@@ -108,7 +108,7 @@ public class GetEligibleEmployeesTests : ApiTestBase<Api.Program>
 
             // Verify CSV file
             string csvData = await response.Response.Content.ReadAsStringAsync();
-            string[] lines = csvData.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+            string[] lines = csvData.Split(["\r\n", "\n"], StringSplitOptions.None);
             // line 0 is today's date
             lines[0].Should().NotBeEmpty();
             lines[1].Should().Be($"Get Eligible Employees for Year {TestProfitYear}");

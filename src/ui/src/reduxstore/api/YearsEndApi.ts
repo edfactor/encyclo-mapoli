@@ -15,7 +15,6 @@ import {
   EligibleEmployeesRequestDto,
   ExecutiveHoursAndDollars,
   ExecutiveHoursAndDollarsRequestDto,
-  MasterInquiryDetail,
   MasterInquryRequest,
   MilitaryAndRehire,
   MilitaryAndRehireForfeiture,
@@ -32,7 +31,8 @@ import {
   ContributionsByAge,
   ForfeituresByAge,
   BalanceByAge,
-  MasterInquiryResponseType
+  VestedAmountsByAge,
+  MasterInquiryResponseType, ProfitYearRequest
 } from "reduxstore/types";
 import {
   setDemographicBadgesNotInPayprofitData,
@@ -50,10 +50,10 @@ import {
   setMilitaryAndRehireForfeituresDetails,
   setMilitaryAndRehireProfitSummaryDetails,
   setMissingCommaInPYName,
+  setVestingAmountByAge,
   setNegativeEtvaForSssnsOnPayprofit
 } from "reduxstore/slices/yearsEndSlice";
 import { url } from "./api";
-import { Paged } from "smart-ui-library";
 
 export const YearsEndApi = createApi({
   baseQuery: fetchBaseQuery({
@@ -474,6 +474,23 @@ export const YearsEndApi = createApi({
           console.log("Err: " + err);
         }
       }
+    }),
+    getVestingAmountByAge: builder.query<VestedAmountsByAge, ProfitYearRequest>({
+      query: (params) => ({
+        url: "yearend/frozen/vested-amounts-by-age",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setVestingAmountByAge(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
     })
   })
 });
@@ -494,5 +511,6 @@ export const {
   useLazyGetContributionsByAgeQuery,
   useLazyGetForfeituresByAgeQuery,
   useLazyGetBalanceByAgeQuery,
-  useLazyGetProfitMasterInquiryQuery
+  useLazyGetProfitMasterInquiryQuery,
+  useLazyGetVestingAmountByAgeQuery
 } = YearsEndApi;
