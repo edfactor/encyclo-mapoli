@@ -1,6 +1,4 @@
-﻿using Demoulas.Common.Contracts.Contracts.Request;
-using Demoulas.Common.Contracts.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 
@@ -19,6 +17,7 @@ public abstract record BalanceByBase<TDetail> : ReportResponseBase<TDetail> wher
     {
         get { return (short)(TotalMembers - TotalBeneficiaries); }
     }
+
     public decimal TotalEmployeeAmount
     {
         get { return BalanceTotalAmount - TotalBeneficiariesAmount; }

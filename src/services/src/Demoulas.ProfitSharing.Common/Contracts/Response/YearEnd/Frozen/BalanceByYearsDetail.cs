@@ -1,16 +1,11 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
+
 public sealed record BalanceByYearsDetail : BalanceByDetailBase
 {
-    public required int Age { get; init; }
-  
+    public required byte Years { get; init; }
+
     public static BalanceByYearsDetail ResponseExample()
     {
-        return new BalanceByYearsDetail
-        {
-            Age = 32,
-            CurrentBalance = (decimal)159_451.46,
-            EmployeeCount = 7,
-            BeneficiaryCount = 3
-        };
+        return new BalanceByYearsDetail { Years = 12, CurrentBalance = (decimal)159_451.46, EmployeeCount = 7, BeneficiaryCount = 3 };
     }
 }

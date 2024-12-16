@@ -7,7 +7,6 @@ using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen.VestingByAgeEndpoint;
-using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen.ForfeituresByAgeEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
 
@@ -32,12 +31,7 @@ public class VestingByAgeEndpoint : EndpointWithCsvTotalsBase<ProfitYearRequest,
                 "This report produces a list of members showing their vested balances over the year grouped by age";
 
             s.ExampleRequest = ProfitYearRequest.RequestExample();
-            s.ResponseExamples = new Dictionary<int, object>
-            {
-                {
-                    200, VestedAmountsByAge.ResponseExample()
-                }
-            };
+            s.ResponseExamples = new Dictionary<int, object> { { 200, VestedAmountsByAge.ResponseExample() } };
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
         Group<YearEndGroup>();
@@ -120,8 +114,6 @@ public class VestingByAgeEndpoint : EndpointWithCsvTotalsBase<ProfitYearRequest,
     }
 
 
-
-
     public class ProfitSharingVestingByAgeByAgeMapper : ClassMap<VestedAmountsByAgeDetail>
     {
         public ProfitSharingVestingByAgeByAgeMapper()
@@ -135,5 +127,4 @@ public class VestingByAgeEndpoint : EndpointWithCsvTotalsBase<ProfitYearRequest,
             Map(m => m.PartTimeNotVestedCount).Index(6).Name("PT NOT VESTED EMPLOY/$BALANCE");
         }
     }
-
 }
