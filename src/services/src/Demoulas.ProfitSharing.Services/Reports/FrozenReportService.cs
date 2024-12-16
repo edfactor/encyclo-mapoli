@@ -444,7 +444,6 @@ public class FrozenReportService : IFrozenReportService
                 Total = details.Count
             }
         };
-
     }
 
     public async Task<VestedAmountsByAge> GetVestedAmountsByAgeYearAsync(ProfitYearRequest req, CancellationToken cancellationToken = default)
