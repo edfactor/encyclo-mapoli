@@ -1,4 +1,5 @@
 ﻿using System.CommandLine;
+using System.Xml.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -6,6 +7,7 @@ using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Factories;
 using Microsoft.Extensions.DependencyInjection;
+using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 
 namespace Demoulas.ProfitSharing.Data.Cli;
 
@@ -95,10 +97,34 @@ public sealed class Program
             });
         });
 
+        var generateMarkdownCommand = new Command("generate-markdown", "Generate a Markdown file from DGML")
+        {
+            new Option<string>("--connection-name", "The name of the configuration property that holds the connection string"),
+            new Option<string>("--output-file", "The path to save the Markdown file")
+        };
+
+        generateMarkdownCommand.SetHandler(async () =>
+            {
+                var outputFile = configuration["output-file"];
+                if (string.IsNullOrEmpty(outputFile))
+                {
+                    throw new ArgumentNullException(nameof(outputFile), "Output file path must be provided.");
+                }
+
+                await ExecuteWithDbContext(configuration, args, async context =>
+                {
+                    var dgml = context.AsDgml();
+                    await GenerateMarkdownFromDgml(dgml, outputFile);
+                    Console.WriteLine($"Markdown file created: {outputFile}");
+                });
+            });
+
+
         rootCommand.AddCommand(upgradeDbCommand);
         rootCommand.AddCommand(dropRecreateDbCommand);
         rootCommand.AddCommand(runSqlCommand);
         rootCommand.AddCommand(generateDgmlCommand);
+        rootCommand.AddCommand(generateMarkdownCommand);
 
         return rootCommand.InvokeAsync(args);
     }
@@ -119,6 +145,49 @@ public sealed class Program
         await action(context);
 #pragma warning restore S3928
     }
+
+    private static Task GenerateMarkdownFromDgml(string dgmlContent, string outputFile)
+    {
+        // Parse DGML content
+        var dgml = XDocument.Parse(dgmlContent);
+        XNamespace ns = "http://schemas.microsoft.com/vs/2009/dgml";
+
+        // Parse Nodes
+        var nodes = dgml.Descendants(ns + "Node")
+            .Select(node => node.Attribute("Id")?.Value)
+            .Where(id => !string.IsNullOrEmpty(id))
+            .ToList();
+
+
+        // Parse Links
+        var links = dgml.Descendants("Link")
+            .Select(link => new
+            {
+                Source = link.Attribute("Source")?.Value,
+                Target = link.Attribute("Target")?.Value
+            })
+            .Where(link => !string.IsNullOrWhiteSpace(link.Source) && !string.IsNullOrWhiteSpace(link.Target))
+            .ToList();
+
+        // Create Markdown content
+        var markdown = new System.Text.StringBuilder();
+        markdown.AppendLine("# DGML Graph Representation");
+        markdown.AppendLine("\n## Nodes\n");
+        foreach (var node in nodes)
+        {
+            markdown.AppendLine($"- **{node}**");
+        }
+
+        markdown.AppendLine("\n## Links\n");
+        foreach (var link in links)
+        {
+            markdown.AppendLine($"- **{link.Source}** → **{link.Target}**");
+        }
+
+        // Save to output file
+        return File.WriteAllTextAsync(outputFile, markdown.ToString());
+    }
+
 
     private static HostApplicationBuilder CreateHostBuilder(string[] args)
     {
