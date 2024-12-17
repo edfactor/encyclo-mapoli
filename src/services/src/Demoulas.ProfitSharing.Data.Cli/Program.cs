@@ -54,7 +54,8 @@ public sealed class Program
         var runSqlCommand = new Command("import-from-ready", "Run a custom SQL script after migrations")
         {
             new Option<string>("--connection-name", "The name of the configuration property that holds the connection string"),
-            new Option<string>("--sql-file", "The path to the custom SQL file")
+            new Option<string>("--sql-file", "The path to the custom SQL file"),
+            new Option<string>("--source-Schema", "Name of the schema that is being used as the source database")
         };
 
         runSqlCommand.SetHandler(async () =>
