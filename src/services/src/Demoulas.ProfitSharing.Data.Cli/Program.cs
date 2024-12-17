@@ -10,21 +10,18 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Demoulas.ProfitSharing.Data.Cli;
 
 #pragma warning disable S1118
-public class Program
+public sealed class Program
 #pragma warning restore S1118
 {
     public static Task<int> Main(string[] args)
     {
 #pragma warning disable S3928
-        // Setup configuration to include command-line arguments
         var configuration = new ConfigurationBuilder()
             .AddCommandLine(args)
             .Build();
 
-        // Create root command
         var rootCommand = new RootCommand("CLI tool for database operations");
 
-        // Define and set up "upgrade-db" command
         var upgradeDbCommand = new Command("upgrade-db", "Apply migrations to upgrade the database")
         {
             new Option<string>("--connection-name", "The name of the configuration property that holds the connection string")
@@ -32,21 +29,12 @@ public class Program
 
         upgradeDbCommand.SetHandler(async () =>
         {
-            string? connectionName = configuration["connection-name"];
-            if (string.IsNullOrEmpty(connectionName))
+            await ExecuteWithDbContext(configuration, args, async context =>
             {
-                throw new ArgumentNullException(nameof(connectionName), "Connection name must be provided.");
-            }
-
-            HostApplicationBuilder builder = CreateHostBuilder(args);
-            var list = new List<ContextFactoryRequest> { ContextFactoryRequest.Initialize<ProfitSharingDbContext>(connectionName) };
-            _ = DataContextFactory.Initialize(builder, contextFactoryRequests: list);
-
-            var context = builder.Services.BuildServiceProvider().GetRequiredService<ProfitSharingDbContext>();
-            await context.Database.MigrateAsync();
+                await context.Database.MigrateAsync();
+            });
         });
 
-        // Define and set up "drop-recreate-db" command
         var dropRecreateDbCommand = new Command("drop-recreate-db", "Drop and recreate the database")
         {
             new Option<string>("--connection-name", "The name of the configuration property that holds the connection string")
@@ -54,23 +42,13 @@ public class Program
 
         dropRecreateDbCommand.SetHandler(async () =>
         {
-            string? connectionName = configuration["connection-name"];
-            if (string.IsNullOrEmpty(connectionName))
+            await ExecuteWithDbContext(configuration, args, async context =>
             {
-                throw new ArgumentNullException(nameof(connectionName), "Connection name must be provided.");
-            }
-
-            HostApplicationBuilder builder = CreateHostBuilder(args);
-            var list = new List<ContextFactoryRequest> { ContextFactoryRequest.Initialize<ProfitSharingDbContext>(connectionName) };
-            _ = DataContextFactory.Initialize(builder, contextFactoryRequests: list);
-
-            var context = builder.Services.BuildServiceProvider().GetRequiredService<ProfitSharingDbContext>();
-            await context.Database.EnsureDeletedAsync();
-            await context.Database.MigrateAsync();
-
+                await context.Database.EnsureDeletedAsync();
+                await context.Database.MigrateAsync();
+            });
         });
 
-        // Define and set up "run-sql" command
         var runSqlCommand = new Command("import-from-ready", "Run a custom SQL script after migrations")
         {
             new Option<string>("--connection-name", "The name of the configuration property that holds the connection string"),
@@ -79,49 +57,66 @@ public class Program
 
         runSqlCommand.SetHandler(async () =>
         {
-            string? connectionName = configuration["connection-name"];
-            string? sqlFile = configuration["sql-file"];
-            string? sourceSchema = configuration["source-Schema"];
-            if (string.IsNullOrEmpty(connectionName))
+            await ExecuteWithDbContext(configuration, args, async context =>
             {
-                throw new ArgumentNullException(nameof(connectionName), "Connection name must be provided.");
-            }
+                var sqlFile = configuration["sql-file"];
+                var sourceSchema = configuration["source-Schema"];
+                if (string.IsNullOrEmpty(sqlFile) || string.IsNullOrEmpty(sourceSchema))
+                {
+                    throw new ArgumentNullException("SQL file path and schema must be provided.");
+                }
 
-            if (string.IsNullOrEmpty(sqlFile))
-            {
-                throw new ArgumentNullException(nameof(sqlFile), "SQL file path must be provided.");
-            }
-
-            if (string.IsNullOrEmpty(sourceSchema))
-            {
-                throw new ArgumentNullException(nameof(sourceSchema), "A source schema name must be provided.");
-            }
-
-            HostApplicationBuilder builder = CreateHostBuilder(args);
-            var list = new List<ContextFactoryRequest>
-            {
-                ContextFactoryRequest.Initialize<ProfitSharingDbContext>(connectionName)
-            };
-
-            var factory = DataContextFactory.Initialize(builder, contextFactoryRequests: list);
-            await factory.UseWritableContext(async context =>
-            {
                 string sqlCommand = await File.ReadAllTextAsync(sqlFile);
                 sqlCommand = sqlCommand.Replace("COMMIT ;", string.Empty)
                     .Replace("{SOURCE_PROFITSHARE_SCHEMA}", sourceSchema).Trim();
-                return await context.Database.ExecuteSqlRawAsync(sqlCommand);
+                await context.Database.ExecuteSqlRawAsync(sqlCommand);
             });
         });
 
-        // Add commands to root command
-        rootCommand.TreatUnmatchedTokensAsErrors = false;
+        var generateDgmlCommand = new Command("generate-dgml", "Generate a DGML file for the DbContext model")
+        {
+            new Option<string>("--connection-name", "The name of the configuration property that holds the connection string"),
+            new Option<string>("--output-file", "The path to save the DGML file")
+        };
+
+        generateDgmlCommand.SetHandler(async () =>
+        {
+            await ExecuteWithDbContext(configuration, args, async context =>
+            {
+                var outputFile = configuration["output-file"];
+                if (string.IsNullOrEmpty(outputFile))
+                {
+                    throw new ArgumentNullException(nameof(outputFile), "Output file path must be provided.");
+                }
+
+                var dgml = context.AsDgml();
+                await File.WriteAllTextAsync(outputFile, dgml, System.Text.Encoding.UTF8);
+                Console.WriteLine($"DGML file created: {outputFile}");
+            });
+        });
+
         rootCommand.AddCommand(upgradeDbCommand);
         rootCommand.AddCommand(dropRecreateDbCommand);
         rootCommand.AddCommand(runSqlCommand);
+        rootCommand.AddCommand(generateDgmlCommand);
 
-        
-        // Invoke the root command
         return rootCommand.InvokeAsync(args);
+    }
+
+    private static async Task ExecuteWithDbContext(IConfiguration configuration, string[] args, Func<ProfitSharingDbContext, Task> action)
+    {
+        string? connectionName = configuration["connection-name"];
+        if (string.IsNullOrEmpty(connectionName))
+        {
+            throw new ArgumentNullException(nameof(connectionName), "Connection name must be provided.");
+        }
+
+        HostApplicationBuilder builder = CreateHostBuilder(args);
+        var list = new List<ContextFactoryRequest> { ContextFactoryRequest.Initialize<ProfitSharingDbContext>(connectionName) };
+        _ = DataContextFactory.Initialize(builder, contextFactoryRequests: list);
+
+        await using var context = builder.Services.BuildServiceProvider().GetRequiredService<ProfitSharingDbContext>();
+        await action(context);
 #pragma warning restore S3928
     }
 

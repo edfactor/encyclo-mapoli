@@ -7,6 +7,10 @@
         "run-sql": {
             "commandName": "Project",
             "commandLineArgs": "import-from-ready --connection-name ProfitSharing --sql-file \"R:\\repos\\Demoulas\\smart-profit-sharing\\src\\database\\ready_import\\SQL copy all from ready to smart ps.sql\""
+        },
+        "create-dgml": {
+            "commandName": "Project",
+            "commandLineArgs": "generate-dgml --connection-name ProfitSharing --output-file \"output.dgml\""
         }
 
     }
