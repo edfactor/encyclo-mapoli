@@ -501,7 +501,13 @@ export const YearsEndApi = createApi({
           profitYear: params.profitYear
         },
         headers: {
-          Accept: params.accetHeader // Pass the provided Accept header value
+          Accept: params.acceptHeader
+        },
+        responseHandler: async (response) => {
+          if (params.acceptHeader === 'text/csv') {
+            return response.blob();
+          }
+          return response.json();
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
