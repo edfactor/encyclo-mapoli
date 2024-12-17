@@ -152,41 +152,67 @@ public sealed class Program
         var dgml = XDocument.Parse(dgmlContent);
         XNamespace ns = "http://schemas.microsoft.com/vs/2009/dgml";
 
-        // Parse Nodes
-        var nodes = dgml.Descendants(ns + "Node")
-            .Select(node => node.Attribute("Id")?.Value)
-            .Where(id => !string.IsNullOrEmpty(id))
-            .ToList();
+        // Parse Tables: Group by Id to handle duplicates
+        var tables = dgml.Descendants(ns + "Node")
+            .Where(node => node.Attribute("Category")?.Value == "EntityType" && node.Attribute("Id") != null)
+            .GroupBy(node => node.Attribute("Id")!.Value) // Group by Id
+            .ToDictionary(
+                group => group.Key,
+                group => group.First().Attribute("Label")?.Value ?? group.Key);
 
+        // Parse Columns: Group by Id to handle duplicates
+        var columns = dgml.Descendants(ns + "Node")
+            .Where(node => node.Attribute("Category")?.Value?.Contains("Property") == true && node.Attribute("Id") != null)
+            .GroupBy(node => node.Attribute("Id")!.Value) // Group by Id
+            .ToDictionary(
+                group => group.Key,
+                group => new
+                {
+                    ColumnName = group.First().Attribute("Label")?.Value ?? group.Key,
+                    DataType = group.First().Attribute("DataType")?.Value ?? "N/A",
+                    Precision = group.First().Attribute("Precision")?.Value ?? "N/A",
+                    Explanation = group.First().Attribute("Annotations")?.Value ?? "N/A"
+                });
 
-        // Parse Links
-        var links = dgml.Descendants("Link")
-            .Select(link => new
-            {
-                Source = link.Attribute("Source")?.Value,
-                Target = link.Attribute("Target")?.Value
-            })
-            .Where(link => !string.IsNullOrWhiteSpace(link.Source) && !string.IsNullOrWhiteSpace(link.Target))
-            .ToList();
+        // Parse Links to associate Columns with Tables
+        var tableColumnsMap = dgml.Descendants(ns + "Link")
+            .Where(link => link.Attribute("Source") != null && link.Attribute("Target") != null)
+            .GroupBy(link => link.Attribute("Source")!.Value) // Group links by Source (table)
+            .ToDictionary(
+                group => group.Key,
+                group => group.Select(link => link.Attribute("Target")!.Value).ToList());
 
-        // Create Markdown content
+        // Build Markdown content
         var markdown = new System.Text.StringBuilder();
-        markdown.AppendLine("# DGML Graph Representation");
-        markdown.AppendLine("\n## Nodes\n");
-        foreach (var node in nodes)
-        {
-            markdown.AppendLine($"- **{node}**");
-        }
+        markdown.AppendLine("# Database Schema Representation");
 
-        markdown.AppendLine("\n## Links\n");
-        foreach (var link in links)
+        foreach (var table in tables)
         {
-            markdown.AppendLine($"- **{link.Source}** → **{link.Target}**");
+            markdown.AppendLine($"\n## Table: **{table.Value}**\n");
+            markdown.AppendLine("| Column Name | Data Type | Precision | Explanation |");
+            markdown.AppendLine("|-------------|-----------|-----------|-------------|");
+
+            if (tableColumnsMap.TryGetValue(table.Key, out var columnIds))
+            {
+                foreach (var columnId in columnIds.Distinct()) // Ensure unique column references
+                {
+                    if (columns.TryGetValue(columnId, out var column))
+                    {
+                        markdown.AppendLine($"| {column.ColumnName} | {column.DataType} | {column.Precision} | {column.Explanation} |");
+                    }
+                }
+            }
+            else
+            {
+                markdown.AppendLine("| No columns found | N/A | N/A | N/A |");
+            }
         }
 
         // Save to output file
         return File.WriteAllTextAsync(outputFile, markdown.ToString());
     }
+
+
 
 
     private static HostApplicationBuilder CreateHostBuilder(string[] args)
