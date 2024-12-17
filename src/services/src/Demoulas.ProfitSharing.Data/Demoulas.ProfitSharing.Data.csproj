@@ -16,6 +16,7 @@
     <PackageReference Include="Demoulas.Common.Data.Contexts" />
     <PackageReference Include="Demoulas.Common.Data.Services" />
     <PackageReference Include="EFCore.NamingConventions" />
+    <PackageReference Include="ErikEJ.EntityFrameworkCore.DgmlBuilder" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

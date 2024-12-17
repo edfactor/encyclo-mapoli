@@ -493,12 +493,21 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getVestingAmountByAge: builder.query<VestedAmountsByAge, ProfitYearRequest>({
+    getVestingAmountByAge: builder.query<VestedAmountsByAge, ProfitYearRequest & { acceptHeader: string }>({
       query: (params) => ({
         url: "yearend/frozen/vested-amounts-by-age",
         method: "GET",
         params: {
           profitYear: params.profitYear
+        },
+        headers: {
+          Accept: params.acceptHeader
+        },
+        responseHandler: async (response) => {
+          if (params.acceptHeader === 'text/csv') {
+            return response.blob();
+          }
+          return response.json();
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
