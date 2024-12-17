@@ -6,47 +6,47 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
-using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen.BalanceByAgeEndpoint;
+using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen.BalanceByYearsEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
 
-public class BalanceByAgeEndpoint : EndpointWithCsvTotalsBase<FrozenReportsByAgeRequest, BalanceByAge, BalanceByAgeDetail, ProfitSharingBalanceByAgeMapper>
+public class BalanceByYearsEndpoint : EndpointWithCsvTotalsBase<FrozenReportsByAgeRequest, BalanceByYears, BalanceByYearsDetail, ProfitSharingBalanceByYearsMapper>
 {
     private readonly IFrozenReportService _frozenReportService;
 
-    public BalanceByAgeEndpoint(IFrozenReportService frozenReportService)
+    public BalanceByYearsEndpoint(IFrozenReportService frozenReportService)
     {
         _frozenReportService = frozenReportService;
     }
 
-    public override string ReportFileName => "PROFIT SHARING BALANCE BY AGE";
+    public override string ReportFileName => "PROFIT SHARING BALANCE BY YEARS";
 
     public override void Configure()
     {
-        Get("frozen/balance-by-age");
+        Get("frozen/balance-by-years");
         Summary(s =>
         {
             s.Summary = ReportFileName;
             s.Description =
-                "This report produces a list of members showing their balances over the year grouped by age";
+                "This report produces a list of members showing their balances over the year grouped by years";
 
             s.ExampleRequest = FrozenReportsByAgeRequest.RequestExample();
-            s.ResponseExamples = new Dictionary<int, object> { { 200, BalanceByAge.ResponseExample() } };
+            s.ResponseExamples = new Dictionary<int, object> { { 200, BalanceByYears.ResponseExample() } };
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
         Group<YearEndGroup>();
         base.Configure();
     }
 
-    public override Task<BalanceByAge> GetResponse(FrozenReportsByAgeRequest req, CancellationToken ct)
+    public override Task<BalanceByYears> GetResponse(FrozenReportsByAgeRequest req, CancellationToken ct)
     {
-        return _frozenReportService.GetBalanceByAgeYearAsync(req, ct);
+        return _frozenReportService.GetBalanceByYearsAsync(req, ct);
     }
 
-    protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, BalanceByAge report, CancellationToken cancellationToken)
+    protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, BalanceByYears report, CancellationToken cancellationToken)
     {
         // Register the class map for the main member data
-        csvWriter.Context.RegisterClassMap<ProfitSharingBalanceByAgeMapper>();
+        csvWriter.Context.RegisterClassMap<ProfitSharingBalanceByYearsMapper>();
 
         await base.GenerateCsvContent(csvWriter, report, cancellationToken);
 
@@ -67,16 +67,16 @@ public class BalanceByAgeEndpoint : EndpointWithCsvTotalsBase<FrozenReportsByAge
         await csvWriter.NextRecordAsync();
 
         // Write the headers
-        csvWriter.WriteHeader<BalanceByAgeDetail>();
+        csvWriter.WriteHeader<ForfeituresByAgeDetail>();
         await csvWriter.NextRecordAsync();
     }
 
 
-    public class ProfitSharingBalanceByAgeMapper : ClassMap<BalanceByAgeDetail>
+    public class ProfitSharingBalanceByYearsMapper : ClassMap<BalanceByYearsDetail>
     {
-        public ProfitSharingBalanceByAgeMapper()
+        public ProfitSharingBalanceByYearsMapper()
         {
-            Map(m => m.Age).Index(0).Name("AGE");
+            Map(m => m.Years).Index(0).Name("YRS");
             Map(m => m.EmployeeCount).Index(1).Name("EMPS");
             Map(m => m.CurrentBalance).Index(2).Name("BALANCE");
             Map(m => m.VestedBalance).Index(2).Name("VESTED");

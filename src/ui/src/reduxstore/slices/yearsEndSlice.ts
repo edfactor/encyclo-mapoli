@@ -3,6 +3,7 @@ import {
   ContributionsByAge,
   ForfeituresByAge,
   BalanceByAge,
+  BalanceByYears,
   DemographicBadgesNotInPayprofit,
   DistributionsAndForfeitures,
   DuplicateNameAndBirthday,
@@ -49,6 +50,9 @@ export interface YearsEndState {
   balanceByAgeTotal: BalanceByAge | null;
   balanceByAgeFullTime: BalanceByAge | null;
   balanceByAgePartTime: BalanceByAge | null;
+  balanceByYearsTotal: BalanceByAge | null;
+  balanceByYearsFullTime: BalanceByAge | null;
+  balanceByYearsPartTime: BalanceByAge | null;
   vestedAmountsByAge: VestedAmountsByAge | null;
 }
 
@@ -78,6 +82,9 @@ const initialState: YearsEndState = {
   balanceByAgeTotal: null,
   balanceByAgeFullTime: null,
   balanceByAgePartTime: null,
+    balanceByYearsTotal: null,
+  balanceByYearsFullTime: null,
+  balanceByYearsPartTime: null,
   vestedAmountsByAge : null
 };
 
@@ -196,6 +203,20 @@ export const yearsEndSlice = createSlice({
         state.balanceByAgePartTime = action.payload;
       }
     },
+    setBalanceByYears: (state, action: PayloadAction<BalanceByYears>) => {
+
+      if (action.payload.reportType == FrozenReportsByAgeRequestType.Total) {
+        state.balanceByYearsTotal = action.payload;
+      }
+
+      if (action.payload.reportType == FrozenReportsByAgeRequestType.FullTime) {
+        state.balanceByYearsFullTime = action.payload;
+      }
+
+      if (action.payload.reportType == FrozenReportsByAgeRequestType.PartTime) {
+        state.balanceByYearsPartTime = action.payload;
+      }
+    },
     setVestingAmountByAge: (state, action: PayloadAction<VestedAmountsByAge>) => {
         state.vestedAmountsByAge = action.payload;
     }
@@ -220,6 +241,7 @@ export const {
   setContributionsByAge,
   setForfeituresByAge,
   setBalanceByAge,
+  setBalanceByYears,
   setVestingAmountByAge
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;
