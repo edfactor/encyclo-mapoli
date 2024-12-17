@@ -19,8 +19,9 @@
 
     <!-- Recommended: Embed symbols containing Source Link in the main file (exe/dll) -->
     <DebugType>embedded</DebugType>
-
+    
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
     <!-- CS8034 is loading the analyzers more than once -->
     <NoWarn>CA2227;CA1715;CA1000;CA1822;IDE0062;IDE1006;IDE0090;CS1591;CS8034;VSSpell001;NU1507;NU1900;S1481;IDE0161;VSTHRD200</NoWarn>
 

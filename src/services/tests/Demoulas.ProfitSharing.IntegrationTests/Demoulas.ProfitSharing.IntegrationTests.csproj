@@ -19,10 +19,12 @@
   <ItemGroup>
     <None Remove="Resources\ExecutiveHoursAndDollars year=this.csv" />
     <None Remove="Resources\terminatedEmployeeAndBeneficiaryReport-correct.txt" />
+    <None Remove="Resources\psupdate-*.txt" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Resources\ExecutiveHoursAndDollars year=this.csv" />
+    <EmbeddedResource Include="Resources\psupdate-*.txt" />
     <EmbeddedResource Include="Resources\terminatedEmployeeAndBeneficiaryReport-correct.txt" />
   </ItemGroup>
 

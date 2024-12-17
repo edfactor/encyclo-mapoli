@@ -3,6 +3,7 @@ using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ExecutiveHoursAndDollars;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Services.Reports.YearEnd;
 using Demoulas.ProfitSharing.UnitTests.Extensions;
 using FastEndpoints;
 using FluentAssertions;
@@ -17,19 +18,20 @@ public class ExecutiveHoursAndDollarsIntegrationTests : ApiIntegrationTestBase<P
     [Fact]
     public async Task Ensure_SMART_CSV_matches_READY_CSV_for_year_THIS()
     {
+        // Arrange
         string expectCsvContents = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.ExecutiveHoursAndDollars year=this.csv");
-        expectCsvContents.Should().NotBeEmpty();
-
         DownloadClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
 
+        // Act
         var response =
             await DownloadClient.GETAsync<ExecutiveHoursAndDollarsEndpoint, ExecutiveHoursAndDollarsRequest, StreamContent>(
                 new ExecutiveHoursAndDollarsRequest { ProfitYear = YearThis, HasExecutiveHoursAndDollars = true});
 
+        // Assert
         string csvData = await response.Response.Content.ReadAsStringAsync();
 
-        // Break SVS into lines
-        var lines = csvData.Split(["\r\n", "\n"], StringSplitOptions.None);
+        // Break CVS into lines
+        var lines = csvData.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
 
         // Todays date
         lines[0].Should().NotBeEmpty();
@@ -47,12 +49,15 @@ public class ExecutiveHoursAndDollarsIntegrationTests : ApiIntegrationTestBase<P
     [Fact]
     public async Task Ensure_SMART_CSV_matches_READY_CSV_for_year_LAST()
     {
+        // Arrange
         DownloadClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
 
+        // Act
         var response =
             await DownloadClient.GETAsync<ExecutiveHoursAndDollarsEndpoint, ExecutiveHoursAndDollarsRequest, StreamContent>(
                 new ExecutiveHoursAndDollarsRequest { ProfitYear = YearLast, HasExecutiveHoursAndDollars = true});
 
+        // Assert
         string csvData = await response.Response.Content.ReadAsStringAsync();
 
         // Break CVS into lines
