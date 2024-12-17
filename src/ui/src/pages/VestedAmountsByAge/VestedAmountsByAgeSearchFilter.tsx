@@ -1,9 +1,10 @@
-import { FormHelperText, FormLabel, TextField } from "@mui/material";
+import { FormHelperText, FormLabel, TextField, Button } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useLazyGetVestingAmountByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
+import { downloadFileFromResponse } from "utils/fileDownload"; // Import utility function
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 
@@ -23,7 +24,6 @@ const schema = yup.object().shape({
 
 const VestedAmountsByAgeSearchFilter = () => {
   const [isFetching, setIsFetching] = useState(false);
-
   const [triggerSearch] = useLazyGetVestingAmountByAgeQuery();
 
   const {
@@ -43,7 +43,8 @@ const VestedAmountsByAgeSearchFilter = () => {
       setIsFetching(true);
       triggerSearch(
         {
-          profitYear: data.profitYear
+          profitYear: data.profitYear,
+          acceptHeader: "application/json"
         },
         false
       );
@@ -53,9 +54,19 @@ const VestedAmountsByAgeSearchFilter = () => {
 
   const handleReset = () => {
     reset({
-      profitYear: undefined,
+      profitYear: undefined
     });
   };
+
+  const handleDownloadCSV = handleSubmit(async (data) => {
+    if (isValid) {
+      const fetchPromise = triggerSearch({
+        profitYear: data.profitYear,
+        acceptHeader: "text/csv"
+      });
+      await downloadFileFromResponse(fetchPromise, `vesting-amounts-${data.profitYear}.csv`);
+    }
+  });
 
   return (
     <form onSubmit={validateAndSearch}>
@@ -89,13 +100,22 @@ const VestedAmountsByAgeSearchFilter = () => {
       </Grid2>
       <Grid2
         width="100%"
-        paddingX="24px">
+        paddingX="24px"
+        display="flex"
+        gap="16px">
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={validateAndSearch}
           isFetching={isFetching}
           disabled={!isValid}
         />
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleDownloadCSV}
+          disabled={!isValid}>
+          Download CSV
+        </Button>
       </Grid2>
     </form>
   );
