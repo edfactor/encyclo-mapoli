@@ -2,7 +2,7 @@
     "profiles": {
         "drop-recreate-db": {
             "commandName": "Project",
-            "commandLineArgs": "drop-recreate-db --connection-name ProfitSharing"
+            "commandLineArgs": "drop-recreate-db --connection-name ProfitSharing --source-Schema \"PROFITSHARE\" --sql-file \"R:\\repos\\Demoulas\\smart-profit-sharing\\src\\database\\ready_import\\SQL copy all from ready to smart ps.sql\""
         },
         "run-sql": {
             "commandName": "Project",

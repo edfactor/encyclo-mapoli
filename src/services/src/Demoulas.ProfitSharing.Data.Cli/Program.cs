@@ -39,7 +39,9 @@ public sealed class Program
 
         var dropRecreateDbCommand = new Command("drop-recreate-db", "Drop and recreate the database")
         {
-            new Option<string>("--connection-name", "The name of the configuration property that holds the connection string")
+            new Option<string>("--connection-name", "The name of the configuration property that holds the connection string"),
+            new Option<string>("--sql-file", "The path to the custom SQL file"),
+            new Option<string>("--source-Schema", "Name of the schema that is being used as the source database")
         };
 
         dropRecreateDbCommand.SetHandler(async () =>
