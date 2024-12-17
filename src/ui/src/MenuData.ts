@@ -20,6 +20,7 @@ const yearEndReports: RouteCategory = {
     { caption: "Get Contributions by Age (PROF 130)", route: "/contributions-by-age" },
     { caption: "Get Forfeitures by Age (PROF 130)", route: "/forfeitures-by-age" },
     { caption: "Get Balance by Age (PROF 130B)", route: "/balance-by-age" },
+    { caption: "Get Balance by Years (PROF 130Y)", route: "/balance-by-years" },
     { caption: "Get Vested Amounts by Age (PROF 130V)", route: "/vested-amounts-by-age" }
   ]
 };

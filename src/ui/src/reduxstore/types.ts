@@ -365,28 +365,46 @@ export interface MasterInquiryResponseType {
   employeeDetails: EmployeeDetails | null;
   inquiryResults: Paged<MasterInquiryDetail>;
 }
-export interface BalanceByAge {
+export interface BalanceByDetailBase {
+  employeeCount: number;
+  currentBalance: number;
+  beneficiaryCount?: number;
+  vestedBalance?: number;
+  currentBeneficiaryBalance?: number;
+  currentBeneficiaryVestedBalance?: number;
+  fullTimeCount?: number;
+  partTimeCount?: number;
+}
+
+export interface BalanceByBase<TDetail extends BalanceByDetailBase> {
   reportName: string;
   reportDate: string;
   reportType: FrozenReportsByAgeRequestType;
   balanceTotalAmount: number;
-  vestedTotalAmount: number;
+  vestedTotalAmount?: number;
   totalMembers: number;
   totalBeneficiaries: number;
-  totalBeneficiariesAmount : number;
-  totalBeneficiariesVestedAmount : number;
-  totalEmployee: number;
-  totalEmployeeAmount: number;
-  totalEmployeesVestedAmount : number;
-  response: Paged<BalanceByAgeDetail>;
+  totalBeneficiariesAmount?: number;
+  totalBeneficiariesVestedAmount?: number;
+  totalEmployee: number; // Derived
+  totalEmployeeAmount: number; // Derived
+  totalEmployeesVestedAmount: number; // Derived
+  totalFullTimeCount?: number;
+  totalPartTimeCount?: number;
+  response: Paged<TDetail>;
 }
 
-export interface BalanceByAgeDetail {
+export interface BalanceByAgeDetail extends BalanceByDetailBase {
   age: number;
-  employeeCount: number;
-  currentBalance: number;
-  vestedBalance: number;
 }
+
+export interface BalanceByAge extends BalanceByBase<BalanceByAgeDetail> {}
+
+export interface BalanceByYearsDetail extends BalanceByDetailBase {
+  age: number;
+}
+
+export interface BalanceByYears  extends BalanceByBase<BalanceByAgeDetail> {}
 
 export interface VestedAmountsByAge {
   totalFullTime100PercentAmount: number
