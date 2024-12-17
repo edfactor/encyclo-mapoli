@@ -12,8 +12,8 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    [Migration("20241120221047_initialMigration")]
-    partial class initialMigration
+    [Migration("20241217232137_initialMigrations")]
+    partial class initialMigrations
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,7 +21,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .UseCollation("USING_NLS_COMP")
-                .HasAnnotation("ProductVersion", "8.0.11")
+                .HasAnnotation("ProductVersion", "9.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             OracleModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -26351,6 +26351,122 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.ToTable("DEMOGRAPHIC", (string)null);
                 });
 
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.DemographicHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(18)
+                        .HasColumnType("NUMBER(18)")
+                        .HasColumnName("ID");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedDateTime")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("CREATED_DATETIME");
+
+                    b.Property<DateTime>("DateOfBirth")
+                        .HasColumnType("DATE")
+                        .HasColumnName("DATE_OF_BIRTH")
+                        .HasComment("DateOfBirth");
+
+                    b.Property<int>("DemographicId")
+                        .HasPrecision(9)
+                        .HasColumnType("NUMBER(9)")
+                        .HasColumnName("DEMOGRAPHIC_ID");
+
+                    b.Property<byte>("DepartmentId")
+                        .HasPrecision(1)
+                        .HasColumnType("NUMBER(1)")
+                        .HasColumnName("DEPARTMENT")
+                        .HasComment("Department");
+
+                    b.Property<int>("EmployeeId")
+                        .HasPrecision(7)
+                        .HasColumnType("NUMBER(7)")
+                        .HasColumnName("EMPLOYEE_ID");
+
+                    b.Property<string>("EmploymentStatusId")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR2(1)")
+                        .HasColumnName("EMPLOYMENT_STATUS_ID");
+
+                    b.Property<string>("EmploymentTypeId")
+                        .IsRequired()
+                        .HasMaxLength(2)
+                        .HasColumnType("NVARCHAR2(2)")
+                        .HasColumnName("EMPLOYMENT_TYPE_ID")
+                        .HasComment("EmploymentType");
+
+                    b.Property<DateTime>("HireDate")
+                        .HasColumnType("DATE")
+                        .HasColumnName("HIRE_DATE")
+                        .HasComment("HireDate");
+
+                    b.Property<long>("OracleHcmId")
+                        .HasPrecision(15)
+                        .HasColumnType("NUMBER(15)")
+                        .HasColumnName("ORACLE_HCM_ID");
+
+                    b.Property<byte>("PayClassificationId")
+                        .HasPrecision(2)
+                        .HasColumnType("NUMBER(2)")
+                        .HasColumnName("PAY_CLASSIFICATION_ID")
+                        .HasComment("PayClassification");
+
+                    b.Property<byte>("PayFrequencyId")
+                        .HasMaxLength(1)
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("PAY_FREQUENCY_ID")
+                        .HasComment("PayFrequency");
+
+                    b.Property<DateTime?>("ReHireDate")
+                        .HasColumnType("DATE")
+                        .HasColumnName("REHIRE_DATE")
+                        .HasComment("ReHireDate");
+
+                    b.Property<int>("Ssn")
+                        .HasPrecision(9)
+                        .HasColumnType("NUMBER(9)")
+                        .HasColumnName("SSN");
+
+                    b.Property<short>("StoreNumber")
+                        .HasPrecision(4)
+                        .HasColumnType("NUMBER(4)")
+                        .HasColumnName("STORE_NUMBER")
+                        .HasComment("StoreNumber");
+
+                    b.Property<string>("TerminationCodeId")
+                        .HasMaxLength(1)
+                        .HasColumnType("NVARCHAR2(1)")
+                        .HasColumnName("TERMINATION_CODE_ID")
+                        .HasComment("TerminationCode");
+
+                    b.Property<DateTime?>("TerminationDate")
+                        .HasColumnType("DATE")
+                        .HasColumnName("TERMINATION_DATE")
+                        .HasComment("TerminationDate");
+
+                    b.Property<DateTime>("ValidFrom")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("VALID_FROM");
+
+                    b.Property<DateTime>("ValidTo")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("VALID_TO");
+
+                    b.HasKey("Id")
+                        .HasName("PK_DEMOGRAPHIC_HISTORY");
+
+                    b.HasIndex(new[] { "DemographicId" }, "IX_DEMOGRAPHIC")
+                        .HasDatabaseName("IX_DEMOGRAPHIC_HISTORY_DEMOGRAPHICID");
+
+                    b.HasIndex(new[] { "EmployeeId" }, "IX_EmployeeId")
+                        .HasDatabaseName("IX_DEMOGRAPHIC_HISTORY_EMPLOYEEID");
+
+                    b.ToTable("DEMOGRAPHIC_HISTORY", (string)null);
+                });
+
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.DemographicSyncAudit", b =>
                 {
                     b.Property<long>("Id")
@@ -27181,6 +27297,33 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.FrozenState", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AsOfDateTime")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("AS_OF_DATETIME");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("NUMBER(1)")
+                        .HasColumnName("IS_ACTIVE");
+
+                    b.Property<short>("ProfitYear")
+                        .HasColumnType("NUMBER(5)")
+                        .HasColumnName("PROFIT_YEAR");
+
+                    b.HasKey("Id")
+                        .HasName("PK_FROZEN_STATE");
+
+                    b.ToTable("FROZEN_STATE", (string)null);
+                });
+
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Gender", b =>
                 {
                     b.Property<string>("Id")
@@ -27968,6 +28111,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(2)")
                         .HasColumnName("WEEKS_WORKED_YEAR");
 
+                    b.Property<byte>("YearsInPlan")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(2)
+                        .HasColumnType("NUMBER(2)")
+                        .HasDefaultValue((byte)0)
+                        .HasColumnName("YEARS_IN_PLAN");
+
                     b.Property<byte?>("ZeroContributionReasonId")
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("ZERO_CONTRIBUTION_REASON_ID");
@@ -27981,11 +28131,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasIndex("EmployeeTypeId")
                         .HasDatabaseName("IX_PAY_PROFIT_EMPLOYEETYPEID");
 
-                    b.HasIndex("EnrollmentId")
-                        .HasDatabaseName("IX_PAY_PROFIT_ENROLLMENTID");
-
                     b.HasIndex("ZeroContributionReasonId")
                         .HasDatabaseName("IX_PAY_PROFIT_ZEROCONTRIBUTIONREASONID");
+
+                    b.HasIndex(new[] { "EnrollmentId" }, "IX_EnrollmentId")
+                        .HasDatabaseName("IX_PAY_PROFIT_ENROLLMENTID");
 
                     b.ToTable("PAY_PROFIT", (string)null);
                 });
@@ -28077,8 +28227,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(1)")
                         .HasColumnName("COMMENT_IS_PARTIAL_TRANSACTION");
 
-                    b.Property<int?>("CommentRelatedCheckNumber")
-                        .HasColumnType("NUMBER(10)")
+                    b.Property<string>("CommentRelatedCheckNumber")
+                        .HasMaxLength(9)
+                        .HasColumnType("NVARCHAR2(9)")
                         .HasColumnName("COMMENT_RELATED_CHECK_NUMBER");
 
                     b.Property<long?>("CommentRelatedOracleHcmId")
@@ -28101,7 +28252,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<decimal>("Contribution")
                         .HasPrecision(9, 2)
                         .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("CONTRIBUTION");
+                        .HasColumnName("CONTRIBUTION")
+                        .HasComment("Contribution to plan from DMB");
 
                     b.Property<int>("DistributionSequence")
                         .HasColumnType("NUMBER(10)")
@@ -28279,7 +28431,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<string>("TaxCodeId")
                         .IsRequired()
                         .HasColumnType("NVARCHAR2(1)")
-                        .HasColumnName("TAXCODEID");
+                        .HasColumnName("TAX_CODE_ID");
 
                     b.Property<DateTime?>("VoidDate")
                         .HasColumnType("DATE")
@@ -28301,9 +28453,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasIndex(new[] { "CheckNumber", "IsVoided" }, "IX_CheckNumber_IsVoided")
                         .HasDatabaseName("IX_PROFIT_SHARE_CHECK_CHECKNUMBER_ISVOIDED");
 
-                    b.HasIndex(new[] { "PscCheckId" }, "IX_PscCheckId")
+                    b.HasIndex(new[] { "PscCheckId" }, "IX_PSC_CHECKID")
                         .IsUnique()
                         .HasDatabaseName("IX_PROFIT_SHARE_CHECK_PSCCHECKID");
+
+                    b.HasIndex(new[] { "Ssn" }, "IX_SSN")
+                        .HasDatabaseName("IX_PROFIT_SHARE_CHECK_SSN");
 
                     b.ToTable("PROFIT_SHARE_CHECK", (string)null);
                 });
