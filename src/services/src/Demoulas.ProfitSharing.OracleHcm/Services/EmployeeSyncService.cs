@@ -43,9 +43,9 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
         _employeeValidator = employeeValidator;
     }
 
-    public async Task SynchronizeEmployees(string requestedBy = "System", CancellationToken cancellationToken = default)
+    public async Task SynchronizeEmployeesAsync(string requestedBy = "System", CancellationToken cancellationToken = default)
     {
-        using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(SynchronizeEmployees), ActivityKind.Internal);
+        using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(SynchronizeEmployeesAsync), ActivityKind.Internal);
 
         var job = new Job
         {
@@ -68,12 +68,12 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
             await CleanAuditError(cancellationToken);
             var oracleHcmEmployees = _oracleDemographicsSyncClient.GetAllEmployees(cancellationToken);
             var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, requestedBy, cancellationToken);
-            await _demographicsService.AddDemographicsStream(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
+            await _demographicsService.AddDemographicsStreamAsync(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
         }
         catch (Exception ex)
         {
             success = false;
-            await AuditError(0, new[] { new FluentValidation.Results.ValidationFailure("Error", ex.Message) }, requestedBy, cancellationToken);
+            await AuditError(0, [new FluentValidation.Results.ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken);
         }
         finally
         {

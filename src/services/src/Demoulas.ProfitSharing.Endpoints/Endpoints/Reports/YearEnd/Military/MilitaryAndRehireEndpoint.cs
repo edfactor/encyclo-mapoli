@@ -55,7 +55,7 @@ public class MilitaryAndRehireEndpoint : EndpointWithCsvBase<PaginationRequestDt
 
     public override Task<ReportResponseBase<MilitaryAndRehireReportResponse>> GetResponse(PaginationRequestDto req, CancellationToken ct)
     {
-        return _reportService.GetMilitaryAndRehireReport(req, ct);
+        return _reportService.GetMilitaryAndRehireReportAsync(req, ct);
     }
 
 

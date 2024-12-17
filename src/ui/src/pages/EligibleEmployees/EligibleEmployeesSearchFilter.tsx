@@ -2,11 +2,10 @@ import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { useLazyGetEligibleEmployeesQuery, useLazyGetNegativeEVTASSNQuery } from "reduxstore/api/YearsEndApi";
+import { useLazyGetEligibleEmployeesQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { ImpersonationRoles } from "reduxstore/types";
 
 interface EligibleEmployeesSearch {
   profitYear: number;
@@ -46,8 +45,7 @@ const EligibleEmployeesSearchFilter = () => {
       triggerSearch(
         {
           profitYear: data.profitYear,
-          pagination: { skip: 0, take: 25 },
-          impersonation: ImpersonationRoles.ProfitSharingAdministrator
+          pagination: { skip: 0, take: 25 }
         },
         false
       );

@@ -17,6 +17,7 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new CountryMap());
         modelBuilder.ApplyConfiguration(new DepartmentMap());
         modelBuilder.ApplyConfiguration(new DemographicMap());
+        modelBuilder.ApplyConfiguration(new DemographicHistoryMap());
         modelBuilder.ApplyConfiguration(new DemographicSyncAuditMap());
         modelBuilder.ApplyConfiguration(new DistributionFrequencyMap());
         modelBuilder.ApplyConfiguration(new DistributionMap());
@@ -31,6 +32,7 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new EmploymentStatusMap());
         modelBuilder.ApplyConfiguration(new EmploymentTypeMap());
         modelBuilder.ApplyConfiguration(new EnrollmentMap());
+        modelBuilder.ApplyConfiguration(new FrozenStateMap());
         modelBuilder.ApplyConfiguration(new GenderMap());
         modelBuilder.ApplyConfiguration(new JobMap());
         modelBuilder.ApplyConfiguration(new JobStatusMap());

@@ -54,10 +54,10 @@ const BalanceByAgeGrid = () => {
                       vestedBalance: balanceByAgeTotal?.totalBeneficiariesVestedAmount
                     },
                     {
-                      age: "NON-BEN",
-                      employeeCount: balanceByAgeTotal?.totalNonBeneficiaries || 0,
-                      currentBalance: balanceByAgeTotal?.totalNonBeneficiariesAmount,
-                      vestedBalance: balanceByAgeTotal?.totalNonBeneficiariesVestedAmount
+                      age: "EMPLOYEE",
+                      employeeCount: balanceByAgeTotal?.totalEmployee || 0,
+                      currentBalance: balanceByAgeTotal?.totalEmployeeAmount,
+                      vestedBalance: balanceByAgeTotal?.totalEmployeesVestedAmount
                     },
                     {
                       age: "TOTAL",
@@ -90,10 +90,10 @@ const BalanceByAgeGrid = () => {
                       vestedBalance: balanceByAgeFullTime?.totalBeneficiariesVestedAmount
                     },
                     {
-                      age: "NON-BEN",
-                      employeeCount: balanceByAgeFullTime?.totalNonBeneficiaries || 0,
-                       currentBalance: balanceByAgeFullTime?.totalNonBeneficiariesAmount,
-                      vestedBalance: balanceByAgeFullTime?.totalNonBeneficiariesVestedAmount
+                      age: "EMPLOYEE",
+                      employeeCount: balanceByAgeFullTime?.totalEmployee || 0,
+                       currentBalance: balanceByAgeFullTime?.totalEmployeeAmount,
+                      vestedBalance: balanceByAgeFullTime?.totalEmployeesVestedAmount
                     },
                     {
                       age: "TOTAL",
@@ -126,10 +126,10 @@ const BalanceByAgeGrid = () => {
                       vestedBalance: balanceByAgePartTime?.totalBeneficiariesVestedAmount
                     },
                     {
-                      age: "NON-BEN",
-                      employeeCount: balanceByAgePartTime?.totalNonBeneficiaries || 0,
-                      currentBalance: balanceByAgePartTime?.totalNonBeneficiariesAmount,
-                      vestedBalance: balanceByAgePartTime?.totalNonBeneficiariesVestedAmount
+                      age: "EMPLOYEE",
+                      employeeCount: balanceByAgePartTime?.totalEmployee || 0,
+                      currentBalance: balanceByAgePartTime?.totalEmployeeAmount,
+                      vestedBalance: balanceByAgePartTime?.totalEmployeesVestedAmount
                     },
                     {
                       age: "TOTAL",

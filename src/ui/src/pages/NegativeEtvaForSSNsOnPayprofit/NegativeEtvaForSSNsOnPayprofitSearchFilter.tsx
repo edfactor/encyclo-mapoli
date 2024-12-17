@@ -6,7 +6,6 @@ import { useLazyGetNegativeEVTASSNQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { ImpersonationRoles } from "reduxstore/types";
 
 interface NegativeEtvaForSSNsOnPayprofitSearch {
   profitYear: number;
@@ -46,8 +45,7 @@ const NegativeEtvaForSSNsOnPayprofitSearchFilter = () => {
       triggerSearch(
         {
           profitYear: data.profitYear,
-          pagination: { skip: 0, take: 25 },
-          impersonation: ImpersonationRoles.ProfitSharingAdministrator
+          pagination: { skip: 0, take: 25 }
         },
         false
       );

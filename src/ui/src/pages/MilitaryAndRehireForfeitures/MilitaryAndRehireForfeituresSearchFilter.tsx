@@ -2,12 +2,10 @@ import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import {  useLazyGetMilitaryAndRehireForfeituresQuery} from "reduxstore/api/YearsEndApi";
+import { useLazyGetMilitaryAndRehireForfeituresQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { ImpersonationRoles } from "reduxstore/types";
-
 interface MilitaryAndRehireForfeituresSearch {
   profitYear: number;
   reportingYear: string;
@@ -21,9 +19,7 @@ const schema = yup.object().shape({
     .min(2020, "Year must be 2020 or later")
     .max(2100, "Profit Year must be 2100 or earlier")
     .required("Profit Year is required"),
-  reportingYear: yup
-    .string()
-    .required("Reporting Year is required")
+  reportingYear: yup.string().required("Reporting Year is required")
 });
 
 const MilitaryAndRehireForfeituresSearchFilter = () => {
@@ -52,8 +48,7 @@ const MilitaryAndRehireForfeituresSearchFilter = () => {
         {
           profitYear: data.profitYear,
           reportingYear: data.reportingYear,
-          pagination: { skip: 0, take: 25 },
-          impersonation: ImpersonationRoles.ProfitSharingAdministrator
+          pagination: { skip: 0, take: 25 }
         },
         false
       );

@@ -1,15 +1,23 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Contracts.Services;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.ServiceDto;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services;
 
+/// <summary>
+/// Provides services for calculating and retrieving various profit-sharing totals and related data.
+/// </summary>
+/// <remarks>
+/// This class implements the <see cref="ITotalService"/> interface and offers methods to compute
+/// participant totals, distributions, vesting balances, and other profit-sharing-related metrics.
+/// It relies on dependencies such as <see cref="IProfitSharingDataContextFactory"/> and <see cref="ICalendarService"/>
+/// to interact with the data context and calendar-related operations.
+/// </remarks>
 public sealed class TotalService : ITotalService
 {
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
@@ -20,6 +28,19 @@ public sealed class TotalService : ITotalService
         _profitSharingDataContextFactory = profitSharingDataContextFactory;
         _calendarService = calendarService;
     }
+    
+    /// <summary>
+    /// Retrieves a queryable set of total balance data for participants based on the specified profit year.
+    /// </summary>
+    /// <param name="ctx">
+    /// The database context implementing <see cref="IProfitSharingDbContext"/> used to access profit-sharing data.
+    /// </param>
+    /// <param name="profitYear">
+    /// The profit year (as a <see cref="short"/>) up to which the total balances are calculated.
+    /// </param>
+    /// <returns>
+    /// An <see cref="IQueryable{T}"/> of <see cref="ParticipantTotalDto"/> containing the total balance data for participants.
+    /// </returns>
     public IQueryable<ParticipantTotalDto> GetTotalBalanceSet(IProfitSharingDbContext ctx, short profitYear)
     {
         var sumAllFieldProfitCodeTypes = new[] {
@@ -44,6 +65,18 @@ public sealed class TotalService : ITotalService
 #pragma warning restore S3358 // Ternary operators should not be nested
     }
 
+    /// <summary>
+    /// Retrieves the total profit-sharing amounts for participants up to a specified profit year.
+    /// </summary>
+    /// <param name="ctx">
+    /// The database context used to access profit-sharing data.
+    /// </param>
+    /// <param name="profitYear">
+    /// The profit year up to which the totals should be calculated.
+    /// </param>
+    /// <returns>
+    /// A queryable collection of <see cref="ParticipantTotalDto"/> objects, each containing the SSN and total profit-sharing amount for a participant.
+    /// </returns>
     public IQueryable<ParticipantTotalDto> GetTotalEtva(IProfitSharingDbContext ctx, short profitYear)
     {
         return (
@@ -60,6 +93,19 @@ public sealed class TotalService : ITotalService
         );
     }
 
+    /// <summary>
+    /// Retrieves the total distributions for participants up to a specified profit year.
+    /// </summary>
+    /// <param name="ctx">
+    /// The database context implementing <see cref="IProfitSharingDbContext"/> used to access profit-sharing data.
+    /// </param>
+    /// <param name="profitYear">
+    /// The profit year up to which distributions are calculated.
+    /// </param>
+    /// <returns>
+    /// An <see cref="IQueryable{T}"/> of <see cref="ParticipantTotalDto"/> representing the total distributions
+    /// for each participant, grouped by their SSN.
+    /// </returns>
     public IQueryable<ParticipantTotalDto> GetTotalDistributions(IProfitSharingDbContext ctx, short profitYear)
     {
         return (
@@ -80,7 +126,18 @@ public sealed class TotalService : ITotalService
         );
     }
 
-
+    /// <summary>
+    /// Retrieves the total years of service for participants in the profit-sharing plan for a specified year.
+    /// </summary>
+    /// <param name="ctx">
+    /// The database context used to access profit-sharing data.
+    /// </param>
+    /// <param name="profitYear">
+    /// The year for which the total years of service are to be calculated.
+    /// </param>
+    /// <returns>
+    /// An <see cref="IQueryable{T}"/> of <see cref="ParticipantTotalYearsDto"/> containing the SSN and total years of service for each participant.
+    /// </returns>
     public IQueryable<ParticipantTotalYearsDto> GetYearsOfService(IProfitSharingDbContext ctx, short profitYear)
     {
         return (from pp in ctx.PayProfits.Include(p => p.Demographic)
@@ -88,6 +145,23 @@ public sealed class TotalService : ITotalService
             select new ParticipantTotalYearsDto { Ssn = pp.Demographic!.Ssn, Years = pp.YearsInPlan }); //Need to verify logic here
     }
 
+    /// <summary>
+    /// Calculates the vesting ratio for participants based on their demographic and beneficiary information,
+    /// years of service, hours worked, and other criteria.
+    /// </summary>
+    /// <param name="ctx">
+    /// The database context used to access demographic, pay profit, and beneficiary data.
+    /// </param>
+    /// <param name="profitYear">
+    /// The profit-sharing year for which the vesting ratio is being calculated.
+    /// </param>
+    /// <param name="asOfDate">
+    /// The date as of which the vesting ratio is being determined.
+    /// </param>
+    /// <returns>
+    /// An <see cref="IQueryable{T}"/> of <see cref="ParticipantTotalRatioDto"/> containing the calculated vesting ratios
+    /// for each participant.
+    /// </returns>
     public IQueryable<ParticipantTotalRatioDto> GetVestingRatio(IProfitSharingDbContext ctx, short profitYear, DateOnly asOfDate)
     {
 
@@ -156,6 +230,16 @@ public sealed class TotalService : ITotalService
 #pragma warning restore S1244 // Floating point numbers should not be tested for equality
     }
 
+    /// <summary>
+    /// Retrieves the total vesting balance for participants based on the provided profit year and date.
+    /// </summary>
+    /// <param name="ctx">The database context used to access profit-sharing data.</param>
+    /// <param name="profitYear">The profit year for which the vesting balance is calculated.</param>
+    /// <param name="asOfDate">The date as of which the vesting balance is calculated.</param>
+    /// <returns>
+    /// An <see cref="IQueryable{T}"/> of <see cref="ParticipantTotalVestingBalanceDto"/> containing the total vesting balance 
+    /// details for each participant, including current balance, ETVA, total distributions, vesting percentage, and vested balance.
+    /// </returns>
     public IQueryable<ParticipantTotalVestingBalanceDto> TotalVestingBalance(IProfitSharingDbContext ctx, short profitYear, DateOnly asOfDate)
     {
         return (from b in GetTotalBalanceSet(ctx, profitYear)
@@ -174,9 +258,28 @@ public sealed class TotalService : ITotalService
         );
     }
 
-    public async Task<BalanceEndpointResponse?> GetVestingBalanceForSingleMember(SearchBy searchBy, int employeeIdOrSsn, short profitYear)
+    /// <summary>
+    /// Retrieves the vesting balance for a single member based on the specified search criteria.
+    /// </summary>
+    /// <param name="searchBy">
+    /// Specifies the search criteria, either by Social Security Number (SSN) or Employee ID.
+    /// </param>
+    /// <param name="employeeIdOrSsn">
+    /// The identifier used for the search, which can be either an Employee ID or an SSN, depending on the <paramref name="searchBy"/> value.
+    /// </param>
+    /// <param name="profitYear">
+    /// The profit year for which the vesting balance is being retrieved.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token to monitor for cancellation requests.
+    /// </param>
+    /// <returns>
+    /// A task that represents the asynchronous operation. The task result contains the vesting balance details
+    /// as a <see cref="BalanceEndpointResponse"/> object, or <c>null</c> if no matching record is found.
+    /// </returns>
+    public async Task<BalanceEndpointResponse?> GetVestingBalanceForSingleMemberAsync(SearchBy searchBy, int employeeIdOrSsn, short profitYear, CancellationToken cancellationToken)
     {
-        var calendarInfo = await _calendarService.GetYearStartAndEndAccountingDates(profitYear);
+        var calendarInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(profitYear, cancellationToken);
         switch (searchBy)
         {
             case SearchBy.EmployeeId:
@@ -185,7 +288,7 @@ public sealed class TotalService : ITotalService
                     var rslt = (from t in TotalVestingBalance(ctx, profitYear, calendarInfo.FiscalEndDate)
                                       join d in ctx.Demographics on t.Ssn equals d.Ssn
                                       where d.EmployeeId == employeeIdOrSsn
-                                      select new BalanceEndpointResponse { Id = employeeIdOrSsn, Ssn = t.Ssn.MaskSsn(), CurrentBalance = t.CurrentBalance, Etva = t.Etva, TotalDistributions = t.TotalDistributions, VestedBalance = t.VestedBalance, VestingPercent = t.VestingPercent }).FirstOrDefaultAsync();
+                                      select new BalanceEndpointResponse { Id = employeeIdOrSsn, Ssn = t.Ssn.MaskSsn(), CurrentBalance = t.CurrentBalance, Etva = t.Etva, TotalDistributions = t.TotalDistributions, VestedBalance = t.VestedBalance, VestingPercent = t.VestingPercent }).FirstOrDefaultAsync(cancellationToken);
                     return rslt;
                 });
 
@@ -193,7 +296,7 @@ public sealed class TotalService : ITotalService
                 return await _profitSharingDataContextFactory.UseReadOnlyContext(ctx =>
                 {
                     var rslt = (from t in TotalVestingBalance(ctx, profitYear, calendarInfo.FiscalEndDate) where t.Ssn == employeeIdOrSsn
-                                      select new BalanceEndpointResponse { Id = employeeIdOrSsn, Ssn = t.Ssn.MaskSsn(), CurrentBalance = t.CurrentBalance, Etva = t.Etva, TotalDistributions = t.TotalDistributions, VestedBalance =  t.VestedBalance, VestingPercent = t.VestingPercent}).FirstOrDefaultAsync();
+                                      select new BalanceEndpointResponse { Id = employeeIdOrSsn, Ssn = t.Ssn.MaskSsn(), CurrentBalance = t.CurrentBalance, Etva = t.Etva, TotalDistributions = t.TotalDistributions, VestedBalance =  t.VestedBalance, VestingPercent = t.VestingPercent}).FirstOrDefaultAsync(cancellationToken);
                     return rslt;
                 });
                 

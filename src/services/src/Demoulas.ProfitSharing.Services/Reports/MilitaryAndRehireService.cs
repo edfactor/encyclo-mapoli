@@ -8,7 +8,6 @@ using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.Util.Extensions;
 
@@ -31,7 +30,7 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
     /// <param name="req">The pagination request details.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the report response with details of employees on military leave.</returns>
-    public async Task<ReportResponseBase<MilitaryAndRehireReportResponse>> GetMilitaryAndRehireReport(PaginationRequestDto req, CancellationToken cancellationToken)
+    public async Task<ReportResponseBase<MilitaryAndRehireReportResponse>> GetMilitaryAndRehireReportAsync(PaginationRequestDto req, CancellationToken cancellationToken)
     {
         var militaryMembers = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
@@ -66,7 +65,7 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
     /// <param name="req">The pagination request containing the necessary parameters for the search.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a report response with the rehire profit sharing data.</returns>
-    public async Task<ReportResponseBase<MilitaryAndRehireForfeituresResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYears(ProfitYearRequest req, CancellationToken cancellationToken)
+    public async Task<ReportResponseBase<MilitaryAndRehireForfeituresResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(ProfitYearRequest req, CancellationToken cancellationToken)
     {
         var militaryMembers = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
@@ -104,7 +103,7 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
         };
     }
 
-    public async Task<ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>> GetMilitaryAndRehireProfitSummaryReport(ProfitYearRequest req, CancellationToken cancellationToken)
+    public async Task<ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>> GetMilitaryAndRehireProfitSummaryReportAsync(ProfitYearRequest req, CancellationToken cancellationToken)
     {
         var militaryMembers = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
@@ -143,7 +142,7 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
     private async Task<IQueryable<MilitaryAndRehireProfitSummaryQueryResponse>> GetMilitaryAndRehireProfitQueryBase(ProfitSharingReadOnlyDbContext context,
         ProfitYearRequest req, CancellationToken cancellationToken)
     {
-        var bracket = await _calendarService.GetYearStartAndEndAccountingDates(req.ProfitYear, cancellationToken);
+        var bracket = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
 
         var query = context.Demographics
             .Join(

@@ -3,6 +3,7 @@ using Demoulas.Common.Api.Extensions;
 using Demoulas.Common.Contracts.Configuration;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.Common.Data.Services.Entities.Contexts;
+using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Api.Extensions;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Data.Contexts;
@@ -44,7 +45,7 @@ var rolePermissionService = new RolePermissionService();
 if (!builder.Environment.IsTestEnvironment())
 {
     builder.Services.AddOktaSecurity(builder.Configuration, rolePermissionService);
-} 
+}
 else
 {
     builder.Services.AddTestingSecurity(builder.Configuration, rolePermissionService);
@@ -63,18 +64,14 @@ builder.Services.AddCors(options =>
     });
 });
 
-List<ContextFactoryRequest> list = new List<ContextFactoryRequest>
-{
+List<ContextFactoryRequest> list =
+[
     ContextFactoryRequest.Initialize<ProfitSharingDbContext>("ProfitSharing"),
     ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"),
     ContextFactoryRequest.Initialize<DemoulasCommonDataContext>("StoreInfo")
-};
+];
 
-#if RUSS
-await builder.AddDatabaseServices(list, true, true);
-#else
-await builder.AddDatabaseServices(list);
-#endif
+builder.AddDatabaseServices(list);
 
 builder.AddCachingServices();
 builder.AddProjectServices();
@@ -90,8 +87,8 @@ void OktaDocumentSettings(AspNetCoreOpenApiDocumentGeneratorSettings settings)
     settings.OperationProcessors.Add(new SwaggerImpersonationHeader());
 }
 
-builder.ConfigureDefaultEndpoints(meterNames: new[] { InstrumentationOptions.MeterName },
-        activitySourceNames: new[] { OracleHcmActivitySource.Instance.Name })
+builder.ConfigureDefaultEndpoints(meterNames: [InstrumentationOptions.MeterName],
+        activitySourceNames: [OracleHcmActivitySource.Instance.Name])
     .AddSwaggerOpenApi(oktaSettingsAction: OktaSettingsAction, documentSettingsAction: OktaDocumentSettings)
     .AddSwaggerOpenApi(version: 2, oktaSettingsAction: OktaSettingsAction, documentSettingsAction: OktaDocumentSettings);
 

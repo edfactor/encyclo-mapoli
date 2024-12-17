@@ -2,11 +2,8 @@ import { FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { isValid } from "date-fns";
 import { useState } from "react";
-import {
-  useLazyGetDemographicBadgesNotInPayprofitQuery,
-} from "reduxstore/api/YearsEndApi";
+import { useLazyGetDemographicBadgesNotInPayprofitQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
-import { ImpersonationRoles } from "reduxstore/types";
 
 const DemographicBadgesNotInPayprofitSearchFilter = () => {
   const [isFetching, setIsFetching] = useState(false);
@@ -15,10 +12,7 @@ const DemographicBadgesNotInPayprofitSearchFilter = () => {
 
   const validateAndSearch = (event: any) => {
     event.preventDefault();
-    triggerSearch(
-      { pagination: { skip: 0, take: 25 }, impersonation: ImpersonationRoles.ProfitSharingAdministrator },
-      false
-    );
+    triggerSearch({ pagination: { skip: 0, take: 25 } }, false);
   };
 
   const handleReset = () => {

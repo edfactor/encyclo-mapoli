@@ -2,7 +2,6 @@
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.UnitTests.Mocks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 
-namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
+namespace Demoulas.ProfitSharing.Services.Reports.YearEnd;
 
 /**
  * WARNING - needs a refactor.   It is locked to the ExecutiveHoursAndDollarsResponse type at the moment.
@@ -51,7 +50,7 @@ public class ApiIntegrationTestBase<TStartup> where TStartup : class
     {
         // We get a connection to the SMART obfuscated pristine database.
         var configuration = new ConfigurationBuilder().AddUserSecrets<TStartup>().Build();
-        string connectionString = configuration["ConnectionStrings:ProfitSharing-ObfuscatedPristine"]!;
+        string connectionString = configuration["ConnectionStrings:ProfitSharing"]!;
         var options = new DbContextOptionsBuilder<ProfitSharingReadOnlyDbContext>().UseOracle(connectionString).EnableSensitiveDataLogging().Options;
         var ctx = new ProfitSharingReadOnlyDbContext(options);
 

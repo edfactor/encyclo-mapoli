@@ -1,0 +1,11 @@
+PAY444A                           P R O F I T     S H A R I N G    F O R     2024     11/19/24    19:18          PAGE:      1
+
+                                    A D J U S T M E N T S    E N T E R E D
+
+    ADJ DESC            BADGE           CONTRIB         EARNINGS     EARNINGS2         FORFEITS
+
+   INITIAL              700174           3,855.00           182.00              .00           257.00
+
+   ADJUSTMENT                               44.77            22.33              .00            18.16
+
+   FINAL                                 3,899.77           204.33              .00           275.16

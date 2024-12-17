@@ -1,21 +1,31 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UserSecretsId>a3be1bce-4a9e-4da4-a908-5f315c147298</UserSecretsId>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <Configurations>Debug;Release;Russ</Configurations>
+    <IntegraionTest>true</IntegraionTest>
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Base\**" />
+    <EmbeddedResource Remove="Base\**" />
+    <None Remove="Base\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Resources\ExecutiveHoursAndDollars year=this.csv" />
+    <None Remove="Resources\terminatedEmployeeAndBeneficiaryReport-correct.txt" />
+    <None Remove="Resources\psupdate-*.txt" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Resources\ExecutiveHoursAndDollars year=this.csv" />
+    <EmbeddedResource Include="Resources\psupdate-*.txt" />
+    <EmbeddedResource Include="Resources\terminatedEmployeeAndBeneficiaryReport-correct.txt" />
   </ItemGroup>
 
   <ItemGroup>
@@ -71,10 +81,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Base\" />
   </ItemGroup>
 
 </Project>

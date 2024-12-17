@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.UnitTests.Base;
 using Demoulas.ProfitSharing.UnitTests.Extensions;
 using FastEndpoints;
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
@@ -21,12 +22,12 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
             ProfitYear = 0,
             ExecutiveHoursAndDollars = [
                 new() {
-                    BadgeNumber = 99,
+                    EmployeeId = 99,
                     ExecutiveDollars = 0,
                     ExecutiveHours = 0
                 },
                 new() {
-                    BadgeNumber = 99,
+                    EmployeeId = 99,
                     ExecutiveDollars = 0,
                     ExecutiveHours = 0
                 }
@@ -51,26 +52,20 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
         SetExecutiveHoursAndDollarsRequest request = new SetExecutiveHoursAndDollarsRequest
         {
             ProfitYear = 0,
-            ExecutiveHoursAndDollars = new List<SetExecutiveHoursAndDollarsDto>
-            {
-                new()
-                {
-                    BadgeNumber = 484848,
-                    ExecutiveDollars = 444m,
-                    ExecutiveHours = 555m
-                }
-            }
+            ExecutiveHoursAndDollars =
+            [
+                new() { EmployeeId = 484848, ExecutiveDollars = 444m, ExecutiveHours = 555m }
+            ]
         };
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
         // Act
-        var response =
+        var exception = await Assert.ThrowsAsync<BadHttpRequestException>(async () =>
             await ApiClient
-                .PUTAsync<SetExecutiveHoursAndDollarsEndpoint, SetExecutiveHoursAndDollarsRequest, HttpResponseMessage>(request);
-        response.Response.StatusCode.ShouldBeEquivalentTo(HttpStatusCode.BadRequest);
+                .PUTAsync<SetExecutiveHoursAndDollarsEndpoint, SetExecutiveHoursAndDollarsRequest, HttpResponseMessage>(request));
 
         // Assert
-        await ErrorMessageShouldBe(response, "", "Year 0 is not valid.");
+        Assert.Equal("Year 0 is not valid.", exception.Message);
     }
 
     [Fact]
@@ -85,7 +80,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
             [
                 new ()
                 {
-                    BadgeNumber = int.MaxValue,
+                    EmployeeId = int.MaxValue,
                     ExecutiveDollars = 22,
                     ExecutiveHours = 33
                 }
@@ -94,14 +89,13 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
         // Act
-        var response =
-            await ApiClient
-                .PUTAsync<SetExecutiveHoursAndDollarsEndpoint, SetExecutiveHoursAndDollarsRequest, HttpResponseMessage>(request);
-        response.Response.StatusCode.ShouldBeEquivalentTo(HttpStatusCode.BadRequest);
+        var exception = await Assert.ThrowsAsync<BadHttpRequestException>(async () =>
+              await ApiClient
+                .PUTAsync<SetExecutiveHoursAndDollarsEndpoint, SetExecutiveHoursAndDollarsRequest, HttpResponseMessage>(request));
+
 
         // Assert
-        await ErrorMessageShouldBe(response, "", "One or more badge numbers were not found.");
-
+        Assert.Equal("One or more badge numbers were not found.", exception.Message);
     }
 
     [Fact]
@@ -112,7 +106,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
         SetExecutiveHoursAndDollarsRequest request = new SetExecutiveHoursAndDollarsRequest
         {
             ProfitYear = profitYear,
-            ExecutiveHoursAndDollars = new List<SetExecutiveHoursAndDollarsDto> { }
+            ExecutiveHoursAndDollars = []
         };
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
@@ -155,7 +149,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
                 ExecutiveHoursAndDollars = [
                     new()
                     {
-                        BadgeNumber = badgeNumber,
+                        EmployeeId = badgeNumber,
                         ExecutiveDollars = newIncomeExecutive,
                         ExecutiveHours = newHoursExecutive
                     }
@@ -204,7 +198,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
                 .FirstAsync();
 
             // note badge number, keep track of current hours/dollars and attempt to change them
-            var badgeNumber = demographicsWithPayProfits.Demographic.EmployeeId;
+            var employeeId = demographicsWithPayProfits.Demographic.EmployeeId;
             var origExecutiveHoursExecutive = demographicsWithPayProfits.PayProfit.HoursExecutive;
             var origIncomeExecutive = demographicsWithPayProfits.PayProfit.IncomeExecutive;
             var newHoursExecutive = demographicsWithPayProfits.PayProfit.HoursExecutive + 41;
@@ -218,27 +212,27 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
 
                     new()
                     {
-                        BadgeNumber = badgeNumber,
+                        EmployeeId = employeeId,
                         ExecutiveDollars = newIncomeExecutive,
                         ExecutiveHours = newHoursExecutive
                     },
-                    new() { BadgeNumber = int.MaxValue, ExecutiveDollars = 44, ExecutiveHours = 55 }
+                    new() { EmployeeId = int.MaxValue, ExecutiveDollars = 44, ExecutiveHours = 55 }
                 ]
             };
             ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
             // Act
-            var response =
-                await ApiClient
+            var exception = await Assert.ThrowsAsync<BadHttpRequestException>(async () =>
+                 await ApiClient
                     .PUTAsync<SetExecutiveHoursAndDollarsEndpoint, SetExecutiveHoursAndDollarsRequest,
-                        HttpResponseMessage>(request);
+                        HttpResponseMessage>(request));
 
             // Assert
-            await ErrorMessageShouldBe(response, "", "One or more badge numbers were not found.");
+            Assert.Equal("One or more badge numbers were not found.", exception.Message);
 
             // verify no change to existing employee.
             var demographicsWithPayProfitsReloaded = await ctx.Demographics
-                .Where(d => d.EmployeeId == badgeNumber)
+                .Where(d => d.EmployeeId == employeeId)
                 .Join(ctx.PayProfits,
                     d => d.Id,
                     pp => pp.DemographicId,

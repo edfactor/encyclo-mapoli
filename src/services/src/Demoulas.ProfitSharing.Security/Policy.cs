@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Demoulas.ProfitSharing.Security;
+﻿namespace Demoulas.ProfitSharing.Security;
 public static class Policy
 {
     public static readonly string CanViewYearEndReports = "CAN_VIEW_YEAR_END_REPORTS";
@@ -13,4 +6,5 @@ public static class Policy
     public static readonly string CanViewPayClassificationTypes = "CAN_VIEW_PAY_CLASSIFICATION_TYPES";
     public static readonly string CanGetPayProfitRecords = "CAN_GET_PAY_PROFIT_RECORDS";
     public static readonly string CanViewBalances = "CAN_VIEW_BALANCES";
+    public static readonly string CanFreezeDemographics = "CAN_FREEZE_DEMOGRAPHICS";
 }

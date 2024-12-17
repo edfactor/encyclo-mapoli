@@ -1,7 +1,7 @@
 import { Typography } from "@mui/material";
 import { useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useLazyGetNegativeEVTASSNQuery } from "reduxstore/api/YearsEndApi";
+import { useLazyGetEligibleEmployeesQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetEligibleEmployeesColumns } from "./EligibleEmployeesGridColumn";
@@ -16,7 +16,7 @@ const EligibleEmployeesGrid = () => {
 
   const dispatch = useDispatch();
   const { eligibleEmployees } = useSelector((state: RootState) => state.yearsEnd);
-  const [_, { isLoading }] = useLazyGetNegativeEVTASSNQuery();
+  const [_, { isLoading }] = useLazyGetEligibleEmployeesQuery();
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetEligibleEmployeesColumns(), []);

@@ -15,7 +15,6 @@ import {
   EligibleEmployeesRequestDto,
   ExecutiveHoursAndDollars,
   ExecutiveHoursAndDollarsRequestDto,
-  MasterInquiryDetail,
   MasterInquryRequest,
   MilitaryAndRehire,
   MilitaryAndRehireForfeiture,
@@ -30,8 +29,10 @@ import {
   PagedReportResponse,
   ProfitSharingDistributionsByAge,
   ContributionsByAge,
-  ForfeituresByAge, BalanceByAge,
-  MasterInquiryResponseType
+  ForfeituresByAge,
+  BalanceByAge,
+  VestedAmountsByAge,
+  MasterInquiryResponseType, ProfitYearRequest, BalanceByYears
 } from "reduxstore/types";
 import {
   setDemographicBadgesNotInPayprofitData,
@@ -49,21 +50,23 @@ import {
   setMilitaryAndRehireForfeituresDetails,
   setMilitaryAndRehireProfitSummaryDetails,
   setMissingCommaInPYName,
-  setNegativeEtvaForSssnsOnPayprofit
+  setVestingAmountByAge,
+  setNegativeEtvaForSssnsOnPayprofit, setBalanceByYears
 } from "reduxstore/slices/yearsEndSlice";
 import { url } from "./api";
-import { Paged } from "smart-ui-library";
 
 export const YearsEndApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: `${url}/api/`,
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).security.token;
+      const impersonating = (getState() as RootState).security.impersonating;
       if (token) {
         headers.set("authorization", `Bearer ${token}`);
       }
-      headers.set("impersonation", "Profit-Sharing-Administrator");
-
+      if (impersonating) {
+        headers.set("impersonation", impersonating);
+      }
       return headers;
     }
   }),
@@ -76,8 +79,7 @@ export const YearsEndApi = createApi({
         params: {
           take: params.pagination.take,
           skip: params.pagination.skip,
-          profitYear: params.profitYear,
-          impersonation: params.impersonation
+          profitYear: params.profitYear
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -98,8 +100,7 @@ export const YearsEndApi = createApi({
         method: "GET",
         params: {
           take: params.pagination.take,
-          skip: params.pagination.skip,
-          impersonation: params.impersonation
+          skip: params.pagination.skip
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -124,8 +125,7 @@ export const YearsEndApi = createApi({
           startMonth: params.startMonth,
           endMonth: params.endMonth,
           take: params.pagination.take,
-          skip: params.pagination.skip,
-          impersonation: params.impersonation
+          skip: params.pagination.skip
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -392,7 +392,7 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-     getContributionsByAge: builder.query<ContributionsByAge, FrozenReportsByAgeRequest>({
+    getContributionsByAge: builder.query<ContributionsByAge, FrozenReportsByAgeRequest>({
       query: (params) => ({
         url: "yearend/frozen/contributions-by-age",
         method: "GET",
@@ -428,7 +428,7 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-     getBalanceByAge: builder.query<BalanceByAge, FrozenReportsByAgeRequest>({
+    getBalanceByAge: builder.query<BalanceByAge, FrozenReportsByAgeRequest>({
       query: (params) => ({
         url: "yearend/frozen/balance-by-age",
         method: "GET",
@@ -441,6 +441,24 @@ export const YearsEndApi = createApi({
         try {
           const { data } = await queryFulfilled;
           dispatch(setBalanceByAge(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
+    getBalanceByYears: builder.query<BalanceByYears, FrozenReportsByAgeRequest>({
+      query: (params) => ({
+        url: "yearend/frozen/balance-by-years",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          reportType: params.reportType
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setBalanceByYears(data));
         } catch (err) {
           console.log("Err: " + err);
         }
@@ -475,6 +493,32 @@ export const YearsEndApi = createApi({
         }
       }
     }),
+    getVestingAmountByAge: builder.query<VestedAmountsByAge, ProfitYearRequest & { acceptHeader: string }>({
+      query: (params) => ({
+        url: "yearend/frozen/vested-amounts-by-age",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear
+        },
+        headers: {
+          Accept: params.acceptHeader
+        },
+        responseHandler: async (response) => {
+          if (params.acceptHeader === 'text/csv') {
+            return response.blob();
+          }
+          return response.json();
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setVestingAmountByAge(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    })
   })
 });
 
@@ -494,5 +538,7 @@ export const {
   useLazyGetContributionsByAgeQuery,
   useLazyGetForfeituresByAgeQuery,
   useLazyGetBalanceByAgeQuery,
-  useLazyGetProfitMasterInquiryQuery
+  useLazyGetBalanceByYearsQuery,
+  useLazyGetProfitMasterInquiryQuery,
+  useLazyGetVestingAmountByAgeQuery
 } = YearsEndApi;

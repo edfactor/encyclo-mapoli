@@ -72,8 +72,8 @@ const ContributionsByAgeGrid = () => {
                   pinnedTopRowData: [
                     {
                      age: "CONT TTL",
-                      employeeCount: (contributionsByAgeTotal?.totalEmployees || 0),
-                      amount: contributionsByAgeTotal?.distributionTotalAmount
+                      employeeCount: (contributionsByAgeFullTime?.totalEmployees || 0),
+                      amount: contributionsByAgeFullTime?.distributionTotalAmount
                     }
                   ],
                   columnDefs: [
@@ -95,8 +95,8 @@ const ContributionsByAgeGrid = () => {
                   pinnedTopRowData: [
                     {
                       age: "CONT TTL",
-                      employeeCount: (contributionsByAgeTotal?.totalEmployees || 0),
-                      amount: contributionsByAgeTotal?.distributionTotalAmount
+                      employeeCount: (contributionsByAgePartTime?.totalEmployees || 0),
+                      amount: contributionsByAgePartTime?.distributionTotalAmount
                     }
                   ],
                   columnDefs: [

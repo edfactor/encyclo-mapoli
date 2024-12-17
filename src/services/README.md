@@ -7,13 +7,14 @@
 ### Getting Started
 Install 3rd Party Libraries:
 
-1. Visual Studio Professional 2022 (17.12.1) or higher installed - https://visualstudio.microsoft.com/downloads/
+1. Visual Studio Professional 2022 (17.12.3) or higher installed - https://visualstudio.microsoft.com/downloads/
 
     ![Workload](./setup_images/workload.PNG)
     - Install the "ASP.net and web development", "Azure" workload, and ".NET desktop development" workloads
     - If VS requires any additional workloads or packages, you will be prompted at startup.
 
-2. OPTIONAL - Latest version of Chrome web browser - https://www.google.com/chrome/
+1.1. OPTIONAL: JetBrains Rider 2024.3.2 or higher installed - https://www.jetbrains.com/rider/
+3. OPTIONAL - Latest version of Chrome web browser - https://www.google.com/chrome/
 
 
 ### Build and Test
@@ -26,7 +27,8 @@ Install 3rd Party Libraries:
 3. Check for ArtifactoryCloud NuGet package source
     - Open a command prompt or terminal window.
     - run dotnet nuget list source
-    - If "ArtifactoryCloud" is not in the list, reach out to a team member and get the connection details
+    - If "ArtifactoryCloud" is not in the list, read this [guide](https://demoulas.atlassian.net/wiki/spaces/JFD/pages/133726274/Add+Custom+NuGet+source+for+JFrog+Cloud) to add it.
+        - reach out to a team member and get the connection details if needed.
 3. Get secrets.json from one of the team members
     - [Safe storage of app secrets in development](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-8.0&tabs=windows#manage-user-secrets-with-visual-studio)
 4. F5/Run, it's that simple.
@@ -35,7 +37,7 @@ Install 3rd Party Libraries:
 
 1. [Safe storage of app secrets in development](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-8.0&tabs=windows#enable-secret-storage)
 2. [Fast-Endpoints](https://fast-endpoints.com/) | [REPR Design Pattern](https://deviq.com/design-patterns/repr-design-pattern)
-3. [EntityFramework.Core 8 w/Oracle](https://www.nuget.org/packages/Oracle.EntityFrameworkCore)
+3. [EntityFramework.Core 9 w/Oracle](https://www.nuget.org/packages/Oracle.EntityFrameworkCore)
 4. [.editorconfig](https://learn.microsoft.com/en-us/visualstudio/ide/create-portable-custom-editor-options?view=vs-2022)
 5. [Directory.Build.Props](https://learn.microsoft.com/en-us/visualstudio/msbuild/customize-by-directory?view=vs-2022)
 6. [Centralized package management](https://learn.microsoft.com/en-us/nuget/consume-packages/central-package-management)
@@ -83,10 +85,11 @@ dotnet ef migrations add {migrationName} --context ProfitSharingDbContext
 dotnet ef migrations script --context ProfitSharingDbContext --output {FILE}
 
 
-
-
-### EntityFramework scaffold
-dotnet ef dbcontext scaffold "{Data Source}" Oracle.EntityFrameworkCore -o Models -t AR_ACTIVE -t AR_ADJUSTMENT -t AR_DEPOSIT -t AR_DEPOSIT_DETAIL -t AR_TEMP
+### Manage the database
+**In place upgrade**: Demoulas.ProfitSharing.Data.Cli upgrade-db --connection-name ProfitSharing
+**Drop and rebuild schema**: Demoulas.ProfitSharing.Data.Cli drop-recreate-db --connection-name ProfitSharing
+**Import from Ready**: Demoulas.ProfitSharing.Data.Cli import-from-ready --connection-name ProfitSharing --sql-file ".\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-Schema "PROFITSHARE"
+ - Second Example: Demoulas.ProfitSharing.Data.Cli import-from-ready --connection-name ProfitSharing --sql-file "..\..\..\..\..\..\..\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-Schema "PROFITSHARE"
 
 
 <hr/>

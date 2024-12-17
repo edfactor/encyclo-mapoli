@@ -26,7 +26,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingReadOnlyDbContext = new Mock<ProfitSharingReadOnlyDbContext>();
         _storeInfoDbContext = new Mock<DemoulasCommonDataContext>();
 
-       
+
         List<Country>? countries = new CountryFaker().Generate(10);
         Mock<DbSet<Country>> mockCountry = countries.AsQueryable().BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.Countries).Returns(mockCountry.Object);
@@ -48,7 +48,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingReadOnlyDbContext.Setup(m => m.TaxCodes).Returns(mockTaxCodes.Object);
 
         List<Demographic>? demographics = new DemographicFaker().Generate(500);
-        
+        List<DemographicHistory>? demographicHistories = new DemographicHistoryFaker(demographics).Generate(demographics.Count);
 
         var profitDetails = new ProfitDetailFaker(demographics).Generate(demographics.Count * 5);
         var mockProfitDetails = profitDetails.AsQueryable().BuildMockDbSet();
@@ -57,13 +57,14 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
 
         List<Beneficiary>? beneficiaries = new BeneficiaryFaker(demographics).Generate(demographics.Count * 5);
         List<PayProfit>? profits = new PayProfitFaker(demographics).Generate(demographics.Count * 3);
-        
+
         foreach (PayProfit payProfit in profits)
         {
-            demographics.Find(d=> d.Id == payProfit.DemographicId)?.PayProfits.Add(payProfit);
+            demographics.Find(d => d.Id == payProfit.DemographicId)?.PayProfits.Add(payProfit);
         }
 
-
+        List<FrozenState>? frozenStates = new FrozenStateFaker().Generate(1);
+        
         Mock<DbSet<Beneficiary>> mockBeneficiaries = beneficiaries.AsQueryable().BuildMockDbSet();
         Mock<DbSet<BeneficiaryContact>> mockBeneficiaryContacts = beneficiaries.Where(b => b.Contact != null).Select(b=> b.Contact!).AsQueryable().BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaries.Object);
@@ -78,11 +79,20 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(m => m.Demographics).Returns(mockDemographic.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Demographics).Returns(mockDemographic.Object);
 
+        Mock<DbSet<DemographicHistory>> mockDemographicHistories = demographicHistories.AsQueryable().BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.DemographicHistories).Returns(mockDemographicHistories.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.DemographicHistories).Returns(mockDemographicHistories.Object);
+
         Mock<DbSet<AccountingPeriod>>? mockCalendar = CaldarRecordSeeder.Records.AsQueryable().BuildMockDbSet();
         _profitSharingReadOnlyDbContext.Setup(m => m.AccountingPeriods).Returns(mockCalendar.Object);
 
+        Mock<DbSet<FrozenState>> mockFrozenStates = frozenStates.AsQueryable().BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.FrozenStates).Returns(mockFrozenStates.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.FrozenStates).Returns(mockFrozenStates.Object);
 
-        _profitSharingReadOnlyDbContext.Setup(s => s.SaveChangesAsync(It.IsAny<CancellationToken>())).ThrowsAsync(new NotImplementedException("This is a read only context, saving changes is not allowed."));
+
+
+        _profitSharingDbContext.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()));
         _profitSharingDbContext.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .Returns<CancellationToken>(token =>
             {

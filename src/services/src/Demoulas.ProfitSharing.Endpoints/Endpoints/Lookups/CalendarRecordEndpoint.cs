@@ -34,6 +34,6 @@ public class CalendarRecordEndpoint : Endpoint<CalendarRequestDto, CalendarRespo
 
     public override Task<CalendarResponseDto> ExecuteAsync(CalendarRequestDto req, CancellationToken ct)
     {
-        return _calendarService.GetYearStartAndEndAccountingDates(req.ProfitYear, ct);
+        return _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, ct);
     }
 }

@@ -36,6 +36,6 @@ public class TotalBalanceEndpoint:Endpoint<BalanceEndpointRequest, BalanceEndpoi
             employeeIdOrSsn = req.Id.ConvertSsnToInt();
         }
    
-        return _totalService.GetVestingBalanceForSingleMember(req.SearchType, employeeIdOrSsn, req.ProfitYear);
+        return _totalService.GetVestingBalanceForSingleMemberAsync(req.SearchType, employeeIdOrSsn, req.ProfitYear, ct);
     }
 }

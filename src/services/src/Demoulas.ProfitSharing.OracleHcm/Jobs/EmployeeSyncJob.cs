@@ -17,6 +17,6 @@ internal sealed class EmployeeSyncJob : IJob
 
     public Task Execute(IJobExecutionContext context)
     {
-        return _employeeSyncService.SynchronizeEmployees(requestedBy: "System", context.CancellationToken);
+        return _employeeSyncService.SynchronizeEmployeesAsync(requestedBy: "System", context.CancellationToken);
     }
 }
