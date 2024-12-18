@@ -27,6 +27,8 @@ import { ImpersonationRoles } from "reduxstore/types";
 import CleanUpSummary from "pages/CleanUpSummary/CleanUpSummary";
 import { useEffect } from "react";
 import FrozenSummary from "pages/FrozenSummary/FrozenSummary";
+import BalanceByYears from "pages/BalanceByYears/BalanceByYears";
+import VestedAmountsByAge from "pages/VestedAmountsByAge/VestedAmountsByAge";
 
 const Router = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -143,6 +145,12 @@ const Router = () => {
           <Route
           path="frozen-summary"
           element={<FrozenSummary />}></Route>
+          <Route
+          path="balance-by-years"
+          element={<BalanceByYears />}></Route>
+        <Route
+          path="vested-amounts-by-age"
+          element={<VestedAmountsByAge />}></Route>
       </RouteSecurity>
     </BrowserRouter>
   );

@@ -1,5 +1,4 @@
 ﻿using Demoulas.Common.Caching.Interfaces;
-using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Services.HostedServices;
 using Demoulas.ProfitSharing.Services.Mappers;
@@ -10,6 +9,7 @@ using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Caching;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
+using Demoulas.ProfitSharing.Services.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 
 namespace Demoulas.ProfitSharing.Services.Extensions;
@@ -42,6 +42,7 @@ public static class ServicesExtension
         _ = builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
         _ = builder.Services.AddSingleton<ICalendarService, CalendarService>();
 
+        _ = builder.Services.AddScoped<IProfitShareUpdateService, ProfitShareUpdateService>();
 
 
         _ = builder.Services.AddKeyedSingleton<IBaseCacheService<LookupTableCache<byte>>, PayClassificationHostedService>(nameof(PayClassificationHostedService));

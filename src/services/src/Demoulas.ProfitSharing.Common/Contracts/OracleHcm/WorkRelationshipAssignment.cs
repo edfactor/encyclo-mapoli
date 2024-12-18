@@ -1,6 +1,4 @@
-﻿using System.Text.RegularExpressions;
-
-namespace Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 
 /// <summary>
 /// Represents an assignment within a work relationship in the Oracle HCM system.

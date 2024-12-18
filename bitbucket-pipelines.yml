@@ -14,59 +14,30 @@ definitions:
         - windows
         - self.hosted
       script:
-          # Set environment variables
-          - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
-          - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}"
-          - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
+        # Set environment variables
+        - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
+        - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}"
+        - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
 
-          # Ensure the REPORTS_PATH directory exists
-          - mkdir -Force -Path $env:REPORTS_PATH
+        # Ensure the REPORTS_PATH directory exists
+        - mkdir -Force -Path $env:REPORTS_PATH
 
-           # Run tests and generate JUnit reports
-          - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml" -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
-          
-      artifacts:
-        - test-reports/**
+        # Check if .NET 9 SDK is installed
+        - $dotnetSdkInstalled = dotnet --list-sdks | Select-String "^9\."
+        
+        # Install .NET 9 SDK if not installed
+        - if (-not $dotnetSdkInstalled) {
+            Invoke-WebRequest -Uri "https://download.visualstudio.microsoft.com/download/pr/38e45a81-a6a4-4a37-a986-bc46be78db16/33e64c0966ebdf0088d1a2b6597f62e5/dotnet-sdk-9.0.101-win-x64.exe" -OutFile "$env:TEMP\dotnet-sdk-9.0.101-win-x64.exe";
+            Start-Process -FilePath "$env:TEMP\dotnet-sdk-9.0.101-win-x64.exe" -ArgumentList "/quiet", "/norestart" -Wait;
+          }
 
-    nightly-dotnet-trace: &nightly-dotnet-trace
-      name: Nightly Dotnet Trace
-      runs-on:
-        - windows
-        - self.hosted
-      script:
-          # Set environment variables
-          - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
-          - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}"
-          - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
-
-          # Ensure the REPORTS_PATH directory exists
-          - mkdir -Force -Path $env:REPORTS_PATH
-
-           # Run tests and generate JUnit reports
-          - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml" -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
-
-
-          # Install dotnet-trace globally
-          - dotnet tool install --global dotnet-trace  --add-source $env:NUGET_ORG
-
-          # Add dotnet-trace to PATH
-          - $env:PATH += ";$env:USERPROFILE\\.dotnet\\tools"
-
-          # Collect performance trace
-          - dotnet trace collect --output "$env:REPORTS_PATH/performance.nettrace" -- dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --no-build
-
-          # Install speedscope globally (requires Node.js)
-          - npm install -g speedscope
-
-          # Convert .nettrace to speedscope file
-          - speedscope "$env:REPORTS_PATH/performance.nettrace" --output "$env:REPORTS_PATH/performance.speedscope"
-
-          # Create a Markdown summary for display
-          - echo "## Performance Analysis Report" > "$env:REPORTS_PATH/performance-summary.md"
-          - echo "View the performance analysis results >> "$env:REPORTS_PATH/performance-summary.md"
+        # Run tests and generate JUnit reports
+        - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml" -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
 
       artifacts:
         - test-reports/**
+
+   
 
     test-frontend: &test-frontend
           name:  Build and Test Frontend UI
@@ -278,7 +249,3 @@ pipelines:
                         - drop-recreate-db
                         - import-from-ready                        
         - step: *upgrade-database
-  
-      nightly:
-        - step: *nightly-dotnet-trace
-

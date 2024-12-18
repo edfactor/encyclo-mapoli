@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class initialMigration : Migration
+    public partial class initialMigrations : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -86,6 +86,36 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_COUNTRY", x => x.ISO);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DEMOGRAPHIC_HISTORY",
+                columns: table => new
+                {
+                    ID = table.Column<long>(type: "NUMBER(18)", precision: 18, nullable: false)
+                        .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
+                    DEMOGRAPHIC_ID = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false),
+                    VALID_FROM = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: false),
+                    VALID_TO = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: false),
+                    ORACLE_HCM_ID = table.Column<long>(type: "NUMBER(15)", precision: 15, nullable: false),
+                    SSN = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false),
+                    EMPLOYEE_ID = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false),
+                    STORE_NUMBER = table.Column<short>(type: "NUMBER(4)", precision: 4, nullable: false, comment: "StoreNumber"),
+                    PAY_CLASSIFICATION_ID = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false, comment: "PayClassification"),
+                    DATE_OF_BIRTH = table.Column<DateTime>(type: "DATE", nullable: false, comment: "DateOfBirth"),
+                    HIRE_DATE = table.Column<DateTime>(type: "DATE", nullable: false, comment: "HireDate"),
+                    REHIRE_DATE = table.Column<DateTime>(type: "DATE", nullable: true, comment: "ReHireDate"),
+                    TERMINATION_DATE = table.Column<DateTime>(type: "DATE", nullable: true, comment: "TerminationDate"),
+                    DEPARTMENT = table.Column<byte>(type: "NUMBER(1)", precision: 1, nullable: false, comment: "Department"),
+                    EMPLOYMENT_TYPE_ID = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: false, comment: "EmploymentType"),
+                    PAY_FREQUENCY_ID = table.Column<byte>(type: "NUMBER(3)", maxLength: 1, nullable: false, comment: "PayFrequency"),
+                    TERMINATION_CODE_ID = table.Column<string>(type: "NVARCHAR2(1)", maxLength: 1, nullable: true, comment: "TerminationCode"),
+                    EMPLOYMENT_STATUS_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
+                    CREATED_DATETIME = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DEMOGRAPHIC_HISTORY", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
@@ -224,6 +254,21 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ENROLLMENT", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "FROZEN_STATE",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "NUMBER(10)", nullable: false)
+                        .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
+                    PROFIT_YEAR = table.Column<short>(type: "NUMBER(5)", nullable: false),
+                    IS_ACTIVE = table.Column<bool>(type: "NUMBER(1)", nullable: false),
+                    AS_OF_DATETIME = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FROZEN_STATE", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
@@ -581,7 +626,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     PROFIT_YEAR_ITERATION = table.Column<byte>(type: "NUMBER(3)", nullable: false),
                     DISTRIBUTION_SEQUENCE = table.Column<int>(type: "NUMBER(10)", nullable: false),
                     PROFIT_CODE_ID = table.Column<byte>(type: "NUMBER(3)", nullable: false),
-                    CONTRIBUTION = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
+                    CONTRIBUTION = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false, comment: "Contribution to plan from DMB"),
                     EARNINGS = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
                     FORFEITURE = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
                     MONTH_TO_DATE = table.Column<byte>(type: "NUMBER(2,0)", precision: 2, scale: 0, nullable: false),
@@ -592,7 +637,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     STATE_TAXES = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
                     TAX_CODE_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: true),
                     COMMENT_TYPE_ID = table.Column<byte>(type: "NUMBER(3)", nullable: true),
-                    COMMENT_RELATED_CHECK_NUMBER = table.Column<int>(type: "NUMBER(10)", nullable: true),
+                    COMMENT_RELATED_CHECK_NUMBER = table.Column<string>(type: "NVARCHAR2(9)", maxLength: 9, nullable: true),
                     COMMENT_RELATED_STATE = table.Column<string>(type: "NVARCHAR2(24)", maxLength: 24, nullable: true),
                     COMMENT_RELATED_ORACLE_HCM_ID = table.Column<long>(type: "NUMBER(19)", nullable: true),
                     COMMENT_RELATED_PSN_SUFFIX = table.Column<short>(type: "NUMBER(5)", nullable: true),
@@ -794,7 +839,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     HOURS_EXECUTIVE = table.Column<decimal>(type: "DECIMAL(6,2)", precision: 6, scale: 2, nullable: false),
                     INCOME_EXECUTIVE = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
                     LAST_UPDATE = table.Column<DateTime>(type: "TIMESTAMP", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    POINTS_EARNED = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: true)
+                    POINTS_EARNED = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: true),
+                    YEARS_IN_PLAN = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false, defaultValue: (byte)0)
                 },
                 constraints: table =>
                 {
@@ -837,7 +883,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     DEMOGRAPHIC_ID = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false),
                     PAYABLE_NAME = table.Column<string>(type: "NVARCHAR2(84)", maxLength: 84, nullable: false),
                     CHECK_AMOUNT = table.Column<decimal>(type: "DECIMAL(9,2)", precision: 9, scale: 2, nullable: false),
-                    TAXCODEID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
+                    TAX_CODE_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
                     CHECK_DATE = table.Column<DateTime>(type: "DATE", nullable: true),
                     VOID_FLAG = table.Column<bool>(type: "NUMBER(1)", nullable: true),
                     VOID_CHECK_DATE = table.Column<DateTime>(type: "DATE", nullable: true),
@@ -863,7 +909,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         principalColumn: "ID");
                     table.ForeignKey(
                         name: "FK_PROFIT_SHARE_CHECK_TAXCODES_TAXCODEID",
-                        column: x => x.TAXCODEID,
+                        column: x => x.TAX_CODE_ID,
                         principalTable: "TAX_CODE",
                         principalColumn: "ID");
                 });
@@ -2940,6 +2986,16 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 column: "TERMINATION_CODE_ID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_DEMOGRAPHIC_HISTORY_DEMOGRAPHICID",
+                table: "DEMOGRAPHIC_HISTORY",
+                column: "DEMOGRAPHIC_ID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DEMOGRAPHIC_HISTORY_EMPLOYEEID",
+                table: "DEMOGRAPHIC_HISTORY",
+                column: "EMPLOYEE_ID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_DEMOGRAPHIC_SYNC_AUDIT_BADGENUMBER",
                 table: "DEMOGRAPHIC_SYNC_AUDIT",
                 column: "BADGE_NUMBER");
@@ -3097,9 +3153,14 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_PROFIT_SHARE_CHECK_SSN",
+                table: "PROFIT_SHARE_CHECK",
+                column: "SSN");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PROFIT_SHARE_CHECK_TAXCODEID",
                 table: "PROFIT_SHARE_CHECK",
-                column: "TAXCODEID");
+                column: "TAX_CODE_ID");
         }
 
         /// <inheritdoc />
@@ -3112,6 +3173,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "CALDAR_RECORD");
 
             migrationBuilder.DropTable(
+                name: "DEMOGRAPHIC_HISTORY");
+
+            migrationBuilder.DropTable(
                 name: "DEMOGRAPHIC_SYNC_AUDIT");
 
             migrationBuilder.DropTable(
@@ -3119,6 +3183,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "DISTRIBUTION_REQUEST");
+
+            migrationBuilder.DropTable(
+                name: "FROZEN_STATE");
 
             migrationBuilder.DropTable(
                 name: "JOB");

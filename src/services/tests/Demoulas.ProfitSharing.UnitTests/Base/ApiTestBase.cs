@@ -57,6 +57,8 @@ public class ApiTestBase<TStartup> where TStartup : class
             });
 
         ApiClient = builder.CreateClient();
+        // When debugging, the 100 second default goes by quickly.
+        ApiClient.Timeout = TimeSpan.FromMinutes(30);
         DownloadClient = builder.CreateClient();
         DownloadClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("text/csv"));
     }

@@ -18,7 +18,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .UseCollation("USING_NLS_COMP")
-                .HasAnnotation("ProductVersion", "8.0.11")
+                .HasAnnotation("ProductVersion", "9.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             OracleModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -28128,11 +28128,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasIndex("EmployeeTypeId")
                         .HasDatabaseName("IX_PAY_PROFIT_EMPLOYEETYPEID");
 
-                    b.HasIndex("EnrollmentId")
-                        .HasDatabaseName("IX_PAY_PROFIT_ENROLLMENTID");
-
                     b.HasIndex("ZeroContributionReasonId")
                         .HasDatabaseName("IX_PAY_PROFIT_ZEROCONTRIBUTIONREASONID");
+
+                    b.HasIndex(new[] { "EnrollmentId" }, "IX_EnrollmentId")
+                        .HasDatabaseName("IX_PAY_PROFIT_ENROLLMENTID");
 
                     b.ToTable("PAY_PROFIT", (string)null);
                 });
@@ -28249,7 +28249,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<decimal>("Contribution")
                         .HasPrecision(9, 2)
                         .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("CONTRIBUTION");
+                        .HasColumnName("CONTRIBUTION")
+                        .HasComment("Contribution to plan from DMB");
 
                     b.Property<int>("DistributionSequence")
                         .HasColumnType("NUMBER(10)")
@@ -29192,18 +29193,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Navigation("PayFrequency");
 
                     b.Navigation("TerminationCode");
-                });
-
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.DemographicHistory", b =>
-                {
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Demographic", "Demographic")
-                        .WithMany()
-                        .HasForeignKey("DemographicId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_DEMOGRAPHIC_HISTORY_DEMOGRAPHIC_DEMOGRAPHICID");
-
-                    b.Navigation("Demographic");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Distribution", b =>

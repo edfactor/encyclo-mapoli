@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Runtime.Intrinsics.X86;
 
 namespace Demoulas.ProfitSharing.Common.Extensions;
 public static class SsnExtensions

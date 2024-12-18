@@ -64,18 +64,14 @@ builder.Services.AddCors(options =>
     });
 });
 
-List<ContextFactoryRequest> list = new List<ContextFactoryRequest>
-{
+List<ContextFactoryRequest> list =
+[
     ContextFactoryRequest.Initialize<ProfitSharingDbContext>("ProfitSharing"),
     ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"),
     ContextFactoryRequest.Initialize<DemoulasCommonDataContext>("StoreInfo")
-};
+];
 
-#if RUSS
-await builder.AddDatabaseServicesAsync(list, true, true);
-#else
-await builder.AddDatabaseServicesAsync(list);
-#endif
+builder.AddDatabaseServices(list);
 
 builder.AddCachingServices();
 builder.AddProjectServices();
@@ -91,8 +87,8 @@ void OktaDocumentSettings(AspNetCoreOpenApiDocumentGeneratorSettings settings)
     settings.OperationProcessors.Add(new SwaggerImpersonationHeader());
 }
 
-builder.ConfigureDefaultEndpoints(meterNames: new[] { InstrumentationOptions.MeterName },
-        activitySourceNames: new[] { OracleHcmActivitySource.Instance.Name })
+builder.ConfigureDefaultEndpoints(meterNames: [InstrumentationOptions.MeterName],
+        activitySourceNames: [OracleHcmActivitySource.Instance.Name])
     .AddSwaggerOpenApi(oktaSettingsAction: OktaSettingsAction, documentSettingsAction: OktaDocumentSettings)
     .AddSwaggerOpenApi(version: 2, oktaSettingsAction: OktaSettingsAction, documentSettingsAction: OktaDocumentSettings);
 

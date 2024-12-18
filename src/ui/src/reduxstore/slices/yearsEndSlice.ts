@@ -3,6 +3,7 @@ import {
   ContributionsByAge,
   ForfeituresByAge,
   BalanceByAge,
+  BalanceByYears,
   DemographicBadgesNotInPayprofit,
   DistributionsAndForfeitures,
   DuplicateNameAndBirthday,
@@ -19,7 +20,7 @@ import {
   PagedReportResponse,
   ProfitSharingDistributionsByAge,
   EmployeeDetails,
-  MasterInquiryResponseType
+  MasterInquiryResponseType, VestedAmountsByAge
 } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
 
@@ -49,6 +50,10 @@ export interface YearsEndState {
   balanceByAgeTotal: BalanceByAge | null;
   balanceByAgeFullTime: BalanceByAge | null;
   balanceByAgePartTime: BalanceByAge | null;
+  balanceByYearsTotal: BalanceByAge | null;
+  balanceByYearsFullTime: BalanceByAge | null;
+  balanceByYearsPartTime: BalanceByAge | null;
+  vestedAmountsByAge: VestedAmountsByAge | null;
 }
 
 const initialState: YearsEndState = {
@@ -76,7 +81,11 @@ const initialState: YearsEndState = {
   forfeituresByAgePartTime: null,
   balanceByAgeTotal: null,
   balanceByAgeFullTime: null,
-  balanceByAgePartTime: null
+  balanceByAgePartTime: null,
+    balanceByYearsTotal: null,
+  balanceByYearsFullTime: null,
+  balanceByYearsPartTime: null,
+  vestedAmountsByAge : null
 };
 
 export const yearsEndSlice = createSlice({
@@ -193,6 +202,23 @@ export const yearsEndSlice = createSlice({
       if (action.payload.reportType == FrozenReportsByAgeRequestType.PartTime) {
         state.balanceByAgePartTime = action.payload;
       }
+    },
+    setBalanceByYears: (state, action: PayloadAction<BalanceByYears>) => {
+
+      if (action.payload.reportType == FrozenReportsByAgeRequestType.Total) {
+        state.balanceByYearsTotal = action.payload;
+      }
+
+      if (action.payload.reportType == FrozenReportsByAgeRequestType.FullTime) {
+        state.balanceByYearsFullTime = action.payload;
+      }
+
+      if (action.payload.reportType == FrozenReportsByAgeRequestType.PartTime) {
+        state.balanceByYearsPartTime = action.payload;
+      }
+    },
+    setVestingAmountByAge: (state, action: PayloadAction<VestedAmountsByAge>) => {
+        state.vestedAmountsByAge = action.payload;
     }
   }
 });
@@ -214,6 +240,8 @@ export const {
   setDistributionsByAge,
   setContributionsByAge,
   setForfeituresByAge,
-  setBalanceByAge
+  setBalanceByAge,
+  setBalanceByYears,
+  setVestingAmountByAge
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;
