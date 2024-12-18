@@ -52,7 +52,7 @@ function Deploy-Service($Artifact, $TargetPath, $ServiceExecutable, $ServiceName
 
         if (!(Get-Service -Name $Using:ServiceName -ErrorAction SilentlyContinue)) {
             Write-Host 'Installing service'
-            New-Service -Name $Using:ServiceName -BinaryPathName "$($Using:ServiceExecutable)" -StartupType "Automatic"
+            New-Service -Name $Using:ServiceName -BinaryPathName "$($Using:ServiceExecutable)" -StartupType "AutomaticDelayedStart"
         }
 
         Start-Service -Name $Using:ServiceName
