@@ -83,10 +83,10 @@
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.0.0" />
     <PackageVersion Include="JsonSchema.Net" Version="6.0.2" />
     <PackageVersion Include="OpenTelemetry.Exporter.InMemory" Version="1.7.0" />
-    <PackageVersion Include="Roslynator.Analyzers" Version="4.12.9" />
-    <PackageVersion Include="Roslynator.Formatting.Analyzers" Version="4.12.9" />
+    <PackageVersion Include="Roslynator.Analyzers" Version="4.12.10" />
+    <PackageVersion Include="Roslynator.Formatting.Analyzers" Version="4.12.10" />
     <PackageVersion Include="AsyncAwaitBestPractices" Version="9.0.0" />
-    <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.3.0.106239" />
+    <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.4.0.108396" />
     <PackageVersion Include="Microsoft.SourceLink.Bitbucket.Git" Version="8.0.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Analyzers" Version="9.0.0" />
