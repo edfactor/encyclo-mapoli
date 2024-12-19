@@ -2,29 +2,32 @@
 using System.Text;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
+using Demoulas.ProfitSharing.OracleHcm.Factories;
+using Demoulas.ProfitSharing.OracleHcm.HealthCheck;
 using Demoulas.ProfitSharing.OracleHcm.HostedServices;
 using Demoulas.ProfitSharing.OracleHcm.Jobs;
+using Demoulas.ProfitSharing.OracleHcm.Messaging;
 using Demoulas.ProfitSharing.OracleHcm.Services;
 using Demoulas.ProfitSharing.OracleHcm.Validators;
+using Demoulas.ProfitSharing.Services.Caching.Extensions;
 using Demoulas.Util.Extensions;
+using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Http.Resilience;
+using Quartz;
 using Quartz.Impl;
 using Quartz.Spi;
-using Quartz;
-using Demoulas.ProfitSharing.OracleHcm.Factories;
-using Demoulas.ProfitSharing.OracleHcm.HealthCheck;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Extensions;
+
 public static class OracleHcmExtension
 {
     private const string FrameworkVersionHeader = "REST-Framework-Version";
 
 
-    public static IHostApplicationBuilder ConfigureOracleHcm(this IHostApplicationBuilder builder)
+    public static IHostApplicationBuilder AddOracleHcmSynchronization(this IHostApplicationBuilder builder)
     {
         OracleHcmConfig oracleHcmConfig = builder.Configuration.GetSection("OracleHcm").Get<OracleHcmConfig>() ??
                                           new OracleHcmConfig { BaseAddress = string.Empty, DemographicUrl = string.Empty };
@@ -56,12 +59,22 @@ public static class OracleHcmExtension
         builder.Services.AddHttpClient<OracleHcmHealthCheck>("HealthCheck", BuildOracleHcmAuthClient);
 
 
-
         if (!builder.Environment.IsTestEnvironment())
         {
             _ = builder.Services.AddHostedService<OracleHcmHostedService>();
             _ = builder.Services.AddHealthChecks().AddCheck<OracleHcmHealthCheck>("OracleHcm");
         }
+
+        builder.AddProjectCachingServices();
+
+        builder.Services.AddMassTransit(x =>
+        {
+            x.SetKebabCaseEndpointNameFormatter();
+
+            x.AddConsumer<OracleHcmMessageConsumer>();
+
+            x.UsingInMemory((context, cfg) => { cfg.ConfigureEndpoints(context); });
+        });
 
 
         return builder;

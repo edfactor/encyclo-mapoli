@@ -1,16 +1,13 @@
-﻿using Demoulas.Common.Caching.Interfaces;
+﻿using Demoulas.Common.Data.Services.Interfaces;
+using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Services.HostedServices;
+using Demoulas.ProfitSharing.Services.Caching.Extensions;
 using Demoulas.ProfitSharing.Services.Mappers;
+using Demoulas.ProfitSharing.Services.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services.Reports;
+using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Demoulas.Common.Data.Services.Interfaces;
-using Demoulas.Common.Data.Services.Service;
-using Demoulas.ProfitSharing.Common.Caching;
-using Demoulas.ProfitSharing.OracleHcm.Extensions;
-using Demoulas.ProfitSharing.Services.ProfitShareUpdate;
-using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 
 namespace Demoulas.ProfitSharing.Services.Extensions;
 
@@ -33,7 +30,7 @@ public static class ServicesExtension
 
         _ = builder.Services.AddScoped<TotalService>();
         _ = builder.Services.AddScoped<ContributionService>();
-        
+
         _ = builder.Services.AddScoped<ITerminatedEmployeeAndBeneficiaryReportService, TerminatedEmployeeAndBeneficiaryReportService>();
 
         _ = builder.Services.AddSingleton<IDemographicsServiceInternal, DemographicsService>();
@@ -43,13 +40,6 @@ public static class ServicesExtension
         _ = builder.Services.AddSingleton<ICalendarService, CalendarService>();
 
         _ = builder.Services.AddScoped<IProfitShareUpdateService, ProfitShareUpdateService>();
-
-
-        _ = builder.Services.AddKeyedSingleton<IBaseCacheService<LookupTableCache<byte>>, PayClassificationHostedService>(nameof(PayClassificationHostedService));
-        _ = builder.Services.AddKeyedSingleton<IBaseCacheService<LookupTableCache<byte>>, DepartmentHostedService>(nameof(DepartmentHostedService));
-
-
-        _ = builder.ConfigureOracleHcm();
 
         #region Mappers
 
@@ -61,8 +51,9 @@ public static class ServicesExtension
 
         #endregion
 
-        builder.ConfigureMassTransitServices();
-        
+        builder.AddProjectCachingServices();
+
+
         return builder;
     }
 }
