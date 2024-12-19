@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Demoulas.ProfitSharing.Api\Demoulas.ProfitSharing.Api.csproj" />
+    <ProjectReference Include="..\Demoulas.ProfitSharing.OracleHcm.Sync\Demoulas.ProfitSharing.OracleHcm.Sync.csproj"/>
   </ItemGroup>
 
   <ItemGroup>

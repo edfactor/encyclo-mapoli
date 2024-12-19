@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.UnitTests.Fakes;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using MockQueryable.Moq;
 using Moq;
 
@@ -64,9 +65,10 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         }
 
         List<FrozenState>? frozenStates = new FrozenStateFaker().Generate(1);
-        
+
         Mock<DbSet<Beneficiary>> mockBeneficiaries = beneficiaries.AsQueryable().BuildMockDbSet();
-        Mock<DbSet<BeneficiaryContact>> mockBeneficiaryContacts = beneficiaries.Where(b => b.Contact != null).Select(b=> b.Contact!).AsQueryable().BuildMockDbSet();
+        Mock<DbSet<BeneficiaryContact>> mockBeneficiaryContacts =
+            beneficiaries.Where(b => b.Contact != null).Select(b => b.Contact!).AsQueryable().BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaries.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaries.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.BeneficiaryContacts).Returns(mockBeneficiaryContacts.Object);
@@ -91,7 +93,6 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingReadOnlyDbContext.Setup(m => m.FrozenStates).Returns(mockFrozenStates.Object);
 
 
-
         _profitSharingDbContext.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()));
         _profitSharingDbContext.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .Returns<CancellationToken>(token =>
@@ -100,6 +101,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
                 {
                     throw new OperationCanceledException(token);
                 }
+
                 return Task.FromResult(1); // Return some result for non-canceled token
             });
     }
@@ -152,6 +154,27 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
             }
         }
     }
+
+    public async Task<T> UseWritableContextAsync<T>(
+        Func<ProfitSharingDbContext, IDbContextTransaction, Task<T>> action,
+        CancellationToken cancellationToken)
+    {
+        if (action == null)
+        {
+            throw new ArgumentNullException(nameof(action));
+        }
+
+        try
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return await action.Invoke(_profitSharingDbContext.Object, null!).ConfigureAwait(false);
+        }
+        catch (TargetInvocationException ex) when (ex.InnerException != null)
+        {
+            throw ex.InnerException;
+        }
+    }
+
 
     /// <summary>
     /// For read only workloads. This should not be mixed with Read/Write workloads in the same method as a matter of best

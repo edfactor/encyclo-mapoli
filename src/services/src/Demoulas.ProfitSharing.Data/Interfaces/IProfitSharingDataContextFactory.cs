@@ -6,6 +6,5 @@ namespace Demoulas.ProfitSharing.Data.Interfaces;
 
 public interface IProfitSharingDataContextFactory : IDataContextFactory<ProfitSharingDbContext, ProfitSharingReadOnlyDbContext>
 {
-    Task UseWritableContext(Func<ProfitSharingDbContext, Task> func, CancellationToken cancellationToken = default);
     Task<T> UseStoreInfoContext<T>(Func<DemoulasCommonDataContext, Task<T>> func);
 }
