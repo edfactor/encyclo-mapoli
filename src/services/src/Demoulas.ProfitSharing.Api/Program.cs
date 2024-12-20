@@ -8,11 +8,11 @@ using Demoulas.ProfitSharing.Api.Extensions;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
+using Demoulas.ProfitSharing.OracleHcm.Extensions;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.Security;
 using Demoulas.Util.Extensions;
-using MassTransit.Monitoring;
 using Microsoft.AspNetCore.Authentication;
 using NSwag.Generation.AspNetCore;
 
@@ -58,9 +58,9 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(pol =>
     {
         _ = pol.AllowAnyMethod() // Specify the allowed methods, e.g., GET, POST, etc.
-        .AllowAnyHeader()
-        .AllowAnyOrigin()
-        .WithExposedHeaders("Location");
+            .AllowAnyHeader()
+            .AllowAnyOrigin()
+            .WithExposedHeaders("Location");
     });
 });
 
@@ -72,8 +72,7 @@ List<ContextFactoryRequest> list =
 ];
 
 builder.AddDatabaseServices(list);
-
-builder.AddCachingServices();
+builder.AddOracleHcmSynchronization();
 builder.AddProjectServices();
 
 
@@ -87,7 +86,7 @@ void OktaDocumentSettings(AspNetCoreOpenApiDocumentGeneratorSettings settings)
     settings.OperationProcessors.Add(new SwaggerImpersonationHeader());
 }
 
-builder.ConfigureDefaultEndpoints(meterNames: [InstrumentationOptions.MeterName],
+builder.ConfigureDefaultEndpoints(meterNames: [],
         activitySourceNames: [OracleHcmActivitySource.Instance.Name])
     .AddSwaggerOpenApi(oktaSettingsAction: OktaSettingsAction, documentSettingsAction: OktaDocumentSettings)
     .AddSwaggerOpenApi(version: 2, oktaSettingsAction: OktaSettingsAction, documentSettingsAction: OktaDocumentSettings);

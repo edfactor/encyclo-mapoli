@@ -6,15 +6,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Hosting;
 
-namespace Demoulas.ProfitSharing.Services.HostedServices;
-public sealed class PayClassificationHostedService : BaseCacheHostedService<LookupTableCache<byte>>
+namespace Demoulas.ProfitSharing.Services.Caching.HostedServices;
+
+public sealed class DepartmentHostedService : BaseCacheHostedService<LookupTableCache<byte>>
 {
     private readonly IProfitSharingDataContextFactory _contextFactory;
-    protected override string BaseKeyName => "ACS";
+    protected override string BaseKeyName => "DEP";
 
     protected override ushort RefreshSeconds { get; set; } = 7200; // Every two hours refresh
 
-    public PayClassificationHostedService(IHostEnvironment hostEnvironment,
+    public DepartmentHostedService(IHostEnvironment hostEnvironment,
         IDistributedCache distributedCache,
         IProfitSharingDataContextFactory contextFactory) : base(hostEnvironment: hostEnvironment, distributedCache: distributedCache)
     {
@@ -24,15 +25,15 @@ public sealed class PayClassificationHostedService : BaseCacheHostedService<Look
 
     public override Task<IEnumerable<LookupTableCache<byte>>> GetDataToUpdateCacheAsync(CacheDataDictionary cdd, CancellationToken cancellation = default)
     {
-        return GetAllPayClassifications(cancellationToken: cancellation);
+        return GetAllDepartments(cancellationToken: cancellation);
     }
 
     public override Task<IEnumerable<LookupTableCache<byte>>> GetInitialDataToCacheAsync(CancellationToken cancellation = default)
     {
-        return GetAllPayClassifications(cancellationToken: cancellation);
+        return GetAllDepartments(cancellationToken: cancellation);
     }
 
-    private async Task<IEnumerable<LookupTableCache<byte>>> GetAllPayClassifications(CancellationToken cancellationToken)
+    private async Task<IEnumerable<LookupTableCache<byte>>> GetAllDepartments(CancellationToken cancellationToken)
     {
         return await _contextFactory.UseReadOnlyContext(func: async context =>
         {
@@ -42,12 +43,8 @@ public sealed class PayClassificationHostedService : BaseCacheHostedService<Look
                 return [];
             }
 
-            return await context.PayClassifications
-                .Select(selector: c => new LookupTableCache<byte>
-                {
-                    Id = c.Id,
-                    Name = c.Name
-                })
+            return await context.Departments
+                .Select(selector: c => new LookupTableCache<byte> { Id = c.Id, Name = c.Name })
                 .ToListAsync(cancellationToken: cancellationToken);
         });
     }

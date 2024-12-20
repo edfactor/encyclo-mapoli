@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Demoulas.ProfitSharing.Api\Demoulas.ProfitSharing.Api.csproj" />
+    <ProjectReference Include="..\Demoulas.ProfitSharing.OracleHcm.Sync\Demoulas.ProfitSharing.OracleHcm.Sync.csproj"/>
   </ItemGroup>
 
   <ItemGroup>
@@ -33,6 +34,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Update="Roslynator.Formatting.Analyzers">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Update="SonarAnalyzer.CSharp">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

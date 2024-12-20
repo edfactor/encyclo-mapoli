@@ -107,11 +107,11 @@ public class FrozenReportService : IFrozenReportService
                     var cy = currentYear.Find(x => x.EmployeeId == rec.EmployeeId);
                     if (cy != default)
                     {
-                        var points = (totals[(int)rec.EmployeeId].TotalContributions +
-                                      totals[(int)rec.EmployeeId].TotalEarnings +
-                                      totals[(int)rec.EmployeeId].TotalForfeitures -
-                                      totals[(int)rec.EmployeeId].TotalPayments) -
-                                     (cy.loan1Total - cy.loan2Total - cy.forfeitTotal);
+                        decimal points = (totals[(int)rec.EmployeeId].TotalContributions +
+                                          totals[(int)rec.EmployeeId].TotalEarnings +
+                                          totals[(int)rec.EmployeeId].TotalForfeitures -
+                                          totals[(int)rec.EmployeeId].TotalPayments) -
+                                         (cy.loan1Total - cy.loan2Total - cy.forfeitTotal);
 
                         rec.EarningPoints = Convert.ToInt16(Math.Round(points / 100, 0, MidpointRounding.AwayFromZero));
                     }
@@ -471,20 +471,20 @@ public class FrozenReportService : IFrozenReportService
             .ToList();
 
         // Calculate totals for all categories
-        var totalFullTimeCount = (short)details.Sum(d => d.FullTimeCount);
-        var totalNotVestedCount = (short)details.Sum(d => d.NotVestedCount);
-        var totalPartialVestedCount = (short)details.Sum(d => d.PartialVestedCount);
-        var totalBeneficiaryCount = (short)details.Sum(d => d.BeneficiaryCount);
+        short totalFullTimeCount = (short)details.Sum(d => d.FullTimeCount);
+        short totalNotVestedCount = (short)details.Sum(d => d.NotVestedCount);
+        short totalPartialVestedCount = (short)details.Sum(d => d.PartialVestedCount);
+        short totalBeneficiaryCount = (short)details.Sum(d => d.BeneficiaryCount);
 
-        var totalFullTime100PercentAmount = details.Sum(d => d.FullTime100PercentAmount);
-        var totalFullTimePartialAmount = details.Sum(d => d.FullTimePartialAmount);
-        var totalFullTimeNotVestedAmount = details.Sum(d => d.FullTimeNotVestedAmount);
+        decimal totalFullTime100PercentAmount = details.Sum(d => d.FullTime100PercentAmount);
+        decimal totalFullTimePartialAmount = details.Sum(d => d.FullTimePartialAmount);
+        decimal totalFullTimeNotVestedAmount = details.Sum(d => d.FullTimeNotVestedAmount);
 
-        var totalPartTime100PercentAmount = details.Sum(d => d.PartTime100PercentAmount);
-        var totalPartTimePartialAmount = details.Sum(d => d.PartTimePartialAmount);
-        var totalPartTimeNotVestedAmount = details.Sum(d => d.PartTimeNotVestedAmount);
+        decimal totalPartTime100PercentAmount = details.Sum(d => d.PartTime100PercentAmount);
+        decimal totalPartTimePartialAmount = details.Sum(d => d.PartTimePartialAmount);
+        decimal totalPartTimeNotVestedAmount = details.Sum(d => d.PartTimeNotVestedAmount);
 
-        var totalBeneficiaryAmount = details.Sum(d => d.BeneficiaryAmount);
+        decimal totalBeneficiaryAmount = details.Sum(d => d.BeneficiaryAmount);
 
         // Build the final response
         req = req with { Take = details.Count + 1 };
@@ -559,7 +559,7 @@ public class FrozenReportService : IFrozenReportService
                     FullTimeCount = group.Count(e => e.EmploymentType == FT),
                     PartTimeCount = group.Count(e => e.EmploymentType == PT)
                 })
-                .OrderBy(e => e.Years)
+                .OrderByDescending(e => e.Years)
                 .ToListAsync(cancellationToken);
         });
 

@@ -7,15 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Demoulas.ProfitSharing.CachingServices\Demoulas.ProfitSharing.Services.Caching.csproj" />
     <ProjectReference Include="..\Demoulas.ProfitSharing.Common\Demoulas.ProfitSharing.Common.csproj" />
-    <ProjectReference Include="..\Demoulas.ProfitSharing.Data\Demoulas.ProfitSharing.Data.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Bogus" />
-    <PackageReference Include="Demoulas.Common.Caching" />
     <PackageReference Include="Quartz" />
     <PackageReference Include="MassTransit" />
+    <PackageReference Include="Riok.Mapperly" />
     <PackageReference Include="Quartz.Extensions.Hosting" />
     <PackageReference Include="Microsoft.Extensions.Http.Resilience" />
   </ItemGroup>
@@ -34,6 +34,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Update="Roslynator.Formatting.Analyzers">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Update="SonarAnalyzer.CSharp">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
