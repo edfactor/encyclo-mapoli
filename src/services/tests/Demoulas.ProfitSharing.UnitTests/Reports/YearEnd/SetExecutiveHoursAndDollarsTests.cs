@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Net.Http.Json;
 using System.Text.Json;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ExecutiveHoursAndDollars;
@@ -7,6 +8,7 @@ using Demoulas.ProfitSharing.UnitTests.Base;
 using Demoulas.ProfitSharing.UnitTests.Extensions;
 using FastEndpoints;
 using FluentAssertions;
+using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
@@ -59,13 +61,14 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
         };
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
-        // Act
-        var exception = await Assert.ThrowsAsync<BadHttpRequestException>(async () =>
-            await ApiClient
-                .PUTAsync<SetExecutiveHoursAndDollarsEndpoint, SetExecutiveHoursAndDollarsRequest, HttpResponseMessage>(request));
+        var response = await ApiClient.PUTAsync<SetExecutiveHoursAndDollarsEndpoint, SetExecutiveHoursAndDollarsRequest, HttpResponseMessage>(request);
 
         // Assert
-        Assert.Equal("Year 0 is not valid.", exception.Message);
+        Assert.False(response.Response.IsSuccessStatusCode);
+
+        var pd = await response.Response.Content.ReadFromJsonAsync<ProblemDetails>();
+        pd.Should().NotBeNull();
+        pd!.Detail?.Should().Contain("Year 0 is not valid.");
     }
 
     [Fact]
@@ -89,13 +92,16 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
         // Act
-        var exception = await Assert.ThrowsAsync<BadHttpRequestException>(async () =>
-              await ApiClient
-                .PUTAsync<SetExecutiveHoursAndDollarsEndpoint, SetExecutiveHoursAndDollarsRequest, HttpResponseMessage>(request));
+        var response = await ApiClient
+                .PUTAsync<SetExecutiveHoursAndDollarsEndpoint, SetExecutiveHoursAndDollarsRequest, HttpResponseMessage>(request);
 
 
         // Assert
-        Assert.Equal("One or more badge numbers were not found.", exception.Message);
+        Assert.False(response.Response.IsSuccessStatusCode);
+
+        var pd = await response.Response.Content.ReadFromJsonAsync<ProblemDetails>();
+        pd.Should().NotBeNull();
+        pd!.Detail?.Should().Contain("One or more badge numbers were not found.");
     }
 
     [Fact]
@@ -208,27 +214,24 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
             var request = new SetExecutiveHoursAndDollarsRequest
             {
                 ProfitYear = profitYear,
-                ExecutiveHoursAndDollars = [
+                ExecutiveHoursAndDollars =
+                [
 
-                    new()
-                    {
-                        EmployeeId = employeeId,
-                        ExecutiveDollars = newIncomeExecutive,
-                        ExecutiveHours = newHoursExecutive
-                    },
+                    new() { EmployeeId = employeeId, ExecutiveDollars = newIncomeExecutive, ExecutiveHours = newHoursExecutive },
                     new() { EmployeeId = int.MaxValue, ExecutiveDollars = 44, ExecutiveHours = 55 }
                 ]
             };
             ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
             // Act
-            var exception = await Assert.ThrowsAsync<BadHttpRequestException>(async () =>
-                 await ApiClient
-                    .PUTAsync<SetExecutiveHoursAndDollarsEndpoint, SetExecutiveHoursAndDollarsRequest,
-                        HttpResponseMessage>(request));
+            var response = await ApiClient.PUTAsync<SetExecutiveHoursAndDollarsEndpoint, SetExecutiveHoursAndDollarsRequest, HttpResponseMessage>(request);
 
             // Assert
-            Assert.Equal("One or more badge numbers were not found.", exception.Message);
+            Assert.False(response.Response.IsSuccessStatusCode);
+
+            var pd = await response.Response.Content.ReadFromJsonAsync<ProblemDetails>();
+            pd.Should().NotBeNull();
+            pd!.Detail?.Should().Contain("One or more badge numbers were not found.");
 
             // verify no change to existing employee.
             var demographicsWithPayProfitsReloaded = await ctx.Demographics
