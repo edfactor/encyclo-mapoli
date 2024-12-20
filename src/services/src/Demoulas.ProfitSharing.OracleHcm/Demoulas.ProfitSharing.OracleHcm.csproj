@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Demoulas.ProfitSharing.CachingServices\Demoulas.ProfitSharing.Services.Caching.csproj"/>
+    <ProjectReference Include="..\Demoulas.ProfitSharing.CachingServices\Demoulas.ProfitSharing.Services.Caching.csproj" />
     <ProjectReference Include="..\Demoulas.ProfitSharing.Common\Demoulas.ProfitSharing.Common.csproj" />
   </ItemGroup>
 
@@ -15,6 +15,7 @@
     <PackageReference Include="Bogus" />
     <PackageReference Include="Quartz" />
     <PackageReference Include="MassTransit" />
+    <PackageReference Include="Riok.Mapperly" />
     <PackageReference Include="Quartz.Extensions.Hosting" />
     <PackageReference Include="Microsoft.Extensions.Http.Resilience" />
   </ItemGroup>

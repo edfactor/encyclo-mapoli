@@ -4,6 +4,7 @@ using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
+using Demoulas.ProfitSharing.OracleHcm.HostedServices;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -15,7 +16,7 @@ List<ContextFactoryRequest> list =
 ];
 
 builder.AddDatabaseServices(list);
-builder.AddOracleHcmSynchronization();
+builder.AddOracleHcmBackgroundProcess();
 
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 {

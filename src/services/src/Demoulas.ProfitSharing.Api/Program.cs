@@ -8,6 +8,7 @@ using Demoulas.ProfitSharing.Api.Extensions;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
+using Demoulas.ProfitSharing.OracleHcm.Extensions;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.Security;
@@ -71,7 +72,7 @@ List<ContextFactoryRequest> list =
 ];
 
 builder.AddDatabaseServices(list);
-
+builder.AddOracleHcmSynchronization();
 builder.AddProjectServices();
 
 

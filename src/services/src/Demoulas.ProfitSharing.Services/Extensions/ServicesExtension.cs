@@ -33,7 +33,6 @@ public static class ServicesExtension
 
         _ = builder.Services.AddScoped<ITerminatedEmployeeAndBeneficiaryReportService, TerminatedEmployeeAndBeneficiaryReportService>();
 
-        _ = builder.Services.AddSingleton<IDemographicsServiceInternal, DemographicsService>();
         _ = builder.Services.AddSingleton<IFrozenService, FrozenService>();
         _ = builder.Services.AddSingleton<IStoreService, StoreService>();
         _ = builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
@@ -43,9 +42,7 @@ public static class ServicesExtension
 
         #region Mappers
 
-        builder.Services.AddSingleton<AddressMapper>();
-        builder.Services.AddSingleton<ContactInfoMapper>();
-        builder.Services.AddSingleton<DemographicMapper>();
+       
         builder.Services.AddSingleton<BeneficiaryTypeMapper>();
         builder.Services.AddSingleton<EmployeeTypeMapper>();
 

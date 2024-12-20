@@ -9,8 +9,9 @@ using Demoulas.ProfitSharing.OracleHcm.Jobs;
 using Demoulas.ProfitSharing.OracleHcm.Messaging;
 using Demoulas.ProfitSharing.OracleHcm.Services;
 using Demoulas.ProfitSharing.OracleHcm.Validators;
+using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Caching.Extensions;
-using Demoulas.Util.Extensions;
+using Demoulas.ProfitSharing.Services.Mappers;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +27,14 @@ public static class OracleHcmExtension
 {
     private const string FrameworkVersionHeader = "REST-Framework-Version";
 
+    public static IHostApplicationBuilder AddOracleHcmBackgroundProcess(this IHostApplicationBuilder builder)
+    {
+        _ = builder.AddOracleHcmSynchronization();
+
+        _ = builder.Services.AddHostedService<OracleHcmHostedService>();
+
+        return builder;
+    }
 
     public static IHostApplicationBuilder AddOracleHcmSynchronization(this IHostApplicationBuilder builder)
     {
@@ -36,16 +45,22 @@ public static class OracleHcmExtension
         _ = builder.Services.AddSingleton<OracleEmployeeValidator>();
         _ = builder.Services.AddSingleton<EmployeeSyncJob>();
         _ = builder.Services.AddSingleton<PayrollSyncJob>();
+
+        _ = builder.Services.AddSingleton<AddressMapper>();
+        _ = builder.Services.AddSingleton<ContactInfoMapper>();
+        _ = builder.Services.AddSingleton<DemographicMapper>();
+        _ = builder.Services.AddSingleton<IDemographicsServiceInternal, DemographicsService>();
         _ = builder.Services.AddSingleton<IJobFactory, OracleHcmJobFactory>();
         _ = builder.Services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
 
 
-        _ = builder.Services.AddHttpClient<IEmployeeSyncService, EmployeeSyncService>("EmployeeSync", BuildOracleHcmAuthClient).AddStandardResilienceHandler(options =>
-        {
-            options.CircuitBreaker = new HttpCircuitBreakerStrategyOptions { SamplingDuration = TimeSpan.FromMinutes(2) };
-            options.AttemptTimeout = new HttpTimeoutStrategyOptions { Timeout = TimeSpan.FromMinutes(1) };
-            options.TotalRequestTimeout = new HttpTimeoutStrategyOptions { Timeout = TimeSpan.FromMinutes(2) };
-        });
+        _ = builder.Services.AddHttpClient<IEmployeeSyncService, EmployeeSyncService>("EmployeeSync", BuildOracleHcmAuthClient).AddStandardResilienceHandler(
+            options =>
+            {
+                options.CircuitBreaker = new HttpCircuitBreakerStrategyOptions { SamplingDuration = TimeSpan.FromMinutes(2) };
+                options.AttemptTimeout = new HttpTimeoutStrategyOptions { Timeout = TimeSpan.FromMinutes(1) };
+                options.TotalRequestTimeout = new HttpTimeoutStrategyOptions { Timeout = TimeSpan.FromMinutes(2) };
+            });
 
 
         _ = builder.Services.AddHttpClient<PayrollSyncClient>("PayrollSync", BuildOracleHcmAuthClient).AddStandardResilienceHandler(options =>
@@ -56,16 +71,20 @@ public static class OracleHcmExtension
         });
 
 
-        builder.Services.AddHttpClient<OracleHcmHealthCheck>("HealthCheck", BuildOracleHcmAuthClient);
+        _ = builder.Services.AddHttpClient<OracleHcmHealthCheck>("HealthCheck", BuildOracleHcmAuthClient);
+
+        _ = builder.Services.AddHealthChecks().AddCheck<OracleHcmHealthCheck>("OracleHcm");
+
+        _ = builder.AddProjectCachingServices();
+
+        _ = builder.AddOracleHcmMessaging();
 
 
-        if (!builder.Environment.IsTestEnvironment())
-        {
-            _ = builder.Services.AddHostedService<OracleHcmHostedService>();
-            _ = builder.Services.AddHealthChecks().AddCheck<OracleHcmHealthCheck>("OracleHcm");
-        }
+        return builder;
+    }
 
-        builder.AddProjectCachingServices();
+    private static IHostApplicationBuilder AddOracleHcmMessaging(this IHostApplicationBuilder builder)
+    {
 
         builder.Services.AddMassTransit(x =>
         {
