@@ -76,8 +76,8 @@ try {
 
             if (Test-Path -Path "$($Using:Deploy.TargetPath)\web.config" -PathType Leaf) {
                 Write-Output "$($Using:Deploy.TargetPath)\web.config"
-                (Get-Content -path "$( $Using:Deploy.TargetPath )\web.config" -Raw) -replace 'Development', $Using:Deploy.ConfigEnvironment | Set-Content -Path "$( $Using:Deploy.TargetPath )\web.config"
-                Get-Content -path "$( $Using:Deploy.TargetPath )\web.config" -Raw
+                (Get-Content -path "$($Using:Deploy.TargetPath)\web.config" -Raw) -replace 'Development', $Using:Deploy.ConfigEnvironment | Set-Content -Path "$($Using:Deploy.TargetPath)\web.config"
+                Get-Content -path "$($Using:Deploy.TargetPath)\web.config" -Raw
             }
 
             # Start App Pool and IIS site
