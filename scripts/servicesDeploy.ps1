@@ -88,12 +88,14 @@ function Deploy-Service($Artifact, $TargetPath, $ServiceExecutable, $ServiceName
             $json | ConvertTo-Json -Depth 10 | Set-Content $file
 
             # Install and start the service if not already registered
-            if (!(Get-Service -Name $Using:ServiceName -ErrorAction SilentlyContinue))
+            if (!(Get-Service -Name "$Using:ServiceName" -ErrorAction SilentlyContinue))
             {
                 Write-Host "Installing service: $Using:ServiceName"
-                New-Service -Name $Using:ServiceName -BinaryPathName "$Using:ServiceExecutable" -StartupType "AutomaticDelayedStart"
+                $BinaryFullPath = Join-Path -Path "$Using:TargetPath" -ChildPath $Using:ServiceExecutable
+                Write-Host "BinaryPathName is '$BinaryFullPath'"
+                New-Service -Name "$Using:ServiceName" -BinaryPathName "$BinaryFullPath" -StartupType "AutomaticDelayedStart"
             }
-            Start-Service -Name $Using:ServiceName
+            Start-Service -Name "$Using:ServiceName"
         }
 
         return $true
@@ -156,7 +158,7 @@ try {
         }
     )
     foreach ($Deploy in $Deployments) {
-        $result = Deploy-Service -Artifact $Deploy.Artifact -TargetPath $Deploy.TargetPath -ServiceExecutable $Deploy.ServiceExecutable -ServiceName $Deploy.ServiceName -ConfigEnvironment $configTarget -Session $Session
+        $result = Deploy-Service -Artifact $Deploy.Artifact -TargetPath "$Deploy.TargetPath" -ServiceExecutable $Deploy.ServiceExecutable -ServiceName "$Deploy.ServiceName" -ConfigEnvironment $configTarget -Session $Session
         if (-not $result)
         {
             $Failed = $true
