@@ -26,7 +26,7 @@ definitions:
         - echo "Using .NET 9 SDK container"
         
         # Configure NuGet sources (Encryption is not supported on non-Windows platforms.)        
-        - dotnet nuget add source "$CUSTOM_NUGET" --name custom-nuget --store-password-in-clear-text --username "anonymous" --password "$NUGET_AUTH_TOKEN"
+        - dotnet nuget add source "$CUSTOM_NUGET" --name custom-nuget --store-password-in-clear-text --username "apikey" --password "$NUGET_AUTH_TOKEN"
         
         # Restore dependencies and run tests
         - dotnet test "src/services/tests/Demoulas.ProfitSharing.UnitTests/${TEST_PROJECT_NAME}.csproj" --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath=$REPORTS_PATH/junit.xml"
