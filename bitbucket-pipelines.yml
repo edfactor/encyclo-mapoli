@@ -58,8 +58,8 @@ definitions:
       script:
         - dotnet tool update --global Demoulas.Common.Build.Cli
         - Write-Host ${env:BITBUCKET_BUILD_NUMBER}
-        - if (${env:BITBUCKET_BRANCH}) { Write-Host "Branch: ${env:BITBUCKET_BRANCH}" } else { Write-Warning "BITBUCKET_BRANCH is not defined." }
-        - if (${env:BITBUCKET_COMMIT}) { Write-Host "Commit: ${env:BITBUCKET_COMMIT}" } else { Write-Warning "BITBUCKET_COMMIT is not defined." }
+        - Write-Host ${env:BITBUCKET_BRANCH}
+        - Write-Host ${env:BITBUCKET_COMMIT}
         - Write-Host $(Get-Location)
         - Write-Host $(Get-ChildItem)
         - New-Item -ItemType Directory -Path "dist"
@@ -206,7 +206,7 @@ definitions:
 
           .\output\Demoulas.ProfitSharing.Data.Cli $action --connection-name ProfitSharing --sql-file ".\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-schema $sourceSchema
           if ($LASTEXITCODE -ne 0) { Write-Error "Database upgrade failed. Exiting"; exit 1 }
-          
+
 pipelines:
   branches:
     release:
@@ -216,9 +216,7 @@ pipelines:
       - parallel:
           - step: *create-api-artifacts
           - step: *create-service-artifacts
-          - step: *create-frontend-artifact-qa
-          # Deployment Stage
-
+          - step: *create-frontend-artifact-qa      
       - step:
           name: "Application Deployment"
           runs-on:
