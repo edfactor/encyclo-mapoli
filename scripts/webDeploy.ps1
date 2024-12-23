@@ -19,20 +19,21 @@ $configTarget = Get-ConfigEnvironment $envTarget
 
 $Deployments = @(
     @{
-        Artifact = "$apiArtifactName";
-       TargetPath = 'C:\inetpub\wwwroot\api';
-       SiteName = 'API';
-       AppPoolName = 'NETSApiAppPool';
-       IgnoreFiles = @("credSettings.$($envTarget).json");
-       ConfigEnvironment = $configTarget },
-
+        Artifact = "$apiArtifactName"
+        TargetPath = 'C:\inetpub\wwwroot\api'
+        SiteName = 'API'
+        AppPoolName = 'NETSApiAppPool'
+        IgnoreFiles = @("credSettings.$( $envTarget ).json")
+        ConfigEnvironment = $configTarget
+    },
     @{
-        Artifact = "$uiArtifactName";
-       TargetPath = 'C:\inetpub\wwwroot\frontend';
-       SiteName = 'Frontend';
-       AppPoolName = 'FrontendUIAppPool';
-       IgnoreFiles = @();
-       ConfigEnvironment = $configTarget }
+        Artifact = "$uiArtifactName"
+        TargetPath = 'C:\inetpub\wwwroot\frontend'
+        SiteName = 'Frontend'
+        AppPoolName = 'FrontendUIAppPool'
+        IgnoreFiles = @()
+        ConfigEnvironment = $configTarget
+    }
 )
 
 $Failed = $false
@@ -78,8 +79,8 @@ try {
 
             if (Test-Path -Path "$($Using:Deploy.TargetPath)\web.config" -PathType Leaf) {
                 Write-Output "$($Using:Deploy.TargetPath)\web.config"
-                (Get-Content -Path "$($Using:Deploy.TargetPath)\web.config" -Raw) -replace 'Development', $Using:Deploy.ConfigEnvironment | Set-Content -Path "$($Using:Deploy.TargetPath)\web.config"
-                Get-Content -Path "$($Using:Deploy.TargetPath)\web.config" -Raw
+                (Get-Content -path "$( $Using:Deploy.TargetPath )\web.config" -Raw) -replace 'Development', $Using:Deploy.ConfigEnvironment | Set-Content -Path "$( $Using:Deploy.TargetPath )\web.config"
+                Get-Content -path "$( $Using:Deploy.TargetPath )\web.config" -Raw
             }
 
             # Start App Pool and IIS site
