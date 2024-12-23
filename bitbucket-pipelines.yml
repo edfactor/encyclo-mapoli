@@ -29,11 +29,7 @@ definitions:
         - dotnet nuget add source "$CUSTOM_NUGET" --name custom-nuget --store-password-in-clear-text --username "anonymous" --password "$NUGET_AUTH_TOKEN"
         
         # Restore dependencies and run tests
-        - dotnet test "src/services/tests/Demoulas.ProfitSharing.UnitTests/${TEST_PROJECT_NAME}.csproj" \
-          --configuration Release \
-          --test-adapter-path:. \
-          --logger:"junit;LogFilePath=$REPORTS_PATH/junit.xml" \
-          -p:RestoreAdditionalProjectSources="$NUGET_ORG;$CUSTOM_NUGET"
+        - dotnet test "src/services/tests/Demoulas.ProfitSharing.UnitTests/${TEST_PROJECT_NAME}.csproj" --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath=$REPORTS_PATH/junit.xml" -p:RestoreAdditionalProjectSources="$NUGET_ORG;$CUSTOM_NUGET"
       
       artifacts:
         - test-reports/**
