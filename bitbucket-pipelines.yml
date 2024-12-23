@@ -72,6 +72,22 @@ definitions:
 
         - Compress-Archive -Path .\publishOutput\* -DestinationPath .\dist\Demoulas.ProfitSharing.Api.zip -Force
 
+    create-service-artifacts: &create-service-artifacts
+      name: Create Background Service Artifacts
+      runs-on:
+        - windows
+        - self.hosted
+      artifacts:
+        - dist\**
+      script:
+        - Write-Host $(Get-Location)
+        - Write-Host $(Get-ChildItem)
+        - New-Item -ItemType Directory -Path "dist"
+
+        - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.OracleHcm.Sync -c Release -p:PublishProfile=FolderProfile -o .\publishOutput
+
+        - Compress-Archive -Path .\publishOutput\* -DestinationPath .\dist\Demoulas.ProfitSharing.OracleHcm.Sync.zip -Force
+
     create-frontend-artifact-qa: &create-frontend-artifact-qa
       name: Create FrontEnd Artifacts (QA)
       runs-on:
@@ -139,7 +155,6 @@ definitions:
         # Compress the build output into a zip file in the dist folder
         - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.${env:ENV}.zip" -Force
 
-
     create-frontend-artifact-prod: &create-frontend-artifact-prod
       name: Create FrontEnd Artifacts (PROD)
       runs-on:
@@ -196,6 +211,7 @@ pipelines:
           - step: *test-frontend
       - parallel:
           - step: *create-api-artifacts
+          - step: *create-service-artifacts
           - step: *create-frontend-artifact-qa
           # Deployment Stage
 
@@ -207,12 +223,16 @@ pipelines:
           deployment: QA
           trigger: "manual"
           script:
-            - echo "Deploying application..."
             - ${env:ENV} = "QA"
             - $env:API_SERVER_QA = "appt23d"
+
+            - echo "Deploying web application..."
             - $env:API_ARTIFACT_NAME = "Demoulas.ProfitSharing.Api.zip"
             - $env:UI_ARTIFACT_NAME = "Demoulas.ProfitSharing.UI.$env:ENV.zip"
             - powershell .\scripts\webDeploy.ps1 $env $env:API_SERVER_QA $env:API_ARTIFACT_NAME
+
+            - echo "Deploying background service..."
+            - powershell .\scripts\servicesDeploy.ps1 $env $env:API_SERVER_QA $env:API_ARTIFACT_NAME
       - parallel:
           - step: *upgrade-database
           - step: *create-frontend-artifact-uat
