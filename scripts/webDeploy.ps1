@@ -63,16 +63,6 @@ try {
 
             # Remove old files, excluding ignored ones
             Get-ChildItem -Path $Using:Deploy.TargetPath -Exclude $Using:Deploy.IgnoreFiles | Remove-Item -Force -Recurse
-
-            # Enable HTTP/2 if not already enabled
-            Import-Module IISAdministration
-            $binding = Get-IISSite -Name $Using:Deploy.SiteName | Get-IISSiteBinding -BindingInformation '*:8443:'
-            if ($binding) {
-                Set-IISSiteBinding -BindingInformation '*:8443:' -Protocol https -EnableHttp2 $true
-                Write-Host "HTTP/2 enabled for site: $($Using:Deploy.SiteName)"
-            } else {
-                Write-Host "HTTPS binding not found for site: $($Using:Deploy.SiteName). Cannot enable HTTP/2."
-            }
         }
 
         if (!$?) { $Failed = $true; break }
