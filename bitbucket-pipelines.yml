@@ -39,8 +39,6 @@ definitions:
       artifacts:
         - test-reports/**
     
-    
-    
     test-frontend: &test-frontend
       name: Build and Test Frontend UI
       runs-on:
