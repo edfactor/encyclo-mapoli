@@ -175,12 +175,12 @@ definitions:
         - windows
         - self.hosted
       script:
-        - echo "Upgrading Database..."
         - $env:NUGET_ORG="https://api.nuget.org/v3/index.json"
         - dotnet build .\src\services\src\Demoulas.ProfitSharing.Data.Cli\Demoulas.ProfitSharing.Data.Cli.csproj -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -o .\output || { Write-Error "Database project build failed. Exiting."; exit 1 }
+        
         - $environment = $env:Environment
         - $action = $env:Action
-        - $sourceSchema = $null
+        - $sourceSchema = ""
         - if (-not $environment) { $environment = "QA" }
         - if (-not $action) { $action = "upgrade-db" }
 
@@ -194,13 +194,12 @@ definitions:
           $sourceSchema = "PROFITSHARE_STAGING";
           }
 
+        - echo "Upgrading Database..."
         - Write-Host "Source Schema: $action"
         - Write-Host "Environment: $environment"
         - Write-Host "Source Schema: $sourceSchema"
 
         - .\output\Demoulas.ProfitSharing.Data.Cli $action --connection-name ProfitSharing --sql-file ".\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-Schema $sourceSchema
-
-
 
 pipelines:
   branches:
