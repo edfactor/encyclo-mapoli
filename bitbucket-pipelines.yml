@@ -86,7 +86,7 @@ definitions:
         - Compress-Archive -Path .\publishOutput\* -DestinationPath .\dist\Demoulas.ProfitSharing.OracleHcm.Sync.zip -Force
 
     create-frontend-artifact-qa: &create-frontend-artifact-qa
-      name: Create FrontEnd Artifacts (QA)
+      name: Create FrontEnd Artifacts (QA)     
       runs-on:
         - windows
         - self.hosted
@@ -97,23 +97,22 @@ definitions:
         - ${env:ENV} = "qa"
         - cd .\src\UI
         - |
-          @"
-          registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
-          //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=$env:JFROG_WORKSPACE_VARIABLE
-          "@ | Out-File -FilePath .npmrc -Encoding ASCII
+            @"
+            registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
+            //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=$env:JFROG_WORKSPACE_VARIABLE
+            "@ | Out-File -FilePath .npmrc -Encoding ASCII
         - C:\nvm\v20.4.0\npm.cmd install --legacy-peer-deps;
         - C:\nvm\v20.4.0\npm.cmd run build:${env:ENV}
-        - if (!(Test-Path -Path "C:\nvm\v20.4.0\npm.cmd")) { Write-Error "NPM not found at specified path. Exiting."; exit 1 }
-        - C:\nvm\v20.4.0\npm.cmd install --legacy-peer-deps;
+        
         - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
         - Copy-Item -Path ".buildinfo.json" -Destination "..\..\src\UI\build"
-
-        - if (Test-Path -Path ".\src\web.config") { Copy-Item -Path ".\src\web.config" -Destination "..\..\src\UI\build" } else { Write-Warning "web.config file not found. Skipping copy."; }
+        
+        - Copy-Item -Path ".\src\web.config" -Destination "..\..\src\UI\build"
         - New-Item -Path "..\..\dist" -ItemType Directory
-        - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.${env:ENV}.zip" -Force
-    
+        - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.${env:ENV}.zip" -Force        
+
     create-frontend-artifact-uat: &create-frontend-artifact-uat
-      name: Create FrontEnd Artifacts (UAT)
+      name: Create FrontEnd Artifacts (UAT)     
       runs-on:
         - windows
         - self.hosted
@@ -128,10 +127,10 @@ definitions:
 
         # Create and configure .npmrc file
         - |
-          @"
-          registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
-          //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=$env:JFROG_WORKSPACE_VARIABLE
-          "@ | Out-File -FilePath .npmrc -Encoding ASCII
+            @"
+            registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
+            //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=$env:JFROG_WORKSPACE_VARIABLE
+            "@ | Out-File -FilePath .npmrc -Encoding ASCII
 
         # Install dependencies with legacy peer deps
         - C:\nvm\v20.4.0\npm.cmd install --legacy-peer-deps
@@ -146,7 +145,9 @@ definitions:
         - Copy-Item -Path ".\src\web.config" -Destination "..\..\src\UI\build" -Force
 
         # Ensure the dist directory exists before compressing
-        - if (!(Test-Path -Path "..\..\dist")) { New-Item -Path "..\..\dist" -ItemType Directory }
+        - if (!(Test-Path -Path "..\..\dist")) {
+            New-Item -Path "..\..\dist" -ItemType Directory
+            }
 
         # Compress the build output into a zip file in the dist folder
         - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.${env:ENV}.zip" -Force
