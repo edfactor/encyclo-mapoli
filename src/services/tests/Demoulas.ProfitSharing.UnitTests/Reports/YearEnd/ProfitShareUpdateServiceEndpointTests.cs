@@ -16,12 +16,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
-public class ProfitShareServiceEndpointTests : ApiTestBase<Program>
+public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
 {
     private readonly ProfitShareUpdateEndpoint _endpoint;
     private const short ProfitYear = 2024;
 
-    public ProfitShareServiceEndpointTests()
+    public ProfitShareUpdateServiceEndpointTests()
     {
         IProfitShareUpdateService svc = ServiceProvider?.GetRequiredService<IProfitShareUpdateService>()!;
         _endpoint = new ProfitShareUpdateEndpoint(svc);
@@ -31,13 +31,13 @@ public class ProfitShareServiceEndpointTests : ApiTestBase<Program>
     public async Task Unauthorized()
     {
         // Arrange
-        ProfitSharingUpdateRequest req = new() { ProfitYear = ProfitYear };
+        ProfitShareUpdateRequest req = new() { ProfitYear = ProfitYear };
 
         // Act
         TestResult<ProfitShareUpdateResponse> response =
             await ApiClient
                 .GETAsync<ProfitShareUpdateEndpoint,
-                    ProfitSharingUpdateRequest, ProfitShareUpdateResponse>(req);
+                    ProfitShareUpdateRequest, ProfitShareUpdateResponse>(req);
 
         // Assert
         response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -47,14 +47,14 @@ public class ProfitShareServiceEndpointTests : ApiTestBase<Program>
     public async Task BasicQuery()
     {
         // Arrange
-        ProfitSharingUpdateRequest req = new() { ProfitYear = ProfitYear };
+        ProfitShareUpdateRequest req = new() { ProfitYear = ProfitYear };
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
         // Act
         TestResult<ProfitShareUpdateResponse> response =
             await ApiClient
                 .GETAsync<ProfitShareUpdateEndpoint,
-                    ProfitSharingUpdateRequest, ProfitShareUpdateResponse>(req);
+                    ProfitShareUpdateRequest, ProfitShareUpdateResponse>(req);
 
         // Assert
         response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -69,18 +69,18 @@ public class ProfitShareServiceEndpointTests : ApiTestBase<Program>
             // Arrange
             // ensure we always have an employee with PointsEarned
             await EnsureEmployeeHasPoints(c);
-            ProfitSharingUpdateRequest req = new() { ProfitYear = ProfitYear, AdjustContributionAmount = 20, MaxAllowedContributions = 1 };
+            ProfitShareUpdateRequest req = new() { ProfitYear = ProfitYear, AdjustContributionAmount = 20, MaxAllowedContributions = 1 };
             ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
             // Act
             TestResult<ProfitShareUpdateResponse> response =
                 await ApiClient
                     .GETAsync<ProfitShareUpdateEndpoint,
-                        ProfitSharingUpdateRequest, ProfitShareUpdateResponse>(req);
+                        ProfitShareUpdateRequest, ProfitShareUpdateResponse>(req);
 
             // Assert
             response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
-            response.Result.IsReRunRequired.Should().BeTrue();
+            response.Result.HasExceededMaximumContributions.Should().BeTrue();
         });
     }
 
@@ -107,7 +107,7 @@ public class ProfitShareServiceEndpointTests : ApiTestBase<Program>
         const int currentBalance = 33_000;
         const int badge = 77;
         _ = await SetupEmployee(badge, employeeIncome, currentBalance);
-        ProfitSharingUpdateRequest req = new()
+        ProfitShareUpdateRequest req = new()
         {
             ProfitYear = ProfitYear,
             ContributionPercent = 20,
@@ -122,10 +122,10 @@ public class ProfitShareServiceEndpointTests : ApiTestBase<Program>
         // Assert
         int memberCount = response.Response.Results.Count();
         memberCount.Should().Be(1); // should be just 1 employee
-        MemberFinancialsResponse memberFinancials = response.Response.Results.First(mf => mf.Badge == badge);
-        memberFinancials.Contributions.Should().Be(employeeIncome * 0.20m);
-        memberFinancials.Earnings.Should().Be(currentBalance * 0.127m);
-        memberFinancials.IncomingForfeitures.Should().Be(employeeIncome * .011m);
+        ProfitShareUpdateMemberResponse profitShareUpdateMember = response.Response.Results.First(mf => mf.Badge == badge);
+        profitShareUpdateMember.Contributions.Should().Be(employeeIncome * 0.20m);
+        profitShareUpdateMember.Earnings.Should().Be(currentBalance * 0.127m);
+        profitShareUpdateMember.IncomingForfeitures.Should().Be(employeeIncome * .011m);
     }
 
     private async Task<int> SetupEmployee(int badge, decimal employeeIncome, decimal currentBalance)
@@ -225,7 +225,7 @@ public class ProfitShareServiceEndpointTests : ApiTestBase<Program>
         const decimal currentBalance = 10_000m;
         await SetupBeneficiary(currentBalance);
 
-        ProfitSharingUpdateRequest req = new()
+        ProfitShareUpdateRequest req = new()
         {
             ProfitYear = ProfitYear,
             ContributionPercent = 0,
@@ -239,10 +239,10 @@ public class ProfitShareServiceEndpointTests : ApiTestBase<Program>
         // Assert
         int memberCount = response.Response.Results.Count();
         memberCount.Should().Be(1); // should be just 1 bene
-        MemberFinancialsResponse memberFinancials = response.Response.Results.First();
-        memberFinancials.Contributions.Should().Be(0);
-        memberFinancials.Earnings.Should().Be(currentBalance*0.067m);
-        memberFinancials.IncomingForfeitures.Should().Be(0);
+        ProfitShareUpdateMemberResponse profitShareUpdateMember = response.Response.Results.First();
+        profitShareUpdateMember.Contributions.Should().Be(0);
+        profitShareUpdateMember.Earnings.Should().Be(currentBalance*0.067m);
+        profitShareUpdateMember.IncomingForfeitures.Should().Be(0);
     }
 
     private async Task SetupBeneficiary(decimal currentBalance)

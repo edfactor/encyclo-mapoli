@@ -10,9 +10,8 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 /// <summary>
 ///     Values provided by user to guide how to update Earnings,Contributions and forfeiture points are updated for the new PS year
 /// </summary>
-public sealed record ProfitSharingUpdateRequest : ProfitYearRequest
+public sealed record ProfitShareUpdateRequest : ProfitYearRequest
 {
-
     public decimal ContributionPercent { get; set; }
     public decimal IncomingForfeitPercent { get; set; }
     public decimal EarningsPercent { get; set; }
@@ -25,9 +24,9 @@ public sealed record ProfitSharingUpdateRequest : ProfitYearRequest
     public decimal AdjustIncomingForfeitAmount { get; set; }
     public decimal AdjustEarningsSecondaryAmount { get; set; }
 
-    public static new ProfitSharingUpdateRequest RequestExample()
+    public static new ProfitShareUpdateRequest RequestExample()
     {
-        return new ProfitSharingUpdateRequest
+        return new ProfitShareUpdateRequest
         {
             Skip = null,
             Take = null,
@@ -44,6 +43,4 @@ public sealed record ProfitSharingUpdateRequest : ProfitYearRequest
             AdjustEarningsSecondaryAmount = 0
         };
     }
-
 }
-
