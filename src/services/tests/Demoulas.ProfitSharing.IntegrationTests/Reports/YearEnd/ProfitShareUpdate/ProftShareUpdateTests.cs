@@ -48,7 +48,7 @@ public class ProfitShareUpdateTests
 
         // Act
         await profitShareUpdateService.ProfitSharingUpdatePaginated(
-            new ProfitSharingUpdateRequest
+            new ProfitShareUpdateRequest
             {
                 Skip = null,
                 Take = null,
@@ -85,7 +85,7 @@ public class ProfitShareUpdateTests
 
         // Act
         await profitShareUpdateService.ProfitSharingUpdatePaginated(
-            new ProfitSharingUpdateRequest
+            new ProfitShareUpdateRequest
             {
                 Skip = null,
                 Take = null,

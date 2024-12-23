@@ -268,13 +268,5 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
         message.Should().Be("One or more errors occurred!");
         errorMessage.Should().Be(expectedMessage);
     }
-
-    private Task<short> GetMaxProfitYearAsync()
-    {
-        return MockDbContextFactory.UseWritableContext(async ctx =>
-        {
-            return await ctx.PayProfits.MaxAsync(pp => pp.ProfitYear);
-        });
-    }
-
+    
 }
