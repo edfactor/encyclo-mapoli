@@ -231,16 +231,13 @@ pipelines:
             - echo "Deploying web application..."
             - $env:API_ARTIFACT_NAME = "Demoulas.ProfitSharing.Api.zip"
             - $env:UI_ARTIFACT_NAME = "Demoulas.ProfitSharing.UI.{$env:ENV}.zip"
-            - if (!(Test-Path -Path ".\scripts\webDeploy.ps1")) { Write-Error "webDeploy.ps1 script not found. Exiting."; exit 1 }
             - powershell .\scripts\webDeploy.ps1 $env:ENV $env:API_SERVER_QA $env:API_ARTIFACT_NAME
 
             - echo "Deploying background service..."
-
             - $env:SERVICE_SERVICE_NAME = "Demoulas ProfitSharing OracleHcm Sync"
             - $env:SERVICE_SERVICE_TARGET_PATH = "C:\NextGenApplications\ps\Services"
             - $env:SERVICE_ARTIFACT_NAME = "Demoulas.ProfitSharing.OracleHcm.Sync.zip"
             - $env:SERVICE_ARTIFACT_EXECUTABLE = "Demoulas.ProfitSharing.OracleHcm.Sync.exe"
-            - if (!(Test-Path -Path ".\scripts\servicesDeploy.ps1")) { Write-Error "servicesDeploy.ps1 script not found. Exiting."; exit 1 }
             - powershell .\scripts\servicesDeploy.ps1 $env:ENV $env:API_SERVER_QA $env:SERVICE_ARTIFACT_NAME $env:SERVICE_ARTIFACT_EXECUTABLE $env:SERVICE_SERVICE_NAME
       - parallel:
           - step: *upgrade-database
