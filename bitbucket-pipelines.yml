@@ -62,11 +62,11 @@ definitions:
         - Write-Host $(Get-ChildItem)
         - New-Item -ItemType Directory -Path "dist"
 
-        - if (!(Test-Path -Path "dist")) { New-Item -ItemType Directory -Path "dist" }
-
+        - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.Api -c Release -p:PublishProfile=FolderProfile -o .\publishOutput
+        
         - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
         - Copy-Item -Path ".buildinfo.json" -Destination ".\publishOutput\"
-
+        
         - Compress-Archive -Path .\publishOutput\* -DestinationPath .\dist\Demoulas.ProfitSharing.Api.zip -Force
 
     create-service-artifacts: &create-service-artifacts
@@ -77,11 +77,12 @@ definitions:
       artifacts:
         - dist\**
       script:
+        - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
         - Write-Host $(Get-Location)
         - Write-Host $(Get-ChildItem)
         - New-Item -ItemType Directory -Path "dist"
 
-        - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.OracleHcm.Sync -c Release -p:PublishProfile=FolderProfile -o .\publishOutput
+        - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.OracleHcm.Sync -c Release -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -p:PublishProfile=FolderProfile -o .\publishOutput
 
         - Compress-Archive -Path .\publishOutput\* -DestinationPath .\dist\Demoulas.ProfitSharing.OracleHcm.Sync.zip -Force
 
