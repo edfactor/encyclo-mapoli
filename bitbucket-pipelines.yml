@@ -26,7 +26,7 @@ definitions:
         - echo "Using .NET 9 SDK container"
         
         # Configure NuGet sources (Encryption is not supported on non-Windows platforms.)        
-        - nuget setapikey "$NUGET_AUTH_TOKEN" -source "$CUSTOM_NUGET"
+        - dotnet nuget setapikey "$NUGET_AUTH_TOKEN" -source "$CUSTOM_NUGET"
         - dotnet nuget add source "$CUSTOM_NUGET" --name custom-nuget
         
         # Restore dependencies and run tests
