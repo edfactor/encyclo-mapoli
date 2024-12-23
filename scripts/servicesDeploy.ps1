@@ -56,15 +56,15 @@ function Deploy-Service($Artifact, $TargetPath, $ServiceExecutable, $ServiceName
 
         # Clean and prepare target path
         Invoke-Command -Session $Session -ScriptBlock {
-            if (Test-Path -Path $Using:TargetPath)
+            if (Test-Path -Path "$Using:TargetPath")
             {
                 Write-Host "Cleaning target folder: $Using:TargetPath"
-                Get-ChildItem -Path $Using:TargetPath -Exclude "credSettings.$( $Using:ConfigEnvironment ).json" | Remove-Item -Force -Recurse
+                Get-ChildItem -Path "$Using:TargetPath" -Exclude "credSettings.$( $Using:ConfigEnvironment ).json" | Remove-Item -Force -Recurse
             }
             else
             {
                 Write-Host "Creating target folder: $Using:TargetPath"
-                New-Item -ItemType Directory -Force -Path $Using:TargetPath
+                New-Item -ItemType Directory -Force -Path "$Using:TargetPath"
             }
         }
 
@@ -74,7 +74,7 @@ function Deploy-Service($Artifact, $TargetPath, $ServiceExecutable, $ServiceName
 
         # Extract, update config, and handle the service installation
         Invoke-Command -Session $Session -ScriptBlock {
-            Expand-Archive -Force -Path "$Using:TargetPath\$Using:Artifact" -DestinationPath $Using:TargetPath
+            Expand-Archive -Force -Path "$Using:TargetPath\$Using:Artifact" -DestinationPath "$Using:TargetPath"
             Remove-Item -Force -Path "$Using:TargetPath\$Using:Artifact"
 
             # Update environment settings in the buildSettings file
