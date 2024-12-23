@@ -37,7 +37,7 @@ $Deployments = @(
 
 $Failed = $false
 try {
-    $Session = New-PSSession -ComputerName $envServerName
+    $Session = New-PSSession
 
     # Update .NET workloads
     Invoke-Command -Session $Session -ScriptBlock { dotnet workload update }
