@@ -1,4 +1,3 @@
-$StopAppTimeout = 5
 $envTarget = $args[0]
 $envServerName = $args[1]
 $configTarget = ''
