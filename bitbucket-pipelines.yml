@@ -16,7 +16,7 @@ definitions:
         - export TEST_PROJECT_NAME="Demoulas.ProfitSharing.UnitTests"
         - export REPORTS_PATH="test-reports/build_${BITBUCKET_BUILD_NUMBER}"
         - export NUGET_ORG="https://api.nuget.org/v3/index.json"
-        - export CUSTOM_NUGET="https://custom.jfrog.io/artifactory/api/nuget/custom-nuget-virt"
+        - export CUSTOM_NUGET="https://demoulas.jfrog.io/artifactory/api/nuget/v3/nuget-demoulas-dev-local/index.json"
         - export NUGET_AUTH_TOKEN="${JFROG_WORKSPACE_VARIABLE}"
         
         # Ensure the REPORTS_PATH directory exists
@@ -26,7 +26,7 @@ definitions:
         - echo "Using .NET 9 SDK container"
         
         # Configure NuGet sources
-        - dotnet nuget add source "$CUSTOM_NUGET" --name custom-nuget -username "anonymous" --password "$NUGET_AUTH_TOKEN"
+        - dotnet nuget add source "$CUSTOM_NUGET" --name custom-nuget --username "anonymous" --password "$NUGET_AUTH_TOKEN"
         
         # Restore dependencies and run tests
         - dotnet test "src/services/tests/Demoulas.ProfitSharing.UnitTests/${TEST_PROJECT_NAME}.csproj" \
