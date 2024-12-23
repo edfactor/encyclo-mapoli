@@ -11,8 +11,6 @@ definitions:
   steps:
     build-and-test-backend: &build-and-test-backend
       name: Build and Test Backend API
-      runs-on:
-        - linux
       script:
         # Define environment variables
         - export TEST_PROJECT_NAME="Demoulas.ProfitSharing.UnitTests"
