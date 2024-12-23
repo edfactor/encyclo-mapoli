@@ -3,7 +3,6 @@
 # ------------------------------------------------------------------------
 # Application Name:
 #   - SMART Profit Sharing
-#
 # ------------------------------------------------------------------------
 
 definitions:
@@ -198,7 +197,7 @@ definitions:
         - Write-Host "Source Schema: $action"
         - Write-Host "Environment: $environment"
         - Write-Host "Source Schema: $sourceSchema"
-        
+
         - .\output\Demoulas.ProfitSharing.Data.Cli $action --connection-name ProfitSharing --sql-file ".\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-Schema $sourceSchema
 
 
