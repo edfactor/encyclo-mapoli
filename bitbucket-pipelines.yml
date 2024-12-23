@@ -231,7 +231,7 @@ pipelines:
             - echo "Deploying web application..."
             - $env:API_ARTIFACT_NAME = "Demoulas.ProfitSharing.Api.zip"
             - $env:UI_ARTIFACT_NAME = "Demoulas.ProfitSharing.UI.{$env:ENV}.zip"
-            - powershell .\scripts\webDeploy.ps1 $env:ENV $env:API_SERVER_QA $env:API_ARTIFACT_NAME
+            - powershell .\scripts\webDeploy.ps1 $env:ENV $env:API_SERVER_QA $env:API_ARTIFACT_NAME $env:UI_ARTIFACT_NAME
 
             - echo "Deploying background service..."
             - $env:SERVICE_SERVICE_NAME = "Demoulas ProfitSharing OracleHcm Sync"
