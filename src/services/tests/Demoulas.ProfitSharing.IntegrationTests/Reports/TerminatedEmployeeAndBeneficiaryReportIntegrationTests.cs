@@ -1,9 +1,9 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
-using Demoulas.AccountsReceivable.Tests.Common.Fixtures;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.IntegrationTests.Fixtures;
 using Demoulas.ProfitSharing.IntegrationTests.Helpers;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports;
+
 public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : TestClassBase
 {
     private readonly ITestOutputHelper _testOutputHelper;
@@ -40,7 +41,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : TestClassB
         var contributionService = _fixture.Services.GetRequiredService<ContributionService>()!;
         TerminatedEmployeeAndBeneficiaryReportService mockService =
             new TerminatedEmployeeAndBeneficiaryReportService(ProfitSharingDataContextFactory, calendarService, totalService, contributionService);
-       
+
         Stopwatch stopwatch = Stopwatch.StartNew();
         stopwatch.Start();
         var data = await mockService.GetReportAsync(new ProfitYearRequest { ProfitYear = profitSharingYear }, CancellationToken.None);
@@ -66,19 +67,17 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : TestClassB
     private static string CreateTextReport(DateOnly effectiveDateOfTestData, DateOnly startDate, DateOnly endDate, decimal profitSharingYearWithIteration,
         TerminatedEmployeeAndBeneficiaryResponse report)
     {
-
         TextReportGenerator textReportGenerator = new TextReportGenerator(effectiveDateOfTestData, startDate, endDate, profitSharingYearWithIteration);
 
         foreach (var ms in report.Response.Results)
         {
-
             textReportGenerator.PrintDetails(ms.BadgePSn, ms.Name, ms.BeginningBalance,
                 ms.BeneficiaryAllocation, ms.DistributionAmount, ms.Forfeit,
                 ms.EndingBalance, ms.VestedBalance, ms.DateTerm, ms.YtdPsHours, ms.VestedPercent, ms.Age,
                 ms.EnrollmentCode ?? 0);
         }
+
         textReportGenerator.PrintTotals(report.TotalEndingBalance, report.TotalVested, report.TotalForfeit, report.TotalBeneficiaryAllocation);
         return textReportGenerator.GetReport();
-
     }
 }

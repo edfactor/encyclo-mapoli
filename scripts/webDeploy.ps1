@@ -40,9 +40,6 @@ $Failed = $false
 try {
     $Session = New-PSSession $envServerName
 
-    # Update .NET workloads
-    Invoke-Command -Session $Session -ScriptBlock { dotnet workload update }
-
     foreach ($Deploy in $Deployments) {
         Invoke-Command -Session $Session -ScriptBlock {
             # Stop IIS site and App Pool
