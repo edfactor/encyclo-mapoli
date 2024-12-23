@@ -175,32 +175,38 @@ definitions:
         - windows
         - self.hosted
       script:
-        - $env:NUGET_ORG="https://api.nuget.org/v3/index.json"
-        - dotnet build .\src\services\src\Demoulas.ProfitSharing.Data.Cli\Demoulas.ProfitSharing.Data.Cli.csproj -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -o .\output || { Write-Error "Database project build failed. Exiting."; exit 1 }
-        
-        - $environment = $env:Environment
-        - $action = $env:Action
-        - $sourceSchema = ""
-        - if (-not $environment) { $environment = "QA" }
-        - if (-not $action) { $action = "upgrade-db" }
+        - |
+          $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
+          dotnet build .\src\services\src\Demoulas.ProfitSharing.Data.Cli\Demoulas.ProfitSharing.Data.Cli.csproj -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -o .\output
+          if ($LASTEXITCODE -ne 0) { Write-Error "Database project build failed. Exiting."; exit 1 }
 
-        - if ($environment -eq "QA") {
-          $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_QA;
-          $sourceSchema = "PROFITSHARE";
+          $environment = $env:Environment
+          $action = $env:Action
+          $sourceSchema = ""
+          if (-not $environment) { $environment = "QA" }
+          if (-not $action) { $action = "upgrade-db" }
+
+          if ($environment -eq "QA") {
+            $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_QA
+            $sourceSchema = "PROFITSHARE"
           }
 
-        - if ($environment -eq "UAT") {
-          $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_UAT;
-          $sourceSchema = "PROFITSHARE_STAGING";
+          if ($environment -eq "UAT") {
+            $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_UAT
+            $sourceSchema = "PROFITSHARE_STAGING"
           }
 
-        - echo "Upgrading Database..."
-        - Write-Host "Source Schema: $action"
-        - Write-Host "Environment: $environment"
-        - Write-Host "Source Schema: $sourceSchema"
+          if (-not $sourceSchema) {
+            Write-Error "Source schema is undefined. Exiting."; exit 1
+          }
 
-        - .\output\Demoulas.ProfitSharing.Data.Cli $action --connection-name ProfitSharing --sql-file ".\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-Schema $sourceSchema
+          Write-Host "Running database upgrade with action: $action"
+          Write-Host "Target environment: $environment"
+          Write-Host "Source schema: $sourceSchema"
 
+          .\output\Demoulas.ProfitSharing.Data.Cli $action --connection-name ProfitSharing --sql-file ".\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-schema $sourceSchema
+          if ($LASTEXITCODE -ne 0) { Write-Error "Database upgrade failed. Exiting"; exit 1 }
+          
 pipelines:
   branches:
     release:
