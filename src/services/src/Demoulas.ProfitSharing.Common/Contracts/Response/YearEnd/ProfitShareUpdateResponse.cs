@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
-public sealed record ProfitShareUpdateResponse : ReportResponseBase<MemberFinancialsResponse>
+public sealed record ProfitShareUpdateResponse : ReportResponseBase<ProfitShareUpdateMemberResponse>
 {
-    public required bool IsReRunRequired { get; set; }
+    public required bool HasExceededMaximumContributions { get; set; }
 }
