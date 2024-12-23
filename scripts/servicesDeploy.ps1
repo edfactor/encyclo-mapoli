@@ -107,6 +107,23 @@ function Deploy-Service($Artifact, $TargetPath, $ServiceExecutable, $ServiceName
     }
 }
 
+# Define a Deployment object
+class Deployment
+{
+    [string]$Artifact
+    [string]$TargetPath
+    [string]$ServiceExecutable
+    [string]$ServiceName
+
+    Deployment([string]$artifact, [string]$targetPath, [string]$serviceExecutable, [string]$serviceName)
+    {
+        $this.Artifact = $artifact
+        $this.TargetPath = $targetPath
+        $this.ServiceExecutable = $serviceExecutable
+        $this.ServiceName = $serviceName
+    }
+}
+
 # Main Execution
 Write-Host "[$( Get-Date -Format 'yyyy-MM-dd HH:mm:ss' )] Starting script execution."
 
@@ -149,20 +166,35 @@ try {
     Write-Host "[$( Get-Date -Format 'yyyy-MM-dd HH:mm:ss' )] Establishing session with server: $envServerName"
     $Session = New-PSSession -ComputerName $envServerName -ErrorAction Stop
 
+    # Refactored Deployment Objects
     $Deployments = @(
-        @{
-            Artifact = $backgroundServiceArtifact
-            TargetPath = $backgroundServiceTargetPath
-            ServiceExecutable = $backgroundServiceExecutable
-            ServiceName = $backgroundServiceName
-        }
+        [Deployment]::new($backgroundServiceArtifact, $backgroundServiceTargetPath, $backgroundServiceExecutable, $backgroundServiceName)
     )
+
+    # Processing Deployments
     foreach ($Deploy in $Deployments) {
-        $result = Deploy-Service -Artifact $Deploy.Artifact -TargetPath "$Deploy.TargetPath" -ServiceExecutable $Deploy.ServiceExecutable -ServiceName "$Deploy.ServiceName" -ConfigEnvironment $configTarget -Session $Session
+        Write-Host "Starting deployment for service: $( $Deploy.ServiceName )"
+        Write-Host "Artifact: $( $Deploy.Artifact )"
+        Write-Host "Target Path: $( $Deploy.TargetPath )"
+        Write-Host "Service Executable: $( $Deploy.ServiceExecutable )"
+
+        $result = Deploy-Service `
+            -Artifact $Deploy.Artifact `
+            -TargetPath $Deploy.TargetPath `
+            -ServiceExecutable $Deploy.ServiceExecutable `
+            -ServiceName $Deploy.ServiceName `
+            -ConfigEnvironment $configTarget `
+            -Session $Session
+
         if (-not $result)
         {
             $Failed = $true
+            Write-Error "Deployment failed for service: $( $Deploy.ServiceName )"
             break
+        }
+        else
+        {
+            Write-Host "Deployment succeeded for service: $( $Deploy.ServiceName )"
         }
     }
 } catch {
@@ -175,6 +207,7 @@ try {
     }
 }
 
+# Exit with appropriate status
 if ($Failed)
 {
     Write-Error "Deployment failed. Exiting with status code 1."
