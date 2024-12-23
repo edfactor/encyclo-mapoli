@@ -180,6 +180,10 @@ definitions:
           $sourceSchema = "PROFITSHARE_STAGING";
           }
 
+        - Write-Host "Source Schema: $action"
+        - Write-Host "Environment: $environment"
+        - Write-Host "Source Schema: $sourceSchema"
+        
         - .\output\Demoulas.ProfitSharing.Data.Cli $action --connection-name ProfitSharing --sql-file ".\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-Schema $sourceSchema
 
 
@@ -204,8 +208,11 @@ pipelines:
           trigger: "manual"
           script:
             - echo "Deploying application..."
+            - ${env:ENV} = "QA"
             - $env:API_SERVER_QA = "appt23d"
-            - powershell .\scripts\webDeploy.ps1 QA $env:API_SERVER_QA
+            - $env:API_ARTIFACT_NAME = "Demoulas.ProfitSharing.Api.zip"
+            - $env:UI_ARTIFACT_NAME = "Demoulas.ProfitSharing.UI.$env:ENV.zip"
+            - powershell .\scripts\webDeploy.ps1 $env $env:API_SERVER_QA $env:API_ARTIFACT_NAME
       - parallel:
           - step: *upgrade-database
           - step: *create-frontend-artifact-uat

@@ -1,7 +1,8 @@
 $StopAppTimeout = 10
 $envTarget = $args[0]
 $envServerName = $args[1]
-$artifactName = $args[2]
+$apiArtifactName = $args[2]
+$uiArtifactName = $args[3]
 $configTarget = ''
 
 function Get-ConfigEnvironment($envTargetVar) {
@@ -17,14 +18,16 @@ function Get-ConfigEnvironment($envTargetVar) {
 $configTarget = Get-ConfigEnvironment $envTarget
 
 $Deployments = @(
-    @{ Artifact = "$artifactName";
+    @{
+        Artifact = "$apiArtifactName";
        TargetPath = 'C:\inetpub\wwwroot\api';
        SiteName = 'API';
        AppPoolName = 'NETSApiAppPool';
        IgnoreFiles = @("credSettings.$($envTarget).json");
        ConfigEnvironment = $configTarget },
 
-    @{ Artifact = "$artifactName";
+    @{
+        Artifact = "$uiArtifactName";
        TargetPath = 'C:\inetpub\wwwroot\frontend';
        SiteName = 'Frontend';
        AppPoolName = 'FrontendUIAppPool';
