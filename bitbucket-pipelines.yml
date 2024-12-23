@@ -8,7 +8,7 @@
 
 definitions:
   steps:
-    build-and-test-backend: &build-and-test-backend
+      build-and-test-backend: &build-and-test-backend
       name: Build and Test Backend API
       runs-on:
         - windows
@@ -18,24 +18,31 @@ definitions:
         - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
         - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}"
         - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
+        - $env:CUSTOM_NUGET = "https://custom.jfrog.io/artifactory/api/nuget/custom-nuget-virt"
+        - $env:NUGET_AUTH_TOKEN = $env:JFROG_WORKSPACE_VARIABLE
 
         # Ensure the REPORTS_PATH directory exists
         - mkdir -Force -Path $env:REPORTS_PATH
 
         # Check if .NET 9 SDK is installed
         - $dotnetSdkInstalled = dotnet --list-sdks | Select-String "^9\."
-        
+
         # Install .NET 9 SDK if not installed
         - if (-not $dotnetSdkInstalled) {
             Invoke-WebRequest -Uri "https://download.visualstudio.microsoft.com/download/pr/38e45a81-a6a4-4a37-a986-bc46be78db16/33e64c0966ebdf0088d1a2b6597f62e5/dotnet-sdk-9.0.101-win-x64.exe" -OutFile "$env:TEMP\dotnet-sdk-9.0.101-win-x64.exe";
             Start-Process -FilePath "$env:TEMP\dotnet-sdk-9.0.101-win-x64.exe" -ArgumentList "/quiet", "/norestart" -Wait;
           }
 
+        # Configure NuGet sources
+        - dotnet nuget add source $env:NUGET_ORG --name nuget.org
+        - dotnet nuget add source $env:CUSTOM_NUGET --name custom-nuget --password $env:NUGET_AUTH_TOKEN
+
         # Run tests and generate JUnit reports
-        - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml" -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
+        - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml" -p:RestoreAdditionalProjectSources="$env:NUGET_ORG;$env:CUSTOM_NUGET"
 
       artifacts:
         - test-reports/**
+
 
    
 

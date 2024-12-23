@@ -1,4 +1,4 @@
-$StopAppTimeout = 5
+$StopAppTimeout = 10
 $envTarget = $args[0]
 $envServerName = $args[1]
 $artifactName = $args[2]
