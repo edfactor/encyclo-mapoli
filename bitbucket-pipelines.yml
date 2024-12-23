@@ -15,24 +15,26 @@ definitions:
         - self.hosted
       script:
         # Set environment variables
-        - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
-        - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}"
+        - if (!$env:TEST_PROJECT_NAME) { $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests" }
+
+        - if (!$env:REPORTS_PATH) { $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}" }
         - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
 
         # Ensure the REPORTS_PATH directory exists
-        - mkdir -Force -Path $env:REPORTS_PATH
+        - if (!(Test-Path -Path $env:REPORTS_PATH)) { mkdir -Force -Path $env:REPORTS_PATH }
 
         # Check if .NET 9 SDK is installed
-        - $dotnetSdkInstalled = dotnet --list-sdks | Select-String "^9\."
+        - $dotnetSdkInstalled = dotnet --list-sdks | Select-String "^9\." | ForEach-Object { $_.Matches.Value }
         
         # Install .NET 9 SDK if not installed
         - if (-not $dotnetSdkInstalled) {
           Invoke-WebRequest -Uri "https://download.visualstudio.microsoft.com/download/pr/38e45a81-a6a4-4a37-a986-bc46be78db16/33e64c0966ebdf0088d1a2b6597f62e5/dotnet-sdk-9.0.101-win-x64.exe" -OutFile "$env:TEMP\dotnet-sdk-9.0.101-win-x64.exe";
-          Start-Process -FilePath "$env:TEMP\dotnet-sdk-9.0.101-win-x64.exe" -ArgumentList "/quiet", "/norestart" -Wait;
+          Start-Process -FilePath "$env:TEMP\dotnet-sdk-9.0.101-win-x64.exe" -ArgumentList "/quiet", "/norestart" -Wait -ErrorAction Stop;
+          if ($LASTEXITCODE -ne 0) { Write-Error "Error installing .NET SDK. Exiting pipeline."; exit 1 }
           }
 
         # Run tests and generate JUnit reports
-        - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml" -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
+        - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml" -p:RestoreAdditionalProjectSources=$env:NUGET_ORG || { Write-Error "Unit tests failed"; exit 1 }
 
       artifacts:
         - test-reports/**
@@ -59,13 +61,13 @@ definitions:
       script:
         - dotnet tool update --global Demoulas.Common.Build.Cli
         - Write-Host ${env:BITBUCKET_BUILD_NUMBER}
-        - Write-Host ${env:BITBUCKET_BRANCH}
-        - Write-Host ${env:BITBUCKET_COMMIT}
+        - if (${env:BITBUCKET_BRANCH}) { Write-Host "Branch: ${env:BITBUCKET_BRANCH}" } else { Write-Warning "BITBUCKET_BRANCH is not defined." }
+        - if (${env:BITBUCKET_COMMIT}) { Write-Host "Commit: ${env:BITBUCKET_COMMIT}" } else { Write-Warning "BITBUCKET_COMMIT is not defined." }
         - Write-Host $(Get-Location)
         - Write-Host $(Get-ChildItem)
         - New-Item -ItemType Directory -Path "dist"
 
-        - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.Api -c Release -p:PublishProfile=FolderProfile -o .\publishOutput
+        - if (!(Test-Path -Path "dist")) { New-Item -ItemType Directory -Path "dist" }
 
         - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
         - Copy-Item -Path ".buildinfo.json" -Destination ".\publishOutput\"
@@ -106,11 +108,12 @@ definitions:
           "@ | Out-File -FilePath .npmrc -Encoding ASCII
         - C:\nvm\v20.4.0\npm.cmd install --legacy-peer-deps;
         - C:\nvm\v20.4.0\npm.cmd run build:${env:ENV}
-
+        - if (!(Test-Path -Path "C:\nvm\v20.4.0\npm.cmd")) { Write-Error "NPM not found at specified path. Exiting."; exit 1 }
+        - C:\nvm\v20.4.0\npm.cmd install --legacy-peer-deps;
         - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
         - Copy-Item -Path ".buildinfo.json" -Destination "..\..\src\UI\build"
 
-        - Copy-Item -Path ".\src\web.config" -Destination "..\..\src\UI\build"
+        - if (Test-Path -Path ".\src\web.config") { Copy-Item -Path ".\src\web.config" -Destination "..\..\src\UI\build" } else { Write-Warning "web.config file not found. Skipping copy."; }
         - New-Item -Path "..\..\dist" -ItemType Directory
         - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.${env:ENV}.zip" -Force
     
@@ -148,9 +151,7 @@ definitions:
         - Copy-Item -Path ".\src\web.config" -Destination "..\..\src\UI\build" -Force
 
         # Ensure the dist directory exists before compressing
-        - if (!(Test-Path -Path "..\..\dist")) {
-          New-Item -Path "..\..\dist" -ItemType Directory
-          }
+        - if (!(Test-Path -Path "..\..\dist")) { New-Item -Path "..\..\dist" -ItemType Directory }
 
         # Compress the build output into a zip file in the dist folder
         - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.${env:ENV}.zip" -Force
@@ -165,6 +166,7 @@ definitions:
       script:
         - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
         - ${env:ENV} = "prod"
+        - if (!(Test-Path -Path ".\src\UI")) { Write-Error "UI source directory not found. Exiting."; exit 1 }
         - cd .\src\UI
         - ${env:NPM} install --legacy-peer-deps;
         - ${env:NPM} run build:${env:ENV}
@@ -178,10 +180,10 @@ definitions:
       script:
         - echo "Upgrading Database..."
         - $env:NUGET_ORG="https://api.nuget.org/v3/index.json"
-        - dotnet build .\src\services\src\Demoulas.ProfitSharing.Data.Cli\Demoulas.ProfitSharing.Data.Cli.csproj -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -o .\output
+        - dotnet build .\src\services\src\Demoulas.ProfitSharing.Data.Cli\Demoulas.ProfitSharing.Data.Cli.csproj -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -o .\output || { Write-Error "Database project build failed. Exiting."; exit 1 }
         - $environment = $env:Environment
         - $action = $env:Action
-        - $sourceSchema = ""
+        - $sourceSchema = $null
         - if (-not $environment) { $environment = "QA" }
         - if (-not $action) { $action = "upgrade-db" }
 
@@ -229,6 +231,7 @@ pipelines:
             - echo "Deploying web application..."
             - $env:API_ARTIFACT_NAME = "Demoulas.ProfitSharing.Api.zip"
             - $env:UI_ARTIFACT_NAME = "Demoulas.ProfitSharing.UI.$env:ENV.zip"
+            - if (!(Test-Path -Path ".\scripts\webDeploy.ps1")) { Write-Error "webDeploy.ps1 script not found. Exiting."; exit 1 }
             - powershell .\scripts\webDeploy.ps1 $env $env:API_SERVER_QA $env:API_ARTIFACT_NAME
 
             - echo "Deploying background service..."
@@ -237,6 +240,7 @@ pipelines:
             - $env:SERVICE_SERVICE_TARGET_PATH = "C:\NextGenApplications\ps\Services"
             - $env:SERVICE_ARTIFACT_NAME = "Demoulas.ProfitSharing.OracleHcm.Sync.zip"
             - $env:SERVICE_ARTIFACT_EXECUTABLE = "Demoulas.ProfitSharing.OracleHcm.Sync.exe"
+            - if (!(Test-Path -Path ".\scripts\servicesDeploy.ps1")) { Write-Error "servicesDeploy.ps1 script not found. Exiting."; exit 1 }
             - powershell .\scripts\servicesDeploy.ps1 $env $env:API_SERVER_QA $env:SERVICE_ARTIFACT_NAME $env:SERVICE_ARTIFACT_EXECUTABLE $env:SERVICE_SERVICE_NAME
       - parallel:
           - step: *upgrade-database
