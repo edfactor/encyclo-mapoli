@@ -232,7 +232,12 @@ pipelines:
             - powershell .\scripts\webDeploy.ps1 $env $env:API_SERVER_QA $env:API_ARTIFACT_NAME
 
             - echo "Deploying background service..."
-            - powershell .\scripts\servicesDeploy.ps1 $env $env:API_SERVER_QA $env:API_ARTIFACT_NAME
+
+            - $env:SERVICE_SERVICE_NAME = "Demoulas ProfitSharing OracleHcm Sync"
+            - $env:SERVICE_SERVICE_TARGET_PATH = "C:\NextGenApplications\ps\Services"
+            - $env:SERVICE_ARTIFACT_NAME = "Demoulas.ProfitSharing.OracleHcm.Sync.zip"
+            - $env:SERVICE_ARTIFACT_EXECUTABLE = "Demoulas.ProfitSharing.OracleHcm.Sync.exe"
+            - powershell .\scripts\servicesDeploy.ps1 $env $env:API_SERVER_QA $env:SERVICE_ARTIFACT_NAME $env:SERVICE_ARTIFACT_EXECUTABLE $env:SERVICE_SERVICE_NAME
       - parallel:
           - step: *upgrade-database
           - step: *create-frontend-artifact-uat
