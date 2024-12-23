@@ -26,7 +26,7 @@ definitions:
         - echo "Using .NET 9 SDK container"
         
         # Configure NuGet sources
-        - dotnet nuget add source "$CUSTOM_NUGET" --name custom-nuget --store-password-in-clear-text --password "$NUGET_AUTH_TOKEN"
+        - dotnet nuget add source "$CUSTOM_NUGET" --name custom-nuget -username "anonymous" --password "$NUGET_AUTH_TOKEN"
         
         # Restore dependencies and run tests
         - dotnet test "src/services/tests/Demoulas.ProfitSharing.UnitTests/${TEST_PROJECT_NAME}.csproj" \
