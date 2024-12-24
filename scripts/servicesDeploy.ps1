@@ -1,84 +1,69 @@
 param (
-    [string]$ServiceName, # Name of the Windows Service
-    [string]$ZipFilePath, # Path to the .zip file (local machine)
-    [string]$RemoteServer, # Remote server name or IP
-    [string]$InstallPath, # Path on the remote server to extract and install the service
-    [string]$ServiceExe           # Name of the .exe file for the service
+    [Parameter(Mandatory = $true)]
+    [string]$ServiceName,
+
+    [Parameter(Mandatory = $true)]
+    [string]$InstallationPath,
+
+    [Parameter(Mandatory = $true)]
+    [string]$RemoteServer,
+
+    [Parameter(Mandatory = $true)]
+    [string]$ZipFilePath
 )
 
-# Variables
-$RemoteTempPath = "\\$RemoteServer\C$\Temp\ServiceDeploy"
-$UnzipTool = "C:\Windows\System32\WindowsPowerShell\v1.0\Modules\Microsoft.PowerShell.Archive\Expand-Archive.ps1"
+# Step 1: Establish a PowerShell session to the remote server
+Write-Host "Establishing remote session to $RemoteServer..."
+$Session = New-PSSession -ComputerName $RemoteServer
 
-# Function to Copy the ZIP File to the Remote Server
-function Copy-ZipFile
-{
-    Write-Host "Copying ZIP file to $RemoteServer..."
-    if (-not (Test-Path $ZipFilePath))
-    {
-        throw "The ZIP file '$ZipFilePath' does not exist."
-    }
-
-    New-Item -ItemType Directory -Force -Path $RemoteTempPath | Out-Null
-    Copy-Item -Path $ZipFilePath -Destination "$RemoteTempPath\$( $ServiceName ).zip" -Force
-}
-
-# Function to Extract ZIP File on the Remote Server
-function Extract-ZipFile
-{
-    Write-Host "Extracting ZIP file on $RemoteServer..."
-    $RemoteZipPath = "$RemoteTempPath\$( $ServiceName ).zip"
-    $RemoteUnzipPath = "$InstallPath\$ServiceName"
-
-    Invoke-Command -ComputerName $RemoteServer -ScriptBlock {
-        param ($ZipPath, $UnzipPath)
-        if (-not (Test-Path $ZipPath))
-        {
-            throw "The ZIP file '$ZipPath' does not exist on the remote server."
-        }
-
-        # Ensure the installation directory exists
-        New-Item -ItemType Directory -Force -Path $UnzipPath | Out-Null
-
-        # Extract the ZIP file
-        Expand-Archive -Path $ZipPath -DestinationPath $UnzipPath -Force
-    } -ArgumentList $RemoteZipPath, $RemoteUnzipPath
-}
-
-# Function to Install or Update the Service
-function Install-Service
-{
-    Write-Host "Installing or updating the service on $RemoteServer..."
-    $RemoteServicePath = "$InstallPath\$ServiceName\$ServiceExe"
-
-    Invoke-Command -ComputerName $RemoteServer -ScriptBlock {
-        param ($ServiceName, $ServicePath)
-
-        # Check if the service exists
-        $service = Get-Service -Name $ServiceName -ErrorAction SilentlyContinue
-        if ($service)
-        {
-            Write-Host "Service '$ServiceName' exists. Stopping and updating it..."
-            Stop-Service -Name $ServiceName -Force
-            Set-Service -Name $ServiceName -BinaryPathName $ServicePath
-        }
-        else
-        {
-            Write-Host "Service '$ServiceName' does not exist. Installing it..."
-            New-Service -Name $ServiceName -BinaryPathName $ServicePath -DisplayName $ServiceName -StartupType Automatic
-        }
-
-        Start-Service -Name $ServiceName
-    } -ArgumentList $ServiceName, $RemoteServicePath
-}
-
-# Main Script Execution
 try {
-    Copy-ZipFile
-    Extract-ZipFile
-    Install-Service
-    Write-Host "Service '$ServiceName' successfully deployed to $RemoteServer."
-} catch {
-    Write-Error $_.Exception.Message
-    exit 1
+    # Step 2: Copy the ZIP file to the remote server's temporary folder
+    $RemoteTempPath = "C:\Temp"
+    $RemoteZipPath = Join-Path -Path $RemoteTempPath -ChildPath (Split-Path -Leaf $ZipFilePath)
+    Write-Host "Copying ZIP file to remote server: $RemoteZipPath"
+    Invoke-Command -Session $Session -ScriptBlock {
+        param ($RemoteTempPath)
+        if (-not (Test-Path $RemoteTempPath))
+        {
+            New-Item -Path $RemoteTempPath -ItemType Directory | Out-Null
+        }
+    } -ArgumentList $RemoteTempPath
+
+    Copy-Item -Path $ZipFilePath -Destination $RemoteZipPath -ToSession $Session
+
+    # Step 3: Deploy the service on the remote server
+    Write-Host "Deploying service on remote server..."
+    Invoke-Command -Session $Session -ScriptBlock {
+        param ($ServiceName, $InstallationPath, $RemoteZipPath)
+        Write-Host "Creating installation path: $InstallationPath"
+        if (-not (Test-Path $InstallationPath))
+        {
+            New-Item -Path $InstallationPath -ItemType Directory | Out-Null
+        }
+
+        Write-Host "Extracting ZIP file: $RemoteZipPath"
+        Add-Type -AssemblyName System.IO.Compression.FileSystem
+        [System.IO.Compression.ZipFile]::ExtractToDirectory($RemoteZipPath, $InstallationPath)
+
+        $ServiceExePath = Join-Path -Path $InstallationPath -ChildPath "$ServiceName.exe"
+        if (-not (Test-Path $ServiceExePath))
+        {
+            throw "Executable not found in extracted directory: $ServiceExePath"
+        }
+
+        Write-Host "Registering Windows Service: $ServiceName"
+        sc.exe create $ServiceName binPath= "$ServiceExePath" start= auto
+        sc.exe start $ServiceName
+
+        Write-Host "Service $ServiceName deployed and started successfully!"
+    } -ArgumentList $ServiceName, $InstallationPath, $RemoteZipPath
+
 }
+finally
+{
+    # Clean up the session
+    Remove-PSSession -Session $Session
+    Write-Host "Remote session closed."
+}
+
+Write-Host "Deployment completed successfully."
