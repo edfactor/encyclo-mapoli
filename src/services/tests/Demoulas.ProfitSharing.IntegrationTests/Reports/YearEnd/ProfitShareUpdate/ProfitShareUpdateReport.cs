@@ -1,10 +1,10 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate.Formatters;
+using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.ProfitShareUpdate;
-using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Services.Reports.YearEnd.ProfitShareUpdate;
+namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 
 /// <summary>
 ///     A testing layer which generates Ready style reports.

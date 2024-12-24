@@ -1,11 +1,10 @@
-﻿using System.Net.Http.Headers;
-using Demoulas.ProfitSharing.Api;
+﻿using Demoulas.ProfitSharing.Api;
 using FastEndpoints.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit.Abstractions;
 
-namespace Demoulas.AccountsReceivable.Tests.Common.Fixtures;
+namespace Demoulas.ProfitSharing.IntegrationTests.Fixtures;
 
 public class IntegrationTestsFixture : AppFixture<Program>
 {

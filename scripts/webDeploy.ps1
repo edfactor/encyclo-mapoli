@@ -1,7 +1,8 @@
-$StopAppTimeout = 5
+$StopAppTimeout = 10
 $envTarget = $args[0]
 $envServerName = $args[1]
-$artifactName = $args[2]
+$apiArtifactName = $args[2]
+$uiArtifactName = $args[3]
 $configTarget = ''
 
 function Get-ConfigEnvironment($envTargetVar) {
@@ -17,27 +18,27 @@ function Get-ConfigEnvironment($envTargetVar) {
 $configTarget = Get-ConfigEnvironment $envTarget
 
 $Deployments = @(
-    @{ Artifact = "$artifactName";
-       TargetPath = 'C:\inetpub\wwwroot\api';
-       SiteName = 'API';
-       AppPoolName = 'NETSApiAppPool';
-       IgnoreFiles = @("credSettings.$($envTarget).json");
-       ConfigEnvironment = $configTarget },
-
-    @{ Artifact = "$artifactName";
-       TargetPath = 'C:\inetpub\wwwroot\frontend';
-       SiteName = 'Frontend';
-       AppPoolName = 'FrontendUIAppPool';
-       IgnoreFiles = @();
-       ConfigEnvironment = $configTarget }
+    @{
+        Artifact = "$apiArtifactName"
+        TargetPath = 'C:\inetpub\wwwroot\api'
+        SiteName = 'API'
+        AppPoolName = 'NETSApiAppPool'
+        IgnoreFiles = @("credSettings.$( $envTarget ).json")
+        ConfigEnvironment = $configTarget
+    },
+    @{
+        Artifact = "$uiArtifactName"
+        TargetPath = 'C:\inetpub\wwwroot\frontend'
+        SiteName = 'Frontend'
+        AppPoolName = 'FrontendUIAppPool'
+        IgnoreFiles = @()
+        ConfigEnvironment = $configTarget
+    }
 )
 
 $Failed = $false
 try {
-    $Session = New-PSSession -ComputerName $envServerName
-
-    # Update .NET workloads
-    Invoke-Command -Session $Session -ScriptBlock { dotnet workload update }
+    $Session = New-PSSession $envServerName
 
     foreach ($Deploy in $Deployments) {
         Invoke-Command -Session $Session -ScriptBlock {
@@ -60,16 +61,6 @@ try {
 
             # Remove old files, excluding ignored ones
             Get-ChildItem -Path $Using:Deploy.TargetPath -Exclude $Using:Deploy.IgnoreFiles | Remove-Item -Force -Recurse
-
-            # Enable HTTP/2 if not already enabled
-            Import-Module IISAdministration
-            $binding = Get-IISSite -Name $Using:Deploy.SiteName | Get-IISSiteBinding -BindingInformation '*:8443:'
-            if ($binding) {
-                Set-IISSiteBinding -BindingInformation '*:8443:' -Protocol https -EnableHttp2 $true
-                Write-Host "HTTP/2 enabled for site: $($Using:Deploy.SiteName)"
-            } else {
-                Write-Host "HTTPS binding not found for site: $($Using:Deploy.SiteName). Cannot enable HTTP/2."
-            }
         }
 
         if (!$?) { $Failed = $true; break }
@@ -85,8 +76,8 @@ try {
 
             if (Test-Path -Path "$($Using:Deploy.TargetPath)\web.config" -PathType Leaf) {
                 Write-Output "$($Using:Deploy.TargetPath)\web.config"
-                (Get-Content -Path "$($Using:Deploy.TargetPath)\web.config" -Raw) -replace 'Development', $Using:Deploy.ConfigEnvironment | Set-Content -Path "$($Using:Deploy.TargetPath)\web.config"
-                Get-Content -Path "$($Using:Deploy.TargetPath)\web.config" -Raw
+                (Get-Content -path "$($Using:Deploy.TargetPath)\web.config" -Raw) -replace 'Development', $Using:Deploy.ConfigEnvironment | Set-Content -Path "$($Using:Deploy.TargetPath)\web.config"
+                Get-Content -path "$($Using:Deploy.TargetPath)\web.config" -Raw
             }
 
             # Start App Pool and IIS site
