@@ -16,6 +16,8 @@ namespace Demoulas.ProfitSharing.Services.ProfitShareUpdate;
 /// <summary>
 ///     Does the Year And application of Earnings and Contributions to all employees and beneficiaries.
 ///     Modeled very closely after Pay444
+///
+///     This class follows the name of the step in the Ready YE flow.    It could instead be named "View effect of YE update on members"
 /// </summary>
 public class ProfitShareUpdateService : IProfitShareUpdateService
 {
@@ -79,7 +81,8 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
         AdjustmentReportData adjustmentReportData, CancellationToken cancellationToken)
     {
         var employeeExceededMaxContribution = false;
-        var fiscalDates = await _calendarService.GetYearStartAndEndAccountingDatesAsync(profitShareUpdateRequest.ProfitYear, cancellationToken);
+        // We want everything up to the beginning of this profit share year, so we use "profitYear - 1" in this lookup.
+        var fiscalDates = await _calendarService.GetYearStartAndEndAccountingDatesAsync((short)(profitShareUpdateRequest.ProfitYear - 1), cancellationToken);
         List<EmployeeFinancials> employeeFinancialsList = await _dbContextFactory.UseReadOnlyContext(async ctx =>
         {
             var employees = await ctx.PayProfits
@@ -88,36 +91,42 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
                 .Where(pp => pp.ProfitYear == profitShareUpdateRequest.ProfitYear)
                 .Select(x => new
                 {
-                    EmployeeId = x.Demographic!.EmployeeId,
-                    Ssn = x.Demographic.Ssn,
+                    x.Demographic!.EmployeeId,
+                    x.Demographic.Ssn,
                     Name = x.Demographic.ContactInfo!.FullName,
                     EnrolledId = x.EnrollmentId,
-                    YearsInPlan = x.YearsInPlan,
-                    EmployeeTypeId = x.EmployeeTypeId,
+                    x.YearsInPlan,
+                    x.EmployeeTypeId,
                     PointsEarned = (int)(x.PointsEarned ?? 0),
                 }).ToListAsync(cancellationToken);
             var ssns = employees.Select(e => e.Ssn);
             var totalVestingBalances = await ((TotalService)_totalService).TotalVestingBalance(ctx,
                     (short)(profitShareUpdateRequest.ProfitYear - 1), fiscalDates.FiscalEndDate)
-                    .Where(e=>ssns.Contains(e.Ssn)).ToListAsync(cancellationToken);
-
-            return (
-                from e in employees
-                join t in totalVestingBalances on e.Ssn equals t.Ssn into t_join
-                from tvb in t_join.DefaultIfEmpty()
-                select new EmployeeFinancials
-                {
-                    EmployeeId = e.EmployeeId,
-                    Ssn = e.Ssn,
-                    Name = e.Name,
-                    EnrolledId = e.EnrolledId,
-                    YearsInPlan = e.YearsInPlan,
-                    CurrentAmount = tvb == null ? 0 : tvb.CurrentBalance,
-                    EmployeeTypeId = e.EmployeeTypeId,
-                    PointsEarned =  e.PointsEarned,
-                    EtvaAfterVestingRules = tvb == null ? 0 : tvb.Etva
-                }
-            ).ToList();
+                .Where(e => ssns.Contains(e.Ssn)).ToListAsync(cancellationToken);
+            return
+                employees
+                    .GroupJoin(
+                        totalVestingBalances,
+                        e => e.Ssn,
+                        t => t.Ssn,
+                        (e, t_join) => new { Employee = e, Tvb = t_join.DefaultIfEmpty() }
+                    )
+                    .SelectMany(
+                        et => et.Tvb,
+                        (et, tvb) => new EmployeeFinancials
+                        {
+                            EmployeeId = et.Employee.EmployeeId,
+                            Ssn = et.Employee.Ssn,
+                            Name = et.Employee.Name,
+                            EnrolledId = et.Employee.EnrolledId,
+                            YearsInPlan = et.Employee.YearsInPlan,
+                            CurrentAmount = tvb == null ? 0 : tvb.CurrentBalance,
+                            EmployeeTypeId = et.Employee.EmployeeTypeId,
+                            PointsEarned = et.Employee.PointsEarned,
+                            EtvaAfterVestingRules = tvb == null ? 0 : tvb.Etva
+                        }
+                    )
+                    .ToList();
         });
 
         foreach (EmployeeFinancials empl in employeeFinancialsList)

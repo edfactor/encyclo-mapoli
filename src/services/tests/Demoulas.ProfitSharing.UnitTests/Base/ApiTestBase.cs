@@ -17,7 +17,7 @@ public class ApiTestBase<TStartup> where TStartup : class
     /// <summary>
     ///   Mock for DbContext.
     /// </summary>
-    public IProfitSharingDataContextFactory MockDbContextFactory { get; }
+    public IProfitSharingDataContextFactory MockDbContextFactory { get; set; }
 
 
 
@@ -70,7 +70,7 @@ public class ApiTestBase<TStartup> where TStartup : class
     /// <summary>
     public Task<short> GetMaxProfitYearAsync()
     {
-        return MockDbContextFactory.UseWritableContext(async ctx =>
+        return MockDbContextFactory.UseReadOnlyContext(async ctx =>
         {
             return await ctx.PayProfits.MaxAsync(pp => pp.ProfitYear);
         });
