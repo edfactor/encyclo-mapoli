@@ -1,0 +1,13 @@
+﻿
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+
+/// <summary>
+/// The Totals of all the YE Update Transactions (aka PROFIT_DETAIL rows)
+/// </summary>
+public sealed record ProfitShareEditResponse : ReportResponseBase<ProfitShareEditMemberRecordResponse>
+{
+    public required decimal BeginningBalance { get; set; }
+    public required decimal ContributionGrandTotal { get; set; }
+    public required decimal IncomingForfeitureGrandTotal { get; set; }
+    public required decimal EarningsGrandTotal { get; set; }
+}
