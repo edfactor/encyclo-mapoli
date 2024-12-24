@@ -101,18 +101,12 @@ try {
             Expand-Archive -Force -Path "$( $Using:Deploy.TargetPath )\$( $Using:Deploy.Artifact )" -DestinationPath $Using:Deploy.TargetPath
             Remove-Item -Force -Path "$( $Using:Deploy.TargetPath )\$( $Using:Deploy.Artifact )"
 
-            $file = "$( $Using:Deploy.TargetPath )\buildSettings.json"
-            $json = Get-Content -Raw $file;
-            $jsonparsed = ConvertFrom-Json -InputObject $json;
-            Add-Member -InputObject $jsonparsed -MemberType NoteProperty -Name environment -Value $Using:Deploy.ConfigEnvironment
-            $jsonparsed | ConvertTo-Json | Out-File $file
-
             $ServiceInfo = Get-Service -Name $Using:Deploy.ServiceName -ErrorAction SilentlyContinue
             Write-Host $ServiceInfo
             if ($ServiceInfo -eq $null)
             {
                 Write-Host 'Installing service'
-                New-Service -Name $Using:Deploy.ServiceName -BinaryPathName "$( $Using:Deploy.ServiceExecutable )" -StartupType "Automatic"
+                New-Service -Name $Using:Deploy.ServiceName -BinaryPathName "$( $Using:Deploy.ServiceExecutable )" -StartupType AutomaticDelayedStart
             }
 
             $ServiceInfo = Get-Service -Name $Using:Deploy.ServiceName
