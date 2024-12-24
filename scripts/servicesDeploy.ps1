@@ -97,6 +97,11 @@ try {
 
         Write-Host 'copied artifacts'
 
+        # Set the environment variable on the remote machine
+        Invoke-Command -Session $Session -ScriptBlock {
+            [System.Environment]::SetEnvironmentVariable("DOTNET_ENVIRONMENT", $Using:Deploy.ConfigEnvironment, [System.EnvironmentVariableTarget]::Machine)
+        }
+
         Invoke-Command -Session $Session -ScriptBlock {
             Expand-Archive -Force -Path "$( $Using:Deploy.TargetPath )\$( $Using:Deploy.Artifact )" -DestinationPath $Using:Deploy.TargetPath
             Remove-Item -Force -Path "$( $Using:Deploy.TargetPath )\$( $Using:Deploy.Artifact )"
