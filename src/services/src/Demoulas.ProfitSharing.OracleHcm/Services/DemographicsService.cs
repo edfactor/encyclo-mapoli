@@ -4,11 +4,12 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.OracleHcm.Atom;
 using Demoulas.ProfitSharing.Services.Mappers;
+using EntityFramework.Exceptions.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Oracle.ManagedDataAccess.Client;
-using EntityFramework.Exceptions.Common;
 
 namespace Demoulas.ProfitSharing.Services;
 
@@ -16,15 +17,18 @@ public class DemographicsService : IDemographicsServiceInternal
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly DemographicMapper _mapper;
+    private readonly EmployeeMapper _employeeMapper;
     private readonly ILogger<DemographicsService> _logger;
 
     public DemographicsService(IProfitSharingDataContextFactory dataContextFactory,
         DemographicMapper mapper,
+        EmployeeMapper employeeMapper,
         ILogger<DemographicsService> logger)
     {
         _dataContextFactory = dataContextFactory;
         _mapper = mapper;
         _logger = logger;
+        _employeeMapper = employeeMapper ?? throw new ArgumentNullException(nameof(employeeMapper));
     }
 
     /// <summary>
@@ -69,16 +73,16 @@ public class DemographicsService : IDemographicsServiceInternal
         });
     }
 
-   /// <summary>
-   /// Asynchronously inserts or updates a collection of demographic records in the database.
-   /// </summary>
-   /// <param name="demographicsRequests">A collection of <see cref="DemographicsRequest"/> objects representing the demographic data to be upserted.</param>
-   /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete. This token can be used to cancel the operation.</param>
-   /// <returns>A <see cref="Task"/> representing the asynchronous upsert operation.</returns>
-   /// <remarks>
-   /// This method ensures that demographic records are either inserted as new entries or updated if they already exist in the database.
-   /// The operation is performed within a writable database context to maintain data integrity.
-   /// </remarks>
+    /// <summary>
+    /// Asynchronously inserts or updates a collection of demographic records in the database.
+    /// </summary>
+    /// <param name="demographicsRequests">A collection of <see cref="DemographicsRequest"/> objects representing the demographic data to be upserted.</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete. This token can be used to cancel the operation.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous upsert operation.</returns>
+    /// <remarks>
+    /// This method ensures that demographic records are either inserted as new entries or updated if they already exist in the database.
+    /// The operation is performed within a writable database context to maintain data integrity.
+    /// </remarks>
     private Task UpsertDemographicsAsync(IEnumerable<DemographicsRequest> demographicsRequests, CancellationToken cancellationToken)
     {
         DateTime currentModificationDate = DateTime.Now;
@@ -106,9 +110,9 @@ public class DemographicsService : IDemographicsServiceInternal
 
             // Handle potential duplicates in the existing database (SSN duplicates)
             var duplicateSsnEntities = existingEntities.GroupBy(e => e.Ssn)
-                                                       .Where(g => g.Count() > 1)
-                                                       .SelectMany(g => g)
-                                                       .ToList();
+                .Where(g => g.Count() > 1)
+                .SelectMany(g => g)
+                .ToList();
 
             if (duplicateSsnEntities.Any())
             {
@@ -142,7 +146,7 @@ public class DemographicsService : IDemographicsServiceInternal
                     try
                     {
                         context.Demographics.Add(entity);
-                        
+
                         var history = DemographicHistory.FromDemographic(entity);
                         context.DemographicHistories.Add(history);
                     }
@@ -202,11 +206,13 @@ public class DemographicsService : IDemographicsServiceInternal
                     {
                         updateHistory = true;
                     }
+
                     UpdateEntityValues(existingEntity, incomingEntity, currentModificationDate);
                     if (updateHistory)
                     {
                         var newHistoryRecord = DemographicHistory.FromDemographic(incomingEntity, existingEntity.Id);
-                        var oldHistoryRecord = await context.DemographicHistories.Where(x => x.DemographicId == existingEntity.Id && DateTime.UtcNow >= x.ValidFrom && DateTime.UtcNow < x.ValidTo).FirstAsync();
+                        var oldHistoryRecord = await context.DemographicHistories
+                            .Where(x => x.DemographicId == existingEntity.Id && DateTime.UtcNow >= x.ValidFrom && DateTime.UtcNow < x.ValidTo).FirstAsync();
                         oldHistoryRecord.ValidTo = DateTime.UtcNow;
                         newHistoryRecord.ValidFrom = oldHistoryRecord.ValidTo;
                         context.DemographicHistories.Add(newHistoryRecord);
@@ -240,5 +246,20 @@ public class DemographicsService : IDemographicsServiceInternal
         existingEntity.GenderId = incomingEntity.GenderId;
         existingEntity.EmploymentStatusId = incomingEntity.EmploymentStatusId;
         existingEntity.LastModifiedDate = modificationDate;
+    }
+
+    public void ProcessDemographicsAsync(AtomFeedRecord record)
+    {
+        try
+        {
+            var mappedRecord = _employeeMapper.MapFromAtomFeed(record);
+
+            // Replace with actual database operation
+            _logger.LogInformation("Processed demographic record for EmployeeId {EmployeeId}", mappedRecord.EmployeeId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error processing demographic record for PersonId {PersonId}", record.PersonId);
+        }
     }
 }
