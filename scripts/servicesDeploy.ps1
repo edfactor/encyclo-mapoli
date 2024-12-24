@@ -45,7 +45,7 @@ try {
         Add-Type -AssemblyName System.IO.Compression.FileSystem
         [System.IO.Compression.ZipFile]::ExtractToDirectory($RemoteZipPath, $InstallationPath)
 
-        $ServiceExePath = Join-Path -Path $InstallationPath -ChildPath "$ServiceName.exe"
+        $ServiceExePath = Join-Path -Path $InstallationPath -ChildPath "Demoulas.ProfitSharing.OracleHcm.Sync.exe"
         if (-not (Test-Path $ServiceExePath))
         {
             throw "Executable not found in extracted directory: $ServiceExePath"
