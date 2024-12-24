@@ -15,7 +15,7 @@ namespace Demoulas.ProfitSharing.UnitTests.Mocks;
 
 /// <summary>
 /// This factory is used to configure a ScenarioDataContextFactory for use in tests.
-/// Specifically it helps configure Employees or Beneficiaries in a standard or helps configure the mock database for a specific test scenario.
+/// Specifically it helps configure Employees or Beneficiaries in a standard way or helps configure the mock database for a specific test scenario.
 /// </summary>
 public sealed class ScenarioFactory
 {

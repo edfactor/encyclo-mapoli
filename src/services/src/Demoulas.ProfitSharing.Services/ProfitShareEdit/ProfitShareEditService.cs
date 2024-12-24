@@ -6,8 +6,10 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 namespace Demoulas.ProfitSharing.Services.ProfitShareEdit;
 
 /// <summary>
-///     Invokes the Profit Share Service to compute and returns the transactions (PROFIT_DETAIL rows) based on user input.
+///     Invokes the Profit Share Update Service to compute and return the transactions (PROFIT_DETAIL rows) based on user input.
 ///     Modeled after PAY447
+///
+///     This class follows the name of the step in the Ready YE flow.    It could instead be named "View Transactions for YE Update"
 /// </summary>
 public class ProfitShareEditService : IProfitShareEditService
 {

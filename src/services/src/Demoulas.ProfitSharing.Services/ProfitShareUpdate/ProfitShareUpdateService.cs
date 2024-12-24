@@ -16,6 +16,8 @@ namespace Demoulas.ProfitSharing.Services.ProfitShareUpdate;
 /// <summary>
 ///     Does the Year And application of Earnings and Contributions to all employees and beneficiaries.
 ///     Modeled very closely after Pay444
+///
+///     This class follows the name of the step in the Ready YE flow.    It could instead be named "View effect of YE update on members"
 /// </summary>
 public class ProfitShareUpdateService : IProfitShareUpdateService
 {
