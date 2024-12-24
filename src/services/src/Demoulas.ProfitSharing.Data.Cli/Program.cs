@@ -1,13 +1,13 @@
 ﻿using System.CommandLine;
+using System.Text;
 using System.Xml.Linq;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Factories;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
+using Microsoft.Extensions.Hosting;
 
 namespace Demoulas.ProfitSharing.Data.Cli;
 
@@ -24,27 +24,22 @@ public sealed class Program
 
         var rootCommand = new RootCommand("CLI tool for database operations");
 
-        var upgradeDbCommand = new Command("upgrade-db", "Apply migrations to upgrade the database")
+        var commonOptions = new List<Option>
         {
             new Option<string>("--connection-name", "The name of the configuration property that holds the connection string"),
             new Option<string>("--sql-file", "The path to the custom SQL file"),
-            new Option<string>("--source-Schema", "Name of the schema that is being used as the source database")
+            new Option<string>("--source-schema", "Name of the schema that is being used as the source database"),
+            new Option<string>("--output-file", "The path to save the file (if applicable)")
         };
 
-        upgradeDbCommand.SetHandler(async () =>
-        {
-            await ExecuteWithDbContext(configuration, args, async context =>
-            {
-                await context.Database.MigrateAsync();
-            });
-        });
+        var upgradeDbCommand = new Command("upgrade-db", "Apply migrations to upgrade the database");
+        commonOptions.ForEach(upgradeDbCommand.AddOption);
 
-        var dropRecreateDbCommand = new Command("drop-recreate-db", "Drop and recreate the database")
-        {
-            new Option<string>("--connection-name", "The name of the configuration property that holds the connection string"),
-            new Option<string>("--sql-file", "The path to the custom SQL file"),
-            new Option<string>("--source-Schema", "Name of the schema that is being used as the source database")
-        };
+
+        upgradeDbCommand.SetHandler(async () => { await ExecuteWithDbContext(configuration, args, async context => { await context.Database.MigrateAsync(); }); });
+
+        var dropRecreateDbCommand = new Command("drop-recreate-db", "Drop and recreate the database");
+        commonOptions.ForEach(dropRecreateDbCommand.AddOption);
 
         dropRecreateDbCommand.SetHandler(async () =>
         {
@@ -55,19 +50,15 @@ public sealed class Program
             });
         });
 
-        var runSqlCommand = new Command("import-from-ready", "Run a custom SQL script after migrations")
-        {
-            new Option<string>("--connection-name", "The name of the configuration property that holds the connection string"),
-            new Option<string>("--sql-file", "The path to the custom SQL file"),
-            new Option<string>("--source-Schema", "Name of the schema that is being used as the source database")
-        };
+        var runSqlCommand = new Command("import-from-ready", "Run a custom SQL script after migrations");
+        commonOptions.ForEach(runSqlCommand.AddOption);
 
         runSqlCommand.SetHandler(async () =>
         {
             await ExecuteWithDbContext(configuration, args, async context =>
             {
                 var sqlFile = configuration["sql-file"];
-                var sourceSchema = configuration["source-Schema"];
+                var sourceSchema = configuration["source-schema"];
                 if (string.IsNullOrEmpty(sqlFile) || string.IsNullOrEmpty(sourceSchema))
                 {
                     throw new ArgumentNullException("SQL file path and schema must be provided.");
@@ -80,11 +71,8 @@ public sealed class Program
             });
         });
 
-        var generateDgmlCommand = new Command("generate-dgml", "Generate a DGML file for the DbContext model")
-        {
-            new Option<string>("--connection-name", "The name of the configuration property that holds the connection string"),
-            new Option<string>("--output-file", "The path to save the DGML file")
-        };
+        var generateDgmlCommand = new Command("generate-dgml", "Generate a DGML file for the DbContext model");
+        commonOptions.ForEach(generateDgmlCommand.AddOption);
 
         generateDgmlCommand.SetHandler(async () =>
         {
@@ -97,32 +85,29 @@ public sealed class Program
                 }
 
                 var dgml = context.AsDgml();
-                await File.WriteAllTextAsync(outputFile, dgml, System.Text.Encoding.UTF8);
+                await File.WriteAllTextAsync(outputFile, dgml, Encoding.UTF8);
                 Console.WriteLine($"DGML file created: {outputFile}");
             });
         });
 
-        var generateMarkdownCommand = new Command("generate-markdown", "Generate a Markdown file from DGML")
-        {
-            new Option<string>("--connection-name", "The name of the configuration property that holds the connection string"),
-            new Option<string>("--output-file", "The path to save the Markdown file")
-        };
+        var generateMarkdownCommand = new Command("generate-markdown", "Generate a Markdown file from DGML");
+        commonOptions.ForEach(generateMarkdownCommand.AddOption);
 
         generateMarkdownCommand.SetHandler(async () =>
+        {
+            var outputFile = configuration["output-file"];
+            if (string.IsNullOrEmpty(outputFile))
             {
-                var outputFile = configuration["output-file"];
-                if (string.IsNullOrEmpty(outputFile))
-                {
-                    throw new ArgumentNullException(nameof(outputFile), "Output file path must be provided.");
-                }
+                throw new ArgumentNullException(nameof(outputFile), "Output file path must be provided.");
+            }
 
-                await ExecuteWithDbContext(configuration, args, async context =>
-                {
-                    var dgml = context.AsDgml();
-                    await GenerateMarkdownFromDgml(dgml, outputFile);
-                    Console.WriteLine($"Markdown file created: {outputFile}");
-                });
+            await ExecuteWithDbContext(configuration, args, async context =>
+            {
+                var dgml = context.AsDgml();
+                await GenerateMarkdownFromDgml(dgml, outputFile);
+                Console.WriteLine($"Markdown file created: {outputFile}");
             });
+        });
 
 
         rootCommand.AddCommand(upgradeDbCommand);
@@ -188,7 +173,7 @@ public sealed class Program
                 group => group.Select(link => link.Attribute("Target")!.Value).ToList());
 
         // Build Markdown content
-        var markdown = new System.Text.StringBuilder();
+        var markdown = new StringBuilder();
         markdown.AppendLine("# Database Schema Representation");
 
         foreach (var table in tables)
@@ -216,8 +201,6 @@ public sealed class Program
         // Save to output file
         return File.WriteAllTextAsync(outputFile, markdown.ToString());
     }
-
-
 
 
     private static HostApplicationBuilder CreateHostBuilder(string[] args)
