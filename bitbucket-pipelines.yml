@@ -13,12 +13,6 @@ definitions:
         - windows
         - self.hosted
       script:
-        # Display the current user
-        - echo "Running as user: $(whoami)"
-        
-        # Display groups the user belongs to
-        - echo "User groups: $(groups)"
-        
         # Set environment variables
         - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
         - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}"
