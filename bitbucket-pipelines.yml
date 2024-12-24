@@ -238,7 +238,7 @@ pipelines:
             - $env:SERVICE_SERVICE_TARGET_PATH = "C:\NextGenApplications\ps\Services"
             - $env:SERVICE_ARTIFACT_NAME = ".\dist\Demoulas.ProfitSharing.OracleHcm.Sync.zip"
             - $env:SERVICE_ARTIFACT_EXECUTABLE = "Demoulas.ProfitSharing.OracleHcm.Sync.exe"
-            - powershell .\scripts\servicesDeploy.ps1 -ServiceName "$env:SERVICE_SERVICE_NAME" -InstallationPath "$env:SERVICE_SERVICE_TARGET_PATH"  -RemoteServer "$env:API_SERVER_QA" -ZipFilePath "$env:SERVICE_ARTIFACT_NAME"
+            - powershell .\scripts\servicesDeploy.ps1 ${env:ENV} $env:API_SERVER_QA
 
 
       - parallel:

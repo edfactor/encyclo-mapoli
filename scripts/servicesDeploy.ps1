@@ -1,69 +1,144 @@
-param (
-    [Parameter(Mandatory = $true)]
-    [string]$ServiceName,
+$StopAppTimeout = 5
+$envTarget = $args[0]
+$envServerName = $args[1]
+$configTarget = ''
 
-    [Parameter(Mandatory = $true)]
-    [string]$InstallationPath,
+function get-ConfigEnvironment($envTargetVar)
+{
+    Write-Host "The value for envTargetVar is $( $envTargetVar )"
+    if ($envTargetVar -eq "qa")
+    {
+        Write-Host "ENV is QA"
+        return "QA"
+    }
+    elseif ($envTargetVar -eq "uat")
+    {
+        Write-Host "ENV is UAT"
+        return "UAT"
+    }
+    elseif ($envTargetVar -eq "prod")
+    {
+        Write-Host "ENV is PRODUCTION"
+        return "Production"
+    }
+    else
+    {
+        Write-Host "Unknown ENV"
+    }
+}
 
-    [Parameter(Mandatory = $true)]
-    [string]$RemoteServer,
+$configTarget = get-ConfigEnvironment $envTarget
 
-    [Parameter(Mandatory = $true)]
-    [string]$ZipFilePath
+$Deployments = @(
+    @{
+        Artifact = 'Demoulas.ProfitSharing.OracleHcm.Sync.zip'
+        TargetPath = 'C:\NextGenApplications\ps'
+        ServiceExecutable = 'C:\NextGenApplications\ps\Demoulas.ProfitSharing.OracleHcm.Sync.exe'
+        ServiceName = 'Demoulas Smart File Handler'
+        DisplayName = 'Demoulas Smart File Handler'
+        IgnoreFiles = @("credSettings.$( $envTarget ).json")
+        ConfigEnvironment = $configTarget
+    }
 )
 
-# Step 1: Establish a PowerShell session to the remote server
-Write-Host "Establishing remote session to $RemoteServer..."
-$Session = New-PSSession -ComputerName $RemoteServer
-
+$Failed = $false
 try {
-    # Step 2: Copy the ZIP file to the remote server's temporary folder
-    $RemoteTempPath = "C:\Temp"
-    $RemoteZipPath = Join-Path -Path $RemoteTempPath -ChildPath (Split-Path -Leaf $ZipFilePath)
-    Write-Host "Copying ZIP file to remote server: $RemoteZipPath"
-    Invoke-Command -Session $Session -ScriptBlock {
-        param ($RemoteTempPath)
-        if (-not (Test-Path $RemoteTempPath))
-        {
-            New-Item -Path $RemoteTempPath -ItemType Directory | Out-Null
+    $Session = New-PSSession $envServerName
+
+
+    foreach ($Deploy in $Deployments)
+    {
+        Write-Host $Deploy
+        Invoke-Command -Session $Session -ScriptBlock {
+            $ServiceInfo = Get-Service -Name $Using:Deploy.ServiceName -ErrorAction SilentlyContinue
+            if (($ServiceInfo -ne $null) -and ($ServiceInfo.Length -gt 0))
+            {
+                $ServiceInfo = Get-Service -Name $Using:Deploy.ServiceName | Where-Object { $_.Status -eq "Running" } -ErrorAction SilentlyContinue
+                Write-Host "Attempting to Stop Running Service" $ServiceInfo
+                if (($ServiceInfo -ne $null) -and ($ServiceInfo.Length -gt 0))
+                {
+                    Write-Host 'Stopping Service'
+                    Stop-Service -Name $Using:Deploy.ServiceName -verbose -ErrorAction SilentlyContinue
+                    while ((Get-Service -Name $Using:Deploy.ServiceName).Status -ne 'Stopped')
+                    {
+                        Write-Host "Waiting for Service " $ServiceInfo " to stop."
+                        Start-Sleep 2
+                    }
+                    Write-Host 'Stopped Service'
+                    $ServiceInfo.Refresh()
+                }
+            }
+
+            Write-Host "Checking existence of folder" $Using:Deploy.TargetPath
+            $FolderExists = Test-Path -Path $Using:Deploy.TargetPath
+            if ($FolderExists -eq $true)
+            {
+                Get-ChildItem -Path $Using:Deploy.TargetPath -Exclude $Using:Deploy.IgnoreFiles | Remove-Item -Force -Recurse
+            }
+            else
+            {
+                Write-Host "creating new folder" $Using:Deploy.TargetPath
+                New-Item -ItemType Directory -Force -Path $Using:Deploy.TargetPath
+            }
+
         }
-    } -ArgumentList $RemoteTempPath
-
-    Copy-Item -Path $ZipFilePath -Destination $RemoteZipPath -ToSession $Session
-
-    # Step 3: Deploy the service on the remote server
-    Write-Host "Deploying service on remote server..."
-    Invoke-Command -Session $Session -ScriptBlock {
-        param ($ServiceName, $InstallationPath, $RemoteZipPath)
-        Write-Host "Creating installation path: $InstallationPath"
-        if (-not (Test-Path $InstallationPath))
+        if (!$?)
         {
-            New-Item -Path $InstallationPath -ItemType Directory | Out-Null
+            $Failed = $true; break
         }
 
-        Write-Host "Extracting ZIP file: $RemoteZipPath"
-        Add-Type -AssemblyName System.IO.Compression.FileSystem
-        [System.IO.Compression.ZipFile]::ExtractToDirectory($RemoteZipPath, $InstallationPath)
 
-        $ServiceExePath = Join-Path -Path $InstallationPath -ChildPath "Demoulas.ProfitSharing.OracleHcm.Sync.exe"
-        if (-not (Test-Path $ServiceExePath))
+        Write-Host 'copying artifacts'
+        Copy-Item -ToSession $Session -Path .\dist\$($Deploy.Artifact) -Destination $Deploy.TargetPath
+        if (!$?)
         {
-            throw "Executable not found in extracted directory: $ServiceExePath"
+            $Failed = $true; break
         }
 
-        Write-Host "Registering Windows Service: $ServiceName"
-        sc.exe create $ServiceName binPath= "$ServiceExePath" start= auto
-        sc.exe start $ServiceName
+        Write-Host 'copied artifacts'
 
-        Write-Host "Service $ServiceName deployed and started successfully!"
-    } -ArgumentList $ServiceName, $InstallationPath, $RemoteZipPath
+        Invoke-Command -Session $Session -ScriptBlock {
+            Expand-Archive -Force -Path "$( $Using:Deploy.TargetPath )\$( $Using:Deploy.Artifact )" -DestinationPath $Using:Deploy.TargetPath
+            Remove-Item -Force -Path "$( $Using:Deploy.TargetPath )\$( $Using:Deploy.Artifact )"
 
+            $file = "$( $Using:Deploy.TargetPath )\buildSettings.json"
+            $json = Get-Content -Raw $file;
+            $jsonparsed = ConvertFrom-Json -InputObject $json;
+            Add-Member -InputObject $jsonparsed -MemberType NoteProperty -Name environment -Value $Using:Deploy.ConfigEnvironment
+            $jsonparsed | ConvertTo-Json | Out-File $file
+
+            $ServiceInfo = Get-Service -Name $Using:Deploy.ServiceName -ErrorAction SilentlyContinue
+            Write-Host $ServiceInfo
+            if ($ServiceInfo -eq $null)
+            {
+                Write-Host 'Installing service'
+                New-Service -Name $Using:Deploy.ServiceName -BinaryPathName "$( $Using:Deploy.ServiceExecutable )" -StartupType "Automatic"
+            }
+
+            $ServiceInfo = Get-Service -Name $Using:Deploy.ServiceName
+            Write-Host "Starting Service with param " $Using:Deploy.ConfigEnvironment
+            $ServiceInfo.Start()
+        }
+        if (!$?)
+        {
+            $Failed = $true; break
+        }
+    }
+}
+catch
+{
+    $Failed = $true
 }
 finally
 {
-    # Clean up the session
-    Remove-PSSession -Session $Session
-    Write-Host "Remote session closed."
+    if ($null -ne $Session)
+    {
+        Remove-PSSession -Session $Session
+        $Session = $null
+    }
 }
 
-Write-Host "Deployment completed successfully."
+if ($Failed)
+{
+    exit 1
+}
