@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿namespace Demoulas.ProfitSharing.Data.Entities;
 
-namespace Demoulas.ProfitSharing.Data.Entities;
 public class DemographicHistory
 {
     public DemographicHistory()
@@ -66,6 +60,4 @@ public class DemographicHistory
         };
         return h;
     }
-
 }
-

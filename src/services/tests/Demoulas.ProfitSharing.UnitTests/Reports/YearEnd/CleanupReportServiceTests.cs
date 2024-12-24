@@ -4,38 +4,37 @@ using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Client.Reports.YearEnd;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Security;
-using Demoulas.ProfitSharing.UnitTests.Base;
-using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
-using Xunit.Abstractions;
-using IdGen;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Data.Entities;
-using FastEndpoints;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareReport;
-using Quartz.Simpl;
+using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.UnitTests.Base;
+using FastEndpoints;
+using FluentAssertions;
+using IdGen;
+using Microsoft.EntityFrameworkCore;
+using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
-public class CleanupReportServiceTests:ApiTestBase<Program>
+
+public class CleanupReportServiceTests : ApiTestBase<Program>
 {
     private readonly CleanupReportClient _cleanupReportClient;
     private readonly ITestOutputHelper _testOutputHelper;
-    private readonly ProfitYearRequest _paginationRequest = new ProfitYearRequest {ProfitYear = 2023, Skip = 0, Take = byte.MaxValue };
+    private readonly ProfitYearRequest _paginationRequest = new ProfitYearRequest { ProfitYear = 2023, Skip = 0, Take = byte.MaxValue };
     private readonly IdGenerator _generator;
 
 
-    public CleanupReportServiceTests( ITestOutputHelper testOutputHelper)
+    public CleanupReportServiceTests(ITestOutputHelper testOutputHelper)
     {
         _testOutputHelper = testOutputHelper;
         _cleanupReportClient = new CleanupReportClient(ApiClient, DownloadClient);
         _generator = new IdGenerator(0);
     }
 
-    
 
-    [Fact(DisplayName ="PS-147: Check Duplicate SSNs (JSON)")]
+    [Fact(DisplayName = "PS-147: Check Duplicate SSNs (JSON)")]
     public async Task GetDuplicateSsNsTestJson()
     {
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
@@ -56,7 +55,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
         result.Should().NotBeNullOrEmpty();
 
         _testOutputHelper.WriteLine(result);
-    }   
+    }
 
     [Fact(DisplayName = "PS-151: Demographic badges without payprofit (JSON)")]
     public Task GetDemographicBadgesWithoutPayProfitTests()
@@ -71,7 +70,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
             _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
 
             byte mismatchedValues = 5;
-            
+
             foreach (var dem in c.Demographics.Take(mismatchedValues))
             {
                 long lastSevenDigits = _generator.CreateId() % 10_000_000;
@@ -101,7 +100,6 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         return MockDbContextFactory.UseWritableContext(async c =>
         {
-
             byte mismatchedValues = 5;
 
             foreach (var dem in c.Demographics.Take(mismatchedValues))
@@ -128,7 +126,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
         });
     }
 
-    [Fact(DisplayName ="PS-153: Names without commas (JSON)")]
+    [Fact(DisplayName = "PS-153: Names without commas (JSON)")]
     public Task GetNamesWithoutCommas()
     {
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
@@ -171,10 +169,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
         return MockDbContextFactory.UseWritableContext(async ctx =>
         {
             byte disruptedNameCount = 10;
-            await ctx.Demographics.Take(disruptedNameCount).ForEachAsync(dem =>
-            {
-                dem.ContactInfo.FullName = dem.ContactInfo.FullName?.Replace(", ", " ");
-            });
+            await ctx.Demographics.Take(disruptedNameCount).ForEachAsync(dem => { dem.ContactInfo.FullName = dem.ContactInfo.FullName?.Replace(", ", " "); });
 
             await ctx.SaveChangesAsync();
 
@@ -209,7 +204,6 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
             await c.SaveChangesAsync();
 
 
-
             var response = await _cleanupReportClient.GetNegativeETVAForSSNsOnPayProfitResponseAsync(_paginationRequest, CancellationToken.None);
 
             response.Should().NotBeNull();
@@ -241,13 +235,12 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
         _testOutputHelper.WriteLine(result);
     }
 
-   
 
     [Fact(DisplayName = "PS-152 : Duplicate names and Birthdays (JSON)")]
     public async Task GetDuplicateNamesAndBirthdays()
     {
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        var request = new ProfitYearRequest {ProfitYear = _paginationRequest.ProfitYear, Take = 1000, Skip = 0 };
+        var request = new ProfitYearRequest { ProfitYear = _paginationRequest.ProfitYear, Take = 1000, Skip = 0 };
         var response = await _cleanupReportClient.GetDuplicateNamesAndBirthdaysAsync(request, CancellationToken.None);
         response.Should().NotBeNull();
         response.Response.Results.Count().Should().Be(0);
@@ -267,7 +260,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
                 dem.ContactInfo.FullName = modelDemographic.ContactInfo.FullName;
                 dem.PayProfits[0]!.ProfitYear = _paginationRequest.ProfitYear;
             }
-            
+
             await c.SaveChangesAsync();
         });
 
@@ -317,7 +310,6 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
         lines.Count().Should().BeGreaterThanOrEqualTo(duplicateRows + 4); //Includes initial row that was used as the template to create duplicates
 
         _testOutputHelper.WriteLine(result);
-
     }
 
     [Fact(DisplayName = "PS-61 : Year-end Profit Sharing Report (JSON)")]
@@ -325,9 +317,14 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
     {
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         var profitYear = (short)(DateTime.Now.Year - 1);
-        var req = new YearEndProfitSharingReportRequest() { Skip = 0, Take=byte.MaxValue, ProfitYear = profitYear, IsYearEnd = true, 
-            IncludeActiveEmployees = true, 
-            IncludeEmployeesWithNoPriorProfitSharingAmounts = true, 
+        var req = new YearEndProfitSharingReportRequest()
+        {
+            Skip = 0,
+            Take = byte.MaxValue,
+            ProfitYear = profitYear,
+            IsYearEnd = true,
+            IncludeActiveEmployees = true,
+            IncludeEmployeesWithNoPriorProfitSharingAmounts = true,
             IncludeEmployeesWithPriorProfitSharingAmounts = true,
             MinimumHoursInclusive = 1000,
             MinimumAgeInclusive = 18,
@@ -340,6 +337,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
             {
                 dem.EmploymentStatusId = 't';
             }
+
             foreach (var demH in ctx.DemographicHistories)
             {
                 demH.EmploymentStatusId = 't';
@@ -387,7 +385,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
 
         response.Should().NotBeNull();
         response.Result.ReportName.Should().BeEquivalentTo($"PROFIT SHARE YEAR END REPORT FOR {req.ProfitYear}");
-        response.Result.Response.Total.Should().Be( 1 );
+        response.Result.Response.Total.Should().Be(1);
         response.Result.Response.Results.Count().Should().Be(1);
 
         _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
@@ -404,7 +402,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
             empH.DateOfBirth = emp!.DateOfBirth;
             await ctx.SaveChangesAsync();
         });
-        
+
         response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, ReportResponseBase<YearEndProfitSharingReportResponse>>(req);
 
         response.Result.Should().NotBeNull();
@@ -492,7 +490,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
             await ctx.SaveChangesAsync();
         });
 
-        var response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest,ReportResponseBase<YearEndProfitSharingReportResponse>>(req);
+        var response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, ReportResponseBase<YearEndProfitSharingReportResponse>>(req);
         response.Should().NotBeNull();
         response.Result.ReportName.Should().BeEquivalentTo($"PROFIT SHARE YEAR END REPORT FOR {req.ProfitYear}");
         response.Result.Response.Total.Should().Be(1);
@@ -532,16 +530,16 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
         response.Result.Response.Results.Count().Should().Be(0);
     }
 
-    [Fact(DisplayName ="PS-294 : Distributions and Forfeitures (JSON)")]
+    [Fact(DisplayName = "PS-294 : Distributions and Forfeitures (JSON)")]
     public async Task GetDistributionsAndForfeitures()
     {
         decimal sampleforfeiture = 5150m;
 
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        var req = new DistributionsAndForfeituresRequest() { Skip=0, Take=byte.MaxValue, ProfitYear = (short)(DateTime.Now.Year-1), IncludeOutgoingForfeitures=true};
+        var req = new DistributionsAndForfeituresRequest() { Skip = 0, Take = byte.MaxValue, ProfitYear = (short)(DateTime.Now.Year - 1), IncludeOutgoingForfeitures = true };
         ReportResponseBase<DistributionsAndForfeitureResponse> response;
 
-        
+
         await MockDbContextFactory.UseWritableContext(async ctx =>
         {
             //Clear out existing data, so that random numbers don't cause the numbers to inflate
@@ -549,11 +547,13 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
             {
                 dem.Ssn = -1;
             }
-            foreach (var ben in ctx.Beneficiaries.Include(b=> b.Contact))
+
+            foreach (var ben in ctx.Beneficiaries.Include(b => b.Contact))
             {
                 ben.Contact!.Ssn = -1;
                 ben.PsnSuffix = -1;
             }
+
             await ctx.SaveChangesAsync();
         });
         var distributionProfitCodes = new[] { 1, 3, 9 }; //Test to see that the forfeiture ends up in the right column for these codes.
@@ -569,7 +569,7 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
                 profitDetail.ProfitYear = (short)(DateTime.Now.Year - 1);
                 profitDetail.ProfitYearIteration = 0;
                 profitDetail.ProfitCodeId = (byte)profitCode;
-                profitDetail.ProfitCode = new Data.Entities.ProfitCode() { Id = 1, Name = "Incoming contributions, forfeitures, earnings", Frequency = "Yearly" };
+                profitDetail.ProfitCode = new ProfitCode() { Id = 1, Name = "Incoming contributions, forfeitures, earnings", Frequency = "Yearly" };
                 profitDetail.Forfeiture = sampleforfeiture;
                 profitDetail.MonthToDate = 3;
                 profitDetail.YearToDate = (short)(DateTime.Now.Year - 1);
@@ -645,6 +645,9 @@ public class CleanupReportServiceTests:ApiTestBase<Program>
     public Task YearEndServiceAuthCheck()
     {
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.HARDSHIPADMINISTRATOR);
-        return Assert.ThrowsAsync<HttpRequestException>(async () => { _ = await _cleanupReportClient.GetDemographicBadgesNotInPayProfitAsync(_paginationRequest, CancellationToken.None); });
+        return Assert.ThrowsAsync<HttpRequestException>(async () =>
+        {
+            _ = await _cleanupReportClient.GetDemographicBadgesNotInPayProfitAsync(_paginationRequest, CancellationToken.None);
+        });
     }
 }

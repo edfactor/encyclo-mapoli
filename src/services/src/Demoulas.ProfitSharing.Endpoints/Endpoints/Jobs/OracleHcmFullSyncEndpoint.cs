@@ -1,5 +1,4 @@
-﻿using System.Threading;
-using Demoulas.Common.Contracts.Interfaces;
+﻿using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Messaging;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Job;
 using Demoulas.ProfitSharing.Data.Entities.MassTransit;
@@ -41,13 +40,10 @@ public class OracleHcmFullSyncEndpoint : EndpointWithoutRequest<SendMessageRespo
             ApplicationName = Env.ApplicationName,
             Body = new OracleHcmJobRequest
             {
-                JobType = JobType.Constants.EmployeeSyncFull,
-                StartMethod = StartMethod.Constants.OnDemand,
-                RequestedBy = _appUser.UserName ?? "UnKnown User"
+                JobType = JobType.Constants.EmployeeSyncFull, StartMethod = StartMethod.Constants.OnDemand, RequestedBy = _appUser.UserName ?? "UnKnown User"
             }
         };
 
         return _bus.Publish(message: message, cancellationToken: ct);
     }
 }
-

@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ExecutiveHoursAndDollars;
 using Demoulas.ProfitSharing.Security;
@@ -8,12 +9,11 @@ using Demoulas.ProfitSharing.UnitTests.Base;
 using Demoulas.ProfitSharing.UnitTests.Extensions;
 using FastEndpoints;
 using FluentAssertions;
-using MassTransit;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
-public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
+
+public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
 {
     [Fact]
     public async Task duplicate_badge_is_bad()
@@ -22,17 +22,10 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
         SetExecutiveHoursAndDollarsRequest request = new SetExecutiveHoursAndDollarsRequest
         {
             ProfitYear = 0,
-            ExecutiveHoursAndDollars = [
-                new() {
-                    EmployeeId = 99,
-                    ExecutiveDollars = 0,
-                    ExecutiveHours = 0
-                },
-                new() {
-                    EmployeeId = 99,
-                    ExecutiveDollars = 0,
-                    ExecutiveHours = 0
-                }
+            ExecutiveHoursAndDollars =
+            [
+                new() { EmployeeId = 99, ExecutiveDollars = 0, ExecutiveHours = 0 },
+                new() { EmployeeId = 99, ExecutiveDollars = 0, ExecutiveHours = 0 }
             ]
         };
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
@@ -81,19 +74,14 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
             ProfitYear = profitYear,
             ExecutiveHoursAndDollars =
             [
-                new ()
-                {
-                    EmployeeId = int.MaxValue,
-                    ExecutiveDollars = 22,
-                    ExecutiveHours = 33
-                }
+                new() { EmployeeId = int.MaxValue, ExecutiveDollars = 22, ExecutiveHours = 33 }
             ]
         };
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
         // Act
         var response = await ApiClient
-                .PUTAsync<SetExecutiveHoursAndDollarsEndpoint, SetExecutiveHoursAndDollarsRequest, HttpResponseMessage>(request);
+            .PUTAsync<SetExecutiveHoursAndDollarsEndpoint, SetExecutiveHoursAndDollarsRequest, HttpResponseMessage>(request);
 
 
         // Assert
@@ -109,11 +97,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
     {
         // Arrange
         short profitYear = await GetMaxProfitYearAsync();
-        SetExecutiveHoursAndDollarsRequest request = new SetExecutiveHoursAndDollarsRequest
-        {
-            ProfitYear = profitYear,
-            ExecutiveHoursAndDollars = []
-        };
+        SetExecutiveHoursAndDollarsRequest request = new SetExecutiveHoursAndDollarsRequest { ProfitYear = profitYear, ExecutiveHoursAndDollars = [] };
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
         // Act
@@ -127,11 +111,9 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
     }
 
 
-
     [Fact]
     public Task update_one_employee()
     {
-
         return MockDbContextFactory.UseWritableContext(async ctx =>
         {
             // Arrange
@@ -152,13 +134,9 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
             SetExecutiveHoursAndDollarsRequest request = new SetExecutiveHoursAndDollarsRequest
             {
                 ProfitYear = profitYear,
-                ExecutiveHoursAndDollars = [
-                    new()
-                    {
-                        EmployeeId = badgeNumber,
-                        ExecutiveDollars = newIncomeExecutive,
-                        ExecutiveHours = newHoursExecutive
-                    }
+                ExecutiveHoursAndDollars =
+                [
+                    new() { EmployeeId = badgeNumber, ExecutiveDollars = newIncomeExecutive, ExecutiveHours = newHoursExecutive }
                 ]
             };
             ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
@@ -180,15 +158,12 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
             // verify updated hours and income
             payProfit.HoursExecutive.Should().Be(newHoursExecutive);
             payProfit.IncomeExecutive.Should().Be(newIncomeExecutive);
-
         });
-
     }
 
     [Fact]
     public Task ensure_bad_badge_stops_updating_of_others()
     {
-
         return MockDbContextFactory.UseWritableContext(async ctx =>
         {
             // Arrange
@@ -216,7 +191,6 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
                 ProfitYear = profitYear,
                 ExecutiveHoursAndDollars =
                 [
-
                     new() { EmployeeId = employeeId, ExecutiveDollars = newIncomeExecutive, ExecutiveHours = newHoursExecutive },
                     new() { EmployeeId = int.MaxValue, ExecutiveDollars = 44, ExecutiveHours = 55 }
                 ]
@@ -262,11 +236,11 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Api.Program>
             title.GetString().Should().Be(expectedMessage);
             return;
         }
+
         // If the 400 is from the Validator, it has the message in the errors array.
         string message = doc.RootElement.GetProperty("message").ToString();
         string errorMessage = doc.RootElement.GetProperty("errors").GetProperty(fieldName)[0].GetString()!;
         message.Should().Be("One or more errors occurred!");
         errorMessage.Should().Be(expectedMessage);
     }
-    
 }

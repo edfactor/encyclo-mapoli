@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Data.Entities;
+﻿using System.Diagnostics;
 
 namespace Demoulas.ProfitSharing.Services.ProfitShareUpdate;
 
@@ -37,7 +31,7 @@ public class MemberFinancials
         CurrentAmount = bene.CurrentAmount;
         SecondaryEarnings = bene.SecondaryEarnings;
         Earnings = bene.Earnings;
-        
+
         Trace.Assert(memberTotals.IncomingForfeitureAmount == 0);
         Common(profitDetailTotals, memberTotals);
     }
@@ -54,7 +48,6 @@ public class MemberFinancials
         Earnings = memberTotals.EarningsAmount;
         EarningPoints = memberTotals.EarnPoints;
         IncomingForfeitures = memberTotals.IncomingForfeitureAmount - profitDetailTotals.ForfeitsTotal;
-        
     }
 
     public long Badge { get; set; }
@@ -84,15 +77,15 @@ public class MemberFinancials
         IncomingForfeitures + Military +
         Caf -
         Distributions;
-    
+
     public bool IsAllZeros() => CurrentAmount == 0m &&
-                             Distributions == 0m &&
-                             Contributions == 0m &&
-                             Xfer == 0m &&
-                             Pxfer == 0m &&
-                             Military == 0m &&
-                             IncomingForfeitures == 0m &&
-                             Earnings == 0m &&
-                             SecondaryEarnings == 0m &&
-                             EndingBalance == 0m;
+                                Distributions == 0m &&
+                                Contributions == 0m &&
+                                Xfer == 0m &&
+                                Pxfer == 0m &&
+                                Military == 0m &&
+                                IncomingForfeitures == 0m &&
+                                Earnings == 0m &&
+                                SecondaryEarnings == 0m &&
+                                EndingBalance == 0m;
 }
