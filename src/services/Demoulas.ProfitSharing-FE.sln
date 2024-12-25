@@ -143,6 +143,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demoulas.Common.Contracts", "..\..\..\demoulas.common\src\Demoulas.Common.Contracts\Demoulas.Common.Contracts.csproj", "{004DF56D-DCE6-4458-8615-92C4E3084312}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Demoulas.Common", "Demoulas.Common", "{F79C7381-DB20-4E5C-94C7-AFFB489B9B49}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\..\demoulas.common\Directory.Build.props = ..\..\..\demoulas.common\Directory.Build.props
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
