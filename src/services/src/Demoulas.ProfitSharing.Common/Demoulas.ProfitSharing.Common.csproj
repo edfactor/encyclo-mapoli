@@ -7,9 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Demoulas.Common.Contracts" />
-    <PackageReference Include="Demoulas.Util" />
     <PackageReference Include="FastEndpoints" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\demoulas.common\src\Demoulas.Common.Contracts\Demoulas.Common.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\..\..\demoulas.common\src\demoulas.util\Demoulas.Common.Util.csproj" />
   </ItemGroup>
 
   <ItemGroup>

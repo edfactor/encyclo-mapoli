@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Demoulas.Security" />
+    <ProjectReference Include="..\..\..\..\..\demoulas.common\src\Demoulas.Security\Demoulas.Common.Security.csproj" />
   </ItemGroup>
 
   <ItemGroup>
