@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\demoulas.common\src\Demoulas.Security\Demoulas.Common.Security.csproj" />
+    <ProjectReference Include="..\..\..\..\..\demoulas.common\src\Demoulas.Security\Demoulas.Security.csproj" />
   </ItemGroup>
 
   <ItemGroup>

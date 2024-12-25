@@ -136,11 +136,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demoulas.ProfitSharing.Serv
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demoulas.Common.Api", "..\..\..\demoulas.common\src\Demoulas.Common.Api\Demoulas.Common.Api.csproj", "{96AA5996-B6E2-4F9A-8FB6-B7E045E52BF0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demoulas.Common.Security", "..\..\..\demoulas.common\src\Demoulas.Security\Demoulas.Common.Security.csproj", "{86A6AE20-DD89-4C94-A5F5-467B2DAA9451}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demoulas.Security", "..\..\..\demoulas.common\src\Demoulas.Security\Demoulas.Security.csproj", "{86A6AE20-DD89-4C94-A5F5-467B2DAA9451}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demoulas.Common.Util", "..\..\..\demoulas.common\src\demoulas.util\Demoulas.Common.Util.csproj", "{D5035B21-A643-4E11-BBAB-D02DA1B7B596}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demoulas.Util", "..\..\..\demoulas.common\src\demoulas.util\Demoulas.Util.csproj", "{D5035B21-A643-4E11-BBAB-D02DA1B7B596}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demoulas.Common.Contracts", "..\..\..\demoulas.common\src\Demoulas.Common.Contracts\Demoulas.Common.Contracts.csproj", "{004DF56D-DCE6-4458-8615-92C4E3084312}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Demoulas.Common", "Demoulas.Common", "{F79C7381-DB20-4E5C-94C7-AFFB489B9B49}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -234,6 +236,10 @@ Global
 		{15C6083C-777D-42C6-A1A7-5F4008345118} = {946306F4-A7A7-40C5-A4EA-D32A46E09328}
 		{10F3A928-8DEB-4366-AAC4-F508D3E67C11} = {946306F4-A7A7-40C5-A4EA-D32A46E09328}
 		{02EF8BA8-8CC3-4B2F-87EA-43D99157BDE5} = {90876D49-395F-40FE-86C6-08DCCF9DBEBC}
+		{96AA5996-B6E2-4F9A-8FB6-B7E045E52BF0} = {F79C7381-DB20-4E5C-94C7-AFFB489B9B49}
+		{86A6AE20-DD89-4C94-A5F5-467B2DAA9451} = {F79C7381-DB20-4E5C-94C7-AFFB489B9B49}
+		{D5035B21-A643-4E11-BBAB-D02DA1B7B596} = {F79C7381-DB20-4E5C-94C7-AFFB489B9B49}
+		{004DF56D-DCE6-4458-8615-92C4E3084312} = {F79C7381-DB20-4E5C-94C7-AFFB489B9B49}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FB1CB19A-BE8B-4F91-9186-FE7C9F3CE4D7}

@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\..\demoulas.common\src\Demoulas.Common.Contracts\Demoulas.Common.Contracts.csproj" />
-    <ProjectReference Include="..\..\..\..\..\demoulas.common\src\demoulas.util\Demoulas.Common.Util.csproj" />
+    <ProjectReference Include="..\..\..\..\..\demoulas.common\src\demoulas.util\Demoulas.Util.csproj" />
   </ItemGroup>
 
   <ItemGroup>
