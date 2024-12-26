@@ -101,7 +101,12 @@ if (app.Environment.IsDevelopment() && Debugger.IsAttached)
 
 app.UseCors();
 
-app.UseDefaultEndpoints(OktaSettingsAction);
+app.UseDefaultEndpoints(OktaSettingsAction)
+    .UseReDoc(settings =>
+    {
+        settings.Path = "/redoc";
+        settings.DocumentPath = "/swagger/Release 1.0/swagger.json"; // Single document
+    });
 
 await app.RunAsync();
 
