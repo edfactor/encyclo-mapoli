@@ -30,12 +30,7 @@ public class ExecutiveHoursAndDollarsEndpoint :
                 "The Executive Hours and Dollars Endpoint endpoint produces a list of executives with hours and dollars.";
 
             s.ExampleRequest = SimpleExampleRequest;
-            s.ResponseExamples = new Dictionary<int, object>
-            {
-                {
-                    204, "Operation completed successfully."
-                }
-            };
+            s.Responses[204] = "Success, No Content";
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
         Group<YearEndGroup>();
