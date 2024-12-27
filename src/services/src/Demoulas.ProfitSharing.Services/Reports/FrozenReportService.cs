@@ -239,7 +239,7 @@ public class FrozenReportService : IFrozenReportService
                 join d in ctx.Demographics on pd.Ssn equals d.Ssn
                 where pd.ProfitYear == req.ProfitYear
                       && pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions
-                      && pd.Contribution > 0
+                      && pd.Contribution > 0  //Question - Contributions can be < 0.  Should those be included?
                 select new { d.DateOfBirth, EmploymentType = d.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT, d.EmployeeId, Amount = pd.Contribution });
 
             query = req.ReportType switch

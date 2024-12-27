@@ -18,47 +18,6 @@ public sealed class ContributionService
     }
 
     /// <summary>
-    /// Retrieves the contribution years for a set of employees.
-    /// </summary>
-    /// <param name="employeeId">
-    /// A set of employee IDs for which to retrieve the contribution years.
-    /// </param>
-    /// <returns>
-    /// A task that represents the asynchronous operation. The task result contains a dictionary 
-    /// where the key is the employee ID and the value is the number of years the employee has been in the plan.
-    /// </returns>
-    internal Task<Dictionary<int, byte>> GetContributionYears(ISet<int> employeeId)
-    {
-        return _dataContextFactory.UseReadOnlyContext(context =>
-        {
-            return GetContributionYears(context, employeeId)
-                .ToDictionaryAsync(arg => arg.EmployeeId, arg => arg.YearsInPlan);
-        });
-    }
-
-    /// <summary>
-    /// Retrieves the contribution years for a set of employees.
-    /// </summary>
-    /// <param name="context">
-    /// The database context used to access profit sharing data.
-    /// </param>
-    /// <param name="employeeId">
-    /// A set of employee IDs for which to retrieve contribution years.
-    /// </param>
-    /// <returns>
-    /// An <see cref="IQueryable{T}"/> of <see cref="ContributionYears"/> representing the contribution years
-    /// for each employee in the specified set.
-    /// </returns>
-    internal IQueryable<ContributionYears> GetContributionYears(IProfitSharingDbContext context, ISet<int> employeeId)
-    {
-        return context.PayProfits
-            .Include(p => p.Demographic)
-            .Where(p => employeeId.Contains(p.Demographic!.EmployeeId))
-            .GroupBy(p => p.Demographic!.EmployeeId)
-            .Select(p => new ContributionYears { EmployeeId = p.Key,YearsInPlan = (byte)p.Count() });
-    }
-
-    /// <summary>
     /// Retrieves a queryable collection of net balance details for employees based on the specified profit year.
     /// </summary>
     /// <param name="profitYear">

@@ -18,17 +18,14 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
     private readonly IProfitSharingDataContextFactory _factory;
     private readonly ICalendarService _calendarService;
     private readonly TotalService _totalService;
-    private readonly ContributionService _contributionService;
 
     public TerminatedEmployeeAndBeneficiaryReport(IProfitSharingDataContextFactory factory,
         ICalendarService calendarService,
-        TotalService totalService,
-        ContributionService contributionService)
+        TotalService totalService)
     {
         _factory = factory;
         _calendarService = calendarService;
         _totalService = totalService;
-        _contributionService = contributionService;
     }
 
     public Task<TerminatedEmployeeAndBeneficiaryResponse> CreateDataAsync(ProfitYearRequest req, CancellationToken cancellationToken)
@@ -80,7 +77,16 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         var demKeyList = await terminatedEmployees.Select(e => new { e.Demographic.Id, e.Demographic.EmployeeId }).ToListAsync(cancellationToken);
         var employeeIds = demKeyList.Select(e => e.EmployeeId).ToHashSet();
 
-        var contributionYearsQuery = _contributionService.GetContributionYears(ctx, employeeIds);
+        var contributionYearsQuery = (
+            from yis in _totalService.GetYearsOfService(ctx, request.ProfitYear)
+            join d in ctx.Demographics on yis.Ssn equals d.Ssn
+            where employeeIds.Contains(d.EmployeeId)
+            select new
+            {
+                d.EmployeeId,
+                YearsInPlan = (byte)yis.Years
+            }
+        );
 
         var validEnrollmentIds = GetValidEnrollmentIds();
 

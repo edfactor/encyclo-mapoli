@@ -142,7 +142,7 @@ public sealed class TotalService : ITotalService
     {
         return (from pp in ctx.PayProfits.Include(p => p.Demographic)
             where pp.ProfitYear == profitYear
-            select new ParticipantTotalYearsDto { Ssn = pp.Demographic!.Ssn, Years = pp.YearsInPlan }); //Need to verify logic here
+            select new ParticipantTotalYearsDto { Ssn = pp.Demographic!.Ssn, Years = pp.YearsInPlan });
     }
 
     /// <summary>

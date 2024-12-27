@@ -255,9 +255,21 @@ public class CleanupReportService : ICleanupReportService
             });
 
             ISet<int> badgeNumbers = results.Results.Select(r => r.BadgeNumber).ToHashSet();
-            var dict = await _contributionService.GetContributionYears(badgeNumbers);
             var balanceDict = await _contributionService.GetNetBalance(req.ProfitYear, badgeNumbers, cancellationToken);
 
+            var dict = await _dataContextFactory.UseReadOnlyContext(ctx =>
+            {
+                return (
+                    from yis in _totalService.GetYearsOfService(ctx, req.ProfitYear)
+                    join d in ctx.Demographics on yis.Ssn equals d.Ssn
+                    select new
+                    {
+                        d.EmployeeId,
+                        Years = (byte)yis.Years
+                    }
+                ).ToDictionaryAsync(x => x.EmployeeId, x => x.Years);
+
+            });
 
             foreach (DuplicateNamesAndBirthdaysResponse dup in results.Results)
             {
