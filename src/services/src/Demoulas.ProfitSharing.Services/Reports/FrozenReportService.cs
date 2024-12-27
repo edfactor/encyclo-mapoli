@@ -41,7 +41,7 @@ public class FrozenReportService : IFrozenReportService
     {
         using (_logger.BeginScope("Request FORFEITURES AND POINTS FOR YEAR"))
         {
-            const short HOURS_WORKED_REQUIREMENT = 1000;
+            var hoursWorkedRequirement = ContributionService.MinimumHoursForContribution();
 
             var rslt = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
@@ -98,7 +98,7 @@ public class FrozenReportService : IFrozenReportService
                 var lastYearPayProfits = await (from pp in ctx.PayProfits
                         join d in ctx.Demographics on pp.DemographicId equals d.Id
                         where pp.ProfitYear == req.ProfitYear - 1 && badges.Contains(d.EmployeeId)
-                                                                  && (pp.HoursExecutive + pp.CurrentHoursYear) >= HOURS_WORKED_REQUIREMENT
+                                                                  && (pp.HoursExecutive + pp.CurrentHoursYear) >= hoursWorkedRequirement
                         select new { d.EmployeeId, pp.CurrentIncomeYear }
                     ).ToListAsync(cancellationToken);
 

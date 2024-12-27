@@ -327,7 +327,7 @@ public class CleanupReportService : ICleanupReportService
                             join nameAndDob in nameAndDobQuery on pd.Ssn equals nameAndDob.Ssn
                             where pd.ProfitYear == req.ProfitYear &&
                                   validProfitCodes.Contains(pd.ProfitCodeId) &&
-                                  (pd.ProfitCodeId != 9 || (pd.ProfitCodeId == 9 && (!pd.CommentTypeId.HasValue || !transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)))) &&
+                                  (pd.ProfitCodeId != ProfitCode.Constants.Outgoing100PercentVestedPayment.Id || (pd.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id && (!pd.CommentTypeId.HasValue || !transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)))) &&
                                   (req.StartMonth == 0 || pd.MonthToDate >= req.StartMonth) &&
                                   (req.EndMonth == 0 || pd.MonthToDate <= req.EndMonth)
                             orderby nameAndDob.LastName, nameAndDob.FirstName
