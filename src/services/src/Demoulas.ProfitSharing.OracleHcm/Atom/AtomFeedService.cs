@@ -27,7 +27,8 @@ public class AtomFeedService
             {
                 HttpResponseMessage response = await _httpClient.GetAsync(url, cancellationToken);
                 response.EnsureSuccessStatusCode();
-                feedResponse = await response.Content.ReadFromJsonAsync<AtomFeedResponse>(cancellationToken: cancellationToken);
+                var str = await response.Content.ReadAsStringAsync(cancellationToken);
+                feedResponse = System.Text.Json.JsonSerializer.Deserialize<AtomFeedResponse>(str);
             }
             catch (Exception ex)
             {

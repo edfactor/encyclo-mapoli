@@ -56,5 +56,8 @@ public static class OracleHcmExtension
         client.BaseAddress = new Uri(config.BaseAddress, UriKind.Absolute);
         client.DefaultRequestHeaders.Add(FrameworkVersionHeader, config.RestFrameworkVersion);
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", encodedAuth);
+
+        // Specify JSON format
+        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
     }
 }
