@@ -8,12 +8,10 @@
 
   <ItemGroup>
     <PackageReference Include="FastEndpoints" />
+    <PackageReference Include="Demoulas.Common.Contracts" />
+    <PackageReference Include="Demoulas.Util" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\demoulas.common\src\Demoulas.Common.Contracts\Demoulas.Common.Contracts.csproj" />
-    <ProjectReference Include="..\..\..\..\..\demoulas.common\src\demoulas.util\Demoulas.Util.csproj" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Update="AsyncAwaitBestPractices">
