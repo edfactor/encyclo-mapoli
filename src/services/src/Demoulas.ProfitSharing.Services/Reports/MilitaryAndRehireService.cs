@@ -147,6 +147,7 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
 
         //Question: Shouldn't there be filters for the ProfitYear on PayProfit and ProfitDetail here?
         //Question: Should this be Frozen Demographics?
+        //Question: The columns that aren't be filled in here, are they a necessary part of the query, or should be put values to them?
         var query = context.Demographics
             .Join(
                 context.PayProfits, // Table to join with (PayProfit)

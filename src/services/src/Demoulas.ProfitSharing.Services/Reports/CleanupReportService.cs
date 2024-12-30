@@ -354,7 +354,7 @@ public class CleanupReportService : ICleanupReportService
                                 FederalTax = pd.FederalTaxes,
                                 ForfeitAmount = pd.ProfitCodeId == 2 ? pd.Forfeiture : 0,
                                 LoanDate = pd.MonthToDate > 0 ? new DateOnly(pd.YearToDate, pd.MonthToDate, 1) : null,
-                                Age = Convert.ToByte(Math.Floor((DateOnly.FromDateTime(DateTime.Now).DayNumber - nameAndDob.DateOfBirth.DayNumber) / 365.2499))
+                                Age = Convert.ToByte(Math.Floor((DateOnly.FromDateTime(DateTime.Now).DayNumber - nameAndDob.DateOfBirth.DayNumber) / 365.2499))  //Question: This should be from the end of the specified profit year?
                             };
                 return await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
             });
