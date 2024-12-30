@@ -45,6 +45,16 @@ definitions:
         - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
       artifacts:
         - build/**
+
+    Health-Check: &health-check
+      name: Build and Test Frontend UI
+      runs-on:
+        - windows
+        - self.hosted
+      script:
+       - powershell -Command "& { ./health-check.ps1 -Url $Env:HEALTH_CHECK_URL }"
+      artifacts:
+        - build/**
     
     create-api-artifacts: &create-api-artifacts
       name: Create API Artifacts
