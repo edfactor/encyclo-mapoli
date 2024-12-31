@@ -3,19 +3,19 @@ using System.Text.Json.Serialization;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 
-public class AtomFeedResponse
+public class AtomFeedResponse<TContext> where TContext : IDeltaContext
 {
-    public required Feed Feed { get; set; }
+    public required Feed<TContext> Feed { get; set; }
 }
 
-public class Feed
+public class Feed<TContext> where TContext : IDeltaContext
 {
     public required string Id { get; set; }
     public required string Title { get; set; }
     public required string Subtitle { get; set; }
     public DateTime Updated { get; set; }
     public List<Author> Authors { get; set; } = new List<Author>();
-    public List<Entry> Entries { get; set; } = new List<Entry>();
+    public List<Entry<TContext>> Entries { get; set; } = new List<Entry<TContext>>();
     public List<Link> Links { get; set; } = new List<Link>();
 }
 
@@ -24,14 +24,14 @@ public class Author
     public required string Name { get; set; }
 }
 
-public class Entry
+public class Entry<TContext> where TContext : IDeltaContext
 {
     public required string Id { get; set; }
     public required string Title { get; set; }
     public required string Summary { get; set; }
 
-    [JsonConverter(typeof(JsonStringToObjectConverter<EntryContent>))]
-    public required EntryContent Content { get; set; }
+    [JsonConverter(typeof(JsonStringToObjectConverterFactory))]
+    public required EntryContent<TContext> Content { get; set; }
 
     public DateTime Updated { get; set; }
     public DateTime Published { get; set; }
@@ -39,12 +39,33 @@ public class Entry
     public List<Author> Authors { get; set; } = new List<Author>();
 }
 
-public class EntryContent
+public class JsonStringToObjectConverterFactory : JsonConverterFactory
 {
-    public List<DeltaContext> Context { get; set; } = new List<DeltaContext>();
+    public override bool CanConvert(Type typeToConvert)
+    {
+        // Only allows conversions for types implementing IDeltaContext
+        return typeof(IDeltaContext).IsAssignableFrom(typeToConvert);
+    }
+
+    public override JsonConverter? CreateConverter(Type typeToConvert, JsonSerializerOptions options)
+    {
+        // Create and return the generic JsonStringToObjectConverter for the given type
+        var converterType = typeof(JsonStringToObjectConverter<>).MakeGenericType(typeToConvert);
+        return (JsonConverter?)Activator.CreateInstance(converterType);
+    }
 }
 
-public class DeltaContext
+public class EntryContent<TContext> where TContext : IDeltaContext
+{
+    public List<TContext> Context { get; set; } = new List<TContext>();
+}
+
+public interface IDeltaContext
+{
+    public long PersonId { get; set; }
+}
+
+public class NewHireContext : IDeltaContext
 {
     public long PeriodOfServiceId { get; set; }
     public required long PersonId { get; set; }
@@ -59,6 +80,21 @@ public class DeltaContext
     public string? DMLOperation { get; set; }
     public DateTime EffectiveStartDate { get; set; }
     public DateTime EffectiveDate { get; set; }
+}
+
+public class AssignmentContext : IDeltaContext
+{
+    public required long PersonId { get; set; }
+}
+
+public class EmployeeUpdateContext : IDeltaContext
+{
+    public required long PersonId { get; set; }
+}
+
+public class TerminationContext : IDeltaContext
+{
+    public required long PersonId { get; set; }
 }
 
 public class DeltaLink

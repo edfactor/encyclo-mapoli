@@ -16,18 +16,18 @@ public class AtomFeedService
         _logger = logger;
     }
 
-    public async IAsyncEnumerable<DeltaContext> GetFeedDataAsync(string feedType, DateTime minDate, DateTime maxDate,
-        [EnumeratorCancellation] CancellationToken cancellationToken)
+    public async IAsyncEnumerable<TContextType> GetFeedDataAsync<TContextType>(string feedType, DateTime minDate, DateTime maxDate,
+        [EnumeratorCancellation] CancellationToken cancellationToken) where TContextType : IDeltaContext
     {
-        var url = $"/hcmRestApi/atomservlet/employee/{feedType}?published-min={minDate:yyyy-MM-ddTHH:mm:ssZ}&published-max={maxDate:yyyy-MM-ddTHH:mm:ssZ}";
+        var url = $"/hcmRestApi/atomservlet/employee/{feedType}?page-size=25&page=1&published-min={minDate:yyyy-MM-ddTHH:mm:ssZ}&published-max={maxDate:yyyy-MM-ddTHH:mm:ssZ}";
 
 
-        AtomFeedResponse? feedRoot = null;
+        AtomFeedResponse<TContextType>? feedRoot = null;
         try
         {
             HttpResponseMessage response = await _httpClient.GetAsync(url, cancellationToken);
             response.EnsureSuccessStatusCode();
-            feedRoot = await response.Content.ReadFromJsonAsync<AtomFeedResponse>(cancellationToken);
+            feedRoot = await response.Content.ReadFromJsonAsync<AtomFeedResponse<TContextType>>(cancellationToken);
         }
         catch (Exception ex)
         {

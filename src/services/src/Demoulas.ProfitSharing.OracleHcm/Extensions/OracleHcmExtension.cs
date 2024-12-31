@@ -67,8 +67,6 @@ public static class OracleHcmExtension
         services.AddSingleton<EmployeeDeltaSyncJob>();
         services.AddSingleton<PayrollSyncJob>();
         services.AddSingleton<DemographicsService>();
-        services.AddSingleton<EmployeeMapper>();
-        services.AddSingleton<SyncJobService>();
 
         // Mappers
         services.AddSingleton<DemographicMapper>();

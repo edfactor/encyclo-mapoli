@@ -1,11 +1,8 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.OracleHcm.Atom;
 using Demoulas.ProfitSharing.OracleHcm.Mappers;
 using EntityFramework.Exceptions.Common;
 using Microsoft.EntityFrameworkCore;
@@ -14,22 +11,19 @@ using Oracle.ManagedDataAccess.Client;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services;
 
-public class DemographicsService : IDemographicsServiceInternal
+internal class DemographicsService : IDemographicsServiceInternal
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly DemographicMapper _mapper;
-    private readonly EmployeeMapper _employeeMapper;
     private readonly ILogger<DemographicsService> _logger;
 
     public DemographicsService(IProfitSharingDataContextFactory dataContextFactory,
         DemographicMapper mapper,
-        EmployeeMapper employeeMapper,
         ILogger<DemographicsService> logger)
     {
         _dataContextFactory = dataContextFactory;
         _mapper = mapper;
         _logger = logger;
-        _employeeMapper = employeeMapper ?? throw new ArgumentNullException(nameof(employeeMapper));
     }
 
     /// <summary>
@@ -62,16 +56,6 @@ public class DemographicsService : IDemographicsServiceInternal
         {
             await UpsertDemographicsAsync(batch, cancellationToken);
         }
-    }
-
-    public Task<DateTime?> GetLastOracleHcmSyncDate(CancellationToken cancellationToken = default)
-    {
-        return _dataContextFactory.UseReadOnlyContext(c =>
-        {
-            return c.Jobs.Where(c =>
-                    c.JobStatusId == JobStatus.Constants.Completed && (c.JobTypeId == JobType.Constants.EmployeeSyncFull || c.JobTypeId == JobType.Constants.PayrollSyncFull))
-                .MaxAsync(j => j.Completed, cancellationToken: cancellationToken);
-        });
     }
 
     /// <summary>
@@ -243,20 +227,5 @@ public class DemographicsService : IDemographicsServiceInternal
         existingEntity.GenderId = incomingEntity.GenderId;
         existingEntity.EmploymentStatusId = incomingEntity.EmploymentStatusId;
         existingEntity.LastModifiedDate = modificationDate;
-    }
-
-    public void ProcessDemographics(DeltaContext record)
-    {
-        try
-        {
-            var mappedRecord = _employeeMapper.MapFromAtomFeed(record);
-
-            // Replace with actual database operation
-            _logger.LogInformation("Processed demographic record for EmployeeId {EmployeeId}", mappedRecord.EmployeeId);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error processing demographic record for PersonId {PersonId}", record.PersonId);
-        }
     }
 }

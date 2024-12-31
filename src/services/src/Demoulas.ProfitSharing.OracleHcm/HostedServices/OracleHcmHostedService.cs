@@ -34,12 +34,14 @@ internal sealed class OracleHcmHostedService : IHostedService
         _scheduler.JobFactory = _jobFactory;
 
         // Schedule all jobs
-        await ScheduleJob<EmployeeFullSyncJob>(
-            "employeeFullSyncTrigger",
-            Debugger.IsAttached ? TimeSpan.Zero : TimeSpan.FromMinutes(5),
-            TimeSpan.FromHours(_oracleHcmConfig.IntervalInHours),
-            cancellationToken
-        );
+        //await ScheduleJob<EmployeeFullSyncJob>(
+        //    "employeeFullSyncTrigger",
+        //    Debugger.IsAttached ? TimeSpan.Zero : TimeSpan.FromMinutes(5),
+        //    TimeSpan.FromHours(_oracleHcmConfig.IntervalInHours),
+        //    cancellationToken
+#pragma warning disable S125
+        //);
+#pragma warning restore S125
 
         await ScheduleJob<EmployeeDeltaSyncJob>(
             "employeeDeltaSyncTrigger",
@@ -48,12 +50,14 @@ internal sealed class OracleHcmHostedService : IHostedService
             cancellationToken
         );
 
-        await ScheduleJob<PayrollSyncJob>(
-            "payrollSyncTrigger",
-            Debugger.IsAttached ? TimeSpan.Zero : TimeSpan.FromMinutes(15),
-            TimeSpan.FromHours(_oracleHcmConfig.IntervalInHours),
-            cancellationToken
-        );
+        //await ScheduleJob<PayrollSyncJob>(
+        //    "payrollSyncTrigger",
+        //    Debugger.IsAttached ? TimeSpan.Zero : TimeSpan.FromMinutes(15),
+        //    TimeSpan.FromHours(_oracleHcmConfig.IntervalInHours),
+        //    cancellationToken
+#pragma warning disable S125
+        //);
+#pragma warning restore S125
 
         await _scheduler.Start(cancellationToken);
     }
