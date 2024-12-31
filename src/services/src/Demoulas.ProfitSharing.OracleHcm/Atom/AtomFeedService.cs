@@ -15,36 +15,30 @@ public class AtomFeedService
         _logger = logger;
     }
 
-    public async IAsyncEnumerable<AtomFeedRecord> GetFeedDataAsync(string feedType, DateTime minDate, DateTime maxDate,
+    public async IAsyncEnumerable<Context> GetFeedDataAsync(string feedType, DateTime minDate, DateTime maxDate,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         var url = $"/hcmRestApi/atomservlet/employee/{feedType}?published-min={minDate:yyyy-MM-ddTHH:mm:ssZ}&published-max={maxDate:yyyy-MM-ddTHH:mm:ssZ}";
 
-        while (!string.IsNullOrWhiteSpace(url))
+
+        AtomFeedResponse? feedRoot = null;
+        try
         {
-            AtomFeedResponse? feedResponse;
-            try
-            {
-                HttpResponseMessage response = await _httpClient.GetAsync(url, cancellationToken);
-                response.EnsureSuccessStatusCode();
-                var str = await response.Content.ReadAsStringAsync(cancellationToken);
-                feedResponse = System.Text.Json.JsonSerializer.Deserialize<AtomFeedResponse>(str);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error fetching Atom feed: {Url}", url);
-                break;
-            }
+            HttpResponseMessage response = await _httpClient.GetAsync(url, cancellationToken);
+            response.EnsureSuccessStatusCode();
+            feedRoot = await response.Content.ReadFromJsonAsync<AtomFeedResponse>(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching Atom feed: {Url}", url);
+        }
 
-            if (feedResponse?.Records != null)
+        if (feedRoot?.Feed.Entries != null)
+        {
+            foreach (var record in feedRoot.Feed.Entries.Select(e => e.Content).SelectMany(c => c.Context)!)
             {
-                foreach (var record in feedResponse.Records)
-                {
-                    yield return record;
-                }
+                yield return record;
             }
-
-            url = feedResponse?.NextPageUrl;
         }
     }
 }

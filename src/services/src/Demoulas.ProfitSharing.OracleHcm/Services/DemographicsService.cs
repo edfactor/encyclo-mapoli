@@ -248,7 +248,7 @@ public class DemographicsService : IDemographicsServiceInternal
         existingEntity.LastModifiedDate = modificationDate;
     }
 
-    public void ProcessDemographicsAsync(AtomFeedRecord record)
+    public void ProcessDemographics(Context record)
     {
         try
         {

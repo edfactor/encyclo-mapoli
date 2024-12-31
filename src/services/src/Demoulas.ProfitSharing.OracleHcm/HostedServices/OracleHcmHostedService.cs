@@ -5,8 +5,8 @@ using Microsoft.Extensions.Hosting;
 using Quartz;
 using Quartz.Spi;
 
-
 namespace Demoulas.ProfitSharing.OracleHcm.HostedServices;
+
 internal sealed class OracleHcmHostedService : IHostedService
 {
     private readonly ISchedulerFactory _schedulerFactory;
@@ -33,13 +33,15 @@ internal sealed class OracleHcmHostedService : IHostedService
         _scheduler = await _schedulerFactory.GetScheduler(cancellationToken);
         _scheduler.JobFactory = _jobFactory;
 
-        // Schedule the recurring job for EmployeeSyncJob
-        var employeeSyncJob = JobBuilder.Create<EmployeeSyncJob>()
-            .WithIdentity(nameof(EmployeeSyncJob))
+        #region Full Sync
+
+        // Schedule the recurring job for EmployeeFullSyncJob
+        var employeeFullSyncJob = JobBuilder.Create<EmployeeFullSyncJob>()
+            .WithIdentity(nameof(EmployeeFullSyncJob))
             .Build();
 
-        var employeeSyncTrigger = TriggerBuilder.Create()
-            .WithIdentity("employeeSyncTrigger")
+        var employeeFullSyncTrigger = TriggerBuilder.Create()
+            .WithIdentity("employeeFullSyncTrigger")
             .StartAt(DateTimeOffset.UtcNow.AddMinutes(Debugger.IsAttached ? 0 : 5))
             .WithSimpleSchedule(x =>
             {
@@ -47,6 +49,28 @@ internal sealed class OracleHcmHostedService : IHostedService
                     .RepeatForever();
             })
             .Build();
+
+        #endregion
+
+        #region Delta Sync ( ATOM Feed )
+
+        // Schedule the recurring job for EmployeeFullSyncJob
+        var employeeDeltaSyncJob = JobBuilder.Create<EmployeeDeltaSyncJob>()
+            .WithIdentity(nameof(EmployeeDeltaSyncJob))
+            .Build();
+
+        var employeeDeltaSyncTrigger = TriggerBuilder.Create()
+            .WithIdentity("employeeDeltaSyncTrigger")
+            .StartAt(DateTimeOffset.UtcNow.AddMinutes(Debugger.IsAttached ? 0 : 5))
+            .WithSimpleSchedule(x =>
+            {
+                x.WithIntervalInMinutes(_oracleHcmConfig.IntervalInHours)
+                    .RepeatForever();
+            })
+            .Build();
+
+        #endregion
+
 
         // Schedule the recurring job for PayrollSyncJob
         var payrollSyncJob = JobBuilder.Create<PayrollSyncJob>()
@@ -63,7 +87,8 @@ internal sealed class OracleHcmHostedService : IHostedService
             })
             .Build();
 
-        await _scheduler.ScheduleJob(employeeSyncJob, employeeSyncTrigger, cancellationToken);
+        await _scheduler.ScheduleJob(employeeFullSyncJob, employeeFullSyncTrigger, cancellationToken);
+        await _scheduler.ScheduleJob(employeeDeltaSyncJob, employeeDeltaSyncTrigger, cancellationToken);
         await _scheduler.ScheduleJob(payrollSyncJob, payrollSyncTrigger, cancellationToken);
 
 
