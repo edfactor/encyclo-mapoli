@@ -33,69 +33,52 @@ internal sealed class OracleHcmHostedService : IHostedService
         _scheduler = await _schedulerFactory.GetScheduler(cancellationToken);
         _scheduler.JobFactory = _jobFactory;
 
-        #region Full Sync ( REST API )
+        // Schedule all jobs
+        await ScheduleJob<EmployeeFullSyncJob>(
+            "employeeFullSyncTrigger",
+            Debugger.IsAttached ? TimeSpan.Zero : TimeSpan.FromMinutes(5),
+            TimeSpan.FromHours(_oracleHcmConfig.IntervalInHours),
+            cancellationToken
+        );
 
-        // Schedule the recurring job for EmployeeFullSyncJob
-        var employeeFullSyncJob = JobBuilder.Create<EmployeeFullSyncJob>()
-            .WithIdentity(nameof(EmployeeFullSyncJob))
-            .Build();
+        await ScheduleJob<EmployeeDeltaSyncJob>(
+            "employeeDeltaSyncTrigger",
+            Debugger.IsAttached ? TimeSpan.Zero : TimeSpan.FromMinutes(5),
+            TimeSpan.FromMinutes(_oracleHcmConfig.IntervalInHours),
+            cancellationToken
+        );
 
-        var employeeFullSyncTrigger = TriggerBuilder.Create()
-            .WithIdentity("employeeFullSyncTrigger")
-            .StartAt(DateTimeOffset.UtcNow.AddMinutes(Debugger.IsAttached ? 0 : 5))
-            .WithSimpleSchedule(x =>
-            {
-                x.WithIntervalInHours(_oracleHcmConfig.IntervalInHours)
-                    .RepeatForever();
-            })
-            .Build();
-
-        #endregion
-
-        #region Delta Sync ( ATOM Feed )
-
-        // Schedule the recurring job for EmployeeFullSyncJob
-        var employeeDeltaSyncJob = JobBuilder.Create<EmployeeDeltaSyncJob>()
-            .WithIdentity(nameof(EmployeeDeltaSyncJob))
-            .Build();
-
-        var employeeDeltaSyncTrigger = TriggerBuilder.Create()
-            .WithIdentity("employeeDeltaSyncTrigger")
-            .StartAt(DateTimeOffset.UtcNow.AddMinutes(Debugger.IsAttached ? 0 : 5))
-            .WithSimpleSchedule(x =>
-            {
-                x.WithIntervalInMinutes(_oracleHcmConfig.IntervalInHours)
-                    .RepeatForever();
-            })
-            .Build();
-
-        #endregion
-
-        #region Payroll Sync ( REST API )
-
-        // Schedule the recurring job for PayrollSyncJob
-        var payrollSyncJob = JobBuilder.Create<PayrollSyncJob>()
-            .WithIdentity(nameof(PayrollSyncJob))
-            .Build();
-
-        var payrollSyncTrigger = TriggerBuilder.Create()
-            .WithIdentity("payrollSyncTrigger")
-            .StartAt(DateTimeOffset.UtcNow.AddMinutes(Debugger.IsAttached ? 0 : 15))
-            .WithSimpleSchedule(x =>
-            {
-                x.WithIntervalInHours(_oracleHcmConfig.IntervalInHours)
-                    .RepeatForever();
-            })
-            .Build();
-
-        #endregion
-
-        await _scheduler.ScheduleJob(employeeFullSyncJob, employeeFullSyncTrigger, cancellationToken);
-        await _scheduler.ScheduleJob(employeeDeltaSyncJob, employeeDeltaSyncTrigger, cancellationToken);
-        await _scheduler.ScheduleJob(payrollSyncJob, payrollSyncTrigger, cancellationToken);
-
+        await ScheduleJob<PayrollSyncJob>(
+            "payrollSyncTrigger",
+            Debugger.IsAttached ? TimeSpan.Zero : TimeSpan.FromMinutes(15),
+            TimeSpan.FromHours(_oracleHcmConfig.IntervalInHours),
+            cancellationToken
+        );
 
         await _scheduler.Start(cancellationToken);
+    }
+
+    private Task ScheduleJob<TJob>(
+        string triggerIdentity,
+        TimeSpan startDelay,
+        TimeSpan interval,
+        CancellationToken cancellationToken
+    ) where TJob : IJob
+    {
+        var job = JobBuilder.Create<TJob>()
+            .WithIdentity(typeof(TJob).Name)
+            .Build();
+
+        var trigger = TriggerBuilder.Create()
+            .WithIdentity(triggerIdentity)
+            .StartAt(DateTimeOffset.UtcNow.Add(startDelay))
+            .WithSimpleSchedule(x => x
+                .WithInterval(interval)
+                .RepeatForever()
+            )
+            .Build();
+
+        return _scheduler!.ScheduleJob(job, trigger, cancellationToken);
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
