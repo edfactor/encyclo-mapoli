@@ -1,17 +1,18 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Atom;
-using Demoulas.ProfitSharing.Services.Mappers;
+using Demoulas.ProfitSharing.OracleHcm.Mappers;
 using EntityFramework.Exceptions.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Oracle.ManagedDataAccess.Client;
 
-namespace Demoulas.ProfitSharing.Services;
+namespace Demoulas.ProfitSharing.OracleHcm.Services;
 
 public class DemographicsService : IDemographicsServiceInternal
 {
@@ -201,11 +202,7 @@ public class DemographicsService : IDemographicsServiceInternal
                     }
 
                     // Update the rest of the entity's fields
-                    var updateHistory = false;
-                    if (!Demographic.DemographicHistoryEqual(existingEntity, incomingEntity))
-                    {
-                        updateHistory = true;
-                    }
+                    bool updateHistory = !Demographic.DemographicHistoryEqual(existingEntity, incomingEntity);
 
                     UpdateEntityValues(existingEntity, incomingEntity, currentModificationDate);
                     if (updateHistory)
@@ -248,7 +245,7 @@ public class DemographicsService : IDemographicsServiceInternal
         existingEntity.LastModifiedDate = modificationDate;
     }
 
-    public void ProcessDemographics(Context record)
+    public void ProcessDemographics(DeltaContext record)
     {
         try
         {

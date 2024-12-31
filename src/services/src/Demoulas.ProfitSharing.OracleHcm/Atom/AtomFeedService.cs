@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
+using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Atom;
@@ -15,7 +16,7 @@ public class AtomFeedService
         _logger = logger;
     }
 
-    public async IAsyncEnumerable<Context> GetFeedDataAsync(string feedType, DateTime minDate, DateTime maxDate,
+    public async IAsyncEnumerable<DeltaContext> GetFeedDataAsync(string feedType, DateTime minDate, DateTime maxDate,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         var url = $"/hcmRestApi/atomservlet/employee/{feedType}?published-min={minDate:yyyy-MM-ddTHH:mm:ssZ}&published-max={maxDate:yyyy-MM-ddTHH:mm:ssZ}";

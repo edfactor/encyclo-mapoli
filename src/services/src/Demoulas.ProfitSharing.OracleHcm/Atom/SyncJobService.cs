@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Microsoft.Extensions.Logging;
 
@@ -60,8 +61,8 @@ public sealed class SyncJobService
     }
 
 
-    private static async IAsyncEnumerable<Context> MergeAsyncEnumerables(IAsyncEnumerable<Context> first, IAsyncEnumerable<Context> second,
-        IAsyncEnumerable<Context> third, [EnumeratorCancellation] CancellationToken cancellationToken)
+    private static async IAsyncEnumerable<DeltaContext> MergeAsyncEnumerables(IAsyncEnumerable<DeltaContext> first, IAsyncEnumerable<DeltaContext> second,
+        IAsyncEnumerable<DeltaContext> third, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         await foreach (var item in first.WithCancellation(cancellationToken))
         {

@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Demoulas.ProfitSharing.OracleHcm.Atom;
+namespace Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 
 public class AtomFeedResponse
 {
@@ -35,16 +35,16 @@ public class Entry
 
     public DateTime Updated { get; set; }
     public DateTime Published { get; set; }
-    public List<Link> Links { get; set; } = new List<Link>();
+    public List<DeltaLink> Links { get; set; } = new List<DeltaLink>();
     public List<Author> Authors { get; set; } = new List<Author>();
 }
 
 public class EntryContent
 {
-    public List<Context> Context { get; set; } = new List<Context>();
+    public List<DeltaContext> Context { get; set; } = new List<DeltaContext>();
 }
 
-public class Context
+public class DeltaContext
 {
     public long PeriodOfServiceId { get; set; }
     public required long PersonId { get; set; }
@@ -61,7 +61,7 @@ public class Context
     public DateTime EffectiveDate { get; set; }
 }
 
-public class Link
+public class DeltaLink
 {
     public string? Href { get; set; }
     public string? Rel { get; set; }

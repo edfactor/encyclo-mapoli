@@ -1,10 +1,11 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Atom;
 
 public class EmployeeMapper
 {
-    public DemographicsRequest MapFromAtomFeed(Context record)
+    public DemographicsRequest MapFromAtomFeed(DeltaContext record)
     {
         ArgumentNullException.ThrowIfNull(record);
 

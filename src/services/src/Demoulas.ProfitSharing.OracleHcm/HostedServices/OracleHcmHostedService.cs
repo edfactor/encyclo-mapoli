@@ -33,7 +33,7 @@ internal sealed class OracleHcmHostedService : IHostedService
         _scheduler = await _schedulerFactory.GetScheduler(cancellationToken);
         _scheduler.JobFactory = _jobFactory;
 
-        #region Full Sync
+        #region Full Sync ( REST API )
 
         // Schedule the recurring job for EmployeeFullSyncJob
         var employeeFullSyncJob = JobBuilder.Create<EmployeeFullSyncJob>()
@@ -71,6 +71,7 @@ internal sealed class OracleHcmHostedService : IHostedService
 
         #endregion
 
+        #region Payroll Sync ( REST API )
 
         // Schedule the recurring job for PayrollSyncJob
         var payrollSyncJob = JobBuilder.Create<PayrollSyncJob>()
@@ -86,6 +87,8 @@ internal sealed class OracleHcmHostedService : IHostedService
                     .RepeatForever();
             })
             .Build();
+
+        #endregion
 
         await _scheduler.ScheduleJob(employeeFullSyncJob, employeeFullSyncTrigger, cancellationToken);
         await _scheduler.ScheduleJob(employeeDeltaSyncJob, employeeDeltaSyncTrigger, cancellationToken);

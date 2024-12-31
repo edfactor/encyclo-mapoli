@@ -6,7 +6,7 @@ using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareUpdate;
+namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 
 public class ProfitShareEditEndpoint
     : EndpointWithCsvTotalsBase<ProfitShareUpdateRequest,

@@ -10,9 +10,7 @@ using Demoulas.ProfitSharing.OracleHcm.Jobs;
 using Demoulas.ProfitSharing.OracleHcm.Messaging;
 using Demoulas.ProfitSharing.OracleHcm.Services;
 using Demoulas.ProfitSharing.OracleHcm.Validators;
-using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Caching.Extensions;
-using Demoulas.ProfitSharing.Services.Mappers;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,6 +19,9 @@ using Microsoft.Extensions.Http.Resilience;
 using Quartz;
 using Quartz.Impl;
 using Quartz.Spi;
+using AddressMapper = Demoulas.ProfitSharing.OracleHcm.Mappers.AddressMapper;
+using ContactInfoMapper = Demoulas.ProfitSharing.OracleHcm.Mappers.ContactInfoMapper;
+using DemographicMapper = Demoulas.ProfitSharing.OracleHcm.Mappers.DemographicMapper;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Extensions;
 
