@@ -1,15 +1,10 @@
-﻿using System.Diagnostics;
-using System.Threading;
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Services.ServiceDto;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.ProfitShareUpdate;
 
@@ -237,16 +232,16 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
 
     private async Task<MemberFinancials> ProcessBeneficiary(BeneficiaryFinancials bene, ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
-        var profitDetailTotals =
+        var thisYearsTotals =
             await ProfitDetailTotals.GetProfitDetailTotals(_dbContextFactory, profitShareUpdateRequest.ProfitYear, bene.Ssn, cancellationToken);
-
+        
         MemberTotals memberTotals = new();
         // Yea, this adding and removing ClassActionFundTotal is strange
-        memberTotals.NewCurrentAmount = profitDetailTotals.AllocationsTotal + profitDetailTotals.ClassActionFundTotal +
-                                        (bene.CurrentAmount - profitDetailTotals.ForfeitsTotal -
-                                         profitDetailTotals.PaidAllocationsTotal) -
-                                        profitDetailTotals.DistributionsTotal;
-        memberTotals.NewCurrentAmount -= profitDetailTotals.ClassActionFundTotal;
+        memberTotals.NewCurrentAmount = thisYearsTotals.AllocationsTotal + thisYearsTotals.ClassActionFundTotal +
+                                        (bene.CurrentAmount - thisYearsTotals.ForfeitsTotal -
+                                         thisYearsTotals.PaidAllocationsTotal) -
+                                        thisYearsTotals.DistributionsTotal;
+        memberTotals.NewCurrentAmount -= thisYearsTotals.ClassActionFundTotal;
 
         if (memberTotals.NewCurrentAmount > 0)
         {
@@ -256,7 +251,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
 
         ComputeEarningsBeneficiary(memberTotals, bene, profitShareUpdateRequest);
 
-        return new MemberFinancials(bene, profitDetailTotals, memberTotals);
+        return new MemberFinancials(bene, thisYearsTotals, memberTotals);
     }
 
 
@@ -320,14 +315,13 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
             memberTotals.SecondaryEarningsAmount += profitShareUpdateRequest.AdjustEarningsSecondaryAmount;
             adjustmentsApplied.SecondaryEarningsAmountAdjusted = memberTotals.SecondaryEarningsAmount;
         }
-
-        decimal etvaAfterVestingRulesAdjustedByCaf = AdjustEmployeeEarningsForClassActionFund(empl!, memberTotals, classActionFundTotal);
-
+        
         if (profitShareUpdateRequest.SecondaryEarningsPercent == 0m) // Secondary Earnings
         {
             return;
         }
-
+        
+        decimal etvaAfterVestingRulesAdjustedByCaf = AdjustEmployeeEarningsForClassActionFund(empl!, memberTotals, classActionFundTotal);
         decimal etvaScaled = etvaAfterVestingRulesAdjustedByCaf / memberTotals.PointsDollars;
         decimal etvaSecondaryScaledAmount = Math.Round(memberTotals.SecondaryEarningsAmount * etvaScaled, 2,
             MidpointRounding.AwayFromZero);

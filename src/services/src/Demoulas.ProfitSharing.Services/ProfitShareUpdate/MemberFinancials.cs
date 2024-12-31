@@ -78,12 +78,16 @@ public class MemberFinancials
     public decimal Caf { get; set; }
 
     public decimal EndingBalance =>
-        CurrentAmount + Contributions +
-        Xfer - Pxfer +
-        Earnings + SecondaryEarnings +
-        IncomingForfeitures + Military +
-        Caf -
-        Distributions;
+        CurrentAmount 
+        + Contributions 
+        + Xfer 
+        - Pxfer 
+        + Earnings 
+        + SecondaryEarnings 
+        + IncomingForfeitures 
+        + Military 
+        + Caf 
+        - Distributions;
     
     public bool IsAllZeros() => CurrentAmount == 0m &&
                              Distributions == 0m &&
