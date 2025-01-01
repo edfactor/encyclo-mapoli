@@ -4,7 +4,6 @@ using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.UnitTests.Base;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.IntegrationTests;
 

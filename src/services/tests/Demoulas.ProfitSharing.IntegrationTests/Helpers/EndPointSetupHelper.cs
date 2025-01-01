@@ -5,7 +5,6 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Helpers;
 
@@ -29,7 +28,6 @@ public sealed class EndPointSetupHelper
     {
         var ep = Factory.Create<TEndpoint>(ctx =>
         {
-     
             ctx.Request.Headers.ContentType = "application/json";
             ctx.Request.Headers.Accept = "application/json";
 
@@ -43,11 +41,10 @@ public sealed class EndPointSetupHelper
                 var configuration = configurationBuilder.Build();
                 s.AddSingleton<IConfiguration>(configuration);
 
-               
+
                 s.AddDistributedMemoryCache();
                 s.AddSingleton<IMemoryCache, MemoryCache>();
                 s.AddSingleton<ICacheProvider, MemoryCacheProvider>();
-                
             });
 
             var loggerFactory = ctx.RequestServices.GetRequiredService<ILoggerFactory>();

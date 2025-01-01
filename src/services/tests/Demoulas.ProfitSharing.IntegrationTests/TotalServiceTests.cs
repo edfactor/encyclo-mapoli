@@ -5,7 +5,6 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Oracle.ManagedDataAccess.Client;
-using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.IntegrationTests;
 

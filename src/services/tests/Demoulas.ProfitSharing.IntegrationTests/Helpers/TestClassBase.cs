@@ -2,7 +2,6 @@
 using Demoulas.ProfitSharing.IntegrationTests.Fixtures;
 using FastEndpoints.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Helpers;
 

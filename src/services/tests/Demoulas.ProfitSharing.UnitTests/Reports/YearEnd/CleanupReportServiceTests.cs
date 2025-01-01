@@ -50,7 +50,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         stream.Should().NotBeNull();
 
         using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
-        string result = await reader.ReadToEndAsync();
+        string result = await reader.ReadToEndAsync(TestContext.Current.CancellationToken);
         result.Should().NotBeNullOrEmpty();
 
         _testOutputHelper.WriteLine(result);
@@ -76,7 +76,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
                 dem.Id += (int)lastSevenDigits;
             }
 
-            await c.SaveChangesAsync();
+            await c.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             response = await _cleanupReportClient.GetDemographicBadgesNotInPayProfitAsync(_paginationRequest, CancellationToken.None);
             response.Should().NotBeNull();
@@ -90,7 +90,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             response.Response.Results.Should().HaveCount(1);
 
             _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
-        });
+        }, TestContext.Current.CancellationToken);
     }
 
     [Fact(DisplayName = "PS-151: Demographic badges without payprofit (CSV)")]
@@ -107,22 +107,22 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
                 dem.Id += (int)lastSevenDigits;
             }
 
-            await c.SaveChangesAsync();
+            await c.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-            await c.SaveChangesAsync();
+            await c.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             var stream = await _cleanupReportClient.DownloadDemographicBadgesNotInPayProfit(CancellationToken.None);
             stream.Should().NotBeNull();
 
             using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
-            string result = await reader.ReadToEndAsync();
+            string result = await reader.ReadToEndAsync(TestContext.Current.CancellationToken);
             result.Should().NotBeNullOrEmpty();
 
             var lines = result.Split(Environment.NewLine);
             lines.Count().Should().Be(mismatchedValues + 4);
 
             _testOutputHelper.WriteLine(result);
-        });
+        }, TestContext.Current.CancellationToken);
     }
 
     [Fact(DisplayName = "PS-153: Names without commas (JSON)")]
@@ -144,7 +144,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
                 dem.ContactInfo.FullName = dem.ContactInfo.FullName?.Replace(", ", " ");
             }
 
-            await ctx.SaveChangesAsync();
+            await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             response = await _cleanupReportClient.GetNamesMissingCommaAsync(request, CancellationToken.None);
             response.Should().NotBeNull();
@@ -158,7 +158,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             response.Response.Results.Should().HaveCount(1);
 
             _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
-        });
+        }, TestContext.Current.CancellationToken);
     }
 
     [Fact(DisplayName = "PS-153: Names without commas (CSV)")]
@@ -168,22 +168,23 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         return MockDbContextFactory.UseWritableContext(async ctx =>
         {
             byte disruptedNameCount = 10;
-            await ctx.Demographics.Take(disruptedNameCount).ForEachAsync(dem => { dem.ContactInfo.FullName = dem.ContactInfo.FullName?.Replace(", ", " "); });
+            await ctx.Demographics.Take(disruptedNameCount)
+                .ForEachAsync(dem => { dem.ContactInfo.FullName = dem.ContactInfo.FullName?.Replace(", ", " "); }, TestContext.Current.CancellationToken);
 
-            await ctx.SaveChangesAsync();
+            await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             var stream = await _cleanupReportClient.DownloadNamesMissingComma(CancellationToken.None);
             stream.Should().NotBeNull();
 
             using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
-            string result = await reader.ReadToEndAsync();
+            string result = await reader.ReadToEndAsync(TestContext.Current.CancellationToken);
             result.Should().NotBeNullOrEmpty();
 
             var lines = result.Split(Environment.NewLine);
             lines.Count().Should().Be(disruptedNameCount + 4);
 
             _testOutputHelper.WriteLine(result);
-        });
+        }, TestContext.Current.CancellationToken);
     }
 
     [Fact(DisplayName = "PS-145 : Negative ETVA for SSNs on PayProfit (JSON)")]
@@ -197,10 +198,10 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             {
                 pp.EarningsEtvaValue *= -1;
                 pp.ProfitYear = _paginationRequest.ProfitYear;
-            });
+            }, TestContext.Current.CancellationToken);
 
 
-            await c.SaveChangesAsync();
+            await c.SaveChangesAsync(TestContext.Current.CancellationToken);
 
 
             var response = await _cleanupReportClient.GetNegativeETVAForSSNsOnPayProfitResponseAsync(_paginationRequest, CancellationToken.None);
@@ -217,7 +218,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             response.Response.Results.Should().HaveCount(1);
 
             _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
-        });
+        }, TestContext.Current.CancellationToken);
     }
 
     [Fact(DisplayName = "PS-145 : Negative ETVA for SSNs on PayProfit (CSV)")]
@@ -228,7 +229,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         stream.Should().NotBeNull();
 
         using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
-        string result = await reader.ReadToEndAsync();
+        string result = await reader.ReadToEndAsync(TestContext.Current.CancellationToken);
         result.Should().NotBeNullOrEmpty();
 
         _testOutputHelper.WriteLine(result);
@@ -249,7 +250,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         byte duplicateRows = 5;
         await MockDbContextFactory.UseWritableContext(async c =>
         {
-            var modelDemographic = await c.Demographics.Include(demographic => demographic.ContactInfo).FirstAsync();
+            var modelDemographic = await c.Demographics.Include(demographic => demographic.ContactInfo).FirstAsync(TestContext.Current.CancellationToken);
 
             foreach (var dem in c.Demographics.Take(duplicateRows))
             {
@@ -257,11 +258,11 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
                 dem.ContactInfo.FirstName = modelDemographic.ContactInfo.FirstName;
                 dem.ContactInfo.LastName = modelDemographic.ContactInfo.LastName;
                 dem.ContactInfo.FullName = modelDemographic.ContactInfo.FullName;
-                dem.PayProfits[0]!.ProfitYear = _paginationRequest.ProfitYear;
+                dem.PayProfits[0].ProfitYear = _paginationRequest.ProfitYear;
             }
 
-            await c.SaveChangesAsync();
-        });
+            await c.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }, TestContext.Current.CancellationToken);
 
         response = await _cleanupReportClient.GetDuplicateNamesAndBirthdaysAsync(request, CancellationToken.None);
         response.Should().NotBeNull();
@@ -284,7 +285,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         byte duplicateRows = 5;
         await MockDbContextFactory.UseWritableContext(async c =>
         {
-            var modelDemographic = await c.Demographics.Include(demographic => demographic.ContactInfo).FirstAsync();
+            var modelDemographic = await c.Demographics.Include(demographic => demographic.ContactInfo).FirstAsync(TestContext.Current.CancellationToken);
 
             foreach (var dem in c.Demographics.Take(duplicateRows))
             {
@@ -292,17 +293,17 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
                 dem.ContactInfo.FirstName = modelDemographic.ContactInfo.FirstName;
                 dem.ContactInfo.LastName = modelDemographic.ContactInfo.LastName;
                 dem.ContactInfo.FullName = modelDemographic.ContactInfo.FullName;
-                dem.PayProfits[0]!.ProfitYear = _paginationRequest.ProfitYear;
+                dem.PayProfits[0].ProfitYear = _paginationRequest.ProfitYear;
             }
 
-            await c.SaveChangesAsync();
-        });
+            await c.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }, TestContext.Current.CancellationToken);
 
         var stream = await _cleanupReportClient.DownloadDuplicateNamesAndBirthdays(_paginationRequest.ProfitYear, CancellationToken.None);
         stream.Should().NotBeNull();
 
         using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
-        string result = await reader.ReadToEndAsync();
+        string result = await reader.ReadToEndAsync(TestContext.Current.CancellationToken);
         result.Should().NotBeNullOrEmpty();
 
         var lines = result.Split(Environment.NewLine);
@@ -349,20 +350,20 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             }
 
             //Setup employee to be returned
-            var payProfit = await ctx.PayProfits.Include(payProfit => payProfit.Demographic).FirstAsync();
+            var payProfit = await ctx.PayProfits.Include(payProfit => payProfit.Demographic).FirstAsync(TestContext.Current.CancellationToken);
             var emp = payProfit.Demographic;
-            var empH = await ctx.DemographicHistories.FirstAsync(x => x.DemographicId == emp!.Id);
+            var empH = await ctx.DemographicHistories.FirstAsync(x => x.DemographicId == emp!.Id, TestContext.Current.CancellationToken);
 
             emp!.EmploymentStatusId = 'a';
-            emp!.DateOfBirth = new DateOnly(DateTime.Now.Year - 28, 9, 21);
-            empH.EmploymentStatusId = emp!.EmploymentStatusId;
-            empH.DateOfBirth = emp!.DateOfBirth;
+            emp.DateOfBirth = new DateOnly(DateTime.Now.Year - 28, 9, 21);
+            empH.EmploymentStatusId = emp.EmploymentStatusId;
+            empH.DateOfBirth = emp.DateOfBirth;
 
             payProfit.ProfitYear = profitYear;
             payProfit.CurrentHoursYear = testHours;
             payProfit.HoursExecutive = 0;
 
-            var profitDetails = await ctx.ProfitDetails.Where(x => x.Ssn == emp!.Ssn).ToListAsync(TestContext.Current.CancellationToken);
+            var profitDetails = await ctx.ProfitDetails.Where(x => x.Ssn == emp.Ssn).ToListAsync(TestContext.Current.CancellationToken);
             foreach (var pd in profitDetails.Skip(2))
             {
                 pd.Ssn = 0; //Reset the profit detail records
@@ -377,8 +378,8 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             profitDetails[1].ProfitCodeId = ProfitCode.Constants.IncomingContributions.Id;
             profitDetails[1].ProfitCode = ProfitCode.Constants.IncomingContributions;
 
-            await ctx.SaveChangesAsync();
-        });
+            await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }, TestContext.Current.CancellationToken);
 
         var response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, ReportResponseBase<YearEndProfitSharingReportResponse>>(req);
 
@@ -393,14 +394,14 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         await MockDbContextFactory.UseWritableContext(async ctx =>
         {
             //Setup employee to be returned
-            var payProfit = await ctx.PayProfits.Include(payProfit => payProfit.Demographic).FirstAsync();
+            var payProfit = await ctx.PayProfits.Include(payProfit => payProfit.Demographic).FirstAsync(TestContext.Current.CancellationToken);
             var emp = payProfit.Demographic;
-            var empH = await ctx.DemographicHistories.FirstAsync(x => x.DemographicId == emp!.Id);
+            var empH = await ctx.DemographicHistories.FirstAsync(x => x.DemographicId == emp!.Id, TestContext.Current.CancellationToken);
 
             emp!.DateOfBirth = new DateOnly(DateTime.Now.Year - 15, 9, 21);
-            empH.DateOfBirth = emp!.DateOfBirth;
-            await ctx.SaveChangesAsync();
-        });
+            empH.DateOfBirth = emp.DateOfBirth;
+            await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }, TestContext.Current.CancellationToken);
 
         response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, ReportResponseBase<YearEndProfitSharingReportResponse>>(req);
 
@@ -414,13 +415,13 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         await MockDbContextFactory.UseWritableContext(async ctx =>
         {
             //Setup employee to be returned
-            var payProfit = await ctx.PayProfits.Include(payProfit => payProfit.Demographic).FirstAsync();
+            var payProfit = await ctx.PayProfits.Include(payProfit => payProfit.Demographic).FirstAsync(TestContext.Current.CancellationToken);
             var emp = payProfit.Demographic;
 
             emp!.DateOfBirth = new DateOnly(DateTime.Now.Year - 28, 9, 21);
             payProfit.CurrentHoursYear = 50;
-            await ctx.SaveChangesAsync();
-        });
+            await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }, TestContext.Current.CancellationToken);
 
         response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, ReportResponseBase<YearEndProfitSharingReportResponse>>(req);
 
@@ -458,20 +459,20 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             }
 
             //Setup employee to be returned
-            var payProfit = await ctx.PayProfits.Include(payProfit => payProfit.Demographic).FirstAsync();
+            var payProfit = await ctx.PayProfits.Include(payProfit => payProfit.Demographic).FirstAsync(TestContext.Current.CancellationToken);
             var emp = payProfit.Demographic;
-            var empH = await ctx.DemographicHistories.FirstAsync(x => x.DemographicId == emp!.Id);
+            var empH = await ctx.DemographicHistories.FirstAsync(x => x.DemographicId == emp!.Id, TestContext.Current.CancellationToken);
 
             emp!.EmploymentStatusId = 'a';
-            emp!.DateOfBirth = new DateOnly(DateTime.Now.Year - 28, 9, 21);
-            empH.EmploymentStatusId = emp!.EmploymentStatusId;
-            empH.DateOfBirth = emp!.DateOfBirth;
+            emp.DateOfBirth = new DateOnly(DateTime.Now.Year - 28, 9, 21);
+            empH.EmploymentStatusId = emp.EmploymentStatusId;
+            empH.DateOfBirth = emp.DateOfBirth;
 
             payProfit.ProfitYear = profitYear;
             payProfit.CurrentHoursYear = testHours;
             payProfit.HoursExecutive = 0;
 
-            var profitDetails = await ctx.ProfitDetails.Where(x => x.Ssn == emp!.Ssn).ToListAsync(TestContext.Current.CancellationToken);
+            var profitDetails = await ctx.ProfitDetails.Where(x => x.Ssn == emp.Ssn).ToListAsync(TestContext.Current.CancellationToken);
             foreach (var pd in profitDetails.Skip(2))
             {
                 pd.Ssn = 0; //Reset the profit detail records
@@ -486,8 +487,8 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             profitDetails[1].ProfitCodeId = ProfitCode.Constants.IncomingContributions.Id;
             profitDetails[1].ProfitCode = ProfitCode.Constants.IncomingContributions;
 
-            await ctx.SaveChangesAsync();
-        });
+            await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }, TestContext.Current.CancellationToken);
 
         var response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, ReportResponseBase<YearEndProfitSharingReportResponse>>(req);
         response.Should().NotBeNull();
@@ -553,17 +554,17 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
                 ben.PsnSuffix = -1;
             }
 
-            await ctx.SaveChangesAsync();
-        });
+            await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }, TestContext.Current.CancellationToken);
         var distributionProfitCodes = new[] { 1, 3, 9 }; //Test to see that the forfeiture ends up in the right column for these codes.
         foreach (var profitCode in distributionProfitCodes)
         {
             await MockDbContextFactory.UseWritableContext(async ctx =>
             {
-                var demographic = await ctx.Demographics.FirstAsync();
+                var demographic = await ctx.Demographics.FirstAsync(TestContext.Current.CancellationToken);
                 demographic.Ssn = 1001;
 
-                var profitDetail = await ctx.ProfitDetails.FirstAsync();
+                var profitDetail = await ctx.ProfitDetails.FirstAsync(TestContext.Current.CancellationToken);
 
                 profitDetail.ProfitYear = (short)(DateTime.Now.Year - 1);
                 profitDetail.ProfitYearIteration = 0;
@@ -578,8 +579,8 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
                 profitDetail.Ssn = demographic.Ssn;
                 profitDetail.DistributionSequence = 6011;
 
-                await ctx.SaveChangesAsync();
-            });
+                await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
+            }, TestContext.Current.CancellationToken);
             response = await _cleanupReportClient.GetDistributionsAndForfeitureAsync(req, CancellationToken.None);
 
             response.Should().NotBeNull();
@@ -593,11 +594,11 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
 
         await MockDbContextFactory.UseWritableContext(async ctx =>
         {
-            var profitDetail = await ctx.ProfitDetails.FirstAsync();
+            var profitDetail = await ctx.ProfitDetails.FirstAsync(TestContext.Current.CancellationToken);
 
             profitDetail.ProfitCodeId = 2; //This profit code should end up in the forfeit column
-            await ctx.SaveChangesAsync();
-        });
+            await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }, TestContext.Current.CancellationToken);
 
         response = await _cleanupReportClient.GetDistributionsAndForfeitureAsync(req, CancellationToken.None);
 
@@ -610,11 +611,11 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
 
         await MockDbContextFactory.UseWritableContext(async ctx =>
         {
-            var profitDetail = await ctx.ProfitDetails.FirstAsync();
+            var profitDetail = await ctx.ProfitDetails.FirstAsync(TestContext.Current.CancellationToken);
 
             profitDetail.ProfitCodeId = 6; //This profit code shouldn't be in the report
-            await ctx.SaveChangesAsync();
-        });
+            await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }, TestContext.Current.CancellationToken);
 
         response = await _cleanupReportClient.GetDistributionsAndForfeitureAsync(req, CancellationToken.None);
 
@@ -625,12 +626,12 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
 
         await MockDbContextFactory.UseWritableContext(async ctx =>
         {
-            var profitDetail = await ctx.ProfitDetails.FirstAsync();
+            var profitDetail = await ctx.ProfitDetails.FirstAsync(TestContext.Current.CancellationToken);
 
             profitDetail.ProfitCodeId = 9; //This profit code shouldn't be in the report if is a transfer
             profitDetail.CommentTypeId = CommentType.Constants.TransferOut;
-            await ctx.SaveChangesAsync();
-        });
+            await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }, TestContext.Current.CancellationToken);
 
         response = await _cleanupReportClient.GetDistributionsAndForfeitureAsync(req, CancellationToken.None);
 

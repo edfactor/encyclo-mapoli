@@ -1,8 +1,12 @@
 ﻿using System.Globalization;
 using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Data.Services.Service;
+using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.NotOwned;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Base;
 using Demoulas.ProfitSharing.UnitTests.Extensions;
@@ -10,13 +14,10 @@ using FastEndpoints;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
-using Demoulas.Common.Data.Services.Service;
-using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.UnitTests;
 
-public class CalendarServiceTests : ApiTestBase<Api.Program>
+public class CalendarServiceTests : ApiTestBase<Program>
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
 
@@ -30,7 +31,7 @@ public class CalendarServiceTests : ApiTestBase<Api.Program>
     [Fact(DisplayName = "Check Calendar can be accessed")]
     public async Task CheckCalendarAccess()
     {
-        long count = await _dataContextFactory.UseReadOnlyContext(c => c.AccountingPeriods.LongCountAsync());
+        long count = await _dataContextFactory.UseReadOnlyContext(c => c.AccountingPeriods.LongCountAsync(TestContext.Current.CancellationToken));
 
         count.ShouldBeEquivalentTo(CaldarRecordSeeder.Records.Length);
     }
@@ -46,7 +47,7 @@ public class CalendarServiceTests : ApiTestBase<Api.Program>
         var date = DateOnly.ParseExact(sDate, "yyMMdd", CultureInfo.InvariantCulture);
         var calendarService = ServiceProvider?.GetRequiredService<ICalendarService>()!;
 
-        var weekEndingDate = await calendarService.FindWeekendingDateFromDateAsync(date);
+        var weekEndingDate = await calendarService.FindWeekendingDateFromDateAsync(date, TestContext.Current.CancellationToken);
 
         weekEndingDate.Should().BeOnOrAfter(date);
 
@@ -59,7 +60,7 @@ public class CalendarServiceTests : ApiTestBase<Api.Program>
     {
         var invalidDate = DateOnly.MaxValue;
         var calendarService = ServiceProvider?.GetRequiredService<ICalendarService>()!;
-        Func<Task> act = async () => await calendarService.FindWeekendingDateFromDateAsync(invalidDate);
+        Func<Task> act = async () => await calendarService.FindWeekendingDateFromDateAsync(invalidDate, TestContext.Current.CancellationToken);
         return act.Should().ThrowAsync<Exception>();
     }
 
@@ -69,7 +70,7 @@ public class CalendarServiceTests : ApiTestBase<Api.Program>
     {
         var futureDate = DateOnly.FromDateTime(DateTime.Now.AddYears(6));
         var calendarService = ServiceProvider?.GetRequiredService<ICalendarService>()!;
-        Func<Task> act = async () => await calendarService.FindWeekendingDateFromDateAsync(futureDate);
+        Func<Task> act = async () => await calendarService.FindWeekendingDateFromDateAsync(futureDate, TestContext.Current.CancellationToken);
         return act.Should().ThrowAsync<ArgumentOutOfRangeException>()
             .WithMessage($"{AccountingPeriodsService.InvalidDateError} (Parameter 'dateTime')");
     }
@@ -91,7 +92,7 @@ public class CalendarServiceTests : ApiTestBase<Api.Program>
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         TestResult<CalendarResponseDto> response =
             await ApiClient
-                .GETAsync<CalendarRecordEndpoint, CalendarRequestDto, CalendarResponseDto>(new CalendarRequestDto { ProfitYear = 2023});
+                .GETAsync<CalendarRecordEndpoint, CalendarRequestDto, CalendarResponseDto>(new CalendarRequestDto { ProfitYear = 2023 });
 
         response.Result.Should().NotBeNull();
         response.Result.FiscalBeginDate.Should().NotBeOnOrBefore(DateOnly.MinValue);

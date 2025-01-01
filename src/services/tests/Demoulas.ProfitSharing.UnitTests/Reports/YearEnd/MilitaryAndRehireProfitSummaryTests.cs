@@ -63,7 +63,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Program>
             // Assert
             response.Result.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
             response.Result.Response.Results.Should().HaveCountGreaterThan(expectedResponse.Response.Results.Count());
-        });
+        }, TestContext.Current.CancellationToken);
     }
 
     [Fact(DisplayName = "PS-346: Check for Military (CSV)")]
@@ -78,7 +78,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Program>
             var response = await DownloadClient.GETAsync<MilitaryAndRehireProfitSummaryEndpoint, ProfitYearRequest, StreamContent>(setup.Request);
             response.Response.Content.Should().NotBeNull();
 
-            string result = await response.Response.Content.ReadAsStringAsync();
+            string result = await response.Response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
             result.Should().NotBeNullOrEmpty();
 
             // Assert CSV format
@@ -103,7 +103,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Program>
             headers.Should().NotBeNull();
             headers.Should().ContainInOrder("", "", "BADGE", "SSN", "NAME", "STR", "HIRE DT", "REHIRE DT", "TERM DT", "STATUS", "BEG BAL", "BEG VEST", "CUR HRS", "PLAN YEARS",
                 "ENROLL", "YEAR", "CMNT", "FORT AMT");
-        });
+        }, TestContext.Current.CancellationToken);
     }
 
 
@@ -171,7 +171,8 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Program>
         reportFileName.Should().Be("MILITARY TERM-REHIRE");
     }
 
-    private static async Task<(ProfitYearRequest Request, MilitaryAndRehireProfitSummaryResponse ExpectedResponse)> SetupTestEmployee(ProfitSharingDbContext c, CancellationToken cancellationToken)
+    private static async Task<(ProfitYearRequest Request, MilitaryAndRehireProfitSummaryResponse ExpectedResponse)> SetupTestEmployee(ProfitSharingDbContext c,
+        CancellationToken cancellationToken)
     {
         // Setup
         MilitaryAndRehireProfitSummaryResponse example = MilitaryAndRehireProfitSummaryResponse.ResponseExample();

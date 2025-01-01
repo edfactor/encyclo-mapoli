@@ -9,7 +9,6 @@ using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports;
 

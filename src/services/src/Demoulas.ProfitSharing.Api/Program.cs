@@ -13,6 +13,7 @@ using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.Security;
 using Demoulas.Util.Extensions;
+using FastEndpoints;
 using Microsoft.AspNetCore.Authentication;
 using NSwag.Generation.AspNetCore;
 
@@ -102,6 +103,7 @@ if (app.Environment.IsDevelopment() && Debugger.IsAttached)
 app.UseCors();
 
 app.UseDefaultEndpoints(OktaSettingsAction)
+    .UseDefaultExceptionHandler()
     .UseReDoc(settings =>
     {
         settings.Path = "/redoc";

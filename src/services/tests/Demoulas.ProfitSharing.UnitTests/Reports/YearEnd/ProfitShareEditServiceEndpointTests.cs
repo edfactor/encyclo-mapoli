@@ -70,7 +70,7 @@ public sealed class ProfitShareEditServiceEndpointTests : ApiTestBase<Program>
         DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
         // Act
-        TestResult<StreamContent> response = await DownloadClient.GETAsync<ProfitShareEditEndpoint, ProfitShareUpdateRequest, StreamContent>(req, TestContext.Current.CancellationToken);
+        TestResult<StreamContent> response = await DownloadClient.GETAsync<ProfitShareEditEndpoint, ProfitShareUpdateRequest, StreamContent>(req);
 
         string result = await response.Response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
         result.Should().NotBeNullOrEmpty();
