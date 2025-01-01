@@ -26,8 +26,7 @@ public class TerminatedEmployeeAndBeneficiaryReportService : ITerminatedEmployee
 
     public Task<TerminatedEmployeeAndBeneficiaryResponse> GetReportAsync(ProfitYearRequest req, CancellationToken ct)
     {
-        TerminatedEmployeeAndBeneficiaryReport reportGenerator =
-            new TerminatedEmployeeAndBeneficiaryReport(_dataContextFactory, _calendarService, _totalService, _contributionService);
+        TerminatedEmployeeAndBeneficiaryReport reportGenerator = new (_dataContextFactory, _calendarService, _totalService, _contributionService);
         return reportGenerator.CreateDataAsync(req, ct);
     }
 }
