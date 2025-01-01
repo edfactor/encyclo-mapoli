@@ -4,27 +4,12 @@ using FastEndpoints;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Helpers;
 
-public sealed class EndPointSetupHelper
+public static class EndPointSetupHelper
 {
-    private readonly ITestOutputHelper _outputHelper;
-
-    private EndPointSetupHelper(ITestOutputHelper outputHelper)
-    {
-        _outputHelper = outputHelper;
-    }
-
-    public static EndPointSetupHelper CreateInstance(ITestOutputHelper? outputHelper)
-    {
-        ArgumentNullException.ThrowIfNull(outputHelper);
-
-        return new EndPointSetupHelper(outputHelper);
-    }
-
-    public TEndpoint Create<TEndpoint>() where TEndpoint : class, IEndpoint
+    public static TEndpoint Create<TEndpoint>() where TEndpoint : class, IEndpoint
     {
         var ep = Factory.Create<TEndpoint>(ctx =>
         {
@@ -46,9 +31,6 @@ public sealed class EndPointSetupHelper
                 s.AddSingleton<IMemoryCache, MemoryCache>();
                 s.AddSingleton<ICacheProvider, MemoryCacheProvider>();
             });
-
-            var loggerFactory = ctx.RequestServices.GetRequiredService<ILoggerFactory>();
-            loggerFactory.AddXUnit(_outputHelper, LogLevel.Debug);
         });
 
         return ep;

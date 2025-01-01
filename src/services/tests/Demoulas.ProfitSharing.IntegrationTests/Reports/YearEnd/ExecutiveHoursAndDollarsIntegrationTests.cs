@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Demoulas.ProfitSharing.Api;
+﻿using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ExecutiveHoursAndDollars;
 using Demoulas.ProfitSharing.Security;
@@ -28,7 +27,7 @@ public class ExecutiveHoursAndDollarsIntegrationTests : ApiIntegrationTestBase<P
                 new ExecutiveHoursAndDollarsRequest { ProfitYear = YearThis, HasExecutiveHoursAndDollars = true });
 
         // Assert
-        string csvData = await response.Response.Content.ReadAsStringAsync();
+        string csvData = await response.Response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 
         // Break CVS into lines
         var lines = csvData.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
@@ -58,7 +57,7 @@ public class ExecutiveHoursAndDollarsIntegrationTests : ApiIntegrationTestBase<P
                 new ExecutiveHoursAndDollarsRequest { ProfitYear = YearLast, HasExecutiveHoursAndDollars = true });
 
         // Assert
-        string csvData = await response.Response.Content.ReadAsStringAsync();
+        string csvData = await response.Response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 
         // Break CVS into lines
         var lines = csvData.Split(["\r\n", "\n"], StringSplitOptions.None);

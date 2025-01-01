@@ -2,7 +2,6 @@
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.ServiceDto;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Oracle.ManagedDataAccess.Client;
 
@@ -55,7 +54,7 @@ public class TotalServiceIntegrationTests
             {
                 if (entry.Value.Years != 0)
                 {
-                    _output.WriteLine("ERROR!: badge =" + entry.Key + " missing in SMART/GYOS");
+                    _output.WriteLine($"ERROR!: badge ={entry.Key} missing in SMART/GYOS");
                 }
             }
             else
@@ -65,8 +64,7 @@ public class TotalServiceIntegrationTests
 
             if (!ssnToSmartTotals.ContainsKey(entry.Value.Ssn))
             {
-                _output.WriteLine("ssn =" + (long)entry.Value.Ssn + " missing in Smart TOTALS.    READY has Amt:" +
-                                  entry.Value.Amount + " Etv:" + entry.Value.Etva);
+                _output.WriteLine($"ssn ={(long)entry.Value.Ssn} missing in Smart TOTALS.    READY has Amt:{entry.Value.Amount} Etv:{entry.Value.Etva}");
             }
             else
             {
@@ -76,9 +74,9 @@ public class TotalServiceIntegrationTests
             }
         }
 
-        _output.WriteLine("YIS Disagree count " + yisDisagree + "   Agree count " + yisAgree);
-        _output.WriteLine("Amt Disagree count " + netBalDisagree + "   Agree count " + netBalAgree);
-        _output.WriteLine("Etva Disagree count " + etvaDisagree + "   Agree count " + etvaAgree);
+        _output.WriteLine($"YIS Disagree count {yisDisagree}   Agree count {yisAgree}");
+        _output.WriteLine($"Amt Disagree count {netBalDisagree}   Agree count {netBalAgree}");
+        _output.WriteLine($"Etva Disagree count {etvaDisagree}   Agree count {etvaAgree}");
         true.Should().Be(true);
     }
 
@@ -100,7 +98,7 @@ public class TotalServiceIntegrationTests
                     elementSelector: p => (int)p.Years // Use Years as the value
                 );
 
-            _output.WriteLine("SMART data count " + ddata.Count);
+            _output.WriteLine($"SMART data count {ddata.Count}");
 
 
             return ddata;
@@ -146,7 +144,7 @@ public class TotalServiceIntegrationTests
             data.Add(badge, pp);
         }
 
-        _output.WriteLine("READY data count " + data.Count);
+        _output.WriteLine($"READY data count {data.Count}");
 
         return data;
     }

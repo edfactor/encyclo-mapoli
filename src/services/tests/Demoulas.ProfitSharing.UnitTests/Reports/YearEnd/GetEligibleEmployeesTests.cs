@@ -111,9 +111,9 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
             lines[0].Should().NotBeEmpty();
             lines[1].Should().Be($"Get Eligible Employees for Year {TestProfitYear}");
             lines[2].Should().BeEmpty(); // blank link
-            lines[3].Should().Be("Number read on FROZEN," + numberReadOnFrozen);
-            lines[4].Should().Be("Number not selected," + numberNotSelected);
-            lines[5].Should().Be("Number written," + numberWritten);
+            lines[3].Should().Be($"Number read on FROZEN,{numberReadOnFrozen}");
+            lines[4].Should().Be($"Number not selected,{numberNotSelected}");
+            lines[5].Should().Be($"Number written,{numberWritten}");
 
             lines[6].Should().Be("ORACLE_HCM_ID,BADGE_PSN,NAME");
 

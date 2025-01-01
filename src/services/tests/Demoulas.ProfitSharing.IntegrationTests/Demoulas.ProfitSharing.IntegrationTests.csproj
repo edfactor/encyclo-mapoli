@@ -8,6 +8,8 @@
     <IsTestProject>true</IsTestProject>
     <Configurations>Debug;Release</Configurations>
     <IntegraionTest>true</IntegraionTest>
+    <OutputType>Exe</OutputType>
+    <GenerateProgramFile>false</GenerateProgramFile>
   </PropertyGroup>
 
   <ItemGroup>

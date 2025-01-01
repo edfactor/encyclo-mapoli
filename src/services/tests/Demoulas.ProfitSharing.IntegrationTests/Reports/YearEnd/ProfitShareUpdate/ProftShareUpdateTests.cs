@@ -170,7 +170,7 @@ public class ProfitShareUpdateTests
     public static string LoadExpectedReport(string resourceName)
     {
         using (Stream? stream = Assembly.GetExecutingAssembly()
-                   .GetManifestResourceStream("Demoulas.ProfitSharing.IntegrationTests.Resources." + resourceName))
+                   .GetManifestResourceStream($"Demoulas.ProfitSharing.IntegrationTests.Resources.{resourceName}"))
         using (StreamReader reader = new(stream!))
         {
             return reader.ReadToEnd().Replace("\r", "");
@@ -216,8 +216,8 @@ public class ProfitShareUpdateTests
                         EtvaAfterVestingRules = tvb == null ? 0 : tvb.Etva
                     }
                 )
-                .ToListAsync();
+                .ToListAsync(TestContext.Current.CancellationToken);
         });
-        _testOutputHelper.WriteLine("Total employees " + employeeFinancialsList.Count);
+        _testOutputHelper.WriteLine($"Total employees {employeeFinancialsList.Count}");
     }
 }
