@@ -146,7 +146,7 @@ public class GetEligibleEmployeesTests : ApiTestBase<Api.Program>
                 .NotContain(e => e.BadgeNumber == te.BadgeNumber);
 
             return Task.CompletedTask;
-        });
+        }, TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -170,7 +170,7 @@ public class GetEligibleEmployeesTests : ApiTestBase<Api.Program>
                 .NotContain(e => e.BadgeNumber == te.BadgeNumber);
 
             return Task.CompletedTask;
-        });
+        }, TestContext.Current.CancellationToken);
     }
     [Fact]
     public Task employee_terminated()
@@ -227,7 +227,7 @@ public class GetEligibleEmployeesTests : ApiTestBase<Api.Program>
         // The fake PayProfits entities share fake Demographic entities. (see demographicQueue in PayProfitFaker)
         // PayProfit and Demographic are 1-1 in the database, to prevent errors - we assign the PayProfits sharing this
         // Demographic new Demographics.
-        var otherPayProfitsUsingOurDemograhic = await ctx.PayProfits.Where(ppo => ppo != pp && ppo.Demographic == demo).ToListAsync();
+        var otherPayProfitsUsingOurDemograhic = await ctx.PayProfits.Where(ppo => ppo != pp && ppo.Demographic == demo).ToListAsync(TestContext.Current.CancellationToken);
         otherPayProfitsUsingOurDemograhic.ForEach(pp => pp.Demographic = df.Generate());
 
         await ctx.SaveChangesAsync();

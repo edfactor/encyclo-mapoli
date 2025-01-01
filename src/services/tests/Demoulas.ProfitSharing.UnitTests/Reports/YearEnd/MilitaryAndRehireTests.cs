@@ -85,7 +85,7 @@ public class MilitaryAndRehireTests : ApiTestBase<Program>
                 await ApiClient.GETAsync<MilitaryAndRehireEndpoint, PaginationRequestDto, ReportResponseBase<MilitaryAndRehireReportResponse>>(setup.Request);
 
             response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
-        });
+        }, TestContext.Current.CancellationToken);
     }
 
     [Fact(DisplayName = "PS-156: Empty Results")]

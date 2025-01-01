@@ -43,7 +43,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Program>
     {
         return MockDbContextFactory.UseWritableContext(async c =>
         {
-            var setup = await SetupTestEmployee(c);
+            var setup = await SetupTestEmployee(c, TestContext.Current.CancellationToken);
 
             var expectedResponse = new ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>
             {
@@ -71,7 +71,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Program>
     {
         return MockDbContextFactory.UseWritableContext(async c =>
         {
-            var setup = await SetupTestEmployee(c);
+            var setup = await SetupTestEmployee(c, TestContext.Current.CancellationToken);
 
             // Act
             DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
@@ -112,13 +112,13 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Program>
     {
         return MockDbContextFactory.UseWritableContext(async c =>
         {
-            var setup = await SetupTestEmployee(c);
+            var setup = await SetupTestEmployee(c, TestContext.Current.CancellationToken);
 
             var response =
                 await ApiClient.GETAsync<MilitaryAndRehireProfitSummaryEndpoint, PaginationRequestDto, ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>>(setup.Request);
 
             response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
-        });
+        }, TestContext.Current.CancellationToken);
     }
 
     [Fact(DisplayName = "PS-346: Empty Results")]
@@ -171,21 +171,21 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Program>
         reportFileName.Should().Be("MILITARY TERM-REHIRE");
     }
 
-    private static async Task<(ProfitYearRequest Request, MilitaryAndRehireProfitSummaryResponse ExpectedResponse)> SetupTestEmployee(ProfitSharingDbContext c)
+    private static async Task<(ProfitYearRequest Request, MilitaryAndRehireProfitSummaryResponse ExpectedResponse)> SetupTestEmployee(ProfitSharingDbContext c, CancellationToken cancellationToken)
     {
         // Setup
         MilitaryAndRehireProfitSummaryResponse example = MilitaryAndRehireProfitSummaryResponse.ResponseExample();
 
-        var demo = await c.Demographics.Include(demographic => demographic.ContactInfo).FirstAsync();
+        var demo = await c.Demographics.Include(demographic => demographic.ContactInfo).FirstAsync(cancellationToken);
         demo.EmploymentStatusId = EmploymentStatus.Constants.Active;
         demo.ReHireDate = DateTime.Today.ToDateOnly();
 
 
-        var payProfit = await c.PayProfits.FirstAsync(pp => pp.DemographicId == demo.Id);
+        var payProfit = await c.PayProfits.FirstAsync(pp => pp.DemographicId == demo.Id, cancellationToken);
         payProfit.EnrollmentId = Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
         payProfit.CurrentHoursYear = 2358;
 
-        var details = await c.ProfitDetails.Where(pd => pd.Ssn == demo.Ssn).ToListAsync();
+        var details = await c.ProfitDetails.Where(pd => pd.Ssn == demo.Ssn).ToListAsync(cancellationToken);
         foreach (var detail in details)
         {
             detail.Forfeiture = short.MaxValue;
@@ -194,7 +194,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Program>
             detail.ProfitCodeId = ProfitCode.Constants.OutgoingForfeitures.Id;
         }
 
-        await c.SaveChangesAsync();
+        await c.SaveChangesAsync(cancellationToken);
 
         example.BadgeNumber = demo.EmployeeId;
         example.Ssn = demo.Ssn.MaskSsn();

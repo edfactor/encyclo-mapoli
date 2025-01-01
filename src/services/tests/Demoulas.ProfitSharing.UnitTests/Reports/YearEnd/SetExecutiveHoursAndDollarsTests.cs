@@ -123,7 +123,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             var payProfit = await ctx.PayProfits
                 .Include(p => p.Demographic)
                 .Where(p => p.ProfitYear == profitYear)
-                .FirstAsync();
+                .FirstAsync(TestContext.Current.CancellationToken);
 
             // pull out badge number, create altered hours and dollars 
             var badgeNumber = payProfit.Demographic!.EmployeeId;
@@ -153,7 +153,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             payProfit = await ctx.PayProfits
                 .Include(p => p.Demographic != null)
                 .Where(p => p.ProfitYear == profitYear && p.DemographicId == payProfit.DemographicId)
-                .FirstAsync();
+                .FirstAsync(TestContext.Current.CancellationToken);
 
             // verify updated hours and income
             payProfit.HoursExecutive.Should().Be(newHoursExecutive);
@@ -167,7 +167,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         return MockDbContextFactory.UseWritableContext(async ctx =>
         {
             // Arrange
-            short profitYear = await GetMaxProfitYearAsync();
+            short profitYear = await GetMaxProfitYearAsync(TestContext.Current.CancellationToken);
 
             // Gather employee
             var demographicsWithPayProfits = await ctx.Demographics

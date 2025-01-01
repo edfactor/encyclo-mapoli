@@ -70,13 +70,13 @@ public sealed class ProfitShareEditServiceEndpointTests : ApiTestBase<Program>
         DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
         // Act
-        TestResult<StreamContent> response = await DownloadClient.GETAsync<ProfitShareEditEndpoint, ProfitShareUpdateRequest, StreamContent>(req);
+        TestResult<StreamContent> response = await DownloadClient.GETAsync<ProfitShareEditEndpoint, ProfitShareUpdateRequest, StreamContent>(req, TestContext.Current.CancellationToken);
 
-        string result = await response.Response.Content.ReadAsStringAsync();
+        string result = await response.Response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
         result.Should().NotBeNullOrEmpty();
 
         // Assert CSV format
-        string csvData = await response.Response.Content.ReadAsStringAsync();
+        string csvData = await response.Response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
         string[] lines = csvData.Split(["\r\n", "\n"], StringSplitOptions.None);
         // line 0 is today's date
         int l = 0;

@@ -45,7 +45,7 @@ public class ContributionsByAgeEndpointTest : ApiTestBase<Program>
             .GETAsync<ContributionsByAgeEndpoint, FrozenReportsByAgeRequest, StreamContent>(request);
 
 
-        string content = await response.Response.Content.ReadAsStringAsync();
+        string content = await response.Response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
         content.Should().Contain("AGE,EMPS,AMOUNT");
         content.Should().Contain("CONT TTL,,");
     }

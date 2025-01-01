@@ -80,7 +80,7 @@ public class CalendarServiceTests : ApiTestBase<Api.Program>
     {
         var validDate = DateOnly.ParseExact("230101", "yyMMdd", CultureInfo.InvariantCulture);
         var calendarService = ServiceProvider?.GetRequiredService<ICalendarService>()!;
-        var weekEndingDate = await calendarService.FindWeekendingDateFromDateAsync(validDate);
+        var weekEndingDate = await calendarService.FindWeekendingDateFromDateAsync(validDate, TestContext.Current.CancellationToken);
         weekEndingDate.Should().BeOnOrAfter(validDate);
         weekEndingDate.DayOfWeek.Should().Be(DayOfWeek.Saturday);
     }

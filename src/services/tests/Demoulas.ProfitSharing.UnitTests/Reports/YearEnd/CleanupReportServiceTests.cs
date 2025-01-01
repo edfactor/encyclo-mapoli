@@ -14,7 +14,6 @@ using FastEndpoints;
 using FluentAssertions;
 using IdGen;
 using Microsoft.EntityFrameworkCore;
-using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -363,7 +362,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             payProfit.CurrentHoursYear = testHours;
             payProfit.HoursExecutive = 0;
 
-            var profitDetails = await ctx.ProfitDetails.Where(x => x.Ssn == emp!.Ssn).ToListAsync();
+            var profitDetails = await ctx.ProfitDetails.Where(x => x.Ssn == emp!.Ssn).ToListAsync(TestContext.Current.CancellationToken);
             foreach (var pd in profitDetails.Skip(2))
             {
                 pd.Ssn = 0; //Reset the profit detail records
@@ -472,7 +471,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             payProfit.CurrentHoursYear = testHours;
             payProfit.HoursExecutive = 0;
 
-            var profitDetails = await ctx.ProfitDetails.Where(x => x.Ssn == emp!.Ssn).ToListAsync();
+            var profitDetails = await ctx.ProfitDetails.Where(x => x.Ssn == emp!.Ssn).ToListAsync(TestContext.Current.CancellationToken);
             foreach (var pd in profitDetails.Skip(2))
             {
                 pd.Ssn = 0; //Reset the profit detail records

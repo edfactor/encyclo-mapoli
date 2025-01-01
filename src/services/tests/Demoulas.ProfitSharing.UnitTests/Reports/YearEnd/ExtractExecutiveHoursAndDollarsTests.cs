@@ -127,7 +127,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             response.Result.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
             response.Result.Response.Results.Count().Should().Be(1);
             response.Result.Response.Results.Should().BeEquivalentTo(expectedResponse.Response.Results);
-        });
+        }, TestContext.Current.CancellationToken);
     }
 
     [Fact(DisplayName = "PS-360: Executive Hours and Dollars (CSV)")]

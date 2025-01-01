@@ -81,7 +81,7 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
             // Assert
             response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
             response.Result.HasExceededMaximumContributions.Should().BeTrue();
-        });
+        }, TestContext.Current.CancellationToken);
     }
 
 
@@ -138,7 +138,7 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
                 .Include(payProfit => payProfit.Demographic!)
                 .ThenInclude(demographic => demographic.ContactInfo)
                 .Include(p => p.Demographic != null)
-                .ToListAsync();
+                .ToListAsync(TestContext.Current.CancellationToken);
 
             // This knocks all the employees out of ProfitSharing
             foreach (PayProfit ppi in ppr)
@@ -253,7 +253,7 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
                 .Include(payProfit => payProfit.Demographic!)
                 .ThenInclude(demographic => demographic.ContactInfo)
                 .Include(p => p.Demographic != null)
-                .ToListAsync();
+                .ToListAsync(TestContext.Current.CancellationToken);
 
             // This knocks all the employees out of ProfitSharing
             foreach (PayProfit ppi in ppr)

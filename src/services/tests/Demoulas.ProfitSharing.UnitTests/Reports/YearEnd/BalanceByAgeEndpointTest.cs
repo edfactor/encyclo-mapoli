@@ -46,7 +46,7 @@ public class BalanceByAgeEndpointTest : ApiTestBase<Program>
             .GETAsync<BalanceByAgeEndpoint, FrozenReportsByAgeRequest, StreamContent>(request);
 
             
-        string content = await response.Response.Content.ReadAsStringAsync();
+        string content = await response.Response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
         content.Should().Contain("AGE,EMPS,BALANCE,VESTED");
         content.Should().Contain("BEN");
     }

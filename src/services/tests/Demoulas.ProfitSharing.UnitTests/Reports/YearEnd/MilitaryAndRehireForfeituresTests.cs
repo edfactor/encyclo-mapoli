@@ -207,7 +207,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Program>
         payProfit.CurrentHoursYear = 2358;
         payProfit.ProfitYear = profitYear;
 
-        var details = await c.ProfitDetails.Where(pd => pd.Ssn == demo.Ssn).ToListAsync();
+        var details = await c.ProfitDetails.Where(pd => pd.Ssn == demo.Ssn).ToListAsync(TestContext.Current.CancellationToken);
         foreach (var detail in details)
         {
             detail.Forfeiture = short.MaxValue;
