@@ -48,7 +48,7 @@ public class PayrollSyncClient
 
     // Method to get payroll process results for a list of person IDs
     internal async IAsyncEnumerable<KeyValuePair<long, HashSet<int>>> GetPayrollProcessResultsAsync(
-        List<long> personIds, [EnumeratorCancellation] CancellationToken cancellationToken)
+        ISet<long> personIds, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         foreach (long personId in personIds)
         {
@@ -216,10 +216,10 @@ public class PayrollSyncClient
         bool success = true;
         try
         {
-            List<long> list = await _profitSharingDataContextFactory.UseReadOnlyContext(c =>
+            HashSet<long> list = await _profitSharingDataContextFactory.UseReadOnlyContext(c =>
                 c.Demographics
                     .Select(d => d.OracleHcmId)
-                    .ToListAsync(cancellationToken));
+                    .ToHashSetAsync(cancellationToken));
 
             // Step 1: Get payroll process results (ObjectActionIds) for each PersonId
             await foreach (KeyValuePair<long, HashSet<int>> emp in GetPayrollProcessResultsAsync(list, cancellationToken))

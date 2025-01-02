@@ -1,10 +1,10 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate.Formatters;
+using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.ProfitShareUpdate;
-using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Services.Reports.YearEnd.ProfitShareUpdate;
+namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 
 /// <summary>
 ///     A testing layer which generates Ready style reports.
@@ -27,17 +27,17 @@ internal sealed class ProfitShareUpdateReport
     public DateTime TodaysDateTime { get; set; }
     public List<string> ReportLines { get; set; } = [];
 
-    public async Task ProfitSharingUpdatePaginated(ProfitSharingUpdateRequest profitSharingUpdateRequest)
+    public async Task ProfitSharingUpdatePaginated(ProfitShareUpdateRequest profitShareUpdateRequest)
     {
         TotalService totalService = new TotalService(_dbFactory, calendarService);
         ProfitShareUpdateService psu = new(_dbFactory, totalService, calendarService);
-        this.profitYear = profitSharingUpdateRequest.ProfitYear;
+        this.profitYear = profitShareUpdateRequest.ProfitYear;
 
         (List<MemberFinancials> members, AdjustmentReportData adjustmentsApplied, bool _) =
-            await psu.ProfitSharingUpdatePaginated(profitSharingUpdateRequest, CancellationToken.None);
+            await psu.ProfitSharingUpdatePaginated(profitShareUpdateRequest, CancellationToken.None);
 
-        m805PrintSequence(members, profitSharingUpdateRequest.MaxAllowedContributions);
-        m1000AdjustmentReport(profitSharingUpdateRequest, adjustmentsApplied);
+        m805PrintSequence(members, profitShareUpdateRequest.MaxAllowedContributions);
+        m1000AdjustmentReport(profitShareUpdateRequest, adjustmentsApplied);
     }
 
     public void m805PrintSequence(List<MemberFinancials> members, long maxAllowedContribution)
@@ -311,10 +311,10 @@ internal sealed class ProfitShareUpdateReport
     }
 
 
-    public void m1000AdjustmentReport(ProfitSharingUpdateRequest profitSharingUpdateRequest,
+    public void m1000AdjustmentReport(ProfitShareUpdateRequest profitShareUpdateRequest,
         AdjustmentReportData adjustmentsApplied)
     {
-        if (profitSharingUpdateRequest.BadgeToAdjust == 0)
+        if (profitShareUpdateRequest.BadgeToAdjust == 0)
         {
             return;
         }
@@ -331,7 +331,7 @@ internal sealed class ProfitShareUpdateReport
         WRITE2_advance2(header_5);
 
         PrintAdjustLine1 printAdjustLine1 = new();
-        printAdjustLine1.PL_ADJUST_BADGE = profitSharingUpdateRequest.BadgeToAdjust;
+        printAdjustLine1.PL_ADJUST_BADGE = profitShareUpdateRequest.BadgeToAdjust;
         printAdjustLine1.PL_ADJ_DESC = "INITIAL";
         printAdjustLine1.PL_CONT_AMT = adjustmentsApplied.ContributionAmountUnadjusted;
         printAdjustLine1.PL_FORF_AMT = adjustmentsApplied.IncomingForfeitureAmountUnadjusted;
@@ -341,10 +341,10 @@ internal sealed class ProfitShareUpdateReport
 
         printAdjustLine1.PL_ADJUST_BADGE = 0;
         printAdjustLine1.PL_ADJ_DESC = "ADJUSTMENT";
-        printAdjustLine1.PL_CONT_AMT = profitSharingUpdateRequest.AdjustContributionAmount;
-        printAdjustLine1.PL_EARN_AMT = profitSharingUpdateRequest.AdjustEarningsAmount;
-        printAdjustLine1.PL_EARN2_AMT = profitSharingUpdateRequest.AdjustEarningsSecondaryAmount;
-        printAdjustLine1.PL_FORF_AMT = profitSharingUpdateRequest.AdjustIncomingForfeitAmount;
+        printAdjustLine1.PL_CONT_AMT = profitShareUpdateRequest.AdjustContributionAmount;
+        printAdjustLine1.PL_EARN_AMT = profitShareUpdateRequest.AdjustEarningsAmount;
+        printAdjustLine1.PL_EARN2_AMT = profitShareUpdateRequest.AdjustEarningsSecondaryAmount;
+        printAdjustLine1.PL_FORF_AMT = profitShareUpdateRequest.AdjustIncomingForfeitAmount;
         WRITE2_advance2(printAdjustLine1);
 
         printAdjustLine1.PL_ADJ_DESC = "FINAL";

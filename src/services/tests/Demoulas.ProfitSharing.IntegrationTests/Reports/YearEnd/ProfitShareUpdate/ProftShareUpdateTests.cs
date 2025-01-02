@@ -5,15 +5,15 @@ using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.ProfitShareUpdate;
-using Demoulas.ProfitSharing.Services.Reports.YearEnd.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services.ServiceDto;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Xunit.Abstractions;
 
-namespace Demoulas.ProfitSharing.Services.Reports.YearEnd.Update;
+namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 
 public class ProfitShareUpdateTests
 {
@@ -48,7 +48,7 @@ public class ProfitShareUpdateTests
 
         // Act
         await profitShareUpdateService.ProfitSharingUpdatePaginated(
-            new ProfitSharingUpdateRequest
+            new ProfitShareUpdateRequest
             {
                 Skip = null,
                 Take = null,
@@ -85,7 +85,7 @@ public class ProfitShareUpdateTests
 
         // Act
         await profitShareUpdateService.ProfitSharingUpdatePaginated(
-            new ProfitSharingUpdateRequest
+            new ProfitShareUpdateRequest
             {
                 Skip = null,
                 Take = null,

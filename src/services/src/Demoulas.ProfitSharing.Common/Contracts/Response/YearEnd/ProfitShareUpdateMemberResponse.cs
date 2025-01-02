@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-public record MemberFinancialsResponse 
+public record ProfitShareUpdateMemberResponse 
 {
     public long Badge { get; set; }
     public long Psn { get; set; }

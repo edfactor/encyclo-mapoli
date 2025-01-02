@@ -1,10 +1,10 @@
-﻿using System.Diagnostics;
-using Demoulas.Common.Data.Services.Entities.Contexts;
+﻿using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
-namespace Demoulas.ProfitSharing.Services;
+namespace Demoulas.ProfitSharing.IntegrationTests;
 
 /**
  * Used to connect to the live/qa/testing database context.  Ideally one that is kept in a pristine condition, so integration tests
@@ -32,8 +32,19 @@ internal sealed class PristineDataContextFactory : IProfitSharingDataContextFact
         _readOnlyCtx = readOnlyCtx;
     }
 
+    public Task UseWritableContext(Func<ProfitSharingDbContext, Task> func,
+        CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
     public Task<T> UseWritableContext<T>(Func<ProfitSharingDbContext, Task<T>> func,
         CancellationToken cancellationToken = new())
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<T> UseWritableContextAsync<T>(Func<ProfitSharingDbContext, IDbContextTransaction, Task<T>> action, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
@@ -41,12 +52,6 @@ internal sealed class PristineDataContextFactory : IProfitSharingDataContextFact
     public Task<T> UseReadOnlyContext<T>(Func<ProfitSharingReadOnlyDbContext, Task<T>> func)
     {
         return func(_readOnlyCtx);
-    }
-
-    public Task UseWritableContext(Func<ProfitSharingDbContext, Task> func,
-        CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
     }
 
     public Task<T> UseStoreInfoContext<T>(Func<DemoulasCommonDataContext, Task<T>> func)

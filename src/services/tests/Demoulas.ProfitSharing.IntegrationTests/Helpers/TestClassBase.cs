@@ -1,5 +1,5 @@
-﻿using Demoulas.AccountsReceivable.Tests.Common.Fixtures;
-using Demoulas.ProfitSharing.Data.Interfaces;
+﻿using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.IntegrationTests.Fixtures;
 using FastEndpoints.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit.Abstractions;

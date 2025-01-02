@@ -3,6 +3,7 @@ using Demoulas.ProfitSharing.UnitTests.Mocks;
 using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.UnitTests.Base;
@@ -16,7 +17,7 @@ public class ApiTestBase<TStartup> where TStartup : class
     /// <summary>
     ///   Mock for DbContext.
     /// </summary>
-    public IProfitSharingDataContextFactory MockDbContextFactory { get; }
+    public IProfitSharingDataContextFactory MockDbContextFactory { get; set; }
 
 
 
@@ -62,4 +63,17 @@ public class ApiTestBase<TStartup> where TStartup : class
         DownloadClient = builder.CreateClient();
         DownloadClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("text/csv"));
     }
+    
+    /// <summary>
+    /// find highest year in mock data.   Many programs require current profit year.
+    /// The alternative would be to expose and access the year range in PayProfitFaker directly.
+    /// <summary>
+    public Task<short> GetMaxProfitYearAsync()
+    {
+        return MockDbContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            return await ctx.PayProfits.MaxAsync(pp => pp.ProfitYear);
+        });
+    }
+
 }

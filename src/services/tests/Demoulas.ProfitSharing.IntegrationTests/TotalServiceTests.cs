@@ -1,20 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.Common.Data.Services.Service;
+﻿using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.ServiceDto;
-using Demoulas.ProfitSharing.UnitTests;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Oracle.ManagedDataAccess.Client;
 using Xunit.Abstractions;
 
-namespace Demoulas.ProfitSharing.Services;
-
+namespace Demoulas.ProfitSharing.IntegrationTests;
 
 public class TotalServiceIntegrationTests
 {
@@ -93,10 +86,8 @@ public class TotalServiceIntegrationTests
 #pragma warning disable AsyncFixer01
     private async Task<Dictionary<int, int>> GetSmartPayProfitData()
     {
-
         return await dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-
             var ddata = await ctx.PayProfits
                 .Include(d => d.Demographic)
                 .Where(p => p.ProfitYear == 2023)
@@ -115,21 +106,16 @@ public class TotalServiceIntegrationTests
 
             return ddata;
         });
-
     }
 
     private async Task<Dictionary<int, ParticipantTotalVestingBalanceDto>> GetSmartAmounts()
     {
-
         return await dataContextFactory.UseReadOnlyContext(ctx =>
-        
             totalService.TotalVestingBalance(ctx, (short)2023, new DateOnly(2024, 1, 1))
                 .ToDictionaryAsync(
                     keySelector: p => p.Ssn,
                     elementSelector: p => p)
-         
         );
-
     }
 #pragma warning restore AsyncFixer01
 
@@ -157,13 +143,7 @@ public class TotalServiceIntegrationTests
         while (await reader.ReadAsync())
         {
             var badge = reader.GetInt32(0);
-            var pp = new PayProfitReady
-            {
-                Ssn = reader.GetInt32(1),
-                Years = reader.GetInt32(2),
-                Amount = reader.GetDecimal(3),
-                Etva = reader.GetDecimal(4)
-            };
+            var pp = new PayProfitReady { Ssn = reader.GetInt32(1), Years = reader.GetInt32(2), Amount = reader.GetDecimal(3), Etva = reader.GetDecimal(4) };
             data.Add(badge, pp);
         }
 
