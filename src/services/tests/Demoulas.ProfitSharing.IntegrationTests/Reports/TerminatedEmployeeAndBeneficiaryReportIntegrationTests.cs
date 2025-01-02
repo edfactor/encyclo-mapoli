@@ -1,6 +1,14 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+﻿using System.Diagnostics;
+using System.Reflection;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.IntegrationTests.Fixtures;
 using Demoulas.ProfitSharing.IntegrationTests.Helpers;
+using Demoulas.ProfitSharing.Services;
+using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
+using FluentAssertions;
+using Microsoft.Testing.Platform.Services;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports;
 

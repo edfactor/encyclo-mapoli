@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Api;
+﻿using System.Reflection;
+using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ExecutiveHoursAndDollars;
 using Demoulas.ProfitSharing.Security;
@@ -78,10 +79,8 @@ public class ExecutiveHoursAndDollarsIntegrationTests : ApiIntegrationTestBase<P
 
     public static string ReadEmbeddedResource(string resourceName)
     {
-        using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
-        using (var reader = new StreamReader(stream!))
-        {
-            return reader.ReadToEnd();
-        }
+        using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName);
+        using var reader = new StreamReader(stream!);
+        return reader.ReadToEnd();
     }
 }

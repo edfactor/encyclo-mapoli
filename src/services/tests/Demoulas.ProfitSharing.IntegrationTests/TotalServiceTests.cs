@@ -2,6 +2,7 @@
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.ServiceDto;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Oracle.ManagedDataAccess.Client;
 

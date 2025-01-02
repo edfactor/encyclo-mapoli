@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Demoulas.ProfitSharing.CachingServices\Demoulas.ProfitSharing.Services.Caching.csproj"/>
+    <ProjectReference Include="..\Demoulas.ProfitSharing.CachingServices\Demoulas.ProfitSharing.Services.Caching.csproj" />
     <ProjectReference Include="..\Demoulas.ProfitSharing.Data\Demoulas.ProfitSharing.Data.csproj" />
   </ItemGroup>
 
@@ -33,6 +33,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Update="Microsoft.CodeAnalysis">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Update="Microsoft.CodeAnalysis.Analyzers">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

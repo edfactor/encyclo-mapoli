@@ -1,6 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.IntegrationTests.Fixtures;
 using FastEndpoints.Testing;
+using Microsoft.Testing.Platform.Services;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Helpers;
 
