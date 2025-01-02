@@ -54,7 +54,7 @@ public class MilitaryAndRehireTests : ApiTestBase<Program>
             // Assert
             response.Result.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
             response.Result.Response.Results.Should().BeEquivalentTo(expectedResponse.Response.Results);
-        }, TestContext.Current.CancellationToken);
+        });
     }
 
     [Fact(DisplayName = "PS-156: Check for Military (CSV)")]
@@ -69,9 +69,9 @@ public class MilitaryAndRehireTests : ApiTestBase<Program>
             var response = await DownloadClient.GETAsync<MilitaryAndRehireEndpoint, PaginationRequestDto, StreamContent>(setup.Request);
             response.Response.Content.Should().NotBeNull();
 
-            string result = await response.Response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+            string result = await response.Response.Content.ReadAsStringAsync();
             result.Should().NotBeNullOrEmpty();
-        }, TestContext.Current.CancellationToken);
+        });
     }
 
     [Fact(DisplayName = "PS-156: Check to ensure unauthorized")]
@@ -85,7 +85,7 @@ public class MilitaryAndRehireTests : ApiTestBase<Program>
                 await ApiClient.GETAsync<MilitaryAndRehireEndpoint, PaginationRequestDto, ReportResponseBase<MilitaryAndRehireReportResponse>>(setup.Request);
 
             response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
-        }, TestContext.Current.CancellationToken);
+        });
     }
 
     [Fact(DisplayName = "PS-156: Empty Results")]

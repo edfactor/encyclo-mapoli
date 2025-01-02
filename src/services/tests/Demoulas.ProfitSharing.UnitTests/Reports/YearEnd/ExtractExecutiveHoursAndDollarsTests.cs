@@ -50,7 +50,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
                         ReportResponseBase<ExecutiveHoursAndDollarsResponse>>(_request);
 
             response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
-        }, TestContext.Current.CancellationToken);
+        });
     }
 
     [Fact(DisplayName = "PS-360: return all employees (no exec dollars/hours constraint)")]
@@ -75,7 +75,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             response.Result.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
             response.Result.Response.Results.Count().Should().Be(1);
             response.Result.Response.Results.Should().BeEquivalentTo(expectedResponse.Response.Results);
-        }, TestContext.Current.CancellationToken);
+        });
     }
 
     [Fact(DisplayName = "PS-360: return only employees with dollars/hours -> expect none")]
@@ -98,7 +98,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
 
             response.Result.ReportName.Should().BeEquivalentTo(_expectedReportName);
             response.Result.Response.Results.Count().Should().Be(0);
-        }, TestContext.Current.CancellationToken);
+        });
     }
 
     [Fact(DisplayName = "PS-360: return all employees (no dollars/hours)")]
@@ -121,7 +121,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             response.Result.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
             response.Result.Response.Results.Count().Should().Be(1);
             response.Result.Response.Results.Should().BeEquivalentTo(expectedResponse.Response.Results);
-        }, TestContext.Current.CancellationToken);
+        });
     }
 
     [Fact(DisplayName = "PS-360: Executive Hours and Dollars (CSV)")]
@@ -142,13 +142,13 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             response.Response.Content.Should().NotBeNull();
 
             // Verify CSV file
-            string csvData = await response.Response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+            string csvData = await response.Response.Content.ReadAsStringAsync();
             string[] lines = csvData.Split(["\r\n", "\n"], StringSplitOptions.None);
             lines[1].Should().Be(_expectedReportName);
             lines[2].Should().Be("BADGE,NAME,STR,EXEC HRS,EXEC DOLS,ORA HRS CUR,ORA DOLS CUR,FREQ,STATUS");
             lines[3].Should().Be(@"1,""John, Null E"",2,3,4,5,6,2,a");
             lines[4].Should().Be("");
-        }, TestContext.Current.CancellationToken);
+        });
     }
 
 
@@ -199,7 +199,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             response.Result.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
             response.Result.Response.Results.Count().Should().Be(1);
             response.Result.Response.Results.Should().BeEquivalentTo(expectedResponse.Response.Results);
-        }, TestContext.Current.CancellationToken);
+        });
     }
 
     [Fact]
@@ -223,7 +223,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
 
             // Assert
             response.Result.Response.Results.Count().Should().Be(0);
-        }, TestContext.Current.CancellationToken);
+        });
     }
 
     private ReportResponseBase<ExecutiveHoursAndDollarsResponse> StockResponse()

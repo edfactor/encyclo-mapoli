@@ -28,7 +28,7 @@ public class ExecutiveHoursAndDollarsIntegrationTests : ApiIntegrationTestBase<P
                 new ExecutiveHoursAndDollarsRequest { ProfitYear = YearThis, HasExecutiveHoursAndDollars = true });
 
         // Assert
-        string csvData = await response.Response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        string csvData = await response.Response.Content.ReadAsStringAsync();
 
         // Break CVS into lines
         var lines = csvData.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
@@ -58,7 +58,7 @@ public class ExecutiveHoursAndDollarsIntegrationTests : ApiIntegrationTestBase<P
                 new ExecutiveHoursAndDollarsRequest { ProfitYear = YearLast, HasExecutiveHoursAndDollars = true });
 
         // Assert
-        string csvData = await response.Response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        string csvData = await response.Response.Content.ReadAsStringAsync();
 
         // Break CVS into lines
         var lines = csvData.Split(["\r\n", "\n"], StringSplitOptions.None);

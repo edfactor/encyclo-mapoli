@@ -75,7 +75,7 @@ public class ApiTestBase<TStartup> where TStartup : class
    /// </summary>
    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
    /// <returns>A task representing the asynchronous operation, containing the year with the maximum profit as a <see cref="short"/>.</returns>
-    public Task<short> GetMaxProfitYearAsync(CancellationToken cancellationToken)
+    public Task<short> GetMaxProfitYearAsync(CancellationToken cancellationToken = default)
     {
         return MockDbContextFactory.UseReadOnlyContext(async ctx =>
         {

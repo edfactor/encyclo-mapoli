@@ -94,12 +94,6 @@ builder.ConfigureDefaultEndpoints(meterNames: [],
 
 WebApplication app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment() && Debugger.IsAttached)
-{
-    // Put code here that ONLY runs when attached to the debugger.
-}
-
 app.UseCors();
 
 app.UseDefaultEndpoints(OktaSettingsAction)
@@ -111,7 +105,6 @@ app.UseDefaultEndpoints(OktaSettingsAction)
     });
 
 await app.RunAsync();
-
 
 namespace Demoulas.ProfitSharing.Api
 {

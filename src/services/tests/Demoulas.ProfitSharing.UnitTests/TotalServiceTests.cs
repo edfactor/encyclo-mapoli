@@ -26,9 +26,9 @@ public class TotalServiceTests : ApiTestBase<Program>
         long demoSsn = 0;
         return _dataContextFactory.UseWritableContext(async ctx =>
         {
-            var demoTest = await ctx.Demographics.FirstAsync(TestContext.Current.CancellationToken);
+            var demoTest = await ctx.Demographics.FirstAsync();
             demoSsn = demoTest.Ssn;
-            var pdArray = await ctx.ProfitDetails.Where(x => x.Ssn == demoTest.Ssn).ToArrayAsync(TestContext.Current.CancellationToken);
+            var pdArray = await ctx.ProfitDetails.Where(x => x.Ssn == demoTest.Ssn).ToArrayAsync();
 
             for (int i = 0; i < pdArray.Length; i++)
             {
@@ -45,10 +45,10 @@ public class TotalServiceTests : ApiTestBase<Program>
                 prof.StateTaxes = 0.25m;
             }
 
-            await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
+            await ctx.SaveChangesAsync();
 
             var testRslt = await _totalService.GetTotalBalanceSet(ctx, (short)DateTime.Now.Year)
-                .Where(x => x.Ssn == demoSsn).ToListAsync(TestContext.Current.CancellationToken);
+                .Where(x => x.Ssn == demoSsn).ToListAsync();
             testRslt.Should().NotBeNull(); //Testing where Forfeiture, Contribution and Earnigns are all added
             testRslt.Count.Should().Be(1);
             testRslt[0].Total.Should().Be(-4681M);
@@ -60,7 +60,7 @@ public class TotalServiceTests : ApiTestBase<Program>
             }
 
             testRslt = await _totalService.GetTotalBalanceSet(ctx, (short)DateTime.Now.Year)
-                .Where(x => x.Ssn == demoSsn).ToListAsync(TestContext.Current.CancellationToken);
+                .Where(x => x.Ssn == demoSsn).ToListAsync();
             testRslt.Should().NotBeNull(); //Testing where only forfeitures are added (negatively)
             testRslt.Count.Should().Be(1);
             testRslt[0].Total.Should().Be(-18724);
@@ -72,17 +72,17 @@ public class TotalServiceTests : ApiTestBase<Program>
             }
 
             testRslt = await _totalService.GetTotalBalanceSet(ctx, (short)DateTime.Now.Year)
-                .Where(x => x.Ssn == demoSsn).ToListAsync(TestContext.Current.CancellationToken);
+                .Where(x => x.Ssn == demoSsn).ToListAsync();
             testRslt.Should().NotBeNull(); // Testing where Earnings and forfeitures are added
             testRslt.Count.Should().Be(1);
             testRslt[0].Total.Should().Be(32767M);
 
             testRslt = await _totalService.GetTotalBalanceSet(ctx, (short)(DateTime.Now.Year - 1))
-                .Where(x => x.Ssn == demoSsn).ToListAsync(TestContext.Current.CancellationToken);
+                .Where(x => x.Ssn == demoSsn).ToListAsync();
             testRslt.Should().NotBeNull(); // Testing As of filter
             testRslt.Count.Should().Be(1);
             testRslt[0].Total.Should().Be(32760M);
-        }, TestContext.Current.CancellationToken);
+        });
     }
 
     [Fact(DisplayName = "Total ETVA Tests")]
@@ -91,9 +91,9 @@ public class TotalServiceTests : ApiTestBase<Program>
         long demoSsn = 0;
         return _dataContextFactory.UseWritableContext(async ctx =>
         {
-            var demoTest = await ctx.Demographics.FirstAsync(TestContext.Current.CancellationToken);
+            var demoTest = await ctx.Demographics.FirstAsync();
             demoSsn = demoTest.Ssn;
-            var pdArray = await ctx.ProfitDetails.Where(x => x.Ssn == demoTest.Ssn).ToArrayAsync(TestContext.Current.CancellationToken);
+            var pdArray = await ctx.ProfitDetails.Where(x => x.Ssn == demoTest.Ssn).ToArrayAsync();
 
             for (int i = 0; i < pdArray.Length; i++)
             {
@@ -110,9 +110,9 @@ public class TotalServiceTests : ApiTestBase<Program>
                 prof.StateTaxes = 0.25m;
             }
 
-            await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
+            await ctx.SaveChangesAsync();
 
-            var testRslt = await _totalService.GetTotalEtva(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync(TestContext.Current.CancellationToken);
+            var testRslt = await _totalService.GetTotalEtva(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync();
             testRslt.Should().NotBeNull(); // Incoming QDRO Beneficiary
             testRslt.Count.Should().Be(1);
             testRslt[0].Total.Should().Be(4681);
@@ -124,9 +124,9 @@ public class TotalServiceTests : ApiTestBase<Program>
                 prof.ProfitCodeId = ProfitCode.Constants.Incoming100PercentVestedEarnings.Id;
             }
 
-            await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
+            await ctx.SaveChangesAsync();
 
-            testRslt = await _totalService.GetTotalEtva(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync(TestContext.Current.CancellationToken);
+            testRslt = await _totalService.GetTotalEtva(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync();
             testRslt.Should().NotBeNull(); // Incoming 100% Vested Earnings
             testRslt.Count.Should().Be(1);
             testRslt[0].Total.Should().Be(9362);
@@ -138,9 +138,9 @@ public class TotalServiceTests : ApiTestBase<Program>
                 prof.ProfitCodeId = ProfitCode.Constants.Outgoing100PercentVestedPayment.Id;
             }
 
-            await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
+            await ctx.SaveChangesAsync();
 
-            testRslt = await _totalService.GetTotalEtva(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync(TestContext.Current.CancellationToken);
+            testRslt = await _totalService.GetTotalEtva(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync();
             testRslt.Should().NotBeNull(); // Outgoing 100% Vested Earnings
             testRslt.Count.Should().Be(1);
             testRslt[0].Total.Should().Be(18724);
@@ -152,9 +152,9 @@ public class TotalServiceTests : ApiTestBase<Program>
                 prof.ProfitCodeId = ProfitCode.Constants.Outgoing100PercentVestedPayment.Id;
             }
 
-            await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
+            await ctx.SaveChangesAsync();
 
-            testRslt = await _totalService.GetTotalEtva(ctx, (short)(DateTime.Now.Year - 1)).Where(x => x.Ssn == demoSsn).ToListAsync(TestContext.Current.CancellationToken);
+            testRslt = await _totalService.GetTotalEtva(ctx, (short)(DateTime.Now.Year - 1)).Where(x => x.Ssn == demoSsn).ToListAsync();
             testRslt.Should().NotBeNull(); // Test as of filter
             testRslt.Count.Should().Be(1);
             testRslt[0].Total.Should().Be(18720);
@@ -166,13 +166,13 @@ public class TotalServiceTests : ApiTestBase<Program>
                 prof.ProfitCodeId = ProfitCode.Constants.IncomingContributions.Id;
             }
 
-            await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
+            await ctx.SaveChangesAsync();
 
-            testRslt = await _totalService.GetTotalEtva(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync(TestContext.Current.CancellationToken);
+            testRslt = await _totalService.GetTotalEtva(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync();
             testRslt.Should().NotBeNull(); // All non-etva records
             testRslt.Count.Should().Be(1);
             testRslt[0].Total.Should().Be(0);
-        }, TestContext.Current.CancellationToken);
+        });
     }
 
     [Fact(DisplayName = "Total Distribution Tests")]
@@ -181,9 +181,9 @@ public class TotalServiceTests : ApiTestBase<Program>
         long demoSsn = 0;
         return _dataContextFactory.UseWritableContext(async ctx =>
         {
-            var demoTest = await ctx.Demographics.FirstAsync(TestContext.Current.CancellationToken);
+            var demoTest = await ctx.Demographics.FirstAsync();
             demoSsn = demoTest.Ssn;
-            var pdArray = await ctx.ProfitDetails.Where(x => x.Ssn == demoTest.Ssn).ToArrayAsync(TestContext.Current.CancellationToken);
+            var pdArray = await ctx.ProfitDetails.Where(x => x.Ssn == demoTest.Ssn).ToArrayAsync();
 
             for (int i = 0; i < pdArray.Length; i++)
             {
@@ -200,9 +200,9 @@ public class TotalServiceTests : ApiTestBase<Program>
                 prof.StateTaxes = 0.25m;
             }
 
-            await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
+            await ctx.SaveChangesAsync();
 
-            var testRslt = await _totalService.GetTotalDistributions(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync(TestContext.Current.CancellationToken);
+            var testRslt = await _totalService.GetTotalDistributions(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync();
             testRslt.Should().NotBeNull(); // Outgoing Partial Withdrawal
             testRslt.Count.Should().Be(1);
             testRslt[0].Total.Should().Be(18724);
@@ -214,9 +214,9 @@ public class TotalServiceTests : ApiTestBase<Program>
                 prof.ProfitCodeId = ProfitCode.Constants.OutgoingForfeitures.Id;
             }
 
-            await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
+            await ctx.SaveChangesAsync();
 
-            testRslt = await _totalService.GetTotalDistributions(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync(TestContext.Current.CancellationToken);
+            testRslt = await _totalService.GetTotalDistributions(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync();
             testRslt.Should().NotBeNull(); // Outgoing Forfeitures
             testRslt.Count.Should().Be(1);
             testRslt[0].Total.Should().Be(18724);
@@ -228,9 +228,9 @@ public class TotalServiceTests : ApiTestBase<Program>
                 prof.ProfitCodeId = ProfitCode.Constants.Outgoing100PercentVestedPayment.Id;
             }
 
-            await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
+            await ctx.SaveChangesAsync();
 
-            testRslt = await _totalService.GetTotalDistributions(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync(TestContext.Current.CancellationToken);
+            testRslt = await _totalService.GetTotalDistributions(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync();
             testRslt.Should().NotBeNull(); // Outgoing 100% Vested Earnings
             testRslt.Count.Should().Be(1);
             testRslt[0].Total.Should().Be(18724);
@@ -242,10 +242,10 @@ public class TotalServiceTests : ApiTestBase<Program>
                 prof.ProfitCodeId = ProfitCode.Constants.Outgoing100PercentVestedPayment.Id;
             }
 
-            await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
+            await ctx.SaveChangesAsync();
 
             testRslt = await _totalService.GetTotalDistributions(ctx, (short)(DateTime.Now.Year - 1)).Where(x => x.Ssn == demoSsn)
-                .ToListAsync(TestContext.Current.CancellationToken);
+                .ToListAsync();
             testRslt.Should().NotBeNull(); // Test as of filter
             testRslt.Count.Should().Be(1);
             testRslt[0].Total.Should().Be(18720);
@@ -257,12 +257,12 @@ public class TotalServiceTests : ApiTestBase<Program>
                 prof.ProfitCodeId = ProfitCode.Constants.IncomingQdroBeneficiary.Id;
             }
 
-            await ctx.SaveChangesAsync(TestContext.Current.CancellationToken);
+            await ctx.SaveChangesAsync();
 
-            testRslt = await _totalService.GetTotalDistributions(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync(TestContext.Current.CancellationToken);
+            testRslt = await _totalService.GetTotalDistributions(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync();
             testRslt.Should().NotBeNull(); // All non-distributon records
             testRslt.Count.Should().Be(1);
             testRslt[0].Total.Should().Be(0);
-        }, TestContext.Current.CancellationToken);
+        });
     }
 }

@@ -31,7 +31,7 @@ public class CalendarServiceTests : ApiTestBase<Program>
     [Fact(DisplayName = "Check Calendar can be accessed")]
     public async Task CheckCalendarAccess()
     {
-        long count = await _dataContextFactory.UseReadOnlyContext(c => c.AccountingPeriods.LongCountAsync(TestContext.Current.CancellationToken));
+        long count = await _dataContextFactory.UseReadOnlyContext(c => c.AccountingPeriods.LongCountAsync());
 
         count.ShouldBeEquivalentTo(CaldarRecordSeeder.Records.Length);
     }
@@ -47,7 +47,7 @@ public class CalendarServiceTests : ApiTestBase<Program>
         var date = DateOnly.ParseExact(sDate, "yyMMdd", CultureInfo.InvariantCulture);
         var calendarService = ServiceProvider?.GetRequiredService<ICalendarService>()!;
 
-        var weekEndingDate = await calendarService.FindWeekendingDateFromDateAsync(date, TestContext.Current.CancellationToken);
+        var weekEndingDate = await calendarService.FindWeekendingDateFromDateAsync(date);
 
         weekEndingDate.Should().BeOnOrAfter(date);
 
@@ -60,7 +60,7 @@ public class CalendarServiceTests : ApiTestBase<Program>
     {
         var invalidDate = DateOnly.MaxValue;
         var calendarService = ServiceProvider?.GetRequiredService<ICalendarService>()!;
-        Func<Task> act = async () => await calendarService.FindWeekendingDateFromDateAsync(invalidDate, TestContext.Current.CancellationToken);
+        Func<Task> act = async () => await calendarService.FindWeekendingDateFromDateAsync(invalidDate);
         return act.Should().ThrowAsync<Exception>();
     }
 
@@ -70,7 +70,7 @@ public class CalendarServiceTests : ApiTestBase<Program>
     {
         var futureDate = DateOnly.FromDateTime(DateTime.Now.AddYears(6));
         var calendarService = ServiceProvider?.GetRequiredService<ICalendarService>()!;
-        Func<Task> act = async () => await calendarService.FindWeekendingDateFromDateAsync(futureDate, TestContext.Current.CancellationToken);
+        Func<Task> act = async () => await calendarService.FindWeekendingDateFromDateAsync(futureDate);
         return act.Should().ThrowAsync<ArgumentOutOfRangeException>()
             .WithMessage($"{AccountingPeriodsService.InvalidDateError} (Parameter 'dateTime')");
     }
@@ -81,7 +81,7 @@ public class CalendarServiceTests : ApiTestBase<Program>
     {
         var validDate = DateOnly.ParseExact("230101", "yyMMdd", CultureInfo.InvariantCulture);
         var calendarService = ServiceProvider?.GetRequiredService<ICalendarService>()!;
-        var weekEndingDate = await calendarService.FindWeekendingDateFromDateAsync(validDate, TestContext.Current.CancellationToken);
+        var weekEndingDate = await calendarService.FindWeekendingDateFromDateAsync(validDate);
         weekEndingDate.Should().BeOnOrAfter(validDate);
         weekEndingDate.DayOfWeek.Should().Be(DayOfWeek.Saturday);
     }

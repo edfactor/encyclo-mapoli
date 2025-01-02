@@ -43,7 +43,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Program>
     {
         return MockDbContextFactory.UseWritableContext(async c =>
         {
-            var setup = await SetupTestEmployee(c, TestContext.Current.CancellationToken);
+            var setup = await SetupTestEmployee(c, CancellationToken.None);
 
             var expectedResponse = new ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>
             {
@@ -63,7 +63,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Program>
             // Assert
             response.Result.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
             response.Result.Response.Results.Should().HaveCountGreaterThan(expectedResponse.Response.Results.Count());
-        }, TestContext.Current.CancellationToken);
+        });
     }
 
     [Fact(DisplayName = "PS-346: Check for Military (CSV)")]
@@ -71,14 +71,14 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Program>
     {
         return MockDbContextFactory.UseWritableContext(async c =>
         {
-            var setup = await SetupTestEmployee(c, TestContext.Current.CancellationToken);
+            var setup = await SetupTestEmployee(c, CancellationToken.None);
 
             // Act
             DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
             var response = await DownloadClient.GETAsync<MilitaryAndRehireProfitSummaryEndpoint, ProfitYearRequest, StreamContent>(setup.Request);
             response.Response.Content.Should().NotBeNull();
 
-            string result = await response.Response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+            string result = await response.Response.Content.ReadAsStringAsync();
             result.Should().NotBeNullOrEmpty();
 
             // Assert CSV format
@@ -103,7 +103,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Program>
             headers.Should().NotBeNull();
             headers.Should().ContainInOrder("", "", "BADGE", "SSN", "NAME", "STR", "HIRE DT", "REHIRE DT", "TERM DT", "STATUS", "BEG BAL", "BEG VEST", "CUR HRS", "PLAN YEARS",
                 "ENROLL", "YEAR", "CMNT", "FORT AMT");
-        }, TestContext.Current.CancellationToken);
+        });
     }
 
 
@@ -112,13 +112,13 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Program>
     {
         return MockDbContextFactory.UseWritableContext(async c =>
         {
-            var setup = await SetupTestEmployee(c, TestContext.Current.CancellationToken);
+            var setup = await SetupTestEmployee(c, CancellationToken.None);
 
             var response =
                 await ApiClient.GETAsync<MilitaryAndRehireProfitSummaryEndpoint, PaginationRequestDto, ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>>(setup.Request);
 
             response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
-        }, TestContext.Current.CancellationToken);
+        });
     }
 
     [Fact(DisplayName = "PS-346: Empty Results")]

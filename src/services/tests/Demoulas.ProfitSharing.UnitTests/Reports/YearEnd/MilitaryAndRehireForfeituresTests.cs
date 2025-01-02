@@ -73,7 +73,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Program>
 #pragma warning restore S1481
 
             response.Result.Response.Results.First().Should().BeEquivalentTo(expectedResponse.Response.Results.First());
-        }, TestContext.Current.CancellationToken);
+        });
     }
 
     [Fact(DisplayName = "PS-345: Check for Military (CSV)")]
@@ -88,7 +88,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Program>
             var response = await DownloadClient.GETAsync<MilitaryAndRehireForfeituresEndpoint, ProfitYearRequest, StreamContent>(setup.Request);
             response.Response.Content.Should().NotBeNull();
 
-            string result = await response.Response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+            string result = await response.Response.Content.ReadAsStringAsync();
             result.Should().NotBeNullOrEmpty();
 
             // Assert CSV format
@@ -120,7 +120,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Program>
             var headers2 = csv.HeaderRecord;
             headers2.Should().NotBeNull();
             headers2.Should().ContainInOrder("", "", "", "", "", "YEAR", "FORFEITURES", "COMMENT");
-        }, TestContext.Current.CancellationToken);
+        });
     }
 
 
@@ -135,7 +135,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Program>
                 await ApiClient.GETAsync<MilitaryAndRehireForfeituresEndpoint, PaginationRequestDto, ReportResponseBase<MilitaryAndRehireForfeituresResponse>>(setup.Request);
 
             response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
-        }, TestContext.Current.CancellationToken);
+        });
     }
 
     [Fact(DisplayName = "PS-345: Empty Results")]
@@ -207,7 +207,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Program>
         payProfit.CurrentHoursYear = 2358;
         payProfit.ProfitYear = profitYear;
 
-        var details = await c.ProfitDetails.Where(pd => pd.Ssn == demo.Ssn).ToListAsync(TestContext.Current.CancellationToken);
+        var details = await c.ProfitDetails.Where(pd => pd.Ssn == demo.Ssn).ToListAsync();
         foreach (var detail in details)
         {
             detail.Forfeiture = short.MaxValue;

@@ -45,7 +45,7 @@ public class ForfeituresByAgeEndpointTest : ApiTestBase<Program>
             .GETAsync<ForfeituresByAgeEndpoint, FrozenReportsByAgeRequest, StreamContent>(request);
 
 
-        string content = await response.Response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        string content = await response.Response.Content.ReadAsStringAsync();
         content.Should().Contain("AGE,EMPS,AMOUNT");
         content.Should().Contain("FORF TTL,,");
     }
