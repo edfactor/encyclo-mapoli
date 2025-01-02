@@ -61,7 +61,7 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
         var response = await DownloadClient.GETAsync<CurrentYearWagesEndpoint, ProfitYearRequest, StreamContent>(new ProfitYearRequest { ProfitYear = 2023 });
         response.Response.Content.Should().NotBeNull();
 
-        string result = await response.Response.Content.ReadAsStringAsync();
+        string result = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
         result.Should().NotBeNullOrEmpty();
 
         // Assert CSV format

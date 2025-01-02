@@ -65,19 +65,8 @@ BADGE/PSN # EMPLOYEE NAME           BALANCE  ALLOCATION       AMOUNT       FORFE
             : $"{wsDoTerm.Value.Year - 2000:00}{wsDoTerm.Value.Month:00}{wsDoTerm.Value.Day:00}";
         string ageStr = age.HasValue ? $"{age:00}" : "";
 
-        _reportWriter.WriteLine(r2BadgePsnNp.PadLeft(11) + " " +
-                          r2EmployeeName?.PadRight(19) + " " +
-                          FormatWithSingleComma(r2PsAmt).PadLeft(12) + " " +
-                          FormatWithSingleComma(r2BenAlloc).PadLeft(12) + " " +
-                          FormatWithSingleComma(r2PsLoan).PadLeft(12) + " " +
-                          FormatWithSingleComma(r2PsForf).PadLeft(12) + " " +
-                          FormatWithSingleComma(r2PsDol).PadLeft(12) + " " +
-                          FormatWithSingleComma(r2Vest).PadLeft(12) + " " +
-                          termDate + " " +
-                          $"{r2PsHrs:0.00}".PadLeft(7) + " " +
-                          $"{wVestPert:00}".PadLeft(3) + " " +
-                          ageStr.PadLeft(3) +
-                          ((wEnrolled == 0) ? "" : " " + wEnrolled));
+        _reportWriter.WriteLine(
+            $"{r2BadgePsnNp.PadLeft(11)} {r2EmployeeName?.PadRight(19)} {FormatWithSingleComma(r2PsAmt).PadLeft(12)} {FormatWithSingleComma(r2BenAlloc).PadLeft(12)} {FormatWithSingleComma(r2PsLoan).PadLeft(12)} {FormatWithSingleComma(r2PsForf).PadLeft(12)} {FormatWithSingleComma(r2PsDol).PadLeft(12)} {FormatWithSingleComma(r2Vest).PadLeft(12)} {termDate} {$"{r2PsHrs:0.00}".PadLeft(7)} {$"{wVestPert:00}".PadLeft(3)} {ageStr.PadLeft(3)}{((wEnrolled == 0) ? "" : $" {wEnrolled}")}");
     }
 
     // In order to print nicely, values over 1 million do not have a second comma.
@@ -91,7 +80,7 @@ BADGE/PSN # EMPLOYEE NAME           BALANCE  ALLOCATION       AMOUNT       FORFE
         Console.WriteLine(parts);
         if (parts.Length == 3)
         {
-            return parts[0] + parts[1] + "," + parts[2];
+            return $"{parts[0]}{parts[1]},{parts[2]}";
         }
         return numberStr;
     }

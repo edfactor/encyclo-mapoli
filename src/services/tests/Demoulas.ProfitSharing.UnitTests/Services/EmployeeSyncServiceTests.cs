@@ -4,11 +4,13 @@ using Demoulas.ProfitSharing.Common.Caching;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.OracleHcm.Atom;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Services;
 using Demoulas.ProfitSharing.OracleHcm.Validators;
 using Demoulas.ProfitSharing.UnitTests.Base;
 using Moq;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.UnitTests.Services;
 
@@ -26,10 +28,16 @@ public class EmployeeSyncServiceTests : IClassFixture<ApiTestBase<Program>>
         OracleHcmConfig oracleHcmConfig = new OracleHcmConfig { BaseAddress = "localhost", DemographicUrl = string.Empty };
         OracleEmployeeValidator employeeValidator = new OracleEmployeeValidator(mockAccountCache.Object, mockDepCache.Object);
         Mock<HttpClient> mockHttpClient = new Mock<HttpClient>();
+        var log = LoggerFactory.Create(builder =>
+        {
+            builder.AddDebug();
+        }).CreateLogger<AtomFeedService>();
+        AtomFeedService atomFeedService = new AtomFeedService(mockHttpClient.Object, log);
 
         _employeeSyncService = new EmployeeSyncService(
             mockHttpClient.Object,
             _mockDemographicsService.Object,
+            atomFeedService,
             mockDataContextFactory.Object,
             oracleHcmConfig,
             employeeValidator

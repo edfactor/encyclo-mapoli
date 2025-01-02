@@ -11,7 +11,6 @@ using Demoulas.ProfitSharing.Services.ServiceDto;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 
@@ -171,7 +170,7 @@ public class ProfitShareUpdateTests
     public static string LoadExpectedReport(string resourceName)
     {
         using (Stream? stream = Assembly.GetExecutingAssembly()
-                   .GetManifestResourceStream("Demoulas.ProfitSharing.IntegrationTests.Resources." + resourceName))
+                   .GetManifestResourceStream($"Demoulas.ProfitSharing.IntegrationTests.Resources.{resourceName}"))
         using (StreamReader reader = new(stream!))
         {
             return reader.ReadToEnd().Replace("\r", "");
@@ -219,6 +218,6 @@ public class ProfitShareUpdateTests
                 )
                 .ToListAsync();
         });
-        _testOutputHelper.WriteLine("Total employees " + employeeFinancialsList.Count);
+        _testOutputHelper.WriteLine($"Total employees {employeeFinancialsList.Count}");
     }
 }

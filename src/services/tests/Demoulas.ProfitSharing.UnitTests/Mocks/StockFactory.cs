@@ -101,7 +101,7 @@ public static class StockFactory
         {
             DemographicId = demographic.Id,
             Demographic = demographic,
-            ProfitYear = (short)DateTime.Today.Year, //  Calendar Service: "The date must be between January 1, 2000, and 5 years from today's date."
+            ProfitYear = 2024, //  Calendar Service: "The date must be between January 1, 2000, and 5 years from today's date."
             CurrentHoursYear = 0,
             CurrentIncomeYear = 0,
             EarningsEtvaValue = 0,

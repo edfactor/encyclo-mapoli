@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.ProfitSharing.Data.Contexts;
-using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore.Storage;
 using Moq;
@@ -12,7 +11,7 @@ public class ScenarioDataContextFactory : IProfitSharingDataContextFactory
 {
     public Mock<ProfitSharingDbContext> ProfitSharingDbContext { get; }
     public Mock<ProfitSharingReadOnlyDbContext> ProfitSharingReadOnlyDbContext { get; }
-    Mock<DemoulasCommonDataContext> StoreInfoDbContext { get;  }
+    Mock<DemoulasCommonDataContext> StoreInfoDbContext { get; }
 
 
     public ScenarioDataContextFactory()
@@ -20,7 +19,6 @@ public class ScenarioDataContextFactory : IProfitSharingDataContextFactory
         ProfitSharingDbContext = new Mock<ProfitSharingDbContext>();
         ProfitSharingReadOnlyDbContext = new Mock<ProfitSharingReadOnlyDbContext>();
         StoreInfoDbContext = new Mock<DemoulasCommonDataContext>();
-
     }
 
     /// <summary>
@@ -123,5 +121,4 @@ public class ScenarioDataContextFactory : IProfitSharingDataContextFactory
             }
         }
     }
-
 }
