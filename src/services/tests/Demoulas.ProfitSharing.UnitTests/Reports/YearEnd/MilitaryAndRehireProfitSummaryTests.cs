@@ -179,7 +179,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Program>
 
         var demo = await c.Demographics.Include(demographic => demographic.ContactInfo).FirstAsync(cancellationToken);
         demo.EmploymentStatusId = EmploymentStatus.Constants.Active;
-        demo.ReHireDate = DateTime.Today.ToDateOnly();
+        demo.ReHireDate = new DateTime(2024, 12, 01, 01, 01, 01, DateTimeKind.Local).ToDateOnly();
 
 
         var payProfit = await c.PayProfits.FirstAsync(pp => pp.DemographicId == demo.Id, cancellationToken);
