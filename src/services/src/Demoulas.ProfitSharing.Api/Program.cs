@@ -97,7 +97,6 @@ WebApplication app = builder.Build();
 app.UseCors();
 
 app.UseDefaultEndpoints(OktaSettingsAction)
-    .UseDefaultExceptionHandler()
     .UseReDoc(settings =>
     {
         settings.Path = "/redoc";
