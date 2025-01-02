@@ -20,6 +20,7 @@ import * as yup from "yup";
 import { MasterInquryRequest } from "reduxstore/types";
 import { clearMasterInquiryData } from "reduxstore/slices/yearsEndSlice";
 import { useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
 
 interface MasterInquirySearch {
   startProfitYear?: number | null;
@@ -93,6 +94,7 @@ const schema = yup.object().shape({
 
 const MasterInquirySearchFilter = () => {
   const [isFetching, setIsFetching] = useState(false);
+  const [fetched, setFetched] = useState(false);
 
   const [triggerSearch, { isLoading }] = useLazyGetProfitMasterInquiryQuery();
   const dispatch = useDispatch();
@@ -148,6 +150,7 @@ const MasterInquirySearchFilter = () => {
       };
 
       triggerSearch(searchParams, false);
+      setFetched(true);
       setIsFetching(false);
     }
   });
@@ -177,6 +180,7 @@ const MasterInquirySearchFilter = () => {
     <form onSubmit={validateAndSearch}>
     <Grid2 container paddingX="24px">
       <Grid2 container spacing={3} width="100%">
+        {fetched && <Link to="/master-inquiry">GO</Link>}
         <Grid2 xs={12} sm={6} md={3}>
           <FormLabel>Beginning Year</FormLabel>
           <Controller

@@ -41,6 +41,15 @@ const frozenReports: RouteCategory = {
   ]
 };
 
-const MenuData: RouteCategory[] = [cleanUpReports, frozenReports, yearEndReports];
+const decemberProcess: RouteCategory = {
+  menuLabel: "December Process",
+  parentRoute: "",
+  items: [
+    { caption: "Summary", route: "/december-process" },
+    { caption: "Local API", route: "/december-process-accordion" }
+  ]
+};
+
+const MenuData: RouteCategory[] = [decemberProcess, cleanUpReports, frozenReports, yearEndReports];
 
 export default MenuData;

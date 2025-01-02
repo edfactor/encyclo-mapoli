@@ -29,6 +29,9 @@ import { useEffect } from "react";
 import FrozenSummary from "pages/FrozenSummary/FrozenSummary";
 import BalanceByYears from "pages/BalanceByYears/BalanceByYears";
 import VestedAmountsByAge from "pages/VestedAmountsByAge/VestedAmountsByAge";
+import DecemberProcess from "pages/DecemberProcess/DecemberProcess";
+import DecemberProcessAccordion from "pages/DecemberProcess/DecemberProcessAccordion";
+import DecemberProcessLocalApi from "pages/DecemberProcess/DecemberProcessLOCALAPI";
 
 const Router = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -43,9 +46,9 @@ const Router = () => {
 
   useEffect(() => {
     if (!!localStorageImpersonating && !impersonating) {
-      dispatch(setImpersonating(localStorageImpersonating as ImpersonationRoles))
+      dispatch(setImpersonating(localStorageImpersonating as ImpersonationRoles));
     }
-  }, [impersonating, localStorageImpersonating])
+  }, [impersonating, localStorageImpersonating]);
 
   return (
     <BrowserRouter>
@@ -142,7 +145,7 @@ const Router = () => {
         <Route
           path="clean-up-summary"
           element={<CleanUpSummary />}></Route>
-          <Route
+        <Route
           path="frozen-summary"
           element={<FrozenSummary />}></Route>
           <Route
@@ -151,6 +154,12 @@ const Router = () => {
         <Route
           path="vested-amounts-by-age"
           element={<VestedAmountsByAge />}></Route>
+        <Route
+          path="december-process"
+          element={<DecemberProcessLocalApi />}></Route>
+          <Route
+          path="december-process-accordion"
+          element={<DecemberProcessAccordion />}></Route>
       </RouteSecurity>
     </BrowserRouter>
   );
