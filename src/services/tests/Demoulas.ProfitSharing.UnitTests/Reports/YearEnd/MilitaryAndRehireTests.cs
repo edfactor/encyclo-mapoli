@@ -69,7 +69,7 @@ public class MilitaryAndRehireTests : ApiTestBase<Program>
             var response = await DownloadClient.GETAsync<MilitaryAndRehireEndpoint, PaginationRequestDto, StreamContent>(setup.Request);
             response.Response.Content.Should().NotBeNull();
 
-            string result = await response.Response.Content.ReadAsStringAsync();
+            string result = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
             result.Should().NotBeNullOrEmpty();
         });
     }
@@ -143,7 +143,7 @@ public class MilitaryAndRehireTests : ApiTestBase<Program>
         // Setup
         MilitaryAndRehireReportResponse example = MilitaryAndRehireReportResponse.ResponseExample();
 
-        var demo = await c.Demographics.Include(demographic => demographic.ContactInfo).FirstAsync();
+        var demo = await c.Demographics.Include(demographic => demographic.ContactInfo).FirstAsync(CancellationToken.None);
         demo.TerminationCodeId = TerminationCode.Constants.Military;
         demo.EmploymentStatusId = EmploymentStatus.Constants.Inactive;
 
@@ -151,7 +151,7 @@ public class MilitaryAndRehireTests : ApiTestBase<Program>
         demo.EmployeeId = example.BadgeNumber;
         demo.DateOfBirth = example.DateOfBirth;
         demo.TerminationDate = example.TerminationDate;
-        await c.SaveChangesAsync();
+        await c.SaveChangesAsync(CancellationToken.None);
 
         example.Ssn = demo.Ssn.MaskSsn();
         example.FullName = demo.ContactInfo.FullName;

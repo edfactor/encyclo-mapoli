@@ -61,7 +61,7 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
         var response = await DownloadClient.GETAsync<CurrentYearWagesEndpoint, ProfitYearRequest, StreamContent>(new ProfitYearRequest { ProfitYear = 2023 });
         response.Response.Content.Should().NotBeNull();
 
-        string result = await response.Response.Content.ReadAsStringAsync();
+        string result = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
         result.Should().NotBeNullOrEmpty();
 
         // Assert CSV format
@@ -69,16 +69,16 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
         using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture));
 
         // Read the first two rows (date and report name)
-        await csv.ReadAsync();  // First row is the date
+        await csv.ReadAsync(CancellationToken.None);  // First row is the date
         string? dateLine = csv.GetField(0);
         dateLine.Should().NotBeNullOrEmpty();
 
-        await csv.ReadAsync();  // Second row is the report name
+        await csv.ReadAsync(CancellationToken.None);  // Second row is the report name
         string? reportNameLine = csv.GetField(0);
         reportNameLine.Should().NotBeNullOrEmpty();
 
         // Start reading the actual CSV content from row 2 (0-based index)
-        await csv.ReadAsync();  // Read the header row (starting at column 2)
+        await csv.ReadAsync(CancellationToken.None);  // Read the header row (starting at column 2)
         csv.ReadHeader();
 
         // Validate the headers

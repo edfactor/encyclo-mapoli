@@ -96,7 +96,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
     public async Task at_least_one_employee_should_be_provided()
     {
         // Arrange
-        short profitYear = await GetMaxProfitYearAsync();
+        short profitYear = await GetMaxProfitYearAsync(CancellationToken.None);
         SetExecutiveHoursAndDollarsRequest request = new SetExecutiveHoursAndDollarsRequest { ProfitYear = profitYear, ExecutiveHoursAndDollars = [] };
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
@@ -123,7 +123,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             var payProfit = await ctx.PayProfits
                 .Include(p => p.Demographic)
                 .Where(p => p.ProfitYear == profitYear)
-                .FirstAsync();
+                .FirstAsync(CancellationToken.None);
 
             // pull out badge number, create altered hours and dollars 
             var badgeNumber = payProfit.Demographic!.EmployeeId;
@@ -153,7 +153,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             payProfit = await ctx.PayProfits
                 .Include(p => p.Demographic != null)
                 .Where(p => p.ProfitYear == profitYear && p.DemographicId == payProfit.DemographicId)
-                .FirstAsync();
+                .FirstAsync(CancellationToken.None);
 
             // verify updated hours and income
             payProfit.HoursExecutive.Should().Be(newHoursExecutive);
@@ -167,7 +167,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         return MockDbContextFactory.UseWritableContext(async ctx =>
         {
             // Arrange
-            short profitYear = await GetMaxProfitYearAsync();
+            short profitYear = await GetMaxProfitYearAsync(CancellationToken.None);
 
             // Gather employee
             var demographicsWithPayProfits = await ctx.Demographics
@@ -176,7 +176,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
                     pp => pp.DemographicId,
                     (d, pp) => new { Demographic = d, PayProfit = pp })
                 .Where(joined => joined.PayProfit.ProfitYear == profitYear)
-                .FirstAsync();
+                .FirstAsync(CancellationToken.None);
 
             // note badge number, keep track of current hours/dollars and attempt to change them
             var employeeId = demographicsWithPayProfits.Demographic.EmployeeId;
@@ -215,7 +215,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
                     pp => pp.DemographicId,
                     (d, pp) => new { Demographic = d, PayProfit = pp })
                 .Where(joined => joined.PayProfit.ProfitYear == profitYear)
-                .FirstAsync();
+                .FirstAsync(CancellationToken.None);
 
             demographicsWithPayProfitsReloaded.PayProfit.HoursExecutive.Should().Be(origExecutiveHoursExecutive);
             demographicsWithPayProfitsReloaded.PayProfit.IncomeExecutive.Should().Be(origIncomeExecutive);
@@ -226,7 +226,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
     {
         response.Response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         response.Response.Content.Headers.ContentType!.MediaType.Should().Be("application/problem+json");
-        string responseContent = await response.Response.Content.ReadAsStringAsync();
+        string responseContent = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
 
         using JsonDocument doc = JsonDocument.Parse(responseContent);
         // If the 400 is from the service, it has the message in the title.

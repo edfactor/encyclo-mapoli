@@ -45,7 +45,7 @@ public class DistributionsByAgeEndpointTest : ApiTestBase<Program>
             .GETAsync<DistributionsByAgeEndpoint, FrozenReportsByAgeRequest, StreamContent>(request);
 
 
-        string content = await response.Response.Content.ReadAsStringAsync();
+        string content = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
         content.Should().Contain("AGE,EMPS,AMOUNT");
         content.Should().Contain("HARDSHIP,");
         content.Should().Contain("DIST TTL,,");

@@ -25,7 +25,7 @@ public class EmployeeTests : ApiTestBase<Program>
     public async Task EnsureEmployeeHappyPath()
     {
         // Arrange
-        ProfitShareUpdateRequest req = new() { ProfitYear = await GetMaxProfitYearAsync() };
+        ProfitShareUpdateRequest req = new() { ProfitYear = await GetMaxProfitYearAsync(CancellationToken.None) };
 
         // Act
         ProfitShareEditResponse response = await _service.ProfitShareEdit(req, CancellationToken.None);

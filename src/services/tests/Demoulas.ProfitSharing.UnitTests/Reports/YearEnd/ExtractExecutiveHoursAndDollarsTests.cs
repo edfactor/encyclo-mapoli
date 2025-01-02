@@ -142,7 +142,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             response.Response.Content.Should().NotBeNull();
 
             // Verify CSV file
-            string csvData = await response.Response.Content.ReadAsStringAsync();
+            string csvData = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
             string[] lines = csvData.Split(["\r\n", "\n"], StringSplitOptions.None);
             lines[1].Should().Be(_expectedReportName);
             lines[2].Should().Be("BADGE,NAME,STR,EXEC HRS,EXEC DOLS,ORA HRS CUR,ORA DOLS CUR,FREQ,STATUS");
@@ -242,7 +242,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             .Include(payProfit => payProfit.Demographic!)
             .ThenInclude(demographic => demographic.ContactInfo)
             .Include(p => p.Demographic != null)
-            .FirstAsync();
+            .FirstAsync(CancellationToken.None);
         Demographic demo = pp.Demographic!;
 
         demo.EmployeeId = _example.BadgeNumber;
@@ -257,7 +257,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         pp.ProfitYear = ProfitShareTestYear;
         pp.Demographic = demo;
 
-        await c.SaveChangesAsync();
+        await c.SaveChangesAsync(CancellationToken.None);
         return pp;
     }
 
@@ -267,7 +267,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             .Include(payProfit => payProfit.Demographic!)
             .ThenInclude(demographic => demographic.ContactInfo)
             .Include(p => p.Demographic != null)
-            .FirstAsync();
+            .FirstAsync(CancellationToken.None);
         Demographic demo = pp.Demographic!;
 
         demo.EmployeeId = _example.BadgeNumber;
@@ -282,6 +282,6 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         pp.ProfitYear = ProfitShareTestYear;
         pp.Demographic = demo;
 
-        await c.SaveChangesAsync();
+        await c.SaveChangesAsync(CancellationToken.None);
     }
 }

@@ -31,7 +31,7 @@ public class CalendarServiceTests : ApiTestBase<Program>
     [Fact(DisplayName = "Check Calendar can be accessed")]
     public async Task CheckCalendarAccess()
     {
-        long count = await _dataContextFactory.UseReadOnlyContext(c => c.AccountingPeriods.LongCountAsync());
+        long count = await _dataContextFactory.UseReadOnlyContext(c => c.AccountingPeriods.LongCountAsync(CancellationToken.None));
 
         count.ShouldBeEquivalentTo(CaldarRecordSeeder.Records.Length);
     }

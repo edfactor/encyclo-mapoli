@@ -88,7 +88,7 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
                 .Where(p => p.ProfitYear == TestProfitYear)
                 .Where(p => p.Demographic!.DateOfBirth > birthDateOfExactly21YearsOld /*too young*/ || p.CurrentHoursYear < 1000 ||
                             p.Demographic!.EmploymentStatusId == EmploymentStatus.Constants.Terminated)
-                .CountAsync();
+                .CountAsync(CancellationToken.None);
 
             int numberWritten = await c.PayProfits
                 .Include(p => p.Demographic)
@@ -105,7 +105,7 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
             response.Response.Content.Should().NotBeNull();
 
             // Verify CSV file
-            string csvData = await response.Response.Content.ReadAsStringAsync();
+            string csvData = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
             string[] lines = csvData.Split(["\r\n", "\n"], StringSplitOptions.None);
             // line 0 is today's date
             lines[0].Should().NotBeEmpty();
@@ -210,7 +210,7 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
     private static async Task save(TestEmployee testEmployee, ProfitSharingDbContext ctx)
     {
         var pp = await ctx.PayProfits.Include(payProfit => payProfit.Demographic!)
-            .ThenInclude(demographic => demographic.ContactInfo).Include(p => p.Demographic != null).FirstAsync();
+            .ThenInclude(demographic => demographic.ContactInfo).Include(p => p.Demographic != null).FirstAsync(CancellationToken.None);
         pp.ProfitYear = TestProfitYear;
         pp.DemographicId = testEmployee.Id;
         pp.CurrentHoursYear = testEmployee.HoursWorked;
@@ -226,10 +226,10 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
         // The fake PayProfits entities share fake Demographic entities. (see demographicQueue in PayProfitFaker)
         // PayProfit and Demographic are 1-1 in the database, to prevent errors - we assign the PayProfits sharing this
         // Demographic new Demographics.
-        var otherPayProfitsUsingOurDemograhic = await ctx.PayProfits.Where(ppo => ppo != pp && ppo.Demographic == demo).ToListAsync();
+        var otherPayProfitsUsingOurDemograhic = await ctx.PayProfits.Where(ppo => ppo != pp && ppo.Demographic == demo).ToListAsync(CancellationToken.None);
         otherPayProfitsUsingOurDemograhic.ForEach(pp => pp.Demographic = df.Generate());
 
-        await ctx.SaveChangesAsync();
+        await ctx.SaveChangesAsync(CancellationToken.None);
     }
 
     private static DateOnly convertAgeToBirthDate(short profitSharYear, int age)

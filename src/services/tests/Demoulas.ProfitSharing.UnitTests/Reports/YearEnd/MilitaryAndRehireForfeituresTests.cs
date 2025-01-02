@@ -88,7 +88,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Program>
             var response = await DownloadClient.GETAsync<MilitaryAndRehireForfeituresEndpoint, ProfitYearRequest, StreamContent>(setup.Request);
             response.Response.Content.Should().NotBeNull();
 
-            string result = await response.Response.Content.ReadAsStringAsync();
+            string result = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
             result.Should().NotBeNullOrEmpty();
 
             // Assert CSV format
@@ -195,7 +195,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Program>
         // Setup
         MilitaryAndRehireForfeituresResponse example = MilitaryAndRehireForfeituresResponse.ResponseExample();
 
-        var demo = await c.Demographics.Include(demographic => demographic.ContactInfo).FirstAsync();
+        var demo = await c.Demographics.Include(demographic => demographic.ContactInfo).FirstAsync(CancellationToken.None);
         demo.EmploymentStatusId = EmploymentStatus.Constants.Active;
         demo.ReHireDate = new DateTime(2024, 12, 01, 01, 01, 01, DateTimeKind.Local).ToDateOnly();
 
@@ -207,7 +207,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Program>
         payProfit.CurrentHoursYear = 2358;
         payProfit.ProfitYear = profitYear;
 
-        var details = await c.ProfitDetails.Where(pd => pd.Ssn == demo.Ssn).ToListAsync();
+        var details = await c.ProfitDetails.Where(pd => pd.Ssn == demo.Ssn).ToListAsync(CancellationToken.None);
         foreach (var detail in details)
         {
             detail.Forfeiture = short.MaxValue;
@@ -218,7 +218,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Program>
             detail.Earnings = byte.MaxValue;
         }
 
-        await c.SaveChangesAsync();
+        await c.SaveChangesAsync(CancellationToken.None);
 
         example.BadgeNumber = demo.EmployeeId;
         example.Ssn = demo.Ssn.MaskSsn();

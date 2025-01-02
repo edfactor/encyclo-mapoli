@@ -78,7 +78,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Program>
             var response = await DownloadClient.GETAsync<MilitaryAndRehireProfitSummaryEndpoint, ProfitYearRequest, StreamContent>(setup.Request);
             response.Response.Content.Should().NotBeNull();
 
-            string result = await response.Response.Content.ReadAsStringAsync();
+            string result = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
             result.Should().NotBeNullOrEmpty();
 
             // Assert CSV format
