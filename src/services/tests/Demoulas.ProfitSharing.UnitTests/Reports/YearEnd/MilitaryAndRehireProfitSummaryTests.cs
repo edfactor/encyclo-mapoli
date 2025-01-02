@@ -125,7 +125,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Program>
     public async Task GetResponse_Should_HandleEmptyResults()
     {
         // Arrange
-        var request = new ProfitYearRequest { Skip = 0, Take = 10, ProfitYear = (short)DateTime.Today.Year };
+        var request = new ProfitYearRequest { Skip = 0, Take = 10, ProfitYear = 2024 };
         var cancellationToken = CancellationToken.None;
         var expectedResponse = new ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>
         {
@@ -146,7 +146,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Program>
     public async Task GetResponse_Should_HandleNullResults()
     {
         // Arrange
-        var request = new ProfitYearRequest { Skip = 0, Take = 10, ProfitYear = (short)DateTime.Today.Year };
+        var request = new ProfitYearRequest { Skip = 0, Take = 10, ProfitYear = 2024 };
         var cancellationToken = CancellationToken.None;
         var expectedResponse = new ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>
         {
@@ -205,6 +205,6 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Program>
         example.ReHiredDate = demo.ReHireDate ?? SqlDateTime.MinValue.Value.ToDateOnly();
 
 
-        return (new ProfitYearRequest { Skip = 0, Take = 10, ProfitYear = (short)demo.ReHireDate!.Value.Year }, example);
+        return (new ProfitYearRequest { Skip = 0, Take = 10, ProfitYear = (short)Math.Min(demo.ReHireDate!.Value.Year, 2024) }, example);
     }
 }
