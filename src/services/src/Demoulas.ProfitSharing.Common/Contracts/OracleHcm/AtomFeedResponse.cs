@@ -30,7 +30,7 @@ public class Entry<TContext> where TContext : IDeltaContext
     public required string Title { get; set; }
     public required string Summary { get; set; }
 
-    [JsonConverter(typeof(JsonStringToObjectConverterFactory))]
+    [JsonConverter(typeof(JsonStringToObjectConverterFactory<TContext>))]
     public required EntryContent<TContext> Content { get; set; }
 
     public DateTime Updated { get; set; }
@@ -39,12 +39,12 @@ public class Entry<TContext> where TContext : IDeltaContext
     public List<Author> Authors { get; set; } = new List<Author>();
 }
 
-public class JsonStringToObjectConverterFactory : JsonConverterFactory
+public class JsonStringToObjectConverterFactory<TContext> : JsonConverterFactory where TContext : IDeltaContext
 {
     public override bool CanConvert(Type typeToConvert)
     {
         // Only allows conversions for types implementing IDeltaContext
-        return typeof(IDeltaContext).IsAssignableFrom(typeToConvert);
+        return typeof(TContext).IsAssignableFrom(typeToConvert);
     }
 
     public override JsonConverter? CreateConverter(Type typeToConvert, JsonSerializerOptions options)

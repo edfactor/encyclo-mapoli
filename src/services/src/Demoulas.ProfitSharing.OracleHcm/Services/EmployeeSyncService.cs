@@ -212,7 +212,14 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
 
             await foreach (var record in MergeAsyncEnumerables(newHires, updates, terminations, assignments, cancellationToken))
             {
-                Console.WriteLine(JsonSerializer.Serialize(record, JsonSerializerOptions.Web));
+                switch (record)
+                {
+                    case NewHireContext nhc:
+                        {
+                            Console.WriteLine(nhc);
+                            break;
+                        }
+                }
             }
         }
         catch (Exception ex)
