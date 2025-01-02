@@ -10,5 +10,5 @@ public sealed record OracleHcmConfig
     public string? Password { get; set; }
     public string RestFrameworkVersion { get; set; } = "9";
     public byte Limit { get; set; } = 75;
-    public byte IntervalInHours { get; set; } = 24; // Runs every 24 hours
+    public byte IntervalInHours { get; set; } = 150;
 }

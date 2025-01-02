@@ -218,7 +218,7 @@ internal sealed class ProfitShareUpdateReport
     {
         reportCounters.PageCounter += 1;
         header_1.HDR1_PAGE = reportCounters.PageCounter;
-        WRITE("\f" + header_1);
+        WRITE($"\f{header_1}");
         WRITE("");
         WRITE(new Header2());
         WRITE(new Header3());
@@ -239,7 +239,7 @@ internal sealed class ProfitShareUpdateReport
         client_tot.EARN2_TOT = ws_client_totals.WS_TOT_EARN2;
         if (ws_client_totals.WS_TOT_EARN2 != 0)
         {
-            Console.WriteLine("WS_TOT_EARN2 NOT 0 " + ws_client_totals.WS_TOT_EARN2);
+            Console.WriteLine($"WS_TOT_EARN2 NOT 0 {ws_client_totals.WS_TOT_EARN2}");
         }
 
         client_tot.EARN2_TOT = ws_client_totals.WS_TOT_CAF;
@@ -254,7 +254,7 @@ internal sealed class ProfitShareUpdateReport
         total_header_1.TOT_HDR1_HR = TodaysDateTime.Hour;
         total_header_1.TOT_HDR1_MN = TodaysDateTime.Minute;
 
-        WRITE("\f" + total_header_1);
+        WRITE($"\f{total_header_1}");
         WRITE("");
         WRITE(new TotalHeader2());
         WRITE(new TotalHeader3());

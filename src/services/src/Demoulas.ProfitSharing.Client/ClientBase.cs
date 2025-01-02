@@ -1,10 +1,10 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
 using System.Security.Claims;
-using System.Text;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Demoulas.ProfitSharing.Client;
+
 public class ClientBase
 {
     private readonly HttpClient?[] _clients;

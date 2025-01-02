@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
+
 internal sealed class FrozenStateMap : IEntityTypeConfiguration<FrozenState>
 {
     public void Configure(EntityTypeBuilder<FrozenState> builder)
@@ -15,7 +11,7 @@ internal sealed class FrozenStateMap : IEntityTypeConfiguration<FrozenState>
         _ = builder.ToTable("FROZEN_STATE");
         _ = builder.HasKey(c => c.Id);
 
-        _ = builder.Property(x=>x.Id)
+        _ = builder.Property(x => x.Id)
             .ValueGeneratedOnAdd()
             .HasColumnName("ID");
 
@@ -28,6 +24,6 @@ internal sealed class FrozenStateMap : IEntityTypeConfiguration<FrozenState>
             .IsRequired();
 
         _ = builder.Property(x => x.IsActive)
-                .HasColumnName("IS_ACTIVE");
+            .HasColumnName("IS_ACTIVE");
     }
 }
