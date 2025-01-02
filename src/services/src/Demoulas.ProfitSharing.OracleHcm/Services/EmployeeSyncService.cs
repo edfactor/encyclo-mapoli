@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Bogus;
 using Bogus.Extensions.UnitedStates;
 using Demoulas.ProfitSharing.Common.ActivitySources;
@@ -210,9 +211,15 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
             var updates = _atomFeedService.GetFeedDataAsync<EmployeeUpdateContext>("empupdate", minDate, maxDate, cancellationToken);
             var terminations = _atomFeedService.GetFeedDataAsync<TerminationContext>("termination", minDate, maxDate, cancellationToken);
 
+            var options = new JsonSerializerOptions(JsonSerializerOptions.Web)
+            {
+                PropertyNameCaseInsensitive = true,
+                NumberHandling = JsonNumberHandling.AllowReadingFromString
+            };
+
             await foreach (var record in MergeAsyncEnumerables(newHires, updates, terminations, assignments, cancellationToken))
             {
-                Console.WriteLine(JsonSerializer.Serialize(record, JsonSerializerOptions.Web));
+                Console.WriteLine(JsonSerializer.Serialize(record, options));
             }
         }
         catch (Exception ex)
