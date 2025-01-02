@@ -10,7 +10,7 @@
     <LangVersion>latest</LangVersion>
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
     <RepositoryType>Git</RepositoryType>
-    <RepositoryUrl>https://bitbucket.org/demoulas/smart-profit-sharing/</RepositoryUrl>
+    <RepositoryUrl>https://bitbucket.org/demoulas/smart-profit-sharing.git</RepositoryUrl>
     <!-- Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
 
