@@ -317,7 +317,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
     public async Task GetYearEndProfitSharingReport()
     {
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
-        var profitYear = (short)(DateTime.Now.Year - 1);
+        var profitYear = (short)(2023);
         var req = new YearEndProfitSharingReportRequest()
         {
             Skip = 0,
