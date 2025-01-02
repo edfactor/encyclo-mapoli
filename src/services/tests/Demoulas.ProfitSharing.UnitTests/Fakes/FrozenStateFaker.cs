@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Bogus;
+﻿using Bogus;
 using Demoulas.ProfitSharing.Data.Entities;
 
 namespace Demoulas.ProfitSharing.UnitTests.Fakes;
-internal sealed class FrozenStateFaker:Faker<FrozenState>
+
+internal sealed class FrozenStateFaker : Faker<FrozenState>
 {
     internal FrozenStateFaker()
     {

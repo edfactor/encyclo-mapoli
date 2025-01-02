@@ -18,7 +18,8 @@ internal static class TolerantCsvComparisonUtility
 
         // Compare the counts first
         actualRecords.Count.Should().Be(expectedRecords.Count,
-            because: "the number of records in both CSVs should be equal\r\nActual CSV\r\n" + actualCsvContents + "\r\n\r\nExpected Csv Contents\r\n" + expectedCsvContents);
+            because:
+            $"the number of records in both CSVs should be equal\r\nActual CSV\r\n{actualCsvContents}\r\n\r\nExpected Csv Contents\r\n{expectedCsvContents}");
 
         // Compare each record
         for (int i = 0; i < actualRecords.Count; i++)

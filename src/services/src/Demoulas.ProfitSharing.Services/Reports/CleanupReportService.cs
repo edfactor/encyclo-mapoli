@@ -259,6 +259,13 @@ public class CleanupReportService : ICleanupReportService
 
             var dict = await _dataContextFactory.UseReadOnlyContext(ctx =>
             {
+                var tst = (from yis in _totalService.GetYearsOfService(ctx, req.ProfitYear)
+                           join d in ctx.Demographics on yis.Ssn equals d.Ssn
+                           select new
+                           {
+                               d.EmployeeId,
+                               Years = (byte)yis.Years
+                           }).ToListAsync(cancellationToken);
                 return (
                     from yis in _totalService.GetYearsOfService(ctx, req.ProfitYear)
                     join d in ctx.Demographics on yis.Ssn equals d.Ssn

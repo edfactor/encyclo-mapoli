@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Demoulas.ProfitSharing.Services.ProfitShareUpdate;
+﻿namespace Demoulas.ProfitSharing.Services.ProfitShareUpdate;
 
 /// <summary>
 ///     Newly computed (after applying the adjustments from the user) values for a member.

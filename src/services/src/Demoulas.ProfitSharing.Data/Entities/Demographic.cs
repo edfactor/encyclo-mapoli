@@ -10,6 +10,7 @@ namespace Demoulas.ProfitSharing.Data.Entities;
 public sealed class Demographic : Member
 {
     public int Id { get; set; }
+
     /// <summary>
     /// Gets or sets the Oracle HCM (Human Capital Management) ID.
     /// This ID is used to uniquely identify an employee within the Oracle HCM system.
@@ -18,9 +19,9 @@ public sealed class Demographic : Member
     /// The People ID of the employee.
     /// </value>
     public required long OracleHcmId { get; set; }
+
     public required int Ssn { get; set; }
     public required int EmployeeId { get; set; }
-    public DateTime LastModifiedDate { get; set; }
 
     public required short StoreNumber { get; set; }
 
@@ -59,14 +60,35 @@ public sealed class Demographic : Member
 
     public char EmploymentStatusId { get; set; }
     public EmploymentStatus? EmploymentStatus { get; set; }
-    
-    
+
+
     public List<PayProfit> PayProfits { get; set; } = [];
     public List<Beneficiary> Beneficiaries { get; set; } = [];
 
     public List<ProfitShareCheck> Checks { get; set; } = [];
     public List<DistributionRequest> DistributionRequests { get; set; } = [];
 
+
+    /// <summary>
+    /// Gets or sets the date and time when the demographic entity was last modified.
+    /// </summary>
+    /// <value>
+    /// A <see cref="DateTime"/> representing the last modification timestamp of the demographic entity.
+    /// </value>
+    public DateTime LastModifiedDate { get; set; }
+
+    /// <summary>
+    /// Compares two <see cref="Demographic"/> objects to determine if their historical data is equivalent.
+    /// </summary>
+    /// <param name="demo1">The first <see cref="Demographic"/> object to compare.</param>
+    /// <param name="demo2">The second <see cref="Demographic"/> object to compare.</param>
+    /// <returns>
+    /// <c>true</c> if the historical data of the two <see cref="Demographic"/> objects is equivalent; otherwise, <c>false</c>.
+    /// </returns>
+    /// <remarks>
+    /// This method compares key properties of the <see cref="Demographic"/> objects, excluding SSN due to potential inconsistencies 
+    /// in the Oracle HCM process. It is used to determine whether a new history record should be created.
+    /// </remarks>
     public static bool DemographicHistoryEqual(Demographic demo1, Demographic demo2)
     {
         return demo1.OracleHcmId == demo2.OracleHcmId &&
@@ -83,6 +105,5 @@ public sealed class Demographic : Member
                demo1.PayFrequencyId == demo2.PayFrequencyId &&
                demo1.TerminationCodeId == demo2.TerminationCodeId &&
                demo1.EmploymentStatusId == demo2.EmploymentStatusId;
-                
     }
 }

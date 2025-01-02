@@ -2,13 +2,12 @@
 using FastEndpoints.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Fixtures;
 
 public class IntegrationTestsFixture : AppFixture<Program>
 {
-    public IntegrationTestsFixture(IMessageSink s) : base(s)
+    public IntegrationTestsFixture()
     {
         Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Testing");
     }

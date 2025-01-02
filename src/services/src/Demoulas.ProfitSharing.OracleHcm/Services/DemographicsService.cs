@@ -2,17 +2,16 @@
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Services.Mappers;
+using Demoulas.ProfitSharing.OracleHcm.Mappers;
+using EntityFramework.Exceptions.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Oracle.ManagedDataAccess.Client;
-using EntityFramework.Exceptions.Common;
 
-namespace Demoulas.ProfitSharing.Services;
+namespace Demoulas.ProfitSharing.OracleHcm.Services;
 
-public class DemographicsService : IDemographicsServiceInternal
+internal class DemographicsService : IDemographicsServiceInternal
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly DemographicMapper _mapper;
@@ -59,26 +58,16 @@ public class DemographicsService : IDemographicsServiceInternal
         }
     }
 
-    public Task<DateTime?> GetLastOracleHcmSyncDate(CancellationToken cancellationToken = default)
-    {
-        return _dataContextFactory.UseReadOnlyContext(c =>
-        {
-            return c.Jobs.Where(c =>
-                    c.JobStatusId == JobStatus.Constants.Completed && (c.JobTypeId == JobType.Constants.EmployeeSyncFull || c.JobTypeId == JobType.Constants.PayrollSyncFull))
-                .MaxAsync(j => j.Completed, cancellationToken: cancellationToken);
-        });
-    }
-
-   /// <summary>
-   /// Asynchronously inserts or updates a collection of demographic records in the database.
-   /// </summary>
-   /// <param name="demographicsRequests">A collection of <see cref="DemographicsRequest"/> objects representing the demographic data to be upserted.</param>
-   /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete. This token can be used to cancel the operation.</param>
-   /// <returns>A <see cref="Task"/> representing the asynchronous upsert operation.</returns>
-   /// <remarks>
-   /// This method ensures that demographic records are either inserted as new entries or updated if they already exist in the database.
-   /// The operation is performed within a writable database context to maintain data integrity.
-   /// </remarks>
+    /// <summary>
+    /// Asynchronously inserts or updates a collection of demographic records in the database.
+    /// </summary>
+    /// <param name="demographicsRequests">A collection of <see cref="DemographicsRequest"/> objects representing the demographic data to be upserted.</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete. This token can be used to cancel the operation.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous upsert operation.</returns>
+    /// <remarks>
+    /// This method ensures that demographic records are either inserted as new entries or updated if they already exist in the database.
+    /// The operation is performed within a writable database context to maintain data integrity.
+    /// </remarks>
     private Task UpsertDemographicsAsync(IEnumerable<DemographicsRequest> demographicsRequests, CancellationToken cancellationToken)
     {
         DateTime currentModificationDate = DateTime.Now;
@@ -106,9 +95,9 @@ public class DemographicsService : IDemographicsServiceInternal
 
             // Handle potential duplicates in the existing database (SSN duplicates)
             var duplicateSsnEntities = existingEntities.GroupBy(e => e.Ssn)
-                                                       .Where(g => g.Count() > 1)
-                                                       .SelectMany(g => g)
-                                                       .ToList();
+                .Where(g => g.Count() > 1)
+                .SelectMany(g => g)
+                .ToList();
 
             if (duplicateSsnEntities.Any())
             {
@@ -142,7 +131,7 @@ public class DemographicsService : IDemographicsServiceInternal
                     try
                     {
                         context.Demographics.Add(entity);
-                        
+
                         var history = DemographicHistory.FromDemographic(entity);
                         context.DemographicHistories.Add(history);
                     }
@@ -197,16 +186,14 @@ public class DemographicsService : IDemographicsServiceInternal
                     }
 
                     // Update the rest of the entity's fields
-                    var updateHistory = false;
-                    if (!Demographic.DemographicHistoryEqual(existingEntity, incomingEntity))
-                    {
-                        updateHistory = true;
-                    }
+                    bool updateHistory = !Demographic.DemographicHistoryEqual(existingEntity, incomingEntity);
+
                     UpdateEntityValues(existingEntity, incomingEntity, currentModificationDate);
                     if (updateHistory)
                     {
                         var newHistoryRecord = DemographicHistory.FromDemographic(incomingEntity, existingEntity.Id);
-                        var oldHistoryRecord = await context.DemographicHistories.Where(x => x.DemographicId == existingEntity.Id && DateTime.UtcNow >= x.ValidFrom && DateTime.UtcNow < x.ValidTo).FirstAsync();
+                        var oldHistoryRecord = await context.DemographicHistories
+                            .Where(x => x.DemographicId == existingEntity.Id && DateTime.UtcNow >= x.ValidFrom && DateTime.UtcNow < x.ValidTo).FirstAsync();
                         oldHistoryRecord.ValidTo = DateTime.UtcNow;
                         newHistoryRecord.ValidFrom = oldHistoryRecord.ValidTo;
                         context.DemographicHistories.Add(newHistoryRecord);

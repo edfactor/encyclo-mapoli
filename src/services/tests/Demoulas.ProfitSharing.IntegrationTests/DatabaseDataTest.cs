@@ -1,4 +1,4 @@
-﻿#if DEBUG || RUSS
+﻿#if DEBUG
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.UnitTests.Base;

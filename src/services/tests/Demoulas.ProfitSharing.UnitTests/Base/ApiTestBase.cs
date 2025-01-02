@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Data.Interfaces;
+﻿using System.Diagnostics;
+using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.UnitTests.Mocks;
 using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
@@ -58,21 +59,27 @@ public class ApiTestBase<TStartup> where TStartup : class
             });
 
         ApiClient = builder.CreateClient();
-        // When debugging, the 100 second default goes by quickly.
-        ApiClient.Timeout = TimeSpan.FromMinutes(30);
+        
+        // When debugging, the 100-second default goes by quickly.
+        if (Debugger.IsAttached)
+        {
+            ApiClient.Timeout = TimeSpan.FromMinutes(30);
+        }
+
         DownloadClient = builder.CreateClient();
         DownloadClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("text/csv"));
     }
     
-    /// <summary>
-    /// find highest year in mock data.   Many programs require current profit year.
-    /// The alternative would be to expose and access the year range in PayProfitFaker directly.
-    /// <summary>
-    public Task<short> GetMaxProfitYearAsync()
+   /// <summary>
+   /// Retrieves the year with the maximum profit from the database.
+   /// </summary>
+   /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+   /// <returns>A task representing the asynchronous operation, containing the year with the maximum profit as a <see cref="short"/>.</returns>
+    public Task<short> GetMaxProfitYearAsync(CancellationToken cancellationToken = default)
     {
         return MockDbContextFactory.UseReadOnlyContext(async ctx =>
         {
-            return await ctx.PayProfits.MaxAsync(pp => pp.ProfitYear);
+            return await ctx.PayProfits.MaxAsync(pp => pp.ProfitYear, cancellationToken: cancellationToken);
         });
     }
 

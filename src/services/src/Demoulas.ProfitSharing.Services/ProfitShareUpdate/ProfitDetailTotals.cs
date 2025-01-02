@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -28,7 +23,7 @@ public record ProfitDetailTotals(
     /// <param name="ssn"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    internal  static async Task<ProfitDetailTotals> GetProfitDetailTotals(IProfitSharingDataContextFactory dbFactory, short profitYear, int ssn, CancellationToken cancellationToken)
+    internal static async Task<ProfitDetailTotals> GetProfitDetailTotals(IProfitSharingDataContextFactory dbFactory, short profitYear, int ssn, CancellationToken cancellationToken)
     {
         decimal distributionsTotal = 0;
         decimal forfeitsTotal = 0;
