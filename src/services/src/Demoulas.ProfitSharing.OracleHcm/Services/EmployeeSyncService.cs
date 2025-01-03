@@ -213,8 +213,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
 
             var options = new JsonSerializerOptions(JsonSerializerOptions.Web)
             {
-                PropertyNameCaseInsensitive = true,
-                NumberHandling = JsonNumberHandling.AllowReadingFromString
+                PropertyNameCaseInsensitive = true, NumberHandling = JsonNumberHandling.AllowReadingFromString
             };
 
             await foreach (var record in MergeAsyncEnumerables(newHires, updates, terminations, assignments, cancellationToken))
@@ -223,6 +222,17 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
                 {
                     case NewHireContext nhc:
                         {
+                            try
+                            {
+                                var oracleHcmEmployees = _oracleDemographicsSyncClient.GetEmployee(nhc.PersonId, cancellationToken);
+                                var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, requestedBy, cancellationToken);
+                                await _demographicsService.AddDemographicsStreamAsync(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
+                            }
+                            catch (Exception ex)
+                            {
+                                await AuditError(0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken);
+                            }
+
                             break;
                         }
                 }

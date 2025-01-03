@@ -2,17 +2,10 @@
 
 public class DemographicHistory
 {
-    public DemographicHistory()
-    {
-        CreatedDateTime = DateTime.UtcNow;
-        ValidTo = new DateTime(2100, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-        ValidFrom = new DateTime(1900, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-    }
-
     public long Id { get; set; }
     public int DemographicId { get; set; }
-    public DateTime ValidFrom { get; set; }
-    public DateTime ValidTo { get; set; }
+    public DateTime ValidFrom { get; set; } = new DateTime(1900, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+    public DateTime ValidTo { get; set; } = new DateTime(2100, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
     public required long OracleHcmId { get; set; }
     public int Ssn { get; set; }
@@ -29,7 +22,7 @@ public class DemographicHistory
     public char? TerminationCodeId { get; set; }
     public char EmploymentStatusId { get; set; }
 
-    public DateTime CreatedDateTime { get; set; }
+    public DateTime CreatedDateTime { get; set; } = DateTime.UtcNow;
 
     public static DemographicHistory FromDemographic(Demographic source, int demographicId)
     {
