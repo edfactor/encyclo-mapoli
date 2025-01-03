@@ -94,7 +94,6 @@ internal class PayrollSyncClient
         {
             HashSet<long> list = await _profitSharingDataContextFactory.UseReadOnlyContext(c =>
                 c.Demographics
-                    .Where(d => d.OracleHcmId > 10000)
                     .Select(d => d.OracleHcmId)
                     .ToHashSetAsync(cancellationToken));
 
