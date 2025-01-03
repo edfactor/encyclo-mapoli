@@ -239,10 +239,10 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
     /// <returns>
     /// An asynchronous enumerable that yields elements from all provided enumerables in sequence.
     /// </returns>
-    private static async IAsyncEnumerable<IDeltaContext> MergeAsyncEnumerables(IAsyncEnumerable<IDeltaContext> first,
-        IAsyncEnumerable<IDeltaContext> second,
-        IAsyncEnumerable<IDeltaContext> third,
-        IAsyncEnumerable<IDeltaContext> fourth,
+    private static async IAsyncEnumerable<DeltaContextBase> MergeAsyncEnumerables(IAsyncEnumerable<DeltaContextBase> first,
+        IAsyncEnumerable<DeltaContextBase> second,
+        IAsyncEnumerable<DeltaContextBase> third,
+        IAsyncEnumerable<DeltaContextBase> fourth,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         await foreach (var item in first.WithCancellation(cancellationToken))

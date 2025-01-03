@@ -3,12 +3,12 @@ using System.Text.Json.Serialization;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 
-public class AtomFeedResponse<TContext> where TContext : IDeltaContext
+public class AtomFeedResponse<TContext> where TContext : DeltaContextBase
 {
     public required Feed<TContext> Feed { get; set; }
 }
 
-public class Feed<TContext> where TContext : IDeltaContext
+public class Feed<TContext> where TContext : DeltaContextBase
 {
     public required string Id { get; set; }
     public required string Title { get; set; }
@@ -24,7 +24,7 @@ public class Author
     public required string Name { get; set; }
 }
 
-public class Entry<TContext> where TContext : IDeltaContext
+public class Entry<TContext> where TContext : DeltaContextBase
 {
     public required string Id { get; set; }
     public required string Title { get; set; }
@@ -39,7 +39,7 @@ public class Entry<TContext> where TContext : IDeltaContext
     public List<Author> Authors { get; set; } = new List<Author>();
 }
 
-public class EntryContent<TContext> where TContext : IDeltaContext
+public class EntryContent<TContext> where TContext : DeltaContextBase
 {
     public List<TContext> Context { get; set; } = new List<TContext>();
 
@@ -47,30 +47,26 @@ public class EntryContent<TContext> where TContext : IDeltaContext
     public List<ChangedAttribute>? ChangedAttributes { get; set; } = new List<ChangedAttribute>();
 }
 
-public interface IDeltaContext
+public abstract class DeltaContextBase
 {
+    public string? FeedType { get; set; }
     public long PersonId { get; set; }
+    public string? PersonName { get; set; }
+    public int? PersonNumber { get; set; }
+    public string? PrimaryPhoneNumber { get; set; }
+    public string? WorkerType { get; set; }
+    public string? PeriodType { get; set; }
+    public string? DMLOperation { get; set; }
+    public DateOnly? EffectiveDate { get; set; }
 }
 
-public class NewHireContext : IDeltaContext
+public class NewHireContext : DeltaContextBase
 {
     public long? PeriodOfServiceId { get; set; }
     
-    public required long PersonId { get; set; }
-
-    public string? PersonName { get; set; }
-    public int? PersonNumber { get; set; }
     public string? WorkEmail { get; set; }
-    public string? PrimaryPhoneNumber { get; set; }
-
-    public string? PeriodType { get; set; }
-
-    public string? WorkerType { get; set; }
-
-    public string? DMLOperation { get; set; }
-
-    public DateOnly? EffectiveStartDate { get; set; }
-    public DateOnly? EffectiveDate { get; set; }
+    
+public DateOnly? EffectiveStartDate { get; set; }
 }
 
 public record ChangedAttribute
@@ -83,48 +79,24 @@ public record ChangedAttribute
 }
 
 
-public class AssignmentContext : IDeltaContext
+public class AssignmentContext : DeltaContextBase
 {
     public long SalaryId { get; set; }
-    public string? PersonName { get; set; }
-    public int? PersonNumber { get; set; }
-    public required long PersonId { get; set; }
-
     public string? WorkEmail { get; set; }
-    public string? PrimaryPhoneNumber { get; set; }
-
-    public string? PeriodType { get; set; }
-
-    public string? WorkerType { get; set; }
-
-    public string? DMLOperation { get; set; }
 
     public long? AssignmentId { get; set; }
-
-    public DateOnly? EffectiveDate { get; set; }
 }
 
-public class EmployeeUpdateContext : IDeltaContext
+public class EmployeeUpdateContext : DeltaContextBase
 {
-    public required long PersonId { get; set; }
     public long? NationalIdentifierId { get; set; }
-    public string? PersonName { get; set; }
-    public int? PersonNumber { get; set; }
-    public string? PrimaryPhoneNumber { get; set; }
-
-    public string? PeriodType { get; set; }
-
-    public string? WorkerType { get; set; }
-
-    public string? DMLOperation { get; set; }
-
+    
     public DateOnly? EffectiveStartDate { get; set; }
-    public DateOnly? EffectiveDate { get; set; }
 }
 
-public class TerminationContext : IDeltaContext
+public class TerminationContext : DeltaContextBase
 {
-    public required long PersonId { get; set; }
+    
 }
 
 public class DeltaLink
@@ -150,7 +122,7 @@ public class EntryContentConverterFactory : JsonConverterFactory
 }
 
 
-public class EntryContentConverter<TContext> : JsonConverter<EntryContent<TContext>> where TContext : IDeltaContext
+public class EntryContentConverter<TContext> : JsonConverter<EntryContent<TContext>> where TContext : DeltaContextBase
 {
     public override EntryContent<TContext>? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
