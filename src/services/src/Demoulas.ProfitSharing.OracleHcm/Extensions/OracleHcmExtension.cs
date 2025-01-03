@@ -36,6 +36,16 @@ public static class OracleHcmExtension
 
     private const string FrameworkVersionHeader = "REST-Framework-Version";
 
+    /// <summary>
+    /// Adds the Oracle HCM background process to the application builder.
+    /// </summary>
+    /// <param name="builder">The <see cref="IHostApplicationBuilder"/> to configure.</param>
+    /// <returns>The configured <see cref="IHostApplicationBuilder"/>.</returns>
+    /// <remarks>
+    /// This method registers the Oracle HCM synchronization services and the hosted service
+    /// responsible for managing Oracle HCM background processes. It ensures that the necessary
+    /// dependencies and configurations are added to the application.
+    /// </remarks>
     public static IHostApplicationBuilder AddOracleHcmBackgroundProcess(this IHostApplicationBuilder builder)
     {
         builder.AddOracleHcmSynchronization();
@@ -43,10 +53,25 @@ public static class OracleHcmExtension
         return builder;
     }
 
+    /// <summary>
+    /// Configures and registers services required for Oracle HCM synchronization.
+    /// </summary>
+    /// <param name="builder">The <see cref="IHostApplicationBuilder"/> used to configure the application.</param>
+    /// <returns>The updated <see cref="IHostApplicationBuilder"/> instance.</returns>
+    /// <remarks>
+    /// This method performs the following actions:
+    /// - Retrieves and binds the Oracle HCM configuration.
+    /// - Registers the Oracle HCM configuration as a singleton service.
+    /// - Registers necessary Oracle HCM services.
+    /// - Configures HTTP clients for Oracle HCM.
+    /// - Adds a health check for Oracle HCM.
+    /// - Adds project-specific caching services.
+    /// - Configures Oracle HCM messaging.
+    /// </remarks>
     public static IHostApplicationBuilder AddOracleHcmSynchronization(this IHostApplicationBuilder builder)
     {
-        var oracleHcmConfig = builder.Configuration.GetSection("OracleHcm").Get<OracleHcmConfig>()
-                              ?? new OracleHcmConfig { BaseAddress = string.Empty, DemographicUrl = string.Empty };
+        OracleHcmConfig oracleHcmConfig = builder.Configuration.GetSection("OracleHcm").Get<OracleHcmConfig>()
+                                          ?? new OracleHcmConfig { BaseAddress = string.Empty, DemographicUrl = string.Empty };
         builder.Services.AddSingleton(oracleHcmConfig);
 
         RegisterOracleHcmServices(builder.Services);
@@ -59,6 +84,16 @@ public static class OracleHcmExtension
         return builder;
     }
 
+    /// <summary>
+    /// Registers the necessary services for Oracle HCM integration into the provided service collection.
+    /// </summary>
+    /// <param name="services">
+    /// The <see cref="IServiceCollection"/> to which the Oracle HCM services will be added.
+    /// </param>
+    /// <remarks>
+    /// This method configures general services, mappers, and internal services required for Oracle HCM functionality.
+    /// It ensures that dependencies such as validators, jobs, and mappers are properly registered.
+    /// </remarks>
     private static void RegisterOracleHcmServices(IServiceCollection services)
     {
         // General services
@@ -79,9 +114,20 @@ public static class OracleHcmExtension
         services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
     }
 
+    /// <summary>
+    /// Configures HTTP clients used for Oracle HCM integration by registering them with resilience strategies.
+    /// </summary>
+    /// <param name="services">
+    /// The <see cref="IServiceCollection"/> to which the HTTP clients will be added.
+    /// </param>
+    /// <remarks>
+    /// This method sets up HTTP clients for various Oracle HCM services, such as Atom feed synchronization,
+    /// employee synchronization, and payroll synchronization. It applies standard resilience strategies,
+    /// including circuit breakers and timeout configurations, to ensure robust communication with the Oracle HCM API.
+    /// </remarks>
     private static void ConfigureHttpClients(IServiceCollection services)
     {
-        var commonHttpOptions = new HttpResilienceOptions
+        HttpResilienceOptions commonHttpOptions = new HttpResilienceOptions
         {
             CircuitBreakerOptions = new HttpCircuitBreakerStrategyOptions { SamplingDuration = TimeSpan.FromMinutes(2) },
             AttemptTimeoutOptions = new HttpTimeoutStrategyOptions { Timeout = TimeSpan.FromMinutes(1) },
@@ -98,6 +144,19 @@ public static class OracleHcmExtension
             .AddStandardResilienceHandler(options => ApplyResilienceOptions(options, commonHttpOptions));
     }
 
+    /// <summary>
+    /// Configures resilience options for HTTP requests.
+    /// </summary>
+    /// <param name="options">The <see cref="HttpStandardResilienceOptions"/> to configure.</param>
+    /// <param name="commonOptions">
+    /// The common resilience options containing configurations for circuit breaker, 
+    /// attempt timeout, and total request timeout strategies.
+    /// </param>
+    /// <remarks>
+    /// This method applies the specified resilience strategies to the provided HTTP options, 
+    /// ensuring consistent handling of circuit breaker, attempt timeout, and total request timeout 
+    /// across HTTP clients.
+    /// </remarks>
     private static void ApplyResilienceOptions(HttpStandardResilienceOptions options, HttpResilienceOptions commonOptions)
     {
         options.CircuitBreaker = commonOptions.CircuitBreakerOptions;
@@ -105,6 +164,18 @@ public static class OracleHcmExtension
         options.TotalRequestTimeout = commonOptions.TotalRequestTimeoutOptions;
     }
 
+    /// <summary>
+    /// Configures and registers the messaging services required for Oracle HCM.
+    /// </summary>
+    /// <param name="builder">The <see cref="IHostApplicationBuilder"/> used to configure the application.</param>
+    /// <returns>The updated <see cref="IHostApplicationBuilder"/> instance.</returns>
+    /// <remarks>
+    /// This method performs the following actions:
+    /// - Configures MassTransit with an in-memory transport.
+    /// - Sets the endpoint name formatter to kebab-case.
+    /// - Registers the <see cref="OracleHcmMessageConsumer"/> as a consumer.
+    /// - Configures endpoints for the registered consumers.
+    /// </remarks>
     private static IHostApplicationBuilder AddOracleHcmMessaging(this IHostApplicationBuilder builder)
     {
         builder.Services.AddMassTransit(x =>
@@ -117,10 +188,20 @@ public static class OracleHcmExtension
         return builder;
     }
 
+    /// <summary>
+    /// Configures the provided <see cref="HttpClient"/> instance for Oracle HCM authentication.
+    /// Sets the base address, authorization headers, and default request headers required for communication with the Oracle HCM API.
+    /// </summary>
+    /// <param name="services">
+    /// The <see cref="IServiceProvider"/> instance used to resolve dependencies, including the <see cref="OracleHcmConfig"/>.
+    /// </param>
+    /// <param name="client">
+    /// The <see cref="HttpClient"/> instance to be configured for Oracle HCM API communication.
+    /// </param>
     private static void BuildOracleHcmAuthClient(IServiceProvider services, HttpClient client)
     {
-        var config = services.GetRequiredService<OracleHcmConfig>();
-        var authToken = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{config.Username}:{config.Password}"));
+        OracleHcmConfig config = services.GetRequiredService<OracleHcmConfig>();
+        string authToken = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{config.Username}:{config.Password}"));
 
         client.BaseAddress = new Uri(config.BaseAddress, UriKind.Absolute);
         client.DefaultRequestHeaders.Add(FrameworkVersionHeader, config.RestFrameworkVersion);

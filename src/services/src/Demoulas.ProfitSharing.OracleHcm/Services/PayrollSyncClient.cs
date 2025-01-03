@@ -146,7 +146,7 @@ internal class PayrollSyncClient
 
         ParallelOptions parallelOptions = new ParallelOptions
         {
-            MaxDegreeOfParallelism = Environment.ProcessorCount,
+            MaxDegreeOfParallelism = Math.Min(Environment.ProcessorCount, 6),
             CancellationToken = cancellationToken
         };
 
