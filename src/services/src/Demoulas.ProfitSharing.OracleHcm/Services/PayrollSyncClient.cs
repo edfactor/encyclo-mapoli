@@ -47,10 +47,13 @@ internal class PayrollSyncClient
     }
 
     // Method to get payroll process results for a list of person IDs
-    internal async IAsyncEnumerable<KeyValuePair<long, HashSet<int>>> GetPayrollProcessResultsAsync(
-        ISet<long> personIds, [EnumeratorCancellation] CancellationToken cancellationToken)
+    internal Task GetPayrollProcessResultsAsync(
+        ISet<long> personIds, Func<long, HashSet<int>, CancellationToken, Task> getBalanceTypesForProcessResults, CancellationToken cancellationToken)
     {
-        foreach (long personId in personIds)
+        const int payrollActionId = 2003;
+
+        //foreach (long personId in personIds)
+        return Parallel.ForEachAsync(personIds, async (personId, token) =>
         {
             HashSet<int> objectActionIds = [];
             bool isSuccessful = false;
@@ -58,18 +61,18 @@ internal class PayrollSyncClient
             try
             {
                 string query = $"{_oracleHcmConfig.PayrollUrl}?q=PersonId={personId}&fields=PayrollActionId,ObjectActionId&onlyData=true";
-                using var response = await _httpClient.GetAsync(query, cancellationToken);
+                using var response = await _httpClient.GetAsync(query, token);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var results = await response.Content.ReadFromJsonAsync<PayrollRoot>(_jsonSerializerOptions, cancellationToken);
+                    var results = await response.Content.ReadFromJsonAsync<PayrollRoot>(_jsonSerializerOptions, token);
                     if ((results?.Count ?? 0) == 0)
                     {
-                        continue;
+                       return;
                     }
 
                     objectActionIds = results!.Items
-                        .Where(result => result is { PayrollActionId: 2003, ObjectActionId: not null })
+                        .Where(result => result is { PayrollActionId: payrollActionId, ObjectActionId: not null })
                         .Select(result => result.ObjectActionId!.Value)
                         .ToHashSet();
 
@@ -87,9 +90,9 @@ internal class PayrollSyncClient
 
             if (isSuccessful)
             {
-                yield return new KeyValuePair<long, HashSet<int>>(personId, objectActionIds);
+                await getBalanceTypesForProcessResults(personId, objectActionIds, token);
             }
-        }
+        }, cancellationToken);
     }
 
 
@@ -217,15 +220,12 @@ internal class PayrollSyncClient
         {
             HashSet<long> list = await _profitSharingDataContextFactory.UseReadOnlyContext(c =>
                 c.Demographics
+                    .Where(d=> d.OracleHcmId > 10000)
                     .Select(d => d.OracleHcmId)
                     .ToHashSetAsync(cancellationToken));
 
             // Step 1: Get payroll process results (ObjectActionIds) for each PersonId
-            await foreach (KeyValuePair<long, HashSet<int>> emp in GetPayrollProcessResultsAsync(list, cancellationToken))
-            {
-                // Step 2: Get specific balance types for each ObjectActionId
-                await GetBalanceTypesForProcessResultsAsync(emp.Key, emp.Value, cancellationToken);
-            }
+            await GetPayrollProcessResultsAsync(list, GetBalanceTypesForProcessResultsAsync, cancellationToken);
         }
         catch (Exception ex)
         {
