@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Linq.Expressions;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Demoulas.ProfitSharing.Common;
@@ -50,6 +51,25 @@ internal class PayrollSyncClient
         _jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
     }
 
+    /// <summary>
+    /// Retrieves payroll balances asynchronously by processing payroll data for specified individuals.
+    /// </summary>
+    /// <param name="requestedBy">
+    /// The identifier of the entity or user requesting the operation. Defaults to "System".
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A <see cref="CancellationToken"/> to observe while waiting for the task to complete.
+    /// </param>
+    /// <returns>
+    /// A <see cref="Task"/> representing the asynchronous operation.
+    /// </returns>
+    /// <remarks>
+    /// This method initiates a job to synchronize payroll data, processes payroll balances for individuals
+    /// with valid Oracle HCM IDs, and updates the job status upon completion or failure.
+    /// </remarks>
+    /// <exception cref="Exception">
+    /// Logs critical errors if an exception occurs during the payroll synchronization process.
+    /// </exception>
     public async Task RetrievePayrollBalancesAsync(string requestedBy = "System", CancellationToken cancellationToken = default)
     {
         using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(RetrievePayrollBalancesAsync), ActivityKind.Internal);
@@ -98,8 +118,25 @@ internal class PayrollSyncClient
         }
     }
 
-
-    // Method to get payroll process results for a list of person IDs
+    /// <summary>
+    /// Retrieves payroll process results for a set of person IDs and processes the results using a specified callback function.
+    /// </summary>
+    /// <param name="personIds">
+    /// A set of person IDs for which payroll process results will be retrieved.
+    /// </param>
+    /// <param name="getBalanceTypesForProcessResults">
+    /// A callback function to process the balance types for the retrieved payroll process results.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token to monitor for cancellation requests.
+    /// </param>
+    /// <returns>
+    /// A task that represents the asynchronous operation of retrieving and processing payroll process results.
+    /// </returns>
+    /// <remarks>
+    /// This method uses parallel processing to retrieve payroll process results for each person ID.
+    /// If the retrieval is successful, the specified callback function is invoked to process the results.
+    /// </remarks>
     private Task GetPayrollProcessResultsAsync(
         ISet<long> personIds,
         Func<long, HashSet<int>, CancellationToken, ValueTask> getBalanceTypesForProcessResults,
@@ -158,7 +195,25 @@ internal class PayrollSyncClient
     }
 
 
-    // Method to get balance types for each ObjectActionId
+    /// <summary>
+    /// Retrieves balance types for the specified payroll process results asynchronously.
+    /// </summary>
+    /// <param name="oracleHcmId">
+    /// The unique identifier for the Oracle HCM entity.
+    /// </param>
+    /// <param name="objectActionIds">
+    /// A collection of action IDs associated with payroll process results.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token to monitor for cancellation requests.
+    /// </param>
+    /// <returns>
+    /// A <see cref="ValueTask"/> representing the asynchronous operation.
+    /// </returns>
+    /// <remarks>
+    /// This method processes payroll balances by fetching data from an external Oracle HCM service
+    /// and updates the database with the accumulated totals for the specified balance types.
+    /// </remarks>
     private async ValueTask GetBalanceTypesForProcessResultsAsync(
         long oracleHcmId,
         HashSet<int> objectActionIds,
@@ -262,7 +317,7 @@ internal class PayrollSyncClient
 
             int resultCount = await context.SaveChangesAsync(cancellationToken);
 
-            Console.ForegroundColor = ConsoleColor.Red;
+            Console.ForegroundColor = resultCount == 0 ? ConsoleColor.Red : ConsoleColor.DarkGreen;
             Console.WriteLine();
             Console.WriteLine($"Inserted {resultCount} rows into {nameof(PayProfit)} for {demographic.ContactInfo.FullName}({demographic.EmployeeId})");
             Console.WriteLine();
