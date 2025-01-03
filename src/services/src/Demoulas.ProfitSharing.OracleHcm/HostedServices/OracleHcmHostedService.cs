@@ -46,7 +46,7 @@ internal sealed class OracleHcmHostedService : IHostedService
         await ScheduleJob<EmployeeDeltaSyncJob>(
             "employeeDeltaSyncTrigger",
             Debugger.IsAttached ? TimeSpan.Zero : TimeSpan.FromMinutes(5),
-            TimeSpan.FromMinutes(_oracleHcmConfig.IntervalInHours),
+            TimeSpan.FromMinutes(_oracleHcmConfig.DeltaIntervalInMinutes),
             cancellationToken
         );
 
