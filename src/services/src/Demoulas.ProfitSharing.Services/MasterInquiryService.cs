@@ -31,7 +31,7 @@ public class MasterInquiryService : IMasterInquiryService
             var rslt = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
                 var query = ctx.ProfitDetails
-                            .Join(ctx.Demographics,
+                            .Join(ctx.Demographics,  //Question: Should this be frozen demographics?
                                 pd => pd.Ssn,
                                 d => d.Ssn,
                                 (pd, d) => new { ProfitDetail = pd, Demographics = d })
@@ -151,7 +151,7 @@ public class MasterInquiryService : IMasterInquiryService
                          d.TerminationDate,
                          d.StoreNumber,
                          DemographicId = d.Id,
-                         LatestPayProfit = d.PayProfits
+                         LatestPayProfit = d.PayProfits //Question - If a max profit year is specified, should we be filtering to it here?
                              .OrderByDescending(p => p.ProfitYear)
                              .FirstOrDefault()
                      })

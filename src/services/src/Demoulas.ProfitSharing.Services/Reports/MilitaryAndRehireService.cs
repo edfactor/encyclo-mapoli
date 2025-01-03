@@ -34,6 +34,7 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
     {
         var militaryMembers = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
+            //Question - Should this be off Frozen Demographics?
             var inactiveMilitaryMembers = await context.Demographics.Where(d => d.TerminationCodeId == TerminationCode.Constants.Military
                                                                                 && d.EmploymentStatusId == EmploymentStatus.Constants.Inactive)
                 .OrderBy(d => d.ContactInfo.FullName)
@@ -144,6 +145,9 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
     {
         var bracket = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
 
+        //Question: Shouldn't there be filters for the ProfitYear on PayProfit and ProfitDetail here?
+        //Question: Should this be Frozen Demographics?
+        //Question: The columns that aren't be filled in here, are they a necessary part of the query, or should be put values to them?
         var query = context.Demographics
             .Join(
                 context.PayProfits, // Table to join with (PayProfit)

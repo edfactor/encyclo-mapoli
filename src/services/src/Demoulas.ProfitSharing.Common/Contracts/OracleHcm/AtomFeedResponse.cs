@@ -3,12 +3,12 @@ using System.Text.Json.Serialization;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 
-public class AtomFeedResponse<TContext> where TContext : IDeltaContext
+public class AtomFeedResponse<TContext> where TContext : DeltaContextBase
 {
     public required Feed<TContext> Feed { get; set; }
 }
 
-public class Feed<TContext> where TContext : IDeltaContext
+public class Feed<TContext> where TContext : DeltaContextBase
 {
     public required string Id { get; set; }
     public required string Title { get; set; }
@@ -24,13 +24,13 @@ public class Author
     public required string Name { get; set; }
 }
 
-public class Entry<TContext> where TContext : IDeltaContext
+public class Entry<TContext> where TContext : DeltaContextBase
 {
     public required string Id { get; set; }
     public required string Title { get; set; }
     public required string Summary { get; set; }
 
-    [JsonConverter(typeof(JsonStringToObjectConverterFactory<TContext>))]
+    [JsonConverter(typeof(EntryContentConverterFactory))]
     public required EntryContent<TContext> Content { get; set; }
 
     public DateTime Updated { get; set; }
@@ -39,62 +39,64 @@ public class Entry<TContext> where TContext : IDeltaContext
     public List<Author> Authors { get; set; } = new List<Author>();
 }
 
-public class JsonStringToObjectConverterFactory<TContext> : JsonConverterFactory where TContext : IDeltaContext
-{
-    public override bool CanConvert(Type typeToConvert)
-    {
-        // Only allows conversions for types implementing IDeltaContext
-        return typeof(TContext).IsAssignableFrom(typeToConvert);
-    }
-
-    public override JsonConverter? CreateConverter(Type typeToConvert, JsonSerializerOptions options)
-    {
-        // Create and return the generic JsonStringToObjectConverter for the given type
-        var converterType = typeof(JsonStringToObjectConverter<>).MakeGenericType(typeToConvert);
-        return (JsonConverter?)Activator.CreateInstance(converterType);
-    }
-}
-
-public class EntryContent<TContext> where TContext : IDeltaContext
+public class EntryContent<TContext> where TContext : DeltaContextBase
 {
     public List<TContext> Context { get; set; } = new List<TContext>();
+
+    [JsonPropertyName("Changed Attributes")]
+    public List<ChangedAttribute>? ChangedAttributes { get; set; } = new List<ChangedAttribute>();
 }
 
-public interface IDeltaContext
+public abstract class DeltaContextBase
 {
+    public string? FeedType { get; set; }
     public long PersonId { get; set; }
-}
-
-public class NewHireContext : IDeltaContext
-{
-    public long PeriodOfServiceId { get; set; }
-    public required long PersonId { get; set; }
-
     public string? PersonName { get; set; }
-    public string? PersonNumber { get; set; }
-    public string? WorkEmail { get; set; }
+    public int? PersonNumber { get; set; }
     public string? PrimaryPhoneNumber { get; set; }
-
-    public string? PeriodType { get; set; }
     public string? WorkerType { get; set; }
+    public string? PeriodType { get; set; }
     public string? DMLOperation { get; set; }
-    public DateTime EffectiveStartDate { get; set; }
-    public DateTime EffectiveDate { get; set; }
+    public DateOnly? EffectiveDate { get; set; }
 }
 
-public class AssignmentContext : IDeltaContext
+public class NewHireContext : DeltaContextBase
 {
-    public required long PersonId { get; set; }
+    public long? PeriodOfServiceId { get; set; }
+    
+    public string? WorkEmail { get; set; }
+    
+public DateOnly? EffectiveStartDate { get; set; }
 }
 
-public class EmployeeUpdateContext : IDeltaContext
+public record ChangedAttribute
 {
-    public required long PersonId { get; set; }
+    public string? SalaryBasisId { get; set; }
+    public long? NationalIdentifierId { get; set; }
+    public string? LegislationCode { get; set; }
+    public string? NationalIdentifierType { get; set; }
+    public DateOnly? ExpirationDate { get; set; }
 }
 
-public class TerminationContext : IDeltaContext
+
+public class AssignmentContext : DeltaContextBase
 {
-    public required long PersonId { get; set; }
+    public long SalaryId { get; set; }
+    public string? WorkEmail { get; set; }
+
+    public long? AssignmentId { get; set; }
+}
+
+public class EmployeeUpdateContext : DeltaContextBase
+{
+    public long? NationalIdentifierId { get; set; }
+    
+    public DateOnly? EffectiveStartDate { get; set; }
+}
+
+public class TerminationContext : DeltaContextBase
+{
+    
 }
 
 public class DeltaLink
@@ -104,30 +106,81 @@ public class DeltaLink
     public string? RelType { get; set; }
 }
 
-public class JsonStringToObjectConverter<T> : JsonConverter<T>
+public class EntryContentConverterFactory : JsonConverterFactory
 {
-    public override T? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions? options)
+    public override bool CanConvert(Type typeToConvert)
     {
-        // Ensure the JSON value is a string
-        if (reader.TokenType != JsonTokenType.String)
-        {
-            throw new JsonException($"Unexpected token parsing {typeof(T).Name}. Expected String, got {reader.TokenType}.");
-        }
-
-        // Get the raw string value and deserialize it
-        string? rawString = reader.GetString();
-        if (string.IsNullOrWhiteSpace(rawString))
-        {
-            return default(T)!; // or throw new JsonException()
-        }
-
-        return JsonSerializer.Deserialize<T>(rawString, options);
+        return typeToConvert.IsGenericType && typeToConvert.GetGenericTypeDefinition() == typeof(EntryContent<>);
     }
 
-    public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
+    public override JsonConverter? CreateConverter(Type typeToConvert, JsonSerializerOptions options)
     {
-        // Serialize the object as a JSON string
-        string rawString = JsonSerializer.Serialize(value, options);
-        writer.WriteStringValue(rawString);
+        var contextType = typeToConvert.GetGenericArguments()[0]; // Get the TContext type
+        var converterType = typeof(EntryContentConverter<>).MakeGenericType(contextType);
+        return (JsonConverter?)Activator.CreateInstance(converterType);
     }
 }
+
+
+public class EntryContentConverter<TContext> : JsonConverter<EntryContent<TContext>> where TContext : DeltaContextBase
+{
+    public override EntryContent<TContext>? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        // Check if the token is a string (raw JSON in a string)
+        if (reader.TokenType == JsonTokenType.String)
+        {
+            // Extract the string and parse it as JSON
+            var rawString = reader.GetString();
+            if (string.IsNullOrWhiteSpace(rawString))
+            {
+                return new EntryContent<TContext>();
+            }
+
+            using var document = JsonDocument.Parse(rawString);
+            var rootElement = document.RootElement;
+
+            // Process as if it's the standard JSON structure
+            return ParseEntryContent(rootElement, options);
+        }
+
+        // Otherwise, handle it as a direct JSON object
+        if (reader.TokenType == JsonTokenType.StartObject)
+        {
+            using var document = JsonDocument.ParseValue(ref reader);
+            return ParseEntryContent(document.RootElement, options);
+        }
+
+        throw new JsonException($"Unexpected token parsing {typeof(EntryContent<TContext>)}. Expected String or StartObject.");
+    }
+
+    private EntryContent<TContext> ParseEntryContent(JsonElement rootElement, JsonSerializerOptions options)
+    {
+        // Extract the "Context" property
+        if (rootElement.TryGetProperty("Context", out var contextElement) && contextElement.ValueKind == JsonValueKind.Array)
+        {
+            var contextList = JsonSerializer.Deserialize<List<TContext>>(contextElement.GetRawText(), options);
+
+            // Handle optional "Changed Attributes" property
+            var changedAttributes = rootElement.TryGetProperty("Changed Attributes", out var changedAttributesElement) &&
+                                    changedAttributesElement.ValueKind == JsonValueKind.Array
+                ? JsonSerializer.Deserialize<List<ChangedAttribute>>(changedAttributesElement.GetRawText(), options)
+                : new List<ChangedAttribute>();
+
+            return new EntryContent<TContext>
+            {
+                Context = contextList ?? new List<TContext>(),
+                ChangedAttributes = changedAttributes
+            };
+        }
+
+        throw new JsonException($"Missing or invalid 'Context' property in {typeof(EntryContent<TContext>)}.");
+    }
+
+    public override void Write(Utf8JsonWriter writer, EntryContent<TContext> value, JsonSerializerOptions options)
+    {
+       // we will never write. This is a read-only operation
+    }
+}
+
+
+

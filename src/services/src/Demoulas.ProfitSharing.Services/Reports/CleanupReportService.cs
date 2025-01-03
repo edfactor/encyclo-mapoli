@@ -255,9 +255,28 @@ public class CleanupReportService : ICleanupReportService
             });
 
             ISet<int> badgeNumbers = results.Results.Select(r => r.BadgeNumber).ToHashSet();
-            var dict = await _contributionService.GetContributionYears(badgeNumbers);
             var balanceDict = await _contributionService.GetNetBalance(req.ProfitYear, badgeNumbers, cancellationToken);
 
+            var dict = await _dataContextFactory.UseReadOnlyContext(ctx =>
+            {
+                var tst = (from yis in _totalService.GetYearsOfService(ctx, req.ProfitYear)
+                           join d in ctx.Demographics on yis.Ssn equals d.Ssn
+                           select new
+                           {
+                               d.EmployeeId,
+                               Years = (byte)yis.Years
+                           }).ToListAsync(cancellationToken);
+                return (
+                    from yis in _totalService.GetYearsOfService(ctx, req.ProfitYear)
+                    join d in ctx.Demographics on yis.Ssn equals d.Ssn
+                    select new
+                    {
+                        d.EmployeeId,
+                        Years = (byte)yis.Years
+                    }
+                ).ToDictionaryAsync(x => x.EmployeeId, x => x.Years);
+
+            });
 
             foreach (DuplicateNamesAndBirthdaysResponse dup in results.Results)
             {
@@ -327,7 +346,7 @@ public class CleanupReportService : ICleanupReportService
                             join nameAndDob in nameAndDobQuery on pd.Ssn equals nameAndDob.Ssn
                             where pd.ProfitYear == req.ProfitYear &&
                                   validProfitCodes.Contains(pd.ProfitCodeId) &&
-                                  (pd.ProfitCodeId != 9 || (pd.ProfitCodeId == 9 && (!pd.CommentTypeId.HasValue || !transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)))) &&
+                                  (pd.ProfitCodeId != ProfitCode.Constants.Outgoing100PercentVestedPayment.Id || (pd.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id && (!pd.CommentTypeId.HasValue || !transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)))) &&
                                   (req.StartMonth == 0 || pd.MonthToDate >= req.StartMonth) &&
                                   (req.EndMonth == 0 || pd.MonthToDate <= req.EndMonth)
                             orderby nameAndDob.LastName, nameAndDob.FirstName
@@ -342,7 +361,7 @@ public class CleanupReportService : ICleanupReportService
                                 FederalTax = pd.FederalTaxes,
                                 ForfeitAmount = pd.ProfitCodeId == 2 ? pd.Forfeiture : 0,
                                 LoanDate = pd.MonthToDate > 0 ? new DateOnly(pd.YearToDate, pd.MonthToDate, 1) : null,
-                                Age = Convert.ToByte(Math.Floor((DateOnly.FromDateTime(DateTime.Now).DayNumber - nameAndDob.DateOfBirth.DayNumber) / 365.2499))
+                                Age = Convert.ToByte(Math.Floor((DateOnly.FromDateTime(DateTime.Now).DayNumber - nameAndDob.DateOfBirth.DayNumber) / 365.2499))  //Question: This should be from the end of the specified profit year?
                             };
                 return await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
             });

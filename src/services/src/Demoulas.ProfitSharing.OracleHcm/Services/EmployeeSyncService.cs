@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Bogus;
 using Bogus.Extensions.UnitedStates;
 using Demoulas.ProfitSharing.Common.ActivitySources;
@@ -210,16 +211,15 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
             var updates = _atomFeedService.GetFeedDataAsync<EmployeeUpdateContext>("empupdate", minDate, maxDate, cancellationToken);
             var terminations = _atomFeedService.GetFeedDataAsync<TerminationContext>("termination", minDate, maxDate, cancellationToken);
 
+            var options = new JsonSerializerOptions(JsonSerializerOptions.Web)
+            {
+                PropertyNameCaseInsensitive = true,
+                NumberHandling = JsonNumberHandling.AllowReadingFromString
+            };
+
             await foreach (var record in MergeAsyncEnumerables(newHires, updates, terminations, assignments, cancellationToken))
             {
-                switch (record)
-                {
-                    case NewHireContext nhc:
-                        {
-                            Console.WriteLine(nhc);
-                            break;
-                        }
-                }
+                Console.WriteLine(JsonSerializer.Serialize(record, options));
             }
         }
         catch (Exception ex)
@@ -239,10 +239,10 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
     /// <returns>
     /// An asynchronous enumerable that yields elements from all provided enumerables in sequence.
     /// </returns>
-    private static async IAsyncEnumerable<IDeltaContext> MergeAsyncEnumerables(IAsyncEnumerable<IDeltaContext> first,
-        IAsyncEnumerable<IDeltaContext> second,
-        IAsyncEnumerable<IDeltaContext> third,
-        IAsyncEnumerable<IDeltaContext> fourth,
+    private static async IAsyncEnumerable<DeltaContextBase> MergeAsyncEnumerables(IAsyncEnumerable<DeltaContextBase> first,
+        IAsyncEnumerable<DeltaContextBase> second,
+        IAsyncEnumerable<DeltaContextBase> third,
+        IAsyncEnumerable<DeltaContextBase> fourth,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         await foreach (var item in first.WithCancellation(cancellationToken))
