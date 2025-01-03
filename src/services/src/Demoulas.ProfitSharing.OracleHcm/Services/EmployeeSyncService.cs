@@ -211,32 +211,26 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
             var updates = _atomFeedService.GetFeedDataAsync<EmployeeUpdateContext>("empupdate", minDate, maxDate, cancellationToken);
             var terminations = _atomFeedService.GetFeedDataAsync<TerminationContext>("termination", minDate, maxDate, cancellationToken);
 
-            var options = new JsonSerializerOptions(JsonSerializerOptions.Web)
-            {
-                PropertyNameCaseInsensitive = true, NumberHandling = JsonNumberHandling.AllowReadingFromString
-            };
-
+            HashSet<long> people = new HashSet<long>();
             await foreach (var record in MergeAsyncEnumerables(newHires, updates, terminations, assignments, cancellationToken))
             {
-                switch (record)
-                {
-                    case NewHireContext nhc:
-                        {
-                            try
-                            {
-                                var oracleHcmEmployees = _oracleDemographicsSyncClient.GetEmployee(nhc.PersonId, cancellationToken);
-                                var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, requestedBy, cancellationToken);
-                                await _demographicsService.AddDemographicsStreamAsync(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
-                            }
-                            catch (Exception ex)
-                            {
-                                await AuditError(0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken);
-                            }
+                people.Add(record.PersonId);
+            }
 
-                            break;
-                        }
+            try
+            {
+                foreach (long oracleHcmId in people)
+                {
+                    var oracleHcmEmployees = _oracleDemographicsSyncClient.GetEmployee(oracleHcmId, cancellationToken);
+                    var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, requestedBy, cancellationToken);
+                    await _demographicsService.AddDemographicsStreamAsync(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
                 }
             }
+            catch (Exception ex)
+            {
+                await AuditError(0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken);
+            }
+
         }
         catch (Exception ex)
         {

@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Demoulas.ProfitSharing.Common.Extensions;
 public static class SsnExtensions
@@ -18,9 +19,10 @@ public static class SsnExtensions
 
     public static int ConvertSsnToInt([StringSyntax("###-##-####")] this string formattedSsn)
     {
-        if (string.IsNullOrWhiteSpace(formattedSsn) || formattedSsn.Length != 11)
+        if (string.IsNullOrWhiteSpace(formattedSsn) || formattedSsn.Length < 9)
         {
-            throw new ArgumentException("Invalid SSN format. Expected format: ###-##-1234.");
+            Debug.WriteLine($"SSN :{formattedSsn}");
+            throw new ArgumentException("Invalid SSN format. Expected format: ###-##-1234 or ######1234.");
         }
 
         // Remove non-numeric characters if any (e.g., dashes)
