@@ -1,7 +1,9 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics;
+using System.Linq.Expressions;
 using System.Net.Http.Json;
-using System.Runtime.CompilerServices;
 using System.Text.Json;
+using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -23,6 +25,9 @@ internal class PayrollSyncClient
         public const long MbProfitSharingHours = 300000789345477; // MB Profit Sharing Hours
         public const long MbProfitSharingWeeks = 300000785152356; // MB Profit Sharing Weeks
     }
+
+    private readonly List<long> _balanceTypeIds =
+        [BalanceTypeIds.MbProfitSharingDollars, BalanceTypeIds.MbProfitSharingHours, BalanceTypeIds.MbProfitSharingWeeks];
 
     // Constants for other parameters
     private const string PLDGId = "300000005030436";
@@ -48,14 +53,22 @@ internal class PayrollSyncClient
 
     // Method to get payroll process results for a list of person IDs
     internal Task GetPayrollProcessResultsAsync(
-        ISet<long> personIds, Func<long, HashSet<int>, CancellationToken, Task> getBalanceTypesForProcessResults, CancellationToken cancellationToken)
+        ISet<long> personIds,
+        Func<long, HashSet<int>, CancellationToken, ValueTask> getBalanceTypesForProcessResults,
+        CancellationToken cancellationToken)
     {
+
         const int payrollActionId = 2003;
 
-        //foreach (long personId in personIds)
-        return Parallel.ForEachAsync(personIds, async (personId, token) =>
+        ParallelOptions parallelOptions = new ParallelOptions
         {
-            HashSet<int> objectActionIds = [];
+            MaxDegreeOfParallelism = Environment.ProcessorCount,
+            CancellationToken = cancellationToken
+        };
+
+        return Parallel.ForEachAsync(source: personIds, parallelOptions: parallelOptions, body: async (personId, token) =>
+        {
+            var objectActionIds = new HashSet<int>();
             bool isSuccessful = false;
 
             try
@@ -68,7 +81,7 @@ internal class PayrollSyncClient
                     var results = await response.Content.ReadFromJsonAsync<PayrollRoot>(_jsonSerializerOptions, token);
                     if ((results?.Count ?? 0) == 0)
                     {
-                       return;
+                        return;
                     }
 
                     objectActionIds = results!.Items
@@ -90,14 +103,15 @@ internal class PayrollSyncClient
 
             if (isSuccessful)
             {
+                // Wrap Task in ValueTask
                 await getBalanceTypesForProcessResults(personId, objectActionIds, token);
             }
-        }, cancellationToken);
+        });
     }
 
 
     // Method to get balance types for each ObjectActionId
-    internal async Task GetBalanceTypesForProcessResultsAsync(
+    internal async ValueTask GetBalanceTypesForProcessResultsAsync(
         long oracleHcmId,
         HashSet<int> objectActionIds,
         CancellationToken cancellationToken)
@@ -105,19 +119,14 @@ internal class PayrollSyncClient
         // DimensionName should be set to Relationship No Calculation Breakdown Inception to Date. That will give you the correct value for current dollars, weeks, hours.
         const string dimensionName = "Relationship No Calculation Breakdown Inception to Date";
 
-        var balanceTypeIds = new List<long> { BalanceTypeIds.MbProfitSharingDollars, BalanceTypeIds.MbProfitSharingHours, BalanceTypeIds.MbProfitSharingWeeks };
-
         // Initialize totals dictionary
-        var balanceTypeTotals = new Dictionary<long, decimal>
-        {
-            { BalanceTypeIds.MbProfitSharingDollars, 0 }, { BalanceTypeIds.MbProfitSharingHours, 0 }, { BalanceTypeIds.MbProfitSharingWeeks, 0 }
-        };
+        var balanceTypeTotals = new ConcurrentDictionary<long, decimal>();
 
         int year = DateTime.Today.Year;
 
         foreach (int objectActionId in objectActionIds)
         {
-            foreach (long balanceTypeId in balanceTypeIds)
+            await Task.WhenAll(_balanceTypeIds.Select(async balanceTypeId =>
             {
                 string url =
                     $"{_oracleHcmConfig.PayrollUrl}/{objectActionId}/child/BalanceView/?onlyData=true&fields=BalanceTypeId,TotalValue1,TotalValue2,DefbalId1,DimensionName&finder=findByBalVar;pBalGroupUsageId1=null,pBalGroupUsageId2=-1,pLDGId={PLDGId},pLC={PLC},pBalTypeId={balanceTypeId}&onlyData=true";
@@ -134,18 +143,20 @@ internal class PayrollSyncClient
                             .Sum(b => b.TotalValue1);
 
                         // Accumulate totals per balance type ID
-                        balanceTypeTotals[balanceTypeId] += total;
+                        balanceTypeTotals.AddOrUpdate(balanceTypeId, total, (key, oldValue) => oldValue + total);
+
                     }
                     else
                     {
-                        _logger.LogError("Failed to get balance types for ObjectActionId {ObjectActionId}: {ResponseReasonPhrase}", objectActionId, response.ReasonPhrase);
+                        _logger.LogError("Failed to get balance types for ObjectActionId {ObjectActionId}: {ResponseReasonPhrase}", objectActionId,
+                            response.ReasonPhrase);
                     }
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error fetching balance types for ObjectActionId {ObjectActionId}: {Message}", objectActionId, ex.Message);
                 }
-            }
+            }));
         }
 
         // Single database interaction
@@ -153,15 +164,20 @@ internal class PayrollSyncClient
         {
             var demographic = await context.Demographics
                 .Include(d => d.PayProfits.Where(p => p.ProfitYear == year))
+                .Include(demographic => demographic.ContactInfo)
                 .FirstOrDefaultAsync(d => d.OracleHcmId == oracleHcmId, cancellationToken);
 
             if (demographic == null)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine();
                 Console.WriteLine($"Demographic with OracleHcmId {oracleHcmId} not found.");
+                Console.WriteLine();
+                Console.ForegroundColor = ConsoleColor.White;
                 return;
             }
 
-            var payProfit = demographic.PayProfits.FirstOrDefault();
+            var payProfit = demographic.PayProfits.FirstOrDefault(p=> p.ProfitYear == year);
 
             if (payProfit == null)
             {
@@ -191,8 +207,19 @@ internal class PayrollSyncClient
             }
 
             payProfit.LastUpdate = DateTime.Now;
+            if (payProfit.CurrentHoursYear >= ReferenceData.MinimumHoursForContribution())
+            {
+                payProfit.YearsInPlan = (byte)await context.PayProfits.Where(pp => pp.DemographicId == payProfit.DemographicId).MaxAsync(pp => pp.YearsInPlan + 1 , cancellationToken: cancellationToken);
+            }
 
-            await context.SaveChangesAsync(cancellationToken);
+            int resultCount = await context.SaveChangesAsync(cancellationToken);
+
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine();
+            Console.WriteLine($"Inserted {resultCount} rows into {nameof(PayProfit)} for {demographic.ContactInfo.FullName}({demographic.EmployeeId})");
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.White;
+
         }, cancellationToken);
     }
 

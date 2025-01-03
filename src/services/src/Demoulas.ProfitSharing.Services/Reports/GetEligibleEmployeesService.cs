@@ -1,4 +1,5 @@
 ﻿using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -24,7 +25,7 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
     {
         var response = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
         var birthDateOfExactly21YearsOld = response.FiscalEndDate.AddYears(-21);
-        var hoursWorkedRequirement = ContributionService.MinimumHoursForContribution();
+        var hoursWorkedRequirement = ReferenceData.MinimumHoursForContribution();
 
         return  await _dataContextFactory.UseReadOnlyContext(async c =>
         {

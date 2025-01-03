@@ -1,8 +1,6 @@
 ﻿using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Bogus;
 using Bogus.Extensions.UnitedStates;
 using Demoulas.ProfitSharing.Common.ActivitySources;

@@ -1,5 +1,6 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
@@ -41,7 +42,7 @@ public class FrozenReportService : IFrozenReportService
     {
         using (_logger.BeginScope("Request FORFEITURES AND POINTS FOR YEAR"))
         {
-            var hoursWorkedRequirement = ContributionService.MinimumHoursForContribution();
+            var hoursWorkedRequirement = ReferenceData.MinimumHoursForContribution();
 
             var rslt = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
