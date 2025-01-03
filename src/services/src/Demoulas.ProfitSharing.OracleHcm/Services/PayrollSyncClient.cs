@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Linq.Expressions;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Demoulas.ProfitSharing.Common;
@@ -51,8 +50,57 @@ internal class PayrollSyncClient
         _jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
     }
 
+    public async Task RetrievePayrollBalancesAsync(string requestedBy = "System", CancellationToken cancellationToken = default)
+    {
+        using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(RetrievePayrollBalancesAsync), ActivityKind.Internal);
+
+        var job = new Job
+        {
+            JobTypeId = JobType.Constants.PayrollSyncFull,
+            StartMethodId = StartMethod.Constants.System,
+            RequestedBy = requestedBy,
+            JobStatusId = JobStatus.Constants.Running,
+            Started = DateTime.Now
+        };
+
+        await _profitSharingDataContextFactory.UseWritableContext(db =>
+        {
+            db.Jobs.Add(job);
+            return db.SaveChangesAsync(cancellationToken);
+        }, cancellationToken);
+
+        bool success = true;
+        try
+        {
+            HashSet<long> list = await _profitSharingDataContextFactory.UseReadOnlyContext(c =>
+                c.Demographics
+                    .Where(d => d.OracleHcmId > 10000)
+                    .Select(d => d.OracleHcmId)
+                    .ToHashSetAsync(cancellationToken));
+
+            // Step 1: Get payroll process results (ObjectActionIds) for each PersonId
+            await GetPayrollProcessResultsAsync(list, GetBalanceTypesForProcessResultsAsync, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            success = false;
+            _logger.LogCritical(ex, ex.Message);
+        }
+        finally
+        {
+            await _profitSharingDataContextFactory.UseWritableContext(db =>
+            {
+                return db.Jobs.Where(j => j.Id == job.Id).ExecuteUpdateAsync(s => s
+                        .SetProperty(b => b.Completed, b => DateTime.Now)
+                        .SetProperty(b => b.JobStatusId, b => success ? JobStatus.Constants.Completed : JobStatus.Constants.Failed),
+                    cancellationToken: cancellationToken);
+            }, cancellationToken);
+        }
+    }
+
+
     // Method to get payroll process results for a list of person IDs
-    internal Task GetPayrollProcessResultsAsync(
+    private Task GetPayrollProcessResultsAsync(
         ISet<long> personIds,
         Func<long, HashSet<int>, CancellationToken, ValueTask> getBalanceTypesForProcessResults,
         CancellationToken cancellationToken)
@@ -111,7 +159,7 @@ internal class PayrollSyncClient
 
 
     // Method to get balance types for each ObjectActionId
-    internal async ValueTask GetBalanceTypesForProcessResultsAsync(
+    private async ValueTask GetBalanceTypesForProcessResultsAsync(
         long oracleHcmId,
         HashSet<int> objectActionIds,
         CancellationToken cancellationToken)
@@ -221,53 +269,5 @@ internal class PayrollSyncClient
             Console.ForegroundColor = ConsoleColor.White;
 
         }, cancellationToken);
-    }
-
-    public async Task RetrievePayrollBalancesAsync(string requestedBy = "System", CancellationToken cancellationToken = default)
-    {
-        using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(RetrievePayrollBalancesAsync), ActivityKind.Internal);
-
-        var job = new Job
-        {
-            JobTypeId = JobType.Constants.PayrollSyncFull,
-            StartMethodId = StartMethod.Constants.System,
-            RequestedBy = requestedBy,
-            JobStatusId = JobStatus.Constants.Running,
-            Started = DateTime.Now
-        };
-
-        await _profitSharingDataContextFactory.UseWritableContext(db =>
-        {
-            db.Jobs.Add(job);
-            return db.SaveChangesAsync(cancellationToken);
-        }, cancellationToken);
-
-        bool success = true;
-        try
-        {
-            HashSet<long> list = await _profitSharingDataContextFactory.UseReadOnlyContext(c =>
-                c.Demographics
-                    .Where(d=> d.OracleHcmId > 10000)
-                    .Select(d => d.OracleHcmId)
-                    .ToHashSetAsync(cancellationToken));
-
-            // Step 1: Get payroll process results (ObjectActionIds) for each PersonId
-            await GetPayrollProcessResultsAsync(list, GetBalanceTypesForProcessResultsAsync, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            success = false;
-            _logger.LogCritical(ex, ex.Message);
-        }
-        finally
-        {
-            await _profitSharingDataContextFactory.UseWritableContext(db =>
-            {
-                return db.Jobs.Where(j => j.Id == job.Id).ExecuteUpdateAsync(s => s
-                        .SetProperty(b => b.Completed, b => DateTime.Now)
-                        .SetProperty(b => b.JobStatusId, b => success ? JobStatus.Constants.Completed : JobStatus.Constants.Failed),
-                    cancellationToken: cancellationToken);
-            }, cancellationToken);
-        }
     }
 }
