@@ -111,6 +111,22 @@ internal class PayrollSyncClient
         }
     }
 
+    /// <summary>
+    /// Retrieves payroll process results from the Oracle HCM system and processes them using the provided callback function.
+    /// </summary>
+    /// <param name="getBalanceTypesForProcessResults">
+    /// A callback function to process the retrieved payroll items. It takes a list of <see cref="PayrollItem"/> and a <see cref="CancellationToken"/> as parameters.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token to monitor for cancellation requests.
+    /// </param>
+    /// <returns>
+    /// A <see cref="Task"/> representing the asynchronous operation.
+    /// </returns>
+    /// <remarks>
+    /// This method retrieves payroll process results in a paginated manner, processes them using the provided callback, 
+    /// and continues fetching until all results are processed or an error occurs.
+    /// </remarks>
     private async Task GetPayrollProcessResultsAsync(
         Func<IReadOnlyList<PayrollItem>, CancellationToken, ValueTask> getBalanceTypesForProcessResults,
         CancellationToken cancellationToken)
@@ -151,6 +167,28 @@ internal class PayrollSyncClient
         }
     }
 
+    /// <summary>
+    /// Processes the balance types for the given payroll process results asynchronously.
+    /// </summary>
+    /// <param name="items">
+    /// A read-only list of <see cref="PayrollItem"/> objects representing the payroll process results to process.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A <see cref="CancellationToken"/> to observe while waiting for the task to complete.
+    /// </param>
+    /// <returns>
+    /// A <see cref="ValueTask"/> that represents the asynchronous operation.
+    /// </returns>
+    /// <remarks>
+    /// This method retrieves balance type totals for each payroll item by making HTTP requests to the Oracle HCM service.
+    /// It calculates and updates the profit-sharing records based on the retrieved data.
+    /// </remarks>
+    /// <exception cref="HttpRequestException">
+    /// Thrown when an error occurs while making HTTP requests to fetch balance types.
+    /// </exception>
+    /// <exception cref="OperationCanceledException">
+    /// Thrown when the operation is canceled via the provided <paramref name="cancellationToken"/>.
+    /// </exception>
     private async ValueTask GetBalanceTypesForProcessResultsAsync(IReadOnlyList<PayrollItem> items,
         CancellationToken cancellationToken)
     {
@@ -206,6 +244,24 @@ internal class PayrollSyncClient
         });
     }
 
+    /// <summary>
+    /// Calculates and updates the pay profit record for a specified individual based on the provided balance type totals.
+    /// </summary>
+    /// <param name="oracleHcmId">
+    /// The unique identifier of the individual in the Oracle HCM system.
+    /// </param>
+    /// <param name="year">
+    /// The year for which the pay profit record is being calculated and updated.
+    /// </param>
+    /// <param name="balanceTypeTotals">
+    /// A dictionary containing balance type IDs and their corresponding total values.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token to monitor for cancellation requests.
+    /// </param>
+    /// <returns>
+    /// A task representing the asynchronous operation.
+    /// </returns>
     private Task CalculateAndUpdatePayProfitRecord(long oracleHcmId, int year, ConcurrentDictionary<long, decimal> balanceTypeTotals,
         CancellationToken cancellationToken)
     {
@@ -268,6 +324,24 @@ internal class PayrollSyncClient
         }, cancellationToken);
     }
 
+    /// <summary>
+    /// Sends an HTTP GET request to the specified Oracle Payroll API URL and retrieves the response.
+    /// </summary>
+    /// <param name="url">The URL of the Oracle Payroll API endpoint to send the request to.</param>
+    /// <param name="cancellationToken">
+    /// A <see cref="CancellationToken"/> to observe while waiting for the task to complete.
+    /// </param>
+    /// <returns>
+    /// A <see cref="Task{TResult}"/> representing the asynchronous operation, containing the 
+    /// <see cref="HttpResponseMessage"/> returned by the Oracle Payroll API.
+    /// </returns>
+    /// <exception cref="HttpRequestException">
+    /// Thrown if the HTTP response indicates an unsuccessful status code.
+    /// </exception>
+    /// <remarks>
+    /// This method ensures that the HTTP response has a successful status code before returning it.
+    /// If the response is unsuccessful, the content of the response is logged to the console.
+    /// </remarks>
     private async Task<HttpResponseMessage> GetOraclePayrollValue(string url, CancellationToken cancellationToken)
     {
         using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
@@ -285,7 +359,23 @@ internal class PayrollSyncClient
         return response;
     }
 
-
+    /// <summary>
+    /// Constructs a URL for retrieving payroll data from the Oracle HCM system.
+    /// </summary>
+    /// <param name="offset">
+    /// The offset value used for pagination. Defaults to 0.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A <see cref="CancellationToken"/> to observe while waiting for the task to complete.
+    /// </param>
+    /// <returns>
+    /// A <see cref="Task{TResult}"/> representing the asynchronous operation, 
+    /// with a result of the constructed URL as a <see cref="string"/>.
+    /// </returns>
+    /// <remarks>
+    /// The URL is built using the base address and payroll URL from the Oracle HCM configuration,
+    /// along with query parameters such as limit, offset, and specific fields to retrieve.
+    /// </remarks>
     private async Task<string> BuildUrl(int offset = 0, CancellationToken cancellationToken = default)
     {
         const int payrollActionId = 2003;
