@@ -35,23 +35,23 @@ internal sealed class OracleHcmHostedService : IHostedService
 
         // Schedule all jobs
 
-        await ScheduleJob<EmployeeDeltaSyncJob>(
-            "employeeDeltaSyncTrigger",
-            Debugger.IsAttached ? TimeSpan.Zero : TimeSpan.FromMinutes(5),
-            TimeSpan.FromMinutes(_oracleHcmConfig.DeltaIntervalInMinutes),
-            cancellationToken
-#pragma warning disable S125
-        );
-#pragma warning restore S125
-
-        await ScheduleJob<EmployeeFullSyncJob>(
-            "employeeFullSyncTrigger",
-            Debugger.IsAttached ? TimeSpan.Zero : TimeSpan.FromMinutes(15),
-            TimeSpan.FromHours(_oracleHcmConfig.IntervalInHours),
-            cancellationToken
-#pragma warning disable S125
-        );
-#pragma warning restore S125
+//         await ScheduleJob<EmployeeDeltaSyncJob>(
+//             "employeeDeltaSyncTrigger",
+//             Debugger.IsAttached ? TimeSpan.Zero : TimeSpan.FromMinutes(5),
+//             TimeSpan.FromMinutes(_oracleHcmConfig.DeltaIntervalInMinutes),
+//             cancellationToken
+ #pragma warning disable S125
+//         );
+ #pragma warning restore S125
+//
+//         await ScheduleJob<EmployeeFullSyncJob>(
+//             "employeeFullSyncTrigger",
+//             Debugger.IsAttached ? TimeSpan.Zero : TimeSpan.FromMinutes(15),
+//             TimeSpan.FromHours(_oracleHcmConfig.IntervalInHours),
+//             cancellationToken
+// #pragma warning disable S125
+//         );
+// #pragma warning restore S125
 
 
         await ScheduleJob<PayrollSyncJob>(

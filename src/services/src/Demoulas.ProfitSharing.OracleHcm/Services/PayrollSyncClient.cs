@@ -1,6 +1,6 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Linq.Expressions;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Demoulas.ProfitSharing.Common;
@@ -12,7 +12,6 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Polly.Timeout;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services;
 
@@ -92,13 +91,8 @@ internal class PayrollSyncClient
         bool success = true;
         try
         {
-            HashSet<long> list = await _profitSharingDataContextFactory.UseReadOnlyContext(c =>
-                c.Demographics
-                    .Select(d => d.OracleHcmId)
-                    .ToHashSetAsync(cancellationToken));
-
             // Step 1: Get payroll process results (ObjectActionIds) for each PersonId
-            await GetPayrollProcessResultsAsync(list, GetBalanceTypesForProcessResultsAsync, cancellationToken);
+            await GetPayrollProcessResultsAsync(GetBalanceTypesForProcessResultsAsync, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -117,152 +111,105 @@ internal class PayrollSyncClient
         }
     }
 
-    /// <summary>
-    /// Retrieves payroll process results for a set of person IDs and processes the results using a specified callback function.
-    /// </summary>
-    /// <param name="personIds">
-    /// A set of person IDs for which payroll process results will be retrieved.
-    /// </param>
-    /// <param name="getBalanceTypesForProcessResults">
-    /// A callback function to process the balance types for the retrieved payroll process results.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// A token to monitor for cancellation requests.
-    /// </param>
-    /// <returns>
-    /// A task that represents the asynchronous operation of retrieving and processing payroll process results.
-    /// </returns>
-    /// <remarks>
-    /// This method uses parallel processing to retrieve payroll process results for each person ID.
-    /// If the retrieval is successful, the specified callback function is invoked to process the results.
-    /// </remarks>
-    private Task GetPayrollProcessResultsAsync(
-        ISet<long> personIds,
-        Func<long, HashSet<int>, CancellationToken, ValueTask> getBalanceTypesForProcessResults,
+    private async Task GetPayrollProcessResultsAsync(
+        Func<IReadOnlyList<PayrollItem>, CancellationToken, ValueTask> getBalanceTypesForProcessResults,
         CancellationToken cancellationToken)
     {
 
-        const int payrollActionId = 2003;
-
-        ParallelOptions parallelOptions = new ParallelOptions
+        string url = await BuildUrl(cancellationToken: cancellationToken);
+        while (true)
         {
-            MaxDegreeOfParallelism = Math.Min(Environment.ProcessorCount, 6),
-            CancellationToken = cancellationToken
-        };
+            using var response = await GetOraclePayrollValue(url, cancellationToken);
 
-        return Parallel.ForEachAsync(source: personIds, parallelOptions: parallelOptions, body: async (personId, token) =>
-        {
-            var objectActionIds = new HashSet<int>();
-            bool isSuccessful = false;
-
-            try
+            if (!response.IsSuccessStatusCode)
             {
-                string query = $"{_oracleHcmConfig.PayrollUrl}?q=PersonId={personId}&fields=PayrollActionId,ObjectActionId&onlyData=true";
-                using var response = await _httpClient.GetAsync(query, token);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    var results = await response.Content.ReadFromJsonAsync<PayrollRoot>(_jsonSerializerOptions, token);
-                    if ((results?.Count ?? 0) == 0)
-                    {
-                        return;
-                    }
-
-                    objectActionIds = results!.Items
-                        .Where(result => result is { PayrollActionId: payrollActionId, ObjectActionId: not null })
-                        .Select(result => result.ObjectActionId!.Value)
-                        .ToHashSet();
-
-                    isSuccessful = objectActionIds.Any();
-                }
-                else
-                {
-                    _logger.LogError("Failed to get payroll process results for PersonId {PersonId}: {ResponseReasonPhrase}", personId, response.ReasonPhrase);
-                }
-            }
-            catch (TimeoutRejectedException e)
-            {
-                _logger.LogError(e, e.Message);
+                break;
             }
 
-            if (isSuccessful)
+            var results = await response.Content.ReadFromJsonAsync<PayrollRoot>(_jsonSerializerOptions, cancellationToken);
+            if ((results?.Count ?? 0) == 0)
             {
-                // Wrap Task in ValueTask
-                await getBalanceTypesForProcessResults(personId, objectActionIds, token);
+                return;
             }
-        });
+
+            await getBalanceTypesForProcessResults(results!.Items, cancellationToken);
+
+
+            if (!results.HasMore)
+            {
+                break;
+            }
+
+            // Construct the next URL for pagination
+            string nextUrl = await BuildUrl(results.Count + results.Offset, cancellationToken: cancellationToken);
+            if (string.IsNullOrEmpty(nextUrl))
+            {
+                break;
+            }
+
+            url = nextUrl;
+        }
     }
 
-
-    /// <summary>
-    /// Retrieves balance types for the specified payroll process results asynchronously.
-    /// </summary>
-    /// <param name="oracleHcmId">
-    /// The unique identifier for the Oracle HCM entity.
-    /// </param>
-    /// <param name="objectActionIds">
-    /// A collection of action IDs associated with payroll process results.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// A token to monitor for cancellation requests.
-    /// </param>
-    /// <returns>
-    /// A <see cref="ValueTask"/> representing the asynchronous operation.
-    /// </returns>
-    /// <remarks>
-    /// This method processes payroll balances by fetching data from an external Oracle HCM service
-    /// and updates the database with the accumulated totals for the specified balance types.
-    /// </remarks>
-    private async ValueTask GetBalanceTypesForProcessResultsAsync(
-        long oracleHcmId,
-        HashSet<int> objectActionIds,
+    private async ValueTask GetBalanceTypesForProcessResultsAsync(IReadOnlyList<PayrollItem> items,
         CancellationToken cancellationToken)
     {
         // DimensionName should be set to Relationship No Calculation Breakdown Inception to Date. That will give you the correct value for current dollars, weeks, hours.
         const string dimensionName = "Relationship No Calculation Breakdown Inception to Date";
 
         // Initialize totals dictionary
-        var balanceTypeTotals = new ConcurrentDictionary<long, decimal>();
-
         int year = DateTime.Today.Year;
 
-        foreach (int objectActionId in objectActionIds)
+         ParallelOptions parallelOptions = new ParallelOptions
+         {
+             MaxDegreeOfParallelism = Math.Min(Environment.ProcessorCount, 4),
+             CancellationToken = cancellationToken
+         };
+        await Parallel.ForEachAsync(items, parallelOptions, async (item, token) =>
         {
+            var balanceTypeTotals = new ConcurrentDictionary<long, decimal>();
             await Task.WhenAll(_balanceTypeIds.Select(async balanceTypeId =>
             {
                 string url =
-                    $"{_oracleHcmConfig.PayrollUrl}/{objectActionId}/child/BalanceView/?onlyData=true&fields=BalanceTypeId,TotalValue1,TotalValue2,DefbalId1,DimensionName&finder=findByBalVar;pBalGroupUsageId1=null,pBalGroupUsageId2=-1,pLDGId={PLDGId},pLC={PLC},pBalTypeId={balanceTypeId}&onlyData=true";
+                    $"{_oracleHcmConfig.PayrollUrl}/{item.ObjectActionId}/child/BalanceView/?onlyData=true&fields=BalanceTypeId,TotalValue1,TotalValue2,DefbalId1,DimensionName&finder=findByBalVar;pBalGroupUsageId1=null,pBalGroupUsageId2=-1,pLDGId={PLDGId},pLC={PLC},pBalTypeId={balanceTypeId}";
 
                 try
                 {
-                    using var response = await _httpClient.GetAsync(url, cancellationToken);
+                    using var response = await _httpClient.GetAsync(url, token);
 
                     if (response.IsSuccessStatusCode)
                     {
-                        var balanceResults = await response.Content.ReadFromJsonAsync<BalanceRoot>(_jsonSerializerOptions, cancellationToken);
+                        var balanceResults = await response.Content.ReadFromJsonAsync<BalanceRoot>(_jsonSerializerOptions, token);
 
                         decimal total = balanceResults!.Items.Where(i => string.CompareOrdinal(i.DimensionName, dimensionName) == 0)
                             .Sum(b => b.TotalValue1);
 
                         // Accumulate totals per balance type ID
-                        balanceTypeTotals.AddOrUpdate(balanceTypeId, total, (key, oldValue) => oldValue + total);
+                        balanceTypeTotals.AddOrUpdate(item.PersonId, total, (key, oldValue) => oldValue + total);
 
                     }
                     else
                     {
-                        _logger.LogError("Failed to get balance types for ObjectActionId {ObjectActionId}: {ResponseReasonPhrase}", objectActionId,
+                        _logger.LogError("Failed to get balance types for PersonId {PersonId}/ObjectActionId {ObjectActionId}: {ResponseReasonPhrase}",
+                            item.PersonId, item.ObjectActionId,
                             response.ReasonPhrase);
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error fetching balance types for ObjectActionId {ObjectActionId}: {Message}", objectActionId, ex.Message);
+                    _logger.LogError(ex, "Error fetching balance types for PersonId {PersonId}/ObjectActionId {ObjectActionId}: {Message}", item.PersonId,
+                        item.ObjectActionId, ex.Message);
                 }
             }));
-        }
 
-        // Single database interaction
-        await _profitSharingDataContextFactory.UseWritableContext(async context =>
+            await CalculateAndUpdatePayProfitRecord(item.PersonId, year, balanceTypeTotals, cancellationToken);
+        });
+    }
+
+    private Task CalculateAndUpdatePayProfitRecord(long oracleHcmId, int year, ConcurrentDictionary<long, decimal> balanceTypeTotals,
+        CancellationToken cancellationToken)
+    {
+        return _profitSharingDataContextFactory.UseWritableContext(async context =>
         {
             var demographic = await context.Demographics
                 .Include(d => d.PayProfits.Where(p => p.ProfitYear == year))
@@ -271,15 +218,10 @@ internal class PayrollSyncClient
 
             if (demographic == null)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine();
-                Console.WriteLine($"Demographic with OracleHcmId {oracleHcmId} not found.");
-                Console.WriteLine();
-                Console.ForegroundColor = ConsoleColor.White;
                 return;
             }
 
-            var payProfit = demographic.PayProfits.FirstOrDefault(p=> p.ProfitYear == year);
+            var payProfit = demographic.PayProfits.FirstOrDefault(p => p.ProfitYear == year);
 
             if (payProfit == null)
             {
@@ -311,17 +253,55 @@ internal class PayrollSyncClient
             payProfit.LastUpdate = DateTime.Now;
             if (payProfit.CurrentHoursYear >= ReferenceData.MinimumHoursForContribution())
             {
-                payProfit.YearsInPlan = (byte)await context.PayProfits.Where(pp => pp.DemographicId == payProfit.DemographicId).MaxAsync(pp => pp.YearsInPlan + 1 , cancellationToken: cancellationToken);
+                payProfit.YearsInPlan = (byte)await context.PayProfits.Where(pp => pp.DemographicId == payProfit.DemographicId)
+                    .MaxAsync(pp => pp.YearsInPlan + 1, cancellationToken: cancellationToken);
             }
 
             int resultCount = await context.SaveChangesAsync(cancellationToken);
 
             Console.ForegroundColor = resultCount == 0 ? ConsoleColor.Red : ConsoleColor.DarkGreen;
             Console.WriteLine();
-            Console.WriteLine($"Inserted {resultCount} rows into {nameof(PayProfit)} for {demographic.ContactInfo.FullName}({demographic.EmployeeId})");
+            Console.WriteLine($"Upserted {resultCount} rows into {nameof(PayProfit)} for {demographic.ContactInfo.FullName}({demographic.EmployeeId})");
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.White;
 
         }, cancellationToken);
+    }
+
+    private async Task<HttpResponseMessage> GetOraclePayrollValue(string url, CancellationToken cancellationToken)
+    {
+        using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+        HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken);
+        if (!response.IsSuccessStatusCode)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine();
+            Console.WriteLine(await response.Content.ReadAsStringAsync(cancellationToken));
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+
+        _ = response.EnsureSuccessStatusCode();
+        return response;
+    }
+
+
+    private async Task<string> BuildUrl(int offset = 0, CancellationToken cancellationToken = default)
+    {
+        const int payrollActionId = 2003;
+        ushort limit = ushort.Min(50, _oracleHcmConfig.Limit);
+        Dictionary<string, string> initialQuery = new Dictionary<string, string>()
+        {
+            { "limit", $"{limit}" },
+            { "offset", $"{offset}" },
+            { "totalResults", "false" },
+            { "onlyData", "true" },
+            { "q", $"PayrollActionId={payrollActionId}" },
+            { "fields", "PayrollActionId,ObjectActionId,SubmissionDate,PersonId" }
+        };
+
+        string url = string.Concat(_oracleHcmConfig.BaseAddress, _oracleHcmConfig.PayrollUrl);
+        UriBuilder initialUriBuilder = new UriBuilder(url) { Query = await new FormUrlEncodedContent(initialQuery).ReadAsStringAsync(cancellationToken) };
+        return initialUriBuilder.Uri.ToString();
     }
 }
