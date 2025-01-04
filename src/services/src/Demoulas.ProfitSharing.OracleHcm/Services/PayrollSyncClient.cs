@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Demoulas.ProfitSharing.Common;
@@ -205,8 +203,8 @@ internal class PayrollSyncClient
          };
         await Parallel.ForEachAsync(items, parallelOptions, async (item, token) =>
         {
-            var balanceTypeTotals = new ConcurrentDictionary<long, decimal>();
-            await Task.WhenAll(_balanceTypeIds.Select(async balanceTypeId =>
+            var balanceTypeTotals = new Dictionary<long, decimal>();
+            foreach (var balanceTypeId in _balanceTypeIds)
             {
                 string url =
                     $"{_oracleHcmConfig.PayrollUrl}/{item.ObjectActionId}/child/BalanceView/?onlyData=true&fields=BalanceTypeId,TotalValue1,TotalValue2,DefbalId1,DimensionName&finder=findByBalVar;pBalGroupUsageId1=null,pBalGroupUsageId2=-1,pLDGId={PLDGId},pLC={PLC},pBalTypeId={balanceTypeId}";
@@ -223,7 +221,7 @@ internal class PayrollSyncClient
                             .Sum(b => b.TotalValue1);
 
                         // Accumulate totals per balance type ID
-                        balanceTypeTotals.AddOrUpdate(item.PersonId, total, (key, oldValue) => oldValue + total);
+                        balanceTypeTotals[balanceTypeId] += total;
 
                     }
                     else
@@ -238,7 +236,7 @@ internal class PayrollSyncClient
                     _logger.LogError(ex, "Error fetching balance types for PersonId {PersonId}/ObjectActionId {ObjectActionId}: {Message}", item.PersonId,
                         item.ObjectActionId, ex.Message);
                 }
-            }));
+            }
 
             await CalculateAndUpdatePayProfitRecord(item.PersonId, year, balanceTypeTotals, cancellationToken);
         });
@@ -262,7 +260,7 @@ internal class PayrollSyncClient
     /// <returns>
     /// A task representing the asynchronous operation.
     /// </returns>
-    private Task CalculateAndUpdatePayProfitRecord(long oracleHcmId, int year, ConcurrentDictionary<long, decimal> balanceTypeTotals,
+    private Task CalculateAndUpdatePayProfitRecord(long oracleHcmId, int year, IDictionary<long, decimal> balanceTypeTotals,
         CancellationToken cancellationToken)
     {
         return _profitSharingDataContextFactory.UseWritableContext(async context =>
