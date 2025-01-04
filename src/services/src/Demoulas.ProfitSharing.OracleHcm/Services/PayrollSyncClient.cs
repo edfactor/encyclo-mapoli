@@ -198,12 +198,15 @@ internal class PayrollSyncClient
 
          ParallelOptions parallelOptions = new ParallelOptions
          {
-             MaxDegreeOfParallelism = Math.Min(Environment.ProcessorCount, 4),
+             MaxDegreeOfParallelism = Math.Min(Environment.ProcessorCount, 4), // 4 threads seems to be the max/sweet spot for OracleHCM
              CancellationToken = cancellationToken
          };
         await Parallel.ForEachAsync(items, parallelOptions, async (item, token) =>
         {
-            var balanceTypeTotals = new Dictionary<long, decimal>();
+            var balanceTypeTotals = new Dictionary<long, decimal>
+            {
+                { BalanceTypeIds.MbProfitSharingDollars, 0 }, { BalanceTypeIds.MbProfitSharingHours, 0 }, { BalanceTypeIds.MbProfitSharingWeeks, 0 }
+            };
             foreach (var balanceTypeId in _balanceTypeIds)
             {
                 string url =
