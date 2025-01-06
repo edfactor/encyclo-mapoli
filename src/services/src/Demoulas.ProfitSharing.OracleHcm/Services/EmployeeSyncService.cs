@@ -11,7 +11,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.OracleHcm.Atom;
+using Demoulas.ProfitSharing.OracleHcm.Clients;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
 using Demoulas.ProfitSharing.OracleHcm.Validators;
@@ -27,23 +27,23 @@ namespace Demoulas.ProfitSharing.OracleHcm.Services;
 /// </summary>
 internal sealed class EmployeeSyncService : IEmployeeSyncService
 {
-    private readonly OracleDemographicsSyncClient _oracleDemographicsSyncClient;
+    private readonly OracleEmployeeDataSyncClient _oracleEmployeeDataSyncClient;
     private readonly IDemographicsServiceInternal _demographicsService;
-    private readonly AtomFeedService _atomFeedService;
+    private readonly AtomFeedClient _atomFeedClient;
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
     private readonly OracleHcmConfig _oracleHcmConfig;
     private readonly OracleEmployeeValidator _employeeValidator;
 
-    public EmployeeSyncService(HttpClient httpClient,
-        IDemographicsServiceInternal demographicsService,
-        AtomFeedService atomFeedService,
+    public EmployeeSyncService(IDemographicsServiceInternal demographicsService,
+        AtomFeedClient atomFeedClient,
+        OracleEmployeeDataSyncClient oracleEmployeeDataSyncClient,
         IProfitSharingDataContextFactory profitSharingDataContextFactory,
         OracleHcmConfig oracleHcmConfig,
         OracleEmployeeValidator employeeValidator)
     {
-        _oracleDemographicsSyncClient = new OracleDemographicsSyncClient(httpClient, oracleHcmConfig);
+        _oracleEmployeeDataSyncClient = oracleEmployeeDataSyncClient;
         _demographicsService = demographicsService;
-        _atomFeedService = atomFeedService;
+        _atomFeedClient = atomFeedClient;
         _profitSharingDataContextFactory = profitSharingDataContextFactory;
         _oracleHcmConfig = oracleHcmConfig;
         _employeeValidator = employeeValidator;
@@ -72,7 +72,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         try
         {
             await CleanAuditError(cancellationToken);
-            var oracleHcmEmployees = _oracleDemographicsSyncClient.GetAllEmployees(cancellationToken);
+            var oracleHcmEmployees = _oracleEmployeeDataSyncClient.GetAllEmployees(cancellationToken);
             var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, requestedBy, cancellationToken);
             await _demographicsService.AddDemographicsStreamAsync(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
         }
@@ -92,6 +92,49 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
             }, cancellationToken);
         }
     }
+
+    public async Task ExecuteDeltaSyncAsync(string requestedBy = "System", CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var maxDate = DateTime.Now;
+            var minDate = await _profitSharingDataContextFactory.UseReadOnlyContext(c =>
+            {
+                return c.Demographics.MinAsync(d => d.LastModifiedDate - TimeSpan.FromDays(30), cancellationToken: cancellationToken);
+            });
+
+            var newHires = _atomFeedClient.GetFeedDataAsync<NewHireContext>("newhire", minDate, maxDate, cancellationToken);
+            var assignments = _atomFeedClient.GetFeedDataAsync<AssignmentContext>("empassignment", minDate, maxDate, cancellationToken);
+            var updates = _atomFeedClient.GetFeedDataAsync<EmployeeUpdateContext>("empupdate", minDate, maxDate, cancellationToken);
+            var terminations = _atomFeedClient.GetFeedDataAsync<TerminationContext>("termination", minDate, maxDate, cancellationToken);
+
+            HashSet<long> people = new HashSet<long>();
+            await foreach (var record in MergeAsyncEnumerables(newHires, updates, terminations, assignments, cancellationToken))
+            {
+                people.Add(record.PersonId);
+            }
+
+            try
+            {
+                foreach (long oracleHcmId in people)
+                {
+                    var oracleHcmEmployees = _oracleEmployeeDataSyncClient.GetEmployee(oracleHcmId, cancellationToken);
+                    var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, requestedBy, cancellationToken);
+                    await _demographicsService.AddDemographicsStreamAsync(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
+                }
+            }
+            catch (Exception ex)
+            {
+                await AuditError(0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken);
+            }
+
+        }
+        catch (Exception ex)
+        {
+            await AuditError(0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken);
+        }
+    }
+
 
     private Task AuditError(int badgeNumber, IEnumerable<ValidationFailure> errorMessages, string requestedBy, CancellationToken cancellationToken = default,
         params object?[] args)
@@ -191,48 +234,6 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
                     CountryIso = employee.Address.Country
                 }
             };
-        }
-    }
-
-    public async Task ExecuteDeltaSyncAsync(string requestedBy = "System", CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var maxDate = DateTime.Now;
-            var minDate = await _profitSharingDataContextFactory.UseReadOnlyContext(c =>
-            {
-                return c.Demographics.MinAsync(d => d.LastModifiedDate - TimeSpan.FromDays(30), cancellationToken: cancellationToken);
-            });
-
-            var newHires = _atomFeedService.GetFeedDataAsync<NewHireContext>("newhire", minDate, maxDate, cancellationToken);
-            var assignments = _atomFeedService.GetFeedDataAsync<AssignmentContext>("empassignment", minDate, maxDate, cancellationToken);
-            var updates = _atomFeedService.GetFeedDataAsync<EmployeeUpdateContext>("empupdate", minDate, maxDate, cancellationToken);
-            var terminations = _atomFeedService.GetFeedDataAsync<TerminationContext>("termination", minDate, maxDate, cancellationToken);
-
-            HashSet<long> people = new HashSet<long>();
-            await foreach (var record in MergeAsyncEnumerables(newHires, updates, terminations, assignments, cancellationToken))
-            {
-                people.Add(record.PersonId);
-            }
-
-            try
-            {
-                foreach (long oracleHcmId in people)
-                {
-                    var oracleHcmEmployees = _oracleDemographicsSyncClient.GetEmployee(oracleHcmId, cancellationToken);
-                    var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, requestedBy, cancellationToken);
-                    await _demographicsService.AddDemographicsStreamAsync(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
-                }
-            }
-            catch (Exception ex)
-            {
-                await AuditError(0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken);
-            }
-
-        }
-        catch (Exception ex)
-        {
-            await AuditError(0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken);
         }
     }
 

@@ -4,7 +4,7 @@ using Demoulas.ProfitSharing.Common.Caching;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.OracleHcm.Atom;
+using Demoulas.ProfitSharing.OracleHcm.Clients;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Services;
 using Demoulas.ProfitSharing.OracleHcm.Validators;
@@ -31,13 +31,14 @@ public class EmployeeSyncServiceTests : IClassFixture<ApiTestBase<Program>>
         var log = LoggerFactory.Create(builder =>
         {
             builder.AddDebug();
-        }).CreateLogger<AtomFeedService>();
-        AtomFeedService atomFeedService = new AtomFeedService(mockHttpClient.Object, log);
+        }).CreateLogger<AtomFeedClient>();
+        AtomFeedClient atomFeedClient = new AtomFeedClient(mockHttpClient.Object, log);
+        OracleEmployeeDataSyncClient employeeDataSyncClient = new OracleEmployeeDataSyncClient(mockHttpClient.Object, oracleHcmConfig);
 
         _employeeSyncService = new EmployeeSyncService(
-            mockHttpClient.Object,
             _mockDemographicsService.Object,
-            atomFeedService,
+            atomFeedClient,
+            employeeDataSyncClient,
             mockDataContextFactory.Object,
             oracleHcmConfig,
             employeeValidator
@@ -48,7 +49,7 @@ public class EmployeeSyncServiceTests : IClassFixture<ApiTestBase<Program>>
     public async Task SynchronizeEmployees_ShouldCallAddDemographicsStream()
     {
         // Arrange
-        var cancellationToken = new CancellationToken();
+        var cancellationToken = CancellationToken.None;
         // Act
         await _employeeSyncService.SynchronizeEmployeesAsync("Unit Test", cancellationToken);
         // Assert

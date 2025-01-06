@@ -2,7 +2,7 @@
 using System.Net.Http.Headers;
 using System.Text;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.OracleHcm.Atom;
+using Demoulas.ProfitSharing.OracleHcm.Clients;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Factories;
 using Demoulas.ProfitSharing.OracleHcm.HealthCheck;
@@ -103,7 +103,7 @@ public static class OracleHcmExtension
         services.AddSingleton<EmployeeDeltaSyncJob>();
         services.AddSingleton<PayrollSyncJob>();
         services.AddSingleton<DemographicsService>();
-
+        
         // Mappers
         services.AddSingleton<DemographicMapper>();
         services.AddSingleton<AddressMapper>();
@@ -111,6 +111,7 @@ public static class OracleHcmExtension
 
         // Internal services
         services.AddSingleton<IDemographicsServiceInternal, DemographicsService>();
+        services.AddSingleton<IEmployeeSyncService, EmployeeSyncService>();
         services.AddSingleton<IJobFactory, OracleHcmJobFactory>();
         services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
     }
@@ -135,10 +136,10 @@ public static class OracleHcmExtension
             TotalRequestTimeoutOptions = new HttpTimeoutStrategyOptions { Timeout = TimeSpan.FromMinutes(2) }
         };
         
-        services.AddHttpClient<AtomFeedService>("AtomFeedSync", BuildOracleHcmAuthClient)
+        services.AddHttpClient<AtomFeedClient>("AtomFeedSync", BuildOracleHcmAuthClient)
             .AddStandardResilienceHandler(options => ApplyResilienceOptions(options, commonHttpOptions));
 
-        services.AddHttpClient<IEmployeeSyncService, EmployeeSyncService>("EmployeeSync", BuildOracleHcmAuthClient)
+        services.AddHttpClient<OracleEmployeeDataSyncClient>("EmployeeSync", BuildOracleHcmAuthClient)
             .AddStandardResilienceHandler(options => ApplyResilienceOptions(options, commonHttpOptions));
 
         services.AddHttpClient<PayrollSyncClient>("PayrollSync", BuildOracleHcmAuthClient)
