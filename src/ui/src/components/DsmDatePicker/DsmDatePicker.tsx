@@ -2,7 +2,7 @@ import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { FC, KeyboardEvent } from "react";
+import { FC, KeyboardEvent, useState } from "react";
 import { parseISO } from "date-fns";
 
 type MyProps = {
@@ -16,40 +16,59 @@ type MyProps = {
   label: string;
   onKeyDown?: Function;
   ref?: React.ForwardedRef<unknown>;
+  views?: Array<"year" | "month" | "day">;
 };
 
-const DsmDatePicker: FC<MyProps> = (props) => {
-  const isInvalid = props.error ? props.error?.length > 0 : false;
+const DsmDatePicker: FC<MyProps> = ({
+  error,
+  views,
+  onChange,
+  value,
+  disableFuture,
+  setError,
+  required,
+  label,
+  onKeyDown,
+  ref,
+  id
+}) => {
+  const isInvalid = error ? error?.length > 0 : false;
+  const isYearOnly = views?.length === 1 && views[0] === "year";
 
   const handleTextFieldBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    const ddmmyyyyString = e.target.value;
-    const parts = ddmmyyyyString.split("/");
-    const swapped = [parts[2], parts[0], parts[1]];
-    const yyyymmdd = swapped.join("-");
-    const v = tryddmmyyyyToDate(yyyymmdd);
-    props.onChange(v);
+    const value = e.target.value.trim();
+
+    if (isYearOnly) {
+      const year = parseInt(value);
+      if (!isNaN(year) && year >= 1900 && year <= 2100) {
+        onChange(new Date(year, 0, 1));
+      }
+    } else {
+      const parts = value.split("/");
+      const swapped = [parts[2], parts[0], parts[1]];
+      const yyyymmdd = swapped.join("-");
+      const v = tryddmmyyyyToDate(yyyymmdd);
+      onChange(v);
+    }
   };
 
   const tryddmmyyyyToDate = (date: string | null): Date | null => {
-    if (!date || date === "YYYY-MM-DD") {
-      return null;
-    }
-    const result = parseISO(date);
-    return result;
+    if (!date || date === "YYYY-MM-DD") return null;
+    return parseISO(date);
   };
 
-  const CustomTextField = (inputProps: object) => (
+  const CustomTextField = (params: any) => (
     <TextField
-      {...inputProps}
-      inputRef={props.ref}
-      id={props.id}
-      data-your-attrib={props.id}
+      {...params}
+      inputRef={ref}
+      id={id}
+      data-your-attrib={id}
       fullWidth
       error={isInvalid}
       onError={(err) => {}}
       onKeyDown={(e: KeyboardEvent<HTMLDivElement>) => {
-        if (props.onKeyDown) {
-          props.onKeyDown(e);
+        if (onKeyDown) {
+          onKeyDown(e);
         }
       }}
       onBlur={handleTextFieldBlur}
@@ -62,9 +81,9 @@ const DsmDatePicker: FC<MyProps> = (props) => {
         <div className="date-picker-label-wrapper">
           <FormLabel
             className={isInvalid ? "" : "date-picker-label"}
-            required={props.required ?? false}
+            required={required ?? false}
             error={isInvalid}>
-            {props.label}
+            {label}
           </FormLabel>
         </div>
         <DatePicker
@@ -73,13 +92,15 @@ const DsmDatePicker: FC<MyProps> = (props) => {
             textField: CustomTextField
           }}
           onAccept={(e) => {
-            props.onChange(e);
+            onChange(e);
           }}
-          disableFuture={props.disableFuture}
-          value={props.value}
+          views={views}
+          openTo={views?.[0]}
+          disableFuture={disableFuture}
+          value={value}
         />
       </LocalizationProvider>
-      {!!props.error && <FormHelperText error>{props.error}</FormHelperText>}
+      {!!error && <FormHelperText error>{error}</FormHelperText>}
     </div>
   );
 };
