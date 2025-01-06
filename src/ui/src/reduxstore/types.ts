@@ -442,3 +442,35 @@ export interface VestedAmountsByAgeDetail {
   notVestedCount: number
   partialVestedCount: number
 }
+
+export interface TerminationRequest {
+  profitYear: number;
+  pagination: PaginationParams;
+}
+
+export interface TerminationDetail {
+  badgePSn: string;
+  name: string;
+  beginningBalance: number;
+  beneficiaryAllocation: number;
+  distributionAmount: number;
+  forfeit: number;
+  endingBalance: number;
+  vestedBalance: number;
+  dateTerm: string;
+  ytdPsHours: number;
+  vestedPercent: number;
+  age: number;
+  enrollmentCode: number;
+}
+
+export interface TerminationResponse {
+  totalVested: number;
+  totalForfeit: number;
+  totalEndingBalance: number;
+  totalBeneficiaryAllocation: number;
+  reportName: string;
+  reportDate: string;
+  response: Paged<TerminationDetail[]>;
+}
+
