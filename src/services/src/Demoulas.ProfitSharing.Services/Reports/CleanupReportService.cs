@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -193,7 +194,8 @@ public class CleanupReportService : ICleanupReportService
     {
         using (_logger.BeginScope("Request BEGIN DUPLICATE NAMES AND BIRTHDAYS"))
         {
-            var results = await _dataContextFactory.UseReadOnlyContext(ctx =>
+            var dict = new Dictionary<int, byte>();
+            var results = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
                 var dupNameSlashDateOfBirth = (from dem in ctx.Demographics
                                                group dem by new { dem.ContactInfo.FullName, dem.DateOfBirth }
@@ -251,22 +253,9 @@ public class CleanupReportService : ICleanupReportService
                                 IncomeCurrentYear = g.Key.CurrentIncomeYear
                             };
 
-                return query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
-            });
-
-            ISet<int> badgeNumbers = results.Results.Select(r => r.BadgeNumber).ToHashSet();
-            var balanceDict = await _contributionService.GetNetBalance(req.ProfitYear, badgeNumbers, cancellationToken);
-
-            var dict = await _dataContextFactory.UseReadOnlyContext(ctx =>
-            {
-                var tst = (from yis in _totalService.GetYearsOfService(ctx, req.ProfitYear)
-                           join d in ctx.Demographics on yis.Ssn equals d.Ssn
-                           select new
-                           {
-                               d.EmployeeId,
-                               Years = (byte)yis.Years
-                           }).ToListAsync(cancellationToken);
-                return (
+                var rslt = await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
+                
+                dict = await (
                     from yis in _totalService.GetYearsOfService(ctx, req.ProfitYear)
                     join d in ctx.Demographics on yis.Ssn equals d.Ssn
                     select new
@@ -276,7 +265,11 @@ public class CleanupReportService : ICleanupReportService
                     }
                 ).ToDictionaryAsync(x => x.EmployeeId, x => x.Years);
 
+                return rslt;
             });
+
+            ISet<int> badgeNumbers = results.Results.Select(r => r.BadgeNumber).ToHashSet();
+            var balanceDict = await _contributionService.GetNetBalance(req.ProfitYear, badgeNumbers, cancellationToken);
 
             foreach (DuplicateNamesAndBirthdaysResponse dup in results.Results)
             {
@@ -315,6 +308,7 @@ public class CleanupReportService : ICleanupReportService
 
             var results = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
+                var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
                 var nameAndDobQuery = ctx.Demographics.Select(x => new
                 {
                     x.Ssn,
@@ -361,7 +355,7 @@ public class CleanupReportService : ICleanupReportService
                                 FederalTax = pd.FederalTaxes,
                                 ForfeitAmount = pd.ProfitCodeId == 2 ? pd.Forfeiture : 0,
                                 LoanDate = pd.MonthToDate > 0 ? new DateOnly(pd.YearToDate, pd.MonthToDate, 1) : null,
-                                Age = Convert.ToByte(Math.Floor((DateOnly.FromDateTime(DateTime.Now).DayNumber - nameAndDob.DateOfBirth.DayNumber) / 365.2499))  //Question: This should be from the end of the specified profit year?
+                                Age = (byte)nameAndDob.DateOfBirth.Age(calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc))
                             };
                 return await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
             });

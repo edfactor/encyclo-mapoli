@@ -92,4 +92,11 @@ public sealed class ContributionService
             return query.ToDictionaryAsync(d => d.BadgeNumber, cancellationToken);
         });
     }
+
+    #pragma warning disable S3400
+    internal static short MinimumHoursForContribution()
+    {
+        return 1000;
+    }
+    #pragma warning restore S3400
 }

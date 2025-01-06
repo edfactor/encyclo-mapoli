@@ -1,5 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -206,7 +205,7 @@ public sealed class TotalService : ITotalService
         );
 
         var demoOrBeneficiary = demoInfo.Union(beneficiaryInfo);
-        var hoursWorkedRequirement = ReferenceData.MinimumHoursForContribution();
+        var hoursWorkedRequirement = ContributionService.MinimumHoursForContribution();
 
 #pragma warning disable S1244 // Floating point numbers should not be tested for equality
 #pragma warning disable S3358 // Ternary operators should not be nested

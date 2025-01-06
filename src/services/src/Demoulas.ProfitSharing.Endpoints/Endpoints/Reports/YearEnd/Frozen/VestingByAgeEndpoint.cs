@@ -10,7 +10,7 @@ using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen.V
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
 
-public class VestingByAgeEndpoint : EndpointWithCsvTotalsBase<ProfitYearRequest, VestedAmountsByAge, VestedAmountsByAgeDetail, ProfitSharingVestingByAgeByAgeMapper>
+public class VestingByAgeEndpoint : EndpointWithCsvTotalsBase<ProfitYearAndAsOfDateRequest, VestedAmountsByAge, VestedAmountsByAgeDetail, ProfitSharingVestingByAgeByAgeMapper>
 {
     private readonly IFrozenReportService _frozenReportService;
 
@@ -38,7 +38,7 @@ public class VestingByAgeEndpoint : EndpointWithCsvTotalsBase<ProfitYearRequest,
         base.Configure();
     }
 
-    public override Task<VestedAmountsByAge> GetResponse(ProfitYearRequest req, CancellationToken ct)
+    public override Task<VestedAmountsByAge> GetResponse(ProfitYearAndAsOfDateRequest req, CancellationToken ct)
     {
         return _frozenReportService.GetVestedAmountsByAgeYearAsync(req, ct);
     }

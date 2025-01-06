@@ -34,7 +34,6 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
     {
         var militaryMembers = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
-            //Question - Should this be off Frozen Demographics?
             var inactiveMilitaryMembers = await context.Demographics.Where(d => d.TerminationCodeId == TerminationCode.Constants.Military
                                                                                 && d.EmploymentStatusId == EmploymentStatus.Constants.Inactive)
                 .OrderBy(d => d.ContactInfo.FullName)
@@ -145,12 +144,10 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
     {
         var bracket = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
 
-        //Question: Shouldn't there be filters for the ProfitYear on PayProfit and ProfitDetail here?
-        //Question: Should this be Frozen Demographics?
         //Question: The columns that aren't be filled in here, are they a necessary part of the query, or should be put values to them?
         var query = context.Demographics
             .Join(
-                context.PayProfits, // Table to join with (PayProfit)
+                context.PayProfits.Where(x=>x.ProfitYear == req.ProfitYear), // Table to join with (PayProfit)
                 demographics => demographics.Id, // Primary key selector from Demographics
                 payProfit => payProfit.DemographicId, // Foreign key selector from PayProfit
                 (demographics, payProfit) => new // Result selector after joining
@@ -162,7 +159,7 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
                     demographics.TerminationDate,
                     demographics.ReHireDate,
                     demographics.StoreNumber,
-                    //payProfit.CompanyContributionYears,
+                    CompanyContributionYears = payProfit.YearsInPlan,
                     payProfit.EnrollmentId,
                     payProfit.CurrentHoursYear,
                     //payProfit.NetBalanceLastYear,
@@ -176,7 +173,7 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
                 && m.ReHireDate >= bracket.FiscalBeginDate
                 && m.ReHireDate <= bracket.FiscalEndDate)
             .Join(
-                context.ProfitDetails, // Table to join with (ProfitDetail)
+                context.ProfitDetails.Where(x=>x.ProfitYear == req.ProfitYear), // Table to join with (ProfitDetail)
                 combined => combined.Ssn, // Key selector from the result of the first join
                 profitDetail => profitDetail.Ssn, // Foreign key selector from ProfitDetail
                 (member, profitDetail) => new // Result selector after joining ProfitDetail

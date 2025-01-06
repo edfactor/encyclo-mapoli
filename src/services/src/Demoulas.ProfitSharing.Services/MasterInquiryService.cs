@@ -31,7 +31,7 @@ public class MasterInquiryService : IMasterInquiryService
             var rslt = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
                 var query = ctx.ProfitDetails
-                            .Join(ctx.Demographics,  //Question: Should this be frozen demographics?
+                            .Join(ctx.Demographics,
                                 pd => pd.Ssn,
                                 d => d.Ssn,
                                 (pd, d) => new { ProfitDetail = pd, Demographics = d })
@@ -133,6 +133,8 @@ public class MasterInquiryService : IMasterInquiryService
                     var previousBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(SearchBy.Ssn, ssn, previousYear, cancellationToken);
                     var currentBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(SearchBy.Ssn, ssn, currentYear, cancellationToken);
 
+                    var maxProfitYear = req.EndProfitYear.HasValue ? req.EndProfitYear : short.MaxValue;
+
                     var demographicData = await ctx.Demographics
                      .Where(d => d.Ssn == uniqueSsns[0])
                      .Select(d => new
@@ -151,7 +153,8 @@ public class MasterInquiryService : IMasterInquiryService
                          d.TerminationDate,
                          d.StoreNumber,
                          DemographicId = d.Id,
-                         LatestPayProfit = d.PayProfits //Question - If a max profit year is specified, should we be filtering to it here?
+                         LatestPayProfit = d.PayProfits
+                             .Where(x=>x.ProfitYear <= maxProfitYear)
                              .OrderByDescending(p => p.ProfitYear)
                              .FirstOrDefault()
                      })
