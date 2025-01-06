@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using CsvHelper;
+﻿using CsvHelper;
 using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
@@ -12,7 +11,6 @@ using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Terminat
 
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.TerminatedEmployeeAndBeneficiary;
-
 
 public class TerminatedEmployeeAndBeneficiaryDataEndpoint
     : EndpointWithCsvTotalsBase<ProfitYearRequest,
@@ -37,10 +35,7 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
             s.Summary = "Provide the Terminated Employee and Beneficiary Report (QPAY066) report.";
             s.Description =
                 "Reports on beneficiaries with a non-zero balance and employees who were terminated (and not retired) in the specified date range.";
-            s.ExampleRequest = new ProfitYearRequest()
-            {
-                ProfitYear = 2023
-            };
+            s.ExampleRequest = new ProfitYearRequest() { ProfitYear = 2023 };
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
@@ -56,10 +51,7 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
                         Response = new PaginatedResponseDto<TerminatedEmployeeAndBeneficiaryDataResponseDto>
                         {
                             Total = 1,
-                            Results = new List<TerminatedEmployeeAndBeneficiaryDataResponseDto>
-                            {
-                                TerminatedEmployeeAndBeneficiaryDataResponseDto.ResponseExample()
-                            }
+                            Results = new List<TerminatedEmployeeAndBeneficiaryDataResponseDto> { TerminatedEmployeeAndBeneficiaryDataResponseDto.ResponseExample() }
                         }
                     }
                 }
@@ -111,7 +103,6 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
     }
 
 
-
     public sealed class
         TerminatedEmployeeAndBeneficiaryDataResponseMap : ClassMap<TerminatedEmployeeAndBeneficiaryDataResponseDto>
     {
@@ -131,6 +122,5 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
             Map(m => m.Age).Index(11).Name("AGE");
             Map(m => m.EnrollmentCode).Index(12).Name("ENROLLMENT_CODE");
         }
-
     }
 }

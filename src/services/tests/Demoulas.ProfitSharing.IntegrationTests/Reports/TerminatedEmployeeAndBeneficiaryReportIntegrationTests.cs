@@ -8,8 +8,7 @@ using Demoulas.ProfitSharing.IntegrationTests.Helpers;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 using FluentAssertions;
-using Microsoft.Extensions.DependencyInjection;
-using Xunit.Abstractions;
+using Microsoft.Testing.Platform.Services;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports;
 
@@ -18,7 +17,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : TestClassB
     private readonly ITestOutputHelper _testOutputHelper;
     private readonly IntegrationTestsFixture _fixture;
 
-    public TerminatedEmployeeAndBeneficiaryReportIntegrationTests(ITestOutputHelper testOutputHelper, IntegrationTestsFixture fixture) : base(testOutputHelper, fixture)
+    public TerminatedEmployeeAndBeneficiaryReportIntegrationTests(ITestOutputHelper testOutputHelper, IntegrationTestsFixture fixture) : base(fixture)
     {
         _testOutputHelper = testOutputHelper;
         _fixture = fixture;
@@ -48,7 +47,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : TestClassB
 
         string actualText = CreateTextReport(effectiveDateOfTestData, startDate, endDate, profitSharingYear, data);
         stopwatch.Stop();
-        _testOutputHelper.WriteLine("Took: " + stopwatch.ElapsedMilliseconds);
+        _testOutputHelper.WriteLine($"Took: {stopwatch.ElapsedMilliseconds}");
 
         actualText.Should().NotBeNullOrEmpty();
 

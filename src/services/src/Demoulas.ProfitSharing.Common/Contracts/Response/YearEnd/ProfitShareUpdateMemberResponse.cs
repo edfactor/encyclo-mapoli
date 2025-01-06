@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
-namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-public record ProfitShareUpdateMemberResponse 
+public record ProfitShareUpdateMemberResponse
 {
     public long Badge { get; set; }
     public long Psn { get; set; }

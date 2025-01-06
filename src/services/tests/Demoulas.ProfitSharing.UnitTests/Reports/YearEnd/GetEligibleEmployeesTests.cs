@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Data.Contexts;
@@ -25,10 +26,10 @@ internal sealed record TestEmployee
     public char EmploymentStatusId { get; init; }
 }
 
-public class GetEligibleEmployeesTests : ApiTestBase<Api.Program>
+public class GetEligibleEmployeesTests : ApiTestBase<Program>
 {
     private const short TestProfitYear = 2023; // We use this year, so the mock calendar service will be happy
-    private readonly ProfitYearRequest _requestDto = new ProfitYearRequest() { ProfitYear = TestProfitYear};
+    private readonly ProfitYearRequest _requestDto = new ProfitYearRequest() { ProfitYear = TestProfitYear };
 
     [Fact]
     public async Task Unauthorized()
@@ -60,13 +61,8 @@ public class GetEligibleEmployeesTests : ApiTestBase<Api.Program>
             // Assert
             response.Result.ReportName.Should().Be($"Get Eligible Employees for Year {TestProfitYear}");
             var dto = response.Result.Response.Results.First(e => e.BadgeNumber == te.BadgeNumber);
-            dto.Should().BeEquivalentTo(new GetEligibleEmployeesResponseDto
-                {
-                    OracleHcmId = te.OracleHcmId,
-                    BadgeNumber = te.BadgeNumber,
-                    FullName = te.FullName
-                }
-                );
+            dto.Should().BeEquivalentTo(new GetEligibleEmployeesResponseDto { OracleHcmId = te.OracleHcmId, BadgeNumber = te.BadgeNumber, FullName = te.FullName }
+            );
 
             return Task.CompletedTask;
         });
@@ -90,13 +86,15 @@ public class GetEligibleEmployeesTests : ApiTestBase<Api.Program>
             int numberNotSelected = await c.PayProfits
                 .Include(p => p.Demographic)
                 .Where(p => p.ProfitYear == TestProfitYear)
-                .Where(p => p.Demographic!.DateOfBirth > birthDateOfExactly21YearsOld /*too young*/ || p.CurrentHoursYear < 1000 || p.Demographic!.EmploymentStatusId == EmploymentStatus.Constants.Terminated)
-                .CountAsync();
+                .Where(p => p.Demographic!.DateOfBirth > birthDateOfExactly21YearsOld /*too young*/ || p.CurrentHoursYear < 1000 ||
+                            p.Demographic!.EmploymentStatusId == EmploymentStatus.Constants.Terminated)
+                .CountAsync(CancellationToken.None);
 
             int numberWritten = await c.PayProfits
                 .Include(p => p.Demographic)
                 .Where(p => p.ProfitYear == TestProfitYear)
-                .Where(p => p.Demographic!.DateOfBirth <= birthDateOfExactly21YearsOld /*over 21*/  && p.CurrentHoursYear >= 1000 && p.Demographic!.EmploymentStatusId != EmploymentStatus.Constants.Terminated).CountAsync(CancellationToken.None);
+                .Where(p => p.Demographic!.DateOfBirth <= birthDateOfExactly21YearsOld /*over 21*/ && p.CurrentHoursYear >= 1000 &&
+                            p.Demographic!.EmploymentStatusId != EmploymentStatus.Constants.Terminated).CountAsync(CancellationToken.None);
 
             // Act
             var response =
@@ -107,15 +105,15 @@ public class GetEligibleEmployeesTests : ApiTestBase<Api.Program>
             response.Response.Content.Should().NotBeNull();
 
             // Verify CSV file
-            string csvData = await response.Response.Content.ReadAsStringAsync();
+            string csvData = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
             string[] lines = csvData.Split(["\r\n", "\n"], StringSplitOptions.None);
             // line 0 is today's date
             lines[0].Should().NotBeEmpty();
             lines[1].Should().Be($"Get Eligible Employees for Year {TestProfitYear}");
             lines[2].Should().BeEmpty(); // blank link
-            lines[3].Should().Be("Number read on FROZEN,"+ numberReadOnFrozen);
-            lines[4].Should().Be("Number not selected,"+ numberNotSelected);
-            lines[5].Should().Be("Number written,"+ numberWritten);
+            lines[3].Should().Be($"Number read on FROZEN,{numberReadOnFrozen}");
+            lines[4].Should().Be($"Number not selected,{numberNotSelected}");
+            lines[5].Should().Be($"Number written,{numberWritten}");
 
             lines[6].Should().Be("ORACLE_HCM_ID,BADGE_PSN,NAME");
 
@@ -124,7 +122,7 @@ public class GetEligibleEmployeesTests : ApiTestBase<Api.Program>
             return Task.CompletedTask;
         });
     }
-    
+
     [Fact]
     public Task no_employees_too_young()
     {
@@ -172,6 +170,7 @@ public class GetEligibleEmployeesTests : ApiTestBase<Api.Program>
             return Task.CompletedTask;
         });
     }
+
     [Fact]
     public Task employee_terminated()
     {
@@ -211,7 +210,7 @@ public class GetEligibleEmployeesTests : ApiTestBase<Api.Program>
     private static async Task save(TestEmployee testEmployee, ProfitSharingDbContext ctx)
     {
         var pp = await ctx.PayProfits.Include(payProfit => payProfit.Demographic!)
-            .ThenInclude(demographic => demographic.ContactInfo).Include(p => p.Demographic != null).FirstAsync();
+            .ThenInclude(demographic => demographic.ContactInfo).Include(p => p.Demographic != null).FirstAsync(CancellationToken.None);
         pp.ProfitYear = TestProfitYear;
         pp.DemographicId = testEmployee.Id;
         pp.CurrentHoursYear = testEmployee.HoursWorked;
@@ -227,15 +226,14 @@ public class GetEligibleEmployeesTests : ApiTestBase<Api.Program>
         // The fake PayProfits entities share fake Demographic entities. (see demographicQueue in PayProfitFaker)
         // PayProfit and Demographic are 1-1 in the database, to prevent errors - we assign the PayProfits sharing this
         // Demographic new Demographics.
-        var otherPayProfitsUsingOurDemograhic = await ctx.PayProfits.Where(ppo => ppo != pp && ppo.Demographic == demo).ToListAsync();
+        var otherPayProfitsUsingOurDemograhic = await ctx.PayProfits.Where(ppo => ppo != pp && ppo.Demographic == demo).ToListAsync(CancellationToken.None);
         otherPayProfitsUsingOurDemograhic.ForEach(pp => pp.Demographic = df.Generate());
 
-        await ctx.SaveChangesAsync();
+        await ctx.SaveChangesAsync(CancellationToken.None);
     }
 
     private static DateOnly convertAgeToBirthDate(short profitSharYear, int age)
     {
         return new DateOnly(profitSharYear - age, 6, 1); // drop them in June to avoid any fiscal year end weirdness.
     }
-
 }
