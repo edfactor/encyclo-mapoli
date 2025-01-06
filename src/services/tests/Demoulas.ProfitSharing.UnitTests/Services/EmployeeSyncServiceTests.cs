@@ -51,7 +51,7 @@ public class EmployeeSyncServiceTests : IClassFixture<ApiTestBase<Program>>
         // Arrange
         var cancellationToken = CancellationToken.None;
         // Act
-        await _employeeSyncService.SynchronizeEmployeesAsync("Unit Test", cancellationToken);
+        await _employeeSyncService.ExecuteFullSyncAsync("Unit Test", cancellationToken);
         // Assert
         _mockDemographicsService.Verify(d => d.AddDemographicsStreamAsync(It.IsAny<IAsyncEnumerable<DemographicsRequest>>(), It.IsAny<byte>(), cancellationToken),
             Times.Once);

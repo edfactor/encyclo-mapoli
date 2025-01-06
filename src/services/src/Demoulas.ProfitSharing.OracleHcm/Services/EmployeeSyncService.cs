@@ -38,9 +38,9 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         _employeeSyncBus = employeeSyncBus;
     }
 
-    public async Task SynchronizeEmployeesAsync(string requestedBy = "System", CancellationToken cancellationToken = default)
+    public async Task ExecuteFullSyncAsync(string requestedBy = "System", CancellationToken cancellationToken = default)
     {
-        using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(SynchronizeEmployeesAsync), ActivityKind.Internal);
+        using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(ExecuteFullSyncAsync), ActivityKind.Internal);
 
         var job = new Job
         {
@@ -62,7 +62,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         {
             await _demographicsService.CleanAuditError(cancellationToken);
             var oracleHcmEmployees = _oracleEmployeeDataSyncClient.GetAllEmployees(cancellationToken);
-            await QueueEmployee(requestedBy, cancellationToken, oracleHcmEmployees);
+            await QueueEmployee(cancellationToken, requestedBy, oracleHcmEmployees);
         }
         catch (Exception ex)
         {
@@ -107,7 +107,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
                 foreach (long oracleHcmId in people)
                 {
                     var oracleHcmEmployees = _oracleEmployeeDataSyncClient.GetEmployee(oracleHcmId, cancellationToken);
-                    await QueueEmployee(requestedBy, cancellationToken, oracleHcmEmployees);
+                    await QueueEmployee(cancellationToken, requestedBy, oracleHcmEmployees);
                 }
             }
             catch (Exception ex)
@@ -122,7 +122,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         }
     }
 
-    private async Task QueueEmployee(string requestedBy, CancellationToken cancellationToken, IAsyncEnumerable<OracleEmployee?> oracleHcmEmployees)
+    private async Task QueueEmployee(CancellationToken cancellationToken, string requestedBy, IAsyncEnumerable<OracleEmployee?> oracleHcmEmployees)
     {
         await foreach (var employee in oracleHcmEmployees.WithCancellation(cancellationToken))
         {
@@ -136,7 +136,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
                 ApplicationName = nameof(EmployeeSyncService), Body = employee, UserId = requestedBy
             };
                         
-            await _employeeSyncBus.Publish<MessageRequest<OracleEmployee>>(message, cancellationToken);
+            await _employeeSyncBus.Publish(message, cancellationToken);
         }
     }
 
