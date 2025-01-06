@@ -142,7 +142,7 @@ public sealed class TotalService : ITotalService
     {
         return (from pp in ctx.PayProfits.Include(p => p.Demographic)
             where pp.ProfitYear == profitYear
-            select new ParticipantTotalYearsDto { Ssn = pp.Demographic!.Ssn, Years = pp.YearsInPlan }); //Need to verify logic here
+            select new ParticipantTotalYearsDto { Ssn = pp.Demographic!.Ssn, Years = pp.YearsInPlan });
     }
 
     /// <summary>
@@ -205,6 +205,7 @@ public sealed class TotalService : ITotalService
         );
 
         var demoOrBeneficiary = demoInfo.Union(beneficiaryInfo);
+        var hoursWorkedRequirement = ContributionService.MinimumHoursForContribution();
 
 #pragma warning disable S1244 // Floating point numbers should not be tested for equality
 #pragma warning disable S3358 // Ternary operators should not be nested
@@ -218,12 +219,12 @@ public sealed class TotalService : ITotalService
                         db.EnrollmentId == 3 || db.EnrollmentId == 4 ? 1m :
                         db.TerminationCodeId == 'Z' ? 1m :
                         db.ZeroContributionReasonId == 6 ? 1m :
-                        (db.EnrollmentId == 2 ? 1 : 0) + (db.Hours >= 1000 ? 1 : 0) + db.Years < 3 ? 0m :
-                        (db.EnrollmentId == 2 ? 1 : 0) + (db.Hours >= 1000 ? 1 : 0) + db.Years == 3 ? .2m :
-                        (db.EnrollmentId == 2 ? 1 : 0) + (db.Hours >= 1000 ? 1 : 0) + db.Years == 4 ? .4m :
-                        (db.EnrollmentId == 2 ? 1 : 0) + (db.Hours >= 1000 ? 1 : 0) + db.Years == 5 ? .6m :
-                        (db.EnrollmentId == 2 ? 1 : 0) + (db.Hours >= 1000 ? 1 : 0) + db.Years == 6 ? .8m :
-                        (db.EnrollmentId == 2 ? 1 : 0) + (db.Hours >= 1000 ? 1 : 0) + db.Years > 6 ? 1m : 0
+                        (db.EnrollmentId == 2 ? 1 : 0) + (db.Hours >= hoursWorkedRequirement ? 1 : 0) + db.Years < 3 ? 0m :
+                        (db.EnrollmentId == 2 ? 1 : 0) + (db.Hours >= hoursWorkedRequirement ? 1 : 0) + db.Years == 3 ? .2m :
+                        (db.EnrollmentId == 2 ? 1 : 0) + (db.Hours >= hoursWorkedRequirement ? 1 : 0) + db.Years == 4 ? .4m :
+                        (db.EnrollmentId == 2 ? 1 : 0) + (db.Hours >= hoursWorkedRequirement ? 1 : 0) + db.Years == 5 ? .6m :
+                        (db.EnrollmentId == 2 ? 1 : 0) + (db.Hours >= hoursWorkedRequirement ? 1 : 0) + db.Years == 6 ? .8m :
+                        (db.EnrollmentId == 2 ? 1 : 0) + (db.Hours >= hoursWorkedRequirement ? 1 : 0) + db.Years > 6 ? 1m : 0
             }
         );
 #pragma warning restore S3358 // Ternary operators should not be nested

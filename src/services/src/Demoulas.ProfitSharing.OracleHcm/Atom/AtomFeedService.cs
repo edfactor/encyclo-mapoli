@@ -17,7 +17,7 @@ public class AtomFeedService
     }
 
     public async IAsyncEnumerable<TContextType> GetFeedDataAsync<TContextType>(string feedType, DateTime minDate, DateTime maxDate,
-        [EnumeratorCancellation] CancellationToken cancellationToken) where TContextType : IDeltaContext
+        [EnumeratorCancellation] CancellationToken cancellationToken) where TContextType : DeltaContextBase
     {
         var url = $"/hcmRestApi/atomservlet/employee/{feedType}?page-size=25&page=1&published-min={minDate:yyyy-MM-ddTHH:mm:ssZ}&published-max={maxDate:yyyy-MM-ddTHH:mm:ssZ}";
 
@@ -38,6 +38,7 @@ public class AtomFeedService
         {
             foreach (var record in feedRoot.Feed.Entries.Select(e => e.Content).SelectMany(c => c.Context)!)
             {
+                record.FeedType = feedType;
                 yield return record;
             }
         }

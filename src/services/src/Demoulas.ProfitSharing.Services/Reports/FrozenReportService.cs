@@ -41,14 +41,14 @@ public class FrozenReportService : IFrozenReportService
     {
         using (_logger.BeginScope("Request FORFEITURES AND POINTS FOR YEAR"))
         {
-            const short HOURS_WORKED_REQUIREMENT = 1000;
+            var hoursWorkedRequirement = ContributionService.MinimumHoursForContribution();
 
             var rslt = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
                 var forfeitures = ctx.ProfitDetails
-                    .Where(pd => pd.ProfitYear == req.ProfitYear)
-                    .Where(pd => pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id)
                     .Join(ctx.Demographics, x => x.Ssn, x => x.Ssn, (pd, d) => new { pd, d })
+                    .Where(x => x.pd.ProfitYear == req.ProfitYear)
+                    .Where(x => x.pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id)
                     .GroupBy(pd => pd.d.Id)
                     .Select(g => new { DemographicId = g.Key, Forfeitures = g.Sum(x => x.pd.Forfeiture) > 0 ? g.Sum(x => x.pd.Forfeiture) : 0 });
 
@@ -64,7 +64,7 @@ public class FrozenReportService : IFrozenReportService
                         EmployeeId = d.EmployeeId,
                         EmployeeName = d.ContactInfo.FullName,
                         EmployeeSsn = d.Ssn.ToString(),
-                        Forfeitures = f != null ? f.Forfeitures : 0,
+                        Forfeitures = f.Forfeitures,
                         ForfeitPoints = 0,
                         EarningPoints = 0
                     };
@@ -98,7 +98,7 @@ public class FrozenReportService : IFrozenReportService
                 var lastYearPayProfits = await (from pp in ctx.PayProfits
                         join d in ctx.Demographics on pp.DemographicId equals d.Id
                         where pp.ProfitYear == req.ProfitYear - 1 && badges.Contains(d.EmployeeId)
-                                                                  && (pp.HoursExecutive + pp.CurrentHoursYear) >= HOURS_WORKED_REQUIREMENT
+                                                                  && (pp.HoursExecutive + pp.CurrentHoursYear) >= hoursWorkedRequirement
                         select new { d.EmployeeId, pp.CurrentIncomeYear }
                     ).ToListAsync(cancellationToken);
 
@@ -120,6 +120,14 @@ public class FrozenReportService : IFrozenReportService
                     if (lypp != null)
                     {
                         rec.ForfeitPoints = Convert.ToInt16(Math.Round((lypp.CurrentIncomeYear) / 100, 0, MidpointRounding.AwayFromZero));
+                    }
+                }
+
+                foreach (var q in query.Results)
+                {
+                    if (!q.Forfeitures.HasValue)
+                    {
+                        q.Forfeitures = 0;
                     }
                 }
 
@@ -146,20 +154,21 @@ public class FrozenReportService : IFrozenReportService
 
         const string FT = "FullTime";
         const string PT = "PartTime";
+        DateTime asOfDate = await GetAsOfDate(req, cancellationToken);
 
         var queryResult = await _dataContextFactory.UseReadOnlyContext(ctx =>
         {
             var query = (from pd in ctx.ProfitDetails
-                join d in ctx.Demographics on pd.Ssn equals d.Ssn
-                where pd.ProfitYear == req.ProfitYear && codes.Contains(pd.ProfitCodeId)
-                select new
-                {
-                    d.DateOfBirth,
-                    EmploymentType = d.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT,
-                    d.EmployeeId,
-                    Amount = pd.Forfeiture,
-                    pd.CommentTypeId
-                });
+                         join d in ctx.Demographics on pd.Ssn equals d.Ssn
+                         where pd.ProfitYear == req.ProfitYear && codes.Contains(pd.ProfitCodeId)
+                         select new
+                         {
+                             d.DateOfBirth,
+                             EmploymentType = d.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT,
+                             d.EmployeeId,
+                             Amount = pd.Forfeiture,
+                             pd.CommentTypeId
+                         });
 
             query = req.ReportType switch
             {
@@ -184,13 +193,13 @@ public class FrozenReportService : IFrozenReportService
         }
 
         var details = queryResult.Select(x => new
-            {
-                Age = x.DateOfBirth.Age(),
-                x.EmploymentType,
-                x.EmployeeId,
-                x.Amount,
-                x.CommentTypeId
-            })
+        {
+            Age = x.DateOfBirth.Age(asOfDate),
+            x.EmploymentType,
+            x.EmployeeId,
+            x.Amount,
+            x.CommentTypeId
+        })
             .GroupBy(x => new { x.Age, x.EmploymentType })
             .Select(g => new DistributionsByAgeDetail
             {
@@ -227,7 +236,6 @@ public class FrozenReportService : IFrozenReportService
         };
     }
 
-
     public async Task<ContributionsByAge> GetContributionsByAgeYearAsync(FrozenReportsByAgeRequest req, CancellationToken cancellationToken = default)
     {
         const string FT = "FullTime";
@@ -253,8 +261,8 @@ public class FrozenReportService : IFrozenReportService
             return query.ToListAsync(cancellationToken: cancellationToken);
         });
 
-
-        var details = queryResult.Select(x => new { Age = x.DateOfBirth.Age(), x.EmployeeId, x.Amount })
+        var asOfDate = await GetAsOfDate(req, cancellationToken);
+        var details = queryResult.Select(x => new { Age = x.DateOfBirth.Age(asOfDate), x.EmployeeId, x.Amount })
             .GroupBy(x => new { x.Age })
             .Select(g => new ContributionsByAgeDetail { Age = g.Key.Age, EmployeeCount = g.Select(x => x.EmployeeId).Distinct().Count(), Amount = g.Sum(x => x.Amount), })
             .OrderBy(x => x.Age)
@@ -299,8 +307,8 @@ public class FrozenReportService : IFrozenReportService
             return query.ToListAsync(cancellationToken: cancellationToken);
         });
 
-
-        var details = queryResult.Select(x => new { Age = x.DateOfBirth.Age(), x.EmployeeId, x.Amount })
+        var asOfDate = await GetAsOfDate(req, cancellationToken);
+        var details = queryResult.Select(x => new { Age = x.DateOfBirth.Age(asOfDate), x.EmployeeId, x.Amount })
             .GroupBy(x => new { x.Age })
             .Select(g => new ForfeituresByAgeDetail { Age = g.Key.Age, EmployeeCount = g.Select(x => x.EmployeeId).Distinct().Count(), Amount = g.Sum(x => x.Amount), })
             .OrderBy(x => x.Age)
@@ -362,8 +370,9 @@ public class FrozenReportService : IFrozenReportService
         });
 
         // Client-side processing for grouping and filtering
+        var asOfDate = await GetAsOfDate(req, cancellationToken);
         var groupedResult = rawResult
-            .GroupBy(item => item.DateOfBirth.Age())
+            .GroupBy(item => item.DateOfBirth.Age(asOfDate))
             .Select(g => new { Age = g.Key, Entries = g.ToList() })
             .ToList();
 
@@ -404,7 +413,7 @@ public class FrozenReportService : IFrozenReportService
         };
     }
 
-    public async Task<VestedAmountsByAge> GetVestedAmountsByAgeYearAsync(ProfitYearRequest req, CancellationToken cancellationToken = default)
+    public async Task<VestedAmountsByAge> GetVestedAmountsByAgeYearAsync(ProfitYearAndAsOfDateRequest req, CancellationToken cancellationToken = default)
     {
         const string FT = "FullTime";
         const string PT = "PartTime";
@@ -439,8 +448,9 @@ public class FrozenReportService : IFrozenReportService
         });
 
         // Client-side grouping and aggregation
+        var asOfDate = await GetAsOfDate(req, cancellationToken);
         var groupedResult = rawResult
-            .GroupBy(item => item.DateOfBirth.Age())
+            .GroupBy(item => item.DateOfBirth.Age(asOfDate))
             .Select(g => new { Age = g.Key, Entries = g.ToList() })
             .ToList();
 
@@ -518,8 +528,10 @@ public class FrozenReportService : IFrozenReportService
         var details = await _dataContextFactory.UseReadOnlyContext(ctx =>
         {
             var query = _totalService.TotalVestingBalance(ctx, req.ProfitYear, startEnd.FiscalEndDate);
+            var yearsInPlanQuery = _totalService.GetYearsOfService(ctx, req.ProfitYear);
 
             var joinedQuery = from q in query
+                join yip in yearsInPlanQuery on q.Ssn equals yip.Ssn
                 join d in ctx.Demographics.Include(d => d.PayProfits.Where(p => p.YearsInPlan > 0)) on q.Ssn equals d.Ssn into demographics
                 from demographic in demographics.DefaultIfEmpty()
                 join b in ctx.BeneficiaryContacts on q.Ssn equals b.Ssn into beneficiaries
@@ -532,9 +544,7 @@ public class FrozenReportService : IFrozenReportService
                     EmploymentType =
                         demographic != null && demographic.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT,
                     IsBeneficiary = demographic == null && beneficiary != null,
-                    YearsInPlan = demographic != null
-                        ? demographic.PayProfits.Max(p => p.YearsInPlan)
-                        : byte.MaxValue,
+                    YearsInPlan = (byte)yip.Years
                 };
 
             joinedQuery = req.ReportType switch
@@ -581,5 +591,21 @@ public class FrozenReportService : IFrozenReportService
             TotalPartTimeCount = details.Sum(d => d.PartTimeCount),
             Response = new PaginatedResponseDto<BalanceByYearsDetail>(req) { Results = details, Total = details.Count }
         };
+    }
+
+    private async Task<DateTime> GetAsOfDate(ProfitYearAndAsOfDateRequest req, CancellationToken cancellationToken)
+    {
+        DateTime asOfDate;
+        if (req.AsOfDate.HasValue)
+        {
+            asOfDate = req.AsOfDate.Value.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+        }
+        else
+        {
+            var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
+            asOfDate = calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+        }
+
+        return asOfDate;
     }
 }

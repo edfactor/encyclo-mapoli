@@ -12,5 +12,5 @@ public interface IFrozenReportService
     Task<ForfeituresByAge> GetForfeituresByAgeYearAsync(FrozenReportsByAgeRequest req, CancellationToken cancellationToken = default);
     Task<BalanceByAge> GetBalanceByAgeYearAsync(FrozenReportsByAgeRequest req, CancellationToken cancellationToken = default);
     Task<BalanceByYears> GetBalanceByYearsAsync(FrozenReportsByAgeRequest req, CancellationToken cancellationToken = default);
-    Task<VestedAmountsByAge> GetVestedAmountsByAgeYearAsync(ProfitYearRequest req, CancellationToken cancellationToken = default);
+    Task<VestedAmountsByAge> GetVestedAmountsByAgeYearAsync(ProfitYearAndAsOfDateRequest req, CancellationToken cancellationToken = default);
 }

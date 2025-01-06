@@ -259,7 +259,10 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
                 dem.ContactInfo.FirstName = modelDemographic.ContactInfo.FirstName;
                 dem.ContactInfo.LastName = modelDemographic.ContactInfo.LastName;
                 dem.ContactInfo.FullName = modelDemographic.ContactInfo.FullName;
-                dem.PayProfits[0].ProfitYear = _paginationRequest.ProfitYear;
+                if (!dem.PayProfits.Any(x => x.ProfitYear == _paginationRequest.ProfitYear))
+                {
+                    dem.PayProfits[0].ProfitYear = _paginationRequest.ProfitYear;
+                }
             }
 
             await c.SaveChangesAsync(CancellationToken.None);
@@ -294,7 +297,10 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
                 dem.ContactInfo.FirstName = modelDemographic.ContactInfo.FirstName;
                 dem.ContactInfo.LastName = modelDemographic.ContactInfo.LastName;
                 dem.ContactInfo.FullName = modelDemographic.ContactInfo.FullName;
-                dem.PayProfits[0].ProfitYear = _paginationRequest.ProfitYear;
+                if (!dem.PayProfits.Any(x => x.ProfitYear == _paginationRequest.ProfitYear))
+                {
+                    dem.PayProfits[0].ProfitYear = _paginationRequest.ProfitYear;
+                }
             }
 
             await c.SaveChangesAsync(CancellationToken.None);
