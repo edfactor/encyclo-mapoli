@@ -4,6 +4,7 @@ using System.Text.Json;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -32,18 +33,24 @@ internal class PayrollSyncClient
 
     private readonly HttpClient _httpClient;
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
+    private readonly IEmployeeSyncService _employeeSyncService;
     private readonly OracleHcmConfig _oracleHcmConfig;
+    private readonly OracleEmployeeDataSyncClient _oracleEmployeeDataSyncClient;
     private readonly ILogger<PayrollSyncClient> _logger;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
 
     public PayrollSyncClient(HttpClient httpClient,
         IProfitSharingDataContextFactory profitSharingDataContextFactory,
+        IEmployeeSyncService employeeSyncService,
         OracleHcmConfig oracleHcmConfig,
+        OracleEmployeeDataSyncClient oracleEmployeeDataSyncClient,
         ILogger<PayrollSyncClient> logger)
     {
         _httpClient = httpClient;
         _profitSharingDataContextFactory = profitSharingDataContextFactory;
+        _employeeSyncService = employeeSyncService;
         _oracleHcmConfig = oracleHcmConfig;
+        _oracleEmployeeDataSyncClient = oracleEmployeeDataSyncClient;
         _logger = logger;
         _jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
     }
@@ -146,6 +153,9 @@ internal class PayrollSyncClient
                 return;
             }
 
+            var existsCollection = results!.Items.Select(d => d.PersonId).ToHashSet();
+            await TrySyncMissingEmployees(existsCollection, cancellationToken);
+
             await getBalanceTypesForProcessResults(results!.Items, cancellationToken);
 
 
@@ -162,6 +172,27 @@ internal class PayrollSyncClient
             }
 
             url = nextUrl;
+        }
+    }
+
+    private async Task TrySyncMissingEmployees(HashSet<long> existsCollection, CancellationToken cancellationToken)
+    {
+        var missingPersonIds = await _profitSharingDataContextFactory.UseReadOnlyContext(async c =>
+        {
+            // Query only the relevant PersonIds from the database
+            var existingPersonIds = await c.Demographics
+                .Where(d => existsCollection.Contains(d.OracleHcmId))
+                .Select(d => d.OracleHcmId)
+                .ToHashSetAsync(cancellationToken);
+
+            // Find PersonIds that are in existsCollection but not in the database
+            return existsCollection.Except(existingPersonIds).ToList();
+        });
+
+        foreach (long id in missingPersonIds)
+        {
+            var oracleHcmEmployees = _oracleEmployeeDataSyncClient.GetEmployee(id, cancellationToken);
+            await _employeeSyncService.QueueEmployee("System", oracleHcmEmployees, cancellationToken);
         }
     }
 

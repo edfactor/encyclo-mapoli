@@ -62,7 +62,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         {
             await _demographicsService.CleanAuditError(cancellationToken);
             var oracleHcmEmployees = _oracleEmployeeDataSyncClient.GetAllEmployees(cancellationToken);
-            await QueueEmployee(cancellationToken, requestedBy, oracleHcmEmployees);
+            await QueueEmployee(requestedBy, oracleHcmEmployees, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -107,7 +107,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
                 foreach (long oracleHcmId in people)
                 {
                     var oracleHcmEmployees = _oracleEmployeeDataSyncClient.GetEmployee(oracleHcmId, cancellationToken);
-                    await QueueEmployee(cancellationToken, requestedBy, oracleHcmEmployees);
+                    await QueueEmployee(requestedBy, oracleHcmEmployees, cancellationToken);
                 }
             }
             catch (Exception ex)
@@ -122,7 +122,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         }
     }
 
-    private async Task QueueEmployee(CancellationToken cancellationToken, string requestedBy, IAsyncEnumerable<OracleEmployee?> oracleHcmEmployees)
+    public async Task QueueEmployee(string requestedBy, IAsyncEnumerable<OracleEmployee?> oracleHcmEmployees, CancellationToken cancellationToken)
     {
         await foreach (var employee in oracleHcmEmployees.WithCancellation(cancellationToken))
         {

@@ -12,6 +12,13 @@ using Oracle.ManagedDataAccess.Client;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services;
 
+/// <summary>
+/// Provides services for handling demographic data related to employees within the Oracle HCM system.
+/// </summary>
+/// <remarks>
+/// This service is responsible for processing, auditing, and managing demographic information.
+/// It integrates with data context factories, mappers, and logging to ensure efficient and reliable operations.
+/// </remarks>
 internal class DemographicsService : IDemographicsServiceInternal
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
@@ -197,7 +204,8 @@ internal class DemographicsService : IDemographicsServiceInternal
                     {
                         var newHistoryRecord = DemographicHistory.FromDemographic(incomingEntity, existingEntity.Id);
                         var oldHistoryRecord = await context.DemographicHistories
-                            .Where(x => x.DemographicId == existingEntity.Id && DateTime.UtcNow >= x.ValidFrom && DateTime.UtcNow < x.ValidTo).FirstAsync();
+                            .Where(x => x.DemographicId == existingEntity.Id && DateTime.UtcNow >= x.ValidFrom && DateTime.UtcNow < x.ValidTo)
+                            .FirstAsync(cancellationToken: cancellationToken);
                         oldHistoryRecord.ValidTo = DateTime.UtcNow;
                         newHistoryRecord.ValidFrom = oldHistoryRecord.ValidTo;
                         context.DemographicHistories.Add(newHistoryRecord);
