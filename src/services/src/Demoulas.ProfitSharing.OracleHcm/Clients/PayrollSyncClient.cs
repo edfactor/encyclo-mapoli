@@ -153,9 +153,7 @@ internal class PayrollSyncClient
                 return;
             }
 
-            var existsCollection = results!.Items.Select(d => d.PersonId).ToHashSet();
-            await TrySyncMissingEmployees(existsCollection, cancellationToken);
-
+            await TrySyncMissingEmployees(results!.Items, cancellationToken);
             await getBalanceTypesForProcessResults(results!.Items, cancellationToken);
 
 
@@ -175,8 +173,9 @@ internal class PayrollSyncClient
         }
     }
 
-    private async Task TrySyncMissingEmployees(HashSet<long> existsCollection, CancellationToken cancellationToken)
+    private async Task TrySyncMissingEmployees(IReadOnlyList<PayrollItem> items, CancellationToken cancellationToken)
     {
+        var existsCollection = items.Select(d => d.PersonId).ToHashSet();
         var missingPersonIds = await _profitSharingDataContextFactory.UseReadOnlyContext(async c =>
         {
             // Query only the relevant PersonIds from the database

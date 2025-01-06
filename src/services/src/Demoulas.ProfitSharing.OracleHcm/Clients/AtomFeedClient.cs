@@ -16,6 +16,31 @@ internal class AtomFeedClient
         _logger = logger;
     }
 
+    /// <summary>
+    /// Retrieves data from an Atom feed asynchronously based on the specified feed type and date range.
+    /// </summary>
+    /// <typeparam name="TContextType">
+    /// The type of the context representing the feed data. Must inherit from <see cref="DeltaContextBase"/>.
+    /// </typeparam>
+    /// <param name="feedType">
+    /// The type of the feed to retrieve, such as "newhire", "empassignment", etc.
+    /// </param>
+    /// <param name="minDate">
+    /// The minimum date for filtering feed entries. Only entries published after this date will be included.
+    /// </param>
+    /// <param name="maxDate">
+    /// The maximum date for filtering feed entries. Only entries published before this date will be included.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token to monitor for cancellation requests.
+    /// </param>
+    /// <returns>
+    /// An asynchronous stream of feed data of type <typeparamref name="TContextType"/>.
+    /// </returns>
+    /// <remarks>
+    /// This method constructs a URL to query the Atom feed API, retrieves the feed data, and yields the parsed entries.
+    /// If an error occurs during the fetch operation, it logs the error and skips processing.
+    /// </remarks>
     public async IAsyncEnumerable<TContextType> GetFeedDataAsync<TContextType>(string feedType, DateTime minDate, DateTime maxDate,
         [EnumeratorCancellation] CancellationToken cancellationToken) where TContextType : DeltaContextBase
     {
