@@ -1,16 +1,14 @@
-﻿using Demoulas.Common.Caching.Interfaces;
-using Demoulas.Common.Contracts.Interfaces;
+﻿using Demoulas.Common.Data.Services.Interfaces;
+using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Services.HostedServices;
+using Demoulas.ProfitSharing.Services.Caching.Extensions;
 using Demoulas.ProfitSharing.Services.Mappers;
+using Demoulas.ProfitSharing.Services.ProfitShareEdit;
+using Demoulas.ProfitSharing.Services.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services.Reports;
+using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Demoulas.Common.Data.Services.Interfaces;
-using Demoulas.Common.Data.Services.Service;
-using Demoulas.ProfitSharing.Common.Caching;
-using Demoulas.ProfitSharing.OracleHcm.Extensions;
-using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 
 namespace Demoulas.ProfitSharing.Services.Extensions;
 
@@ -33,35 +31,28 @@ public static class ServicesExtension
 
         _ = builder.Services.AddScoped<TotalService>();
         _ = builder.Services.AddScoped<ContributionService>();
-        
+
         _ = builder.Services.AddScoped<ITerminatedEmployeeAndBeneficiaryReportService, TerminatedEmployeeAndBeneficiaryReportService>();
 
-        _ = builder.Services.AddSingleton<IDemographicsServiceInternal, DemographicsService>();
         _ = builder.Services.AddSingleton<IFrozenService, FrozenService>();
         _ = builder.Services.AddSingleton<IStoreService, StoreService>();
         _ = builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
         _ = builder.Services.AddSingleton<ICalendarService, CalendarService>();
 
-
-
-        _ = builder.Services.AddKeyedSingleton<IBaseCacheService<LookupTableCache<byte>>, PayClassificationHostedService>(nameof(PayClassificationHostedService));
-        _ = builder.Services.AddKeyedSingleton<IBaseCacheService<LookupTableCache<byte>>, DepartmentHostedService>(nameof(DepartmentHostedService));
-
-
-        _ = builder.ConfigureOracleHcm();
+        _ = builder.Services.AddScoped<IProfitShareUpdateService, ProfitShareUpdateService>();
+        _ = builder.Services.AddScoped<IProfitShareEditService, ProfitShareEditService>();
 
         #region Mappers
 
-        builder.Services.AddSingleton<AddressMapper>();
-        builder.Services.AddSingleton<ContactInfoMapper>();
-        builder.Services.AddSingleton<DemographicMapper>();
+       
         builder.Services.AddSingleton<BeneficiaryTypeMapper>();
         builder.Services.AddSingleton<EmployeeTypeMapper>();
 
         #endregion
 
-        builder.ConfigureMassTransitServices();
-        
+        builder.AddProjectCachingServices();
+
+
         return builder;
     }
 }

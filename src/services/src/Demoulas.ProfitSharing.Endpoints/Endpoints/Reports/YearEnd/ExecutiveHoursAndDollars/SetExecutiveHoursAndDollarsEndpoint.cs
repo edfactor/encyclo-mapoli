@@ -17,8 +17,7 @@ public class SetExecutiveHoursAndDollarsEndpoint : Endpoint<SetExecutiveHoursAnd
 
     public override void Configure()
     {
-        Put("/executive-hours-and-dollars");
-        Group<YearEndGroup>();
+        Put("executive-hours-and-dollars");
         Summary(s =>
         {
             s.Summary = "Executive Hours and Dollars Endpoint";
@@ -26,14 +25,12 @@ public class SetExecutiveHoursAndDollarsEndpoint : Endpoint<SetExecutiveHoursAnd
                 "This endpoint allows the executive hours and dollars to be set.";
 
             s.ExampleRequest = SetExecutiveHoursAndDollarsRequest.Example();
-            s.ResponseExamples = new Dictionary<int, object>
-            {
-                {
-                    204, "Success, No Content"
-                }
-            };
+
+            s.Responses[204] = "Success, No Content";
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
+
+        Group<YearEndGroup>();
     }
 
     public override Task HandleAsync(SetExecutiveHoursAndDollarsRequest req, CancellationToken ct)

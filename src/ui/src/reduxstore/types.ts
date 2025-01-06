@@ -4,7 +4,11 @@ export enum ImpersonationRoles {
   FinanceManager = "Finance-Manager",
   DistributionsClerk = "Distributions-Clerk",
   HardshipAdministrator = "Hardship-Administrator",
-  ProfitSharingAdministrator = "Profit-Sharing-Administrator"
+  ProfitSharingAdministrator = "Profit-Sharing-Administrator",
+}
+
+export interface ProfitYearRequest {
+  profitYear: number;
 }
 
 export interface DemographicBadgesNotInPayprofitResponse {
@@ -31,11 +35,11 @@ export interface PagedReportResponse<T> {
   response: Paged<T>;
 }
 
-export interface DistributionsAndForfeituresRequestDto {
+export interface DistributionsAndForfeituresRequestDto
+  extends ProfitYearRequest {
   startMonth?: number;
   endMonth?: number;
   includeOutgoingForfeitures?: boolean;
-  profitYear: number;
   pagination: PaginationParams;
 }
 
@@ -80,8 +84,7 @@ export interface DuplicateSSNDetail {
   incomeCurrentYear: number;
 }
 
-export interface DuplicateSSNsRequestDto {
-  profitYear: number;
+export interface DuplicateSSNsRequestDto extends ProfitYearRequest {
   pagination: PaginationParams;
 }
 
@@ -95,13 +98,12 @@ export interface MissingCommasInPYName {
   employeeName: string;
 }
 
-export interface DuplicateNameAndBirthdayRequestDto {
-  profitYear: number;
+export interface DuplicateNameAndBirthdayRequestDto extends ProfitYearRequest {
   pagination: PaginationParams;
 }
 
-export interface NegativeEtvaForSSNsOnPayprofitRequestDto {
-  profitYear: number;
+export interface NegativeEtvaForSSNsOnPayprofitRequestDto
+  extends ProfitYearRequest {
   pagination: PaginationParams;
 }
 
@@ -150,35 +152,35 @@ export interface MilitaryAndRehire {
   terminationDate: string;
 }
 
-export interface MilitaryAndRehireForfeituresRequestDto {
+export interface MilitaryAndRehireForfeituresRequestDto
+  extends ProfitYearRequest {
   reportingYear: string;
-  profitYear: number;
   pagination: PaginationParams;
 }
 
-export interface ForfeitureDetail {
-  profitYear: number;
+export interface ForfeitureDetail extends ProfitYearRequest {
   forfeiture: number;
   remark: string;
 }
 
 export interface MilitaryAndRehireForfeiture {
-  badgeNumber: number;
-  fullName: string;
-  ssn: string;
-  reHiredDate: string;
-  companyContributionYears: number;
-  hoursCurrentYear: number;
-  details: ForfeitureDetail[];
+    badgeNumber: number;
+    fullName: string;
+    ssn: string;
+    reHiredDate: string;
+    companyContributionYears: number;
+    hoursCurrentYear: number;
+    details: ForfeitureDetail[];
 }
 
-export interface MilitaryAndRehireProfitSummaryRequestDto {
+
+export interface MilitaryAndRehireProfitSummaryRequestDto
+  extends ProfitYearRequest {
   reportingYear: string;
-  profitYear: number;
   pagination: PaginationParams;
 }
 
-export interface MilitaryAndRehireProfitSummary {
+export interface MilitaryAndRehireProfitSummary extends ProfitYearRequest {
   badgeNumber: number;
   fullName: string;
   ssn: string;
@@ -188,7 +190,6 @@ export interface MilitaryAndRehireProfitSummary {
   reHiredDate: string;
   companyContributionYears: number;
   hoursCurrentYear: number;
-  profitYear: number;
   forfeiture: number;
   remark: string;
   enrollmentId: number;
@@ -198,10 +199,9 @@ export interface MilitaryAndRehireProfitSummary {
   profitCodeId: number;
 }
 
-export interface ExecutiveHoursAndDollarsRequestDto {
+export interface ExecutiveHoursAndDollarsRequestDto extends ProfitYearRequest {
   badgeNumber?: number;
   fullNameContains?: string;
-  profitYear: number;
   hasExecutiveHoursAndDollars: boolean;
   pagination: PaginationParams;
 }
@@ -218,8 +218,7 @@ export interface ExecutiveHoursAndDollars {
   employmentStatusId: string;
 }
 
-export interface EligibleEmployeesRequestDto {
-  profitYear: number;
+export interface EligibleEmployeesRequestDto extends ProfitYearRequest {
   pagination: PaginationParams;
 }
 
@@ -238,10 +237,9 @@ export interface EligibleEmployeeResponseDto {
   response: Paged<EligibleEmployee>;
 }
 
-export interface MasterInquiryDetail {
+export interface MasterInquiryDetail extends ProfitYearRequest {
   id: number;
   ssn: number;
-  profitYear: number;
   profitYearIteration: number;
   distributionSequence: number;
   profitCodeId: number;
@@ -277,18 +275,17 @@ export interface MasterInquryRequest {
   comment?: string;
   pagination: PaginationParams;
 }
+
 export enum FrozenReportsByAgeRequestType {
   Total = "Total",
   FullTime = "FullTime",
-  PartTime = "PartTime"
+  PartTime = "PartTime",
 }
 
-export interface FrozenReportsByAgeRequest {
-  profitYear: number;
+export interface FrozenReportsByAgeRequest extends ProfitYearRequest {
   pagination: PaginationParams;
   reportType: FrozenReportsByAgeRequestType;
 }
-
 export interface ProfitSharingDistributionsByAge {
   reportName: string;
   reportDate: string;
@@ -368,26 +365,112 @@ export interface MasterInquiryResponseType {
   employeeDetails: EmployeeDetails | null;
   inquiryResults: Paged<MasterInquiryDetail>;
 }
-export interface BalanceByAge {
+export interface BalanceByDetailBase {
+  employeeCount: number;
+  currentBalance: number;
+  beneficiaryCount?: number;
+  vestedBalance?: number;
+  currentBeneficiaryBalance?: number;
+  currentBeneficiaryVestedBalance?: number;
+  fullTimeCount?: number;
+  partTimeCount?: number;
+}
+
+export interface BalanceByBase<TDetail extends BalanceByDetailBase> {
   reportName: string;
   reportDate: string;
   reportType: FrozenReportsByAgeRequestType;
   balanceTotalAmount: number;
-  vestedTotalAmount: number;
+  vestedTotalAmount?: number;
   totalMembers: number;
   totalBeneficiaries: number;
-  totalBeneficiariesAmount : number;
-  totalBeneficiariesVestedAmount : number;
-  totalEmployee: number;
-  totalEmployeeAmount: number;
-  totalEmployeesVestedAmount : number;
-  response: Paged<BalanceByAgeDetail>;
+  totalBeneficiariesAmount?: number;
+  totalBeneficiariesVestedAmount?: number;
+  totalEmployee: number; // Derived
+  totalEmployeeAmount: number; // Derived
+  totalEmployeesVestedAmount: number; // Derived
+  totalFullTimeCount?: number;
+  totalPartTimeCount?: number;
+  response: Paged<TDetail>;
 }
 
-export interface BalanceByAgeDetail {
+export interface BalanceByAgeDetail extends BalanceByDetailBase {
   age: number;
-  employeeCount: number;
-  currentBalance: number;
-  vestedBalance: number;
-  beneficiaryCount: number;
 }
+
+export interface BalanceByAge extends BalanceByBase<BalanceByAgeDetail> {}
+
+export interface BalanceByYearsDetail extends BalanceByDetailBase {
+  age: number;
+}
+
+export interface BalanceByYears  extends BalanceByBase<BalanceByAgeDetail> {}
+
+export interface VestedAmountsByAge {
+  totalFullTime100PercentAmount: number
+  totalFullTimePartialAmount: number
+  totalFullTimeNotVestedAmount: number
+  totalPartTime100PercentAmount: number
+  totalPartTimePartialAmount: number
+  totalPartTimeNotVestedAmount: number
+  totalBeneficiaryCount: number
+  totalBeneficiaryAmount: number
+  totalFullTimeCount: number
+  totalNotVestedCount: number
+  totalPartialVestedCount: number
+  reportName: string
+  reportDate: string
+  response: Paged<VestedAmountsByAgeDetail>
+}
+export interface VestedAmountsByAgeDetail {
+  age: number
+  fullTime100PercentCount: number
+  fullTime100PercentAmount: number
+  fullTimePartialCount: number
+  fullTimePartialAmount: number
+  fullTimeNotVestedCount: number
+  fullTimeNotVestedAmount: number
+  partTime100PercentCount: number
+  partTime100PercentAmount: number
+  partTimePartialCount: number
+  partTimePartialAmount: number
+  partTimeNotVestedCount: number
+  partTimeNotVestedAmount: number
+  beneficiaryCount: number
+  beneficiaryAmount: number
+  fullTimeCount: number
+  notVestedCount: number
+  partialVestedCount: number
+}
+
+export interface TerminationRequest {
+  profitYear: number;
+  pagination: PaginationParams;
+}
+
+export interface TerminationDetail {
+  badgePSn: string;
+  name: string;
+  beginningBalance: number;
+  beneficiaryAllocation: number;
+  distributionAmount: number;
+  forfeit: number;
+  endingBalance: number;
+  vestedBalance: number;
+  dateTerm: string;
+  ytdPsHours: number;
+  vestedPercent: number;
+  age: number;
+  enrollmentCode: number;
+}
+
+export interface TerminationResponse {
+  totalVested: number;
+  totalForfeit: number;
+  totalEndingBalance: number;
+  totalBeneficiaryAllocation: number;
+  reportName: string;
+  reportDate: string;
+  response: Paged<TerminationDetail[]>;
+}
+

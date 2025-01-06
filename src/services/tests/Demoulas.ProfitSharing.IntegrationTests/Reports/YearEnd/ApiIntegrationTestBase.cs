@@ -1,4 +1,5 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
+﻿using System.Net.Http.Headers;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -19,7 +20,6 @@ namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
  * now it uses a mock to get the testing framework to swap in the read only connection.
  *
  */
-
 /// <summary>
 ///   Abstraction for testing api endpoints that use a <c>DbContext</c>.
 ///   sets up a web application, endpoints and services and a real read only database connection.
@@ -50,7 +50,7 @@ public class ApiIntegrationTestBase<TStartup> where TStartup : class
     {
         // We get a connection to the SMART obfuscated pristine database.
         var configuration = new ConfigurationBuilder().AddUserSecrets<TStartup>().Build();
-        string connectionString = configuration["ConnectionStrings:ProfitSharing-ObfuscatedPristine"]!;
+        string connectionString = configuration["ConnectionStrings:ProfitSharing"]!;
         var options = new DbContextOptionsBuilder<ProfitSharingReadOnlyDbContext>().UseOracle(connectionString).EnableSensitiveDataLogging().Options;
         var ctx = new ProfitSharingReadOnlyDbContext(options);
 
@@ -80,6 +80,6 @@ public class ApiIntegrationTestBase<TStartup> where TStartup : class
 
         ApiClient = builder.CreateClient();
         DownloadClient = builder.CreateClient();
-        DownloadClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("text/csv"));
+        DownloadClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/csv"));
     }
 }

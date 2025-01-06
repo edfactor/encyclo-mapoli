@@ -21,10 +21,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
 {
     private const int ProfitShareTestYear = 2075; // used to avoid pre-canned data.
 
-    private static readonly ExecutiveHoursAndDollarsRequest _request = new()
-    {
-        ProfitYear = ProfitShareTestYear, Skip = 0, Take = 10
-    };
+    private static readonly ExecutiveHoursAndDollarsRequest _request = new() { ProfitYear = ProfitShareTestYear, Skip = 0, Take = 10 };
 
     private static readonly ExecutiveHoursAndDollarsResponse _example =
         ExecutiveHoursAndDollarsResponse.ResponseExample();
@@ -88,10 +85,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         {
             // Arrange
             await SetupTestEmployee_Without_HoursAndDollars(c);
-            ExecutiveHoursAndDollarsRequest request = new()
-            {
-                ProfitYear = ProfitShareTestYear, Skip = 0, Take = 10, HasExecutiveHoursAndDollars = true
-            };
+            ExecutiveHoursAndDollarsRequest request = new() { ProfitYear = ProfitShareTestYear, Skip = 0, Take = 10, HasExecutiveHoursAndDollars = true };
 
             // Act
             ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
@@ -138,10 +132,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             // Arrange
             await SetupTestEmployee_With_HoursAndDollars(c);
             DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-            ExecutiveHoursAndDollarsRequest request = new()
-            {
-                ProfitYear = ProfitShareTestYear, HasExecutiveHoursAndDollars = true
-            };
+            ExecutiveHoursAndDollarsRequest request = new() { ProfitYear = ProfitShareTestYear, HasExecutiveHoursAndDollars = true };
 
             // Act
             TestResult<StreamContent> response = await DownloadClient
@@ -151,8 +142,8 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             response.Response.Content.Should().NotBeNull();
 
             // Verify CSV file
-            string csvData = await response.Response.Content.ReadAsStringAsync();
-            string[] lines = csvData.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+            string csvData = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
+            string[] lines = csvData.Split(["\r\n", "\n"], StringSplitOptions.None);
             lines[1].Should().Be(_expectedReportName);
             lines[2].Should().Be("BADGE,NAME,STR,EXEC HRS,EXEC DOLS,ORA HRS CUR,ORA DOLS CUR,FREQ,STATUS");
             lines[3].Should().Be(@"1,""John, Null E"",2,3,4,5,6,2,a");
@@ -193,10 +184,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             PayProfit payProfit = await SetupTestEmployee_With_HoursAndDollars(c);
             ExecutiveHoursAndDollarsRequest request = new()
             {
-                FullNameContains = payProfit.Demographic!.ContactInfo.FullName,
-                ProfitYear = ProfitShareTestYear,
-                Skip = 0,
-                Take = 10
+                FullNameContains = payProfit.Demographic!.ContactInfo.FullName, ProfitYear = ProfitShareTestYear, Skip = 0, Take = 10
             };
             ReportResponseBase<ExecutiveHoursAndDollarsResponse> expectedResponse = StockResponse();
             ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
@@ -223,10 +211,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             PayProfit payProfit = await SetupTestEmployee_With_HoursAndDollars(c);
             ExecutiveHoursAndDollarsRequest request = new()
             {
-                FullNameContains = "ZZ" + payProfit.Demographic!.ContactInfo.FullName,
-                ProfitYear = ProfitShareTestYear,
-                Skip = 0,
-                Take = 10
+                FullNameContains = $"ZZ{payProfit.Demographic!.ContactInfo.FullName}", ProfitYear = ProfitShareTestYear, Skip = 0, Take = 10
             };
             ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
@@ -247,10 +232,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         {
             ReportName = _expectedReportName,
             ReportDate = DateTimeOffset.Now,
-            Response = new PaginatedResponseDto<ExecutiveHoursAndDollarsResponse>
-            {
-                Results = [ExecutiveHoursAndDollarsResponse.ResponseExample()]
-            }
+            Response = new PaginatedResponseDto<ExecutiveHoursAndDollarsResponse> { Results = [ExecutiveHoursAndDollarsResponse.ResponseExample()] }
         };
     }
 
@@ -260,7 +242,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             .Include(payProfit => payProfit.Demographic!)
             .ThenInclude(demographic => demographic.ContactInfo)
             .Include(p => p.Demographic != null)
-            .FirstAsync();
+            .FirstAsync(CancellationToken.None);
         Demographic demo = pp.Demographic!;
 
         demo.EmployeeId = _example.BadgeNumber;
@@ -275,7 +257,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         pp.ProfitYear = ProfitShareTestYear;
         pp.Demographic = demo;
 
-        await c.SaveChangesAsync();
+        await c.SaveChangesAsync(CancellationToken.None);
         return pp;
     }
 
@@ -285,7 +267,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             .Include(payProfit => payProfit.Demographic!)
             .ThenInclude(demographic => demographic.ContactInfo)
             .Include(p => p.Demographic != null)
-            .FirstAsync();
+            .FirstAsync(CancellationToken.None);
         Demographic demo = pp.Demographic!;
 
         demo.EmployeeId = _example.BadgeNumber;
@@ -300,6 +282,6 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         pp.ProfitYear = ProfitShareTestYear;
         pp.Demographic = demo;
 
-        await c.SaveChangesAsync();
+        await c.SaveChangesAsync(CancellationToken.None);
     }
 }

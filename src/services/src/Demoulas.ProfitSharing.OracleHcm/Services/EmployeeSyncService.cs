@@ -1,6 +1,8 @@
 ﻿using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
+using Bogus;
 using Bogus.Extensions.UnitedStates;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
@@ -10,10 +12,12 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.OracleHcm.Atom;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
 using Demoulas.ProfitSharing.OracleHcm.Validators;
 using Demoulas.Util.Extensions;
+using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services;
@@ -22,22 +26,25 @@ namespace Demoulas.ProfitSharing.OracleHcm.Services;
 /// Service responsible for synchronizing employee data from the Oracle HCM system to the Profit Sharing system.
 /// This includes fetching employee data, validating it, and updating the Profit Sharing database.
 /// </summary>
-public sealed class EmployeeSyncService : IEmployeeSyncService
+internal sealed class EmployeeSyncService : IEmployeeSyncService
 {
     private readonly OracleDemographicsSyncClient _oracleDemographicsSyncClient;
     private readonly IDemographicsServiceInternal _demographicsService;
+    private readonly AtomFeedService _atomFeedService;
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
     private readonly OracleHcmConfig _oracleHcmConfig;
     private readonly OracleEmployeeValidator _employeeValidator;
 
     public EmployeeSyncService(HttpClient httpClient,
         IDemographicsServiceInternal demographicsService,
+        AtomFeedService atomFeedService,
         IProfitSharingDataContextFactory profitSharingDataContextFactory,
         OracleHcmConfig oracleHcmConfig,
         OracleEmployeeValidator employeeValidator)
     {
         _oracleDemographicsSyncClient = new OracleDemographicsSyncClient(httpClient, oracleHcmConfig);
         _demographicsService = demographicsService;
+        _atomFeedService = atomFeedService;
         _profitSharingDataContextFactory = profitSharingDataContextFactory;
         _oracleHcmConfig = oracleHcmConfig;
         _employeeValidator = employeeValidator;
@@ -73,21 +80,21 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
         catch (Exception ex)
         {
             success = false;
-            await AuditError(0, new[] { new FluentValidation.Results.ValidationFailure("Error", ex.Message) }, requestedBy, cancellationToken);
+            await AuditError(0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken);
         }
         finally
         {
             await _profitSharingDataContextFactory.UseWritableContext(db =>
             {
-                return db.Jobs.Where(j=> j.Id == job.Id).ExecuteUpdateAsync(s => s
-                    .SetProperty(b => b.Completed, b => DateTime.Now)
-                    .SetProperty(b => b.JobStatusId, b => success ? JobStatus.Constants.Completed : JobStatus.Constants.Failed),
+                return db.Jobs.Where(j => j.Id == job.Id).ExecuteUpdateAsync(s => s
+                        .SetProperty(b => b.Completed, b => DateTime.Now)
+                        .SetProperty(b => b.JobStatusId, b => success ? JobStatus.Constants.Completed : JobStatus.Constants.Failed),
                     cancellationToken: cancellationToken);
             }, cancellationToken);
         }
     }
 
-    private Task AuditError(int badgeNumber, IEnumerable<FluentValidation.Results.ValidationFailure> errorMessages, string requestedBy, CancellationToken cancellationToken = default,
+    private Task AuditError(int badgeNumber, IEnumerable<ValidationFailure> errorMessages, string requestedBy, CancellationToken cancellationToken = default,
         params object?[] args)
     {
         return _profitSharingDataContextFactory.UseWritableContext(c =>
@@ -122,7 +129,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
         }, cancellationToken);
     }
 
-    private async IAsyncEnumerable<DemographicsRequest> ConvertToRequestDto(IAsyncEnumerable<OracleEmployee?> asyncEnumerable, 
+    private async IAsyncEnumerable<DemographicsRequest> ConvertToRequestDto(IAsyncEnumerable<OracleEmployee?> asyncEnumerable,
         string requestedBy,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
@@ -141,7 +148,7 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
                 continue;
             }
 
-            Bogus.Faker faker = new Bogus.Faker();
+            Faker faker = new Faker();
             yield return new DemographicsRequest
             {
                 OracleHcmId = employee.PersonId,
@@ -185,6 +192,70 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
                     CountryIso = employee.Address.Country
                 }
             };
+        }
+    }
+
+    public async Task ExecuteDeltaSyncAsync(string requestedBy = "System", CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var maxDate = DateTime.Now;
+            var minDate = await _profitSharingDataContextFactory.UseReadOnlyContext(c =>
+            {
+                return c.Demographics.MinAsync(d => d.LastModifiedDate - TimeSpan.FromDays(30), cancellationToken: cancellationToken);
+            });
+
+            var newHires = _atomFeedService.GetFeedDataAsync<NewHireContext>("newhire", minDate, maxDate, cancellationToken);
+            var assignments = _atomFeedService.GetFeedDataAsync<AssignmentContext>("empassignment", minDate, maxDate, cancellationToken);
+            var updates = _atomFeedService.GetFeedDataAsync<EmployeeUpdateContext>("empupdate", minDate, maxDate, cancellationToken);
+            var terminations = _atomFeedService.GetFeedDataAsync<TerminationContext>("termination", minDate, maxDate, cancellationToken);
+
+            await foreach (var record in MergeAsyncEnumerables(newHires, updates, terminations, assignments, cancellationToken))
+            {
+                Console.WriteLine(JsonSerializer.Serialize(record, JsonSerializerOptions.Web));
+            }
+        }
+        catch (Exception ex)
+        {
+            await AuditError(0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken);
+        }
+    }
+
+    /// <summary>
+    /// Merges multiple asynchronous enumerables of <see cref="T"/> into a single asynchronous enumerable.
+    /// </summary>
+    /// <param name="first">The first asynchronous enumerable to merge.</param>
+    /// <param name="second">The second asynchronous enumerable to merge.</param>
+    /// <param name="third">The third asynchronous enumerable to merge.</param>
+    /// <param name="fourth">The fourth asynchronous enumerable to merge.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>
+    /// An asynchronous enumerable that yields elements from all provided enumerables in sequence.
+    /// </returns>
+    private static async IAsyncEnumerable<IDeltaContext> MergeAsyncEnumerables(IAsyncEnumerable<IDeltaContext> first,
+        IAsyncEnumerable<IDeltaContext> second,
+        IAsyncEnumerable<IDeltaContext> third,
+        IAsyncEnumerable<IDeltaContext> fourth,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        await foreach (var item in first.WithCancellation(cancellationToken))
+        {
+            yield return item;
+        }
+
+        await foreach (var item in second.WithCancellation(cancellationToken))
+        {
+            yield return item;
+        }
+
+        await foreach (var item in third.WithCancellation(cancellationToken))
+        {
+            yield return item;
+        }
+
+        await foreach (var item in fourth.WithCancellation(cancellationToken))
+        {
+            yield return item;
         }
     }
 }

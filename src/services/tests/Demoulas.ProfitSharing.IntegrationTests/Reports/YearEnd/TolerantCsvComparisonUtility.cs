@@ -17,7 +17,9 @@ internal static class TolerantCsvComparisonUtility
         var expectedRecords = GetRecords(expectedCsvContents);
 
         // Compare the counts first
-        actualRecords.Count.Should().Be(expectedRecords.Count, because: "the number of records in both CSVs should be equal\r\nActual CSV\r\n"+actualCsvContents+"\r\n\r\nExpected Csv Contents\r\n"+expectedCsvContents);
+        actualRecords.Count.Should().Be(expectedRecords.Count,
+            because:
+            $"the number of records in both CSVs should be equal\r\nActual CSV\r\n{actualCsvContents}\r\n\r\nExpected Csv Contents\r\n{expectedCsvContents}");
 
         // Compare each record
         for (int i = 0; i < actualRecords.Count; i++)
@@ -76,7 +78,8 @@ internal static class TolerantCsvComparisonUtility
             {
                 // Compare trimmed case-insensitive string values
                 // Our status codes are lower case, ready uses upper case
-                value1?.ToString()?.Trim().ToLowerInvariant().Should().Be(value2?.ToString()?.Trim().ToLowerInvariant(), because: $"string values should match for column '{key}' at line {lineNumber}");
+                value1?.ToString()?.Trim().ToLowerInvariant().Should().Be(value2?.ToString()?.Trim().ToLowerInvariant(),
+                    because: $"string values should match for column '{key}' at line {lineNumber}");
             }
         }
     }
@@ -91,6 +94,4 @@ internal static class TolerantCsvComparisonUtility
         // Check if the value is a number
         return double.TryParse(value.ToString(), out _);
     }
-
 }
-

@@ -14,7 +14,7 @@ using Polly.Timeout;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services;
 
-public class PayrollSyncClient
+internal class PayrollSyncClient
 {
     // Define constants for balance type IDs
     private static class BalanceTypeIds
@@ -34,7 +34,7 @@ public class PayrollSyncClient
     private readonly ILogger<PayrollSyncClient> _logger;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
 
-    public PayrollSyncClient(HttpClient httpClient, 
+    public PayrollSyncClient(HttpClient httpClient,
         IProfitSharingDataContextFactory profitSharingDataContextFactory,
         OracleHcmConfig oracleHcmConfig,
         ILogger<PayrollSyncClient> logger)
@@ -48,11 +48,11 @@ public class PayrollSyncClient
 
     // Method to get payroll process results for a list of person IDs
     internal async IAsyncEnumerable<KeyValuePair<long, HashSet<int>>> GetPayrollProcessResultsAsync(
-        List<long> personIds, [EnumeratorCancellation] CancellationToken cancellationToken)
+        ISet<long> personIds, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         foreach (long personId in personIds)
         {
-            HashSet<int> objectActionIds = new HashSet<int>();
+            HashSet<int> objectActionIds = [];
             bool isSuccessful = false;
 
             try
@@ -67,7 +67,7 @@ public class PayrollSyncClient
                     {
                         continue;
                     }
-                    
+
                     objectActionIds = results!.Items
                         .Where(result => result is { PayrollActionId: 2003, ObjectActionId: not null })
                         .Select(result => result.ObjectActionId!.Value)
@@ -93,7 +93,6 @@ public class PayrollSyncClient
     }
 
 
-
     // Method to get balance types for each ObjectActionId
     internal async Task GetBalanceTypesForProcessResultsAsync(
         long oracleHcmId,
@@ -102,7 +101,7 @@ public class PayrollSyncClient
     {
         // DimensionName should be set to Relationship No Calculation Breakdown Inception to Date. That will give you the correct value for current dollars, weeks, hours.
         const string dimensionName = "Relationship No Calculation Breakdown Inception to Date";
-        
+
         var balanceTypeIds = new List<long> { BalanceTypeIds.MbProfitSharingDollars, BalanceTypeIds.MbProfitSharingHours, BalanceTypeIds.MbProfitSharingWeeks };
 
         // Initialize totals dictionary
@@ -117,7 +116,8 @@ public class PayrollSyncClient
         {
             foreach (long balanceTypeId in balanceTypeIds)
             {
-                string url = $"{_oracleHcmConfig.PayrollUrl}/{objectActionId}/child/BalanceView/?onlyData=true&fields=BalanceTypeId,TotalValue1,TotalValue2,DefbalId1,DimensionName&finder=findByBalVar;pBalGroupUsageId1=null,pBalGroupUsageId2=-1,pLDGId={PLDGId},pLC={PLC},pBalTypeId={balanceTypeId}&onlyData=true";
+                string url =
+                    $"{_oracleHcmConfig.PayrollUrl}/{objectActionId}/child/BalanceView/?onlyData=true&fields=BalanceTypeId,TotalValue1,TotalValue2,DefbalId1,DimensionName&finder=findByBalVar;pBalGroupUsageId1=null,pBalGroupUsageId2=-1,pLDGId={PLDGId},pLC={PLC},pBalTypeId={balanceTypeId}&onlyData=true";
 
                 try
                 {
@@ -127,7 +127,7 @@ public class PayrollSyncClient
                     {
                         var balanceResults = await response.Content.ReadFromJsonAsync<BalanceRoot>(_jsonSerializerOptions, cancellationToken);
 
-                        decimal total = balanceResults!.Items.Where(i=> string.CompareOrdinal(i.DimensionName, dimensionName) == 0)
+                        decimal total = balanceResults!.Items.Where(i => string.CompareOrdinal(i.DimensionName, dimensionName) == 0)
                             .Sum(b => b.TotalValue1);
 
                         // Accumulate totals per balance type ID
@@ -140,7 +140,7 @@ public class PayrollSyncClient
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex , "Error fetching balance types for ObjectActionId {ObjectActionId}: {Message}", objectActionId, ex.Message);
+                    _logger.LogError(ex, "Error fetching balance types for ObjectActionId {ObjectActionId}: {Message}", objectActionId, ex.Message);
                 }
             }
         }
@@ -190,7 +190,6 @@ public class PayrollSyncClient
             payProfit.LastUpdate = DateTime.Now;
 
             await context.SaveChangesAsync(cancellationToken);
-
         }, cancellationToken);
     }
 
@@ -216,10 +215,10 @@ public class PayrollSyncClient
         bool success = true;
         try
         {
-            List<long> list = await _profitSharingDataContextFactory.UseReadOnlyContext(c =>
+            HashSet<long> list = await _profitSharingDataContextFactory.UseReadOnlyContext(c =>
                 c.Demographics
                     .Select(d => d.OracleHcmId)
-                    .ToListAsync(cancellationToken));
+                    .ToHashSetAsync(cancellationToken));
 
             // Step 1: Get payroll process results (ObjectActionIds) for each PersonId
             await foreach (KeyValuePair<long, HashSet<int>> emp in GetPayrollProcessResultsAsync(list, cancellationToken))

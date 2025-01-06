@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
+using Projects;
 
 IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(options: new DistributedApplicationOptions { AllowUnsecuredTransport = true });
-
 
 
 int uiPort = 3100;
@@ -32,18 +32,20 @@ catch (Exception ex)
     Console.WriteLine($"An error occurred: {ex.Message}");
 }
 
-
-var api = builder.AddProject<Projects.Demoulas_ProfitSharing_Api>("demoulas-profitsharing-api")
+var api = builder.AddProject<Demoulas_ProfitSharing_Api>("Demoulas-profitsharing-api")
     .WithHttpHealthCheck("/health")
     .WithHttpsHealthCheck("/health")
     .AsHttp2Service();
 
-builder.AddNpmApp("demoulas-profitsharing-ui", "../../../ui/", "dev")
+var ui = builder.AddNpmApp("Demoulas-profitsharing-ui", "../../../ui/", "dev")
     .WithReference(api)
     .WaitFor(api)
-    .WithHttpEndpoint(port: uiPort, isProxied:false)
+    .WithHttpEndpoint(port: uiPort, isProxied: false)
     .WithExternalHttpEndpoints();
 
+builder.AddProject<Demoulas_ProfitSharing_OracleHcm_Sync>(name: "Demoulas-ProfitSharing-OracleHcm-Sync")
+    .WaitFor(api)
+    .WaitFor(ui);
 
 await using DistributedApplication host = builder.Build();
 await host.RunAsync();
