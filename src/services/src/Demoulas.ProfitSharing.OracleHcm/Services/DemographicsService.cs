@@ -5,6 +5,7 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Mappers;
 using EntityFramework.Exceptions.Common;
+using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Oracle.ManagedDataAccess.Client;
@@ -15,14 +16,17 @@ internal class DemographicsService : IDemographicsServiceInternal
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly DemographicMapper _mapper;
+    private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
     private readonly ILogger<DemographicsService> _logger;
 
     public DemographicsService(IProfitSharingDataContextFactory dataContextFactory,
         DemographicMapper mapper,
+        IProfitSharingDataContextFactory profitSharingDataContextFactory,
         ILogger<DemographicsService> logger)
     {
         _dataContextFactory = dataContextFactory;
         _mapper = mapper;
+        _profitSharingDataContextFactory = profitSharingDataContextFactory;
         _logger = logger;
     }
 
@@ -227,5 +231,40 @@ internal class DemographicsService : IDemographicsServiceInternal
         existingEntity.GenderId = incomingEntity.GenderId;
         existingEntity.EmploymentStatusId = incomingEntity.EmploymentStatusId;
         existingEntity.LastModifiedDate = modificationDate;
+    }
+
+    public Task AuditError(int badgeNumber, IEnumerable<ValidationFailure> errorMessages, string requestedBy, CancellationToken cancellationToken = default,
+        params object?[] args)
+    {
+        return _profitSharingDataContextFactory.UseWritableContext(c =>
+        {
+            for (int i = 0; i < args.Length; i++)
+            {
+                args[i] ??= "null"; // Replace null with a default value
+            }
+
+            var auditRecords = errorMessages.Select(e =>
+                new DemographicSyncAudit
+                {
+                    BadgeNumber = badgeNumber,
+                    InvalidValue = e.AttemptedValue?.ToString() ?? e.CustomState?.ToString(),
+                    Message = e.ErrorMessage,
+                    UserName = requestedBy,
+                    PropertyName = e.PropertyName,
+                });
+            c.DemographicSyncAudit.AddRange(auditRecords);
+
+            return c.SaveChangesAsync(cancellationToken);
+        }, cancellationToken);
+    }
+
+    public Task CleanAuditError(CancellationToken cancellationToken)
+    {
+        return _profitSharingDataContextFactory.UseWritableContext(c =>
+        {
+            DateTime clearBackTo = DateTime.Today.AddDays(-30);
+
+            return c.DemographicSyncAudit.Where(t => t.Created < clearBackTo).ExecuteDeleteAsync(cancellationToken);
+        }, cancellationToken);
     }
 }
