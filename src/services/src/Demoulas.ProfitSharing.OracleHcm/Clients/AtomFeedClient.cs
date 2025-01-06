@@ -41,7 +41,7 @@ internal class AtomFeedClient
     /// This method constructs a URL to query the Atom feed API, retrieves the feed data, and yields the parsed entries.
     /// If an error occurs during the fetch operation, it logs the error and skips processing.
     /// </remarks>
-    public async IAsyncEnumerable<TContextType> GetFeedDataAsync<TContextType>(string feedType, DateTime minDate, DateTime maxDate,
+    internal async IAsyncEnumerable<TContextType> GetFeedDataAsync<TContextType>(string feedType, DateTime minDate, DateTime maxDate,
         [EnumeratorCancellation] CancellationToken cancellationToken) where TContextType : DeltaContextBase
     {
         var url = $"/hcmRestApi/atomservlet/employee/{feedType}?page-size=25&page=1&published-min={minDate:yyyy-MM-ddTHH:mm:ssZ}&published-max={maxDate:yyyy-MM-ddTHH:mm:ssZ}";
