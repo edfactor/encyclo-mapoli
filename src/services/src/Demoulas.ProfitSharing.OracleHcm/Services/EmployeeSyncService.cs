@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Runtime;
 using System.Runtime.CompilerServices;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Contracts.Messaging;
@@ -78,6 +79,11 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
                         .SetProperty(b => b.JobStatusId, b => success ? JobStatus.Constants.Completed : JobStatus.Constants.Failed),
                     cancellationToken: cancellationToken);
             }, cancellationToken);
+
+#pragma warning disable S1215
+            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+            GC.Collect();
+#pragma warning restore S1215
         }
     }
 

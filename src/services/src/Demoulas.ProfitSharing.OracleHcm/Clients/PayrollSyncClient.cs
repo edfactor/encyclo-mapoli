@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Net.Http.Json;
+using System.Runtime;
 using System.Text.Json;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.ActivitySources;
@@ -108,6 +109,11 @@ internal class PayrollSyncClient
                         .SetProperty(b => b.JobStatusId, b => success ? JobStatus.Constants.Completed : JobStatus.Constants.Failed),
                     cancellationToken: cancellationToken);
             }, cancellationToken);
+
+#pragma warning disable S1215
+            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+            GC.Collect();
+#pragma warning restore S1215
         }
     }
 
