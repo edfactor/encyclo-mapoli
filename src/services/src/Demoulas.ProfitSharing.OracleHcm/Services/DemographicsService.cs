@@ -60,33 +60,49 @@ internal class DemographicsService : IDemographicsServiceInternal
    /// <exception cref="OperationCanceledException">
    /// Thrown if the operation is canceled via the provided <paramref name="cancellationToken"/>.
    /// </exception>
-    public async Task AddDemographicsStreamAsync(IAsyncEnumerable<DemographicsRequest> employees, byte batchSize = byte.MaxValue,
-        CancellationToken cancellationToken = default)
-    {
-        await foreach (var employee in employees.WithCancellation(cancellationToken))
-        {
-            _requests.Enqueue(employee);
-        }
+   public async Task AddDemographicsStreamAsync(IAsyncEnumerable<DemographicsRequest> employees, byte batchSize = byte.MaxValue,
+       CancellationToken cancellationToken = default)
+   {
+       const int throttleLimit = 10_000; // Max queue size for safety (configurable)
+       var batch = new List<DemographicsRequest>();
+       bool batchProcessed = false;
+       await foreach (var employee in employees.WithCancellation(cancellationToken))
+       {
+           // Throttle queue size
+           while (_requests.Count >= throttleLimit)
+           {
+               await Task.Delay(50, cancellationToken); // Wait to prevent unbounded growth
+           }
 
-        do
-        {
-            if (_requests.Count >= batchSize)
-            {
-                var batch = new List<DemographicsRequest>();
-                while (_requests.TryDequeue(out var demoRequest))
-                {
-                    batch.Add(demoRequest);
-                }
+           _requests.Enqueue(employee);
 
-                await UpsertDemographicsAsync(batch, cancellationToken);
-            }
-            else
-            {
-                break;
-            }
-        } while (_requests.Count > 0);
-       
-    }
+           // Process batch when batchSize is reached during enqueue
+           if (_requests.Count >= batchSize)
+           {
+               while (_requests.TryDequeue(out var demoRequest))
+               {
+                   batch.Add(demoRequest);
+                   if (batch.Count == batchSize)
+                   {
+                       break;
+                   }
+               }
+
+               if (batch.Count > 0)
+               {
+                   await UpsertDemographicsAsync(batch, cancellationToken);
+                   batchProcessed = true;
+                   batch.Clear(); // Clear batch after processing
+               }
+           }
+       }
+
+       // Process any leftover requests in the batch
+       if (batch.Count > 0 && batchProcessed)
+       {
+           await UpsertDemographicsAsync(batch, cancellationToken);
+       }
+   }
 
     /// <summary>
     /// Asynchronously inserts or updates a collection of demographic records in the database.
