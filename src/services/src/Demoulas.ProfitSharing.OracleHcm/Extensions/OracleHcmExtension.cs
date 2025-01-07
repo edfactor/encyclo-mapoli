@@ -118,8 +118,7 @@ public static class OracleHcmExtension
         services.AddSingleton<EmployeeDeltaSyncJob>();
         services.AddSingleton<PayrollSyncJob>();
         services.AddSingleton<DemographicsService>();
-        services.AddSingleton<PayrollSyncService>();
-
+        
         // Mappers
         services.AddSingleton<DemographicMapper>();
         services.AddSingleton<AddressMapper>();
@@ -158,7 +157,10 @@ public static class OracleHcmExtension
         services.AddHttpClient<OracleEmployeeDataSyncClient>("EmployeeSync", BuildOracleHcmAuthClient)
             .AddStandardResilienceHandler(options => ApplyResilienceOptions(options, commonHttpOptions));
 
-        services.AddHttpClient<PayrollSyncClient>("PayrollSync", BuildOracleHcmAuthClient)
+        services.AddHttpClient<PayrollSyncClient>("PayrollSyncClient", BuildOracleHcmAuthClient)
+            .AddStandardResilienceHandler(options => ApplyResilienceOptions(options, commonHttpOptions));
+
+        services.AddHttpClient<PayrollSyncService>("PayrollSyncService", BuildOracleHcmAuthClient)
             .AddStandardResilienceHandler(options => ApplyResilienceOptions(options, commonHttpOptions));
     }
 
