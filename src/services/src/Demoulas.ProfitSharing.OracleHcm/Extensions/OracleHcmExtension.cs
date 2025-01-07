@@ -200,6 +200,7 @@ public static class OracleHcmExtension
             x.SetKebabCaseEndpointNameFormatter();
             x.AddConsumer<OracleHcmMessageConsumer>();
             x.AddConsumer<EmployeeSyncConsumer>();
+            x.AddConsumer<PayrollSyncConsumer>();
             x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
         });
 
