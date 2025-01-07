@@ -44,7 +44,7 @@ internal class PayrollSyncService
     /// <summary>
     /// Processes the balance types for the given payroll process results asynchronously.
     /// </summary>
-    /// <param name="items">
+    /// <param name="item">
     /// A read-only list of <see cref="PayrollItem"/> objects representing the payroll process results to process.
     /// </param>
     /// <param name="cancellationToken">
@@ -63,7 +63,7 @@ internal class PayrollSyncService
     /// <exception cref="OperationCanceledException">
     /// Thrown when the operation is canceled via the provided <paramref name="cancellationToken"/>.
     /// </exception>
-    public async ValueTask GetBalanceTypesForProcessResultsAsync(IReadOnlyList<PayrollItem> items,
+    public async Task GetBalanceTypesForProcessResultsAsync(PayrollItem item,
         CancellationToken cancellationToken)
     {
         // DimensionName should be set to Relationship No Calculation Breakdown Inception to Date. That will give you the correct value for current dollars, weeks, hours.
@@ -72,52 +72,44 @@ internal class PayrollSyncService
         // Initialize totals dictionary
         int year = DateTime.Today.Year;
 
-        ParallelOptions parallelOptions = new ParallelOptions
+
+        var balanceTypeTotals = new Dictionary<long, decimal>
         {
-            MaxDegreeOfParallelism = Math.Min(Environment.ProcessorCount, 4), // 4 threads seems to be the max/sweet spot for OracleHCM
-            CancellationToken = cancellationToken
+            { BalanceTypeIds.MbProfitSharingDollars, 0 }, { BalanceTypeIds.MbProfitSharingHours, 0 }, { BalanceTypeIds.MbProfitSharingWeeks, 0 }
         };
-        await Parallel.ForEachAsync(items, parallelOptions, async (item, token) =>
+        foreach (var balanceTypeId in _balanceTypeIds)
         {
-            var balanceTypeTotals = new Dictionary<long, decimal>
+            string url =
+                $"{_oracleHcmConfig.PayrollUrl}/{item.ObjectActionId}/child/BalanceView/?onlyData=true&fields=BalanceTypeId,TotalValue1,TotalValue2,DefbalId1,DimensionName&finder=findByBalVar;pBalGroupUsageId1=null,pBalGroupUsageId2=-1,pLDGId={PLDGId},pLC={PLC},pBalTypeId={balanceTypeId}";
+            try
             {
-                { BalanceTypeIds.MbProfitSharingDollars, 0 }, { BalanceTypeIds.MbProfitSharingHours, 0 }, { BalanceTypeIds.MbProfitSharingWeeks, 0 }
-            };
-            foreach (var balanceTypeId in _balanceTypeIds)
-            {
-                string url =
-                    $"{_oracleHcmConfig.PayrollUrl}/{item.ObjectActionId}/child/BalanceView/?onlyData=true&fields=BalanceTypeId,TotalValue1,TotalValue2,DefbalId1,DimensionName&finder=findByBalVar;pBalGroupUsageId1=null,pBalGroupUsageId2=-1,pLDGId={PLDGId},pLC={PLC},pBalTypeId={balanceTypeId}";
-                try
+                using var response = await _httpClient.GetAsync(url, cancellationToken);
+
+                if (response.IsSuccessStatusCode)
                 {
-                    using var response = await _httpClient.GetAsync(url, token);
+                    var balanceResults = await response.Content.ReadFromJsonAsync<BalanceRoot>(cancellationToken);
 
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var balanceResults = await response.Content.ReadFromJsonAsync<BalanceRoot>(token);
+                    decimal total = balanceResults!.Items.Where(i => string.CompareOrdinal(i.DimensionName, dimensionName) == 0)
+                        .Sum(b => b.TotalValue1);
 
-                        decimal total = balanceResults!.Items.Where(i => string.CompareOrdinal(i.DimensionName, dimensionName) == 0)
-                            .Sum(b => b.TotalValue1);
+                    // Accumulate totals per balance type ID
+                    balanceTypeTotals[balanceTypeId] += total;
 
-                        // Accumulate totals per balance type ID
-                        balanceTypeTotals[balanceTypeId] += total;
-
-                    }
-                    else
-                    {
-                        _logger.LogError("Failed to get balance types for PersonId {PersonId}/ObjectActionId {ObjectActionId}: {ResponseReasonPhrase}",
-                            item.PersonId, item.ObjectActionId,
-                            response.ReasonPhrase);
-                    }
                 }
-                catch (Exception ex)
+                else
                 {
-                    _logger.LogError(ex, "Error fetching balance types for PersonId {PersonId}/ObjectActionId {ObjectActionId}: {Message}", item.PersonId,
-                        item.ObjectActionId, ex.Message);
+                    _logger.LogError("Failed to get balance types for PersonId {PersonId}/ObjectActionId {ObjectActionId}: {ResponseReasonPhrase}",
+                        item.PersonId, item.ObjectActionId,
+                        response.ReasonPhrase);
                 }
             }
-
-            await CalculateAndUpdatePayProfitRecord(item.PersonId, year, balanceTypeTotals, cancellationToken);
-        });
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching balance types for PersonId {PersonId}/ObjectActionId {ObjectActionId}: {Message}", item.PersonId,
+                    item.ObjectActionId, ex.Message);
+            }
+        }
+        await CalculateAndUpdatePayProfitRecord(item.PersonId, year, balanceTypeTotals, cancellationToken);
     }
 
     /// <summary>

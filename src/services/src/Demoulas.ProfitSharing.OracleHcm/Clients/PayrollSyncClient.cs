@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.ActivitySources;
+using Demoulas.ProfitSharing.Common.Contracts.Messaging;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -10,6 +11,7 @@ using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Services;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -26,6 +28,7 @@ internal class PayrollSyncClient
     private readonly OracleHcmConfig _oracleHcmConfig;
     private readonly OracleEmployeeDataSyncClient _oracleEmployeeDataSyncClient;
     private readonly ILogger<PayrollSyncClient> _logger;
+    private readonly IBus _payrollSyncBus;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
 
    
@@ -34,7 +37,8 @@ internal class PayrollSyncClient
         IEmployeeSyncService employeeSyncService,
         OracleHcmConfig oracleHcmConfig,
         OracleEmployeeDataSyncClient oracleEmployeeDataSyncClient,
-        ILogger<PayrollSyncClient> logger)
+        ILogger<PayrollSyncClient> logger,
+        IBus payrollSyncBus)
     {
         _httpClient = httpClient;
         _profitSharingDataContextFactory = profitSharingDataContextFactory;
@@ -42,6 +46,7 @@ internal class PayrollSyncClient
         _oracleHcmConfig = oracleHcmConfig;
         _oracleEmployeeDataSyncClient = oracleEmployeeDataSyncClient;
         _logger = logger;
+        _payrollSyncBus = payrollSyncBus;
         _jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
     }
 
@@ -139,10 +144,16 @@ internal class PayrollSyncClient
             }
 
             await TrySyncMissingEmployees(results!.Items, cancellationToken);
-            
-            // Queue Here
-            await getBalanceTypesForProcessResults(results!.Items, cancellationToken);
 
+            // Queue Here
+            const string requestedBy = "System";
+            foreach (var item in results!.Items)
+            {
+                var message = new MessageRequest<PayrollItem> { ApplicationName = nameof(PayrollSyncClient), Body = item, UserId = requestedBy };
+
+                await _payrollSyncBus.Publish(message, cancellationToken);
+
+            }
 
             if (!results.HasMore)
             {
