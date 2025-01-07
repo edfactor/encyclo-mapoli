@@ -29,7 +29,7 @@ List<ContextFactoryRequest> list =
 ];
 
 builder.AddDatabaseServices(list);
-builder.AddEmployeeDeltaSyncService();
+builder.AddEmployeeFullSyncService();
 
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 {
