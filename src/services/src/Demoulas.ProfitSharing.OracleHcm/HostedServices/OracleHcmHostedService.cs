@@ -1,31 +1,30 @@
-﻿using System.Diagnostics;
-using Demoulas.ProfitSharing.OracleHcm.Configuration;
-using Demoulas.ProfitSharing.OracleHcm.Jobs;
+﻿using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Microsoft.Extensions.Hosting;
 using Quartz;
 using Quartz.Spi;
 
 namespace Demoulas.ProfitSharing.OracleHcm.HostedServices;
 
-internal sealed class OracleHcmHostedService : IHostedService
+internal abstract class OracleHcmHostedServiceBase : IHostedService
 {
+    protected OracleHcmConfig OracleHcmConfig { get; }
+    
     private readonly ISchedulerFactory _schedulerFactory;
     private readonly IJobFactory _jobFactory;
-    private readonly OracleHcmConfig _oracleHcmConfig;
     private IScheduler? _scheduler;
 
-    public OracleHcmHostedService(ISchedulerFactory schedulerFactory,
+    protected OracleHcmHostedServiceBase(ISchedulerFactory schedulerFactory,
         IJobFactory jobFactory,
         OracleHcmConfig oracleHcmConfig)
     {
         _schedulerFactory = schedulerFactory;
         _jobFactory = jobFactory;
-        _oracleHcmConfig = oracleHcmConfig;
+        OracleHcmConfig = oracleHcmConfig;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        if (!_oracleHcmConfig.EnableSync)
+        if (!OracleHcmConfig.EnableSync)
         {
             return;
         }
@@ -35,38 +34,14 @@ internal sealed class OracleHcmHostedService : IHostedService
 
         // Schedule all jobs
 
-        await ScheduleJob<EmployeeDeltaSyncJob>(
-            "employeeDeltaSyncTrigger",
-            Debugger.IsAttached ? TimeSpan.Zero : TimeSpan.FromMinutes(5),
-            TimeSpan.FromMinutes(_oracleHcmConfig.DeltaIntervalInMinutes),
-            cancellationToken
-#pragma warning disable S125
-        );
-#pragma warning restore S125
-
-        await ScheduleJob<EmployeeFullSyncJob>(
-            "employeeFullSyncTrigger",
-            Debugger.IsAttached ? TimeSpan.Zero : TimeSpan.FromMinutes(15),
-            TimeSpan.FromHours(_oracleHcmConfig.IntervalInHours),
-            cancellationToken
-#pragma warning disable S125
-        );
-#pragma warning restore S125
-
-
-        await ScheduleJob<PayrollSyncJob>(
-            "payrollSyncTrigger",
-            Debugger.IsAttached ? TimeSpan.Zero : TimeSpan.FromMinutes(30),
-            TimeSpan.FromHours(_oracleHcmConfig.IntervalInHours),
-            cancellationToken
-#pragma warning disable S125
-        );
-#pragma warning restore S125
+        await ConfigureJob(cancellationToken);
 
         await _scheduler.Start(cancellationToken);
     }
 
-    private Task ScheduleJob<TJob>(
+    protected abstract Task ConfigureJob(CancellationToken cancellationToken);
+
+    protected Task ScheduleJob<TJob>(
         string triggerIdentity,
         TimeSpan startDelay,
         TimeSpan interval,

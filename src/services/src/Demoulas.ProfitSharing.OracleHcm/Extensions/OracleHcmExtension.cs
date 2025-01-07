@@ -47,12 +47,27 @@ public static class OracleHcmExtension
     /// responsible for managing Oracle HCM background processes. It ensures that the necessary
     /// dependencies and configurations are added to the application.
     /// </remarks>
-    public static IHostApplicationBuilder AddOracleHcmBackgroundProcess(this IHostApplicationBuilder builder)
+    public static IHostApplicationBuilder AddEmployeeDeltaSyncService(this IHostApplicationBuilder builder)
     {
         builder.AddOracleHcmSynchronization();
-        builder.Services.AddHostedService<OracleHcmHostedService>();
+        builder.Services.AddHostedService<EmployeeDeltaSyncService>();
         return builder;
     }
+
+    public static IHostApplicationBuilder AddEmployeeFullSyncService(this IHostApplicationBuilder builder)
+    {
+        builder.AddOracleHcmSynchronization();
+        builder.Services.AddHostedService<EmployeeFullSyncService>();
+        return builder;
+    }
+
+    public static IHostApplicationBuilder AddEmployeePayrollSyncService(this IHostApplicationBuilder builder)
+    {
+        builder.AddOracleHcmSynchronization();
+        builder.Services.AddHostedService<EmployeePayrollSyncService>();
+        return builder;
+    }
+    
 
     /// <summary>
     /// Configures and registers services required for Oracle HCM synchronization.

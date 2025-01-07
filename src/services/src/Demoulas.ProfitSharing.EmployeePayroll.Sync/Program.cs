@@ -29,7 +29,7 @@ List<ContextFactoryRequest> list =
 ];
 
 builder.AddDatabaseServices(list);
-builder.AddOracleHcmBackgroundProcess();
+builder.AddEmployeePayrollSyncService();
 
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 {
