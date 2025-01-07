@@ -11,5 +11,15 @@ public static class ReferenceData
     {
         return 1000;
     }
+
+    public static short MinimumAgeForContribution()
+    {
+        return 21;
+    }
+
+    public static short MinimumAgeForVesting()
+    {
+        return 18;
+    }
 #pragma warning restore S3400
 }

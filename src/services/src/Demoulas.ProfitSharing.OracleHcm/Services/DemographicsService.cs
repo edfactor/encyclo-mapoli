@@ -1,7 +1,9 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using System.Collections.Concurrent;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Factories;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Mappers;
 using EntityFramework.Exceptions.Common;
@@ -23,50 +25,67 @@ internal class DemographicsService : IDemographicsServiceInternal
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly DemographicMapper _mapper;
-    private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
     private readonly ILogger<DemographicsService> _logger;
+    private readonly ConcurrentQueue<DemographicsRequest> _requests;
 
     public DemographicsService(IProfitSharingDataContextFactory dataContextFactory,
         DemographicMapper mapper,
-        IProfitSharingDataContextFactory profitSharingDataContextFactory,
         ILogger<DemographicsService> logger)
     {
         _dataContextFactory = dataContextFactory;
         _mapper = mapper;
-        _profitSharingDataContextFactory = profitSharingDataContextFactory;
         _logger = logger;
+        _requests = new ConcurrentQueue<DemographicsRequest>();
     }
 
-    /// <summary>
-    /// Asynchronously processes a stream of demographic data for employees, adding them in batches.
-    /// </summary>
-    /// <param name="employees">An asynchronous enumerable of <see cref="DemographicsRequest"/> representing the employees' demographic data.</param>
-    /// <param name="batchSize">The size of each batch to be processed. Defaults to <see cref="byte.MaxValue"/>.</param>
-    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <returns>A task that represents the asynchronous operation.</returns>
-    /// <remarks>
-    /// This method processes the demographic data in batches to optimize performance and resource usage.
-    /// </remarks>
+   /// <summary>
+   /// Asynchronously processes a stream of demographic requests and batches them for upsert operations.
+   /// </summary>
+   /// <param name="employees">
+   /// An asynchronous enumerable of <see cref="DemographicsRequest"/> objects representing the demographic data to be processed.
+   /// </param>
+   /// <param name="batchSize">
+   /// The maximum number of requests to process in a single batch. Defaults to <see cref="byte.MaxValue"/>.
+   /// </param>
+   /// <param name="cancellationToken">
+   /// A <see cref="CancellationToken"/> to observe while waiting for the task to complete. Defaults to <see cref="CancellationToken.None"/>.
+   /// </param>
+   /// <returns>
+   /// A <see cref="Task"/> that represents the asynchronous operation.
+   /// </returns>
+   /// <remarks>
+   /// This method enqueues incoming demographic requests and processes them in batches. 
+   /// Once the batch size is reached, the requests are upserted into the database.
+   /// </remarks>
+   /// <exception cref="OperationCanceledException">
+   /// Thrown if the operation is canceled via the provided <paramref name="cancellationToken"/>.
+   /// </exception>
     public async Task AddDemographicsStreamAsync(IAsyncEnumerable<DemographicsRequest> employees, byte batchSize = byte.MaxValue,
         CancellationToken cancellationToken = default)
     {
-        var batch = new List<DemographicsRequest>();
-
         await foreach (var employee in employees.WithCancellation(cancellationToken))
         {
-            batch.Add(employee);
-
-            if (batch.Count >= batchSize)
-            {
-                await UpsertDemographicsAsync(batch, cancellationToken);
-                batch.Clear();
-            }
+            _requests.Enqueue(employee);
         }
 
-        if (batch.Count > 0)
+        do
         {
-            await UpsertDemographicsAsync(batch, cancellationToken);
-        }
+            if (_requests.Count >= batchSize)
+            {
+                var batch = new List<DemographicsRequest>();
+                while (_requests.TryDequeue(out var demoRequest))
+                {
+                    batch.Add(demoRequest);
+                }
+
+                await UpsertDemographicsAsync(batch, cancellationToken);
+            }
+            else
+            {
+                break;
+            }
+        } while (_requests.Count > 0);
+       
     }
 
     /// <summary>
@@ -83,21 +102,21 @@ internal class DemographicsService : IDemographicsServiceInternal
     {
         DateTime currentModificationDate = DateTime.Now;
 
+        // Map incoming demographic requests to entity models
+        List<Demographic> demographicsEntities = _mapper.Map(demographicsRequests).ToList();
+
+        // Update LastModifiedDate for all entities
+        demographicsEntities.ForEach(entity => entity.LastModifiedDate = currentModificationDate);
+
+        // Create lookup dictionaries for both OracleHcmId and SSN
+        var demographicOracleHcmIdLookup = demographicsEntities.ToDictionary(entity => entity.OracleHcmId);
+        var demographicSsnLookup = demographicsEntities.ToLookup(entity => (entity.Ssn, entity.EmployeeId));
+        var ssnCollection = demographicsEntities.Select(d => d.Ssn).ToHashSet();
+        var dobCollection = demographicsEntities.Select(d => d.DateOfBirth).ToHashSet();
+
         // Use writable context for the upsert operation
         return _dataContextFactory.UseWritableContext(async context =>
         {
-            // Map incoming demographic requests to entity models
-            List<Demographic> demographicsEntities = _mapper.Map(demographicsRequests).ToList();
-
-            // Update LastModifiedDate for all entities
-            demographicsEntities.ForEach(entity => entity.LastModifiedDate = currentModificationDate);
-
-            // Create lookup dictionaries for both OracleHcmId and SSN
-            var demographicOracleHcmIdLookup = demographicsEntities.ToDictionary(entity => entity.OracleHcmId);
-            var demographicSsnLookup = demographicsEntities.ToLookup(entity => (entity.Ssn, entity.EmployeeId));
-            var ssnCollection = demographicsEntities.Select(d => d.Ssn).ToHashSet();
-            var dobCollection = demographicsEntities.Select(d => d.DateOfBirth).ToHashSet();
-
             // Fetch existing entities from the database using both OracleHcmId and SSN
             var existingEntities = await context.Demographics
                 .Where(dbEntity => demographicOracleHcmIdLookup.Keys.Contains(dbEntity.OracleHcmId) ||
@@ -244,7 +263,7 @@ internal class DemographicsService : IDemographicsServiceInternal
     public Task AuditError(int badgeNumber, IEnumerable<ValidationFailure> errorMessages, string requestedBy, CancellationToken cancellationToken = default,
         params object?[] args)
     {
-        return _profitSharingDataContextFactory.UseWritableContext(c =>
+        return _dataContextFactory.UseWritableContext(c =>
         {
             for (int i = 0; i < args.Length; i++)
             {
@@ -268,7 +287,7 @@ internal class DemographicsService : IDemographicsServiceInternal
 
     public Task CleanAuditError(CancellationToken cancellationToken)
     {
-        return _profitSharingDataContextFactory.UseWritableContext(c =>
+        return _dataContextFactory.UseWritableContext(c =>
         {
             DateTime clearBackTo = DateTime.Today.AddDays(-30);
 

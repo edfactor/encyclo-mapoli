@@ -5,6 +5,7 @@ using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
+using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -136,7 +137,7 @@ internal class PayrollSyncService
         return _profitSharingDataContextFactory.UseWritableContext(async context =>
         {
             var demographic = await context.Demographics
-                .Include(d => d.PayProfits.Where(p => p.ProfitYear == year))
+                .Include(d => d.PayProfits.Where(p => p.ProfitYear >= year))
                 .Include(demographic => demographic.ContactInfo)
                 .FirstOrDefaultAsync(d => d.OracleHcmId == oracleHcmId, cancellationToken);
 
@@ -175,11 +176,6 @@ internal class PayrollSyncService
             }
 
             payProfit.LastUpdate = DateTime.Now;
-            if (payProfit.CurrentHoursYear >= ReferenceData.MinimumHoursForContribution())
-            {
-                payProfit.YearsInPlan = (byte)await context.PayProfits.Where(pp => pp.DemographicId == payProfit.DemographicId)
-                    .MaxAsync(pp => pp.YearsInPlan + 1, cancellationToken: cancellationToken);
-            }
 
             int resultCount = await context.SaveChangesAsync(cancellationToken);
 
