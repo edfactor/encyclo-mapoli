@@ -8,7 +8,7 @@ namespace Demoulas.ProfitSharing.OracleHcm.HostedServices;
 
 internal sealed class EmployeeDeltaSyncService : OracleHcmHostedServiceBase
 {
-    internal EmployeeDeltaSyncService(ISchedulerFactory schedulerFactory,
+    public EmployeeDeltaSyncService(ISchedulerFactory schedulerFactory,
         IJobFactory jobFactory,
         OracleHcmConfig oracleHcmConfig) : base(schedulerFactory, jobFactory, oracleHcmConfig)
     {
