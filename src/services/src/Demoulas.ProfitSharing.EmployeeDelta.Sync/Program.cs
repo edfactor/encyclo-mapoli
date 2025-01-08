@@ -30,9 +30,12 @@ List<ContextFactoryRequest> list =
 
 builder.AddDatabaseServices(list);
 
-HashSet<long> debugOracleHcmIdSet = [300005072436966, 300005305133563, 300005305485131, 300005305501085];
+#pragma warning disable S125
+//HashSet<long> debugOracleHcmIdSet = [300005072436966, 300005305133563, 300005305485131, 300005305501085];
+//builder.AddEmployeeDeltaSyncService(debugOracleHcmIdSet);
+#pragma warning restore S125
 
-builder.AddEmployeeDeltaSyncService(debugOracleHcmIdSet);
+builder.AddEmployeeDeltaSyncService();
 
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 {

@@ -12,11 +12,16 @@ internal sealed class EmployeeDeltaSyncJob : IJob
     private readonly ISet<long>? _debugOracleHcmIdSet;
 
     public EmployeeDeltaSyncJob(IEmployeeSyncService employeeSyncService,
-        ISet<long>? debugOracleHcmIdSet)
+        ISet<long>? debugOracleHcmIdSet) : this(employeeSyncService)
     {
-        _employeeSyncService = employeeSyncService;
         _debugOracleHcmIdSet = debugOracleHcmIdSet;
     }
+
+    public EmployeeDeltaSyncJob(IEmployeeSyncService employeeSyncService)
+    {
+        _employeeSyncService = employeeSyncService;
+    }
+
 
     public Task Execute(IJobExecutionContext context)
     {

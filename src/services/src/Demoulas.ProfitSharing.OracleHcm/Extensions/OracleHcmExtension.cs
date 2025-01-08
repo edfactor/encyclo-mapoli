@@ -50,7 +50,11 @@ public static class OracleHcmExtension
     /// responsible for managing Oracle HCM background processes. It ensures that the necessary
     /// dependencies and configurations are added to the application.
     /// </remarks>
+#if DEBUG
     public static IHostApplicationBuilder AddEmployeeDeltaSyncService(this IHostApplicationBuilder builder, ISet<long>? debugOracleHcmIdSet = null)
+#else
+    public static IHostApplicationBuilder AddEmployeeDeltaSyncService(this IHostApplicationBuilder builder)
+#endif
     {
         OracleHcmConfig oracleHcmConfig = builder.Configuration.GetSection("OracleHcm").Get<OracleHcmConfig>()
                                           ?? new OracleHcmConfig { BaseAddress = string.Empty, DemographicUrl = string.Empty };
@@ -61,12 +65,10 @@ public static class OracleHcmExtension
         // Add Oracle HCM synchronization with the retrieved configuration.
         builder.AddOracleHcmSynchronization(oracleHcmConfig);
 
+#if DEBUG
+        builder.Services.AddSingleton(debugOracleHcmIdSet ?? new HashSet<long>());
+#endif
 
-        if (Debugger.IsAttached && (debugOracleHcmIdSet?.Any() ?? false))
-        {
-            builder.Services.AddSingleton(debugOracleHcmIdSet);
-        }
-        
         builder.Services.AddHostedService<EmployeeDeltaSyncService>();
         return builder;
     }
