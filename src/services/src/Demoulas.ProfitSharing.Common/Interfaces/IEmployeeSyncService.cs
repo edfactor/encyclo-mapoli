@@ -7,4 +7,5 @@ public interface IEmployeeSyncService
     Task ExecuteFullSyncAsync(string requestedBy = "System", CancellationToken cancellationToken = default);
     Task ExecuteDeltaSyncAsync(string requestedBy = "System", CancellationToken cancellationToken = default);
     Task QueueEmployee(string requestedBy, IAsyncEnumerable<OracleEmployee?> oracleHcmEmployees, CancellationToken cancellationToken);
+    Task TrySyncEmployeeFromOracleHcm(string requestedBy, ISet<long> people, CancellationToken cancellationToken);
 }

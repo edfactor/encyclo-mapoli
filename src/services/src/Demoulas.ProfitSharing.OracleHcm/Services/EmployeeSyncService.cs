@@ -108,19 +108,24 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
                 people.Add(record.PersonId);
             }
 
-            try
-            {
-                foreach (long oracleHcmId in people)
-                {
-                    var oracleHcmEmployees = _oracleEmployeeDataSyncClient.GetEmployee(oracleHcmId, cancellationToken);
-                    await QueueEmployee(requestedBy, oracleHcmEmployees, cancellationToken);
-                }
-            }
-            catch (Exception ex)
-            {
-                await _demographicsService.AuditError(0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken);
-            }
+            await TrySyncEmployeeFromOracleHcm(requestedBy, people, cancellationToken);
 
+        }
+        catch (Exception ex)
+        {
+            await _demographicsService.AuditError(0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken);
+        }
+    }
+
+    public async Task TrySyncEmployeeFromOracleHcm(string requestedBy, ISet<long> people, CancellationToken cancellationToken)
+    {
+        try
+        {
+            foreach (long oracleHcmId in people)
+            {
+                var oracleHcmEmployees = _oracleEmployeeDataSyncClient.GetEmployee(oracleHcmId, cancellationToken);
+                await QueueEmployee(requestedBy, oracleHcmEmployees, cancellationToken);
+            }
         }
         catch (Exception ex)
         {

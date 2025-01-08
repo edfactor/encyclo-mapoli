@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System.Diagnostics;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -47,9 +48,15 @@ public static class OracleHcmExtension
     /// responsible for managing Oracle HCM background processes. It ensures that the necessary
     /// dependencies and configurations are added to the application.
     /// </remarks>
-    public static IHostApplicationBuilder AddEmployeeDeltaSyncService(this IHostApplicationBuilder builder)
+    public static IHostApplicationBuilder AddEmployeeDeltaSyncService(this IHostApplicationBuilder builder, ISet<long>? debugOracleHcmIdSet = null)
     {
         builder.AddOracleHcmSynchronization();
+
+        if (Debugger.IsAttached && (debugOracleHcmIdSet?.Any() ?? false))
+        {
+            builder.Services.AddSingleton(debugOracleHcmIdSet);
+        }
+        
         builder.Services.AddHostedService<EmployeeDeltaSyncService>();
         return builder;
     }
