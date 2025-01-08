@@ -211,20 +211,20 @@ public sealed class TotalService : ITotalService
 #pragma warning disable S3358 // Ternary operators should not be nested
         return (
             from db in demoOrBeneficiary
-            select new ParticipantTotalRatioDto()
+            select new ParticipantTotalRatioDto
             {
                 Ssn = db.Ssn,
                 Ratio = db.FromBeneficiary == 1 ? 1.0m :
                         db.DateOfBirth <= birthDate65 && (db.TerminationDate == null || db.TerminationDate < beginningOfYear) ? 1m :
                         db.EnrollmentId == 3 || db.EnrollmentId == 4 ? 1m :
-                        db.TerminationCodeId == 'Z' ? 1m :
-                        db.ZeroContributionReasonId == 6 ? 1m :
-                        (db.EnrollmentId == 2 ? 1 : 0) + (db.Hours >= hoursWorkedRequirement ? 1 : 0) + db.Years < 3 ? 0m :
-                        (db.EnrollmentId == 2 ? 1 : 0) + (db.Hours >= hoursWorkedRequirement ? 1 : 0) + db.Years == 3 ? .2m :
-                        (db.EnrollmentId == 2 ? 1 : 0) + (db.Hours >= hoursWorkedRequirement ? 1 : 0) + db.Years == 4 ? .4m :
-                        (db.EnrollmentId == 2 ? 1 : 0) + (db.Hours >= hoursWorkedRequirement ? 1 : 0) + db.Years == 5 ? .6m :
-                        (db.EnrollmentId == 2 ? 1 : 0) + (db.Hours >= hoursWorkedRequirement ? 1 : 0) + db.Years == 6 ? .8m :
-                        (db.EnrollmentId == 2 ? 1 : 0) + (db.Hours >= hoursWorkedRequirement ? 1 : 0) + db.Years > 6 ? 1m : 0
+                        db.TerminationCodeId == TerminationCode.Constants.Deceased ? 1m :
+                        db.ZeroContributionReasonId == ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested ? 1m :
+                        (db.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions ? 1 : 0) + (db.Hours >= hoursWorkedRequirement ? 1 : 0) + db.Years < 3 ? 0m :
+                        (db.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions ? 1 : 0) + (db.Hours >= hoursWorkedRequirement ? 1 : 0) + db.Years == 3 ? .2m :
+                        (db.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions ? 1 : 0) + (db.Hours >= hoursWorkedRequirement ? 1 : 0) + db.Years == 4 ? .4m :
+                        (db.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions ? 1 : 0) + (db.Hours >= hoursWorkedRequirement ? 1 : 0) + db.Years == 5 ? .6m :
+                        (db.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions ? 1 : 0) + (db.Hours >= hoursWorkedRequirement ? 1 : 0) + db.Years == 6 ? .8m :
+                        (db.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions ? 1 : 0) + (db.Hours >= hoursWorkedRequirement ? 1 : 0) + db.Years > 6 ? 1m : 0
             }
         );
 #pragma warning restore S3358 // Ternary operators should not be nested
