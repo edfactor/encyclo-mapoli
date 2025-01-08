@@ -29,11 +29,11 @@ List<ContextFactoryRequest> list =
 ];
 
 builder.AddDatabaseServices(list);
-builder.AddOracleHcmBackgroundProcess();
+builder.AddEmployeePayrollSyncService();
 
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 {
-    builder.Services.AddWindowsService(options => { options.ServiceName = "Demoulas ProfitSharing OracleHcm Sync"; });
+    builder.Services.AddWindowsService(options => { options.ServiceName = "Demoulas ProfitSharing Payroll Sync"; });
 }
 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
 {

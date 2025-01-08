@@ -88,8 +88,8 @@ dotnet ef migrations script --context ProfitSharingDbContext --output {FILE}
 ### Manage the database
 **In place upgrade**: Demoulas.ProfitSharing.Data.Cli upgrade-db --connection-name ProfitSharing
 **Drop and rebuild schema**: Demoulas.ProfitSharing.Data.Cli drop-recreate-db --connection-name ProfitSharing
-**Import from Ready**: Demoulas.ProfitSharing.Data.Cli import-from-ready --connection-name ProfitSharing --sql-file ".\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-Schema "PROFITSHARE"
- - Second Example: Demoulas.ProfitSharing.Data.Cli import-from-ready --connection-name ProfitSharing --sql-file "..\..\..\..\..\..\..\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-Schema "PROFITSHARE"
+**Import from Ready**: Demoulas.ProfitSharing.Data.Cli import-from-ready --connection-name ProfitSharing --sql-file ".\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-schema "PROFITSHARE"
+ - Second Example: Demoulas.ProfitSharing.Data.Cli import-from-ready --connection-name ProfitSharing --sql-file "..\..\..\..\..\..\..\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-schema "PROFITSHARE"
 
 
 <hr/>

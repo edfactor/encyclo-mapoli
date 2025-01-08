@@ -96,7 +96,7 @@ public class EmployeeUpdateContext : DeltaContextBase
 
 public class TerminationContext : DeltaContextBase
 {
-    
+    public DateOnly? EffectiveStartDate { get; set; }
 }
 
 public class DeltaLink

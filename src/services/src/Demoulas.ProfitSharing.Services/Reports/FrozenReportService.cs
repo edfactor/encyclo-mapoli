@@ -143,6 +143,19 @@ public class FrozenReportService : IFrozenReportService
         }
     }
 
+    /// <summary>
+    /// Retrieves the profit-sharing distributions grouped by age and year.
+    /// </summary>
+    /// <param name="req">
+    /// The request object containing the parameters for the report, such as the year and as-of date.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token to monitor for cancellation requests.
+    /// </param>
+    /// <returns>
+    /// A task that represents the asynchronous operation. The task result contains the 
+    /// <see cref="DistributionsByAge"/> object, which includes the report details and aggregated data.
+    /// </returns>
     public async Task<DistributionsByAge> GetDistributionsByAgeYearAsync(FrozenReportsByAgeRequest req, CancellationToken cancellationToken = default)
     {
         List<byte> codes =
@@ -236,6 +249,27 @@ public class FrozenReportService : IFrozenReportService
         };
     }
 
+    /// <summary>
+    /// Retrieves the contributions grouped by age for a specific profit year, based on the provided request.
+    /// </summary>
+    /// <param name="req">
+    /// The request containing the parameters for generating the contributions report, 
+    /// including the profit year and report type (e.g., FullTime, PartTime, or Total).
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token to monitor for cancellation requests.
+    /// </param>
+    /// <returns>
+    /// A task that represents the asynchronous operation. The task result contains a <see cref="ContributionsByAge"/> object, 
+    /// which includes details such as the report name, report date, total employees, distribution total amount, 
+    /// and a paginated response of contributions grouped by age.
+    /// </returns>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown if the <paramref name="req"/> parameter is null.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown if there is an issue with retrieving or processing the data.
+    /// </exception>
     public async Task<ContributionsByAge> GetContributionsByAgeYearAsync(FrozenReportsByAgeRequest req, CancellationToken cancellationToken = default)
     {
         const string FT = "FullTime";

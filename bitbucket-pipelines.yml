@@ -92,9 +92,14 @@ definitions:
         - Write-Host $(Get-ChildItem)
         - New-Item -ItemType Directory -Path "dist"
 
-        - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.OracleHcm.Sync -c Release -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -p:PublishProfile=FolderProfile -o .\publishOutput
+        - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.EmployeeFull.Sync -c Release -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -p:PublishProfile=FolderProfile -o .\publishOutput
+        - Compress-Archive -Path .\publishOutput\* -DestinationPath .\dist\Demoulas.ProfitSharing.EmployeeFull.Sync.zip -Force
 
-        - Compress-Archive -Path .\publishOutput\* -DestinationPath .\dist\Demoulas.ProfitSharing.OracleHcm.Sync.zip -Force
+        - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.EmployeeDelta.Sync -c Release -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -p:PublishProfile=FolderProfile -o .\publishOutput
+        - Compress-Archive -Path .\publishOutput\* -DestinationPath .\dist\Demoulas.ProfitSharing.EmployeeDelta.Sync.zip -Force
+
+        - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.EmployeePayroll.Sync -c Release -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -p:PublishProfile=FolderProfile -o .\publishOutput
+        - Compress-Archive -Path .\publishOutput\* -DestinationPath .\dist\Demoulas.ProfitSharing.EmployeePayroll.Sync.zip -Force
 
     create-frontend-artifact-qa: &create-frontend-artifact-qa
       name: Create FrontEnd Artifacts (QA)     
@@ -243,11 +248,7 @@ pipelines:
             - $env:UI_ARTIFACT_NAME = "Demoulas.ProfitSharing.UI.QA.zip"
             - powershell .\scripts\webDeploy.ps1 $env:ENV $env:API_SERVER_QA $env:API_ARTIFACT_NAME $env:UI_ARTIFACT_NAME
 
-            - echo "Deploying background service..."
-            - $env:SERVICE_SERVICE_NAME = "Demoulas ProfitSharing OracleHcm Sync"
-            - $env:SERVICE_SERVICE_TARGET_PATH = "C:\NextGenApplications\ps\Services"
-            - $env:SERVICE_ARTIFACT_NAME = ".\dist\Demoulas.ProfitSharing.OracleHcm.Sync.zip"
-            - $env:SERVICE_ARTIFACT_EXECUTABLE = "Demoulas.ProfitSharing.OracleHcm.Sync.exe"
+            - echo "Deploying background service..."            
             - powershell .\scripts\servicesDeploy.ps1 ${env:ENV} $env:API_SERVER_QA
 
 
