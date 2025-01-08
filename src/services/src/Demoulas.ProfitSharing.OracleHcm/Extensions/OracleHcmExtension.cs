@@ -1,7 +1,9 @@
 ﻿using System.Diagnostics;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
+using Demoulas.Common.Contracts.Configuration;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Clients;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
@@ -50,7 +52,15 @@ public static class OracleHcmExtension
     /// </remarks>
     public static IHostApplicationBuilder AddEmployeeDeltaSyncService(this IHostApplicationBuilder builder, ISet<long>? debugOracleHcmIdSet = null)
     {
-        builder.AddOracleHcmSynchronization();
+        OracleHcmConfig oracleHcmConfig = builder.Configuration.GetSection("OracleHcm").Get<OracleHcmConfig>()
+                                          ?? new OracleHcmConfig { BaseAddress = string.Empty, DemographicUrl = string.Empty };
+
+        // Process each delta employee one at a time.
+        oracleHcmConfig.Limit = 1;
+
+        // Add Oracle HCM synchronization with the retrieved configuration.
+        builder.AddOracleHcmSynchronization(oracleHcmConfig);
+
 
         if (Debugger.IsAttached && (debugOracleHcmIdSet?.Any() ?? false))
         {
@@ -63,14 +73,20 @@ public static class OracleHcmExtension
 
     public static IHostApplicationBuilder AddEmployeeFullSyncService(this IHostApplicationBuilder builder)
     {
-        builder.AddOracleHcmSynchronization();
+        OracleHcmConfig oracleHcmConfig = builder.Configuration.GetSection("OracleHcm").Get<OracleHcmConfig>()
+                                          ?? new OracleHcmConfig { BaseAddress = string.Empty, DemographicUrl = string.Empty };
+
+        builder.AddOracleHcmSynchronization(oracleHcmConfig);
         builder.Services.AddHostedService<EmployeeFullSyncService>();
         return builder;
     }
 
     public static IHostApplicationBuilder AddEmployeePayrollSyncService(this IHostApplicationBuilder builder)
     {
-        builder.AddOracleHcmSynchronization();
+        OracleHcmConfig oracleHcmConfig = builder.Configuration.GetSection("OracleHcm").Get<OracleHcmConfig>()
+                                          ?? new OracleHcmConfig { BaseAddress = string.Empty, DemographicUrl = string.Empty };
+
+        builder.AddOracleHcmSynchronization(oracleHcmConfig);
         builder.Services.AddHostedService<EmployeePayrollSyncService>();
         return builder;
     }
@@ -91,10 +107,9 @@ public static class OracleHcmExtension
     /// - Adds project-specific caching services.
     /// - Configures Oracle HCM messaging.
     /// </remarks>
-    public static IHostApplicationBuilder AddOracleHcmSynchronization(this IHostApplicationBuilder builder)
+    public static IHostApplicationBuilder AddOracleHcmSynchronization(this IHostApplicationBuilder builder,
+        OracleHcmConfig oracleHcmConfig)
     {
-        OracleHcmConfig oracleHcmConfig = builder.Configuration.GetSection("OracleHcm").Get<OracleHcmConfig>()
-                                          ?? new OracleHcmConfig { BaseAddress = string.Empty, DemographicUrl = string.Empty };
         builder.Services.AddSingleton(oracleHcmConfig);
 
         RegisterOracleHcmServices(builder.Services);
