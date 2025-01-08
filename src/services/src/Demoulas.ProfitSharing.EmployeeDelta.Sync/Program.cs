@@ -33,7 +33,7 @@ builder.AddEmployeeDeltaSyncService();
 
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 {
-    builder.Services.AddWindowsService(options => { options.ServiceName = "Demoulas ProfitSharing OracleHcm Sync"; });
+    builder.Services.AddWindowsService(options => { options.ServiceName = "Demoulas ProfitSharing Employee Delta Sync"; });
 }
 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
 {
