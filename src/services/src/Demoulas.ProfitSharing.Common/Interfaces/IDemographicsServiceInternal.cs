@@ -1,5 +1,5 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
+using FluentValidation.Results;
 
 namespace Demoulas.ProfitSharing.Common.Interfaces;
 
@@ -7,4 +7,8 @@ public interface IDemographicsServiceInternal
 {
     Task AddDemographicsStreamAsync(IAsyncEnumerable<DemographicsRequest> employees, byte batchSize = byte.MaxValue,
         CancellationToken cancellationToken = default);
+
+    Task CleanAuditError(CancellationToken cancellationToken);
+    Task AuditError(int badgeNumber, IEnumerable<ValidationFailure> errorMessages, string requestedBy, CancellationToken cancellationToken = default,
+        params object?[] args);
 }

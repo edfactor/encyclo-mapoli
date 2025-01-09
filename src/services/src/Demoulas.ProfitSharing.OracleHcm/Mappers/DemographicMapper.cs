@@ -2,7 +2,7 @@
 using Demoulas.ProfitSharing.Data.Entities;
 using Riok.Mapperly.Abstractions;
 
-namespace Demoulas.ProfitSharing.Services.Mappers;
+namespace Demoulas.ProfitSharing.OracleHcm.Mappers;
 
 [Mapper]
 public partial class DemographicMapper
@@ -10,14 +10,14 @@ public partial class DemographicMapper
     private readonly AddressMapper _addressMapper;
     private readonly ContactInfoMapper _contactInfoMapper;
 
-    public DemographicMapper(AddressMapper addressMapper, 
+    public DemographicMapper(AddressMapper addressMapper,
         ContactInfoMapper contactInfoMapper)
     {
         _addressMapper = addressMapper;
         _contactInfoMapper = contactInfoMapper;
     }
 
-    
+
     public partial IEnumerable<Demographic> Map(IEnumerable<DemographicsRequest> sources);
 
     public Demographic Map(DemographicsRequest source)

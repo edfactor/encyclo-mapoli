@@ -3,7 +3,6 @@
 # ------------------------------------------------------------------------
 # Application Name:
 #   - SMART Profit Sharing
-#
 # ------------------------------------------------------------------------
 
 definitions:
@@ -36,21 +35,29 @@ definitions:
 
       artifacts:
         - test-reports/**
-
-   
-
+    
     test-frontend: &test-frontend
-          name:  Build and Test Frontend UI
-          runs-on:
-           - windows
-           - self.hosted
-          script:
-           - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
-          artifacts:
-            - build/**
-   
+      name: Build and Test Frontend UI
+      runs-on:
+        - windows
+        - self.hosted
+      script:
+        - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
+      artifacts:
+        - build/**
+
+    Health-Check: &health-check
+      name: Build and Test Frontend UI
+      runs-on:
+        - windows
+        - self.hosted
+      script:
+       - powershell -Command "& { ./health-check.ps1 -Url $Env:HEALTH_CHECK_URL }"
+      artifacts:
+        - build/**
+    
     create-api-artifacts: &create-api-artifacts
-      name: Create API Artifacts      
+      name: Create API Artifacts
       runs-on:
         - windows
         - self.hosted
@@ -64,13 +71,35 @@ definitions:
         - Write-Host $(Get-Location)
         - Write-Host $(Get-ChildItem)
         - New-Item -ItemType Directory -Path "dist"
-        
+
         - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.Api -c Release -p:PublishProfile=FolderProfile -o .\publishOutput
         
         - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
         - Copy-Item -Path ".buildinfo.json" -Destination ".\publishOutput\"
         
         - Compress-Archive -Path .\publishOutput\* -DestinationPath .\dist\Demoulas.ProfitSharing.Api.zip -Force
+
+    create-service-artifacts: &create-service-artifacts
+      name: Create Background Service Artifacts
+      runs-on:
+        - windows
+        - self.hosted
+      artifacts:
+        - dist\**
+      script:
+        - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
+        - Write-Host $(Get-Location)
+        - Write-Host $(Get-ChildItem)
+        - New-Item -ItemType Directory -Path "dist"
+
+        - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.EmployeeFull.Sync -c Release -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -p:PublishProfile=FolderProfile -o .\publishOutput
+        - Compress-Archive -Path .\publishOutput\* -DestinationPath .\dist\Demoulas.ProfitSharing.EmployeeFull.Sync.zip -Force
+
+        - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.EmployeeDelta.Sync -c Release -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -p:PublishProfile=FolderProfile -o .\publishOutput
+        - Compress-Archive -Path .\publishOutput\* -DestinationPath .\dist\Demoulas.ProfitSharing.EmployeeDelta.Sync.zip -Force
+
+        - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.EmployeePayroll.Sync -c Release -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -p:PublishProfile=FolderProfile -o .\publishOutput
+        - Compress-Archive -Path .\publishOutput\* -DestinationPath .\dist\Demoulas.ProfitSharing.EmployeePayroll.Sync.zip -Force
 
     create-frontend-artifact-qa: &create-frontend-artifact-qa
       name: Create FrontEnd Artifacts (QA)     
@@ -139,9 +168,8 @@ definitions:
         # Compress the build output into a zip file in the dist folder
         - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.${env:ENV}.zip" -Force
 
-
     create-frontend-artifact-prod: &create-frontend-artifact-prod
-      name: Create FrontEnd Artifacts (PROD)     
+      name: Create FrontEnd Artifacts (PROD)
       runs-on:
         - windows
         - self.hosted
@@ -150,39 +178,49 @@ definitions:
       script:
         - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
         - ${env:ENV} = "prod"
+        - if (!(Test-Path -Path ".\src\UI")) { Write-Error "UI source directory not found. Exiting."; exit 1 }
         - cd .\src\UI
         - ${env:NPM} install --legacy-peer-deps;
         - ${env:NPM} run build:${env:ENV}
-        - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.$env:ENV.zip" -Force   
-        
+        - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.$env:ENV.zip" -Force
+    
     upgrade-database: &upgrade-database
       name: Upgrade Database
       runs-on:
         - windows
         - self.hosted
       script:
-        - echo "Upgrading Database..."
-        - $env:NUGET_ORG="https://api.nuget.org/v3/index.json"
-        - dotnet build .\src\services\src\Demoulas.ProfitSharing.Data.Cli\Demoulas.ProfitSharing.Data.Cli.csproj -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -o .\output
-        - $environment = $env:Environment
-        - $action = $env:Action
-        - $sourceSchema = ""
-        - if (-not $environment) { $environment = "QA" }
-        - if (-not $action) { $action = "upgrade-db" }
-        
-        - if ($environment -eq "QA") {
-            $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_QA;
-            $sourceSchema = "PROFITSHARE";
+        - |
+          $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
+          dotnet build .\src\services\src\Demoulas.ProfitSharing.Data.Cli\Demoulas.ProfitSharing.Data.Cli.csproj -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -o .\output
+          if ($LASTEXITCODE -ne 0) { Write-Error "Database project build failed. Exiting."; exit 1 }
+
+          $environment = $env:Environment
+          $action = $env:Action
+          $sourceSchema = ""
+          if (-not $environment) { $environment = "QA" }
+          if (-not $action) { $action = "upgrade-db" }
+
+          if ($environment -eq "QA") {
+            $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_QA
+            $sourceSchema = "PROFITSHARE"
           }
 
-        - if ($environment -eq "UAT") {
-            $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_UAT;
-            $sourceSchema = "PROFITSHARE_STAGING";
+          if ($environment -eq "UAT") {
+            $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_UAT
+            $sourceSchema = "PROFITSHARE_STAGING"
           }
-        
-        - .\output\Demoulas.ProfitSharing.Data.Cli $action --connection-name ProfitSharing --sql-file ".\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-Schema $sourceSchema
 
+          if (-not $sourceSchema) {
+            Write-Error "Source schema is undefined. Exiting."; exit 1
+          }
 
+          Write-Host "Running database upgrade with action: $action"
+          Write-Host "Target environment: $environment"
+          Write-Host "Source schema: $sourceSchema"
+
+          .\output\Demoulas.ProfitSharing.Data.Cli $action --connection-name ProfitSharing --sql-file ".\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-schema $sourceSchema
+          if ($LASTEXITCODE -ne 0) { Write-Error "Database upgrade failed. Exiting"; exit 1 }
 
 pipelines:
   branches:
@@ -192,20 +230,28 @@ pipelines:
           - step: *test-frontend
       - parallel:
           - step: *create-api-artifacts
-          - step: *create-frontend-artifact-qa          
-           # Deployment Stage
-      
+          - step: *create-service-artifacts
+          - step: *create-frontend-artifact-qa      
       - step:
           name: "Application Deployment"
           runs-on:
             - windows
             - self.hosted
           deployment: QA
-          trigger: "manual"     
+          trigger: "manual"
           script:
-            - echo "Deploying application..."
-            - $env:API_SERVER_QA = "appt23d"            
-            - powershell .\scripts\webDeploy.ps1 QA $env:API_SERVER_QA
+            - ${env:ENV} = "QA"
+            - $env:API_SERVER_QA = "appt23d"
+
+            - echo "Deploying web application..."
+            - $env:API_ARTIFACT_NAME = "Demoulas.ProfitSharing.Api.zip"
+            - $env:UI_ARTIFACT_NAME = "Demoulas.ProfitSharing.UI.QA.zip"
+            - powershell .\scripts\webDeploy.ps1 $env:ENV $env:API_SERVER_QA $env:API_ARTIFACT_NAME $env:UI_ARTIFACT_NAME
+
+            - echo "Deploying background service..."            
+            - powershell .\scripts\servicesDeploy.ps1 ${env:ENV} $env:API_SERVER_QA
+
+
       - parallel:
           - step: *upgrade-database
           - step: *create-frontend-artifact-uat
@@ -215,10 +261,10 @@ pipelines:
             - windows
             - self.hosted
           deployment: UAT
-          trigger: "manual"     
+          trigger: "manual"
           script:
             - echo "Deploying application..."
-            - $env:API_SERVER_UAT = "appt24d"            
+            - $env:API_SERVER_UAT = "appt24d"
             - powershell .\scripts\webDeploy.ps1 UAT $env:API_SERVER_UAT
       #- step: *create-frontend-artifact-prod
 
@@ -235,17 +281,17 @@ pipelines:
           - step: *test-frontend
   
   custom:
-      profitsharing_database:
-        - variables: # https://bitbucket.org/blog/predefine-values-of-custom-pipeline-variables
-                  - name: Environment
-                    default: QA
-                    allowed-values: # optionally restrict variable values
-                        - QA
-                        - UAT                        
-                  - name: Action
-                    default: upgrade-db
-                    allowed-values: # optionally restrict variable values
-                        - upgrade-db
-                        - drop-recreate-db
-                        - import-from-ready                        
-        - step: *upgrade-database
+    profitsharing_database:
+      - variables: # https://bitbucket.org/blog/predefine-values-of-custom-pipeline-variables
+          - name: Environment
+            default: QA
+            allowed-values: # optionally restrict variable values
+              - QA
+              - UAT
+          - name: Action
+            default: upgrade-db
+            allowed-values: # optionally restrict variable values
+              - upgrade-db
+              - drop-recreate-db
+              - import-from-ready
+      - step: *upgrade-database

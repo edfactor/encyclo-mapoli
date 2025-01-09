@@ -48,7 +48,7 @@ public class OracleHcmMessageConsumer : IConsumer<MessageRequest<OracleHcmJobReq
             }
 
 
-            await _employeeSyncService.SynchronizeEmployeesAsync(message.Body.RequestedBy, cancellationToken);
+            await _employeeSyncService.ExecuteFullSyncAsync(message.Body.RequestedBy, cancellationToken);
         }
     }
 }

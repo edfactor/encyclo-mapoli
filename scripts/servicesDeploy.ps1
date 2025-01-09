@@ -3,86 +3,159 @@ $envTarget = $args[0]
 $envServerName = $args[1]
 $configTarget = ''
 
-function Get-ConfigEnvironment($envTargetVar) {
-    Write-Host "The value for envTargetVar is $($envTargetVar)"
-    switch ($envTargetVar) {
-        "qa" { Write-Host "ENV is QA"; return "QA" }
-        "uat" { Write-Host "ENV is UAT"; return "UAT" }
-        "prod" { Write-Host "ENV is PRODUCTION"; return "Production" }
-        default { Write-Host "Unknown ENV" }
+function get-ConfigEnvironment($envTargetVar)
+{
+    Write-Host "The value for envTargetVar is $( $envTargetVar )"
+    if ($envTargetVar -eq "qa")
+    {
+        Write-Host "ENV is QA"
+        return "QA"
+    }
+    elseif ($envTargetVar -eq "uat")
+    {
+        Write-Host "ENV is UAT"
+        return "UAT"
+    }
+    elseif ($envTargetVar -eq "prod")
+    {
+        Write-Host "ENV is PRODUCTION"
+        return "Production"
+    }
+    else
+    {
+        Write-Host "Unknown ENV"
     }
 }
 
-function Deploy-Service($Artifact, $TargetPath, $ServiceExecutable, $ServiceName, $DisplayName, $ConfigEnvironment, $Session) {
-    Invoke-Command -Session $Session -ScriptBlock {
-        $ServiceInfo = Get-Service -Name $Using:ServiceName -ErrorAction SilentlyContinue
-        if ($ServiceInfo) {
-            Write-Host "Attempting to Stop Running Service" $ServiceInfo
-            Stop-Service -Name $Using:ServiceName -ErrorAction SilentlyContinue
-            while ((Get-Service -Name $Using:ServiceName).Status -ne 'Stopped') {
-                Write-Host "Waiting for Service to stop."
-                Start-Sleep 2
-            }
-            Write-Host 'Stopped Service'
-        }
+$configTarget = get-ConfigEnvironment $envTarget
 
-        Write-Host "Checking existence of folder $($Using:TargetPath)"
-        if (Test-Path -Path $Using:TargetPath) {
-            Get-ChildItem -Path $Using:TargetPath -Exclude "credSettings.$($Using:ConfigEnvironment).json" | Remove-Item -Force -Recurse
-        } else {
-            Write-Host "Creating folder $($Using:TargetPath)"
-            New-Item -ItemType Directory -Force -Path $Using:TargetPath
-        }
+$Deployments = @(
+    @{
+        Artifact = 'Demoulas.ProfitSharing.EmployeePayroll.Sync.zip'
+        TargetPath = 'C:\NextGenApplications\ps'
+        ServiceExecutable = 'C:\NextGenApplications\ps\Payroll\Demoulas.ProfitSharing.EmployeePayroll.Sync.exe'
+        ServiceName = 'Demoulas ProfitSharing OracleHCM Payroll Sync'
+        DisplayName = 'Demoulas ProfitSharing OracleHCM Payroll Sync'
+        IgnoreFiles = @("credSettings.$( $envTarget ).json")
+        ConfigEnvironment = $configTarget
+    },
+    @{
+        Artifact = 'Demoulas.ProfitSharing.EmployeeFull.Sync.zip'
+        TargetPath = 'C:\NextGenApplications\ps'
+        ServiceExecutable = 'C:\NextGenApplications\ps\EmployeeFull\Demoulas.ProfitSharing.EmployeeFull.Sync.exe'
+        ServiceName = 'Demoulas ProfitSharing OracleHCM Full Sync'
+        DisplayName = 'Demoulas ProfitSharing OracleHCM Full Sync'
+        IgnoreFiles = @("credSettings.$( $envTarget ).json")
+        ConfigEnvironment = $configTarget
+    },
+     @{
+        Artifact = 'Demoulas.ProfitSharing.EmployeeDelta.Sync.zip'
+        TargetPath = 'C:\NextGenApplications\ps'
+        ServiceExecutable = 'C:\NextGenApplications\ps\EmployeeDelta\Demoulas.ProfitSharing.EmployeeDelta.Sync.exe'
+        ServiceName = 'Demoulas ProfitSharing OracleHCM Delta Sync'
+        DisplayName = 'Demoulas ProfitSharing OracleHCM Delta Sync'
+        IgnoreFiles = @("credSettings.$( $envTarget ).json")
+        ConfigEnvironment = $configTarget
     }
-
-    if (!$?) { return $false }
-
-    Write-Host 'Copying artifacts'
-    Copy-Item -ToSession $Session -Path .\dist\$Artifact -Destination $TargetPath
-    if (!$?) { return $false }
-
-    Invoke-Command -Session $Session -ScriptBlock {
-        Expand-Archive -Force -Path "$($Using:TargetPath)\$Artifact" -DestinationPath $Using:TargetPath
-        Remove-Item -Force -Path "$($Using:TargetPath)\$Artifact"
-
-        $file = "$($Using:TargetPath)\buildSettings.json"
-        $json = Get-Content -Raw $file | ConvertFrom-Json
-        $json.environment = $Using:ConfigEnvironment
-        $json | ConvertTo-Json -Depth 10 | Set-Content $file
-
-        if (!(Get-Service -Name $Using:ServiceName -ErrorAction SilentlyContinue)) {
-            Write-Host 'Installing service'
-            New-Service -Name $Using:ServiceName -BinaryPathName "$($Using:ServiceExecutable)" -StartupType "AutomaticDelayedStart"
-        }
-
-        Start-Service -Name $Using:ServiceName
-    }
-
-    return $?
-}
-
-$configTarget = Get-ConfigEnvironment $envTarget
+)
 
 $Failed = $false
-
 try {
     $Session = New-PSSession $envServerName
 
-    $Deployments = @(
-        @{ Artifact = 'Demoulas.Smart.FileHandler.zip'; TargetPath = 'C:\SmartFileHandler'; ServiceExecutable = 'C:\SmartFileHandler\Demoulas.Smart.FileHandler.exe'; ServiceName = 'Demoulas Smart File Handler'; DisplayName = 'Demoulas Smart File Handler' },
-        @{ Artifact = 'Demoulas.Smart.IngestionServices.zip'; TargetPath = 'C:\SmartFileIngestion'; ServiceExecutable = 'C:\SmartFileIngestion\Demoulas.Smart.IngestionServices.exe'; ServiceName = 'Demoulas Smart File Ingestion'; DisplayName = 'Demoulas Smart File Ingestion' }
-    )
 
-    foreach ($Deploy in $Deployments) {
-        $result = Deploy-Service -Artifact $Deploy.Artifact -TargetPath $Deploy.TargetPath -ServiceExecutable $Deploy.ServiceExecutable -ServiceName $Deploy.ServiceName -DisplayName $Deploy.DisplayName -ConfigEnvironment $configTarget -Session $Session
-        if (!$result) { $Failed = $true; break }
+    foreach ($Deploy in $Deployments)
+    {
+        Write-Host $Deploy
+        Invoke-Command -Session $Session -ScriptBlock {
+            $ServiceInfo = Get-Service -Name $Using:Deploy.ServiceName -ErrorAction SilentlyContinue
+            if (($ServiceInfo -ne $null) -and ($ServiceInfo.Length -gt 0))
+            {
+                $ServiceInfo = Get-Service -Name $Using:Deploy.ServiceName | Where-Object { $_.Status -eq "Running" } -ErrorAction SilentlyContinue
+                Write-Host "Attempting to Stop Running Service" $ServiceInfo
+                if (($ServiceInfo -ne $null) -and ($ServiceInfo.Length -gt 0))
+                {
+                    Write-Host 'Stopping Service'
+                    Stop-Service -Name $Using:Deploy.ServiceName -verbose -ErrorAction SilentlyContinue
+                    while ((Get-Service -Name $Using:Deploy.ServiceName).Status -ne 'Stopped')
+                    {
+                        Write-Host "Waiting for Service " $ServiceInfo " to stop."
+                        Start-Sleep 2
+                    }
+                    Write-Host 'Stopped Service'
+                    $ServiceInfo.Refresh()
+                }
+            }
+
+            Write-Host "Checking existence of folder" $Using:Deploy.TargetPath
+            $FolderExists = Test-Path -Path $Using:Deploy.TargetPath
+            if ($FolderExists -eq $true)
+            {
+                Get-ChildItem -Path $Using:Deploy.TargetPath -Exclude $Using:Deploy.IgnoreFiles | Remove-Item -Force -Recurse
+            }
+            else
+            {
+                Write-Host "creating new folder" $Using:Deploy.TargetPath
+                New-Item -ItemType Directory -Force -Path $Using:Deploy.TargetPath
+            }
+
+        }
+        if (!$?)
+        {
+            $Failed = $true; break
+        }
+
+
+        Write-Host 'copying artifacts'
+        Copy-Item -ToSession $Session -Path .\dist\$($Deploy.Artifact) -Destination $Deploy.TargetPath
+        if (!$?)
+        {
+            $Failed = $true; break
+        }
+
+        Write-Host 'copied artifacts'
+
+        # Set the environment variable on the remote machine
+        Invoke-Command -Session $Session -ScriptBlock {
+            [System.Environment]::SetEnvironmentVariable("DOTNET_ENVIRONMENT", $Using:Deploy.ConfigEnvironment, [System.EnvironmentVariableTarget]::Machine)
+        }
+
+        Invoke-Command -Session $Session -ScriptBlock {
+            Expand-Archive -Force -Path "$( $Using:Deploy.TargetPath )\$( $Using:Deploy.Artifact )" -DestinationPath $Using:Deploy.TargetPath
+            Remove-Item -Force -Path "$( $Using:Deploy.TargetPath )\$( $Using:Deploy.Artifact )"
+
+            $ServiceInfo = Get-Service -Name $Using:Deploy.ServiceName -ErrorAction SilentlyContinue
+            Write-Host $ServiceInfo
+            if ($ServiceInfo -eq $null)
+            {
+                Write-Host 'Installing service'
+                New-Service -Name $Using:Deploy.ServiceName -BinaryPathName "$( $Using:Deploy.ServiceExecutable )" -StartupType AutomaticDelayedStart
+            }
+
+            $ServiceInfo = Get-Service -Name $Using:Deploy.ServiceName
+            Write-Host "Starting Service with param " $Using:Deploy.ConfigEnvironment
+            $ServiceInfo.Start()
+        }
+        if (!$?)
+        {
+            $Failed = $true; break
+        }
     }
-} catch {
+}
+catch
+{
     $Failed = $true
-} finally {
-    if ($Session) {
+}
+finally
+{
+    if ($null -ne $Session)
+    {
         Remove-PSSession -Session $Session
+        $Session = $null
     }
 }
 
-if ($Failed) { exit 1 }
+if ($Failed)
+{
+    exit 1
+}

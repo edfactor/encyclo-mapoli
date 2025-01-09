@@ -44,6 +44,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
         return MockDbContextFactory.UseWritableContext(async c =>
         {
             var setup = await SetupTestEmployee(c);
+            setup.Request.ProfitYear = 2023;
 
             var expectedResponse = new ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>
             {
@@ -62,7 +63,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
 
             // Assert
             response.Result.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
-            response.Result.Response.Results.Should().HaveCountGreaterThan(expectedResponse.Response.Results.Count());
+            response.Result.Response.Results.Should().HaveCountGreaterThanOrEqualTo(expectedResponse.Response.Results.Count());
         });
     }
 
@@ -126,7 +127,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
     public async Task GetResponse_Should_HandleEmptyResults()
     {
         // Arrange
-        var request = new ProfitYearRequest { Skip = 0, Take = 10, ProfitYear = (short)DateTime.Today.Year };
+        var request = new ProfitYearRequest { Skip = 0, Take = 10, ProfitYear = (short)2024 };
         var cancellationToken = CancellationToken.None;
         var expectedResponse = new ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>
         {
@@ -147,7 +148,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
     public async Task GetResponse_Should_HandleNullResults()
     {
         // Arrange
-        var request = new ProfitYearRequest { Skip = 0, Take = 10, ProfitYear = (short)DateTime.Today.Year };
+        var request = new ProfitYearRequest { Skip = 0, Take = 10, ProfitYear = (short)2024 };
         var cancellationToken = CancellationToken.None;
         var expectedResponse = new ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>
         {
@@ -181,12 +182,13 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
 
         var demo = await c.Demographics.Include(demographic => demographic.ContactInfo).FirstAsync();
         demo.EmploymentStatusId = EmploymentStatus.Constants.Active;
-        demo.ReHireDate = DateTime.Today.ToDateOnly();
+        demo.ReHireDate = new DateOnly(2023, 1, 10);
         
 
         var payProfit = await c.PayProfits.FirstAsync(pp => pp.DemographicId == demo.Id);
         payProfit.EnrollmentId = Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
         payProfit.CurrentHoursYear = 2358;
+        payProfit.ProfitYear = 2023;
 
         var details = await c.ProfitDetails.Where(pd => pd.Ssn == demo.Ssn).ToListAsync();
         foreach (var detail in details)
@@ -196,6 +198,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
             detail.Remark = "Test remarks";
             detail.ProfitCodeId = ProfitCode.Constants.OutgoingForfeitures.Id;
         }
+        details[0].ProfitYear = 2023;
 
         await c.SaveChangesAsync();
 

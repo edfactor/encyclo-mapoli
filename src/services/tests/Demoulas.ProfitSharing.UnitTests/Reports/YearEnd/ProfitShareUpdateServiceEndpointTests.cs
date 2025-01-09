@@ -91,10 +91,10 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
             .Include(payProfit => payProfit.Demographic!)
             .ThenInclude(demographic => demographic.ContactInfo)
             .Include(p => p.Demographic != null)
-            .FirstAsync();
+            .FirstAsync(CancellationToken.None);
         pp.ProfitYear = ProfitYear;
         pp.PointsEarned = 100_000 / 100;
-        await c.SaveChangesAsync();
+        await c.SaveChangesAsync(CancellationToken.None);
         return pp;
     }
 
@@ -138,7 +138,7 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
                 .Include(payProfit => payProfit.Demographic!)
                 .ThenInclude(demographic => demographic.ContactInfo)
                 .Include(p => p.Demographic != null)
-                .ToListAsync();
+                .ToListAsync(CancellationToken.None);
 
             // This knocks all the employees out of ProfitSharing
             foreach (PayProfit ppi in ppr)
@@ -185,7 +185,7 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
             pp1.YearsInPlan = 0; // This is important, otherwise we have no Totals
             
             // Setup some initial money so the earnings have a number to work with.
-            var pd = await ctx.ProfitDetails.FirstAsync();
+            var pd = await ctx.ProfitDetails.FirstAsync(CancellationToken.None);
             pd.Ssn = 7;
             pd.ProfitYear = 2000;
             pd.ProfitYearIteration = 0;
@@ -212,7 +212,7 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
             pd.CommentRelatedPsnSuffix = null;
             pd.CommentIsPartialTransaction = null;
 
-            await ctx.SaveChangesAsync();
+            await ctx.SaveChangesAsync(CancellationToken.None);
 
             return ssn;
         });
@@ -253,7 +253,7 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
                 .Include(payProfit => payProfit.Demographic!)
                 .ThenInclude(demographic => demographic.ContactInfo)
                 .Include(p => p.Demographic != null)
-                .ToListAsync();
+                .ToListAsync(CancellationToken.None);
 
             // This knocks all the employees out of ProfitSharing
             foreach (PayProfit ppi in ppr)
@@ -276,13 +276,13 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
             }
 
             // Now we move 1 bene back in.
-            Beneficiary b = await ctx.Beneficiaries.Include(b => b.Contact).FirstAsync();
+            Beneficiary b = await ctx.Beneficiaries.Include(b => b.Contact).FirstAsync(CancellationToken.None);
             b.Amount = currentBalance; // NOTE:::: This should not be used.
             b.Contact!.Ssn = 7;
 
             // NOTE::: This should be how the bene gets initial amount
             #if false
-            var pd = await ctx.ProfitDetails.FirstAsync();
+            var pd = await ctx.ProfitDetails.FirstAsync(CancellationToken.None);
             pd.Ssn = 7;
             pd.ProfitYear = 2000;
             pd.ProfitYearIteration = 0;
@@ -310,7 +310,7 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
             pd.CommentIsPartialTransaction = null;
             #endif
 
-            await ctx.SaveChangesAsync();
+            await ctx.SaveChangesAsync(CancellationToken.None);
 
         });
     }

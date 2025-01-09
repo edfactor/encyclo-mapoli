@@ -1,6 +1,11 @@
-﻿namespace Demoulas.ProfitSharing.Common.Interfaces;
+﻿using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
+
+namespace Demoulas.ProfitSharing.Common.Interfaces;
 
 public interface IEmployeeSyncService
 {
-    Task SynchronizeEmployeesAsync(string requestedBy = "System", CancellationToken cancellationToken = default);
+    Task ExecuteFullSyncAsync(string requestedBy = "System", CancellationToken cancellationToken = default);
+    Task ExecuteDeltaSyncAsync(string requestedBy = "System", CancellationToken cancellationToken = default);
+    Task QueueEmployee(string requestedBy, IAsyncEnumerable<OracleEmployee?> oracleHcmEmployees, CancellationToken cancellationToken);
+    Task TrySyncEmployeeFromOracleHcm(string requestedBy, ISet<long> people, CancellationToken cancellationToken);
 }

@@ -1,4 +1,5 @@
-﻿namespace Demoulas.ProfitSharing.IntegrationTests.Reports;
+﻿
+namespace Demoulas.ProfitSharing.IntegrationTests.Reports;
 
 /// <summary>
 /// Produces a paper report identical to the QPAY066.pco program.
@@ -57,14 +58,13 @@ BADGE/PSN # EMPLOYEE NAME           BALANCE  ALLOCATION       AMOUNT       FORFE
         {
             PrintHeader();
         }
-
         _lineCounter++;
         string termDate = wsDoTerm == null || wsDoTerm == DateOnly.MinValue
             ? "".PadRight(6)
             : $"{wsDoTerm.Value.Year - 2000:00}{wsDoTerm.Value.Month:00}{wsDoTerm.Value.Day:00}";
         string ageStr = age.HasValue ? $"{age:00}" : "";
 
-        _reportWriter.WriteLine(r2BadgePsnNp.PadLeft(11) + " " +
+        _reportWriter.WriteLine(r2BadgePsnNp.PadLeft(11) + " " + // fmt
                                 r2EmployeeName?.PadRight(19) + " " +
                                 FormatWithSingleComma(r2PsAmt).PadLeft(12) + " " +
                                 FormatWithSingleComma(r2BenAlloc).PadLeft(12) + " " +
@@ -90,9 +90,8 @@ BADGE/PSN # EMPLOYEE NAME           BALANCE  ALLOCATION       AMOUNT       FORFE
         Console.WriteLine(parts);
         if (parts.Length == 3)
         {
-            return parts[0] + parts[1] + "," + parts[2];
+            return $"{parts[0]}{parts[1]},{parts[2]}";
         }
-
         return numberStr;
     }
 
@@ -125,8 +124,8 @@ BADGE/PSN # EMPLOYEE NAME           BALANCE  ALLOCATION       AMOUNT       FORFE
         {
             PrintReportHeader();
         }
-
         PrintPageHeader();
         _pageCounter++;
     }
 }
+

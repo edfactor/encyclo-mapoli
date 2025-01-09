@@ -4,9 +4,22 @@ using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
-using Demoulas.ProfitSharing.OracleHcm.HostedServices;
+using Demoulas.Util.Extensions;
 
 var builder = Host.CreateApplicationBuilder(args);
+
+if (!builder.Environment.IsTestEnvironment())
+{
+    builder.Configuration
+        .AddJsonFile($"credSettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+        .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+        .AddUserSecrets<Program>();
+}
+else
+{
+    builder.Configuration
+        .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
+}
 
 List<ContextFactoryRequest> list =
 [
@@ -16,11 +29,11 @@ List<ContextFactoryRequest> list =
 ];
 
 builder.AddDatabaseServices(list);
-builder.AddOracleHcmBackgroundProcess();
+builder.AddEmployeePayrollSyncService();
 
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 {
-    builder.Services.AddWindowsService(options => { options.ServiceName = "Demoulas ProfitSharing OracleHcm Sync"; });
+    builder.Services.AddWindowsService(options => { options.ServiceName = "Demoulas ProfitSharing Payroll Sync"; });
 }
 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
 {

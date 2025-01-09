@@ -5,15 +5,14 @@ using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.ProfitShareUpdate;
-using Demoulas.ProfitSharing.Services.Reports.YearEnd.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services.ServiceDto;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Xunit.Abstractions;
 
-namespace Demoulas.ProfitSharing.Services.Reports.YearEnd.Update;
+
+namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 
 public class ProfitShareUpdateTests
 {
@@ -21,15 +20,17 @@ public class ProfitShareUpdateTests
     private readonly CalendarService _calendarService;
     private readonly IProfitSharingDataContextFactory _dbFactory;
 
-    public ProfitShareUpdateTests(ITestOutputHelper testOutputHelper)
+    public ProfitShareUpdateTests()
     {
         IConfigurationRoot configuration = new ConfigurationBuilder().AddUserSecrets<ProfitShareUpdateTests>().Build();
         string connectionString = configuration["ConnectionStrings:ProfitSharing"]!;
         _dbFactory = new PristineDataContextFactory(connectionString);
         _calendarService = new CalendarService(_dbFactory, _aps);
     }
-    
-    /** Currently this requires that PAY_PROFIT 2023 and PAY_PROFIT 2024 be clones of each other.  Phil will update the TotalService to allow adding a prior year as an argument.  **/
+
+    /*
+     * Currently this test requires that PAY_PROFIT rows for 2023 and PAY_PROFIT rows 2024 be clones of each other.
+     */
     [Fact]
     public async Task ReportWithUpdates()
     {
@@ -169,7 +170,7 @@ public class ProfitShareUpdateTests
     public static string LoadExpectedReport(string resourceName)
     {
         using (Stream? stream = Assembly.GetExecutingAssembly()
-                   .GetManifestResourceStream("Demoulas.ProfitSharing.IntegrationTests.Resources." + resourceName))
+                   .GetManifestResourceStream($"Demoulas.ProfitSharing.IntegrationTests.Resources.{resourceName}"))
         using (StreamReader reader = new(stream!))
         {
             return reader.ReadToEnd().Replace("\r", "");

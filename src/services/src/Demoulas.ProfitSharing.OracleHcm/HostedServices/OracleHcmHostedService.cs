@@ -1,31 +1,30 @@
-﻿using System.Diagnostics;
-using Demoulas.ProfitSharing.OracleHcm.Configuration;
-using Demoulas.ProfitSharing.OracleHcm.Jobs;
+﻿using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Microsoft.Extensions.Hosting;
 using Quartz;
 using Quartz.Spi;
 
-
 namespace Demoulas.ProfitSharing.OracleHcm.HostedServices;
-internal sealed class OracleHcmHostedService : IHostedService
+
+internal abstract class OracleHcmHostedServiceBase : IHostedService
 {
+    protected OracleHcmConfig OracleHcmConfig { get; }
+    
     private readonly ISchedulerFactory _schedulerFactory;
     private readonly IJobFactory _jobFactory;
-    private readonly OracleHcmConfig _oracleHcmConfig;
     private IScheduler? _scheduler;
 
-    public OracleHcmHostedService(ISchedulerFactory schedulerFactory,
+    protected OracleHcmHostedServiceBase(ISchedulerFactory schedulerFactory,
         IJobFactory jobFactory,
         OracleHcmConfig oracleHcmConfig)
     {
         _schedulerFactory = schedulerFactory;
         _jobFactory = jobFactory;
-        _oracleHcmConfig = oracleHcmConfig;
+        OracleHcmConfig = oracleHcmConfig;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        if (!_oracleHcmConfig.EnableSync)
+        if (!OracleHcmConfig.EnableSync)
         {
             return;
         }
@@ -33,41 +32,36 @@ internal sealed class OracleHcmHostedService : IHostedService
         _scheduler = await _schedulerFactory.GetScheduler(cancellationToken);
         _scheduler.JobFactory = _jobFactory;
 
-        // Schedule the recurring job for EmployeeSyncJob
-        var employeeSyncJob = JobBuilder.Create<EmployeeSyncJob>()
-            .WithIdentity(nameof(EmployeeSyncJob))
-            .Build();
+        // Schedule all jobs
 
-        var employeeSyncTrigger = TriggerBuilder.Create()
-            .WithIdentity("employeeSyncTrigger")
-            .StartAt(DateTimeOffset.UtcNow.AddMinutes(Debugger.IsAttached ? 0 : 5))
-            .WithSimpleSchedule(x =>
-            {
-                x.WithIntervalInHours(_oracleHcmConfig.IntervalInHours)
-                    .RepeatForever();
-            })
-            .Build();
-
-        // Schedule the recurring job for PayrollSyncJob
-        var payrollSyncJob = JobBuilder.Create<PayrollSyncJob>()
-            .WithIdentity(nameof(PayrollSyncJob))
-            .Build();
-
-        var payrollSyncTrigger = TriggerBuilder.Create()
-            .WithIdentity("payrollSyncTrigger")
-            .StartAt(DateTimeOffset.UtcNow.AddMinutes(Debugger.IsAttached ? 0 : 15))
-            .WithSimpleSchedule(x =>
-            {
-                x.WithIntervalInHours(_oracleHcmConfig.IntervalInHours)
-                    .RepeatForever();
-            })
-            .Build();
-
-        await _scheduler.ScheduleJob(employeeSyncJob, employeeSyncTrigger, cancellationToken);
-        await _scheduler.ScheduleJob(payrollSyncJob, payrollSyncTrigger, cancellationToken);
-
+        await ConfigureJob(cancellationToken);
 
         await _scheduler.Start(cancellationToken);
+    }
+
+    protected abstract Task ConfigureJob(CancellationToken cancellationToken);
+
+    protected Task ScheduleJob<TJob>(
+        string triggerIdentity,
+        TimeSpan startDelay,
+        TimeSpan interval,
+        CancellationToken cancellationToken
+    ) where TJob : IJob
+    {
+        var job = JobBuilder.Create<TJob>()
+            .WithIdentity(typeof(TJob).Name)
+            .Build();
+
+        var trigger = TriggerBuilder.Create()
+            .WithIdentity(triggerIdentity)
+            .StartAt(DateTimeOffset.UtcNow.Add(startDelay))
+            .WithSimpleSchedule(x => x
+                .WithInterval(interval)
+                .RepeatForever()
+            )
+            .Build();
+
+        return _scheduler!.ScheduleJob(job, trigger, cancellationToken);
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)

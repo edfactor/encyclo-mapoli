@@ -1,4 +1,5 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
+﻿using System.Net.Http.Headers;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -9,7 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 
-namespace Demoulas.ProfitSharing.Services.Reports.YearEnd;
+namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 
 /**
  * WARNING - needs a refactor.   It is locked to the ExecutiveHoursAndDollarsResponse type at the moment.
@@ -19,7 +20,6 @@ namespace Demoulas.ProfitSharing.Services.Reports.YearEnd;
  * now it uses a mock to get the testing framework to swap in the read only connection.
  *
  */
-
 /// <summary>
 ///   Abstraction for testing api endpoints that use a <c>DbContext</c>.
 ///   sets up a web application, endpoints and services and a real read only database connection.
@@ -80,6 +80,6 @@ public class ApiIntegrationTestBase<TStartup> where TStartup : class
 
         ApiClient = builder.CreateClient();
         DownloadClient = builder.CreateClient();
-        DownloadClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("text/csv"));
+        DownloadClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/csv"));
     }
 }

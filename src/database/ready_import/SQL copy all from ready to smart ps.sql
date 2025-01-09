@@ -697,6 +697,79 @@ WHERE
     AND DRM.ID IS NOT NULL
     AND DSM.ID IS NOT NULL;
 
+BEGIN
+    -- Declare variables
+    DECLARE
+        source_count NUMBER;
+        target_count NUMBER;
+        integrity_mismatches NUMBER;
+    BEGIN
+        -- 1. Validate row counts
+        SELECT COUNT(*) INTO source_count
+        FROM {SOURCE_PROFITSHARE_SCHEMA}.PROFIT_DIST_REQ
+        WHERE PROFIT_DIST_REQ_TYPE IS NOT NULL;
+
+        SELECT COUNT(*) INTO target_count
+        FROM DISTRIBUTION_REQUEST
+        WHERE TYPE_ID IS NOT NULL;
+
+        IF source_count != target_count THEN
+            DBMS_OUTPUT.PUT_LINE('Row count mismatch: Source=' || source_count || ', Target=' || target_count);
+        ELSE
+            DBMS_OUTPUT.PUT_LINE('Row counts match: ' || source_count || ' rows.');
+        END IF;
+
+        -- 2. Data integrity validation
+        SELECT COUNT(*) INTO integrity_mismatches
+        FROM (
+            SELECT
+                PDR.PROFIT_DIST_REQ_EMP,
+                PDR.PROFIT_DIST_REQ_REASON,
+                PDR.PROFIT_DIST_REQ_STATUS,
+                PDR.PROFIT_DIST_REQ_TYPE,
+                DR.DEMOGRAPHIC_ID,
+                DRM.ID AS REASON_ID,
+                DSM.ID AS STATUS_ID,
+                DTM.ID AS TYPE_ID
+            FROM {SOURCE_PROFITSHARE_SCHEMA}.PROFIT_DIST_REQ PDR
+            LEFT JOIN DEMOGRAPHIC D ON D.EMPLOYEE_ID = PDR.PROFIT_DIST_REQ_EMP
+            LEFT JOIN DISTRIBUTION_REQUEST_TYPE DTM ON PDR.PROFIT_DIST_REQ_TYPE = DTM.NAME
+            LEFT JOIN DISTRIBUTION_REQUEST_REASON DRM ON PDR.PROFIT_DIST_REQ_REASON = DRM.NAME
+            LEFT JOIN DISTRIBUTION_REQUEST_STATUS DSM ON PDR.PROFIT_DIST_REQ_STATUS = DSM.ID
+            LEFT JOIN DISTRIBUTION_REQUEST DR ON DR.DEMOGRAPHIC_ID = D.ID
+            WHERE (
+                D.ID IS NULL OR
+                DRM.ID IS NULL OR
+                DSM.ID IS NULL OR
+                DTM.ID IS NULL
+            )
+        );
+
+        IF integrity_mismatches > 0 THEN
+            DBMS_OUTPUT.PUT_LINE('Data integrity validation failed: ' || integrity_mismatches || ' mismatches found.');
+        ELSE
+            DBMS_OUTPUT.PUT_LINE('Data integrity validation passed. No mismatches found.');
+        END IF;
+
+        -- 3. Null value checks in target table
+        SELECT COUNT(*) INTO integrity_mismatches
+        FROM DISTRIBUTION_REQUEST
+        WHERE DEMOGRAPHIC_ID IS NULL
+           OR REASON_ID IS NULL
+           OR STATUS_ID IS NULL
+           OR TYPE_ID IS NULL;
+
+        IF integrity_mismatches > 0 THEN
+            DBMS_OUTPUT.PUT_LINE('Null value validation failed: ' || integrity_mismatches || ' rows with null values found.');
+        ELSE
+            DBMS_OUTPUT.PUT_LINE('Null value validation passed. No null values found in critical columns.');
+        END IF;
+
+        -- Final result
+        DBMS_OUTPUT.PUT_LINE('Validation completed successfully.');
+    END;
+END;
+
 
 
 

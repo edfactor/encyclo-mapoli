@@ -21,8 +21,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
     public TerminatedEmployeeAndBeneficiaryReport(IProfitSharingDataContextFactory factory,
         ICalendarService calendarService,
-        TotalService totalService,
-        ContributionService contributionService)
+        TotalService totalService)
     {
         _factory = factory;
         _calendarService = calendarService;

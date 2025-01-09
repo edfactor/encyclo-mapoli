@@ -133,6 +133,8 @@ public class MasterInquiryService : IMasterInquiryService
                     var previousBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(SearchBy.Ssn, ssn, previousYear, cancellationToken);
                     var currentBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(SearchBy.Ssn, ssn, currentYear, cancellationToken);
 
+                    var maxProfitYear = req.EndProfitYear.HasValue ? req.EndProfitYear : short.MaxValue;
+
                     var demographicData = await ctx.Demographics
                      .Where(d => d.Ssn == uniqueSsns[0])
                      .Select(d => new
@@ -152,6 +154,7 @@ public class MasterInquiryService : IMasterInquiryService
                          d.StoreNumber,
                          DemographicId = d.Id,
                          LatestPayProfit = d.PayProfits
+                             .Where(x=>x.ProfitYear <= maxProfitYear)
                              .OrderByDescending(p => p.ProfitYear)
                              .FirstOrDefault()
                      })

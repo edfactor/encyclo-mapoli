@@ -1,6 +1,4 @@
-﻿
-
-namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
+﻿namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 
 /// <summary>
 /// Produces a paper report identical to the QPAY066.pco program.
@@ -46,37 +44,26 @@ public class TextReportGenerator
         _reportWriter.WriteLine(@"                                  BEGINNING  BENEFICIARY   DISTRIBUTION                 ENDING       VESTED    DATE      YTD VST     E
 BADGE/PSN # EMPLOYEE NAME           BALANCE  ALLOCATION       AMOUNT       FORFEIT      BALANCE      BALANCE   TERM   PS HRS PCT AGE C");
         _reportWriter.WriteLine();
-
     }
 
 
     public void PrintDetails(string r2BadgePsnNp, string r2EmployeeName, decimal r2PsAmt, decimal r2BenAlloc, decimal r2PsLoan,
-                                    decimal r2PsForf, decimal r2PsDol, decimal r2Vest, DateOnly? wsDoTerm, decimal r2PsHrs,
-                                    int wVestPert, int? age, byte? wEnrolled)
+        decimal r2PsForf, decimal r2PsDol, decimal r2Vest, DateOnly? wsDoTerm, decimal r2PsHrs,
+        int wVestPert, int? age, byte? wEnrolled)
     {
         if (_lineCounter % LinesOnPage == 0)
         {
             PrintHeader();
         }
+
         _lineCounter++;
-        string termDate = wsDoTerm == null || wsDoTerm == DateOnly.MinValue ?
-            "".PadRight(6)
+        string termDate = wsDoTerm == null || wsDoTerm == DateOnly.MinValue
+            ? "".PadRight(6)
             : $"{wsDoTerm.Value.Year - 2000:00}{wsDoTerm.Value.Month:00}{wsDoTerm.Value.Day:00}";
         string ageStr = age.HasValue ? $"{age:00}" : "";
 
-        _reportWriter.WriteLine(r2BadgePsnNp.PadLeft(11) + " " +
-                          r2EmployeeName.PadRight(19) + " " +
-                          FormatWithSingleComma(r2PsAmt).PadLeft(12) + " " +
-                          FormatWithSingleComma(r2BenAlloc).PadLeft(12) + " " +
-                          FormatWithSingleComma(r2PsLoan).PadLeft(12) + " " +
-                          FormatWithSingleComma(r2PsForf).PadLeft(12) + " " +
-                          FormatWithSingleComma(r2PsDol).PadLeft(12) + " " +
-                          FormatWithSingleComma(r2Vest).PadLeft(12) + " " +
-                          termDate + " " +
-                          $"{r2PsHrs:0.00}".PadLeft(7) + " " +
-                          $"{wVestPert:00}".PadLeft(3) + " " +
-                          ageStr.PadLeft(3) +
-                          ((wEnrolled == 0) ? "" : " " + wEnrolled));
+        _reportWriter.WriteLine(
+            $"{r2BadgePsnNp.PadLeft(11)} {r2EmployeeName.PadRight(19)} {FormatWithSingleComma(r2PsAmt).PadLeft(12)} {FormatWithSingleComma(r2BenAlloc).PadLeft(12)} {FormatWithSingleComma(r2PsLoan).PadLeft(12)} {FormatWithSingleComma(r2PsForf).PadLeft(12)} {FormatWithSingleComma(r2PsDol).PadLeft(12)} {FormatWithSingleComma(r2Vest).PadLeft(12)} {termDate} {$"{r2PsHrs:0.00}".PadLeft(7)} {$"{wVestPert:00}".PadLeft(3)} {ageStr.PadLeft(3)}{((wEnrolled == 0) ? "" : $" {wEnrolled}")}");
     }
 
     // In order to print nicely, values over 1 million do not have a second comma.
@@ -90,8 +77,9 @@ BADGE/PSN # EMPLOYEE NAME           BALANCE  ALLOCATION       AMOUNT       FORFE
         Console.WriteLine(parts);
         if (parts.Length == 3)
         {
-            return parts[0] + parts[1] + "," + parts[2];
+            return $"{parts[0]}{parts[1]},{parts[2]}";
         }
+
         return numberStr;
     }
 
@@ -124,8 +112,8 @@ BADGE/PSN # EMPLOYEE NAME           BALANCE  ALLOCATION       AMOUNT       FORFE
         {
             PrintReportHeader();
         }
+
         PrintPageHeader();
         _pageCounter++;
     }
 }
-

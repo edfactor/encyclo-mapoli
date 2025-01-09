@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.OracleHcm.Services;
+﻿using Demoulas.ProfitSharing.OracleHcm.Clients;
 using Quartz;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Jobs;

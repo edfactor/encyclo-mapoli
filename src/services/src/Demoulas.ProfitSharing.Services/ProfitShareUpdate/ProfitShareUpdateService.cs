@@ -87,7 +87,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
         List<EmployeeFinancials> employeeFinancialsList = await _dbContextFactory.UseReadOnlyContext(async ctx =>
         {
             var employees = await ctx.PayProfits
-                .Include(pp => pp.Demographic)
+                .Include(pp => pp.Demographic) //Question - Should this be referring to frozen demographics
                 .Include(pp => pp.Demographic!.ContactInfo)
                 .Where(pp => pp.ProfitYear == profitShareUpdateRequest.ProfitYear)
                 .Select(x => new

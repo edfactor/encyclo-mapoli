@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.Common.Contracts.Contracts.Request;
-
-namespace Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 
 /// <summary>
 ///     Values provided by user to guide how to update Earnings,Contributions and forfeiture points are updated for the new PS year
