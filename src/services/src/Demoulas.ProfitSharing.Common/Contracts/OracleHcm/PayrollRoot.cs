@@ -4,8 +4,8 @@ namespace Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 
 public record PayrollRoot(
     [property: JsonPropertyName("items")] IReadOnlyList<PayrollItem> Items,
-    [property: JsonPropertyName("count")] int? Count,
-    [property: JsonPropertyName("hasMore")] bool? HasMore,
-    [property: JsonPropertyName("limit")] int? Limit,
-    [property: JsonPropertyName("offset")] int? Offset
+    [property: JsonPropertyName("count")] int Count,
+    [property: JsonPropertyName("hasMore")] bool HasMore,
+    [property: JsonPropertyName("limit")] int Limit,
+    [property: JsonPropertyName("offset")] int Offset
 );

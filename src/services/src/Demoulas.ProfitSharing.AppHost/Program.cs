@@ -32,18 +32,26 @@ catch (Exception ex)
     Console.WriteLine($"An error occurred: {ex.Message}");
 }
 
-var api = builder.AddProject<Demoulas_ProfitSharing_Api>("Demoulas-profitsharing-api")
+var api = builder.AddProject<Demoulas_ProfitSharing_Api>("ProfitSharing-Api")
     .WithHttpHealthCheck("/health")
     .WithHttpsHealthCheck("/health")
     .AsHttp2Service();
 
-var ui = builder.AddNpmApp("Demoulas-profitsharing-ui", "../../../ui/", "dev")
+var ui = builder.AddNpmApp("ProfitSharing-Ui", "../../../ui/", "dev")
     .WithReference(api)
     .WaitFor(api)
     .WithHttpEndpoint(port: uiPort, isProxied: false)
     .WithExternalHttpEndpoints();
 
-builder.AddProject<Demoulas_ProfitSharing_OracleHcm_Sync>(name: "Demoulas-ProfitSharing-OracleHcm-Sync")
+builder.AddProject<Demoulas_ProfitSharing_EmployeeFull_Sync>(name: "ProfitSharing-EmployeeFull-Sync")
+    .WaitFor(api)
+    .WaitFor(ui);
+
+builder.AddProject<Demoulas_ProfitSharing_EmployeeDelta_Sync>(name: "ProfitSharing-EmployeeDelta-Sync")
+    .WaitFor(api)
+    .WaitFor(ui);
+
+builder.AddProject<Demoulas_ProfitSharing_EmployeePayroll_Sync>(name: "ProfitSharing-EmployeePayroll-Sync")
     .WaitFor(api)
     .WaitFor(ui);
 
