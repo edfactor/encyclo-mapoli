@@ -1,4 +1,4 @@
-#How to run script: .\Get-ChangedFiles.ps1 -Author "developer@example.com" -Branch "main" -OutputFile "ChangedFilesReport.txt"
+#How to run script: .\\Get-ChangedFiles.ps1 -Author "developer@example.com" -Branch "main" -OutputFile "ChangedFilesReport.txt"
 
 # Parameters
 param (
@@ -33,6 +33,10 @@ $ChangedFiles = @{}
 
 # Process each commit
 foreach ($Commit in $Commits) {
+    # Get commit details
+    $CommitDetails = git log -n 1 --pretty=format:"Commit: %H`nAuthor: %an <%ae>`nDate: %ad`nMessage: %s`n" $Commit
+    Add-Content -Path $OutputFile -Value "`n$CommitDetails`n"
+
     Write-Host "Processing commit: $Commit"
     try {
         # Check if the commit has a parent
@@ -40,21 +44,19 @@ foreach ($Commit in $Commits) {
         if ($ParentCommit) {
             # Normal case: diff with the parent commit
             $Files = git diff --name-only "$Commit^" "$Commit"
+            $Diffs = git diff "$Commit^" "$Commit"
         } else {
-            # Initial/root commit: use git diff-tree
-            $Files = git diff-tree --no-commit-id --name-only -r "$Commit"
+            # Initial/root commit: use git show
+            $Files = git show --pretty="" --name-only $Commit
+            $Diffs = git show $Commit
         }
 
-        # Add files to the hash table for uniqueness
-        foreach ($File in $Files) {
-            $ChangedFiles[$File] = $true
-        }
+        # Add files and their diffs to the report
+        Add-Content -Path $OutputFile -Value "Changed files:`n$Files`n"
+        Add-Content -Path $OutputFile -Value "Changes:`n$Diffs`n"
     } catch {
         Write-Warning "Failed to process commit $Commit"
     }
 }
-
-# Output unique changed files to the report
-$ChangedFiles.Keys | Sort-Object | Out-File -Encoding UTF8 $OutputFile
 
 Write-Host "Report generated: $OutputFile"
