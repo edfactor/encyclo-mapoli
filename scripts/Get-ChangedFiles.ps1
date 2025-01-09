@@ -50,7 +50,7 @@ foreach ($Commit in $Commits) {
             $ChangedFiles[$File] = $true
         }
     } catch {
-        Write-Warning "Failed to process commit $Commit: $(${_})"
+        Write-Warning "Failed to process commit $Commit"
     }
 }
 
