@@ -34,9 +34,23 @@ $ChangedFiles = @{}
 # Process each commit
 foreach ($Commit in $Commits) {
     Write-Host "Processing commit: $Commit"
-    $Files = git diff --name-only "$Commit^" "$Commit"
-    foreach ($File in $Files) {
-        $ChangedFiles[$File] = $true
+    try {
+        # Check if the commit has a parent
+        $ParentCommit = git rev-parse "$Commit^" 2>$null
+        if ($ParentCommit) {
+            # Normal case: diff with the parent commit
+            $Files = git diff --name-only "$Commit^" "$Commit"
+        } else {
+            # Initial/root commit: use git diff-tree
+            $Files = git diff-tree --no-commit-id --name-only -r "$Commit"
+        }
+
+        # Add files to the hash table for uniqueness
+        foreach ($File in $Files) {
+            $ChangedFiles[$File] = $true
+        }
+    } catch {
+        Write-Warning "Failed to process commit $Commit: $(${_})"
     }
 }
 
