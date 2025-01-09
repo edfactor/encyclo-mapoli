@@ -185,7 +185,7 @@ public class ProfitShareUpdateTests
         short profitShare = 2023;
 
         CalendarResponseDto fiscalDates =
-            await _calendarService.GetYearStartAndEndAccountingDatesAsync(2023, CancellationToken.None);
+            await _calendarService.GetYearStartAndEndAccountingDatesAsync(2023, TestContext.Current.CancellationToken);
         List<EmployeeFinancials> employeeFinancialsList = await _dbFactory.UseReadOnlyContext(async ctx =>
         {
             IQueryable<ParticipantTotalVestingBalanceDto> totalVestingBalances =

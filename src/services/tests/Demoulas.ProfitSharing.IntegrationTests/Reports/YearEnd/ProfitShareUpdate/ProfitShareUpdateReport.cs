@@ -34,7 +34,7 @@ internal sealed class ProfitShareUpdateReport
         this.profitYear = profitShareUpdateRequest.ProfitYear;
 
         (List<MemberFinancials> members, AdjustmentReportData adjustmentsApplied, bool _) =
-            await psu.ProfitSharingUpdatePaginated(profitShareUpdateRequest, CancellationToken.None);
+            await psu.ProfitSharingUpdatePaginated(profitShareUpdateRequest, TestContext.Current.CancellationToken);
 
         m805PrintSequence(members, profitShareUpdateRequest.MaxAllowedContributions);
         m1000AdjustmentReport(profitShareUpdateRequest, adjustmentsApplied);

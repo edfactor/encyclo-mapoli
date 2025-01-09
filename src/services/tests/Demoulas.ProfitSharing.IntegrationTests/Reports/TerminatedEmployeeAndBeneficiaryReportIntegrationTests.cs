@@ -43,7 +43,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : TestClassB
 
         Stopwatch stopwatch = Stopwatch.StartNew();
         stopwatch.Start();
-        var data = await mockService.GetReportAsync(new ProfitYearRequest { ProfitYear = profitSharingYear }, CancellationToken.None);
+        var data = await mockService.GetReportAsync(new ProfitYearRequest { ProfitYear = profitSharingYear }, TestContext.Current.CancellationToken);
 
         string actualText = CreateTextReport(effectiveDateOfTestData, startDate, endDate, profitSharingYear, data);
         stopwatch.Stop();
