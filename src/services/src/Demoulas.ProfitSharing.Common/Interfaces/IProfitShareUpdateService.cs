@@ -11,6 +11,4 @@ namespace Demoulas.ProfitSharing.Common.Interfaces;
 public interface IProfitShareUpdateService
 {
     public Task<ProfitShareUpdateResponse> ProfitShareUpdate(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken);
-
-
 }

@@ -21,16 +21,39 @@ public sealed class ScenarioFactory
 {
     private readonly ScenarioDataContextFactory _sdb = new();
 
+    public short ThisYear { get; set; } = 2024; 
+    public short LastYear => (short) (ThisYear -1);
     public List<Demographic> Demographics { get; set; } = [];
     public List<PayProfit> PayProfits { get; set; } = [];
     public List<Beneficiary> Beneficiaries { get; set; } = [];
     public List<ProfitDetail> ProfitDetails { get; set; } = [];
+    
 
-    public ScenarioFactory CreateOneEmployee()
+    public ScenarioFactory CreateOneEmployeeWithProfitDetails()
     {
-        var (demographic, payprofit) = StockFactory.CreateEmployee();
-        PayProfits = [payprofit];
+        var (demographic, payprofits) = StockFactory.CreateEmployee(ThisYear);
+        PayProfits = payprofits;
         Demographics = [demographic];
+        ProfitDetails =
+        [
+            // A default contribution record which gives the employee some initial money
+            new ProfitDetail
+            {
+                ProfitCode = /*0*/ ProfitCode.Constants.IncomingContributions,
+                ProfitCodeId = /*0*/ ProfitCode.Constants.IncomingContributions.Id,
+                Ssn = demographic.Ssn,
+                ProfitYear = LastYear,
+                Contribution = 1000m
+            },
+            // This is a NOP record that tests can manipulate as approprate.  
+            new ProfitDetail
+            {
+                ProfitCode = /*8*/ ProfitCode.Constants.Incoming100PercentVestedEarnings,
+                ProfitCodeId = /*0*/ ProfitCode.Constants.Incoming100PercentVestedEarnings.Id,
+                Ssn = demographic.Ssn,
+                ProfitYear = LastYear
+            }
+        ];
         return this;
     }
 

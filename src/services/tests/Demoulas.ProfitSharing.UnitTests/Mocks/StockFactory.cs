@@ -41,13 +41,13 @@ public static class StockFactory
         };
     }
 
-    public static (Demographic demographic, PayProfit payprofit) CreateEmployee()
+    public static (Demographic demographic, List<PayProfit> payprofit) CreateEmployee(short profitYear)
     {
         Demographic demographic = new()
         {
             Id = _id++,
             OracleHcmId = 0,
-            Ssn = 0,
+            Ssn = 444,
             EmployeeId = 0,
             LastModifiedDate = default,
             StoreNumber = 0,
@@ -97,32 +97,61 @@ public static class StockFactory
             DistributionRequests = []
         };
 
-        PayProfit payprofit = new()
-        {
-            DemographicId = demographic.Id,
-            Demographic = demographic,
-            ProfitYear = (short)DateTime.Today.Year, //  Calendar Service: "The date must be between January 1, 2000, and 5 years from today's date."
-            CurrentHoursYear = 0,
-            CurrentIncomeYear = 0,
-            EarningsEtvaValue = 0,
-            SecondaryEarnings = null,
-            SecondaryEtvaEarnings = null,
-            WeeksWorkedYear = 0,
-            PsCertificateIssuedDate = null,
-            EnrollmentId = Enrollment.Constants.NewVestingPlanHasContributions,
-            Enrollment = null,
-            BeneficiaryTypeId = 0,
-            BeneficiaryType = null,
-            EmployeeTypeId = 0,
-            EmployeeType = null,
-            ZeroContributionReasonId = null,
-            ZeroContributionReason = null,
-            HoursExecutive = 0,
-            IncomeExecutive = 0,
-            LastUpdate = default,
-            PointsEarned = null,
-            YearsInPlan = 0
-        };
-        return (demographic, payprofit);
+        List<PayProfit> payprofits =
+        [
+            new()
+            {
+                DemographicId = demographic.Id,
+                Demographic = demographic,
+                ProfitYear = profitYear, //  Calendar Service: "The date must be between January 1, 2000, and 5 years from today's date."
+                CurrentHoursYear = 0,
+                CurrentIncomeYear = 0,
+                EarningsEtvaValue = 0,
+                SecondaryEarnings = null,
+                SecondaryEtvaEarnings = null,
+                WeeksWorkedYear = 0,
+                PsCertificateIssuedDate = null,
+                EnrollmentId = Enrollment.Constants.NewVestingPlanHasContributions,
+                Enrollment = new Enrollment { Id = Enrollment.Constants.NewVestingPlanHasContributions, Name = "" },
+                BeneficiaryTypeId = 0,
+                BeneficiaryType = null,
+                EmployeeTypeId = 0,
+                EmployeeType = null,
+                ZeroContributionReasonId = null,
+                ZeroContributionReason = null,
+                HoursExecutive = 0,
+                IncomeExecutive = 0,
+                LastUpdate = default,
+                PointsEarned = null,
+                YearsInPlan = 3
+            },
+            new()
+            {
+                DemographicId = demographic.Id,
+                Demographic = demographic,
+                ProfitYear = (short)(profitYear-1), //  Calendar Service: "The date must be between January 1, 2000, and 5 years from today's date."
+                CurrentHoursYear = 0,
+                CurrentIncomeYear = 0,
+                EarningsEtvaValue = 0,
+                SecondaryEarnings = null,
+                SecondaryEtvaEarnings = null,
+                WeeksWorkedYear = 0,
+                PsCertificateIssuedDate = null,
+                EnrollmentId = Enrollment.Constants.NewVestingPlanHasContributions,
+                Enrollment = new Enrollment { Id = Enrollment.Constants.NewVestingPlanHasContributions, Name = "" },
+                BeneficiaryTypeId = 0,
+                BeneficiaryType = null,
+                EmployeeTypeId = 0,
+                EmployeeType = null,
+                ZeroContributionReasonId = null,
+                ZeroContributionReason = null,
+                HoursExecutive = 0,
+                IncomeExecutive = 0,
+                LastUpdate = default,
+                PointsEarned = null,
+                YearsInPlan = 2
+            }
+        ];
+        return (demographic, payprofits);
     }
 }

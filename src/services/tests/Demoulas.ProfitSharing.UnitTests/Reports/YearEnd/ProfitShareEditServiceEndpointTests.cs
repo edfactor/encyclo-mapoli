@@ -29,10 +29,10 @@ public sealed class ProfitShareEditServiceEndpointTests : ApiTestBase<Program>
         ProfitShareUpdateRequest req = new() { ProfitYear = _profitYear };
 
         // Act
-        TestResult<ProfitShareUpdateResponse> response =
+        TestResult<ProfitShareEditResponse> response =
             await ApiClient
-                .GETAsync<ProfitShareUpdateEndpoint,
-                    ProfitShareUpdateRequest, ProfitShareUpdateResponse>(req);
+                .GETAsync<ProfitShareEditEndpoint,
+                    ProfitShareUpdateRequest, ProfitShareEditResponse>(req);
 
         // Assert
         response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);

@@ -127,7 +127,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                     ? x.Beneficiary.Contact.ContactInfo.MiddleName.Substring(0, 1)
                     : string.Empty,
                 LastName = x.Beneficiary.Contact.ContactInfo.LastName,
-                YearsInPs = 10,  // Makes function IsInteresting() always return true for beneficiaries.
+                YearsInPs = 10, // Makes function IsInteresting() always return true for beneficiaries.  This is the same value/convention used in READY.
                 BeneficiaryAllocation = x.Beneficiary.Amount
             });
 
@@ -173,11 +173,12 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             InternalProfitDetailDto transactionsThisYear = await RetrieveProfitDetail(profitDetails, cancellationToken) ?? new InternalProfitDetailDto();
 
             // Transactions 2: Up to last year (requested year - 1)
-            var lastYearBalances = await _totalService.TotalVestingBalance(ctx, lastYear, calendarInfoLastYear.FiscalBeginDate).Where(k => k.Ssn == memberSlice.Ssn)
+            var lastYearBalances = await _totalService.GetTotalBalanceSet(ctx, lastYear).Where(k => k.Ssn == memberSlice.Ssn)
                 .FirstOrDefaultAsync(cancellationToken);
 
             // Transactions 3: the current (requested) year
-            var thisYearBalances = await _totalService.TotalVestingBalance(ctx, req.ProfitYear, calendarInfoThisYear.FiscalEndDate).Where(k => k.Ssn == memberSlice.Ssn)
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            var thisYearBalances = await _totalService.TotalVestingBalance(ctx, req.ProfitYear, today).Where(k => k.Ssn == memberSlice.Ssn)
                 .FirstOrDefaultAsync(cancellationToken);
 
             var member = new Member
@@ -193,7 +194,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 Ssn = memberSlice.Ssn,
                 TerminationDate = memberSlice.TerminationDate,
                 TerminationCode = memberSlice.TerminationCode,
-                BeginningAmount = lastYearBalances?.CurrentBalance ?? 0m,
+                BeginningAmount = lastYearBalances?.Total ?? 0m,
                 CurrentVestedAmount = 77m,
                 YearsInPlan = memberSlice.YearsInPs,
                 ZeroCont = memberSlice.ZeroCont,
@@ -202,7 +203,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 BeneficiaryAllocation = transactionsThisYear.BeneficiaryAllocation,
                 DistributionAmount = transactionsThisYear.Distribution,
                 ForfeitAmount = transactionsThisYear.TotalForfeitures,
-                EndingBalance = (lastYearBalances?.CurrentBalance ?? 0m)
+                EndingBalance = (lastYearBalances?.Total ?? 0m)
                                 + transactionsThisYear.TotalForfeitures + transactionsThisYear.Distribution + transactionsThisYear.BeneficiaryAllocation,
                 VestedBalance = thisYearBalances?.VestedBalance ?? 0m
             };
@@ -277,7 +278,8 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
     }
 
     /// <summary>
-    /// Do we include the member in the report or not?
+    /// Do we include the member in the report or not?    They are interesting if they have money (as a bene) or
+    /// have been in the plan long enough to have money.
     /// </summary>
     /// <param name="member"></param>
     /// <returns></returns>
@@ -285,7 +287,9 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
     {
         // Has a bene allocation
         if (member.BeneficiaryAllocation != 0)
+        {
             return true;
+        }
 
         //  OldPlan, > 2 years, has beginning amount
         if ((member.EnrollmentId is (Enrollment.Constants.NotEnrolled /*0*/ or Enrollment.Constants.OldVestingPlanHasContributions /*1*/
@@ -297,7 +301,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         }
 
         // NewPlan, > 1 year, has beginning amount
-        if (member.EnrollmentId is (Enrollment.Constants.NewVestingPlanHasContributions or Enrollment.Constants.NewVestingPlanHasForfeitureRecords) &&
+        if (member.EnrollmentId is (Enrollment.Constants.NewVestingPlanHasContributions /*2*/ or Enrollment.Constants.NewVestingPlanHasForfeitureRecords /*4*/ ) &&
             member.YearsInPlan > 1 && member.BeginningAmount != 0)
         {
             return true;
