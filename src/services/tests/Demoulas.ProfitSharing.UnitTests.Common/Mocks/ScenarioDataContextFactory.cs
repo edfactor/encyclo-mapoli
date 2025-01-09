@@ -5,7 +5,7 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore.Storage;
 using Moq;
 
-namespace Demoulas.ProfitSharing.UnitTests.Mocks;
+namespace Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 
 public class ScenarioDataContextFactory : IProfitSharingDataContextFactory
 {

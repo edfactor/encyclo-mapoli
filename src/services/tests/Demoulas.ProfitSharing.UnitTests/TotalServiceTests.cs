@@ -2,7 +2,7 @@
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services;
-using Demoulas.ProfitSharing.UnitTests.Base;
+using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

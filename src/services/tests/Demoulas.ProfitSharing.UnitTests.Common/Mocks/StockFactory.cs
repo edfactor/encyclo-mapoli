@@ -1,6 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Data.Entities;
 
-namespace Demoulas.ProfitSharing.UnitTests.Mocks;
+namespace Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 
 /**
  * A collect of "stock" objects suitable for use in testing.

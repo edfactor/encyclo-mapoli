@@ -1,7 +1,7 @@
 ﻿using Bogus;
 using Demoulas.ProfitSharing.Data.Entities;
 
-namespace Demoulas.ProfitSharing.UnitTests.Fakes;
+namespace Demoulas.ProfitSharing.UnitTests.Common.Fakes;
 internal sealed class PayClassificationFaker : Faker<PayClassification>
 {
     internal PayClassificationFaker()

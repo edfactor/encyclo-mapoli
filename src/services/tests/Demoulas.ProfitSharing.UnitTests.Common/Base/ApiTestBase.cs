@@ -1,13 +1,13 @@
 ﻿using System.Diagnostics;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.UnitTests.Mocks;
+using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Demoulas.ProfitSharing.UnitTests.Base;
+namespace Demoulas.ProfitSharing.UnitTests.Common.Base;
 
 /// <summary>
 ///   Abstraction for testing api endpoints that use a <c>DbContext</c>.

@@ -3,7 +3,7 @@ using System.Reflection;
 using Castle.Core.Internal;
 using FluentAssertions;
 
-namespace Demoulas.ProfitSharing.UnitTests.Extensions;
+namespace Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 
 public static class ComparisonExtensions
 {

@@ -3,7 +3,7 @@ using System.Net.Http.Headers;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Demoulas.ProfitSharing.UnitTests.Extensions;
+namespace Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 
 public static class SecurityExtensions
 {

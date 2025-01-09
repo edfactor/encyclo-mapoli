@@ -138,6 +138,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demoulas.ProfitSharing.Empl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demoulas.ProfitSharing.EmployeePayroll.Sync", "src\Demoulas.ProfitSharing.EmployeePayroll.Sync\Demoulas.ProfitSharing.EmployeePayroll.Sync.csproj", "{C3C2C269-E745-433A-8425-845B4D5EEF07}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployment Configuration Files", "Deployment Configuration Files", "{D5AF5CF4-D69A-4989-BE5B-86BF4E705EF1}"
+	ProjectSection(SolutionItems) = preProject
+		configuration\credsettings.json = configuration\credsettings.json
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demoulas.ProfitSharing.UnitTests.Common", "tests\Demoulas.ProfitSharing.UnitTests.Common\Demoulas.ProfitSharing.UnitTests.Common.csproj", "{2845B5C5-E155-451F-860C-0FD28B7399EF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -208,6 +215,10 @@ Global
 		{C3C2C269-E745-433A-8425-845B4D5EEF07}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C3C2C269-E745-433A-8425-845B4D5EEF07}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C3C2C269-E745-433A-8425-845B4D5EEF07}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2845B5C5-E155-451F-860C-0FD28B7399EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2845B5C5-E155-451F-860C-0FD28B7399EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2845B5C5-E155-451F-860C-0FD28B7399EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2845B5C5-E155-451F-860C-0FD28B7399EF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -224,6 +235,7 @@ Global
 		{8E7C7233-DF2C-4319-8BA2-5B32B14C91A2} = {90876D49-395F-40FE-86C6-08DCCF9DBEBC}
 		{1DE23C20-0E31-4953-A679-5BA58A8040D0} = {90876D49-395F-40FE-86C6-08DCCF9DBEBC}
 		{C3C2C269-E745-433A-8425-845B4D5EEF07} = {90876D49-395F-40FE-86C6-08DCCF9DBEBC}
+		{2845B5C5-E155-451F-860C-0FD28B7399EF} = {80B088DC-C84B-46AA-BFF3-DC309C5B4325}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FB1CB19A-BE8B-4F91-9186-FE7C9F3CE4D7}

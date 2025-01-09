@@ -5,9 +5,9 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Security;
-using Demoulas.ProfitSharing.UnitTests.Base;
-using Demoulas.ProfitSharing.UnitTests.Extensions;
-using Demoulas.ProfitSharing.UnitTests.Mocks;
+using Demoulas.ProfitSharing.UnitTests.Common.Base;
+using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
+using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 using FastEndpoints;
 using FluentAssertions;
 

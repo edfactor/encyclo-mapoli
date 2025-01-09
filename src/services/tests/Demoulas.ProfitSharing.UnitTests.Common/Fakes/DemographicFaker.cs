@@ -4,16 +4,16 @@ using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.Util.Extensions;
 
-namespace Demoulas.ProfitSharing.UnitTests.Fakes;
+namespace Demoulas.ProfitSharing.UnitTests.Common.Fakes;
 
-internal sealed class DemographicFaker : Faker<Demographic>
+public sealed class DemographicFaker : Faker<Demographic>
 {
     private static int _badgeNumberCounter = 1_000;
     private static int _idCounter = 10_000;
     private static long _oracleHcmIdCounter = 100_000;
     
 
-    internal DemographicFaker()
+    public DemographicFaker()
     {
         ContactInfoFaker contactInfoFaker = new ContactInfoFaker();
         AddressFaker addressFaker = new AddressFaker();

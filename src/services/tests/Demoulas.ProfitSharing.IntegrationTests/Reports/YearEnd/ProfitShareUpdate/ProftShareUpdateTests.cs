@@ -216,7 +216,7 @@ public class ProfitShareUpdateTests
                         EtvaAfterVestingRules = tvb == null ? 0 : tvb.Etva
                     }
                 )
-                .ToListAsync();
+                .ToListAsync(TestContext.Current.CancellationToken);
         });
         _testOutputHelper.WriteLine($"Total employees {employeeFinancialsList.Count}");
     }
