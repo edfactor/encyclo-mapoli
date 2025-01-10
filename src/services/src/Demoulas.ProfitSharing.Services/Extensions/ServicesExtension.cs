@@ -28,6 +28,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IMilitaryAndRehireService, MilitaryAndRehireService>();
         _ = builder.Services.AddScoped<ITotalService, TotalService>();
         _ = builder.Services.AddScoped<IWagesService, WagesService>();
+        _ = builder.Services.AddScoped<IYearEndService, YearEndService>();
 
         _ = builder.Services.AddScoped<TotalService>();
         _ = builder.Services.AddScoped<ContributionService>();
@@ -41,6 +42,8 @@ public static class ServicesExtension
 
         _ = builder.Services.AddScoped<IProfitShareUpdateService, ProfitShareUpdateService>();
         _ = builder.Services.AddScoped<IProfitShareEditService, ProfitShareEditService>();
+
+        _ = builder.Services.AddSingleton<IPayProfitUpdateService, PayProfitUpdateService>();
 
         #region Mappers
 
