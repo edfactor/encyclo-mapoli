@@ -5,13 +5,13 @@ using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.NotOwned;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.UnitTests.Fakes;
+using Demoulas.ProfitSharing.UnitTests.Common.Fakes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using MockQueryable.Moq;
 using Moq;
 
-namespace Demoulas.ProfitSharing.UnitTests.Mocks;
+namespace Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 
 public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
 {

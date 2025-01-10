@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using MockQueryable.Moq;
 using Moq;
 
-namespace Demoulas.ProfitSharing.UnitTests.Mocks;
+namespace Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 
 /// <summary>
 /// This factory is used to configure a ScenarioDataContextFactory for use in tests.

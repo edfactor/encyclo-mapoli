@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Api;
+﻿using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.UnitTests.Base;
+using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.UnitTests;
-public class YearEndServiceTests:ApiTestBase<Program>
+
+public class YearEndServiceTests : ApiTestBase<Program>
 {
     [Fact]
     public async Task YearEndProcessShouldSetPoints()
@@ -26,10 +22,11 @@ public class YearEndServiceTests:ApiTestBase<Program>
 
         await dataContextFactory.UseReadOnlyContext<bool>(ctx =>
         {
-            foreach (var pp in ctx.PayProfits.Where(p=>p.ProfitYear == testYear))
+            foreach (var pp in ctx.PayProfits.Where(p => p.ProfitYear == testYear))
             {
                 Assert.Equal(testYear, pp.ProfitYear);
             }
+
             return Task.FromResult(true);
         });
 

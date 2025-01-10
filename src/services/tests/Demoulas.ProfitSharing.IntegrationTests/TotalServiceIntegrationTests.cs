@@ -5,7 +5,6 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Oracle.ManagedDataAccess.Client;
-using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.IntegrationTests;
 
@@ -15,10 +14,10 @@ public class TotalServiceIntegrationTests
 #pragma warning disable S4487
     private readonly ITestOutputHelper _output;
 
-    private readonly CalendarService calsvc;
-    private readonly TotalService totalService;
-    private readonly OracleConnection connection;
-    private readonly PristineDataContextFactory dataContextFactory;
+    private readonly CalendarService _calsvc;
+    private readonly TotalService _totalService;
+    private readonly OracleConnection _connection;
+    private readonly PristineDataContextFactory _dataContextFactory;
 
     public TotalServiceIntegrationTests(ITestOutputHelper output)
     {
@@ -26,21 +25,21 @@ public class TotalServiceIntegrationTests
         _output.WriteLine("test start");
         var configuration = new ConfigurationBuilder().AddUserSecrets<TotalServiceIntegrationTests>().Build();
         string connectionString = configuration["ConnectionStrings:ProfitSharing"]!;
-        dataContextFactory = new PristineDataContextFactory(connectionString);
+        _dataContextFactory = new PristineDataContextFactory(connectionString);
 
         AccountingPeriodsService aps = new AccountingPeriodsService();
-        calsvc = new CalendarService(dataContextFactory, aps);
-        totalService = new TotalService(dataContextFactory, calsvc);
+        _calsvc = new CalendarService(_dataContextFactory, aps);
+        _totalService = new TotalService(_dataContextFactory, _calsvc);
 
         // For accessing PROFITSHARE.* tables
-        connection = new OracleConnection(connectionString);
+        _connection = new OracleConnection(connectionString);
     }
 
 
     [Fact]
     public async Task Verify_that_NetBalanceLastYear_and_CompanyContributionYears_match_PAYPROFIT()
     {
-        var ppReady = await getReadyPayProfitData();
+        var ppReady = await GetReadyPayProfitData();
         var ppSmartYis = await GetSmartPayProfitData();
         var ssnToSmartTotals = await GetSmartAmounts();
         var yisAgree = 0;
@@ -85,13 +84,13 @@ public class TotalServiceIntegrationTests
 #pragma warning disable AsyncFixer01
     private async Task<Dictionary<int, int>> GetSmartPayProfitData()
     {
-        return await dataContextFactory.UseReadOnlyContext(async ctx =>
+        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var ddata = await ctx.PayProfits
                 .Include(d => d.Demographic)
                 .Where(p => p.ProfitYear == 2023)
                 .Join(
-                    totalService.GetYearsOfService(ctx, 2023),
+                    _totalService.GetYearsOfService(ctx, 2023),
                     x => x.Demographic!.Ssn,
                     x => x.Ssn,
                     (p, tot) => new { p.Demographic!.EmployeeId, Years = tot.Years }
@@ -106,8 +105,8 @@ public class TotalServiceIntegrationTests
 
     private async Task<Dictionary<int, ParticipantTotalVestingBalanceDto>> GetSmartAmounts()
     {
-        return await dataContextFactory.UseReadOnlyContext(ctx =>
-            totalService.TotalVestingBalance(ctx, (short)2023, new DateOnly(2024, 1, 1))
+        return await _dataContextFactory.UseReadOnlyContext(ctx =>
+            _totalService.TotalVestingBalance(ctx, (short)2023, new DateOnly(2024, 1, 1))
                 .ToDictionaryAsync(
                     keySelector: p => p.Ssn,
                     elementSelector: p => p)
@@ -124,15 +123,15 @@ public class TotalServiceIntegrationTests
         public decimal Etva;
     }
 
-    private async Task<Dictionary<int, PayProfitReady>> getReadyPayProfitData()
+    private async Task<Dictionary<int, PayProfitReady>> GetReadyPayProfitData()
     {
-        await connection.OpenAsync();
+        await _connection.OpenAsync();
 
         string query =
             "select payprof_badge, PAYPROF_SSN, PY_PS_YEARS, PY_PS_AMT, PY_PS_ETVA from PROFITSHARE.PAYPROFIT";
 
         var data = new Dictionary<int, PayProfitReady>();
-        var command = new OracleCommand(query, connection);
+        var command = new OracleCommand(query, _connection);
 
         var reader = await command.ExecuteReaderAsync();
 

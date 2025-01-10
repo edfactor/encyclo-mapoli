@@ -4,7 +4,7 @@ using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.Util.Extensions;
 
-namespace Demoulas.ProfitSharing.UnitTests.Fakes;
+namespace Demoulas.ProfitSharing.UnitTests.Common.Fakes;
 
 /// <summary>
 ///   Faker for <c>Beneficiary</c>
