@@ -17,6 +17,75 @@ import {
 import { RootState } from "reduxstore/store";
 import NegativeEtvaForSSNsOnPayprofitGrid from "pages/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofitGrid";
 
+/*
+
+None of the below is set in stone, but is a proposed data structure to formally track related processes. 
+The goal is this be general and repeatable as a pattern across projects. All feedback welcome!
+
+Process Persistence Brainstorm
+-----------------------------
+The process state pattern explores the following goals:
+1. Track user-driven process completion (vs the old batch processing model)
+2. Enable process validation and user decision tracking
+3. Create a reusable pattern for other workflow-based applications
+
+Core Concepts:
+-------------
+- Flows: High-level groupings of related jobs (e.g. "cleanup-reports")
+- Jobs: Individual tasks that need user attention/review
+- Status Tracking: Both at flow and job level for granular progress
+- Validation States: Separate from job status to track data quality (used to highlight issues that need attention in the UI)
+- Audit Trail: Who completed what and when
+
+Future Iterations Could Include:
+------------------------------
+- Role-based access control for specific jobs
+- User decision tracking (approvals, hold)
+- Formal dependencies between jobs (informs user of downstream/side effects)
+- Historical runs and validation results
+
+DB Needs
+------------------------
+ProcessState
+  - Tracks the state of each process/job by year
+  - Core fields:
+    • Year            (which year's process)
+    • Flow ID         (which group of jobs)
+    • Job ID          (specific job/task)
+    • Status          (pending/in-progress/completed)
+    • Validation      (valid/invalid/pending)
+    • Audit fields    (who completed, when)
+    • Timestamps      (created/updated)
+
+  - Key relationships:
+    • One year has many flows
+    • One flow has many jobs
+    • Each job has one current state
+
+  - We can index by year and flow for quick lookups
+
+Required API Endpoints:
+---------------------
+GET /api/process-state/{year}
+- Returns the full process state for a given year
+
+PATCH /api/process-state/{year}/{flowId}/{jobId}
+Request body: {
+    status: string,
+    validationStatus?: string,
+    completedBy?: string
+}
+- Updates the status of a specific job
+
+GET /api/process-state/{year}/summary
+- Returns a summary of completion status for all flows/jobs for the given year
+
+POST /api/process-state/{year}/initialize
+- This will init the process state for a new year with default values - starting fresh
+
+*/
+
+
 const decemberProcessState: ProcessState = {
   year: 2024,
   flows: {
