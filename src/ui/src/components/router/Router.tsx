@@ -28,6 +28,7 @@ import VestedAmountsByAge from "../../pages/VestedAmountsByAge/VestedAmountsByAg
 import BalanceByYears from "../../pages/BalanceByYears/BalanceByYears";
 import Termination from "pages/Termination/Termination";
 import { useEffect } from "react";
+import MilitaryAndRehireEntryAndModification from "pages/MilitaryAndRehireEntryAndModification/MilitaryAndRehireEntryAndModification";
 
 const Router = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -147,6 +148,9 @@ const Router = () => {
           <Route
           path="prof-term"
           element={<Termination />}></Route>
+          <Route
+          path="military-and-rehire-entry"
+          element={<MilitaryAndRehireEntryAndModification />}></Route>
       </RouteSecurity>
     </BrowserRouter>
   );
