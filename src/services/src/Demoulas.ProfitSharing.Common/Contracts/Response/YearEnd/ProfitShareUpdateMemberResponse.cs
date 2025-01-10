@@ -2,10 +2,12 @@
 
 public record ProfitShareUpdateMemberResponse
 {
+    public bool IsEmployee { get; init; }
+    public int Ssn { get; set; }
     public long Badge { get; set; }
     public long Psn { get; set; }
     public string? Name { get; set; }
-    public decimal CurrentAmount { get; set; }
+    public decimal BeginningAmount { get; set; }
     public decimal Distributions { get; set; }
     public decimal Military { get; set; }
     public decimal Xfer { get; set; }
@@ -13,7 +15,11 @@ public record ProfitShareUpdateMemberResponse
     public long EmployeeTypeId { get; set; }
     public decimal Contributions { get; set; }
     public decimal IncomingForfeitures { get; set; }
-    public decimal Earnings { get; set; }
-    public decimal SecondaryEarnings { get; set; }
+    public decimal AllEarnings { get; set; } // Earnings on both Non-ETVA and ETVA (PY-PROF-EARN)
+    public decimal AllSecondaryEarnings { get; set; } // // Earnings on both Non-ETVA and ETVA (PY-PROF-EARN2) 
     public decimal EndingBalance { get; set; }
+    public byte? ZeroContributionReasonId { get; set; }
+    public decimal Etva { get; set; } // PAYPROFIT.PY_PS_ETVA
+    public decimal EtvaEarnings { get; set; } // PY-PROF-ETVA  (a portion of Earnings which applies to ETVA)
+    public decimal SecondaryEtvaEarnings { get; set; } // PY_PROF_ETVA2 (portion of Secondary Earnings which applies to ETVA)
 }

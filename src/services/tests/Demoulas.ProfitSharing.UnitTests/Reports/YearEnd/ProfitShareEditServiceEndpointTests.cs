@@ -30,10 +30,10 @@ public sealed class ProfitShareEditServiceEndpointTests : ApiTestBase<Program>
         ProfitShareUpdateRequest req = new() { ProfitYear = _profitYear };
 
         // Act
-        TestResult<ProfitShareUpdateResponse> response =
+        TestResult<ProfitShareEditResponse> response =
             await ApiClient
-                .GETAsync<ProfitShareUpdateEndpoint,
-                    ProfitShareUpdateRequest, ProfitShareUpdateResponse>(req);
+                .GETAsync<ProfitShareEditEndpoint,
+                    ProfitShareUpdateRequest, ProfitShareEditResponse>(req);
 
         // Assert
         response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -44,7 +44,7 @@ public sealed class ProfitShareEditServiceEndpointTests : ApiTestBase<Program>
     public async Task BasicQuery_json()
     {
         // Arrange
-        ProfitShareUpdateRequest req = new() { ProfitYear = _profitYear };
+        ProfitShareUpdateRequest req = new() { ProfitYear = _profitYear, EarningsPercent = 7m};
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
         // Act
@@ -66,7 +66,7 @@ public sealed class ProfitShareEditServiceEndpointTests : ApiTestBase<Program>
     public async Task BasicQuery_csv()
     {
         // Arrange
-        ProfitShareUpdateRequest req = new() { ProfitYear = _profitYear };
+        ProfitShareUpdateRequest req = new() { ProfitYear = _profitYear, EarningsPercent = 8m};
         DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
         // Act
@@ -83,6 +83,6 @@ public sealed class ProfitShareEditServiceEndpointTests : ApiTestBase<Program>
         lines[l++].Should().NotBeEmpty(); // has Date/time
         lines[l++].Should().Be("Profit Sharing Edit");
         lines[l++].Should().Be("Number,Name,Code,Contribution Amount,Earnings Amount,Incoming Forfeitures,Reason");
-        lines[l].Should().Be("10721,\"Benny, Ben\",0,0,0,0,TBD");
+        lines[l].Should().Be("10721,\"Benny, Ben\",8,0,80,0,100% Earnings");
     }
 }

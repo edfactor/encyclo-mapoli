@@ -94,16 +94,6 @@ internal sealed class ProfitShareUpdateReport
             m830PrintHeader(reportCounters, header1);
         }
 
-        if (memberFinancials.Xfer != 0)
-        {
-            memberFinancials.Contributions = memberFinancials.Contributions + memberFinancials.Xfer;
-        }
-
-        if (memberFinancials.Pxfer != 0)
-        {
-            memberFinancials.Military = memberFinancials.Military - memberFinancials.Pxfer;
-        }
-
         ReportLine report_line = new();
         ReportLine2 report_line_2 = new();
         if (memberFinancials.Badge > 0)
@@ -126,18 +116,11 @@ internal sealed class ProfitShareUpdateReport
             }
 
 
-            report_line.PR_CONT = memberFinancials.Contributions;
-            report_line.PR_MIL = memberFinancials.Military;
+            report_line.PR_CONT = memberFinancials.Contributions + memberFinancials.Xfer;
+            report_line.PR_MIL = memberFinancials.Military - memberFinancials.Pxfer;
             report_line.PR_FORF = memberFinancials.IncomingForfeitures;
-            report_line.PR_EARN = memberFinancials.Earnings;
-
-            if (memberFinancials.SecondaryEarnings != 0)
-            {
-                Console.WriteLine(
-                    $"badge {memberFinancials.Badge} earnings2 ${memberFinancials.SecondaryEarnings}");
-            }
-
-            report_line.PR_EARN2 = memberFinancials.SecondaryEarnings;
+            report_line.PR_EARN = memberFinancials.AllEarnings;
+            report_line.PR_EARN2 = memberFinancials.AllSecondaryEarnings;
             report_line.PR_EARN2 = memberFinancials.Caf;
 
             report_line.END_BAL = memberFinancials.EndingBalance;
@@ -152,33 +135,23 @@ internal sealed class ProfitShareUpdateReport
             report_line_2.PR2_BEG_BAL = memberFinancials.CurrentAmount;
             report_line_2.PR2_DIST1 = memberFinancials.Distributions;
             report_line_2.PR2_NEWEMP = "BEN";
-            report_line_2.PR2_CONT = memberFinancials.Contributions;
+            report_line_2.PR2_CONT = memberFinancials.Contributions + memberFinancials.Xfer;
             report_line_2.PR2_MIL = memberFinancials.Military;
             report_line_2.PR2_FORF = memberFinancials.IncomingForfeitures;
-            report_line_2.PR2_EARN = memberFinancials.Earnings;
-            report_line_2.PR2_EARN2 = memberFinancials.SecondaryEarnings;
+            report_line_2.PR2_EARN = memberFinancials.AllEarnings;
+            report_line_2.PR2_EARN2 = memberFinancials.AllSecondaryEarnings;
             report_line_2.PR2_EARN2 = memberFinancials.Caf;
 
             report_line_2.PR2_END_BAL = memberFinancials.EndingBalance;
         }
 
         collectTotals.WS_TOT_BEGBAL += memberFinancials.CurrentAmount;
-        if (memberFinancials.Xfer != 0)
-        {
-            memberFinancials.Contributions -= memberFinancials.Xfer;
-        }
-
-        if (memberFinancials.Pxfer != 0)
-        {
-            memberFinancials.Military += memberFinancials.Pxfer;
-        }
-
         collectTotals.WS_TOT_DIST1 += memberFinancials.Distributions;
         collectTotals.WS_TOT_CONT += memberFinancials.Contributions;
         collectTotals.WS_TOT_MIL += memberFinancials.Military;
         collectTotals.WS_TOT_FORF += memberFinancials.IncomingForfeitures;
-        collectTotals.WS_TOT_EARN += memberFinancials.Earnings;
-        collectTotals.WS_TOT_EARN2 += memberFinancials.SecondaryEarnings;
+        collectTotals.WS_TOT_EARN += memberFinancials.AllEarnings;
+        collectTotals.WS_TOT_EARN2 += memberFinancials.AllSecondaryEarnings;
         collectTotals.WS_TOT_ENDBAL += memberFinancials.EndingBalance;
         collectTotals.WS_TOT_XFER += memberFinancials.Xfer;
         collectTotals.WS_TOT_PXFER -= memberFinancials.Pxfer;
@@ -195,8 +168,8 @@ internal sealed class ProfitShareUpdateReport
             || memberFinancials.Pxfer != 0m
             || memberFinancials.Military != 0m
             || memberFinancials.IncomingForfeitures != 0m
-            || memberFinancials.Earnings != 0m
-            || memberFinancials.SecondaryEarnings != 0m)
+            || memberFinancials.AllEarnings != 0m
+            || memberFinancials.AllSecondaryEarnings != 0m)
         {
             if (memberFinancials.Badge > 0)
             {

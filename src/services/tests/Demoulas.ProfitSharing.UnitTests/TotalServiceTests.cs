@@ -143,7 +143,7 @@ public class TotalServiceTests : ApiTestBase<Program>
             testRslt = await _totalService.GetTotalEtva(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync(CancellationToken.None);
             testRslt.Should().NotBeNull(); // Outgoing 100% Vested Earnings
             testRslt.Count.Should().Be(1);
-            testRslt[0].Total.Should().Be(18724);
+            testRslt[0].Total.Should().Be(-18724);
 
             for (int i = 0; i < pdArray.Length; i++)
             {
@@ -157,7 +157,7 @@ public class TotalServiceTests : ApiTestBase<Program>
             testRslt = await _totalService.GetTotalEtva(ctx, (short)(DateTime.Now.Year - 1)).Where(x => x.Ssn == demoSsn).ToListAsync(CancellationToken.None);
             testRslt.Should().NotBeNull(); // Test as of filter
             testRslt.Count.Should().Be(1);
-            testRslt[0].Total.Should().Be(18720);
+            testRslt[0].Total.Should().Be(-18720);
 
             for (int i = 0; i < pdArray.Length; i++)
             {
