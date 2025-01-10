@@ -5,6 +5,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.IntegrationTests.Fixtures;
 using Demoulas.ProfitSharing.IntegrationTests.Helpers;
+using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 using FluentAssertions;
@@ -35,9 +36,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : TestClassB
 
         var calendarService = _fixture.Services.GetRequiredService<ICalendarService>()!;
         var totalService = _fixture.Services.GetRequiredService<TotalService>()!;
-        var contributionService = _fixture.Services.GetRequiredService<ContributionService>()!;
         TerminatedEmployeeAndBeneficiaryReportService mockService =
-            new TerminatedEmployeeAndBeneficiaryReportService(ProfitSharingDataContextFactory, calendarService, totalService, contributionService);
+            new TerminatedEmployeeAndBeneficiaryReportService(ProfitSharingDataContextFactory, calendarService, totalService);
 
         Stopwatch stopwatch = Stopwatch.StartNew();
         stopwatch.Start();
