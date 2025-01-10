@@ -1,15 +1,10 @@
-﻿using System.Diagnostics;
-using System.Threading;
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Services.ServiceDto;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.ProfitShareUpdate;
 
@@ -37,10 +32,12 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
         (List<MemberFinancials> memberFinancials, _, bool employeeExceededMaxContribution) = await ProfitSharingUpdatePaginated(profitShareUpdateRequest, cancellationToken);
         List<ProfitShareUpdateMemberResponse> members = memberFinancials.Select(m => new ProfitShareUpdateMemberResponse
         {
+            IsEmployee = m.IsEmployee,
+            Ssn = m.Ssn,
             Badge = m.Badge,
             Psn = m.Psn,
             Name = m.Name,
-            CurrentAmount = m.CurrentAmount,
+            BeginningAmount = m.CurrentAmount,
             Distributions = m.Distributions,
             Military = m.Military,
             Xfer = m.Xfer,
@@ -48,9 +45,13 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
             EmployeeTypeId = m.EmployeeTypeId,
             Contributions = m.Contributions,
             IncomingForfeitures = m.IncomingForfeitures,
-            Earnings = m.Earnings,
-            SecondaryEarnings = m.SecondaryEarnings,
-            EndingBalance = m.EndingBalance
+            AllEarnings = m.AllEarnings,
+            Etva = m.Etva,
+            AllSecondaryEarnings = m.AllSecondaryEarnings,
+            EtvaEarnings = m.EarningsOnEtva,
+            SecondaryEtvaEarnings = m.SecondaryEtvaEarnings,
+            EndingBalance = m.EndingBalance,
+            ZeroContributionReasonId = m.ZeroContributionReasonId
         }).ToList();
 
         return new ProfitShareUpdateResponse
@@ -86,7 +87,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
         List<EmployeeFinancials> employeeFinancialsList = await _dbContextFactory.UseReadOnlyContext(async ctx =>
         {
             var employees = await ctx.PayProfits
-                .Include(pp => pp.Demographic)
+                .Include(pp => pp.Demographic) //Question - Should this be referring to frozen demographics
                 .Include(pp => pp.Demographic!.ContactInfo)
                 .Where(pp => pp.ProfitYear == profitShareUpdateRequest.ProfitYear)
                 .Select(x => new
@@ -98,6 +99,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
                     x.YearsInPlan,
                     x.EmployeeTypeId,
                     PointsEarned = (int)(x.PointsEarned ?? 0),
+                    x.ZeroContributionReasonId,
                 }).ToListAsync(cancellationToken);
             var ssns = employees.Select(e => e.Ssn);
             var totalVestingBalances = await ((TotalService)_totalService).TotalVestingBalance(ctx,
@@ -123,7 +125,12 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
                             CurrentAmount = tvb == null ? 0 : tvb.CurrentBalance,
                             EmployeeTypeId = et.Employee.EmployeeTypeId,
                             PointsEarned = et.Employee.PointsEarned,
-                            EtvaAfterVestingRules = tvb == null ? 0 : tvb.Etva
+                            /* This value of ETVA is not the users actual ETVA for about 1/3 for all members in the obfuscated dataset.
+                               This problem will need to be addressed in the future.
+                               You can see this if you run the Integration test for TotalServices.
+                                */
+                            Etva = tvb == null ? 0 : tvb.Etva,
+                            ZeroContributionReasonId = et.Employee.ZeroContributionReasonId
                         }
                     )
                     .ToList();
@@ -237,16 +244,16 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
 
     private async Task<MemberFinancials> ProcessBeneficiary(BeneficiaryFinancials bene, ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
-        var profitDetailTotals =
+        var thisYearsTotals =
             await ProfitDetailTotals.GetProfitDetailTotals(_dbContextFactory, profitShareUpdateRequest.ProfitYear, bene.Ssn, cancellationToken);
 
         MemberTotals memberTotals = new();
         // Yea, this adding and removing ClassActionFundTotal is strange
-        memberTotals.NewCurrentAmount = profitDetailTotals.AllocationsTotal + profitDetailTotals.ClassActionFundTotal +
-                                        (bene.CurrentAmount - profitDetailTotals.ForfeitsTotal -
-                                         profitDetailTotals.PaidAllocationsTotal) -
-                                        profitDetailTotals.DistributionsTotal;
-        memberTotals.NewCurrentAmount -= profitDetailTotals.ClassActionFundTotal;
+        memberTotals.NewCurrentAmount = thisYearsTotals.AllocationsTotal + thisYearsTotals.ClassActionFundTotal +
+                                        (bene.CurrentAmount - thisYearsTotals.ForfeitsTotal -
+                                         thisYearsTotals.PaidAllocationsTotal) -
+                                        thisYearsTotals.DistributionsTotal;
+        memberTotals.NewCurrentAmount -= thisYearsTotals.ClassActionFundTotal;
 
         if (memberTotals.NewCurrentAmount > 0)
         {
@@ -256,7 +263,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
 
         ComputeEarningsBeneficiary(memberTotals, bene, profitShareUpdateRequest);
 
-        return new MemberFinancials(bene, profitDetailTotals, memberTotals);
+        return new MemberFinancials(bene, thisYearsTotals, memberTotals);
     }
 
 
@@ -321,19 +328,51 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
             adjustmentsApplied.SecondaryEarningsAmountAdjusted = memberTotals.SecondaryEarningsAmount;
         }
 
-        decimal etvaAfterVestingRulesAdjustedByCaf = AdjustEmployeeEarningsForClassActionFund(empl!, memberTotals, classActionFundTotal);
 
-        if (profitShareUpdateRequest.SecondaryEarningsPercent == 0m) // Secondary Earnings
+        decimal workingEtva = 0;
+        // When the CAF is present and the memeber is under 6 in YIP, we need to remove the CAF from the ETVA for earnings calculations.
+        // Need to subtract CAF out of PY-PS-ETVA (ETVA) for people not fully vested
+        // because we can't give earnings for 2021 on class action funds -
+        // they were added in 2021.  CAF was added to PY-PS-ETVA (ETVA) for
+        // PY-PS-YEARS < 6.
+        if (empl!.Etva > 0)
+        {
+            // This check for 6 years is only used here, so it is intentionally not pulled out.
+            // It is presumed that this 6 is specific to the 2021 adjustment.   It is assumed that the
+            // plan enrollment type is specifically not consulted (i.e. No OLD vs NEW plan)
+            if (empl.YearsInPlan < 6)
+            {
+                workingEtva = empl.Etva - classActionFundTotal;
+            }
+            else
+            {
+                empl.Etva = workingEtva;
+            }
+        }
+
+        if (workingEtva <= 0)
+        {
+            empl.Earnings = memberTotals.EarningsAmount; // set PY-PROF-EARN
+            empl.SecondaryEarnings = memberTotals.SecondaryEarningsAmount; // set PY-PROF-EARN2
+            empl.EarningsOnEtva = 0m;
+            empl.EarningsOnSecondaryEtva = 0m;
+            return;
+        }
+
+        if (memberTotals.PointsDollars <= 0)
         {
             return;
         }
 
-        decimal etvaScaled = etvaAfterVestingRulesAdjustedByCaf / memberTotals.PointsDollars;
-        decimal etvaSecondaryScaledAmount = Math.Round(memberTotals.SecondaryEarningsAmount * etvaScaled, 2,
-            MidpointRounding.AwayFromZero);
-        memberTotals.SecondaryEarningsAmount -= etvaSecondaryScaledAmount;
-        empl!.SecondaryEarnings = memberTotals.SecondaryEarningsAmount;
-        empl.SecondaryEtvaEarnings = etvaSecondaryScaledAmount;
+        // Here we scale the Earned interest to report on what portion is in a 0 record (contribution), vs what goes in an 8 record (100% ETVA Earnings) 
+        decimal etvaScaled = workingEtva / memberTotals.PointsDollars;
+
+        // Sets Earn and ETVA amounts
+        empl!.Earnings = memberTotals.EarningsAmount;
+        empl.EarningsOnEtva = Math.Round(memberTotals.EarningsAmount * etvaScaled, 2, MidpointRounding.AwayFromZero);
+
+        empl.SecondaryEarnings = memberTotals.SecondaryEarningsAmount;
+        empl.EarningsOnSecondaryEtva = Math.Round(memberTotals.SecondaryEarningsAmount * etvaScaled, 2, MidpointRounding.AwayFromZero);
     }
 
     private static void ComputeEarningsBeneficiary(MemberTotals memberTotals, BeneficiaryFinancials bene, ProfitShareUpdateRequest profitShareUpdateRequest)
@@ -348,57 +387,5 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
                 MidpointRounding.AwayFromZero);
 
         bene.SecondaryEarnings = memberTotals.SecondaryEarningsAmount;
-    }
-
-    // This comment from cobol helps explain the following method.
-    //* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-    //* ETVA EARNINGS ARE CALCULATED AND WRITTEN TO PY-PROF-ETVA (EtvaAfterVestingRules)
-    //* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-    //* need to subtract CAF out of PY-PS-ETVA (EtvaAfterVestingRules) for people not fully vested
-    //* because  we can't give earnings for 2021 on class action funds -
-    //* they were added in 2021.CAF was added to PY-PS-ETVA (EtvaAfterVestingRules) for
-    //* PY-PS-YEARS < 6.
-    private static decimal AdjustEmployeeEarningsForClassActionFund(EmployeeFinancials empl, MemberTotals memberTotals, decimal classActionFundTotal)
-    {
-        decimal etvaAfterVestingRulesAdjustedByCaf = 0;
-        if (empl.EtvaAfterVestingRules > 0)
-        {
-            if (empl.YearsInPlan < 6) // This 6 is only used here, so it is intentionally not pulled out.  
-            {
-                etvaAfterVestingRulesAdjustedByCaf = empl.EtvaAfterVestingRules - classActionFundTotal;
-            }
-            else
-            {
-                empl.EtvaAfterVestingRules = etvaAfterVestingRulesAdjustedByCaf;
-            }
-        }
-
-        if (etvaAfterVestingRulesAdjustedByCaf <= 0)
-        {
-            empl.Earnings = memberTotals.EarningsAmount;
-            empl.SecondaryEarnings = memberTotals.SecondaryEarningsAmount;
-            empl.EarningsOnEtva = 0m;
-            empl.SecondaryEtvaEarnings = 0m;
-            return 0;
-        }
-
-        if (memberTotals.PointsDollars <= 0)
-        {
-            return etvaAfterVestingRulesAdjustedByCaf;
-        }
-
-        // Computes the ETVA amount
-        decimal etvaScaled = etvaAfterVestingRulesAdjustedByCaf / memberTotals.PointsDollars;
-        decimal etvaScaledAmount =
-            Math.Round(memberTotals.EarningsAmount * etvaScaled, 2, MidpointRounding.AwayFromZero);
-
-        // subtracts that amount from the members total earnings
-        memberTotals.EarningsAmount -= etvaScaledAmount;
-
-        // Sets Earn and ETVA amounts
-        empl!.Earnings = memberTotals.EarningsAmount;
-        empl.EarningsOnEtva = etvaScaledAmount;
-
-        return etvaAfterVestingRulesAdjustedByCaf;
     }
 }

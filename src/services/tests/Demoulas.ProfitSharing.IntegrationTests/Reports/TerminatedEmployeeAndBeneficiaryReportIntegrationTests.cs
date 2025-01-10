@@ -5,11 +5,11 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.IntegrationTests.Fixtures;
 using Demoulas.ProfitSharing.IntegrationTests.Helpers;
+using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 using FluentAssertions;
-using Microsoft.Extensions.DependencyInjection;
-using Xunit.Abstractions;
+using Microsoft.Testing.Platform.Services;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports;
 
@@ -18,7 +18,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : TestClassB
     private readonly ITestOutputHelper _testOutputHelper;
     private readonly IntegrationTestsFixture _fixture;
 
-    public TerminatedEmployeeAndBeneficiaryReportIntegrationTests(ITestOutputHelper testOutputHelper, IntegrationTestsFixture fixture) : base(testOutputHelper, fixture)
+    public TerminatedEmployeeAndBeneficiaryReportIntegrationTests(ITestOutputHelper testOutputHelper, IntegrationTestsFixture fixture) : base(fixture)
     {
         _testOutputHelper = testOutputHelper;
         _fixture = fixture;
@@ -29,31 +29,29 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : TestClassB
     {
         // These are arguments to the program/rest endpoint
         // Plan admin may choose a range of dates (ie. Q2 ?)
-        DateOnly startDate = new DateOnly(2023, 01, 07);
-        DateOnly endDate = new DateOnly(2024, 01, 02);
-        short profitSharingYear = 2023;
-
-
-        DateOnly effectiveDateOfTestData = new DateOnly(2024, 9, 17);
+        short profitSharingYear = 2024;
+        DateOnly startDate = new DateOnly(2024, 01, 01);
+        DateOnly endDate = new DateOnly(2024, 12, 31);
+        DateOnly effectiveDateOfTestData = new DateOnly(2024, 12, 31);
 
         var calendarService = _fixture.Services.GetRequiredService<ICalendarService>()!;
         var totalService = _fixture.Services.GetRequiredService<TotalService>()!;
-        var contributionService = _fixture.Services.GetRequiredService<ContributionService>()!;
         TerminatedEmployeeAndBeneficiaryReportService mockService =
-            new TerminatedEmployeeAndBeneficiaryReportService(ProfitSharingDataContextFactory, calendarService, totalService, contributionService);
+            new TerminatedEmployeeAndBeneficiaryReportService(ProfitSharingDataContextFactory, calendarService, totalService);
 
         Stopwatch stopwatch = Stopwatch.StartNew();
         stopwatch.Start();
-        var data = await mockService.GetReportAsync(new ProfitYearRequest { ProfitYear = profitSharingYear }, CancellationToken.None);
+        var data = await mockService.GetReportAsync(new ProfitYearRequest { ProfitYear = profitSharingYear }, TestContext.Current.CancellationToken);
 
         string actualText = CreateTextReport(effectiveDateOfTestData, startDate, endDate, profitSharingYear, data);
         stopwatch.Stop();
-        _testOutputHelper.WriteLine("Took: " + stopwatch.ElapsedMilliseconds);
+        _testOutputHelper.WriteLine($"Took: {stopwatch.ElapsedMilliseconds}");
 
         actualText.Should().NotBeNullOrEmpty();
 
         string expectedText = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.terminatedEmployeeAndBeneficiaryReport-correct.txt");
-        expectedText.Should().BeEquivalentTo(actualText);
+        
+        ProfitShareUpdateTests.AssertReportsAreEquivalent(expectedText, actualText);
     }
 
     public static string ReadEmbeddedResource(string resourceName)
@@ -76,8 +74,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : TestClassB
                 ms.EndingBalance, ms.VestedBalance, ms.DateTerm, ms.YtdPsHours, ms.VestedPercent, ms.Age,
                 ms.EnrollmentCode ?? 0);
         }
-
         textReportGenerator.PrintTotals(report.TotalEndingBalance, report.TotalVested, report.TotalForfeit, report.TotalBeneficiaryAllocation);
         return textReportGenerator.GetReport();
+
     }
 }

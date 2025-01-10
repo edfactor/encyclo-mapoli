@@ -3,7 +3,6 @@ import RouteSecurity from "./RouteSecurity";
 import LandingPage from "./LandingPage";
 import { ImpersonationMultiSelect, MenuBar } from "smart-ui-library";
 import MenuData from "../../MenuData";
-
 import DemographicBadgesNotInPayprofit from "pages/DemographicBadgesNotInPayprofit/DemographicBadgesNotInPayprofit";
 import DuplicateSSNsOnDemographics from "pages/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographics";
 import NegativeEtvaForSSNsOnPayprofit from "pages/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofit";
@@ -32,6 +31,7 @@ import VestedAmountsByAge from "pages/VestedAmountsByAge/VestedAmountsByAge";
 import DecemberProcess from "pages/DecemberProcess/DecemberProcess";
 import DecemberProcessAccordion from "pages/DecemberProcess/DecemberProcessAccordion";
 import DecemberProcessLocalApi from "pages/DecemberProcess/DecemberProcessLOCALAPI";
+import Termination from "pages/Termination/Termination";
 
 const Router = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -148,7 +148,7 @@ const Router = () => {
         <Route
           path="frozen-summary"
           element={<FrozenSummary />}></Route>
-          <Route
+        <Route
           path="balance-by-years"
           element={<BalanceByYears />}></Route>
         <Route
@@ -156,10 +156,16 @@ const Router = () => {
           element={<VestedAmountsByAge />}></Route>
         <Route
           path="december-process"
+          element={<DecemberProcess />}></Route>
+        <Route
+          path="december-process-local"
           element={<DecemberProcessLocalApi />}></Route>
-          <Route
+        <Route
           path="december-process-accordion"
           element={<DecemberProcessAccordion />}></Route>
+        <Route
+          path="prof-term"
+          element={<Termination />}></Route>
       </RouteSecurity>
     </BrowserRouter>
   );

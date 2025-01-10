@@ -1,23 +1,20 @@
 ﻿using System.Net;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
-using FluentAssertions;
-using FastEndpoints;
-using JetBrains.Annotations;
-using Demoulas.ProfitSharing.UnitTests.Base;
 using Demoulas.ProfitSharing.Api;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ExecutiveHoursAndDollars;
-using Demoulas.ProfitSharing.Security;
-using Demoulas.ProfitSharing.UnitTests.Extensions;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
+using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.UnitTests.Common.Base;
+using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
+using FastEndpoints;
+using FluentAssertions;
+using JetBrains.Annotations;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
 [TestSubject(typeof(DistributionsByAgeEndpoint))]
 public class DistributionsByAgeEndpointTest : ApiTestBase<Program>
 {
-
     [Fact]
     public async Task GetResponse_ShouldReturnExpectedResponse()
     {
@@ -47,8 +44,8 @@ public class DistributionsByAgeEndpointTest : ApiTestBase<Program>
         TestResult<StreamContent> response = await DownloadClient
             .GETAsync<DistributionsByAgeEndpoint, FrozenReportsByAgeRequest, StreamContent>(request);
 
-            
-        string content = await response.Response.Content.ReadAsStringAsync();
+
+        string content = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
         content.Should().Contain("AGE,EMPS,AMOUNT");
         content.Should().Contain("HARDSHIP,");
         content.Should().Contain("DIST TTL,,");
@@ -57,7 +54,6 @@ public class DistributionsByAgeEndpointTest : ApiTestBase<Program>
     [Fact(DisplayName = "PS-401: Check to ensure unauthorized")]
     public async Task Unauthorized()
     {
-
         // Arrange
         var request = new FrozenReportsByAgeRequest { ProfitYear = 2023, ReportType = FrozenReportsByAgeRequest.Report.Total };
 

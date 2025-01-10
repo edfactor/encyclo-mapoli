@@ -32,7 +32,9 @@ import {
   ForfeituresByAge,
   BalanceByAge,
   VestedAmountsByAge,
-  MasterInquiryResponseType, ProfitYearRequest, BalanceByYears
+  MasterInquiryResponseType, ProfitYearRequest, BalanceByYears,
+  TerminationResponse,
+  TerminationRequest
 } from "reduxstore/types";
 import {
   setDemographicBadgesNotInPayprofitData,
@@ -51,7 +53,8 @@ import {
   setMilitaryAndRehireProfitSummaryDetails,
   setMissingCommaInPYName,
   setVestingAmountByAge,
-  setNegativeEtvaForSssnsOnPayprofit, setBalanceByYears
+  setNegativeEtvaForSssnsOnPayprofit, setBalanceByYears,
+  setTermination
 } from "reduxstore/slices/yearsEndSlice";
 import { url } from "./api";
 
@@ -68,7 +71,7 @@ export const YearsEndApi = createApi({
         headers.set("impersonation", impersonating);
       } else {
         const localImpersonation = localStorage.getItem("impersonatingRole");
-        headers.set("impersonation", localImpersonation);
+        !!localImpersonation && headers.set("impersonation", localImpersonation);
       }
       return headers;
     }
@@ -521,7 +524,26 @@ export const YearsEndApi = createApi({
           console.log("Err: " + err);
         }
       }
-    })
+    }),
+    getTerminationReport: builder.query<TerminationResponse, TerminationRequest>({
+      query: (params) => ({
+        url: "yearend/terminated-employee-and-beneficiary",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          skip: params.pagination.skip,
+          take: params.pagination.take
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setTermination(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
   })
 });
 
@@ -543,5 +565,6 @@ export const {
   useLazyGetBalanceByAgeQuery,
   useLazyGetBalanceByYearsQuery,
   useLazyGetProfitMasterInquiryQuery,
-  useLazyGetVestingAmountByAgeQuery
+  useLazyGetVestingAmountByAgeQuery,
+  useLazyGetTerminationReportQuery
 } = YearsEndApi;

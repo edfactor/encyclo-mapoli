@@ -31,11 +31,29 @@ $configTarget = get-ConfigEnvironment $envTarget
 
 $Deployments = @(
     @{
-        Artifact = 'Demoulas.ProfitSharing.OracleHcm.Sync.zip'
+        Artifact = 'Demoulas.ProfitSharing.EmployeePayroll.Sync.zip'
         TargetPath = 'C:\NextGenApplications\ps'
-        ServiceExecutable = 'C:\NextGenApplications\ps\Demoulas.ProfitSharing.OracleHcm.Sync.exe'
-        ServiceName = 'Demoulas Smart File Handler'
-        DisplayName = 'Demoulas Smart File Handler'
+        ServiceExecutable = 'C:\NextGenApplications\ps\Payroll\Demoulas.ProfitSharing.EmployeePayroll.Sync.exe'
+        ServiceName = 'Demoulas ProfitSharing OracleHCM Payroll Sync'
+        DisplayName = 'Demoulas ProfitSharing OracleHCM Payroll Sync'
+        IgnoreFiles = @("credSettings.$( $envTarget ).json")
+        ConfigEnvironment = $configTarget
+    },
+    @{
+        Artifact = 'Demoulas.ProfitSharing.EmployeeFull.Sync.zip'
+        TargetPath = 'C:\NextGenApplications\ps'
+        ServiceExecutable = 'C:\NextGenApplications\ps\EmployeeFull\Demoulas.ProfitSharing.EmployeeFull.Sync.exe'
+        ServiceName = 'Demoulas ProfitSharing OracleHCM Full Sync'
+        DisplayName = 'Demoulas ProfitSharing OracleHCM Full Sync'
+        IgnoreFiles = @("credSettings.$( $envTarget ).json")
+        ConfigEnvironment = $configTarget
+    },
+     @{
+        Artifact = 'Demoulas.ProfitSharing.EmployeeDelta.Sync.zip'
+        TargetPath = 'C:\NextGenApplications\ps'
+        ServiceExecutable = 'C:\NextGenApplications\ps\EmployeeDelta\Demoulas.ProfitSharing.EmployeeDelta.Sync.exe'
+        ServiceName = 'Demoulas ProfitSharing OracleHCM Delta Sync'
+        DisplayName = 'Demoulas ProfitSharing OracleHCM Delta Sync'
         IgnoreFiles = @("credSettings.$( $envTarget ).json")
         ConfigEnvironment = $configTarget
     }

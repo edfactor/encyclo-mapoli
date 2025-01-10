@@ -8,11 +8,13 @@ using Demoulas.ProfitSharing.Api.Extensions;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
+using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.Security;
 using Demoulas.Util.Extensions;
+using FastEndpoints;
 using Microsoft.AspNetCore.Authentication;
 using NSwag.Generation.AspNetCore;
 
@@ -72,8 +74,12 @@ List<ContextFactoryRequest> list =
 ];
 
 builder.AddDatabaseServices(list);
-builder.AddOracleHcmSynchronization();
 builder.AddProjectServices();
+
+OracleHcmConfig oracleHcmConfig = builder.Configuration.GetSection("OracleHcm").Get<OracleHcmConfig>()
+                                  ?? new OracleHcmConfig { BaseAddress = string.Empty, DemographicUrl = string.Empty };
+
+builder.AddOracleHcmSynchronization(oracleHcmConfig);
 
 
 void OktaSettingsAction(OktaSwaggerConfiguration settings)
@@ -93,18 +99,16 @@ builder.ConfigureDefaultEndpoints(meterNames: [],
 
 WebApplication app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment() && Debugger.IsAttached)
-{
-    // Put code here that ONLY runs when attached to the debugger.
-}
-
 app.UseCors();
 
-app.UseDefaultEndpoints(OktaSettingsAction);
+app.UseDefaultEndpoints(OktaSettingsAction)
+    .UseReDoc(settings =>
+    {
+        settings.Path = "/redoc";
+        settings.DocumentPath = "/swagger/Release 1.0/swagger.json"; // Single document
+    });
 
 await app.RunAsync();
-
 
 namespace Demoulas.ProfitSharing.Api
 {
