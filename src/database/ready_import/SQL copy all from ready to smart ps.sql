@@ -546,7 +546,7 @@ SELECT
     PROFIT_MDTE,
     CASE
          WHEN TRIM(PROFIT_CMNT) = '' THEN NULL
-         ELSE PROFIT_CMNT           
+         ELSE TRIM(PROFIT_CMNT)           
     END as pcmnt,
     CASE 
         WHEN TO_NUMBER(PROFIT_YDTE) >= 59 THEN '19' || PROFIT_YDTE
@@ -595,7 +595,7 @@ SELECT
     PROFIT_SS_MDTE,
     CASE
          WHEN TRIM(PROFIT_SS_CMNT) = '' THEN NULL
-         ELSE PROFIT_SS_CMNT           
+         ELSE TRIM(PROFIT_SS_CMNT)           
     END as pcmnt,
     CASE 
         WHEN TO_NUMBER(PROFIT_SS_YDTE) >= 59 THEN '19' || PROFIT_SS_YDTE
@@ -935,6 +935,14 @@ WHERE REMARK LIKE 'REV%';
 UPDATE PROFIT_DETAIL pd
 SET COMMENT_TYPE_ID = 22
 WHERE REMARK LIKE 'UN-REV%';
+
+UPDATE profit_detail pd
+SET comment_type_id = 23
+WHERE REMARK = '100% EARNINGS';
+
+UPDATE profit_detail pd
+SET comment_type_id = 24
+WHERE REMARK = '>64 & >5 100%';
 
 END;
 COMMIT ;
