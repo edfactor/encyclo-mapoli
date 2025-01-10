@@ -8,7 +8,7 @@ using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.IntegrationTests;
 
-public class DatabaseDataTest : IClassFixture<ApiTestBase<Program>>
+public class DatabaseDataTest : Xunit.IClassFixture<ApiTestBase<Program>>
 {
     private readonly ITestOutputHelper _output;
 

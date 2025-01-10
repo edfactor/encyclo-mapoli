@@ -51,10 +51,10 @@ public class ProfitShareUpdateEndpoint
         {
             Map(m => m.Psn).Index(0).Name("Number");
             Map(m => m.Name).Index(1).Name("Name");
-            Map(m => m.CurrentAmount).Index(2).Name("Beginning Balance");
+            Map(m => m.BeginningAmount).Index(2).Name("Beginning Balance");
             Map(m => m.Contributions).Index(3).Name("Contributions");
-            Map(m => m.Earnings).Index(4).Name("Earning");
-            Map(m => m.SecondaryEarnings).Index(5).Name("Earning2");
+            Map(m => m.AllEarnings).Index(4).Name("Earning");
+            Map(m => m.AllSecondaryEarnings).Index(5).Name("Earning2");
             Map(m => m.IncomingForfeitures).Index(6).Name("Forfeits");
             Map(m => m.Distributions).Index(7).Name("Distributions");
             Map(m => m.Military).Index(8).Name("Military / Paid Alloc");

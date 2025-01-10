@@ -79,7 +79,7 @@ public class TotalServiceIntegrationTests
         _output.WriteLine($"YIS Disagree count {yisDisagree}   Agree count {yisAgree}");
         _output.WriteLine($"Amt Disagree count {netBalDisagree}   Agree count {netBalAgree}");
         _output.WriteLine($"Etva Disagree count {etvaDisagree}   Agree count {etvaAgree}");
-        true.Should().Be(true);
+        etvaDisagree.Should().Be(0);
     }
 
 #pragma warning disable AsyncFixer01
@@ -99,10 +99,7 @@ public class TotalServiceIntegrationTests
                     keySelector: p => p.EmployeeId, // Use EmployeeId as the key
                     elementSelector: p => (int)p.Years // Use Years as the value
                 );
-
             _output.WriteLine($"SMART data count {ddata.Count}");
-
-
             return ddata;
         });
     }
