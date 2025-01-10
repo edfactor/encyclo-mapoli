@@ -7,7 +7,6 @@ using Demoulas.ProfitSharing.IntegrationTests.Fixtures;
 using Demoulas.ProfitSharing.IntegrationTests.Helpers;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
-using Demoulas.ProfitSharing.Services.Reports.YearEnd.Update;
 using FluentAssertions;
 using Microsoft.Testing.Platform.Services;
 

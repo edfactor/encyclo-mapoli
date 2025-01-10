@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.Common.Data.Services.Service;
+﻿using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.ServiceDto;
-using Demoulas.ProfitSharing.UnitTests;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -108,7 +102,6 @@ public class TotalServiceIntegrationTests
             _output.WriteLine($"SMART data count {ddata.Count}");
             return ddata;
         });
-
     }
 
     private async Task<Dictionary<int, ParticipantTotalVestingBalanceDto>> GetSmartAmounts()

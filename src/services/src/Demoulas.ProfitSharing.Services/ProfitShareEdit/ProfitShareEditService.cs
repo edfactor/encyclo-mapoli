@@ -28,14 +28,13 @@ public class ProfitShareEditService : IProfitShareEditService
         List<ProfitShareEditMemberRecordResponse> records = new();
         foreach (var member in psur.Response.Results)
         {
-            // is Beneficiary?
-            if (!member.IsEmployee)
+            if (member.IsEmployee)
             {
-                ConsiderBeneficary(records, member);
+                AddEmployeeRecords(records, member);
             }
             else
             {
-                ConsiderEmployee(records, member);
+                AddBeneficaryRecords(records, member);
             }
         }
 
@@ -51,7 +50,7 @@ public class ProfitShareEditService : IProfitShareEditService
         };
     }
     
-    private static void ConsiderEmployee(List<ProfitShareEditMemberRecordResponse> records, ProfitShareUpdateMemberResponse member)
+    private static void AddEmployeeRecords(List<ProfitShareEditMemberRecordResponse> records, ProfitShareUpdateMemberResponse member)
     {
         // Under 21
         if (member.ZeroContributionReasonId == ZeroContributionReason.Constants.Under21WithOver1Khours /*1*/)
@@ -65,7 +64,7 @@ public class ProfitShareEditService : IProfitShareEditService
             };
             if (member.AllEarnings <= 0)
             {
-                Write(records, rec);
+                AddRecord(records, rec);
                 return;
             }
         }
@@ -80,7 +79,7 @@ public class ProfitShareEditService : IProfitShareEditService
                 ZeroContStatus = ZeroContributionReason.Constants.Normal,
                 Reason = CommentType.Constants.OneHundredPercentEarnings.Name
             };
-            Write(records, rec);
+            AddRecord(records, rec);
         }
 
         if (member.SecondaryEtvaEarnings /*PY_PROF_ETVA2*/ > 0)
@@ -92,7 +91,7 @@ public class ProfitShareEditService : IProfitShareEditService
                 ZeroContStatus = ZeroContributionReason.Constants.Normal,
                 Reason = CommentType.Constants.OneHundredPercentEarnings.Name
             };
-            Write(records, rec);
+            AddRecord(records, rec);
         }
 
         if (member.AllSecondaryEarnings /*PY-PROF-EARN2*/ > 0)
@@ -103,7 +102,7 @@ public class ProfitShareEditService : IProfitShareEditService
                 EarningsAmount = member.AllSecondaryEarnings - member.SecondaryEtvaEarnings
             };
             // rec.ZeroContStatus = Note, not set in PAY477.cbl
-            Write(records, rec);
+            AddRecord(records, rec);
         }
 
         // -- Normal Record
@@ -125,7 +124,7 @@ public class ProfitShareEditService : IProfitShareEditService
             rec.Reason = CommentType.Constants.VOnly.Name;
             rec.ReasonSummary = "TERM > 1000 HRS";
             rec.ZeroContStatus = /*2*/ ZeroContributionReason.Constants.TerminatedEmployeeOver1000HoursWorkedGetsYearVested;
-            Write(records, rec);
+            AddRecord(records, rec);
         }
         else if (member.ZeroContributionReasonId == /*6*/ ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested)
         {
@@ -137,20 +136,20 @@ public class ProfitShareEditService : IProfitShareEditService
 
             rec.ZeroContStatus = /*6*/ ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested;
             rec.Reason = /*>64 & >5 Zero Records*/ CommentType.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested.Name;
-            Write(records, rec);
+            AddRecord(records, rec);
         }
         else if (member.ZeroContributionReasonId == /*7*/ ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay)
         {
             // No update of ZeroContStatus
-            Write(records, rec);
+            AddRecord(records, rec);
         }
         else if (member.Contributions != 0 || member.AllEarnings != 0 || member.IncomingForfeitures != 0)
         {
-            Write(records, rec);
+            AddRecord(records, rec);
         }
     }
 
-    private static void ConsiderBeneficary(List<ProfitShareEditMemberRecordResponse> records, ProfitShareUpdateMemberResponse member)
+    private static void AddBeneficaryRecords(List<ProfitShareEditMemberRecordResponse> records, ProfitShareUpdateMemberResponse member)
     {
         if (member.AllEarnings > 0)
         {
@@ -160,7 +159,7 @@ public class ProfitShareEditService : IProfitShareEditService
                 EarningsAmount = member.AllEarnings,
                 Reason = CommentType.Constants.OneHundredPercentEarnings.Name
             };
-            Write(records, rec);
+            AddRecord(records, rec);
         }
 
         if (member.AllSecondaryEarnings > 0)
@@ -172,12 +171,12 @@ public class ProfitShareEditService : IProfitShareEditService
                 EarningsAmount = member.AllSecondaryEarnings,
                 Reason = CommentType.Constants.OneHundredPercentEarnings.Name
             };
-            Write(records, rec);
+            AddRecord(records, rec);
         }
     }
 
 
-    private static void Write(List<ProfitShareEditMemberRecordResponse> records, ProfitShareEditMemberRecordResponse rec)
+    private static void AddRecord(List<ProfitShareEditMemberRecordResponse> records, ProfitShareEditMemberRecordResponse rec)
     {
         if (rec.ContributionAmount == 0 && rec.EarningsAmount == 0 && rec.IncomingForfeitures == 0 && rec.Reason == null)
         {

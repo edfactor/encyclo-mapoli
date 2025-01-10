@@ -5,6 +5,11 @@
 /// </summary>
 public record ProfitShareEditMemberRecordResponse
 {
+    // Used by the JSON Serializer
+    public ProfitShareEditMemberRecordResponse()
+    {
+    }
+
     public ProfitShareEditMemberRecordResponse(ProfitShareUpdateMemberResponse mr, byte code)
     {
         Ssn = mr.Ssn;
