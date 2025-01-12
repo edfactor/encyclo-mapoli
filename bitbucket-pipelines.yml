@@ -107,24 +107,17 @@ definitions:
         - windows
         - self.hosted
       script:
-          # Define environment variable (replace with actual environment name during deployment)
-          - export ENV_NAME="prod" # Change this to the desired environment name
+          # Define environment
+          - SET ENV="qa"
 
-          # Read the file
-          - cat credsettings.json > temp.json
-
-          # Replace placeholders with environment-prefixed variables
-          - sed -i "s/{{CONNECTIONSTRINGS_PROFITSHARING_SLUG}}/${ENV_NAME}_CONNECTIONSTRINGS_PROFITSHARING_SLUG/g" temp.json
-          - sed -i "s/{{CONNECTIONSTRINGS_COMMON_SLUG}}/${ENV_NAME}_CONNECTIONSTRINGS_COMMON_SLUG/g" temp.json
-          - sed -i "s/{{ORACLEHCM_BASE_URL_SLUG}}/${ENV_NAME}_ORACLEHCM_BASE_URL_SLUG/g" temp.json
-          - sed -i "s/{{ORACLEHCM_USERNAME_SLUG}}/${ENV_NAME}_ORACLEHCM_USERNAME_SLUG/g" temp.json
-          - sed -i "s/{{ORACLEHCM_PASSWORD_SLUG}}/${ENV_NAME}_ORACLEHCM_PASSWORD_SLUG/g" temp.json
+          # Replace placeholders in credsettings.json with environment-prefixed variables
+          - powershell -Command "(Get-Content credsettings.json) -replace '\{\{(.*?)\}\}', \$ENV + '_$1' | Set-Content credsettings.modified.json"
 
           # Ensure output directory exists
-          - mkdir -p ./publishOutput
+          - powershell -Command "New-Item -ItemType Directory -Force -Path .\publishOutput"
 
-          # Move and rename the file
-          - mv temp.json ./publishOutput/credsettings.${ENV_NAME}.json
+          # Copy and rename the modified file
+          - powershell -Command "Copy-Item .\credsettings.modified.json .\publishOutput\credsettings.%ENV%.json"
         
     create-frontend-artifact-qa: &create-frontend-artifact-qa
       name: Create FrontEnd Artifacts (QA)     
@@ -253,6 +246,7 @@ pipelines:
       - parallel:
           - step: *build-and-test-backend
           - step: *test-frontend
+      - step: *create-credsettings
       - parallel:
           - step: *create-api-artifacts
           - step: *create-service-artifacts
