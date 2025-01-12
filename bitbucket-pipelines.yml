@@ -109,11 +109,12 @@ definitions:
       script:
         - SET ENV=qa
 
-        # Define replacements as a JSON string
-        - SET REPLACEMENTS={"[[CONNECTIONSTRINGS_PROFITSHARING_SLUG]]":"value1","[[CONNECTIONSTRINGS_COMMON_SLUG]]":"value2", "[[ORACLEHCM_BASE_URL_SLUG]]":"value3", "[[ORACLEHCM_USERNAME_SLUG]]":"value4", "[[ORACLEHCM_PASSWORD_SLUG]]":"value5"}
+        # Define replacements as a base64-encoded JSON string
+        - powershell -Command "$ReplacementsJson = '{\"[[CONNECTIONSTRINGS_PROFITSHARING_SLUG]]\":\"value1\",\"[[CONNECTIONSTRINGS_COMMON_SLUG]]\":\"value2\",\"[[ORACLEHCM_BASE_URL_SLUG]]\":\"value3\",\"[[ORACLEHCM_USERNAME_SLUG]]\":\"value4\",\"[[ORACLEHCM_PASSWORD_SLUG]]\":\"value5\"}'; [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($ReplacementsJson)) | Set-Content Replacements.json.b64"
 
-        # Call the PowerShell script with the environment name and replacements JSON
-        - powershell -File .\scripts\credsettings.ps1 -EnvName $ENV -ReplacementsJson $REPLACEMENTS
+        # Call the PowerShell script with the environment name and decoded replacements JSON
+        - powershell -Command "[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String((Get-Content Replacements.json.b64 -Raw))) | Out-File -FilePath replacements.json"
+        - powershell -File .\scripts\credsettings.ps1 -EnvName $ENV -ReplacementsJson (Get-Content replacements.json -Raw)
         
     create-frontend-artifact-qa: &create-frontend-artifact-qa
       name: Create FrontEnd Artifacts (QA)     
