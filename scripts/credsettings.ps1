@@ -28,7 +28,7 @@ if (Test-Path $inputFile) {
 
 # Perform the replacements
 foreach ($key in $replacements.Keys) {
-    $fileContent = $fileContent -replace '\[\[' + [regex]::Escape($key) + '\]\]', $replacements[$key]
+    $fileContent = $fileContent -replace $key, $replacements[$key]
 }
 
 # Save the modified JSON content
