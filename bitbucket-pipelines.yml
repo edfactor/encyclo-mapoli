@@ -108,16 +108,16 @@ definitions:
         - self.hosted
       script:
           # Define environment
-          - SET ENV="qa"
+          - SET ${env:ENV}="qa"
 
           # Replace placeholders in credsettings.json with environment-prefixed variables
-          - powershell -Command '(Get-Content credsettings.json) -replace "\[\[(.*?)\]\]", "$ENV`_$1" | Set-Content credsettings.modified.json'
+          - powershell -Command '(Get-Content credsettings.json) -replace "\[\[(.*?)\]\]", "${env:ENV}`_$1" | Set-Content credsettings.modified.json'
 
           # Ensure output directory exists
           - powershell -Command "New-Item -ItemType Directory -Force -Path .\publishOutput"
 
           # Copy and rename the modified file
-          - powershell -Command "Copy-Item .\credsettings.modified.json .\publishOutput\credsettings.%ENV%.json"
+          - powershell -Command "Copy-Item .\credsettings.modified.json .\publishOutput\credsettings.${env:ENV}.json"
         
     create-frontend-artifact-qa: &create-frontend-artifact-qa
       name: Create FrontEnd Artifacts (QA)     
