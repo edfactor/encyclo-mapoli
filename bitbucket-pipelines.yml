@@ -111,7 +111,7 @@ definitions:
           - SET ENV="qa"
 
           # Replace placeholders in credsettings.json with environment-prefixed variables
-          - powershell -Command "(Get-Content credsettings.json) -replace '\\{\\{(.*?)\\}\\}', \"$ENV`_$1\" | Set-Content credsettings.modified.json"
+          - powershell -Command '(Get-Content credsettings.json) -replace "\\{\\{(.*?)\\}\\}", "$ENV`_$1" | Set-Content credsettings.modified.json'
 
           # Ensure output directory exists
           - powershell -Command "New-Item -ItemType Directory -Force -Path .\publishOutput"
