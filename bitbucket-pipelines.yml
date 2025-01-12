@@ -243,10 +243,10 @@ definitions:
 pipelines:
   branches:
     release:
+      - step: *create-credsettings
       - parallel:
           - step: *build-and-test-backend
           - step: *test-frontend
-      - step: *create-credsettings
       - parallel:
           - step: *create-api-artifacts
           - step: *create-service-artifacts
