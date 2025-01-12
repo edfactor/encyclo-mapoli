@@ -107,23 +107,17 @@ definitions:
         - windows
         - self.hosted
       script:
-           # Define environment variable
+          # Define environment variable
           - SET ENV=qa
-          - powershell -Command "
-              $filePath = 'credsettings.json';
-              $outputDir = '.\publishOutput';
-              $outputFile = \"credsettings.$Env:ENV.json\";
-              
-              # Read and modify the file
-              $content = Get-Content $filePath;
-              $updated = $content -replace '\[\[(.*?)\]\]', \"$Env:ENV`_$1\";
 
-              # Ensure output directory exists
-              if (!(Test-Path $outputDir)) { New-Item -ItemType Directory -Path $outputDir };
+          # Replace placeholders in credsettings.json with environment-prefixed variables
+          - powershell -Command "(Get-Content credsettings.json) -replace '[[(.*?)]]', \"${Env:ENV}_$1\" | Set-Content credsettings.modified.json"
 
-              # Save the modified file
-              $updated | Set-Content \"$outputDir\$outputFile\";
-            "
+          # Ensure output directory exists
+          - powershell -Command "New-Item -ItemType Directory -Force -Path .\publishOutput"
+
+          # Copy and rename the modified file
+          - powershell -Command "Copy-Item .\credsettings.modified.json .\publishOutput\credsettings.%ENV%.json"
         
     create-frontend-artifact-qa: &create-frontend-artifact-qa
       name: Create FrontEnd Artifacts (QA)     
