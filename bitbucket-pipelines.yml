@@ -111,8 +111,20 @@ definitions:
  
         - echo "Checking PowerShell version..."
         - pwsh -Command '$PSVersionTable.PSVersion'
+        - pwsh -Command @'
+            $replacements = @"
+            {
+              "CONNECTIONSTRINGS_PROFITSHARING_SLUG": "value1",
+              "CONNECTIONSTRINGS_COMMON_SLUG": "value2",
+              "ORACLEHCM_BASE_URL_SLUG": "value3",
+              "ORACLEHCM_USERNAME_SLUG": "value4",
+              "ORACLEHCM_PASSWORD_SLUG": "value5"
+            }
+            "@
+            Set-Content -Path replacements.json -Value $replacements -NoNewline
+            '@
 
-        - pwsh -Command "Set-Content -Path replacements.json -Value '{\"CONNECTIONSTRINGS_PROFITSHARING_SLUG\":\"value1\",\"CONNECTIONSTRINGS_COMMON_SLUG\":\"value2\",\"ORACLEHCM_BASE_URL_SLUG\":\"value3\",\"ORACLEHCM_USERNAME_SLUG\":\"value4\",\"ORACLEHCM_PASSWORD_SLUG\":\"value5\"}' -NoNewline"
+
         - pwsh -Command "Write-Host 'Contents of replacements.json:'; Get-Content replacements.json"
 
 
