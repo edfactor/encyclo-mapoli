@@ -311,7 +311,7 @@ export interface ContributionsByAge {
   reportDate: string;
   reportType: FrozenReportsByAgeRequestType;
   totalEmployees: number;
-  distributionTotalAmount: number;
+  totalAmount: number;
   response: Paged<ContributionsByAgeDetail>;
 }
 
@@ -326,7 +326,7 @@ export interface ForfeituresByAge {
   reportDate: string;
   reportType: FrozenReportsByAgeRequestType;
   totalEmployees: number;
-  distributionTotalAmount: number;
+  totalAmount: number;
   response: Paged<ForfeituresByAgeDetail>;
 }
 

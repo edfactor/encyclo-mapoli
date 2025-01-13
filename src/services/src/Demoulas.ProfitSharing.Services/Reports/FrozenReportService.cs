@@ -310,7 +310,7 @@ public class FrozenReportService : IFrozenReportService
             ReportName = "PROFIT SHARING CONTRIBUTIONS BY AGE",
             ReportDate = DateTimeOffset.Now,
             ReportType = req.ReportType,
-            DistributionTotalAmount = details.Sum(d => d.Amount),
+            TotalAmount = details.Sum(d => d.Amount),
             TotalEmployees = (short)details.Sum(d => d.EmployeeCount),
             Response = new PaginatedResponseDto<ContributionsByAgeDetail>(req) { Results = details, Total = details.Count }
         };
@@ -356,7 +356,7 @@ public class FrozenReportService : IFrozenReportService
             ReportName = "PROFIT SHARING FORFEITURES BY AGE",
             ReportDate = DateTimeOffset.Now,
             ReportType = req.ReportType,
-            DistributionTotalAmount = details.Sum(d => d.Amount),
+            TotalAmount = details.Sum(d => d.Amount),
             TotalEmployees = (short)details.Sum(d => d.EmployeeCount),
             Response = new PaginatedResponseDto<ForfeituresByAgeDetail>(req) { Results = details, Total = details.Count }
         };

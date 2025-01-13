@@ -58,7 +58,7 @@ public class ForfeituresByAgeEndpoint : EndpointWithCsvTotalsBase<FrozenReportsB
         await csvWriter.NextRecordAsync();
         csvWriter.WriteField("FORF TTL");
         csvWriter.WriteField("");
-        csvWriter.WriteField(report.DistributionTotalAmount);
+        csvWriter.WriteField(report.TotalAmount);
 
         await csvWriter.NextRecordAsync();
 
