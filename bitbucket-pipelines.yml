@@ -103,7 +103,9 @@ definitions:
 
     create-credsettings: &create-credsettings
       name: Replace Slugs and Copy File
-      image: mcr.microsoft.com/powershell:latest
+      runs-on:
+        - windows
+        - self.hosted
       script:
         - SET ENV=qa
  
