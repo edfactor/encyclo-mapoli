@@ -108,23 +108,18 @@ definitions:
         - self.hosted
       script:
         - SET ENV=qa
-        - >-
-            SET replacements={"CONNECTIONSTRINGS_PROFITSHARING_SLUG":"value1",
-            "CONNECTIONSTRINGS_COMMON_SLUG":"value2",
-            "ORACLEHCM_BASE_URL_SLUG":"value3",
-            "ORACLEHCM_USERNAME_SLUG":"value4",
-            "ORACLEHCM_PASSWORD_SLUG":"value5"}
-
-        - pwsh -Command "Write-Host 'Debugging replacements variable:'; Write-Host $env:replacements"
-
-
         - pwsh -Command >-
-            $replacementsJson = $env:replacements;
-            Write-Host "JSON from Environment Variable:";
-            Write-Host $replacementsJson;
-            $replacements = $replacementsJson | ConvertFrom-Json;
-            Write-Host "Parsed JSON:";
-            $replacements | ConvertTo-Json -Depth 10
+            $replacements = @{
+              "CONNECTIONSTRINGS_PROFITSHARING_SLUG" = "value1";
+              "CONNECTIONSTRINGS_COMMON_SLUG" = "value2";
+              "ORACLEHCM_BASE_URL_SLUG" = "value3";
+              "ORACLEHCM_USERNAME_SLUG" = "value4";
+              "ORACLEHCM_PASSWORD_SLUG" = "value5";
+            };
+            $json = $replacements | ConvertTo-Json -Depth 10;
+            Write-Host "JSON String:";
+            Write-Host $json;
+            .\scripts\credsettings.ps1 -EnvName qa -ReplacementsJson $json
 
         - pwsh -Command ".\scripts\credsettings.ps1 -EnvName qa -ReplacementsJson $replacements"
 
