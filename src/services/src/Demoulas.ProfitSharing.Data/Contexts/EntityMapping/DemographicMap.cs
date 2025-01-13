@@ -31,8 +31,8 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             .ValueGeneratedNever()
             .HasColumnName("SSN");
 
-        _ = builder.HasIndex(e => e.EmployeeId, "IX_EmployeeId");
-        _ = builder.Property(e => e.EmployeeId)
+        _ = builder.HasIndex(e => e.BadgeNumber, "IX_BadgeNumber");
+        _ = builder.Property(e => e.BadgeNumber)
             .HasPrecision(7)
             .HasColumnName("EMPLOYEE_ID");
 

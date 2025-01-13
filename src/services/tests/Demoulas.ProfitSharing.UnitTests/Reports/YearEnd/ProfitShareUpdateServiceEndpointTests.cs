@@ -168,7 +168,7 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
             PayProfit pp0 = ppx[0];
             pp0.DemographicId.Should().Be(demo.Id);
             demo.Ssn = ssn;
-            demo.EmployeeId = badge;
+            demo.BadgeNumber = badge;
             pp0.ProfitYear = ProfitYear;
             pp0.PointsEarned = (long)(employeeIncome / 100);
             pp0.EnrollmentId = Enrollment.Constants.NewVestingPlanHasContributions /*2*/;

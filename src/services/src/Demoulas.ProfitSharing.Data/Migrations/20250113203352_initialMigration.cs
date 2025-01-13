@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class initialMigrations : Migration
+    public partial class initialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -540,7 +540,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     ORACLE_HCM_ID = table.Column<long>(type: "NUMBER(15)", precision: 15, nullable: false),
                     SSN = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false),
                     EMPLOYEE_ID = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false),
-                    LAST_MODIFIED_DATE = table.Column<DateTime>(type: "DATE", nullable: false, defaultValueSql: "SYSDATE"),
                     STORE_NUMBER = table.Column<short>(type: "NUMBER(4)", precision: 4, nullable: false, comment: "StoreNumber"),
                     PAY_CLASSIFICATION_ID = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false, comment: "PayClassification"),
                     FULL_NAME = table.Column<string>(type: "NVARCHAR2(84)", maxLength: 84, nullable: false, comment: "FullName"),
@@ -568,7 +567,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     GENDER_ID = table.Column<string>(type: "NVARCHAR2(1)", maxLength: 1, nullable: false, comment: "Gender"),
                     PAY_FREQUENCY_ID = table.Column<byte>(type: "NUMBER(3)", maxLength: 1, nullable: false, comment: "PayFrequency"),
                     TERMINATION_CODE_ID = table.Column<string>(type: "NVARCHAR2(1)", maxLength: 1, nullable: true, comment: "TerminationCode"),
-                    EMPLOYMENT_STATUS_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false)
+                    EMPLOYMENT_STATUS_ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
+                    LAST_MODIFIED_DATE = table.Column<DateTime>(type: "DATE", nullable: false, defaultValueSql: "SYSDATE")
                 },
                 constraints: table =>
                 {
@@ -2321,7 +2321,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     { (byte)19, "Military" },
                     { (byte)20, "Other" },
                     { (byte)21, "Rev" },
-                    { (byte)22, "Unrev" }
+                    { (byte)22, "Unrev" },
+                    { (byte)23, "100% Earnings" },
+                    { (byte)24, ">64 & >5 100%" }
                 });
 
             migrationBuilder.InsertData(
@@ -2890,6 +2892,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_BENEFICIARY_BADGENUMBER",
+                table: "BENEFICIARY",
+                column: "EMPLOYEE_ID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_BENEFICIARY_BENEFICIARYCONTACTID",
                 table: "BENEFICIARY",
                 column: "BENEFICIARY_CONTACT_ID");
@@ -2898,11 +2905,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "IX_BENEFICIARY_DEMOGRAPHICID",
                 table: "BENEFICIARY",
                 column: "DEMOGRAPHIC_ID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_BENEFICIARY_EMPLOYEEID",
-                table: "BENEFICIARY",
-                column: "EMPLOYEE_ID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_BENEFICIARY_KINDID",
@@ -2925,6 +2927,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 column: "SSN");
 
             migrationBuilder.CreateIndex(
+                name: "IX_DEMOGRAPHIC_BADGENUMBER",
+                table: "DEMOGRAPHIC",
+                column: "EMPLOYEE_ID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_DEMOGRAPHIC_COUNTRY_ISO",
                 table: "DEMOGRAPHIC",
                 column: "COUNTRY_ISO");
@@ -2933,11 +2940,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 name: "IX_DEMOGRAPHIC_DEPARTMENTID",
                 table: "DEMOGRAPHIC",
                 column: "DEPARTMENT");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_DEMOGRAPHIC_EMPLOYEEID",
-                table: "DEMOGRAPHIC",
-                column: "EMPLOYEE_ID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DEMOGRAPHIC_EMPLOYMENTSTATUSID",
@@ -2986,14 +2988,14 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 column: "TERMINATION_CODE_ID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_DEMOGRAPHIC_HISTORY_BADGENUMBER",
+                table: "DEMOGRAPHIC_HISTORY",
+                column: "EMPLOYEE_ID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_DEMOGRAPHIC_HISTORY_DEMOGRAPHICID",
                 table: "DEMOGRAPHIC_HISTORY",
                 column: "DEMOGRAPHIC_ID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_DEMOGRAPHIC_HISTORY_EMPLOYEEID",
-                table: "DEMOGRAPHIC_HISTORY",
-                column: "EMPLOYEE_ID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DEMOGRAPHIC_SYNC_AUDIT_BADGENUMBER",

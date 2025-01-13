@@ -245,7 +245,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             .FirstAsync(CancellationToken.None);
         Demographic demo = pp.Demographic!;
 
-        demo.EmployeeId = _example.BadgeNumber;
+        demo.BadgeNumber = _example.BadgeNumber;
         demo.ContactInfo.FullName = _example.FullName;
         demo.StoreNumber = _example.StoreNumber;
         pp.IncomeExecutive = _example.IncomeExecutive;
@@ -270,7 +270,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             .FirstAsync(CancellationToken.None);
         Demographic demo = pp.Demographic!;
 
-        demo.EmployeeId = _example.BadgeNumber;
+        demo.BadgeNumber = _example.BadgeNumber;
         demo.ContactInfo.FullName = _example.FullName;
         demo.StoreNumber = _example.StoreNumber;
         pp.IncomeExecutive = 0m;

@@ -92,7 +92,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
                 .Where(pp => pp.ProfitYear == profitShareUpdateRequest.ProfitYear)
                 .Select(x => new
                 {
-                    x.Demographic!.EmployeeId,
+                    BadgeNumber = x.Demographic!.BadgeNumber,
                     x.Demographic.Ssn,
                     Name = x.Demographic.ContactInfo!.FullName,
                     EnrolledId = x.EnrollmentId,
@@ -117,7 +117,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
                         et => et.Tvb,
                         (et, tvb) => new EmployeeFinancials
                         {
-                            EmployeeId = et.Employee.EmployeeId,
+                            BadgeNumber = et.Employee.BadgeNumber,
                             Ssn = et.Employee.Ssn,
                             Name = et.Employee.Name,
                             EnrolledId = et.Employee.EnrolledId,
@@ -154,7 +154,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
     {
         List<BeneficiaryFinancials> benes = await _dbContextFactory.UseReadOnlyContext(ctx =>
             ctx.Beneficiaries.OrderBy(b => b.Contact!.ContactInfo.FullName)
-                .ThenByDescending(b => b.EmployeeId * 10000 + b.PsnSuffix).Select(b =>
+                .ThenByDescending(b => b.BadgeNumber * 10000 + b.PsnSuffix).Select(b =>
                     new BeneficiaryFinancials
                     {
                         Psn = Convert.ToInt64(b.Psn),
@@ -191,9 +191,9 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
         MemberTotals memberTotals = new();
 
         memberTotals.ContributionAmount =
-            ComputeContribution(empl.PointsEarned, empl.EmployeeId, profitShareUpdateRequest, adjustmentReportData);
+            ComputeContribution(empl.PointsEarned, empl.BadgeNumber, profitShareUpdateRequest, adjustmentReportData);
         memberTotals.IncomingForfeitureAmount =
-            ComputeForfeitures(empl.PointsEarned, empl.EmployeeId, profitShareUpdateRequest, adjustmentReportData);
+            ComputeForfeitures(empl.PointsEarned, empl.BadgeNumber, profitShareUpdateRequest, adjustmentReportData);
 
         // This "EarningsBalance" is actually the new Current Balance.  Consider changing the name
         // Note that CAF gets added here, but subtracted in the next line.   Odd.
@@ -311,7 +311,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
 
         memberTotals.EarningsAmount = Math.Round(profitShareUpdateRequest.EarningsPercent * memberTotals.EarnPoints, 2,
             MidpointRounding.AwayFromZero);
-        if (profitShareUpdateRequest.BadgeToAdjust > 0 && profitShareUpdateRequest.BadgeToAdjust == (empl?.EmployeeId ?? 0))
+        if (profitShareUpdateRequest.BadgeToAdjust > 0 && profitShareUpdateRequest.BadgeToAdjust == (empl?.BadgeNumber ?? 0))
         {
             adjustmentsApplied!.EarningsAmountUnadjusted = memberTotals.EarningsAmount;
             memberTotals.EarningsAmount += profitShareUpdateRequest.AdjustEarningsAmount;
@@ -321,7 +321,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
         memberTotals.SecondaryEarningsAmount =
             Math.Round(profitShareUpdateRequest.SecondaryEarningsPercent * memberTotals.EarnPoints, 2,
                 MidpointRounding.AwayFromZero);
-        if (profitShareUpdateRequest.BadgeToAdjust2 > 0 && profitShareUpdateRequest.BadgeToAdjust2 == (empl?.EmployeeId ?? 0))
+        if (profitShareUpdateRequest.BadgeToAdjust2 > 0 && profitShareUpdateRequest.BadgeToAdjust2 == (empl?.BadgeNumber ?? 0))
         {
             adjustmentsApplied!.SecondaryEarningsAmountUnadjusted = memberTotals.SecondaryEarningsAmount;
             memberTotals.SecondaryEarningsAmount += profitShareUpdateRequest.AdjustEarningsSecondaryAmount;

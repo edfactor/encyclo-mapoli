@@ -25,7 +25,7 @@ public class WagesService : IWagesService
                 .Where(p => p.CurrentIncomeYear != 0 && p.ProfitYear == request.ProfitYear)
                 .Select(p => new WagesCurrentYearResponse
                 {
-                    EmployeeId = p.Demographic!.EmployeeId, HoursCurrentYear = p.CurrentHoursYear, IncomeCurrentYear = p.CurrentIncomeYear
+                    BadgeNumber = p.Demographic!.BadgeNumber, HoursCurrentYear = p.CurrentHoursYear, IncomeCurrentYear = p.CurrentIncomeYear
                 })
                 .ToPaginationResultsAsync(request, cancellationToken);
 

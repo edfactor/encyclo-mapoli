@@ -58,10 +58,10 @@ public class FrozenReportService : IFrozenReportService
                     join fLj in forfeitures on d.Id equals fLj.DemographicId into fTmp
                     from f in fTmp.DefaultIfEmpty()
                     where pp.ProfitYear == req.ProfitYear
-                    orderby d.EmployeeId
+                    orderby d.BadgeNumber
                     select new ForfeituresAndPointsForYearResponse()
                     {
-                        EmployeeId = d.EmployeeId,
+                        BadgeNumber = d.BadgeNumber,
                         EmployeeName = d.ContactInfo.FullName,
                         EmployeeSsn = d.Ssn.ToString(),
                         Forfeitures = f.Forfeitures,
@@ -71,18 +71,18 @@ public class FrozenReportService : IFrozenReportService
 
                 var query = await recs.ToPaginationResultsAsync(req, cancellationToken);
 
-                var badges = query.Results.Select(x => (int)x.EmployeeId).ToHashSet();
+                var badges = query.Results.Select(x => (int)x.BadgeNumber).ToHashSet();
                 var totals = await _contributionService.GetNetBalance((req.ProfitYear), badges, cancellationToken);
 
                 var currentYear = await (from pd in ctx.ProfitDetails
                     join d in ctx.Demographics on pd.Ssn equals d.Ssn
                     where pd.ProfitYear == req.ProfitYear
-                          && badges.Contains(d.EmployeeId)
-                    group pd by new { pd.Ssn, d.EmployeeId }
+                          && badges.Contains(d.BadgeNumber)
+                    group pd by new { pd.Ssn, BadgeNumber = d.BadgeNumber }
                     into pd_g
                     select new
                     {
-                        pd_g.Key.EmployeeId,
+                        pd_g.Key.BadgeNumber,
                         pd_g.Key.Ssn,
                         loan1Total =
                             pd_g.Where(x =>
@@ -97,26 +97,26 @@ public class FrozenReportService : IFrozenReportService
 
                 var lastYearPayProfits = await (from pp in ctx.PayProfits
                         join d in ctx.Demographics on pp.DemographicId equals d.Id
-                        where pp.ProfitYear == req.ProfitYear - 1 && badges.Contains(d.EmployeeId)
+                        where pp.ProfitYear == req.ProfitYear - 1 && badges.Contains(d.BadgeNumber)
                                                                   && (pp.HoursExecutive + pp.CurrentHoursYear) >= hoursWorkedRequirement
-                        select new { d.EmployeeId, pp.CurrentIncomeYear }
+                        select new { BadgeNumber = d.BadgeNumber, pp.CurrentIncomeYear }
                     ).ToListAsync(cancellationToken);
 
-                foreach (var rec in query.Results.Where(rec => totals.ContainsKey((int)rec.EmployeeId)))
+                foreach (var rec in query.Results.Where(rec => totals.ContainsKey((int)rec.BadgeNumber)))
                 {
-                    var cy = currentYear.Find(x => x.EmployeeId == rec.EmployeeId);
+                    var cy = currentYear.Find(x => x.BadgeNumber == rec.BadgeNumber);
                     if (cy != default)
                     {
-                        decimal points = (totals[(int)rec.EmployeeId].TotalContributions +
-                                          totals[(int)rec.EmployeeId].TotalEarnings +
-                                          totals[(int)rec.EmployeeId].TotalForfeitures -
-                                          totals[(int)rec.EmployeeId].TotalPayments) -
+                        decimal points = (totals[(int)rec.BadgeNumber].TotalContributions +
+                                          totals[(int)rec.BadgeNumber].TotalEarnings +
+                                          totals[(int)rec.BadgeNumber].TotalForfeitures -
+                                          totals[(int)rec.BadgeNumber].TotalPayments) -
                                          (cy.loan1Total - cy.loan2Total - cy.forfeitTotal);
 
                         rec.EarningPoints = Convert.ToInt16(Math.Round(points / 100, 0, MidpointRounding.AwayFromZero));
                     }
 
-                    var lypp = lastYearPayProfits.Find(x => x.EmployeeId == rec.EmployeeId);
+                    var lypp = lastYearPayProfits.Find(x => x.BadgeNumber == rec.BadgeNumber);
                     if (lypp != null)
                     {
                         rec.ForfeitPoints = Convert.ToInt16(Math.Round((lypp.CurrentIncomeYear) / 100, 0, MidpointRounding.AwayFromZero));
@@ -178,7 +178,7 @@ public class FrozenReportService : IFrozenReportService
                          {
                              d.DateOfBirth,
                              EmploymentType = d.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT,
-                             d.EmployeeId,
+                             BadgeNumber = d.BadgeNumber,
                              Amount = pd.Forfeiture,
                              pd.CommentTypeId
                          });
@@ -209,7 +209,7 @@ public class FrozenReportService : IFrozenReportService
         {
             Age = x.DateOfBirth.Age(asOfDate),
             x.EmploymentType,
-            x.EmployeeId,
+            x.BadgeNumber,
             x.Amount,
             x.CommentTypeId
         })
@@ -218,7 +218,7 @@ public class FrozenReportService : IFrozenReportService
             {
                 Age = g.Key.Age,
                 EmploymentType = g.Key.EmploymentType,
-                EmployeeCount = g.Select(x => x.EmployeeId).Distinct().Count(),
+                EmployeeCount = g.Select(x => x.BadgeNumber).Distinct().Count(),
                 Amount = g.Sum(x => x.Amount),
                 // Compute the total hardship amount within the group
                 HardshipAmount = g
@@ -282,7 +282,7 @@ public class FrozenReportService : IFrozenReportService
                 where pd.ProfitYear == req.ProfitYear
                       && pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions
                       && pd.Contribution > 0
-                select new { d.DateOfBirth, EmploymentType = d.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT, d.EmployeeId, Amount = pd.Contribution });
+                select new { d.DateOfBirth, EmploymentType = d.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT, BadgeNumber = d.BadgeNumber, Amount = pd.Contribution });
 
             query = req.ReportType switch
             {
@@ -296,9 +296,9 @@ public class FrozenReportService : IFrozenReportService
         });
 
         var asOfDate = await GetAsOfDate(req, cancellationToken);
-        var details = queryResult.Select(x => new { Age = x.DateOfBirth.Age(asOfDate), x.EmployeeId, x.Amount })
+        var details = queryResult.Select(x => new { Age = x.DateOfBirth.Age(asOfDate), x.BadgeNumber, x.Amount })
             .GroupBy(x => new { x.Age })
-            .Select(g => new ContributionsByAgeDetail { Age = g.Key.Age, EmployeeCount = g.Select(x => x.EmployeeId).Distinct().Count(), Amount = g.Sum(x => x.Amount), })
+            .Select(g => new ContributionsByAgeDetail { Age = g.Key.Age, EmployeeCount = g.Select(x => x.BadgeNumber).Distinct().Count(), Amount = g.Sum(x => x.Amount), })
             .OrderBy(x => x.Age)
             .ToList();
 
@@ -328,7 +328,7 @@ public class FrozenReportService : IFrozenReportService
                 where pd.ProfitYear == req.ProfitYear
                       && pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id
                       && pd.Forfeiture > 0
-                select new { d.DateOfBirth, EmploymentType = d.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT, d.EmployeeId, Amount = pd.Forfeiture });
+                select new { d.DateOfBirth, EmploymentType = d.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT, BadgeNumber = d.BadgeNumber, Amount = pd.Forfeiture });
 
             query = req.ReportType switch
             {
@@ -342,9 +342,9 @@ public class FrozenReportService : IFrozenReportService
         });
 
         var asOfDate = await GetAsOfDate(req, cancellationToken);
-        var details = queryResult.Select(x => new { Age = x.DateOfBirth.Age(asOfDate), x.EmployeeId, x.Amount })
+        var details = queryResult.Select(x => new { Age = x.DateOfBirth.Age(asOfDate), x.BadgeNumber, x.Amount })
             .GroupBy(x => new { x.Age })
-            .Select(g => new ForfeituresByAgeDetail { Age = g.Key.Age, EmployeeCount = g.Select(x => x.EmployeeId).Distinct().Count(), Amount = g.Sum(x => x.Amount), })
+            .Select(g => new ForfeituresByAgeDetail { Age = g.Key.Age, EmployeeCount = g.Select(x => x.BadgeNumber).Distinct().Count(), Amount = g.Sum(x => x.Amount), })
             .OrderBy(x => x.Age)
             .ToList();
 

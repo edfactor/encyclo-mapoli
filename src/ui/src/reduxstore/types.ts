@@ -350,7 +350,7 @@ export interface EmployeeDetails {
   percentageVested: number;
   contributionsLastYear: boolean;
   enrolled: boolean;
-  employeeId: string;
+  badgeNumber: string;
   hireDate: string;
   terminationDate: string | null;
   reHireDate: string | null;

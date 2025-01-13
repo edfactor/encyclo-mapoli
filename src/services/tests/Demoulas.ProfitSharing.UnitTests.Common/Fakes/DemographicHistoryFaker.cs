@@ -18,7 +18,7 @@ internal sealed class DemographicHistoryFaker : Faker<DemographicHistory>
         RuleFor(dh => dh.ValidTo, f => new DateTime(2100, 12, 31, 0, 0, 0, DateTimeKind.Utc));
         RuleFor(dh => dh.OracleHcmId, f => currentDemographic.OracleHcmId);
         RuleFor(dh => dh.Ssn, f => currentDemographic.Ssn);
-        RuleFor(dh => dh.EmployeeId, f => currentDemographic.EmployeeId);
+        RuleFor(dh => dh.BadgeNumber, f => currentDemographic.BadgeNumber);
         RuleFor(dh => dh.StoreNumber, f => currentDemographic.StoreNumber);
         RuleFor(dh => dh.PayClassificationId, f => currentDemographic.PayClassificationId);
         RuleFor(dh => dh.DateOfBirth, f => currentDemographic.DateOfBirth);

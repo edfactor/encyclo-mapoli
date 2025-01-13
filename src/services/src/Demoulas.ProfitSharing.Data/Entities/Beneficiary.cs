@@ -4,11 +4,11 @@ public sealed class Beneficiary
     public required int Id { get; set; }
     public required short PsnSuffix { get; set; } // Suffix for hierarchy (1000, 2000, etc.)
 
-    public required int EmployeeId { get; set; }
+    public required int BadgeNumber { get; set; }
     public required int DemographicId { get; set; }
 
     // Reconstruct the full PSN dynamically
-    public string Psn => $"{EmployeeId}{PsnSuffix:D4}"; // Reconstruct PSN w
+    public string Psn => $"{BadgeNumber}{PsnSuffix:D4}"; // Reconstruct PSN w
 
     public BeneficiaryContact? Contact { get; set; }
     public required int BeneficiaryContactId { get; set; }

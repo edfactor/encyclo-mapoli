@@ -20,7 +20,7 @@ public sealed class DemographicFaker : Faker<Demographic>
         PayClassificationFaker payClassificationFaker = new PayClassificationFaker();
         EmploymentStatusFaker employmentStatusFaker = new EmploymentStatusFaker();
 
-        RuleFor(d => d.EmployeeId, f => _badgeNumberCounter++)
+        RuleFor(d => d.BadgeNumber, f => _badgeNumberCounter++)
             .RuleFor(d => d.Id, f => _idCounter++)
             .RuleFor(d => d.Ssn, f => f.Person.Ssn().ConvertSsnToInt())
             .RuleFor(d => d.OracleHcmId, f => _oracleHcmIdCounter++)
