@@ -126,12 +126,32 @@ public class MasterInquiryService : IMasterInquiryService
 
                 if (uniqueSsns.Count == 1)
                 {
-                    int ssn = (int) uniqueSsns[0];
-                    short currentYear = (short) DateTime.Today.Year;
-                    short previousYear = (short) (currentYear - 1);
+                    int ssn = (int)uniqueSsns[0];
+                    short currentYear = (short)DateTime.Today.Year;
+                    short previousYear = (short)(currentYear - 1);
 
-                    var previousBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(SearchBy.Ssn, ssn, previousYear, cancellationToken);
-                    var currentBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(SearchBy.Ssn, ssn, currentYear, cancellationToken);
+                    BalanceEndpointResponse? previousBalance = null;
+                    BalanceEndpointResponse? currentBalance = null;
+
+                    try
+                    {
+                        previousBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(
+                            SearchBy.Ssn, ssn, previousYear, cancellationToken);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to retrieve previous year balance for SSN {SSN}", ssn);
+                    }
+
+                    try
+                    {
+                        currentBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(
+                            SearchBy.Ssn, ssn, currentYear, cancellationToken);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to retrieve current year balance for SSN {SSN}", ssn);
+                    }
 
                     var maxProfitYear = req.EndProfitYear.HasValue ? req.EndProfitYear : short.MaxValue;
 
@@ -154,7 +174,7 @@ public class MasterInquiryService : IMasterInquiryService
                          d.StoreNumber,
                          DemographicId = d.Id,
                          LatestPayProfit = d.PayProfits
-                             .Where(x=>x.ProfitYear <= maxProfitYear)
+                             .Where(x => x.ProfitYear <= maxProfitYear)
                              .OrderByDescending(p => p.ProfitYear)
                              .FirstOrDefault()
                      })
@@ -182,10 +202,10 @@ public class MasterInquiryService : IMasterInquiryService
                             ContributionsLastYear = previousBalance != null && previousBalance.CurrentBalance > 0,
                             Enrolled = demographicData.LatestPayProfit?.EnrollmentId != 0,
                             EmployeeId = demographicData.EmployeeId.ToString(),
-                            BeginPSAmount = (long) (previousBalance?.CurrentBalance ?? 0),
-                            CurrentPSAmount = (long) (currentBalance?.CurrentBalance ?? 0),
-                            BeginVestedAmount = (long) (previousBalance?.VestedBalance ?? 0),
-                            CurrentVestedAmount = (long) (currentBalance?.VestedBalance ?? 0)
+                            BeginPSAmount = (long)(previousBalance?.CurrentBalance ?? 0),
+                            CurrentPSAmount = (long)(currentBalance?.CurrentBalance ?? 0),
+                            BeginVestedAmount = (long)(previousBalance?.VestedBalance ?? 0),
+                            CurrentVestedAmount = (long)(currentBalance?.VestedBalance ?? 0)
                         };
                     }
                 }
