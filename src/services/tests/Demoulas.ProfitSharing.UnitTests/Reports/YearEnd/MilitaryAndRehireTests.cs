@@ -148,7 +148,7 @@ public class MilitaryAndRehireTests : ApiTestBase<Program>
         demo.EmploymentStatusId = EmploymentStatus.Constants.Inactive;
 
         demo.DepartmentId = example.DepartmentId;
-        demo.EmployeeId = example.BadgeNumber;
+        demo.BadgeNumber = example.BadgeNumber;
         demo.DateOfBirth = example.DateOfBirth;
         demo.TerminationDate = example.TerminationDate;
         await c.SaveChangesAsync(CancellationToken.None);

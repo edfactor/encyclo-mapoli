@@ -41,7 +41,7 @@ internal class EmployeeSyncConsumer : IConsumer<MessageRequest<OracleEmployee>>
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
 
-        int badgeNumber = employee?.EmployeeId ?? 0;
+        int badgeNumber = employee?.BadgeNumber ?? 0;
         if (employee == null || badgeNumber == 0)
         {
             yield break;
@@ -58,7 +58,7 @@ internal class EmployeeSyncConsumer : IConsumer<MessageRequest<OracleEmployee>>
         yield return new DemographicsRequest
         {
             OracleHcmId = employee.PersonId,
-            EmployeeId = employee.EmployeeId,
+            BadgeNumber = employee.BadgeNumber,
             DateOfBirth = employee.DateOfBirth,
             HireDate = employee.WorkRelationship?.StartDate ?? SqlDateTime.MinValue.Value.ToDateOnly(),
             TerminationDate = employee.WorkRelationship?.TerminationDate,

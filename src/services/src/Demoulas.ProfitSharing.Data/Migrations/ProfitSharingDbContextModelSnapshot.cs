@@ -24520,6 +24520,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("AMOUNT");
 
+                    b.Property<int>("BadgeNumber")
+                        .HasPrecision(7)
+                        .HasColumnType("NUMBER(7)")
+                        .HasColumnName("EMPLOYEE_ID");
+
                     b.Property<int>("BeneficiaryContactId")
                         .HasColumnType("NUMBER(10)")
                         .HasColumnName("BENEFICIARY_CONTACT_ID");
@@ -24538,11 +24543,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasPrecision(9, 2)
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("EARNINGS");
-
-                    b.Property<int>("EmployeeId")
-                        .HasPrecision(7)
-                        .HasColumnType("NUMBER(7)")
-                        .HasColumnName("EMPLOYEE_ID");
 
                     b.Property<string>("KindId")
                         .HasColumnType("NVARCHAR2(1)")
@@ -24580,8 +24580,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasIndex("KindId")
                         .HasDatabaseName("IX_BENEFICIARY_KINDID");
 
-                    b.HasIndex(new[] { "EmployeeId" }, "IX_EMPLOYEE_ID")
-                        .HasDatabaseName("IX_BENEFICIARY_EMPLOYEEID");
+                    b.HasIndex(new[] { "BadgeNumber" }, "IX_EMPLOYEE_ID")
+                        .HasDatabaseName("IX_BENEFICIARY_BADGENUMBER");
 
                     b.HasIndex(new[] { "PsnSuffix" }, "IX_PsnSuffix")
                         .HasDatabaseName("IX_BENEFICIARY_PSNSUFFIX");
@@ -26223,6 +26223,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("BadgeNumber")
+                        .HasPrecision(7)
+                        .HasColumnType("NUMBER(7)")
+                        .HasColumnName("EMPLOYEE_ID");
+
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("DATE")
                         .HasColumnName("DATE_OF_BIRTH")
@@ -26233,11 +26238,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(1)")
                         .HasColumnName("DEPARTMENT")
                         .HasComment("Department");
-
-                    b.Property<int>("EmployeeId")
-                        .HasPrecision(7)
-                        .HasColumnType("NUMBER(7)")
-                        .HasColumnName("EMPLOYEE_ID");
 
                     b.Property<string>("EmploymentStatusId")
                         .IsRequired()
@@ -26342,8 +26342,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasIndex("TerminationCodeId")
                         .HasDatabaseName("IX_DEMOGRAPHIC_TERMINATIONCODEID");
 
-                    b.HasIndex(new[] { "EmployeeId" }, "IX_EmployeeId")
-                        .HasDatabaseName("IX_DEMOGRAPHIC_EMPLOYEEID");
+                    b.HasIndex(new[] { "BadgeNumber" }, "IX_BadgeNumber")
+                        .HasDatabaseName("IX_DEMOGRAPHIC_BADGENUMBER");
 
                     b.HasIndex(new[] { "OracleHcmId" }, "IX_ORACLE_HCM_ID")
                         .IsUnique()
@@ -26368,6 +26368,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
+                    b.Property<int>("BadgeNumber")
+                        .HasPrecision(7)
+                        .HasColumnType("NUMBER(7)")
+                        .HasColumnName("EMPLOYEE_ID");
+
                     b.Property<DateTime>("CreatedDateTime")
                         .HasColumnType("TIMESTAMP(7)")
                         .HasColumnName("CREATED_DATETIME");
@@ -26387,11 +26392,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(1)")
                         .HasColumnName("DEPARTMENT")
                         .HasComment("Department");
-
-                    b.Property<int>("EmployeeId")
-                        .HasPrecision(7)
-                        .HasColumnType("NUMBER(7)")
-                        .HasColumnName("EMPLOYEE_ID");
 
                     b.Property<string>("EmploymentStatusId")
                         .IsRequired()
@@ -26465,11 +26465,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasKey("Id")
                         .HasName("PK_DEMOGRAPHIC_HISTORY");
 
+                    b.HasIndex(new[] { "BadgeNumber" }, "IX_BadgeNumber")
+                        .HasDatabaseName("IX_DEMOGRAPHIC_HISTORY_BADGENUMBER");
+
                     b.HasIndex(new[] { "DemographicId" }, "IX_DEMOGRAPHIC")
                         .HasDatabaseName("IX_DEMOGRAPHIC_HISTORY_DEMOGRAPHICID");
-
-                    b.HasIndex(new[] { "EmployeeId" }, "IX_EmployeeId")
-                        .HasDatabaseName("IX_DEMOGRAPHIC_HISTORY_EMPLOYEEID");
 
                     b.ToTable("DEMOGRAPHIC_HISTORY", (string)null);
                 });

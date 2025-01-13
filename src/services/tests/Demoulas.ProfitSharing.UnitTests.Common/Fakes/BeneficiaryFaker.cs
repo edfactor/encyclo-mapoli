@@ -22,7 +22,7 @@ internal sealed class BeneficiaryFaker : Faker<Beneficiary>
         Demographic currentDemographic = demographicQueue.Peek();
 
         RuleFor(pc => pc.DemographicId, (f, o) => (currentDemographic.Id));
-        RuleFor(pc => pc.EmployeeId, (f, o) => (currentDemographic.EmployeeId));
+        RuleFor(pc => pc.BadgeNumber, (f, o) => (currentDemographic.BadgeNumber));
         RuleFor(d => d.Demographic, (f, o) =>
         {
             if (demographicQueue.Any()) // demographic record that contains the both of them

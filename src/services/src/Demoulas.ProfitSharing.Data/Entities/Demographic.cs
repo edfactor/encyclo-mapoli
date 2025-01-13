@@ -6,7 +6,7 @@ namespace Demoulas.ProfitSharing.Data.Entities;
 /// <summary>
 /// https://demoulas.atlassian.net/wiki/spaces/~bherrmann/pages/39944312/Quick+Guide+to+Profit+Sharing+Tables
 /// </summary>
-[DebuggerDisplay("Id={Id} OracleHcmId={OracleHcmId} EmployeeId={EmployeeId} FullName={ContactInfo.FullName} StoreNumber={StoreNumber}")]
+[DebuggerDisplay("Id={Id} OracleHcmId={OracleHcmId} BadgeNumber={BadgeNumber} FullName={ContactInfo.FullName} StoreNumber={StoreNumber}")]
 public sealed class Demographic : Member
 {
     public int Id { get; set; }
@@ -21,7 +21,7 @@ public sealed class Demographic : Member
     public required long OracleHcmId { get; set; }
 
     public required int Ssn { get; set; }
-    public required int EmployeeId { get; set; }
+    public required int BadgeNumber { get; set; }
 
     public required short StoreNumber { get; set; }
 
@@ -93,7 +93,7 @@ public sealed class Demographic : Member
     {
         return demo1.OracleHcmId == demo2.OracleHcmId &&
                //The Oracle HCM process seems to have a random SSN.  Until that settles down, not including SSN changes as a reason to create a new history record.  demo1.Ssn == demo2.Ssn &&
-               demo1.EmployeeId == demo2.EmployeeId &&
+               demo1.BadgeNumber == demo2.BadgeNumber &&
                demo1.StoreNumber == demo2.StoreNumber &&
                demo1.PayClassificationId == demo2.PayClassificationId &&
                demo1.DateOfBirth == demo2.DateOfBirth &&
