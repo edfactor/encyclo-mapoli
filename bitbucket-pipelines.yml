@@ -111,12 +111,13 @@ definitions:
  
         - echo "Checking PowerShell version..."
         - pwsh -Command '$PSVersionTable.PSVersion'
+        - powershell -Command '$PSVersionTable.PSVersion'
 
         # Save replacements as a JSON string to a temporary file
-        - powershell -Command "Set-Content -Path replacements.json -Value '{\"CONNECTIONSTRINGS_PROFITSHARING_SLUG\":\"value1\",\"CONNECTIONSTRINGS_COMMON_SLUG\":\"value2\",\"ORACLEHCM_BASE_URL_SLUG\":\"value3\",\"ORACLEHCM_USERNAME_SLUG\":\"value4\",\"ORACLEHCM_PASSWORD_SLUG\":\"value5\"}'"
+        - pwsh -Command "Set-Content -Path replacements.json -Value '{\"CONNECTIONSTRINGS_PROFITSHARING_SLUG\":\"value1\",\"CONNECTIONSTRINGS_COMMON_SLUG\":\"value2\",\"ORACLEHCM_BASE_URL_SLUG\":\"value3\",\"ORACLEHCM_USERNAME_SLUG\":\"value4\",\"ORACLEHCM_PASSWORD_SLUG\":\"value5\"}'"
 
         # Call the PowerShell script with the JSON file content
-        - powershell -Command ".\scripts\credsettings.ps1 -EnvName qa -ReplacementsJson (Get-Content replacements.json -Raw)"
+        - pwsh -Command ".\scripts\credsettings.ps1 -EnvName qa -ReplacementsJson (Get-Content replacements.json -Raw)"
         
     create-frontend-artifact-qa: &create-frontend-artifact-qa
       name: Create FrontEnd Artifacts (QA)     
