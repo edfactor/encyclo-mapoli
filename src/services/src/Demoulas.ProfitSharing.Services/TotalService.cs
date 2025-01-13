@@ -86,9 +86,9 @@ public sealed class TotalService : ITotalService
             select new ParticipantTotalDto
             {
                 Ssn = pd_g.Key,
-                Total = pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary.Id).Sum(x => x.Contribution) +
-                       pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.Incoming100PercentVestedEarnings.Id).Sum(x => x.Earnings) +
-                       pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id).Sum(x => x.Forfeiture)
+                Total =  pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary.Id /*6*/).Sum(x => x.Contribution) 
+                       + pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.Incoming100PercentVestedEarnings.Id /*8*/).Sum(x => x.Earnings) 
+                       - pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id /*9*/).Sum(x => x.Forfeiture)
             }
         );
     }

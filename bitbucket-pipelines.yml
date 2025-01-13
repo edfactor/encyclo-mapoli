@@ -52,7 +52,7 @@ definitions:
         - windows
         - self.hosted
       script:
-       - powershell -Command "& { ./health-check.ps1 -Url $Env:HEALTH_CHECK_URL }"
+       - pwsh -Command "& { ./health-check.ps1 -Url $Env:HEALTH_CHECK_URL }"
       artifacts:
         - build/**
     
@@ -101,6 +101,31 @@ definitions:
         - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.EmployeePayroll.Sync -c Release -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -p:PublishProfile=FolderProfile -o .\publishOutput
         - Compress-Archive -Path .\publishOutput\* -DestinationPath .\dist\Demoulas.ProfitSharing.EmployeePayroll.Sync.zip -Force
 
+    create-credsettings: &create-credsettings
+      name: Replace Slugs and Copy File
+      runs-on:
+        - windows
+        - self.hosted
+      script:
+        - SET ENV=qa
+         - pwsh -Command >-
+            $replacements = @{
+              "CONNECTIONSTRINGS_PROFITSHARING_SLUG" = "value1";
+              "CONNECTIONSTRINGS_COMMON_SLUG" = "value2";
+              "ORACLEHCM_BASE_URL_SLUG" = "value3";
+              "ORACLEHCM_USERNAME_SLUG" = "value4";
+              "ORACLEHCM_PASSWORD_SLUG" = "value5";
+            };
+            $json = $replacements | ConvertTo-Json -Depth 10 -Compress;
+            Write-Host "JSON String:";
+            Write-Host $json;
+            .\scripts\credsettings.ps1 -EnvName qa -ReplacementsJson $json
+
+        - pwsh -Command ".\scripts\credsettings.ps1 -EnvName qa -ReplacementsJson $replacements"
+
+
+
+        
     create-frontend-artifact-qa: &create-frontend-artifact-qa
       name: Create FrontEnd Artifacts (QA)     
       runs-on:
@@ -246,10 +271,10 @@ pipelines:
             - echo "Deploying web application..."
             - $env:API_ARTIFACT_NAME = "Demoulas.ProfitSharing.Api.zip"
             - $env:UI_ARTIFACT_NAME = "Demoulas.ProfitSharing.UI.QA.zip"
-            - powershell .\scripts\webDeploy.ps1 $env:ENV $env:API_SERVER_QA $env:API_ARTIFACT_NAME $env:UI_ARTIFACT_NAME
+            - pwsh .\scripts\webDeploy.ps1 $env:ENV $env:API_SERVER_QA $env:API_ARTIFACT_NAME $env:UI_ARTIFACT_NAME
 
             - echo "Deploying background service..."            
-            - powershell .\scripts\servicesDeploy.ps1 ${env:ENV} $env:API_SERVER_QA
+            - pwsh .\scripts\servicesDeploy.ps1 ${env:ENV} $env:API_SERVER_QA
 
 
       - parallel:
@@ -265,7 +290,7 @@ pipelines:
           script:
             - echo "Deploying application..."
             - $env:API_SERVER_UAT = "appt24d"
-            - powershell .\scripts\webDeploy.ps1 UAT $env:API_SERVER_UAT
+            - pwsh .\scripts\webDeploy.ps1 UAT $env:API_SERVER_UAT
       #- step: *create-frontend-artifact-prod
 
 

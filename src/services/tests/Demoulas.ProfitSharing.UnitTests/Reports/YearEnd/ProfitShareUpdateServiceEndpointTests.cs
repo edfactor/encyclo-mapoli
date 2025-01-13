@@ -7,8 +7,8 @@ using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Security;
-using Demoulas.ProfitSharing.UnitTests.Base;
-using Demoulas.ProfitSharing.UnitTests.Extensions;
+using Demoulas.ProfitSharing.UnitTests.Common.Base;
+using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
@@ -124,7 +124,7 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
         memberCount.Should().Be(1); // should be just 1 employee
         ProfitShareUpdateMemberResponse profitShareUpdateMember = response.Response.Results.First(mf => mf.Badge == badge);
         profitShareUpdateMember.Contributions.Should().Be(employeeIncome * 0.20m);
-        profitShareUpdateMember.Earnings.Should().Be(currentBalance * 0.127m);
+        profitShareUpdateMember.AllEarnings.Should().Be(currentBalance * 0.127m);
         profitShareUpdateMember.IncomingForfeitures.Should().Be(employeeIncome * .011m);
     }
 
@@ -241,7 +241,7 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
         memberCount.Should().Be(1); // should be just 1 bene
         ProfitShareUpdateMemberResponse profitShareUpdateMember = response.Response.Results.First();
         profitShareUpdateMember.Contributions.Should().Be(0);
-        profitShareUpdateMember.Earnings.Should().Be(currentBalance*0.067m);
+        profitShareUpdateMember.AllEarnings.Should().Be(currentBalance*0.067m);
         profitShareUpdateMember.IncomingForfeitures.Should().Be(0);
     }
 

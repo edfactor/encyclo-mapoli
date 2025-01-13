@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Json;
+﻿using System.Diagnostics;
+using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Microsoft.Extensions.Logging;
@@ -51,6 +52,10 @@ internal class AtomFeedClient
         try
         {
             HttpResponseMessage response = await _httpClient.GetAsync(url, cancellationToken);
+            if (Debugger.IsAttached)
+            {
+                _logger.LogInformation(url);
+            }
             response.EnsureSuccessStatusCode();
             feedRoot = await response.Content.ReadFromJsonAsync<AtomFeedResponse<TContextType>>(cancellationToken);
         }

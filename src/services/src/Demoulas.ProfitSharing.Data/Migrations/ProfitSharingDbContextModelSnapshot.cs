@@ -24810,6 +24810,16 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         {
                             Id = (byte)22,
                             Name = "Unrev"
+                        },
+                        new
+                        {
+                            Id = (byte)23,
+                            Name = "100% Earnings"
+                        },
+                        new
+                        {
+                            Id = (byte)24,
+                            Name = ">64 & >5 100%"
                         });
                 });
 

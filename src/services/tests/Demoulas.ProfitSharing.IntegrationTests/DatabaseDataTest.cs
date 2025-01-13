@@ -1,14 +1,13 @@
 ﻿#if DEBUG
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Data.Contexts;
-using Demoulas.ProfitSharing.UnitTests.Base;
+using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.IntegrationTests;
 
-public class DatabaseDataTest : IClassFixture<ApiTestBase<Program>>
+public class DatabaseDataTest : Xunit.IClassFixture<ApiTestBase<Program>>
 {
     private readonly ITestOutputHelper _output;
 
@@ -27,18 +26,18 @@ public class DatabaseDataTest : IClassFixture<ApiTestBase<Program>>
             .LogTo(_output.WriteLine).Options;
         var ctx = new ProfitSharingDbContext(options);
 
-        await ctx.Demographics.Take(5).ToListAsync();
-        await ctx.Beneficiaries.Take(5).ToListAsync();
-        await ctx.PayProfits.Take(5).ToListAsync();
-        await ctx.ProfitDetails.Take(5).ToListAsync();
-        await ctx.Distributions.Take(5).ToListAsync();
+        await ctx.Demographics.Take(5).ToListAsync(TestContext.Current.CancellationToken);
+        await ctx.Beneficiaries.Take(5).ToListAsync(TestContext.Current.CancellationToken);
+        await ctx.PayProfits.Take(5).ToListAsync(TestContext.Current.CancellationToken);
+        await ctx.ProfitDetails.Take(5).ToListAsync(TestContext.Current.CancellationToken);
+        await ctx.Distributions.Take(5).ToListAsync(TestContext.Current.CancellationToken);
 
 
         var readOnlyOptions = new DbContextOptionsBuilder<ProfitSharingReadOnlyDbContext>().UseOracle(connectionString).EnableSensitiveDataLogging()
             .LogTo(_output.WriteLine).Options;
         var readctx = new ProfitSharingReadOnlyDbContext(readOnlyOptions);
 
-        await readctx.AccountingPeriods.Take(5).ToListAsync();
+        await readctx.AccountingPeriods.Take(5).ToListAsync(TestContext.Current.CancellationToken);
 
         Assert.True(true);
     }

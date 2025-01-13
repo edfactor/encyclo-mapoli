@@ -50,7 +50,7 @@ const ContributionsByAgeGrid = () => {
                     {
                       age: "CONT TTL",
                       employeeCount: (contributionsByAgeTotal?.totalEmployees || 0),
-                      amount: contributionsByAgeTotal?.distributionTotalAmount
+                      amount: contributionsByAgeTotal?.totalAmount
                     }
                   ],
                   columnDefs: [
@@ -73,7 +73,7 @@ const ContributionsByAgeGrid = () => {
                     {
                      age: "CONT TTL",
                       employeeCount: (contributionsByAgeFullTime?.totalEmployees || 0),
-                      amount: contributionsByAgeFullTime?.distributionTotalAmount
+                      amount: contributionsByAgeFullTime?.totalAmount
                     }
                   ],
                   columnDefs: [
@@ -96,7 +96,7 @@ const ContributionsByAgeGrid = () => {
                     {
                       age: "CONT TTL",
                       employeeCount: (contributionsByAgePartTime?.totalEmployees || 0),
-                      amount: contributionsByAgePartTime?.distributionTotalAmount
+                      amount: contributionsByAgePartTime?.totalAmount
                     }
                   ],
                   columnDefs: [

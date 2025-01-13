@@ -50,7 +50,7 @@ const ForfeituresByAgeGrid = () => {
                     {
                       age: "FORF  TTL",
                       employeeCount: (forfeituresByAgeTotal?.totalEmployees || 0),
-                      amount: forfeituresByAgeTotal?.distributionTotalAmount
+                      amount: forfeituresByAgeTotal?.totalAmount
                     }
                   ],
                   columnDefs: [
@@ -73,7 +73,7 @@ const ForfeituresByAgeGrid = () => {
                     {
                      age: "FORF  TTL",
                       employeeCount: (forfeituresByAgeFullTime?.totalEmployees || 0),
-                      amount: forfeituresByAgeFullTime?.distributionTotalAmount
+                      amount: forfeituresByAgeFullTime?.totalAmount
                     }
                   ],
                   columnDefs: [
@@ -96,7 +96,7 @@ const ForfeituresByAgeGrid = () => {
                     {
                      age: "FORF  TTL",
                       employeeCount: (forfeituresByAgePartTime?.totalEmployees || 0),
-                      amount: forfeituresByAgePartTime?.distributionTotalAmount
+                      amount: forfeituresByAgePartTime?.totalAmount
                     }
                   ],
                   columnDefs: [

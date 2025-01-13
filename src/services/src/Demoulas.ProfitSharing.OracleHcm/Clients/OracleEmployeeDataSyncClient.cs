@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Clients;
 
@@ -11,13 +12,15 @@ internal sealed class OracleEmployeeDataSyncClient
 {
     private readonly HttpClient _httpClient;
     private readonly OracleHcmConfig _oracleHcmConfig;
+    private readonly ILogger<OracleEmployeeDataSyncClient> _logger;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
 
 
-    public OracleEmployeeDataSyncClient(HttpClient httpClient, OracleHcmConfig oracleHcmConfig)
+    public OracleEmployeeDataSyncClient(HttpClient httpClient, OracleHcmConfig oracleHcmConfig, ILogger<OracleEmployeeDataSyncClient> logger)
     {
         _httpClient = httpClient;
         _oracleHcmConfig = oracleHcmConfig;
+        _logger = logger;
         _jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
     }
 
@@ -111,7 +114,14 @@ internal sealed class OracleEmployeeDataSyncClient
         UriBuilder initialUriBuilder = new UriBuilder(url);
         string initialQueryString = await new FormUrlEncodedContent(initialQuery).ReadAsStringAsync(cancellationToken);
         initialUriBuilder.Query = initialQueryString;
-        return initialUriBuilder.Uri.ToString();
+        var returnUrl = initialUriBuilder.Uri.ToString();
+
+        if (Debugger.IsAttached)
+        {
+            _logger.LogInformation(returnUrl);
+        }
+
+        return returnUrl;
     }
 
 
