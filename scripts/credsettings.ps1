@@ -6,7 +6,10 @@ param (
 
 # Convert JSON string to a hashtable
 try {
-    $replacements = $ReplacementsJson | ConvertFrom-Json -AsHashtable
+    $replacements = $ReplacementsJson | ConvertFrom-Json | ForEach-Object { $_.psobject.Properties } | ForEach-Object {
+    [ordered]@{ $_.Name = $_.Value }
+}
+
 } catch {
     Write-Error "Failed to parse replacements JSON: $_"
     exit 1
