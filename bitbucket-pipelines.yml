@@ -110,7 +110,7 @@ definitions:
         - SET ENV=qa
         
         - pwsh -Command @"
-            $replacements = {
+            $replacements = @{
               "CONNECTIONSTRINGS_PROFITSHARING_SLUG" = "value1";
               "CONNECTIONSTRINGS_COMMON_SLUG" = "value2";
               "ORACLEHCM_BASE_URL_SLUG" = "value3";
