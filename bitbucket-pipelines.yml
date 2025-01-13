@@ -108,9 +108,7 @@ definitions:
         - self.hosted
       script:
         - SET ENV=qa
-        - echo "Checking PowerShell version..."        
-        - pwsh -Command "$PSVersionTable.PSVersion"
-
+        
         - pwsh -Command "
             \$replacements = @{
               CONNECTIONSTRINGS_PROFITSHARING_SLUG = 'value1';
