@@ -54,7 +54,7 @@ const MilitaryAndRehireEntryAndModificationSearchFilter = () => {
           xs={12}
           sm={6}
           md={3}>
-          <FormLabel>socialSecurity</FormLabel>
+          <FormLabel>SSN</FormLabel>
           <TextField
             fullWidth
             variant="outlined"

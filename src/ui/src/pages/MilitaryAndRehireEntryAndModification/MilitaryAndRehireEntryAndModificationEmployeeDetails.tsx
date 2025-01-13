@@ -56,20 +56,6 @@ const MilitaryAndRehireEntryAndModificationEmployeeDetails: React.FC<MilitaryAnd
     { label: "Emp", value: employeeId },
   ];
 
-  const hireSection = [
-    { label: "Hire", value: mmDDYYFormat(hireDate) },
-    { label: "Term", value: mmDDYYFormat(terminationDate) ?? 'N/A' },
-    { label: "Store", value: storeNumber },
-    { label: "Rehire", value: mmDDYYFormat(reHireDate) ?? 'N/A' },
-  ];
-
-  const amountsSection = [
-    { label: "Begin PS Amount", value: numberToCurrency(beginPSAmount) },
-    { label: "Current PS Amount", value: numberToCurrency(currentPSAmount) },
-    { label: "Begin Vested Amount", value: numberToCurrency(beginVestedAmount) },
-    { label: "Current Vested Amount", value: numberToCurrency(currentVestedAmount) },
-  ];
-
   return (
     <Grid2
     container
@@ -87,29 +73,19 @@ const MilitaryAndRehireEntryAndModificationEmployeeDetails: React.FC<MilitaryAnd
         <Grid2
           container
           spacing={3}>
-          <Grid2 xs={2}>
+          <Grid2 xs={4}>
             <LabelValueSection
               data={infoSection}
             />
           </Grid2>
-          <Grid2 xs={3}>
+          <Grid2 xs={4}>
             <LabelValueSection
               data={planSection}
             />
           </Grid2>
-          <Grid2 xs={2}>
+          <Grid2 xs={4}>
             <LabelValueSection
               data={employeeSection}
-            />
-          </Grid2>
-          <Grid2 xs={2}>
-            <LabelValueSection
-              data={hireSection}
-            />
-          </Grid2>
-          <Grid2 xs={3}>
-            <LabelValueSection
-              data={amountsSection}
             />
           </Grid2>
         </Grid2>
