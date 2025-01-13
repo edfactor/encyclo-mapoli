@@ -16,7 +16,7 @@ try {
 }
 
 # Path to the original and modified files
-$inputFile = "credsettings.json"
+$inputFile = "..\src\services\configuration\credsettings.json"
 $outputFile = "credsettings.modified.json"
 $outputDir = ".\publishOutput"
 $finalOutputFile = "$outputDir\credsettings.$EnvName.json"
