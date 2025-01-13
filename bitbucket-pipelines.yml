@@ -108,7 +108,7 @@ definitions:
         - self.hosted
       script:
         - SET ENV=qa
-        - pwsh -Command >-
+         - pwsh -Command >-
             $replacements = @{
               "CONNECTIONSTRINGS_PROFITSHARING_SLUG" = "value1";
               "CONNECTIONSTRINGS_COMMON_SLUG" = "value2";
@@ -116,7 +116,7 @@ definitions:
               "ORACLEHCM_USERNAME_SLUG" = "value4";
               "ORACLEHCM_PASSWORD_SLUG" = "value5";
             };
-            $json = $replacements | ConvertTo-Json -Depth 10;
+            $json = $replacements | ConvertTo-Json -Depth 10 -Compress;
             Write-Host "JSON String:";
             Write-Host $json;
             .\scripts\credsettings.ps1 -EnvName qa -ReplacementsJson $json
