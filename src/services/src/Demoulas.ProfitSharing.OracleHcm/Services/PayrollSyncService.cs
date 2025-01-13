@@ -86,6 +86,11 @@ internal class PayrollSyncService
             {
                 using var response = await _httpClient.GetAsync(url, cancellationToken);
 
+                if (Debugger.IsAttached)
+                {
+                    _logger.LogInformation(url);
+                }
+
                 if (response.IsSuccessStatusCode)
                 {
                     var balanceResults = await response.Content.ReadFromJsonAsync<BalanceRoot>(cancellationToken);
