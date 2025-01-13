@@ -4,9 +4,7 @@ import { useLazyGetMilitaryAndRehireQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
 
 const MilitaryAndRehireSearchFilter = () => {
-  const [isFetching, setIsFetching] = useState(false);
-
-  const [triggerSearch, { isLoading }] = useLazyGetMilitaryAndRehireQuery();
+  const [triggerSearch, { isFetching }] = useLazyGetMilitaryAndRehireQuery();
 
   return (
     <Grid2

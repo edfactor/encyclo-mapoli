@@ -22,15 +22,13 @@ const validationSchema = yup.object().shape({
 );
 
 const MilitaryAndRehireEntryAndModificationSearchFilter = () => {
-  const [isFetching, setIsFetching] = useState(false);
-  const [triggerSearch, { isLoading }] = useLazyGetProfitMasterInquiryQuery();
+  const [triggerSearch, { isFetching }] = useLazyGetProfitMasterInquiryQuery();
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<SearchFormData>({
     resolver: yupResolver(validationSchema)
   });
 
   const onSubmit = (data: SearchFormData) => {
-    setIsFetching(true);
     triggerSearch(
       {
         pagination: { skip: 0, take: 25 },
@@ -40,7 +38,6 @@ const MilitaryAndRehireEntryAndModificationSearchFilter = () => {
       },
       false
     );
-    setIsFetching(false);
   };
 
   const handleReset = () => {
