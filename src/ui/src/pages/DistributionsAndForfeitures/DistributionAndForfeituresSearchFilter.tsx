@@ -40,9 +40,7 @@ const schema = yup.object().shape({
 });
 
 const DistributionsAndForfeituresSearchFilter = () => {
-  const [isFetching, setIsFetching] = useState(false);
-
-  const [triggerSearch, { isLoading }] = useLazyGetDistributionsAndForfeituresQuery();
+  const [triggerSearch, { isFetching }] = useLazyGetDistributionsAndForfeituresQuery();
 
   const {
     control,
@@ -62,7 +60,6 @@ const DistributionsAndForfeituresSearchFilter = () => {
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
-      setIsFetching(true);
       triggerSearch(
         {
           profitYear: data.profitYear,
@@ -73,7 +70,6 @@ const DistributionsAndForfeituresSearchFilter = () => {
         },
         false
       );
-      setIsFetching(false);
     }
   });
 

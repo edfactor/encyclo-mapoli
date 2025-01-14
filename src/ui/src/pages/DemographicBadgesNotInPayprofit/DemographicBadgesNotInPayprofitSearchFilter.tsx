@@ -6,9 +6,7 @@ import { useLazyGetDemographicBadgesNotInPayprofitQuery } from "reduxstore/api/Y
 import { SearchAndReset } from "smart-ui-library";
 
 const DemographicBadgesNotInPayprofitSearchFilter = () => {
-  const [isFetching, setIsFetching] = useState(false);
-
-  const [triggerSearch, { isLoading }] = useLazyGetDemographicBadgesNotInPayprofitQuery();
+  const [triggerSearch, { isFetching }] = useLazyGetDemographicBadgesNotInPayprofitQuery();
 
   const validateAndSearch = (event: any) => {
     event.preventDefault();

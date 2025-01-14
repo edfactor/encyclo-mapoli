@@ -32,9 +32,7 @@ const schema = yup.object().shape({
 });
 
 const ManageExecutiveHoursAndDollarsSearchFilter = () => {
-  const [isFetching, setIsFetching] = useState(false);
-
-  const [triggerSearch, { isLoading }] = useLazyGetExecutiveHoursAndDollarsQuery();
+  const [triggerSearch, { isFetching }] = useLazyGetExecutiveHoursAndDollarsQuery();
 
   const {
     control,
@@ -54,7 +52,6 @@ const ManageExecutiveHoursAndDollarsSearchFilter = () => {
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
-      setIsFetching(true);
       triggerSearch(
         {
           pagination: { skip: 0, take: 25 },
@@ -65,7 +62,6 @@ const ManageExecutiveHoursAndDollarsSearchFilter = () => {
         },
         false
       );
-      setIsFetching(false);
     }
   });
 

@@ -9,7 +9,7 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
-public class ForfeituresAndPointsForYearEndpoint:EndpointWithCsvBase<ProfitYearRequest, ForfeituresAndPointsForYearResponse, ForfeituresAndPointsForYearEndpoint.ForfeituresAndPointsForYearEndpointMapper>
+public class ForfeituresAndPointsForYearEndpoint:EndpointWithCsvBase<FrozenProfitYearRequest, ForfeituresAndPointsForYearResponse, ForfeituresAndPointsForYearEndpoint.ForfeituresAndPointsForYearEndpointMapper>
 {
     private readonly IFrozenReportService _frozenReportService;
 
@@ -50,7 +50,7 @@ public class ForfeituresAndPointsForYearEndpoint:EndpointWithCsvBase<ProfitYearR
         base.Configure();
     }
 
-    public override Task<ReportResponseBase<ForfeituresAndPointsForYearResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
+    public override Task<ReportResponseBase<ForfeituresAndPointsForYearResponse>> GetResponse(FrozenProfitYearRequest req, CancellationToken ct)
     {
         return _frozenReportService.GetForfeituresAndPointsForYearAsync(req, ct);
     }

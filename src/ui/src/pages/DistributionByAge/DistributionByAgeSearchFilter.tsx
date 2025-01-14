@@ -24,9 +24,7 @@ const schema = yup.object().shape({
 });
 
 const DistributionByAgeSearchFilter = () => {
-  const [isFetching, setIsFetching] = useState(false);
-
-  const [triggerSearch] = useLazyGetDistributionsByAgeQuery();
+  const [triggerSearch, { isFetching }] = useLazyGetDistributionsByAgeQuery();
 
   const {
     control,
@@ -43,7 +41,6 @@ const DistributionByAgeSearchFilter = () => {
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
-      setIsFetching(true);
       triggerSearch(
         {
           profitYear: data.profitYear,
@@ -68,7 +65,6 @@ const DistributionByAgeSearchFilter = () => {
         },
         false
       );
-      setIsFetching(false);
     }
   });
 

@@ -92,9 +92,7 @@ const schema = yup.object().shape({
 });
 
 const MasterInquirySearchFilter = () => {
-  const [isFetching, setIsFetching] = useState(false);
-
-  const [triggerSearch, { isLoading }] = useLazyGetProfitMasterInquiryQuery();
+  const [triggerSearch, { isFetching }] = useLazyGetProfitMasterInquiryQuery();
   const dispatch = useDispatch();
 
   const {
@@ -126,7 +124,6 @@ const MasterInquirySearchFilter = () => {
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
-      setIsFetching(true);
       const searchParams: MasterInquryRequest = {
         pagination: { skip: 0, take: 25 },
         ...(!!data.startProfitYear && { startProfitYear: data.startProfitYear }),
@@ -148,7 +145,6 @@ const MasterInquirySearchFilter = () => {
       };
 
       triggerSearch(searchParams, false);
-      setIsFetching(false);
     }
   });
 
@@ -468,7 +464,7 @@ const MasterInquirySearchFilter = () => {
       <SearchAndReset
         handleReset={handleReset}
         handleSearch={validateAndSearch}
-        isFetching={isLoading}
+        isFetching={isFetching}
         disabled={!isValid}
       />
     </Grid2>
