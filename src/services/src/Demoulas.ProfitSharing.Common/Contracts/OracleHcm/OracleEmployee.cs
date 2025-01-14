@@ -4,7 +4,7 @@ namespace Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 
 public record OracleEmployee(
     [property: JsonPropertyName("PersonId")] long PersonId,
-    [property: JsonPropertyName("PersonNumber")] int EmployeeId,
+    [property: JsonPropertyName("PersonNumber")] int BadgeNumber,
     [property: JsonPropertyName("DateOfBirth")] DateOnly DateOfBirth,
     [property: JsonPropertyName("DateOfDeath")] DateOnly? DateOfDeath,
     [property: JsonPropertyName("CreatedBy")] string CreatedBy,

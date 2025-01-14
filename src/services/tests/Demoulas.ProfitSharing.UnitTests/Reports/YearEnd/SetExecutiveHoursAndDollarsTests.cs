@@ -24,8 +24,8 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             ProfitYear = 0,
             ExecutiveHoursAndDollars =
             [
-                new() { EmployeeId = 99, ExecutiveDollars = 0, ExecutiveHours = 0 },
-                new() { EmployeeId = 99, ExecutiveDollars = 0, ExecutiveHours = 0 }
+                new() { BadgeNumber = 99, ExecutiveDollars = 0, ExecutiveHours = 0 },
+                new() { BadgeNumber = 99, ExecutiveDollars = 0, ExecutiveHours = 0 }
             ]
         };
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
@@ -49,7 +49,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             ProfitYear = 0,
             ExecutiveHoursAndDollars =
             [
-                new() { EmployeeId = 484848, ExecutiveDollars = 444m, ExecutiveHours = 555m }
+                new() { BadgeNumber = 484848, ExecutiveDollars = 444m, ExecutiveHours = 555m }
             ]
         };
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
@@ -74,7 +74,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             ProfitYear = profitYear,
             ExecutiveHoursAndDollars =
             [
-                new() { EmployeeId = int.MaxValue, ExecutiveDollars = 22, ExecutiveHours = 33 }
+                new() { BadgeNumber = int.MaxValue, ExecutiveDollars = 22, ExecutiveHours = 33 }
             ]
         };
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
@@ -126,7 +126,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
                 .FirstAsync(CancellationToken.None);
 
             // pull out badge number, create altered hours and dollars 
-            var badgeNumber = payProfit.Demographic!.EmployeeId;
+            var badgeNumber = payProfit.Demographic!.BadgeNumber;
             var newHoursExecutive = payProfit.HoursExecutive + 41;
             var newIncomeExecutive = payProfit.IncomeExecutive + 43;
 
@@ -136,7 +136,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
                 ProfitYear = profitYear,
                 ExecutiveHoursAndDollars =
                 [
-                    new() { EmployeeId = badgeNumber, ExecutiveDollars = newIncomeExecutive, ExecutiveHours = newHoursExecutive }
+                    new() { BadgeNumber = badgeNumber, ExecutiveDollars = newIncomeExecutive, ExecutiveHours = newHoursExecutive }
                 ]
             };
             ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
@@ -179,7 +179,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
                 .FirstAsync(CancellationToken.None);
 
             // note badge number, keep track of current hours/dollars and attempt to change them
-            var employeeId = demographicsWithPayProfits.Demographic.EmployeeId;
+            var badgeNumber = demographicsWithPayProfits.Demographic.BadgeNumber;
             var origExecutiveHoursExecutive = demographicsWithPayProfits.PayProfit.HoursExecutive;
             var origIncomeExecutive = demographicsWithPayProfits.PayProfit.IncomeExecutive;
             var newHoursExecutive = demographicsWithPayProfits.PayProfit.HoursExecutive + 41;
@@ -191,8 +191,8 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
                 ProfitYear = profitYear,
                 ExecutiveHoursAndDollars =
                 [
-                    new() { EmployeeId = employeeId, ExecutiveDollars = newIncomeExecutive, ExecutiveHours = newHoursExecutive },
-                    new() { EmployeeId = int.MaxValue, ExecutiveDollars = 44, ExecutiveHours = 55 }
+                    new() { BadgeNumber = badgeNumber, ExecutiveDollars = newIncomeExecutive, ExecutiveHours = newHoursExecutive },
+                    new() { BadgeNumber = int.MaxValue, ExecutiveDollars = 44, ExecutiveHours = 55 }
                 ]
             };
             ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
@@ -209,7 +209,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
 
             // verify no change to existing employee.
             var demographicsWithPayProfitsReloaded = await ctx.Demographics
-                .Where(d => d.EmployeeId == employeeId)
+                .Where(d => d.BadgeNumber == badgeNumber)
                 .Join(ctx.PayProfits,
                     d => d.Id,
                     pp => pp.DemographicId,

@@ -6,7 +6,7 @@
 public record EmployeeFinancials
 {
     public string? Name { get; set; }
-    public long EmployeeId { get; set; }
+    public long BadgeNumber { get; set; }
     public int Ssn { get; set; }
     public byte EnrolledId { get; set; }
     public short YearsInPlan { get; set; }

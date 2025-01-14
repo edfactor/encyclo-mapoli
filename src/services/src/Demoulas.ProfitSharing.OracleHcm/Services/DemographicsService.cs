@@ -126,7 +126,7 @@ internal class DemographicsService : IDemographicsServiceInternal
 
         // Create lookup dictionaries for both OracleHcmId and SSN
         var demographicOracleHcmIdLookup = demographicsEntities.ToDictionary(entity => entity.OracleHcmId);
-        var demographicSsnLookup = demographicsEntities.ToLookup(entity => (entity.Ssn, entity.EmployeeId));
+        var demographicSsnLookup = demographicsEntities.ToLookup(entity => (entity.Ssn, BadgeNumber: entity.BadgeNumber));
         var ssnCollection = demographicsEntities.Select(d => d.Ssn).ToHashSet();
         var dobCollection = demographicsEntities.Select(d => d.DateOfBirth).ToHashSet();
 
@@ -150,7 +150,7 @@ internal class DemographicsService : IDemographicsServiceInternal
                 // Log duplicate SSN entries to the audit table
                 var audit = duplicateSsnEntities.Select(d => new DemographicSyncAudit
                 {
-                    BadgeNumber = d.EmployeeId,
+                    BadgeNumber = d.BadgeNumber,
                     InvalidValue = d.Ssn.MaskSsn(),
                     Message = "Duplicate SSNs found in the database.",
                     UserName = "System",
@@ -184,7 +184,7 @@ internal class DemographicsService : IDemographicsServiceInternal
                     catch (InvalidOperationException e) when (e.Message.Contains(
                                                                   "When attaching existing entities, ensure that only one entity instance with a given key value is attached."))
                     {
-                        _logger.LogCritical(e, "Failed to process Demographic/OracleHCM employee record for EmployeeId {EmployeeId}", entity.EmployeeId);
+                        _logger.LogCritical(e, "Failed to process Demographic/OracleHCM employee record for BadgeNumber {BadgeNumber}", entity.BadgeNumber);
                         try
                         {
                             await context.SaveChangesAsync(cancellationToken);
@@ -202,7 +202,7 @@ internal class DemographicsService : IDemographicsServiceInternal
             }
 
 
-            // Update existing entities based on either OracleHcmId or SSN & EmployeeId
+            // Update existing entities based on either OracleHcmId or SSN & BadgeNumber
             foreach (var existingEntity in existingEntities)
             {
                 Demographic? incomingEntity = null;
@@ -214,7 +214,7 @@ internal class DemographicsService : IDemographicsServiceInternal
                 }
                 else
                 {
-                    var entityBySsn = demographicSsnLookup[(existingEntity.Ssn, existingEntity.EmployeeId)].FirstOrDefault();
+                    var entityBySsn = demographicSsnLookup[(existingEntity.Ssn, existingEntity.BadgeNumber)].FirstOrDefault();
                     if (entityBySsn != null)
                     {
                         incomingEntity = entityBySsn;
@@ -257,7 +257,7 @@ internal class DemographicsService : IDemographicsServiceInternal
     private static void UpdateEntityValues(Demographic existingEntity, Demographic incomingEntity, DateTime modificationDate)
     {
         existingEntity.Ssn = incomingEntity.Ssn;
-        existingEntity.EmployeeId = incomingEntity.EmployeeId;
+        existingEntity.BadgeNumber = incomingEntity.BadgeNumber;
         existingEntity.StoreNumber = incomingEntity.StoreNumber;
         existingEntity.DepartmentId = incomingEntity.DepartmentId;
         existingEntity.PayClassificationId = incomingEntity.PayClassificationId;

@@ -220,7 +220,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Program>
 
         await c.SaveChangesAsync(CancellationToken.None);
 
-        example.BadgeNumber = demo.EmployeeId;
+        example.BadgeNumber = demo.BadgeNumber;
         example.Ssn = demo.Ssn.MaskSsn();
         example.FullName = demo.ContactInfo.FullName;
         example.CompanyContributionYears = 0;

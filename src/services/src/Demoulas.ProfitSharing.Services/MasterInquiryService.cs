@@ -167,7 +167,7 @@ public class MasterInquiryService : IMasterInquiryService
                          d.Address.PostalCode,
                          d.DateOfBirth,
                          d.Ssn,
-                         d.EmployeeId,
+                         BadgeNumber = d.BadgeNumber,
                          d.ReHireDate,
                          d.HireDate,
                          d.TerminationDate,
@@ -201,11 +201,11 @@ public class MasterInquiryService : IMasterInquiryService
                             PercentageVested = currentBalance?.VestingPercent ?? 0,
                             ContributionsLastYear = previousBalance != null && previousBalance.CurrentBalance > 0,
                             Enrolled = demographicData.LatestPayProfit?.EnrollmentId != 0,
-                            EmployeeId = demographicData.EmployeeId.ToString(),
-                            BeginPSAmount = (long)(previousBalance?.CurrentBalance ?? 0),
-                            CurrentPSAmount = (long)(currentBalance?.CurrentBalance ?? 0),
-                            BeginVestedAmount = (long)(previousBalance?.VestedBalance ?? 0),
-                            CurrentVestedAmount = (long)(currentBalance?.VestedBalance ?? 0)
+                            BadgeNumber = demographicData.BadgeNumber.ToString(),
+                            BeginPSAmount = (long) (previousBalance?.CurrentBalance ?? 0),
+                            CurrentPSAmount = (long) (currentBalance?.CurrentBalance ?? 0),
+                            BeginVestedAmount = (long) (previousBalance?.VestedBalance ?? 0),
+                            CurrentVestedAmount = (long) (currentBalance?.VestedBalance ?? 0)
                         };
                     }
                 }

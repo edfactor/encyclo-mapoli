@@ -31,11 +31,11 @@ public class TotalBalanceEndpoint:Endpoint<BalanceEndpointRequest, BalanceEndpoi
 
     public override Task<BalanceEndpointResponse?> ExecuteAsync(BalanceEndpointRequest req, CancellationToken ct)
     {
-        if (int.TryParse(req.Id, out int employeeIdOrSsn))
+        if (int.TryParse(req.Id, out int badgeNumberOrSsn))
         {
-            employeeIdOrSsn = req.Id.ConvertSsnToInt();
+            badgeNumberOrSsn = req.Id.ConvertSsnToInt();
         }
    
-        return _totalService.GetVestingBalanceForSingleMemberAsync(req.SearchType, employeeIdOrSsn, req.ProfitYear, ct);
+        return _totalService.GetVestingBalanceForSingleMemberAsync(req.SearchType, badgeNumberOrSsn, req.ProfitYear, ct);
     }
 }
