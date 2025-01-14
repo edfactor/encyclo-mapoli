@@ -1,6 +1,8 @@
 ﻿using System.Runtime.InteropServices;
+using Demoulas.Common.Contracts.Configuration;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.Common.Data.Services.Entities.Contexts;
+using Demoulas.Common.Logging.Extensions;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
@@ -29,6 +31,17 @@ List<ContextFactoryRequest> list =
 ];
 
 builder.AddDatabaseServices(list);
+
+builder.AddServiceDefaults(null, null);
+
+ElasticSearchConfig smartConfig = new ElasticSearchConfig();
+builder.Configuration.Bind("Logging:Smart", smartConfig);
+
+FileSystemLogConfig fileSystemLog = new FileSystemLogConfig();
+builder.Configuration.Bind("Logging:FileSystem", fileSystemLog);
+
+await builder.SetDefaultLoggerConfigurationAsync(smartConfig, fileSystemLog);
+
 builder.AddEmployeePayrollSyncService();
 
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))

@@ -92,6 +92,9 @@ dotnet ef migrations script --context ProfitSharingDbContext --output {FILE}
  - Second Example: Demoulas.ProfitSharing.Data.Cli import-from-ready --connection-name ProfitSharing --sql-file "..\..\..\..\..\..\..\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-schema "PROFITSHARE"
 
 
+ **Generate dgml**: Demoulas.ProfitSharing.Data.Cli generate-dgml --connection-name ProfitSharing --output-file ProfitSharing.dgml
+ **Generate markdown**: Demoulas.ProfitSharing.Data.Cli generate-markdown --connection-name ProfitSharing --output-file ProfitSharing.dgml
+
 <hr/>
 
 # Docker Publish Example

@@ -1,10 +1,10 @@
 ﻿using System.Globalization;
 using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping.Data;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.NotOwned;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 using Demoulas.ProfitSharing.Security;
@@ -33,7 +33,7 @@ public class CalendarServiceTests : ApiTestBase<Program>
     {
         long count = await _dataContextFactory.UseReadOnlyContext(c => c.AccountingPeriods.LongCountAsync(CancellationToken.None));
 
-        count.ShouldBeEquivalentTo(CaldarRecordSeeder.Records.Length);
+        count.ShouldBeEquivalentTo(CaldarRecordSeeder.Records.Count());
     }
 
     [InlineData("000101")]

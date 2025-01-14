@@ -40,7 +40,6 @@ public class ApiTestBase<TStartup> where TStartup : class
     /// </remarks>
     public ApiTestBase()
     {
-        AssertionOptions.FormattingOptions.MaxLines = 250;
         MockDbContextFactory = MockDataContextFactory.InitializeForTesting();
         WebApplicationFactory<TStartup> webApplicationFactory = new WebApplicationFactory<TStartup>();
 

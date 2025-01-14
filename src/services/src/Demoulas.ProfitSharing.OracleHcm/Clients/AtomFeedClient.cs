@@ -42,35 +42,55 @@ internal class AtomFeedClient
     /// This method constructs a URL to query the Atom feed API, retrieves the feed data, and yields the parsed entries.
     /// If an error occurs during the fetch operation, it logs the error and skips processing.
     /// </remarks>
-    internal async IAsyncEnumerable<TContextType> GetFeedDataAsync<TContextType>(string feedType, DateTime minDate, DateTime maxDate,
-        [EnumeratorCancellation] CancellationToken cancellationToken) where TContextType : DeltaContextBase
+    internal async IAsyncEnumerable<TContextType> GetFeedDataAsync<TContextType>(
+        string feedType,
+        DateTime minDate,
+        DateTime maxDate,
+        [EnumeratorCancellation] CancellationToken cancellationToken
+    ) where TContextType : DeltaContextBase
     {
-        var url = $"/hcmRestApi/atomservlet/employee/{feedType}?page-size=25&page=1&published-min={minDate:yyyy-MM-ddTHH:mm:ssZ}&published-max={maxDate:yyyy-MM-ddTHH:mm:ssZ}";
+        int page = 1;
+        bool hasMoreData;
 
-
-        AtomFeedResponse<TContextType>? feedRoot = null;
-        try
+        do
         {
-            HttpResponseMessage response = await _httpClient.GetAsync(url, cancellationToken);
-            if (Debugger.IsAttached)
+            var url = $"/hcmRestApi/atomservlet/employee/{feedType}?page-size=25&page={page}&published-min={minDate:yyyy-MM-ddTHH:mm:ssZ}&published-max={maxDate:yyyy-MM-ddTHH:mm:ssZ}";
+            AtomFeedResponse<TContextType>? feedRoot = null;
+
+            try
             {
-                _logger.LogInformation(url);
-            }
-            response.EnsureSuccessStatusCode();
-            feedRoot = await response.Content.ReadFromJsonAsync<AtomFeedResponse<TContextType>>(cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error fetching Atom feed: {Url}", url);
-        }
+                HttpResponseMessage response = await _httpClient.GetAsync(url, cancellationToken);
 
-        if (feedRoot?.Feed.Entries != null)
-        {
-            foreach (var record in feedRoot.Feed.Entries.Select(e => e.Content).SelectMany(c => c.Context)!)
-            {
-                record.FeedType = feedType;
-                yield return record;
+                if (Debugger.IsAttached)
+                {
+                    _logger.LogInformation(url);
+                }
+
+                response.EnsureSuccessStatusCode();
+
+                feedRoot = await response.Content.ReadFromJsonAsync<AtomFeedResponse<TContextType>>(cancellationToken);
             }
-        }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching Atom feed: {Url}", url);
+                yield break;
+            }
+
+            if (feedRoot?.Feed.Entries != null && feedRoot.Feed.Entries.Any())
+            {
+                foreach (var record in feedRoot.Feed.Entries.Select(e => e.Content).SelectMany(c => c.Context)!)
+                {
+                    record.FeedType = feedType;
+                    yield return record;
+                }
+
+                hasMoreData = true;
+                page++;
+            }
+            else
+            {
+                hasMoreData = false;
+            }
+        } while (hasMoreData);
     }
 }

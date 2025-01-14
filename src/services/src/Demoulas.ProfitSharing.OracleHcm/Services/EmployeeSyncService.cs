@@ -94,7 +94,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
             var maxDate = DateTime.Now;
             var minDate = await _profitSharingDataContextFactory.UseReadOnlyContext(c =>
             {
-                return c.Demographics.MinAsync(d => d.LastModifiedDate - TimeSpan.FromDays(30), cancellationToken: cancellationToken);
+                return c.Demographics.MinAsync(d => d.LastModifiedDate - TimeSpan.FromDays(7), cancellationToken: cancellationToken);
             });
 
             var newHires = _atomFeedClient.GetFeedDataAsync<NewHireContext>("newhire", minDate, maxDate, cancellationToken);
