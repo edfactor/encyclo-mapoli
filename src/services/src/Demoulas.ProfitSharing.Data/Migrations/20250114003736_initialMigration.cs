@@ -99,7 +99,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     VALID_TO = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: false),
                     ORACLE_HCM_ID = table.Column<long>(type: "NUMBER(15)", precision: 15, nullable: false),
                     SSN = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false),
-                    EMPLOYEE_ID = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false),
+                    BADGE_NUMBER = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false),
                     STORE_NUMBER = table.Column<short>(type: "NUMBER(4)", precision: 4, nullable: false, comment: "StoreNumber"),
                     PAY_CLASSIFICATION_ID = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false, comment: "PayClassification"),
                     DATE_OF_BIRTH = table.Column<DateTime>(type: "DATE", nullable: false, comment: "DateOfBirth"),
@@ -539,7 +539,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
                     ORACLE_HCM_ID = table.Column<long>(type: "NUMBER(15)", precision: 15, nullable: false),
                     SSN = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false),
-                    EMPLOYEE_ID = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false),
+                    BADGE_NUMBER = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false),
                     STORE_NUMBER = table.Column<short>(type: "NUMBER(4)", precision: 4, nullable: false, comment: "StoreNumber"),
                     PAY_CLASSIFICATION_ID = table.Column<byte>(type: "NUMBER(2)", precision: 2, nullable: false, comment: "PayClassification"),
                     FULL_NAME = table.Column<string>(type: "NVARCHAR2(84)", maxLength: 84, nullable: false, comment: "FullName"),
@@ -740,7 +740,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     ID = table.Column<int>(type: "NUMBER(10)", nullable: false)
                         .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
                     PSN_SUFFIX = table.Column<short>(type: "NUMBER(5)", precision: 5, nullable: false),
-                    EMPLOYEE_ID = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false),
+                    BADGE_NUMBER = table.Column<int>(type: "NUMBER(7)", precision: 7, nullable: false),
                     DEMOGRAPHIC_ID = table.Column<int>(type: "NUMBER(9)", precision: 9, nullable: false),
                     BENEFICIARY_CONTACT_ID = table.Column<int>(type: "NUMBER(10)", nullable: false),
                     RELATIONSHIP = table.Column<string>(type: "NVARCHAR2(10)", maxLength: 10, nullable: true),
@@ -2894,7 +2894,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_BENEFICIARY_BADGENUMBER",
                 table: "BENEFICIARY",
-                column: "EMPLOYEE_ID");
+                column: "BADGE_NUMBER");
 
             migrationBuilder.CreateIndex(
                 name: "IX_BENEFICIARY_BENEFICIARYCONTACTID",
@@ -2929,7 +2929,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_DEMOGRAPHIC_BADGENUMBER",
                 table: "DEMOGRAPHIC",
-                column: "EMPLOYEE_ID");
+                column: "BADGE_NUMBER");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DEMOGRAPHIC_COUNTRY_ISO",
@@ -2990,7 +2990,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_DEMOGRAPHIC_HISTORY_BADGENUMBER",
                 table: "DEMOGRAPHIC_HISTORY",
-                column: "EMPLOYEE_ID");
+                column: "BADGE_NUMBER");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DEMOGRAPHIC_HISTORY_DEMOGRAPHICID",
