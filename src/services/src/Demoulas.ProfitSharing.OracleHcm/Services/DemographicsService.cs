@@ -258,6 +258,14 @@ internal class DemographicsService : IDemographicsServiceInternal
                 }
             }
 
+            var newSync = context.Demographics.Local.Where(d => d.Id == 0).Select(d => d.OracleHcmId).ToHashSet();
+            var exists = await context.Demographics
+                .AnyAsync(x => newSync.Contains(x.OracleHcmId), cancellationToken);
+            if (exists)
+            {
+                throw new InvalidOperationException("Duplicate value found.");
+            }
+
             // Save all changes to the database
             await context.SaveChangesAsync(cancellationToken);
         }, cancellationToken);
