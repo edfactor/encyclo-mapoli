@@ -32,7 +32,7 @@ $configTarget = get-ConfigEnvironment $envTarget
 $Deployments = @(
     @{
         Artifact = 'Demoulas.ProfitSharing.EmployeePayroll.Sync.zip'
-        TargetPath = 'C:\NextGenApplications\ps'
+        TargetPath = 'C:\NextGenApplications\ps\Payroll'
         ServiceExecutable = 'C:\NextGenApplications\ps\Payroll\Demoulas.ProfitSharing.EmployeePayroll.Sync.exe'
         ServiceName = 'Demoulas ProfitSharing OracleHCM Payroll Sync'
         DisplayName = 'Demoulas ProfitSharing OracleHCM Payroll Sync'
@@ -41,7 +41,7 @@ $Deployments = @(
     },
     @{
         Artifact = 'Demoulas.ProfitSharing.EmployeeFull.Sync.zip'
-        TargetPath = 'C:\NextGenApplications\ps'
+        TargetPath = 'C:\NextGenApplications\ps\EmployeeFull'
         ServiceExecutable = 'C:\NextGenApplications\ps\EmployeeFull\Demoulas.ProfitSharing.EmployeeFull.Sync.exe'
         ServiceName = 'Demoulas ProfitSharing OracleHCM Full Sync'
         DisplayName = 'Demoulas ProfitSharing OracleHCM Full Sync'
@@ -50,7 +50,7 @@ $Deployments = @(
     },
      @{
         Artifact = 'Demoulas.ProfitSharing.EmployeeDelta.Sync.zip'
-        TargetPath = 'C:\NextGenApplications\ps'
+        TargetPath = 'C:\NextGenApplications\ps\EmployeeDelta'
         ServiceExecutable = 'C:\NextGenApplications\ps\EmployeeDelta\Demoulas.ProfitSharing.EmployeeDelta.Sync.exe'
         ServiceName = 'Demoulas ProfitSharing OracleHCM Delta Sync'
         DisplayName = 'Demoulas ProfitSharing OracleHCM Delta Sync'
