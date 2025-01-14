@@ -57,7 +57,11 @@ export default defineConfig(({ command, mode }) => {
       exmptyOutDir: true,
       minify: isProd,
       rollupOptions: {
-        external: ['@mui/system/RtlProvider'],
+        external: [
+          '@mui/system',
+          '@mui/system/RtlProvider',
+          '@mui/system/**'
+        ],
         output: {
           assetFileNames: (assetInfo) => {
             let extType = assetInfo.name!.split(".").at(1)!;
