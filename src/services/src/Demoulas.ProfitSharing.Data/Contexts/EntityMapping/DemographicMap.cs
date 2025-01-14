@@ -34,7 +34,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
         _ = builder.HasIndex(e => e.BadgeNumber, "IX_BadgeNumber");
         _ = builder.Property(e => e.BadgeNumber)
             .HasPrecision(7)
-            .HasColumnName("EMPLOYEE_ID");
+            .HasColumnName("BADGE_NUMBER");
 
         _ = builder.HasIndex(e => e.OracleHcmId, "IX_ORACLE_HCM_ID").IsUnique();
         _ = builder.Property(e => e.OracleHcmId)

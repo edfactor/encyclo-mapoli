@@ -24523,7 +24523,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<int>("BadgeNumber")
                         .HasPrecision(7)
                         .HasColumnType("NUMBER(7)")
-                        .HasColumnName("EMPLOYEE_ID");
+                        .HasColumnName("BADGE_NUMBER");
 
                     b.Property<int>("BeneficiaryContactId")
                         .HasColumnType("NUMBER(10)")
@@ -24580,7 +24580,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasIndex("KindId")
                         .HasDatabaseName("IX_BENEFICIARY_KINDID");
 
-                    b.HasIndex(new[] { "BadgeNumber" }, "IX_EMPLOYEE_ID")
+                    b.HasIndex(new[] { "BadgeNumber" }, "IX_BADGE_NUMBER")
                         .HasDatabaseName("IX_BENEFICIARY_BADGENUMBER");
 
                     b.HasIndex(new[] { "PsnSuffix" }, "IX_PsnSuffix")
@@ -26226,7 +26226,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<int>("BadgeNumber")
                         .HasPrecision(7)
                         .HasColumnType("NUMBER(7)")
-                        .HasColumnName("EMPLOYEE_ID");
+                        .HasColumnName("BADGE_NUMBER");
 
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("DATE")
@@ -26371,7 +26371,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<int>("BadgeNumber")
                         .HasPrecision(7)
                         .HasColumnType("NUMBER(7)")
-                        .HasColumnName("EMPLOYEE_ID");
+                        .HasColumnName("BADGE_NUMBER");
 
                     b.Property<DateTime>("CreatedDateTime")
                         .HasColumnType("TIMESTAMP(7)")

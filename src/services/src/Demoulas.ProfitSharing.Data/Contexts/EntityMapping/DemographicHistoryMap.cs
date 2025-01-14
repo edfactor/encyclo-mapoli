@@ -41,7 +41,7 @@ internal sealed class DemographicHistoryMap : IEntityTypeConfiguration<Demograph
         _ = builder.HasIndex(e => e.BadgeNumber, "IX_BadgeNumber");
         _ = builder.Property(e => e.BadgeNumber)
             .HasPrecision(7)
-            .HasColumnName("EMPLOYEE_ID");
+            .HasColumnName("BADGE_NUMBER");
 
         _ = builder.Property(e => e.OracleHcmId)
             .HasPrecision(15)
