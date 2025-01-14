@@ -30,7 +30,7 @@ public class OracleHcmHealthCheck : IHealthCheck
                 return HealthCheckResult.Healthy("Oracle HCM is available.");
             }
 
-            return HealthCheckResult.Degraded($"Oracle HCM is not available : Response Status Code {response.StatusCode}");
+            return HealthCheckResult.Degraded($"Oracle HCM is not available : Response Status Code {response.StatusCode} for Url '{url}'");
         }
         catch (Exception ex)
         {
