@@ -130,28 +130,8 @@ public class MasterInquiryService : IMasterInquiryService
                     short currentYear = (short)DateTime.Today.Year;
                     short previousYear = (short)(currentYear - 1);
 
-                    BalanceEndpointResponse? previousBalance = null;
-                    BalanceEndpointResponse? currentBalance = null;
-
-                    try
-                    {
-                        previousBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(
-                            SearchBy.Ssn, ssn, previousYear, cancellationToken);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogWarning(ex, "Failed to retrieve previous year balance for SSN {SSN}", ssn);
-                    }
-
-                    try
-                    {
-                        currentBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(
-                            SearchBy.Ssn, ssn, currentYear, cancellationToken);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogWarning(ex, "Failed to retrieve current year balance for SSN {SSN}", ssn);
-                    }
+                    var previousBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(SearchBy.Ssn, ssn, previousYear, cancellationToken);
+                    var currentBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(SearchBy.Ssn, ssn, currentYear, cancellationToken);
 
                     var maxProfitYear = req.EndProfitYear.HasValue ? req.EndProfitYear : short.MaxValue;
 
