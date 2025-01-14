@@ -42,7 +42,7 @@ public class MasterInquiryEndpoint : Endpoint<MasterInquiryRequest, MasterInquir
             };
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
-        Group<YearEndGroup>();
+        Group<MasterInquiryGroup>();
     }
 
     public override Task<MasterInquiryWithDetailsResponseDto> ExecuteAsync(MasterInquiryRequest req, CancellationToken ct)
