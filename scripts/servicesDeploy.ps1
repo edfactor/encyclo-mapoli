@@ -129,7 +129,7 @@ try {
             if ($ServiceInfo -eq $null)
             {
                 Write-Host 'Installing service'
-                New-Service -Name $Using:Deploy.ServiceName -BinaryPathName "$( $Using:Deploy.ServiceExecutable )" -StartupType AutomaticDelayedStart
+                New-Service -Name $Using:Deploy.ServiceName -BinaryPathName "$( $Using:Deploy.ServiceExecutable )" -StartupType Automatic
             }
 
             $ServiceInfo = Get-Service -Name $Using:Deploy.ServiceName
