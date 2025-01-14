@@ -1,4 +1,6 @@
 ﻿using System.Runtime.InteropServices;
+using Demoulas.Common.Api.Extensions;
+using Demoulas.Common.Contracts.Configuration;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.ProfitSharing.Data.Contexts;
@@ -20,6 +22,15 @@ else
     builder.Configuration
         .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
 }
+
+ElasticSearchConfig smartConfig = new ElasticSearchConfig();
+builder.Configuration.Bind("Logging:Smart", smartConfig);
+
+FileSystemLogConfig fileSystemLog = new FileSystemLogConfig();
+builder.Configuration.Bind("Logging:FileSystem", fileSystemLog);
+
+await builder.SetDefaultLoggerConfigurationAsync(smartConfig, fileSystemLog);
+
 
 List<ContextFactoryRequest> list =
 [

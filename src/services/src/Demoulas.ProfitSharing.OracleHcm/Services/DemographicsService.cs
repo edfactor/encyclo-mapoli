@@ -64,7 +64,7 @@ internal class DemographicsService : IDemographicsServiceInternal
        CancellationToken cancellationToken = default)
    {
        const int throttleLimit = 10_000; // Max queue size for safety (configurable)
-       var batch = new List<DemographicsRequest>();
+       var batch = new Dictionary<long, DemographicsRequest>();
        bool batchProcessed = false;
        await foreach (var employee in employees.WithCancellation(cancellationToken))
        {
@@ -81,7 +81,11 @@ internal class DemographicsService : IDemographicsServiceInternal
            {
                while (_requests.TryDequeue(out var demoRequest))
                {
-                   batch.Add(demoRequest);
+                   if (!batch.TryAdd(demoRequest.OracleHcmId, demoRequest))
+                   {
+                       _logger.LogError("Duplicate OracleHcmId: {OracleHcmId} found; skipping....", demoRequest.OracleHcmId);
+                   }
+
                    if (batch.Count == batchSize)
                    {
                        break;
@@ -90,9 +94,7 @@ internal class DemographicsService : IDemographicsServiceInternal
 
                if (batch.Count > 0)
                {
-                   await UpsertDemographicsAsync(batch, cancellationToken);
-                   batchProcessed = true;
-                   batch.Clear(); // Clear batch after processing
+                   batchProcessed = await ProcessBatch();
                }
            }
        }
@@ -100,7 +102,15 @@ internal class DemographicsService : IDemographicsServiceInternal
        // Process any leftover requests in the batch
        if (batch.Count > 0 && batchProcessed)
        {
-           await UpsertDemographicsAsync(batch, cancellationToken);
+           _ = await ProcessBatch();
+       }
+
+       async Task<bool> ProcessBatch()
+       {
+           await UpsertDemographicsAsync(batch.Values, cancellationToken);
+           batchProcessed = true;
+           batch.Clear(); // Clear batch after processing
+           return batchProcessed;
        }
    }
 
