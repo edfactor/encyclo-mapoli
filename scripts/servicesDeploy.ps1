@@ -80,7 +80,7 @@ try {
                     while ((Get-Service -Name $Using:Deploy.ServiceName).Status -ne 'Stopped')
                     {
                         Write-Host "Waiting for Service " $ServiceInfo " to stop."
-                        Start-Sleep 2
+                        Start-Sleep 3
                     }
                     Write-Host 'Stopped Service'
                     $ServiceInfo.Refresh()
