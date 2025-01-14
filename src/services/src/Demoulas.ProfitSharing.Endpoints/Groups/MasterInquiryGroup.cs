@@ -24,7 +24,7 @@ public sealed class MasterInquiryGroup : GroupBase
                 .ProducesProblemFE<ProblemDetails>(StatusCodes.Status500InternalServerError)
                 .WithRequestTimeout(TimeSpan.FromMinutes(1))
                 .WithTags(RouteName));
-            ep.Policies(Policy.CanViewYearEndReports);
+            ep.Policies(Policy.CanRunMasterInquiry);
         });
     }
 }
