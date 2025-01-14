@@ -17,7 +17,7 @@ public static class StockFactory
         {
             Id = _id++,
             PsnSuffix = 721,
-            EmployeeId = 1,
+            BadgeNumber = 1,
             Contact = new BeneficiaryContact
             {
                 Address = new Address { Street = "1 Main Street" },
@@ -48,7 +48,7 @@ public static class StockFactory
             Id = _id++,
             OracleHcmId = 0,
             Ssn = 444,
-            EmployeeId = 0,
+            BadgeNumber = 0,
             LastModifiedDate = default,
             StoreNumber = 0,
             PayClassification = null,

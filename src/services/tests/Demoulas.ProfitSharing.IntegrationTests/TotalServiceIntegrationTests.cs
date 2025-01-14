@@ -93,9 +93,9 @@ public class TotalServiceIntegrationTests
                     _totalService.GetYearsOfService(ctx, 2023),
                     x => x.Demographic!.Ssn,
                     x => x.Ssn,
-                    (p, tot) => new { p.Demographic!.EmployeeId, Years = tot.Years }
+                    (p, tot) => new { BadgeNumber = p.Demographic!.BadgeNumber, Years = tot.Years }
                 ).ToDictionaryAsync(
-                    keySelector: p => p.EmployeeId, // Use EmployeeId as the key
+                    keySelector: p => p.BadgeNumber, // Use BadgeNumber as the key
                     elementSelector: p => (int)p.Years // Use Years as the value
                 );
             _output.WriteLine($"SMART data count {ddata.Count}");

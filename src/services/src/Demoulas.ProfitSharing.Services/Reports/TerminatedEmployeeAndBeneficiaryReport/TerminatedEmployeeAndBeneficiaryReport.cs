@@ -80,7 +80,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             select new MemberSlice
             {
                 PsnSuffix = 0,
-                EmployeeId = employee.Demographic.EmployeeId,
+                BadgeNumber = employee.Demographic.BadgeNumber,
                 Ssn = employee.Demographic.Ssn,
                 BirthDate = employee.Demographic.DateOfBirth,
                 HoursCurrentYear = payProfit.CurrentHoursYear,
@@ -117,7 +117,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             .Select(x => new MemberSlice
             {
                 PsnSuffix = (x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn) ? 0 : x.Beneficiary.PsnSuffix,
-                EmployeeId = (x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn) ? x.Demographic.EmployeeId : x.Beneficiary!.EmployeeId,
+                BadgeNumber = (x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn) ? x.Demographic.BadgeNumber : x.Beneficiary!.BadgeNumber,
                 Ssn = x.Beneficiary.Contact!.Ssn,
                 BirthDate = x.Beneficiary.Contact!.DateOfBirth,
                 FullName = x.Beneficiary.Contact!.ContactInfo.FullName!,
@@ -143,7 +143,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             // NOTE: Sort using same character handling that ready uses (ie "Mc" sorts after "ME") aka the Ordinal sort.
             // Failture to use this sort, causes READY and SMART reports to not match.
             .OrderBy(x => x.FullName, StringComparer.Ordinal)
-            .ThenBy(x => x.EmployeeId)
+            .ThenBy(x => x.BadgeNumber)
             .ToList();
     }
 
@@ -182,7 +182,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
             var member = new Member
             {
-                Psn = memberSlice.PsnSuffix > 0 ? $"{memberSlice.EmployeeId}{memberSlice.PsnSuffix}" : memberSlice.EmployeeId.ToString(),
+                Psn = memberSlice.PsnSuffix > 0 ? $"{memberSlice.BadgeNumber}{memberSlice.PsnSuffix}" : memberSlice.BadgeNumber.ToString(),
                 FullName = memberSlice.FullName,
                 FirstName = memberSlice.FirstName,
                 LastName = memberSlice.LastName,

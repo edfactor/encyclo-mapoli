@@ -38,10 +38,10 @@ internal sealed class DemographicHistoryMap : IEntityTypeConfiguration<Demograph
             .ValueGeneratedNever()
             .HasColumnName("SSN");
 
-        _ = builder.HasIndex(e => e.EmployeeId, "IX_EmployeeId");
-        _ = builder.Property(e => e.EmployeeId)
+        _ = builder.HasIndex(e => e.BadgeNumber, "IX_BadgeNumber");
+        _ = builder.Property(e => e.BadgeNumber)
             .HasPrecision(7)
-            .HasColumnName("EMPLOYEE_ID");
+            .HasColumnName("BADGE_NUMBER");
 
         _ = builder.Property(e => e.OracleHcmId)
             .HasPrecision(15)

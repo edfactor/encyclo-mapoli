@@ -4,6 +4,6 @@ using Demoulas.ProfitSharing.Common.Contracts.Response;
 namespace Demoulas.ProfitSharing.Common.Interfaces;
 public interface ITotalService
 {
-    Task<BalanceEndpointResponse?> GetVestingBalanceForSingleMemberAsync(SearchBy searchBy, int employeeIdOrSsn, short profitYear,
+    Task<BalanceEndpointResponse?> GetVestingBalanceForSingleMemberAsync(SearchBy searchBy, int badgeNumberOrSsn, short profitYear,
         CancellationToken cancellationToken);
 }

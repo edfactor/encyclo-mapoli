@@ -9,7 +9,7 @@ public class DemographicHistory
 
     public required long OracleHcmId { get; set; }
     public int Ssn { get; set; }
-    public int EmployeeId { get; set; }
+    public int BadgeNumber { get; set; }
     public short StoreNumber { get; set; }
     public byte PayClassificationId { get; set; }
     public DateOnly DateOfBirth { get; set; }
@@ -38,7 +38,7 @@ public class DemographicHistory
             DemographicId = source.Id,
             OracleHcmId = source.OracleHcmId,
             Ssn = source.Ssn,
-            EmployeeId = source.EmployeeId,
+            BadgeNumber = source.BadgeNumber,
             StoreNumber = source.StoreNumber,
             PayClassificationId = source.PayClassificationId,
             DateOfBirth = source.DateOfBirth,

@@ -188,7 +188,7 @@ internal class PayrollSyncService
             {
                 Console.ForegroundColor = resultCount == 0 ? ConsoleColor.Red : ConsoleColor.DarkGreen;
                 Console.WriteLine();
-                Console.WriteLine($"Upserted {resultCount} rows into {nameof(PayProfit)} for {demographic.ContactInfo.FullName}({demographic.EmployeeId})");
+                Console.WriteLine($"Upserted {resultCount} rows into {nameof(PayProfit)} for {demographic.ContactInfo.FullName}({demographic.BadgeNumber})");
                 Console.WriteLine();
                 Console.ForegroundColor = ConsoleColor.White;
             }

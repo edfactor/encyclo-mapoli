@@ -43,17 +43,21 @@ var ui = builder.AddNpmApp("ProfitSharing-Ui", "../../../ui/", "dev")
     .WithHttpEndpoint(port: uiPort, isProxied: false)
     .WithExternalHttpEndpoints();
 
-builder.AddProject<Demoulas_ProfitSharing_EmployeeFull_Sync>(name: "ProfitSharing-EmployeeFull-Sync")
+var fullSync = builder.AddProject<Demoulas_ProfitSharing_EmployeeFull_Sync>(name: "ProfitSharing-EmployeeFull-Sync")
     .WaitFor(api)
     .WaitFor(ui);
+
+var payroll = builder.AddProject<Demoulas_ProfitSharing_EmployeePayroll_Sync>(name: "ProfitSharing-EmployeePayroll-Sync")
+    .WaitFor(api)
+    .WaitFor(ui)
+    .WaitFor(fullSync);
 
 builder.AddProject<Demoulas_ProfitSharing_EmployeeDelta_Sync>(name: "ProfitSharing-EmployeeDelta-Sync")
     .WaitFor(api)
-    .WaitFor(ui);
+    .WaitFor(ui)
+    .WaitFor(fullSync)
+    .WaitFor(payroll);
 
-builder.AddProject<Demoulas_ProfitSharing_EmployeePayroll_Sync>(name: "ProfitSharing-EmployeePayroll-Sync")
-    .WaitFor(api)
-    .WaitFor(ui);
 
 await using DistributedApplication host = builder.Build();
 await host.RunAsync();

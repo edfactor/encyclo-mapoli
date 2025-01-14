@@ -48,7 +48,7 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
                 .Select(p => new GetEligibleEmployeesResponseDto()
                 {
                     OracleHcmId = p.Demographic!.OracleHcmId,
-                    BadgeNumber = p.Demographic!.EmployeeId,
+                    BadgeNumber = p.Demographic!.BadgeNumber,
                     FullName = p.Demographic!.ContactInfo.FullName!,
                 })
                 .OrderBy(p => p.FullName)
