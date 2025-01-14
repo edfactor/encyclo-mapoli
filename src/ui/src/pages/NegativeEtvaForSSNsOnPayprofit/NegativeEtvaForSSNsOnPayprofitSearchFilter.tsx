@@ -22,9 +22,7 @@ const schema = yup.object().shape({
 });
 
 const NegativeEtvaForSSNsOnPayprofitSearchFilter = () => {
-  const [isFetching, setIsFetching] = useState(false);
-
-  const [triggerSearch, { isLoading }] = useLazyGetNegativeEVTASSNQuery();
+  const [triggerSearch, { isFetching }] = useLazyGetNegativeEVTASSNQuery();
 
   const {
     control,
@@ -41,7 +39,6 @@ const NegativeEtvaForSSNsOnPayprofitSearchFilter = () => {
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
-      setIsFetching(true);
       triggerSearch(
         {
           profitYear: data.profitYear,
@@ -49,7 +46,6 @@ const NegativeEtvaForSSNsOnPayprofitSearchFilter = () => {
         },
         false
       );
-      setIsFetching(false);
     }
   });
 

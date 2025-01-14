@@ -26,9 +26,7 @@ const schema = yup.object().shape({
 });
 
 const MilitaryAndRehireProfitSummarySearchFilter = () => {
-  const [isFetching, setIsFetching] = useState(false);
-
-  const [triggerSearch, { isLoading }] = useLazyGetMilitaryAndRehireProfitSummaryQuery();
+  const [triggerSearch, { isFetching }] = useLazyGetMilitaryAndRehireProfitSummaryQuery();
 
   const {
     control,
@@ -46,7 +44,6 @@ const MilitaryAndRehireProfitSummarySearchFilter = () => {
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
-      setIsFetching(true);
       triggerSearch(
         {
           reportingYear: data.reportingYear,
@@ -55,7 +52,6 @@ const MilitaryAndRehireProfitSummarySearchFilter = () => {
         },
         false
       );
-      setIsFetching(false);
     }
   });
 

@@ -21,8 +21,7 @@ const schema = yup.object().shape({
 });
 
 const TerminationSearchFilter = () => {
-  const [isFetching, setIsFetching] = useState(false);
-  const [triggerSearch] = useLazyGetTerminationReportQuery();
+  const [triggerSearch, { isFetching }] = useLazyGetTerminationReportQuery();
 
   const {
     control,
@@ -39,7 +38,6 @@ const TerminationSearchFilter = () => {
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
-      setIsFetching(true);
       triggerSearch(
         {
           profitYear: data.profitYear.getFullYear(),
@@ -47,7 +45,6 @@ const TerminationSearchFilter = () => {
         },
         false
       );
-      setIsFetching(false);
     }
   });
 
