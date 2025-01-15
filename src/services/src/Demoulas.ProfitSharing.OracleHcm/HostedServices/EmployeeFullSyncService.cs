@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Jobs;
+using Microsoft.Extensions.Logging;
 using Quartz;
 using Quartz.Spi;
 
@@ -10,7 +11,8 @@ internal sealed class EmployeeFullSyncService : OracleHcmHostedServiceBase
 {
     public EmployeeFullSyncService(ISchedulerFactory schedulerFactory,
         IJobFactory jobFactory,
-        OracleHcmConfig oracleHcmConfig) : base(schedulerFactory, jobFactory, oracleHcmConfig)
+        OracleHcmConfig oracleHcmConfig, 
+        ILogger<EmployeeFullSyncService> logger) : base(schedulerFactory, jobFactory, oracleHcmConfig, logger)
     {
        
     }
@@ -19,7 +21,7 @@ internal sealed class EmployeeFullSyncService : OracleHcmHostedServiceBase
     {
         return ScheduleJob<EmployeeFullSyncJob>(
             "employeeFullSyncTrigger",
-            Debugger.IsAttached ? TimeSpan.Zero : TimeSpan.FromMinutes(15),
+            Debugger.IsAttached ? TimeSpan.Zero : TimeSpan.FromMinutes(1),
             TimeSpan.FromHours(OracleHcmConfig.IntervalInHours),
             cancellationToken
         );

@@ -34,14 +34,12 @@ catch (Exception ex)
 
 var api = builder.AddProject<Demoulas_ProfitSharing_Api>("ProfitSharing-Api")
     .WithHttpHealthCheck("/health")
-    .WithHttpsHealthCheck("/health")
-    .AsHttp2Service();
+    .WithHttpsHealthCheck("/health");
 
 var ui = builder.AddNpmApp("ProfitSharing-Ui", "../../../ui/", "dev")
     .WithReference(api)
     .WaitFor(api)
-    .WithHttpEndpoint(port: uiPort, isProxied: false)
-    .WithExternalHttpEndpoints();
+    .WithHttpEndpoint(port: uiPort, isProxied: false);
 
 var fullSync = builder.AddProject<Demoulas_ProfitSharing_EmployeeFull_Sync>(name: "ProfitSharing-EmployeeFull-Sync")
     .WaitFor(api)

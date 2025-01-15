@@ -92,12 +92,13 @@ public static class OracleHcmExtension
         builder.Services.AddHostedService<EmployeePayrollSyncService>();
         return builder;
     }
-    
+
 
     /// <summary>
     /// Configures and registers services required for Oracle HCM synchronization.
     /// </summary>
     /// <param name="builder">The <see cref="IHostApplicationBuilder"/> used to configure the application.</param>
+    /// <param name="oracleHcmConfig"></param>
     /// <returns>The updated <see cref="IHostApplicationBuilder"/> instance.</returns>
     /// <remarks>
     /// This method performs the following actions:

@@ -11,6 +11,7 @@ using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Oracle.ManagedDataAccess.Client;
+using Exception = System.Exception;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services;
 
@@ -257,17 +258,17 @@ internal class DemographicsService : IDemographicsServiceInternal
                     }
                 }
             }
-
-            var newSync = context.Demographics.Local.Where(d => d.Id == 0).Select(d => d.OracleHcmId).ToHashSet();
-            var exists = await context.Demographics
-                .AnyAsync(x => newSync.Contains(x.OracleHcmId), cancellationToken);
-            if (exists)
-            {
-                throw new InvalidOperationException("Duplicate value found.");
-            }
-
+            
             // Save all changes to the database
-            await context.SaveChangesAsync(cancellationToken);
+            try
+            {
+                await context.SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception e)
+            {
+                _logger.LogCritical(e, "Failed to save batch: {DemographicsRequests}", demographicsRequests);
+            }
+            
         }, cancellationToken);
     }
 
