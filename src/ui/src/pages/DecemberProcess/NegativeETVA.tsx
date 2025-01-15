@@ -74,7 +74,7 @@ const NegativeETVA: React.FC = () => {
     <Stack
       spacing={2}>
       <Typography
-        variant="h2"
+        variant="h6"
         sx={{ color: "#0258A5", paddingLeft: '24px' }}>
         NEGATIVE ETVA FOR SSNs ON PAYPROFIT
       </Typography>

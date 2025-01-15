@@ -78,7 +78,7 @@ const CleanUpSummaryCards: React.FC<CleanUpSummaryCardsProps> = ({ setSelectedTa
             <InfoCard
               buttonDisabled={disableButtons}
               handleClick={() => setSelectedTab(1)}
-              title="Negatibe ETVA for SSNs on Payprofit"
+              title="Negative ETVA for SSNs on Payprofit"
               valid={negativeEtvaForSSNsOnPayprofit.response.total == 0}
               data={{
                 Count: negativeEtvaForSSNsOnPayprofit.response.total.toString()

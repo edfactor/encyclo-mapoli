@@ -1,15 +1,11 @@
-import { Filter, FilterList } from "@mui/icons-material";
-import { Box, Button, Divider, Stack, Typography } from "@mui/material";
+import { FilterList } from "@mui/icons-material";
+import { Button, Divider, Stack, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import DuplicateNamesAndBirthdaysGrid from "pages/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdaysGrid";
 import DuplicateSSNsOnDemographicsGrid from "pages/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographicsGrid";
 import MasterInquiryGrid from "pages/MasterInquiry/MasterInquiryGrid";
 import MasterInquirySearchFilter from "pages/MasterInquiry/MasterInquirySearchFilter";
 import MilitaryAndRehire from "pages/MilitaryAndRehire/MilitaryAndRehire";
-import MissingCommaInPyNameGrid from "pages/MissingCommaInPyName/MissingCommaInPyNameGrid";
-import NegativeEtvaForSSNsOnPayprofit from "pages/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofit";
-import NegativeEtvaForSSNsOnPayprofitGrid from "pages/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofitGrid";
-import VestedAmountsByAgeSearchFilter from "pages/VestedAmountsByAge/VestedAmountsByAgeSearchFilter";
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import {
@@ -21,6 +17,13 @@ import {
 import { RootState } from "reduxstore/store";
 import { DSMAccordion, Page } from "smart-ui-library";
 import NegativeETVA from "./NegativeETVA";
+import { useNavigate } from "react-router";
+import MasterInquiryEmployeeDetails from "pages/MasterInquiry/MasterInquiryEmployeeDetails";
+import TerminationGrid from "pages/Termination/TerminationGrid";
+import TerminationSearchFilter from "pages/Termination/TerminationSearchFilter";
+import DistributionsAndForfeituresGrid from "pages/DistributionsAndForfeitures/DistributionAndForfeituresGrid";
+import DistributionsAndForfeituresSearchFilter from "pages/DistributionsAndForfeitures/DistributionAndForfeituresSearchFilter";
+import DSMCollapsedAccordion from "components/DSMCollapsedAccordion";
 
 const DecemberProcessAccordion = () => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
@@ -35,6 +38,8 @@ const DecemberProcessAccordion = () => {
   const { negativeEtvaForSSNsOnPayprofit, duplicateSSNsData, demographicBadges, duplicateNamesAndBirthday } =
     useSelector((state: RootState) => state.yearsEnd);
 
+  const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.yearsEnd);
+
   useEffect(() => {
     if (hasToken) {
       triggerPayrollDupeSsnsOnDemographics({ profitYear: 2023, pagination: { take: 25, skip: 0 } });
@@ -43,9 +48,11 @@ const DecemberProcessAccordion = () => {
     }
   }, [hasToken]);
 
+  const navigate = useNavigate();
+
   return (
     <Page
-      label="2024 December"
+      label="December Process"
       actionNode={
         <Button
           variant="outlined"
@@ -54,52 +61,149 @@ const DecemberProcessAccordion = () => {
         </Button>
       }>
       <Grid2
-        container
-        rowSpacing="24px">
+        container>
         <Grid2
           xs={12}
           width={"100%"}>
           <Divider />
         </Grid2>
-        <DSMAccordion title="Clean Up Reports">
-          <Grid2 width="100%">
-            <NegativeETVA />
-          </Grid2>
-          <Grid2 width="100%">
-            <DuplicateSSNsOnDemographicsGrid />
-          </Grid2>
-          <Grid2 width="100%">
-            <DuplicateNamesAndBirthdaysGrid />
-          </Grid2>
-          <Grid2 width="100%">
-            <Stack paddingX="24px">
-              <Typography
-                variant="h2"
-                sx={{ color: "#0258A5" }}>
-                MISSING COMMA IN FULL NAME
-              </Typography>
-              <Stack
-                sx={{ alignContent: "center" }}
-                direction="row">
-                <Typography sx={{ margin: 0, padding: 0 }}>This has not been created yet. </Typography>
-                <Button>Create Report</Button>
-              </Stack>
-            </Stack>
-          </Grid2>
-        </DSMAccordion>
 
         <Grid2 width="100%">
-          <DSMAccordion title="Military and Rehire">
-            <MilitaryAndRehire />
-          </DSMAccordion>
+          <DSMCollapsedAccordion
+            title="Clean Up Reports"
+            actionButtonText="START PROCESS"
+            status={{
+              label: "Completed",
+              color: "success"
+            }}
+            onActionClick={() =>
+              navigate('/clean-up-summary')
+            }
+            isCollapsedOnRender={true}
+          >
+            <Grid2 width="100%">
+              <NegativeETVA />
+            </Grid2>
+            <Grid2 width="100%">
+              <DuplicateSSNsOnDemographicsGrid />
+            </Grid2>
+            <Grid2 width="100%">
+              <DuplicateNamesAndBirthdaysGrid />
+            </Grid2>
+            <Grid2 width="100%">
+              <Stack paddingX="24px">
+                <Typography
+                  variant="h2"
+                  sx={{ color: "#0258A5" }}>
+                  MISSING COMMA IN FULL NAME
+                </Typography>
+                <Stack
+                  sx={{ alignContent: "center" }}
+                  direction="row">
+                  <Typography sx={{ margin: 0, padding: 0 }}>This has not been created yet. </Typography>
+                  <Button>Create Report</Button>
+                </Stack>
+              </Stack>
+            </Grid2>
+          </DSMCollapsedAccordion>
         </Grid2>
+
         <Grid2 width="100%">
-          <DSMAccordion title="Master Inquiry (008-10)">
-            <DSMAccordion title="Search">
-              <MasterInquirySearchFilter />
-            </DSMAccordion>
-          </DSMAccordion>
-          
+          <DSMCollapsedAccordion
+            title="Military and Rehire"
+            onActionClick={() => navigate('/military-and-rehire')}
+            actionButtonText="START PROCESS"
+          >
+            <MilitaryAndRehire />
+          </DSMCollapsedAccordion>
+        </Grid2>
+
+        <Grid2 width="100%">
+          <DSMCollapsedAccordion
+            title="Prof Termination"
+            actionButtonText="START PROCESS"
+            onActionClick={() => navigate('/prof-term')}
+            isCollapsedOnRender={true}
+          >
+            <Grid2 width={"100%"}>
+              <Divider />
+            </Grid2>
+            <Grid2
+              width={"100%"}>
+              <DSMAccordion title="Filter">
+                <TerminationSearchFilter />
+              </DSMAccordion>
+
+            </Grid2>
+
+            <Grid2 width="100%">
+              <TerminationGrid />
+            </Grid2>
+          </DSMCollapsedAccordion>
+        </Grid2>
+
+        <Grid2 width="100%">
+          <DSMCollapsedAccordion
+            title="Loan Balance"
+            actionButtonText="START PROCESS"
+            onActionClick={() => navigate('/distributions-and-forfeitures')}
+            isCollapsedOnRender={true}
+          >
+            <Grid2 width={"100%"}>
+              <Divider />
+            </Grid2>
+            <Grid2
+              width={"100%"}>
+              <DSMAccordion title="Filter">
+                <DistributionsAndForfeituresSearchFilter />
+              </DSMAccordion>
+            </Grid2>
+
+            <Grid2 width="100%">
+              <DistributionsAndForfeituresGrid />
+            </Grid2>
+          </DSMCollapsedAccordion>
+        </Grid2>
+
+        <Grid2 width="100%">
+          <DSMCollapsedAccordion
+            title="Manage Executives"
+            onActionClick={() => alert("Manage Executives")}
+            actionButtonText="START PROCESS"
+            isCollapsedOnRender={true}
+          >
+            <Typography>Manage Executives content</Typography>
+          </DSMCollapsedAccordion>
+        </Grid2>
+
+        <Grid2 width="100%">
+          <DSMCollapsedAccordion
+            title="Master Inquiry (008-10)"
+            isCollapsedOnRender={false}
+            onActionClick={() => navigate('/master-inquiry')}
+            actionButtonText="VIEW DETAILS"
+          >
+
+            <Grid2
+              container>
+              <Grid2 width={"100%"}>
+                <Divider />
+              </Grid2>
+              <Grid2
+                width={"100%"}>
+                <DSMAccordion title="Filter">
+                  <MasterInquirySearchFilter />
+                </DSMAccordion>
+
+              </Grid2>
+
+              {masterInquiryEmployeeDetails && <MasterInquiryEmployeeDetails details={masterInquiryEmployeeDetails} />}
+
+              <Grid2 width="100%">
+                <MasterInquiryGrid />
+              </Grid2>
+            </Grid2>
+          </DSMCollapsedAccordion>
         </Grid2>
       </Grid2>
     </Page>

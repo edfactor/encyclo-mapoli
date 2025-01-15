@@ -1,9 +1,10 @@
-import { Divider, Tabs, Tab } from "@mui/material";
+import { Divider, Tabs, Tab, Button } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { useState } from "react";
 import { Page } from "smart-ui-library";
 import CleanUpSummaryCards from "./CleanUpSummaryCards";
 import CleanUpSummaryGrids from "./CleanUpSummaryGrids";
+import { useNavigate } from "react-router";
 
 const CleanUpSummary = () => {
   const [selectedTab, setSelectedTab] = useState(0);
@@ -19,9 +20,10 @@ const CleanUpSummary = () => {
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setSelectedTab(newValue);
   };
+  const navigate = useNavigate();
 
   return (
-    <Page label="Clean Up Process Summary">
+    <Page label={selectedTab == 0 ? "Clean Up Process Summary" : tabs[selectedTab]} actionNode={selectedTab == 0 ? <Button onClick={() => navigate('/december-process-accordion')} variant="outlined">December Process</Button> : null}>
       <Grid2
         container
         width="100%"
