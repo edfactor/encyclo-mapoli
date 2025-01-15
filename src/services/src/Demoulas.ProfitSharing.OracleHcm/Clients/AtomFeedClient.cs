@@ -51,6 +51,7 @@ internal class AtomFeedClient
     {
         int page = 1;
         bool hasMoreData;
+        maxDate = maxDate.AddDays(1).Date;
 
         do
         {
@@ -59,6 +60,7 @@ internal class AtomFeedClient
 
             try
             {
+
                 HttpResponseMessage response = await _httpClient.GetAsync(url, cancellationToken);
 
                 if (Debugger.IsAttached)
