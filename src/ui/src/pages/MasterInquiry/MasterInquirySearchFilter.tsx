@@ -93,10 +93,7 @@ const schema = yup.object().shape({
 });
 
 const MasterInquirySearchFilter = () => {
-  const [isFetching, setIsFetching] = useState(false);
-  const [fetched, setFetched] = useState(false);
-
-  const [triggerSearch, { isLoading }] = useLazyGetProfitMasterInquiryQuery();
+  const [triggerSearch, { isFetching }] = useLazyGetProfitMasterInquiryQuery();
   const dispatch = useDispatch();
 
   const {
@@ -128,7 +125,6 @@ const MasterInquirySearchFilter = () => {
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
-      setIsFetching(true);
       const searchParams: MasterInquryRequest = {
         pagination: { skip: 0, take: 25 },
         ...(!!data.startProfitYear && { startProfitYear: data.startProfitYear }),
@@ -150,8 +146,6 @@ const MasterInquirySearchFilter = () => {
       };
 
       triggerSearch(searchParams, false);
-      setFetched(true);
-      setIsFetching(false);
     }
   });
 
@@ -180,7 +174,6 @@ const MasterInquirySearchFilter = () => {
     <form onSubmit={validateAndSearch}>
     <Grid2 container paddingX="24px">
       <Grid2 container spacing={3} width="100%">
-        {fetched && <Link to="/master-inquiry">GO</Link>}
         <Grid2 xs={12} sm={6} md={3}>
           <FormLabel>Beginning Year</FormLabel>
           <Controller
@@ -472,7 +465,7 @@ const MasterInquirySearchFilter = () => {
       <SearchAndReset
         handleReset={handleReset}
         handleSearch={validateAndSearch}
-        isFetching={isLoading}
+        isFetching={isFetching}
         disabled={!isValid}
       />
     </Grid2>

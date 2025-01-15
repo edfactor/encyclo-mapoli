@@ -64,7 +64,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Program>
 
             // Assert
             response.Result.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
-            response.Result.Response.Results.Should().HaveCountGreaterOrEqualTo(expectedResponse.Response.Results.Count());
+            response.Result.Response.Results.Should().HaveCountGreaterThanOrEqualTo(expectedResponse.Response.Results.Count());
 
 #pragma warning disable S1481
             var expected = JsonSerializer.Serialize(expectedResponse.Response.Results);
@@ -220,7 +220,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Program>
 
         await c.SaveChangesAsync(CancellationToken.None);
 
-        example.BadgeNumber = demo.EmployeeId;
+        example.BadgeNumber = demo.BadgeNumber;
         example.Ssn = demo.Ssn.MaskSsn();
         example.FullName = demo.ContactInfo.FullName;
         example.CompanyContributionYears = 0;

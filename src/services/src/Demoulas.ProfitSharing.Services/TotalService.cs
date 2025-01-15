@@ -265,7 +265,7 @@ public sealed class TotalService : ITotalService
     /// <param name="searchBy">
     /// Specifies the search criteria, either by Social Security Number (SSN) or Employee ID.
     /// </param>
-    /// <param name="employeeIdOrSsn">
+    /// <param name="badgeNumberOrSsn">
     /// The identifier used for the search, which can be either an Employee ID or an SSN, depending on the <paramref name="searchBy"/> value.
     /// </param>
     /// <param name="profitYear">
@@ -278,26 +278,26 @@ public sealed class TotalService : ITotalService
     /// A task that represents the asynchronous operation. The task result contains the vesting balance details
     /// as a <see cref="BalanceEndpointResponse"/> object, or <c>null</c> if no matching record is found.
     /// </returns>
-    public async Task<BalanceEndpointResponse?> GetVestingBalanceForSingleMemberAsync(SearchBy searchBy, int employeeIdOrSsn, short profitYear, CancellationToken cancellationToken)
+    public async Task<BalanceEndpointResponse?> GetVestingBalanceForSingleMemberAsync(SearchBy searchBy, int badgeNumberOrSsn, short profitYear, CancellationToken cancellationToken)
     {
         var calendarInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(profitYear, cancellationToken);
         switch (searchBy)
         {
-            case SearchBy.EmployeeId:
+            case SearchBy.BadgeNumber:
                 return await _profitSharingDataContextFactory.UseReadOnlyContext(ctx =>
                 {
                     var rslt = (from t in TotalVestingBalance(ctx, profitYear, calendarInfo.FiscalEndDate)
                                       join d in ctx.Demographics on t.Ssn equals d.Ssn
-                                      where d.EmployeeId == employeeIdOrSsn
-                                      select new BalanceEndpointResponse { Id = employeeIdOrSsn, Ssn = t.Ssn.MaskSsn(), CurrentBalance = t.CurrentBalance, Etva = t.Etva, TotalDistributions = t.TotalDistributions, VestedBalance = t.VestedBalance, VestingPercent = t.VestingPercent }).FirstOrDefaultAsync(cancellationToken);
+                                      where d.BadgeNumber == badgeNumberOrSsn
+                                      select new BalanceEndpointResponse { Id = badgeNumberOrSsn, Ssn = t.Ssn.MaskSsn(), CurrentBalance = t.CurrentBalance, Etva = t.Etva, TotalDistributions = t.TotalDistributions, VestedBalance = t.VestedBalance, VestingPercent = t.VestingPercent }).FirstOrDefaultAsync(cancellationToken);
                     return rslt;
                 });
 
             default: //SSN
                 return await _profitSharingDataContextFactory.UseReadOnlyContext(ctx =>
                 {
-                    var rslt = (from t in TotalVestingBalance(ctx, profitYear, calendarInfo.FiscalEndDate) where t.Ssn == employeeIdOrSsn
-                                      select new BalanceEndpointResponse { Id = employeeIdOrSsn, Ssn = t.Ssn.MaskSsn(), CurrentBalance = t.CurrentBalance, Etva = t.Etva, TotalDistributions = t.TotalDistributions, VestedBalance =  t.VestedBalance, VestingPercent = t.VestingPercent}).FirstOrDefaultAsync(cancellationToken);
+                    var rslt = (from t in TotalVestingBalance(ctx, profitYear, calendarInfo.FiscalEndDate) where t.Ssn == badgeNumberOrSsn
+                                      select new BalanceEndpointResponse { Id = badgeNumberOrSsn, Ssn = t.Ssn.MaskSsn(), CurrentBalance = t.CurrentBalance, Etva = t.Etva, TotalDistributions = t.TotalDistributions, VestedBalance =  t.VestedBalance, VestingPercent = t.VestingPercent}).FirstOrDefaultAsync(cancellationToken);
                     return rslt;
                 });
                 

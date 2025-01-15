@@ -86,6 +86,11 @@ internal class PayrollSyncService
             {
                 using var response = await _httpClient.GetAsync(url, cancellationToken);
 
+                if (Debugger.IsAttached)
+                {
+                    _logger.LogInformation(url);
+                }
+
                 if (response.IsSuccessStatusCode)
                 {
                     var balanceResults = await response.Content.ReadFromJsonAsync<BalanceRoot>(cancellationToken);
@@ -183,7 +188,7 @@ internal class PayrollSyncService
             {
                 Console.ForegroundColor = resultCount == 0 ? ConsoleColor.Red : ConsoleColor.DarkGreen;
                 Console.WriteLine();
-                Console.WriteLine($"Upserted {resultCount} rows into {nameof(PayProfit)} for {demographic.ContactInfo.FullName}({demographic.EmployeeId})");
+                Console.WriteLine($"Upserted {resultCount} rows into {nameof(PayProfit)} for {demographic.ContactInfo.FullName}({demographic.BadgeNumber})");
                 Console.WriteLine();
                 Console.ForegroundColor = ConsoleColor.White;
             }

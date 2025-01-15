@@ -16,8 +16,8 @@ public class MemberFinancials
     public MemberFinancials(EmployeeFinancials empl, ProfitDetailTotals profitDetailTotals, MemberTotals memberTotals)
     {
         IsEmployee = true;
-        Badge = empl.EmployeeId;
-        Psn = empl.EmployeeId;
+        Badge = empl.BadgeNumber;
+        Psn = empl.BadgeNumber;
         Name = empl.Name;
         Ssn = empl.Ssn;
         AllEarnings = empl.Earnings;

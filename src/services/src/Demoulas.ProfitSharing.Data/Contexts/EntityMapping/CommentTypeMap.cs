@@ -39,7 +39,9 @@ internal sealed class CommentTypeMap : IEntityTypeConfiguration<CommentType>
             CommentType.Constants.Military,
             CommentType.Constants.Other,
             CommentType.Constants.Rev,
-            CommentType.Constants.Unrev
+            CommentType.Constants.Unrev,
+            CommentType.Constants.OneHundredPercentEarnings,
+            CommentType.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested
         ];
     }
 }

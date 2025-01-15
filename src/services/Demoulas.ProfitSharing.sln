@@ -25,6 +25,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pipelines", "Pipelines", "{E8B4A68D-9AFA-479D-BB49-BD8843E0800C}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\bitbucket-pipelines.yml = ..\..\bitbucket-pipelines.yml
+		..\..\scripts\credsettings.ps1 = ..\..\scripts\credsettings.ps1
 		..\..\scripts\servicesDeploy.ps1 = ..\..\scripts\servicesDeploy.ps1
 		..\..\scripts\webDeploy.ps1 = ..\..\scripts\webDeploy.ps1
 	EndProjectSection

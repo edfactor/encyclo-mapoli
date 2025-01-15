@@ -32,6 +32,7 @@ import DecemberProcess from "pages/DecemberProcess/DecemberProcess";
 import DecemberProcessAccordion from "pages/DecemberProcess/DecemberProcessAccordion";
 import DecemberProcessLocalApi from "pages/DecemberProcess/DecemberProcessLOCALAPI";
 import Termination from "pages/Termination/Termination";
+import MilitaryAndRehireEntryAndModification from "pages/MilitaryAndRehireEntryAndModification/MilitaryAndRehireEntryAndModification";
 
 const Router = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -166,6 +167,9 @@ const Router = () => {
         <Route
           path="prof-term"
           element={<Termination />}></Route>
+          <Route
+          path="military-and-rehire-entry"
+          element={<MilitaryAndRehireEntryAndModification />}></Route>
       </RouteSecurity>
     </BrowserRouter>
   );

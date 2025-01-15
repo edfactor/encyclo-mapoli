@@ -22,9 +22,7 @@ const schema = yup.object().shape({
 });
 
 const DuplicateSSNsOnDemographicsSearchFilter = () => {
-  const [isFetching, setIsFetching] = useState(false);
-
-  const [triggerSearch, { isLoading }] = useLazyGetDuplicateSSNsQuery();
+  const [triggerSearch, { isFetching }] = useLazyGetDuplicateSSNsQuery();
 
   const {
     control,
@@ -41,7 +39,6 @@ const DuplicateSSNsOnDemographicsSearchFilter = () => {
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
-      setIsFetching(true);
       triggerSearch(
         {
           profitYear: data.profitYear,
@@ -49,7 +46,6 @@ const DuplicateSSNsOnDemographicsSearchFilter = () => {
         },
         false
       );
-      setIsFetching(false);
     }
   });
 

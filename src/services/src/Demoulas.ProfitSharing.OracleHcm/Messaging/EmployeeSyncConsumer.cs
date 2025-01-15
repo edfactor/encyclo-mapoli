@@ -20,6 +20,7 @@ internal class EmployeeSyncConsumer : IConsumer<MessageRequest<OracleEmployee>>
     private readonly OracleEmployeeValidator _employeeValidator;
     private readonly IDemographicsServiceInternal _demographicsService;
     private readonly OracleHcmConfig _oracleHcmConfig;
+    private readonly Faker _faker = new Faker();
 
     public EmployeeSyncConsumer(OracleEmployeeValidator employeeValidator,
         IDemographicsServiceInternal demographicsServiceInternal,
@@ -41,7 +42,7 @@ internal class EmployeeSyncConsumer : IConsumer<MessageRequest<OracleEmployee>>
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
 
-        int badgeNumber = employee?.EmployeeId ?? 0;
+        int badgeNumber = employee?.BadgeNumber ?? 0;
         if (employee == null || badgeNumber == 0)
         {
             yield break;
@@ -54,15 +55,14 @@ internal class EmployeeSyncConsumer : IConsumer<MessageRequest<OracleEmployee>>
             yield break;
         }
 
-        Faker faker = new Faker();
         yield return new DemographicsRequest
         {
             OracleHcmId = employee.PersonId,
-            EmployeeId = employee.EmployeeId,
+            BadgeNumber = employee.BadgeNumber,
             DateOfBirth = employee.DateOfBirth,
             HireDate = employee.WorkRelationship?.StartDate ?? SqlDateTime.MinValue.Value.ToDateOnly(),
             TerminationDate = employee.WorkRelationship?.TerminationDate,
-            Ssn = (employee.NationalIdentifier?.NationalIdentifierNumber ?? faker.Person.Ssn()).ConvertSsnToInt(),
+            Ssn = (employee.NationalIdentifier?.NationalIdentifierNumber ?? _faker.Person.Ssn()).ConvertSsnToInt(),
             StoreNumber = employee.WorkRelationship?.Assignment.LocationCode ?? 0,
             DepartmentId = employee.WorkRelationship?.Assignment.GetDepartmentId() ?? 0,
             PayClassificationId = employee.WorkRelationship?.Assignment.JobCode ?? 0,

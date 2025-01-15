@@ -52,7 +52,7 @@ definitions:
         - windows
         - self.hosted
       script:
-       - powershell -Command "& { ./health-check.ps1 -Url $Env:HEALTH_CHECK_URL }"
+       - pwsh -Command "& { ./health-check.ps1 -Url $Env:HEALTH_CHECK_URL }"
       artifacts:
         - build/**
     
@@ -107,24 +107,24 @@ definitions:
         - windows
         - self.hosted
       script:
-          # Define environment variable (replace with actual environment name during deployment)
-          - export ENV_NAME="prod" # Change this to the desired environment name
+        - SET ENV=qa
+         - pwsh -Command >-
+            $replacements = @{
+              "CONNECTIONSTRINGS_PROFITSHARING_SLUG" = "value1";
+              "CONNECTIONSTRINGS_COMMON_SLUG" = "value2";
+              "ORACLEHCM_BASE_URL_SLUG" = "value3";
+              "ORACLEHCM_USERNAME_SLUG" = "value4";
+              "ORACLEHCM_PASSWORD_SLUG" = "value5";
+            };
+            $json = $replacements | ConvertTo-Json -Depth 10 -Compress;
+            Write-Host "JSON String:";
+            Write-Host $json;
+            .\scripts\credsettings.ps1 -EnvName qa -ReplacementsJson $json
 
-          # Read the file
-          - cat credsettings.json > temp.json
+        - pwsh -Command ".\scripts\credsettings.ps1 -EnvName qa -ReplacementsJson $replacements"
 
-          # Replace placeholders with environment-prefixed variables
-          - sed -i "s/{{CONNECTIONSTRINGS_PROFITSHARING_SLUG}}/${ENV_NAME}_CONNECTIONSTRINGS_PROFITSHARING_SLUG/g" temp.json
-          - sed -i "s/{{CONNECTIONSTRINGS_COMMON_SLUG}}/${ENV_NAME}_CONNECTIONSTRINGS_COMMON_SLUG/g" temp.json
-          - sed -i "s/{{ORACLEHCM_BASE_URL_SLUG}}/${ENV_NAME}_ORACLEHCM_BASE_URL_SLUG/g" temp.json
-          - sed -i "s/{{ORACLEHCM_USERNAME_SLUG}}/${ENV_NAME}_ORACLEHCM_USERNAME_SLUG/g" temp.json
-          - sed -i "s/{{ORACLEHCM_PASSWORD_SLUG}}/${ENV_NAME}_ORACLEHCM_PASSWORD_SLUG/g" temp.json
 
-          # Ensure output directory exists
-          - mkdir -p ./publishOutput
 
-          # Move and rename the file
-          - mv temp.json ./publishOutput/credsettings.${ENV_NAME}.json
         
     create-frontend-artifact-qa: &create-frontend-artifact-qa
       name: Create FrontEnd Artifacts (QA)     
@@ -271,10 +271,10 @@ pipelines:
             - echo "Deploying web application..."
             - $env:API_ARTIFACT_NAME = "Demoulas.ProfitSharing.Api.zip"
             - $env:UI_ARTIFACT_NAME = "Demoulas.ProfitSharing.UI.QA.zip"
-            - powershell .\scripts\webDeploy.ps1 $env:ENV $env:API_SERVER_QA $env:API_ARTIFACT_NAME $env:UI_ARTIFACT_NAME
+            - pwsh .\scripts\webDeploy.ps1 $env:ENV $env:API_SERVER_QA $env:API_ARTIFACT_NAME $env:UI_ARTIFACT_NAME
 
             - echo "Deploying background service..."            
-            - powershell .\scripts\servicesDeploy.ps1 ${env:ENV} $env:API_SERVER_QA
+            - pwsh .\scripts\servicesDeploy.ps1 ${env:ENV} $env:API_SERVER_QA
 
 
       - parallel:
@@ -290,7 +290,7 @@ pipelines:
           script:
             - echo "Deploying application..."
             - $env:API_SERVER_UAT = "appt24d"
-            - powershell .\scripts\webDeploy.ps1 UAT $env:API_SERVER_UAT
+            - pwsh .\scripts\webDeploy.ps1 UAT $env:API_SERVER_UAT
       #- step: *create-frontend-artifact-prod
 
 

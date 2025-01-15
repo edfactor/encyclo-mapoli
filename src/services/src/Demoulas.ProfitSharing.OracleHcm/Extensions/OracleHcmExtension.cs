@@ -186,6 +186,9 @@ public static class OracleHcmExtension
 
         services.AddHttpClient<PayrollSyncService>("PayrollSyncService", BuildOracleHcmAuthClient)
             .AddStandardResilienceHandler(options => ApplyResilienceOptions(options, commonHttpOptions));
+
+        services.AddHttpClient<OracleHcmHealthCheck>("OracleHcmHealthCheck", BuildOracleHcmAuthClient)
+            .AddStandardResilienceHandler(options => ApplyResilienceOptions(options, commonHttpOptions));
     }
 
     /// <summary>

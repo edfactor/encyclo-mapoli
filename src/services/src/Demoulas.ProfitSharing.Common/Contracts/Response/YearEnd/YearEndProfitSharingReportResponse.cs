@@ -1,7 +1,7 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 public sealed record YearEndProfitSharingReportResponse
 {
-    public required long EmployeeId { get; set; }
+    public required long BadgeNumber { get; set; }
     public required string EmployeeName { get; set; }
     public required short StoreNumber { get; set; }
     public required char EmployeeTypeCode { get; set; }
@@ -21,7 +21,7 @@ public sealed record YearEndProfitSharingReportResponse
     {
         return new YearEndProfitSharingReportResponse()
         {
-            EmployeeId = 135,
+            BadgeNumber = 135,
             EmployeeName = "John Doe",
             StoreNumber = 23,
             EmployeeTypeCode = 'a',

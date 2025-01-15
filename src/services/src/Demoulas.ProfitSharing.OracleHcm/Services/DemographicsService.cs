@@ -64,7 +64,7 @@ internal class DemographicsService : IDemographicsServiceInternal
        CancellationToken cancellationToken = default)
    {
        const int throttleLimit = 10_000; // Max queue size for safety (configurable)
-       var batch = new List<DemographicsRequest>();
+       var batch = new Dictionary<long, DemographicsRequest>();
        bool batchProcessed = false;
        await foreach (var employee in employees.WithCancellation(cancellationToken))
        {
@@ -81,7 +81,11 @@ internal class DemographicsService : IDemographicsServiceInternal
            {
                while (_requests.TryDequeue(out var demoRequest))
                {
-                   batch.Add(demoRequest);
+                   if (!batch.TryAdd(demoRequest.OracleHcmId, demoRequest))
+                   {
+                       _logger.LogError("Duplicate OracleHcmId: {OracleHcmId} found; skipping....", demoRequest.OracleHcmId);
+                   }
+
                    if (batch.Count == batchSize)
                    {
                        break;
@@ -90,9 +94,7 @@ internal class DemographicsService : IDemographicsServiceInternal
 
                if (batch.Count > 0)
                {
-                   await UpsertDemographicsAsync(batch, cancellationToken);
-                   batchProcessed = true;
-                   batch.Clear(); // Clear batch after processing
+                   batchProcessed = await ProcessBatch();
                }
            }
        }
@@ -100,7 +102,15 @@ internal class DemographicsService : IDemographicsServiceInternal
        // Process any leftover requests in the batch
        if (batch.Count > 0 && batchProcessed)
        {
-           await UpsertDemographicsAsync(batch, cancellationToken);
+           _ = await ProcessBatch();
+       }
+
+       async Task<bool> ProcessBatch()
+       {
+           await UpsertDemographicsAsync(batch.Values, cancellationToken);
+           batchProcessed = true;
+           batch.Clear(); // Clear batch after processing
+           return batchProcessed;
        }
    }
 
@@ -126,7 +136,7 @@ internal class DemographicsService : IDemographicsServiceInternal
 
         // Create lookup dictionaries for both OracleHcmId and SSN
         var demographicOracleHcmIdLookup = demographicsEntities.ToDictionary(entity => entity.OracleHcmId);
-        var demographicSsnLookup = demographicsEntities.ToLookup(entity => (entity.Ssn, entity.EmployeeId));
+        var demographicSsnLookup = demographicsEntities.ToLookup(entity => (entity.Ssn, BadgeNumber: entity.BadgeNumber));
         var ssnCollection = demographicsEntities.Select(d => d.Ssn).ToHashSet();
         var dobCollection = demographicsEntities.Select(d => d.DateOfBirth).ToHashSet();
 
@@ -150,7 +160,7 @@ internal class DemographicsService : IDemographicsServiceInternal
                 // Log duplicate SSN entries to the audit table
                 var audit = duplicateSsnEntities.Select(d => new DemographicSyncAudit
                 {
-                    BadgeNumber = d.EmployeeId,
+                    BadgeNumber = d.BadgeNumber,
                     InvalidValue = d.Ssn.MaskSsn(),
                     Message = "Duplicate SSNs found in the database.",
                     UserName = "System",
@@ -184,7 +194,7 @@ internal class DemographicsService : IDemographicsServiceInternal
                     catch (InvalidOperationException e) when (e.Message.Contains(
                                                                   "When attaching existing entities, ensure that only one entity instance with a given key value is attached."))
                     {
-                        _logger.LogCritical(e, "Failed to process Demographic/OracleHCM employee record for EmployeeId {EmployeeId}", entity.EmployeeId);
+                        _logger.LogCritical(e, "Failed to process Demographic/OracleHCM employee record for BadgeNumber {BadgeNumber}", entity.BadgeNumber);
                         try
                         {
                             await context.SaveChangesAsync(cancellationToken);
@@ -202,7 +212,7 @@ internal class DemographicsService : IDemographicsServiceInternal
             }
 
 
-            // Update existing entities based on either OracleHcmId or SSN & EmployeeId
+            // Update existing entities based on either OracleHcmId or SSN & BadgeNumber
             foreach (var existingEntity in existingEntities)
             {
                 Demographic? incomingEntity = null;
@@ -214,7 +224,7 @@ internal class DemographicsService : IDemographicsServiceInternal
                 }
                 else
                 {
-                    var entityBySsn = demographicSsnLookup[(existingEntity.Ssn, existingEntity.EmployeeId)].FirstOrDefault();
+                    var entityBySsn = demographicSsnLookup[(existingEntity.Ssn, existingEntity.BadgeNumber)].FirstOrDefault();
                     if (entityBySsn != null)
                     {
                         incomingEntity = entityBySsn;
@@ -248,6 +258,14 @@ internal class DemographicsService : IDemographicsServiceInternal
                 }
             }
 
+            var newSync = context.Demographics.Local.Where(d => d.Id == 0).Select(d => d.OracleHcmId).ToHashSet();
+            var exists = await context.Demographics
+                .AnyAsync(x => newSync.Contains(x.OracleHcmId), cancellationToken);
+            if (exists)
+            {
+                throw new InvalidOperationException("Duplicate value found.");
+            }
+
             // Save all changes to the database
             await context.SaveChangesAsync(cancellationToken);
         }, cancellationToken);
@@ -257,7 +275,7 @@ internal class DemographicsService : IDemographicsServiceInternal
     private static void UpdateEntityValues(Demographic existingEntity, Demographic incomingEntity, DateTime modificationDate)
     {
         existingEntity.Ssn = incomingEntity.Ssn;
-        existingEntity.EmployeeId = incomingEntity.EmployeeId;
+        existingEntity.BadgeNumber = incomingEntity.BadgeNumber;
         existingEntity.StoreNumber = incomingEntity.StoreNumber;
         existingEntity.DepartmentId = incomingEntity.DepartmentId;
         existingEntity.PayClassificationId = incomingEntity.PayClassificationId;

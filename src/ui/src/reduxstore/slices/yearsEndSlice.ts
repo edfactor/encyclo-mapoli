@@ -57,6 +57,7 @@ export interface YearsEndState {
   balanceByYearsPartTime: BalanceByAge | null;
   vestedAmountsByAge: VestedAmountsByAge | null;
   terminattion: TerminationResponse | null;
+  militaryAndRehireEntryAndModification: EmployeeDetails | null;
 }
 
 const initialState: YearsEndState = {
@@ -89,7 +90,8 @@ const initialState: YearsEndState = {
   balanceByYearsFullTime: null,
   balanceByYearsPartTime: null,
   vestedAmountsByAge: null,
-  terminattion: null
+  terminattion: null,
+  militaryAndRehireEntryAndModification: null
 };
 
 export const yearsEndSlice = createSlice({
@@ -225,6 +227,9 @@ export const yearsEndSlice = createSlice({
     },
     setTermination: (state, action: PayloadAction<TerminationResponse>) => {
       state.terminattion = action.payload;
+    },
+    setMilitaryAndRehireEntryAndModificationEmployeeDetails: (state, action: PayloadAction<EmployeeDetails>) => {
+      state.militaryAndRehireEntryAndModification = action.payload;
     },
   }
 });

@@ -15,10 +15,8 @@ public sealed record ForfeituresByAge : ReportResponseBase<ForfeituresByAgeDetai
     public FrozenReportsByAgeRequest.Report ReportType { get; init; }
 
     public required short TotalEmployees { get; init; }
-    public required decimal DistributionTotalAmount { get; init; }
-
-
-
+    public required decimal TotalAmount { get; init; }
+    
 
 
     public static ForfeituresByAge ResponseExample()
@@ -27,7 +25,7 @@ public sealed record ForfeituresByAge : ReportResponseBase<ForfeituresByAgeDetai
         {
             ReportName = "PROFIT SHARING FORFEITURES BY AGE",
             ReportDate = DateTimeOffset.Now,
-            DistributionTotalAmount = (decimal)1_855_156.09,
+            TotalAmount = (decimal)1_855_156.09,
             TotalEmployees = 63,
 
             Response = new PaginatedResponseDto<ForfeituresByAgeDetail>(new PaginationRequestDto())

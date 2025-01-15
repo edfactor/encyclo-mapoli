@@ -1,5 +1,5 @@
-﻿using Demoulas.Common.Data.Services.Entities.Entities;
-using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.NotOwned;
+﻿using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping.Data;
+using Demoulas.Common.Data.Services.Entities.Entities;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;

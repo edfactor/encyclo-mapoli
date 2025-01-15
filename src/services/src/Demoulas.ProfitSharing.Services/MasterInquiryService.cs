@@ -126,9 +126,9 @@ public class MasterInquiryService : IMasterInquiryService
 
                 if (uniqueSsns.Count == 1)
                 {
-                    int ssn = (int) uniqueSsns[0];
-                    short currentYear = (short) DateTime.Today.Year;
-                    short previousYear = (short) (currentYear - 1);
+                    int ssn = (int)uniqueSsns[0];
+                    short currentYear = (short)DateTime.Today.Year;
+                    short previousYear = (short)(currentYear - 1);
 
                     var previousBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(SearchBy.Ssn, ssn, previousYear, cancellationToken);
                     var currentBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(SearchBy.Ssn, ssn, currentYear, cancellationToken);
@@ -147,14 +147,14 @@ public class MasterInquiryService : IMasterInquiryService
                          d.Address.PostalCode,
                          d.DateOfBirth,
                          d.Ssn,
-                         d.EmployeeId,
+                         BadgeNumber = d.BadgeNumber,
                          d.ReHireDate,
                          d.HireDate,
                          d.TerminationDate,
                          d.StoreNumber,
                          DemographicId = d.Id,
                          LatestPayProfit = d.PayProfits
-                             .Where(x=>x.ProfitYear <= maxProfitYear)
+                             .Where(x => x.ProfitYear <= maxProfitYear)
                              .OrderByDescending(p => p.ProfitYear)
                              .FirstOrDefault()
                      })
@@ -181,7 +181,7 @@ public class MasterInquiryService : IMasterInquiryService
                             PercentageVested = currentBalance?.VestingPercent ?? 0,
                             ContributionsLastYear = previousBalance != null && previousBalance.CurrentBalance > 0,
                             Enrolled = demographicData.LatestPayProfit?.EnrollmentId != 0,
-                            EmployeeId = demographicData.EmployeeId.ToString(),
+                            BadgeNumber = demographicData.BadgeNumber.ToString(),
                             BeginPSAmount = (long) (previousBalance?.CurrentBalance ?? 0),
                             CurrentPSAmount = (long) (currentBalance?.CurrentBalance ?? 0),
                             BeginVestedAmount = (long) (previousBalance?.VestedBalance ?? 0),

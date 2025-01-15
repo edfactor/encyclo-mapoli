@@ -38,7 +38,7 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
             }
             if (request.BadgeNumber.HasValue)
             {
-                query = query.Where(pp => pp.Demographic!.EmployeeId == request.BadgeNumber);
+                query = query.Where(pp => pp.Demographic!.BadgeNumber == request.BadgeNumber);
             }
             if (request.FullNameContains != null)
             {
@@ -51,7 +51,7 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
             return query
                 .Select(p => new ExecutiveHoursAndDollarsResponse
                 {
-                    BadgeNumber = p.Demographic!.EmployeeId,
+                    BadgeNumber = p.Demographic!.BadgeNumber,
                     FullName = p.Demographic.ContactInfo.FullName,
                     StoreNumber = p.Demographic.StoreNumber,
                     HoursExecutive = p.HoursExecutive,
@@ -85,12 +85,12 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
             {
                 throw new BadHttpRequestException($"Year {profitYear} is not valid.");
             }
-            var badges = executiveHoursAndDollarsDtos.Select(dto => dto.EmployeeId).ToList();
+            var badges = executiveHoursAndDollarsDtos.Select(dto => dto.BadgeNumber).ToList();
 
             var ppQuery = await ctx.PayProfits
                 .Include(p => p.Demographic)
                 .Where(p => p.ProfitYear == profitYear)
-                .Where(p => badges.Contains(p.Demographic!.EmployeeId))
+                .Where(p => badges.Contains(p.Demographic!.BadgeNumber))
                 .ToListAsync(cancellationToken);
 
             if (executiveHoursAndDollarsDtos.Count != ppQuery.Count)
@@ -100,7 +100,7 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
 
             foreach (var pp in ppQuery)
             {
-                var dto = executiveHoursAndDollarsDtos.First(x => x.EmployeeId == pp.Demographic!.EmployeeId);
+                var dto = executiveHoursAndDollarsDtos.First(x => x.BadgeNumber == pp.Demographic!.BadgeNumber);
                 pp.HoursExecutive = dto.ExecutiveHours;
                 pp.IncomeExecutive = dto.ExecutiveDollars;
             }
