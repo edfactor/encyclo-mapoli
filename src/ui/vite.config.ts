@@ -31,7 +31,7 @@ export default defineConfig(({ command, mode }) => {
       "process.env": env
     },
     optimizeDeps: {
-      include: ["@emotion/react", "@emotion/styled", "@mui/material/Tooltip"]
+      include: ["@emotion/react", "@emotion/styled", "@mui/material/Tooltip", "@mui/system", "@mui/x-date-pickers"]
     },
     test: {
       globals: true,
@@ -57,11 +57,6 @@ export default defineConfig(({ command, mode }) => {
       exmptyOutDir: true,
       minify: isProd,
       rollupOptions: {
-        external: [
-          '@mui/system',
-          '@mui/system/RtlProvider',
-          '@mui/system/**'
-        ],
         output: {
           assetFileNames: (assetInfo) => {
             let extType = assetInfo.name!.split(".").at(1)!;
