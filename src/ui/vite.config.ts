@@ -17,7 +17,8 @@ export default defineConfig(({ command, mode }) => {
         pages: path.resolve(__dirname, "./src/pages"),
         schemas: path.resolve(__dirname, "./src/schemas"),
         hooks: path.resolve(__dirname, "./src/hooks"),
-        styles: path.resolve(__dirname, "./src/styles")
+        styles: path.resolve(__dirname, "./src/styles"),
+        "@mui/system/RtlProvider": "@mui/system/esm/RtlProvider"
       }
     },
     server: {
