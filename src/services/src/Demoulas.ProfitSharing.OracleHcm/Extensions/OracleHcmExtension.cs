@@ -138,7 +138,7 @@ public static class OracleHcmExtension
     private static void RegisterOracleHcmServices(IServiceCollection services)
     {
         // General services
-        services.AddScoped<OracleEmployeeValidator>();
+        services.AddSingleton<OracleEmployeeValidator>();
         services.AddSingleton<EmployeeFullSyncJob>();
         services.AddSingleton<EmployeeDeltaSyncJob>();
         services.AddSingleton<PayrollSyncJob>();
