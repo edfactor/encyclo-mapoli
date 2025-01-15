@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.OracleHcm.Configuration;
+﻿using System.Diagnostics;
+using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Quartz;
@@ -101,6 +102,24 @@ internal abstract class OracleHcmHostedServiceBase : IHostedService
     private async void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
     {
         e.SetObserved();
+
+        if (Debugger.IsAttached)
+        {
+            // Log the exception details
+            var taskDetails = sender as Task;
+            Console.WriteLine("Unobserved Task Exception occurred:");
+            Console.WriteLine($"Exception: {e.Exception}");
+            Console.WriteLine($"Stack Trace: {e.Exception.StackTrace}");
+
+            if (taskDetails != null)
+            {
+                Console.WriteLine($"Task ID: {taskDetails.Id}");
+                Console.WriteLine($"Task Status: {taskDetails.Status}");
+                Console.WriteLine($"Is Faulted: {taskDetails.IsFaulted}");
+                Console.WriteLine($"Is Canceled: {taskDetails.IsCanceled}");
+            }
+        }
+
         await HandleException(e.Exception);
     }
 #pragma warning restore VSTHRD100
@@ -108,7 +127,7 @@ internal abstract class OracleHcmHostedServiceBase : IHostedService
     private async Task HandleException(Exception exception)
     {
         // Log the exception
-        _logger.LogCritical(exception, "Unhandled exception: {Exception}", exception);
+        _logger.LogCritical(exception, "Unobserved Task Exception occurred: {Exception}", exception);
 
         // Stop the service
         await StopAsync(CancellationToken.None);

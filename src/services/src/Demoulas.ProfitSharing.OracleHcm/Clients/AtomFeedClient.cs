@@ -78,7 +78,9 @@ internal class AtomFeedClient
 
             if (feedRoot?.Feed.Entries != null && feedRoot.Feed.Entries.Any())
             {
-                foreach (var record in feedRoot.Feed.Entries.Select(e => e.Content).SelectMany(c => c.Context)!)
+                foreach (var record in feedRoot.Feed.Entries
+                             .Select(e => e.Content)
+                             .SelectMany(c => c.Context)!)
                 {
                     record.FeedType = feedType;
                     yield return record;
