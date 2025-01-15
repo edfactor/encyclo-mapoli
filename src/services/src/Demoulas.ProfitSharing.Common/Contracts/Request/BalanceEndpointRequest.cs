@@ -13,5 +13,4 @@ public sealed class BalanceEndpointRequest
     public required SearchBy SearchType { get; set; } //Ssn or BadgeNumber
     public required string Id { get; set; }
     public short ProfitYear { get; set; }
-    public StringComparison Comparison { get; set; }
 }
