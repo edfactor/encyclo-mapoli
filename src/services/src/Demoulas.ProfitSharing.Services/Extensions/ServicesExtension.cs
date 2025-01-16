@@ -42,6 +42,7 @@ public static class ServicesExtension
 
         _ = builder.Services.AddScoped<IProfitShareUpdateService, ProfitShareUpdateService>();
         _ = builder.Services.AddScoped<IProfitShareEditService, ProfitShareEditService>();
+        _ = builder.Services.AddScoped<IProfitMasterService, ProfitMasterService>();
 
         _ = builder.Services.AddSingleton<IPayProfitUpdateService, PayProfitUpdateService>();
 

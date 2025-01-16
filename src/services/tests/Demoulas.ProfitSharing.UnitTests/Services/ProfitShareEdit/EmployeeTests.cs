@@ -47,7 +47,7 @@ public class EmployeeTests : ApiTestBase<Program>
         ProfitShareEditMemberRecordResponse m = records[0];
         m.Name.Should().Be("Joey, Doughnuts");
         // test's default balance is 1000. test's default requested earnings 5%
-        m.EarningsAmount.Should().Be(1000 * .05m); 
+        m.EarningAmount.Should().Be(1000 * .05m);
     }
 
     [Fact]
@@ -110,8 +110,8 @@ public class EmployeeTests : ApiTestBase<Program>
         List<ProfitShareEditMemberRecordResponse> records = response.Response.Results.ToList();
         ProfitShareEditMemberRecordResponse m = records[0];
 
-        m.Reason.Should().Be(CommentType.Constants.VOnly.Name);
-        m.ReasonSummary.Should().Be("18,19,20 > 1000");
+        m.Remark.Should().Be(CommentType.Constants.VOnly.Name);
+        m.RecordChangeSummary.Should().Be("18,19,20 > 1000");
     }
 
 
@@ -132,8 +132,8 @@ public class EmployeeTests : ApiTestBase<Program>
         ProfitShareEditMemberRecordResponse m = records[0];
 
         m.ContributionAmount.Should().Be(0);
-        m.IncomingForfeitures.Should().Be(0);
-        m.Reason.Should().BeNull();
+        m.ForfeitureAmount.Should().Be(0);
+        m.Remark.Should().BeNull();
     }
 
     [Fact]
@@ -164,11 +164,11 @@ public class EmployeeTests : ApiTestBase<Program>
         records.Should().HaveCount(2);
         ProfitShareEditMemberRecordResponse r1 = records[0];
         r1.Code.Should().Be(8);
-        r1.EarningsAmount.Should().Be(1000 /*ETVA Bal*/ * DefaultEarningsPercent / 100);
+        r1.EarningAmount.Should().Be(1000 /*ETVA Bal*/ * DefaultEarningsPercent / 100);
 
         ProfitShareEditMemberRecordResponse r2 = records[1];
         r2.Code.Should().Be(0);
-        r2.EarningsAmount.Should().Be(2000 /*Non Etva Bal*/ * DefaultEarningsPercent / 100);
+        r2.EarningAmount.Should().Be(2000 /*Non Etva Bal*/ * DefaultEarningsPercent / 100);
     }
 
 
@@ -188,7 +188,7 @@ public class EmployeeTests : ApiTestBase<Program>
         
         // test's default balance is 1000. test's default requested earnings 5%
         m.YearExtension.Should().Be(2);
-        m.EarningsAmount.Should().Be(1000 * .03m);
+        m.EarningAmount.Should().Be(1000 * .03m);
     }
 
     [Fact]
@@ -216,11 +216,11 @@ public class EmployeeTests : ApiTestBase<Program>
         // 3% of 3000 = 90 
         r1.Code.Should().Be(/*8*/ ProfitCode.Constants.Incoming100PercentVestedEarnings);
         r1.YearExtension.Should().Be(2);
-        r1.EarningsAmount.Should().Be(30 /*1000 * .03m*/);
+        r1.EarningAmount.Should().Be(30 /*1000 * .03m*/);
 
         r2.Code.Should().Be(/*0*/ ProfitCode.Constants.IncomingContributions);
         r2.YearExtension.Should().Be(2);
-        r2.EarningsAmount.Should().Be(60 /*2000 * .03m*/);
+        r2.EarningAmount.Should().Be(60 /*2000 * .03m*/);
     }
 
 
