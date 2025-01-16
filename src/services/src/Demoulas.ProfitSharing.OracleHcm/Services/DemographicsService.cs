@@ -162,6 +162,7 @@ internal class DemographicsService : IDemographicsServiceInternal
                 List<DemographicSyncAudit> audit = duplicateSsnEntities.Select(d => new DemographicSyncAudit
                 {
                     BadgeNumber = d.BadgeNumber,
+                    OracleHcmId = d.OracleHcmId,
                     InvalidValue = d.Ssn.MaskSsn(),
                     Message = "Duplicate SSNs found in the database.",
                     UserName = "System",
@@ -295,7 +296,35 @@ internal class DemographicsService : IDemographicsServiceInternal
         existingEntity.LastModifiedDate = modificationDate;
     }
 
-    public Task AuditError(int badgeNumber, IEnumerable<ValidationFailure> errorMessages, string requestedBy, CancellationToken cancellationToken = default,
+    /// <summary>
+    /// Audits demographic synchronization errors by logging them into the database.
+    /// </summary>
+    /// <param name="badgeNumber">
+    /// The badge number of the employee associated with the error.
+    /// </param>
+    /// <param name="oracleHcmId">
+    /// The Oracle HCM identifier of the employee.
+    /// </param>
+    /// <param name="errorMessages">
+    /// A collection of validation failures containing details about the errors.
+    /// </param>
+    /// <param name="requestedBy">
+    /// The username of the individual who initiated the request.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token to monitor for cancellation requests.
+    /// </param>
+    /// <param name="args">
+    /// Additional arguments providing context or metadata for the audit.
+    /// </param>
+    /// <returns>
+    /// A task that represents the asynchronous operation of auditing errors.
+    /// </returns>
+    /// <remarks>
+    /// This method processes validation errors and records them in the <see cref="DemographicSyncAudit"/> table.
+    /// It ensures that null values in the additional arguments are replaced with a default value.
+    /// </remarks>
+    public Task AuditError(int badgeNumber, long oracleHcmId, IEnumerable<ValidationFailure> errorMessages, string requestedBy, CancellationToken cancellationToken = default,
         params object?[] args)
     {
         return _dataContextFactory.UseWritableContext(c =>
@@ -309,6 +338,7 @@ internal class DemographicsService : IDemographicsServiceInternal
                 new DemographicSyncAudit
                 {
                     BadgeNumber = badgeNumber,
+                    OracleHcmId = oracleHcmId,
                     InvalidValue = e.AttemptedValue?.ToString() ?? e.CustomState?.ToString(),
                     Message = e.ErrorMessage,
                     UserName = requestedBy,

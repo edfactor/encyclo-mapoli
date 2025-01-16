@@ -68,7 +68,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         catch (Exception ex)
         {
             success = false;
-            await _demographicsService.AuditError(0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken);
+            await _demographicsService.AuditError(0, 0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken);
         }
         finally
         {
@@ -113,7 +113,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         }
         catch (Exception ex)
         {
-            await _demographicsService.AuditError(0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken);
+            await _demographicsService.AuditError(0, 0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken);
         }
     }
 
@@ -129,7 +129,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         }
         catch (Exception ex)
         {
-            await _demographicsService.AuditError(0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken);
+            await _demographicsService.AuditError(0, 0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken);
         }
     }
 

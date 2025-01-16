@@ -52,7 +52,7 @@ internal class EmployeeSyncConsumer : IConsumer<MessageRequest<OracleEmployee>>
         ValidationResult? result = await _employeeValidator.ValidateAsync(employee!, cancellationToken);
         if (!result.IsValid)
         {
-            await _demographicsService.AuditError(badgeNumber, result.Errors, requestedBy, cancellationToken);
+            await _demographicsService.AuditError(badgeNumber, employee?.PersonId ?? 0, result.Errors, requestedBy, cancellationToken);
             yield break;
         }
 

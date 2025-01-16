@@ -9,6 +9,8 @@ public interface IDemographicsServiceInternal
         CancellationToken cancellationToken = default);
 
     Task CleanAuditError(CancellationToken cancellationToken);
-    Task AuditError(int badgeNumber, IEnumerable<ValidationFailure> errorMessages, string requestedBy, CancellationToken cancellationToken = default,
+
+    Task AuditError(int badgeNumber, long oracleHcmId, IEnumerable<ValidationFailure> errorMessages, string requestedBy,
+        CancellationToken cancellationToken = default,
         params object?[] args);
 }
