@@ -83,8 +83,8 @@ DECLARE
         FROM DEMOGRAPHICS DEMO;
         
 -- Our Nested Table type
-        TYPE EMPLOYEE_IDS_NT IS TABLE OF DEMOGRAPHICS%ROWTYPE INDEX BY PLS_INTEGER;
-        L_EMPLOYEE_IDS_NT EMPLOYEE_IDS_NT;
+        TYPE BADGE_NUMBERS_NT IS TABLE OF DEMOGRAPHICS%ROWTYPE INDEX BY PLS_INTEGER;
+        L_BADGE_NUMBERS_NT BADGE_NUMBERS_NT;
  -- Number of records
         NUM_RECORDS NUMBER := 0;
         L_SQL_ERROR NUMBER;
@@ -103,7 +103,7 @@ BEGIN
         DBMS_OUTPUT.PUT_LINE(chr(10) || '- - - Begin obfuscation of non SSN/PSN employee data - - -');
         l_start_time := DBMS_UTILITY.get_time;
         DBMS_OUTPUT.PUT_LINE('Randomizing employee data fields...');
-        L_EMPLOYEE_IDS_NT := EMPLOYEE_IDS_NT();
+        L_BADGE_NUMBERS_NT := BADGE_NUMBERS_NT();
         
         L_HUGE_STORES := STORES_NT();
         L_TINY_STORES := STORES_NT();
@@ -118,84 +118,84 @@ BEGIN
             
         
             OPEN GET_DEMOGRAPHICS_INFO_CUR;
-            LOOP FETCH GET_DEMOGRAPHICS_INFO_CUR BULK COLLECT INTO L_EMPLOYEE_IDS_NT LIMIT BATCH_READ_SIZE;
-            EXIT WHEN L_EMPLOYEE_IDS_NT.COUNT = 0;  
+            LOOP FETCH GET_DEMOGRAPHICS_INFO_CUR BULK COLLECT INTO L_BADGE_NUMBERS_NT LIMIT BATCH_READ_SIZE;
+            EXIT WHEN L_BADGE_NUMBERS_NT.COUNT = 0;  
             
             -- Now we need to add in correct fields, dates and state zip
             
-            FOR EMP_INDEX IN 1..L_EMPLOYEE_IDS_NT.COUNT
+            FOR EMP_INDEX IN 1..L_BADGE_NUMBERS_NT.COUNT
             LOOP
             L_FIRST_NAME := get_a_first_name();
             L_MIDDLE_NAME := get_a_middle_name();
             L_LAST_NAME := get_a_last_name();
             L_FULL_NAME := L_LAST_NAME || ', ' || L_FIRST_NAME;
-            L_EMPLOYEE_IDS_NT(EMP_INDEX).PY_FNAME := L_FIRST_NAME;
-            L_EMPLOYEE_IDS_NT(EMP_INDEX).PY_MNAME := L_MIDDLE_NAME;
-            L_EMPLOYEE_IDS_NT(EMP_INDEX).PY_LNAME := L_LAST_NAME;
-            L_EMPLOYEE_IDS_NT(EMP_INDEX).PY_NAM := L_FULL_NAME;
-            L_EMPLOYEE_IDS_NT(EMP_INDEX).PY_ADD := get_an_address();
-            L_EMPLOYEE_IDS_NT(EMP_INDEX).PY_ADD2 := GET_SPACES_FOR_COLUMN('DEMOGRAPHICS', 'PY_ADD2');
-            L_EMPLOYEE_IDS_NT(EMP_INDEX).PY_ASSIGN_DESC := GET_SPACES_FOR_COLUMN('DEMOGRAPHICS', 'PY_ASSIGN_DESC');
-            L_EMPLOYEE_IDS_NT(EMP_INDEX).PY_CITY := get_a_city();
+            L_BADGE_NUMBERS_NT(EMP_INDEX).PY_FNAME := L_FIRST_NAME;
+            L_BADGE_NUMBERS_NT(EMP_INDEX).PY_MNAME := L_MIDDLE_NAME;
+            L_BADGE_NUMBERS_NT(EMP_INDEX).PY_LNAME := L_LAST_NAME;
+            L_BADGE_NUMBERS_NT(EMP_INDEX).PY_NAM := L_FULL_NAME;
+            L_BADGE_NUMBERS_NT(EMP_INDEX).PY_ADD := get_an_address();
+            L_BADGE_NUMBERS_NT(EMP_INDEX).PY_ADD2 := GET_SPACES_FOR_COLUMN('DEMOGRAPHICS', 'PY_ADD2');
+            L_BADGE_NUMBERS_NT(EMP_INDEX).PY_ASSIGN_DESC := GET_SPACES_FOR_COLUMN('DEMOGRAPHICS', 'PY_ASSIGN_DESC');
+            L_BADGE_NUMBERS_NT(EMP_INDEX).PY_CITY := get_a_city();
 
-            L_EMPLOYEE_IDS_NT(EMP_INDEX).PY_DOB := ADJUST_DATE(L_EMPLOYEE_IDS_NT(EMP_INDEX).PY_DOB);
-            L_EMPLOYEE_IDS_NT(EMP_INDEX).PY_HIRE_DT := ADJUST_DATE(L_EMPLOYEE_IDS_NT(EMP_INDEX).PY_HIRE_DT);
-            L_EMPLOYEE_IDS_NT(EMP_INDEX).PY_REHIRE_DT := ADJUST_DATE(L_EMPLOYEE_IDS_NT(EMP_INDEX).PY_REHIRE_DT);
-            L_EMPLOYEE_IDS_NT(EMP_INDEX).PY_FULL_DT := ADJUST_DATE(L_EMPLOYEE_IDS_NT(EMP_INDEX).PY_FULL_DT);
-            L_EMPLOYEE_IDS_NT(EMP_INDEX).PY_TERM_DT := ADJUST_DATE(L_EMPLOYEE_IDS_NT(EMP_INDEX).PY_TERM_DT);
-            L_EMPLOYEE_IDS_NT(EMP_INDEX).PY_CLASS_DT := ADJUST_DATE(L_EMPLOYEE_IDS_NT(EMP_INDEX).PY_CLASS_DT);
-            L_EMPLOYEE_IDS_NT(EMP_INDEX).PY_ZIP := get_zip_for_state(L_EMPLOYEE_IDS_NT(EMP_INDEX).PY_STATE);
-            L_EMPLOYEE_IDS_NT(EMP_INDEX).PY_EMP_TELNO := get_a_phone_number();
+            L_BADGE_NUMBERS_NT(EMP_INDEX).PY_DOB := ADJUST_DATE(L_BADGE_NUMBERS_NT(EMP_INDEX).PY_DOB);
+            L_BADGE_NUMBERS_NT(EMP_INDEX).PY_HIRE_DT := ADJUST_DATE(L_BADGE_NUMBERS_NT(EMP_INDEX).PY_HIRE_DT);
+            L_BADGE_NUMBERS_NT(EMP_INDEX).PY_REHIRE_DT := ADJUST_DATE(L_BADGE_NUMBERS_NT(EMP_INDEX).PY_REHIRE_DT);
+            L_BADGE_NUMBERS_NT(EMP_INDEX).PY_FULL_DT := ADJUST_DATE(L_BADGE_NUMBERS_NT(EMP_INDEX).PY_FULL_DT);
+            L_BADGE_NUMBERS_NT(EMP_INDEX).PY_TERM_DT := ADJUST_DATE(L_BADGE_NUMBERS_NT(EMP_INDEX).PY_TERM_DT);
+            L_BADGE_NUMBERS_NT(EMP_INDEX).PY_CLASS_DT := ADJUST_DATE(L_BADGE_NUMBERS_NT(EMP_INDEX).PY_CLASS_DT);
+            L_BADGE_NUMBERS_NT(EMP_INDEX).PY_ZIP := get_zip_for_state(L_BADGE_NUMBERS_NT(EMP_INDEX).PY_STATE);
+            L_BADGE_NUMBERS_NT(EMP_INDEX).PY_EMP_TELNO := get_a_phone_number();
 
-            L_EMPLOYEE_IDS_NT(EMP_INDEX).PY_SHOUR := get_hours();
+            L_BADGE_NUMBERS_NT(EMP_INDEX).PY_SHOUR := get_hours();
             
 
             
-            IF (L_EMPLOYEE_IDS_NT(EMP_INDEX).PY_STOR MEMBER OF L_TINY_STORES) THEN
+            IF (L_BADGE_NUMBERS_NT(EMP_INDEX).PY_STOR MEMBER OF L_TINY_STORES) THEN
                 -- We now need to reassign to one of the three largest stores
                 L_HUGE_STORE_REPLACEMENT := FLOOR(DBMS_RANDOM.VALUE(1, L_HUGE_STORES.COUNT +1));
-                L_EMPLOYEE_IDS_NT(EMP_INDEX).PY_STOR := L_HUGE_STORES(L_HUGE_STORE_REPLACEMENT);
+                L_BADGE_NUMBERS_NT(EMP_INDEX).PY_STOR := L_HUGE_STORES(L_HUGE_STORE_REPLACEMENT);
                 
             END IF;
 
             END LOOP;
             
             
-            FORALL L_INDEX IN 1 .. L_EMPLOYEE_IDS_NT.COUNT SAVE EXCEPTIONS
+            FORALL L_INDEX IN 1 .. L_BADGE_NUMBERS_NT.COUNT SAVE EXCEPTIONS
                 UPDATE DEMOGRAPHICS 
                 SET 
-                    PY_FNAME = L_EMPLOYEE_IDS_NT(L_INDEX).PY_FNAME,
-                    PY_MNAME = L_EMPLOYEE_IDS_NT(L_INDEX).PY_MNAME, 
-                    PY_LNAME = L_EMPLOYEE_IDS_NT(L_INDEX).PY_LNAME,
-                    PY_NAM = L_EMPLOYEE_IDS_NT(L_INDEX).PY_NAM, 
-                    PY_ADD = L_EMPLOYEE_IDS_NT(L_INDEX).PY_ADD,
-                    PY_ADD2 = L_EMPLOYEE_IDS_NT(L_INDEX).PY_ADD2,
-                    PY_CITY = L_EMPLOYEE_IDS_NT(L_INDEX).PY_CITY,
-                    PY_ZIP = L_EMPLOYEE_IDS_NT(L_INDEX).PY_ZIP,
-                    PY_DOB = L_EMPLOYEE_IDS_NT(L_INDEX).PY_DOB,
-                    PY_HIRE_DT = L_EMPLOYEE_IDS_NT(L_INDEX).PY_HIRE_DT,
-                    PY_FULL_DT = L_EMPLOYEE_IDS_NT(L_INDEX).PY_FULL_DT,
-                    PY_REHIRE_DT = L_EMPLOYEE_IDS_NT(L_INDEX).PY_REHIRE_DT,
-                    PY_TERM_DT = L_EMPLOYEE_IDS_NT(L_INDEX).PY_TERM_DT,
-                    PY_TERM = L_EMPLOYEE_IDS_NT(L_INDEX).PY_TERM,
-                    PY_EMP_TELNO = L_EMPLOYEE_IDS_NT(L_INDEX).PY_EMP_TELNO,
-                    PY_STOR = L_EMPLOYEE_IDS_NT(L_INDEX).PY_STOR,
+                    PY_FNAME = L_BADGE_NUMBERS_NT(L_INDEX).PY_FNAME,
+                    PY_MNAME = L_BADGE_NUMBERS_NT(L_INDEX).PY_MNAME, 
+                    PY_LNAME = L_BADGE_NUMBERS_NT(L_INDEX).PY_LNAME,
+                    PY_NAM = L_BADGE_NUMBERS_NT(L_INDEX).PY_NAM, 
+                    PY_ADD = L_BADGE_NUMBERS_NT(L_INDEX).PY_ADD,
+                    PY_ADD2 = L_BADGE_NUMBERS_NT(L_INDEX).PY_ADD2,
+                    PY_CITY = L_BADGE_NUMBERS_NT(L_INDEX).PY_CITY,
+                    PY_ZIP = L_BADGE_NUMBERS_NT(L_INDEX).PY_ZIP,
+                    PY_DOB = L_BADGE_NUMBERS_NT(L_INDEX).PY_DOB,
+                    PY_HIRE_DT = L_BADGE_NUMBERS_NT(L_INDEX).PY_HIRE_DT,
+                    PY_FULL_DT = L_BADGE_NUMBERS_NT(L_INDEX).PY_FULL_DT,
+                    PY_REHIRE_DT = L_BADGE_NUMBERS_NT(L_INDEX).PY_REHIRE_DT,
+                    PY_TERM_DT = L_BADGE_NUMBERS_NT(L_INDEX).PY_TERM_DT,
+                    PY_TERM = L_BADGE_NUMBERS_NT(L_INDEX).PY_TERM,
+                    PY_EMP_TELNO = L_BADGE_NUMBERS_NT(L_INDEX).PY_EMP_TELNO,
+                    PY_STOR = L_BADGE_NUMBERS_NT(L_INDEX).PY_STOR,
                     PY_ASSIGN_ID = 654321,
-                    PY_ASSIGN_DESC = L_EMPLOYEE_IDS_NT(L_INDEX).PY_ASSIGN_DESC,
-                    PY_STATE = L_EMPLOYEE_IDS_NT(L_INDEX).PY_STATE,
-                    PY_SHOUR = L_EMPLOYEE_IDS_NT(L_INDEX).PY_SHOUR,
-                    PY_SET_PWD = L_EMPLOYEE_IDS_NT(L_INDEX).PY_SET_PWD,
-                    PY_SET_PWD_DT = L_EMPLOYEE_IDS_NT(L_INDEX).PY_SET_PWD_DT,
-                    PY_CLASS_DT = L_EMPLOYEE_IDS_NT(L_INDEX).PY_CLASS_DT,
-                    PY_GUID = L_EMPLOYEE_IDS_NT(L_INDEX).PY_GUID
+                    PY_ASSIGN_DESC = L_BADGE_NUMBERS_NT(L_INDEX).PY_ASSIGN_DESC,
+                    PY_STATE = L_BADGE_NUMBERS_NT(L_INDEX).PY_STATE,
+                    PY_SHOUR = L_BADGE_NUMBERS_NT(L_INDEX).PY_SHOUR,
+                    PY_SET_PWD = L_BADGE_NUMBERS_NT(L_INDEX).PY_SET_PWD,
+                    PY_SET_PWD_DT = L_BADGE_NUMBERS_NT(L_INDEX).PY_SET_PWD_DT,
+                    PY_CLASS_DT = L_BADGE_NUMBERS_NT(L_INDEX).PY_CLASS_DT,
+                    PY_GUID = L_BADGE_NUMBERS_NT(L_INDEX).PY_GUID
                 WHERE
-                    DEM_BADGE = L_EMPLOYEE_IDS_NT(L_INDEX).DEM_BADGE;
+                    DEM_BADGE = L_BADGE_NUMBERS_NT(L_INDEX).DEM_BADGE;
 
 
             -- We need to also put some fields in the EMPLOYEES_OBFUSCATED 
             -- table because we may need them when an employee is also a beneficiary
 
-            FORALL L_INDEX IN 1 .. L_EMPLOYEE_IDS_NT.COUNT SAVE EXCEPTIONS
+            FORALL L_INDEX IN 1 .. L_BADGE_NUMBERS_NT.COUNT SAVE EXCEPTIONS
                 INSERT INTO EMPLOYEES_OBFUSCATED (
                         DEM_SSN,
                         PY_STATE,
@@ -206,14 +206,14 @@ BEGIN
                         PY_ADD2,
                         PY_NAM
                 ) VALUES (
-                    L_EMPLOYEE_IDS_NT(L_INDEX).DEM_SSN,
-                    L_EMPLOYEE_IDS_NT(L_INDEX).PY_STATE,
-                    L_EMPLOYEE_IDS_NT(L_INDEX).PY_ZIP,
-                    L_EMPLOYEE_IDS_NT(L_INDEX).PY_DOB,
-                    L_EMPLOYEE_IDS_NT(L_INDEX).PY_CITY,
-                    L_EMPLOYEE_IDS_NT(L_INDEX).PY_ADD,
+                    L_BADGE_NUMBERS_NT(L_INDEX).DEM_SSN,
+                    L_BADGE_NUMBERS_NT(L_INDEX).PY_STATE,
+                    L_BADGE_NUMBERS_NT(L_INDEX).PY_ZIP,
+                    L_BADGE_NUMBERS_NT(L_INDEX).PY_DOB,
+                    L_BADGE_NUMBERS_NT(L_INDEX).PY_CITY,
+                    L_BADGE_NUMBERS_NT(L_INDEX).PY_ADD,
                     GET_SPACES_FOR_COLUMN('DEMOGRAPHICS', 'PY_ADD2'),
-                    SUBSTR(L_EMPLOYEE_IDS_NT(L_INDEX).PY_NAM, 1, 40)    
+                    SUBSTR(L_BADGE_NUMBERS_NT(L_INDEX).PY_NAM, 1, 40)    
                 );
 
             END LOOP;

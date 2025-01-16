@@ -6,15 +6,15 @@ using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Services.Reports;
 using JetBrains.Annotations;
-using Demoulas.ProfitSharing.UnitTests.Base;
 using Demoulas.ProfitSharing.Security;
-using Demoulas.ProfitSharing.UnitTests.Extensions;
 using FastEndpoints;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Wages;
 using CsvHelper.Configuration;
 using CsvHelper;
 using System.Globalization;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.UnitTests.Common.Base;
+using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -61,7 +61,7 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
         var response = await DownloadClient.GETAsync<CurrentYearWagesEndpoint, ProfitYearRequest, StreamContent>(new ProfitYearRequest { ProfitYear = 2023 });
         response.Response.Content.Should().NotBeNull();
 
-        string result = await response.Response.Content.ReadAsStringAsync();
+        string result = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
         result.Should().NotBeNullOrEmpty();
 
         // Assert CSV format

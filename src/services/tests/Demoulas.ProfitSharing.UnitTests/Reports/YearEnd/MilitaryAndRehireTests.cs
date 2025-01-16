@@ -1,27 +1,27 @@
 ﻿using System.Net;
-using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-using FluentAssertions;
 using Demoulas.Common.Contracts.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Api;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Extensions;
-using JetBrains.Annotations;
-using Demoulas.ProfitSharing.UnitTests.Base;
-using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Data.Extensions;
-using Demoulas.ProfitSharing.Security;
-using Demoulas.ProfitSharing.UnitTests.Extensions;
-using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
-using Demoulas.ProfitSharing.Data.Contexts;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Contexts;
+using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
+using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.UnitTests.Common.Base;
+using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
+using FastEndpoints;
+using FluentAssertions;
+using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
 [TestSubject(typeof(MilitaryAndRehireEndpoint))]
-public class MilitaryAndRehireTests : ApiTestBase<Api.Program>
+public class MilitaryAndRehireTests : ApiTestBase<Program>
 {
     private readonly MilitaryAndRehireEndpoint _endpoint;
 
@@ -31,7 +31,7 @@ public class MilitaryAndRehireTests : ApiTestBase<Api.Program>
         _endpoint = new MilitaryAndRehireEndpoint(mockService);
     }
 
-    
+
     [Fact(DisplayName = "PS-156: Check for Military (JSON)")]
     public Task GetResponse_Should_ReturnReportResponse_WhenCalledWithValidRequest()
     {
@@ -43,10 +43,7 @@ public class MilitaryAndRehireTests : ApiTestBase<Api.Program>
             {
                 ReportName = "EMPLOYEES ON MILITARY LEAVE",
                 ReportDate = DateTimeOffset.Now,
-                Response = new PaginatedResponseDto<MilitaryAndRehireReportResponse>
-                {
-                    Results = new List<MilitaryAndRehireReportResponse> { setup.ExpectedResponse }
-                }
+                Response = new PaginatedResponseDto<MilitaryAndRehireReportResponse> { Results = new List<MilitaryAndRehireReportResponse> { setup.ExpectedResponse } }
             };
 
             // Act
@@ -72,7 +69,7 @@ public class MilitaryAndRehireTests : ApiTestBase<Api.Program>
             var response = await DownloadClient.GETAsync<MilitaryAndRehireEndpoint, PaginationRequestDto, StreamContent>(setup.Request);
             response.Response.Content.Should().NotBeNull();
 
-            string result = await response.Response.Content.ReadAsStringAsync();
+            string result = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
             result.Should().NotBeNullOrEmpty();
         });
     }
@@ -120,9 +117,7 @@ public class MilitaryAndRehireTests : ApiTestBase<Api.Program>
         var cancellationToken = CancellationToken.None;
         var expectedResponse = new ReportResponseBase<MilitaryAndRehireReportResponse>
         {
-            ReportName = "EMPLOYEES ON MILITARY LEAVE",
-            ReportDate = DateTimeOffset.Now,
-            Response = new PaginatedResponseDto<MilitaryAndRehireReportResponse> { Results = [] }
+            ReportName = "EMPLOYEES ON MILITARY LEAVE", ReportDate = DateTimeOffset.Now, Response = new PaginatedResponseDto<MilitaryAndRehireReportResponse> { Results = [] }
         };
 
         // Act
@@ -148,15 +143,15 @@ public class MilitaryAndRehireTests : ApiTestBase<Api.Program>
         // Setup
         MilitaryAndRehireReportResponse example = MilitaryAndRehireReportResponse.ResponseExample();
 
-        var demo = await c.Demographics.Include(demographic => demographic.ContactInfo).FirstAsync();
+        var demo = await c.Demographics.Include(demographic => demographic.ContactInfo).FirstAsync(CancellationToken.None);
         demo.TerminationCodeId = TerminationCode.Constants.Military;
         demo.EmploymentStatusId = EmploymentStatus.Constants.Inactive;
 
         demo.DepartmentId = example.DepartmentId;
-        demo.EmployeeId = example.BadgeNumber;
+        demo.BadgeNumber = example.BadgeNumber;
         demo.DateOfBirth = example.DateOfBirth;
         demo.TerminationDate = example.TerminationDate;
-        await c.SaveChangesAsync();
+        await c.SaveChangesAsync(CancellationToken.None);
 
         example.Ssn = demo.Ssn.MaskSsn();
         example.FullName = demo.ContactInfo.FullName;

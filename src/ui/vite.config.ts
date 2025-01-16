@@ -2,7 +2,6 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import { defineConfig, loadEnv } from "vite";
 import compress from "vite-plugin-compression";
-
 export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   const isProd = mode === "production";
@@ -63,7 +62,6 @@ export default defineConfig(({ command, mode }) => {
             if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(extType)) {
               extType = "img";
             }
-
             if (extType === "css") {
               return `static/${extType}/[name]-[hash][extname]`;
             }

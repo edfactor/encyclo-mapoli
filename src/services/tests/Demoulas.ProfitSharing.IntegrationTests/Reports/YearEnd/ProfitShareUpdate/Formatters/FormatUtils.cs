@@ -85,7 +85,7 @@ public static class FormatUtils
         string[] parts = numberStr.Split(',');
         if (parts.Length == 3)
         {
-            return parts[0] + parts[1] + "," + parts[2];
+            return $"{parts[0]}{parts[1]},{parts[2]}";
         }
 
         return numberStr.PadLeft(length);
@@ -158,8 +158,8 @@ public static class FormatUtils
             // Handle negative values with trailing minus.
         {
             formattedValue = value < 0
-                ? Math.Abs(value).ToString(format, CultureInfo.InvariantCulture) + "-"
-                : value.ToString(format, CultureInfo.InvariantCulture) + " ";
+                ? $"{Math.Abs(value).ToString(format, CultureInfo.InvariantCulture)}-"
+                : $"{value.ToString(format, CultureInfo.InvariantCulture)} ";
         }
 
         return formattedValue.PadLeft(width);

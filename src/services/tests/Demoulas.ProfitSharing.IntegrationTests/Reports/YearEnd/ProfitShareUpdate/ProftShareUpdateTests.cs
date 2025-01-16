@@ -5,36 +5,32 @@ using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.ProfitShareUpdate;
-using Demoulas.ProfitSharing.Services.Reports.YearEnd.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services.ServiceDto;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Xunit.Abstractions;
 
-namespace Demoulas.ProfitSharing.Services.Reports.YearEnd.Update;
+
+namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 
 public class ProfitShareUpdateTests
 {
     private readonly AccountingPeriodsService _aps = new();
     private readonly CalendarService _calendarService;
     private readonly IProfitSharingDataContextFactory _dbFactory;
-    private readonly ITestOutputHelper _testOutputHelper;
-    private readonly TotalService _totalService;
 
-    public ProfitShareUpdateTests(ITestOutputHelper testOutputHelper)
+    public ProfitShareUpdateTests()
     {
-        _testOutputHelper = testOutputHelper;
-
         IConfigurationRoot configuration = new ConfigurationBuilder().AddUserSecrets<ProfitShareUpdateTests>().Build();
         string connectionString = configuration["ConnectionStrings:ProfitSharing"]!;
         _dbFactory = new PristineDataContextFactory(connectionString);
         _calendarService = new CalendarService(_dbFactory, _aps);
-        _totalService = new TotalService(_dbFactory, _calendarService);
     }
 
-
+    /*
+     * Currently this test requires that PAY_PROFIT rows for 2023 and PAY_PROFIT rows 2024 be clones of each other.
+     */
     [Fact]
     public async Task ReportWithUpdates()
     {
@@ -48,7 +44,7 @@ public class ProfitShareUpdateTests
 
         // Act
         await profitShareUpdateService.ProfitSharingUpdatePaginated(
-            new ProfitSharingUpdateRequest
+            new ProfitShareUpdateRequest
             {
                 Skip = null,
                 Take = null,
@@ -85,7 +81,7 @@ public class ProfitShareUpdateTests
 
         // Act
         await profitShareUpdateService.ProfitSharingUpdatePaginated(
-            new ProfitSharingUpdateRequest
+            new ProfitShareUpdateRequest
             {
                 Skip = null,
                 Take = null,
@@ -134,9 +130,11 @@ public class ProfitShareUpdateTests
         return sb.ToString();
     }
 
-    private static void AssertReportsAreEquivalent(string expected, string actual)
+#pragma warning disable xUnit1013
+    public static void AssertReportsAreEquivalent(string expected, string actual)
     {
-        if (!File.Exists("/Program Files/Meld/Meld.exe"))
+        string? externalDiffTool = Environment.GetEnvironmentVariable("EXTERNAL_DIFF_TOOL");
+        if (externalDiffTool == null)
         {
             actual.Should().Be(expected);
             return;
@@ -157,7 +155,7 @@ public class ProfitShareUpdateTests
 
         ProcessStartInfo startInfo = new()
         {
-            FileName = "/Program Files/Meld/Meld.exe",
+            FileName = externalDiffTool,
             ArgumentList = { expectedFile, actualFile },
             UseShellExecute = false,
             RedirectStandardOutput = true,
@@ -166,59 +164,17 @@ public class ProfitShareUpdateTests
 
         // Start the process
         using Process? process = Process.Start(startInfo);
+        process?.WaitForExit();
     }
 
     public static string LoadExpectedReport(string resourceName)
     {
         using (Stream? stream = Assembly.GetExecutingAssembly()
-                   .GetManifestResourceStream("Demoulas.ProfitSharing.IntegrationTests.Resources." + resourceName))
+                   .GetManifestResourceStream($"Demoulas.ProfitSharing.IntegrationTests.Resources.{resourceName}"))
         using (StreamReader reader = new(stream!))
         {
             return reader.ReadToEnd().Replace("\r", "");
         }
     }
 
-    // This code runs fine on the mock db, but on oracle it throws an exception with the beneficiary part of the TotalService.GetVestingRatio()
-    [Fact]
-    public async Task Bene_problem()
-    {
-        true.Should().Be(true);
-        short profitShare = 2023;
-
-        CalendarResponseDto fiscalDates =
-            await _calendarService.GetYearStartAndEndAccountingDatesAsync(2023, CancellationToken.None);
-        List<EmployeeFinancials> employeeFinancialsList = await _dbFactory.UseReadOnlyContext(async ctx =>
-        {
-            IQueryable<ParticipantTotalVestingBalanceDto> totalVestingBalances =
-                _totalService.TotalVestingBalance(ctx, (short)(profitShare - 1), fiscalDates.FiscalEndDate);
-
-            return await ctx.PayProfits
-                .Include(pp => pp.Demographic)
-                .Include(pp => pp.Demographic!.ContactInfo)
-                .Where(pp => pp.ProfitYear == 2023)
-                .GroupJoin(
-                    totalVestingBalances,
-                    pp => pp.Demographic!.Ssn,
-                    tvb => tvb.Ssn,
-                    (pp, tvbs) => new { PayProfit = pp, TotalVestingBalances = tvbs.DefaultIfEmpty() }
-                )
-                .SelectMany(
-                    x => x.TotalVestingBalances,
-                    (x, tvb) => new EmployeeFinancials
-                    {
-                        EmployeeId = x.PayProfit.Demographic!.EmployeeId,
-                        Ssn = x.PayProfit.Demographic.Ssn,
-                        Name = x.PayProfit.Demographic.ContactInfo!.FullName,
-                        EnrolledId = x.PayProfit.EnrollmentId,
-                        YearsInPlan = x.PayProfit.YearsInPlan,
-                        CurrentAmount = tvb == null ? 0 : tvb.CurrentBalance,
-                        EmployeeTypeId = x.PayProfit.EmployeeTypeId,
-                        PointsEarned = (int)(x.PayProfit.PointsEarned ?? 0),
-                        EtvaAfterVestingRules = tvb == null ? 0 : tvb.Etva
-                    }
-                )
-                .ToListAsync();
-        });
-        _testOutputHelper.WriteLine("Total employees " + employeeFinancialsList.Count);
-    }
 }

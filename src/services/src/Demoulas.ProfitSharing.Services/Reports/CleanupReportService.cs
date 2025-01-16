@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -49,7 +50,7 @@ public class CleanupReportService : ICleanupReportService
                                group new { dem, DemPdPp }
                                    by new
                                    {
-                                       dem.EmployeeId,
+                                       BadgeNumber = dem.BadgeNumber,
                                        SSN = dem.Ssn,
                                        dem.ContactInfo.FullName,
                                        dem.Address.Street,
@@ -67,7 +68,7 @@ public class CleanupReportService : ICleanupReportService
                     into grp
                                select new PayrollDuplicateSsnResponseDto
                                {
-                                   BadgeNumber = grp.Key.EmployeeId,
+                                   BadgeNumber = grp.Key.BadgeNumber,
                                    Ssn = grp.Key.SSN.MaskSsn(),
                                    Name = grp.Key.FullName,
                                    Address = new AddressResponseDto
@@ -112,7 +113,7 @@ public class CleanupReportService : ICleanupReportService
                                 && p.EarningsEtvaValue < 0)
                     .Select(p => new NegativeEtvaForSsNsOnPayProfitResponse
                     {
-                        EmployeeBadge = p.Demographic!.EmployeeId,
+                        EmployeeBadge = p.Demographic!.BadgeNumber,
                         EmployeeSsn = p.Demographic.Ssn,
                         EtvaValue = p.EarningsEtvaValue
                     })
@@ -142,7 +143,7 @@ public class CleanupReportService : ICleanupReportService
                             where !(from pp in ctx.PayProfits select pp.DemographicId).Contains(dem.Id)
                             select new DemographicBadgesNotInPayProfitResponse
                             {
-                                EmployeeBadge = dem.EmployeeId,
+                                EmployeeBadge = dem.BadgeNumber,
                                 EmployeeSsn = dem.Ssn,
                                 EmployeeName = dem.ContactInfo.FullName ?? "",
                                 Status = dem.EmploymentStatusId,
@@ -173,7 +174,7 @@ public class CleanupReportService : ICleanupReportService
 #pragma warning disable CA1847
                             where dem.ContactInfo.FullName == null || !dem.ContactInfo.FullName.Contains(",")
 #pragma warning restore CA1847
-                            select new NamesMissingCommaResponse { EmployeeBadge = dem.EmployeeId, EmployeeSsn = dem.Ssn, EmployeeName = dem.ContactInfo.FullName ?? "", };
+                            select new NamesMissingCommaResponse { EmployeeBadge = dem.BadgeNumber, EmployeeSsn = dem.Ssn, EmployeeName = dem.ContactInfo.FullName ?? "", };
                 return await query.ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken: cancellationToken);
             });
 
@@ -193,7 +194,8 @@ public class CleanupReportService : ICleanupReportService
     {
         using (_logger.BeginScope("Request BEGIN DUPLICATE NAMES AND BIRTHDAYS"))
         {
-            var results = await _dataContextFactory.UseReadOnlyContext(ctx =>
+            var dict = new Dictionary<int, byte>();
+            var results = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
                 var dupNameSlashDateOfBirth = (from dem in ctx.Demographics
                                                group dem by new { dem.ContactInfo.FullName, dem.DateOfBirth }
@@ -209,7 +211,7 @@ public class CleanupReportService : ICleanupReportService
                             where pp.ProfitYear == req.ProfitYear && dupNameSlashDateOfBirth.Contains(dem.ContactInfo.FullName)
                             group new { dem, pp, pd } by new
                             {
-                                dem.EmployeeId,
+                                BadgeNumber = dem.BadgeNumber,
                                 SSN = dem.Ssn,
                                 dem.ContactInfo.FullName,
                                 dem.DateOfBirth,
@@ -227,10 +229,10 @@ public class CleanupReportService : ICleanupReportService
                                 pp.CurrentIncomeYear
                             }
                     into g
-                            orderby g.Key.FullName, g.Key.DateOfBirth, g.Key.SSN, g.Key.EmployeeId
+                            orderby g.Key.FullName, g.Key.DateOfBirth, g.Key.SSN, g.Key.BadgeNumber
                             select new DuplicateNamesAndBirthdaysResponse
                             {
-                                BadgeNumber = g.Key.EmployeeId,
+                                BadgeNumber = g.Key.BadgeNumber,
                                 Ssn = g.Key.SSN.MaskSsn(),
                                 Name = g.Key.FullName,
                                 DateOfBirth = g.Key.DateOfBirth,
@@ -251,13 +253,23 @@ public class CleanupReportService : ICleanupReportService
                                 IncomeCurrentYear = g.Key.CurrentIncomeYear
                             };
 
-                return query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
+                var rslt = await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
+                
+                dict = await (
+                    from yis in _totalService.GetYearsOfService(ctx, req.ProfitYear)
+                    join d in ctx.Demographics on yis.Ssn equals d.Ssn
+                    select new
+                    {
+                        BadgeNumber = d.BadgeNumber,
+                        Years = (byte)yis.Years
+                    }
+                ).ToDictionaryAsync(x => x.BadgeNumber, x => x.Years);
+
+                return rslt;
             });
 
             ISet<int> badgeNumbers = results.Results.Select(r => r.BadgeNumber).ToHashSet();
-            var dict = await _contributionService.GetContributionYears(badgeNumbers);
             var balanceDict = await _contributionService.GetNetBalance(req.ProfitYear, badgeNumbers, cancellationToken);
-
 
             foreach (DuplicateNamesAndBirthdaysResponse dup in results.Results)
             {
@@ -296,20 +308,21 @@ public class CleanupReportService : ICleanupReportService
 
             var results = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
+                var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
                 var nameAndDobQuery = ctx.Demographics.Select(x => new
                 {
                     x.Ssn,
                     x.ContactInfo.FirstName,
                     x.ContactInfo.LastName,
                     x.DateOfBirth,
-                    x.EmployeeId
+                    BadgeNumber = x.BadgeNumber
                 }).Union(ctx.Beneficiaries.Include(b => b.Contact).Select(x => new
                 {
                     x.Contact!.Ssn,
                     x.Contact.ContactInfo.FirstName,
                     x.Contact.ContactInfo.LastName,
                     x.Contact.DateOfBirth,
-                    EmployeeId = 0
+                    BadgeNumber = 0
                 }))
                     .GroupBy(x => x.Ssn)
                     .Select(x => new
@@ -318,7 +331,7 @@ public class CleanupReportService : ICleanupReportService
                         FirstName = x.Max(m => m.FirstName),
                         LastName = x.Max(m => m.LastName),
                         DateOfBirth = x.Max(m => m.DateOfBirth),
-                        BadgeNumber = x.Max(m => m.EmployeeId)
+                        BadgeNumber = x.Max(m => m.BadgeNumber)
                     });
 
                 var transferAndQdroCommentTypes = new List<int>() { CommentType.Constants.TransferIn.Id, CommentType.Constants.TransferOut.Id, CommentType.Constants.QdroIn.Id, CommentType.Constants.QdroOut.Id };
@@ -327,13 +340,13 @@ public class CleanupReportService : ICleanupReportService
                             join nameAndDob in nameAndDobQuery on pd.Ssn equals nameAndDob.Ssn
                             where pd.ProfitYear == req.ProfitYear &&
                                   validProfitCodes.Contains(pd.ProfitCodeId) &&
-                                  (pd.ProfitCodeId != 9 || (pd.ProfitCodeId == 9 && (!pd.CommentTypeId.HasValue || !transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)))) &&
+                                  (pd.ProfitCodeId != ProfitCode.Constants.Outgoing100PercentVestedPayment.Id || (pd.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id && (!pd.CommentTypeId.HasValue || !transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)))) &&
                                   (req.StartMonth == 0 || pd.MonthToDate >= req.StartMonth) &&
                                   (req.EndMonth == 0 || pd.MonthToDate <= req.EndMonth)
                             orderby nameAndDob.LastName, nameAndDob.FirstName
                             select new DistributionsAndForfeitureResponse()
                             {
-                                EmployeeId = nameAndDob.BadgeNumber,
+                                BadgeNumber = nameAndDob.BadgeNumber,
                                 EmployeeSsn = pd.Ssn.MaskSsn(),
                                 EmployeeName = $"{nameAndDob.LastName}, {nameAndDob.FirstName}",
                                 DistributionAmount = distributionProfitCodes.Contains(pd.ProfitCodeId) ? pd.Forfeiture : 0,
@@ -342,7 +355,7 @@ public class CleanupReportService : ICleanupReportService
                                 FederalTax = pd.FederalTaxes,
                                 ForfeitAmount = pd.ProfitCodeId == 2 ? pd.Forfeiture : 0,
                                 LoanDate = pd.MonthToDate > 0 ? new DateOnly(pd.YearToDate, pd.MonthToDate, 1) : null,
-                                Age = Convert.ToByte(Math.Floor((DateOnly.FromDateTime(DateTime.Now).DayNumber - nameAndDob.DateOfBirth.DayNumber) / 365.2499))
+                                Age = (byte)nameAndDob.DateOfBirth.Age(calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc))
                             };
                 return await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
             });
@@ -369,7 +382,7 @@ public class CleanupReportService : ICleanupReportService
                 .Join(_totalService.GetYearsOfService(ctx, req.ProfitYear), x => x.Demographic!.Ssn, x => x.Ssn, (p, tot) => new { pp = p, yip = tot })
                 .Select(p => new
                 {
-                    p.pp.Demographic!.EmployeeId,
+                    BadgeNumber = p.pp.Demographic!.BadgeNumber,
                     p.pp.CurrentHoursYear,
                     p.pp.HoursExecutive,
                     p.pp.Demographic!.DateOfBirth,
@@ -395,7 +408,7 @@ public class CleanupReportService : ICleanupReportService
                     where pp.ProfitYear == req.ProfitYear
                     select new
                     {
-                        d.EmployeeId,
+                        BadgeNumber = d.BadgeNumber,
                         pp.CurrentHoursYear,
                         pp.HoursExecutive,
                         d.DateOfBirth,
@@ -420,7 +433,7 @@ public class CleanupReportService : ICleanupReportService
                       where (!ctx.Demographics.Any(x => x.Ssn == b.Contact!.Ssn)) //Filter out employees who are beneficiaries
                       select new
                       {
-                          EmployeeId = 0,
+                          BadgeNumber = 0,
                           CurrentHoursYear = 0m,
                           HoursExecutive = 0m,
                           b.Contact!.DateOfBirth,
@@ -508,7 +521,7 @@ public class CleanupReportService : ICleanupReportService
                       .ThenBy(p => p.pp.FirstName)
                       .Select(x => new YearEndProfitSharingReportResponse()
                       {
-                          EmployeeId = x.pp.EmployeeId,
+                          BadgeNumber = x.pp.BadgeNumber,
                           EmployeeName = $"{x.pp.LastName}, {x.pp.FirstName}",
                           StoreNumber = x.pp.StoreNumber,
                           EmployeeTypeCode = x.pp.EmploymentTypeId,

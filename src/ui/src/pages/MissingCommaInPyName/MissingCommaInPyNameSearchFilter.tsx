@@ -5,19 +5,15 @@ import { useLazyGetNamesMissingCommasQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
 
 const MissingCommaInPyNameSearchFilter = () => {
-  const [isFetching, setIsFetching] = useState(false);
-
-  const [triggerSearch, { isLoading }] = useLazyGetNamesMissingCommasQuery();
+  const [triggerSearch, { isFetching }] = useLazyGetNamesMissingCommasQuery();
 
   const search = () => {
-    setIsFetching(true);
     triggerSearch(
       {
         pagination: { skip: 0, take: 25 }
       },
       false
     );
-    setIsFetching(false);
   };
 
   const handleReset = () => {

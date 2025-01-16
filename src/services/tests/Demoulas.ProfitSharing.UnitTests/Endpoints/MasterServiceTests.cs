@@ -1,25 +1,25 @@
-﻿using System.Net;
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Master;
 using Demoulas.ProfitSharing.Security;
-using Demoulas.ProfitSharing.UnitTests.Base;
-using Demoulas.ProfitSharing.UnitTests.Extensions;
+using Demoulas.ProfitSharing.UnitTests.Common.Base;
+using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
 using FluentAssertions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints;
+
 public class MasterServiceTests : ApiTestBase<Program>
 {
-   [Fact(DisplayName ="PS-433: Profit Master Inquiry - Start Profit Year")]
+    [Fact(DisplayName = "PS-433: Profit Master Inquiry - Start Profit Year")]
     public async Task GetMasterInquiryWithStartProfitYear()
     {
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         var request = new MasterInquiryRequest() { StartProfitYear = 2023, Skip = 0, Take = 25 };
-        var response = await ApiClient.GETAsync<MasterInquiryEndpoint, MasterInquiryRequest, PaginatedResponseDto<MasterInquiryResponseDto>> (request);
+        var response = await ApiClient.GETAsync<MasterInquiryEndpoint, MasterInquiryRequest, PaginatedResponseDto<MasterInquiryResponseDto>>(request);
         response.Should().NotBeNull();
     }
 
@@ -72,7 +72,7 @@ public class MasterServiceTests : ApiTestBase<Program>
     public async Task GetMasterInquiryWithEarningsAmount()
     {
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
-        var request = new MasterInquiryRequest() { EarningsAmount = (decimal?) 0.0, Skip = 0, Take = 25 };
+        var request = new MasterInquiryRequest() { EarningsAmount = (decimal?)0.0, Skip = 0, Take = 25 };
         var response = await ApiClient.GETAsync<MasterInquiryEndpoint, MasterInquiryRequest, PaginatedResponseDto<MasterInquiryResponseDto>>(request);
         response.Should().NotBeNull();
     }
@@ -95,11 +95,25 @@ public class MasterServiceTests : ApiTestBase<Program>
         response.Should().NotBeNull();
     }
 
-     [Fact(DisplayName = "PS-433: Profit Master Inquiry - All")]
+    [Fact(DisplayName = "PS-433: Profit Master Inquiry - All")]
     public async Task GetMasterInquiryWithSocialSecurityWithAll()
     {
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
-        var request = new MasterInquiryRequest() { StartProfitMonth = 1, EndProfitMonth = 12, StartProfitYear = 2022, EndProfitYear = 2024, ContributionAmount = 0, EarningsAmount = 0, ForfeitureAmount = 0, PaymentAmount = 0, ProfitCode = ProfitCode.Constants.IncomingContributions.Id,  SocialSecurity = 000000000, Skip = 0, Take = 25 };
+        var request = new MasterInquiryRequest()
+        {
+            StartProfitMonth = 1,
+            EndProfitMonth = 12,
+            StartProfitYear = 2022,
+            EndProfitYear = 2024,
+            ContributionAmount = 0,
+            EarningsAmount = 0,
+            ForfeitureAmount = 0,
+            PaymentAmount = 0,
+            ProfitCode = ProfitCode.Constants.IncomingContributions.Id,
+            SocialSecurity = 000000000,
+            Skip = 0,
+            Take = 25
+        };
         var response = await ApiClient.GETAsync<MasterInquiryEndpoint, MasterInquiryRequest, PaginatedResponseDto<MasterInquiryResponseDto>>(request);
         response.Should().NotBeNull();
     }

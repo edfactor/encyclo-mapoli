@@ -30,6 +30,9 @@ public sealed class CommentType : ILookupTable<byte>
         public static CommentType Other => new CommentType() { Id = 20, Name = "Other" };
         public static CommentType Rev => new CommentType() { Id = 21, Name = "Rev" };
         public static CommentType Unrev => new CommentType() { Id = 22, Name = "Unrev" };
+        public static CommentType OneHundredPercentEarnings => new CommentType() { Id = 23, Name = "100% Earnings" };
+        // The variable name here purposely corresponds to the ZeroContrbutionReason.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested name
+        public static CommentType SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested => new CommentType() { Id = 24, Name = ">64 & >5 100%" };
     }
 
     // Override Equals method for correct comparison between materialized values and constants

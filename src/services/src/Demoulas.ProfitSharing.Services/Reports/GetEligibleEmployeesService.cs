@@ -24,6 +24,7 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
     {
         var response = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
         var birthDateOfExactly21YearsOld = response.FiscalEndDate.AddYears(-21);
+        var hoursWorkedRequirement = ContributionService.MinimumHoursForContribution();
 
         return  await _dataContextFactory.UseReadOnlyContext(async c =>
         {
@@ -32,22 +33,22 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
             int numberNotSelected = await c.PayProfits
             .Include(p => p.Demographic)
             .Where(p => p.ProfitYear == request.ProfitYear)
-            .Where(p => p.Demographic!.DateOfBirth > birthDateOfExactly21YearsOld /*too young*/ || p.CurrentHoursYear < 1000 || p.Demographic!.EmploymentStatusId == EmploymentStatus.Constants.Terminated)
+            .Where(p => p.Demographic!.DateOfBirth > birthDateOfExactly21YearsOld /*too young*/ || p.CurrentHoursYear < hoursWorkedRequirement || p.Demographic!.EmploymentStatusId == EmploymentStatus.Constants.Terminated)
             .CountAsync(cancellationToken: cancellationToken);
 
             var totalEligible = await c.PayProfits
            .Include(p => p.Demographic)
            .Where(p => p.ProfitYear == request.ProfitYear)
-           .Where(p => p.Demographic!.DateOfBirth <= birthDateOfExactly21YearsOld /*over 21*/  && p.CurrentHoursYear >= 1000 && p.Demographic!.EmploymentStatusId != EmploymentStatus.Constants.Terminated).CountAsync(cancellationToken);
+           .Where(p => p.Demographic!.DateOfBirth <= birthDateOfExactly21YearsOld /*over 21*/  && p.CurrentHoursYear >= hoursWorkedRequirement && p.Demographic!.EmploymentStatusId != EmploymentStatus.Constants.Terminated).CountAsync(cancellationToken);
 
             var result = await c.PayProfits
                 .Include(p => p.Demographic)
                 .Where(p =>  p.ProfitYear == request.ProfitYear)
-                .Where(p => p.Demographic!.DateOfBirth <= birthDateOfExactly21YearsOld /*over 21*/  && p.CurrentHoursYear >= 1000 && p.Demographic!.EmploymentStatusId != EmploymentStatus.Constants.Terminated)
+                .Where(p => p.Demographic!.DateOfBirth <= birthDateOfExactly21YearsOld /*over 21*/  && p.CurrentHoursYear >= hoursWorkedRequirement && p.Demographic!.EmploymentStatusId != EmploymentStatus.Constants.Terminated)
                 .Select(p => new GetEligibleEmployeesResponseDto()
                 {
                     OracleHcmId = p.Demographic!.OracleHcmId,
-                    BadgeNumber = p.Demographic!.EmployeeId,
+                    BadgeNumber = p.Demographic!.BadgeNumber,
                     FullName = p.Demographic!.ContactInfo.FullName!,
                 })
                 .OrderBy(p => p.FullName)

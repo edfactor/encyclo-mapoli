@@ -1,5 +1,4 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
-using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
@@ -36,53 +35,58 @@ public class FrozenReportService : IFrozenReportService
         _logger = loggerFactory.CreateLogger<FrozenReportService>();
     }
 
-    public async Task<ReportResponseBase<ForfeituresAndPointsForYearResponse>> GetForfeituresAndPointsForYearAsync(ProfitYearRequest req,
+    public async Task<ReportResponseBase<ForfeituresAndPointsForYearResponse>> GetForfeituresAndPointsForYearAsync(FrozenProfitYearRequest req,
         CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("Request FORFEITURES AND POINTS FOR YEAR"))
         {
-            const short HOURS_WORKED_REQUIREMENT = 1000;
+            var hoursWorkedRequirement = ContributionService.MinimumHoursForContribution();
 
             var rslt = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                var forfeitures = ctx.ProfitDetails
-                    .Where(pd => pd.ProfitYear == req.ProfitYear)
-                    .Where(pd => pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id)
-                    .Join(ctx.Demographics, x => x.Ssn, x => x.Ssn, (pd, d) => new { pd, d })
-                    .GroupBy(pd => pd.d.Id)
-                    .Select(g => new { DemographicId = g.Key, Forfeitures = g.Sum(x => x.pd.Forfeiture) > 0 ? g.Sum(x => x.pd.Forfeiture) : 0 });
+                var demographicExpression = ctx.Demographics.Include(d => d.ContactInfo).Select(x=>x);
+                if (req.UseFrozenData)
+                {
+                    demographicExpression = FrozenService.GetDemographicSnapshot(ctx, req.ProfitYear);
+                }
 
                 var recs =
-                    from d in ctx.Demographics.Include(d => d.ContactInfo)
+                    from d in demographicExpression
                     join pp in ctx.PayProfits on d.Id equals pp.DemographicId
-                    join fLj in forfeitures on d.Id equals fLj.DemographicId into fTmp
-                    from f in fTmp.DefaultIfEmpty()
                     where pp.ProfitYear == req.ProfitYear
-                    orderby d.EmployeeId
+                    orderby d.BadgeNumber
                     select new ForfeituresAndPointsForYearResponse()
                     {
-                        EmployeeId = d.EmployeeId,
+                        BadgeNumber = d.BadgeNumber,
                         EmployeeName = d.ContactInfo.FullName,
                         EmployeeSsn = d.Ssn.ToString(),
-                        Forfeitures = f != null ? f.Forfeitures : 0,
+                        Forfeitures = 0,
                         ForfeitPoints = 0,
                         EarningPoints = 0
                     };
 
-                var query = await recs.ToPaginationResultsAsync(req, cancellationToken);
+                var query = await recs.ToListAsync(cancellationToken);
 
-                var badges = query.Results.Select(x => (int)x.EmployeeId).ToHashSet();
+                var badges = query.Select(x => (int)x.BadgeNumber).ToHashSet();
                 var totals = await _contributionService.GetNetBalance((req.ProfitYear), badges, cancellationToken);
+                var forfeitures = ctx.ProfitDetails
+                    .Join(ctx.Demographics, x => x.Ssn, x => x.Ssn, (pd, d) => new { pd, d })
+                    .Where(x => x.pd.ProfitYear == req.ProfitYear)
+                    .Where(x => x.pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id)
+                    .GroupBy(pd => pd.d.BadgeNumber)
+                    .Select(g => new { DemographicId = g.Key, Forfeitures = g.Sum(x => x.pd.Forfeiture) > 0 ? g.Sum(x => x.pd.Forfeiture) : 0 });
+                
+                var forfeituresFiltered = await forfeitures.Where(f => badges.Contains(f.DemographicId)).ToHashSetAsync(cancellationToken);
 
                 var currentYear = await (from pd in ctx.ProfitDetails
                     join d in ctx.Demographics on pd.Ssn equals d.Ssn
                     where pd.ProfitYear == req.ProfitYear
-                          && badges.Contains(d.EmployeeId)
-                    group pd by new { pd.Ssn, d.EmployeeId }
+                          && badges.Contains(d.BadgeNumber)
+                    group pd by new { pd.Ssn, BadgeNumber = d.BadgeNumber }
                     into pd_g
                     select new
                     {
-                        pd_g.Key.EmployeeId,
+                        pd_g.Key.BadgeNumber,
                         pd_g.Key.Ssn,
                         loan1Total =
                             pd_g.Where(x =>
@@ -97,33 +101,45 @@ public class FrozenReportService : IFrozenReportService
 
                 var lastYearPayProfits = await (from pp in ctx.PayProfits
                         join d in ctx.Demographics on pp.DemographicId equals d.Id
-                        where pp.ProfitYear == req.ProfitYear - 1 && badges.Contains(d.EmployeeId)
-                                                                  && (pp.HoursExecutive + pp.CurrentHoursYear) >= HOURS_WORKED_REQUIREMENT
-                        select new { d.EmployeeId, pp.CurrentIncomeYear }
+                        where pp.ProfitYear == req.ProfitYear - 1 && badges.Contains(d.BadgeNumber)
+                                                                  && (pp.HoursExecutive + pp.CurrentHoursYear) >= hoursWorkedRequirement
+                        select new { BadgeNumber = d.BadgeNumber, pp.CurrentIncomeYear }
                     ).ToListAsync(cancellationToken);
 
-                foreach (var rec in query.Results.Where(rec => totals.ContainsKey((int)rec.EmployeeId)))
+                foreach (var rec in query.Where(rec => totals.ContainsKey((int)rec.BadgeNumber)))
                 {
-                    var cy = currentYear.Find(x => x.EmployeeId == rec.EmployeeId);
+                    var cy = currentYear.Find(x => x.BadgeNumber == rec.BadgeNumber);
                     if (cy != default)
                     {
-                        var points = (totals[(int)rec.EmployeeId].TotalContributions +
-                                      totals[(int)rec.EmployeeId].TotalEarnings +
-                                      totals[(int)rec.EmployeeId].TotalForfeitures -
-                                      totals[(int)rec.EmployeeId].TotalPayments) -
-                                     (cy.loan1Total - cy.loan2Total - cy.forfeitTotal);
+                        decimal points = (totals[(int)rec.BadgeNumber].TotalContributions +
+                                          totals[(int)rec.BadgeNumber].TotalEarnings +
+                                          totals[(int)rec.BadgeNumber].TotalForfeitures -
+                                          totals[(int)rec.BadgeNumber].TotalPayments) -
+                                         (cy.loan1Total - cy.loan2Total - cy.forfeitTotal);
 
                         rec.EarningPoints = Convert.ToInt16(Math.Round(points / 100, 0, MidpointRounding.AwayFromZero));
                     }
 
-                    var lypp = lastYearPayProfits.Find(x => x.EmployeeId == rec.EmployeeId);
+                    var lypp = lastYearPayProfits.Find(x => x.BadgeNumber == rec.BadgeNumber);
                     if (lypp != null)
                     {
                         rec.ForfeitPoints = Convert.ToInt16(Math.Round((lypp.CurrentIncomeYear) / 100, 0, MidpointRounding.AwayFromZero));
                     }
+
+                    var forfeitRec = forfeituresFiltered.FirstOrDefault(x => x.DemographicId == rec.BadgeNumber);
+                    if (forfeitRec != default)
+                    {
+                        rec.Forfeitures = forfeitRec.Forfeitures;
+                    }
                 }
 
-                return query;
+                var rowsWithData = query.Where(x => x.EarningPoints != 0 || x.ForfeitPoints != 0 || x.Forfeitures != 0);
+
+                return new PaginatedResponseDto<ForfeituresAndPointsForYearResponse>(req)
+                {
+                    Results = rowsWithData.Skip(req.Skip ?? 0).Take(req.Take ?? int.MaxValue),
+                    Total = rowsWithData.Count()
+                };
             });
 
             _logger.LogInformation("Returned {Results} records", rslt.Results.Count());
@@ -135,6 +151,19 @@ public class FrozenReportService : IFrozenReportService
         }
     }
 
+    /// <summary>
+    /// Retrieves the profit-sharing distributions grouped by age and year.
+    /// </summary>
+    /// <param name="req">
+    /// The request object containing the parameters for the report, such as the year and as-of date.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token to monitor for cancellation requests.
+    /// </param>
+    /// <returns>
+    /// A task that represents the asynchronous operation. The task result contains the 
+    /// <see cref="DistributionsByAge"/> object, which includes the report details and aggregated data.
+    /// </returns>
     public async Task<DistributionsByAge> GetDistributionsByAgeYearAsync(FrozenReportsByAgeRequest req, CancellationToken cancellationToken = default)
     {
         List<byte> codes =
@@ -146,20 +175,21 @@ public class FrozenReportService : IFrozenReportService
 
         const string FT = "FullTime";
         const string PT = "PartTime";
+        DateTime asOfDate = await GetAsOfDate(req, cancellationToken);
 
         var queryResult = await _dataContextFactory.UseReadOnlyContext(ctx =>
         {
             var query = (from pd in ctx.ProfitDetails
-                join d in ctx.Demographics on pd.Ssn equals d.Ssn
-                where pd.ProfitYear == req.ProfitYear && codes.Contains(pd.ProfitCodeId)
-                select new
-                {
-                    d.DateOfBirth,
-                    EmploymentType = d.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT,
-                    d.EmployeeId,
-                    Amount = pd.Forfeiture,
-                    pd.CommentTypeId
-                });
+                         join d in ctx.Demographics on pd.Ssn equals d.Ssn
+                         where pd.ProfitYear == req.ProfitYear && codes.Contains(pd.ProfitCodeId)
+                         select new
+                         {
+                             d.DateOfBirth,
+                             EmploymentType = d.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT,
+                             BadgeNumber = d.BadgeNumber,
+                             Amount = pd.Forfeiture,
+                             pd.CommentTypeId
+                         });
 
             query = req.ReportType switch
             {
@@ -184,19 +214,19 @@ public class FrozenReportService : IFrozenReportService
         }
 
         var details = queryResult.Select(x => new
-            {
-                Age = x.DateOfBirth.Age(),
-                x.EmploymentType,
-                x.EmployeeId,
-                x.Amount,
-                x.CommentTypeId
-            })
+        {
+            Age = x.DateOfBirth.Age(asOfDate),
+            x.EmploymentType,
+            x.BadgeNumber,
+            x.Amount,
+            x.CommentTypeId
+        })
             .GroupBy(x => new { x.Age, x.EmploymentType })
             .Select(g => new DistributionsByAgeDetail
             {
                 Age = g.Key.Age,
                 EmploymentType = g.Key.EmploymentType,
-                EmployeeCount = g.Select(x => x.EmployeeId).Distinct().Count(),
+                EmployeeCount = g.Select(x => x.BadgeNumber).Distinct().Count(),
                 Amount = g.Sum(x => x.Amount),
                 // Compute the total hardship amount within the group
                 HardshipAmount = g
@@ -227,7 +257,27 @@ public class FrozenReportService : IFrozenReportService
         };
     }
 
-
+    /// <summary>
+    /// Retrieves the contributions grouped by age for a specific profit year, based on the provided request.
+    /// </summary>
+    /// <param name="req">
+    /// The request containing the parameters for generating the contributions report, 
+    /// including the profit year and report type (e.g., FullTime, PartTime, or Total).
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token to monitor for cancellation requests.
+    /// </param>
+    /// <returns>
+    /// A task that represents the asynchronous operation. The task result contains a <see cref="ContributionsByAge"/> object, 
+    /// which includes details such as the report name, report date, total employees, distribution total amount, 
+    /// and a paginated response of contributions grouped by age.
+    /// </returns>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown if the <paramref name="req"/> parameter is null.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown if there is an issue with retrieving or processing the data.
+    /// </exception>
     public async Task<ContributionsByAge> GetContributionsByAgeYearAsync(FrozenReportsByAgeRequest req, CancellationToken cancellationToken = default)
     {
         const string FT = "FullTime";
@@ -240,7 +290,7 @@ public class FrozenReportService : IFrozenReportService
                 where pd.ProfitYear == req.ProfitYear
                       && pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions
                       && pd.Contribution > 0
-                select new { d.DateOfBirth, EmploymentType = d.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT, d.EmployeeId, Amount = pd.Contribution });
+                select new { d.DateOfBirth, EmploymentType = d.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT, BadgeNumber = d.BadgeNumber, Amount = pd.Contribution });
 
             query = req.ReportType switch
             {
@@ -253,10 +303,10 @@ public class FrozenReportService : IFrozenReportService
             return query.ToListAsync(cancellationToken: cancellationToken);
         });
 
-
-        var details = queryResult.Select(x => new { Age = x.DateOfBirth.Age(), x.EmployeeId, x.Amount })
+        var asOfDate = await GetAsOfDate(req, cancellationToken);
+        var details = queryResult.Select(x => new { Age = x.DateOfBirth.Age(asOfDate), x.BadgeNumber, x.Amount })
             .GroupBy(x => new { x.Age })
-            .Select(g => new ContributionsByAgeDetail { Age = g.Key.Age, EmployeeCount = g.Select(x => x.EmployeeId).Distinct().Count(), Amount = g.Sum(x => x.Amount), })
+            .Select(g => new ContributionsByAgeDetail { Age = g.Key.Age, EmployeeCount = g.Select(x => x.BadgeNumber).Distinct().Count(), Amount = g.Sum(x => x.Amount), })
             .OrderBy(x => x.Age)
             .ToList();
 
@@ -268,7 +318,7 @@ public class FrozenReportService : IFrozenReportService
             ReportName = "PROFIT SHARING CONTRIBUTIONS BY AGE",
             ReportDate = DateTimeOffset.Now,
             ReportType = req.ReportType,
-            DistributionTotalAmount = details.Sum(d => d.Amount),
+            TotalAmount = details.Sum(d => d.Amount),
             TotalEmployees = (short)details.Sum(d => d.EmployeeCount),
             Response = new PaginatedResponseDto<ContributionsByAgeDetail>(req) { Results = details, Total = details.Count }
         };
@@ -286,7 +336,7 @@ public class FrozenReportService : IFrozenReportService
                 where pd.ProfitYear == req.ProfitYear
                       && pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id
                       && pd.Forfeiture > 0
-                select new { d.DateOfBirth, EmploymentType = d.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT, d.EmployeeId, Amount = pd.Forfeiture });
+                select new { d.DateOfBirth, EmploymentType = d.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT, BadgeNumber = d.BadgeNumber, Amount = pd.Forfeiture });
 
             query = req.ReportType switch
             {
@@ -299,10 +349,10 @@ public class FrozenReportService : IFrozenReportService
             return query.ToListAsync(cancellationToken: cancellationToken);
         });
 
-
-        var details = queryResult.Select(x => new { Age = x.DateOfBirth.Age(), x.EmployeeId, x.Amount })
+        var asOfDate = await GetAsOfDate(req, cancellationToken);
+        var details = queryResult.Select(x => new { Age = x.DateOfBirth.Age(asOfDate), x.BadgeNumber, x.Amount })
             .GroupBy(x => new { x.Age })
-            .Select(g => new ForfeituresByAgeDetail { Age = g.Key.Age, EmployeeCount = g.Select(x => x.EmployeeId).Distinct().Count(), Amount = g.Sum(x => x.Amount), })
+            .Select(g => new ForfeituresByAgeDetail { Age = g.Key.Age, EmployeeCount = g.Select(x => x.BadgeNumber).Distinct().Count(), Amount = g.Sum(x => x.Amount), })
             .OrderBy(x => x.Age)
             .ToList();
 
@@ -314,7 +364,7 @@ public class FrozenReportService : IFrozenReportService
             ReportName = "PROFIT SHARING FORFEITURES BY AGE",
             ReportDate = DateTimeOffset.Now,
             ReportType = req.ReportType,
-            DistributionTotalAmount = details.Sum(d => d.Amount),
+            TotalAmount = details.Sum(d => d.Amount),
             TotalEmployees = (short)details.Sum(d => d.EmployeeCount),
             Response = new PaginatedResponseDto<ForfeituresByAgeDetail>(req) { Results = details, Total = details.Count }
         };
@@ -362,8 +412,9 @@ public class FrozenReportService : IFrozenReportService
         });
 
         // Client-side processing for grouping and filtering
+        var asOfDate = await GetAsOfDate(req, cancellationToken);
         var groupedResult = rawResult
-            .GroupBy(item => item.DateOfBirth.Age())
+            .GroupBy(item => item.DateOfBirth.Age(asOfDate))
             .Select(g => new { Age = g.Key, Entries = g.ToList() })
             .ToList();
 
@@ -404,7 +455,7 @@ public class FrozenReportService : IFrozenReportService
         };
     }
 
-    public async Task<VestedAmountsByAge> GetVestedAmountsByAgeYearAsync(ProfitYearRequest req, CancellationToken cancellationToken = default)
+    public async Task<VestedAmountsByAge> GetVestedAmountsByAgeYearAsync(ProfitYearAndAsOfDateRequest req, CancellationToken cancellationToken = default)
     {
         const string FT = "FullTime";
         const string PT = "PartTime";
@@ -439,8 +490,9 @@ public class FrozenReportService : IFrozenReportService
         });
 
         // Client-side grouping and aggregation
+        var asOfDate = await GetAsOfDate(req, cancellationToken);
         var groupedResult = rawResult
-            .GroupBy(item => item.DateOfBirth.Age())
+            .GroupBy(item => item.DateOfBirth.Age(asOfDate))
             .Select(g => new { Age = g.Key, Entries = g.ToList() })
             .ToList();
 
@@ -471,20 +523,20 @@ public class FrozenReportService : IFrozenReportService
             .ToList();
 
         // Calculate totals for all categories
-        var totalFullTimeCount = (short)details.Sum(d => d.FullTimeCount);
-        var totalNotVestedCount = (short)details.Sum(d => d.NotVestedCount);
-        var totalPartialVestedCount = (short)details.Sum(d => d.PartialVestedCount);
-        var totalBeneficiaryCount = (short)details.Sum(d => d.BeneficiaryCount);
+        short totalFullTimeCount = (short)details.Sum(d => d.FullTimeCount);
+        short totalNotVestedCount = (short)details.Sum(d => d.NotVestedCount);
+        short totalPartialVestedCount = (short)details.Sum(d => d.PartialVestedCount);
+        short totalBeneficiaryCount = (short)details.Sum(d => d.BeneficiaryCount);
 
-        var totalFullTime100PercentAmount = details.Sum(d => d.FullTime100PercentAmount);
-        var totalFullTimePartialAmount = details.Sum(d => d.FullTimePartialAmount);
-        var totalFullTimeNotVestedAmount = details.Sum(d => d.FullTimeNotVestedAmount);
+        decimal totalFullTime100PercentAmount = details.Sum(d => d.FullTime100PercentAmount);
+        decimal totalFullTimePartialAmount = details.Sum(d => d.FullTimePartialAmount);
+        decimal totalFullTimeNotVestedAmount = details.Sum(d => d.FullTimeNotVestedAmount);
 
-        var totalPartTime100PercentAmount = details.Sum(d => d.PartTime100PercentAmount);
-        var totalPartTimePartialAmount = details.Sum(d => d.PartTimePartialAmount);
-        var totalPartTimeNotVestedAmount = details.Sum(d => d.PartTimeNotVestedAmount);
+        decimal totalPartTime100PercentAmount = details.Sum(d => d.PartTime100PercentAmount);
+        decimal totalPartTimePartialAmount = details.Sum(d => d.PartTimePartialAmount);
+        decimal totalPartTimeNotVestedAmount = details.Sum(d => d.PartTimeNotVestedAmount);
 
-        var totalBeneficiaryAmount = details.Sum(d => d.BeneficiaryAmount);
+        decimal totalBeneficiaryAmount = details.Sum(d => d.BeneficiaryAmount);
 
         // Build the final response
         req = req with { Take = details.Count + 1 };
@@ -518,8 +570,10 @@ public class FrozenReportService : IFrozenReportService
         var details = await _dataContextFactory.UseReadOnlyContext(ctx =>
         {
             var query = _totalService.TotalVestingBalance(ctx, req.ProfitYear, startEnd.FiscalEndDate);
+            var yearsInPlanQuery = _totalService.GetYearsOfService(ctx, req.ProfitYear);
 
             var joinedQuery = from q in query
+                join yip in yearsInPlanQuery on q.Ssn equals yip.Ssn
                 join d in ctx.Demographics.Include(d => d.PayProfits.Where(p => p.YearsInPlan > 0)) on q.Ssn equals d.Ssn into demographics
                 from demographic in demographics.DefaultIfEmpty()
                 join b in ctx.BeneficiaryContacts on q.Ssn equals b.Ssn into beneficiaries
@@ -532,9 +586,7 @@ public class FrozenReportService : IFrozenReportService
                     EmploymentType =
                         demographic != null && demographic.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT,
                     IsBeneficiary = demographic == null && beneficiary != null,
-                    YearsInPlan = demographic != null
-                        ? demographic.PayProfits.Max(p => p.YearsInPlan)
-                        : byte.MaxValue,
+                    YearsInPlan = (byte)yip.Years
                 };
 
             joinedQuery = req.ReportType switch
@@ -559,7 +611,7 @@ public class FrozenReportService : IFrozenReportService
                     FullTimeCount = group.Count(e => e.EmploymentType == FT),
                     PartTimeCount = group.Count(e => e.EmploymentType == PT)
                 })
-                .OrderBy(e => e.Years)
+                .OrderByDescending(e => e.Years)
                 .ToListAsync(cancellationToken);
         });
 
@@ -581,5 +633,21 @@ public class FrozenReportService : IFrozenReportService
             TotalPartTimeCount = details.Sum(d => d.PartTimeCount),
             Response = new PaginatedResponseDto<BalanceByYearsDetail>(req) { Results = details, Total = details.Count }
         };
+    }
+
+    private async Task<DateTime> GetAsOfDate(ProfitYearAndAsOfDateRequest req, CancellationToken cancellationToken)
+    {
+        DateTime asOfDate;
+        if (req.AsOfDate.HasValue)
+        {
+            asOfDate = req.AsOfDate.Value.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+        }
+        else
+        {
+            var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
+            asOfDate = calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+        }
+
+        return asOfDate;
     }
 }

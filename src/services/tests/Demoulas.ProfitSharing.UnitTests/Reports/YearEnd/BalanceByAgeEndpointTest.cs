@@ -4,11 +4,11 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using FluentAssertions;
 using FastEndpoints;
 using JetBrains.Annotations;
-using Demoulas.ProfitSharing.UnitTests.Base;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Security;
-using Demoulas.ProfitSharing.UnitTests.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
+using Demoulas.ProfitSharing.UnitTests.Common.Base;
+using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -46,7 +46,7 @@ public class BalanceByAgeEndpointTest : ApiTestBase<Program>
             .GETAsync<BalanceByAgeEndpoint, FrozenReportsByAgeRequest, StreamContent>(request);
 
             
-        string content = await response.Response.Content.ReadAsStringAsync();
+        string content = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
         content.Should().Contain("AGE,EMPS,BALANCE,VESTED");
         content.Should().Contain("BEN");
     }

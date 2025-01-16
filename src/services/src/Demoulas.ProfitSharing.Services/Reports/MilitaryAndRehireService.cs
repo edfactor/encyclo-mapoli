@@ -40,7 +40,7 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
                 .Select(d => new MilitaryAndRehireReportResponse
                 {
                     DepartmentId = d.DepartmentId,
-                    BadgeNumber = d.EmployeeId,
+                    BadgeNumber = d.BadgeNumber,
                     Ssn = d.Ssn.MaskSsn(),
                     FullName = d.ContactInfo.FullName,
                     DateOfBirth = d.DateOfBirth,
@@ -144,21 +144,22 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
     {
         var bracket = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
 
+        //Question: The columns that aren't be filled in here, are they a necessary part of the query, or should be put values to them?
         var query = context.Demographics
             .Join(
-                context.PayProfits, // Table to join with (PayProfit)
+                context.PayProfits.Where(x=>x.ProfitYear == req.ProfitYear), // Table to join with (PayProfit)
                 demographics => demographics.Id, // Primary key selector from Demographics
                 payProfit => payProfit.DemographicId, // Foreign key selector from PayProfit
                 (demographics, payProfit) => new // Result selector after joining
                 {
-                    demographics.EmployeeId,
+                    BadgeNumber = demographics.BadgeNumber,
                     demographics.ContactInfo.FullName,
                     demographics.Ssn,
                     demographics.HireDate,
                     demographics.TerminationDate,
                     demographics.ReHireDate,
                     demographics.StoreNumber,
-                    //payProfit.CompanyContributionYears,
+                    CompanyContributionYears = payProfit.YearsInPlan,
                     payProfit.EnrollmentId,
                     payProfit.CurrentHoursYear,
                     //payProfit.NetBalanceLastYear,
@@ -172,12 +173,12 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
                 && m.ReHireDate >= bracket.FiscalBeginDate
                 && m.ReHireDate <= bracket.FiscalEndDate)
             .Join(
-                context.ProfitDetails, // Table to join with (ProfitDetail)
+                context.ProfitDetails.Where(x=>x.ProfitYear == req.ProfitYear), // Table to join with (ProfitDetail)
                 combined => combined.Ssn, // Key selector from the result of the first join
                 profitDetail => profitDetail.Ssn, // Foreign key selector from ProfitDetail
                 (member, profitDetail) => new // Result selector after joining ProfitDetail
                 {
-                    member.EmployeeId,
+                    member.BadgeNumber,
                     member.FullName,
                     member.Ssn,
                     member.HireDate,
@@ -196,11 +197,11 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
                     profitDetail.ProfitCodeId
                 }
             )
-            .OrderBy(m => m.EmployeeId)
+            .OrderBy(m => m.BadgeNumber)
             .ThenBy(m => m.FullName)
             .Select(d => new MilitaryAndRehireProfitSummaryQueryResponse
             {
-                BadgeNumber = d.EmployeeId,
+                BadgeNumber = d.BadgeNumber,
                 FullName = d.FullName,
                 Ssn = d.Ssn,
                 HireDate = d.HireDate,

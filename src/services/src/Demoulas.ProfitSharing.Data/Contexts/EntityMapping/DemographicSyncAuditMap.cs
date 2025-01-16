@@ -20,6 +20,11 @@ internal sealed class DemographicSyncAuditMap : IEntityTypeConfiguration<Demogra
             .HasPrecision(7)
             .HasColumnName("BADGE_NUMBER");
 
+        _ = builder.Property(e => e.OracleHcmId)
+            .HasPrecision(15)
+            .ValueGeneratedNever()
+            .HasColumnName("ORACLE_HCM_ID");
+
         _ = builder.Property(e => e.InvalidValue)
             .HasColumnName("INVALID_VALUE")
             .HasMaxLength(256);

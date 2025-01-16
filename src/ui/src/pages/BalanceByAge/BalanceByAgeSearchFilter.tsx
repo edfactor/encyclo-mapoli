@@ -24,9 +24,8 @@ const schema = yup.object().shape({
 });
 
 const BalanceByAgeSearchFilter = () => {
-  const [isFetching, setIsFetching] = useState(false);
 
-  const [triggerSearch] = useLazyGetBalanceByAgeQuery();
+  const [triggerSearch, { isFetching }] = useLazyGetBalanceByAgeQuery();
 
   const {
     control,
@@ -43,7 +42,6 @@ const BalanceByAgeSearchFilter = () => {
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
-      setIsFetching(true);
       triggerSearch(
         {
           profitYear: data.profitYear,
@@ -68,7 +66,6 @@ const BalanceByAgeSearchFilter = () => {
         },
         false
       );
-      setIsFetching(false);
     }
   });
 

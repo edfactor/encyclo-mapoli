@@ -1,19 +1,15 @@
-﻿using System.Data.SqlTypes;
-using System.Diagnostics;
+﻿using System.Diagnostics;
+using System.Runtime;
 using System.Runtime.CompilerServices;
-using Bogus.Extensions.UnitedStates;
 using Demoulas.ProfitSharing.Common.ActivitySources;
+using Demoulas.ProfitSharing.Common.Contracts.Messaging;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.OracleHcm.Configuration;
-using Demoulas.ProfitSharing.OracleHcm.Extensions;
-using Demoulas.ProfitSharing.OracleHcm.Validators;
-using Demoulas.Util.Extensions;
+using Demoulas.ProfitSharing.OracleHcm.Clients;
+using FluentValidation.Results;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services;
@@ -22,32 +18,32 @@ namespace Demoulas.ProfitSharing.OracleHcm.Services;
 /// Service responsible for synchronizing employee data from the Oracle HCM system to the Profit Sharing system.
 /// This includes fetching employee data, validating it, and updating the Profit Sharing database.
 /// </summary>
-public sealed class EmployeeSyncService : IEmployeeSyncService
+internal sealed class EmployeeSyncService : IEmployeeSyncService
 {
-    private readonly OracleDemographicsSyncClient _oracleDemographicsSyncClient;
+    private readonly OracleEmployeeDataSyncClient _oracleEmployeeDataSyncClient;
     private readonly IDemographicsServiceInternal _demographicsService;
+    private readonly AtomFeedClient _atomFeedClient;
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
-    private readonly OracleHcmConfig _oracleHcmConfig;
-    private readonly OracleEmployeeValidator _employeeValidator;
+    private readonly IBus _employeeSyncBus;
 
-    public EmployeeSyncService(HttpClient httpClient,
+    public EmployeeSyncService(AtomFeedClient atomFeedClient,
+        OracleEmployeeDataSyncClient oracleEmployeeDataSyncClient,
         IDemographicsServiceInternal demographicsService,
         IProfitSharingDataContextFactory profitSharingDataContextFactory,
-        OracleHcmConfig oracleHcmConfig,
-        OracleEmployeeValidator employeeValidator)
+        IBus employeeSyncBus)
     {
-        _oracleDemographicsSyncClient = new OracleDemographicsSyncClient(httpClient, oracleHcmConfig);
+        _oracleEmployeeDataSyncClient = oracleEmployeeDataSyncClient;
         _demographicsService = demographicsService;
+        _atomFeedClient = atomFeedClient;
         _profitSharingDataContextFactory = profitSharingDataContextFactory;
-        _oracleHcmConfig = oracleHcmConfig;
-        _employeeValidator = employeeValidator;
+        _employeeSyncBus = employeeSyncBus;
     }
 
-    public async Task SynchronizeEmployeesAsync(string requestedBy = "System", CancellationToken cancellationToken = default)
+    public async Task ExecuteFullSyncAsync(string requestedBy = "System", CancellationToken cancellationToken = default)
     {
-        using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(SynchronizeEmployeesAsync), ActivityKind.Internal);
+        using Activity? activity = OracleHcmActivitySource.Instance.StartActivity(nameof(ExecuteFullSyncAsync), ActivityKind.Internal);
 
-        var job = new Job
+        Job job = new Job
         {
             JobTypeId = JobType.Constants.EmployeeSyncFull,
             StartMethodId = StartMethod.Constants.System,
@@ -65,126 +61,132 @@ public sealed class EmployeeSyncService : IEmployeeSyncService
         bool success = true;
         try
         {
-            await CleanAuditError(cancellationToken);
-            var oracleHcmEmployees = _oracleDemographicsSyncClient.GetAllEmployees(cancellationToken);
-            var requestDtoEnumerable = ConvertToRequestDto(oracleHcmEmployees, requestedBy, cancellationToken);
-            await _demographicsService.AddDemographicsStreamAsync(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken);
+            await _demographicsService.CleanAuditError(cancellationToken);
+            IAsyncEnumerable<OracleEmployee?> oracleHcmEmployees = _oracleEmployeeDataSyncClient.GetAllEmployees(cancellationToken);
+            await QueueEmployee(requestedBy, oracleHcmEmployees, cancellationToken);
         }
         catch (Exception ex)
         {
             success = false;
-            await AuditError(0, [new FluentValidation.Results.ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken);
+            await _demographicsService.AuditError(0, 0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken);
         }
         finally
         {
             await _profitSharingDataContextFactory.UseWritableContext(db =>
             {
-                return db.Jobs.Where(j=> j.Id == job.Id).ExecuteUpdateAsync(s => s
-                    .SetProperty(b => b.Completed, b => DateTime.Now)
-                    .SetProperty(b => b.JobStatusId, b => success ? JobStatus.Constants.Completed : JobStatus.Constants.Failed),
+                return db.Jobs.Where(j => j.Id == job.Id).ExecuteUpdateAsync(s => s
+                        .SetProperty(b => b.Completed, b => DateTime.Now)
+                        .SetProperty(b => b.JobStatusId, b => success ? JobStatus.Constants.Completed : JobStatus.Constants.Failed),
                     cancellationToken: cancellationToken);
             }, cancellationToken);
+
+#pragma warning disable S1215
+            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+            GC.Collect();
+#pragma warning restore S1215
         }
     }
 
-    private Task AuditError(int badgeNumber, IEnumerable<FluentValidation.Results.ValidationFailure> errorMessages, string requestedBy, CancellationToken cancellationToken = default,
-        params object?[] args)
+    public async Task ExecuteDeltaSyncAsync(string requestedBy = "System", CancellationToken cancellationToken = default)
     {
-        return _profitSharingDataContextFactory.UseWritableContext(c =>
+        try
         {
-            for (int i = 0; i < args.Length; i++)
+            DateTime maxDate = DateTime.Now;
+            DateTime minDate = await _profitSharingDataContextFactory.UseReadOnlyContext(c =>
             {
-                args[i] ??= "null"; // Replace null with a default value
+                return c.Demographics.MinAsync(d => d.LastModifiedDate - TimeSpan.FromDays(7), cancellationToken: cancellationToken);
+            });
+
+            IAsyncEnumerable<NewHireContext> newHires = _atomFeedClient.GetFeedDataAsync<NewHireContext>("newhire", minDate, maxDate, cancellationToken);
+            IAsyncEnumerable<AssignmentContext> assignments = _atomFeedClient.GetFeedDataAsync<AssignmentContext>("empassignment", minDate, maxDate, cancellationToken);
+            IAsyncEnumerable<EmployeeUpdateContext> updates = _atomFeedClient.GetFeedDataAsync<EmployeeUpdateContext>("empupdate", minDate, maxDate, cancellationToken);
+            IAsyncEnumerable<TerminationContext> terminations = _atomFeedClient.GetFeedDataAsync<TerminationContext>("termination", minDate, maxDate, cancellationToken);
+
+            HashSet<long> people = new HashSet<long>();
+            await foreach (DeltaContextBase record in MergeAsyncEnumerables(newHires, updates, terminations, assignments, cancellationToken))
+            {
+                people.Add(record.PersonId);
             }
 
-            var auditRecords = errorMessages.Select(e =>
-                new DemographicSyncAudit
-                {
-                    BadgeNumber = badgeNumber,
-                    InvalidValue = e.AttemptedValue?.ToString() ?? e.CustomState?.ToString(),
-                    Message = e.ErrorMessage,
-                    UserName = requestedBy,
-                    PropertyName = e.PropertyName
-                });
-            c.DemographicSyncAudit.AddRange(auditRecords);
+            await TrySyncEmployeeFromOracleHcm(requestedBy, people, cancellationToken);
 
-            return c.SaveChangesAsync(cancellationToken);
-        }, cancellationToken);
-    }
-
-    private Task CleanAuditError(CancellationToken cancellationToken)
-    {
-        return _profitSharingDataContextFactory.UseWritableContext(c =>
+        }
+        catch (Exception ex)
         {
-            DateTime clearBackTo = DateTime.Today.AddDays(-30);
-
-            return c.DemographicSyncAudit.Where(t => t.Created < clearBackTo).ExecuteDeleteAsync(cancellationToken);
-        }, cancellationToken);
+            await _demographicsService.AuditError(0, 0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken);
+        }
     }
 
-    private async IAsyncEnumerable<DemographicsRequest> ConvertToRequestDto(IAsyncEnumerable<OracleEmployee?> asyncEnumerable, 
-        string requestedBy,
+    public async Task TrySyncEmployeeFromOracleHcm(string requestedBy, ISet<long> people, CancellationToken cancellationToken)
+    {
+        try
+        {
+            foreach (long oracleHcmId in people)
+            {
+                IAsyncEnumerable<OracleEmployee?> oracleHcmEmployees = _oracleEmployeeDataSyncClient.GetEmployee(oracleHcmId, cancellationToken);
+                await QueueEmployee(requestedBy, oracleHcmEmployees, cancellationToken);
+            }
+        }
+        catch (Exception ex)
+        {
+            await _demographicsService.AuditError(0, 0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken);
+        }
+    }
+
+    public async Task QueueEmployee(string requestedBy, IAsyncEnumerable<OracleEmployee?> oracleHcmEmployees, CancellationToken cancellationToken)
+    {
+        await foreach (OracleEmployee? employee in oracleHcmEmployees.WithCancellation(cancellationToken))
+        {
+            if (employee == null)
+            {
+                continue;
+            }
+
+            MessageRequest<OracleEmployee> message = new MessageRequest<OracleEmployee>
+            {
+                ApplicationName = nameof(EmployeeSyncService), Body = employee, UserId = requestedBy
+            };
+                        
+            await _employeeSyncBus.Publish(message, cancellationToken);
+        }
+    }
+
+
+    /// <summary>
+    /// Merges multiple asynchronous enumerables of <see cref="T"/> into a single asynchronous enumerable.
+    /// </summary>
+    /// <param name="first">The first asynchronous enumerable to merge.</param>
+    /// <param name="second">The second asynchronous enumerable to merge.</param>
+    /// <param name="third">The third asynchronous enumerable to merge.</param>
+    /// <param name="fourth">The fourth asynchronous enumerable to merge.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>
+    /// An asynchronous enumerable that yields elements from all provided enumerables in sequence.
+    /// </returns>
+    private static async IAsyncEnumerable<DeltaContextBase> MergeAsyncEnumerables(IAsyncEnumerable<DeltaContextBase> first,
+        IAsyncEnumerable<DeltaContextBase> second,
+        IAsyncEnumerable<DeltaContextBase> third,
+        IAsyncEnumerable<DeltaContextBase> fourth,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        await foreach (OracleEmployee? employee in asyncEnumerable.WithCancellation(cancellationToken))
+        await foreach (DeltaContextBase item in first.WithCancellation(cancellationToken))
         {
-            int badgeNumber = employee?.EmployeeId ?? 0;
-            if (employee == null || badgeNumber == 0)
-            {
-                continue;
-            }
+            yield return item;
+        }
 
-            var result = await _employeeValidator.ValidateAsync(employee!, cancellationToken);
-            if (!result.IsValid)
-            {
-                await AuditError(badgeNumber, result.Errors, requestedBy, cancellationToken);
-                continue;
-            }
+        await foreach (DeltaContextBase item in second.WithCancellation(cancellationToken))
+        {
+            yield return item;
+        }
 
-            Bogus.Faker faker = new Bogus.Faker();
-            yield return new DemographicsRequest
-            {
-                OracleHcmId = employee.PersonId,
-                EmployeeId = employee.EmployeeId,
-                DateOfBirth = employee.DateOfBirth,
-                HireDate = employee.WorkRelationship?.StartDate ?? SqlDateTime.MinValue.Value.ToDateOnly(),
-                TerminationDate = employee.WorkRelationship?.TerminationDate,
-                Ssn = (employee.NationalIdentifier?.NationalIdentifierNumber ?? faker.Person.Ssn()).ConvertSsnToInt(),
-                StoreNumber = employee.WorkRelationship?.Assignment.LocationCode ?? 0,
-                DepartmentId = employee.WorkRelationship?.Assignment.GetDepartmentId() ?? 0,
-                PayClassificationId = employee.WorkRelationship?.Assignment.JobCode ?? 0,
-                EmploymentTypeCode = employee.WorkRelationship?.Assignment.GetEmploymentType() ?? char.MinValue,
-                PayFrequencyId = employee.WorkRelationship?.Assignment.GetPayFrequency() ?? byte.MinValue,
-                EmploymentStatusId =
-                    employee.WorkRelationship?.TerminationDate == null ? EmploymentStatus.Constants.Active : EmploymentStatus.Constants.Terminated,
-                GenderCode = employee.LegislativeInfoItem?.Gender switch
-                {
-                    "M" => Gender.Constants.Male,
-                    "F" => Gender.Constants.Female,
-                    "ORA_HRX_X" => Gender.Constants.Nonbinary,
-                    _ => Gender.Constants.Unknown
-                },
-                ContactInfo = new ContactInfoRequestDto
-                {
-                    FirstName = employee.Name.FirstName,
-                    MiddleName = employee.Name.MiddleNames,
-                    LastName = employee.Name.LastName,
-                    FullName = $"{employee.Name.LastName}, {employee.Name.FirstName}",
-                    PhoneNumber = employee.Phone?.PhoneNumber,
-                    EmailAddress = employee.Email?.EmailAddress
-                },
-                Address = new AddressRequestDto
-                {
-                    Street = employee.Address!.AddressLine1,
-                    Street2 = employee.Address.AddressLine2,
-                    Street3 = employee.Address.AddressLine3,
-                    Street4 = employee.Address.AddressLine4,
-                    City = employee.Address.TownOrCity,
-                    State = employee.Address.State,
-                    PostalCode = employee.Address.PostalCode,
-                    CountryIso = employee.Address.Country
-                }
-            };
+        await foreach (DeltaContextBase item in third.WithCancellation(cancellationToken))
+        {
+            yield return item;
+        }
+
+        await foreach (DeltaContextBase item in fourth.WithCancellation(cancellationToken))
+        {
+            yield return item;
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
+using Projects;
 
 IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(options: new DistributedApplicationOptions { AllowUnsecuredTransport = true });
-
 
 
 int uiPort = 3100;
@@ -32,17 +32,29 @@ catch (Exception ex)
     Console.WriteLine($"An error occurred: {ex.Message}");
 }
 
-
-var api = builder.AddProject<Projects.Demoulas_ProfitSharing_Api>("demoulas-profitsharing-api")
+var api = builder.AddProject<Demoulas_ProfitSharing_Api>("ProfitSharing-Api")
     .WithHttpHealthCheck("/health")
-    .WithHttpsHealthCheck("/health")
-    .AsHttp2Service();
+    .WithHttpsHealthCheck("/health");
 
-builder.AddNpmApp("demoulas-profitsharing-ui", "../../../ui/", "dev")
+var ui = builder.AddNpmApp("ProfitSharing-Ui", "../../../ui/", "dev")
     .WithReference(api)
     .WaitFor(api)
-    .WithHttpEndpoint(port: uiPort, isProxied:false)
-    .WithExternalHttpEndpoints();
+    .WithHttpEndpoint(port: uiPort, isProxied: false);
+
+var fullSync = builder.AddProject<Demoulas_ProfitSharing_EmployeeFull_Sync>(name: "ProfitSharing-EmployeeFull-Sync")
+    .WaitFor(api)
+    .WaitFor(ui);
+
+var payroll = builder.AddProject<Demoulas_ProfitSharing_EmployeePayroll_Sync>(name: "ProfitSharing-EmployeePayroll-Sync")
+    .WaitFor(api)
+    .WaitFor(ui)
+    .WaitFor(fullSync);
+
+builder.AddProject<Demoulas_ProfitSharing_EmployeeDelta_Sync>(name: "ProfitSharing-EmployeeDelta-Sync")
+    .WaitFor(api)
+    .WaitFor(ui)
+    .WaitFor(fullSync)
+    .WaitFor(payroll);
 
 
 await using DistributedApplication host = builder.Build();

@@ -1,21 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.Common.Data.Contexts.ValueConverters;
+﻿using Demoulas.Common.Data.Contexts.ValueConverters;
 using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
+
 internal sealed class DemographicHistoryMap : IEntityTypeConfiguration<DemographicHistory>
 {
     public void Configure(EntityTypeBuilder<DemographicHistory> builder)
     {
         _ = builder.ToTable("DEMOGRAPHIC_HISTORY");
         _ = builder.HasKey(x => x.Id);
-        
+
         _ = builder.HasIndex(x => x.DemographicId, "IX_DEMOGRAPHIC");
 
         _ = builder.Property(x => x.Id)
@@ -42,10 +38,10 @@ internal sealed class DemographicHistoryMap : IEntityTypeConfiguration<Demograph
             .ValueGeneratedNever()
             .HasColumnName("SSN");
 
-        _ = builder.HasIndex(e => e.EmployeeId, "IX_EmployeeId");
-        _ = builder.Property(e => e.EmployeeId)
+        _ = builder.HasIndex(e => e.BadgeNumber, "IX_BadgeNumber");
+        _ = builder.Property(e => e.BadgeNumber)
             .HasPrecision(7)
-            .HasColumnName("EMPLOYEE_ID");
+            .HasColumnName("BADGE_NUMBER");
 
         _ = builder.Property(e => e.OracleHcmId)
             .HasPrecision(15)
@@ -98,9 +94,9 @@ internal sealed class DemographicHistoryMap : IEntityTypeConfiguration<Demograph
             .HasConversion<DateOnlyConverter>();
 
         _ = builder.Property(e => e.EmploymentTypeId)
-           .HasMaxLength(2)
-           .HasColumnName("EMPLOYMENT_TYPE_ID")
-           .HasComment("EmploymentType");
+            .HasMaxLength(2)
+            .HasColumnName("EMPLOYMENT_TYPE_ID")
+            .HasComment("EmploymentType");
 
         _ = builder.Property(e => e.PayFrequencyId)
             .HasMaxLength(1)

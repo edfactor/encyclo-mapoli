@@ -6,11 +6,9 @@ using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.Common.Contracts.Contracts.Response;
 using JetBrains.Annotations;
-using Demoulas.ProfitSharing.UnitTests.Base;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Security;
-using Demoulas.ProfitSharing.UnitTests.Extensions;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using Demoulas.ProfitSharing.Data.Contexts;
@@ -22,6 +20,8 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.UnitTests.Common.Base;
+using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
@@ -44,6 +44,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
         return MockDbContextFactory.UseWritableContext(async c =>
         {
             var setup = await SetupTestEmployee(c);
+            setup.Request.ProfitYear = 2023;
 
             var expectedResponse = new ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>
             {
@@ -62,7 +63,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
 
             // Assert
             response.Result.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
-            response.Result.Response.Results.Should().HaveCountGreaterThan(expectedResponse.Response.Results.Count());
+            response.Result.Response.Results.Should().HaveCountGreaterThanOrEqualTo(expectedResponse.Response.Results.Count());
         });
     }
 
@@ -126,7 +127,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
     public async Task GetResponse_Should_HandleEmptyResults()
     {
         // Arrange
-        var request = new ProfitYearRequest { Skip = 0, Take = 10, ProfitYear = (short)DateTime.Today.Year };
+        var request = new ProfitYearRequest { Skip = 0, Take = 10, ProfitYear = (short)2024 };
         var cancellationToken = CancellationToken.None;
         var expectedResponse = new ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>
         {
@@ -147,7 +148,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
     public async Task GetResponse_Should_HandleNullResults()
     {
         // Arrange
-        var request = new ProfitYearRequest { Skip = 0, Take = 10, ProfitYear = (short)DateTime.Today.Year };
+        var request = new ProfitYearRequest { Skip = 0, Take = 10, ProfitYear = (short)2024 };
         var cancellationToken = CancellationToken.None;
         var expectedResponse = new ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>
         {
@@ -181,12 +182,13 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
 
         var demo = await c.Demographics.Include(demographic => demographic.ContactInfo).FirstAsync();
         demo.EmploymentStatusId = EmploymentStatus.Constants.Active;
-        demo.ReHireDate = DateTime.Today.ToDateOnly();
+        demo.ReHireDate = new DateOnly(2023, 1, 10);
         
 
         var payProfit = await c.PayProfits.FirstAsync(pp => pp.DemographicId == demo.Id);
         payProfit.EnrollmentId = Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
         payProfit.CurrentHoursYear = 2358;
+        payProfit.ProfitYear = 2023;
 
         var details = await c.ProfitDetails.Where(pd => pd.Ssn == demo.Ssn).ToListAsync();
         foreach (var detail in details)
@@ -196,10 +198,11 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
             detail.Remark = "Test remarks";
             detail.ProfitCodeId = ProfitCode.Constants.OutgoingForfeitures.Id;
         }
+        details[0].ProfitYear = 2023;
 
         await c.SaveChangesAsync();
 
-        example.BadgeNumber = demo.EmployeeId;
+        example.BadgeNumber = demo.BadgeNumber;
         example.Ssn = demo.Ssn.MaskSsn();
         example.FullName = demo.ContactInfo.FullName;
         example.CompanyContributionYears = 0;

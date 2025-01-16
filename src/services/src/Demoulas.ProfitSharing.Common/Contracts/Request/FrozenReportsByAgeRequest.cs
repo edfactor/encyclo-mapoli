@@ -2,7 +2,7 @@
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 
-public sealed record FrozenReportsByAgeRequest : ProfitYearRequest
+public sealed record FrozenReportsByAgeRequest : ProfitYearAndAsOfDateRequest
 {
     public enum Report
     {
@@ -16,7 +16,6 @@ public sealed record FrozenReportsByAgeRequest : ProfitYearRequest
 
     [DefaultValue(byte.MaxValue)]
     public override int? Take { get; init; }
-
     public static new FrozenReportsByAgeRequest RequestExample()
     {
         return new FrozenReportsByAgeRequest

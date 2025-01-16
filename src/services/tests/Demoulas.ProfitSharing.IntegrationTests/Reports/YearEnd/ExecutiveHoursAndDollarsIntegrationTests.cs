@@ -3,12 +3,12 @@ using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ExecutiveHoursAndDollars;
 using Demoulas.ProfitSharing.Security;
-using Demoulas.ProfitSharing.Services.Reports.YearEnd;
-using Demoulas.ProfitSharing.UnitTests.Extensions;
+using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
 using FluentAssertions;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
+
 public class ExecutiveHoursAndDollarsIntegrationTests : ApiIntegrationTestBase<Program>
 {
     // Probably should define these somewhere more global, or be looked up dynamically 
@@ -25,10 +25,10 @@ public class ExecutiveHoursAndDollarsIntegrationTests : ApiIntegrationTestBase<P
         // Act
         var response =
             await DownloadClient.GETAsync<ExecutiveHoursAndDollarsEndpoint, ExecutiveHoursAndDollarsRequest, StreamContent>(
-                new ExecutiveHoursAndDollarsRequest { ProfitYear = YearThis, HasExecutiveHoursAndDollars = true});
+                new ExecutiveHoursAndDollarsRequest { ProfitYear = YearThis, HasExecutiveHoursAndDollars = true });
 
         // Assert
-        string csvData = await response.Response.Content.ReadAsStringAsync();
+        string csvData = await response.Response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 
         // Break CVS into lines
         var lines = csvData.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
@@ -55,10 +55,10 @@ public class ExecutiveHoursAndDollarsIntegrationTests : ApiIntegrationTestBase<P
         // Act
         var response =
             await DownloadClient.GETAsync<ExecutiveHoursAndDollarsEndpoint, ExecutiveHoursAndDollarsRequest, StreamContent>(
-                new ExecutiveHoursAndDollarsRequest { ProfitYear = YearLast, HasExecutiveHoursAndDollars = true});
+                new ExecutiveHoursAndDollarsRequest { ProfitYear = YearLast, HasExecutiveHoursAndDollars = true });
 
         // Assert
-        string csvData = await response.Response.Content.ReadAsStringAsync();
+        string csvData = await response.Response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 
         // Break CVS into lines
         var lines = csvData.Split(["\r\n", "\n"], StringSplitOptions.None);
@@ -79,12 +79,8 @@ public class ExecutiveHoursAndDollarsIntegrationTests : ApiIntegrationTestBase<P
 
     public static string ReadEmbeddedResource(string resourceName)
     {
-        using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
-        using (var reader = new StreamReader(stream!))
-        {
-            return reader.ReadToEnd();
-        }
+        using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName);
+        using var reader = new StreamReader(stream!);
+        return reader.ReadToEnd();
     }
-
-
 }

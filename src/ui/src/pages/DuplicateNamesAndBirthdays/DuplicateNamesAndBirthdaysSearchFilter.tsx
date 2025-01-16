@@ -22,9 +22,7 @@ const schema = yup.object().shape({
 });
 
 const DuplicateNamesAndBirthdaysSearchFilter = () => {
-  const [isFetching, setIsFetching] = useState(false);
-
-  const [triggerSearch, { isLoading }] = useLazyGetDuplicateNamesAndBirthdaysQuery();
+  const [triggerSearch, { isFetching }] = useLazyGetDuplicateNamesAndBirthdaysQuery();
 
   const {
     control,
@@ -41,7 +39,6 @@ const DuplicateNamesAndBirthdaysSearchFilter = () => {
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
-      setIsFetching(true);
       triggerSearch(
         {
           profitYear: data.profitYear,
@@ -49,7 +46,6 @@ const DuplicateNamesAndBirthdaysSearchFilter = () => {
         },
         false
       );
-      setIsFetching(false);
     }
   });
 

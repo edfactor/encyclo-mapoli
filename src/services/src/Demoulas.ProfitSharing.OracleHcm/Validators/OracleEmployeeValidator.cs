@@ -2,12 +2,14 @@
 using Demoulas.ProfitSharing.Common.Caching;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
+using Demoulas.ProfitSharing.Services.Caching.HostedServices;
 using FastEndpoints;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Validators;
+
 public sealed class OracleEmployeeValidator : Validator<OracleEmployee>
 {
     private readonly NameItemValidator _nameItemValidator = new NameItemValidator();
@@ -24,18 +26,20 @@ public sealed class OracleEmployeeValidator : Validator<OracleEmployee>
     private const string UnknownStoreLocation = "Unknown store location for employee";
     private const string UnknownPayClassification = "Unknown pay classification for employee";
     private const string UnknownDepartment = "Unknown department for employee";
-    
+
 
     public OracleEmployeeValidator(
-        [FromKeyedServices("PayClassificationHostedService")] IBaseCacheService<LookupTableCache<byte>> accountCache,
-        [FromKeyedServices("DepartmentHostedService")] IBaseCacheService<LookupTableCache<byte>> depCache)
+        [FromKeyedServices(nameof(PayClassificationHostedService))]
+        IBaseCacheService<LookupTableCache<byte>> accountCache,
+        [FromKeyedServices(nameof(DepartmentHostedService))]
+        IBaseCacheService<LookupTableCache<byte>> depCache)
     {
         _accountCache = accountCache;
         _depCache = depCache;
 
         RuleFor(e => e.Address)
             .Must(v => v != null)
-            .WithMessage(e=> BadAddress);
+            .WithMessage(e => BadAddress);
 
         // Use the AddressRequestDtoValidator to validate the Address object
         RuleFor(e => e.Address)
@@ -44,7 +48,7 @@ public sealed class OracleEmployeeValidator : Validator<OracleEmployee>
                 if (address != null)
                 {
                     ValidationResult result = _addressValidator.Validate(address);
-                    foreach (var error in result.Errors)
+                    foreach (ValidationFailure? error in result.Errors)
                     {
                         context.AddFailure(error);
                     }
@@ -57,7 +61,7 @@ public sealed class OracleEmployeeValidator : Validator<OracleEmployee>
                 if (nameItem != null)
                 {
                     ValidationResult result = _nameItemValidator.Validate(nameItem);
-                    foreach (var error in result.Errors)
+                    foreach (ValidationFailure? error in result.Errors)
                     {
                         context.AddFailure(error);
                     }
@@ -70,7 +74,7 @@ public sealed class OracleEmployeeValidator : Validator<OracleEmployee>
 
         RuleFor(e => e.WorkRelationship!.Assignment.GetEmploymentType())
             .Must(v => v is not char.MinValue)
-            .WithMessage(e=> UnknownEmploymentType)
+            .WithMessage(e => UnknownEmploymentType)
             .WithState(e => e.WorkRelationship?.Assignment.FullPartTime)
             .OverridePropertyName("WorkRelationship.Assignment.FullPartTime");
 
@@ -99,8 +103,8 @@ public sealed class OracleEmployeeValidator : Validator<OracleEmployee>
             .OverridePropertyName("WorkRelationship.Assignment.PositionCode");
 
 
-        RuleFor(x => x.EmployeeId)
-            .InclusiveBetween(1, 9_999_999).WithMessage("EmployeeId must be a 7-digit number.");
+        RuleFor(x => x.BadgeNumber)
+            .InclusiveBetween(1, 9_999_999).WithMessage("BadgeNumber must be a 7-digit number.");
 
         RuleFor(x => x.PersonId)
             .NotEmpty()
@@ -112,15 +116,15 @@ public sealed class OracleEmployeeValidator : Validator<OracleEmployee>
 
     private async Task<bool> ValidatePayClassificationAsync(byte? jobCode, CancellationToken ct)
     {
-        var lookup = await _accountCache.GetAllAsync(ct);
-        var codes = lookup.Select(p => p.Id).ToHashSet();
+        ISet<LookupTableCache<byte>> lookup = await _accountCache.GetAllAsync(ct);
+        HashSet<byte> codes = lookup.Select(p => p.Id).ToHashSet();
         return codes.Contains(jobCode ?? 0);
     }
 
     private async Task<bool> ValidateDepartmentIdAsync(byte departmentId, CancellationToken ct)
     {
-        var lookup = await _depCache.GetAllAsync(ct);
-        var codes = lookup.Select(p => p.Id).ToHashSet();
+        ISet<LookupTableCache<byte>> lookup = await _depCache.GetAllAsync(ct);
+        HashSet<byte> codes = lookup.Select(p => p.Id).ToHashSet();
         return codes.Contains(departmentId);
     }
 }

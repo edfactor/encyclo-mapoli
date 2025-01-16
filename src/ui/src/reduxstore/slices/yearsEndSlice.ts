@@ -20,7 +20,9 @@ import {
   PagedReportResponse,
   ProfitSharingDistributionsByAge,
   EmployeeDetails,
-  MasterInquiryResponseType, VestedAmountsByAge
+  MasterInquiryResponseType,
+  VestedAmountsByAge,
+  TerminationResponse
 } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
 
@@ -54,6 +56,8 @@ export interface YearsEndState {
   balanceByYearsFullTime: BalanceByAge | null;
   balanceByYearsPartTime: BalanceByAge | null;
   vestedAmountsByAge: VestedAmountsByAge | null;
+  terminattion: TerminationResponse | null;
+  militaryAndRehireEntryAndModification: EmployeeDetails | null;
 }
 
 const initialState: YearsEndState = {
@@ -82,10 +86,12 @@ const initialState: YearsEndState = {
   balanceByAgeTotal: null,
   balanceByAgeFullTime: null,
   balanceByAgePartTime: null,
-    balanceByYearsTotal: null,
+  balanceByYearsTotal: null,
   balanceByYearsFullTime: null,
   balanceByYearsPartTime: null,
-  vestedAmountsByAge : null
+  vestedAmountsByAge: null,
+  terminattion: null,
+  militaryAndRehireEntryAndModification: null
 };
 
 export const yearsEndSlice = createSlice({
@@ -142,7 +148,7 @@ export const yearsEndSlice = createSlice({
     },
     setMasterInquiryData: (state, action: PayloadAction<MasterInquiryResponseType>) => {
       state.masterInquiryData = action.payload.inquiryResults;
-      
+
       if (action.payload.employeeDetails) {
         state.masterInquiryEmployeeDetails = action.payload.employeeDetails;
       }
@@ -204,7 +210,6 @@ export const yearsEndSlice = createSlice({
       }
     },
     setBalanceByYears: (state, action: PayloadAction<BalanceByYears>) => {
-
       if (action.payload.reportType == FrozenReportsByAgeRequestType.Total) {
         state.balanceByYearsTotal = action.payload;
       }
@@ -218,8 +223,14 @@ export const yearsEndSlice = createSlice({
       }
     },
     setVestingAmountByAge: (state, action: PayloadAction<VestedAmountsByAge>) => {
-        state.vestedAmountsByAge = action.payload;
-    }
+      state.vestedAmountsByAge = action.payload;
+    },
+    setTermination: (state, action: PayloadAction<TerminationResponse>) => {
+      state.terminattion = action.payload;
+    },
+    setMilitaryAndRehireEntryAndModificationEmployeeDetails: (state, action: PayloadAction<EmployeeDetails>) => {
+      state.militaryAndRehireEntryAndModification = action.payload;
+    },
   }
 });
 
@@ -242,6 +253,7 @@ export const {
   setForfeituresByAge,
   setBalanceByAge,
   setBalanceByYears,
-  setVestingAmountByAge
+  setVestingAmountByAge,
+  setTermination
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

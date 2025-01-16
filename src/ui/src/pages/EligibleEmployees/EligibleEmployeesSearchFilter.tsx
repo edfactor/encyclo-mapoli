@@ -22,9 +22,7 @@ const schema = yup.object().shape({
 });
 
 const EligibleEmployeesSearchFilter = () => {
-  const [isFetching, setIsFetching] = useState(false);
-
-  const [triggerSearch, { isLoading }] = useLazyGetEligibleEmployeesQuery();
+  const [triggerSearch, { isFetching }] = useLazyGetEligibleEmployeesQuery();
 
   const {
     control,
@@ -41,7 +39,6 @@ const EligibleEmployeesSearchFilter = () => {
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
-      setIsFetching(true);
       triggerSearch(
         {
           profitYear: data.profitYear,
@@ -49,7 +46,6 @@ const EligibleEmployeesSearchFilter = () => {
         },
         false
       );
-      setIsFetching(false);
     }
   });
 
