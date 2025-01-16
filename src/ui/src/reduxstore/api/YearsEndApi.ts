@@ -472,7 +472,7 @@ export const YearsEndApi = createApi({
     }),
     getProfitMasterInquiry: builder.query<MasterInquiryResponseType, MasterInquryRequest>({
       query: (params) => ({
-        url: "yearend/master-inquiry",
+        url: "master/master-inquiry",
         method: "GET",
         params: {
           startProfitYear: params.startProfitYear,
