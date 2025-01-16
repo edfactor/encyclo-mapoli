@@ -52,7 +52,7 @@ const DecemberProcessAccordion = () => {
 
   return (
     <Page
-      label="December Process"
+      label="December Flow"
       actionNode={
         <Button
           variant="outlined"

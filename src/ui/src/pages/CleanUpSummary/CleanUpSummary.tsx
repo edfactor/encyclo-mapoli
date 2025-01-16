@@ -23,7 +23,7 @@ const CleanUpSummary = () => {
   const navigate = useNavigate();
 
   return (
-    <Page label={selectedTab == 0 ? "Clean Up Process Summary" : tabs[selectedTab]} actionNode={selectedTab == 0 ? <Button onClick={() => navigate('/december-process-accordion')} variant="outlined">December Process</Button> : null}>
+    <Page label={selectedTab == 0 ? "Clean Up Process Summary" : tabs[selectedTab]} actionNode={selectedTab == 0 ? <Button onClick={() => navigate('/december-process-accordion')} variant="outlined">December Flow</Button> : null}>
       <Grid2
         container
         width="100%"

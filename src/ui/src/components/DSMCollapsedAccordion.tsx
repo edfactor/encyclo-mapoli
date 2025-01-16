@@ -118,8 +118,8 @@ const DSMCollapsedAccordion: React.FC<DSMCollapsedAccordionProps> = ({
                     </Box>
                     {actionButtonText && (
                         <Button
-                            variant="contained"
-                            color="success"
+                            variant="outlined"
+                            color="secondary"
                             size="medium"
                             onClick={handleActionClick}
                             disabled={disabled}

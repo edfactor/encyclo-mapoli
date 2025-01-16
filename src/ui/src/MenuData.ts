@@ -44,7 +44,7 @@ const frozenReports: RouteCategory = {
 };
 
 const decemberProcess: RouteCategory = {
-  menuLabel: "December Process",
+  menuLabel: "December Flow",
   parentRoute: "",
   items: [
     { caption: "Summary", route: "/december-process" },
