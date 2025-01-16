@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Net.Http.Json;
+using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
@@ -127,18 +128,27 @@ internal sealed class OracleEmployeeDataSyncClient
 
     private async Task<HttpResponseMessage> GetOracleHcmValue(string url, CancellationToken cancellationToken)
     {
-        using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
-        HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken);
-        if (!response.IsSuccessStatusCode && Debugger.IsAttached)
+        try
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine();
-            Console.WriteLine(await response.Content.ReadAsStringAsync(cancellationToken));
-            Console.WriteLine();
-            Console.ForegroundColor = ConsoleColor.White;
+            using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+            HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken);
+            if (!response.IsSuccessStatusCode && Debugger.IsAttached)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine();
+                Console.WriteLine(await response.Content.ReadAsStringAsync(cancellationToken));
+                Console.WriteLine();
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+
+            _ = response.EnsureSuccessStatusCode();
+            return response;
+        }
+        catch (SocketException e)
+        {
+            _logger.LogError(e, e.Message);
         }
 
-        _ = response.EnsureSuccessStatusCode();
-        return response;
+        return new HttpResponseMessage();
     }
 }

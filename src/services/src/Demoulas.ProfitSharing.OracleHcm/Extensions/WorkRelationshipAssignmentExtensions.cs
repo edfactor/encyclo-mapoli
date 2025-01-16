@@ -97,6 +97,7 @@ internal static partial class WorkRelationshipAssignmentExtensions
         char result = work.AssignmentCategory switch
         {
             "PT" => partTime,
+            "PR" => partTime, // Part Time Regular
             "FT" => fullTimeStraightSalary,
             "FR" => fullTimeStraightSalary, // Full Time Regular
             _ => char.MinValue
