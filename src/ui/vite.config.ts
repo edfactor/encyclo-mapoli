@@ -17,8 +17,7 @@ export default defineConfig(({ command, mode }) => {
         pages: path.resolve(__dirname, "./src/pages"),
         schemas: path.resolve(__dirname, "./src/schemas"),
         hooks: path.resolve(__dirname, "./src/hooks"),
-        styles: path.resolve(__dirname, "./src/styles"),
-        "@mui/system/RtlProvider": "@mui/system/esm/RtlProvider"
+        styles: path.resolve(__dirname, "./src/styles")
       }
     },
     server: {
@@ -32,7 +31,7 @@ export default defineConfig(({ command, mode }) => {
       "process.env": env
     },
     optimizeDeps: {
-      include: ["@emotion/react", "@emotion/styled", "@mui/material/Tooltip", "@mui/system", "@mui/x-date-pickers"]
+      include: ["@emotion/react", "@emotion/styled", "@mui/material/Tooltip", "@mui/system", "@mui/x-date-pickers", '@mui/system/RtlProvider']
     },
     test: {
       globals: true,
