@@ -2,7 +2,6 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import { defineConfig, loadEnv } from "vite";
 import compress from "vite-plugin-compression";
-
 export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   const isProd = mode === "production";
@@ -17,8 +16,7 @@ export default defineConfig(({ command, mode }) => {
         pages: path.resolve(__dirname, "./src/pages"),
         schemas: path.resolve(__dirname, "./src/schemas"),
         hooks: path.resolve(__dirname, "./src/hooks"),
-        styles: path.resolve(__dirname, "./src/styles"),
-        "@mui/system/RtlProvider": "@mui/system/esm/RtlProvider"
+        styles: path.resolve(__dirname, "./src/styles")
       }
     },
     server: {
@@ -32,7 +30,7 @@ export default defineConfig(({ command, mode }) => {
       "process.env": env
     },
     optimizeDeps: {
-      include: ["@emotion/react", "@emotion/styled", "@mui/material/Tooltip", "@mui/system", "@mui/x-date-pickers"]
+      include: ["@emotion/react", "@emotion/styled", "@mui/material/Tooltip"]
     },
     test: {
       globals: true,
@@ -64,7 +62,6 @@ export default defineConfig(({ command, mode }) => {
             if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(extType)) {
               extType = "img";
             }
-
             if (extType === "css") {
               return `static/${extType}/[name]-[hash][extname]`;
             }

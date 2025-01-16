@@ -74,17 +74,17 @@ internal class PayrollSyncService
         int year = DateTime.Today.Year;
 
 
-        var balanceTypeTotals = new Dictionary<long, decimal>
+        Dictionary<long, decimal> balanceTypeTotals = new Dictionary<long, decimal>
         {
             { BalanceTypeIds.MbProfitSharingDollars, 0 }, { BalanceTypeIds.MbProfitSharingHours, 0 }, { BalanceTypeIds.MbProfitSharingWeeks, 0 }
         };
-        foreach (var balanceTypeId in _balanceTypeIds)
+        foreach (long balanceTypeId in _balanceTypeIds)
         {
             string url =
                 $"{_oracleHcmConfig.PayrollUrl}/{item.ObjectActionId}/child/BalanceView/?onlyData=true&fields=BalanceTypeId,TotalValue1,TotalValue2,DefbalId1,DimensionName&finder=findByBalVar;pBalGroupUsageId1=null,pBalGroupUsageId2=-1,pLDGId={PLDGId},pLC={PLC},pBalTypeId={balanceTypeId}";
             try
             {
-                using var response = await _httpClient.GetAsync(url, cancellationToken);
+                using HttpResponseMessage response = await _httpClient.GetAsync(url, cancellationToken);
 
                 if (Debugger.IsAttached)
                 {
@@ -93,7 +93,7 @@ internal class PayrollSyncService
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var balanceResults = await response.Content.ReadFromJsonAsync<BalanceRoot>(cancellationToken);
+                    BalanceRoot? balanceResults = await response.Content.ReadFromJsonAsync<BalanceRoot>(cancellationToken);
 
                     decimal total = balanceResults!.Items.Where(i => string.CompareOrdinal(i.DimensionName, dimensionName) == 0)
                         .Sum(b => b.TotalValue1);
@@ -141,7 +141,7 @@ internal class PayrollSyncService
     {
         return _profitSharingDataContextFactory.UseWritableContext(async context =>
         {
-            var demographic = await context.Demographics
+            Demographic? demographic = await context.Demographics
                 .Include(d => d.PayProfits.Where(p => p.ProfitYear >= year))
                 .Include(demographic => demographic.ContactInfo)
                 .FirstOrDefaultAsync(d => d.OracleHcmId == oracleHcmId, cancellationToken);
@@ -151,7 +151,7 @@ internal class PayrollSyncService
                 return;
             }
 
-            var payProfit = demographic.PayProfits.FirstOrDefault(p => p.ProfitYear == year);
+            PayProfit? payProfit = demographic.PayProfits.FirstOrDefault(p => p.ProfitYear == year);
 
             if (payProfit == null)
             {
@@ -161,7 +161,7 @@ internal class PayrollSyncService
             }
 
             // Update PayProfit with accumulated totals
-            foreach (var kvp in balanceTypeTotals)
+            foreach (KeyValuePair<long, decimal> kvp in balanceTypeTotals)
             {
                 long balanceTypeId = kvp.Key;
                 decimal total = kvp.Value;

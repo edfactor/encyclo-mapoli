@@ -27,13 +27,13 @@ public class OracleHcmMessageConsumer : IConsumer<MessageRequest<OracleHcmJobReq
     public async Task Consume(ConsumeContext<MessageRequest<OracleHcmJobRequest>> context)
     {
         CancellationToken cancellationToken = context.CancellationToken;
-        var message = context.Message;
+        MessageRequest<OracleHcmJobRequest> message = context.Message;
 
         if (message.Body.JobType is JobType.Constants.EmployeeSyncFull or JobType.Constants.PayrollSyncFull)
         {
             bool jobIsAlreadyRunning = await _dataContext.UseReadOnlyContext(c =>
             {
-                var runningJobs = c.Jobs
+                IQueryable<Job> runningJobs = c.Jobs
                     .Where(j => (j.JobTypeId == JobType.Constants.EmployeeSyncFull || j.JobTypeId == JobType.Constants.PayrollSyncFull) &&
                                 j.JobStatusId == JobStatus.Constants.Running
                                 && j.Started > DateTime.Now.AddHours(-8));

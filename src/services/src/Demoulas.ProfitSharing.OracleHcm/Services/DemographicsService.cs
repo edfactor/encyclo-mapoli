@@ -65,9 +65,9 @@ internal class DemographicsService : IDemographicsServiceInternal
        CancellationToken cancellationToken = default)
    {
        const int throttleLimit = 10_000; // Max queue size for safety (configurable)
-       var batch = new Dictionary<long, DemographicsRequest>();
+       Dictionary<long, DemographicsRequest> batch = new Dictionary<long, DemographicsRequest>();
        bool batchProcessed = false;
-       await foreach (var employee in employees.WithCancellation(cancellationToken))
+       await foreach (DemographicsRequest employee in employees.WithCancellation(cancellationToken))
        {
            // Throttle queue size
            while (_requests.Count >= throttleLimit)
@@ -80,7 +80,7 @@ internal class DemographicsService : IDemographicsServiceInternal
            // Process batch when batchSize is reached during enqueue
            if (_requests.Count >= batchSize)
            {
-               while (_requests.TryDequeue(out var demoRequest))
+               while (_requests.TryDequeue(out DemographicsRequest? demoRequest))
                {
                    if (!batch.TryAdd(demoRequest.OracleHcmId, demoRequest))
                    {
@@ -136,22 +136,22 @@ internal class DemographicsService : IDemographicsServiceInternal
         demographicsEntities.ForEach(entity => entity.LastModifiedDate = currentModificationDate);
 
         // Create lookup dictionaries for both OracleHcmId and SSN
-        var demographicOracleHcmIdLookup = demographicsEntities.ToDictionary(entity => entity.OracleHcmId);
-        var demographicSsnLookup = demographicsEntities.ToLookup(entity => (entity.Ssn, BadgeNumber: entity.BadgeNumber));
-        var ssnCollection = demographicsEntities.Select(d => d.Ssn).ToHashSet();
-        var dobCollection = demographicsEntities.Select(d => d.DateOfBirth).ToHashSet();
+        Dictionary<long, Demographic> demographicOracleHcmIdLookup = demographicsEntities.ToDictionary(entity => entity.OracleHcmId);
+        ILookup<(int Ssn, int BadgeNumber), Demographic> demographicSsnLookup = demographicsEntities.ToLookup(entity => (entity.Ssn, BadgeNumber: entity.BadgeNumber));
+        HashSet<int> ssnCollection = demographicsEntities.Select(d => d.Ssn).ToHashSet();
+        HashSet<DateOnly> dobCollection = demographicsEntities.Select(d => d.DateOfBirth).ToHashSet();
 
         // Use writable context for the upsert operation
         return _dataContextFactory.UseWritableContext(async context =>
         {
             // Fetch existing entities from the database using both OracleHcmId and SSN
-            var existingEntities = await context.Demographics
+            List<Demographic> existingEntities = await context.Demographics
                 .Where(dbEntity => demographicOracleHcmIdLookup.Keys.Contains(dbEntity.OracleHcmId) ||
                                    (ssnCollection.Contains(dbEntity.Ssn) && dobCollection.Contains(dbEntity.DateOfBirth)))
                 .ToListAsync(cancellationToken);
 
             // Handle potential duplicates in the existing database (SSN duplicates)
-            var duplicateSsnEntities = existingEntities.GroupBy(e => e.Ssn)
+            List<Demographic> duplicateSsnEntities = existingEntities.GroupBy(e => e.Ssn)
                 .Where(g => g.Count() > 1)
                 .SelectMany(g => g)
                 .ToList();
@@ -159,9 +159,10 @@ internal class DemographicsService : IDemographicsServiceInternal
             if (duplicateSsnEntities.Any())
             {
                 // Log duplicate SSN entries to the audit table
-                var audit = duplicateSsnEntities.Select(d => new DemographicSyncAudit
+                List<DemographicSyncAudit> audit = duplicateSsnEntities.Select(d => new DemographicSyncAudit
                 {
                     BadgeNumber = d.BadgeNumber,
+                    OracleHcmId = d.OracleHcmId,
                     InvalidValue = d.Ssn.MaskSsn(),
                     Message = "Duplicate SSNs found in the database.",
                     UserName = "System",
@@ -172,10 +173,10 @@ internal class DemographicsService : IDemographicsServiceInternal
             }
 
             // Handle inserts for entities that do not exist in the database by OracleHcmId or SSN
-            var existingOracleHcmIds = existingEntities.Select(dbEntity => dbEntity.OracleHcmId).ToHashSet();
-            var existingSsns = existingEntities.Select(dbEntity => dbEntity.Ssn).ToHashSet();
+            HashSet<long> existingOracleHcmIds = existingEntities.Select(dbEntity => dbEntity.OracleHcmId).ToHashSet();
+            HashSet<int> existingSsns = existingEntities.Select(dbEntity => dbEntity.Ssn).ToHashSet();
 
-            var newEntities = demographicsEntities
+            List<Demographic> newEntities = demographicsEntities
                 .Where(entity => !existingOracleHcmIds.Contains(entity.OracleHcmId) && !existingSsns.Contains(entity.Ssn))
                 .ToList();
 
@@ -183,13 +184,13 @@ internal class DemographicsService : IDemographicsServiceInternal
             {
                 // Bulk insert new entities
 
-                foreach (var entity in newEntities)
+                foreach (Demographic entity in newEntities)
                 {
                     try
                     {
                         context.Demographics.Add(entity);
 
-                        var history = DemographicHistory.FromDemographic(entity);
+                        DemographicHistory history = DemographicHistory.FromDemographic(entity);
                         context.DemographicHistories.Add(history);
                     }
                     catch (InvalidOperationException e) when (e.Message.Contains(
@@ -214,18 +215,18 @@ internal class DemographicsService : IDemographicsServiceInternal
 
 
             // Update existing entities based on either OracleHcmId or SSN & BadgeNumber
-            foreach (var existingEntity in existingEntities)
+            foreach (Demographic existingEntity in existingEntities)
             {
                 Demographic? incomingEntity = null;
 
                 // Prioritize matching by OracleHcmId, but fallback to SSN if OracleHcmId is missing (legacy case)
-                if (demographicOracleHcmIdLookup.TryGetValue(existingEntity.OracleHcmId, out var entityByOracleHcmId))
+                if (demographicOracleHcmIdLookup.TryGetValue(existingEntity.OracleHcmId, out Demographic? entityByOracleHcmId))
                 {
                     incomingEntity = entityByOracleHcmId;
                 }
                 else
                 {
-                    var entityBySsn = demographicSsnLookup[(existingEntity.Ssn, existingEntity.BadgeNumber)].FirstOrDefault();
+                    Demographic? entityBySsn = demographicSsnLookup[(existingEntity.Ssn, existingEntity.BadgeNumber)].FirstOrDefault();
                     if (entityBySsn != null)
                     {
                         incomingEntity = entityBySsn;
@@ -248,10 +249,13 @@ internal class DemographicsService : IDemographicsServiceInternal
                     UpdateEntityValues(existingEntity, incomingEntity, currentModificationDate);
                     if (updateHistory)
                     {
-                        var newHistoryRecord = DemographicHistory.FromDemographic(incomingEntity, existingEntity.Id);
-                        var oldHistoryRecord = await context.DemographicHistories
-                            .Where(x => x.DemographicId == existingEntity.Id && DateTime.UtcNow >= x.ValidFrom && DateTime.UtcNow < x.ValidTo)
+                        DemographicHistory newHistoryRecord = DemographicHistory.FromDemographic(incomingEntity, existingEntity.Id);
+                        DemographicHistory oldHistoryRecord = await context.DemographicHistories
+                            .Where(x => x.DemographicId == existingEntity.Id 
+                                        && DateTime.UtcNow >= x.ValidFrom 
+                                        && DateTime.UtcNow < x.ValidTo)
                             .FirstAsync(cancellationToken: cancellationToken);
+                        
                         oldHistoryRecord.ValidTo = DateTime.UtcNow;
                         newHistoryRecord.ValidFrom = oldHistoryRecord.ValidTo;
                         context.DemographicHistories.Add(newHistoryRecord);
@@ -295,7 +299,35 @@ internal class DemographicsService : IDemographicsServiceInternal
         existingEntity.LastModifiedDate = modificationDate;
     }
 
-    public Task AuditError(int badgeNumber, IEnumerable<ValidationFailure> errorMessages, string requestedBy, CancellationToken cancellationToken = default,
+    /// <summary>
+    /// Audits demographic synchronization errors by logging them into the database.
+    /// </summary>
+    /// <param name="badgeNumber">
+    /// The badge number of the employee associated with the error.
+    /// </param>
+    /// <param name="oracleHcmId">
+    /// The Oracle HCM identifier of the employee.
+    /// </param>
+    /// <param name="errorMessages">
+    /// A collection of validation failures containing details about the errors.
+    /// </param>
+    /// <param name="requestedBy">
+    /// The username of the individual who initiated the request.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A token to monitor for cancellation requests.
+    /// </param>
+    /// <param name="args">
+    /// Additional arguments providing context or metadata for the audit.
+    /// </param>
+    /// <returns>
+    /// A task that represents the asynchronous operation of auditing errors.
+    /// </returns>
+    /// <remarks>
+    /// This method processes validation errors and records them in the <see cref="DemographicSyncAudit"/> table.
+    /// It ensures that null values in the additional arguments are replaced with a default value.
+    /// </remarks>
+    public Task AuditError(int badgeNumber, long oracleHcmId, IEnumerable<ValidationFailure> errorMessages, string requestedBy, CancellationToken cancellationToken = default,
         params object?[] args)
     {
         return _dataContextFactory.UseWritableContext(c =>
@@ -305,10 +337,11 @@ internal class DemographicsService : IDemographicsServiceInternal
                 args[i] ??= "null"; // Replace null with a default value
             }
 
-            var auditRecords = errorMessages.Select(e =>
+            IEnumerable<DemographicSyncAudit> auditRecords = errorMessages.Select(e =>
                 new DemographicSyncAudit
                 {
                     BadgeNumber = badgeNumber,
+                    OracleHcmId = oracleHcmId,
                     InvalidValue = e.AttemptedValue?.ToString() ?? e.CustomState?.ToString(),
                     Message = e.ErrorMessage,
                     UserName = requestedBy,
