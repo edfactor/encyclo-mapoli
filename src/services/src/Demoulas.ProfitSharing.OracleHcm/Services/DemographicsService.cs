@@ -249,19 +249,15 @@ internal class DemographicsService : IDemographicsServiceInternal
                     UpdateEntityValues(existingEntity, incomingEntity, currentModificationDate);
                     if (updateHistory)
                     {
-                        var now = DateTime.UtcNow;
-
                         DemographicHistory newHistoryRecord = DemographicHistory.FromDemographic(incomingEntity, existingEntity.Id);
-                        DemographicHistory? oldHistoryRecord = await context.DemographicHistories
-                            .Where(x => x.DemographicId == existingEntity.Id && now >= x.ValidFrom && now < x.ValidTo)
-                            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
-
-                        if (oldHistoryRecord != null)
-                        {
-                            oldHistoryRecord.ValidTo = now;
-                        }
-
-                        newHistoryRecord.ValidFrom = oldHistoryRecord?.ValidTo ?? now;
+                        DemographicHistory oldHistoryRecord = await context.DemographicHistories
+                            .Where(x => x.DemographicId == existingEntity.Id 
+                                        && DateTime.UtcNow >= x.ValidFrom 
+                                        && DateTime.UtcNow < x.ValidTo)
+                            .FirstAsync(cancellationToken: cancellationToken);
+                        
+                        oldHistoryRecord.ValidTo = DateTime.UtcNow;
+                        newHistoryRecord.ValidFrom = oldHistoryRecord.ValidTo;
                         context.DemographicHistories.Add(newHistoryRecord);
                     }
                 }
