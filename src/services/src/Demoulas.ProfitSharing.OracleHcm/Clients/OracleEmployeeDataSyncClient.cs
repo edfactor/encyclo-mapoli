@@ -115,7 +115,7 @@ internal sealed class OracleEmployeeDataSyncClient
         UriBuilder initialUriBuilder = new UriBuilder(url);
         string initialQueryString = await new FormUrlEncodedContent(initialQuery).ReadAsStringAsync(cancellationToken);
         initialUriBuilder.Query = initialQueryString;
-        var returnUrl = initialUriBuilder.Uri.ToString();
+        string returnUrl = initialUriBuilder.Uri.ToString();
 
         if (Debugger.IsAttached)
         {
@@ -128,27 +128,18 @@ internal sealed class OracleEmployeeDataSyncClient
 
     private async Task<HttpResponseMessage> GetOracleHcmValue(string url, CancellationToken cancellationToken)
     {
-        try
+        using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+        HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken);
+        if (!response.IsSuccessStatusCode && Debugger.IsAttached)
         {
-            using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
-            HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken);
-            if (!response.IsSuccessStatusCode && Debugger.IsAttached)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine();
-                Console.WriteLine(await response.Content.ReadAsStringAsync(cancellationToken));
-                Console.WriteLine();
-                Console.ForegroundColor = ConsoleColor.White;
-            }
-
-            _ = response.EnsureSuccessStatusCode();
-            return response;
-        }
-        catch (SocketException e)
-        {
-            _logger.LogError(e, e.Message);
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine();
+            Console.WriteLine(await response.Content.ReadAsStringAsync(cancellationToken));
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.White;
         }
 
-        return new HttpResponseMessage();
+        _ = response.EnsureSuccessStatusCode();
+        return response;
     }
 }

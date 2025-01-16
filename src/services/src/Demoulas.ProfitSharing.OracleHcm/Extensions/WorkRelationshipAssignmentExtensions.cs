@@ -58,7 +58,7 @@ internal static partial class WorkRelationshipAssignmentExtensions
             return 0;
         }
 
-        var department = _departmentArray.Find(d => string.Compare(d.Name, work.DepartmentName, StringComparison.InvariantCultureIgnoreCase) == 0);
+        Department? department = _departmentArray.Find(d => string.Compare(d.Name, work.DepartmentName, StringComparison.InvariantCultureIgnoreCase) == 0);
         if (department != null)
         {
             return department.Id;
@@ -70,7 +70,7 @@ internal static partial class WorkRelationshipAssignmentExtensions
         }
 
         // Regular expression to find the first numeric sequence after the second dash
-        var match = _departmentRegex().Match(work.PositionCode);
+        Match match = _departmentRegex().Match(work.PositionCode);
         if (match.Success && byte.TryParse(match.Groups[1].Value, out byte departmentId))
         {
             return departmentId;

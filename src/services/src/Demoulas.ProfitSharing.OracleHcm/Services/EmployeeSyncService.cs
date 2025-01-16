@@ -41,9 +41,9 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
 
     public async Task ExecuteFullSyncAsync(string requestedBy = "System", CancellationToken cancellationToken = default)
     {
-        using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(ExecuteFullSyncAsync), ActivityKind.Internal);
+        using Activity? activity = OracleHcmActivitySource.Instance.StartActivity(nameof(ExecuteFullSyncAsync), ActivityKind.Internal);
 
-        var job = new Job
+        Job job = new Job
         {
             JobTypeId = JobType.Constants.EmployeeSyncFull,
             StartMethodId = StartMethod.Constants.System,
@@ -62,7 +62,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         try
         {
             await _demographicsService.CleanAuditError(cancellationToken);
-            var oracleHcmEmployees = _oracleEmployeeDataSyncClient.GetAllEmployees(cancellationToken);
+            IAsyncEnumerable<OracleEmployee?> oracleHcmEmployees = _oracleEmployeeDataSyncClient.GetAllEmployees(cancellationToken);
             await QueueEmployee(requestedBy, oracleHcmEmployees, cancellationToken);
         }
         catch (Exception ex)
@@ -91,19 +91,19 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
     {
         try
         {
-            var maxDate = DateTime.Now;
-            var minDate = await _profitSharingDataContextFactory.UseReadOnlyContext(c =>
+            DateTime maxDate = DateTime.Now;
+            DateTime minDate = await _profitSharingDataContextFactory.UseReadOnlyContext(c =>
             {
                 return c.Demographics.MinAsync(d => d.LastModifiedDate - TimeSpan.FromDays(7), cancellationToken: cancellationToken);
             });
 
-            var newHires = _atomFeedClient.GetFeedDataAsync<NewHireContext>("newhire", minDate, maxDate, cancellationToken);
-            var assignments = _atomFeedClient.GetFeedDataAsync<AssignmentContext>("empassignment", minDate, maxDate, cancellationToken);
-            var updates = _atomFeedClient.GetFeedDataAsync<EmployeeUpdateContext>("empupdate", minDate, maxDate, cancellationToken);
-            var terminations = _atomFeedClient.GetFeedDataAsync<TerminationContext>("termination", minDate, maxDate, cancellationToken);
+            IAsyncEnumerable<NewHireContext> newHires = _atomFeedClient.GetFeedDataAsync<NewHireContext>("newhire", minDate, maxDate, cancellationToken);
+            IAsyncEnumerable<AssignmentContext> assignments = _atomFeedClient.GetFeedDataAsync<AssignmentContext>("empassignment", minDate, maxDate, cancellationToken);
+            IAsyncEnumerable<EmployeeUpdateContext> updates = _atomFeedClient.GetFeedDataAsync<EmployeeUpdateContext>("empupdate", minDate, maxDate, cancellationToken);
+            IAsyncEnumerable<TerminationContext> terminations = _atomFeedClient.GetFeedDataAsync<TerminationContext>("termination", minDate, maxDate, cancellationToken);
 
             HashSet<long> people = new HashSet<long>();
-            await foreach (var record in MergeAsyncEnumerables(newHires, updates, terminations, assignments, cancellationToken))
+            await foreach (DeltaContextBase record in MergeAsyncEnumerables(newHires, updates, terminations, assignments, cancellationToken))
             {
                 people.Add(record.PersonId);
             }
@@ -123,7 +123,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         {
             foreach (long oracleHcmId in people)
             {
-                var oracleHcmEmployees = _oracleEmployeeDataSyncClient.GetEmployee(oracleHcmId, cancellationToken);
+                IAsyncEnumerable<OracleEmployee?> oracleHcmEmployees = _oracleEmployeeDataSyncClient.GetEmployee(oracleHcmId, cancellationToken);
                 await QueueEmployee(requestedBy, oracleHcmEmployees, cancellationToken);
             }
         }
@@ -135,14 +135,14 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
 
     public async Task QueueEmployee(string requestedBy, IAsyncEnumerable<OracleEmployee?> oracleHcmEmployees, CancellationToken cancellationToken)
     {
-        await foreach (var employee in oracleHcmEmployees.WithCancellation(cancellationToken))
+        await foreach (OracleEmployee? employee in oracleHcmEmployees.WithCancellation(cancellationToken))
         {
             if (employee == null)
             {
                 continue;
             }
 
-            var message = new MessageRequest<OracleEmployee>
+            MessageRequest<OracleEmployee> message = new MessageRequest<OracleEmployee>
             {
                 ApplicationName = nameof(EmployeeSyncService), Body = employee, UserId = requestedBy
             };
@@ -169,22 +169,22 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         IAsyncEnumerable<DeltaContextBase> fourth,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        await foreach (var item in first.WithCancellation(cancellationToken))
+        await foreach (DeltaContextBase item in first.WithCancellation(cancellationToken))
         {
             yield return item;
         }
 
-        await foreach (var item in second.WithCancellation(cancellationToken))
+        await foreach (DeltaContextBase item in second.WithCancellation(cancellationToken))
         {
             yield return item;
         }
 
-        await foreach (var item in third.WithCancellation(cancellationToken))
+        await foreach (DeltaContextBase item in third.WithCancellation(cancellationToken))
         {
             yield return item;
         }
 
-        await foreach (var item in fourth.WithCancellation(cancellationToken))
+        await foreach (DeltaContextBase item in fourth.WithCancellation(cancellationToken))
         {
             yield return item;
         }

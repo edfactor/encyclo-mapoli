@@ -72,9 +72,9 @@ internal class PayrollSyncClient
     /// </exception>
     public async Task RetrievePayrollBalancesAsync(string requestedBy = "System", CancellationToken cancellationToken = default)
     {
-        using var activity = OracleHcmActivitySource.Instance.StartActivity(nameof(RetrievePayrollBalancesAsync), ActivityKind.Internal);
+        using Activity? activity = OracleHcmActivitySource.Instance.StartActivity(nameof(RetrievePayrollBalancesAsync), ActivityKind.Internal);
 
-        var job = new Job
+        Job job = new Job
         {
             JobTypeId = JobType.Constants.PayrollSyncFull,
             StartMethodId = StartMethod.Constants.System,
@@ -136,14 +136,14 @@ internal class PayrollSyncClient
         string url = await BuildUrl(cancellationToken: cancellationToken);
         while (true)
         {
-            using var response = await GetOraclePayrollValue(url, cancellationToken);
+            using HttpResponseMessage response = await GetOraclePayrollValue(url, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
                 break;
             }
 
-            var results = await response.Content.ReadFromJsonAsync<PayrollRoot>(_jsonSerializerOptions, cancellationToken);
+            PayrollRoot? results = await response.Content.ReadFromJsonAsync<PayrollRoot>(_jsonSerializerOptions, cancellationToken);
             if ((results?.Count ?? 0) == 0)
             {
                 return;
@@ -153,9 +153,9 @@ internal class PayrollSyncClient
 
             // Queue Here
             const string requestedBy = "System";
-            foreach (var item in results!.Items)
+            foreach (PayrollItem item in results!.Items)
             {
-                var message = new MessageRequest<PayrollItem> { ApplicationName = nameof(PayrollSyncClient), Body = item, UserId = requestedBy };
+                MessageRequest<PayrollItem> message = new MessageRequest<PayrollItem> { ApplicationName = nameof(PayrollSyncClient), Body = item, UserId = requestedBy };
 
                 await _payrollSyncBus.Publish(message, cancellationToken);
 
@@ -179,11 +179,11 @@ internal class PayrollSyncClient
 
     private async Task TrySyncMissingEmployees(IReadOnlyList<PayrollItem> items, CancellationToken cancellationToken)
     {
-        var existsCollection = items.Select(d => d.PersonId).ToHashSet();
-        var missingPersonIds = await _profitSharingDataContextFactory.UseReadOnlyContext(async c =>
+        HashSet<long> existsCollection = items.Select(d => d.PersonId).ToHashSet();
+        List<long> missingPersonIds = await _profitSharingDataContextFactory.UseReadOnlyContext(async c =>
         {
             // Query only the relevant PersonIds from the database
-            var existingPersonIds = await c.Demographics
+            HashSet<long> existingPersonIds = await c.Demographics
                 .Where(d => existsCollection.Contains(d.OracleHcmId))
                 .Select(d => d.OracleHcmId)
                 .ToHashSetAsync(cancellationToken);
@@ -194,7 +194,7 @@ internal class PayrollSyncClient
 
         foreach (long id in missingPersonIds)
         {
-            var oracleHcmEmployees = _oracleEmployeeDataSyncClient.GetEmployee(id, cancellationToken);
+            IAsyncEnumerable<OracleEmployee?> oracleHcmEmployees = _oracleEmployeeDataSyncClient.GetEmployee(id, cancellationToken);
             await _employeeSyncService.QueueEmployee("System", oracleHcmEmployees, cancellationToken);
         }
     }

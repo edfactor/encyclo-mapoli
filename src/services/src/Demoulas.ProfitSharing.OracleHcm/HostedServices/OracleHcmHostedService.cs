@@ -57,11 +57,11 @@ internal abstract class OracleHcmHostedServiceBase : IHostedService
         CancellationToken cancellationToken
     ) where TJob : IJob
     {
-        var job = JobBuilder.Create<TJob>()
+        IJobDetail job = JobBuilder.Create<TJob>()
             .WithIdentity(typeof(TJob).Name)
             .Build();
 
-        var trigger = TriggerBuilder.Create()
+        ITrigger trigger = TriggerBuilder.Create()
             .WithIdentity(triggerIdentity)
             .StartAt(DateTimeOffset.UtcNow.Add(startDelay))
             .WithSimpleSchedule(x => x
@@ -106,7 +106,7 @@ internal abstract class OracleHcmHostedServiceBase : IHostedService
         if (Debugger.IsAttached)
         {
             // Log the exception details
-            var taskDetails = sender as Task;
+            Task? taskDetails = sender as Task;
             Console.WriteLine("Unobserved Task Exception occurred:");
             Console.WriteLine($"Exception: {e.Exception}");
             Console.WriteLine($"Stack Trace: {e.Exception.StackTrace}");

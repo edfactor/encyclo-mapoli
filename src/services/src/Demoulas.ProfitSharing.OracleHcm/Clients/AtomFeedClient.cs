@@ -55,7 +55,7 @@ internal class AtomFeedClient
 
         do
         {
-            var url = $"/hcmRestApi/atomservlet/employee/{feedType}?page-size=25&page={page}&published-min={minDate:yyyy-MM-ddTHH:mm:ssZ}&published-max={maxDate:yyyy-MM-ddTHH:mm:ssZ}";
+            string url = $"/hcmRestApi/atomservlet/employee/{feedType}?page-size=25&page={page}&published-min={minDate:yyyy-MM-ddTHH:mm:ssZ}&published-max={maxDate:yyyy-MM-ddTHH:mm:ssZ}";
             AtomFeedResponse<TContextType>? feedRoot = null;
 
             try
@@ -80,7 +80,7 @@ internal class AtomFeedClient
 
             if (feedRoot?.Feed.Entries != null && feedRoot.Feed.Entries.Any())
             {
-                foreach (var record in feedRoot.Feed.Entries
+                foreach (TContextType record in feedRoot.Feed.Entries
                              .Select(e => e.Content)
                              .SelectMany(c => c.Context)!)
                 {
