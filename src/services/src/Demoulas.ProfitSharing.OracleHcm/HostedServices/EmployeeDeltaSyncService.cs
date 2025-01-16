@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Jobs;
+using Microsoft.Extensions.Logging;
 using Quartz;
 using Quartz.Spi;
 
@@ -10,7 +11,8 @@ internal sealed class EmployeeDeltaSyncService : OracleHcmHostedServiceBase
 {
     public EmployeeDeltaSyncService(ISchedulerFactory schedulerFactory,
         IJobFactory jobFactory,
-        OracleHcmConfig oracleHcmConfig) : base(schedulerFactory, jobFactory, oracleHcmConfig)
+        OracleHcmConfig oracleHcmConfig,
+        ILogger<EmployeeDeltaSyncService> logger) : base(schedulerFactory, jobFactory, oracleHcmConfig, logger)
     {
        
     }
@@ -19,7 +21,7 @@ internal sealed class EmployeeDeltaSyncService : OracleHcmHostedServiceBase
     {
         return ScheduleJob<EmployeeDeltaSyncJob>(
             "employeeDeltaSyncTrigger",
-            Debugger.IsAttached ? TimeSpan.Zero : TimeSpan.FromMinutes(5),
+            Debugger.IsAttached ? TimeSpan.Zero : TimeSpan.FromMinutes(2),
             TimeSpan.FromMinutes(OracleHcmConfig.DeltaIntervalInMinutes),
             cancellationToken
         );

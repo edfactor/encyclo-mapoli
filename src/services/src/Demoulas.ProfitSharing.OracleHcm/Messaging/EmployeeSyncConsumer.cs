@@ -13,6 +13,7 @@ using Demoulas.ProfitSharing.OracleHcm.Extensions;
 using Demoulas.ProfitSharing.OracleHcm.Validators;
 using Demoulas.Util.Extensions;
 using MassTransit;
+using ValidationResult = FluentValidation.Results.ValidationResult;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Messaging;
 internal class EmployeeSyncConsumer : IConsumer<MessageRequest<OracleEmployee>>
@@ -33,8 +34,8 @@ internal class EmployeeSyncConsumer : IConsumer<MessageRequest<OracleEmployee>>
 
     public Task Consume(ConsumeContext<MessageRequest<OracleEmployee>> context)
     {
-        var employee = context.Message.Body;
-        var requestDtoEnumerable = ConvertToRequestDto(employee, context.Message.UserId, context.CancellationToken);
+        OracleEmployee employee = context.Message.Body;
+        IAsyncEnumerable<DemographicsRequest> requestDtoEnumerable = ConvertToRequestDto(employee, context.Message.UserId, context.CancellationToken);
         return _demographicsService.AddDemographicsStreamAsync(requestDtoEnumerable, _oracleHcmConfig.Limit, context.CancellationToken);
     }
     private async IAsyncEnumerable<DemographicsRequest> ConvertToRequestDto(OracleEmployee employee,
@@ -48,10 +49,10 @@ internal class EmployeeSyncConsumer : IConsumer<MessageRequest<OracleEmployee>>
             yield break;
         }
 
-        var result = await _employeeValidator.ValidateAsync(employee!, cancellationToken);
+        ValidationResult? result = await _employeeValidator.ValidateAsync(employee!, cancellationToken);
         if (!result.IsValid)
         {
-            await _demographicsService.AuditError(badgeNumber, result.Errors, requestedBy, cancellationToken);
+            await _demographicsService.AuditError(badgeNumber, employee?.PersonId ?? 0, result.Errors, requestedBy, cancellationToken);
             yield break;
         }
 

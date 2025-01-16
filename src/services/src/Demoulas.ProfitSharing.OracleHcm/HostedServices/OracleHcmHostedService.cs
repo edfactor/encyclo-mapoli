@@ -1,5 +1,6 @@
 ﻿using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Quartz;
 using Quartz.Spi;
 
@@ -11,14 +12,17 @@ internal abstract class OracleHcmHostedServiceBase : IHostedService
     
     private readonly ISchedulerFactory _schedulerFactory;
     private readonly IJobFactory _jobFactory;
+    private readonly ILogger _logger;
     private IScheduler? _scheduler;
 
     protected OracleHcmHostedServiceBase(ISchedulerFactory schedulerFactory,
         IJobFactory jobFactory,
-        OracleHcmConfig oracleHcmConfig)
+        OracleHcmConfig oracleHcmConfig,
+        ILogger logger)
     {
         _schedulerFactory = schedulerFactory;
         _jobFactory = jobFactory;
+        _logger = logger;
         OracleHcmConfig = oracleHcmConfig;
     }
 
@@ -48,11 +52,11 @@ internal abstract class OracleHcmHostedServiceBase : IHostedService
         CancellationToken cancellationToken
     ) where TJob : IJob
     {
-        var job = JobBuilder.Create<TJob>()
+        IJobDetail job = JobBuilder.Create<TJob>()
             .WithIdentity(typeof(TJob).Name)
             .Build();
 
-        var trigger = TriggerBuilder.Create()
+        ITrigger trigger = TriggerBuilder.Create()
             .WithIdentity(triggerIdentity)
             .StartAt(DateTimeOffset.UtcNow.Add(startDelay))
             .WithSimpleSchedule(x => x
@@ -60,7 +64,7 @@ internal abstract class OracleHcmHostedServiceBase : IHostedService
                 .RepeatForever()
             )
             .Build();
-
+        _logger.LogInformation("Scheduling Job {Job} with interval of {Interval}", typeof(TJob).Name, interval);
         return _scheduler!.ScheduleJob(job, trigger, cancellationToken);
     }
 

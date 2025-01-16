@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Net.Http.Json;
+using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
@@ -114,7 +115,7 @@ internal sealed class OracleEmployeeDataSyncClient
         UriBuilder initialUriBuilder = new UriBuilder(url);
         string initialQueryString = await new FormUrlEncodedContent(initialQuery).ReadAsStringAsync(cancellationToken);
         initialUriBuilder.Query = initialQueryString;
-        var returnUrl = initialUriBuilder.Uri.ToString();
+        string returnUrl = initialUriBuilder.Uri.ToString();
 
         if (Debugger.IsAttached)
         {

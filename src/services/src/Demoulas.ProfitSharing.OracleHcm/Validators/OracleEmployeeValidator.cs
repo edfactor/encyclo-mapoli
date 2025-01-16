@@ -48,7 +48,7 @@ public sealed class OracleEmployeeValidator : Validator<OracleEmployee>
                 if (address != null)
                 {
                     ValidationResult result = _addressValidator.Validate(address);
-                    foreach (var error in result.Errors)
+                    foreach (ValidationFailure? error in result.Errors)
                     {
                         context.AddFailure(error);
                     }
@@ -61,7 +61,7 @@ public sealed class OracleEmployeeValidator : Validator<OracleEmployee>
                 if (nameItem != null)
                 {
                     ValidationResult result = _nameItemValidator.Validate(nameItem);
-                    foreach (var error in result.Errors)
+                    foreach (ValidationFailure? error in result.Errors)
                     {
                         context.AddFailure(error);
                     }
@@ -116,15 +116,15 @@ public sealed class OracleEmployeeValidator : Validator<OracleEmployee>
 
     private async Task<bool> ValidatePayClassificationAsync(byte? jobCode, CancellationToken ct)
     {
-        var lookup = await _accountCache.GetAllAsync(ct);
-        var codes = lookup.Select(p => p.Id).ToHashSet();
+        ISet<LookupTableCache<byte>> lookup = await _accountCache.GetAllAsync(ct);
+        HashSet<byte> codes = lookup.Select(p => p.Id).ToHashSet();
         return codes.Contains(jobCode ?? 0);
     }
 
     private async Task<bool> ValidateDepartmentIdAsync(byte departmentId, CancellationToken ct)
     {
-        var lookup = await _depCache.GetAllAsync(ct);
-        var codes = lookup.Select(p => p.Id).ToHashSet();
+        ISet<LookupTableCache<byte>> lookup = await _depCache.GetAllAsync(ct);
+        HashSet<byte> codes = lookup.Select(p => p.Id).ToHashSet();
         return codes.Contains(departmentId);
     }
 }

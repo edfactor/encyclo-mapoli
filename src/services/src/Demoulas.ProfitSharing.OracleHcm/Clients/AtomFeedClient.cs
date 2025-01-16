@@ -51,14 +51,16 @@ internal class AtomFeedClient
     {
         int page = 1;
         bool hasMoreData;
+        maxDate = maxDate.AddDays(1).Date;
 
         do
         {
-            var url = $"/hcmRestApi/atomservlet/employee/{feedType}?page-size=25&page={page}&published-min={minDate:yyyy-MM-ddTHH:mm:ssZ}&published-max={maxDate:yyyy-MM-ddTHH:mm:ssZ}";
+            string url = $"/hcmRestApi/atomservlet/employee/{feedType}?page-size=25&page={page}&published-min={minDate:yyyy-MM-ddTHH:mm:ssZ}&published-max={maxDate:yyyy-MM-ddTHH:mm:ssZ}";
             AtomFeedResponse<TContextType>? feedRoot = null;
 
             try
             {
+
                 HttpResponseMessage response = await _httpClient.GetAsync(url, cancellationToken);
 
                 if (Debugger.IsAttached)
@@ -78,7 +80,9 @@ internal class AtomFeedClient
 
             if (feedRoot?.Feed.Entries != null && feedRoot.Feed.Entries.Any())
             {
-                foreach (var record in feedRoot.Feed.Entries.Select(e => e.Content).SelectMany(c => c.Context)!)
+                foreach (TContextType record in feedRoot.Feed.Entries
+                             .Select(e => e.Content)
+                             .SelectMany(c => c.Context)!)
                 {
                     record.FeedType = feedType;
                     yield return record;

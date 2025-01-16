@@ -19,6 +19,7 @@
     "@hookform/resolvers": "~3.4.2",
     "@mui/icons-material": "^5.15.18",
     "@mui/material": "^5.15.18",
+    "@mui/system": "^5.15.18",
     "@mui/x-date-pickers": "^7.5.1",
     "@okta/okta-auth-js": "^7.9.0",
     "@okta/okta-react": "~6.9.0",
