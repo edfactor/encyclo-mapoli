@@ -500,7 +500,7 @@ public class FrozenReportService : IFrozenReportService
         var details = groupedResult
             .Select(group => new VestedAmountsByAgeDetail
             {
-                Age = (byte)group.Age,
+                Age = (byte)(group.Age),
                 FullTimeCount = (short)group.Entries.Count(e => e.EmploymentType == FT && e.VestedBalance == e.CurrentBalance),
                 NotVestedCount = (short)group.Entries.Count(e => e.VestedBalance == 0),
                 PartialVestedCount = (short)group.Entries.Count(e => e.VestedBalance > 0 && e.VestedBalance < e.CurrentBalance),
@@ -616,7 +616,9 @@ public class FrozenReportService : IFrozenReportService
         });
 
         // Build the final response
-        req = req with { Take = details.Count + 1 };
+#pragma warning disable S2971
+        req = req with { Take = (details.Count() + 1) };
+#pragma warning restore S2971
 
         return new BalanceByYears
         {
