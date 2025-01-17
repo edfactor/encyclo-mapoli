@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Aspire.Hosting;
 using Projects;
 
 IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(options: new DistributedApplicationOptions { AllowUnsecuredTransport = true });
@@ -32,9 +33,16 @@ catch (Exception ex)
     Console.WriteLine($"An error occurred: {ex.Message}");
 }
 
+var cli = builder.AddExecutable("Database-Cli",
+    "dotnet",
+    @"..\Demoulas.ProfitSharing.Data.Cli\",
+    "run","--launch-profile", "upgrade-db");
+
+
 var api = builder.AddProject<Demoulas_ProfitSharing_Api>("ProfitSharing-Api")
     .WithHttpHealthCheck("/health")
-    .WithHttpsHealthCheck("/health");
+    .WithHttpsHealthCheck("/health")
+    .WaitFor(cli);
 
 var ui = builder.AddNpmApp("ProfitSharing-Ui", "../../../ui/", "dev")
     .WithReference(api)
