@@ -18,7 +18,8 @@ internal sealed class JobTypeMap : IEntityTypeConfiguration<JobType>
 
         builder.HasData(
             new JobType { Id = JobType.Constants.EmployeeSyncFull, Name = "Employee Sync Full" },
-            new JobType { Id = JobType.Constants.PayrollSyncFull, Name = "Payroll Sync Full" }
+            new JobType { Id = JobType.Constants.PayrollSyncFull, Name = "Payroll Sync Full" },
+            new JobType { Id = JobType.Constants.EmployeeSyncDelta, Name = "Employee Sync Delta" }
         );
     }
 }
