@@ -6,8 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsAspireHost>true</IsAspireHost>
-    <UserSecretsId>3be9e26a-fe8f-4155-9b49-5f1c5bbf388e</UserSecretsId>
-    <Configurations>Debug;Release;Russ</Configurations>
+    <UserSecretsId>a3be1bce-4a9e-4da4-a908-5f315c147298</UserSecretsId>
+    <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Demoulas.ProfitSharing.Api\Demoulas.ProfitSharing.Api.csproj" />
+    <ProjectReference Include="..\Demoulas.ProfitSharing.Data.Cli\Demoulas.ProfitSharing.Data.Cli.csproj" />
     <ProjectReference Include="..\Demoulas.ProfitSharing.EmployeeDelta.Sync\Demoulas.ProfitSharing.EmployeeDelta.Sync.csproj" />
     <ProjectReference Include="..\Demoulas.ProfitSharing.EmployeeFull.Sync\Demoulas.ProfitSharing.EmployeeFull.Sync.csproj" />
     <ProjectReference Include="..\Demoulas.ProfitSharing.EmployeePayroll.Sync\Demoulas.ProfitSharing.EmployeePayroll.Sync.csproj" />

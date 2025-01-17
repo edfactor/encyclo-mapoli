@@ -33,16 +33,19 @@ catch (Exception ex)
     Console.WriteLine($"An error occurred: {ex.Message}");
 }
 
-var cli = builder.AddExecutable("Database-Cli",
+Demoulas_ProfitSharing_Data_Cli cli = new Demoulas_ProfitSharing_Data_Cli();
+var projectPath = new FileInfo(cli.ProjectPath).Directory?.FullName;
+
+var cliRunner = builder.AddExecutable("Database-Cli",
     "dotnet",
-    @"..\Demoulas.ProfitSharing.Data.Cli\",
-    "run","--launch-profile", "upgrade-db");
+    projectPath!,
+    "run", "--launch-profile", "upgrade-db");
 
 
 var api = builder.AddProject<Demoulas_ProfitSharing_Api>("ProfitSharing-Api")
     .WithHttpHealthCheck("/health")
     .WithHttpsHealthCheck("/health")
-    .WaitFor(cli);
+    .WaitFor(cliRunner);
 
 var ui = builder.AddNpmApp("ProfitSharing-Ui", "../../../ui/", "dev")
     .WithReference(api)
