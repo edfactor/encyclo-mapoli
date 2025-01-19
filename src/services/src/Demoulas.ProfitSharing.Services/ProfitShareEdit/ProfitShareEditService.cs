@@ -37,7 +37,7 @@ public class ProfitShareEditService : IProfitShareEditService
             }
             else
             {
-                AddBeneficaryRecords(records, member);
+                AddBeneficiaryRecords(records, member);
             }
         }
 
@@ -152,7 +152,7 @@ public class ProfitShareEditService : IProfitShareEditService
         }
     }
 
-    private static void AddBeneficaryRecords(List<ProfitShareEditMemberRecordResponse> records, ProfitShareUpdateMemberResponse member)
+    private static void AddBeneficiaryRecords(List<ProfitShareEditMemberRecordResponse> records, ProfitShareUpdateMemberResponse member)
     {
         if (member.AllEarnings > 0)
         {

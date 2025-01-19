@@ -125,9 +125,8 @@ public sealed class ScenarioFactory
         // ProfitDetails
         Mock<DbSet<ProfitDetail>> mockProfitDetails = ProfitDetails.AsQueryable().BuildMockDbSet();
         mockProfitDetails
-            .Setup(m => m.AddRangeAsync(It.IsAny<IEnumerable<ProfitDetail>>(), default(CancellationToken)))
-            .Callback<IEnumerable<ProfitDetail>, CancellationToken>((profitDetails, _) => { addedProfitDetails.AddRange(profitDetails); })
-            .Returns(Task.CompletedTask);
+            .Setup(m => m.AddRange(It.IsAny<IEnumerable<ProfitDetail>>()))
+            .Callback<IEnumerable<ProfitDetail>>((profitDetails) => addedProfitDetails.AddRange(profitDetails));
         mockProfitDetails
             .Setup(m => m.RemoveRange(It.IsAny<IEnumerable<ProfitDetail>>()))
             .Callback<IEnumerable<ProfitDetail>>((profitDetails) => removedProftitDetails.AddRange(profitDetails));

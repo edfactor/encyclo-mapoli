@@ -12,8 +12,8 @@ namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 public class ExecutiveHoursAndDollarsIntegrationTests : ApiIntegrationTestBase<Program>
 {
     // Probably should define these somewhere more global, or be looked up dynamically 
-    private const short YearThis = 2023;
-    private const short YearLast = 2022;
+    private const short YearThis = 2024;
+    private const short YearLast = 2023;
 
     [Fact]
     public async Task Ensure_SMART_CSV_matches_READY_CSV_for_year_THIS()
@@ -72,7 +72,7 @@ public class ExecutiveHoursAndDollarsIntegrationTests : ApiIntegrationTestBase<P
         // remaining content should match expectedCsvContent
         var actualCsvContents = string.Join("\n", lines.Skip(2));
 
-        // We do not have actual executive hours and dollars for 2022, so we expect just the headers
+        // We do not have actual executive hours and dollars for prior years, so we expect just the headers
         actualCsvContents.Should().Be("BADGE,NAME,STR,EXEC HRS,EXEC DOLS,ORA HRS CUR,ORA DOLS CUR,FREQ,STATUS\n");
     }
 
