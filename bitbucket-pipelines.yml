@@ -112,6 +112,10 @@ definitions:
         - SET ENV=qa
         - $env:API_SERVER_QA = "appt23d"
 
+        - powershell -Command "Write-Host 'Current Directory:'; Get-Location"
+        - powershell -Command "Write-Host 'Files and Folders:'; Get-ChildItem"
+
+
         - pwsh -Command "Set-ExecutionPolicy Bypass -Scope Process -Force"
 
         - pwsh -File credsettings.ps1 `
