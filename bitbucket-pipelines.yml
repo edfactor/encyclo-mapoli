@@ -108,21 +108,21 @@ definitions:
         - self.hosted
       script:
         - SET ENV=qa
-        - $env:API_SERVER_QA = "appt23d"
-        - $env:REPLACEMENTS = "{ \"PLACEHOLDER1\": \"Value1\", \"PLACEHOLDER2\": \"Value2\" }"
+        - pwsh -Command "$env:API_SERVER_QA = 'appt23d'"
+        - pwsh -Command "$env:REPLACEMENTS = '{\"PLACEHOLDER1\": \"Value1\", \"PLACEHOLDER2\": \"Value2\"}'"
 
-        - powershell -Command "Write-Host 'Current Directory:'; Get-Location"
-        - powershell -Command "Write-Host 'Files and Folders:'; Get-ChildItem"
-
+        - pwsh -Command "Write-Host 'Current Directory:'; Get-Location"
+        - pwsh -Command "Write-Host 'Files and Folders:'; Get-ChildItem"
 
         - pwsh -Command "Set-ExecutionPolicy Bypass -Scope Process -Force"
 
         - pwsh -File ./scripts/credsettings.ps1 `
-              -FilePath "./src/services/configuration/credsettings.json" `
-              -OutputPath "./src/services/configuration/credsettings.${ENV}.json" `
-              -Replacements $Env:REPLACEMENTS `
-              -RemoteServer $env:API_SERVER_QA `
-              -RemotePath "C:/NextGenApplications/ps/EmployeeFull"
+                -FilePath "./src/services/configuration/credsettings.json" `
+                -OutputPath "./src/services/configuration/credsettings.${ENV}.json" `
+                -Replacements $Env:REPLACEMENTS `
+                -RemoteServer $env:API_SERVER_QA `
+                -RemotePath "C:/NextGenApplications/ps/EmployeeFull"
+
 
 
         
