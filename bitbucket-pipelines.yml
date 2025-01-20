@@ -118,12 +118,12 @@ definitions:
 
         - pwsh -Command "Set-ExecutionPolicy Bypass -Scope Process -Force"
 
-        - pwsh -File credsettings.ps1 `
-              -FilePath ".\src\services\configuration\credsettings.json" `
-              -OutputPath ".\src\services\configuration\credsettings.${ENV}.json" `
+        - pwsh -File ./scripts/credsettings.ps1 `
+              -FilePath "./src/services/configuration/credsettings.json" `
+              -OutputPath "./src/services/configuration/credsettings.${ENV}.json" `
               -Replacements $Env:REPLACEMENTS `
               -RemoteServer $env:API_SERVER_QA `
-              -RemotePath "C:\NextGenApplications\ps\EmployeeFull"
+              -RemotePath "C:/NextGenApplications/ps/EmployeeFull"
 
 
         
