@@ -112,11 +112,11 @@ definitions:
         - SET ENV=qa
         - $env:API_SERVER_QA = "appt23d"
 
-        - powershell -Command "Set-ExecutionPolicy Bypass -Scope Process -Force"
+        - pwsh -Command "Set-ExecutionPolicy Bypass -Scope Process -Force"
 
-        - powershell -File credsettings.ps1 `
-              -FilePath "..\src\services\configuration\credsettings.json" `
-              -OutputPath "..\src\services\configuration\credsettings.${ENV}.json" `
+        - pwsh -File credsettings.ps1 `
+              -FilePath ".\src\services\configuration\credsettings.json" `
+              -OutputPath ".\src\services\configuration\credsettings.${ENV}.json" `
               -Replacements $Env:REPLACEMENTS `
               -RemoteServer $env:API_SERVER_QA `
               -RemotePath "C:\NextGenApplications\ps\EmployeeFull"
