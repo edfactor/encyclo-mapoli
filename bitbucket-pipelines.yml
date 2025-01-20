@@ -103,26 +103,21 @@ definitions:
 
     create-credsettings: &create-credsettings
       name: Replace Slugs and Copy File
+      variables:
+        REPLACEMENTS: '{"CONNECTIONSTRINGS_PROFITSHARING_SLUG":"value1", "CONNECTIONSTRINGS_COMMON_SLUG":"value2", "ORACLEHCM_BASE_URL_SLUG" : "value3"}'
       runs-on:
         - windows
         - self.hosted
       script:
         - SET ENV=qa
-         - pwsh -Command >-
-            $replacements = @{
-              "CONNECTIONSTRINGS_PROFITSHARING_SLUG" = "value1";
-              "CONNECTIONSTRINGS_COMMON_SLUG" = "value2";
-              "ORACLEHCM_BASE_URL_SLUG" = "value3";
-              "ORACLEHCM_USERNAME_SLUG" = "value4";
-              "ORACLEHCM_PASSWORD_SLUG" = "value5";
-            };
-            $json = $replacements | ConvertTo-Json -Depth 10 -Compress;
-            Write-Host "JSON String:";
-            Write-Host $json;
-            .\scripts\credsettings.ps1 -EnvName qa -ReplacementsJson $json
-
-        - pwsh -Command ".\scripts\credsettings.ps1 -EnvName qa -ReplacementsJson $replacements"
-
+        - $env:API_SERVER_QA = "appt23d"
+        - powershell -Command "Set-ExecutionPolicy Bypass -Scope Process -Force"
+          - powershell -File credsettings.ps1 `
+              -FilePath "..\src\services\configuration\credsettings.json" `
+              -OutputPath "..\src\services\configuration\credsettings.${ENV}.json" `
+              -Replacements $Env:REPLACEMENTS `
+              -RemoteServer $env:API_SERVER_QA `
+              -RemotePath "C:\NextGenApplications\ps\EmployeeFull" `
 
 
         
@@ -253,6 +248,7 @@ pipelines:
       - parallel:
           - step: *build-and-test-backend
           - step: *test-frontend
+          - step: *create-credsettings
       - parallel:
           - step: *create-api-artifacts
           - step: *create-service-artifacts

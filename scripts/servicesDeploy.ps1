@@ -1,4 +1,3 @@
-$StopAppTimeout = 5
 $envTarget = $args[0]
 $envServerName = $args[1]
 $configTarget = ''
@@ -73,6 +72,7 @@ try {
             {
                 $ServiceInfo = Get-Service -Name $Using:Deploy.ServiceName | Where-Object { $_.Status -eq "Running" } -ErrorAction SilentlyContinue
                 Write-Host "Attempting to Stop Running Service" $ServiceInfo
+
                 if (($ServiceInfo -ne $null) -and ($ServiceInfo.Length -gt 0))
                 {
                     Write-Host 'Stopping Service'
