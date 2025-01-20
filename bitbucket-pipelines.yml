@@ -108,8 +108,8 @@ definitions:
         - self.hosted
       script:
         - SET ENV=qa
-        - pwsh -Command "$Env:API_SERVER_QA = 'appt23d'"
-        - pwsh -Command "$Env:REPLACEMENTS = '{\"PLACEHOLDER1\":\"Value1\", \"PLACEHOLDER2\":\"Value2\"}'"
+        - pwsh -Command "[Environment]::SetEnvironmentVariable('API_SERVER_QA', 'appt23d', 'Process')"
+        - pwsh -Command "[Environment]::SetEnvironmentVariable('REPLACEMENTS', '{\"PLACEHOLDER1\":\"Value1\",\"PLACEHOLDER2\":\"Value2\"}', 'Process')"
 
         - pwsh -Command "Write-Host 'Current Directory:'; Get-Location"
         - pwsh -Command "Write-Host 'Files and Folders:'; Get-ChildItem"
@@ -122,6 +122,7 @@ definitions:
               -Replacements $Env:REPLACEMENTS `
               -RemoteServer $Env:API_SERVER_QA `
               -RemotePath "C:/NextGenApplications/ps/EmployeeFull"
+
 
 
 
