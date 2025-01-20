@@ -3,26 +3,22 @@ param (
     [string]$OutputPath,
     [hashtable]$Replacements,
     [string]$RemoteServer,
-    [string]$RemotePath,
-    [string]$Username,
-    [string]$Password
+    [string]$RemotePath
 )
 
-# Read the content of the file
-$content = Get-Content -Path $FilePath
+# Convert JSON to hashtable if passed as string
+if ($Replacements -is [string]) {
+    $Replacements = ConvertFrom-Json $Replacements
+}
 
-# Perform find/replace
+Write-Host "Replacements: $Replacements"
+
+# Process File
+$content = Get-Content -Path $FilePath
 foreach ($key in $Replacements.Keys) {
     $content = $content -replace $key, $Replacements[$key]
 }
-
-# Write the updated content to the output file
 Set-Content -Path $OutputPath -Value $content
 
-# Copy the file to the remote server
-$securePassword = ConvertTo-SecureString $Password -AsPlainText -Force
-$credential = New-Object System.Management.Automation.PSCredential($Username, $securePassword)
-Invoke-Command -ComputerName $RemoteServer -Credential $credential -ScriptBlock {
-    param($src, $dest)
-    Copy-Item -Path $src -Destination $dest
-} -ArgumentList $OutputPath, $RemotePath
+# Copy file to remote server (Example logic, adjust as needed)
+Write-Host "Copying $OutputPath to $RemoteServer:$RemotePath"
