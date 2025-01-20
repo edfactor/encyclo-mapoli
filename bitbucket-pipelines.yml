@@ -109,7 +109,8 @@ definitions:
       script:
         - SET ENV=qa
         - $env:API_SERVER_QA = "appt23d"
-        - $env:REPLACEMENTS = @"{ 'PLACEHOLDER1' = 'Value1'; 'PLACEHOLDER2' = 'Value2' }"
+        - $env:REPLACEMENTS = @
+                        "{ 'PLACEHOLDER1' = 'Value1'; 'PLACEHOLDER2' = 'Value2' }"
 
         - powershell -Command "Write-Host 'Current Directory:'; Get-Location"
         - powershell -Command "Write-Host 'Files and Folders:'; Get-ChildItem"
