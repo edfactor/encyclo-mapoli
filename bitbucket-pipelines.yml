@@ -111,8 +111,10 @@ definitions:
       script:
         - SET ENV=qa
         - $env:API_SERVER_QA = "appt23d"
+
         - powershell -Command "Set-ExecutionPolicy Bypass -Scope Process -Force"
-          - powershell -File credsettings.ps1 `
+
+        - powershell -File credsettings.ps1 `
               -FilePath "..\src\services\configuration\credsettings.json" `
               -OutputPath "..\src\services\configuration\credsettings.${ENV}.json" `
               -Replacements $Env:REPLACEMENTS `
@@ -245,10 +247,10 @@ definitions:
 pipelines:
   branches:
     release:
+      - step: *create-credsettings
       - parallel:
           - step: *build-and-test-backend
-          - step: *test-frontend
-          - step: *create-credsettings
+          - step: *test-frontend          
       - parallel:
           - step: *create-api-artifacts
           - step: *create-service-artifacts
