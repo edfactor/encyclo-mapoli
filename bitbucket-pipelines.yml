@@ -109,10 +109,14 @@ definitions:
       script:
         - SET ENV=qa
         - pwsh -Command "$env:API_SERVER_QA = 'appt23d'"
-        - pwsh -Command "$env:REPLACEMENTS = '{\"PLACEHOLDER1\": \"Value1\", \"PLACEHOLDER2\": \"Value2\"}'"
+        - pwsh -Command "$Env:REPLACEMENTS = '{\"PLACEHOLDER1\": \"Value1\", \"PLACEHOLDER2\": \"Value2\"}'"
 
         - pwsh -Command "Write-Host 'Current Directory:'; Get-Location"
         - pwsh -Command "Write-Host 'Files and Folders:'; Get-ChildItem"
+
+        - powershell -Command "Write-Host 'REPLACEMENTS: $Env:REPLACEMENTS'"
+        - powershell -Command "Write-Host 'API_SERVER_QA: $Env:API_SERVER_QA'"
+
 
         - pwsh -Command "Set-ExecutionPolicy Bypass -Scope Process -Force"
 
