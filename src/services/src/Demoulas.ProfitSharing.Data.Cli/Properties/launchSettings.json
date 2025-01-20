@@ -1,12 +1,16 @@
 {
     "profiles": {
+        "upgrade-db": {
+            "commandName": "Project",
+            "commandLineArgs": "upgrade-db --connection-name ProfitSharing"
+        },
         "drop-recreate-db": {
             "commandName": "Project",
-            "commandLineArgs": "drop-recreate-db --connection-name ProfitSharing --source-Schema \"PROFITSHARE\" --sql-file \"R:\\repos\\Demoulas\\smart-profit-sharing\\src\\database\\ready_import\\SQL copy all from ready to smart ps.sql\""
+            "commandLineArgs": "drop-recreate-db --connection-name ProfitSharing --source-schema \"PROFITSHARE\" --sql-file \"R:\\repos\\Demoulas\\smart-profit-sharing\\src\\database\\ready_import\\SQL copy all from ready to smart ps.sql\""
         },
-        "run-sql": {
+        "import-from-ready": {
             "commandName": "Project",
-            "commandLineArgs": "import-from-ready --connection-name ProfitSharing --source-Schema \"PROFITSHARE\" --sql-file \"R:\\repos\\Demoulas\\smart-profit-sharing\\src\\database\\ready_import\\SQL copy all from ready to smart ps.sql\""
+            "commandLineArgs": "import-from-ready --connection-name ProfitSharing --source-schema \"PROFITSHARE\" --sql-file \"R:\\repos\\Demoulas\\smart-profit-sharing\\src\\database\\ready_import\\SQL copy all from ready to smart ps.sql\""
         },
         "create-dgml": {
             "commandName": "Project",
