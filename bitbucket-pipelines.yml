@@ -117,7 +117,7 @@ definitions:
               -OutputPath "..\src\services\configuration\credsettings.${ENV}.json" `
               -Replacements $Env:REPLACEMENTS `
               -RemoteServer $env:API_SERVER_QA `
-              -RemotePath "C:\NextGenApplications\ps\EmployeeFull" `
+              -RemotePath "C:\NextGenApplications\ps\EmployeeFull"
 
 
         
