@@ -21,4 +21,6 @@ foreach ($key in $Replacements.Keys) {
 Set-Content -Path $OutputPath -Value $content
 
 # Copy file to remote server (Example logic, adjust as needed)
-Write-Host "Copying $OutputPath to $RemoteServer:$RemotePath"
+Write-Host "Copying $OutputPath to ${RemoteServer}:${RemotePath}"
+
+
