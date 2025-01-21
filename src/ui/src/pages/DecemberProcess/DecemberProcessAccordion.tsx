@@ -183,7 +183,7 @@ const DecemberProcessAccordion = () => {
         <Grid2 width="100%">
           <DSMCollapsedAccordion
             title="Profit Share Report"
-            onActionClick={() => navigate('/military-and-rehire')}
+            onActionClick={() => navigate('/profit-share-report')}
             actionButtonText="START PROCESS"
           >
             <MilitaryAndRehire />
