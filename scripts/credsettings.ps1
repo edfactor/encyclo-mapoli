@@ -1,7 +1,7 @@
 param (
     [string]$FilePath,
     [string]$OutputPath,
-    [Object]$Replacements, # Accept both Hashtable and JSON string
+    [string]$Replacements, # Accept both Hashtable and JSON string
     [string]$RemoteServer,
     [string]$RemotePath
 )
