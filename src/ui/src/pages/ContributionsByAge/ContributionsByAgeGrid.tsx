@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetContributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams } from "smart-ui-library";
+import { DSMGrid, ISortParams, TotalsGrid } from "smart-ui-library";
 import { GetContributionsByAgeColumns } from "./ContributionsByAgeGridColumns";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { FrozenReportsByAgeRequestType } from "../../reduxstore/types";
@@ -13,6 +13,10 @@ const ContributionsByAgeGrid = () => {
     sortBy: "Badge",
     isSortDescending: false
   });
+
+  function currencyFormat(num : Number) : string {
+    return '$' + num.toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+ }
 
   const { contributionsByAgeTotal, contributionsByAgeFullTime, contributionsByAgePartTime } = useSelector(
     (state: RootState) => state.yearsEnd
@@ -35,6 +39,29 @@ const ContributionsByAgeGrid = () => {
               sx={{ color: "#0258A5" }}>
               {`${contributionsByAgeTotal.reportName}`}
             </Typography>
+          </div>
+          <div style={{display: 'flex'}}>
+          <TotalsGrid 
+            displayData = {[[(contributionsByAgeTotal?.totalEmployees || 0), currencyFormat(contributionsByAgeTotal?.totalAmount)], 
+              [4, 5],
+              [8, 9]]} 
+              leftColumnHeaders = {['Regular', 'Hardship', 'DistTotal']}
+              topRowHeaders={['All', 'Total', 'Amount']}
+          ></TotalsGrid>
+          <TotalsGrid 
+            displayData = {[[(contributionsByAgeFullTime?.totalEmployees || 0), (contributionsByAgeFullTime?.totalAmount || 0)], 
+              [4, 5],
+              [8, 9]]} 
+              leftColumnHeaders = {['Regular', 'Hardship', 'DistTotal']}
+              topRowHeaders={['FullTime', 'Total', 'Amount']}
+          ></TotalsGrid>
+          <TotalsGrid 
+            displayData = {[[(contributionsByAgePartTime?.totalEmployees || 0), (contributionsByAgePartTime?.totalAmount || 0)], 
+              [4, 5],
+              [8, 9]]} 
+              leftColumnHeaders = {['Regular', 'Hardship', 'DistTotal']}
+              topRowHeaders={['PartTime', 'Total', 'Amount']}
+          ></TotalsGrid>
           </div>
           <Grid2
             container
