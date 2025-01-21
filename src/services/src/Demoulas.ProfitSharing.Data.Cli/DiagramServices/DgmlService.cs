@@ -39,7 +39,7 @@ internal static class DgmlService
                 group => group.Key,
                 group => new
                 {
-                    EntityPropertyName = group.First().Label ?? group.Key,
+                    EntityPropertyName = group.First().Name ?? group.Key,
                     DataType =  group.First().Category == navProperty ? group.First().Category : group.First().Type ?? "N/A",
                     Precision = group.First().MaxLength ?? "N/A",
                     Explanation = group.First().Annotations ?? "N/A",
