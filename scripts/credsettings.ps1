@@ -1,26 +1,18 @@
 param (
     [string]$FilePath,
     [string]$OutputPath,
-    [hashtable]$Replacements,
+    [Object]$Replacements, # Accept both Hashtable and JSON string
     [string]$RemoteServer,
     [string]$RemotePath
 )
 
-# Convert JSON to hashtable if passed as string
+# Convert JSON string to Hashtable if needed
 if ($Replacements -is [string]) {
-    $Replacements = ConvertFrom-Json $Replacements
+    $Replacements = ConvertFrom-Json $Replacements | ForEach-Object { @{$_.Name = $_.Value} }
 }
 
-Write-Host "Replacements: $Replacements"
-
-# Process File
-$content = Get-Content -Path $FilePath
-foreach ($key in $Replacements.Keys) {
-    $content = $content -replace $key, $Replacements[$key]
+if (-not $Replacements -or $Replacements.Count -eq 0) {
+    throw "The 'Replacements' parameter is missing or invalid. Provide a valid Hashtable."
 }
-Set-Content -Path $OutputPath -Value $content
 
-# Copy file to remote server (Example logic, adjust as needed)
-Write-Host "Copying $OutputPath to ${RemoteServer}:${RemotePath}"
-
-
+Write-Host "Replacements provided: $Replacements"
