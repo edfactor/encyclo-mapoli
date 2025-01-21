@@ -22,10 +22,11 @@ import { clearMasterInquiryData } from "reduxstore/slices/yearsEndSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useParams } from "react-router-dom";
 import { RootState } from "reduxstore/store";
+import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 
 interface MasterInquirySearch {
-  startProfitYear?: number | null;
-  endProfitYear?: number | null;
+  startProfitYear?: Date | null;
+  endProfitYear?: Date | null;
   startProfitMonth?: number | null;
   endProfitMonth?: number | null;
   socialSecurity?: number | null;
@@ -43,18 +44,16 @@ interface MasterInquirySearch {
 
 const schema = yup.object().shape({
   startProfitYear: yup
-    .number()
-    .typeError("Beginning Year must be a number")
-    .integer("Beginning Year must be an integer")
-    .min(2020, "Year must be 2020 or later")
-    .max(2100, "Beginning Year must be 2100 or earlier")
+    .date()
+    .min(new Date(2020, 0, 1), "Year must be 2020 or later")
+    .max(new Date(2100, 11, 31), "Year must be 2100 or earlier")
+    .typeError("Invalid date")
     .nullable(),
   endProfitYear: yup
-    .number()
-    .typeError("Ending Year must be a number")
-    .integer("Ending Year must be an integer")
-    .min(2020, "Year must be 2020 or later")
-    .max(2100, "Ending Year must be 2100 or earlier")
+    .date()
+    .min(new Date(2020, 0, 1), "Year must be 2020 or later")
+    .max(new Date(2100, 11, 31), "Year must be 2100 or earlier")
+    .typeError("Invalid date")
     .nullable(),
   startProfitMonth: yup
     .number()
@@ -152,8 +151,8 @@ const MasterInquirySearchFilter = () => {
     if (isValid) {
       const searchParams: MasterInquryRequest = {
         pagination: { skip: 0, take: 25 },
-        ...(!!data.startProfitYear && { startProfitYear: data.startProfitYear }),
-        ...(!!data.endProfitYear && { endProfitYear: data.endProfitYear }),
+        ...(!!data.startProfitYear && { startProfitYear: data.startProfitYear.getFullYear() }),
+        ...(!!data.endProfitYear && { endProfitYear: data.endProfitYear.getFullYear() }),
         ...(!!data.startProfitMonth && { startProfitMonth: data.startProfitMonth }),
         ...(!!data.endProfitMonth && { endProfitMonth: data.endProfitMonth }),
         ...(!!data.socialSecurity && { socialSecurity: data.socialSecurity }),
@@ -200,22 +199,19 @@ const MasterInquirySearchFilter = () => {
       <Grid2 container paddingX="24px">
         <Grid2 container spacing={3} width="100%">
           <Grid2 xs={12} sm={6} md={3}>
-            <FormLabel>Beginning Year</FormLabel>
             <Controller
               name="startProfitYear"
               control={control}
               render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  value={field.value ?? ''}
-                  error={!!errors.startProfitYear}
-                  onChange={(e) => {
-                    const value = e.target.value === "" ? null : Number(e.target.value);
-                    field.onChange(value);
-                  }}
+                <DsmDatePicker
+                  id="Beginning Year"
+                  onChange={(value: Date | null) => field.onChange(value)}
+                  value={field.value ?? null}
+                  required={true}
+                  label="Profit Year"
+                  disableFuture
+                  views={["year"]}
+                  error={errors.startProfitYear?.message}
                 />
               )}
             />
@@ -223,18 +219,19 @@ const MasterInquirySearchFilter = () => {
           </Grid2>
 
           <Grid2 xs={12} sm={6} md={3}>
-            <FormLabel>Ending Year</FormLabel>
             <Controller
               name="endProfitYear"
               control={control}
               render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  value={field.value ?? ''}
-                  error={!!errors.endProfitYear}
+                <DsmDatePicker
+                  id="End Year"
+                  onChange={(value: Date | null) => field.onChange(value)}
+                  value={field.value ?? null}
+                  required={true}
+                  label="End Year"
+                  disableFuture
+                  views={["year"]}
+                  error={errors.startProfitYear?.message}
                 />
               )}
             />
@@ -365,7 +362,7 @@ const MasterInquirySearchFilter = () => {
                   <RadioGroup {...field} row>
                     <FormControlLabel value="all" control={<Radio size="small" />} label="All" />
                     <FormControlLabel value="hardship" control={<Radio size="small" />} label="Hardship/Dis" />
-                    <FormControlLabel value="payoffs" control={<Radio size="small" />} label="Payoffs/Forfiet" />
+                    <FormControlLabel value="payoffs" control={<Radio size="small" />} label="Payoffs/Forfeit" />
                     <FormControlLabel value="rollovers" control={<Radio size="small" />} label="Rollovers" />
                   </RadioGroup>
                 )}
