@@ -119,7 +119,7 @@ definitions:
           -OutputPath "./src/services/configuration/credsettings.${env:ENV}.json" `
           -Replacements '{\"CONNECTIONSTRINGS_PROFITSHARING_SLUG\":\"${env:ConnectionStrings_ProfitSharing_QA}\",\"CONNECTIONSTRINGS_COMMON_SLUG\":\"${env:ConnectionStrings_ProfitSharing_QA}\",\"ORACLEHCM_BASE_URL_SLUG\":\"${env:QA_ORACLEHCM_BASE_URL_SLUG}\"}' `
           -RemoteServer "appt23d" `
-          -RemotePath "C:/NextGenApplications/ps/EmployeeFull"
+          -RemotePath "C:/NextGenApplications/ps"
 
 
 

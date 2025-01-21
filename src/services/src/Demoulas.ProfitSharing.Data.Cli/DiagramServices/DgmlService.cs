@@ -41,11 +41,12 @@ internal static class DgmlService
                 {
                     EntityPropertyName = group.First().Name ?? group.Key,
                     DataType =  group.First().Category == navProperty ? group.First().Category : group.First().Type ?? "N/A",
-                    Precision = group.First().MaxLength ?? "N/A",
+                    Precision = ExtractPrecision(group.First()),
                     Explanation = group.First().Annotations ?? "N/A",
                     IsPrimaryKey = group.First().IsPrimaryKey,
                     IsForeignKey = group.First().IsForeignKey,
                     IsIndexed = group.First().IsIndexed,
+                    IndexName = ExtractIndexName(group.First()),
                     IsRequired = group.First().IsRequired,
                     ColumnName = ExtractColumnName(group.First()),
                 });
@@ -68,12 +69,25 @@ internal static class DgmlService
             markdown.AppendLine("| Entity Name | Column Name | Data Type | Precision | IsPrimaryKey | IsForeignKey | IsRequired | IsIndexed |");
             markdown.AppendLine("|-------------|-------------|-----------|-----------|--------------|--------------|------------|-----------|");
 
+            var primaryKeys = new List<string>();
+            var foreignKeys = new List<string>();
+            var indexes = new List<string>();
+
             if (tableColumnsMap.TryGetValue(table.Key, out var columnIds))
             {
                 foreach (var columnId in columnIds.Distinct())
                 {
                     if (columns.TryGetValue(columnId, out var column))
                     {
+                        // Add to PK, FK, and Index lists for separate summary
+                        if (column.IsPrimaryKey) {primaryKeys.Add(column.ColumnName);}
+                        if (column.IsForeignKey) {foreignKeys.Add(column.ColumnName);}
+                        if (column.IsIndexed)
+                        {
+                            indexes.Add($"{column.IndexName} (Column: {column.ColumnName})");
+                        }
+
+
                         markdown.AppendLine(
                             $"| {column.EntityPropertyName} | {column.ColumnName} | {column.DataType} | {column.Precision} | {column.IsPrimaryKey} | {column.IsForeignKey} | {column.IsRequired} | {column.IsIndexed} |");
                     }
@@ -83,6 +97,12 @@ internal static class DgmlService
             {
                 markdown.AppendLine("| No columns found | N/A | N/A | N/A | N/A | N/A | N/A | N/A |");
             }
+
+            // Append PK, FK, and Index summaries
+            markdown.AppendLine("\n### Summary");
+            markdown.AppendLine($"- **Primary Keys**: {(primaryKeys.Any() ? string.Join(", ", primaryKeys) : "None")}");
+            markdown.AppendLine($"- **Foreign Keys**: {(foreignKeys.Any() ? string.Join(", ", foreignKeys) : "None")}");
+            markdown.AppendLine($"- **Indexes**: {(indexes.Any() ? string.Join(", ", indexes) : "None")}");
         }
 
         // Save to output file
@@ -102,4 +122,39 @@ internal static class DgmlService
 
         return $"{node.Id}";
     }
+
+    public static string ExtractIndexName(Node node)
+    {
+        if (!string.IsNullOrWhiteSpace(node.Annotations))
+        {
+            var match = System.Text.RegularExpressions.Regex.Match(node.Annotations, @"IndexName:\s*(\S+)");
+            if (match.Success)
+            {
+                return match.Groups[1].Value;
+            }
+        }
+
+        return "Unnamed Index"; // Fallback for indexes without names
+    }
+
+    public static string ExtractPrecision(Node node)
+    {
+        if (!string.IsNullOrWhiteSpace(node.MaxLength) && node.MaxLength != "None")
+        {
+            return node.MaxLength;
+        }
+
+        if (!string.IsNullOrWhiteSpace(node.Annotations))
+        {
+            var match = System.Text.RegularExpressions.Regex.Match(node.Annotations, @"Precision:\s*(\d+)");
+            if (match.Success)
+            {
+                return match.Groups[1].Value;
+            }
+        }
+
+        return "None"; // Fallback if precision is not found
+    }
+
+
 }
