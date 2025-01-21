@@ -21,9 +21,28 @@ if (-not $Replacements -or $Replacements.GetEnumerator().Count -eq 0) {
 
 Write-Host "Replacements provided: $Replacements"
 
-# Example: Iterate through the hashtable
+# Iterate through the hashtable
 foreach ($key in $Replacements.Keys) {
     Write-Host "Replacing $key with $($Replacements[$key])"
 }
 
-# Proceed with the rest of your script...
+# Read the content of the file
+if (-not (Test-Path -Path $FilePath)) {
+    throw "The file specified by 'FilePath' does not exist: $FilePath"
+}
+
+Write-Host "Reading content from $FilePath"
+$content = Get-Content -Path $FilePath -Raw
+
+# Perform find and replace for each key-value pair in the hashtable
+foreach ($key in $Replacements.Keys) {
+    $value = $Replacements[$key]
+    Write-Host "Replacing '$key' with '$value'"
+    $content = $content -replace [regex]::Escape($key), $value
+}
+
+# Write the modified content to the output file
+Write-Host "Writing modified content to $OutputPath"
+Set-Content -Path $OutputPath -Value $content
+
+Write-Host "File has been successfully updated and saved to $OutputPath"
