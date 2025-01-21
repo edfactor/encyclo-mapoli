@@ -52,14 +52,7 @@ const DecemberProcessAccordion = () => {
 
   return (
     <Page
-      label="December Flow"
-      actionNode={
-        <Button
-          variant="outlined"
-          startIcon={<FilterList />}>
-          Filter List
-        </Button>
-      }>
+      label="December Flow">
       <Grid2
         container>
         <Grid2
@@ -71,6 +64,7 @@ const DecemberProcessAccordion = () => {
         <Grid2 width="100%">
           <DSMCollapsedAccordion
             title="Clean Up Reports"
+            expandable={false}
             actionButtonText="START PROCESS"
             status={{
               label: "Completed",
@@ -110,7 +104,17 @@ const DecemberProcessAccordion = () => {
 
         <Grid2 width="100%">
           <DSMCollapsedAccordion
-            title="Military and Rehire"
+            title="Military"
+            onActionClick={() => navigate('/military-and-rehire')}
+            actionButtonText="START PROCESS"
+          >
+            <MilitaryAndRehire />
+          </DSMCollapsedAccordion>
+        </Grid2>
+
+        <Grid2 width="100%">
+          <DSMCollapsedAccordion
+            title="Rehire"
             onActionClick={() => navigate('/military-and-rehire')}
             actionButtonText="START PROCESS"
           >
@@ -178,33 +182,14 @@ const DecemberProcessAccordion = () => {
 
         <Grid2 width="100%">
           <DSMCollapsedAccordion
-            title="Master Inquiry (008-10)"
-            isCollapsedOnRender={false}
-            onActionClick={() => navigate('/master-inquiry')}
-            actionButtonText="VIEW DETAILS"
+            title="Profit Share Report"
+            onActionClick={() => navigate('/military-and-rehire')}
+            actionButtonText="START PROCESS"
           >
-
-            <Grid2
-              container>
-              <Grid2 width={"100%"}>
-                <Divider />
-              </Grid2>
-              <Grid2
-                width={"100%"}>
-                <DSMAccordion title="Filter">
-                  <MasterInquirySearchFilter />
-                </DSMAccordion>
-
-              </Grid2>
-
-              {masterInquiryEmployeeDetails && <MasterInquiryEmployeeDetails details={masterInquiryEmployeeDetails} />}
-
-              <Grid2 width="100%">
-                <MasterInquiryGrid />
-              </Grid2>
-            </Grid2>
+            <MilitaryAndRehire />
           </DSMCollapsedAccordion>
         </Grid2>
+
       </Grid2>
     </Page>
   );

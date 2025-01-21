@@ -22,6 +22,7 @@ interface DSMCollapsedAccordionProps {
         color?: 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning';
     };
     disabled?: boolean;
+    expandable?: boolean;
 }
 
 const DSMCollapsedAccordion: React.FC<DSMCollapsedAccordionProps> = ({
@@ -33,11 +34,14 @@ const DSMCollapsedAccordion: React.FC<DSMCollapsedAccordionProps> = ({
     className,
     status,
     disabled = false,
+    expandable = true,
 }) => {
     const [expanded, setExpanded] = useState(!isCollapsedOnRender);
 
     const handleChange = (event: React.SyntheticEvent, isExpanded: boolean) => {
-        setExpanded(isExpanded);
+        if (expandable) {
+            setExpanded(isExpanded);
+        }
     };
 
     const handleActionClick = (event: React.MouseEvent) => {
@@ -47,7 +51,7 @@ const DSMCollapsedAccordion: React.FC<DSMCollapsedAccordionProps> = ({
 
     return (
         <Accordion
-            expanded={expanded}
+            expanded={expandable ? expanded : false}
             onChange={handleChange}
             className={className}
             disabled={disabled}
@@ -63,7 +67,7 @@ const DSMCollapsedAccordion: React.FC<DSMCollapsedAccordionProps> = ({
             }}
         >
             <AccordionSummary
-                expandIcon={expanded ? <ExpandMoreIcon /> : null}
+                expandIcon={expandable && !!expanded ? <ExpandMoreIcon /> : null}
                 sx={{
                     borderBottom: '1px solid',
                     borderColor: 'divider',

@@ -129,7 +129,7 @@ const Router = () => {
           path="eligible-employees"
           element={<EligibleEmployees />}></Route>
         <Route
-          path="master-inquiry"
+          path="master-inquiry/:badgeNumber?"
           element={<MasterInquiry />}></Route>
         <Route
           path="distributions-by-age"

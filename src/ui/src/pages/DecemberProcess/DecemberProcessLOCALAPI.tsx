@@ -250,14 +250,7 @@ const DecemberProcessLocalApi: React.FC = () => {
   }, [hasToken]);
   return (
     <Page
-      label="2024 December"
-      actionNode={
-        <Button
-          variant="outlined"
-          startIcon={<FilterList />}>
-          Filter List
-        </Button>
-      }>
+      label="2024 December">
       <Grid2
         container
         rowSpacing="24px">
