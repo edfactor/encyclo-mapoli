@@ -31,13 +31,13 @@ public class BeneficiaryTests : ApiTestBase<Program>
         ProfitShareUpdateRequest req = new() { ProfitYear = 2024, EarningsPercent = 11 };
 
         // Act
-        MasterUpdateResponse response = await _service.Update(req, CancellationToken.None);
+        ProfitMasterResponse response = await _service.Update(req, CancellationToken.None);
 
         // Assert
         // expect 1 record
         response.BeneficiariesEffected.Should().Be(1);
         response.EmployeesEffected.Should().Be(0);
-        response.EtvasUpdated.Should().Be(0);
+        response.EtvasEffected.Should().Be(0);
         
         _scenarioFactory.addedProfitDetails.Count.Should().Be(1);
         var pd = _scenarioFactory.addedProfitDetails[0];

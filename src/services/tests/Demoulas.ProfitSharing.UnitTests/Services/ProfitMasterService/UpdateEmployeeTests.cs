@@ -38,12 +38,12 @@ public class UpdateEmployeeTests : ApiTestBase<Program>
         // Arrange
 
         // Act
-        MasterUpdateResponse response = await _service.Update(DefaultRequest(), CancellationToken.None);
+        ProfitMasterResponse response = await _service.Update(DefaultRequest(), CancellationToken.None);
 
         // Assert
         response.BeneficiariesEffected.Should().Be(0);
         response.EmployeesEffected.Should().Be(1);
-        response.EtvasUpdated.Should().Be(0);
+        response.EtvasEffected.Should().Be(0);
 
         _scenarioFactory.addedProfitDetails.Count.Should().Be(1);
         var pd = _scenarioFactory.addedProfitDetails[0];
@@ -64,12 +64,12 @@ public class UpdateEmployeeTests : ApiTestBase<Program>
         _profitDetails[1].Earnings = 1000m; // Etva Amount
 
         // Act
-        MasterUpdateResponse response = await _service.Update(DefaultRequest(), CancellationToken.None);
+        ProfitMasterResponse response = await _service.Update(DefaultRequest(), CancellationToken.None);
 
         // Assert
         response.BeneficiariesEffected.Should().Be(0);
         response.EmployeesEffected.Should().Be(1);
-        response.EtvasUpdated.Should().Be(1);
+        response.EtvasEffected.Should().Be(1);
 
         _scenarioFactory.addedProfitDetails.Count.Should().Be(2);
         {

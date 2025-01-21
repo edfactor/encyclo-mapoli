@@ -10,14 +10,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.UnitTests.Services.ProfitMasterService;
 
-public class ReversalEmployeeTests : ApiTestBase<Program>
+public class RevertEmployeeTests : ApiTestBase<Program>
 {
     private readonly ScenarioFactory _scenarioFactory;
     private readonly List<ProfitDetail> _profitDetails;
     private readonly IProfitMasterService _service;
     private readonly short _thisYear;
 
-    public ReversalEmployeeTests()
+    public RevertEmployeeTests()
     {
         // create mock database with just 1 employee with two profit detail rows in last year.
         _scenarioFactory = new ScenarioFactory().CreateOneEmployeeWithProfitDetails();
@@ -40,12 +40,12 @@ public class ReversalEmployeeTests : ApiTestBase<Program>
         _profitDetails[1].ProfitYear = (short)(_thisYear - 5);
 
         // Act
-        MasterRevertResponse response = await _service.Revert(new ProfitYearRequest { ProfitYear = _thisYear }, CancellationToken.None);
+        ProfitMasterResponse response = await _service.Revert(new ProfitYearRequest { ProfitYear = _thisYear }, CancellationToken.None);
 
         // Assert
-        response.BeneficiariesReverted.Should().Be(0);
-        response.EmployeesReverted.Should().Be(1);
-        response.EtvaReverted.Should().Be(0);
+        response.BeneficiariesEffected.Should().Be(0);
+        response.EmployeesEffected.Should().Be(1);
+        response.EtvasEffected.Should().Be(0);
 
         _scenarioFactory.removedProftitDetails.Count.Should().Be(1);
     }
@@ -68,12 +68,12 @@ public class ReversalEmployeeTests : ApiTestBase<Program>
         // _scenarioFactory.PayProfits[0].Etva = 700
 
         // Act
-        MasterRevertResponse response = await _service.Revert(new ProfitYearRequest { ProfitYear = _thisYear }, CancellationToken.None);
+        ProfitMasterResponse response = await _service.Revert(new ProfitYearRequest { ProfitYear = _thisYear }, CancellationToken.None);
 
         // Assert
-        response.BeneficiariesReverted.Should().Be(0);
-        response.EmployeesReverted.Should().Be(1);
-        response.EtvaReverted.Should().Be(1);
+        response.BeneficiariesEffected.Should().Be(0);
+        response.EmployeesEffected.Should().Be(1);
+        response.EtvasEffected.Should().Be(1);
 
         _scenarioFactory.removedProftitDetails.Count.Should().Be(2);
     }

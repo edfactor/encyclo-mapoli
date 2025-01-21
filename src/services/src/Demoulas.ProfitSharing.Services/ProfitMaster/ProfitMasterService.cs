@@ -6,7 +6,7 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace Demoulas.ProfitSharing.Services.ProfitMasterUpdate;
+namespace Demoulas.ProfitSharing.Services.ProfitMaster;
 
 /// <summary>
 /// <para>
@@ -32,10 +32,9 @@ public class ProfitMasterService : IProfitMasterService
         _dbFactory = dbFactory;
     }
 
-    public async Task<MasterUpdateResponse> Update(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
+    public async Task<ProfitMasterResponse> Update(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
         int etvasUpdated = 0;
-
         ProfitShareEditResponse pser = await _profitShareEditService.ProfitShareEdit(profitShareUpdateRequest, cancellationToken);
 
         return await _dbFactory.UseWritableContext(async ctx =>
@@ -64,7 +63,7 @@ public class ProfitMasterService : IProfitMasterService
             var employeesEffected = pser.Response.Results.Where(m => m.IsEmployee).Select(m => m.Ssn).ToHashSet().Count;
             var beneficiariesEffected = pser.Response.Results.Where(m => !m.IsEmployee).Select(m => m.Ssn).ToHashSet().Count;
 
-            return new MasterUpdateResponse { BeneficiariesEffected = beneficiariesEffected, EmployeesEffected = employeesEffected, EtvasUpdated = etvasUpdated }!;
+            return new ProfitMasterResponse { BeneficiariesEffected = beneficiariesEffected, EmployeesEffected = employeesEffected, EtvasEffected = etvasUpdated }!;
         }, cancellationToken);
     }
 
@@ -88,51 +87,37 @@ public class ProfitMasterService : IProfitMasterService
     }
 
 #pragma warning disable AsyncFixer01
-    public async Task<MasterRevertResponse> Revert(ProfitYearRequest profitYearRequest, CancellationToken cancellationToken)
+    public async Task<ProfitMasterResponse> Revert(ProfitYearRequest profitYearRequest, CancellationToken cancellationToken)
     {
         return await _dbFactory.UseWritableContext(async ctx =>
         {
-            await using var transaction = await ctx.Database.BeginTransactionAsync(cancellationToken);
-            try
+            // read this years contribution/vestingEarnings profit_detail rows
+            var pds = await ctx.ProfitDetails
+                .Where(pd => pd.ProfitYear == profitYearRequest.ProfitYear &&
+                             (pd.ProfitCodeId == ProfitCode.Constants.Incoming100PercentVestedEarnings.Id
+                              || pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id))
+                .ToListAsync(cancellationToken);
+
+            var memberSsns = pds.Select(p => p.Ssn).ToHashSet();
+            var ssn2PayProfit = await ctx.PayProfits.Where(pp => pp.ProfitYear == profitYearRequest.ProfitYear && memberSsns.Contains(pp.Demographic!.Ssn))
+                .ToDictionaryAsync(pp => pp.Demographic!.Ssn, pp => pp, cancellationToken);
+
+            var etvaReset = new HashSet<int>();
+            // Adjust ETVA
+            foreach (var etvaRec in pds.Where(pd => pd.ProfitCodeId == ProfitCode.Constants.Incoming100PercentVestedEarnings.Id && ssn2PayProfit.ContainsKey(pd.Ssn))
+                         .Select(pd => new { pd, pp = ssn2PayProfit[pd.Ssn] }))
             {
-                // read this years contribution/vestingEarnings profit_detail rows
-                var pds = await ctx.ProfitDetails
-                    .Where(pd => pd.ProfitYear == profitYearRequest.ProfitYear &&
-                                 (pd.ProfitCodeId == ProfitCode.Constants.Incoming100PercentVestedEarnings.Id
-                                  || pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id))
-                    .ToListAsync(cancellationToken);
-
-                var memberSsns = pds.Select(p => p.Ssn).ToHashSet();
-                var ssn2PayProfit = await ctx.PayProfits.Where(pp => pp.ProfitYear == profitYearRequest.ProfitYear && memberSsns.Contains(pp.Demographic!.Ssn))
-                    .ToDictionaryAsync(pp => pp.Demographic!.Ssn, pp => pp, cancellationToken);
-
-                var etvaReset = new HashSet<int>();
-                // Adjust ETVA
-                foreach (var etvaRec in pds.Where(pd => pd.ProfitCodeId == ProfitCode.Constants.Incoming100PercentVestedEarnings.Id && ssn2PayProfit.ContainsKey(pd.Ssn))
-                             .Select(pd => new { pd, pp = ssn2PayProfit[pd.Ssn] }))
-                {
-                    //pp.Etva -= pd.Earnings
-                    Console.WriteLine(etvaRec.pd + " " + etvaRec.pp);
-                    etvaReset.Add(etvaRec.pd.Ssn);
-                }
-
-                ctx.ProfitDetails.RemoveRange(pds);
-
-                await ctx.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                return new MasterRevertResponse
-                {
-                    BeneficiariesReverted = memberSsns.Count - ssn2PayProfit.Count,
-                    EmployeesReverted = ssn2PayProfit.Count,
-                    EtvaReverted = etvaReset.Count
-                };
+                //pp.Etva -= pd.Earnings
+                Console.WriteLine(etvaRec.pd + " " + etvaRec.pp);
+                etvaReset.Add(etvaRec.pd.Ssn);
             }
-            catch (Exception)
+
+            ctx.ProfitDetails.RemoveRange(pds);
+            await ctx.SaveChangesAsync(cancellationToken);
+            return new ProfitMasterResponse
             {
-                await transaction.RollbackAsync();
-                throw;
-            }
+                BeneficiariesEffected = memberSsns.Count - ssn2PayProfit.Count, EmployeesEffected = ssn2PayProfit.Count, EtvasEffected = etvaReset.Count
+            };
         }, cancellationToken);
     }
 }
