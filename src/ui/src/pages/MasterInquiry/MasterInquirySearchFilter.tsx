@@ -4,8 +4,10 @@ import {
   FormControlLabel,
   FormHelperText,
   FormLabel,
+  MenuItem,
   Radio,
   RadioGroup,
+  Select,
   TextField
 } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
@@ -194,6 +196,17 @@ const MasterInquirySearchFilter = () => {
     dispatch(clearMasterInquiryData());
   };
 
+  const months = Array.from({ length: 12 }, (_, i) => i + 1);
+
+  const selectSx = {
+    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+      borderColor: '#0258A5',
+    },
+    '&:hover .MuiOutlinedInput-notchedOutline': {
+      borderColor: '#0258A5',
+    },
+  };
+
   return (
     <form onSubmit={validateAndSearch}>
       <Grid2 container paddingX="24px">
@@ -244,14 +257,24 @@ const MasterInquirySearchFilter = () => {
               name="startProfitMonth"
               control={control}
               render={({ field }) => (
-                <TextField
+                <Select
                   {...field}
+                  onChange={(e) => field.onChange(e.target.value === '' ? null : e.target.value)}
+                  sx={selectSx}
                   fullWidth
                   size="small"
-                  variant="outlined"
                   value={field.value ?? ''}
                   error={!!errors.startProfitMonth}
-                />
+                >
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
+                  {months.map((month) => (
+                    <MenuItem key={month} value={month}>
+                      {month}
+                    </MenuItem>
+                  ))}
+                </Select>
               )}
             />
             {errors.startProfitMonth && <FormHelperText error>{errors.startProfitMonth.message}</FormHelperText>}
@@ -263,14 +286,24 @@ const MasterInquirySearchFilter = () => {
               name="endProfitMonth"
               control={control}
               render={({ field }) => (
-                <TextField
+                <Select
                   {...field}
+                  onChange={(e) => field.onChange(e.target.value === '' ? null : e.target.value)}
+                  sx={selectSx}
                   fullWidth
                   size="small"
-                  variant="outlined"
                   value={field.value ?? ''}
                   error={!!errors.endProfitMonth}
-                />
+                >
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
+                  {months.map((month) => (
+                    <MenuItem key={month} value={month}>
+                      {month}
+                    </MenuItem>
+                  ))}
+                </Select>
               )}
             />
             {errors.endProfitMonth && <FormHelperText error>{errors.endProfitMonth.message}</FormHelperText>}
