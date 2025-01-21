@@ -23,6 +23,7 @@ public sealed class Program
 #pragma warning disable S3928
         var configuration = new ConfigurationBuilder()
             .AddCommandLine(args)
+            .AddEnvironmentVariables()
             .Build();
 
         var rootCommand = new RootCommand("CLI tool for database operations");
