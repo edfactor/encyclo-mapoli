@@ -36,9 +36,6 @@ const ContributionsByAgeGrid = () => {
               {`${contributionsByAgeTotal.reportName}`}
             </Typography>
           </div>
-          <h1 className="text-3xl font-bold">
-            Hello world!
-          </h1>
           <Grid2
             container
             xs={12}>
