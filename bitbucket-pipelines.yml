@@ -117,7 +117,7 @@ definitions:
         - pwsh -File ./scripts/credsettings.ps1 `
           -FilePath "./src/services/configuration/credsettings.json" `
           -OutputPath "./src/services/configuration/credsettings.${ENV}.json" `
-          -Replacements '{\"CONNECTIONSTRINGS_PROFITSHARING_SLUG\":\"${env:ConnectionStrings_ProfitSharing_QA}\",\"CONNECTIONSTRINGS_COMMON_SLUG\":\"${env:ConnectionStrings_ProfitSharing_QA}\",\"ORACLEHCM_BASE_URL_SLUG\":\"${env:QA_ORACLEHCM_BASE_URL_SLUG}\"}' `
+          -Replacements '{\"CONNECTIONSTRINGS_PROFITSHARING_SLUG\":\"${env:ConnectionStrings_ProfitSharing_QA}\",\"CONNECTIONSTRINGS_COMMON_SLUG\":\"${env:ConnectionStrings_ProfitSharing_QA}\"}' `
           -RemoteServer "appt23d" `
           -RemotePath "C:/NextGenApplications/ps/EmployeeFull"
 
