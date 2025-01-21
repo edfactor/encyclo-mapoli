@@ -54,7 +54,7 @@ try {
     $Session = New-PSSession -ComputerName $RemoteServer
     
     # Ensure the remote path exists
-    Write-Host "Checking if remote path exists: $RemotePath"
+    Write-Host "Checking if remote path exists: ${RemotePath}"
     Invoke-Command -Session $Session -ScriptBlock {
         param ($RemotePath)
         if (-not (Test-Path -Path $RemotePath)) {
@@ -64,12 +64,12 @@ try {
     } -ArgumentList $RemotePath
 
     # Copy the file
-    Write-Host "Copying file to $RemoteServer:$RemotePath"
+    Write-Host "Copying file to ${RemoteServer}:${RemotePath}"
     Copy-Item -ToSession $Session -Path $OutputPath -Destination $RemotePath
 
-    Write-Host "File copied successfully to $RemoteServer:$RemotePath"
+    Write-Host "File copied successfully to ${RemoteServer}:${RemotePath}"
 } catch {
-    Write-Error "Failed to copy the file to $RemoteServer:$RemotePath. Error: $_"
+    Write-Error "Failed to copy the file to ${RemoteServer}:${RemotePath}. Error: $_"
 } finally {
     if ($Session -ne $null) {
         Write-Host "Removing remote session"
