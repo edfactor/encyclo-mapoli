@@ -24,6 +24,24 @@ internal static class DgmlService
 
         const string navProperty = "Navigation Property";
 
+        // Process Links: Map PKs and FKs
+        var relationships = directedGraph.Links.Link
+            .Where(link => !string.IsNullOrEmpty(link.Source) && !string.IsNullOrEmpty(link.Target))
+            .Select(link => new
+            {
+                Source = link.Source!,
+                Target = link.Target!,
+                RelationshipType = ExtractRelationshipType(link), // Determine FK/PK/Other
+                ParsedAnnotations = ParseAnnotations(link.Annotations ?? ""), // Parse annotations
+            })
+            .GroupBy(link => link.Source)
+            .ToDictionary(
+                group => group.Key,
+                group => group.ToList()
+            );
+
+
+
         // Process Nodes: Group by Id to handle duplicates
         var tables = directedGraph.Nodes.Node
             .Where(node => node.Category == "EntityType" && !string.IsNullOrEmpty(node.Id))
@@ -72,6 +90,7 @@ internal static class DgmlService
             var primaryKeys = new List<string>();
             var foreignKeys = new List<string>();
             var indexes = new List<string>();
+            var fkRelationships = new List<string>();
 
             if (tableColumnsMap.TryGetValue(table.Key, out var columnIds))
             {
@@ -98,11 +117,24 @@ internal static class DgmlService
                 markdown.AppendLine("| No columns found | N/A | N/A | N/A | N/A | N/A | N/A | N/A |");
             }
 
+            // Add FK Relationships
+            if (relationships.TryGetValue(table.Key, out var tableRelationships))
+            {
+                foreach (var rel in tableRelationships)
+                {
+                    if (rel.ParsedAnnotations.TryGetValue("RelationalName", out var fkName))
+                    {
+                        fkRelationships.Add($"{rel.Target} (FK Name: {fkName})");
+                    }
+                }
+            }
+
             // Append PK, FK, and Index summaries
             markdown.AppendLine("\n### Summary");
             markdown.AppendLine($"- **Primary Keys**: {(primaryKeys.Any() ? string.Join(", ", primaryKeys) : "None")}");
             markdown.AppendLine($"- **Foreign Keys**: {(foreignKeys.Any() ? string.Join(", ", foreignKeys) : "None")}");
             markdown.AppendLine($"- **Indexes**: {(indexes.Any() ? string.Join(", ", indexes) : "None")}");
+            markdown.AppendLine($"- **Foreign Key Relationships**: {(fkRelationships.Any() ? string.Join("; ", fkRelationships) : "None")}");
         }
 
         // Save to output file
@@ -154,6 +186,42 @@ internal static class DgmlService
         }
 
         return "None"; // Fallback if precision is not found
+    }
+    public static string ExtractRelationshipType(Link link)
+    {
+        if (!string.IsNullOrWhiteSpace(link.Annotations))
+        {
+            if (link.Annotations.Contains("ForeignKey"))
+            {
+                return "ForeignKey";
+            }
+
+            if (link.Annotations.Contains("PrimaryKey"))
+            {
+                return "PrimaryKey";
+            }
+        }
+
+        return "Other";
+    }
+
+    public static Dictionary<string, string> ParseAnnotations(string annotations)
+    {
+        var result = new Dictionary<string, string>();
+
+        if (!string.IsNullOrWhiteSpace(annotations))
+        {
+            // Regex for "Relational:Name: <Value>"
+            var match = System.Text.RegularExpressions.Regex.Match(annotations, @"Relational:Name:\s*(\S+)");
+            if (match.Success)
+            {
+                result["RelationalName"] = match.Groups[1].Value;
+            }
+
+            // Add additional regex patterns here for other types of annotations if needed
+        }
+
+        return result;
     }
 
 
