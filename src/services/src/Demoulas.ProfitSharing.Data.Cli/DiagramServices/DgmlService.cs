@@ -81,7 +81,7 @@ internal static class DgmlService
             }
             else
             {
-                markdown.AppendLine("| No columns found | N/A | N/A | N/A |");
+                markdown.AppendLine("| No columns found | N/A | N/A | N/A | N/A | N/A | N/A | N/A |");
             }
         }
 
