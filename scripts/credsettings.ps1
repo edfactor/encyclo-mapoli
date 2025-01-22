@@ -46,10 +46,6 @@ Write-Host "Oracle Username: $oracleUsername"
     "ORACLEHCM_PASSWORD_SLUG" = $oraclePassword
 }
 
-if (-not $Replacements -or $Replacements.GetEnumerator().Count -eq 0) {
-    throw "The 'Replacements' parameter is missing or invalid. Provide a valid JSON string or Hashtable."
-}
-
 # Iterate through the hashtable
 foreach ($key in $Replacements.Keys) {
     Write-Host "Replacing $key with $($Replacements[$key])"
