@@ -114,10 +114,17 @@ definitions:
 
         - pwsh -Command "Set-ExecutionPolicy Bypass -Scope Process -Force"
 
-        - pwsh -File ./scripts/credsettings.ps1 `
+        - pwsh -Command "
+            \$replacements = @{
+                'CONNECTIONSTRINGS_PROFITSHARING_SLUG' = \$env:ConnectionStrings_ProfitSharing_QA;
+                'CONNECTIONSTRINGS_COMMON_SLUG' = \$env:ConnectionStrings_Common_QA;
+                'ORACLEHCM_BASE_URL_SLUG' = \$env:QA_ORACLEHCM_BASE_URL_SLUG
+            };
+
+          pwsh -File ./scripts/credsettings.ps1 `
           -FilePath "./src/services/configuration/credsettings.json" `
           -OutputPath "./src/services/configuration/credsettings.${env:ENV}.json" `
-          -Replacements '{\"CONNECTIONSTRINGS_PROFITSHARING_SLUG\":\"${env:ConnectionStrings_ProfitSharing_QA}\",\"CONNECTIONSTRINGS_COMMON_SLUG\":\"${env:ConnectionStrings_ProfitSharing_QA}\",\"ORACLEHCM_BASE_URL_SLUG\":\"${env:QA_ORACLEHCM_BASE_URL_SLUG}\"}' `
+          -Replacements (\$replacements | ConvertTo-Json -Depth 10 -Compress)
           -RemoteServer "appt23d" `
           -RemotePath "C:/NextGenApplications/ps"
 
