@@ -3,13 +3,14 @@ using System.Reflection;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.IntegrationTests.Fixtures;
 using Demoulas.ProfitSharing.IntegrationTests.Helpers;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 using FluentAssertions;
-// using Microsoft.Testing.Platform.Services
+using Microsoft.Testing.Platform.Services;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports;
 
@@ -58,7 +59,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : TestClassB
         actualText.Should().NotBeNullOrEmpty();
 
         string expectedText = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.terminatedEmployeeAndBeneficiaryReport-correct.txt");
-        
+
         ProfitShareUpdateTests.AssertReportsAreEquivalent(expectedText, actualText);
     }
 
@@ -84,6 +85,5 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : TestClassB
         }
         textReportGenerator.PrintTotals(report.TotalEndingBalance, report.TotalVested, report.TotalForfeit, report.TotalBeneficiaryAllocation);
         return textReportGenerator.GetReport();
-
     }
 }

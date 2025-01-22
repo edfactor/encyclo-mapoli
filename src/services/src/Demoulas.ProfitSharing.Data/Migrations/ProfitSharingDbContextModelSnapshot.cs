@@ -29039,6 +29039,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("ENROLLMENT_ID");
 
+                    b.Property<decimal>("Etva")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("ETVA");
+
                     b.Property<decimal>("HoursExecutive")
                         .HasPrecision(6, 2)
                         .HasColumnType("DECIMAL(6,2)")

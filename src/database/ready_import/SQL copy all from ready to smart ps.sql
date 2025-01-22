@@ -2,8 +2,8 @@
 ---TO "YOUR CURRENT SCHEMA" FROM - {SOURCE_PROFITSHARE_SCHEMA}
 -------------------------------------------------------------------------------------
 DECLARE
-    this_year NUMBER := 2023; -- Set this to the current year
-    last_year NUMBER := 2022; -- Set this to the previous year
+    this_year NUMBER := 2024; -- Set this to the current year
+    last_year NUMBER := 2023; -- Set this to the previous year
 BEGIN
 
 -- FIRST EMPTY OUT THE TABLE
@@ -316,7 +316,8 @@ END;
         HOURS_EXECUTIVE,
         INCOME_EXECUTIVE,
         POINTS_EARNED,
-        YEARS_IN_PLAN)
+        YEARS_IN_PLAN,
+        ETVA)
     SELECT
         (select ID from DEMOGRAPHIC where BADGE_NUMBER = PAYPROF_BADGE) AS DEMOGRAPHIC_ID,
         this_year AS PROFIT_YEAR,
@@ -337,8 +338,9 @@ END;
         PY_PROF_ZEROCONT AS ZERO_CONTRIBUTION_REASON_ID,
         NVL(PY_PH_EXEC, 0) AS HOURS_EXECUTIVE,
         NVL(PY_PD_EXEC, 0) AS INCOME_EXECUTIVE,
-        0, -- Field in current system is for prior year, not current
-        PY_PS_YEARS as YEARS_IN_PLAN
+        PY_PROF_POINTS,
+        PY_PS_YEARS as YEARS_IN_PLAN,
+        PY_PS_ETVA as ETVA
     FROM {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT
     where PAYPROF_BADGE in ( select BADGE_NUMBER from DEMOGRAPHIC  );
 
@@ -360,7 +362,8 @@ END;
         HOURS_EXECUTIVE,
         INCOME_EXECUTIVE,
         POINTS_EARNED,
-        YEARS_IN_PLAN)
+        YEARS_IN_PLAN,
+        ETVA)
     SELECT
         (SELECT ID FROM DEMOGRAPHIC WHERE BADGE_NUMBER = PAYPROF_BADGE) AS DEMOGRAPHIC_ID,
         last_year AS PROFIT_YEAR,
@@ -383,7 +386,8 @@ END;
         PY_PROF_POINTS AS POINTS_EARNED,
         CASE WHEN d.PY_TERM_DT = 0 THEN  PY_PS_YEARS - 1
             ELSE PY_PS_YEARS
-        END AS YEARS_IN_PLAN
+        END AS YEARS_IN_PLAN,
+        PY_PS_ETVA as ETVA
     FROM
         {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT pp
         LEFT JOIN {SOURCE_PROFITSHARE_SCHEMA}.DEMOGRAPHICS d on d.DEM_BADGE = pp.PAYPROF_BADGE

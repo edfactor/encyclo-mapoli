@@ -1,4 +1,5 @@
-﻿using Demoulas.Common.Data.Services.Service;
+﻿using System.Text.Json;
+using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.ServiceDto;
 using FluentAssertions;
@@ -18,6 +19,7 @@ public class TotalServiceIntegrationTests
     private readonly TotalService _totalService;
     private readonly OracleConnection _connection;
     private readonly PristineDataContextFactory _dataContextFactory;
+    private readonly short employeeYear = 2024;
 
     public TotalServiceIntegrationTests(ITestOutputHelper output)
     {
@@ -78,6 +80,8 @@ public class TotalServiceIntegrationTests
         _output.WriteLine($"YIS Disagree count {yisDisagree}   Agree count {yisAgree}");
         _output.WriteLine($"Amt Disagree count {netBalDisagree}   Agree count {netBalAgree}");
         _output.WriteLine($"Etva Disagree count {etvaDisagree}   Agree count {etvaAgree}");
+        yisDisagree.Should().Be(0);
+        netBalDisagree.Should().Be(0);
         etvaDisagree.Should().Be(0);
     }
 
@@ -88,9 +92,9 @@ public class TotalServiceIntegrationTests
         {
             var ddata = await ctx.PayProfits
                 .Include(d => d.Demographic)
-                .Where(p => p.ProfitYear == 2023)
+                .Where(p => p.ProfitYear == employeeYear)
                 .Join(
-                    _totalService.GetYearsOfService(ctx, 2023),
+                    _totalService.GetYearsOfService(ctx, employeeYear),
                     x => x.Demographic!.Ssn,
                     x => x.Ssn,
                     (p, tot) => new { BadgeNumber = p.Demographic!.BadgeNumber, Years = tot.Years }
@@ -106,7 +110,7 @@ public class TotalServiceIntegrationTests
     private async Task<Dictionary<int, ParticipantTotalVestingBalanceDto>> GetSmartAmounts()
     {
         return await _dataContextFactory.UseReadOnlyContext(ctx =>
-            _totalService.TotalVestingBalance(ctx, (short)2023, new DateOnly(2024, 1, 1))
+            _totalService.TotalVestingBalance(ctx, employeeYear, (short)(employeeYear - 1), new DateOnly(2024, 1, 1))
                 .ToDictionaryAsync(
                     keySelector: p => p.Ssn,
                     elementSelector: p => p)
