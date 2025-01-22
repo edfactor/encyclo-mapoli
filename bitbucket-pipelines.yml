@@ -279,6 +279,13 @@ pipelines:
               -RemoteServer '$env:API_SERVER_QA' `
               -RemotePath 'C:/NextGenApplications/ps/Payroll'
 
+            - pwsh -File ./scripts/credsettings.ps1 `
+              -Environment '${env:ENV}' `
+              -FilePath './src/services/configuration/credsettings.json' `
+              -OutputPath './src/services/configuration/credsettings.${env:ENV}.json' `
+              -RemoteServer '$env:API_SERVER_QA' `
+              -RemotePath 'C:/inetpub/wwwroot/api'
+
             - echo "Deploying web application..."
             - $env:API_ARTIFACT_NAME = "Demoulas.ProfitSharing.Api.zip"
             - $env:UI_ARTIFACT_NAME = "Demoulas.ProfitSharing.UI.QA.zip"
