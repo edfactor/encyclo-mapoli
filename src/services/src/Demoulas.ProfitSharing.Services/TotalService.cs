@@ -239,20 +239,7 @@ public sealed class TotalService : ITotalService
     /// </returns>
     public IQueryable<ParticipantTotalVestingBalanceDto> TotalVestingBalance(IProfitSharingDbContext ctx, short profitYear, DateOnly asOfDate)
     {
-        return (from b in GetTotalBalanceSet(ctx, profitYear)
-                join e in GetTotalEtva(ctx, profitYear) on b.Ssn equals e.Ssn
-                join d in GetTotalDistributions(ctx, profitYear) on b.Ssn equals d.Ssn
-                join v in GetVestingRatio(ctx, profitYear, asOfDate) on e.Ssn equals v.Ssn
-                select new ParticipantTotalVestingBalanceDto
-                {
-                    Ssn = e.Ssn,
-                    CurrentBalance = b.Total,
-                    Etva = e.Total,
-                    TotalDistributions = d.Total,
-                    VestingPercent = v.Ratio,
-                    VestedBalance = ((b.Total + d.Total - e.Total) * v.Ratio) + e.Total - d.Total
-                }
-        );
+        return TotalVestingBalance(ctx,profitYear,profitYear, asOfDate);
     }
 
     /// <summary>
