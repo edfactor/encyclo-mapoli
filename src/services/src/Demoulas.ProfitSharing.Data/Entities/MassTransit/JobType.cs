@@ -7,6 +7,7 @@ public sealed class JobType : ILookupTable<byte>
     {
         public const byte EmployeeSyncFull = 0;
         public const byte PayrollSyncFull = 1;
+        public const byte EmployeeSyncDelta = 2;
     }
 
 

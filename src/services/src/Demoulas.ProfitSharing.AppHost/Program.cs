@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Aspire.Hosting;
 using Projects;
 
 IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(options: new DistributedApplicationOptions { AllowUnsecuredTransport = true });
@@ -32,9 +33,69 @@ catch (Exception ex)
     Console.WriteLine($"An error occurred: {ex.Message}");
 }
 
+ExecuteCommandResult RunConsoleApp(string projectPath, string launchProfile)
+{
+    using var process = new Process
+    {
+        StartInfo = new ProcessStartInfo
+        {
+            FileName = "dotnet",
+            WorkingDirectory = projectPath,
+            Arguments = $"run --launch-profile {launchProfile}",
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        }
+    };
+
+    process.Start();
+
+    // Read the output (optional)
+    string output = process.StandardOutput.ReadToEnd();
+    string error = process.StandardError.ReadToEnd();
+
+    process.WaitForExit();
+    
+    Console.WriteLine(output);
+
+    Console.ForegroundColor = ConsoleColor.Red;
+    Console.WriteLine(error);
+    Console.ForegroundColor = ConsoleColor.DarkGray;
+
+    if (string.IsNullOrWhiteSpace(error))
+    {
+        return CommandResults.Success();
+    }
+
+    return new ExecuteCommandResult { Success = false, ErrorMessage = error };
+}
+
+Demoulas_ProfitSharing_Data_Cli cli = new Demoulas_ProfitSharing_Data_Cli();
+var projectPath = new FileInfo(cli.ProjectPath).Directory?.FullName;
+
+var cliRunner = builder.AddExecutable("Database-Cli",
+    "dotnet",
+    projectPath!,
+    "run", "--launch-profile", "upgrade-db")
+    .WithCommand(
+        name: "upgrade-db",
+        displayName: "Upgrade database",
+        executeCommand: (c) => Task.FromResult(RunConsoleApp(projectPath!, "upgrade-db")))
+    .WithCommand(
+        name: "drop-recreate-db",
+        displayName: "Drop and recreate database",
+        executeCommand: (c) => Task.FromResult(RunConsoleApp(projectPath!, "drop-recreate-db")))
+    .WithCommand(
+        name: "import-from-ready",
+        displayName: "Import from READY",
+        executeCommand: (c) => Task.FromResult(RunConsoleApp(projectPath!, "import-from-ready")));
+
+
 var api = builder.AddProject<Demoulas_ProfitSharing_Api>("ProfitSharing-Api")
     .WithHttpHealthCheck("/health")
-    .WithHttpsHealthCheck("/health");
+    .WithHttpsHealthCheck("/health")
+    .WaitFor(cliRunner);
 
 var ui = builder.AddNpmApp("ProfitSharing-Ui", "../../../ui/", "dev")
     .WithReference(api)
