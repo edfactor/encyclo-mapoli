@@ -101,21 +101,6 @@ definitions:
         - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.EmployeePayroll.Sync -c Release -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -p:PublishProfile=FolderProfile -o .\publishOutput
         - Compress-Archive -Path .\publishOutput\* -DestinationPath .\dist\Demoulas.ProfitSharing.EmployeePayroll.Sync.zip -Force
 
-    create-credsettings: &create-credsettings
-      name: Replace Slugs and Copy File
-      runs-on:
-        - windows
-        - self.hosted
-      script:
-        - pwsh -File ./scripts/credsettings.ps1 `
-              -Environment 'QA' `
-              -FilePath './src/services/configuration/credsettings.json' `
-              -OutputPath './src/services/configuration/credsettings.qa.json' `
-              -RemoteServer 'appt23d' `
-              -RemotePath 'C:/NextGenApplications/ps'
-
-
-
     create-frontend-artifact-qa: &create-frontend-artifact-qa
       name: Create FrontEnd Artifacts (QA)     
       runs-on:
@@ -308,8 +293,43 @@ pipelines:
           script:
             - echo "Deploying application..."
             - $env:API_SERVER_UAT = "appt24d"
-            - pwsh .\scripts\webDeploy.ps1 UAT $env:API_SERVER_UAT
-      #- step: *create-frontend-artifact-prod
+            - ${env:ENV} = "UAT"            
+
+            - pwsh -File ./scripts/credsettings.ps1 `
+              -Environment ${env:ENV} `
+              -FilePath './src/services/configuration/credsettings.json' `
+              -OutputPath './src/services/configuration/credsettings.uat.json' `
+              -RemoteServer $env:API_SERVER_UAT `
+              -RemotePath 'C:/NextGenApplications/ps/EmployeeDelta'
+
+            - pwsh -File ./scripts/credsettings.ps1 `
+              -Environment ${env:ENV} `
+              -FilePath './src/services/configuration/credsettings.json' `
+              -OutputPath './src/services/configuration/credsettings.uat.json' `
+              -RemoteServer $env:API_SERVER_UAT `
+              -RemotePath 'C:/NextGenApplications/ps/EmployeeFull'
+
+            - pwsh -File ./scripts/credsettings.ps1 `
+              -Environment ${env:ENV} `
+              -FilePath './src/services/configuration/credsettings.json' `
+              -OutputPath './src/services/configuration/credsettings.uat.json' `
+              -RemoteServer $env:API_SERVER_UAT `
+              -RemotePath 'C:/NextGenApplications/ps/Payroll'
+
+            - pwsh -File ./scripts/credsettings.ps1 `
+              -Environment ${env:ENV} `
+              -FilePath './src/services/configuration/credsettings.json' `
+              -OutputPath './src/services/configuration/credsettings.uat.json' `
+              -RemoteServer $env:API_SERVER_UAT `
+              -RemotePath 'C:/inetpub/wwwroot/api'
+
+            - echo "Deploying web application..."
+            - $env:API_ARTIFACT_NAME = "Demoulas.ProfitSharing.Api.zip"
+            - $env:UI_ARTIFACT_NAME = "Demoulas.ProfitSharing.UI.UAT.zip"
+            - pwsh .\scripts\webDeploy.ps1 $env:ENV $env:API_SERVER_UAT $env:API_ARTIFACT_NAME $env:UI_ARTIFACT_NAME
+
+            - echo "Deploying background service..."            
+            - pwsh .\scripts\servicesDeploy.ps1 ${env:ENV} $env:API_SERVER_UAT
 
 
     develop:
