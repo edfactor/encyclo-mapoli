@@ -114,8 +114,6 @@ definitions:
                 'ORACLEHCM_BASE_URL_SLUG' = \$env:QA_ORACLEHCM_BASE_URL_SLUG
             };
            
-            Write-Host (\$replacements | ConvertTo-Json -Depth 10 -Compress);
-
             pwsh -File ./scripts/credsettings.ps1 `
               -FilePath './src/services/configuration/credsettings.json' `
               -OutputPath './src/services/configuration/credsettings.qa.json' `
