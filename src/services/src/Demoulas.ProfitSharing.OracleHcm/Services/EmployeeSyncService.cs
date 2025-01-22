@@ -11,6 +11,8 @@ using Demoulas.ProfitSharing.OracleHcm.Clients;
 using FluentValidation.Results;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using static Quartz.Logging.OperationName;
+using Job = Demoulas.ProfitSharing.Data.Entities.MassTransit.Job;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services;
 
@@ -89,6 +91,23 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
 
     public async Task ExecuteDeltaSyncAsync(string requestedBy = "System", CancellationToken cancellationToken = default)
     {
+        using Activity? activity = OracleHcmActivitySource.Instance.StartActivity(nameof(ExecuteDeltaSyncAsync), ActivityKind.Internal);
+
+        Job job = new Job
+        {
+            JobTypeId = JobType.Constants.EmployeeSyncDelta,
+            StartMethodId = StartMethod.Constants.System,
+            RequestedBy = requestedBy,
+            JobStatusId = JobStatus.Constants.Running,
+            Started = DateTime.Now
+        };
+
+        await _profitSharingDataContextFactory.UseWritableContext(db =>
+        {
+            db.Jobs.Add(job);
+            return db.SaveChangesAsync(cancellationToken);
+        }, cancellationToken);
+        bool success = true;
         try
         {
             DateTime maxDate = DateTime.Now;
@@ -113,7 +132,18 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         }
         catch (Exception ex)
         {
+            success = false;
             await _demographicsService.AuditError(0, 0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken);
+        }
+        finally
+        {
+            await _profitSharingDataContextFactory.UseWritableContext(db =>
+            {
+                return db.Jobs.Where(j => j.Id == job.Id).ExecuteUpdateAsync(s => s
+                        .SetProperty(b => b.Completed, b => DateTime.Now)
+                        .SetProperty(b => b.JobStatusId, b => success ? JobStatus.Constants.Completed : JobStatus.Constants.Failed),
+                    cancellationToken: cancellationToken);
+            }, cancellationToken);
         }
     }
 
