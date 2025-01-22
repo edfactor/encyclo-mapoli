@@ -71,26 +71,22 @@ public sealed class TotalService : ITotalService
     /// <param name="ctx">
     /// The database context used to access profit-sharing data.
     /// </param>
-    /// <param name="profitYear">
-    /// The profit year up to which the totals should be calculated.
+    /// <param name="employeeYear">
+    /// The employee year for which the totals should be returned.
     /// </param>
     /// <returns>
     /// A queryable collection of <see cref="ParticipantTotalDto"/> objects, each containing the SSN and total profit-sharing amount for a participant.
     /// </returns>
-    public IQueryable<ParticipantTotalDto> GetTotalEtva(IProfitSharingDbContext ctx, short profitYear)
+    public IQueryable<ParticipantTotalDto> GetTotalEtva(IProfitSharingDbContext ctx, short employeeYear)
     {
         return (
-            from pd in ctx.ProfitDetails
-            where pd.ProfitYear <= profitYear
-            group pd by pd.Ssn into pd_g
+            from pp in ctx.PayProfits
+            where pp.ProfitYear == employeeYear
             select new ParticipantTotalDto
             {
-                Ssn = pd_g.Key,
-                Total =  pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary.Id /*6*/).Sum(x => x.Contribution) 
-                       + pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.Incoming100PercentVestedEarnings.Id /*8*/).Sum(x => x.Earnings) 
-                       - pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id /*9*/).Sum(x => x.Forfeiture)
-            }
-        );
+                Ssn = pp.Demographic!.Ssn,
+                Total = pp.Etva
+            });
     }
 
     /// <summary>
@@ -132,16 +128,16 @@ public sealed class TotalService : ITotalService
     /// <param name="ctx">
     /// The database context used to access profit-sharing data.
     /// </param>
-    /// <param name="profitYear">
-    /// The year for which the total years of service are to be calculated.
+    /// <param name="employeeYear">
+    /// The employee year for which the total years of service are to be returned.
     /// </param>
     /// <returns>
     /// An <see cref="IQueryable{T}"/> of <see cref="ParticipantTotalYearsDto"/> containing the SSN and total years of service for each participant.
     /// </returns>
-    public IQueryable<ParticipantTotalYearsDto> GetYearsOfService(IProfitSharingDbContext ctx, short profitYear)
+    public IQueryable<ParticipantTotalYearsDto> GetYearsOfService(IProfitSharingDbContext ctx, short employeeYear)
     {
         return (from pp in ctx.PayProfits.Include(p => p.Demographic)
-            where pp.ProfitYear == profitYear
+            where pp.ProfitYear == employeeYear
             select new ParticipantTotalYearsDto { Ssn = pp.Demographic!.Ssn, Years = pp.YearsInPlan });
     }
 
@@ -152,8 +148,8 @@ public sealed class TotalService : ITotalService
     /// <param name="ctx">
     /// The database context used to access demographic, pay profit, and beneficiary data.
     /// </param>
-    /// <param name="profitYear">
-    /// The profit-sharing year for which the vesting ratio is being calculated.
+    /// <param name="employeeYear">
+    /// The employeeYear (aka selector of PayProfit) year for which the vesting ratio is being calculated.
     /// </param>
     /// <param name="asOfDate">
     /// The date as of which the vesting ratio is being determined.
@@ -162,7 +158,7 @@ public sealed class TotalService : ITotalService
     /// An <see cref="IQueryable{T}"/> of <see cref="ParticipantTotalRatioDto"/> containing the calculated vesting ratios
     /// for each participant.
     /// </returns>
-    public IQueryable<ParticipantTotalRatioDto> GetVestingRatio(IProfitSharingDbContext ctx, short profitYear, DateOnly asOfDate)
+    public IQueryable<ParticipantTotalRatioDto> GetVestingRatio(IProfitSharingDbContext ctx, short employeeYear, DateOnly asOfDate)
     {
 
         var birthDate65 = asOfDate.AddYears(-65);
@@ -170,8 +166,8 @@ public sealed class TotalService : ITotalService
 
         var demoInfo = (
             from d in ctx.Demographics
-            join pp in ctx.PayProfits on new { d.Id, ProfitYear = profitYear } equals new { Id = pp.DemographicId, pp.ProfitYear }
-            join cy in GetYearsOfService(ctx, profitYear) on d.Ssn equals cy.Ssn
+            join pp in ctx.PayProfits on new { d.Id, ProfitYear = employeeYear } equals new { Id = pp.DemographicId, pp.ProfitYear }
+            join cy in GetYearsOfService(ctx, employeeYear) on d.Ssn equals cy.Ssn
             select new
             {
                 d.Ssn,
@@ -181,7 +177,7 @@ public sealed class TotalService : ITotalService
                 pp.ZeroContributionReasonId,
                 d.DateOfBirth,
                 FromBeneficiary = (short)0,
-                Years = cy.Years,
+                cy.Years,
                 Hours = pp.CurrentHoursYear,
             }
         );
@@ -243,10 +239,27 @@ public sealed class TotalService : ITotalService
     /// </returns>
     public IQueryable<ParticipantTotalVestingBalanceDto> TotalVestingBalance(IProfitSharingDbContext ctx, short profitYear, DateOnly asOfDate)
     {
+        return TotalVestingBalance(ctx,profitYear,profitYear, asOfDate);
+    }
+
+    /// <summary>
+    /// Retrieves the total vesting balance for participants (using employee Year) using profit detail rows based upon the profitYear.
+    /// The asOfDate is used for age at a particular moment in time.
+    /// </summary>
+    /// <param name="ctx">The database context used to access profit-sharing data.</param>
+    /// <param name="employeeYear">Selects the employees to be used (current year, or prior year.)</param>
+    /// <param name="profitYear">The profit year for which the vesting balance is calculated.  Can be this year or any prior year.</param>
+    /// <param name="asOfDate">The date as of which the vesting balance is calculated. In particular for age calculation of vesting.</param>
+    /// <returns>
+    /// An <see cref="IQueryable{T}"/> of <see cref="ParticipantTotalVestingBalanceDto"/> containing the total vesting balance 
+    /// details for each participant, including current balance, ETVA, total distributions, vesting percentage, and vested balance.
+    /// </returns>
+    public IQueryable<ParticipantTotalVestingBalanceDto> TotalVestingBalance(IProfitSharingDbContext ctx, short employeeYear, short profitYear, DateOnly asOfDate)
+    {
         return (from b in GetTotalBalanceSet(ctx, profitYear)
-                join e in GetTotalEtva(ctx, profitYear) on b.Ssn equals e.Ssn
+                join e in GetTotalEtva(ctx, employeeYear) on b.Ssn equals e.Ssn
                 join d in GetTotalDistributions(ctx, profitYear) on b.Ssn equals d.Ssn
-                join v in GetVestingRatio(ctx, profitYear, asOfDate) on e.Ssn equals v.Ssn
+                join v in GetVestingRatio(ctx, employeeYear, asOfDate) on e.Ssn equals v.Ssn
                 select new ParticipantTotalVestingBalanceDto
                 {
                     Ssn = e.Ssn,
@@ -256,7 +269,7 @@ public sealed class TotalService : ITotalService
                     VestingPercent = v.Ratio,
                     VestedBalance = ((b.Total + d.Total - e.Total) * v.Ratio) + e.Total - d.Total
                 }
-        );
+            );
     }
 
     /// <summary>

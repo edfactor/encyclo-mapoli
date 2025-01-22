@@ -31,6 +31,13 @@ public sealed class PayProfit
     public decimal CurrentIncomeYear { get; set; }
 
     /// <summary>
+    /// Amount of money which is outside the time changing Vesting Amount.
+    /// This amount fully belongs to the member.   This number can not be derived (yet) from the PROFIT_DETAIL transactions.   There is an enhancement request to consider
+    /// changing this behavior.
+    /// </summary>
+    public required decimal Etva { get; set; }
+
+    /// <summary>
     /// earnings on the ETVA value 
     /// </summary>
     public required decimal EarningsEtvaValue { get; set; }

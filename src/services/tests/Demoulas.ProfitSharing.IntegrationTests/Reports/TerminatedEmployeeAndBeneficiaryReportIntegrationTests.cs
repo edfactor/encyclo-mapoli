@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
+using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -16,6 +17,9 @@ namespace Demoulas.ProfitSharing.IntegrationTests.Reports;
 public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : TestClassBase
 {
     private readonly ITestOutputHelper _testOutputHelper;
+#pragma warning disable IDE0052
+    // ReSharper disable once NotAccessedField.Local
+#pragma warning disable S4487
     private readonly IntegrationTestsFixture _fixture;
 
     public TerminatedEmployeeAndBeneficiaryReportIntegrationTests(ITestOutputHelper testOutputHelper, IntegrationTestsFixture fixture) : base(fixture)
@@ -34,8 +38,12 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : TestClassB
         DateOnly endDate = new DateOnly(2024, 12, 31);
         DateOnly effectiveDateOfTestData = new DateOnly(2024, 12, 31);
 
-        var calendarService = _fixture.Services.GetRequiredService<ICalendarService>()!;
-        var totalService = _fixture.Services.GetRequiredService<TotalService>()!;
+        // The test framework was throwing exceptions when access the services like this.
+        //var calendarService = _fixture.Services.GetRequiredService<ICalendarService>()!
+        //var totalService = _fixture.Services.GetRequiredService<TotalService>()!
+        var aps = new AccountingPeriodsService();
+        var calendarService = new CalendarService(ProfitSharingDataContextFactory, aps);
+        var  totalService = new TotalService(ProfitSharingDataContextFactory, calendarService);
         TerminatedEmployeeAndBeneficiaryReportService mockService =
             new TerminatedEmployeeAndBeneficiaryReportService(ProfitSharingDataContextFactory, calendarService, totalService);
 
@@ -50,7 +58,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : TestClassB
         actualText.Should().NotBeNullOrEmpty();
 
         string expectedText = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.terminatedEmployeeAndBeneficiaryReport-correct.txt");
-        
+
         ProfitShareUpdateTests.AssertReportsAreEquivalent(expectedText, actualText);
     }
 
@@ -74,8 +82,8 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : TestClassB
                 ms.EndingBalance, ms.VestedBalance, ms.DateTerm, ms.YtdPsHours, ms.VestedPercent, ms.Age,
                 ms.EnrollmentCode ?? 0);
         }
+
         textReportGenerator.PrintTotals(report.TotalEndingBalance, report.TotalVested, report.TotalForfeit, report.TotalBeneficiaryAllocation);
         return textReportGenerator.GetReport();
-
     }
 }

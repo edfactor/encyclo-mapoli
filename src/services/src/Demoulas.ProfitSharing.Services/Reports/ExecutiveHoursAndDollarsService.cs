@@ -26,7 +26,7 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
     /// <returns>A task that represents the asynchronous operation. The task result contains the report response with details of executive hours/dollars</returns>
     public async Task<ReportResponseBase<ExecutiveHoursAndDollarsResponse>> GetExecutiveHoursAndDollarsReportAsync(ExecutiveHoursAndDollarsRequest request, CancellationToken cancellationToken)
     {
-        var result = _dataContextFactory.UseReadOnlyContext(c =>
+        var result =  await _dataContextFactory.UseReadOnlyContext(c =>
         {
             var query = c.PayProfits
                 .Where(p=> p.ProfitYear == request.ProfitYear)
@@ -70,7 +70,7 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
         {
             ReportName = $"Executive Hours and Dollars for Year {request.ProfitYear}",
             ReportDate = DateTimeOffset.Now,
-            Response = await result
+            Response =  result
         };
 
     }
