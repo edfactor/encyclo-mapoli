@@ -274,6 +274,7 @@ export interface MasterInquryRequest {
   socialSecurity?: number;
   comment?: string;
   pagination: PaginationParams;
+  employeeNumber?: string;
 }
 
 export enum FrozenReportsByAgeRequestType {
