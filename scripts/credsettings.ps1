@@ -6,16 +6,38 @@ param (
     [string]$RemotePath
 )
 
-$profitSharing = $env:ConnectionStrings_ProfitSharing_QA
-$commonConnectionString = $env:ConnectionStrings_ProfitSharing_QA
+# Build dynamic environment-specific variable names
+$profitSharingVar = "ConnectionStrings_ProfitSharing_$Environment"
+$commonConnectionStringVar = "ConnectionStrings_Common_$Environment"
+$oracleBaseUrlVar = "QA_ORACLEHCM_BASE_URL_SLUG".Replace("QA", $Environment)
+$oracleUsernameVar = "QA_ORACLEHCM_USERNAME_SLUG".Replace("QA", $Environment)
+$oraclePasswordVar = "QA_ORACLEHCM_PASSWORD_SLUG".Replace("QA", $Environment)
 
+# Dynamically retrieve environment variables
+$profitSharing = $env:$profitSharingVar
+$commonConnectionString = $env:$commonConnectionStringVar
+$oracleBaseUrl = $env:$oracleBaseUrlVar
+$oracleUsername = $env:$oracleUsernameVar
+$oraclePassword = $env:$oraclePasswordVar
 
+# Validate that all variables are populated
+if (-not $profitSharing -or -not $commonConnectionString -or -not $oracleBaseUrl -or -not $oracleUsername -or -not $oraclePassword) {
+    throw "One or more environment variables are missing for the environment: $Environment."
+}
+
+Write-Host "Environment: $Environment"
+Write-Host "ProfitSharing: $profitSharing"
+Write-Host "Common Connection String: $commonConnectionString"
+Write-Host "Oracle Base URL: $oracleBaseUrl"
+Write-Host "Oracle Username: $oracleUsername"
+
+# Create the replacements hashtable
 [hashtable]$Replacements = @{
     "CONNECTIONSTRINGS_PROFITSHARING_SLUG" = $profitSharing
     "CONNECTIONSTRINGS_COMMON_SLUG" = $commonConnectionString
-    "ORACLEHCM_BASE_URL_SLUG" = $env:QA_ORACLEHCM_BASE_URL_SLUG
-    "ORACLEHCM_USERNAME_SLUG" = $env:QA_ORACLEHCM_USERNAME_SLUG
-    "ORACLEHCM_PASSWORD_SLUG" = $env:QA_ORACLEHCM_PASSWORD_SLUG
+    "ORACLEHCM_BASE_URL_SLUG" = $oracleBaseUrl
+    "ORACLEHCM_USERNAME_SLUG" = $oracleUsername
+    "ORACLEHCM_PASSWORD_SLUG" = $oraclePassword
 }
 
 if (-not $Replacements -or $Replacements.GetEnumerator().Count -eq 0) {
