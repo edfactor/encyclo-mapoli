@@ -84,6 +84,7 @@ try {
                     }
                     Write-Host 'Stopped Service'
                     $ServiceInfo.Refresh()
+                    Start-Sleep 5
                 }
             }
 
