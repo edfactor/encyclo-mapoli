@@ -89,7 +89,6 @@ internal static class DgmlService
 
             var primaryKeys = new List<string>();
             var foreignKeys = new List<string>();
-            var indexes = new List<string>();
             var fkRelationships = new List<string>();
 
             if (tableColumnsMap.TryGetValue(table.Key, out var columnIds))
@@ -101,11 +100,6 @@ internal static class DgmlService
                         // Add to PK, FK, and Index lists for separate summary
                         if (column.IsPrimaryKey) {primaryKeys.Add(column.ColumnName);}
                         if (column.IsForeignKey) {foreignKeys.Add(column.ColumnName);}
-                        if (column.IsIndexed)
-                        {
-                            indexes.Add($"{column.IndexName} (Column: {column.ColumnName})");
-                        }
-
 
                         markdown.AppendLine(
                             $"| {column.EntityPropertyName} | {column.ColumnName} | {column.DataType} | {column.Precision} | {column.IsPrimaryKey} | {column.IsForeignKey} | {column.IsRequired} | {column.IsIndexed} |");
@@ -133,8 +127,20 @@ internal static class DgmlService
             markdown.AppendLine("\n### Summary");
             markdown.AppendLine($"- **Primary Keys**: {(primaryKeys.Any() ? string.Join(", ", primaryKeys) : "None")}");
             markdown.AppendLine($"- **Foreign Keys**: {(foreignKeys.Any() ? string.Join(", ", foreignKeys) : "None")}");
-            markdown.AppendLine($"- **Indexes**: {(indexes.Any() ? string.Join(", ", indexes) : "None")}");
-            markdown.AppendLine($"- **Foreign Key Relationships**: {(fkRelationships.Any() ? string.Join("; ", fkRelationships) : "None")}");
+
+            if (fkRelationships.Any())
+            {
+                markdown.AppendLine("- **Foreign Key Relationships**:");
+                foreach (var fkRelationship in fkRelationships)
+                {
+                    markdown.AppendLine($"  - {fkRelationship}");
+                }
+            }
+            else
+            {
+                markdown.AppendLine("- **Foreign Key Relationships**: None");
+            }
+
         }
 
         // Save to output file
