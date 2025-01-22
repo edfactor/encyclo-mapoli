@@ -1,10 +1,15 @@
 param (
     [string]$FilePath,
     [string]$OutputPath,
-    [string]$Replacements, # Accept JSON string
     [string]$RemoteServer,
     [string]$RemotePath
 )
+
+$profitSharing = $env:ConnectionStrings_ProfitSharing_QA
+$oracleBaseUrl = $env:QA_ORACLEHCM_BASE_URL_SLUG
+
+Write-Host "ProfitSharing: $profitSharing"
+Write-Host "Oracle Base URL: $oracleBaseUrl"
 
 # Convert JSON string to Hashtable if needed
 if ($Replacements -is [string]) {
