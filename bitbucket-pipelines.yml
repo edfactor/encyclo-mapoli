@@ -261,28 +261,28 @@ pipelines:
             - pwsh -File ./scripts/credsettings.ps1 `
               -Environment ${env:ENV} `
               -FilePath './src/services/configuration/credsettings.json' `
-              -OutputPath './src/services/configuration/credsettings.${env:ENV}.json' `
+              -OutputPath './src/services/configuration/credsettings.qa.json' `
               -RemoteServer $env:API_SERVER_QA `
               -RemotePath 'C:/NextGenApplications/ps/EmployeeDelta'
 
             - pwsh -File ./scripts/credsettings.ps1 `
               -Environment ${env:ENV} `
               -FilePath './src/services/configuration/credsettings.json' `
-              -OutputPath './src/services/configuration/credsettings.${env:ENV}.json' `
+              -OutputPath './src/services/configuration/credsettings.qa.json' `
               -RemoteServer $env:API_SERVER_QA `
               -RemotePath 'C:/NextGenApplications/ps/EmployeeFull'
 
             - pwsh -File ./scripts/credsettings.ps1 `
               -Environment ${env:ENV} `
               -FilePath './src/services/configuration/credsettings.json' `
-              -OutputPath './src/services/configuration/credsettings.${env:ENV}.json' `
+              -OutputPath './src/services/configuration/credsettings.qa.json' `
               -RemoteServer $env:API_SERVER_QA `
               -RemotePath 'C:/NextGenApplications/ps/Payroll'
 
             - pwsh -File ./scripts/credsettings.ps1 `
               -Environment ${env:ENV} `
               -FilePath './src/services/configuration/credsettings.json' `
-              -OutputPath './src/services/configuration/credsettings.${env:ENV}.json' `
+              -OutputPath './src/services/configuration/credsettings.qa.json' `
               -RemoteServer $env:API_SERVER_QA `
               -RemotePath 'C:/inetpub/wwwroot/api'
 
