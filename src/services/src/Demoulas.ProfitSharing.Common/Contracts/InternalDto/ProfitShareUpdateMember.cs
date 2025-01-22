@@ -1,8 +1,9 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.InternalDto;
 
-public record ProfitShareUpdateMemberResponse
+public record ProfitShareUpdateMember
 {
     public bool IsEmployee { get; init; }
+    public int Ssn { get; set; }
     public long Badge { get; set; }
     public long Psn { get; set; }
     public string? Name { get; set; }

@@ -18,18 +18,19 @@ public class ProfitMasterUpdateEndpoint : Endpoint<ProfitShareUpdateRequest, Pro
 
     public override void Configure()
     {
-        Post("profit-master-update");
+        // If I use Post(), swagger shows no documentation :-(
+        Get("profit-master-update");
         Summary(s =>
         {
-            s.Summary = "applies YE updates to members";
+            s.Summary = "Applies YE updates to members";
+            s.ExampleRequest = ProfitShareUpdateRequest.RequestExample();
             s.ResponseExamples = new Dictionary<int, object> { { 200, ProfitMasterResponse.Example() } };
         });
         Group<YearEndGroup>();
     }
 
-    public override Task<ProfitMasterResponse> ExecuteAsync(ProfitShareUpdateRequest req, CancellationToken ct)
+    public override Task<ProfitMasterResponse> HandleAsync(ProfitShareUpdateRequest req, CancellationToken ct)
     {
         return _profitMasterService.Update(req, ct);
     }
-
 }

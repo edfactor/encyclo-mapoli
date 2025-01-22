@@ -17,17 +17,20 @@ public class ProfitMasterRevertEndpoint : Endpoint<ProfitYearRequest, ProfitMast
 
     public override void Configure()
     {
-        Post("profit-master-revert");
+        // If I use Post(), swagger shows no documentation :-(
+        Get("profit-master-revert");
         Summary(s =>
         {
-            s.Summary = "reverts YE updates to members";
+            s.Summary = "Reverts YE updates to members";
+            s.ExampleRequest = ProfitYearRequest.RequestExample();
             s.ResponseExamples = new Dictionary<int, object> { { 200, ProfitMasterResponse.Example() } };
         });
         Group<YearEndGroup>();
     }
-
-    public override Task<ProfitMasterResponse> ExecuteAsync(ProfitYearRequest req, CancellationToken ct)
+    
+    public override Task<ProfitMasterResponse> HandleAsync(ProfitYearRequest req, CancellationToken ct)
     {
         return _profitMasterService.Revert(req, ct);
     }
+
 }

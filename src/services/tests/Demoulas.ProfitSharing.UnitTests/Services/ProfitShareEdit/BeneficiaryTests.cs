@@ -47,7 +47,7 @@ public class BeneficiaryTests : ApiTestBase<Program>
         record.Code.Should().Be( /*8*/ ProfitCode.Constants.Incoming100PercentVestedEarnings);
         record.ContributionAmount.Should().Be(0);
         record.ForfeitureAmount.Should().Be(0);
-        record.EarningAmount.Should().Be(earnPoints * req.EarningsPercent);
+        record.EarningsAmount.Should().Be(earnPoints * req.EarningsPercent);
         record.Remark.Should().Be(CommentType.Constants.OneHundredPercentEarnings.Name);
     }
 }

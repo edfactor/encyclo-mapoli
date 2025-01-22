@@ -58,11 +58,10 @@ public class UpdateEmployeeTests : ApiTestBase<Program>
     public async Task employee_with_Etva()
     {
         // Arrange
+        _scenarioFactory.PayProfits[0].Etva = 1000;
         _profitDetails[0].ProfitCodeId.Should().Be(0);
         _profitDetails[0].Contribution = 2000m;
-        _profitDetails[1].ProfitCodeId.Should().Be(8);
-        _profitDetails[1].Earnings = 1000m; // Etva Amount
-
+       
         // Act
         ProfitMasterResponse response = await _service.Update(DefaultRequest(), CancellationToken.None);
 
@@ -87,7 +86,7 @@ public class UpdateEmployeeTests : ApiTestBase<Program>
             pd1.ProfitCode.Should().Be(ProfitCode.Constants.IncomingContributions);
             pd1.Contribution.Should().Be(0);
             pd1.Forfeiture.Should().Be(0);
-            var EarnPoints = (int)Math.Round(2000m / 100, MidpointRounding.AwayFromZero);
+            var EarnPoints = (int)Math.Round(1000m / 100, MidpointRounding.AwayFromZero);
             pd1.Earnings.Should().Be(EarnPoints * DefaultEarningsPercent);
         }
     }

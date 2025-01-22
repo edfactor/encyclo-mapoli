@@ -1,13 +1,13 @@
-﻿using Demoulas.ProfitSharing.Common.Extensions;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
-namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+namespace Demoulas.ProfitSharing.Common.Contracts.InternalDto;
 
 /// <summary>
 /// Represents a year end Transaction (aka row in PROFIT_DETAIL) as shown to the user
 /// </summary>
 public record ProfitShareEditMemberRecord
 {
-    public ProfitShareEditMemberRecord(ProfitShareUpdateMemberResponse mr, byte code)
+    public ProfitShareEditMemberRecord(ProfitShareUpdateMember mr, byte code)
     {
         IsEmployee = mr.IsEmployee;
         Ssn = mr.Ssn;
@@ -31,20 +31,4 @@ public record ProfitShareEditMemberRecord
 
     public byte ZeroContStatus { get; set; }
     public byte YearExtension { get; set; }
-    
-    public static ProfitShareEditMemberRecord ResponseExample()
-    {
-        return new ProfitShareEditMemberRecord(new ProfitShareUpdateMemberResponse(), 0)
-        {
-            Ssn = 777,
-            Badge = 123,
-            Psn = 0,
-            Name = "VILLANUEVA, ISAAC",
-            ContributionAmount = 4350m,
-            EarningAmount = 50,
-            ForfeitureAmount = 290,
-            Remark = "V-ONLY",
-            RecordChangeSummary = "18,19,20 > 1000"
-        };
-    }
 }

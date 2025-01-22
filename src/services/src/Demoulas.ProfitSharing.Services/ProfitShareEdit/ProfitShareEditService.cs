@@ -1,4 +1,5 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.InternalDto;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -35,7 +36,7 @@ public class ProfitShareEditService : IProfitShareEditService
             Name = m.Name,
             Code = m.Code,
             ContributionAmount = m.ContributionAmount,
-            EarningAmount = m.EarningAmount,
+            EarningsAmount = m.EarningAmount,
             ForfeitureAmount = m.ForfeitureAmount,
             Remark = m.Remark,
             CommentTypeId = m.CommentTypeId,
@@ -63,10 +64,10 @@ public class ProfitShareEditService : IProfitShareEditService
 
     private async Task<IEnumerable<ProfitShareEditMemberRecord>> getRecords(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
-        ProfitShareUpdateResponse psur = await _profitShareUpdateService.ProfitShareUpdate(profitShareUpdateRequest, cancellationToken);
+        ProfitShareUpdateResult psur = await _profitShareUpdateService.ProfitShareUpdateInternal(profitShareUpdateRequest, cancellationToken);
 
         List<ProfitShareEditMemberRecord> records = new();
-        foreach (var member in psur.Response.Results)
+        foreach (var member in psur.Members)
         {
             if (member.IsEmployee)
             {
@@ -80,7 +81,7 @@ public class ProfitShareEditService : IProfitShareEditService
         return records;
     }
 
-    private static void AddEmployeeRecords(List<ProfitShareEditMemberRecord> records, ProfitShareUpdateMemberResponse member)
+    private static void AddEmployeeRecords(List<ProfitShareEditMemberRecord> records, ProfitShareUpdateMember member)
     {
         // Under 21
         if (member.ZeroContributionReasonId == ZeroContributionReason.Constants.Under21WithOver1Khours /*1*/)
@@ -139,7 +140,7 @@ public class ProfitShareEditService : IProfitShareEditService
         HandleNormalRecord(records, member);
     }
 
-    private static void HandleNormalRecord(List<ProfitShareEditMemberRecord> records, ProfitShareUpdateMemberResponse member)
+    private static void HandleNormalRecord(List<ProfitShareEditMemberRecord> records, ProfitShareUpdateMember member)
     {
         ProfitShareEditMemberRecord rec = new(member, /*0*/ ProfitCode.Constants.IncomingContributions)
         {
@@ -179,7 +180,7 @@ public class ProfitShareEditService : IProfitShareEditService
         }
     }
 
-    private static void AddBeneficiaryRecords(List<ProfitShareEditMemberRecord> records, ProfitShareUpdateMemberResponse member)
+    private static void AddBeneficiaryRecords(List<ProfitShareEditMemberRecord> records, ProfitShareUpdateMember member)
     {
         if (member.AllEarnings > 0)
         {

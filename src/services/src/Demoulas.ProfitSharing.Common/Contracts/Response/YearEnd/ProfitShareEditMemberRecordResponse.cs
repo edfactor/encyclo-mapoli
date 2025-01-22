@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Common.Extensions;
+﻿using Demoulas.ProfitSharing.Common.Contracts.InternalDto;
+using Demoulas.ProfitSharing.Common.Extensions;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
@@ -13,7 +14,7 @@ public record ProfitShareEditMemberRecordResponse
     public string? Name { get; set; }
     public byte Code { get; set; }
     public decimal ContributionAmount { get; set; }
-    public decimal EarningAmount { get; set; }
+    public decimal EarningsAmount { get; set; }
     public decimal ForfeitureAmount { get; set; }
     public string? Remark { get; set; }
     public byte? CommentTypeId { get; set; }
@@ -22,16 +23,15 @@ public record ProfitShareEditMemberRecordResponse
     public byte ZeroContStatus { get; set; }
     public byte YearExtension { get; set; }
     
-    public static ProfitShareEditMemberRecord ResponseExample()
+    public static ProfitShareEditMemberRecordResponse ResponseExample()
     {
-        return new ProfitShareEditMemberRecord(new ProfitShareUpdateMemberResponse(), 0)
+        return new ProfitShareEditMemberRecordResponse()
         {
-
             Badge = 123,
             Psn = 0,
             Name = "VILLANUEVA, ISAAC",
             ContributionAmount = 4350m,
-            EarningAmount = 50,
+            EarningsAmount = 50,
             ForfeitureAmount = 290,
             Remark = "V-ONLY",
             RecordChangeSummary = "18,19,20 > 1000"
