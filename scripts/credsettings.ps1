@@ -1,4 +1,5 @@
 param (
+    [string]$Environment,
     [string]$FilePath,
     [string]$OutputPath,
     [string]$RemoteServer,
@@ -11,13 +12,11 @@ $oracleBaseUrl = $env:QA_ORACLEHCM_BASE_URL_SLUG
 Write-Host "ProfitSharing: $profitSharing"
 Write-Host "Oracle Base URL: $oracleBaseUrl"
 
-# Convert JSON string to Hashtable if needed
-if ($Replacements -is [string]) {
-    try {
-        $Replacements = ConvertFrom-Json $Replacements
-    } catch {
-        throw "Failed to convert 'Replacements' JSON string to a Hashtable. Ensure it is a valid JSON string."
-    }
+
+
+[string]$Replacements = @{
+    "CONNECTIONSTRINGS_PROFITSHARING_SLUG" = $profitSharing
+    "ORACLEHCM_BASE_URL_SLUG" = $oracleBaseUrl
 }
 
 if (-not $Replacements -or $Replacements.GetEnumerator().Count -eq 0) {

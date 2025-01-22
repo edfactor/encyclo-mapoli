@@ -108,6 +108,7 @@ definitions:
         - self.hosted
       script:
         - pwsh -File ./scripts/credsettings.ps1 `
+              -Environment 'QA' `
               -FilePath './src/services/configuration/credsettings.json' `
               -OutputPath './src/services/configuration/credsettings.qa.json' `
               -RemoteServer 'appt23d' `
