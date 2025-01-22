@@ -123,7 +123,8 @@ public static class StockFactory
                 IncomeExecutive = 0,
                 LastUpdate = default,
                 PointsEarned = null,
-                YearsInPlan = 3
+                YearsInPlan = 3,
+                Etva = 0
             },
             new()
             {
@@ -149,7 +150,8 @@ public static class StockFactory
                 IncomeExecutive = 0,
                 LastUpdate = default,
                 PointsEarned = null,
-                YearsInPlan = 2
+                YearsInPlan = 2,
+                Etva = 0
             }
         ];
         return (demographic, payprofits);

@@ -82,17 +82,20 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
         AdjustmentReportData adjustmentReportData, CancellationToken cancellationToken)
     {
         var employeeExceededMaxContribution = false;
-        // We want everything up to the beginning of this profit share year, so we use "profitYear - 1" in this lookup.
-        var fiscalDates = await _calendarService.GetYearStartAndEndAccountingDatesAsync((short)(profitShareUpdateRequest.ProfitYear - 1), cancellationToken);
+        short currentYear = profitShareUpdateRequest.ProfitYear;
+        short priorYear = (short)(profitShareUpdateRequest.ProfitYear - 1);
+        
+        // We want everything up to the beginning of this currentYear year, so we use lastYear in this lookup.
+        var fiscalDates = await _calendarService.GetYearStartAndEndAccountingDatesAsync(priorYear, cancellationToken);
         List<EmployeeFinancials> employeeFinancialsList = await _dbContextFactory.UseReadOnlyContext(async ctx =>
         {
             var employees = await ctx.PayProfits
                 .Include(pp => pp.Demographic) //Question - Should this be referring to frozen demographics
                 .Include(pp => pp.Demographic!.ContactInfo)
-                .Where(pp => pp.ProfitYear == profitShareUpdateRequest.ProfitYear)
+                .Where(pp => pp.ProfitYear == currentYear)
                 .Select(x => new
                 {
-                    BadgeNumber = x.Demographic!.BadgeNumber,
+                    x.Demographic!.BadgeNumber,
                     x.Demographic.Ssn,
                     Name = x.Demographic.ContactInfo!.FullName,
                     EnrolledId = x.EnrollmentId,
@@ -102,8 +105,8 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
                     x.ZeroContributionReasonId,
                 }).ToListAsync(cancellationToken);
             var ssns = employees.Select(e => e.Ssn);
-            var totalVestingBalances = await ((TotalService)_totalService).TotalVestingBalance(ctx,
-                    (short)(profitShareUpdateRequest.ProfitYear - 1), fiscalDates.FiscalEndDate)
+            var totalVestingBalances = await ((TotalService)_totalService)
+                .TotalVestingBalance(ctx, currentYear, priorYear, fiscalDates.FiscalEndDate)
                 .Where(e => ssns.Contains(e.Ssn)).ToListAsync(cancellationToken);
             return
                 employees
@@ -185,7 +188,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
     {
         // Gets this year's profit sharing transactions, aka Distributions - hardships - Military - ClassActionFund
         ProfitDetailTotals profitDetailTotals =
-            await ProfitDetailTotals.GetProfitDetailTotals(_dbContextFactory, profitShareUpdateRequest.ProfitYear, empl.Ssn, cancellationToken);
+            await ProfitDetailTotals.GetProfitDetailTotals(_dbContextFactory, (short)(profitShareUpdateRequest.ProfitYear -1), empl.Ssn, cancellationToken);
 
         // MemberTotals holds newly computed values, not old values
         MemberTotals memberTotals = new();
