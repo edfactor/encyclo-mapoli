@@ -259,31 +259,31 @@ pipelines:
             - $env:API_SERVER_QA = "appt23d"
 
             - pwsh -File ./scripts/credsettings.ps1 `
-              -Environment '${env:ENV}' `
+              -Environment ${env:ENV} `
               -FilePath './src/services/configuration/credsettings.json' `
               -OutputPath './src/services/configuration/credsettings.${env:ENV}.json' `
-              -RemoteServer '$env:API_SERVER_QA' `
+              -RemoteServer $env:API_SERVER_QA `
               -RemotePath 'C:/NextGenApplications/ps/EmployeeDelta'
 
             - pwsh -File ./scripts/credsettings.ps1 `
-              -Environment '${env:ENV}' `
+              -Environment ${env:ENV} `
               -FilePath './src/services/configuration/credsettings.json' `
               -OutputPath './src/services/configuration/credsettings.${env:ENV}.json' `
-              -RemoteServer '$env:API_SERVER_QA' `
+              -RemoteServer $env:API_SERVER_QA `
               -RemotePath 'C:/NextGenApplications/ps/EmployeeFull'
 
             - pwsh -File ./scripts/credsettings.ps1 `
-              -Environment '${env:ENV}' `
+              -Environment ${env:ENV} `
               -FilePath './src/services/configuration/credsettings.json' `
               -OutputPath './src/services/configuration/credsettings.${env:ENV}.json' `
-              -RemoteServer '$env:API_SERVER_QA' `
+              -RemoteServer $env:API_SERVER_QA `
               -RemotePath 'C:/NextGenApplications/ps/Payroll'
 
             - pwsh -File ./scripts/credsettings.ps1 `
-              -Environment '${env:ENV}' `
+              -Environment ${env:ENV} `
               -FilePath './src/services/configuration/credsettings.json' `
               -OutputPath './src/services/configuration/credsettings.${env:ENV}.json' `
-              -RemoteServer '$env:API_SERVER_QA' `
+              -RemoteServer $env:API_SERVER_QA `
               -RemotePath 'C:/inetpub/wwwroot/api'
 
             - echo "Deploying web application..."
