@@ -221,11 +221,11 @@ public class FrozenReportService : IFrozenReportService
             x.Amount,
             x.CommentTypeId
         })
-            .GroupBy(x => new { x.Age, x.EmploymentType })
+            .GroupBy(x => new { x.Age })
             .Select(g => new DistributionsByAgeDetail
             {
                 Age = g.Key.Age,
-                EmploymentType = g.Key.EmploymentType,
+                EmploymentType = req.ReportType.ToString(),
                 EmployeeCount = g.Select(x => x.BadgeNumber).Distinct().Count(),
                 Amount = g.Sum(x => x.Amount),
                 // Compute the total hardship amount within the group
