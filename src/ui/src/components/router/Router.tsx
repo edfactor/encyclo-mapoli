@@ -3,7 +3,6 @@ import RouteSecurity from "./RouteSecurity";
 import LandingPage from "./LandingPage";
 import { ImpersonationMultiSelect, MenuBar } from "smart-ui-library";
 import MenuData from "../../MenuData";
-
 import DemographicBadgesNotInPayprofit from "pages/DemographicBadgesNotInPayprofit/DemographicBadgesNotInPayprofit";
 import DuplicateSSNsOnDemographics from "pages/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographics";
 import NegativeEtvaForSSNsOnPayprofit from "pages/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofit";
@@ -24,11 +23,17 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { setImpersonating } from "reduxstore/slices/securitySlice";
 import { ImpersonationRoles } from "reduxstore/types";
-import VestedAmountsByAge from "../../pages/VestedAmountsByAge/VestedAmountsByAge";
-import BalanceByYears from "../../pages/BalanceByYears/BalanceByYears";
-import Termination from "pages/Termination/Termination";
+import CleanUpSummary from "pages/CleanUpSummary/CleanUpSummary";
 import { useEffect } from "react";
+import FrozenSummary from "pages/FrozenSummary/FrozenSummary";
+import BalanceByYears from "pages/BalanceByYears/BalanceByYears";
+import VestedAmountsByAge from "pages/VestedAmountsByAge/VestedAmountsByAge";
+import DecemberProcess from "pages/DecemberProcess/DecemberProcess";
+import DecemberProcessAccordion from "pages/DecemberProcess/DecemberProcessAccordion";
+import DecemberProcessLocalApi from "pages/DecemberProcess/DecemberProcessLOCALAPI";
+import Termination from "pages/Termination/Termination";
 import MilitaryAndRehireEntryAndModification from "pages/MilitaryAndRehireEntryAndModification/MilitaryAndRehireEntryAndModification";
+import ProfitShareReport from "pages/ProfitShareReport/ProfitShareReport";
 
 const Router = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -125,7 +130,7 @@ const Router = () => {
           path="eligible-employees"
           element={<EligibleEmployees />}></Route>
         <Route
-          path="master-inquiry"
+          path="master-inquiry/:badgeNumber?"
           element={<MasterInquiry />}></Route>
         <Route
           path="distributions-by-age"
@@ -140,17 +145,35 @@ const Router = () => {
           path="balance-by-age"
           element={<BalanceByAge />}></Route>
         <Route
+          path="clean-up-summary"
+          element={<CleanUpSummary />}></Route>
+        <Route
+          path="frozen-summary"
+          element={<FrozenSummary />}></Route>
+        <Route
           path="balance-by-years"
           element={<BalanceByYears />}></Route>
         <Route
           path="vested-amounts-by-age"
           element={<VestedAmountsByAge />}></Route>
-          <Route
+        <Route
+          path="december-process"
+          element={<DecemberProcess />}></Route>
+        <Route
+          path="december-process-local"
+          element={<DecemberProcessLocalApi />}></Route>
+        <Route
+          path="december-process-accordion"
+          element={<DecemberProcessAccordion />}></Route>
+        <Route
           path="prof-term"
           element={<Termination />}></Route>
           <Route
           path="military-and-rehire-entry"
           element={<MilitaryAndRehireEntryAndModification />}></Route>
+          <Route
+          path="profit-share-report"
+          element={<ProfitShareReport />}></Route>
       </RouteSecurity>
     </BrowserRouter>
   );
