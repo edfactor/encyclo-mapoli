@@ -109,9 +109,9 @@ definitions:
       script:
         - pwsh -Command "
             \$replacements = @{
-                'CONNECTIONSTRINGS_PROFITSHARING_SLUG' = \'$env:ConnectionStrings_ProfitSharing_QA';
-                'CONNECTIONSTRINGS_COMMON_SLUG' = \'$env:ConnectionStrings_Common_QA';
-                'ORACLEHCM_BASE_URL_SLUG' = \'$env:QA_ORACLEHCM_BASE_URL_SLUG'
+                'CONNECTIONSTRINGS_PROFITSHARING_SLUG' = '$env:ConnectionStrings_ProfitSharing_QA';
+                'CONNECTIONSTRINGS_COMMON_SLUG' = '$env:ConnectionStrings_Common_QA';
+                'ORACLEHCM_BASE_URL_SLUG' = '$env:QA_ORACLEHCM_BASE_URL_SLUG'
             };
             Write-Host 'Replacements:';
             Write-Host (\$replacements | ConvertTo-Json -Depth 10 -Compress);
