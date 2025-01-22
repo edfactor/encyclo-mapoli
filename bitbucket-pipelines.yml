@@ -240,7 +240,6 @@ definitions:
 pipelines:
   branches:
     release:
-      - step: *create-credsettings
       - parallel:
           - step: *build-and-test-backend
           - step: *test-frontend          
@@ -258,6 +257,27 @@ pipelines:
           script:
             - ${env:ENV} = "QA"
             - $env:API_SERVER_QA = "appt23d"
+
+            - pwsh -File ./scripts/credsettings.ps1 `
+              -Environment '${env:ENV}' `
+              -FilePath './src/services/configuration/credsettings.json' `
+              -OutputPath './src/services/configuration/credsettings.${env:ENV}.json' `
+              -RemoteServer '$env:API_SERVER_QA' `
+              -RemotePath 'C:/NextGenApplications/ps/EmployeeDelta'
+
+            - pwsh -File ./scripts/credsettings.ps1 `
+              -Environment '${env:ENV}' `
+              -FilePath './src/services/configuration/credsettings.json' `
+              -OutputPath './src/services/configuration/credsettings.${env:ENV}.json' `
+              -RemoteServer '$env:API_SERVER_QA' `
+              -RemotePath 'C:/NextGenApplications/ps/EmployeeFull'
+
+            - pwsh -File ./scripts/credsettings.ps1 `
+              -Environment '${env:ENV}' `
+              -FilePath './src/services/configuration/credsettings.json' `
+              -OutputPath './src/services/configuration/credsettings.${env:ENV}.json' `
+              -RemoteServer '$env:API_SERVER_QA' `
+              -RemotePath 'C:/NextGenApplications/ps/Payroll'
 
             - echo "Deploying web application..."
             - $env:API_ARTIFACT_NAME = "Demoulas.ProfitSharing.Api.zip"
