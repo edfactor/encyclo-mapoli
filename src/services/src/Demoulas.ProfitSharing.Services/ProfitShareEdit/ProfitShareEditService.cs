@@ -26,9 +26,46 @@ public class ProfitShareEditService : IProfitShareEditService
 
     public async Task<ProfitShareEditResponse> ProfitShareEdit(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
+        var records = await getRecords(profitShareUpdateRequest, cancellationToken);
+        var responseRecords = records.Select(m => new ProfitShareEditMemberRecordResponse
+        {
+            IsEmployee = false,
+            Badge = m.Badge,
+            Psn = m.Psn,
+            Name = m.Name,
+            Code = m.Code,
+            ContributionAmount = m.ContributionAmount,
+            EarningAmount = m.EarningAmount,
+            ForfeitureAmount = m.ForfeitureAmount,
+            Remark = m.Remark,
+            CommentTypeId = m.CommentTypeId,
+            RecordChangeSummary = m.RecordChangeSummary,
+            ZeroContStatus = m.ZeroContStatus,
+            YearExtension = m.YearExtension
+        }).ToList();
+
+        return new ProfitShareEditResponse
+        {
+            ReportName = "Profit Sharing Edit",
+            ReportDate = DateTimeOffset.Now,
+            BeginningBalance = 1,
+            ContributionGrandTotal = 2,
+            IncomingForfeitureGrandTotal = 3,
+            EarningsGrandTotal = 4,
+            Response = new PaginatedResponseDto<ProfitShareEditMemberRecordResponse> { Results = responseRecords }
+        };
+    }
+
+    public Task<IEnumerable<ProfitShareEditMemberRecord>> ProfitShareEditRecords(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
+    {
+        return getRecords(profitShareUpdateRequest, cancellationToken);
+    }
+
+    private async Task<IEnumerable<ProfitShareEditMemberRecord>> getRecords(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
+    {
         ProfitShareUpdateResponse psur = await _profitShareUpdateService.ProfitShareUpdate(profitShareUpdateRequest, cancellationToken);
 
-        List<ProfitShareEditMemberRecordResponse> records = new();
+        List<ProfitShareEditMemberRecord> records = new();
         foreach (var member in psur.Response.Results)
         {
             if (member.IsEmployee)
@@ -40,25 +77,15 @@ public class ProfitShareEditService : IProfitShareEditService
                 AddBeneficiaryRecords(records, member);
             }
         }
-
-        return new ProfitShareEditResponse
-        {
-            ReportName = "Profit Sharing Edit",
-            ReportDate = DateTimeOffset.Now,
-            BeginningBalance = 1,
-            ContributionGrandTotal = 2,
-            IncomingForfeitureGrandTotal = 3,
-            EarningsGrandTotal = 4,
-            Response = new PaginatedResponseDto<ProfitShareEditMemberRecordResponse> { Results = records }
-        };
+        return records;
     }
 
-    private static void AddEmployeeRecords(List<ProfitShareEditMemberRecordResponse> records, ProfitShareUpdateMemberResponse member)
+    private static void AddEmployeeRecords(List<ProfitShareEditMemberRecord> records, ProfitShareUpdateMemberResponse member)
     {
         // Under 21
         if (member.ZeroContributionReasonId == ZeroContributionReason.Constants.Under21WithOver1Khours /*1*/)
         {
-            ProfitShareEditMemberRecordResponse rec = new(member, /*0*/ ProfitCode.Constants.IncomingContributions)
+            ProfitShareEditMemberRecord rec = new(member, /*0*/ ProfitCode.Constants.IncomingContributions)
             {
                 ZeroContStatus = ZeroContributionReason.Constants.Under21WithOver1Khours, // force new line formatting
                 Remark = CommentType.Constants.VOnly.Name,
@@ -76,7 +103,7 @@ public class ProfitShareEditService : IProfitShareEditService
 
         if (member.EtvaEarnings > 0)
         {
-            ProfitShareEditMemberRecordResponse rec = new(member, /*8*/ProfitCode.Constants.Incoming100PercentVestedEarnings)
+            ProfitShareEditMemberRecord rec = new(member, /*8*/ProfitCode.Constants.Incoming100PercentVestedEarnings)
             {
                 EarningAmount = member.EtvaEarnings, // force new line formatting
                 ZeroContStatus = ZeroContributionReason.Constants.Normal,
@@ -87,7 +114,7 @@ public class ProfitShareEditService : IProfitShareEditService
 
         if (member.SecondaryEtvaEarnings /*PY_PROF_ETVA2*/ > 0)
         {
-            ProfitShareEditMemberRecordResponse rec = new(member, /*8*/ ProfitCode.Constants.Incoming100PercentVestedEarnings)
+            ProfitShareEditMemberRecord rec = new(member, /*8*/ ProfitCode.Constants.Incoming100PercentVestedEarnings)
             {
                 YearExtension = 2, // force new line formatting
                 EarningAmount = member.SecondaryEtvaEarnings,
@@ -99,7 +126,7 @@ public class ProfitShareEditService : IProfitShareEditService
 
         if (member.AllSecondaryEarnings /*PY-PROF-EARN2*/ > 0)
         {
-            ProfitShareEditMemberRecordResponse rec = new(member, /*0*/ ProfitCode.Constants.IncomingContributions)
+            ProfitShareEditMemberRecord rec = new(member, /*0*/ ProfitCode.Constants.IncomingContributions)
             {
                 YearExtension = 2, // force new line formatting
                 EarningAmount = member.AllSecondaryEarnings - member.SecondaryEtvaEarnings
@@ -112,9 +139,9 @@ public class ProfitShareEditService : IProfitShareEditService
         HandleNormalRecord(records, member);
     }
 
-    private static void HandleNormalRecord(List<ProfitShareEditMemberRecordResponse> records, ProfitShareUpdateMemberResponse member)
+    private static void HandleNormalRecord(List<ProfitShareEditMemberRecord> records, ProfitShareUpdateMemberResponse member)
     {
-        ProfitShareEditMemberRecordResponse rec = new(member, /*0*/ ProfitCode.Constants.IncomingContributions)
+        ProfitShareEditMemberRecord rec = new(member, /*0*/ ProfitCode.Constants.IncomingContributions)
         {
             ContributionAmount = member.Contributions,
             ForfeitureAmount = member.IncomingForfeitures, // The Earnings includes Etva Earnings
@@ -152,11 +179,11 @@ public class ProfitShareEditService : IProfitShareEditService
         }
     }
 
-    private static void AddBeneficiaryRecords(List<ProfitShareEditMemberRecordResponse> records, ProfitShareUpdateMemberResponse member)
+    private static void AddBeneficiaryRecords(List<ProfitShareEditMemberRecord> records, ProfitShareUpdateMemberResponse member)
     {
         if (member.AllEarnings > 0)
         {
-            ProfitShareEditMemberRecordResponse rec = new(member, /*8*/ ProfitCode.Constants.Incoming100PercentVestedEarnings)
+            ProfitShareEditMemberRecord rec = new(member, /*8*/ ProfitCode.Constants.Incoming100PercentVestedEarnings)
             {
                 ZeroContStatus = ZeroContributionReason.Constants.Normal, // force new line formatting
                 EarningAmount = member.AllEarnings,
@@ -167,7 +194,7 @@ public class ProfitShareEditService : IProfitShareEditService
 
         if (member.AllSecondaryEarnings > 0)
         {
-            ProfitShareEditMemberRecordResponse rec = new(member, /*8*/ ProfitCode.Constants.Incoming100PercentVestedEarnings)
+            ProfitShareEditMemberRecord rec = new(member, /*8*/ ProfitCode.Constants.Incoming100PercentVestedEarnings)
             {
                 YearExtension = 2,
                 ZeroContStatus = ZeroContributionReason.Constants.Normal,
@@ -179,7 +206,7 @@ public class ProfitShareEditService : IProfitShareEditService
     }
 
 
-    private static void AddRecord(List<ProfitShareEditMemberRecordResponse> records, ProfitShareEditMemberRecordResponse rec)
+    private static void AddRecord(List<ProfitShareEditMemberRecord> records, ProfitShareEditMemberRecord rec)
     {
         if (rec.ContributionAmount == 0 && rec.EarningAmount == 0 && rec.ForfeitureAmount == 0 && rec.Remark == null)
         {

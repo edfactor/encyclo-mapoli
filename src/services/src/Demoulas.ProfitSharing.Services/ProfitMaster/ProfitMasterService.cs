@@ -35,23 +35,23 @@ public class ProfitMasterService : IProfitMasterService
     public async Task<ProfitMasterResponse> Update(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
         int etvasUpdated = 0;
-        ProfitShareEditResponse pser = await _profitShareEditService.ProfitShareEdit(profitShareUpdateRequest, cancellationToken);
+        var records = await _profitShareEditService.ProfitShareEditRecords(profitShareUpdateRequest, cancellationToken);
 
         return await _dbFactory.UseWritableContext(async ctx =>
         {
             var code2ProfitCode = await ctx.ProfitCodes.ToDictionaryAsync(pc => pc.Id, pc => pc, cancellationToken);
 
             // Create records and batch insert them.
-            var profitDetailRecords = CreateProfitDetailRecords(code2ProfitCode, profitShareUpdateRequest.ProfitYear, pser.Response.Results);
+            var profitDetailRecords = CreateProfitDetailRecords(code2ProfitCode, profitShareUpdateRequest.ProfitYear, records);
             ctx.ProfitDetails.AddRange(profitDetailRecords);
 
             // create ETVA updates 
-            var employeeSsns = pser.Response.Results.Select(r => r.Ssn).ToHashSet();
+            var employeeSsns = records.Select(r => r.Ssn).ToHashSet();
             var payProfits = await ctx.PayProfits.Include(pp => pp.Demographic)
                 .Where(pp => pp.ProfitYear == profitShareUpdateRequest.ProfitYear && employeeSsns.Contains(pp.Demographic!.Ssn))
                 .ToListAsync(cancellationToken);
             var ssn2PayProfit = payProfits.ToDictionary(pp => pp.Demographic!.Ssn, pp => pp);
-            foreach (var earningRecord in pser.Response.Results.Where(r => r.Code == /*8*/ ProfitCode.Constants.Incoming100PercentVestedEarnings.Id && r.IsEmployee))
+            foreach (var earningRecord in records.Where(r => r.Code == /*8*/ ProfitCode.Constants.Incoming100PercentVestedEarnings.Id && r.IsEmployee))
             {
                 var pp = ssn2PayProfit[earningRecord.Ssn];
                 pp.HoursExecutive = pp.HoursExecutive + 0; // This is NOP until Etva is added back.
@@ -60,15 +60,15 @@ public class ProfitMasterService : IProfitMasterService
             }
 
             await ctx.SaveChangesAsync(cancellationToken);
-            var employeesEffected = pser.Response.Results.Where(m => m.IsEmployee).Select(m => m.Ssn).ToHashSet().Count;
-            var beneficiariesEffected = pser.Response.Results.Where(m => !m.IsEmployee).Select(m => m.Ssn).ToHashSet().Count;
+            var employeesEffected = records.Where(m => m.IsEmployee).Select(m => m.Ssn).ToHashSet().Count;
+            var beneficiariesEffected = records.Where(m => !m.IsEmployee).Select(m => m.Ssn).ToHashSet().Count;
 
             return new ProfitMasterResponse { BeneficiariesEffected = beneficiariesEffected, EmployeesEffected = employeesEffected, EtvasEffected = etvasUpdated }!;
         }, cancellationToken);
     }
 
     private static List<ProfitDetail> CreateProfitDetailRecords(Dictionary<byte, ProfitCode> id2ProfitCode, short profitYear,
-        IEnumerable<ProfitShareEditMemberRecordResponse> rec)
+        IEnumerable<ProfitShareEditMemberRecord> rec)
     {
         return rec.Select(r => new ProfitDetail
         {

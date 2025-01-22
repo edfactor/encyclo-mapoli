@@ -5,9 +5,19 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 /// <summary>
 /// Represents a year end Transaction (aka row in PROFIT_DETAIL) as shown to the user
 /// </summary>
-public record ProfitShareEditMemberRecordResponse
+public record ProfitShareEditMemberRecord
 {
+    public ProfitShareEditMemberRecord(ProfitShareUpdateMemberResponse mr, byte code)
+    {
+        IsEmployee = mr.IsEmployee;
+        Ssn = mr.Ssn;
+        Badge = mr.Badge;
+        Psn = mr.Psn;
+        Name = mr.Name;
+        Code = code;
+    }
     public bool IsEmployee { get; init; }
+    public int Ssn { get; set; }
     public long Badge { get; set; }
     public long Psn { get; set; }
     public string? Name { get; set; }
@@ -26,7 +36,7 @@ public record ProfitShareEditMemberRecordResponse
     {
         return new ProfitShareEditMemberRecord(new ProfitShareUpdateMemberResponse(), 0)
         {
-
+            Ssn = 777,
             Badge = 123,
             Psn = 0,
             Name = "VILLANUEVA, ISAAC",

@@ -38,7 +38,7 @@ public class BeneficiaryTests : ApiTestBase<Program>
         // Assert
         // expect 1 record
         response.Response.Results.Count().Should().Be(1);
-        ProfitShareEditMemberRecordResponse record = response.Response.Results.First();
+        var record = response.Response.Results.First();
 
         // compute expected 100 Earnings Amount
         decimal pointsDollars = Math.Round(_beneBalance, 2, MidpointRounding.AwayFromZero);
