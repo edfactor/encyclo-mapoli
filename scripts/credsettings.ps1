@@ -8,7 +8,7 @@ param (
 
 # Build dynamic environment-specific variable names
 $profitSharingVar = "ConnectionStrings_ProfitSharing_$Environment"
-$commonConnectionStringVar = "ConnectionStrings_Common_$Environment"
+$commonConnectionStringVar = "ConnectionStrings_ProfitSharing_$Environment"
 $oracleBaseUrlVar = "QA_ORACLEHCM_BASE_URL_SLUG".Replace("QA", $Environment)
 $oracleUsernameVar = "QA_ORACLEHCM_USERNAME_SLUG".Replace("QA", $Environment)
 $oraclePasswordVar = "QA_ORACLEHCM_PASSWORD_SLUG".Replace("QA", $Environment)
@@ -44,6 +44,10 @@ Write-Host "Oracle Username: $oracleUsername"
     "ORACLEHCM_BASE_URL_SLUG" = $oracleBaseUrl
     "ORACLEHCM_USERNAME_SLUG" = $oracleUsername
     "ORACLEHCM_PASSWORD_SLUG" = $oraclePassword
+}
+
+if (-not $Replacements -or $Replacements.GetEnumerator().Count -eq 0) {
+    throw "The 'Replacements' parameter is missing or invalid. Provide a valid JSON string or Hashtable."
 }
 
 # Iterate through the hashtable
