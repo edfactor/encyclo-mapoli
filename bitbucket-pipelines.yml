@@ -111,7 +111,7 @@ definitions:
               -FilePath './src/services/configuration/credsettings.json' `
               -OutputPath './src/services/configuration/credsettings.qa.json' `
               -RemoteServer 'appt23d' `
-              -RemotePath 'C:/NextGenApplications/ps'"
+              -RemotePath 'C:/NextGenApplications/ps'
 
 
 
