@@ -54,8 +54,8 @@ public class ProfitShareEditEndpoint
             Map(m => m.Code).Index(dex++).Name("Code");
             Map(m => m.ContributionAmount).Index(dex++).Name("Contribution Amount");
             Map(m => m.EarningsAmount).Index(dex++).Name("Earnings Amount");
-            Map(m => m.IncomingForfeitures).Index(dex++).Name("Incoming Forfeitures");
-            Map(m => m.Reason).Index(dex).Name("Reason");
+            Map(m => m.ForfeitureAmount).Index(dex++).Name("Incoming Forfeitures");
+            Map(m => m.Remark).Index(dex).Name("Reason");
         }
     }
 }

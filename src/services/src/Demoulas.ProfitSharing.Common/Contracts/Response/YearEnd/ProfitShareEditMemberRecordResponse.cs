@@ -1,51 +1,40 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+﻿using Demoulas.ProfitSharing.Common.Contracts.InternalDto;
+using Demoulas.ProfitSharing.Common.Extensions;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
 /// <summary>
 /// Represents a year end Transaction (aka row in PROFIT_DETAIL) as shown to the user
 /// </summary>
 public record ProfitShareEditMemberRecordResponse
 {
-    // Used by the JSON Serializer
-    public ProfitShareEditMemberRecordResponse()
-    {
-    }
-
-    public ProfitShareEditMemberRecordResponse(ProfitShareUpdateMemberResponse mr, byte code)
-    {
-        Ssn = mr.Ssn;
-        Badge = mr.Badge;
-        Psn = mr.Psn;
-        Name = mr.Name;
-        Code = code;
-    }
-
-    public int Ssn { get; set; }
+    public bool IsEmployee { get; init; }
     public long Badge { get; set; }
     public long Psn { get; set; }
     public string? Name { get; set; }
     public byte Code { get; set; }
     public decimal ContributionAmount { get; set; }
     public decimal EarningsAmount { get; set; }
-    public decimal IncomingForfeitures { get; set; }
-    public string? Reason { get; set; }
-    public string? ReasonSummary { get; set; }
+    public decimal ForfeitureAmount { get; set; }
+    public string? Remark { get; set; }
+    public byte? CommentTypeId { get; set; }
+    public string? RecordChangeSummary { get; set; }
 
-    public int ZeroContStatus { get; set; }
-    public short YearExtension { get; set; }
-
+    public byte ZeroContStatus { get; set; }
+    public byte YearExtension { get; set; }
+    
     public static ProfitShareEditMemberRecordResponse ResponseExample()
     {
-        return new ProfitShareEditMemberRecordResponse(new ProfitShareUpdateMemberResponse(), 0)
+        return new ProfitShareEditMemberRecordResponse()
         {
-            Ssn = 777,
             Badge = 123,
             Psn = 0,
             Name = "VILLANUEVA, ISAAC",
             ContributionAmount = 4350m,
             EarningsAmount = 50,
-            IncomingForfeitures = 290,
-            Reason = "V-ONLY",
-            ReasonSummary = "18,19,20 > 1000"
+            ForfeitureAmount = 290,
+            Remark = "V-ONLY",
+            RecordChangeSummary = "18,19,20 > 1000"
         };
     }
 }

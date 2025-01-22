@@ -17,10 +17,12 @@ namespace Demoulas.ProfitSharing.IntegrationTests.Reports;
 public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : TestClassBase
 {
     private readonly ITestOutputHelper _testOutputHelper;
-#pragma warning disable IDE0052
     // ReSharper disable once NotAccessedField.Local
 #pragma warning disable S4487
+#pragma warning disable IDE0052
     private readonly IntegrationTestsFixture _fixture;
+#pragma warning restore IDE0052
+#pragma warning restore S4487
 
     public TerminatedEmployeeAndBeneficiaryReportIntegrationTests(ITestOutputHelper testOutputHelper, IntegrationTestsFixture fixture) : base(fixture)
     {
@@ -38,12 +40,11 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : TestClassB
         DateOnly endDate = new DateOnly(2024, 12, 31);
         DateOnly effectiveDateOfTestData = new DateOnly(2024, 12, 31);
 
-        // The test framework was throwing exceptions when access the services like this.
-        //var calendarService = _fixture.Services.GetRequiredService<ICalendarService>()!
-        //var totalService = _fixture.Services.GetRequiredService<TotalService>()!
-        var aps = new AccountingPeriodsService();
-        var calendarService = new CalendarService(ProfitSharingDataContextFactory, aps);
-        var  totalService = new TotalService(ProfitSharingDataContextFactory, calendarService);
+        // Throws exceptions at test run time
+        // var calendarService = _fixture.Services.GetRequiredService<ICalendarService>()!
+        // var totalService = _fixture.Services.GetRequiredService<TotalService>()!
+        var calendarService = new CalendarService(ProfitSharingDataContextFactory, new AccountingPeriodsService());
+        var totalService = new TotalService(ProfitSharingDataContextFactory, calendarService);
         TerminatedEmployeeAndBeneficiaryReportService mockService =
             new TerminatedEmployeeAndBeneficiaryReportService(ProfitSharingDataContextFactory, calendarService, totalService);
 
@@ -82,7 +83,6 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : TestClassB
                 ms.EndingBalance, ms.VestedBalance, ms.DateTerm, ms.YtdPsHours, ms.VestedPercent, ms.Age,
                 ms.EnrollmentCode ?? 0);
         }
-
         textReportGenerator.PrintTotals(report.TotalEndingBalance, report.TotalVested, report.TotalForfeit, report.TotalBeneficiaryAllocation);
         return textReportGenerator.GetReport();
     }
