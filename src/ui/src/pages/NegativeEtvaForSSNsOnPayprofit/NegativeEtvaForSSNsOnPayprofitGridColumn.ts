@@ -1,6 +1,9 @@
-import { ColDef } from "ag-grid-community";
+import { style, textTransform } from "@mui/system";
+import { ColDef, ICellRendererParams } from "ag-grid-community";
+import { Link } from '@mui/material';
+import { NegativeEtvaForSSNsOnPayProfit } from "reduxstore/types";
 
-export const GetNegativeEtvaForSSNsOnPayProfitColumns = (): ColDef[] => {
+export const GetNegativeEtvaForSSNsOnPayProfitColumns = (viewBadge: Function): ColDef[] => {
   return [
     {
       headerName: "Badge",
@@ -10,7 +13,8 @@ export const GetNegativeEtvaForSSNsOnPayProfitColumns = (): ColDef[] => {
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
-      sortable: true
+      sortable: true,
+      cellRenderer: viewBadge
     },
     {
       headerName: "SSN",
