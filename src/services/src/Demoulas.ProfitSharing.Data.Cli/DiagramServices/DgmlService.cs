@@ -7,6 +7,21 @@ namespace Demoulas.ProfitSharing.Data.Cli.DiagramServices;
 
 internal static class DgmlService
 {
+    /// <summary>
+    /// Generates a Markdown representation of a database schema from the provided DGML content.
+    /// </summary>
+    /// <param name="dgmlContent">
+    /// The DGML content as a string. This should represent a directed graph in the DGML format.
+    /// </param>
+    /// <param name="outputFile">
+    /// The path to the output file where the generated Markdown content will be saved.
+    /// </param>
+    /// <returns>
+    /// A task that represents the asynchronous operation of generating and saving the Markdown file.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the provided DGML content is invalid or empty.
+    /// </exception>
     public static async Task GenerateMarkdownFromDgml(string dgmlContent, string outputFile)
     {
         // Parse DGML content
@@ -147,7 +162,7 @@ internal static class DgmlService
         await File.WriteAllTextAsync(outputFile, markdown.ToString());
     }
 
-    public static string ExtractColumnName(Node node)
+    internal static string ExtractColumnName(Node node)
     {
         if (!string.IsNullOrWhiteSpace(node.Annotations))
         {
@@ -161,7 +176,7 @@ internal static class DgmlService
         return $"{node.Id}";
     }
 
-    public static string ExtractIndexName(Node node)
+    internal static string ExtractIndexName(Node node)
     {
         if (!string.IsNullOrWhiteSpace(node.Annotations))
         {
@@ -175,7 +190,7 @@ internal static class DgmlService
         return "Unnamed Index"; // Fallback for indexes without names
     }
 
-    public static string ExtractPrecision(Node node)
+    internal static string ExtractPrecision(Node node)
     {
         if (!string.IsNullOrWhiteSpace(node.MaxLength) && node.MaxLength != "None")
         {
@@ -193,7 +208,7 @@ internal static class DgmlService
 
         return "None"; // Fallback if precision is not found
     }
-    public static string ExtractRelationshipType(Link link)
+    internal static string ExtractRelationshipType(Link link)
     {
         if (!string.IsNullOrWhiteSpace(link.Annotations))
         {
@@ -211,7 +226,7 @@ internal static class DgmlService
         return "Other";
     }
 
-    public static Dictionary<string, string> ParseAnnotations(string annotations)
+    internal static Dictionary<string, string> ParseAnnotations(string annotations)
     {
         var result = new Dictionary<string, string>();
 
