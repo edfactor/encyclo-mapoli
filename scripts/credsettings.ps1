@@ -14,7 +14,7 @@ Write-Host "Oracle Base URL: $oracleBaseUrl"
 
 
 
-[string]$Replacements = @{
+[hashtable]$Replacements = @{
     "CONNECTIONSTRINGS_PROFITSHARING_SLUG" = $profitSharing
     "ORACLEHCM_BASE_URL_SLUG" = $oracleBaseUrl
 }
