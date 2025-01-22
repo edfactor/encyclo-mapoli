@@ -13,12 +13,12 @@ $oracleBaseUrlVar = "QA_ORACLEHCM_BASE_URL_SLUG".Replace("QA", $Environment)
 $oracleUsernameVar = "QA_ORACLEHCM_USERNAME_SLUG".Replace("QA", $Environment)
 $oraclePasswordVar = "QA_ORACLEHCM_PASSWORD_SLUG".Replace("QA", $Environment)
 
-# Dynamically retrieve environment variables
-$profitSharing = $env:$profitSharingVar
-$commonConnectionString = $env:$commonConnectionStringVar
-$oracleBaseUrl = $env:$oracleBaseUrlVar
-$oracleUsername = $env:$oracleUsernameVar
-$oraclePassword = $env:$oraclePasswordVar
+# Dynamically retrieve environment variable values
+$profitSharing = [System.Environment]::GetEnvironmentVariable($profitSharingVar)
+$commonConnectionString = [System.Environment]::GetEnvironmentVariable($commonConnectionStringVar)
+$oracleBaseUrl = [System.Environment]::GetEnvironmentVariable($oracleBaseUrlVar)
+$oracleUsername = [System.Environment]::GetEnvironmentVariable($oracleUsernameVar)
+$oraclePassword = [System.Environment]::GetEnvironmentVariable($oraclePasswordVar)
 
 # Validate that all variables are populated
 if (-not $profitSharing -or -not $commonConnectionString -or -not $oracleBaseUrl -or -not $oracleUsername -or -not $oraclePassword) {
