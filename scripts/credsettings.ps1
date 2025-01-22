@@ -7,23 +7,20 @@ param (
 )
 
 $profitSharing = $env:ConnectionStrings_ProfitSharing_QA
-$oracleBaseUrl = $env:QA_ORACLEHCM_BASE_URL_SLUG
-
-Write-Host "ProfitSharing: $profitSharing"
-Write-Host "Oracle Base URL: $oracleBaseUrl"
-
+$commonConnectionString = $env:ConnectionStrings_ProfitSharing_QA
 
 
 [hashtable]$Replacements = @{
     "CONNECTIONSTRINGS_PROFITSHARING_SLUG" = $profitSharing
-    "ORACLEHCM_BASE_URL_SLUG" = $oracleBaseUrl
+    "CONNECTIONSTRINGS_COMMON_SLUG" = $commonConnectionString
+    "ORACLEHCM_BASE_URL_SLUG" = $env:QA_ORACLEHCM_BASE_URL_SLUG
+    "ORACLEHCM_USERNAME_SLUG" = $env:QA_ORACLEHCM_USERNAME_SLUG
+    "ORACLEHCM_PASSWORD_SLUG" = $env:QA_ORACLEHCM_PASSWORD_SLUG
 }
 
 if (-not $Replacements -or $Replacements.GetEnumerator().Count -eq 0) {
     throw "The 'Replacements' parameter is missing or invalid. Provide a valid JSON string or Hashtable."
 }
-
-Write-Host "Replacements provided: $Replacements"
 
 # Iterate through the hashtable
 foreach ($key in $Replacements.Keys) {
