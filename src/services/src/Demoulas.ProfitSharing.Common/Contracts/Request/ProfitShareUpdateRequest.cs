@@ -21,8 +21,6 @@ public sealed record ProfitShareUpdateRequest : ProfitYearRequest
     {
         return new ProfitShareUpdateRequest
         {
-            Skip = null,
-            Take = null,
             ContributionPercent = 15,
             IncomingForfeitPercent = 4,
             EarningsPercent = 2,
