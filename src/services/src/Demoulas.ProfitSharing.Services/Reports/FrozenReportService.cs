@@ -228,7 +228,9 @@ public class FrozenReportService : IFrozenReportService
             {
                 Age = g.Key.Age,
                 EmploymentType = req.ReportType.ToString(),
-                EmployeeCount = g.Select(x => x.BadgeNumber).Distinct().Count(),
+                BadgeNumbers = g.Select(x => x.BadgeNumber).ToHashSet(),
+                HardshipEmployeeCount = g.Where(x => x.CommentTypeId == CommentType.Constants.Hardship).Select(x => x.BadgeNumber).ToHashSet().Count,
+                RegularEmployeeCount = g.Where(x => x.CommentTypeId != CommentType.Constants.Hardship).Select(x => x.BadgeNumber).ToHashSet().Count,
                 Amount = g.Sum(x => x.Amount),
                 // Compute the total hardship amount within the group
                 HardshipAmount = g
