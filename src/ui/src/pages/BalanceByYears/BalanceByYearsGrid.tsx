@@ -1,12 +1,12 @@
-import { Typography } from "@mui/material";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetBalanceByYearsQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams } from "smart-ui-library";
+import { DSMGrid, ISortParams, TotalsGrid } from "smart-ui-library";
 import { GetBalanceByYearsColumns } from "./BalanceByYearsGridColumns";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { FrozenReportsByAgeRequestType } from "../../reduxstore/types";
+import { currencyFormat } from "utils/numberUtils"; // Import utility function
 
 const BalanceByYearsGrid = () => {
   const [_discard0, setSortParams] = useState<ISortParams>({
@@ -29,13 +29,56 @@ const BalanceByYearsGrid = () => {
     <>
       {balanceByYearsTotal?.response && (
         <>
-          <div style={{ padding: "0 24px 0 24px" }}>
-            <Typography
-              variant="h2"
-              sx={{ color: "#0258A5" }}>
-              {`${balanceByYearsTotal.reportName}`}
-            </Typography>
+          <div className="px-[24px]">
+          <h2 className="text-dsm-secondary">Summary</h2>
           </div>
+          <div className="flex sticky top-0 z-10 bg-white">
+            <TotalsGrid 
+              displayData = {[
+                [(balanceByYearsTotal?.totalBeneficiaries || 0), 
+                currencyFormat(balanceByYearsTotal?.totalBeneficiariesAmount || 0), 
+                currencyFormat(balanceByYearsTotal?.totalBeneficiariesVestedAmount || 0)],
+                [(balanceByYearsTotal?.totalEmployee || 0), 
+                currencyFormat(balanceByYearsTotal?.totalEmployeeAmount || 0), 
+                currencyFormat(balanceByYearsTotal?.totalEmployeesVestedAmount || 0)],
+                [(balanceByYearsTotal?.totalMembers || 0), 
+                currencyFormat(balanceByYearsTotal?.balanceTotalAmount || 0), 
+                currencyFormat(balanceByYearsTotal?.vestedTotalAmount || 0)] 
+                ]} 
+                leftColumnHeaders = {['Ben', 'Employee', 'Total']}
+                topRowHeaders={['All', 'Count', 'Balance', 'Vested']}
+            ></TotalsGrid>
+            <TotalsGrid 
+              displayData = {[
+                [(balanceByYearsFullTime?.totalBeneficiaries || 0), 
+                currencyFormat(balanceByYearsFullTime?.totalBeneficiariesAmount || 0), 
+                currencyFormat(balanceByYearsFullTime?.totalBeneficiariesVestedAmount || 0)],
+                [(balanceByYearsFullTime?.totalEmployee || 0), 
+                currencyFormat(balanceByYearsFullTime?.totalEmployeeAmount || 0), 
+                currencyFormat(balanceByYearsFullTime?.totalEmployeesVestedAmount || 0)],
+                [(balanceByYearsFullTime?.totalMembers || 0), 
+                currencyFormat(balanceByYearsFullTime?.balanceTotalAmount || 0), 
+                currencyFormat(balanceByYearsFullTime?.vestedTotalAmount || 0)] 
+                ]} 
+                leftColumnHeaders = {['Ben', 'Employee', 'Total']}
+                topRowHeaders={['FullTime', 'Count', 'Balance', 'Vested']}
+            ></TotalsGrid>
+            <TotalsGrid 
+              displayData = {[
+                [(balanceByYearsPartTime?.totalBeneficiaries || 0), 
+                currencyFormat(balanceByYearsPartTime?.totalBeneficiariesAmount || 0), 
+                currencyFormat(balanceByYearsPartTime?.totalBeneficiariesVestedAmount || 0)],
+                [(balanceByYearsPartTime?.totalEmployee || 0), 
+                currencyFormat(balanceByYearsPartTime?.totalEmployeeAmount || 0), 
+                currencyFormat(balanceByYearsPartTime?.totalEmployeesVestedAmount || 0)],
+                [(balanceByYearsPartTime?.totalMembers || 0), 
+                currencyFormat(balanceByYearsPartTime?.balanceTotalAmount || 0), 
+                currencyFormat(balanceByYearsPartTime?.vestedTotalAmount || 0)] 
+                ]} 
+                leftColumnHeaders = {['Ben', 'Employee', 'Total']}
+                topRowHeaders={['PartTime', 'Count', 'Balance', 'Vested']}
+            ></TotalsGrid>
+            </div>
           <Grid2
             container
             xs={12}>
@@ -45,27 +88,7 @@ const BalanceByYearsGrid = () => {
                 isLoading={isLoading}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
-                  rowData: balanceByYearsTotal?.response.results,
-                  pinnedTopRowData: [
-                    {
-                      years: "BEN",
-                      employeeCount: balanceByYearsTotal?.totalBeneficiaries || 0,
-                      currentBalance: balanceByYearsTotal?.totalBeneficiariesAmount,
-                      vestedBalance: balanceByYearsTotal?.totalBeneficiariesVestedAmount
-                    },
-                    {
-                      years: "EMPLOYEE",
-                      employeeCount: balanceByYearsTotal?.totalEmployee || 0,
-                      currentBalance: balanceByYearsTotal?.totalEmployeeAmount,
-                      vestedBalance: balanceByYearsTotal?.totalEmployeesVestedAmount
-                    },
-                    {
-                      years: "TOTAL",
-                      employeeCount: balanceByYearsTotal?.totalMembers || 0,
-                      currentBalance: balanceByYearsTotal?.balanceTotalAmount,
-                      vestedBalance: balanceByYearsTotal?.vestedTotalAmount
-                    }
-                  ],
+                  rowData: balanceByYearsTotal?.response.results,              
                   columnDefs: [
                     {
                       headerName: columnDefsTotal.headerName,
@@ -82,26 +105,6 @@ const BalanceByYearsGrid = () => {
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: balanceByYearsFullTime?.response.results,
-                  pinnedTopRowData: [
-                    {
-                      years: "BEN",
-                      employeeCount: balanceByYearsFullTime?.totalBeneficiaries || 0,
-                      currentBalance: balanceByYearsFullTime?.totalBeneficiariesAmount,
-                      vestedBalance: balanceByYearsFullTime?.totalBeneficiariesVestedAmount
-                    },
-                    {
-                      years: "EMPLOYEE",
-                      employeeCount: balanceByYearsFullTime?.totalEmployee || 0,
-                       currentBalance: balanceByYearsFullTime?.totalEmployeeAmount,
-                      vestedBalance: balanceByYearsFullTime?.totalEmployeesVestedAmount
-                    },
-                    {
-                      years: "TOTAL",
-                      employeeCount: balanceByYearsFullTime?.totalMembers || 0,
-                      currentBalance: balanceByYearsFullTime?.balanceTotalAmount,
-                      vestedBalance: balanceByYearsFullTime?.vestedTotalAmount
-                    }
-                  ],
                   columnDefs: [
                     {
                       headerName: columnDefsFullTime.headerName,
@@ -118,26 +121,6 @@ const BalanceByYearsGrid = () => {
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: balanceByYearsPartTime?.response.results,
-                  pinnedTopRowData: [
-                    {
-                      years: "BEN",
-                      employeeCount: balanceByYearsPartTime?.totalBeneficiaries || 0,
-                      currentBalance: balanceByYearsPartTime?.totalBeneficiariesAmount,
-                      vestedBalance: balanceByYearsPartTime?.totalBeneficiariesVestedAmount
-                    },
-                    {
-                      years: "EMPLOYEE",
-                      employeeCount: balanceByYearsPartTime?.totalEmployee || 0,
-                      currentBalance: balanceByYearsPartTime?.totalEmployeeAmount,
-                      vestedBalance: balanceByYearsPartTime?.totalEmployeesVestedAmount
-                    },
-                    {
-                      years: "TOTAL",
-                      employeeCount: balanceByYearsPartTime?.totalMembers || 0,
-                      currentBalance: balanceByYearsPartTime?.balanceTotalAmount,
-                      vestedBalance: balanceByYearsPartTime?.vestedTotalAmount
-                    }
-                  ],
                   columnDefs: [
                     {
                       headerName: columnDefsPartTime.headerName,
