@@ -3,6 +3,7 @@ internal sealed record ProfitSharingAggregates
 {
     public short TotalEmployees { get; init; }
     public short BothHardshipAndRegularEmployees { get; init; }
+    public decimal BothHardshipAndRegularAmount { get; init; }
     public short RegularTotalEmployees { get; init; }
     public decimal RegularAmount { get; init; }
 

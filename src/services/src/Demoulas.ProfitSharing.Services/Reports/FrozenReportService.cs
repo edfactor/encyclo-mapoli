@@ -211,7 +211,8 @@ public class FrozenReportService : IFrozenReportService
                 HardshipTotalEmployees = (short)details.Where(d => d.HardshipAmount > 0).Sum(d => d.EmployeeCount),
                 HardshipTotalAmount = details.Sum(d => d.HardshipAmount),
                 TotalEmployees = (short)details.Sum(d => d.EmployeeCount),
-                BothHardshipAndRegularEmployees = (short)details.Where(d => d is { RegularAmount: > 0, HardshipAmount: > 0 }).Sum(d => d.EmployeeCount)
+                BothHardshipAndRegularEmployees = (short)details.Where(d => d is { RegularAmount: > 0, HardshipAmount: > 0 }).Sum(d => d.EmployeeCount),
+                BothHardshipAndRegularAmount = details.Where(d => d is { RegularAmount: > 0, HardshipAmount: > 0 }).Sum(d => d.RegularAmount + d.HardshipAmount)
             };
         }
 
@@ -259,6 +260,7 @@ public class FrozenReportService : IFrozenReportService
             HardshipTotalAmount = totalAggregates.HardshipTotalAmount,
             TotalEmployees = totalAggregates.TotalEmployees,
             BothHardshipAndRegularEmployees = totalAggregates.BothHardshipAndRegularEmployees,
+            BothHardshipAndRegularAmount = totalAggregates.BothHardshipAndRegularAmount,
             Response = new PaginatedResponseDto<DistributionsByAgeDetail>(req) { Results = details, Total = details.Count }
         };
     }

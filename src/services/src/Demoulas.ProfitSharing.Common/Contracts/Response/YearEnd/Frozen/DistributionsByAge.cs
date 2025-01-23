@@ -20,6 +20,7 @@ public sealed record DistributionsByAge : ReportResponseBase<DistributionsByAgeD
     public decimal HardshipTotalAmount { get; set; }
     public short TotalEmployees { get; init; }
     public short BothHardshipAndRegularEmployees { get; init; }
+    
 
     public decimal DistributionTotalAmount
     {
@@ -29,8 +30,7 @@ public sealed record DistributionsByAge : ReportResponseBase<DistributionsByAgeD
         }
     }
 
-
-
+    public decimal BothHardshipAndRegularAmount { get; set; }
 
 
     public static DistributionsByAge ResponseExample()
