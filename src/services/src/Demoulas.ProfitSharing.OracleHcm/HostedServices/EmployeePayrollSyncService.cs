@@ -22,7 +22,7 @@ internal sealed class EmployeePayrollSyncService : OracleHcmHostedServiceBase
         return ScheduleJob<PayrollSyncJob>(
             "payrollSyncTrigger",
             Debugger.IsAttached ? TimeSpan.Zero : TimeSpan.FromMinutes(3),
-            TimeSpan.FromHours(OracleHcmConfig.IntervalInHours),
+            TimeSpan.FromHours(OracleHcmConfig.PayrollIntervalInHours),
             cancellationToken
         );
     }
