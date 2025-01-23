@@ -18,6 +18,8 @@ public sealed record DistributionsByAge : ReportResponseBase<DistributionsByAgeD
     public decimal RegularTotalAmount { get; set; }
     public short RegularTotalEmployees { get; set; }
     public decimal HardshipTotalAmount { get; set; }
+    public short TotalEmployees { get; init; }
+    public short BothHardshipAndRegularEmployees { get; init; }
 
     public decimal DistributionTotalAmount
     {

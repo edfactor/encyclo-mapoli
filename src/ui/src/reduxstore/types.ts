@@ -296,6 +296,8 @@ export interface ProfitSharingDistributionsByAge {
   regularTotalEmployees: number;
   hardshipTotalAmount: number;
   distributionTotalAmount: number;
+  totalEmployees: number;
+  bothHardshipAndRegularEmployees: number;
   response: Paged<ProfitSharingDistributionsByAgeResponse>;
 }
 
