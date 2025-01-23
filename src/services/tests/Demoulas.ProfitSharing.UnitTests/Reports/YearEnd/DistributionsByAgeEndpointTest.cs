@@ -37,7 +37,7 @@ public class DistributionsByAgeEndpointTest : ApiTestBase<Program>
         var hardshipCount = response.Result.Response.Results.Where(c=> c.HardshipAmount > 0).Sum(c => c.EmployeeCount);
 
         ftCount.Should().Be(response.Result.RegularTotalEmployees);
-        hardshipCount.Should().Be(response.Result.HardshipTotalAmount);
+        hardshipCount.Should().Be(response.Result.HardshipTotalEmployees);
     }
 
     [Fact]
