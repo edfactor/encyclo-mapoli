@@ -39,10 +39,12 @@ const DistributionByAgeGrid = () => {
                     currencyFormat(distributionsByAgeTotal?.regularTotalAmount || 0)], 
                   [(distributionsByAgeTotal?.hardshipTotalEmployees || 0), 
                     currencyFormat(distributionsByAgeTotal?.hardshipTotalAmount || 0)],
-                  [(distributionsByAgeTotal?.regularTotalEmployees || 0) + (distributionsByAgeTotal?.hardshipTotalEmployees || 0), 
+                  [(distributionsByAgeTotal?.bothHardshipAndRegularEmployees || 0),
+                    currencyFormat(distributionsByAgeTotal?.bothHardshipAndRegularAmount || 0)],
+                  [(distributionsByAgeTotal?.totalEmployees || 0), 
                     currencyFormat(distributionsByAgeTotal?.distributionTotalAmount || 0)]
                   ]} 
-                  leftColumnHeaders = {['Regular', 'Hardship', 'Dist Total']}
+                  leftColumnHeaders = {['Regular', 'Hardship', 'Both', 'Dist Total']}
                   topRowHeaders={['Total', 'EMPS', 'Amount']}
 
               ></TotalsGrid>
@@ -52,10 +54,12 @@ const DistributionByAgeGrid = () => {
                     currencyFormat(distributionsByAgeFullTime?.regularTotalAmount || 0)], 
                   [(distributionsByAgeFullTime?.hardshipTotalEmployees || 0), 
                     currencyFormat(distributionsByAgeFullTime?.hardshipTotalAmount || 0)],
-                  [(distributionsByAgeFullTime?.regularTotalEmployees || 0) + (distributionsByAgeFullTime?.hardshipTotalEmployees || 0), 
+                  [(distributionsByAgeFullTime?.bothHardshipAndRegularEmployees || 0),
+                    currencyFormat(distributionsByAgeFullTime?.bothHardshipAndRegularAmount || 0)],
+                  [(distributionsByAgeFullTime?.totalEmployees || 0), 
                     currencyFormat(distributionsByAgeFullTime?.distributionTotalAmount || 0)]
-                  ]}  
-                  leftColumnHeaders = {['Regular', 'Hardship', 'Dist Total']}
+                  ]}
+                  leftColumnHeaders = {['Regular', 'Hardship', 'Both', 'Dist Total']}
                   topRowHeaders={['FullTime', 'EMPS', 'Amount']}
               ></TotalsGrid>
               <TotalsGrid 
@@ -64,10 +68,12 @@ const DistributionByAgeGrid = () => {
                     currencyFormat(distributionsByAgePartTime?.regularTotalAmount || 0)], 
                   [(distributionsByAgePartTime?.hardshipTotalEmployees || 0), 
                     currencyFormat(distributionsByAgePartTime?.hardshipTotalAmount || 0)],
-                  [(distributionsByAgePartTime?.regularTotalEmployees || 0) + (distributionsByAgePartTime?.hardshipTotalEmployees || 0), 
+                  [(distributionsByAgePartTime?.bothHardshipAndRegularEmployees || 0),
+                    currencyFormat(distributionsByAgePartTime?.bothHardshipAndRegularAmount || 0)],
+                  [(distributionsByAgePartTime?.totalEmployees || 0), 
                     currencyFormat(distributionsByAgePartTime?.distributionTotalAmount || 0)]
-                  ]}  
-                  leftColumnHeaders = {['Regular', 'Hardship', 'Dist Total']}
+                  ]}
+                  leftColumnHeaders = {['Regular', 'Hardship', 'Both', 'Dist Total']}
                   topRowHeaders={['PartTime', 'EMPS', 'Amount']}
               ></TotalsGrid>
               </div>
