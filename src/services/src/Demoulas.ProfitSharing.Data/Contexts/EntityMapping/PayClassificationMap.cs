@@ -119,7 +119,8 @@ internal sealed class PayClassificationMap : IEntityTypeConfiguration<PayClassif
             new PayClassification { Id = PayClassification.Constants.HelpDesk, Name = "HELP DESK" },
             new PayClassification { Id = PayClassification.Constants.Defunct, Name = "DEFUNCT" },
             new PayClassification { Id = PayClassification.Constants.TechnicalSupport, Name = "TECHNICAL SUPPORT" },
-            new PayClassification { Id = PayClassification.Constants.Training, Name = "TRAINING" }
+            new PayClassification { Id = PayClassification.Constants.Training, Name = "TRAINING" },
+            new PayClassification { Id = PayClassification.Constants.IndianRidge, Name = "Indian Ridge" }
         );
     }
 }
