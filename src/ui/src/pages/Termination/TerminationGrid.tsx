@@ -1,10 +1,12 @@
-import { Typography } from "@mui/material";
+import { Button, Link, Typography } from "@mui/material";
 import { useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetEligibleEmployeesQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetTerminationColumns } from "./TerminationGridColumn";
+import { ICellRendererParams } from "ag-grid-community";
+import { useNavigate } from "react-router";
 
 const TerminationGrid = () => {
   const [pageNumber, setPageNumber] = useState(0);
@@ -17,9 +19,23 @@ const TerminationGrid = () => {
   const dispatch = useDispatch();
   const { terminattion } = useSelector((state: RootState) => state.yearsEnd);
   const [_, { isLoading }] = useLazyGetEligibleEmployeesQuery();
+  const navigate = useNavigate();
+
+  const viewBadge = (params: ICellRendererParams) => {
+    return (
+      params.value && (
+        <Button
+          variant="text"
+          onClick={() => navigate(`/forfeit/${params.value}`)}
+        >
+          {params.value}
+        </Button>
+      )
+    );
+  };
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
-  const columnDefs = useMemo(() => GetTerminationColumns(), []);
+  const columnDefs = useMemo(() => GetTerminationColumns(viewBadge), []);
 
   return (
     <>

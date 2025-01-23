@@ -2,20 +2,20 @@ import { RouteCategory } from "smart-ui-library/dist/components/MenuBar/MenuBar"
 
 const yearEndReports: RouteCategory = {
   menuLabel: "Year End Flow",
-  parentRoute: "",
-  items: [
-    { caption: "Distributions and Forfeitures", route: "/distributions-and-forfeitures" },
-    { caption: "Manage Executive Hours and Dollars", route: "/manage-executive-hours-and-dolars"},
-    { caption: "Get Eligible Employees", route: "/eligible-employees" },
-    { caption: "Get Distributions by Age (PROF 130)", route: "/distributions-by-age" },
-    { caption: "Get Contributions by Age (PROF 130)", route: "/contributions-by-age" },
-    { caption: "Get Forfeitures by Age (PROF 130)", route: "/forfeitures-by-age" },
-    { caption: "Get Balance by Age (PROF 130B)", route: "/balance-by-age" },
-    { caption: "Get Balance by Years (PROF 130Y)", route: "/balance-by-years" },
-    { caption: "Get Vested Amounts by Age (PROF 130V)", route: "/vested-amounts-by-age" },
-    { caption: "PROFTERM", route: "/prof-term" },
-    { caption: "Military and Rehire Entry", route: "/military-and-rehire-entry" },
-  ]
+  parentRoute: "/yearend-flow",
+  // items: [
+  //   { caption: "Distributions and Forfeitures", route: "/distributions-and-forfeitures" },
+  //   { caption: "Manage Executive Hours and Dollars", route: "/manage-executive-hours-and-dolars"},
+  //   { caption: "Get Eligible Employees", route: "/eligible-employees" },
+  //   { caption: "Get Distributions by Age (PROF 130)", route: "/distributions-by-age" },
+  //   { caption: "Get Contributions by Age (PROF 130)", route: "/contributions-by-age" },
+  //   { caption: "Get Forfeitures by Age (PROF 130)", route: "/forfeitures-by-age" },
+  //   { caption: "Get Balance by Age (PROF 130B)", route: "/balance-by-age" },
+  //   { caption: "Get Balance by Years (PROF 130Y)", route: "/balance-by-years" },
+  //   { caption: "Get Vested Amounts by Age (PROF 130V)", route: "/vested-amounts-by-age" },
+  //   { caption: "PROFTERM", route: "/prof-term" },
+  //   { caption: "Military and Rehire Entry", route: "/military-and-rehire-entry" },
+  // ]
 };
 
 const decemberFlow: RouteCategory = {
@@ -74,6 +74,6 @@ const decemberTest: RouteCategory = {
   parentRoute: "/december-process-accordion"
 };
 
-const MenuData: RouteCategory[] = [beneficiaries, distributions, reconciliation, decemberFlow, decemberTest, yearEndReports, miscellaneous];
+const MenuData: RouteCategory[] = [beneficiaries, distributions, reconciliation, decemberTest, yearEndReports, miscellaneous];
 
 export default MenuData;

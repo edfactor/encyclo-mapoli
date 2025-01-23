@@ -34,6 +34,8 @@ import DecemberProcessLocalApi from "pages/DecemberProcess/DecemberProcessLOCALA
 import Termination from "pages/Termination/Termination";
 import MilitaryAndRehireEntryAndModification from "pages/MilitaryAndRehireEntryAndModification/MilitaryAndRehireEntryAndModification";
 import ProfitShareReport from "pages/ProfitShareReport/ProfitShareReport";
+import Forfeit from "pages/Forfeit/Forfeit";
+import YearEndFlow from "pages/YearEndFlow/YearEndFlow";
 
 const Router = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -174,6 +176,12 @@ const Router = () => {
           <Route
           path="profit-share-report"
           element={<ProfitShareReport />}></Route>
+          <Route
+          path="forfeit/:badgeNumber?"
+          element={<Forfeit />}></Route>
+          <Route
+          path="yearend-flow"
+          element={<YearEndFlow />}></Route>
       </RouteSecurity>
     </BrowserRouter>
   );
