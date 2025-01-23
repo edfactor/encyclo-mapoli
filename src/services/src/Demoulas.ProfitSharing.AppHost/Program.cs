@@ -71,6 +71,56 @@ ExecuteCommandResult RunConsoleApp(string projectPath, string launchProfile)
     return new ExecuteCommandResult { Success = false, ErrorMessage = error };
 }
 
+void RunNpmInstall(string projectPath)
+{
+    try
+    {
+        // Determine the correct npm executable based on the operating system
+        string npmExecutable = OperatingSystem.IsWindows() ? @"C:\Program Files\nodejs\npm.cmd" : "/usr/local/bin/npm";
+
+
+        using var process = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = npmExecutable,
+                WorkingDirectory = projectPath,
+                Arguments = "install",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+
+        process.Start();
+
+        // Read the output (optional)
+        string output = process.StandardOutput.ReadToEnd();
+        string error = process.StandardError.ReadToEnd();
+
+        process.WaitForExit();
+
+        Console.WriteLine(output);
+
+        if (!string.IsNullOrWhiteSpace(error))
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"npm install error: {error}");
+            Console.ResetColor();
+        }
+        else
+        {
+            Console.WriteLine("npm install completed successfully.");
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"An error occurred while running npm install: {ex.Message}");
+    }
+}
+
+
 Demoulas_ProfitSharing_Data_Cli cli = new Demoulas_ProfitSharing_Data_Cli();
 var projectPath = new FileInfo(cli.ProjectPath).Directory?.FullName;
 
@@ -101,6 +151,7 @@ var ui = builder.AddNpmApp("ProfitSharing-Ui", "../../../ui/", "dev")
     .WithReference(api)
     .WaitFor(api)
     .WithHttpEndpoint(port: uiPort, isProxied: false);
+RunNpmInstall(ui.Resource.WorkingDirectory);
 
 var fullSync = builder.AddProject<Demoulas_ProfitSharing_EmployeeFull_Sync>(name: "ProfitSharing-EmployeeFull-Sync")
     .WaitFor(api)
