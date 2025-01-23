@@ -1,4 +1,5 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.InternalDto;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -33,7 +34,6 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
         List<ProfitShareUpdateMemberResponse> members = memberFinancials.Select(m => new ProfitShareUpdateMemberResponse
         {
             IsEmployee = m.IsEmployee,
-            Ssn = m.Ssn,
             Badge = m.Badge,
             Psn = m.Psn,
             Name = m.Name,
@@ -60,6 +60,40 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
             ReportName = "Profit Sharing Update",
             ReportDate = DateTimeOffset.Now,
             Response = new PaginatedResponseDto<ProfitShareUpdateMemberResponse> { Results = members }
+        };
+    }
+
+    public async Task<ProfitShareUpdateResult> ProfitShareUpdateInternal(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
+    {
+        (List<MemberFinancials> memberFinancials, _, bool employeeExceededMaxContribution) = await ProfitSharingUpdatePaginated(profitShareUpdateRequest, cancellationToken);
+        List<ProfitShareUpdateMember> members = memberFinancials.Select(m => new ProfitShareUpdateMember
+        {
+            IsEmployee = m.IsEmployee,
+            Ssn = m.Ssn,
+            Badge = m.Badge,
+            Psn = m.Psn,
+            Name = m.Name,
+            BeginningAmount = m.CurrentAmount,
+            Distributions = m.Distributions,
+            Military = m.Military,
+            Xfer = m.Xfer,
+            Pxfer = m.Pxfer,
+            EmployeeTypeId = m.EmployeeTypeId,
+            Contributions = m.Contributions,
+            IncomingForfeitures = m.IncomingForfeitures,
+            AllEarnings = m.AllEarnings,
+            Etva = m.Etva,
+            AllSecondaryEarnings = m.AllSecondaryEarnings,
+            EtvaEarnings = m.EarningsOnEtva,
+            SecondaryEtvaEarnings = m.SecondaryEtvaEarnings,
+            EndingBalance = m.EndingBalance,
+            ZeroContributionReasonId = m.ZeroContributionReasonId
+        }).ToList();
+
+        return new ProfitShareUpdateResult()
+        {
+            HasExceededMaximumContributions = employeeExceededMaxContribution,
+            Members = members
         };
     }
 

@@ -30,7 +30,7 @@ public static class StockFactory
                     PhoneNumber = ""
                 },
                 Id = 0,
-                Ssn = 0,
+                Ssn = 555,
                 DateOfBirth = default,
                 CreatedDate = default
             },

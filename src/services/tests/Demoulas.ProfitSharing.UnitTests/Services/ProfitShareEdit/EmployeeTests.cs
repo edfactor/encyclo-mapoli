@@ -110,8 +110,8 @@ public class EmployeeTests : ApiTestBase<Program>
         List<ProfitShareEditMemberRecordResponse> records = response.Response.Results.ToList();
         ProfitShareEditMemberRecordResponse m = records[0];
 
-        m.Reason.Should().Be(CommentType.Constants.VOnly.Name);
-        m.ReasonSummary.Should().Be("18,19,20 > 1000");
+        m.Remark.Should().Be(CommentType.Constants.VOnly.Name);
+        m.RecordChangeSummary.Should().Be("18,19,20 > 1000");
     }
 
 
@@ -132,8 +132,8 @@ public class EmployeeTests : ApiTestBase<Program>
         ProfitShareEditMemberRecordResponse m = records[0];
 
         m.ContributionAmount.Should().Be(0);
-        m.IncomingForfeitures.Should().Be(0);
-        m.Reason.Should().BeNull();
+        m.ForfeitureAmount.Should().Be(0);
+        m.Remark.Should().BeNull();
     }
 
     [Fact]
@@ -179,7 +179,7 @@ public class EmployeeTests : ApiTestBase<Program>
         List<ProfitShareEditMemberRecordResponse> records = response.Response.Results.ToList();
         records.Count.Should().Be(1);
         ProfitShareEditMemberRecordResponse m = records[0];
-
+        
         // test's default balance is 1000. test's default requested earnings 5%
         m.YearExtension.Should().Be(2);
         m.EarningsAmount.Should().Be(1000 * .03m);
@@ -194,7 +194,6 @@ public class EmployeeTests : ApiTestBase<Program>
         _profitDetails[0].ProfitCodeId.Should().Be(0);
         _profitDetails[0].Contribution = 3000m;
         
-
         var req = new ProfitShareUpdateRequest { ProfitYear = _thisYear, SecondaryEarningsPercent = 3 };
 
         // Act
