@@ -1,12 +1,12 @@
-import { Typography } from "@mui/material";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetForfeituresByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams } from "smart-ui-library";
+import { DSMGrid, ISortParams, TotalsGrid } from "smart-ui-library";
 import { GetForfeituresByAgeColumns } from "./ForfeituresByAgeGridColumns";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { FrozenReportsByAgeRequestType } from "../../reduxstore/types";
+import { currencyFormat } from "utils/numberUtils"; // Import utility function
 
 const ForfeituresByAgeGrid = () => {
   const [_discard0, setSortParams] = useState<ISortParams>({
@@ -29,12 +29,28 @@ const ForfeituresByAgeGrid = () => {
     <>
       {forfeituresByAgeTotal?.response && (
         <>
-          <div style={{ padding: "0 24px 0 24px" }}>
-            <Typography
-              variant="h2"
-              sx={{ color: "#0258A5" }}>
-              {`${forfeituresByAgeTotal.reportName}`}
-            </Typography>
+          <div className="px-[24px]">
+          <h2 className="text-dsm-secondary">Summary</h2>
+          </div>
+          <div className="flex sticky top-0 z-10 bg-white">
+              <TotalsGrid 
+                displayData = {[[(forfeituresByAgeTotal?.totalEmployees || 0), currencyFormat(forfeituresByAgeTotal?.totalAmount)], 
+                  ]} 
+                  leftColumnHeaders = {['All']}
+                  topRowHeaders={['', 'EMPS', 'Amount']}
+              ></TotalsGrid>
+              <TotalsGrid 
+                displayData = {[[(forfeituresByAgeFullTime?.totalEmployees || 0), currencyFormat(forfeituresByAgeFullTime?.totalAmount || 0)], 
+                  ]} 
+                  leftColumnHeaders = {['FullTime']}
+                  topRowHeaders={['', 'EMPS', 'Amount']}
+              ></TotalsGrid>
+              <TotalsGrid 
+                displayData = {[[(forfeituresByAgePartTime?.totalEmployees || 0), currencyFormat(forfeituresByAgePartTime?.totalAmount || 0)], 
+                  ]} 
+                  leftColumnHeaders = {['PartTime']}
+                  topRowHeaders={['', 'EMPS', 'Amount']}
+              ></TotalsGrid>
           </div>
           <Grid2
             container
@@ -46,13 +62,6 @@ const ForfeituresByAgeGrid = () => {
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: forfeituresByAgeTotal?.response.results,
-                  pinnedTopRowData: [
-                    {
-                      age: "FORF  TTL",
-                      employeeCount: (forfeituresByAgeTotal?.totalEmployees || 0),
-                      amount: forfeituresByAgeTotal?.totalAmount
-                    }
-                  ],
                   columnDefs: [
                     {
                       headerName: columnDefsTotal.headerName,
@@ -69,13 +78,6 @@ const ForfeituresByAgeGrid = () => {
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: forfeituresByAgeFullTime?.response.results,
-                  pinnedTopRowData: [
-                    {
-                     age: "FORF  TTL",
-                      employeeCount: (forfeituresByAgeFullTime?.totalEmployees || 0),
-                      amount: forfeituresByAgeFullTime?.totalAmount
-                    }
-                  ],
                   columnDefs: [
                     {
                       headerName: columnDefsFullTime.headerName,
@@ -92,13 +94,6 @@ const ForfeituresByAgeGrid = () => {
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: forfeituresByAgePartTime?.response.results,
-                  pinnedTopRowData: [
-                    {
-                     age: "FORF  TTL",
-                      employeeCount: (forfeituresByAgePartTime?.totalEmployees || 0),
-                      amount: forfeituresByAgePartTime?.totalAmount
-                    }
-                  ],
                   columnDefs: [
                     {
                       headerName: columnDefsPartTime.headerName,

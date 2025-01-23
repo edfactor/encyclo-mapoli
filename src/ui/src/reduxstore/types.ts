@@ -296,13 +296,20 @@ export interface ProfitSharingDistributionsByAge {
   regularTotalEmployees: number;
   hardshipTotalAmount: number;
   distributionTotalAmount: number;
+  totalEmployees: number;
+  bothHardshipAndRegularEmployees: number;
+  bothHardshipAndRegularAmount: number;
   response: Paged<ProfitSharingDistributionsByAgeResponse>;
 }
 
 export interface ProfitSharingDistributionsByAgeResponse {
   age: number;
   employeeCount: number;
+  regularEmployeeCount: number;
+  hardshipEmployeeCount: number;
   amount: number;
+  hardshipAmount : number;
+  regularAmount : number;
   employmentType: string;
   commentTypeId: number | null;
 }
