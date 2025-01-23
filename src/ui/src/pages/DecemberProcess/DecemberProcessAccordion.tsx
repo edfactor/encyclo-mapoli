@@ -106,6 +106,10 @@ const DecemberProcessAccordion = () => {
           <DSMCollapsedAccordion
             title="Military"
             expandable={false}
+            status={{
+              label: "Not Started",
+              color: "default"
+            }}
             onActionClick={() => navigate('/military-and-rehire-entry')}
             actionButtonText="VIEW DETAILS"
           >
@@ -118,6 +122,10 @@ const DecemberProcessAccordion = () => {
           <DSMCollapsedAccordion
             title="Rehire"
             expandable={false}
+            status={{
+              label: "Not Started",
+              color: "default"
+            }}
             onActionClick={() => navigate('/military-and-rehire')}
             actionButtonText="VIEW DETAILS"
           >
@@ -129,6 +137,10 @@ const DecemberProcessAccordion = () => {
           <DSMCollapsedAccordion
             title="Prof Termination"
             expandable={false}
+            status={{
+              label: "Not Started",
+              color: "default"
+            }}
             actionButtonText="VIEW DETAILS"
             onActionClick={() => navigate('/prof-term')}
             isCollapsedOnRender={true}
@@ -141,6 +153,10 @@ const DecemberProcessAccordion = () => {
           <DSMCollapsedAccordion
             title="Loan Balance"
             expandable={false}
+            status={{
+              label: "Not Started",
+              color: "default"
+            }}
             actionButtonText="VIEW DETAILS"
             onActionClick={() => navigate('/distributions-and-forfeitures')}
             isCollapsedOnRender={true}
@@ -153,6 +169,10 @@ const DecemberProcessAccordion = () => {
           <DSMCollapsedAccordion
             title="Manage Executives"
             expandable={false}
+            status={{
+              label: "Not Started",
+              color: "default"
+            }}
             onActionClick={() => alert("Manage Executives")}
             actionButtonText="VIEW DETAILS"
             isCollapsedOnRender={true}
@@ -165,6 +185,10 @@ const DecemberProcessAccordion = () => {
           <DSMCollapsedAccordion
             title="Profit Share Report"
             expandable={false}
+            status={{
+              label: "In Progress",
+              color: "default"
+            }}
             onActionClick={() => navigate('/profit-share-report')}
             actionButtonText="VIEW DETAILS"
           >
