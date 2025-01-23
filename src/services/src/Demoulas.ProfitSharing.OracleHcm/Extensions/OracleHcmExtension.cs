@@ -20,6 +20,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Http.Resilience;
+using OpenTelemetry.Trace;
 using Quartz;
 using Quartz.Impl;
 using Quartz.Spi;
@@ -121,6 +122,12 @@ public static class OracleHcmExtension
         builder.Services.AddHealthChecks().AddCheck<OracleHcmHealthCheck>("OracleHcm");
         builder.AddProjectCachingServices();
         builder.AddOracleHcmMessaging();
+
+        builder.Services.AddOpenTelemetry().WithTracing(tracing =>
+        {
+            tracing.AddQuartzInstrumentation();
+        });
+
 
         return builder;
     }
