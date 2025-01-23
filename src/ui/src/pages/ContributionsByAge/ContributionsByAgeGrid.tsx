@@ -1,12 +1,12 @@
-import { Typography } from "@mui/material";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetContributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams } from "smart-ui-library";
+import { DSMGrid, ISortParams, TotalsGrid } from "smart-ui-library";
 import { GetContributionsByAgeColumns } from "./ContributionsByAgeGridColumns";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { FrozenReportsByAgeRequestType } from "../../reduxstore/types";
+import { currencyFormat } from "utils/numberUtils"; // Import utility function
 
 const ContributionsByAgeGrid = () => {
   const [_discard0, setSortParams] = useState<ISortParams>({
@@ -29,12 +29,28 @@ const ContributionsByAgeGrid = () => {
     <>
       {contributionsByAgeTotal?.response && (
         <>
-          <div style={{ padding: "0 24px 0 24px" }}>
-            <Typography
-              variant="h2"
-              sx={{ color: "#0258A5" }}>
-              {`${contributionsByAgeTotal.reportName}`}
-            </Typography>
+          <div className="px-[24px]">
+          <h2 className="text-dsm-secondary">Summary</h2>
+          </div>
+          <div className="flex sticky top-0 z-10 bg-white">
+          <TotalsGrid 
+            displayData = {[[(contributionsByAgeTotal?.totalEmployees || 0), currencyFormat(contributionsByAgeTotal?.totalAmount)], 
+              ]} 
+              leftColumnHeaders = {['All']}
+              topRowHeaders={['', 'EMPS', 'Amount']}
+          ></TotalsGrid>
+          <TotalsGrid 
+            displayData = {[[(contributionsByAgeFullTime?.totalEmployees || 0), currencyFormat(contributionsByAgeFullTime?.totalAmount || 0)], 
+              ]} 
+              leftColumnHeaders = {['FullTime']}
+              topRowHeaders={['', 'EMPS', 'Amount']}
+          ></TotalsGrid>
+          <TotalsGrid 
+            displayData = {[[(contributionsByAgePartTime?.totalEmployees || 0), currencyFormat(contributionsByAgePartTime?.totalAmount || 0)], 
+              ]} 
+              leftColumnHeaders = {['PartTime']}
+              topRowHeaders={['', 'EMPS', 'Amount']}
+          ></TotalsGrid>
           </div>
           <Grid2
             container
@@ -46,13 +62,7 @@ const ContributionsByAgeGrid = () => {
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: contributionsByAgeTotal?.response.results,
-                  pinnedTopRowData: [
-                    {
-                      age: "CONT TTL",
-                      employeeCount: (contributionsByAgeTotal?.totalEmployees || 0),
-                      amount: contributionsByAgeTotal?.totalAmount
-                    }
-                  ],
+                  
                   columnDefs: [
                     {
                       headerName: columnDefsTotal.headerName,
@@ -69,13 +79,7 @@ const ContributionsByAgeGrid = () => {
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: contributionsByAgeFullTime?.response.results,
-                  pinnedTopRowData: [
-                    {
-                     age: "CONT TTL",
-                      employeeCount: (contributionsByAgeFullTime?.totalEmployees || 0),
-                      amount: contributionsByAgeFullTime?.totalAmount
-                    }
-                  ],
+                  
                   columnDefs: [
                     {
                       headerName: columnDefsFullTime.headerName,
@@ -92,13 +96,7 @@ const ContributionsByAgeGrid = () => {
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: contributionsByAgePartTime?.response.results,
-                  pinnedTopRowData: [
-                    {
-                      age: "CONT TTL",
-                      employeeCount: (contributionsByAgePartTime?.totalEmployees || 0),
-                      amount: contributionsByAgePartTime?.totalAmount
-                    }
-                  ],
+                  
                   columnDefs: [
                     {
                       headerName: columnDefsPartTime.headerName,
