@@ -1,4 +1,3 @@
-import { Typography } from "@mui/material";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetContributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
@@ -7,16 +6,13 @@ import { DSMGrid, ISortParams, TotalsGrid } from "smart-ui-library";
 import { GetContributionsByAgeColumns } from "./ContributionsByAgeGridColumns";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { FrozenReportsByAgeRequestType } from "../../reduxstore/types";
+import { currencyFormat } from "utils/numberUtils"; // Import utility function
 
 const ContributionsByAgeGrid = () => {
   const [_discard0, setSortParams] = useState<ISortParams>({
     sortBy: "Badge",
     isSortDescending: false
   });
-
-  function currencyFormat(num : Number) : string {
-    return '$' + num.toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
- }
 
   const { contributionsByAgeTotal, contributionsByAgeFullTime, contributionsByAgePartTime } = useSelector(
     (state: RootState) => state.yearsEnd
@@ -33,34 +29,27 @@ const ContributionsByAgeGrid = () => {
     <>
       {contributionsByAgeTotal?.response && (
         <>
-          <div style={{ padding: "0 24px 0 24px" }}>
-            <Typography
-              variant="h2"
-              sx={{ color: "#0258A5" }}>
-              {`${contributionsByAgeTotal.reportName}`}
-            </Typography>
+          <div className="px-[24px]">
+          <h2 className="text-dsm-secondary">Summary</h2>
           </div>
-          <div style={{display: 'flex'}}>
+          <div className="flex sticky top-0 z-10 bg-white">
           <TotalsGrid 
             displayData = {[[(contributionsByAgeTotal?.totalEmployees || 0), currencyFormat(contributionsByAgeTotal?.totalAmount)], 
-              [4, 5],
-              [8, 9]]} 
-              leftColumnHeaders = {['Regular', 'Hardship', 'DistTotal']}
-              topRowHeaders={['All', 'Total', 'Amount']}
+              ]} 
+              leftColumnHeaders = {['All']}
+              topRowHeaders={['', 'EMPS', 'Amount']}
           ></TotalsGrid>
           <TotalsGrid 
-            displayData = {[[(contributionsByAgeFullTime?.totalEmployees || 0), (contributionsByAgeFullTime?.totalAmount || 0)], 
-              [4, 5],
-              [8, 9]]} 
-              leftColumnHeaders = {['Regular', 'Hardship', 'DistTotal']}
-              topRowHeaders={['FullTime', 'Total', 'Amount']}
+            displayData = {[[(contributionsByAgeFullTime?.totalEmployees || 0), currencyFormat(contributionsByAgeFullTime?.totalAmount || 0)], 
+              ]} 
+              leftColumnHeaders = {['FullTime']}
+              topRowHeaders={['', 'EMPS', 'Amount']}
           ></TotalsGrid>
           <TotalsGrid 
-            displayData = {[[(contributionsByAgePartTime?.totalEmployees || 0), (contributionsByAgePartTime?.totalAmount || 0)], 
-              [4, 5],
-              [8, 9]]} 
-              leftColumnHeaders = {['Regular', 'Hardship', 'DistTotal']}
-              topRowHeaders={['PartTime', 'Total', 'Amount']}
+            displayData = {[[(contributionsByAgePartTime?.totalEmployees || 0), currencyFormat(contributionsByAgePartTime?.totalAmount || 0)], 
+              ]} 
+              leftColumnHeaders = {['PartTime']}
+              topRowHeaders={['', 'EMPS', 'Amount']}
           ></TotalsGrid>
           </div>
           <Grid2
@@ -73,13 +62,7 @@ const ContributionsByAgeGrid = () => {
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: contributionsByAgeTotal?.response.results,
-                  pinnedTopRowData: [
-                    {
-                      age: "CONT TTL",
-                      employeeCount: (contributionsByAgeTotal?.totalEmployees || 0),
-                      amount: contributionsByAgeTotal?.totalAmount
-                    }
-                  ],
+                  
                   columnDefs: [
                     {
                       headerName: columnDefsTotal.headerName,
@@ -96,13 +79,7 @@ const ContributionsByAgeGrid = () => {
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: contributionsByAgeFullTime?.response.results,
-                  pinnedTopRowData: [
-                    {
-                     age: "CONT TTL",
-                      employeeCount: (contributionsByAgeFullTime?.totalEmployees || 0),
-                      amount: contributionsByAgeFullTime?.totalAmount
-                    }
-                  ],
+                  
                   columnDefs: [
                     {
                       headerName: columnDefsFullTime.headerName,
@@ -119,13 +96,7 @@ const ContributionsByAgeGrid = () => {
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: contributionsByAgePartTime?.response.results,
-                  pinnedTopRowData: [
-                    {
-                      age: "CONT TTL",
-                      employeeCount: (contributionsByAgePartTime?.totalEmployees || 0),
-                      amount: contributionsByAgePartTime?.totalAmount
-                    }
-                  ],
+                  
                   columnDefs: [
                     {
                       headerName: columnDefsPartTime.headerName,
