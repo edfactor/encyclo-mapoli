@@ -1,12 +1,12 @@
-import { Typography } from "@mui/material";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetDistributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams } from "smart-ui-library";
+import { DSMGrid, ISortParams, TotalsGrid } from "smart-ui-library";
 import { GetDistributionsByAgeColumns } from "./DistributionByAgeGridColumns";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { FrozenReportsByAgeRequestType } from "../../reduxstore/types";
+import { currencyFormat } from "utils/numberUtils"; // Import utility function
 
 const DistributionByAgeGrid = () => {
   const [_discard0, setSortParams] = useState<ISortParams>({
@@ -29,13 +29,49 @@ const DistributionByAgeGrid = () => {
     <>
       {distributionsByAgeTotal?.response && (
         <>
-          <div style={{ padding: "0 24px 0 24px" }}>
-            <Typography
-              variant="h2"
-              sx={{ color: "#0258A5" }}>
-              {`${distributionsByAgeTotal.reportName}`}
-            </Typography>
+          <div className="px-[24px]">
+          <h2 className="text-dsm-secondary">Summary</h2>
           </div>
+          <div className="flex sticky top-0 z-10 bg-white">
+              <TotalsGrid 
+                displayData = {[
+                  [(distributionsByAgeTotal?.regularTotalEmployees || 0), 
+                    currencyFormat(distributionsByAgeTotal?.regularTotalAmount || 0)], 
+                  [(distributionsByAgeTotal?.hardshipTotalEmployees || 0), 
+                    currencyFormat(distributionsByAgeTotal?.hardshipTotalAmount || 0)],
+                  [(distributionsByAgeTotal?.regularTotalEmployees || 0) + (distributionsByAgeTotal?.hardshipTotalEmployees || 0), 
+                    currencyFormat(distributionsByAgeTotal?.distributionTotalAmount || 0)]
+                  ]} 
+                  leftColumnHeaders = {['Regular', 'Hardship', 'Dist Total']}
+                  topRowHeaders={['Total', 'EMPS', 'Amount']}
+
+              ></TotalsGrid>
+              <TotalsGrid 
+                displayData = {[
+                  [(distributionsByAgeFullTime?.regularTotalEmployees || 0), 
+                    currencyFormat(distributionsByAgeFullTime?.regularTotalAmount || 0)], 
+                  [(distributionsByAgeFullTime?.hardshipTotalEmployees || 0), 
+                    currencyFormat(distributionsByAgeFullTime?.hardshipTotalAmount || 0)],
+                  [(distributionsByAgeFullTime?.regularTotalEmployees || 0) + (distributionsByAgeFullTime?.hardshipTotalEmployees || 0), 
+                    currencyFormat(distributionsByAgeFullTime?.distributionTotalAmount || 0)]
+                  ]}  
+                  leftColumnHeaders = {['Regular', 'Hardship', 'Dist Total']}
+                  topRowHeaders={['FullTime', 'EMPS', 'Amount']}
+              ></TotalsGrid>
+              <TotalsGrid 
+                displayData = {[
+                  [(distributionsByAgePartTime?.regularTotalEmployees || 0), 
+                    currencyFormat(distributionsByAgePartTime?.regularTotalAmount || 0)], 
+                  [(distributionsByAgePartTime?.hardshipTotalEmployees || 0), 
+                    currencyFormat(distributionsByAgePartTime?.hardshipTotalAmount || 0)],
+                  [(distributionsByAgePartTime?.regularTotalEmployees || 0) + (distributionsByAgePartTime?.hardshipTotalEmployees || 0), 
+                    currencyFormat(distributionsByAgePartTime?.distributionTotalAmount || 0)]
+                  ]}  
+                  leftColumnHeaders = {['Regular', 'Hardship', 'Dist Total']}
+                  topRowHeaders={['PartTime', 'EMPS', 'Amount']}
+              ></TotalsGrid>
+              </div>
+
           <Grid2
             container
             xs={12}>
@@ -46,23 +82,7 @@ const DistributionByAgeGrid = () => {
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: distributionsByAgeTotal?.response.results,
-                  pinnedTopRowData: [
-                    {
-                      age: "Regular",
-                      employeeCount: distributionsByAgeTotal?.regularTotalEmployees,
-                      amount: distributionsByAgeTotal?.regularTotalAmount
-                    },
-                    {
-                      age: "Hardship",
-                      employeeCount: distributionsByAgeTotal?.hardshipTotalEmployees,
-                      amount: distributionsByAgeTotal?.hardshipTotalAmount
-                    },
-                    {
-                      age: "Dist Total",
-                      employeeCount: (distributionsByAgeTotal?.regularTotalEmployees || 0) + (distributionsByAgeTotal?.hardshipTotalEmployees || 0),
-                      amount: distributionsByAgeTotal?.distributionTotalAmount
-                    }
-                  ],
+                  
                   columnDefs: [
                     {
                       headerName: columnDefsTotal.headerName,
@@ -79,23 +99,7 @@ const DistributionByAgeGrid = () => {
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: distributionsByAgeFullTime?.response.results,
-                  pinnedTopRowData: [
-                    {
-                      age: "Regular",
-                      employeeCount: distributionsByAgeFullTime?.regularTotalEmployees,
-                      amount: distributionsByAgeFullTime?.regularTotalAmount
-                    },
-                    {
-                      age: "Hardship",
-                      employeeCount: distributionsByAgeFullTime?.hardshipTotalEmployees,
-                      amount: distributionsByAgeFullTime?.hardshipTotalAmount
-                    },
-                    {
-                      age: "Dist Total",
-                      employeeCount: (distributionsByAgeFullTime?.regularTotalEmployees || 0) + (distributionsByAgeFullTime?.hardshipTotalEmployees || 0),
-                      amount: distributionsByAgeFullTime?.distributionTotalAmount
-                    }
-                  ],
+                  
                   columnDefs: [
                     {
                       headerName: columnDefsFullTime.headerName,
@@ -112,23 +116,7 @@ const DistributionByAgeGrid = () => {
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: distributionsByAgePartTime?.response.results,
-                  pinnedTopRowData: [
-                    {
-                      age: "Regular",
-                      employeeCount: distributionsByAgePartTime?.regularTotalEmployees,
-                      amount: distributionsByAgePartTime?.regularTotalAmount
-                    },
-                    {
-                      age: "Hardship",
-                      employeeCount: distributionsByAgePartTime?.hardshipTotalEmployees,
-                      amount: distributionsByAgePartTime?.hardshipTotalAmount
-                    },
-                    {
-                      age: "Dist Total",
-                      employeeCount: (distributionsByAgePartTime?.regularTotalEmployees || 0) + (distributionsByAgePartTime?.hardshipTotalEmployees || 0),
-                      amount: distributionsByAgePartTime?.distributionTotalAmount
-                    }
-                  ],
+                  
                   columnDefs: [
                     {
                       headerName: columnDefsPartTime.headerName,
