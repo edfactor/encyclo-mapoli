@@ -65,7 +65,7 @@ const DecemberProcessAccordion = () => {
           <DSMCollapsedAccordion
             title="Clean Up Reports"
             expandable={false}
-            actionButtonText="START PROCESS"
+            actionButtonText="VIEW DETAILS"
             status={{
               label: "Completed",
               color: "success"
@@ -105,88 +105,94 @@ const DecemberProcessAccordion = () => {
         <Grid2 width="100%">
           <DSMCollapsedAccordion
             title="Military"
-            onActionClick={() => navigate('/military-and-rehire')}
-            actionButtonText="START PROCESS"
+            expandable={false}
+            status={{
+              label: "Not Started",
+              color: "default"
+            }}
+            onActionClick={() => navigate('/military-and-rehire-entry')}
+            actionButtonText="VIEW DETAILS"
           >
-            <MilitaryAndRehire />
+            <>
+            </>
           </DSMCollapsedAccordion>
         </Grid2>
 
         <Grid2 width="100%">
           <DSMCollapsedAccordion
             title="Rehire"
+            expandable={false}
+            status={{
+              label: "Not Started",
+              color: "default"
+            }}
             onActionClick={() => navigate('/military-and-rehire')}
-            actionButtonText="START PROCESS"
+            actionButtonText="VIEW DETAILS"
           >
-            <MilitaryAndRehire />
+            <></>
           </DSMCollapsedAccordion>
         </Grid2>
 
         <Grid2 width="100%">
           <DSMCollapsedAccordion
             title="Prof Termination"
-            actionButtonText="START PROCESS"
+            expandable={false}
+            status={{
+              label: "Not Started",
+              color: "default"
+            }}
+            actionButtonText="VIEW DETAILS"
             onActionClick={() => navigate('/prof-term')}
             isCollapsedOnRender={true}
           >
-            <Grid2 width={"100%"}>
-              <Divider />
-            </Grid2>
-            <Grid2
-              width={"100%"}>
-              <DSMAccordion title="Filter">
-                <TerminationSearchFilter />
-              </DSMAccordion>
-
-            </Grid2>
-
-            <Grid2 width="100%">
-              <TerminationGrid />
-            </Grid2>
+            <></>
           </DSMCollapsedAccordion>
         </Grid2>
 
         <Grid2 width="100%">
           <DSMCollapsedAccordion
             title="Loan Balance"
-            actionButtonText="START PROCESS"
+            expandable={false}
+            status={{
+              label: "Not Started",
+              color: "default"
+            }}
+            actionButtonText="VIEW DETAILS"
             onActionClick={() => navigate('/distributions-and-forfeitures')}
             isCollapsedOnRender={true}
           >
-            <Grid2 width={"100%"}>
-              <Divider />
-            </Grid2>
-            <Grid2
-              width={"100%"}>
-              <DSMAccordion title="Filter">
-                <DistributionsAndForfeituresSearchFilter />
-              </DSMAccordion>
-            </Grid2>
-
-            <Grid2 width="100%">
-              <DistributionsAndForfeituresGrid />
-            </Grid2>
+            <></>
           </DSMCollapsedAccordion>
         </Grid2>
 
         <Grid2 width="100%">
           <DSMCollapsedAccordion
             title="Manage Executives"
+            expandable={false}
+            status={{
+              label: "Not Started",
+              color: "default"
+            }}
             onActionClick={() => alert("Manage Executives")}
-            actionButtonText="START PROCESS"
+            actionButtonText="VIEW DETAILS"
             isCollapsedOnRender={true}
           >
-            <Typography>Manage Executives content</Typography>
+            <></>
           </DSMCollapsedAccordion>
         </Grid2>
 
         <Grid2 width="100%">
           <DSMCollapsedAccordion
             title="Profit Share Report"
+            expandable={false}
+            status={{
+              label: "In Progress",
+              color: "default"
+            }}
             onActionClick={() => navigate('/profit-share-report')}
-            actionButtonText="START PROCESS"
+            actionButtonText="VIEW DETAILS"
           >
-            <MilitaryAndRehire />
+            <></>
           </DSMCollapsedAccordion>
         </Grid2>
 

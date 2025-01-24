@@ -28967,6 +28967,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         {
                             Id = (byte)98,
                             Name = "TRAINING"
+                        },
+                        new
+                        {
+                            Id = (byte)99,
+                            Name = "Indian Ridge"
                         });
                 });
 
@@ -29040,7 +29045,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("ENROLLMENT_ID");
 
                     b.Property<decimal>("Etva")
-                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasPrecision(9, 2)
+                        .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("ETVA");
 
                     b.Property<decimal>("HoursExecutive")

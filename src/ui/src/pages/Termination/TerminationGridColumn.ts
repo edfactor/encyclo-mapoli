@@ -1,6 +1,6 @@
 import { ColDef } from "ag-grid-community";
 
-export const GetTerminationColumns = (): ColDef[] => {
+export const GetTerminationColumns = (viewBadge: Function): ColDef[] => {
   return [
     {
       headerName: "Badge",
@@ -10,7 +10,8 @@ export const GetTerminationColumns = (): ColDef[] => {
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      sortable: true
+      sortable: true,
+      cellRenderer: viewBadge
     },
     {
       headerName: "Name",

@@ -26,6 +26,7 @@ internal sealed class TaxCodeFaker:Faker<TaxCode>
                                        'P'};
 
         RuleFor(tc => tc.Id, fake => fake.Random.ListItem(taxCodes)).
-            RuleFor(tc => tc.Name, fake => fake.Music.Genre());
+            RuleFor(tc => tc.Name, fake => fake.Music.Genre())
+            .UseSeed(100);
     }
 }

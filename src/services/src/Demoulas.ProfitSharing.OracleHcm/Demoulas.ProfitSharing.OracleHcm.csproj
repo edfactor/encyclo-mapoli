@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="Bogus" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Quartz" />
     <PackageReference Include="Quartz" />
     <PackageReference Include="MassTransit" />
     <PackageReference Include="Riok.Mapperly" />

@@ -6,7 +6,7 @@ import MilitaryAndRehireEntryAndModificationGrid from "./MilitaryAndRehireEntryA
 
 const MilitaryAndRehireEntryAndModification = () => {
   return (
-    <Page label="Military and Rehire - ENTRY AND MOD">
+    <Page label="Military Entry and Modification">
         <Grid2
           container
           rowSpacing="24px">

@@ -13,6 +13,7 @@ internal sealed class ContactInfoFaker : Faker<ContactInfo>
             .RuleFor(ci => ci.FirstName, f => f.Name.FirstName())
             .RuleFor(ci => ci.MiddleName, f => f.Name.FirstName().OrNull(f))
             .RuleFor(ci => ci.LastName, f => f.Name.FirstName())
-            .RuleFor(d => d.FullName, (f, d) => $"{d.LastName}, {d.FirstName}");
+            .RuleFor(d => d.FullName, (f, d) => $"{d.LastName}, {d.FirstName}")
+            .UseSeed(100);
     }
 }

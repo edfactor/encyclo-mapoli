@@ -127,7 +127,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
     public async Task GetResponse_Should_HandleEmptyResults()
     {
         // Arrange
-        var request = new ProfitYearRequest { Skip = 0, Take = 10, ProfitYear = (short)2024 };
+        var request = new ProfitYearRequest { Skip = 0, Take = 10, ProfitYear = 2024 };
         var cancellationToken = CancellationToken.None;
         var expectedResponse = new ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>
         {
@@ -148,7 +148,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
     public async Task GetResponse_Should_HandleNullResults()
     {
         // Arrange
-        var request = new ProfitYearRequest { Skip = 0, Take = 10, ProfitYear = (short)2024 };
+        var request = new ProfitYearRequest { Skip = 0, Take = 10, ProfitYear = 2024 };
         var cancellationToken = CancellationToken.None;
         var expectedResponse = new ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>
         {

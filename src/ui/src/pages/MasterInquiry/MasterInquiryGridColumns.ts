@@ -20,8 +20,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       minWidth: 120,
       headerClass: "left-align", 
       cellClass: "left-align",
-      resizable: true,
-      valueFormatter: (params) => params.value ? `***-**-${params.value.toString().slice(-4)}` : ""
+      resizable: true
     },
     {
       headerName: "Profit Year",

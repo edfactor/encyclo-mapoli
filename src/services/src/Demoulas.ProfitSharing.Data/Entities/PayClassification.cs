@@ -102,6 +102,7 @@ public sealed class PayClassification : ILookupTable<byte>
         public const byte Defunct = 95;
         public const byte TechnicalSupport = 96;
         public const byte Training = 98;
+        public const byte IndianRidge = 99;
     }
 
     public byte Id { get; set; }
