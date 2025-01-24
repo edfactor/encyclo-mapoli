@@ -29,13 +29,20 @@ public class TotalBalanceEndpoint:Endpoint<BalanceEndpointRequest, BalanceEndpoi
         Group<BalanceGroup>();
     }
 
-    public override Task<BalanceEndpointResponse?> ExecuteAsync(BalanceEndpointRequest req, CancellationToken ct)
+    public override async Task HandleAsync(BalanceEndpointRequest req, CancellationToken ct)
     {
         if (int.TryParse(req.Id, out int badgeNumberOrSsn) && req.SearchType == SearchBy.Ssn)
         {
             badgeNumberOrSsn = req.Id.ConvertSsnToInt();
         }
 
-        return _totalService.GetVestingBalanceForSingleMemberAsync(req.SearchType, badgeNumberOrSsn, req.ProfitYear, ct);
+        var rslt = await _totalService.GetVestingBalanceForSingleMemberAsync(req.SearchType, badgeNumberOrSsn, req.ProfitYear, ct);
+        if (rslt == null)
+        {
+            await SendNotFoundAsync(ct);
+        } else
+        {
+            await SendOkAsync(rslt, ct);
+        }
     }
 }
