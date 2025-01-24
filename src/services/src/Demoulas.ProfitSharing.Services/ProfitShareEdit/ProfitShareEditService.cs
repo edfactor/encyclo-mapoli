@@ -17,7 +17,7 @@ namespace Demoulas.ProfitSharing.Services.ProfitShareEdit;
 /// <para>This service invokes the "ProfitShareUpdateService" to compute and return the transactions (PROFIT_DETAIL rows) based on user input.</para>
 /// <para>This class is named after the step in the Year End flow.    It could instead be named "View Transactions for Year End Update"</para>
 /// </summary>
-public class ProfitShareEditService : IProfitShareEditService
+public class ProfitShareEditService : IInternalProfitShareEditService
 {
     private readonly IInternalProfitShareUpdateService _profitShareUpdateService;
 

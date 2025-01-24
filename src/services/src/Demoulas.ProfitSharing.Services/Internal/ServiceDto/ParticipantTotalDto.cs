@@ -1,6 +1,6 @@
 ﻿namespace Demoulas.ProfitSharing.Services.Internal.ServiceDto;
-public class ParticipantTotalDto
+internal sealed class ParticipantTotalDto
 {
-    public required int Ssn { get; set; }
-    public required decimal Total { get; set; }
+    internal required int Ssn { get; set; }
+    internal required decimal Total { get; set; }
 }

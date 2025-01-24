@@ -7,6 +7,6 @@ namespace Demoulas.ProfitSharing.Services.Internal.Interfaces;
 public interface IInternalProfitShareUpdateService : IProfitShareUpdateService
 {
     // Internal access by other services (includes ssn)
-    public Task<ProfitShareUpdateResult> ProfitShareUpdateInternal(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken);
+    internal Task<ProfitShareUpdateResult> ProfitShareUpdateInternal(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken);
 
 }

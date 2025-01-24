@@ -1,9 +1,11 @@
 ﻿using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -94,7 +96,7 @@ public class MasterInquiryService : IMasterInquiryService
                 .Select(x => new MasterInquiryResponseDto
                 {
                     Id = x.ProfitDetail.Id,
-                    Ssn = x.ProfitDetail.Ssn,
+                    Ssn = x.ProfitDetail.Ssn.MaskSsn(),
                     ProfitYear = x.ProfitDetail.ProfitYear,
                     ProfitYearIteration = x.ProfitDetail.ProfitYearIteration,
                     DistributionSequence = x.ProfitDetail.DistributionSequence,
@@ -119,14 +121,12 @@ public class MasterInquiryService : IMasterInquiryService
                 .OrderByDescending(x => x.ProfitYear)
                 .ToPaginationResultsAsync(req, cancellationToken);
 
-                _logger.LogInformation("Returned {Results} records", results.Results.Count());
-
-                var uniqueSsns = results.Results.Select(r => r.Ssn).Distinct().ToList();
+                ISet<int> uniqueSsns = await query.Select(q => q.Demographics.Ssn).ToHashSetAsync(cancellationToken: cancellationToken);
                 EmployeeDetails? employeeDetails = null;
 
                 if (uniqueSsns.Count == 1)
                 {
-                    int ssn = (int)uniqueSsns[0];
+                    int ssn = uniqueSsns.First();
                     short currentYear = (short)DateTime.Today.Year;
                     short previousYear = (short)(currentYear - 1);
 
@@ -136,7 +136,7 @@ public class MasterInquiryService : IMasterInquiryService
                     var maxProfitYear = req.EndProfitYear.HasValue ? req.EndProfitYear : short.MaxValue;
 
                     var demographicData = await ctx.Demographics
-                     .Where(d => d.Ssn == uniqueSsns[0])
+                     .Where(d => d.Ssn == ssn)
                      .Select(d => new
                      {
                          d.ContactInfo.FirstName,
@@ -171,7 +171,7 @@ public class MasterInquiryService : IMasterInquiryService
                             Address = demographicData.Address,
                             AddressZipCode = demographicData.PostalCode!,
                             DateOfBirth = demographicData.DateOfBirth,
-                            Ssn = demographicData.Ssn,
+                            Ssn = demographicData.Ssn.MaskSsn(),
                             YearToDateProfitSharingHours = demographicData.LatestPayProfit?.CurrentHoursYear ?? 0,
                             YearsInPlan = demographicData.LatestPayProfit?.YearsInPlan ?? 0,
                             HireDate = demographicData.HireDate,

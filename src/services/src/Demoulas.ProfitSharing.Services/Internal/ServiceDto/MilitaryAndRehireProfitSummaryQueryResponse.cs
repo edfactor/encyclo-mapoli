@@ -2,28 +2,28 @@
 using Demoulas.Util.Extensions;
 
 namespace Demoulas.ProfitSharing.Services.Internal.ServiceDto;
-public record MilitaryAndRehireProfitSummaryQueryResponse
+internal sealed record MilitaryAndRehireProfitSummaryQueryResponse
 {
-    public required int BadgeNumber { get; set; }
-    public required string? FullName { get; set; }
-    public required int Ssn { get; set; }
-    public required short StoreNumber { get; set; }
-    public required DateOnly HireDate { get; set; }
-    public required DateOnly? TerminationDate { get; set; }
-    public required DateOnly ReHiredDate { get; set; }
-    public required byte CompanyContributionYears { get; set; }
-    public required decimal HoursCurrentYear { get; set; }
-    public required short ProfitYear { get; set; }
-    public required decimal Forfeiture { get; set; }
-    public required string? Remark { get; set; }
-    public required byte EnrollmentId { get; set; }
-    public decimal NetBalanceLastYear { get; set; }
-    public decimal VestedBalanceLastYear { get; set; }
-    public char EmploymentStatusId { get; set; }
-    public byte ProfitCodeId { get; set; }
+    internal required int BadgeNumber { get; set; }
+    internal required string? FullName { get; set; }
+    internal required int Ssn { get; set; }
+    internal required short StoreNumber { get; set; }
+    internal required DateOnly HireDate { get; set; }
+    internal required DateOnly? TerminationDate { get; set; }
+    internal required DateOnly ReHiredDate { get; set; }
+    internal required byte CompanyContributionYears { get; set; }
+    internal required decimal HoursCurrentYear { get; set; }
+    internal required short ProfitYear { get; set; }
+    internal required decimal Forfeiture { get; set; }
+    internal required string? Remark { get; set; }
+    internal required byte EnrollmentId { get; set; }
+    internal decimal NetBalanceLastYear { get; set; }
+    internal decimal VestedBalanceLastYear { get; set; }
+    internal char EmploymentStatusId { get; set; }
+    internal byte ProfitCodeId { get; set; }
 
 
-    public static MilitaryAndRehireProfitSummaryResponse ResponseExample()
+    internal static MilitaryAndRehireProfitSummaryResponse ResponseExample()
     {
         return new MilitaryAndRehireProfitSummaryResponse
         {

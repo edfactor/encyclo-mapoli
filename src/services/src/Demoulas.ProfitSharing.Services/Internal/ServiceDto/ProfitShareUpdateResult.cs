@@ -1,7 +1,7 @@
 ﻿namespace Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 
-public class ProfitShareUpdateResult
+public sealed class ProfitShareUpdateResult
 {
-    public required bool HasExceededMaximumContributions { get; set; }
-    public required List<ProfitShareUpdateMember> Members { get; set; }
+    internal bool HasExceededMaximumContributions { get; set; }
+    internal List<ProfitShareUpdateMember> Members { get; set; } = new List<ProfitShareUpdateMember>();
 }

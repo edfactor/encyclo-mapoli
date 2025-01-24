@@ -1,10 +1,10 @@
 ﻿namespace Demoulas.ProfitSharing.Services.Internal.ServiceDto;
-public class ParticipantTotalVestingBalanceDto
+internal sealed class ParticipantTotalVestingBalanceDto
 {
-    public int Ssn { get; set; }
-    public decimal VestedBalance { get; set; }
-    public decimal TotalDistributions { get; set; }
-    public decimal Etva { get; set; }
-    public decimal VestingPercent { get; set; }
-    public decimal CurrentBalance { get; set; }
+    internal int Ssn { get; set; }
+    internal decimal VestedBalance { get; set; }
+    internal decimal TotalDistributions { get; set; }
+    internal decimal Etva { get; set; }
+    internal decimal VestingPercent { get; set; }
+    internal decimal CurrentBalance { get; set; }
 }

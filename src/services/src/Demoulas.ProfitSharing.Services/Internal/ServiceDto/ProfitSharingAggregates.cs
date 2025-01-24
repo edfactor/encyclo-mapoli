@@ -1,12 +1,12 @@
 ﻿namespace Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 internal sealed record ProfitSharingAggregates
 {
-    public short TotalEmployees { get; init; }
-    public short BothHardshipAndRegularEmployees { get; init; }
-    public decimal BothHardshipAndRegularAmount { get; init; }
-    public short RegularTotalEmployees { get; init; }
-    public decimal RegularAmount { get; init; }
+    internal short TotalEmployees { get; init; }
+    internal short BothHardshipAndRegularEmployees { get; init; }
+    internal decimal BothHardshipAndRegularAmount { get; init; }
+    internal short RegularTotalEmployees { get; init; }
+    internal decimal RegularAmount { get; init; }
 
-    public short HardshipTotalEmployees { get; init; }
-    public decimal HardshipTotalAmount { get; init; }
+    internal short HardshipTotalEmployees { get; init; }
+    internal decimal HardshipTotalAmount { get; init; }
 }

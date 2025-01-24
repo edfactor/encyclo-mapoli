@@ -1,9 +1,9 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,10 +24,10 @@ namespace Demoulas.ProfitSharing.Services.ProfitMaster;
 /// </summary>
 public class ProfitMasterService : IProfitMasterService
 {
-    private readonly IProfitShareEditService _profitShareEditService;
+    private readonly IInternalProfitShareEditService _profitShareEditService;
     private readonly IProfitSharingDataContextFactory _dbFactory;
 
-    public ProfitMasterService(IProfitShareEditService profitShareEditService, IProfitSharingDataContextFactory dbFactory)
+    public ProfitMasterService(IInternalProfitShareEditService profitShareEditService, IProfitSharingDataContextFactory dbFactory)
     {
         _profitShareEditService = profitShareEditService;
         _dbFactory = dbFactory;

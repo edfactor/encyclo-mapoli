@@ -1,6 +1,6 @@
 ﻿namespace Demoulas.ProfitSharing.Services.Internal.ServiceDto;
-public class ParticipantTotalYearsDto
+internal sealed class ParticipantTotalYearsDto
 {
-    public required long Ssn { get; set; }
-    public required short Years { get; set; }
+    internal required int Ssn { get; set; }
+    internal required short Years { get; set; }
 }

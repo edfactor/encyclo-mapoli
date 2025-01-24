@@ -1,13 +1,11 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-
-namespace Demoulas.ProfitSharing.Services.Internal.ServiceDto;
+﻿namespace Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 
 /// <summary>
 /// Represents a year end Transaction (aka row in PROFIT_DETAIL) as shown to the user
 /// </summary>
 public record ProfitShareEditMemberRecord
 {
-    public ProfitShareEditMemberRecord(ProfitShareUpdateMember mr, byte code)
+    internal ProfitShareEditMemberRecord(ProfitShareUpdateMember mr, byte code)
     {
         IsEmployee = mr.IsEmployee;
         Ssn = mr.Ssn;
@@ -16,19 +14,19 @@ public record ProfitShareEditMemberRecord
         Name = mr.Name;
         Code = code;
     }
-    public bool IsEmployee { get; init; }
-    public int Ssn { get; set; }
-    public long Badge { get; set; }
-    public long Psn { get; set; }
-    public string? Name { get; set; }
-    public byte Code { get; set; }
-    public decimal ContributionAmount { get; set; }
-    public decimal EarningAmount { get; set; }
-    public decimal ForfeitureAmount { get; set; }
-    public string? Remark { get; set; }
-    public byte? CommentTypeId { get; set; }
-    public string? RecordChangeSummary { get; set; }
+    internal bool IsEmployee { get; init; }
+    internal int Ssn { get; set; }
+    internal long Badge { get; set; }
+    internal long Psn { get; set; }
+    internal string? Name { get; set; }
+    internal byte Code { get; set; }
+    internal decimal ContributionAmount { get; set; }
+    internal decimal EarningAmount { get; set; }
+    internal decimal ForfeitureAmount { get; set; }
+    internal string? Remark { get; set; }
+    internal byte? CommentTypeId { get; set; }
+    internal string? RecordChangeSummary { get; set; }
 
-    public byte ZeroContStatus { get; set; }
-    public byte YearExtension { get; set; }
+    internal byte ZeroContStatus { get; set; }
+    internal byte YearExtension { get; set; }
 }
