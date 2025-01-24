@@ -20,6 +20,7 @@ interface ProfitShareUpdateInputPanelProps {
     contributionPercent?: number | null | undefined;
     earningsPercent?: number | null;
     incomingForfeiturePercent?: number | null;
+    secondaryEarningsPercent?: number | null;
     maxAllowedContributions: number | null;
 
     adjustmentBadge?: number | null;
@@ -87,19 +88,20 @@ const ProfitShareUpdateInputPanel = () => {
     } = useForm<ProfitShareUpdateInputPanelProps>({
         resolver: yupResolver(schema),
         defaultValues: {
-            startProfitYear: new Date(2024, 1, 1),
-            contributionPercent: 1.1,
-            earningsPercent: 2.2,
-            incomingForfeiturePercent: 3.3,
-            maxAllowedContributions: 60000,
+            startProfitYear: new Date(),
+            contributionPercent: null,
+            earningsPercent: null,
+            incomingForfeiturePercent: null,
+            secondaryEarningsPercent: null,
+            maxAllowedContributions: null,
 
-            adjustmentBadge: 4567,
-            adjustmentContributionAmount: 23.44,
-            adjustmentEarningsAmount: 22.55,
-            adjustmentIncomingForfeitureAmount: 1.22,
+            adjustmentBadge: null,
+            adjustmentContributionAmount: null,
+            adjustmentEarningsAmount: null,
+            adjustmentIncomingForfeitureAmount: null,
 
-            adjustmentSecondaryBadge: 898989,
-            adjustmentSecondaryEarningsAmount: 1.1,
+            adjustmentSecondaryBadge: null,
+            adjustmentSecondaryEarningsAmount: null,
         }
     });
 
@@ -110,12 +112,13 @@ const ProfitShareUpdateInputPanel = () => {
                 ...(!!data.contributionPercent && {contributionPercent: data.contributionPercent}),
                 ...(!!data.earningsPercent && {earningsPercent: data.earningsPercent}),
                 ...(!!data.incomingForfeiturePercent && {incomingForfeitPercent: data.incomingForfeiturePercent}),
+                ...(!!data.secondaryEarningsPercent && {secondaryEarningsPercent: data.secondaryEarningsPercent}),
                 ...(!!data.maxAllowedContributions && {maxAllowedContributions: data.maxAllowedContributions}),
 
                 ...(!!data.adjustmentBadge && {badgeToAdjust: data.adjustmentBadge}),
-                ...(!!data.adjustmentContributionAmount && {adjustmentContributionAmount: data.adjustmentContributionAmount}),
-                ...(!!data.adjustmentEarningsAmount && {adjustmentEarningsAmount: data.adjustmentEarningsAmount}),
-                ...(!!data.incomingForfeiturePercent && {incomingForfeitPercent: data.incomingForfeiturePercent}),
+                ...(!!data.adjustmentContributionAmount && {adjustContributionAmount: data.adjustmentContributionAmount}),
+                ...(!!data.adjustmentEarningsAmount && {adjustEarningsAmount: data.adjustmentEarningsAmount}),
+                ...(!!data.adjustmentIncomingForfeitureAmount && {adjustIncomingForfeitAmount: data.adjustmentIncomingForfeitureAmount}),
 
                 ...(!!data.adjustmentSecondaryBadge && {badgeToAdjust2: data.adjustmentSecondaryBadge}),
                 ...(!!data.adjustmentSecondaryEarningsAmount && {adjustEarningsSecondaryAmount: data.adjustmentSecondaryEarningsAmount}),
@@ -126,7 +129,7 @@ const ProfitShareUpdateInputPanel = () => {
             triggerView(viewParams, false);
         }
     });
-
+    
     return (
         <form onSubmit={validateAndView}>
             <Grid2 container paddingX="24px">
@@ -209,6 +212,24 @@ const ProfitShareUpdateInputPanel = () => {
                         {errors.incomingForfeiturePercent &&
                             <FormHelperText error>{errors.incomingForfeiturePercent.message}</FormHelperText>}
                     </Grid2>
+                    <Grid2 xs={12} sm={6} md={2}>
+                        <FormLabel>Secondary Earnings %</FormLabel>
+                        <Controller
+                            name="secondaryEarningsPercent"
+                            control={control}
+                            render={({field}) => (
+                                <TextField
+                                    {...field}
+                                    fullWidth
+                                    size="small"
+                                    variant="outlined"
+                                    value={field.value ?? ''}
+                                    error={!!errors.secondaryEarningsPercent}
+                                />
+                            )}
+                        />
+                        {errors.secondaryEarningsPercent && <FormHelperText error>{errors.secondaryEarningsPercent.message}</FormHelperText>}
+                    </Grid2>
 
                     <Grid2 xs={12} sm={6} md={2}>
                         <FormLabel>Max Allowed Contributions</FormLabel>
@@ -229,6 +250,7 @@ const ProfitShareUpdateInputPanel = () => {
                         {errors.maxAllowedContributions &&
                             <FormHelperText error>{errors.maxAllowedContributions.message}</FormHelperText>}
                     </Grid2>
+                    
                 </Grid2>
 
                 <Grid2 container spacing={3} width="100%">
