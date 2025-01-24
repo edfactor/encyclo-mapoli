@@ -3,7 +3,9 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 
 public record DemographicsRequest : IMemberRequest
 {
+#pragma warning disable DSM001
     public required int Ssn { get; set; }
+#pragma warning restore DSM001
     public int BadgeNumber { get; set; }
 
     public required long OracleHcmId { get; set; }

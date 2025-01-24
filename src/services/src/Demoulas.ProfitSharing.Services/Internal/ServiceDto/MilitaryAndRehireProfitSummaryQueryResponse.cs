@@ -1,7 +1,7 @@
-﻿
+﻿using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.Util.Extensions;
 
-namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+namespace Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 public record MilitaryAndRehireProfitSummaryQueryResponse
 {
     public required int BadgeNumber { get; set; }

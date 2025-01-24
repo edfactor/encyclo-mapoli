@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Services.ServiceDto;
+﻿namespace Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 public class ParticipantTotalDto
 {
     public required int Ssn { get; set; }

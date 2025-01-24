@@ -1,6 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
-namespace Demoulas.ProfitSharing.Common.Contracts.InternalDto;
+namespace Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 
 /// <summary>
 /// Represents a year end Transaction (aka row in PROFIT_DETAIL) as shown to the user

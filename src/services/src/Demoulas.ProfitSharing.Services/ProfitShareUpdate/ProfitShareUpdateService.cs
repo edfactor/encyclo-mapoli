@@ -1,10 +1,11 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Contracts.InternalDto;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.ProfitShareUpdate;
@@ -15,7 +16,7 @@ namespace Demoulas.ProfitSharing.Services.ProfitShareUpdate;
 ///
 ///     This class follows the name of the step in the Ready YE flow.    It could instead be named "View effect of YE update on members"
 /// </summary>
-public class ProfitShareUpdateService : IProfitShareUpdateService
+public class ProfitShareUpdateService : IInternalProfitShareUpdateService
 {
     private readonly ICalendarService _calendarService;
     private readonly IProfitSharingDataContextFactory _dbContextFactory;

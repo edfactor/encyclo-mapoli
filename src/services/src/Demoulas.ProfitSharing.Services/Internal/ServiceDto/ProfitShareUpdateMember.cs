@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.InternalDto;
+﻿namespace Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 
 public record ProfitShareUpdateMember
 {

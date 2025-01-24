@@ -1,9 +1,10 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Contracts.InternalDto;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 
 namespace Demoulas.ProfitSharing.Services.ProfitShareEdit;
 
@@ -18,9 +19,9 @@ namespace Demoulas.ProfitSharing.Services.ProfitShareEdit;
 /// </summary>
 public class ProfitShareEditService : IProfitShareEditService
 {
-    private readonly IProfitShareUpdateService _profitShareUpdateService;
+    private readonly IInternalProfitShareUpdateService _profitShareUpdateService;
 
-    public ProfitShareEditService(IProfitShareUpdateService profitShareUpdateService)
+    public ProfitShareEditService(IInternalProfitShareUpdateService profitShareUpdateService)
     {
         _profitShareUpdateService = profitShareUpdateService;
     }

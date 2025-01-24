@@ -11,8 +11,4 @@ public interface IProfitShareEditService
 {
     // external method used by endpoints to return data to browser.   No SSN in this result.
     public Task<ProfitShareEditResponse> ProfitShareEdit(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken);
-
-    // internal method used by ProfitMaster service to access profit detail record infomration.  Includes ssn, not masked.
-    public Task<IEnumerable<ProfitShareEditMemberRecord>> ProfitShareEditRecords(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken);
-
 }
