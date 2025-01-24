@@ -67,6 +67,9 @@ public class Node
     [XmlAttribute(AttributeName = "IsIndexed")]
     public bool IsIndexed { get; set; }
 
+    [XmlAttribute(AttributeName = "IndexName")]
+    public string? IndexName { get; set; }
+
     [XmlAttribute(AttributeName = "IsShadow")]
     public bool IsShadow { get; set; }
 

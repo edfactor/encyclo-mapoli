@@ -1,11 +1,12 @@
-import { ColDef } from "ag-grid-community";
 import { agGridNumberToCurrency } from "smart-ui-library";
+import { ColDef } from "ag-grid-community";
 
 export const GetMasterInquiryGridColumns = (): ColDef[] => {
   return [
     {
       headerName: "ID",
       field: "id",
+      colId: "id",
       minWidth: 80,
       headerClass: "right-align",
       cellClass: "right-align",
@@ -15,40 +16,45 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
     {
       headerName: "SSN",
       field: "ssn",
+      colId: "ssn",
       minWidth: 120,
-      headerClass: "right-align", 
-      cellClass: "right-align",
-      valueFormatter: params => params.value ? `***-**-${params.value.toString().slice(-4)}` : "",
+      headerClass: "left-align", 
+      cellClass: "left-align",
       resizable: true
     },
     {
       headerName: "Profit Year",
       field: "profitYear",
+      colId: "profitYear",
       minWidth: 100,
       headerClass: "right-align",
       cellClass: "right-align",
-      resizable: true
+      resizable: true,
+      sortable: true
     },
     {
       headerName: "Iteration",
       field: "profitYearIteration",
-      minWidth: 90,
+      colId: "profitYearIteration", 
+      minWidth: 80,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true
     },
     {
-      headerName: "Distribution Seq",
+      headerName: "Distribution",
       field: "distributionSequence",
-      minWidth: 130,
+      colId: "distributionSequence",
+      minWidth: 100,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true
     },
     {
-      headerName: "Profit Code",
+      headerName: "Code",
       field: "profitCodeId",
-      minWidth: 100,
+      colId: "profitCodeId",
+      minWidth: 80,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true
@@ -56,62 +62,150 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
     {
       headerName: "Contribution",
       field: "contribution",
+      colId: "contribution",
       minWidth: 120,
       headerClass: "right-align",
       cellClass: "right-align",
-      valueFormatter: agGridNumberToCurrency,
-      resizable: true
+      resizable: true,
+      valueFormatter: agGridNumberToCurrency
     },
     {
       headerName: "Earnings",
-      field: "earnings",
+      field: "earnings", 
+      colId: "earnings",
       minWidth: 120,
       headerClass: "right-align",
       cellClass: "right-align",
-      valueFormatter: agGridNumberToCurrency,
-      resizable: true
+      resizable: true,
+      valueFormatter: agGridNumberToCurrency
     },
     {
       headerName: "Forfeiture",
       field: "forfeiture",
+      colId: "forfeiture",
       minWidth: 120,
       headerClass: "right-align",
       cellClass: "right-align",
-      valueFormatter: agGridNumberToCurrency,
+      resizable: true,
+      valueFormatter: agGridNumberToCurrency
+    },
+    {
+      headerName: "Month",
+      field: "monthToDate",
+      colId: "monthToDate",
+      minWidth: 100,
+      headerClass: "right-align",
+      cellClass: "right-align",
+      resizable: true
+    },
+    {
+      headerName: "Year",
+      field: "yearToDate",
+      colId: "yearToDate",
+      minWidth: 100,
+      headerClass: "right-align",
+      cellClass: "right-align",
+      resizable: true
+    },
+    {
+      headerName: "Remark",
+      field: "remark",
+      colId: "remark",
+      minWidth: 150,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true
+    },
+    {
+      headerName: "Zero Contribution Reason",
+      field: "zeroContributionReasonId",
+      colId: "zeroContributionReasonId",
+      minWidth: 150,
+      headerClass: "right-align",
+      cellClass: "right-align",
       resizable: true
     },
     {
       headerName: "Federal Tax",
       field: "federalTaxes",
+      colId: "federalTaxes",
       minWidth: 120,
       headerClass: "right-align",
       cellClass: "right-align",
-      valueFormatter: agGridNumberToCurrency,
-      resizable: true
+      resizable: true,
+      valueFormatter: agGridNumberToCurrency
     },
     {
       headerName: "State Tax",
       field: "stateTaxes",
+      colId: "stateTaxes", 
       minWidth: 120,
       headerClass: "right-align",
       cellClass: "right-align",
-      valueFormatter: agGridNumberToCurrency,
-      resizable: true
+      resizable: true,
+      valueFormatter: agGridNumberToCurrency
     },
     {
       headerName: "Tax Code",
       field: "taxCodeId",
-      minWidth: 90,
-      headerClass: "center-align",
-      cellClass: "center-align",
+      colId: "taxCodeId",
+      minWidth: 100,
+      headerClass: "left-align",
+      cellClass: "left-align",
       resizable: true
     },
     {
-      headerName: "Remarks",
-      field: "remark",
-      minWidth: 200,
+      headerName: "Comment Type",
+      field: "commentTypeId",
+      colId: "commentTypeId",
+      minWidth: 100,
+      headerClass: "right-align",
+      cellClass: "right-align",
+      resizable: true
+    },
+    {
+      headerName: "Check Number",
+      field: "commentRelatedCheckNumber",
+      colId: "commentRelatedCheckNumber",
+      minWidth: 120,
       headerClass: "left-align",
       cellClass: "left-align",
+      resizable: true
+    },
+    {
+      headerName: "State",
+      field: "commentRelatedState",
+      colId: "commentRelatedState",
+      minWidth: 80,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true
+    },
+    {
+      headerName: "Oracle HCM ID",
+      field: "commentRelatedOracleHcmId",
+      colId: "commentRelatedOracleHcmId",
+      minWidth: 120,
+      headerClass: "right-align",
+      cellClass: "right-align",
+      resizable: true
+    },
+    {
+      headerName: "PSN Suffix",
+      field: "commentRelatedPsnSuffix",
+      colId: "commentRelatedPsnSuffix",
+      minWidth: 100,
+      headerClass: "right-align",
+      cellClass: "right-align",
+      resizable: true
+    },
+    {
+      headerName: "Partial Transaction",
+      field: "commentIsPartialTransaction",
+      colId: "commentIsPartialTransaction",
+      minWidth: 120,
+      headerClass: "center-align",
+      cellClass: "center-align",
       resizable: true
     }
   ];

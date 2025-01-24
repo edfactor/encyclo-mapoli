@@ -156,7 +156,7 @@ internal class PayrollSyncService
             if (payProfit == null)
             {
                 // Create new PayProfit if it doesn't exist
-                payProfit = new PayProfit { ProfitYear = (short)year, DemographicId = demographic.Id, EarningsEtvaValue = 0, LastUpdate = DateTime.Now };
+                payProfit = new PayProfit { ProfitYear = (short)year, DemographicId = demographic.Id, EarningsEtvaValue = 0, LastUpdate = DateTime.Now, Etva = 0};
                 demographic.PayProfits.Add(payProfit);
             }
 

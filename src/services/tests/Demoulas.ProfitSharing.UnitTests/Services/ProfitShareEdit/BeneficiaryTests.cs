@@ -38,7 +38,7 @@ public class BeneficiaryTests : ApiTestBase<Program>
         // Assert
         // expect 1 record
         response.Response.Results.Count().Should().Be(1);
-        ProfitShareEditMemberRecordResponse record = response.Response.Results.First();
+        var record = response.Response.Results.First();
 
         // compute expected 100 Earnings Amount
         decimal pointsDollars = Math.Round(_beneBalance, 2, MidpointRounding.AwayFromZero);
@@ -46,8 +46,8 @@ public class BeneficiaryTests : ApiTestBase<Program>
         // validate record
         record.Code.Should().Be( /*8*/ ProfitCode.Constants.Incoming100PercentVestedEarnings);
         record.ContributionAmount.Should().Be(0);
-        record.IncomingForfeitures.Should().Be(0);
+        record.ForfeitureAmount.Should().Be(0);
         record.EarningsAmount.Should().Be(earnPoints * req.EarningsPercent);
-        record.Reason.Should().Be(CommentType.Constants.OneHundredPercentEarnings.Name);
+        record.Remark.Should().Be(CommentType.Constants.OneHundredPercentEarnings.Name);
     }
 }

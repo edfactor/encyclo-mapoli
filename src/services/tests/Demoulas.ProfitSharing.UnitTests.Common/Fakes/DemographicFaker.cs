@@ -49,7 +49,8 @@ public sealed class DemographicFaker : Faker<Demographic>
                     State = f.Address.StateAbbr(),
                     PostalCode = f.Address.ZipCode(),
                     CountryIso = Country.Constants.Us
-                });
+                })
+            .UseSeed(100);
 
     }
 }

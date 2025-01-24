@@ -2,7 +2,9 @@
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Services.Caching.Extensions;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Mappers;
+using Demoulas.ProfitSharing.Services.ProfitMaster;
 using Demoulas.ProfitSharing.Services.ProfitShareEdit;
 using Demoulas.ProfitSharing.Services.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services.Reports;
@@ -41,7 +43,10 @@ public static class ServicesExtension
         _ = builder.Services.AddSingleton<ICalendarService, CalendarService>();
 
         _ = builder.Services.AddScoped<IProfitShareUpdateService, ProfitShareUpdateService>();
+        _ = builder.Services.AddScoped<IInternalProfitShareUpdateService, ProfitShareUpdateService>();
         _ = builder.Services.AddScoped<IProfitShareEditService, ProfitShareEditService>();
+        _ = builder.Services.AddScoped<IInternalProfitShareEditService, ProfitShareEditService>();
+        _ = builder.Services.AddScoped<IProfitMasterService, ProfitMasterService>();
 
         _ = builder.Services.AddSingleton<IPayProfitUpdateService, PayProfitUpdateService>();
 

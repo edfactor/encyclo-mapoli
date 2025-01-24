@@ -4,6 +4,8 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.ProfitShareUpdate;
@@ -14,7 +16,7 @@ namespace Demoulas.ProfitSharing.Services.ProfitShareUpdate;
 ///
 ///     This class follows the name of the step in the Ready YE flow.    It could instead be named "View effect of YE update on members"
 /// </summary>
-public class ProfitShareUpdateService : IProfitShareUpdateService
+public class ProfitShareUpdateService : IInternalProfitShareUpdateService
 {
     private readonly ICalendarService _calendarService;
     private readonly IProfitSharingDataContextFactory _dbContextFactory;
@@ -33,7 +35,6 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
         List<ProfitShareUpdateMemberResponse> members = memberFinancials.Select(m => new ProfitShareUpdateMemberResponse
         {
             IsEmployee = m.IsEmployee,
-            Ssn = m.Ssn,
             Badge = m.Badge,
             Psn = m.Psn,
             Name = m.Name,
@@ -63,6 +64,40 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
         };
     }
 
+    public async Task<ProfitShareUpdateResult> ProfitShareUpdateInternal(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
+    {
+        (List<MemberFinancials> memberFinancials, _, bool employeeExceededMaxContribution) = await ProfitSharingUpdatePaginated(profitShareUpdateRequest, cancellationToken);
+        List<ProfitShareUpdateMember> members = memberFinancials.Select(m => new ProfitShareUpdateMember
+        {
+            IsEmployee = m.IsEmployee,
+            Ssn = m.Ssn,
+            Badge = m.Badge,
+            Psn = m.Psn,
+            Name = m.Name,
+            BeginningAmount = m.CurrentAmount,
+            Distributions = m.Distributions,
+            Military = m.Military,
+            Xfer = m.Xfer,
+            Pxfer = m.Pxfer,
+            EmployeeTypeId = m.EmployeeTypeId,
+            Contributions = m.Contributions,
+            IncomingForfeitures = m.IncomingForfeitures,
+            AllEarnings = m.AllEarnings,
+            Etva = m.Etva,
+            AllSecondaryEarnings = m.AllSecondaryEarnings,
+            EtvaEarnings = m.EarningsOnEtva,
+            SecondaryEtvaEarnings = m.SecondaryEtvaEarnings,
+            EndingBalance = m.EndingBalance,
+            ZeroContributionReasonId = m.ZeroContributionReasonId
+        }).ToList();
+
+        return new ProfitShareUpdateResult()
+        {
+            HasExceededMaximumContributions = employeeExceededMaxContribution,
+            Members = members
+        };
+    }
+
     /// <summary>
     ///     Applies updates specified in request and returns members with updated Contributions/Earnings/IncomingForfeitures/SecondaryEarnings
     /// </summary>
@@ -82,17 +117,20 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
         AdjustmentReportData adjustmentReportData, CancellationToken cancellationToken)
     {
         var employeeExceededMaxContribution = false;
-        // We want everything up to the beginning of this profit share year, so we use "profitYear - 1" in this lookup.
-        var fiscalDates = await _calendarService.GetYearStartAndEndAccountingDatesAsync((short)(profitShareUpdateRequest.ProfitYear - 1), cancellationToken);
+        short currentYear = profitShareUpdateRequest.ProfitYear;
+        short priorYear = (short)(profitShareUpdateRequest.ProfitYear - 1);
+        
+        // We want everything up to the beginning of this currentYear year, so we use lastYear in this lookup.
+        var fiscalDates = await _calendarService.GetYearStartAndEndAccountingDatesAsync(priorYear, cancellationToken);
         List<EmployeeFinancials> employeeFinancialsList = await _dbContextFactory.UseReadOnlyContext(async ctx =>
         {
             var employees = await ctx.PayProfits
                 .Include(pp => pp.Demographic) //Question - Should this be referring to frozen demographics
                 .Include(pp => pp.Demographic!.ContactInfo)
-                .Where(pp => pp.ProfitYear == profitShareUpdateRequest.ProfitYear)
+                .Where(pp => pp.ProfitYear == currentYear)
                 .Select(x => new
                 {
-                    BadgeNumber = x.Demographic!.BadgeNumber,
+                    x.Demographic!.BadgeNumber,
                     x.Demographic.Ssn,
                     Name = x.Demographic.ContactInfo!.FullName,
                     EnrolledId = x.EnrollmentId,
@@ -102,8 +140,8 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
                     x.ZeroContributionReasonId,
                 }).ToListAsync(cancellationToken);
             var ssns = employees.Select(e => e.Ssn);
-            var totalVestingBalances = await ((TotalService)_totalService).TotalVestingBalance(ctx,
-                    (short)(profitShareUpdateRequest.ProfitYear - 1), fiscalDates.FiscalEndDate)
+            var totalVestingBalances = await ((TotalService)_totalService)
+                .TotalVestingBalance(ctx, currentYear, priorYear, fiscalDates.FiscalEndDate)
                 .Where(e => ssns.Contains(e.Ssn)).ToListAsync(cancellationToken);
             return
                 employees
@@ -185,7 +223,7 @@ public class ProfitShareUpdateService : IProfitShareUpdateService
     {
         // Gets this year's profit sharing transactions, aka Distributions - hardships - Military - ClassActionFund
         ProfitDetailTotals profitDetailTotals =
-            await ProfitDetailTotals.GetProfitDetailTotals(_dbContextFactory, profitShareUpdateRequest.ProfitYear, empl.Ssn, cancellationToken);
+            await ProfitDetailTotals.GetProfitDetailTotals(_dbContextFactory, (short)(profitShareUpdateRequest.ProfitYear -1), empl.Ssn, cancellationToken);
 
         // MemberTotals holds newly computed values, not old values
         MemberTotals memberTotals = new();

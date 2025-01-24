@@ -3,7 +3,6 @@
 public record ProfitShareUpdateMemberResponse
 {
     public bool IsEmployee { get; init; }
-    public int Ssn { get; set; }
     public long Badge { get; set; }
     public long Psn { get; set; }
     public string? Name { get; set; }

@@ -1,0 +1,188 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --dsm-grey: #231f20;
+  --dsm-secondary: #0258a5;
+  --dsm-app-banner: #f2f2f2;
+}
+
+@layer utilities {
+  html {
+    color: var(--dsm-grey);
+    scrollbar-gutter: stable;
+  }
+
+  h1,
+  .h1 {
+    color: var(--dsm-secondary);
+    font-family: "Lato";
+    font-size: 2.5rem;
+    font-style: normal;
+    font-weight: 300;
+    line-height: normal;
+    letter-spacing: 0.25rem;
+    margin: 0;
+  }
+
+  h2,
+  .h2 {
+    color: var(--dsm-secondary);
+    font-family: "Lato";
+    font-size: 1.5rem;
+    font-style: normal;
+    font-weight: 400;
+  }
+
+  body,
+  .body1 {
+    font-family: "Lato";
+    font-size: 1rem;
+    font-weight: 400;
+    letter-spacing: 0.00938rem;
+    font-style: normal;
+  }
+
+  .body2 {
+    font-family: "Lato";
+    font-size: 0.875rem;
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 0.01063rem;
+  }
+
+  figcaption,
+  .caption {
+    font-family: "Lato";
+    font-size: 0.75rem;
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0.025rem;
+  }
+
+  .overline {
+    font-family: "Lato";
+    font-size: 0.75rem;
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 0.0625rem;
+    text-transform: uppercase;
+  }
+
+  .app-header {
+    font-family: "Lato";
+    font-size: 2rem;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+    letter-spacing: 0.4rem;
+    text-transform: uppercase;
+  }
+
+  .btn-large {
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+    font-size: 0.9375rem;
+    font-style: normal;
+    font-weight: 500;
+    letter-spacing: 0.02875rem;
+    text-transform: uppercase;
+  }
+
+  .btn-medium {
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+    font-size: 0.875rem;
+    font-style: normal;
+    font-weight: 500;
+    letter-spacing: 0.025rem;
+    text-transform: uppercase;
+  }
+
+  .btn-small {
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+    font-size: 0.8125rem;
+    font-style: normal;
+    font-weight: 500;
+    letter-spacing: 0.02875rem;
+    text-transform: uppercase;
+  }
+
+  label,
+  .input-label {
+    font-family: Lato;
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 0.00938rem;
+  }
+
+  .input-value {
+    font-family: "Lato";
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 0.00938rem;
+  }
+
+  helper-text,
+  .helper-text {
+    font-family: "Lato";
+    font-size: 0.75rem;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: 0.025rem;
+  }
+
+  .dsm-box-shadow {
+    position: relative;
+    box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2),
+      0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+  }
+}
+
+@font-face {
+  font-family: "Lato";
+  src: url("../fonts/Lato-Black.ttf");
+  font-weight: 900;
+}
+@font-face {
+  font-family: "Lato";
+  src: url("../fonts/Lato-Bold.ttf");
+  font-weight: 700;
+}
+@font-face {
+  font-family: "Lato";
+  src: url("../fonts/Lato-Regular.ttf");
+  font-weight: 400;
+}
+@font-face {
+  font-family: "Lato";
+  src: url("../fonts/Lato-Light.ttf");
+  font-weight: 300;
+}
+
+body {
+  font-family: "Lato", sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0.00938rem;
+  font-style: normal;
+  margin: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}

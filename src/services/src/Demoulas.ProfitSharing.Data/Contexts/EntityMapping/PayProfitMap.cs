@@ -32,6 +32,11 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
             .HasColumnName("CURRENT_INCOME_YEAR")
             .IsRequired();
 
+        _ = builder.Property(e => e.Etva)
+            .HasPrecision(9, 2)
+            .HasColumnName("ETVA")
+            .IsRequired();
+
         _ = builder.Property(e => e.EarningsEtvaValue)
             .HasPrecision(9, 2)
             .HasColumnName("EARNINGS_ETVA_VALUE")

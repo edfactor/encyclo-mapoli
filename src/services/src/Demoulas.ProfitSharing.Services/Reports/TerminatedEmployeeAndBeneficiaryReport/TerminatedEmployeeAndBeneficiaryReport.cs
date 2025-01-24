@@ -4,7 +4,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Services.ServiceDto;
+using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 
@@ -127,7 +127,9 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                     : string.Empty,
                 LastName = x.Beneficiary.Contact.ContactInfo.LastName,
                 YearsInPs = 10, // Makes function IsInteresting() always return true for beneficiaries.  This is the same value/convention used in READY.
-                BeneficiaryAllocation = x.Beneficiary.Amount
+                BeneficiaryAllocation = x.Beneficiary.Amount,
+                TerminationCode = (x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn) ? x.Demographic.TerminationCodeId : null,
+                TerminationDate = (x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn) ? x.Demographic.TerminationDate : null
             });
 
         return query;
@@ -177,7 +179,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
             // Transactions 3: the current (requested) year
             var today = DateOnly.FromDateTime(DateTime.Today);
-            var thisYearBalances = await _totalService.TotalVestingBalance(ctx, req.ProfitYear, today).Where(k => k.Ssn == memberSlice.Ssn)
+            var thisYearBalances = await _totalService.TotalVestingBalance(ctx, req.ProfitYear, req.ProfitYear, today).Where(k => k.Ssn == memberSlice.Ssn)
                 .FirstOrDefaultAsync(cancellationToken);
 
             var member = new Member
@@ -194,7 +196,6 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 TerminationDate = memberSlice.TerminationDate,
                 TerminationCode = memberSlice.TerminationCode,
                 BeginningAmount = lastYearBalances?.Total ?? 0m,
-                CurrentVestedAmount = 77m,
                 YearsInPlan = memberSlice.YearsInPs,
                 ZeroCont = memberSlice.ZeroCont,
                 EnrollmentId = memberSlice.EnrollmentId,
@@ -225,7 +226,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             }
 
             var vestedPercent = (thisYearBalances?.VestingPercent ?? 0) * 100;
-            if (member.EndingBalance == 0 && vestedBalance == 0)
+            if (member.EndingBalance == 0 && vestedBalance == 0 )
             {
                 vestedPercent = 0;
             }
