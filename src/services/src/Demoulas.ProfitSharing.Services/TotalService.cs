@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using System.Runtime.CompilerServices;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -28,7 +29,7 @@ public sealed class TotalService : ITotalService
         _profitSharingDataContextFactory = profitSharingDataContextFactory;
         _calendarService = calendarService;
     }
-    
+
     /// <summary>
     /// Retrieves a queryable set of total balance data for participants based on the specified profit year.
     /// </summary>

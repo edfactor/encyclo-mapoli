@@ -55,7 +55,16 @@ internal sealed class ProfitDetailFaker : Faker<ProfitDetail>
             .RuleFor(pd => pd.FederalTaxes, fake => fake.Finance.Amount(0, 10_000))
             .RuleFor(pd => pd.StateTaxes, fake => fake.Finance.Amount(0, 1000))
             .RuleFor(pd => pd.TaxCode, fake => taxCodeFaker.Generate())
-            .RuleFor(pd => pd.TaxCodeId, fake => taxCodeFaker.Generate().Id);
+            .RuleFor(pd => pd.TaxCodeId, fake => taxCodeFaker.Generate().Id)
+            .RuleFor(pd => pd.CommentTypeId, fake => fake.PickRandom<byte>(CommentType.Constants.ClassAction.Id,
+                CommentType.Constants.Dirpay.Id,
+                CommentType.Constants.Distribution.Id,
+                CommentType.Constants.Forfeit.Id,
+                CommentType.Constants.Hardship.Id,
+                CommentType.Constants.Military.Id,
+                CommentType.Constants.OneHundredPercentEarnings.Id,
+                CommentType.Constants.Over64OneYearVested.Id))
+            .UseSeed(100);
 
     }
 }
