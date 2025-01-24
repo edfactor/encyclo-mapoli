@@ -13,13 +13,12 @@ export const GetMissingCommaInPyNameColumns = (): ColDef[] => {
       },
       {
         headerName: "SSN",
-        field: "employeeSsn",
-        colId: "employeeSsn",
+        field: "ssn",
+        colId: "ssn",
         minWidth: 100,
         headerClass: "left-align",
         cellClass: "left-align",
-        resizable: true,
-        valueFormatter: (params) => params.value ? `***-**-${params.value.slice(-4)}` : ""
+        resizable: true
       },
       {
         headerName: "Name",

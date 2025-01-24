@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Common.Contracts.Response;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 public sealed record EmployeeDetails
 {
     public string FirstName { get; init; } = string.Empty;
@@ -9,7 +9,7 @@ public sealed record EmployeeDetails
     public string AddressState { get; init; } = string.Empty;
     public string AddressZipCode { get; init; } = string.Empty;
     public DateOnly DateOfBirth { get; init; }
-    public int Ssn { get; init; }
+    public string Ssn { get; init; } = string.Empty;
     public decimal YearToDateProfitSharingHours { get; init; }
     public int YearsInPlan { get; init; }
     public decimal PercentageVested { get; init; }

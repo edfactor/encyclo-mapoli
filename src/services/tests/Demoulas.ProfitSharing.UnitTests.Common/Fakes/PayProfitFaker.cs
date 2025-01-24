@@ -58,6 +58,7 @@ internal sealed class PayProfitFaker : Faker<PayProfit>
                 ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested,
                 ZeroContributionReason.Constants.TerminatedEmployeeOver1000HoursWorkedGetsYearVested,
                 ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay,
-                ZeroContributionReason.Constants.Under21WithOver1Khours));
+                ZeroContributionReason.Constants.Under21WithOver1Khours))
+            .UseSeed(100);
     }
 }

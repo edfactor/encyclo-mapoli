@@ -18,13 +18,12 @@ export const GetNegativeEtvaForSSNsOnPayProfitColumns = (viewBadge: Function): C
     },
     {
       headerName: "SSN",
-      field: "employeeSsn",
-      colId: "employeeSsn",
+      field: "ssn",
+      colId: "ssn",
       minWidth: 120,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true,
-      valueFormatter: (params) => params.value ? `***-**-${params.value.toString().slice(-4)}` : ""
+      resizable: true
     },
     {
       headerName: "ETVA",

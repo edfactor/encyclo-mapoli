@@ -43,29 +43,29 @@ public class DemographicBadgesNotInPayProfitEndpoint : EndpointWithCsvBase<Pagin
                             {
                                 new DemographicBadgesNotInPayProfitResponse()
                                 {
-                                    EmployeeBadge = 47425,
-                                    EmployeeSsn = 900047425,
+                                    BadgeNumber = 47425,
+                                    Ssn = "XXX-XX-7425",
                                     EmployeeName = "John",
                                     Status = EmploymentStatus.Constants.Active
                                 },
                                 new DemographicBadgesNotInPayProfitResponse
                                 {
-                                    EmployeeBadge = 82424,
-                                    EmployeeSsn = 900082424,
+                                    BadgeNumber = 82424,
+                                    Ssn = "XXX-XX-2424",
                                     EmployeeName = "Jane",
                                     Status = EmploymentStatus.Constants.Delete
                                 },
                                 new DemographicBadgesNotInPayProfitResponse
                                 {
-                                    EmployeeBadge = 85744,
-                                    EmployeeSsn = 900085744,
+                                    BadgeNumber = 85744,
+                                    Ssn = "XXX-XX-5744",
                                     EmployeeName = "Tim",
                                     Status = EmploymentStatus.Constants.Inactive
                                 },
                                 new DemographicBadgesNotInPayProfitResponse
                                 {
-                                    EmployeeBadge = 94861,
-                                    EmployeeSsn = 900094861,
+                                    BadgeNumber = 94861,
+                                    Ssn = "XXX-XX-4861",
                                     EmployeeName = "Sally",
                                     Status = EmploymentStatus.Constants.Terminated,
                                     Store = 4
@@ -94,8 +94,8 @@ public class DemographicBadgesNotInPayProfitEndpoint : EndpointWithCsvBase<Pagin
         {
             Map().Index(0).Convert(_ => string.Empty);
             Map().Index(1).Convert(_ => string.Empty);
-            Map(m => m.EmployeeBadge).Index(2).Name("BADGE");
-            Map(m => m.EmployeeSsn).Index(3).Name("DEM SSN");
+            Map(m => m.BadgeNumber).Index(2).Name("BADGE");
+            Map(m => m.Ssn).Index(3).Name("DEM SSN");
             Map(m => m.EmployeeName).Index(4).Name("Name");
             Map(m => m.Store).Index(5).Name("Store");
             Map(m => m.Status).Index(6).Name("StatusEnum");

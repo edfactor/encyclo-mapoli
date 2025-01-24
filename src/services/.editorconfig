@@ -214,6 +214,8 @@ dotnet_diagnostic.IDE0058.severity = suggestion
 dotnet_diagnostic.RCS1225.severity = warning
 dotnet_diagnostic.IDE0060.severity = none
 dotnet_diagnostic.IDE0290.severity = none
+csharp_prefer_system_threading_lock = true:suggestion
+dotnet_diagnostic.xUnit2002.severity = error
 
 # Visual Basic files
 [*.vb]

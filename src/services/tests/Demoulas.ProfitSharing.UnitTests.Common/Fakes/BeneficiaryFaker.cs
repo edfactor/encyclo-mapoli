@@ -21,9 +21,9 @@ internal sealed class BeneficiaryFaker : Faker<Beneficiary>
 
         Demographic currentDemographic = demographicQueue.Peek();
 
-        RuleFor(pc => pc.DemographicId, (f, o) => (currentDemographic.Id));
-        RuleFor(pc => pc.BadgeNumber, (f, o) => (currentDemographic.BadgeNumber));
-        RuleFor(d => d.Demographic, (f, o) =>
+        RuleFor(pc => pc.DemographicId, (f, o) => (currentDemographic.Id))
+            .RuleFor(pc => pc.BadgeNumber, (f, o) => (currentDemographic.BadgeNumber))
+            .RuleFor(d => d.Demographic, (f, o) =>
         {
             if (demographicQueue.Any()) // demographic record that contains the both of them
             {
@@ -37,32 +37,33 @@ internal sealed class BeneficiaryFaker : Faker<Beneficiary>
             }
 
             return currentDemographic;
-        });
+        })
 
-        RuleFor(d => d.Id, f => _iDCounter++);
-        RuleFor(b => b.PsnSuffix, f => f.Random.Short(1_000, 9_999));
-        RuleFor(pc => pc.Distribution, f => f.Finance.Amount(min: 100, max: 20_000, decimals: 2));
-        RuleFor(pc => pc.Amount, f => f.Finance.Amount(min: 100, max: 20_000, decimals: 2));
-        RuleFor(pc => pc.Earnings, f => f.Finance.Amount(min: 100, max: 20_000, decimals: 2));
-        RuleFor(pc => pc.SecondaryEarnings, f => f.Finance.Amount(min: 100, max: 2_000, decimals: 2));
-        RuleFor(b => b.Kind,
+        .RuleFor(d => d.Id, f => _iDCounter++)
+            .RuleFor(b => b.PsnSuffix, f => f.Random.Short(1_000, 9_999))
+            .RuleFor(pc => pc.Distribution, f => f.Finance.Amount(min: 100, max: 20_000, decimals: 2))
+            .RuleFor(pc => pc.Amount, f => f.Finance.Amount(min: 100, max: 20_000, decimals: 2))
+            .RuleFor(pc => pc.Earnings, f => f.Finance.Amount(min: 100, max: 20_000, decimals: 2))
+            .RuleFor(pc => pc.SecondaryEarnings, f => f.Finance.Amount(min: 100, max: 2_000, decimals: 2))
+            .RuleFor(b => b.Kind,
             f => f.PickRandom(new List<BeneficiaryKind>
             {
                 new BeneficiaryKind { Id = BeneficiaryKind.Constants.Primary, Name = "Primary", },
                 new BeneficiaryKind { Id = BeneficiaryKind.Constants.Secondary, Name = "Secondary", }
-            }));
+            }))
 
-        RuleFor(b => b.Contact, f =>
+            .RuleFor(b => b.Contact, f =>
         {
             var contact = contactFaker.Generate();
             return contact;
-        });
+        })
 
         // Move the setting of BeneficiaryContactId to its own RuleFor block
-        RuleFor(b => b.BeneficiaryContactId, f =>
+        .RuleFor(b => b.BeneficiaryContactId, f =>
         {
             var contact = contactFaker.Generate();
             return contact.Id;
-        });
+        })
+        .UseSeed(100);
     }
 }

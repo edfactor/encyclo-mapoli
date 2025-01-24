@@ -5,7 +5,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Services.ServiceDto;
+using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -59,7 +59,7 @@ public class FrozenReportService : IFrozenReportService
                     {
                         BadgeNumber = d.BadgeNumber,
                         EmployeeName = d.ContactInfo.FullName,
-                        EmployeeSsn = d.Ssn.ToString(),
+                        Ssn = d.Ssn.ToString(),
                         Forfeitures = 0,
                         ForfeitPoints = 0,
                         EarningPoints = 0
@@ -67,7 +67,7 @@ public class FrozenReportService : IFrozenReportService
 
                 var query = await recs.ToListAsync(cancellationToken);
 
-                var badges = query.Select(x => (int)x.BadgeNumber).ToHashSet();
+                var badges = query.Select(x => x.BadgeNumber).ToHashSet();
                 var totals = await _contributionService.GetNetBalance((req.ProfitYear), badges, cancellationToken);
                 var forfeitures = ctx.ProfitDetails
                     .Join(ctx.Demographics, x => x.Ssn, x => x.Ssn, (pd, d) => new { pd, d })
@@ -106,15 +106,15 @@ public class FrozenReportService : IFrozenReportService
                         select new { BadgeNumber = d.BadgeNumber, pp.CurrentIncomeYear }
                     ).ToListAsync(cancellationToken);
 
-                foreach (var rec in query.Where(rec => totals.ContainsKey((int)rec.BadgeNumber)))
+                foreach (var rec in query.Where(rec => totals.ContainsKey(rec.BadgeNumber)))
                 {
                     var cy = currentYear.Find(x => x.BadgeNumber == rec.BadgeNumber);
                     if (cy != default)
                     {
-                        decimal points = (totals[(int)rec.BadgeNumber].TotalContributions +
-                                          totals[(int)rec.BadgeNumber].TotalEarnings +
-                                          totals[(int)rec.BadgeNumber].TotalForfeitures -
-                                          totals[(int)rec.BadgeNumber].TotalPayments) -
+                        decimal points = (totals[rec.BadgeNumber].TotalContributions +
+                                          totals[rec.BadgeNumber].TotalEarnings +
+                                          totals[rec.BadgeNumber].TotalForfeitures -
+                                          totals[rec.BadgeNumber].TotalPayments) -
                                          (cy.loan1Total - cy.loan2Total - cy.forfeitTotal);
 
                         rec.EarningPoints = Convert.ToInt16(Math.Round(points / 100, 0, MidpointRounding.AwayFromZero));

@@ -16,6 +16,7 @@ internal sealed class ProfitCodeFaker : Faker<ProfitCode>
                 ProfitCode.Constants.Incoming100PercentVestedEarnings.Id,
                 ProfitCode.Constants.Outgoing100PercentVestedPayment.Id))
             .RuleFor(pc => pc.Name, f => f.Name.JobTitle())
-            .RuleFor(pc => pc.Frequency, f => f.Lorem.Word());
+            .RuleFor(pc => pc.Frequency, f => f.Lorem.Word())
+            .UseSeed(100);
     }
 }

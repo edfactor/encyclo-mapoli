@@ -19,7 +19,7 @@ export interface DemographicBadgesNotInPayprofitResponse {
 
 export interface DemographicBadgesNotInPayprofit {
   employeeBadge: number;
-  employeeSsn: number;
+  ssn: number;
   empoyeeName: string;
   store: number;
   status: string;
@@ -46,7 +46,7 @@ export interface DistributionsAndForfeituresRequestDto
 export interface DistributionsAndForfeitures {
   badgeNumber: number;
   employeeName: string;
-  employeeSsn: string;
+  ssn: string;
   loanDate: string;
   distributionAmount: number;
   stateTax: number;
@@ -94,7 +94,7 @@ export interface MissingCommasInPYNameRequestDto {
 
 export interface MissingCommasInPYName {
   exployeeBadge: number;
-  employeeSsn: number;
+  ssn: number;
   employeeName: string;
 }
 
@@ -135,7 +135,7 @@ export interface DuplicateNameAndBirthday {
 
 export interface NegativeEtvaForSSNsOnPayProfit {
   employeeBadge: number;
-  employeeSsn: number;
+  ssn: number;
   etvaValue: number;
 }
 

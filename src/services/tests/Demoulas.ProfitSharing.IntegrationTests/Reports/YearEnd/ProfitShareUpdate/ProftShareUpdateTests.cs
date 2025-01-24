@@ -1,13 +1,10 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
 using System.Text;
-using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services;
-using Demoulas.ProfitSharing.Services.ProfitShareUpdate;
-using Demoulas.ProfitSharing.Services.ServiceDto;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 

@@ -61,7 +61,7 @@ public class ForfeituresAndPointsForYearEndpoint:EndpointWithCsvBase<FrozenProfi
         {
             Map(m => m.BadgeNumber).Index(0).Name("EMPLOYEE_BADGE");
             Map(m => m.EmployeeName).Index(1).Name("EMPLOYEE_NAME");
-            Map(m => m.EmployeeSsn).Index(2).Name("EMPLOYEE_SSN");
+            Map(m => m.Ssn).Index(2).Name("EMPLOYEE_SSN");
             Map(m => m.Forfeitures).Index(3).Name("FORFEITURES");
             Map(m => m.ForfeitPoints).Index(4).Name("FORFEIT_POINTS");
             Map(m => m.EarningPoints).Index(5).Name("EARNING_POINTS");

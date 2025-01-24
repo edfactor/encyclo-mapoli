@@ -3,7 +3,7 @@
 public sealed record MasterInquiryResponseDto
 {
     public int Id { get; set; }
-    public long Ssn { get; set; }
+    public string Ssn { get; set; } = string.Empty;
     public short ProfitYear { get; set; }
     public byte ProfitYearIteration { get; set; }
     public int DistributionSequence { get; set; }
@@ -29,7 +29,7 @@ public sealed record MasterInquiryResponseDto
     {
         return new MasterInquiryResponseDto
         {
-            Ssn = 12345
+            Ssn = "XXX-XX-2345"
         };
     }
 }
