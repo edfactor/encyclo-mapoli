@@ -12,6 +12,10 @@
     <PackageReference Include="Demoulas.Util" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Demoulas.ProfitSharing.Analyzers\Demoulas.ProfitSharing.Analyzers.csproj" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Update="AsyncAwaitBestPractices">
