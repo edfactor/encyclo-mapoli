@@ -13,7 +13,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Demoulas.ProfitSharing.Analyzers\Demoulas.ProfitSharing.Analyzers.csproj" />
+    <ProjectReference Include="..\Demoulas.ProfitSharing.Analyzers\Demoulas.ProfitSharing.Analyzers.csproj" >
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <OutputItemType>Analyzer</OutputItemType>
+    </ProjectReference>
   </ItemGroup>
 
 
