@@ -3,7 +3,7 @@ public sealed record DistributionsAndForfeitureResponse
 {
     public required long BadgeNumber { get; set; }
     public required string EmployeeName { get; set; }
-    public required string EmployeeSsn { get; set; }
+    public required string Ssn { get; set; }
     public DateOnly? LoanDate { get; set; }
     public required decimal DistributionAmount { get; set; }
     public required decimal StateTax { get; set; }
@@ -20,7 +20,7 @@ public sealed record DistributionsAndForfeitureResponse
         return new DistributionsAndForfeitureResponse() {
             BadgeNumber = 123,
             EmployeeName = "Doe, John",
-            EmployeeSsn = "124",
+            Ssn = "124",
             DistributionAmount = 1250.25m,
             StateTax = 25.12m,
             FederalTax = 51.52m,

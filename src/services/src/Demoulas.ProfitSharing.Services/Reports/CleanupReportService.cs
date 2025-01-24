@@ -113,11 +113,11 @@ public class CleanupReportService : ICleanupReportService
                                 && p.EarningsEtvaValue < 0)
                     .Select(p => new NegativeEtvaForSsNsOnPayProfitResponse
                     {
-                        EmployeeBadge = p.Demographic!.BadgeNumber,
-                        EmployeeSsn = p.Demographic.Ssn,
+                        BadgeNumber = p.Demographic!.BadgeNumber,
+                        Ssn = p.Demographic.Ssn.MaskSsn(),
                         EtvaValue = p.EarningsEtvaValue
                     })
-                    .OrderBy(p => p.EmployeeBadge)
+                    .OrderBy(p => p.BadgeNumber)
                     .ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken);
             });
 
@@ -143,8 +143,8 @@ public class CleanupReportService : ICleanupReportService
                             where !(from pp in ctx.PayProfits select pp.DemographicId).Contains(dem.Id)
                             select new DemographicBadgesNotInPayProfitResponse
                             {
-                                EmployeeBadge = dem.BadgeNumber,
-                                EmployeeSsn = dem.Ssn,
+                                BadgeNumber = dem.BadgeNumber,
+                                Ssn = dem.Ssn.MaskSsn(),
                                 EmployeeName = dem.ContactInfo.FullName ?? "",
                                 Status = dem.EmploymentStatusId,
                                 Store = dem.StoreNumber,
@@ -174,7 +174,7 @@ public class CleanupReportService : ICleanupReportService
 #pragma warning disable CA1847
                             where dem.ContactInfo.FullName == null || !dem.ContactInfo.FullName.Contains(",")
 #pragma warning restore CA1847
-                            select new NamesMissingCommaResponse { EmployeeBadge = dem.BadgeNumber, EmployeeSsn = dem.Ssn, EmployeeName = dem.ContactInfo.FullName ?? "", };
+                            select new NamesMissingCommaResponse { BadgeNumber = dem.BadgeNumber, Ssn = dem.Ssn.MaskSsn(), EmployeeName = dem.ContactInfo.FullName ?? "", };
                 return await query.ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken: cancellationToken);
             });
 
@@ -347,7 +347,7 @@ public class CleanupReportService : ICleanupReportService
                             select new DistributionsAndForfeitureResponse()
                             {
                                 BadgeNumber = nameAndDob.BadgeNumber,
-                                EmployeeSsn = pd.Ssn.MaskSsn(),
+                                Ssn = pd.Ssn.MaskSsn(),
                                 EmployeeName = $"{nameAndDob.LastName}, {nameAndDob.FirstName}",
                                 DistributionAmount = distributionProfitCodes.Contains(pd.ProfitCodeId) ? pd.Forfeiture : 0,
                                 TaxCode = pd.TaxCodeId,
@@ -527,7 +527,7 @@ public class CleanupReportService : ICleanupReportService
                           EmployeeTypeCode = x.pp.EmploymentTypeId,
                           DateOfBirth = x.pp.DateOfBirth,
                           Age = 0, //Filled out below after materialization
-                          EmployeeSsn = x.pp.Ssn.MaskSsn(),
+                          Ssn = x.pp.Ssn.MaskSsn(),
                           Wages = x.pp.CurrentIncomeYear + x.pp.IncomeExecutive,
                           Hours = x.pp.CurrentHoursYear + x.pp.HoursExecutive,
                           Points = Convert.ToInt16(x.pp.PointsEarned),

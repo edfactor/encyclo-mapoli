@@ -1,13 +1,13 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 public sealed record YearEndProfitSharingReportResponse
 {
-    public required long BadgeNumber { get; set; }
+    public required int BadgeNumber { get; set; }
     public required string EmployeeName { get; set; }
     public required short StoreNumber { get; set; }
     public required char EmployeeTypeCode { get; set; }
     public required DateOnly DateOfBirth { get; set; }
     public required byte Age { get; set; }
-    public required string EmployeeSsn { get; set; }
+    public required string Ssn { get; set; }
     public required decimal Wages { get; set; }
     public required decimal Hours { get; set; }
     public short? Points { get; set; }
@@ -27,7 +27,7 @@ public sealed record YearEndProfitSharingReportResponse
             EmployeeTypeCode = 'a',
             DateOfBirth = new DateOnly(1996, 9, 21),
             Age = 28,
-            EmployeeSsn = "XXX-XX-1234",
+            Ssn = "XXX-XX-1234",
             Wages = 26527,
             Hours = 1475,
             Points = 2653,

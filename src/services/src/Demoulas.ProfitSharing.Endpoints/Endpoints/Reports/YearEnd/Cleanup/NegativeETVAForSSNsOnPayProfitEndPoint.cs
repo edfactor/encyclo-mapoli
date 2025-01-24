@@ -39,7 +39,7 @@ public class NegativeEtvaForSsNsOnPayProfitEndPoint : EndpointWithCsvBase<Profit
                         {
                             Results = new List<NegativeEtvaForSsNsOnPayProfitResponse>
                             {
-                                new NegativeEtvaForSsNsOnPayProfitResponse { EmployeeBadge = 47425, EmployeeSsn = 900047425, EtvaValue = -1293.43m }
+                                new NegativeEtvaForSsNsOnPayProfitResponse { BadgeNumber = 47425, Ssn = "XXX-XX-7425", EtvaValue = -1293.43m }
                             }
                         }
                     }
@@ -64,8 +64,8 @@ public class NegativeEtvaForSsNsOnPayProfitEndPoint : EndpointWithCsvBase<Profit
         {
             Map().Index(0).Convert(_ => string.Empty);
             Map().Index(1).Convert(_ => string.Empty);
-            Map(m => m.EmployeeBadge).Index(2).Name("BADGE");
-            Map(m => m.EmployeeSsn).Index(3).Name("SSN");
+            Map(m => m.BadgeNumber).Index(2).Name("BADGE");
+            Map(m => m.Ssn).Index(3).Name("SSN");
             Map(m => m.EtvaValue).Index(4).Name("ETVA");
         }
     }
