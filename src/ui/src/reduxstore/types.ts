@@ -475,3 +475,45 @@ export interface TerminationResponse {
   response: Paged<TerminationDetail[]>;
 }
 
+export interface ProfitShareUpdateRequest {
+  profitYear: number;
+  contributionPercent: number;
+  earningsPercent: number;
+  incomingForfeiturePercent: number;
+  maxAllowedContributions: number;
+
+  adjustmentBadge: number;
+  adjustmentContributionAmount: number;
+  adjustmentEarningsAmount: number;
+  adjustmentIncomingForfeitureAmount: number;
+
+  adjustmentSecondaryBadge: number;
+  adjustmentSecondaryEarningsAmount: number;
+}
+
+export interface ProfitShareUpdateDetail {
+  badgePSn: string;
+  name: string;
+  beginningBalance: number;
+  beneficiaryAllocation: number;
+  distributionAmount: number;
+  forfeit: number;
+  endingBalance: number;
+  vestedBalance: number;
+  dateTerm: string;
+  ytdPsHours: number;
+  vestedPercent: number;
+  age: number;
+  enrollmentCode: number;
+}
+
+export interface ProfitShareUpdateResponse {
+  isLoading: boolean;
+  totalVested: number;
+  totalForfeit: number;
+  totalEndingBalance: number;
+  totalBeneficiaryAllocation: number;
+  reportName: string;
+  reportDate: string;
+  response: Paged<ProfitShareUpdateDetail[]>;
+}

@@ -34,6 +34,7 @@ import DecemberProcessLocalApi from "pages/DecemberProcess/DecemberProcessLOCALA
 import Termination from "pages/Termination/Termination";
 import MilitaryAndRehireEntryAndModification from "pages/MilitaryAndRehireEntryAndModification/MilitaryAndRehireEntryAndModification";
 import ProfitShareReport from "pages/ProfitShareReport/ProfitShareReport";
+import ProfitShareUpdate from "../../pages/ProfitShareUpdate/ProfitShareUpdate";
 
 const Router = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -171,9 +172,12 @@ const Router = () => {
           <Route
           path="military-and-rehire-entry"
           element={<MilitaryAndRehireEntryAndModification />}></Route>
-          <Route
-          path="profit-share-report"
-          element={<ProfitShareReport />}></Route>
+        <Route
+            path="profit-share-report"
+            element={<ProfitShareReport />}></Route>
+        <Route
+            path="profit-share-update"
+            element={<ProfitShareUpdate />}></Route>
       </RouteSecurity>
     </BrowserRouter>
   );

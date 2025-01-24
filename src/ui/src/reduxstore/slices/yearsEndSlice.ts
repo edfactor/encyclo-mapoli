@@ -22,7 +22,7 @@ import {
   EmployeeDetails,
   MasterInquiryResponseType,
   VestedAmountsByAge,
-  TerminationResponse
+  TerminationResponse, ProfitShareUpdateResponse
 } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
 
@@ -58,6 +58,7 @@ export interface YearsEndState {
   vestedAmountsByAge: VestedAmountsByAge | null;
   terminattion: TerminationResponse | null;
   militaryAndRehireEntryAndModification: EmployeeDetails | null;
+  profitSharingUpdate: ProfitShareUpdateResponse | null;
 }
 
 const initialState: YearsEndState = {
@@ -91,7 +92,8 @@ const initialState: YearsEndState = {
   balanceByYearsPartTime: null,
   vestedAmountsByAge: null,
   terminattion: null,
-  militaryAndRehireEntryAndModification: null
+  profitSharingUpdate: null,
+  militaryAndRehireEntryAndModification: null,
 };
 
 export const yearsEndSlice = createSlice({
@@ -228,6 +230,13 @@ export const yearsEndSlice = createSlice({
     setTermination: (state, action: PayloadAction<TerminationResponse>) => {
       state.terminattion = action.payload;
     },
+    setProfitUpdate: (state, action: PayloadAction<ProfitShareUpdateResponse>) => {
+      state.profitSharingUpdate = action.payload;
+    },
+    clearProfitUpdate: (state) => {
+      // @ts-ignore
+      state.profitSharingUpdate = { isLoading: true };
+    },
     setMilitaryAndRehireEntryAndModificationEmployeeDetails: (state, action: PayloadAction<EmployeeDetails>) => {
       state.militaryAndRehireEntryAndModification = action.payload;
     },
@@ -254,6 +263,8 @@ export const {
   setBalanceByAge,
   setBalanceByYears,
   setVestingAmountByAge,
-  setTermination
+  setTermination,
+  setProfitUpdate,
+  clearProfitUpdate
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

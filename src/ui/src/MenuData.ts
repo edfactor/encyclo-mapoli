@@ -33,7 +33,8 @@ const decemberFlow: RouteCategory = {
     { caption: "Military and Rehire", route: "/military-and-rehire" },
     { caption: "Military and Rehire Forfeitures", route: "/military-and-rehire-forfeitures" },
     { caption: "Military and Rehire Profit Summary", route: "/military-and-rehire-profit-summary" },
-    { caption: "Profit Share Report", route: "/profit-share-report" }
+    { caption: "Profit Share Report", route: "/profit-share-report" },
+    { caption: "Profit Share Update", route: "/profit-share-update" }
   ]
 };
 
