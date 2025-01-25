@@ -2,8 +2,19 @@ param (
     [string]$url
 )
 
-# Combine the base URL with the endpoint
-$fullUrl = "$url:8443/health"
+if (-not $url) {
+    Write-Host "Error: URL parameter is missing."
+    exit 1
+}
+
+# Ensure the base URL ends without a trailing slash
+if ($url.EndsWith("/")) {
+    $url = $url.TrimEnd("/")
+}
+
+# Combine the base URL with the port and endpoint
+$fullUrl = "$($url):8443/health"
+Write-Host "Base url: $url"
 Write-Host "Checking health at: $fullUrl"
 
 # Send a request to the /health endpoint
