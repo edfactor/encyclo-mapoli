@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Common;
+﻿using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services;
 public sealed class YearEndService: IYearEndService

@@ -36,7 +36,7 @@ public class NamesMissingCommasEndpoint : EndpointWithCsvBase<PaginationRequestD
                         {
                             Results = new List<NamesMissingCommaResponse>
                             {
-                                new NamesMissingCommaResponse() {EmployeeName="Jane Doe", EmployeeBadge=10010, EmployeeSsn = 999999999}
+                                new NamesMissingCommaResponse() {EmployeeName="Jane Doe", BadgeNumber=10010, Ssn = "XXXX-XX-1999"}
                             }
                         }
                     }
@@ -62,8 +62,8 @@ public class NamesMissingCommasEndpoint : EndpointWithCsvBase<PaginationRequestD
         {
             Map().Index(0).Convert(_ => string.Empty);
             Map().Index(1).Convert(_ => string.Empty);
-            Map(m => m.EmployeeBadge).Index(2).Name("BADGE");
-            Map(m => m.EmployeeSsn).Index(3).Name("DEM SSN");
+            Map(m => m.BadgeNumber).Index(2).Name("BADGE");
+            Map(m => m.Ssn).Index(3).Name("DEM SSN");
             Map(m => m.EmployeeName).Index(4).Name("Name");
         }
     }

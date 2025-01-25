@@ -1,9 +1,10 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Contracts.InternalDto;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 
 namespace Demoulas.ProfitSharing.Services.ProfitShareEdit;
 
@@ -16,11 +17,11 @@ namespace Demoulas.ProfitSharing.Services.ProfitShareEdit;
 /// <para>This service invokes the "ProfitShareUpdateService" to compute and return the transactions (PROFIT_DETAIL rows) based on user input.</para>
 /// <para>This class is named after the step in the Year End flow.    It could instead be named "View Transactions for Year End Update"</para>
 /// </summary>
-public class ProfitShareEditService : IProfitShareEditService
+public class ProfitShareEditService : IInternalProfitShareEditService
 {
-    private readonly IProfitShareUpdateService _profitShareUpdateService;
+    private readonly IInternalProfitShareUpdateService _profitShareUpdateService;
 
-    public ProfitShareEditService(IProfitShareUpdateService profitShareUpdateService)
+    public ProfitShareEditService(IInternalProfitShareUpdateService profitShareUpdateService)
     {
         _profitShareUpdateService = profitShareUpdateService;
     }

@@ -20,12 +20,12 @@ internal sealed class BeneficiaryContactFaker : Faker<BeneficiaryContact>
     {
         ContactInfoFaker contactInfoFaker = new ContactInfoFaker();
 
-        RuleFor(d => d.Id, f => _iDCounter++);
-        RuleFor(b => b.Ssn, f => f.Person.Ssn().ConvertSsnToInt());
-        RuleFor(b => b.DateOfBirth, f => f.Date.Past(50, DateTime.Now.AddYears(-18)).ToDateOnly());
-        RuleFor(b => b.CreatedDate, f => f.Date.RecentDateOnly());
+        RuleFor(d => d.Id, f => _iDCounter++)
+            .RuleFor(b => b.Ssn, f => f.Person.Ssn().ConvertSsnToInt())
+            .RuleFor(b => b.DateOfBirth, f => f.Date.Past(50, DateTime.Now.AddYears(-18)).ToDateOnly())
+            .RuleFor(b => b.CreatedDate, f => f.Date.RecentDateOnly())
 
-        RuleFor(b => b.Address,
+            .RuleFor(b => b.Address,
             f => new Address
             {
                 Street = f.Address.StreetAddress(),
@@ -34,7 +34,8 @@ internal sealed class BeneficiaryContactFaker : Faker<BeneficiaryContact>
                 State = f.Address.StateAbbr(),
                 PostalCode = f.Address.ZipCode(),
                 CountryIso = Country.Constants.Us
-            });
-        RuleFor(d => d.ContactInfo, f => contactInfoFaker.Generate());
+            })
+            .RuleFor(d => d.ContactInfo, f => contactInfoFaker.Generate())
+            .UseSeed(100);
     }
 }

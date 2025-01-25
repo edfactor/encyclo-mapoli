@@ -68,7 +68,7 @@ public class YearEndProfitSharingReportEndpoint: EndpointWithCsvBase<YearEndProf
             Map(m => m.EmployeeTypeCode).Index(3).Name("Employee Type");
             Map(m => m.DateOfBirth).Index(4).Name("Date of Birth");
             Map(m => m.Age).Index(5).Name("Age");
-            Map(m => m.EmployeeSsn).Index(6).Name("SSN");
+            Map(m => m.Ssn).Index(6).Name("SSN");
             Map(m => m.Wages).Index(7).Name("Wages");
             Map(m => m.Hours).Index(8).Name("Hours");
             Map(m => m.Points).Index(9).Name("Points");

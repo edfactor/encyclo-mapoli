@@ -1,6 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.InternalDto;
-using Demoulas.ProfitSharing.Common.Extensions;
-
+﻿
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
 /// <summary>

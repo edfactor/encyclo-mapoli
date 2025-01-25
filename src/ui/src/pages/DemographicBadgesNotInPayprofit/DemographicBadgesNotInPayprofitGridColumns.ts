@@ -14,13 +14,12 @@ export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
     },
     {
       headerName: "Demographic SSN",
-      field: "employeeSsn",
-      colId: "employeeSsn",
+      field: "ssn",
+      colId: "ssn",
       minWidth: 120,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true,
-      valueFormatter: (params) => params.value ? `***-**-${params.value.toString().slice(-4)}` : ""
+      resizable: true
     },
     {
       headerName: "Name",
