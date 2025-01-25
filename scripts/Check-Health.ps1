@@ -2,9 +2,13 @@ param (
     [string]$url
 )
 
+# Combine the base URL with the endpoint
+$fullUrl = "$url:8443/health"
+Write-Host "Checking health at: $fullUrl"
+
 # Send a request to the /health endpoint
 try {
-    $response = Invoke-WebRequest -Uri $url -Method GET -UseBasicParsing
+    $response = Invoke-WebRequest -Uri $fullUrl -Method GET -UseBasicParsing
     $content = $response.Content | ConvertFrom-Json
 
     if ($content.status -eq 'healthy') {
