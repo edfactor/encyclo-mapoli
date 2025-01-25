@@ -12,14 +12,15 @@ if ($url.EndsWith("/")) {
     $url = $url.TrimEnd("/")
 }
 
-# Combine the base URL with the port and endpoint
+# Properly construct the full URL
 $fullUrl = "$($url):8443/health"
 Write-Host "Base url: $url"
 Write-Host "Checking health at: $fullUrl"
 
-# Send a request to the /health endpoint
+# Send a request to the /health endpoint with certificate validation skipped
+# SkipCertificateCheck Requires Powershell 7 or higher
 try {
-    $response = Invoke-WebRequest -Uri $fullUrl -Method GET -UseBasicParsing
+    $response = Invoke-WebRequest -Uri $fullUrl -Method GET -SkipCertificateCheck -UseBasicParsing
     $content = $response.Content | ConvertFrom-Json
 
     if ($content.status -eq 'healthy') {
