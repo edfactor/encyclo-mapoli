@@ -21,7 +21,7 @@ internal sealed class EmployeeDeltaSyncService : OracleHcmHostedServiceBase
     {
         return ScheduleJob<EmployeeDeltaSyncJob>(
             "employeeDeltaSyncTrigger",
-            Debugger.IsAttached ? TimeSpan.Zero : TimeSpan.FromMinutes(2),
+            Debugger.IsAttached ? TimeSpan.Zero : TimeSpan.FromMinutes(3),
             TimeSpan.FromMinutes(OracleHcmConfig.DeltaIntervalInMinutes),
             cancellationToken
         );
