@@ -74,6 +74,6 @@ const decemberTest: RouteCategory = {
   parentRoute: "/december-process-accordion"
 };
 
-const MenuData: RouteCategory[] = [beneficiaries, distributions, reconciliation, decemberTest, yearEndReports, miscellaneous];
+const MenuData: RouteCategory[] = [distributions, reconciliation,  beneficiaries, miscellaneous, decemberTest, yearEndReports];
 
 export default MenuData;

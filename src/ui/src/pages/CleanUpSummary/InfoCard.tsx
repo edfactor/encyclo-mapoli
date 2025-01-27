@@ -21,11 +21,12 @@ export const InfoCard: FC<InfoCardProps> = ({
   button = (
     <Button
       size="medium"
+      color="secondary"
       variant="outlined"
       onClick={handleClick}
       disabled={buttonDisabled}
-      startIcon={<ViewListOutlined color={buttonDisabled ? "disabled" : "primary"} />}>
-      View
+      startIcon={<ViewListOutlined color={buttonDisabled ? "disabled" : "secondary"} />}>
+      Start
     </Button>
   ),
   data

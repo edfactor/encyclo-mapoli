@@ -65,9 +65,9 @@ const DecemberProcessAccordion = () => {
           <DSMCollapsedAccordion
             title="Clean Up Reports"
             expandable={false}
-            actionButtonText="VIEW DETAILS"
+            actionButtonText="START"
             status={{
-              label: "Completed",
+              label: "In Progress",
               color: "success"
             }}
             onActionClick={() =>
@@ -108,10 +108,10 @@ const DecemberProcessAccordion = () => {
             expandable={false}
             status={{
               label: "Not Started",
-              color: "default"
+              color: "secondary"
             }}
             onActionClick={() => navigate('/military-and-rehire-entry')}
-            actionButtonText="VIEW DETAILS"
+            actionButtonText="START"
           >
             <>
             </>
@@ -124,10 +124,10 @@ const DecemberProcessAccordion = () => {
             expandable={false}
             status={{
               label: "Not Started",
-              color: "default"
+              color: "secondary"
             }}
             onActionClick={() => navigate('/military-and-rehire')}
-            actionButtonText="VIEW DETAILS"
+            actionButtonText="START"
           >
             <></>
           </DSMCollapsedAccordion>
@@ -135,13 +135,13 @@ const DecemberProcessAccordion = () => {
 
         <Grid2 width="100%">
           <DSMCollapsedAccordion
-            title="Prof Termination"
+            title="Terminations"
             expandable={false}
             status={{
               label: "Not Started",
-              color: "default"
+              color: "secondary"
             }}
-            actionButtonText="VIEW DETAILS"
+            actionButtonText="START"
             onActionClick={() => navigate('/prof-term')}
             isCollapsedOnRender={true}
           >
@@ -151,13 +151,13 @@ const DecemberProcessAccordion = () => {
 
         <Grid2 width="100%">
           <DSMCollapsedAccordion
-            title="Loan Balance"
+            title="Distributions and Forfeitures (QPAY129)"
             expandable={false}
             status={{
               label: "Not Started",
-              color: "default"
+              color: "secondary"
             }}
-            actionButtonText="VIEW DETAILS"
+            actionButtonText="START"
             onActionClick={() => navigate('/distributions-and-forfeitures')}
             isCollapsedOnRender={true}
           >
@@ -171,10 +171,10 @@ const DecemberProcessAccordion = () => {
             expandable={false}
             status={{
               label: "Not Started",
-              color: "default"
+              color: "secondary"
             }}
             onActionClick={() => alert("Manage Executives")}
-            actionButtonText="VIEW DETAILS"
+            actionButtonText="START"
             isCollapsedOnRender={true}
           >
             <></>
@@ -186,11 +186,11 @@ const DecemberProcessAccordion = () => {
             title="Profit Share Report"
             expandable={false}
             status={{
-              label: "In Progress",
-              color: "default"
+              label: "Not Started",
+              color: "secondary"
             }}
             onActionClick={() => navigate('/profit-share-report')}
-            actionButtonText="VIEW DETAILS"
+            actionButtonText="START"
           >
             <></>
           </DSMCollapsedAccordion>
