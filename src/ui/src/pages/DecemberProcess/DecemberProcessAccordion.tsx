@@ -173,7 +173,7 @@ const DecemberProcessAccordion = () => {
               label: "Not Started",
               color: "secondary"
             }}
-            onActionClick={() => alert("Manage Executives")}
+            onActionClick={() => navigate("/manage-executives-hours-and-dollars")}
             actionButtonText="START"
             isCollapsedOnRender={true}
           >

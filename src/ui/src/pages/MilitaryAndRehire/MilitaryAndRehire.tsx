@@ -1,12 +1,14 @@
-import { Divider } from "@mui/material";
+import { Button, Divider } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { DSMAccordion, Page } from "smart-ui-library";
 import MilitaryAndRehireSearchFilter from "./MilitaryAndRehireSearchFilter";
 import MilitaryAndRehireGrid from "./MilitaryAndRehireGrid";
+import { useNavigate } from "react-router";
 
 const MilitaryAndRehire = () => {
+  const navigate = useNavigate();
   return (
-    <Page label="Rehire">
+    <Page label="Rehire" actionNode={<Button onClick={() => navigate('/december-process-accordion')} variant="outlined">December Flow</Button>}>
         <Grid2
           container
           rowSpacing="24px">
