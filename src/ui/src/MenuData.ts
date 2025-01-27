@@ -5,7 +5,7 @@ const yearEndReports: RouteCategory = {
   parentRoute: "/yearend-flow",
   items: [
     { caption: "Distributions and Forfeitures", route: "/distributions-and-forfeitures" },
-    { caption: "Manage Executive Hours and Dollars", route: "/manage-executive-hours-and-dolars"},
+    { caption: "Manage Executive Hours and Dollars", route: "/manage-executive-hours-and-dollars"},
     { caption: "Get Eligible Employees", route: "/eligible-employees" },
     { caption: "Get Distributions by Age (PROF 130)", route: "/distributions-by-age" },
     { caption: "Get Contributions by Age (PROF 130)", route: "/contributions-by-age" },
