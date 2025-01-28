@@ -275,6 +275,7 @@ export interface MasterInquryRequest {
   comment?: string;
   pagination: PaginationParams;
   employeeNumber?: string;
+  badgeNumber?: number;
 }
 
 export enum FrozenReportsByAgeRequestType {

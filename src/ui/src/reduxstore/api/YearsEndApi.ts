@@ -485,6 +485,7 @@ export const YearsEndApi = createApi({
           forfeitureAmount: params.forfeitureAmount,
           paymentAmount: params.paymentAmount,
           socialSecurity: params.socialSecurity,
+          badgeNumber: params.badgeNumber,
           comment: params.comment,
           take: params.pagination.take,
           skip: params.pagination.skip

@@ -14,15 +14,12 @@ public class MasterInquiryService : IMasterInquiryService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ILogger _logger;
-    private readonly ITotalService _totalService;
     public MasterInquiryService(
         IProfitSharingDataContextFactory dataContextFactory,
-        ITotalService totalService,
         ILoggerFactory loggerFactory
     )
     {
         _dataContextFactory = dataContextFactory;
-        _totalService = totalService;
         _logger = loggerFactory.CreateLogger<MasterInquiryService>();
     }
 
@@ -38,6 +35,10 @@ public class MasterInquiryService : IMasterInquiryService
                                 d => d.Ssn,
                                 (pd, d) => new { ProfitDetail = pd, Demographics = d })
                             .Where(x => x.Demographics.PayFrequencyId == 1);
+                        
+                if (req.BadgeNumber.HasValue) {
+                    query = query.Where(x => x.Demographics.BadgeNumber == req.BadgeNumber);
+                }
 
                 if (req.StartProfitYear.HasValue)
                 {
@@ -130,9 +131,6 @@ public class MasterInquiryService : IMasterInquiryService
                     short currentYear = (short)DateTime.Today.Year;
                     short previousYear = (short)(currentYear - 1);
 
-                    var previousBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(SearchBy.Ssn, ssn, previousYear, cancellationToken);
-                    var currentBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(SearchBy.Ssn, ssn, currentYear, cancellationToken);
-
                     var maxProfitYear = req.EndProfitYear.HasValue ? req.EndProfitYear : short.MaxValue;
 
                     var demographicData = await ctx.Demographics
@@ -178,14 +176,14 @@ public class MasterInquiryService : IMasterInquiryService
                             ReHireDate = demographicData.ReHireDate,
                             TerminationDate = demographicData.TerminationDate,
                             StoreNumber = demographicData.StoreNumber,
-                            PercentageVested = currentBalance?.VestingPercent ?? 0,
-                            ContributionsLastYear = previousBalance != null && previousBalance.CurrentBalance > 0,
+                            PercentageVested = 0,
+                            ContributionsLastYear =false,
                             Enrolled = demographicData.LatestPayProfit?.EnrollmentId != 0,
                             BadgeNumber = demographicData.BadgeNumber.ToString(),
-                            BeginPSAmount = (long) (previousBalance?.CurrentBalance ?? 0),
-                            CurrentPSAmount = (long) (currentBalance?.CurrentBalance ?? 0),
-                            BeginVestedAmount = (long) (previousBalance?.VestedBalance ?? 0),
-                            CurrentVestedAmount = (long) (currentBalance?.VestedBalance ?? 0)
+                            BeginPSAmount = 0,
+                            CurrentPSAmount = 0,
+                            BeginVestedAmount = 0,
+                            CurrentVestedAmount = 0
                         };
                     }
                 }
