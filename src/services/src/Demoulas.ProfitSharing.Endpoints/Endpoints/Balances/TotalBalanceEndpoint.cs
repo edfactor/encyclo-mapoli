@@ -4,10 +4,12 @@ using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Balances;
 
-public class TotalBalanceEndpoint:Endpoint<BalanceEndpointRequest, BalanceEndpointResponse?>
+public class TotalBalanceEndpoint:Endpoint<BalanceEndpointRequest, Results<Ok<BalanceEndpointResponse>, NotFound>>
 {
     private readonly ITotalService _totalService;
 
@@ -29,13 +31,19 @@ public class TotalBalanceEndpoint:Endpoint<BalanceEndpointRequest, BalanceEndpoi
         Group<BalanceGroup>();
     }
 
-    public override Task<BalanceEndpointResponse?> ExecuteAsync(BalanceEndpointRequest req, CancellationToken ct)
+    public override async Task<Results<Ok<BalanceEndpointResponse>, NotFound>> ExecuteAsync(BalanceEndpointRequest req, CancellationToken ct)
     {
         if (int.TryParse(req.Id, out int badgeNumberOrSsn) && req.SearchType == SearchBy.Ssn)
         {
             badgeNumberOrSsn = req.Id.ConvertSsnToInt();
         }
 
-        return _totalService.GetVestingBalanceForSingleMemberAsync(req.SearchType, badgeNumberOrSsn, req.ProfitYear, ct);
+        var rslt = await _totalService.GetVestingBalanceForSingleMemberAsync(req.SearchType, badgeNumberOrSsn, req.ProfitYear, ct);
+        if (rslt == null)
+        {
+            TypedResults.NotFound();
+        }
+
+        return TypedResults.Ok(rslt);
     }
 }
