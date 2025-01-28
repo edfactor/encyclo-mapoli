@@ -3,7 +3,7 @@ import { ColDef } from "ag-grid-community";
 export const GetManageExecutiveHoursAndDollarsColumns = (): ColDef[] => {
   return [
     {
-      headerName: "ID",
+      headerName: "Badge",
       field: "badgeNumber",
       colId: "badgeNumber",
       minWidth: 80,
