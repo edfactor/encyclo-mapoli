@@ -263,7 +263,7 @@ public class CleanupReportService : ICleanupReportService
                         BadgeNumber = d.BadgeNumber,
                         Years = (byte)yis.Years
                     }
-                ).ToDictionaryAsync(x => x.BadgeNumber, x => x.Years);
+                ).ToDictionaryAsync(x => x.BadgeNumber, x => x.Years, cancellationToken: cancellationToken);
 
                 return rslt;
             });
