@@ -145,8 +145,8 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             string csvData = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
             string[] lines = csvData.Split(["\r\n", "\n"], StringSplitOptions.None);
             lines[1].Should().Be(_expectedReportName);
-            lines[2].Should().Be("BADGE,NAME,STR,EXEC HRS,EXEC DOLS,ORA HRS CUR,ORA DOLS CUR,FREQ,STATUS");
-            lines[3].Should().Be(@"1,""John, Null E"",2,3,4,5,6,2,a");
+            lines[2].Should().Be("BADGE,NAME,STR,EXEC HRS,EXEC DOLS,ORA HRS CUR,ORA DOLS CUR,FREQ,STATUS,SSN");
+            lines[3].Should().Be(@"1,""John, Null E"",2,793938825,3,4,5,6,2,a");
             lines[4].Should().Be("");
         });
     }
