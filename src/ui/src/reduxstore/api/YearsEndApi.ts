@@ -32,9 +32,15 @@ import {
     ForfeituresByAge,
     BalanceByAge,
     VestedAmountsByAge,
-    MasterInquiryResponseType, ProfitYearRequest, BalanceByYears,
+    MasterInquiryResponseType,
+    ProfitYearRequest,
+    BalanceByYears,
     TerminationResponse,
-    TerminationRequest, ProfitShareUpdateRequest, ProfitShareUpdateResponse
+    TerminationRequest,
+    ProfitShareUpdateRequest,
+    ProfitShareUpdateResponse,
+    ProfitShareEditResponse,
+    ProfitShareMasterResponse
 } from "reduxstore/types";
 import {
     setDemographicBadgesNotInPayprofitData,
@@ -54,8 +60,8 @@ import {
     setMissingCommaInPYName,
     setVestingAmountByAge,
     setNegativeEtvaForSssnsOnPayprofit, setBalanceByYears,
-    setTermination, 
-    setProfitUpdate
+    setTermination,
+    setProfitUpdate, clearProfitUpdate, setProfitEdit, clearProfitEdit, setProfitMasterApply, setProfitMasterRevert
 } from "reduxstore/slices/yearsEndSlice";
 import {url} from "./api";
 
@@ -557,9 +563,59 @@ export const YearsEndApi = createApi({
                     dispatch(setProfitUpdate(data));
                 } catch (err) {
                     console.log("Err: " + err);
+                    dispatch(clearProfitUpdate());
                 }
             }
         }),
+        getProfitShareEdit: builder.query<ProfitShareEditResponse, ProfitShareUpdateRequest>({
+            query: (params) => ({
+                url: "yearend/profit-share-edit",
+                method: "GET",
+                params: params
+            }),
+            async onQueryStarted(arg, {dispatch, queryFulfilled}) {
+                try {
+                    const {data} = await queryFulfilled;
+                    dispatch(setProfitEdit(data));
+                } catch (err) {
+                    console.log("Err: " + err);
+                    dispatch(clearProfitEdit());
+                }
+            }
+        }),
+        getMasterApply: builder.query<ProfitShareMasterResponse, ProfitShareUpdateRequest>({
+            query: (params) => ({
+                url: "yearend/profit-master-update",
+                method: "GET",
+                params: params
+            }),
+            async onQueryStarted(arg, {dispatch, queryFulfilled}) {
+                try {
+                    const {data} = await queryFulfilled;
+                    dispatch(setProfitMasterApply(data));
+                } catch (err) {
+                    console.log("Err: " + err);
+                    dispatch(clearProfitEdit());
+                }
+            }
+        }),
+        getMasterRevert: builder.query<ProfitShareMasterResponse, ProfitYearRequest>({
+            query: (params) => ({
+                url: "yearend/profit-master-revert",
+                method: "GET",
+                params: params
+            }),
+            async onQueryStarted(arg, {dispatch, queryFulfilled}) {
+                try {
+                    const {data} = await queryFulfilled;
+                    dispatch(setProfitMasterRevert(data));
+                } catch (err) {
+                    console.log("Err: " + err);
+                    dispatch(clearProfitEdit());
+                }
+            }
+        }),
+
     })
 });
 
@@ -583,5 +639,8 @@ export const {
     useLazyGetProfitMasterInquiryQuery,
     useLazyGetVestingAmountByAgeQuery,
     useLazyGetTerminationReportQuery,
-    useLazyGetProfitShareUpdateQuery
+    useLazyGetProfitShareUpdateQuery,
+    useLazyGetProfitShareEditQuery,
+    useLazyGetMasterApplyQuery,
+    useLazyGetMasterRevertQuery,
 } = YearsEndApi;

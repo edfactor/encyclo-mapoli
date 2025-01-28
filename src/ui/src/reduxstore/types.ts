@@ -524,3 +524,41 @@ export interface ProfitShareUpdateResponse {
   reportDate: string;
   response: Paged<ProfitShareUpdateDetail[]>;
 }
+
+
+export interface ProfitShareEditDetail {
+  badgePSn: string;
+  name: string;
+  beginningBalance: number;
+  beneficiaryAllocation: number;
+  distributionAmount: number;
+  forfeit: number;
+  endingBalance: number;
+  vestedBalance: number;
+  dateTerm: string;
+  ytdPsHours: number;
+  vestedPercent: number;
+  age: number;
+  enrollmentCode: number;
+}
+
+export interface ProfitShareEditResponse {
+  isLoading: boolean; // this feels like a hack, it means display the table with the spinner.
+  
+  beginningBalance: number,
+  contributionGrandTotal: number,
+  incomingForfeitureGrandTotal: number,
+  earningsGrandTotal: number,
+  
+  reportName: string;
+  reportDate: string;
+  response: Paged<ProfitShareEditDetail[]>;
+}
+
+export interface ProfitShareMasterResponse {
+  isLoading: boolean;
+  reportName: string;
+  beneficiariesEffected: number,
+  employeesEffected: number,
+  etvasEffected: number
+}

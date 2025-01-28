@@ -7,13 +7,20 @@ import {
     TextField
 } from "@mui/material";
 import {
+    useLazyGetMasterApplyQuery, useLazyGetMasterRevertQuery,
+    useLazyGetProfitShareEditQuery,
     useLazyGetProfitShareUpdateQuery,
 } from "reduxstore/api/YearsEndApi";
 import {yupResolver} from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import {useDispatch, useSelector} from "react-redux";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
-import {clearMasterInquiryData, clearProfitUpdate} from "../../reduxstore/slices/yearsEndSlice";
+import {
+    clearMasterInquiryData,
+    clearProfitUpdate,
+    setProfitEditLoading, setProfitMasterApplyLoading, setProfitMasterRevertLoading,
+    setProfitUpdateLoading
+} from "../../reduxstore/slices/yearsEndSlice";
 
 interface ProfitShareUpdateInputPanelProps {
     startProfitYear?: Date | null;
@@ -21,7 +28,7 @@ interface ProfitShareUpdateInputPanelProps {
     earningsPercent?: number | null;
     incomingForfeiturePercent?: number | null;
     secondaryEarningsPercent?: number | null;
-    maxAllowedContributions: number | null;
+    maxAllowedContributions: number | null | undefined;
 
     adjustmentBadge?: number | null;
     adjustmentContributionAmount?: number | null;
@@ -78,7 +85,10 @@ const schema = yup.object().shape({
 });
 
 const ProfitShareUpdateInputPanel = () => {
-    const [triggerView, { isFetching }] = useLazyGetProfitShareUpdateQuery();
+    const [previewUpdate] = useLazyGetProfitShareUpdateQuery();
+    const [previewEdit] = useLazyGetProfitShareEditQuery();
+    const [masterApply] = useLazyGetMasterApplyQuery();
+    const [masterRevert] = useLazyGetMasterRevertQuery();
     const dispatch = useDispatch();
 
     const {
@@ -105,10 +115,10 @@ const ProfitShareUpdateInputPanel = () => {
         }
     });
 
-    const validateAndView = handleSubmit((data) => {
+    const validateAndView = handleSubmit((data, event?: React.BaseSyntheticEvent) => {
         if (isValid) {
             const viewParams: ProfitShareUpdateInputPanelProps = {
-                ...(!!data.startProfitYear && {profitYear: data.startProfitYear.getFullYear()}),
+                ...(!!data.startProfitYear && {profitYear: data.startProfitYear.getFullYear()-1 }),
                 ...(!!data.contributionPercent && {contributionPercent: data.contributionPercent}),
                 ...(!!data.earningsPercent && {earningsPercent: data.earningsPercent}),
                 ...(!!data.incomingForfeiturePercent && {incomingForfeitPercent: data.incomingForfeiturePercent}),
@@ -124,12 +134,26 @@ const ProfitShareUpdateInputPanel = () => {
                 ...(!!data.adjustmentSecondaryEarningsAmount && {adjustEarningsSecondaryAmount: data.adjustmentSecondaryEarningsAmount}),
 
             };
-            // clears current table data
-            dispatch(clearProfitUpdate());
-            triggerView(viewParams, false);
+            // clears current table data - gives user feed back that thier search is in progress
+            const nativeEvent = event?.nativeEvent as SubmitEvent;
+            console.log("Action: ", event?.target.value);
+            var action = event?.target.value;
+            if (action == 'preview updates') {
+                dispatch(setProfitUpdateLoading());
+                previewUpdate(viewParams, false);
+            } else if (action == 'preview details') {
+                dispatch(setProfitEditLoading());
+                previewEdit(viewParams, false);
+            } else if (action == 'apply') {
+                dispatch(setProfitMasterApplyLoading());
+                masterApply(viewParams, false);
+            } else if (action == 'revert') {
+                dispatch(setProfitMasterRevertLoading());
+                masterRevert(viewParams, false);
+            }
         }
     });
-    
+
     return (
         <form onSubmit={validateAndView}>
             <Grid2 container paddingX="24px">
@@ -171,7 +195,8 @@ const ProfitShareUpdateInputPanel = () => {
                                 />
                             )}
                         />
-                        {errors.contributionPercent && <FormHelperText error>{errors.contributionPercent.message}</FormHelperText>}
+                        {errors.contributionPercent &&
+                            <FormHelperText error>{errors.contributionPercent.message}</FormHelperText>}
                     </Grid2>
 
                     <Grid2 xs={12} sm={6} md={2}>
@@ -190,7 +215,8 @@ const ProfitShareUpdateInputPanel = () => {
                                 />
                             )}
                         />
-                        {errors.earningsPercent && <FormHelperText error>{errors.earningsPercent.message}</FormHelperText>}
+                        {errors.earningsPercent &&
+                            <FormHelperText error>{errors.earningsPercent.message}</FormHelperText>}
                     </Grid2>
 
                     <Grid2 xs={12} sm={6} md={2}>
@@ -228,7 +254,8 @@ const ProfitShareUpdateInputPanel = () => {
                                 />
                             )}
                         />
-                        {errors.secondaryEarningsPercent && <FormHelperText error>{errors.secondaryEarningsPercent.message}</FormHelperText>}
+                        {errors.secondaryEarningsPercent &&
+                            <FormHelperText error>{errors.secondaryEarningsPercent.message}</FormHelperText>}
                     </Grid2>
 
                     <Grid2 xs={12} sm={6} md={2}>
@@ -250,7 +277,7 @@ const ProfitShareUpdateInputPanel = () => {
                         {errors.maxAllowedContributions &&
                             <FormHelperText error>{errors.maxAllowedContributions.message}</FormHelperText>}
                     </Grid2>
-                    
+
                 </Grid2>
 
                 <Grid2 container spacing={3} width="100%">
@@ -289,7 +316,8 @@ const ProfitShareUpdateInputPanel = () => {
                                 />
                             )}
                         />
-                        {errors.adjustmentContributionAmount && <FormHelperText error>{errors.adjustmentContributionAmount.message}</FormHelperText>}
+                        {errors.adjustmentContributionAmount &&
+                            <FormHelperText error>{errors.adjustmentContributionAmount.message}</FormHelperText>}
                     </Grid2>
 
                     <Grid2 xs={12} sm={6} md={2}>
@@ -308,7 +336,8 @@ const ProfitShareUpdateInputPanel = () => {
                                 />
                             )}
                         />
-                        {errors.adjustmentEarningsAmount && <FormHelperText error>{errors.adjustmentEarningsAmount.message}</FormHelperText>}
+                        {errors.adjustmentEarningsAmount &&
+                            <FormHelperText error>{errors.adjustmentEarningsAmount.message}</FormHelperText>}
                     </Grid2>
 
                     <Grid2 xs={12} sm={6} md={2}>
@@ -370,23 +399,24 @@ const ProfitShareUpdateInputPanel = () => {
                                 />
                             )}
                         />
-                        {errors.adjustmentSecondaryEarningsAmount && <FormHelperText error>{errors.adjustmentSecondaryEarningsAmount.message}</FormHelperText>}
+                        {errors.adjustmentSecondaryEarningsAmount &&
+                            <FormHelperText error>{errors.adjustmentSecondaryEarningsAmount.message}</FormHelperText>}
                     </Grid2>
 
                 </Grid2>
-                <Grid2 xs={12} sm={6} md={4} className="mt-4">
+                <Grid2 xs={12} sm={12} md={12} className="mt-4">
                     <div className="flex gap-4">
-                        <Button variant="contained" type="submit" onClick={validateAndView}>
-                            View Updates
+                        <Button variant="contained" type="submit" value="preview updates" onClick={validateAndView}>
+                            Preview Updates
                         </Button>
-                        <Button disabled variant="contained" type="submit" onClick={validateAndView}>
-                            View Details
+                        <Button variant="contained" type="submit" value="preview details" onClick={validateAndView}>
+                            Preview Details
                         </Button>
-                        <Button disabled variant="contained" type="submit" onClick={validateAndView}>
-                            Apply
+                        <Button variant="contained" type="submit" value="apply" onClick={validateAndView}>
+                            Apply Updates
                         </Button>
-                        <Button disabled variant="contained" type="submit" onClick={validateAndView}>
-                            Revert
+                        <Button variant="contained" type="submit" value="revert" onClick={validateAndView}>
+                            Revert Updates
                         </Button>
                     </div>
                 </Grid2>
