@@ -41,6 +41,7 @@ definitions:
       runs-on:
         - windows
         - self.hosted
+        - nvm
       script:
         - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
       artifacts:
@@ -97,6 +98,7 @@ definitions:
       runs-on:
         - windows
         - self.hosted
+        - nvm
       artifacts:
         - dist\**
       script:
@@ -123,6 +125,7 @@ definitions:
       runs-on:
         - windows
         - self.hosted
+        - nvm
       artifacts:
         - dist\**
       script:
@@ -164,6 +167,7 @@ definitions:
       runs-on:
         - windows
         - self.hosted
+        - nvm
       artifacts:
         - dist\**
       script:
