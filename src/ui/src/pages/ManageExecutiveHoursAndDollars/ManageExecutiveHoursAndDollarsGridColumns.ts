@@ -46,7 +46,8 @@ export const GetManageExecutiveHoursAndDollarsColumns = (): ColDef[] => {
       minWidth: 150,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true
+      resizable: true,
+      editable: true
     },
     {
       headerName: "Executive Dollars",
@@ -55,25 +56,8 @@ export const GetManageExecutiveHoursAndDollarsColumns = (): ColDef[] => {
       minWidth: 150,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true
-    },
-    {
-      headerName: "Executive Hours",
-      field: "hoursExecutive",
-      colId: "hoursExecutive",
-      minWidth: 150,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
-    {
-      headerName: "Executive Dollars",
-      field: "incomeExecutive",
-      colId: "incomeExecutive",
-      minWidth: 150,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
+      resizable: true,
+      editable: true
     },
     {
       headerName: "ORA HRS LAST",
@@ -104,12 +88,36 @@ export const GetManageExecutiveHoursAndDollarsColumns = (): ColDef[] => {
     },
     {
       headerName: "STATUS",
-      field: "employeeStatusId",
-      colId: "employeeStatusId",
+      field: "employmentStatusId",
+      colId: "employmentStatusId",
       minWidth: 150,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true
-    },
+      resizable: true,
+      valueFormatter: (params) => {
+        switch(params.value) { 
+          case 'i': { 
+             //statements;
+             return "Inactive" ;
+          }
+          case 'a': { 
+            //statements;
+            return "Active" ;
+          }
+          case 't': { 
+            //statements;
+            return "Terminated" ;
+          } 
+          case 'd': { 
+            //statements;
+            return "Delete" ;
+          } 
+          default: { 
+             //statements; 
+             return "N/A";
+          } 
+        }
+      }
+    }
   ];
 };
