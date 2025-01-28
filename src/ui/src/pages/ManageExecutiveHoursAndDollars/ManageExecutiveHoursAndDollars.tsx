@@ -6,7 +6,7 @@ import ManageExecutiveHoursAndDollarsGrid from "./ManageExecutiveHoursAndDollars
 
 const ManageExecutiveHoursAndDollars = () => {
   return (
-    <Page label="Manage Edxecutive Hours And Dollars">
+    <Page label="Manage Executive Hours And Dollars">
         <Grid2
           container
           rowSpacing="24px">

@@ -201,6 +201,7 @@ export interface MilitaryAndRehireProfitSummary extends ProfitYearRequest {
 
 export interface ExecutiveHoursAndDollarsRequestDto extends ProfitYearRequest {
   badgeNumber?: number;
+  socialSecurity?: number;
   fullNameContains?: string;
   hasExecutiveHoursAndDollars: boolean;
   pagination: PaginationParams;
@@ -210,6 +211,7 @@ export interface ExecutiveHoursAndDollars {
   badgeNumber: number;
   fullName: string;
   storeNumber: number;
+  socialSecurity: number;
   hoursExecutive: number;
   incomeExecutive: number;
   currentHoursYear: number;
