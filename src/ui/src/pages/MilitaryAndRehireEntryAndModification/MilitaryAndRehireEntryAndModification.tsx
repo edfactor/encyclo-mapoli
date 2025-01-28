@@ -4,11 +4,32 @@ import { DSMAccordion, Page } from "smart-ui-library";
 import MilitaryAndRehireSearchFilter from "./MilitaryAndRehireEntryAndModificationSearchFilter";
 import MilitaryAndRehireEntryAndModificationGrid from "./MilitaryAndRehireEntryAndModificationGrid";
 import { useNavigate } from "react-router";
+import StatusDropdown, { ProcessStatus } from "components/StatusDropdown";
 
 const MilitaryAndRehireEntryAndModification = () => {
   const navigate = useNavigate();
+
+  const handleStatusChange = async (newStatus: ProcessStatus) => {
+    console.info("Logging new status: ", newStatus);
+  };
+
+  const renderActionNode = () => {
+    return (
+      <div className="flex items-center gap-2 h-10">
+        <StatusDropdown onStatusChange={handleStatusChange} />
+        <Button
+          onClick={() => navigate('/december-process-accordion')}
+          variant="outlined"
+          className="h-10 whitespace-nowrap min-w-fit"
+        >
+          December Flow
+        </Button>
+      </div>
+    );
+  };
+
   return (
-    <Page label="Military Entry and Modification" actionNode={<Button onClick={() => navigate('/december-process-accordion')} variant="outlined">December Flow</Button>}>
+    <Page label="Military Entry and Modification" actionNode={renderActionNode()}>
         <Grid2
           container
           rowSpacing="24px">

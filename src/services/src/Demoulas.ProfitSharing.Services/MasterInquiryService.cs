@@ -92,6 +92,13 @@ public class MasterInquiryService : IMasterInquiryService
                         x.ProfitDetail.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id &&
                         x.ProfitDetail.Forfeiture == req.PaymentAmount);
                 }
+
+                // Add Payment Type check
+                if (req.PaymentType.HasValue)
+                {
+                    query = query.Where(x => x.ProfitDetail.ProfitCodeId == req.PaymentType);
+                }
+                
                 var results = await query
                 .Select(x => new MasterInquiryResponseDto
                 {

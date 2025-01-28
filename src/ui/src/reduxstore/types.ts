@@ -275,6 +275,9 @@ export interface MasterInquryRequest {
   comment?: string;
   pagination: PaginationParams;
   employeeNumber?: string;
+  // add payment type and member type to search request
+  paymentType?: string;
+  memberType?: string;
 }
 
 export enum FrozenReportsByAgeRequestType {
