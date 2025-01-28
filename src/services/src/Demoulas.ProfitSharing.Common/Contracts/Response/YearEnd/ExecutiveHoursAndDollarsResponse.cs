@@ -21,7 +21,7 @@ public static  ExecutiveHoursAndDollarsResponse ResponseExample()
             BadgeNumber = 1,
             FullName = "John, Null E",
             StoreNumber = 2,
-            SSN = 790000000,
+            SSN = 793938825,
             HoursExecutive = 3,
             IncomeExecutive = 4,
             CurrentHoursYear = 5,
