@@ -40,6 +40,10 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
             {
                 query = query.Where(pp => pp.Demographic!.BadgeNumber == request.BadgeNumber);
             }
+            if (request.SSN.HasValue)
+            {
+                query = query.Where(pp => pp.Demographic!.Ssn == request.SSN);
+            }
             if (request.FullNameContains != null)
             {
                 // LINQ needs this simpler query so it can convert it to SQL.
@@ -54,6 +58,7 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
                     BadgeNumber = p.Demographic!.BadgeNumber,
                     FullName = p.Demographic.ContactInfo.FullName,
                     StoreNumber = p.Demographic.StoreNumber,
+                    SSN = p.Demographic.Ssn,
                     HoursExecutive = p.HoursExecutive,
                     IncomeExecutive = p.IncomeExecutive,
                     CurrentHoursYear = p.CurrentHoursYear,

@@ -5,4 +5,5 @@ public sealed record ExecutiveHoursAndDollarsRequest : ProfitYearRequest
     public int? BadgeNumber { get; set; }
     public string? FullNameContains { get; set; }
     public bool? HasExecutiveHoursAndDollars { get; set; }
+    public int? SSN { get; set; }
 }
