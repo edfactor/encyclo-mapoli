@@ -1,0 +1,33 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
+public sealed class GrossWagesReportDetail
+{
+    public required int BadgeNumber { get; set; }
+    public required string EmployeeName { get; set; }
+    public required DateOnly DateOfBirth { get; set; }
+    public required string Ssn { get; set; }
+    public required decimal GrossWages { get; set; }
+    public required decimal ProfitSharingAmount { get; set; }
+    public required decimal Loans { get; set; }
+    public required decimal Forfeitures { get; set; }
+
+    public static GrossWagesReportDetail ResponseExample()
+    {
+        return new GrossWagesReportDetail()
+        {
+            BadgeNumber = 123456,
+            EmployeeName = "Sam Hughes",
+            DateOfBirth = new DateOnly(1993,4,28),
+            Ssn = "xxx-xx-1942",
+            GrossWages = 52005.15m,
+            ProfitSharingAmount = 150023.55m,
+            Loans = 0,
+            Forfeitures = 5001m,
+        };
+    }
+}
