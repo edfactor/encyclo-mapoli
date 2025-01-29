@@ -100,7 +100,7 @@ public class ProfitMasterService : IProfitMasterService
                 .ToListAsync(cancellationToken);
 
             var memberSsns = pds.Select(p => p.Ssn).ToHashSet();
-            var ssn2PayProfit = await ctx.PayProfits.Where(pp => pp.ProfitYear == profitYearRequest.ProfitYear && memberSsns.Contains(pp.Demographic!.Ssn))
+            var ssn2PayProfit = await ctx.PayProfits.Include(pp=>pp.Demographic).Where(pp => pp.ProfitYear == profitYearRequest.ProfitYear && memberSsns.Contains(pp.Demographic!.Ssn))
                 .ToDictionaryAsync(pp => pp.Demographic!.Ssn, pp => pp, cancellationToken);
 
             var etvaReset = new HashSet<int>();
