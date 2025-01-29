@@ -127,7 +127,7 @@ const Router = () => {
           path="distributions-and-forfeitures"
           element={<DistributionsAndForfeitures />}></Route>
         <Route
-          path="manage-executive-hours-and-dolars"
+          path="manage-executive-hours-and-dollars"
           element={<ManageExecutiveHoursAndDollars />}></Route>
         <Route
           path="eligible-employees"
