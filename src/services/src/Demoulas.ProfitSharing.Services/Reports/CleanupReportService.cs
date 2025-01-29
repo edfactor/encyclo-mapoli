@@ -224,9 +224,9 @@ public class CleanupReportService : ICleanupReportService
                                 dem.TerminationDate,
                                 dem.EmploymentStatusId,
                                 dem.StoreNumber,
-                                PdSsn = pd.Ssn,
-                                pp.CurrentHoursYear,
-                                pp.CurrentIncomeYear
+                                PdSsn = pd != null ? pd.Ssn : 0,
+                                CurrentHoursYear = pp != null ? pp.CurrentHoursYear : 0,
+                                CurrentIncomeYear = pp != null ? pp.CurrentIncomeYear : 0
                             }
                     into g
                             orderby g.Key.FullName, g.Key.DateOfBirth, g.Key.SSN, g.Key.BadgeNumber
