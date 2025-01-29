@@ -61,4 +61,63 @@ public class FrozenReportServiceTests : ApiTestBase<Program>
         response.Should().NotBeNull();
         response.Result.Response.Total.Should().BeGreaterThan(0);
     }
+
+    [Fact(DisplayName = "PS-404 - Gross Wages Report")]
+    public async Task GetGrossWagesReport()
+    {
+        long demoSsn = 0;
+        int demoBadgeNumber = 0;
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+        _ = MockDbContextFactory.UseWritableContext(async ctx =>
+        {
+            var demoTest = await ctx.Demographics.FirstAsync(CancellationToken.None);
+            demoSsn = demoTest.Ssn;
+            demoBadgeNumber = demoTest.BadgeNumber;
+            var pdArray = await ctx.ProfitDetails.Where(x => x.Ssn == demoTest.Ssn).ToArrayAsync(CancellationToken.None);
+
+            for (int i = 0; i < pdArray.Length; i++)
+            {
+                var prof = pdArray[i];
+                prof.ProfitYear = (short)(DateTime.Now.Year - i);
+                prof.ProfitCode = ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal;
+                prof.ProfitCodeId = ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id;
+                prof.Contribution = Convert.ToDecimal(Math.Pow(2, i * 3));
+                prof.Earnings = Convert.ToDecimal(Math.Pow(2, i * 3 + 1));
+                prof.Forfeiture = Convert.ToDecimal(Math.Pow(2, i * 3 + 2));
+                prof.MonthToDate = 0;
+                prof.YearToDate = (short)(DateTime.Now.Year - i);
+                prof.FederalTaxes = 0.5m;
+                prof.StateTaxes = 0.25m;
+            }
+
+            var ppArray = await ctx.PayProfits.Where(x=>x.DemographicId== demoTest.Id).ToArrayAsync(CancellationToken.None);
+            foreach (var pp in ppArray)
+            {
+                pp.ProfitYear = 10000;
+            }
+            ppArray[0].ProfitYear = 2023;
+            ppArray[0].IncomeExecutive = 25;
+            ppArray[0].CurrentIncomeYear = 0;
+            ppArray[1].ProfitYear = 2022;
+            ppArray[1].IncomeExecutive = 0;
+            ppArray[1].CurrentIncomeYear = 49995;
+
+            await ctx.SaveChangesAsync(CancellationToken.None);
+        });
+
+        var request = new GrossWagesReportRequest()
+        {
+            MinGrossAmount = 50000,
+            ProfitYear = 2023,
+            Skip = 0,
+            Take = 1000
+        };
+
+        var response = await ApiClient.GETAsync<GrossWagesReportEndpoint, GrossWagesReportRequest,  GrossWagesReportResponse>(request);
+        response.Should().NotBeNull();
+        response.Result.Response.Total.Should().BeGreaterThan(0);
+        var testRec = response.Result.Response.Results.First(x => x.BadgeNumber == demoBadgeNumber);
+        testRec.Should().NotBeNull();
+        testRec.GrossWages.Should().Be(49995 + 25);
+    }
 }

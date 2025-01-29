@@ -45,7 +45,7 @@ const BalanceByYearsGrid = () => {
                 currencyFormat(balanceByYearsTotal?.balanceTotalAmount || 0), 
                 currencyFormat(balanceByYearsTotal?.vestedTotalAmount || 0)] 
                 ]} 
-                leftColumnHeaders = {['Ben', 'Employee', 'Total']}
+                leftColumnHeaders = {['Beneficiaries', 'Employees', 'Total']}
                 topRowHeaders={['All', 'Count', 'Balance', 'Vested']}
             ></TotalsGrid>
             <TotalsGrid 
@@ -60,7 +60,7 @@ const BalanceByYearsGrid = () => {
                 currencyFormat(balanceByYearsFullTime?.balanceTotalAmount || 0), 
                 currencyFormat(balanceByYearsFullTime?.vestedTotalAmount || 0)] 
                 ]} 
-                leftColumnHeaders = {['Ben', 'Employee', 'Total']}
+                leftColumnHeaders = {['Beneficiaries', 'Employees', 'Total']}
                 topRowHeaders={['FullTime', 'Count', 'Balance', 'Vested']}
             ></TotalsGrid>
             <TotalsGrid 
@@ -75,7 +75,7 @@ const BalanceByYearsGrid = () => {
                 currencyFormat(balanceByYearsPartTime?.balanceTotalAmount || 0), 
                 currencyFormat(balanceByYearsPartTime?.vestedTotalAmount || 0)] 
                 ]} 
-                leftColumnHeaders = {['Ben', 'Employee', 'Total']}
+                leftColumnHeaders = {['Beneficiaries', 'Employees', 'Total']}
                 topRowHeaders={['PartTime', 'Count', 'Balance', 'Vested']}
             ></TotalsGrid>
             </div>

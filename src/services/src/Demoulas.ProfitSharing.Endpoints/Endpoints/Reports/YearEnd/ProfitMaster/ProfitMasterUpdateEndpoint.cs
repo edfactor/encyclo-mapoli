@@ -29,8 +29,9 @@ public class ProfitMasterUpdateEndpoint : Endpoint<ProfitShareUpdateRequest, Pro
         Group<YearEndGroup>();
     }
 
-    public override Task<ProfitMasterResponse> HandleAsync(ProfitShareUpdateRequest req, CancellationToken ct)
+    public override async Task HandleAsync(ProfitShareUpdateRequest req, CancellationToken ct)
     {
-        return _profitMasterService.Update(req, ct);
+        var response =  await _profitMasterService.Update(req, ct);
+        await SendOkAsync(response, ct);
     }
 }

@@ -1,10 +1,8 @@
 import { Button, Divider } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { DSMAccordion, Page } from "smart-ui-library";
-import MilitaryAndRehireSearchFilter from "./ManageExecutiveHoursAndDollarsSearchFilter";
-import MilitaryAndRehireGrid from "./ManageExecutiveHoursAndDollarsGrid";
-import { useNavigate } from "react-router";
-import StatusDropdown, { ProcessStatus } from "components/StatusDropdown";
+import ManageExecutiveHoursAndDollarsSearchFilter from "./ManageExecutiveHoursAndDollarsSearchFilter";
+import ManageExecutiveHoursAndDollarsGrid from "./ManageExecutiveHoursAndDollarsGrid";
 
 const ManageExecutiveHoursAndDollars = () => {
   const navigate = useNavigate();
@@ -39,13 +37,13 @@ const ManageExecutiveHoursAndDollars = () => {
           <Grid2
             width={"100%"}>
               <DSMAccordion title="Filter">
-                <MilitaryAndRehireSearchFilter />
+                <ManageExecutiveHoursAndDollarsSearchFilter />
               </DSMAccordion>
              
           </Grid2>
 
           <Grid2 width="100%">
-            <MilitaryAndRehireGrid />
+            <ManageExecutiveHoursAndDollarsGrid />
           </Grid2>
         </Grid2>
     </Page>

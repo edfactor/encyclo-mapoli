@@ -201,6 +201,7 @@ export interface MilitaryAndRehireProfitSummary extends ProfitYearRequest {
 
 export interface ExecutiveHoursAndDollarsRequestDto extends ProfitYearRequest {
   badgeNumber?: number;
+  socialSecurity?: number;
   fullNameContains?: string;
   hasExecutiveHoursAndDollars: boolean;
   pagination: PaginationParams;
@@ -210,6 +211,7 @@ export interface ExecutiveHoursAndDollars {
   badgeNumber: number;
   fullName: string;
   storeNumber: number;
+  socialSecurity: number;
   hoursExecutive: number;
   incomeExecutive: number;
   currentHoursYear: number;
@@ -250,6 +252,7 @@ export interface MasterInquiryDetail extends ProfitYearRequest {
   yearToDate: number;
   remark?: string;
   zeroContributionReasonId?: number;
+  badgeNumber?: number;
   federalTaxes: number;
   stateTaxes: number;
   taxCodeId?: string;
@@ -278,6 +281,7 @@ export interface MasterInquryRequest {
   // add payment type and member type to search request
   paymentType?: string;
   memberType?: string;
+  badgeNumber?: number;
 }
 
 export enum FrozenReportsByAgeRequestType {
@@ -485,3 +489,83 @@ export interface TerminationResponse {
   response: Paged<TerminationDetail[]>;
 }
 
+export interface ProfitShareUpdateRequest {
+  profitYear: number;
+  contributionPercent: number;
+  earningsPercent: number;
+  incomingForfeiturePercent: number;
+  maxAllowedContributions: number;
+
+  adjustmentBadge: number;
+  adjustmentContributionAmount: number;
+  adjustmentEarningsAmount: number;
+  adjustmentIncomingForfeitureAmount: number;
+
+  adjustmentSecondaryBadge: number;
+  adjustmentSecondaryEarningsAmount: number;
+}
+
+export interface ProfitShareUpdateDetail {
+  badgePSn: string;
+  name: string;
+  beginningBalance: number;
+  beneficiaryAllocation: number;
+  distributionAmount: number;
+  forfeit: number;
+  endingBalance: number;
+  vestedBalance: number;
+  dateTerm: string;
+  ytdPsHours: number;
+  vestedPercent: number;
+  age: number;
+  enrollmentCode: number;
+}
+
+export interface ProfitShareUpdateResponse {
+  isLoading: boolean;
+  totalVested: number;
+  totalForfeit: number;
+  totalEndingBalance: number;
+  totalBeneficiaryAllocation: number;
+  reportName: string;
+  reportDate: string;
+  response: Paged<ProfitShareUpdateDetail[]>;
+}
+
+
+export interface ProfitShareEditDetail {
+  badgePSn: string;
+  name: string;
+  beginningBalance: number;
+  beneficiaryAllocation: number;
+  distributionAmount: number;
+  forfeit: number;
+  endingBalance: number;
+  vestedBalance: number;
+  dateTerm: string;
+  ytdPsHours: number;
+  vestedPercent: number;
+  age: number;
+  enrollmentCode: number;
+}
+
+export interface ProfitShareEditResponse {
+  isLoading: boolean; // this feels like a hack, it means display the table with the spinner.
+  
+  beginningBalance: number,
+  contributionGrandTotal: number,
+  incomingForfeitureGrandTotal: number,
+  earningsGrandTotal: number,
+  
+  reportName: string;
+  reportDate: string;
+  response: Paged<ProfitShareEditDetail[]>;
+}
+
+export interface ProfitShareMasterResponse {
+  isLoading: boolean;
+  reportName: string;
+  beneficiariesEffected: number,
+  employeesEffected: number,
+  etvasEffected: number
+}
