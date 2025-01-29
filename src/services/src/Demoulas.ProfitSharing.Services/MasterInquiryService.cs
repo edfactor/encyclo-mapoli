@@ -177,16 +177,9 @@ public class MasterInquiryService : IMasterInquiryService
                             d.StoreNumber,
                             DemographicId = d.Id,
                             LatestPayProfit = d.PayProfits
-                                .Where(x => x.ProfitYear <= maxProfitYear)
-                                .OrderByDescending(p => p.ProfitYear)
-                                .Select(p => new
-                                {
-                                    p.CurrentHoursYear,
-                                    p.YearsInPlan,
-                                    p.EnrollmentId,
-                                    p.EarningsEtvaValue
-                                })
-                                .FirstOrDefault()
+                             .Where(x => x.ProfitYear <= maxProfitYear)
+                             .OrderByDescending(p => p.ProfitYear)
+                             .FirstOrDefault()
                         })
                         .AsNoTracking()
                         .FirstOrDefaultAsync(cancellationToken);
