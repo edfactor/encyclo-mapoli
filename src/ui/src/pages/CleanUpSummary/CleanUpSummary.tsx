@@ -1,4 +1,4 @@
-import { Divider, Tabs, Tab, Button, Stack } from "@mui/material";
+import { Divider, Tabs, Tab, Button, Stack, Breadcrumbs, Link } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { useState } from "react";
 import { Page } from "smart-ui-library";
@@ -24,7 +24,7 @@ const CleanUpSummary = () => {
   const navigate = useNavigate();
 
   const handleStatusChange = async (newStatus: ProcessStatus) => {
-      console.info("Logging new status: ", newStatus);
+    console.info("Logging new status: ", newStatus);
   };
 
   const renderActionNode = () => {
@@ -45,8 +45,27 @@ const CleanUpSummary = () => {
     return null;
   };
 
+  const breadcrumbNode = () => {
+
+    if (selectedTab != 0) return (
+      <Breadcrumbs
+        separator="/"
+        maxItems={20}>
+        <Link
+          color={"inherit"}
+          underline="hover"
+          onClick={() => {
+            console.info("Clicked on December Flow Summary");
+            navigate("/december-process-accordion");
+          }}>
+          December Flow Summary
+        </Link>
+        <div className="text-dsm-secondary">Clean Up</div>
+      </Breadcrumbs>);
+  }
+
   return (
-    <Page label={selectedTab == 0 ? "Clean Up Process Summary" : tabs[selectedTab]} actionNode={renderActionNode()}>
+    <Page label={selectedTab == 0 ? "Clean Up Process Summary" : tabs[selectedTab]} breadcrumbNode={breadcrumbNode()} actionNode={renderActionNode()}>
       <Grid2
         container
         width="100%"
