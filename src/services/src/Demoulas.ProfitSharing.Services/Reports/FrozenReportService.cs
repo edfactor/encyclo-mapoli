@@ -1,7 +1,9 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -330,6 +332,53 @@ public class FrozenReportService : IFrozenReportService
             TotalEmployees = (short)details.Sum(d => d.EmployeeCount),
             Response = new PaginatedResponseDto<ContributionsByAgeDetail>(req) { Results = details, Total = details.Count }
         };
+    }
+
+    public async Task<GrossWagesReportResponse> GetGrossWagesReport(GrossWagesReportRequest req, CancellationToken cancellationToken = default)
+    {
+        using (_logger.BeginScope("Request FORFEITURES AND POINTS FOR YEAR"))
+        {
+            var rslt = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+            {
+                short lastProfitYear = (short)(req.ProfitYear - 1);
+                var demographics = FrozenService.GetDemographicSnapshot(ctx, req.ProfitYear);
+                var reportDemographics = await (from d in demographics
+                                          join lyPP in ctx.PayProfits on new { d.Id, Year = lastProfitYear } equals new { Id = lyPP.DemographicId, Year = lyPP.ProfitYear }
+                                          join pp in ctx.PayProfits on new { d.Id, Year = req.ProfitYear } equals new { Id = pp.DemographicId, Year = pp.ProfitYear }
+                                          join psBal in _totalService.GetTotalBalanceSet(ctx, req.ProfitYear) on d.Ssn equals psBal.Ssn
+                                          join fBal in _totalService.GetForfeitures(ctx, req.ProfitYear) on d.Ssn equals fBal.Ssn into fBal_tmp
+                                          from fBal_lj in fBal_tmp.DefaultIfEmpty()
+                                          join lBal in _totalService.GetQuoteLoansUnQuote(ctx, req.ProfitYear) on d.Ssn equals lBal.Ssn into lBal_tmp
+                                          from lBal_lj in lBal_tmp.DefaultIfEmpty()
+                                          where lyPP.CurrentIncomeYear + pp.IncomeExecutive > req.MinGrossAmount
+                                          orderby d.ContactInfo.FullName
+                                          select new GrossWagesReportDetail()
+                                          {
+                                              BadgeNumber = d.BadgeNumber,
+                                              EmployeeName = d.ContactInfo.FullName ?? "",
+                                              DateOfBirth = d.DateOfBirth,
+                                              Ssn = d.Ssn.MaskSsn(),
+                                              Forfeitures = fBal_lj != null ? fBal_lj.Total : 0,
+                                              Loans = lBal_lj != null ? lBal_lj.Total : 0,
+                                              ProfitSharingAmount = psBal.Total,
+                                              GrossWages = lyPP.CurrentIncomeYear + pp.IncomeExecutive
+                                          }).ToListAsync();
+
+                return reportDemographics;
+            });
+
+            return new GrossWagesReportResponse()
+            {
+                ReportDate = DateTimeOffset.Now,
+                ReportName = GrossWagesReportResponse.REPORT_NAME,
+                Response = new PaginatedResponseDto<GrossWagesReportDetail>(req) { Results = rslt, Total = rslt.Count },
+                TotalForfeitures = rslt.Sum(x => x.Forfeitures),
+                TotalGrossWages = rslt.Sum(x => x.GrossWages),
+                TotalLoans = rslt.Sum(x => x.Loans),
+                TotalProfitSharingAmount = rslt.Sum(x => x.ProfitSharingAmount)
+            };
+        }
+            
     }
 
     public async Task<ForfeituresByAge> GetForfeituresByAgeYearAsync(FrozenReportsByAgeRequest req, CancellationToken cancellationToken = default)

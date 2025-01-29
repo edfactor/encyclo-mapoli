@@ -24,6 +24,7 @@ public sealed record MasterInquiryResponseDto
     public long? CommentRelatedOracleHcmId { get; set; }
     public short? CommentRelatedPsnSuffix { get; set; }
     public bool? CommentIsPartialTransaction { get; set; }
+    public int? BadgeNumber { get; set; }
 
      public static MasterInquiryResponseDto ResponseExample()
     {

@@ -143,6 +143,44 @@ public sealed class TotalService : ITotalService
     }
 
     /// <summary>
+    /// Gets the sum total of forfeitures by SSN over the course of history with an employee
+    /// </summary>
+    /// <param name="ctx">The database context</param>
+    /// <param name="employeeYear">Maximum profit year that will be searched through</param>
+    /// <returns></returns>
+    internal IQueryable<ParticipantTotalDto> GetForfeitures(IProfitSharingDbContext ctx, short employeeYear)
+    {
+        int[] validProfitCodes = [ProfitCode.Constants.OutgoingForfeitures.Id, ProfitCode.Constants.Outgoing100PercentVestedPayment.Id];
+        return (from pd in ctx.ProfitDetails
+                where pd.ProfitYear <= employeeYear
+                group pd by pd.Ssn into pd_g
+                select new ParticipantTotalDto()
+                {
+                    Ssn = pd_g.Key,
+                    Total = pd_g.Where(x => validProfitCodes.Contains(x.ProfitCodeId)).Sum(x => x.Forfeiture)
+                });
+    }
+
+    /// <summary>
+    /// Gets the sum total of loans by SSN over the course of history with an employee
+    /// </summary>
+    /// <param name="ctx">The database context</param>
+    /// <param name="employeeYear">Maximum Profit year that will be searched through</param>
+    /// <returns></returns>
+    internal IQueryable<ParticipantTotalDto> GetQuoteLoansUnQuote(IProfitSharingDbContext ctx, short employeeYear)
+    {
+        int[] validProfitCodes = [ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id, ProfitCode.Constants.OutgoingDirectPayments.Id];
+        return (from pd in ctx.ProfitDetails
+                where pd.ProfitYear <= employeeYear
+                group pd by pd.Ssn into pd_g
+                select new ParticipantTotalDto()
+                {
+                    Ssn = pd_g.Key,
+                    Total = pd_g.Where(x => validProfitCodes.Contains(x.ProfitCodeId)).Sum(x => x.Forfeiture)
+                });
+    }
+
+    /// <summary>
     /// Calculates the vesting ratio for participants based on their demographic and beneficiary information,
     /// years of service, hours worked, and other criteria.
     /// </summary>
