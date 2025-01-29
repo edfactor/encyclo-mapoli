@@ -252,6 +252,7 @@ export interface MasterInquiryDetail extends ProfitYearRequest {
   yearToDate: number;
   remark?: string;
   zeroContributionReasonId?: number;
+  badgeNumber?: number;
   federalTaxes: number;
   stateTaxes: number;
   taxCodeId?: string;
@@ -277,6 +278,7 @@ export interface MasterInquryRequest {
   comment?: string;
   pagination: PaginationParams;
   employeeNumber?: string;
+  badgeNumber?: number;
 }
 
 export enum FrozenReportsByAgeRequestType {

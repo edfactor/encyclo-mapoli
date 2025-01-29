@@ -1,6 +1,6 @@
-import {createApi, fetchBaseQuery} from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-import {RootState} from "reduxstore/store";
+import { RootState } from "reduxstore/store";
 import {
     DemographicBadgesNotInPayprofitRequestDto,
     DemographicBadgesNotInPayprofitResponse,
@@ -63,12 +63,12 @@ import {
     setTermination,
     setProfitUpdate, clearProfitUpdate, setProfitEdit, clearProfitEdit, setProfitMasterApply, setProfitMasterRevert
 } from "reduxstore/slices/yearsEndSlice";
-import {url} from "./api";
+import { url } from "./api";
 
 export const YearsEndApi = createApi({
     baseQuery: fetchBaseQuery({
         baseUrl: `${url}/api/`,
-        prepareHeaders: (headers, {getState}) => {
+        prepareHeaders: (headers, { getState }) => {
             const token = (getState() as RootState).security.token;
             const impersonating = (getState() as RootState).security.impersonating;
             if (token) {
@@ -95,9 +95,9 @@ export const YearsEndApi = createApi({
                     profitYear: params.profitYear
                 }
             }),
-            async onQueryStarted(arg, {dispatch, queryFulfilled}) {
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(setDuplicateSSNsData(data));
                 } catch (err) {
                     console.log("Err: " + err);
@@ -116,9 +116,9 @@ export const YearsEndApi = createApi({
                     skip: params.pagination.skip
                 }
             }),
-            async onQueryStarted(arg, {dispatch, queryFulfilled}) {
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(setDemographicBadgesNotInPayprofitData(data));
                 } catch (err) {
                     console.log("Err: " + err);
@@ -141,9 +141,9 @@ export const YearsEndApi = createApi({
                     skip: params.pagination.skip
                 }
             }),
-            async onQueryStarted(arg, {dispatch, queryFulfilled}) {
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(setDistributionsAndForfeitures(data));
                 } catch (err) {
                     console.log("Err: " + err);
@@ -163,9 +163,9 @@ export const YearsEndApi = createApi({
                     skip: params.pagination.skip
                 }
             }),
-            async onQueryStarted(arg, {dispatch, queryFulfilled}) {
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(setDuplicateNamesAndBirthdays(data));
                 } catch (err) {
                     console.log("Err: " + err);
@@ -181,9 +181,9 @@ export const YearsEndApi = createApi({
                     skip: params.pagination.skip
                 }
             }),
-            async onQueryStarted(arg, {dispatch, queryFulfilled}) {
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(setMilitaryAndRehireDetails(data));
                 } catch (err) {
                     console.log("Err: " + err);
@@ -203,9 +203,9 @@ export const YearsEndApi = createApi({
                     skip: params.pagination.skip
                 }
             }),
-            async onQueryStarted(arg, {dispatch, queryFulfilled}) {
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(setMilitaryAndRehireForfeituresDetails(data));
                 } catch (err) {
                     console.log("Err: " + err);
@@ -225,9 +225,9 @@ export const YearsEndApi = createApi({
                     skip: params.pagination.skip
                 }
             }),
-            async onQueryStarted(arg, {dispatch, queryFulfilled}) {
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(setMilitaryAndRehireProfitSummaryDetails(data));
                 } catch (err) {
                     console.log("Err: " + err);
@@ -243,9 +243,9 @@ export const YearsEndApi = createApi({
                     skip: params.pagination.skip
                 }
             }),
-            async onQueryStarted({queryFulfilled}) {
+            async onQueryStarted({ queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                 } catch (err) {
                     console.log("Err: " + err);
                 }
@@ -260,9 +260,9 @@ export const YearsEndApi = createApi({
                     skip: params.pagination.skip
                 }
             }),
-            async onQueryStarted(arg, {dispatch, queryFulfilled}) {
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(setMissingCommaInPYName(data));
                 } catch (err) {
                     console.log("Err: " + err);
@@ -282,9 +282,9 @@ export const YearsEndApi = createApi({
                     skip: params.pagination.skip
                 }
             }),
-            async onQueryStarted(arg, {dispatch, queryFulfilled}) {
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(setNegativeEtvaForSssnsOnPayprofit(data));
                 } catch (err) {
                     console.log("Err: " + err);
@@ -300,9 +300,9 @@ export const YearsEndApi = createApi({
                     skip: params.pagination.skip
                 }
             }),
-            async onQueryStarted({dispatch, queryFulfilled}) {
+            async onQueryStarted({ dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                 } catch (err) {
                     console.log("Err: " + err);
                 }
@@ -317,9 +317,9 @@ export const YearsEndApi = createApi({
                     skip: params.pagination.skip
                 }
             }),
-            async onQueryStarted({dispatch, queryFulfilled}) {
+            async onQueryStarted({ dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                 } catch (err) {
                     console.log("Err: " + err);
                 }
@@ -334,9 +334,9 @@ export const YearsEndApi = createApi({
                     skip: params.pagination.skip
                 }
             }),
-            async onQueryStarted({dispatch, queryFulfilled}) {
+            async onQueryStarted({ dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                 } catch (err) {
                     console.log("Err: " + err);
                 }
@@ -359,9 +359,9 @@ export const YearsEndApi = createApi({
                     hasExecutiveHoursAndDollars: params.hasExecutiveHoursAndDollars
                 }
             }),
-            async onQueryStarted(arg, {dispatch, queryFulfilled}) {
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(setExecutiveHoursAndDollars(data));
                 } catch (err) {
                     console.log("Err: " + err);
@@ -378,9 +378,9 @@ export const YearsEndApi = createApi({
                     skip: params.pagination.skip
                 }
             }),
-            async onQueryStarted(arg, {dispatch, queryFulfilled}) {
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(setEligibleEmployees(data));
                 } catch (err) {
                     console.log("Err: " + err);
@@ -397,9 +397,9 @@ export const YearsEndApi = createApi({
                     reportType: params.reportType
                 }
             }),
-            async onQueryStarted(arg, {dispatch, queryFulfilled}) {
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(setDistributionsByAge(data));
                 } catch (err) {
                     console.log("Err: " + err);
@@ -415,9 +415,9 @@ export const YearsEndApi = createApi({
                     reportType: params.reportType
                 }
             }),
-            async onQueryStarted(arg, {dispatch, queryFulfilled}) {
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(setContributionsByAge(data));
                 } catch (err) {
                     console.log("Err: " + err);
@@ -433,9 +433,9 @@ export const YearsEndApi = createApi({
                     reportType: params.reportType
                 }
             }),
-            async onQueryStarted(arg, {dispatch, queryFulfilled}) {
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(setForfeituresByAge(data));
                 } catch (err) {
                     console.log("Err: " + err);
@@ -451,9 +451,9 @@ export const YearsEndApi = createApi({
                     reportType: params.reportType
                 }
             }),
-            async onQueryStarted(arg, {dispatch, queryFulfilled}) {
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(setBalanceByAge(data));
                 } catch (err) {
                     console.log("Err: " + err);
@@ -469,9 +469,9 @@ export const YearsEndApi = createApi({
                     reportType: params.reportType
                 }
             }),
-            async onQueryStarted(arg, {dispatch, queryFulfilled}) {
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(setBalanceByYears(data));
                 } catch (err) {
                     console.log("Err: " + err);
@@ -483,6 +483,7 @@ export const YearsEndApi = createApi({
                 url: "master/master-inquiry",
                 method: "GET",
                 params: {
+                    badgeNumber: params.badgeNumber,
                     startProfitYear: params.startProfitYear,
                     endProfitYear: params.endProfitYear,
                     startProfitMonth: params.startProfitMonth,
@@ -498,9 +499,9 @@ export const YearsEndApi = createApi({
                     skip: params.pagination.skip
                 }
             }),
-            async onQueryStarted(arg, {dispatch, queryFulfilled}) {
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(setMasterInquiryData(data));
                 } catch (err) {
                     console.log("Err: " + err);
@@ -524,9 +525,9 @@ export const YearsEndApi = createApi({
                     return response.json();
                 }
             }),
-            async onQueryStarted(arg, {dispatch, queryFulfilled}) {
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(setVestingAmountByAge(data));
                 } catch (err) {
                     console.log("Err: " + err);
@@ -543,9 +544,9 @@ export const YearsEndApi = createApi({
                     take: params.pagination.take
                 }
             }),
-            async onQueryStarted(arg, {dispatch, queryFulfilled}) {
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(setTermination(data));
                 } catch (err) {
                     console.log("Err: " + err);
@@ -558,9 +559,9 @@ export const YearsEndApi = createApi({
                 method: "GET",
                 params: params
             }),
-            async onQueryStarted(arg, {dispatch, queryFulfilled}) {
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(setProfitUpdate(data));
                 } catch (err) {
                     console.log("Err: " + err);
@@ -574,9 +575,9 @@ export const YearsEndApi = createApi({
                 method: "GET",
                 params: params
             }),
-            async onQueryStarted(arg, {dispatch, queryFulfilled}) {
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(setProfitEdit(data));
                 } catch (err) {
                     console.log("Err: " + err);
@@ -590,9 +591,9 @@ export const YearsEndApi = createApi({
                 method: "GET",
                 params: params
             }),
-            async onQueryStarted(arg, {dispatch, queryFulfilled}) {
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(setProfitMasterApply(data));
                 } catch (err) {
                     console.log("Err: " + err);
@@ -606,9 +607,9 @@ export const YearsEndApi = createApi({
                 method: "GET",
                 params: params
             }),
-            async onQueryStarted(arg, {dispatch, queryFulfilled}) {
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(setProfitMasterRevert(data));
                 } catch (err) {
                     console.log("Err: " + err);
