@@ -354,6 +354,7 @@ export const YearsEndApi = createApi({
                     skip: params.pagination.skip,
                     profitYear: params.profitYear,
                     badgeNumber: params.badgeNumber,
+                    ssn: params.socialSecurity,
                     fullNameContains: params.fullNameContains,
                     hasExecutiveHoursAndDollars: params.hasExecutiveHoursAndDollars
                 }
