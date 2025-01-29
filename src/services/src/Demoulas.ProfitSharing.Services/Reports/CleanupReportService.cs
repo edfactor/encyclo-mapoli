@@ -204,14 +204,14 @@ public class CleanupReportService : ICleanupReportService
                                                select g.Key.FullName);
 
                 var query = from dem in ctx.Demographics
-                            join ppLj in ctx.PayProfits on dem.Id equals ppLj.DemographicId into tmpPayProfit
+                            join ppLj in ctx.PayProfits on new { DemographicId = dem.Id, req.ProfitYear} equals new { ppLj.DemographicId, ppLj.ProfitYear} into tmpPayProfit
                             from pp in tmpPayProfit.DefaultIfEmpty()
-                            join pdLj in ctx.ProfitDetails on dem.Ssn equals pdLj.Ssn into tmpProfitDetails
+                            join pdLj in ctx.ProfitDetails on new { dem.Ssn, req.ProfitYear } equals new { pdLj.Ssn, pdLj.ProfitYear } into tmpProfitDetails
                             from pd in tmpProfitDetails.DefaultIfEmpty()
-                            where pp.ProfitYear == req.ProfitYear && dupNameSlashDateOfBirth.Contains(dem.ContactInfo.FullName)
+                            where dupNameSlashDateOfBirth.Contains(dem.ContactInfo.FullName)
                             group new { dem, pp, pd } by new
                             {
-                                BadgeNumber = dem.BadgeNumber,
+                                dem.BadgeNumber,
                                 SSN = dem.Ssn,
                                 dem.ContactInfo.FullName,
                                 dem.DateOfBirth,
