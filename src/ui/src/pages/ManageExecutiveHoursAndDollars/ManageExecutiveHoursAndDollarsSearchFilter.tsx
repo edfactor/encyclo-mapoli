@@ -10,6 +10,7 @@ import * as yup from "yup";
 interface ExecutiveHoursAndDollarsSearch {
   profitYear: number;
   badgeNumber?: number | null;
+  socialSecurity?: number | null;
   fullNameContains?: string | null;
   hasExecutiveHoursAndDollars: boolean;
 }
@@ -26,6 +27,13 @@ const schema = yup.object().shape({
     .number()
     .typeError("Badge Number must be a number")
     .integer("Badge Number must be an integer")
+    .nullable(),
+  socialSecurity: yup
+    .number()
+    .typeError("SSN must be a number")
+    .integer("SSN must be an integer")
+    .min(0, "SSN must be positive")
+    .max(999999999, "SSN must be 9 digits or less")
     .nullable(),
   fullNameContains: yup.string().typeError("Full Name must be a string").nullable(),
   hasExecutiveHoursAndDollars: yup.boolean().default(false).required()
@@ -46,6 +54,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter = () => {
       profitYear: undefined,
       fullNameContains: null,
       badgeNumber: null,
+      socialSecurity: null,
       hasExecutiveHoursAndDollars: false
     }
   });
@@ -56,6 +65,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter = () => {
         {
           pagination: { skip: 0, take: 25 },
           profitYear: data.profitYear,
+          ...(!!data.socialSecurity && { socialSecurity: data.socialSecurity }),
           ...(!!data.badgeNumber && { badgeNumber: data.badgeNumber }),
           hasExecutiveHoursAndDollars: data.hasExecutiveHoursAndDollars ?? false,
           ...(!!data.fullNameContains && { fullNameContains: data.fullNameContains })
@@ -76,7 +86,8 @@ const ManageExecutiveHoursAndDollarsSearchFilter = () => {
       <Grid2
         container
         paddingX="24px"
-        gap="24px">
+        >
+        <Grid2 container spacing={3} width="100%">
         <Grid2
           xs={12}
           sm={6}
@@ -126,6 +137,27 @@ const ManageExecutiveHoursAndDollarsSearchFilter = () => {
           xs={12}
           sm={6}
           md={3}>
+          <FormLabel>SSN</FormLabel>
+          <Controller
+              name="socialSecurity"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  size="small"
+                  variant="outlined"
+                  value={field.value ?? ''}
+                  error={!!errors.socialSecurity}
+                />
+            )}
+          />
+          {errors.socialSecurity && <FormHelperText error>{errors.socialSecurity.message}</FormHelperText>}
+        </Grid2>
+        <Grid2
+          xs={12}
+          sm={6}
+          md={3}>
           <FormLabel>Badge Number</FormLabel>
           <Controller
             name="badgeNumber"
@@ -165,6 +197,8 @@ const ManageExecutiveHoursAndDollarsSearchFilter = () => {
             <FormHelperText error>{errors.hasExecutiveHoursAndDollars.message}</FormHelperText>
           )}
         </Grid2>
+        
+      </Grid2>
       </Grid2>
       <Grid2
         width="100%"

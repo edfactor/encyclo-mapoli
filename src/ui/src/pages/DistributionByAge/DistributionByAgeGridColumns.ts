@@ -26,36 +26,15 @@ export const GetDistributionsByAgeColumns = (
       },
       {
         headerName: "EMPS",
-        field: "employeeCount",
-        colId: "employeeCount",
+        field: "regularEmployeeCount",
+        colId: "regularEmployeeCount",
         minWidth: 100,
         headerClass: "left-align",
         cellClass: "left-align",
-        resizable: true,
-        valueGetter: (params) => {
-          const regular = params.data.regularEmployeeCount || 0; // Fallback to 0 if not provided
-          const hardship = params.data.hardshipEmployeeCount || 0; // Fallback to 0 if not provided
-          return `${params.data.employeeCount} (R:${regular}, H:${hardship})`;
-        },
-        cellStyle: (params) => {
-          const regular = params.data.regularEmployeeCount || 0;
-          const hardship = params.data.hardshipEmployeeCount || 0;
-          const total = regular + hardship;
-          return total !== params.data.employeeCount ? { backgroundColor: "yellow" } : null;
-        }
+        resizable: true        
       },
       {
         headerName: "Amount",
-        field: "amount",
-        colId: "amount",
-        minWidth: 150,
-        headerClass: "left-align",
-        cellClass: "left-align",
-        resizable: true,
-        valueFormatter: agGridNumberToCurrency
-      },
-      {
-        headerName: "Regular",
         field: "regularAmount",
         colId: "regularAmount",
         minWidth: 150,
@@ -63,17 +42,7 @@ export const GetDistributionsByAgeColumns = (
         cellClass: "left-align",
         resizable: true,
         valueFormatter: agGridNumberToCurrency
-      },
-      {
-        headerName: "Hardship",
-        field: "hardshipAmount",
-        colId: "hardshipAmount",
-        minWidth: 150,
-        headerClass: "left-align",
-        cellClass: "left-align",
-        resizable: true,
-        valueFormatter: agGridNumberToCurrency
-      }
+      }     
     ]
   };
 };

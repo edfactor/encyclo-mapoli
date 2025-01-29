@@ -22,7 +22,7 @@ import {
   EmployeeDetails,
   MasterInquiryResponseType,
   VestedAmountsByAge,
-  TerminationResponse
+  TerminationResponse, ProfitShareUpdateResponse, ProfitShareEditResponse, ProfitShareMasterResponse
 } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
 
@@ -58,6 +58,7 @@ export interface YearsEndState {
   vestedAmountsByAge: VestedAmountsByAge | null;
   terminattion: TerminationResponse | null;
   militaryAndRehireEntryAndModification: EmployeeDetails | null;
+  profitSharingUpdate: ProfitShareUpdateResponse | ProfitShareEditResponse | ProfitShareMasterResponse | null ;
 }
 
 const initialState: YearsEndState = {
@@ -91,7 +92,8 @@ const initialState: YearsEndState = {
   balanceByYearsPartTime: null,
   vestedAmountsByAge: null,
   terminattion: null,
-  militaryAndRehireEntryAndModification: null
+  profitSharingUpdate: null,
+  militaryAndRehireEntryAndModification: null,
 };
 
 export const yearsEndSlice = createSlice({
@@ -228,6 +230,59 @@ export const yearsEndSlice = createSlice({
     setTermination: (state, action: PayloadAction<TerminationResponse>) => {
       state.terminattion = action.payload;
     },
+    setProfitUpdate: (state, action: PayloadAction<ProfitShareUpdateResponse>) => {
+      state.profitSharingUpdate = action.payload;
+    },
+    setProfitUpdateLoading: (state) => {
+      // @ts-ignore
+      state.profitSharingUpdate = { isLoading: true, reportName: "Profit Sharing Update"  };
+    },
+    clearProfitUpdate: (state) => {
+      // @ts-ignore
+      state.profitSharingUpdate = null;
+    },
+    setProfitEdit: (state, action: PayloadAction<ProfitShareEditResponse>) => {
+      state.profitSharingUpdate = action.payload;
+    },
+    setProfitEditLoading: (state) => {
+      // @ts-ignore
+      state.profitSharingUpdate = { isLoading: true, reportName: "Profit Sharing Edit"  };
+    },
+    clearProfitEdit: (state) => {
+      // @ts-ignore
+      state.profitSharingUpdate = null;
+    },
+    
+    setProfitMasterApply: (state, action: PayloadAction<ProfitShareMasterResponse>) => {
+      state.profitSharingUpdate = {
+        ...action.payload,
+        reportName: "Apply",
+      };
+    },
+    setProfitMasterApplyLoading: (state) => {
+      // @ts-ignore
+      state.profitSharingUpdate = { isLoading: true, reportName: "Apply"  };
+    },
+    clearProfitMasterApply: (state) => {
+      // @ts-ignore
+      state.profitSharingUpdate = null;
+    },
+
+    setProfitMasterRevert: (state, action: PayloadAction<ProfitShareMasterResponse>) => {
+      state.profitSharingUpdate = {
+        ...action.payload,
+        reportName: "Revert",
+      };
+    },
+    setProfitMasterRevertLoading: (state) => {
+      // @ts-ignore
+      state.profitSharingUpdate = { isLoading: true, reportName: "Revert"  };
+    },
+    clearProfitMasterRevert: (state) => {
+      // @ts-ignore
+      state.profitSharingUpdate = null;
+    },
+    
     setMilitaryAndRehireEntryAndModificationEmployeeDetails: (state, action: PayloadAction<EmployeeDetails>) => {
       state.militaryAndRehireEntryAndModification = action.payload;
     },
@@ -254,6 +309,22 @@ export const {
   setBalanceByAge,
   setBalanceByYears,
   setVestingAmountByAge,
-  setTermination
+  setTermination,
+    
+  setProfitUpdate,
+  setProfitUpdateLoading,
+  clearProfitUpdate,
+  
+  setProfitEdit,
+  setProfitEditLoading,
+  clearProfitEdit,
+
+  setProfitMasterApply,
+  setProfitMasterApplyLoading,
+  clearProfitMasterApply,
+
+  setProfitMasterRevert,
+  setProfitMasterRevertLoading,
+  clearProfitMasterRevert
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

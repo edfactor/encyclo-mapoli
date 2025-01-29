@@ -56,6 +56,7 @@ public class ExecutiveHoursAndDollarsEndpoint :
             Map(m => m.CurrentIncomeYear).Index(6).Name("ORA DOLS CUR");
             Map(m => m.PayFrequencyId).Index(7).Name("FREQ");
             Map(m => m.EmploymentStatusId).Index(8).Name("STATUS");
+            Map(m => m.Ssn).Index(9).Name("SSN");
         }
     }
 }
