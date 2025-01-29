@@ -43,7 +43,7 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
             }
             if (request.Ssn!= null)
             {
-                query = query.Where(pp => pp.Demographic!.Ssn.ToString() == request.Ssn);
+                query = query.Where(pp => pp.Demographic!.Ssn == request.Ssn);
             }
             if (request.FullNameContains != null)
             {
