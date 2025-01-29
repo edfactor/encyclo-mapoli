@@ -144,11 +144,10 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             // Verify CSV file
             string csvData = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
             string[] lines = csvData.Split(["\r\n", "\n"], StringSplitOptions.None);
-            const string testName = "John, Null E";
             const string testSSN = "XXX-XX-8825";
             lines[1].Should().Be(_expectedReportName);
             lines[2].Should().Be("BADGE,NAME,STR,EXEC HRS,EXEC DOLS,ORA HRS CUR,ORA DOLS CUR,FREQ,STATUS,SSN");
-            lines[3].Should().Be("1,'" + testName + "',2,3,4,5,6,2,a," + testSSN);
+            lines[3].Should().Be(@"1,""John, Null E"",2,3,4,5,6,2,a," + testSSN);
             lines[4].Should().Be("");
         });
     }
