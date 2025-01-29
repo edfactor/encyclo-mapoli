@@ -33,7 +33,7 @@ interface MasterInquirySearch {
   endProfitMonth?: number | null;
   socialSecurity?: number | null;
   name?: string | null;
-  employeeNumber?: string | null;
+  badgeNumber?: number | null;
   comment?: string | null;
   paymentType: "all" | "hardship" | "payoffs" | "rollovers";
   memberType: "all" | "employees" | "beneficiaries" | "none";
@@ -79,7 +79,7 @@ const schema = yup.object().shape({
     .max(999999999, "SSN must be 9 digits or less")
     .nullable(),
   name: yup.string().nullable(),
-  employeeNumber: yup.string().nullable(),
+  badgeNumber: yup.number().nullable(),
   comment: yup.string().nullable(),
   paymentType: yup.string().oneOf(["all", "hardship", "payoffs", "rollovers"]).default("all").required(),
   memberType: yup.string().oneOf(["all", "employees", "beneficiaries", "none"]).default("all").required(),
@@ -109,13 +109,13 @@ const MasterInquirySearchFilter = () => {
     if (badgeNumber && hasToken) {
       reset({
         ...schema.getDefault(),
-        employeeNumber: badgeNumber
+        badgeNumber: Number(badgeNumber)
       });
 
       // Trigger search automatically when badge number is present
       const searchParams: MasterInquryRequest = {
         pagination: { skip: 0, take: 25 },
-        employeeNumber: badgeNumber
+        badgeNumber: Number(badgeNumber)
       };
 
       triggerSearch(searchParams, false);
@@ -137,7 +137,7 @@ const MasterInquirySearchFilter = () => {
       endProfitMonth: undefined,
       socialSecurity: undefined,
       name: undefined,
-      employeeNumber: undefined,
+      badgeNumber: undefined,
       comment: undefined,
       paymentType: "all",
       memberType: "all",
@@ -159,7 +159,7 @@ const MasterInquirySearchFilter = () => {
         ...(!!data.endProfitMonth && { endProfitMonth: data.endProfitMonth }),
         ...(!!data.socialSecurity && { socialSecurity: data.socialSecurity }),
         ...(!!data.name && { name: data.name }),
-        ...(!!data.employeeNumber && { employeeNumber: data.employeeNumber }),
+        ...(!!data.badgeNumber && { badgeNumber: data.badgeNumber }),
         ...(!!data.comment && { comment: data.comment }),
         ...(!!data.paymentType && { paymentType: data.paymentType }),
         ...(!!data.memberType && { memberType: data.memberType }),
@@ -183,7 +183,7 @@ const MasterInquirySearchFilter = () => {
       endProfitMonth: undefined,
       socialSecurity: undefined,
       name: undefined,
-      employeeNumber: undefined,
+      badgeNumber: undefined,
       comment: undefined,
       paymentType: "all",
       memberType: "all",
@@ -348,9 +348,9 @@ const MasterInquirySearchFilter = () => {
           </Grid2>
 
           <Grid2 xs={12} sm={6} md={3}>
-            <FormLabel>Employee Number / PSN</FormLabel>
+            <FormLabel>Badge Number</FormLabel>
             <Controller
-              name="employeeNumber"
+              name="badgeNumber"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -359,11 +359,11 @@ const MasterInquirySearchFilter = () => {
                   size="small"
                   variant="outlined"
                   value={field.value ?? ''}
-                  error={!!errors.employeeNumber}
+                  error={!!errors.badgeNumber}
                 />
               )}
             />
-            {errors.employeeNumber && <FormHelperText error>{errors.employeeNumber.message}</FormHelperText>}
+            {errors.badgeNumber && <FormHelperText error>{errors.badgeNumber.message}</FormHelperText>}
           </Grid2>
 
           <Grid2 xs={12} sm={6} md={3}>

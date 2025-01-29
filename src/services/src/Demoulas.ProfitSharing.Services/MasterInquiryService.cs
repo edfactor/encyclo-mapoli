@@ -39,6 +39,11 @@ public class MasterInquiryService : IMasterInquiryService
                                 (pd, d) => new { ProfitDetail = pd, Demographics = d })
                             .Where(x => x.Demographics.PayFrequencyId == 1);
 
+                if (req.BadgeNumber.HasValue)
+                {
+                    query = query.Where(x => x.Demographics.BadgeNumber == req.BadgeNumber);
+                }
+
                 if (req.StartProfitYear.HasValue)
                 {
                     query = query.Where(x => x.ProfitDetail.ProfitYear >= req.StartProfitYear);
@@ -116,7 +121,8 @@ public class MasterInquiryService : IMasterInquiryService
                     CommentRelatedState = x.ProfitDetail.CommentRelatedState,
                     CommentRelatedOracleHcmId = x.ProfitDetail.CommentRelatedOracleHcmId,
                     CommentRelatedPsnSuffix = x.ProfitDetail.CommentRelatedPsnSuffix,
-                    CommentIsPartialTransaction = x.ProfitDetail.CommentIsPartialTransaction
+                    CommentIsPartialTransaction = x.ProfitDetail.CommentIsPartialTransaction,
+                    BadgeNumber = x.Demographics.BadgeNumber,
                 })
                 .OrderByDescending(x => x.ProfitYear)
                 .ToPaginationResultsAsync(req, cancellationToken);
@@ -130,35 +136,53 @@ public class MasterInquiryService : IMasterInquiryService
                     short currentYear = (short)DateTime.Today.Year;
                     short previousYear = (short)(currentYear - 1);
 
-                    var previousBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(SearchBy.Ssn, ssn, previousYear, cancellationToken);
-                    var currentBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(SearchBy.Ssn, ssn, currentYear, cancellationToken);
+                    BalanceEndpointResponse? previousBalance = null;
+                    BalanceEndpointResponse? currentBalance = null;
+                    try
+                    {
+                        previousBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(
+                            SearchBy.Ssn, ssn, previousYear, cancellationToken);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to retrieve previous year balance for SSN {SSN}", ssn);
+                    }
+                    try
+                    {
+                        currentBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(
+                            SearchBy.Ssn, ssn, currentYear, cancellationToken);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to retrieve current year balance for SSN {SSN}", ssn);
+                    }
 
                     var maxProfitYear = req.EndProfitYear.HasValue ? req.EndProfitYear : short.MaxValue;
 
                     var demographicData = await ctx.Demographics
-                     .Where(d => d.Ssn == ssn)
-                     .Select(d => new
-                     {
-                         d.ContactInfo.FirstName,
-                         d.ContactInfo.LastName,
-                         d.Address.City,
-                         d.Address.State,
-                         Address = d.Address.Street,
-                         d.Address.PostalCode,
-                         d.DateOfBirth,
-                         d.Ssn,
-                         BadgeNumber = d.BadgeNumber,
-                         d.ReHireDate,
-                         d.HireDate,
-                         d.TerminationDate,
-                         d.StoreNumber,
-                         DemographicId = d.Id,
-                         LatestPayProfit = d.PayProfits
+                        .Where(d => d.Ssn == ssn)
+                        .Select(d => new
+                        {
+                            d.ContactInfo.FirstName,
+                            d.ContactInfo.LastName,
+                            d.Address.City,
+                            d.Address.State,
+                            Address = d.Address.Street,
+                            d.Address.PostalCode,
+                            d.DateOfBirth,
+                            d.Ssn,
+                            BadgeNumber = d.BadgeNumber,
+                            d.ReHireDate,
+                            d.HireDate,
+                            d.TerminationDate,
+                            d.StoreNumber,
+                            DemographicId = d.Id,
+                            LatestPayProfit = d.PayProfits
                              .Where(x => x.ProfitYear <= maxProfitYear)
                              .OrderByDescending(p => p.ProfitYear)
                              .FirstOrDefault()
-                     })
-                     .FirstOrDefaultAsync(cancellationToken);
+                        })
+                        .FirstOrDefaultAsync(cancellationToken);
 
                     if (demographicData != null)
                     {
@@ -182,10 +206,10 @@ public class MasterInquiryService : IMasterInquiryService
                             ContributionsLastYear = previousBalance != null && previousBalance.CurrentBalance > 0,
                             Enrolled = demographicData.LatestPayProfit?.EnrollmentId != 0,
                             BadgeNumber = demographicData.BadgeNumber.ToString(),
-                            BeginPSAmount = (long) (previousBalance?.CurrentBalance ?? 0),
-                            CurrentPSAmount = (long) (currentBalance?.CurrentBalance ?? 0),
-                            BeginVestedAmount = (long) (previousBalance?.VestedBalance ?? 0),
-                            CurrentVestedAmount = (long) (currentBalance?.VestedBalance ?? 0)
+                            BeginPSAmount = (long)(previousBalance?.CurrentBalance ?? 0),
+                            CurrentPSAmount = (long)(currentBalance?.CurrentBalance ?? 0),
+                            BeginVestedAmount = (long)(previousBalance?.VestedBalance ?? 0),
+                            CurrentVestedAmount = (long)(currentBalance?.VestedBalance ?? 0)
                         };
                     }
                 }
