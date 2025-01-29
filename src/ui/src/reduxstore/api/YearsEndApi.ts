@@ -483,6 +483,7 @@ export const YearsEndApi = createApi({
                 url: "master/master-inquiry",
                 method: "GET",
                 params: {
+                    badgeNumber: params.badgeNumber,
                     startProfitYear: params.startProfitYear,
                     endProfitYear: params.endProfitYear,
                     startProfitMonth: params.startProfitMonth,
