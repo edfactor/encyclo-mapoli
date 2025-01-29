@@ -181,7 +181,6 @@ public class MasterInquiryService : IMasterInquiryService
                              .OrderByDescending(p => p.ProfitYear)
                              .FirstOrDefault()
                         })
-                        .AsNoTracking()
                         .FirstOrDefaultAsync(cancellationToken);
 
                     if (demographicData != null)
