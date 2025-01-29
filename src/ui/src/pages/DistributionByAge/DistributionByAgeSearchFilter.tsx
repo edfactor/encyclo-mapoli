@@ -1,12 +1,12 @@
-import { FormHelperText, FormLabel, TextField } from "@mui/material";
+import { FormHelperText } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useLazyGetDistributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { FrozenReportsByAgeRequestType } from "reduxstore/types";
+import DsmDatePicker from "../../components/DsmDatePicker/DsmDatePicker";
 
 interface DistributionByAgeSearch {
   profitYear: number;
@@ -85,20 +85,19 @@ const DistributionByAgeSearchFilter = () => {
           xs={12}
           sm={6}
           md={3}>
-          <FormLabel>Year</FormLabel>
           <Controller
             name="profitYear"
             control={control}
             render={({ field }) => (
-              <TextField
-                {...field}
-                fullWidth
-                variant="outlined"
-                error={!!errors.profitYear}
-                onChange={(e) => {
-                  field.onChange(e);
-                }}
-                inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+              <DsmDatePicker
+                id="Beginning Year"
+                onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
+                value={field.value ? new Date(field.value, 0) : null}
+                required={true}
+                label="Profit Year"
+                disableFuture
+                views={["year"]}
+                error={errors.profitYear?.message}
               />
             )}
           />

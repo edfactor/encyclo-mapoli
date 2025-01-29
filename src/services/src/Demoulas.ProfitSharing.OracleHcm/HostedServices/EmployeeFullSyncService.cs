@@ -21,7 +21,7 @@ internal sealed class EmployeeFullSyncService : OracleHcmHostedServiceBase
     {
         return ScheduleJob<EmployeeFullSyncJob>(
             "employeeFullSyncTrigger",
-            Debugger.IsAttached ? TimeSpan.Zero : TimeSpan.FromMinutes(1),
+            Debugger.IsAttached ? TimeSpan.Zero : TimeSpan.FromMinutes(2),
             TimeSpan.FromHours(OracleHcmConfig.IntervalInHours),
             cancellationToken
         );
