@@ -121,7 +121,8 @@ public class MasterInquiryService : IMasterInquiryService
                     CommentRelatedState = x.ProfitDetail.CommentRelatedState,
                     CommentRelatedOracleHcmId = x.ProfitDetail.CommentRelatedOracleHcmId,
                     CommentRelatedPsnSuffix = x.ProfitDetail.CommentRelatedPsnSuffix,
-                    CommentIsPartialTransaction = x.ProfitDetail.CommentIsPartialTransaction
+                    CommentIsPartialTransaction = x.ProfitDetail.CommentIsPartialTransaction,
+                    BadgeNumber = x.Demographics.BadgeNumber,
                 })
                 .OrderByDescending(x => x.ProfitYear)
                 .ToPaginationResultsAsync(req, cancellationToken);

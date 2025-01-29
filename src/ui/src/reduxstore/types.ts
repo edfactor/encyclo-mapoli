@@ -252,6 +252,7 @@ export interface MasterInquiryDetail extends ProfitYearRequest {
   yearToDate: number;
   remark?: string;
   zeroContributionReasonId?: number;
+  badgeNumber?: number;
   federalTaxes: number;
   stateTaxes: number;
   taxCodeId?: string;
