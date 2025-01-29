@@ -2,6 +2,7 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -40,6 +41,10 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
             {
                 query = query.Where(pp => pp.Demographic!.BadgeNumber == request.BadgeNumber);
             }
+            if (request.Ssn!= null)
+            {
+                query = query.Where(pp => pp.Demographic!.Ssn == request.Ssn);
+            }
             if (request.FullNameContains != null)
             {
                 // LINQ needs this simpler query so it can convert it to SQL.
@@ -54,6 +59,7 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
                     BadgeNumber = p.Demographic!.BadgeNumber,
                     FullName = p.Demographic.ContactInfo.FullName,
                     StoreNumber = p.Demographic.StoreNumber,
+                    Ssn = p.Demographic.Ssn.MaskSsn(),
                     HoursExecutive = p.HoursExecutive,
                     IncomeExecutive = p.IncomeExecutive,
                     CurrentHoursYear = p.CurrentHoursYear,
