@@ -43,7 +43,7 @@ definitions:
         - self.hosted
         - volta
       script:
-        - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
+        - $env:NPM = "npm"
       artifacts:
         - build/**
    
@@ -102,7 +102,7 @@ definitions:
       artifacts:
         - dist\**
       script:
-        - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
+        - $env:NPM = "npm"
         - ${env:ENV} = "qa"
         - cd .\src\UI
         - |
@@ -171,7 +171,7 @@ definitions:
       artifacts:
         - dist\**
       script:
-        - $env:NPM = "C:\nvm\v20.4.0\npm.cmd"
+        - $env:NPM = "npm"
         - ${env:ENV} = "prod"
         - if (!(Test-Path -Path ".\src\UI")) { Write-Error "UI source directory not found. Exiting."; exit 1 }
         - cd .\src\UI
