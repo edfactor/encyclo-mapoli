@@ -111,16 +111,8 @@ public class MasterInquiryService : IMasterInquiryService
                     };
                 }
 
-                if (req.MemberType.HasValue)
-                {
-                    query = req.MemberType.Value switch
-                    {
-                        1 => query.Where(x => !new[] { 5, 6 }.Contains(x.ProfitDetail.ProfitCodeId)),   // Employees
-                        2 => query.Where(x => new[] { 5, 6 }.Contains(x.ProfitDetail.ProfitCodeId)),    // Beneficiaries
-                        3 => query.Where(x => x.ProfitDetail.ProfitCodeId == 0),                         // None
-                        _ => query
-                    };
-                }
+                // member type
+                // payprof - beneficiary type id = 1, employee = 0
 
                 var results = await query
                 .Select(x => new MasterInquiryResponseDto
