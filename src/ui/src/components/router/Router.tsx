@@ -98,7 +98,7 @@ const Router = () => {
       <RouteSecurity oktaEnabled={oktaEnabled}>
         <Route
           path=""
-          element={<LandingPage />}></Route>
+          element={<DecemberProcessAccordion />}></Route>
         <Route
           path="demographic-badges-not-in-payprofit"
           element={<DemographicBadgesNotInPayprofit />}></Route>
