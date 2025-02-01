@@ -145,7 +145,7 @@ var cliRunner = builder.AddExecutable("Database-Cli",
 var api = builder.AddProject<Demoulas_ProfitSharing_Api>("ProfitSharing-Api")
     .WithHttpHealthCheck("/health")
     .WithHttpsHealthCheck("/health")
-    .WaitFor(cliRunner);
+    .WaitForCompletion(cliRunner);
 
 var ui = builder.AddNpmApp("ProfitSharing-Ui", "../../../ui/", "dev")
     .WithReference(api)
