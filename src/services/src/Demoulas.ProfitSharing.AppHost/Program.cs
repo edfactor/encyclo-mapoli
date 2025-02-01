@@ -41,7 +41,7 @@ ExecuteCommandResult RunConsoleApp(string projectPath, string launchProfile)
         {
             FileName = "dotnet",
             WorkingDirectory = projectPath,
-            Arguments = $"run --launch-profile {launchProfile}",
+            Arguments = $"run --no-build --launch-profile {launchProfile}",
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,
@@ -127,7 +127,7 @@ var projectPath = new FileInfo(cli.ProjectPath).Directory?.FullName;
 var cliRunner = builder.AddExecutable("Database-Cli",
     "dotnet",
     projectPath!,
-    "run", "--launch-profile", "upgrade-db")
+    "run", "--no-build", "--launch-profile", "upgrade-db")
     .WithCommand(
         name: "upgrade-db",
         displayName: "Upgrade database",
