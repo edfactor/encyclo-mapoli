@@ -75,5 +75,8 @@
     "typescript": "^5.2.2",
     "vite": "^5.3.4",
     "vite-plugin-compression": "^0.5.1"
+  },
+  "volta": {
+    "node": "20.4.0"
   }
 }
