@@ -273,6 +273,8 @@ pipelines:
 
             - echo "Deploying background service..."            
             - pwsh .\scripts\servicesDeploy.ps1 ${env:ENV} $env:API_SERVER_QA
+      - step: *upgrade-database
+  
       - step:
           name: "Checking API Health"
           runs-on:
@@ -281,9 +283,7 @@ pipelines:
           script:
             - pwsh -File ./scripts/Check-Health.ps1 -Url $env:QA_BASE_URL
 
-      - parallel:
-          - step: *upgrade-database
-          - step: *create-frontend-artifact-uat
+      - step: *create-frontend-artifact-uat
       - step:
           name: "Application Deployment"
           runs-on:

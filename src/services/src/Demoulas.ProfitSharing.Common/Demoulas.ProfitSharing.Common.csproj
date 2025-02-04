@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Contracts\InternalDto\**" />
+    <EmbeddedResource Remove="Contracts\InternalDto\**" />
+    <None Remove="Contracts\InternalDto\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="FastEndpoints" />
     <PackageReference Include="Demoulas.Common.Contracts" />
     <PackageReference Include="Demoulas.Util" />
@@ -49,11 +55,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-  </ItemGroup>
-
-
-  <ItemGroup>
-    <Folder Include="Contracts\InternalDto\" />
   </ItemGroup>
 
 </Project>
