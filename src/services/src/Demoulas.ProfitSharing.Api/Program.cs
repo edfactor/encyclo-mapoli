@@ -64,6 +64,7 @@ builder.Services.AddCors(options =>
             .WithExposedHeaders("Location");
     });
 });
+builder.Services.AddOpenApi();
 
 List<ContextFactoryRequest> list =
 [
