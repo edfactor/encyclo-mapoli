@@ -135,14 +135,20 @@ public class EmployeeTests : ApiTestBase<Program>
         m.ForfeitureAmount.Should().Be(0);
         m.Remark.Should().BeNull();
     }
-
+    
     [Fact]
     public async Task employee_with_ETVA_expect_earnings_on_both_an_8_record_and_a_0_record()
     {
         // Arrange
-        _payProfit.Etva = 1000m;
+        // In the future, this could simply be
+        //      _payProfit.Etva = 1000m
+        // but for now we rely on using the TotalService ETA calculation.   So we setup an employee
+        // with 2000 in contribution, and 1000 in ETVA
         _profitDetails[0].ProfitCodeId.Should().Be(0);
-        _profitDetails[0].Contribution = 3000m;
+        _profitDetails[0].Contribution = 2000m;
+
+        _profitDetails[1].ProfitCodeId.Should().Be(8);
+        _profitDetails[1].Earnings = 1000m; // Etva Amount
 
         // Balance is 3000 in profit details
         // ETVA is 1000
@@ -189,10 +195,13 @@ public class EmployeeTests : ApiTestBase<Program>
     public async Task secondary_earnings_with_etva()
     {
         // Arrange
-        _payProfit.Etva = 1000m;
+        // FYI: In the future: _payProfit.Etva = 1000m
         // 0 record has Vested amounts
         _profitDetails[0].ProfitCodeId.Should().Be(0);
-        _profitDetails[0].Contribution = 3000m;
+        _profitDetails[0].Contribution = 2000m;
+        // 8 record holds ETVA amount
+        _profitDetails[1].ProfitCodeId.Should().Be(8);
+        _profitDetails[1].Earnings = 1000m; // Etva Amount
         
         var req = new ProfitShareUpdateRequest { ProfitYear = _thisYear, SecondaryEarningsPercent = 3 };
 
