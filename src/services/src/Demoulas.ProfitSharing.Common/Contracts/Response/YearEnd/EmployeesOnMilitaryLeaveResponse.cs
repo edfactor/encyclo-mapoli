@@ -2,7 +2,7 @@
 using Demoulas.Util.Extensions;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-public sealed record MilitaryAndRehireReportResponse
+public sealed record EmployeesOnMilitaryLeaveResponse
 {
     public required byte DepartmentId { get; set; }
     public required int BadgeNumber { get; set; }
@@ -12,9 +12,9 @@ public sealed record MilitaryAndRehireReportResponse
     public required DateOnly? TerminationDate { get; set; }
 
 
-    public static MilitaryAndRehireReportResponse ResponseExample()
+    public static EmployeesOnMilitaryLeaveResponse ResponseExample()
     {
-        return new MilitaryAndRehireReportResponse
+        return new EmployeesOnMilitaryLeaveResponse
         {
             DepartmentId = 6,
             BadgeNumber = 123,

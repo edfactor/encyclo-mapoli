@@ -30,7 +30,7 @@ const decemberFlow: RouteCategory = {
     { caption: "Negative ETVA for SSNs on Payprofit", route: "/negative-etva-for-ssns-on-payprofit" },
     { caption: "Duplicate Names and Birthdays", route: "/duplicate-names-and-birthdays" },
     { caption: "Missing Comma in Full Name", route: "/missing-comma-in-py-name" },
-    { caption: "Military and Rehire", route: "/military-and-rehire" },
+    { caption: "Employees On Military Leave", route: "/employees-on-military-leave" },
     { caption: "Military and Rehire Forfeitures", route: "/military-and-rehire-forfeitures" },
     { caption: "Military and Rehire Profit Summary", route: "/military-and-rehire-profit-summary" },
     { caption: "Profit Share Report", route: "/profit-share-report" },

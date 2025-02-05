@@ -5,7 +5,7 @@ import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import { isValid } from "date-fns";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { useLazyGetMilitaryAndRehireQuery } from "reduxstore/api/YearsEndApi";
+import { useLazyGetEmployeesOnMilitaryLeaveQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 
@@ -19,8 +19,8 @@ const schema = yup.object().shape({
   startDate: yup.date().required("Start Date is required"),
 });
 
-const MilitaryAndRehireSearchFilter = () => {
-  const [triggerSearch, { isFetching }] = useLazyGetMilitaryAndRehireQuery();
+const EmployeesOnMilitaryLeaveSearchFilter = () => {
+  const [triggerSearch, { isFetching }] = useLazyGetEmployeesOnMilitaryLeaveQuery();
 
   const { control, handleSubmit, formState: { errors, isValid }, reset } = useForm<ISearchForm>({
     resolver: yupResolver(schema),
@@ -106,4 +106,4 @@ const MilitaryAndRehireSearchFilter = () => {
   );
 };
 
-export default MilitaryAndRehireSearchFilter;
+export default EmployeesOnMilitaryLeaveSearchFilter;

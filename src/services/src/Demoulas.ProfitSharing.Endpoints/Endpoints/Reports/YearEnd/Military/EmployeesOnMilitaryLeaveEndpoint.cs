@@ -11,36 +11,36 @@ using Demoulas.ProfitSharing.Security;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
 
-public class MilitaryAndRehireEndpoint : EndpointWithCsvBase<PaginationRequestDto, MilitaryAndRehireReportResponse, MilitaryAndRehireEndpoint.MilitaryAndRehireReportResponseMap>
+public class EmployeesOnMilitaryLeaveEndpoint : EndpointWithCsvBase<PaginationRequestDto, EmployeesOnMilitaryLeaveResponse, EmployeesOnMilitaryLeaveEndpoint.EmployeesOnMilitaryLeaveResponseMap>
 {
     private readonly IMilitaryAndRehireService _reportService;
 
-    public MilitaryAndRehireEndpoint(IMilitaryAndRehireService reportService)
+    public EmployeesOnMilitaryLeaveEndpoint(IMilitaryAndRehireService reportService)
     {
         _reportService = reportService;
     }
 
     public override void Configure()
     {
-        Get("military-and-rehire");
+        Get("employees-on-military-leave");
         Summary(s =>
         {
-            s.Summary = "Military and Rehire Report Endpoint";
+            s.Summary = ReportFileName;
             s.Description =
-                "Provides a report on employees who are on military leave or have been rehired. This report helps identify potential issues that need to be addressed before running profit sharing. The endpoint can be executed multiple times.";
+                "Provides a report on employees who are on military leave. This report helps identify potential issues that need to be addressed before running profit sharing. The endpoint can be executed multiple times.";
 
             s.ExampleRequest = SimpleExampleRequest;
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
                     200,
-                    new ReportResponseBase<MilitaryAndRehireReportResponse>
+                    new ReportResponseBase<EmployeesOnMilitaryLeaveResponse>
                     {
                         ReportName = ReportFileName,
                         ReportDate = DateTimeOffset.Now,
-                        Response = new PaginatedResponseDto<MilitaryAndRehireReportResponse>
+                        Response = new PaginatedResponseDto<EmployeesOnMilitaryLeaveResponse>
                         {
-                            Results = new List<MilitaryAndRehireReportResponse> { MilitaryAndRehireReportResponse.ResponseExample() }
+                            Results = new List<EmployeesOnMilitaryLeaveResponse> { EmployeesOnMilitaryLeaveResponse.ResponseExample() }
                         }
                     }
                 }
@@ -53,16 +53,16 @@ public class MilitaryAndRehireEndpoint : EndpointWithCsvBase<PaginationRequestDt
 
     public override string ReportFileName => "EMPLOYEES ON MILITARY LEAVE";
 
-    public override Task<ReportResponseBase<MilitaryAndRehireReportResponse>> GetResponse(PaginationRequestDto req, CancellationToken ct)
+    public override Task<ReportResponseBase<EmployeesOnMilitaryLeaveResponse>> GetResponse(PaginationRequestDto req, CancellationToken ct)
     {
         return _reportService.GetMilitaryAndRehireReportAsync(req, ct);
     }
 
 
 
-    public sealed class MilitaryAndRehireReportResponseMap : ClassMap<MilitaryAndRehireReportResponse>
+    public sealed class EmployeesOnMilitaryLeaveResponseMap : ClassMap<EmployeesOnMilitaryLeaveResponse>
     {
-        public MilitaryAndRehireReportResponseMap()
+        public EmployeesOnMilitaryLeaveResponseMap()
         {
             Map().Index(0).Convert(_ => string.Empty);
             Map().Index(1).Convert(_ => string.Empty);

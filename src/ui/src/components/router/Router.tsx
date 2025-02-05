@@ -8,7 +8,7 @@ import DuplicateSSNsOnDemographics from "pages/DuplicateSSNsOnDemographics/Dupli
 import NegativeEtvaForSSNsOnPayprofit from "pages/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofit";
 import DuplicateNamesAndBirthdays from "pages/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdays";
 import MissingCommaInPyName from "pages/MissingCommaInPyName/MissingCommaInPyName";
-import MilitaryAndRehire from "pages/MilitaryAndRehire/MilitaryAndRehire";
+import EmployeesOnMilitaryLeave from "pages/EmployeesOnMilitaryLeave/EmployeesOnMilitaryLeave";
 import MilitaryAndRehireForfeitures from "pages/MilitaryAndRehireForfeitures/MilitaryAndRehireForfeitures";
 import MilitaryAndRehireProfitSummary from "pages/MilitaryAndRehireProfitSummary/MilitaryAndRehireProfitSummary";
 import DistributionsAndForfeitures from "pages/DistributionsAndForfeitures/DistributionAndForfeitures";
@@ -115,8 +115,8 @@ const Router = () => {
           path="missing-comma-in-py-name"
           element={<MissingCommaInPyName />}></Route>
         <Route
-          path="military-and-rehire"
-          element={<MilitaryAndRehire />}></Route>
+          path="employees-on-military-leave"
+          element={<EmployeesOnMilitaryLeave />}></Route>
         <Route
           path="military-and-rehire-forfeitures"
           element={<MilitaryAndRehireForfeitures />}></Route>

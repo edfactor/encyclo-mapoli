@@ -4,9 +4,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetNegativeEVTASSNQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { GetMilitaryAndRehireColumns } from "./MilitaryAndRehireGridColumns";
+import { GetMilitaryAndRehireColumns } from "./EmployeesOnMilitaryLeaveGridColumns";
 
-const MilitaryAndRehireGrid = () => {
+const EmployeesOnMilitaryLeaveGrid = () => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
@@ -61,4 +61,4 @@ const MilitaryAndRehireGrid = () => {
   );
 };
 
-export default MilitaryAndRehireGrid;
+export default EmployeesOnMilitaryLeaveGrid;

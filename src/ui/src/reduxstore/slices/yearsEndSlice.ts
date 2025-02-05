@@ -12,7 +12,7 @@ import {
   ExecutiveHoursAndDollars,
   FrozenReportsByAgeRequestType,
   MasterInquiryDetail,
-  MilitaryAndRehire,
+  EmployeesOnMilitaryLeaveResponse,
   MilitaryAndRehireForfeiture,
   MilitaryAndRehireProfitSummary,
   MissingCommasInPYName,
@@ -32,7 +32,7 @@ export interface YearsEndState {
   duplicateNamesAndBirthday: PagedReportResponse<DuplicateNameAndBirthday> | null;
   negativeEtvaForSSNsOnPayprofit: PagedReportResponse<NegativeEtvaForSSNsOnPayProfit> | null;
   missingCommaInPYName: PagedReportResponse<MissingCommasInPYName> | null;
-  militaryAndRehire: PagedReportResponse<MilitaryAndRehire> | null;
+  militaryAndRehire: PagedReportResponse<EmployeesOnMilitaryLeaveResponse> | null;
   militaryAndRehireForfeitures: PagedReportResponse<MilitaryAndRehireForfeiture> | null;
   militaryAndRehireProfitSummary: PagedReportResponse<MilitaryAndRehireProfitSummary> | null;
   distributionsAndForfeitures: PagedReportResponse<DistributionsAndForfeitures> | null;
@@ -121,7 +121,7 @@ export const yearsEndSlice = createSlice({
     setMissingCommaInPYName: (state, action: PayloadAction<PagedReportResponse<MissingCommasInPYName>>) => {
       state.missingCommaInPYName = action.payload;
     },
-    setMilitaryAndRehireDetails: (state, action: PayloadAction<PagedReportResponse<MilitaryAndRehire>>) => {
+    setEmployeesOnMilitaryLeaveDetails: (state, action: PayloadAction<PagedReportResponse<EmployeesOnMilitaryLeaveResponse>>) => {
       state.militaryAndRehire = action.payload;
     },
     setMilitaryAndRehireForfeituresDetails: (
@@ -295,7 +295,7 @@ export const {
   setNegativeEtvaForSssnsOnPayprofit,
   setDuplicateNamesAndBirthdays,
   setMissingCommaInPYName,
-  setMilitaryAndRehireDetails,
+  setEmployeesOnMilitaryLeaveDetails,
   setMilitaryAndRehireForfeituresDetails,
   setMilitaryAndRehireProfitSummaryDetails,
   setDistributionsAndForfeitures,

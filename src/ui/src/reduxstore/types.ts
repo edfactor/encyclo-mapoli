@@ -139,11 +139,11 @@ export interface NegativeEtvaForSSNsOnPayProfit {
   etvaValue: number;
 }
 
-export interface MilitaryAndRehireRequestDto {
+export interface EmployeesOnMilitaryLeaveRequestDto {
   pagination: PaginationParams;
 }
 
-export interface MilitaryAndRehire {
+export interface EmployeesOnMilitaryLeaveResponse {
   departmentId: number;
   badgeNumber: number;
   ssn: string;
