@@ -351,18 +351,43 @@ pipelines:
           - step: *build-and-test-backend
           - step: *test-frontend
   
-  custom:
+custom:
     profitsharing_database:
       - variables: # https://bitbucket.org/blog/predefine-values-of-custom-pipeline-variables
           - name: Environment
             default: QA
-            allowed-values: # optionally restrict variable values
+            allowed-values:
               - QA
               - UAT
           - name: Action
             default: upgrade-db
-            allowed-values: # optionally restrict variable values
+            allowed-values:
               - upgrade-db
               - drop-recreate-db
               - import-from-ready
+          - name: SourceSchema
+            default: PROFITSHARE
+            allowed-values:
+              - PROFITSHARE
+              - MTPR    
+              - PROFITSHARE_STAGING
+      - step:
+          name: Validate SourceSchema
+          script:
+            - |
+              $validSchemas = @{
+                  'QA'  = @('PROFITSHARE', 'MTPR')
+                  'UAT' = @('PROFITSHARE_STAGING')
+              }
+
+              if (-not $validSchemas[$env:Environment] -contains $env:SourceSchema) {
+                  Write-Host "ERROR: Invalid SourceSchema '$env:SourceSchema' for Environment '$env:Environment'"
+                  Write-Host "Allowed values: $($validSchemas[$env:Environment] -join ', ')"
+                  exit 1
+              }
+
+              Write-Host "Validated: Environment=$env:Environment, SourceSchema=$env:SourceSchema"
       - step: *upgrade-database
+
+
+
