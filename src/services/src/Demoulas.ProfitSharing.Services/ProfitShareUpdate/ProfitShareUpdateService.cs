@@ -223,7 +223,7 @@ public class ProfitShareUpdateService : IInternalProfitShareUpdateService
     {
         // Gets this year's profit sharing transactions, aka Distributions - hardships - Military - ClassActionFund
         ProfitDetailTotals profitDetailTotals =
-            await ProfitDetailTotals.GetProfitDetailTotals(_dbContextFactory, (short)(profitShareUpdateRequest.ProfitYear -1), empl.Ssn, cancellationToken);
+            await ProfitDetailTotals.GetProfitDetailTotals(_dbContextFactory, profitShareUpdateRequest.ProfitYear, empl.Ssn, cancellationToken);
 
         // MemberTotals holds newly computed values, not old values
         MemberTotals memberTotals = new();
@@ -241,9 +241,9 @@ public class ProfitShareUpdateService : IInternalProfitShareUpdateService
                                         profitDetailTotals.DistributionsTotal;
         memberTotals.NewCurrentAmount -= profitDetailTotals.ClassActionFundTotal;
 
-        if (memberTotals.NewCurrentAmount > 0)
+        if (empl.CurrentAmount > 0)
         {
-            memberTotals.PointsDollars = Math.Round(memberTotals.NewCurrentAmount, 2, MidpointRounding.AwayFromZero);
+            memberTotals.PointsDollars = Math.Round(empl.CurrentAmount - profitDetailTotals.DistributionsTotal - profitDetailTotals.PaidAllocationsTotal, 2, MidpointRounding.AwayFromZero);
             memberTotals.EarnPoints = (int)Math.Round(memberTotals.PointsDollars / 100, MidpointRounding.AwayFromZero);
         }
 

@@ -26,19 +26,19 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
     }
 
     /// <summary>
-    /// Generates a report of employees who are on military leave and have been rehired.
+    /// Generates a report of employees who are on military leave.
     /// </summary>
     /// <param name="req">The pagination request details.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the report response with details of employees on military leave.</returns>
-    public async Task<ReportResponseBase<MilitaryAndRehireReportResponse>> GetMilitaryAndRehireReportAsync(PaginationRequestDto req, CancellationToken cancellationToken)
+    public async Task<ReportResponseBase<EmployeesOnMilitaryLeaveResponse>> GetMilitaryAndRehireReportAsync(PaginationRequestDto req, CancellationToken cancellationToken)
     {
         var militaryMembers = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
             var inactiveMilitaryMembers = await context.Demographics.Where(d => d.TerminationCodeId == TerminationCode.Constants.Military
                                                                                 && d.EmploymentStatusId == EmploymentStatus.Constants.Inactive)
                 .OrderBy(d => d.ContactInfo.FullName)
-                .Select(d => new MilitaryAndRehireReportResponse
+                .Select(d => new EmployeesOnMilitaryLeaveResponse
                 {
                     DepartmentId = d.DepartmentId,
                     BadgeNumber = d.BadgeNumber,
@@ -52,7 +52,7 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
             return inactiveMilitaryMembers;
         });
 
-        return new ReportResponseBase<MilitaryAndRehireReportResponse>
+        return new ReportResponseBase<EmployeesOnMilitaryLeaveResponse>
         {
             ReportName = "EMPLOYEES ON MILITARY LEAVE",
             ReportDate = DateTimeOffset.Now,

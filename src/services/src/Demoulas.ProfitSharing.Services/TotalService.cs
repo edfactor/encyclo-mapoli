@@ -45,10 +45,10 @@ public sealed class TotalService : ITotalService
     internal IQueryable<ParticipantTotalDto> GetTotalBalanceSet(IProfitSharingDbContext ctx, short profitYear)
     {
         var sumAllFieldProfitCodeTypes = new[] {
-                                       ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
-                                       ProfitCode.Constants.OutgoingForfeitures.Id,
-                                       ProfitCode.Constants.OutgoingDirectPayments.Id,
-                                       ProfitCode.Constants.OutgoingXferBeneficiary.Id
+                                       /*1*/ ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
+                                       /*2*/ ProfitCode.Constants.OutgoingForfeitures.Id,
+                                       /*3*/ ProfitCode.Constants.OutgoingDirectPayments.Id,
+                                       /*5*/ ProfitCode.Constants.OutgoingXferBeneficiary.Id
         };
 
 #pragma warning disable S3358 // Ternary operators should not be nested
@@ -59,7 +59,7 @@ public sealed class TotalService : ITotalService
             select new ParticipantTotalDto
             {
                 Ssn = pd_g.Key,
-                Total = pd_g.Sum(x => x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id ? x.Forfeiture * -1 : //Just look at forfeiture
+                Total = pd_g.Sum(x => x.ProfitCodeId == /*9*/ ProfitCode.Constants.Outgoing100PercentVestedPayment.Id ? x.Forfeiture * -1 : //Just look at forfeiture
                     sumAllFieldProfitCodeTypes.Contains(x.ProfitCodeId) ? -x.Forfeiture + x.Contribution + x.Earnings : //Invert forfeiture, and add columns
                     x.Contribution + x.Earnings + x.Forfeiture) //Just add the columns
             });
@@ -72,23 +72,28 @@ public sealed class TotalService : ITotalService
     /// <param name="ctx">
     /// The database context used to access profit-sharing data.
     /// </param>
-    /// <param name="employeeYear">
+    /// <param name="profitYear">
     /// The employee year for which the totals should be returned.
     /// </param>
     /// <returns>
     /// A queryable collection of <see cref="ParticipantTotalDto"/> objects, each containing the SSN and total profit-sharing amount for a participant.
     /// </returns>
-    internal IQueryable<ParticipantTotalDto> GetTotalEtva(IProfitSharingDbContext ctx, short employeeYear)
+    internal IQueryable<ParticipantTotalDto> GetTotalComputedEtva(IProfitSharingDbContext ctx, short profitYear)
     {
         return (
-            from pp in ctx.PayProfits
-            where pp.ProfitYear == employeeYear
+            from pd in ctx.ProfitDetails
+            where pd.ProfitYear <= profitYear
+            group pd by pd.Ssn into pd_g
             select new ParticipantTotalDto
             {
-                Ssn = pp.Demographic!.Ssn,
-                Total = pp.Etva
-            });
+                Ssn = pd_g.Key,
+                Total =  pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary.Id /*6*/).Sum(x => x.Contribution) 
+                         + pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.Incoming100PercentVestedEarnings.Id /*8*/).Sum(x => x.Earnings) 
+                         - pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id /*9*/).Sum(x => x.Forfeiture)
+            }
+        );
     }
+
 
     /// <summary>
     /// Retrieves the total distributions for participants up to a specified profit year.
@@ -113,11 +118,11 @@ public sealed class TotalService : ITotalService
             {
                 Ssn = pd_g.Key,
                 Total = pd_g.Where(x => new[] {
-                        ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
-                        ProfitCode.Constants.OutgoingForfeitures.Id,
-                        ProfitCode.Constants.OutgoingDirectPayments.Id,
-                        ProfitCode.Constants.OutgoingXferBeneficiary.Id,
-                        ProfitCode.Constants.Outgoing100PercentVestedPayment.Id
+                        /*1*/ ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
+                        /*2*/ ProfitCode.Constants.OutgoingForfeitures.Id,
+                        /*3*/ ProfitCode.Constants.OutgoingDirectPayments.Id,
+                        /*5*/ ProfitCode.Constants.OutgoingXferBeneficiary.Id,
+                        /*9*/ ProfitCode.Constants.Outgoing100PercentVestedPayment.Id
                     }.Contains(x.ProfitCodeId)).Sum(x => x.Forfeiture)
             }
         );
@@ -281,6 +286,7 @@ public sealed class TotalService : ITotalService
         return TotalVestingBalance(ctx,profitYear,profitYear, asOfDate);
     }
 
+
     /// <summary>
     /// Retrieves the total vesting balance for participants (using employee Year) using profit detail rows based upon the profitYear.
     /// The asOfDate is used for age at a particular moment in time.
@@ -296,7 +302,7 @@ public sealed class TotalService : ITotalService
     internal IQueryable<ParticipantTotalVestingBalanceDto> TotalVestingBalance(IProfitSharingDbContext ctx, short employeeYear, short profitYear, DateOnly asOfDate)
     {
         return (from b in GetTotalBalanceSet(ctx, profitYear)
-                join e in GetTotalEtva(ctx, employeeYear) on b.Ssn equals e.Ssn
+                join e in GetTotalComputedEtva(ctx, employeeYear) on b.Ssn equals e.Ssn
                 join d in GetTotalDistributions(ctx, profitYear) on b.Ssn equals d.Ssn
                 join v in GetVestingRatio(ctx, employeeYear, asOfDate) on e.Ssn equals v.Ssn
                 select new ParticipantTotalVestingBalanceDto

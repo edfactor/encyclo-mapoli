@@ -1,7 +1,6 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request;
-public sealed record SetExecutiveHoursAndDollarsRequest
+public sealed record SetExecutiveHoursAndDollarsRequest : YearRequest
 {
-    public required short ProfitYear { get; set; }
     public required List<SetExecutiveHoursAndDollarsDto> ExecutiveHoursAndDollars { get; set; } = [];
 
     public static SetExecutiveHoursAndDollarsRequest Example()

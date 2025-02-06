@@ -5,7 +5,7 @@ import DuplicateNamesAndBirthdaysGrid from "pages/DuplicateNamesAndBirthdays/Dup
 import DuplicateSSNsOnDemographicsGrid from "pages/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographicsGrid";
 import MasterInquiryGrid from "pages/MasterInquiry/MasterInquiryGrid";
 import MasterInquirySearchFilter from "pages/MasterInquiry/MasterInquirySearchFilter";
-import MilitaryAndRehire from "pages/MilitaryAndRehire/MilitaryAndRehire";
+import EmployeesOnMilitaryLeave from "pages/EmployeesOnMilitaryLeave/EmployeesOnMilitaryLeave";
 import MissingCommaInPyNameGrid from "pages/MissingCommaInPyName/MissingCommaInPyNameGrid";
 import NegativeEtvaForSSNsOnPayprofit from "pages/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofit";
 import NegativeEtvaForSSNsOnPayprofitGrid from "pages/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofitGrid";
@@ -102,7 +102,7 @@ const DecemberProcess = () => {
           </Stack>
         </Grid2>
         <Grid2 width="100%">
-          <MilitaryAndRehire />
+          <EmployeesOnMilitaryLeave />
         </Grid2>
         <Grid2 width="100%">
           <Typography

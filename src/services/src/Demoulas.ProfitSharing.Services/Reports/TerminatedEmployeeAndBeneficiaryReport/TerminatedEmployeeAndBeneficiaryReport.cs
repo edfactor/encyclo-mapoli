@@ -107,6 +107,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 #pragma warning disable S1172
     private IQueryable<MemberSlice> GetBeneficiaries(IProfitSharingDbContext ctx, ProfitYearRequest request)
     {
+        // This query loads the Beneficiary and then the employee they are related to
         var query = ctx.Beneficiaries
             .Include(b => b.Contact)
             .Include(b => b.Demographic)
@@ -129,7 +130,12 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 YearsInPs = 10, // Makes function IsInteresting() always return true for beneficiaries.  This is the same value/convention used in READY.
                 BeneficiaryAllocation = x.Beneficiary.Amount,
                 TerminationCode = (x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn) ? x.Demographic.TerminationCodeId : null,
-                TerminationDate = (x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn) ? x.Demographic.TerminationDate : null
+                TerminationDate = (x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn) ? x.Demographic.TerminationDate : null,
+                ZeroCont = /*6*/ ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested,
+                IsOnlyBeneficiary = true,
+#pragma warning disable S1125
+                IsBeneficiaryAndEmployee = (x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn) ? true : false,
+#pragma warning restore S1125
             });
 
         return query;
@@ -169,7 +175,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         {
             // We pull up this members transactions 3 times.    Not ideal, but this allows us to use our common code for computing vesting ratio and balances.
 
-            // Transactions 1: Only this year.  
+            // Transactions 1: Only this year's transactions
             IQueryable<ProfitDetail> profitDetails = ctx.ProfitDetails.Where(pd => pd.ProfitYear == req.ProfitYear && pd.Ssn == memberSlice.Ssn);
             InternalProfitDetailDto transactionsThisYear = await RetrieveProfitDetail(profitDetails, cancellationToken) ?? new InternalProfitDetailDto();
 
@@ -225,7 +231,16 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 vestedBalance = member.EndingBalance;
             }
 
+            if (vestedBalance < 0)
+            {
+                vestedBalance = 0;
+            }
+
             var vestedPercent = (thisYearBalances?.VestingPercent ?? 0) * 100;
+            if (memberSlice.IsOnlyBeneficiary)
+            {
+                vestedPercent = 100;
+            }
             if (member.EndingBalance == 0 && vestedBalance == 0 )
             {
                 vestedPercent = 0;
