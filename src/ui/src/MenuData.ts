@@ -22,9 +22,7 @@ const decemberFlow: RouteCategory = {
   menuLabel: "December Flow",
   parentRoute: "",
   items: [
-    { caption: "Summary", route: "/december-process" },
-    { caption: "Local API", route: "/december-process-local" },
-    { caption: "Accordion", route: "/december-process-accordion" },
+    { caption: "Summary", route: "/december-process-accordion" },
     { caption: "Demographic Badges Not In Payprofit", route: "/demographic-badges-not-in-payprofit" },
     { caption: "Duplicate SSNs in Demographics", route: "/duplicate-ssns-demographics" },
     { caption: "Negative ETVA for SSNs on Payprofit", route: "/negative-etva-for-ssns-on-payprofit" },
