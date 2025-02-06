@@ -373,6 +373,9 @@ pipelines:
               - PROFITSHARE_STAGING
       - step:
           name: Validate SourceSchema
+          runs-on:
+            - windows
+            - self.hosted
           script:
             - |
               $validSchemas = @{
