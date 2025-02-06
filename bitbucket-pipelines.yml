@@ -192,18 +192,18 @@ definitions:
 
           $environment = $env:Environment
           $action = $env:Action
-          $sourceSchema = ""
+          $sourceSchema = $env:SourceSchema
+
           if (-not $environment) { $environment = "QA" }
           if (-not $action) { $action = "upgrade-db" }
+          if (-not $sourceSchema) { $action = "PROFITSHARE" }
 
           if ($environment -eq "QA") {
-            $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_QA
-            $sourceSchema = "PROFITSHARE"
+            $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_QA            
           }
 
           if ($environment -eq "UAT") {
-            $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_UAT
-            $sourceSchema = "PROFITSHARE_STAGING"
+            $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_UAT            
           }
 
           if (-not $sourceSchema) {
