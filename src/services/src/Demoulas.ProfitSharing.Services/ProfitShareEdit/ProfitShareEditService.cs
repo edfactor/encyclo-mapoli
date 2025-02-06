@@ -90,7 +90,8 @@ public class ProfitShareEditService : IInternalProfitShareEditService
             ProfitShareEditMemberRecord rec = new(member, /*0*/ ProfitCode.Constants.IncomingContributions)
             {
                 ZeroContStatus = ZeroContributionReason.Constants.Under21WithOver1Khours, // force new line formatting
-                Remark = CommentType.Constants.VOnly.Name,
+                Remark = /*V-ONLY*/ CommentType.Constants.VOnly.Name,
+                CommentTypeId = CommentType.Constants.VOnly.Id,
                 RecordChangeSummary = "18,19,20 > 1000",
                 Code = 0
             };
@@ -109,7 +110,8 @@ public class ProfitShareEditService : IInternalProfitShareEditService
             {
                 EarningAmount = member.EtvaEarnings, // force new line formatting
                 ZeroContStatus = ZeroContributionReason.Constants.Normal,
-                Remark = CommentType.Constants.OneHundredPercentEarnings.Name
+                Remark = /*"100% Earnings"*/ CommentType.Constants.OneHundredPercentEarnings.Name,
+                CommentTypeId = CommentType.Constants.OneHundredPercentEarnings.Id
             };
             AddRecord(records, rec);
         }
@@ -121,7 +123,8 @@ public class ProfitShareEditService : IInternalProfitShareEditService
                 YearExtension = 2, // force new line formatting
                 EarningAmount = member.SecondaryEtvaEarnings,
                 ZeroContStatus = ZeroContributionReason.Constants.Normal,
-                Remark = CommentType.Constants.OneHundredPercentEarnings.Name
+                Remark = /*"100% Earnings"*/ CommentType.Constants.OneHundredPercentEarnings.Name,
+                CommentTypeId = CommentType.Constants.OneHundredPercentEarnings.Id
             };
             AddRecord(records, rec);
         }
@@ -153,7 +156,8 @@ public class ProfitShareEditService : IInternalProfitShareEditService
         // --- Zerocont 2 = Vesting Only - Terminated with >= 1000 hours
         if (member.ZeroContributionReasonId == /*2*/ ZeroContributionReason.Constants.TerminatedEmployeeOver1000HoursWorkedGetsYearVested)
         {
-            rec.Remark = CommentType.Constants.VOnly.Name;
+            rec.Remark = /*"V-Only"*/ CommentType.Constants.VOnly.Name;
+            rec.CommentTypeId = CommentType.Constants.VOnly.Id;
             rec.RecordChangeSummary = "TERM > 1000 HRS";
             rec.ZeroContStatus = /*2*/ ZeroContributionReason.Constants.TerminatedEmployeeOver1000HoursWorkedGetsYearVested;
             AddRecord(records, rec);
@@ -167,7 +171,8 @@ public class ProfitShareEditService : IInternalProfitShareEditService
             }
 
             rec.ZeroContStatus = /*6*/ ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested;
-            rec.Remark = /*>64 & >5 Zero Records*/ CommentType.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested.Name;
+            rec.Remark = /*">64 & >5 100%"*/ CommentType.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested.Name;
+            rec.CommentTypeId = CommentType.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested.Id;
             AddRecord(records, rec);
         }
         else if (member.ZeroContributionReasonId == /*7*/ ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay)
@@ -189,7 +194,8 @@ public class ProfitShareEditService : IInternalProfitShareEditService
             {
                 ZeroContStatus = ZeroContributionReason.Constants.Normal, // force new line formatting
                 EarningAmount = member.AllEarnings,
-                Remark = CommentType.Constants.OneHundredPercentEarnings.Name
+                Remark = /*"100% Earnings"*/ CommentType.Constants.OneHundredPercentEarnings.Name,
+                CommentTypeId = CommentType.Constants.OneHundredPercentEarnings.Id
             };
             AddRecord(records, rec);
         }
@@ -201,7 +207,8 @@ public class ProfitShareEditService : IInternalProfitShareEditService
                 YearExtension = 2,
                 ZeroContStatus = ZeroContributionReason.Constants.Normal,
                 EarningAmount = member.AllSecondaryEarnings,
-                Remark = CommentType.Constants.OneHundredPercentEarnings.Name
+                Remark = /*"100% Earnings"*/ CommentType.Constants.OneHundredPercentEarnings.Name,
+                CommentTypeId = CommentType.Constants.OneHundredPercentEarnings.Id
             };
             AddRecord(records, rec);
         }

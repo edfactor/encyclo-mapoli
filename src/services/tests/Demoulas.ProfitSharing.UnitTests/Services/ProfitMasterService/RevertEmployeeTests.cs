@@ -64,8 +64,8 @@ public class RevertEmployeeTests : ApiTestBase<Program>
         pd1.ProfitCodeId = 8;
         pd1.Earnings = 100;
         pd1.Remark = /*"100% Earnings"*/ CommentType.Constants.OneHundredPercentEarnings.Name;
-
-
+        pd1.CommentTypeId = CommentType.Constants.OneHundredPercentEarnings.Id;
+        
         // ETVA is due to be added back real soon now.   https://demoulas.atlassian.net/browse/PS-630
         // _scenarioFactory.PayProfits[0].Etva = 700
 

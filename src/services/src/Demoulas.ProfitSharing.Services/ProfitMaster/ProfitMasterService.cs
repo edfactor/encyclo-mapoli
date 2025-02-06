@@ -95,7 +95,7 @@ public class ProfitMasterService : IProfitMasterService
             var pds = await ctx.ProfitDetails
                 .Where(pd => pd.ProfitYear == profitYearRequest.ProfitYear &&
                              ( (pd.ProfitCodeId == /*8*/ ProfitCode.Constants.Incoming100PercentVestedEarnings.Id &&
-                                pd.Remark == /*"100% Earnings"*/ CommentType.Constants.OneHundredPercentEarnings.Name )
+                                pd.CommentTypeId == CommentType.Constants.OneHundredPercentEarnings.Id )
                               || pd.ProfitCodeId == /*0*/ ProfitCode.Constants.IncomingContributions.Id))
                 .ToListAsync(cancellationToken);
 
