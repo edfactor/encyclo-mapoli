@@ -4,13 +4,17 @@ export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
   return [
     {
       headerName: "Badge",
-      field: "employeeBadge",
-      colId: "employeeBadge",
+      field: "badgeNumber",
+      colId: "badgeNumber",
       minWidth: 80,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
-      sortable: true
+      sortable: true,
+      valueFormatter: (params) => {
+        const badgeNumber = params.value;
+        return badgeNumber ? badgeNumber.toString().padStart(7, '0') : '';
+      }
     },
     {
       headerName: "Demographic SSN",
