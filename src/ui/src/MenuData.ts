@@ -70,11 +70,6 @@ const miscellaneous: RouteCategory = {
   ]
 };
 
-const decemberTest: RouteCategory = {
-  menuLabel: "December Flow",
-  parentRoute: "/december-process-accordion"
-};
-
-const MenuData: RouteCategory[] = [beneficiaries, distributions, reconciliation, decemberTest, yearEndReports, miscellaneous];
+const MenuData: RouteCategory[] = [beneficiaries, distributions, reconciliation, decemberFlow, yearEndReports, miscellaneous];
 
 export default MenuData;

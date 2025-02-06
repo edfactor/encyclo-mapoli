@@ -6,7 +6,7 @@ import EmployeesOnMilitaryLeaveGrid from "./EmployeesOnMilitaryLeaveGrid";
 
 const EmployeesOnMilitaryLeave = () => {
   return (
-    <Page label="Rehire">
+    <Page label="Employees on Military Leave">
         <Grid2
           container
           rowSpacing="24px">

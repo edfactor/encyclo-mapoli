@@ -1,5 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormLabel } from "@mui/material";
+import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import { isValid } from "date-fns";
@@ -10,13 +10,17 @@ import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 
 interface ISearchForm {
-  startDate: Date;
-  endDate: Date;
+  profitYear: number;
 }
 
 const schema = yup.object().shape({
-  endDate: yup.date().required("End Date is required"),
-  startDate: yup.date().required("Start Date is required"),
+  profitYear: yup
+    .number()
+    .typeError("Year must be a number")
+    .integer("Year must be an integer")
+    .min(2020, "Year must be 2020 or later")
+    .max(2100, "Year must be 2100 or earlier")
+    .required("Year is required")
 });
 
 const EmployeesOnMilitaryLeaveSearchFilter = () => {
@@ -25,19 +29,17 @@ const EmployeesOnMilitaryLeaveSearchFilter = () => {
   const { control, handleSubmit, formState: { errors, isValid }, reset } = useForm<ISearchForm>({
     resolver: yupResolver(schema),
     defaultValues: {
-      startDate: undefined,
-      endDate: undefined
+      profitYear: undefined
     }
   });
 
   const validateAndSearch = (data: ISearchForm) => {
-    // TODO: triggerSearch(
-    //   {
-    //     pagination: { skip: 0, take: 25 },
-    //     cutoffDate: data.cutoffDate
-    //   },
-    //   false
-    // );
+    triggerSearch(
+       {
+         pagination: { skip: 0, take: 25 }
+       },
+       false
+     );
   };
 
   const handleReset = () => {
@@ -55,41 +57,24 @@ const EmployeesOnMilitaryLeaveSearchFilter = () => {
           xs={12}
           sm={6}
           md={3}>
+          <FormLabel>Year</FormLabel>
           <Controller
-            name="startDate"
+            name="profitYear"
             control={control}
             render={({ field }) => (
-              <DsmDatePicker
-                id="start"
-                onChange={(value: Date | null) => field.onChange(value)}
-                value={field.value ?? null}
-                required={true}
-                label="Beginning Date"
-                disableFuture
-                error={errors.startDate?.message}
+              <TextField
+                {...field}
+                fullWidth
+                variant="outlined"
+                error={!!errors.profitYear}
+                onChange={(e) => {
+                  field.onChange(e);
+                }}
+                inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
               />
             )}
           />
-        </Grid2>
-        <Grid2
-          xs={12}
-          sm={6}
-          md={3}>
-          <Controller
-            name="endDate"
-            control={control}
-            render={({ field }) => (
-              <DsmDatePicker
-                id="endDate"
-                onChange={(value: Date | null) => field.onChange(value)}
-                value={field.value ?? null}
-                required={true}
-                label="Ending Date"
-                disableFuture
-                error={errors.endDate?.message}
-              />
-            )}
-          />
+          {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
         </Grid2>
       </Grid2>
       <Grid2
