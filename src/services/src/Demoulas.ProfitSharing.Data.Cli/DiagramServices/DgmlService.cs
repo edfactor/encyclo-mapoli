@@ -32,7 +32,7 @@ internal static class DgmlService
         using XmlReader xmlReader = XmlReader.Create(stringReader);
         var directedGraph = serializer.Deserialize(xmlReader) as DirectedGraph;
 
-        if (directedGraph == null || directedGraph.Nodes == null || directedGraph.Links == null)
+        if (directedGraph?.Nodes == null || directedGraph.Links == null)
         {
             throw new InvalidOperationException("Invalid or empty DGML content.");
         }

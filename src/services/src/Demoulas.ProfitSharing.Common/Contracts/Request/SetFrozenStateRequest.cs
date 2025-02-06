@@ -1,7 +1,8 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using System.ComponentModel;
 
-public sealed class SetFrozenStateRequest
+namespace Demoulas.ProfitSharing.Common.Contracts.Request;
+
+public sealed record SetFrozenStateRequest : YearRequest
 {
-    public short ProfitYear { get; set; }
     public DateTime AsOfDateTime { get; set; }
 }

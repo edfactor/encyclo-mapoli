@@ -92,7 +92,7 @@ public class CalendarServiceTests : ApiTestBase<Program>
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         TestResult<CalendarResponseDto> response =
             await ApiClient
-                .GETAsync<CalendarRecordEndpoint, CalendarRequestDto, CalendarResponseDto>(new CalendarRequestDto { ProfitYear = 2023 });
+                .GETAsync<CalendarRecordEndpoint, YearRequest, CalendarResponseDto>(new YearRequest { ProfitYear = 2023 });
 
         response.Result.Should().NotBeNull();
         response.Result.FiscalBeginDate.Should().NotBeOnOrBefore(DateOnly.MinValue);

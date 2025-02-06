@@ -1,7 +1,7 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 public sealed record DistributionsAndForfeitureResponse
 {
-    public required long BadgeNumber { get; set; }
+    public required int BadgeNumber { get; set; }
     public required string EmployeeName { get; set; }
     public required string Ssn { get; set; }
     public DateOnly? LoanDate { get; set; }

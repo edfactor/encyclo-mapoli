@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
+﻿using System.ComponentModel;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 public record GrossWagesReportRequest : ProfitYearRequest
