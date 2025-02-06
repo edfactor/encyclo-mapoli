@@ -58,10 +58,15 @@ public class UpdateEmployeeTests : ApiTestBase<Program>
     public async Task employee_with_Etva()
     {
         // Arrange
-        _scenarioFactory.PayProfits[0].Etva = 1000;
         _profitDetails[0].ProfitCodeId.Should().Be(0);
-        _profitDetails[0].Contribution = 2000m;
-       
+        _profitDetails[0].Contribution = 1000m;
+        
+        // NOTE: ETVA is not currently connected to the Earnings distribution.  This work is TBD
+        _scenarioFactory.PayProfits[0].Etva = 1000;
+        // so we put the EVTA in this way.
+        _profitDetails[1].ProfitCodeId.Should().Be(8);
+        _profitDetails[1].Earnings = 1000m; // Etva Amount
+
         // Act
         ProfitMasterResponse response = await _service.Update(DefaultRequest(), CancellationToken.None);
 

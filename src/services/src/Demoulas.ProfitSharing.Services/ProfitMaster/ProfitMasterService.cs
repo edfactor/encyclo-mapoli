@@ -55,8 +55,7 @@ public class ProfitMasterService : IProfitMasterService
             foreach (var earningRecord in records.Where(r => r.Code == /*8*/ ProfitCode.Constants.Incoming100PercentVestedEarnings.Id && r.IsEmployee))
             {
                 var pp = ssn2PayProfit[earningRecord.Ssn];
-                pp.HoursExecutive = pp.HoursExecutive + 0; // This is NOP until Etva is added back.
-                // pp.Etva = rec8.Earnings
+                pp.Etva += earningRecord.EarningAmount;
                 etvasUpdated++;
             }
 
@@ -92,32 +91,32 @@ public class ProfitMasterService : IProfitMasterService
     {
         return await _dbFactory.UseWritableContext(async ctx =>
         {
-            // read this years contribution/vestingEarnings profit_detail rows
+            // read this year's contribution/vestingEarnings profit_detail rows
             var pds = await ctx.ProfitDetails
                 .Where(pd => pd.ProfitYear == profitYearRequest.ProfitYear &&
-                             (pd.ProfitCodeId == ProfitCode.Constants.Incoming100PercentVestedEarnings.Id
-                              || pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id))
+                             ( (pd.ProfitCodeId == /*8*/ ProfitCode.Constants.Incoming100PercentVestedEarnings.Id &&
+                                pd.CommentTypeId == CommentType.Constants.OneHundredPercentEarnings.Id )
+                              || pd.ProfitCodeId == /*0*/ ProfitCode.Constants.IncomingContributions.Id))
                 .ToListAsync(cancellationToken);
 
             var memberSsns = pds.Select(p => p.Ssn).ToHashSet();
             var ssn2PayProfit = await ctx.PayProfits.Include(pp=>pp.Demographic).Where(pp => pp.ProfitYear == profitYearRequest.ProfitYear && memberSsns.Contains(pp.Demographic!.Ssn))
                 .ToDictionaryAsync(pp => pp.Demographic!.Ssn, pp => pp, cancellationToken);
 
-            var etvaReset = new HashSet<int>();
+            var etvaReset = 0;
             // Adjust ETVA
-            foreach (var etvaRec in pds.Where(pd => pd.ProfitCodeId == ProfitCode.Constants.Incoming100PercentVestedEarnings.Id && ssn2PayProfit.ContainsKey(pd.Ssn))
+            foreach (var etvaRec in pds.Where(pd => pd.ProfitCodeId == /*8*/ ProfitCode.Constants.Incoming100PercentVestedEarnings.Id && ssn2PayProfit.ContainsKey(pd.Ssn))
                          .Select(pd => new { pd, pp = ssn2PayProfit[pd.Ssn] }))
             {
-                //pp.Etva -= pd.Earnings
-                Console.WriteLine(etvaRec.pd + " " + etvaRec.pp);
-                etvaReset.Add(etvaRec.pd.Ssn);
+                etvaRec.pp.Etva -= etvaRec.pd.Earnings;
+                etvaReset++;
             }
 
             ctx.ProfitDetails.RemoveRange(pds);
             await ctx.SaveChangesAsync(cancellationToken);
             return new ProfitMasterResponse
             {
-                BeneficiariesEffected = memberSsns.Count - ssn2PayProfit.Count, EmployeesEffected = ssn2PayProfit.Count, EtvasEffected = etvaReset.Count
+                BeneficiariesEffected = memberSsns.Count - ssn2PayProfit.Count, EmployeesEffected = ssn2PayProfit.Count, EtvasEffected = etvaReset
             };
         }, cancellationToken);
     }

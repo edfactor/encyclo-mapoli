@@ -61,7 +61,7 @@ export const ProfitShareUpdateGridColumns = (): ColDef[] => {
             valueFormatter: agGridNumberToCurrency
         },
         {
-            headerName: "Incoming Forfeiture",
+            headerName: "Forfeiture",
             field: "incomingForfeitures",
             colId: "incomingForfeitures",
             minWidth: 120,
