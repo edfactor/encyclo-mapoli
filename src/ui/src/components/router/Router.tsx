@@ -37,6 +37,8 @@ import ProfitShareReport from "pages/ProfitShareReport/ProfitShareReport";
 import ProfitShareUpdate from "../../pages/ProfitShareUpdate/ProfitShareUpdate";
 import Forfeit from "pages/Forfeit/Forfeit";
 import YearEndFlow from "pages/YearEndFlow/YearEndFlow";
+import { Box } from "@mui/material";
+import DSMDynamicBreadcrumbs from "components/DSMDynamicBreadcrumbs/DSMDynamicBreadcrumbs";
 
 const Router = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -95,10 +97,25 @@ const Router = () => {
           )
         }
       />
+      <Box sx={{ position: "relative", paddingTop: "8" }}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            paddingTop: "8px",
+            marginLeft: "24px",
+            marginRight: "24px"
+          }}
+        >
+          <DSMDynamicBreadcrumbs />
+        </Box>
+      </Box>
       <RouteSecurity oktaEnabled={oktaEnabled}>
         <Route
           path=""
-          element={<LandingPage />}></Route>
+          element={<DecemberProcessAccordion />}></Route>
         <Route
           path="demographic-badges-not-in-payprofit"
           element={<DemographicBadgesNotInPayprofit />}></Route>
@@ -171,24 +188,24 @@ const Router = () => {
         <Route
           path="prof-term"
           element={<Termination />}></Route>
-          <Route
+        <Route
           path="military-and-rehire-entry"
           element={<MilitaryAndRehireEntryAndModification />}></Route>
-          <Route
+        <Route
           path="profit-share-report"
           element={<ProfitShareReport />}></Route>
-          <Route
+        <Route
           path="forfeit/:badgeNumber?"
           element={<Forfeit />}></Route>
-          <Route
+        <Route
           path="yearend-flow"
           element={<YearEndFlow />}></Route>
         <Route
-            path="profit-share-report"
-            element={<ProfitShareReport />}></Route>
+          path="profit-share-report"
+          element={<ProfitShareReport />}></Route>
         <Route
-            path="profit-share-update"
-            element={<ProfitShareUpdate />}></Route>
+          path="profit-share-update"
+          element={<ProfitShareUpdate />}></Route>
       </RouteSecurity>
     </BrowserRouter>
   );
