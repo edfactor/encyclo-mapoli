@@ -81,7 +81,7 @@ public class DemographicBadgesNotInPayProfitEndpoint : EndpointWithCsvBase<Pagin
         base.Configure();
     }
 
-    public override string ReportFileName => "DEMOGRAPHIC-WITHOUT-DEMOGRAPHICS";
+    public override string ReportFileName => "DEMOGRAPHIC BADGES NOT IN PAYPROFIT";
 
     public override Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetResponse(PaginationRequestDto req, CancellationToken ct)
     {

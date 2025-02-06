@@ -18,11 +18,12 @@ export interface DemographicBadgesNotInPayprofitResponse {
 }
 
 export interface DemographicBadgesNotInPayprofit {
-  employeeBadge: number;
+  badgeNumber: number;
   ssn: number;
   empoyeeName: string;
   store: number;
   status: string;
+  statusName: string;
 }
 
 export interface DemographicBadgesNotInPayprofitRequestDto {

@@ -6,4 +6,5 @@ public sealed record DemographicBadgesNotInPayProfitResponse
     public required string EmployeeName { get; set; }
     public short Store { get; set; }
     public char Status { get; set; }
+    public string StatusName { get; set; } = string.Empty;
 }
