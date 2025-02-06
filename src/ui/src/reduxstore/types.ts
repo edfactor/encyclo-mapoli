@@ -23,6 +23,7 @@ export interface DemographicBadgesNotInPayprofit {
   empoyeeName: string;
   store: number;
   status: string;
+  statusName: string;
 }
 
 export interface DemographicBadgesNotInPayprofitRequestDto {
