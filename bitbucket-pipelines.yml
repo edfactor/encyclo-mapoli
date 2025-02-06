@@ -351,7 +351,7 @@ pipelines:
           - step: *build-and-test-backend
           - step: *test-frontend
   
-custom:
+  custom:
     profitsharing_database:
       - variables: # https://bitbucket.org/blog/predefine-values-of-custom-pipeline-variables
           - name: Environment
