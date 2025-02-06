@@ -373,24 +373,46 @@ pipelines:
               - PROFITSHARE_STAGING
       - step:
           name: Validate SourceSchema
-          runs-on:
-            - windows
-            - self.hosted
           script:
             - |
-              $validSchemas = @{
-                  'QA'  = @('PROFITSHARE', 'MTPR')
-                  'UAT' = @('PROFITSHARE_STAGING')
-              }
+              if [ "$BITBUCKET_PIPELINE_OS" = "windows" ]; then
+                pwsh -Command "
+                  \$validSchemas = @{
+                      'QA'  = @('PROFITSHARE', 'MTPR')
+                      'UAT' = @('PROFITSHARE_STAGING')
+                  }
 
-              if (-not $validSchemas[$env:Environment] -contains $env:SourceSchema) {
-                  Write-Host "ERROR: Invalid SourceSchema '$env:SourceSchema' for Environment '$env:Environment'"
-                  Write-Host "Allowed values: $($validSchemas[$env:Environment] -join ', ')"
+                  if (-not \$validSchemas[\$env:Environment] -contains \$env:SourceSchema) {
+                      Write-Host 'ERROR: Invalid SourceSchema for selected Environment'
+                      Write-Host ('Allowed values for ' + \$env:Environment + ': ' + (\$validSchemas[\$env:Environment] -join ', '))
+                      exit 1
+                  }
+
+                  Write-Host ('Validated: Environment=' + \$env:Environment + ', SourceSchema=' + \$env:SourceSchema)
+                "
+              else
+                validSchemas_QA=("PROFITSHARE" "MTPR")
+                validSchemas_UAT=("PROFITSHARE_STAGING")
+
+                if [ "$Environment" = "QA" ]; then
+                  validSchemas=("${validSchemas_QA[@]}")
+                elif [ "$Environment" = "UAT" ]; then
+                  validSchemas=("${validSchemas_UAT[@]}")
+                else
+                  echo "ERROR: Unknown Environment '$Environment'"
                   exit 1
-              }
+                fi
 
-              Write-Host "Validated: Environment=$env:Environment, SourceSchema=$env:SourceSchema"
+                if [[ ! " ${validSchemas[@]} " =~ " $SourceSchema " ]]; then
+                  echo "ERROR: Invalid SourceSchema '$SourceSchema' for Environment '$Environment'"
+                  echo "Allowed values: ${validSchemas[*]}"
+                  exit 1
+                fi
+
+                echo "Validated: Environment=$Environment, SourceSchema=$SourceSchema"
+              fi
       - step: *upgrade-database
+
 
 
 
