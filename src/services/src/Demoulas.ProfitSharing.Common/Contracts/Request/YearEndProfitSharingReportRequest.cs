@@ -5,8 +5,11 @@ public record YearEndProfitSharingReportRequest:ProfitYearRequest
 {
     [DefaultValue(true)]
     public bool IsYearEnd { get; set; }
+
     [DefaultValue(18)]
     public short? MinimumAgeInclusive { get; set; }
+
+    [DefaultValue(100)]
     public short? MaximumAgeInclusive { get; set; }
     public decimal? MinimumHoursInclusive { get; set; }
     public decimal? MaximumHoursInclusive { get; set; }
