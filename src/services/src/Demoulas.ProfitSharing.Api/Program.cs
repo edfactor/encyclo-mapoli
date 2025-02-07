@@ -65,7 +65,6 @@ builder.Services.AddCors(options =>
             .WithExposedHeaders("Location");
     });
 });
-builder.Services.AddOpenApi();
 
 List<ContextFactoryRequest> list =
 [
@@ -100,25 +99,7 @@ builder.ConfigureDefaultEndpoints(meterNames: [],
 
 WebApplication app = builder.Build();
 
-app.Use(async (context, next) =>
-{
-    var dtoTypes = AppDomain.CurrentDomain.GetAssemblies()
-        .SelectMany(a => a.GetTypes())
-        .Where(t => t.IsClass 
-                    && (t.FullName?.Contains("Demoulas") ?? false)
-                    && t.GetProperties().Any(p => p.PropertyType == typeof(short)));
-
-    foreach (var dto in dtoTypes)
-    {
-        Console.WriteLine($"DTO with short property: {dto.FullName}");
-    }
-
-    await next();
-});
-
-
 app.UseCors();
-app.MapOpenApi();
 
 app.UseDefaultEndpoints(OktaSettingsAction)
     .UseReDoc(settings =>
@@ -127,7 +108,10 @@ app.UseDefaultEndpoints(OktaSettingsAction)
         settings.DocumentPath = "/swagger/Release 1.0/swagger.json"; // Single document
     });
 
-app.MapScalarApiReference();
+app.MapScalarApiReference(options =>
+{
+    options.OpenApiRoutePattern = "/swagger/Release 1.0/swagger.json";
+});
 
 await app.RunAsync();
 

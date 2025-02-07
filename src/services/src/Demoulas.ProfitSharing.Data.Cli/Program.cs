@@ -3,6 +3,7 @@ using System.Text;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.ProfitSharing.Data.Cli.DiagramServices;
 using Demoulas.ProfitSharing.Data.Contexts;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Factories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -72,6 +73,9 @@ public sealed class Program
                 sqlCommand = sqlCommand.Replace("COMMIT ;", string.Empty)
                     .Replace("{SOURCE_PROFITSHARE_SCHEMA}", sourceSchema).Trim();
                 await context.Database.ExecuteSqlRawAsync(sqlCommand);
+
+                context.DataImportRecords.Add(new DataImportRecord { SourceSchema = sourceSchema });
+                await context.SaveChangesAsync();
             });
         });
 
