@@ -1,0 +1,103 @@
+﻿using System.CommandLine;
+using Demoulas.Common.Data.Contexts.DTOs.Context;
+using Demoulas.ProfitSharing.Data.Contexts;
+using Demoulas.ProfitSharing.Data.Factories;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+
+namespace Demoulas.ProfitSharing.Data.Cli;
+
+internal static class GenerateScriptHelper
+{
+    public static Command CreateGenerateUpgradeScriptCommand(
+        IConfiguration configuration,
+        string[] args,
+        List<Option> commonOptions)
+    {
+        var generateScriptCommand = new Command("generate-upgrade-script", "Generate a SQL script to upgrade the database to the latest migration");
+
+        // Add any common options you have
+        commonOptions.ForEach(generateScriptCommand.AddOption);
+
+        generateScriptCommand.SetHandler(async _ =>
+        {
+            var outputPath = configuration["output-file"];
+
+            // Use your existing helper method to retrieve a DbContext.
+            // The ExecuteWithDbContext signature presumably looks something like:
+            //   Task ExecuteWithDbContext(IConfiguration config, string[] args, Func<DbContext, Task> action)
+            await ExecuteWithDbContext(configuration, args, async dbContext =>
+            {
+                var migrator = dbContext.GetService<IMigrator>();
+
+                var appliedMigrations = await dbContext.Database.GetAppliedMigrationsAsync();
+                var currentMigration = appliedMigrations.LastOrDefault("0");
+                
+                Console.WriteLine($"Current DB version: {currentMigration}");
+
+                var hasPendingChanges = await dbContext.Database.GetPendingMigrationsAsync();
+                if (!hasPendingChanges.Any())
+                {
+                    Console.WriteLine("Database is current. No changes need be applied.");
+                    return;
+                }
+
+                // Generate the migration script from "0" (initial) to the latest.
+                // If you only want pending migrations, you can detect the last applied migration and use that instead.
+                var script = migrator.GenerateScript(
+                    fromMigration: currentMigration,
+                    toMigration: null, // null means "to the latest"
+                    options: MigrationsSqlGenerationOptions.Idempotent | MigrationsSqlGenerationOptions.Script
+                );
+
+                if (!string.IsNullOrWhiteSpace(outputPath))
+                {
+                    // Write the script to a file
+                    await File.WriteAllTextAsync(outputPath, script);
+                    Console.WriteLine($"SQL upgrade script generated at: {outputPath}");
+                }
+                else
+                {
+                    // Print the script to the console
+                    Console.WriteLine("Generated SQL Script:");
+                    Console.WriteLine(script);
+                }
+            });
+        });
+
+        return generateScriptCommand;
+    }
+
+    internal static async Task ExecuteWithDbContext(IConfiguration configuration, string[] args, Func<ProfitSharingDbContext, Task> action)
+    {
+        string? connectionName = configuration["connection-name"];
+        if (string.IsNullOrEmpty(connectionName))
+        {
+#pragma warning disable S112
+            throw new NullReferenceException(nameof(connectionName));
+#pragma warning restore S112
+        }
+
+        HostApplicationBuilder builder = CreateHostBuilder(args);
+        var list = new List<ContextFactoryRequest> { ContextFactoryRequest.Initialize<ProfitSharingDbContext>(connectionName) };
+        _ = DataContextFactory.Initialize(builder, contextFactoryRequests: list);
+
+        await using var context = builder.Services.BuildServiceProvider().GetRequiredService<ProfitSharingDbContext>();
+        await action(context);
+#pragma warning restore S3928
+    }
+
+
+    private static HostApplicationBuilder CreateHostBuilder(string[] args)
+    {
+        var builder = Host.CreateApplicationBuilder(args);
+        builder.Configuration.AddUserSecrets<Program>();
+        builder.Configuration.AddEnvironmentVariables();
+        return builder;
+    }
+
+}
