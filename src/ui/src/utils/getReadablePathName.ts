@@ -1,5 +1,5 @@
 const pathToReadableName: Record<string, string> = {
-    '': 'December Flow Summary',
+    '': 'Home',
     'demographic-badges-not-in-payprofit': 'Demographic Badges Not In Payprofit',
     'duplicate-ssns-demographics': 'Duplicate SSNs on Demographics',
     'negative-etva-for-ssns-on-payprofit': 'Negative ETVA for SSNs on Payprofit',
@@ -28,7 +28,8 @@ const pathToReadableName: Record<string, string> = {
     'profit-share-report': 'Profit Share Report',
     'forfeit': 'Forfeit',
     'yearend-flow': 'Year End Flow',
-    'profit-share-update': 'Profit Share Update'
+    'profit-share-update': 'Profit Share Update',
+    'employees-on-military-leave': 'Employees on Military Leave',
 };
 
 export const getReadablePathName = (path: string): string => {
