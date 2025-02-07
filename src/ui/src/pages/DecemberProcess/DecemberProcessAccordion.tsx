@@ -5,7 +5,7 @@ import DuplicateNamesAndBirthdaysGrid from "pages/DuplicateNamesAndBirthdays/Dup
 import DuplicateSSNsOnDemographicsGrid from "pages/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographicsGrid";
 import MasterInquiryGrid from "pages/MasterInquiry/MasterInquiryGrid";
 import MasterInquirySearchFilter from "pages/MasterInquiry/MasterInquirySearchFilter";
-import MilitaryAndRehire from "pages/MilitaryAndRehire/MilitaryAndRehire";
+import EmployeesOnMilitaryLeave from "pages/EmployeesOnMilitaryLeave/EmployeesOnMilitaryLeave";
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import {

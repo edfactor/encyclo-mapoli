@@ -16,6 +16,7 @@ using Demoulas.Security;
 using Demoulas.Util.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using NSwag.Generation.AspNetCore;
+using Scalar.AspNetCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder();
 
@@ -106,6 +107,11 @@ app.UseDefaultEndpoints(OktaSettingsAction)
         settings.Path = "/redoc";
         settings.DocumentPath = "/swagger/Release 1.0/swagger.json"; // Single document
     });
+
+app.MapScalarApiReference(options =>
+{
+    options.OpenApiRoutePattern = "/swagger/Release 1.0/swagger.json";
+});
 
 await app.RunAsync();
 

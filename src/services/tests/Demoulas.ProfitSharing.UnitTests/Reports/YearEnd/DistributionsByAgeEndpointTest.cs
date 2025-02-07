@@ -33,7 +33,7 @@ public class DistributionsByAgeEndpointTest : ApiTestBase<Program>
         response.Result.ReportName.Should().Be("PROFIT SHARING DISTRIBUTIONS BY AGE");
         response.Result.ReportType.Should().Be(request.ReportType);
 
-        var ftCount = response.Result.Response.Results.Sum(c => c.EmployeeCount);
+        var ftCount = response.Result.Response.Results.Where(c=> c.RegularAmount > 0).Sum(c => c.EmployeeCount);
         var hardshipCount = response.Result.Response.Results.Where(c=> c.HardshipAmount > 0).Sum(c => c.EmployeeCount);
 
         ftCount.Should().Be(response.Result.RegularTotalEmployees);

@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-using Aspire.Hosting;
+using Demoulas.ProfitSharing.AppHost;
 using Projects;
 
 IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(options: new DistributedApplicationOptions { AllowUnsecuredTransport = true });
@@ -41,7 +41,7 @@ ExecuteCommandResult RunConsoleApp(string projectPath, string launchProfile)
         {
             FileName = "dotnet",
             WorkingDirectory = projectPath,
-            Arguments = $"run --launch-profile {launchProfile}",
+            Arguments = $"run --no-build --launch-profile {launchProfile}",
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,
@@ -127,7 +127,7 @@ var projectPath = new FileInfo(cli.ProjectPath).Directory?.FullName;
 var cliRunner = builder.AddExecutable("Database-Cli",
     "dotnet",
     projectPath!,
-    "run", "--launch-profile", "upgrade-db")
+    "run", "--no-build", "--launch-profile", "upgrade-db")
     .WithCommand(
         name: "upgrade-db",
         displayName: "Upgrade database",
@@ -145,7 +145,10 @@ var cliRunner = builder.AddExecutable("Database-Cli",
 var api = builder.AddProject<Demoulas_ProfitSharing_Api>("ProfitSharing-Api")
     .WithHttpHealthCheck("/health")
     .WithHttpsHealthCheck("/health")
-    .WaitFor(cliRunner);
+    .WithSwaggerUi()
+    .WithRedoc()
+    .WithScalar()
+    .WaitForCompletion(cliRunner);
 
 var ui = builder.AddNpmApp("ProfitSharing-Ui", "../../../ui/", "dev")
     .WithReference(api)

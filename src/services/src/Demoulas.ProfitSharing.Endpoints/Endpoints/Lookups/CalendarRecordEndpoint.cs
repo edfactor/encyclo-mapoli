@@ -6,7 +6,7 @@ using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 
-public class CalendarRecordEndpoint : Endpoint<CalendarRequestDto, CalendarResponseDto>
+public class CalendarRecordEndpoint : Endpoint<YearRequest, CalendarResponseDto>
 {
     private readonly ICalendarService _calendarService;
 
@@ -32,7 +32,7 @@ public class CalendarRecordEndpoint : Endpoint<CalendarRequestDto, CalendarRespo
         Group<LookupGroup>();
     }
 
-    public override Task<CalendarResponseDto> ExecuteAsync(CalendarRequestDto req, CancellationToken ct)
+    public override Task<CalendarResponseDto> ExecuteAsync(YearRequest req, CancellationToken ct)
     {
         return _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, ct);
     }

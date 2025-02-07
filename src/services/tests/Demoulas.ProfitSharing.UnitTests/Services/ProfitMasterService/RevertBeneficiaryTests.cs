@@ -31,6 +31,8 @@ public class RevertBeneficiaryTests : ApiTestBase<Program>
         var pd0 = _scenarioFactory.ProfitDetails[0];
         pd0.ProfitYear = _thisYear;
         pd0.ProfitCodeId = /*8*/ ProfitCode.Constants.Incoming100PercentVestedEarnings.Id;
+        pd0.Remark = /*"100% Earnings"*/ CommentType.Constants.OneHundredPercentEarnings.Name;
+        pd0.CommentTypeId = CommentType.Constants.OneHundredPercentEarnings.Id;
 
         // Act
         ProfitMasterResponse response = await _service.Revert(new ProfitYearRequest { ProfitYear = _thisYear }, CancellationToken.None);

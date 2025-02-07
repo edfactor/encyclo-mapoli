@@ -16,12 +16,12 @@ import {
     ExecutiveHoursAndDollars,
     ExecutiveHoursAndDollarsRequestDto,
     MasterInquryRequest,
-    MilitaryAndRehire,
+    EmployeesOnMilitaryLeaveResponse,
     MilitaryAndRehireForfeiture,
     MilitaryAndRehireForfeituresRequestDto,
     MilitaryAndRehireProfitSummary,
     MilitaryAndRehireProfitSummaryRequestDto,
-    MilitaryAndRehireRequestDto,
+    EmployeesOnMilitaryLeaveRequestDto,
     MissingCommasInPYName,
     MissingCommasInPYNameRequestDto,
     NegativeEtvaForSSNsOnPayProfit,
@@ -54,7 +54,7 @@ import {
     setEligibleEmployees,
     setExecutiveHoursAndDollars,
     setMasterInquiryData,
-    setMilitaryAndRehireDetails,
+    setEmployeesOnMilitaryLeaveDetails,
     setMilitaryAndRehireForfeituresDetails,
     setMilitaryAndRehireProfitSummaryDetails,
     setMissingCommaInPYName,
@@ -172,9 +172,9 @@ export const YearsEndApi = createApi({
                 }
             }
         }),
-        getMilitaryAndRehire: builder.query<PagedReportResponse<MilitaryAndRehire>, MilitaryAndRehireRequestDto>({
+        getEmployeesOnMilitaryLeave: builder.query<PagedReportResponse<EmployeesOnMilitaryLeaveResponse>, EmployeesOnMilitaryLeaveRequestDto>({
             query: (params) => ({
-                url: "yearend/military-and-rehire",
+                url: "yearend/employees-on-military-leave",
                 method: "GET",
                 params: {
                     take: params.pagination.take,
@@ -184,7 +184,7 @@ export const YearsEndApi = createApi({
             async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
                     const { data } = await queryFulfilled;
-                    dispatch(setMilitaryAndRehireDetails(data));
+                    dispatch(setEmployeesOnMilitaryLeaveDetails(data));
                 } catch (err) {
                     console.log("Err: " + err);
                 }
@@ -629,7 +629,7 @@ export const {
     useLazyGetDuplicateNamesAndBirthdaysQuery,
     useLazyGetMilitaryAndRehireForfeituresQuery,
     useLazyGetMilitaryAndRehireProfitSummaryQuery,
-    useLazyGetMilitaryAndRehireQuery,
+    useLazyGetEmployeesOnMilitaryLeaveQuery,
     useLazyGetNamesMissingCommasQuery,
     useLazyGetNegativeEVTASSNQuery,
     useLazyGetDistributionsAndForfeituresQuery,

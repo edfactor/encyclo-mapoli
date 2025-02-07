@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Request;
-public sealed class YearRequest
+public record YearRequest
 {
+    [DefaultValue(2024)]
     public short ProfitYear { get; set; }
 }
