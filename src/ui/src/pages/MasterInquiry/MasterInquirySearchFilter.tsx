@@ -538,7 +538,7 @@ const MasterInquirySearchFilter = () => {
           disabled={!isValid}
         />
       </Grid2>
-    </form >
+    </form>
   );
 };
 
