@@ -279,7 +279,6 @@ export interface MasterInquryRequest {
   comment?: string;
   pagination: PaginationParams;
   employeeNumber?: string;
-  // add payment type and member type to search request
   paymentType?: number;
   memberType?: number;
   badgeNumber?: number;

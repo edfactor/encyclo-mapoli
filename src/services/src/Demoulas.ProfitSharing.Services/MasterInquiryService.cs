@@ -26,7 +26,7 @@ public class MasterInquiryService : IMasterInquiryService
         _logger = loggerFactory.CreateLogger<MasterInquiryService>();
     }
 
-    public async Task<MasterInquiryWithDetailsResponseDto> GetMasterInquiryAsync(MasterInquiryRequest req, CancellationToken cancellationToken = default)
+     public async Task<MasterInquiryWithDetailsResponseDto> GetMasterInquiryAsync(MasterInquiryRequest req, CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("REQUEST MASTER INQUIRY"))
         {
@@ -97,23 +97,6 @@ public class MasterInquiryService : IMasterInquiryService
                         x.ProfitDetail.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id &&
                         x.ProfitDetail.Forfeiture == req.PaymentAmount);
                 }
-
-                // Add Payment Type check
-                // Replace the existing Payment Type check with this:
-                if (req.PaymentType.HasValue)
-                {
-                    query = req.PaymentType.Value switch
-                    {
-                        1 => query.Where(x => new[] { 1, 3 }.Contains(x.ProfitDetail.ProfitCodeId)),    // Hardship/Distribution
-                        2 => query.Where(x => new[] { 2, 9 }.Contains(x.ProfitDetail.ProfitCodeId)),    // Payoffs/Forfeit
-                        3 => query.Where(x => x.ProfitDetail.ProfitCodeId == 5),                        // Rollovers
-                        _ => query
-                    };
-                }
-
-                // member type
-                // payprof - beneficiary type id = 1, employee = 0
-
                 var results = await query
                 .Select(x => new MasterInquiryResponseDto
                 {

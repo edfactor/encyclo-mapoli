@@ -45,27 +45,8 @@ const CleanUpSummary = () => {
     return null;
   };
 
-  const breadcrumbNode = () => {
-
-    if (selectedTab != 0) return (
-      <Breadcrumbs
-        separator="/"
-        maxItems={20}>
-        <Link
-          color={"inherit"}
-          underline="hover"
-          onClick={() => {
-            console.info("Clicked on December Flow Summary");
-            navigate("/december-process-accordion");
-          }}>
-          December Flow Summary
-        </Link>
-        <div className="text-dsm-secondary">Clean Up</div>
-      </Breadcrumbs>);
-  }
-
   return (
-    <Page label={selectedTab == 0 ? "Clean Up Process Summary" : tabs[selectedTab]} breadcrumbNode={breadcrumbNode()} actionNode={renderActionNode()}>
+    <Page label={selectedTab == 0 ? "Clean Up Process Summary" : tabs[selectedTab]} actionNode={renderActionNode()}>
       <Grid2
         container
         width="100%"
