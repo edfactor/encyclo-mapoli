@@ -76,7 +76,7 @@ void RunNpmInstall(string projectPath)
     try
     {
         // Determine the correct npm executable based on the operating system
-        string npmExecutable = OperatingSystem.IsWindows() ? @"C:\Program Files\nodejs\npm.cmd" : "/usr/local/bin/npm";
+        string npmExecutable = OperatingSystem.IsWindows() ? @"C:\Program Files\nodejs\npm.cmd" : "npm";
 
 
         using var process = new Process
