@@ -26,7 +26,7 @@ public class MasterInquiryService : IMasterInquiryService
         _logger = loggerFactory.CreateLogger<MasterInquiryService>();
     }
 
-     public async Task<MasterInquiryWithDetailsResponseDto> GetMasterInquiryAsync(MasterInquiryRequest req, CancellationToken cancellationToken = default)
+    public async Task<MasterInquiryWithDetailsResponseDto> GetMasterInquiryAsync(MasterInquiryRequest req, CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("REQUEST MASTER INQUIRY"))
         {
