@@ -56,6 +56,12 @@ internal static class GenerateScriptHelper
 
                 if (!string.IsNullOrWhiteSpace(outputPath))
                 {
+                    var directory = Path.GetDirectoryName(outputPath);
+                    if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory))
+                    {
+                        Directory.CreateDirectory(directory);
+                    }
+
                     // Write the script to a file
                     await File.WriteAllTextAsync(outputPath, script);
                     Console.WriteLine($"SQL upgrade script generated at: {outputPath}");
