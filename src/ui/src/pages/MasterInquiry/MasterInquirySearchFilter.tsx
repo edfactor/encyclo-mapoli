@@ -435,109 +435,109 @@ const MasterInquirySearchFilter = () => {
             </FormControl>
           </Grid2>
 
-        <Grid2 xs={12} sm={6} md={3}>
-          <FormLabel>Contribution</FormLabel>
-          <Controller
-            name="contribution"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                fullWidth
-                size="small"
-                variant="outlined"
-                value={field.value ?? ''}
-                error={!!errors.contribution}
-              />
-            )}
-          />
-          {errors.contribution && <FormHelperText error>{errors.contribution.message}</FormHelperText>}
+          <Grid2 xs={12} sm={6} md={3}>
+            <FormLabel>Contribution</FormLabel>
+            <Controller
+              name="contribution"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  size="small"
+                  variant="outlined"
+                  value={field.value ?? ''}
+                  error={!!errors.contribution}
+                />
+              )}
+            />
+            {errors.contribution && <FormHelperText error>{errors.contribution.message}</FormHelperText>}
+          </Grid2>
+
+          <Grid2 xs={12} sm={6} md={3}>
+            <FormLabel>Earnings</FormLabel>
+            <Controller
+              name="earnings"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  size="small"
+                  variant="outlined"
+                  value={field.value ?? ''}
+                  error={!!errors.earnings}
+                />
+              )}
+            />
+            {errors.earnings && <FormHelperText error>{errors.earnings.message}</FormHelperText>}
+          </Grid2>
+
+          <Grid2 xs={12} sm={6} md={3}>
+            <FormLabel>Forfeiture</FormLabel>
+            <Controller
+              name="forfeiture"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  size="small"
+                  variant="outlined"
+                  value={field.value ?? ''}
+                  error={!!errors.forfeiture}
+                />
+              )}
+            />
+            {errors.forfeiture && <FormHelperText error>{errors.forfeiture.message}</FormHelperText>}
+          </Grid2>
+
+          <Grid2 xs={12} sm={6} md={3}>
+            <FormLabel>Payment</FormLabel>
+            <Controller
+              name="payment"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  size="small"
+                  variant="outlined"
+                  value={field.value ?? ''}
+                  error={!!errors.payment}
+                />
+              )}
+            />
+            {errors.payment && <FormHelperText error>{errors.payment.message}</FormHelperText>}
+          </Grid2>
+
+          <Grid2 xs={12}>
+            <FormControlLabel
+              control={
+                <Controller
+                  name="voids"
+                  control={control}
+                  render={({ field }) => (
+                    <Checkbox
+                      {...field}
+                      size="small"
+                      checked={field.value}
+                    />
+                  )}
+                />
+              }
+              label="Voids"
+            />
+          </Grid2>
         </Grid2>
 
-        <Grid2 xs={12} sm={6} md={3}>
-          <FormLabel>Earnings</FormLabel>
-          <Controller
-            name="earnings"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                fullWidth
-                size="small"
-                variant="outlined"
-                value={field.value ?? ''}
-                error={!!errors.earnings}
-              />
-            )}
-          />
-          {errors.earnings && <FormHelperText error>{errors.earnings.message}</FormHelperText>}
-        </Grid2>
-
-        <Grid2 xs={12} sm={6} md={3}>
-          <FormLabel>Forfeiture</FormLabel>
-          <Controller
-            name="forfeiture"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                fullWidth
-                size="small"
-                variant="outlined"
-                value={field.value ?? ''}
-                error={!!errors.forfeiture}
-              />
-            )}
-          />
-          {errors.forfeiture && <FormHelperText error>{errors.forfeiture.message}</FormHelperText>}
-        </Grid2>
-
-        <Grid2 xs={12} sm={6} md={3}>
-          <FormLabel>Payment</FormLabel>
-          <Controller
-            name="payment"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                fullWidth
-                size="small"
-                variant="outlined"
-                value={field.value ?? ''}
-                error={!!errors.payment}
-              />
-            )}
-          />
-          {errors.payment && <FormHelperText error>{errors.payment.message}</FormHelperText>}
-        </Grid2>
-
-        <Grid2 xs={12}>
-          <FormControlLabel
-            control={
-              <Controller
-                name="voids"
-                control={control}
-                render={({ field }) => (
-                  <Checkbox
-                    {...field}
-                    size="small"
-                    checked={field.value}
-                  />
-                )}
-              />
-            }
-            label="Voids"
-          />
-        </Grid2>
+        <SearchAndReset
+          handleReset={handleReset}
+          handleSearch={validateAndSearch}
+          isFetching={isFetching}
+          disabled={!isValid}
+        />
       </Grid2>
-
-      <SearchAndReset
-        handleReset={handleReset}
-        handleSearch={validateAndSearch}
-        isFetching={isFetching}
-        disabled={!isValid}
-      />
-    </Grid2>
     </form >
   );
 };
