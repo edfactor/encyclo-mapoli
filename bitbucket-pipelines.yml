@@ -214,7 +214,7 @@ definitions:
           Write-Host "Target environment: $environment"
           Write-Host "Source schema: $sourceSchema"
 
-          .\output\Demoulas.ProfitSharing.Data.Cli $action --connection-name ProfitSharing --sql-file ".\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-schema $sourceSchema
+          .\output\Demoulas.ProfitSharing.Data.Cli $action --connection-name ProfitSharing --output-file \".\dist\migration.sql\" --sql-file ".\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-schema $sourceSchema
           if ($LASTEXITCODE -ne 0) { Write-Error "Database upgrade failed. Exiting"; exit 1 }
 
 pipelines:
@@ -365,6 +365,7 @@ pipelines:
               - upgrade-db
               - drop-recreate-db
               - import-from-ready
+              - generate-upgrade-script
           - name: SourceSchema
             default: PROFITSHARE
             allowed-values:
