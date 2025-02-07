@@ -140,6 +140,7 @@ public class CleanupReportService : ICleanupReportService
             var results = await _dataContextFactory.UseReadOnlyContext(ctx =>
             {
                 var query = from dem in ctx.Demographics
+                        .Include(d=> d.EmploymentStatus)
                             where !(from pp in ctx.PayProfits select pp.DemographicId).Contains(dem.Id)
                             select new DemographicBadgesNotInPayProfitResponse
                             {
@@ -147,6 +148,7 @@ public class CleanupReportService : ICleanupReportService
                                 Ssn = dem.Ssn.MaskSsn(),
                                 EmployeeName = dem.ContactInfo.FullName ?? "",
                                 Status = dem.EmploymentStatusId,
+                                StatusName = dem.EmploymentStatus!.Name,
                                 Store = dem.StoreNumber,
                             };
                 return query.ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken: cancellationToken);

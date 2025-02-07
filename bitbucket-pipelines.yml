@@ -192,18 +192,18 @@ definitions:
 
           $environment = $env:Environment
           $action = $env:Action
-          $sourceSchema = ""
+          $sourceSchema = $env:SourceSchema
+
           if (-not $environment) { $environment = "QA" }
           if (-not $action) { $action = "upgrade-db" }
+          if (-not $sourceSchema) { $action = "PROFITSHARE" }
 
           if ($environment -eq "QA") {
-            $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_QA
-            $sourceSchema = "PROFITSHARE"
+            $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_QA            
           }
 
           if ($environment -eq "UAT") {
-            $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_UAT
-            $sourceSchema = "PROFITSHARE_STAGING"
+            $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_UAT            
           }
 
           if (-not $sourceSchema) {
@@ -356,13 +356,63 @@ pipelines:
       - variables: # https://bitbucket.org/blog/predefine-values-of-custom-pipeline-variables
           - name: Environment
             default: QA
-            allowed-values: # optionally restrict variable values
+            allowed-values:
               - QA
               - UAT
           - name: Action
             default: upgrade-db
-            allowed-values: # optionally restrict variable values
+            allowed-values:
               - upgrade-db
               - drop-recreate-db
               - import-from-ready
+          - name: SourceSchema
+            default: PROFITSHARE
+            allowed-values:
+              - PROFITSHARE
+              - MTPR    
+              - PROFITSHARE_STAGING
+      - step:
+          name: Validate SourceSchema
+          script:
+            - |
+              if [ "$BITBUCKET_PIPELINE_OS" = "windows" ]; then
+                pwsh -Command "
+                  \$validSchemas = @{
+                      'QA'  = @('PROFITSHARE', 'MTPR')
+                      'UAT' = @('PROFITSHARE_STAGING')
+                  }
+
+                  if (-not \$validSchemas[\$env:Environment] -contains \$env:SourceSchema) {
+                      Write-Host 'ERROR: Invalid SourceSchema for selected Environment'
+                      Write-Host ('Allowed values for ' + \$env:Environment + ': ' + (\$validSchemas[\$env:Environment] -join ', '))
+                      exit 1
+                  }
+
+                  Write-Host ('Validated: Environment=' + \$env:Environment + ', SourceSchema=' + \$env:SourceSchema)
+                "
+              else
+                validSchemas_QA=("PROFITSHARE" "MTPR")
+                validSchemas_UAT=("PROFITSHARE_STAGING")
+
+                if [ "$Environment" = "QA" ]; then
+                  validSchemas=("${validSchemas_QA[@]}")
+                elif [ "$Environment" = "UAT" ]; then
+                  validSchemas=("${validSchemas_UAT[@]}")
+                else
+                  echo "ERROR: Unknown Environment '$Environment'"
+                  exit 1
+                fi
+
+                if [[ ! " ${validSchemas[@]} " =~ " $SourceSchema " ]]; then
+                  echo "ERROR: Invalid SourceSchema '$SourceSchema' for Environment '$Environment'"
+                  echo "Allowed values: ${validSchemas[*]}"
+                  exit 1
+                fi
+
+                echo "Validated: Environment=$Environment, SourceSchema=$SourceSchema"
+              fi
       - step: *upgrade-database
+
+
+
+

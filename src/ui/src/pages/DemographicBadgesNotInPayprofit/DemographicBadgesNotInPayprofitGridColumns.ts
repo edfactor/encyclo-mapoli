@@ -4,13 +4,17 @@ export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
   return [
     {
       headerName: "Badge",
-      field: "employeeBadge",
-      colId: "employeeBadge",
+      field: "badgeNumber",
+      colId: "badgeNumber",
       minWidth: 80,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
-      sortable: true
+      sortable: true,
+      valueFormatter: (params) => {
+        const badgeNumber = params.value;
+        return badgeNumber ? badgeNumber.toString().padStart(7, '0') : '';
+      }
     },
     {
       headerName: "Demographic SSN",
@@ -46,7 +50,12 @@ export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
       minWidth: 80,
       headerClass: "center-align",
       cellClass: "center-align",
-      resizable: true
+      resizable: true,
+      valueFormatter: (params) => {
+        const status = params.data.status; // assuming 'status' is in the row data
+        const statusName = params.data.statusName; // assuming 'statusName' is in the row data
+        return `${statusName}(${status})`;
+      }
     },
   ];
-};
+}
