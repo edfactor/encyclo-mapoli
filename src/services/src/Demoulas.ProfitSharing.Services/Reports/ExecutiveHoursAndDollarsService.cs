@@ -41,6 +41,10 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
             {
                 query = query.Where(pp => pp.Demographic!.BadgeNumber == request.BadgeNumber);
             }
+            
+            // Executives have a pay frequency value of 2
+            query = query.Where(pp => pp.Demographic!.PayFrequencyId == 2);
+
             if (request.Ssn!= null)
             {
                 query = query.Where(pp => pp.Demographic!.Ssn == request.Ssn);

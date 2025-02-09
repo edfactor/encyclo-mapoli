@@ -1,6 +1,5 @@
 import { Checkbox, FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useLazyGetExecutiveHoursAndDollarsQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
@@ -46,8 +45,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter = () => {
     control,
     handleSubmit,
     formState: { errors, isValid },
-    reset,
-    trigger
+    reset
   } = useForm<ExecutiveHoursAndDollarsSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
@@ -77,7 +75,11 @@ const ManageExecutiveHoursAndDollarsSearchFilter = () => {
 
   const handleReset = () => {
     reset({
-      profitYear: undefined
+      profitYear: undefined,
+      fullNameContains: null,
+      badgeNumber: null,
+      socialSecurity: null,
+      hasExecutiveHoursAndDollars: false
     });
   };
 
@@ -85,60 +87,62 @@ const ManageExecutiveHoursAndDollarsSearchFilter = () => {
     <form onSubmit={validateAndSearch}>
       <Grid2
         container
-        paddingX="24px"
-        >
-        <Grid2 container spacing={3} width="100%">
+        paddingX="24px">
         <Grid2
-          xs={12}
-          sm={6}
-          md={3}>
-          <FormLabel>Profit Year</FormLabel>
-          <Controller
-            name="profitYear"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                fullWidth
-                variant="outlined"
-                error={!!errors.profitYear}
-                onChange={(e) => {
-                  field.onChange(e);
-                }}
-                inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
-              />
-            )}
-          />
-          {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
-        </Grid2>
-        <Grid2
-          xs={12}
-          sm={6}
-          md={3}>
-          <FormLabel>Full Name</FormLabel>
-          <Controller
-            name="fullNameContains"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                fullWidth
-                variant="outlined"
-                error={!!errors.fullNameContains}
-                onChange={(e) => {
-                  field.onChange(e);
-                }}
-              />
-            )}
-          />
-          {errors.fullNameContains && <FormHelperText error>{errors.fullNameContains.message}</FormHelperText>}
-        </Grid2>
-        <Grid2
-          xs={12}
-          sm={6}
-          md={3}>
-          <FormLabel>SSN</FormLabel>
-          <Controller
+          container
+          spacing={3}
+          width="100%">
+          <Grid2
+            xs={12}
+            sm={6}
+            md={3}>
+            <FormLabel>Profit Year</FormLabel>
+            <Controller
+              name="profitYear"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  variant="outlined"
+                  error={!!errors.profitYear}
+                  onChange={(e) => {
+                    field.onChange(e);
+                  }}
+                  inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                />
+              )}
+            />
+            {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
+          </Grid2>
+          <Grid2
+            xs={12}
+            sm={6}
+            md={3}>
+            <FormLabel>Full Name</FormLabel>
+            <Controller
+              name="fullNameContains"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  variant="outlined"
+                  error={!!errors.fullNameContains}
+                  onChange={(e) => {
+                    field.onChange(e);
+                  }}
+                />
+              )}
+            />
+            {errors.fullNameContains && <FormHelperText error>{errors.fullNameContains.message}</FormHelperText>}
+          </Grid2>
+          <Grid2
+            xs={12}
+            sm={6}
+            md={3}>
+            <FormLabel>SSN</FormLabel>
+            <Controller
               name="socialSecurity"
               control={control}
               render={({ field }) => (
@@ -147,64 +151,63 @@ const ManageExecutiveHoursAndDollarsSearchFilter = () => {
                   fullWidth
                   size="small"
                   variant="outlined"
-                  value={field.value ?? ''}
+                  value={field.value ?? ""}
                   error={!!errors.socialSecurity}
                 />
+              )}
+            />
+            {errors.socialSecurity && <FormHelperText error>{errors.socialSecurity.message}</FormHelperText>}
+          </Grid2>
+          <Grid2
+            xs={12}
+            sm={6}
+            md={3}>
+            <FormLabel>Badge Number</FormLabel>
+            <Controller
+              name="badgeNumber"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  variant="outlined"
+                  error={!!errors.badgeNumber}
+                  onChange={(e) => {
+                    const parsedValue = e.target.value === "" ? null : Number(e.target.value);
+                    field.onChange(parsedValue);
+                  }}
+                  inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                />
+              )}
+            />
+            {errors.badgeNumber && <FormHelperText error>{errors.badgeNumber.message}</FormHelperText>}
+          </Grid2>
+          <Grid2
+            xs={12}
+            sm={6}
+            md={3}>
+            <FormLabel>Has Executive Hours and Dollars</FormLabel>
+            <Controller
+              name="hasExecutiveHoursAndDollars"
+              control={control}
+              render={({ field }) => (
+                <Checkbox
+                  checked={field.value}
+                  onChange={field.onChange}
+                />
+              )}
+            />
+            {errors.hasExecutiveHoursAndDollars && (
+              <FormHelperText error>{errors.hasExecutiveHoursAndDollars.message}</FormHelperText>
             )}
-          />
-          {errors.socialSecurity && <FormHelperText error>{errors.socialSecurity.message}</FormHelperText>}
+          </Grid2>
         </Grid2>
-        <Grid2
-          xs={12}
-          sm={6}
-          md={3}>
-          <FormLabel>Badge Number</FormLabel>
-          <Controller
-            name="badgeNumber"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                fullWidth
-                variant="outlined"
-                error={!!errors.badgeNumber}
-                onChange={(e) => {
-                  const parsedValue = e.target.value === "" ? null : Number(e.target.value);
-                  field.onChange(parsedValue);
-                }}
-                inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
-              />
-            )}
-          />
-          {errors.badgeNumber && <FormHelperText error>{errors.badgeNumber.message}</FormHelperText>}
-        </Grid2>
-        <Grid2
-          xs={12}
-          sm={6}
-          md={3}>
-          <FormLabel>Has Executive Hours and Dollars</FormLabel>
-          <Controller
-            name="hasExecutiveHoursAndDollars"
-            control={control}
-            render={({ field }) => (
-              <Checkbox
-                checked={field.value}
-                onChange={field.onChange}
-              />
-            )}
-          />
-          {errors.hasExecutiveHoursAndDollars && (
-            <FormHelperText error>{errors.hasExecutiveHoursAndDollars.message}</FormHelperText>
-          )}
-        </Grid2>
-        
-      </Grid2>
       </Grid2>
       <Grid2
         width="100%"
         paddingX="24px">
         <SearchAndReset
-          handleReset={() => {}}
+          handleReset={handleReset}
           handleSearch={validateAndSearch}
           isFetching={isFetching}
         />
