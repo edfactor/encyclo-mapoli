@@ -4,7 +4,7 @@ export enum ImpersonationRoles {
   FinanceManager = "Finance-Manager",
   DistributionsClerk = "Distributions-Clerk",
   HardshipAdministrator = "Hardship-Administrator",
-  ProfitSharingAdministrator = "Profit-Sharing-Administrator",
+  ProfitSharingAdministrator = "Profit-Sharing-Administrator"
 }
 
 export interface ProfitYearRequest {
@@ -36,8 +36,7 @@ export interface PagedReportResponse<T> {
   response: Paged<T>;
 }
 
-export interface DistributionsAndForfeituresRequestDto
-  extends ProfitYearRequest {
+export interface DistributionsAndForfeituresRequestDto extends ProfitYearRequest {
   startMonth?: number;
   endMonth?: number;
   includeOutgoingForfeitures?: boolean;
@@ -103,8 +102,7 @@ export interface DuplicateNameAndBirthdayRequestDto extends ProfitYearRequest {
   pagination: PaginationParams;
 }
 
-export interface NegativeEtvaForSSNsOnPayprofitRequestDto
-  extends ProfitYearRequest {
+export interface NegativeEtvaForSSNsOnPayprofitRequestDto extends ProfitYearRequest {
   pagination: PaginationParams;
 }
 
@@ -153,8 +151,7 @@ export interface EmployeesOnMilitaryLeaveResponse {
   terminationDate: string;
 }
 
-export interface MilitaryAndRehireForfeituresRequestDto
-  extends ProfitYearRequest {
+export interface MilitaryAndRehireForfeituresRequestDto extends ProfitYearRequest {
   reportingYear: string;
   pagination: PaginationParams;
 }
@@ -165,18 +162,16 @@ export interface ForfeitureDetail extends ProfitYearRequest {
 }
 
 export interface MilitaryAndRehireForfeiture {
-    badgeNumber: number;
-    fullName: string;
-    ssn: string;
-    reHiredDate: string;
-    companyContributionYears: number;
-    hoursCurrentYear: number;
-    details: ForfeitureDetail[];
+  badgeNumber: number;
+  fullName: string;
+  ssn: string;
+  reHiredDate: string;
+  companyContributionYears: number;
+  hoursCurrentYear: number;
+  details: ForfeitureDetail[];
 }
 
-
-export interface MilitaryAndRehireProfitSummaryRequestDto
-  extends ProfitYearRequest {
+export interface MilitaryAndRehireProfitSummaryRequestDto extends ProfitYearRequest {
   reportingYear: string;
   pagination: PaginationParams;
 }
@@ -206,6 +201,21 @@ export interface ExecutiveHoursAndDollarsRequestDto extends ProfitYearRequest {
   fullNameContains?: string;
   hasExecutiveHoursAndDollars: boolean;
   pagination: PaginationParams;
+}
+
+// This is the state of an editable executive's hours and dollars
+export interface ExecutiveHoursAndDollarsRow {
+  badgeNumber: number;
+  executiveHours: number;
+  executiveDollars: number;
+}
+
+// This structure is used to store the state of the Manage
+// Executive Hours and Dollars Grid, which allows editing
+// and writing of data
+export interface ExecutiveHoursAndDollarsGrid {
+  executiveHoursAndDollars: ExecutiveHoursAndDollarsRow[];
+  profitYear: number;
 }
 
 export interface ExecutiveHoursAndDollars {
@@ -285,7 +295,7 @@ export interface MasterInquryRequest {
 export enum FrozenReportsByAgeRequestType {
   Total = "Total",
   FullTime = "FullTime",
-  PartTime = "PartTime",
+  PartTime = "PartTime"
 }
 
 export interface FrozenReportsByAgeRequest extends ProfitYearRequest {
@@ -313,8 +323,8 @@ export interface ProfitSharingDistributionsByAgeResponse {
   regularEmployeeCount: number;
   hardshipEmployeeCount: number;
   amount: number;
-  hardshipAmount : number;
-  regularAmount : number;
+  hardshipAmount: number;
+  regularAmount: number;
   employmentType: string;
   commentTypeId: number | null;
 }
@@ -417,43 +427,43 @@ export interface BalanceByYearsDetail extends BalanceByDetailBase {
   age: number;
 }
 
-export interface BalanceByYears  extends BalanceByBase<BalanceByAgeDetail> {}
+export interface BalanceByYears extends BalanceByBase<BalanceByAgeDetail> {}
 
 export interface VestedAmountsByAge {
-  totalFullTime100PercentAmount: number
-  totalFullTimePartialAmount: number
-  totalFullTimeNotVestedAmount: number
-  totalPartTime100PercentAmount: number
-  totalPartTimePartialAmount: number
-  totalPartTimeNotVestedAmount: number
-  totalBeneficiaryCount: number
-  totalBeneficiaryAmount: number
-  totalFullTimeCount: number
-  totalNotVestedCount: number
-  totalPartialVestedCount: number
-  reportName: string
-  reportDate: string
-  response: Paged<VestedAmountsByAgeDetail>
+  totalFullTime100PercentAmount: number;
+  totalFullTimePartialAmount: number;
+  totalFullTimeNotVestedAmount: number;
+  totalPartTime100PercentAmount: number;
+  totalPartTimePartialAmount: number;
+  totalPartTimeNotVestedAmount: number;
+  totalBeneficiaryCount: number;
+  totalBeneficiaryAmount: number;
+  totalFullTimeCount: number;
+  totalNotVestedCount: number;
+  totalPartialVestedCount: number;
+  reportName: string;
+  reportDate: string;
+  response: Paged<VestedAmountsByAgeDetail>;
 }
 export interface VestedAmountsByAgeDetail {
-  age: number
-  fullTime100PercentCount: number
-  fullTime100PercentAmount: number
-  fullTimePartialCount: number
-  fullTimePartialAmount: number
-  fullTimeNotVestedCount: number
-  fullTimeNotVestedAmount: number
-  partTime100PercentCount: number
-  partTime100PercentAmount: number
-  partTimePartialCount: number
-  partTimePartialAmount: number
-  partTimeNotVestedCount: number
-  partTimeNotVestedAmount: number
-  beneficiaryCount: number
-  beneficiaryAmount: number
-  fullTimeCount: number
-  notVestedCount: number
-  partialVestedCount: number
+  age: number;
+  fullTime100PercentCount: number;
+  fullTime100PercentAmount: number;
+  fullTimePartialCount: number;
+  fullTimePartialAmount: number;
+  fullTimeNotVestedCount: number;
+  fullTimeNotVestedAmount: number;
+  partTime100PercentCount: number;
+  partTime100PercentAmount: number;
+  partTimePartialCount: number;
+  partTimePartialAmount: number;
+  partTimeNotVestedCount: number;
+  partTimeNotVestedAmount: number;
+  beneficiaryCount: number;
+  beneficiaryAmount: number;
+  fullTimeCount: number;
+  notVestedCount: number;
+  partialVestedCount: number;
 }
 
 export interface TerminationRequest {
@@ -530,7 +540,6 @@ export interface ProfitShareUpdateResponse {
   response: Paged<ProfitShareUpdateDetail[]>;
 }
 
-
 export interface ProfitShareEditDetail {
   badgePSn: string;
   name: string;
@@ -549,12 +558,12 @@ export interface ProfitShareEditDetail {
 
 export interface ProfitShareEditResponse {
   isLoading: boolean; // this feels like a hack, it means display the table with the spinner.
-  
-  beginningBalance: number,
-  contributionGrandTotal: number,
-  incomingForfeitureGrandTotal: number,
-  earningsGrandTotal: number,
-  
+
+  beginningBalance: number;
+  contributionGrandTotal: number;
+  incomingForfeitureGrandTotal: number;
+  earningsGrandTotal: number;
+
   reportName: string;
   reportDate: string;
   response: Paged<ProfitShareEditDetail[]>;
@@ -563,7 +572,7 @@ export interface ProfitShareEditResponse {
 export interface ProfitShareMasterResponse {
   isLoading: boolean;
   reportName: string;
-  beneficiariesEffected: number,
-  employeesEffected: number,
-  etvasEffected: number
+  beneficiariesEffected: number;
+  employeesEffected: number;
+  etvasEffected: number;
 }
