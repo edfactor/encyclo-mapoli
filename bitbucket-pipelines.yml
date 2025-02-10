@@ -196,7 +196,7 @@ definitions:
 
           if (-not $environment) { $environment = "QA" }
           if (-not $action) { $action = "upgrade-db" }
-          if (-not $sourceSchema) { $action = "PROFITSHARE" }
+          if (-not $sourceSchema) { $sourceSchema = "PROFITSHARE" }
 
           if ($environment -eq "QA") {
             $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_QA            
