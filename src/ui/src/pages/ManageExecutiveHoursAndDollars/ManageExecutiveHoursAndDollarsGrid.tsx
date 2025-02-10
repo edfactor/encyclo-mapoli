@@ -1,7 +1,6 @@
 import { Typography } from "@mui/material";
 import { useState, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useLazyGetNegativeEVTASSNQuery } from "reduxstore/api/YearsEndApi";
+import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetManageExecutiveHoursAndDollarsColumns } from "./ManageExecutiveHoursAndDollarsGridColumns";
@@ -9,13 +8,14 @@ import { GetManageExecutiveHoursAndDollarsColumns } from "./ManageExecutiveHours
 const ManageExecutiveHoursAndDollarsGrid = () => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [sortParams, setSortParams] = useState<ISortParams>({
     sortBy: "Badge",
     isSortDescending: false
   });
 
   const { executiveHoursAndDollars } = useSelector((state: RootState) => state.yearsEnd);
-  const [_, { isLoading }] = useLazyGetNegativeEVTASSNQuery();
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetManageExecutiveHoursAndDollarsColumns(), []);
@@ -24,7 +24,7 @@ const ManageExecutiveHoursAndDollarsGrid = () => {
     <>
       {executiveHoursAndDollars?.response && (
         <>
-          <div style={{ padding: "0 24px 0 24px" }}>
+          <div className="px-[24px]">
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
