@@ -29,7 +29,7 @@ const YearEndFlow = () => {
           <DSMCollapsedAccordion
             title="Pay 426"
             expandable={false}
-            actionButtonText="VIEW DETAILS"
+            actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"
@@ -45,7 +45,7 @@ const YearEndFlow = () => {
           <DSMCollapsedAccordion
             title="Pay 426-TOT"
             expandable={false}
-            actionButtonText="VIEW DETAILS"
+            actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"
@@ -61,7 +61,7 @@ const YearEndFlow = () => {
           <DSMCollapsedAccordion
             title="Pay 426N-1"
             expandable={false}
-            actionButtonText="VIEW DETAILS"
+            actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"
@@ -77,7 +77,7 @@ const YearEndFlow = () => {
           <DSMCollapsedAccordion
             title="Pay 426N-2"
             expandable={false}
-            actionButtonText="VIEW DETAILS"
+            actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"
@@ -93,7 +93,7 @@ const YearEndFlow = () => {
           <DSMCollapsedAccordion
             title="Pay 426N-3"
             expandable={false}
-            actionButtonText="VIEW DETAILS"
+            actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"
@@ -109,7 +109,7 @@ const YearEndFlow = () => {
           <DSMCollapsedAccordion
             title="Pay 426N-4"
             expandable={false}
-            actionButtonText="VIEW DETAILS"
+            actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"
@@ -125,7 +125,7 @@ const YearEndFlow = () => {
           <DSMCollapsedAccordion
             title="Pay 426N-5"
             expandable={false}
-            actionButtonText="VIEW DETAILS"
+            actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"
@@ -141,7 +141,7 @@ const YearEndFlow = () => {
           <DSMCollapsedAccordion
             title="Pay 426N-6"
             expandable={false}
-            actionButtonText="VIEW DETAILS"
+            actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"
@@ -157,7 +157,7 @@ const YearEndFlow = () => {
           <DSMCollapsedAccordion
             title="Pay 426N-7"
             expandable={false}
-            actionButtonText="VIEW DETAILS"
+            actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"
@@ -173,7 +173,7 @@ const YearEndFlow = () => {
           <DSMCollapsedAccordion
             title="Pay 426N-8"
             expandable={false}
-            actionButtonText="VIEW DETAILS"
+            actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"
@@ -189,7 +189,7 @@ const YearEndFlow = () => {
           <DSMCollapsedAccordion
             title="Pay 426N-9"
             expandable={false}
-            actionButtonText="VIEW DETAILS"
+            actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"
@@ -205,7 +205,7 @@ const YearEndFlow = () => {
           <DSMCollapsedAccordion
             title="Pay 426N-10"
             expandable={false}
-            actionButtonText="VIEW DETAILS"
+            actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"
@@ -221,7 +221,7 @@ const YearEndFlow = () => {
           <DSMCollapsedAccordion
             title="Payprofit Extract"
             expandable={false}
-            actionButtonText="VIEW DETAILS"
+            actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"
@@ -237,7 +237,7 @@ const YearEndFlow = () => {
           <DSMCollapsedAccordion
             title="YTD Wages Extract (Prof Hours Dollars)"
             expandable={false}
-            actionButtonText="VIEW DETAILS"
+            actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"
@@ -253,7 +253,7 @@ const YearEndFlow = () => {
           <DSMCollapsedAccordion
             title="Manage Executive Hours"
             expandable={false}
-            actionButtonText="VIEW DETAILS"
+            actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"
@@ -269,7 +269,7 @@ const YearEndFlow = () => {
           <DSMCollapsedAccordion
             title="Profit Share Report - Edit Run (Pay426)"
             expandable={false}
-            actionButtonText="VIEW DETAILS"
+            actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"
@@ -285,7 +285,7 @@ const YearEndFlow = () => {
           <DSMCollapsedAccordion
             title="Profit Share Report - Final Run (Pay426)"
             expandable={false}
-            actionButtonText="VIEW DETAILS"
+            actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"
@@ -301,7 +301,7 @@ const YearEndFlow = () => {
           <DSMCollapsedAccordion
             title="Get Eligible Employees"
             expandable={false}
-            actionButtonText="VIEW DETAILS"
+            actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"
@@ -317,7 +317,7 @@ const YearEndFlow = () => {
           <DSMCollapsedAccordion
             title="Profit Share Forfeit (Pay443)"
             expandable={false}
-            actionButtonText="VIEW DETAILS"
+            actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"
@@ -333,7 +333,7 @@ const YearEndFlow = () => {
           <DSMCollapsedAccordion
             title="Profit Share Updates (Pay444)"
             expandable={false}
-            actionButtonText="VIEW DETAILS"
+            actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"
@@ -349,7 +349,7 @@ const YearEndFlow = () => {
           <DSMCollapsedAccordion
             title="Profit Share Edit (Pay447)"
             expandable={false}
-            actionButtonText="VIEW DETAILS"
+            actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"
@@ -365,7 +365,7 @@ const YearEndFlow = () => {
           <DSMCollapsedAccordion
             title="Profit Master Update"
             expandable={false}
-            actionButtonText="VIEW DETAILS"
+            actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"
@@ -381,7 +381,7 @@ const YearEndFlow = () => {
           <DSMCollapsedAccordion
             title="Prof Paymaster UPD"
             expandable={false}
-            actionButtonText="VIEW DETAILS"
+            actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"
@@ -397,7 +397,7 @@ const YearEndFlow = () => {
           <DSMCollapsedAccordion
             title="Profit Share Report By Age (prof130, prof 130b, prof130v, prof130y)"
             expandable={false}
-            actionButtonText="VIEW DETAILS"
+            actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"
@@ -413,7 +413,7 @@ const YearEndFlow = () => {
           <DSMCollapsedAccordion
             title="Prof Share Gross Report (Qpay501)"
             expandable={false}
-            actionButtonText="VIEW DETAILS"
+            actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"

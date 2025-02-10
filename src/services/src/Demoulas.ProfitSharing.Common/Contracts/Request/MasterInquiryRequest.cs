@@ -17,5 +17,7 @@ public record MasterInquiryRequest : PaginationRequestDto
     public decimal? PaymentAmount { get; set; }
     public int? SocialSecurity { get; set; }
     public string? Comment { get; set; }
+    public byte? PaymentType { get; set; }
+    public byte? MemberType { get; set; }
     public int? BadgeNumber { get; set; }
 }

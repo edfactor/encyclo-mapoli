@@ -94,6 +94,20 @@ const schema = yup.object().shape({
   voids: yup.boolean().default(false).required()
 });
 
+const paymentTypeMap: Record<string, number> = {
+  all: 0,
+  hardship: 1,
+  payoffs: 2,
+  rollovers: 3
+};
+
+const memberTypeMap: Record<string, number> = {
+  all: 0,
+  employees: 1,
+  beneficiaries: 2,
+  none: 3
+};
+
 const MasterInquirySearchFilter = () => {
   const [triggerSearch, { isFetching }] = useLazyGetProfitMasterInquiryQuery();
   const dispatch = useDispatch();
@@ -161,8 +175,8 @@ const MasterInquirySearchFilter = () => {
         ...(!!data.name && { name: data.name }),
         ...(!!data.badgeNumber && { badgeNumber: data.badgeNumber }),
         ...(!!data.comment && { comment: data.comment }),
-        ...(!!data.paymentType && { paymentType: data.paymentType }),
-        ...(!!data.memberType && { memberType: data.memberType }),
+        ...(!!data.paymentType && { paymentType: paymentTypeMap[data.paymentType] }),
+        ...(!!data.memberType && { memberType: memberTypeMap[data.memberType] }),
         ...(!!data.contribution && { contribution: data.contribution }),
         ...(!!data.earnings && { earnings: data.earnings }),
         ...(!!data.forfeiture && { forfeiture: data.forfeiture }),

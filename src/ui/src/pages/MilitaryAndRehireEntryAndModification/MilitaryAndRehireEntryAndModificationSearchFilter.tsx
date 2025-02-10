@@ -67,7 +67,7 @@ const MilitaryAndRehireEntryAndModificationSearchFilter = () => {
           xs={12}
           sm={6}
           md={3}>
-          <FormLabel>Employee Number</FormLabel>
+          <FormLabel>Badge Number</FormLabel>
           <TextField
             fullWidth
             variant="outlined"
