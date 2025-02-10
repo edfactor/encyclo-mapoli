@@ -19,19 +19,6 @@ const ManageExecutiveHoursAndDollarsGrid = () => {
 
   const { executiveHoursAndDollars } = useSelector((state: RootState) => state.yearsEnd);
 
-  const dataChanged = (
-    originalData: PagedReportResponse<ExecutiveHoursAndDollars> | null,
-    newData: PagedReportResponse<ExecutiveHoursAndDollars> | null
-  ) => JSON.stringify(originalData) !== JSON.stringify(newData);
-
-  //let gridHoursAndDollars<PagedReportResponse>;</PagedReportResponse>;
-  //Object.assign(gridHoursAndDollars, executiveHoursAndDollars);
-  const copiedResponse = structuredClone(executiveHoursAndDollars);
-
-  console.log("Initial value was: " + dataChanged(copiedResponse, executiveHoursAndDollars));
-
-  // We cannot use the values directly as they are immutable
-
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetManageExecutiveHoursAndDollarsColumns(), []);
 
