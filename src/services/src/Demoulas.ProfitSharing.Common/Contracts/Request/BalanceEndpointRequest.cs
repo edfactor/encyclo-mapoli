@@ -7,7 +7,7 @@ public enum SearchBy
     Ssn = 0,
     BadgeNumber = 1
 }
-public sealed class BalanceEndpointRequest
+public sealed record BalanceEndpointRequest
 {
     [DefaultValue(SearchBy.Ssn)]
     public required SearchBy SearchType { get; set; } //Ssn or BadgeNumber

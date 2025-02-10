@@ -1,13 +1,10 @@
 ﻿using System.CommandLine;
 using System.Text;
-using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.ProfitSharing.Data.Cli.DiagramServices;
-using Demoulas.ProfitSharing.Data.Contexts;
-using Demoulas.ProfitSharing.Data.Factories;
+using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace Demoulas.ProfitSharing.Data.Cli;
 
@@ -39,7 +36,7 @@ public sealed class Program
 
         upgradeDbCommand.SetHandler(async () =>
         {
-            await ExecuteWithDbContext(configuration, args, async context => { await context.Database.MigrateAsync(); });
+            await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async context => { await context.Database.MigrateAsync(); });
         });
 
         var dropRecreateDbCommand = new Command("drop-recreate-db", "Drop and recreate the database");
@@ -47,7 +44,7 @@ public sealed class Program
 
         dropRecreateDbCommand.SetHandler(async () =>
         {
-            await ExecuteWithDbContext(configuration, args, async context =>
+            await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async context =>
             {
                 await context.Database.EnsureDeletedAsync();
                 await context.Database.MigrateAsync();
@@ -59,7 +56,7 @@ public sealed class Program
 
         runSqlCommand.SetHandler(async () =>
         {
-            await ExecuteWithDbContext(configuration, args, async context =>
+            await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async context =>
             {
                 var sqlFile = configuration["sql-file"];
                 var sourceSchema = configuration["source-schema"];
@@ -72,6 +69,9 @@ public sealed class Program
                 sqlCommand = sqlCommand.Replace("COMMIT ;", string.Empty)
                     .Replace("{SOURCE_PROFITSHARE_SCHEMA}", sourceSchema).Trim();
                 await context.Database.ExecuteSqlRawAsync(sqlCommand);
+
+                context.DataImportRecords.Add(new DataImportRecord { SourceSchema = sourceSchema });
+                await context.SaveChangesAsync();
             });
         });
 
@@ -80,7 +80,7 @@ public sealed class Program
 
         generateDgmlCommand.SetHandler(async () =>
         {
-            await ExecuteWithDbContext(configuration, args, async context =>
+            await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async context =>
             {
                 var outputFile = configuration["output-file"];
                 if (string.IsNullOrEmpty(outputFile))
@@ -105,7 +105,7 @@ public sealed class Program
                 throw new ArgumentNullException(nameof(outputFile), "Output file path must be provided.");
             }
 
-            await ExecuteWithDbContext(configuration, args, async context =>
+            await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async context =>
             {
                 var dgml = context.AsDgml();
                 await DgmlService.GenerateMarkdownFromDgml(dgml, outputFile);
@@ -119,35 +119,8 @@ public sealed class Program
         rootCommand.AddCommand(runSqlCommand);
         rootCommand.AddCommand(generateDgmlCommand);
         rootCommand.AddCommand(generateMarkdownCommand);
+        rootCommand.AddCommand(GenerateScriptHelper.CreateGenerateUpgradeScriptCommand(configuration, args, commonOptions));
 
         return rootCommand.InvokeAsync(args);
-    }
-
-    private static async Task ExecuteWithDbContext(IConfiguration configuration, string[] args, Func<ProfitSharingDbContext, Task> action)
-    {
-        string? connectionName = configuration["connection-name"];
-        if (string.IsNullOrEmpty(connectionName))
-        {
-            throw new ArgumentNullException(nameof(connectionName), "Connection name must be provided.");
-        }
-
-        HostApplicationBuilder builder = CreateHostBuilder(args);
-        var list = new List<ContextFactoryRequest> { ContextFactoryRequest.Initialize<ProfitSharingDbContext>(connectionName) };
-        _ = DataContextFactory.Initialize(builder, contextFactoryRequests: list);
-
-        await using var context = builder.Services.BuildServiceProvider().GetRequiredService<ProfitSharingDbContext>();
-        await action(context);
-#pragma warning restore S3928
-    }
-
-
-
-
-    private static HostApplicationBuilder CreateHostBuilder(string[] args)
-    {
-        var builder = Host.CreateApplicationBuilder(args);
-        builder.Configuration.AddUserSecrets<Program>();
-        builder.Configuration.AddEnvironmentVariables();
-        return builder;
     }
 }

@@ -18,11 +18,12 @@ export interface DemographicBadgesNotInPayprofitResponse {
 }
 
 export interface DemographicBadgesNotInPayprofit {
-  employeeBadge: number;
+  badgeNumber: number;
   ssn: number;
   empoyeeName: string;
   store: number;
   status: string;
+  statusName: string;
 }
 
 export interface DemographicBadgesNotInPayprofitRequestDto {
@@ -139,11 +140,11 @@ export interface NegativeEtvaForSSNsOnPayProfit {
   etvaValue: number;
 }
 
-export interface MilitaryAndRehireRequestDto {
+export interface EmployeesOnMilitaryLeaveRequestDto {
   pagination: PaginationParams;
 }
 
-export interface MilitaryAndRehire {
+export interface EmployeesOnMilitaryLeaveResponse {
   departmentId: number;
   badgeNumber: number;
   ssn: string;

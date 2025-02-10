@@ -1,4 +1,6 @@
 ﻿
+using System.ComponentModel;
+
 namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 
 public record DemographicsRequest : IMemberRequest
@@ -9,7 +11,8 @@ public record DemographicsRequest : IMemberRequest
     public int BadgeNumber { get; set; }
 
     public required long OracleHcmId { get; set; }
-    
+
+    [DefaultValue(99)]
     public required short StoreNumber { get; set; }
 
     public required byte DepartmentId { get; set; }

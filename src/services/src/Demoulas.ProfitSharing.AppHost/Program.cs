@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-using Aspire.Hosting;
+using Demoulas.ProfitSharing.AppHost;
 using Projects;
 
 IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(options: new DistributedApplicationOptions { AllowUnsecuredTransport = true });
@@ -76,7 +76,7 @@ void RunNpmInstall(string projectPath)
     try
     {
         // Determine the correct npm executable based on the operating system
-        string npmExecutable = OperatingSystem.IsWindows() ? @"C:\Program Files\nodejs\npm.cmd" : "/usr/local/bin/npm";
+        string npmExecutable = OperatingSystem.IsWindows() ? @"C:\Program Files\nodejs\npm.cmd" : "npm";
 
 
         using var process = new Process
@@ -145,6 +145,9 @@ var cliRunner = builder.AddExecutable("Database-Cli",
 var api = builder.AddProject<Demoulas_ProfitSharing_Api>("ProfitSharing-Api")
     .WithHttpHealthCheck("/health")
     .WithHttpsHealthCheck("/health")
+    .WithSwaggerUi()
+    .WithRedoc()
+    .WithScalar()
     .WaitForCompletion(cliRunner);
 
 var ui = builder.AddNpmApp("ProfitSharing-Ui", "../../../ui/", "dev")

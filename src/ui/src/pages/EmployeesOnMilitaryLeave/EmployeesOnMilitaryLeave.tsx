@@ -1,12 +1,12 @@
 import { Divider } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { DSMAccordion, Page } from "smart-ui-library";
-import MilitaryAndRehireSearchFilter from "./MilitaryAndRehireSearchFilter";
-import MilitaryAndRehireGrid from "./MilitaryAndRehireGrid";
+import EmployeesOnMilitaryLeaveSearchFilter from "./EmployeesOnMilitaryLeaveSearchFilter";
+import EmployeesOnMilitaryLeaveGrid from "./EmployeesOnMilitaryLeaveGrid";
 
-const MilitaryAndRehire = () => {
+const EmployeesOnMilitaryLeave = () => {
   return (
-    <Page label="Rehire">
+    <Page label="Employees on Military Leave">
         <Grid2
           container
           rowSpacing="24px">
@@ -16,17 +16,17 @@ const MilitaryAndRehire = () => {
           <Grid2
             width={"100%"}>
               <DSMAccordion title="Filter">
-                <MilitaryAndRehireSearchFilter />
+                <EmployeesOnMilitaryLeaveSearchFilter />
               </DSMAccordion>
              
           </Grid2>
 
           <Grid2 width="100%">
-            <MilitaryAndRehireGrid />
+            <EmployeesOnMilitaryLeaveGrid />
           </Grid2>
         </Grid2>
     </Page>
   );
 };
 
-export default MilitaryAndRehire;
+export default EmployeesOnMilitaryLeave;

@@ -1,16 +1,15 @@
 import { Divider } from "@mui/material";
-import Button from "@mui/material/Button";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { useState } from "react";
-import { useLazyGetDemographicBadgesNotInPayprofitQuery, useLazyGetDuplicateSSNsQuery } from "reduxstore/api/YearsEndApi";
-import { DSMAccordion, Page, SectionTitle, SmartModal } from "smart-ui-library";
+import { useLazyGetDemographicBadgesNotInPayprofitQuery } from "reduxstore/api/YearsEndApi";
+import { DSMAccordion, Page } from "smart-ui-library";
 import DuplicateSSNsOnDemographicsSearchFilter from "./DuplicateSSNsOnDemographicsSearchFilter";
 import DuplicateSSNsOnDemographicsGrid from "./DuplicateSSNsOnDemographicsGrid";
 
 const DuplicateSSNsOnDemographics = () => {
-  const [openModal, setOpenModal] = useState<boolean>(false);
+  const [, ] = useState<boolean>(false);
 
-  const [trigger] = useLazyGetDemographicBadgesNotInPayprofitQuery();
+  const [] = useLazyGetDemographicBadgesNotInPayprofitQuery();
   return (
     <Page label="Duplicate SSNs on Demographics">
         <Grid2
