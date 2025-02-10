@@ -4,21 +4,11 @@ import { ColDef } from "ag-grid-community";
 export const GetMasterInquiryGridColumns = (): ColDef[] => {
   return [
     {
-      headerName: "ID",
-      field: "id",
-      colId: "id",
-      minWidth: 80,
-      headerClass: "right-align",
-      cellClass: "right-align",
-      resizable: true,
-      sortable: true
-    },
-    {
       headerName: "SSN",
       field: "ssn",
       colId: "ssn",
       minWidth: 120,
-      headerClass: "left-align", 
+      headerClass: "left-align",
       cellClass: "left-align",
       resizable: true
     },
@@ -35,14 +25,14 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
     {
       headerName: "Iteration",
       field: "profitYearIteration",
-      colId: "profitYearIteration", 
+      colId: "profitYearIteration",
       minWidth: 80,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true
     },
     {
-      headerName: "Distribution",
+      headerName: "Distribution Sequence",
       field: "distributionSequence",
       colId: "distributionSequence",
       minWidth: 100,
@@ -51,13 +41,18 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       resizable: true
     },
     {
-      headerName: "Code",
-      field: "profitCodeId",
-      colId: "profitCodeId",
+      headerName: "Profit Code",
+      field: "profitCodeName",
+      colId: "profitCodeName",
       minWidth: 80,
       headerClass: "right-align",
       cellClass: "right-align",
-      resizable: true
+      resizable: true,
+      valueFormatter: (params) => {
+        const id = params.data.profitCodeId; // assuming 'status' is in the row data
+        const name = params.data.profitCodeName; // assuming 'statusName' is in the row data
+        return `${name} (${id})`;
+      }
     },
     {
       headerName: "Contribution",
@@ -71,7 +66,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
     },
     {
       headerName: "Earnings",
-      field: "earnings", 
+      field: "earnings",
       colId: "earnings",
       minWidth: 120,
       headerClass: "right-align",
@@ -90,7 +85,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       valueFormatter: agGridNumberToCurrency
     },
     {
-      headerName: "Month",
+      headerName: "Month to Date",
       field: "monthToDate",
       colId: "monthToDate",
       minWidth: 100,
@@ -99,7 +94,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       resizable: true
     },
     {
-      headerName: "Year",
+      headerName: "Year To Date",
       field: "yearToDate",
       colId: "yearToDate",
       minWidth: 100,
@@ -108,22 +103,31 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       resizable: true
     },
     {
-      headerName: "Remark",
-      field: "remark",
-      colId: "remark",
-      minWidth: 150,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
-    {
       headerName: "Zero Contribution Reason",
-      field: "zeroContributionReasonId",
-      colId: "zeroContributionReasonId",
+      field: "zeroContributionReasonName",
+      colId: "zeroContributionReasonName",
       minWidth: 150,
       headerClass: "right-align",
       cellClass: "right-align",
-      resizable: true
+      resizable: true,
+      valueFormatter: (params) => {
+        const id = params.data?.zeroContributionReasonId; // assuming 'status' is in the row data
+        const name = params.data?.zeroContributionReasonName; // assuming 'statusName' is in the row data
+        // If both are null/undefined, just return an empty string
+        if (!id && !name) {
+          return '';
+        }
+        // If one of them is missing, show only the one that exists
+        if (!id) {
+          return `${name}`;
+        }
+        if (!name) {
+          return `${id}`;
+        }
+
+        // If both exist, format as "name (id)"
+        return `${name} (${id})`;
+      }
     },
     {
       headerName: "Federal Tax",
@@ -138,7 +142,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
     {
       headerName: "State Tax",
       field: "stateTaxes",
-      colId: "stateTaxes", 
+      colId: "stateTaxes",
       minWidth: 120,
       headerClass: "right-align",
       cellClass: "right-align",
@@ -152,12 +156,30 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       minWidth: 100,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true
+      resizable: true,
+      valueFormatter: (params) => {
+        const id = params.data?.taxCodeId; // assuming 'status' is in the row data
+        const name = params.data?.taxCodeName; // assuming 'statusName' is in the row data
+        // If both are null/undefined, just return an empty string
+        if (!id && !name) {
+          return '';
+        }
+        // If one of them is missing, show only the one that exists
+        if (!id) {
+          return `${name}`;
+        }
+        if (!name) {
+          return `${id}`;
+        }
+
+        // If both exist, format as "name (id)"
+        return `${name} (${id})`;
+      }
     },
     {
       headerName: "Comment Type",
-      field: "commentTypeId",
-      colId: "commentTypeId",
+      field: "commentTypeName",
+      colId: "commentTypeName",
       minWidth: 100,
       headerClass: "right-align",
       cellClass: "right-align",
@@ -179,15 +201,6 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       minWidth: 80,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true
-    },
-    {
-      headerName: "Oracle HCM ID",
-      field: "commentRelatedOracleHcmId",
-      colId: "commentRelatedOracleHcmId",
-      minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
       resizable: true
     },
     {

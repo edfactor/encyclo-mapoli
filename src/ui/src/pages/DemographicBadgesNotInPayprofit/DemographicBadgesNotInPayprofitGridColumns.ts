@@ -1,4 +1,5 @@
 import { ColDef } from "ag-grid-community";
+import { viewBadgeRenderer } from "../../utils/masterInquiryLink"; // Ensure this import path is correct
 
 export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
   return [
@@ -11,6 +12,7 @@ export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
       cellClass: "right-align",
       resizable: true,
       sortable: true,
+      cellRenderer: (params) => viewBadgeRenderer({ value: params.data.badgeNumber }),
       valueFormatter: (params) => {
         const badgeNumber = params.value;
         return badgeNumber ? badgeNumber.toString().padStart(7, '0') : '';
