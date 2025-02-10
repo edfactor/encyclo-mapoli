@@ -215,7 +215,7 @@ export interface ExecutiveHoursAndDollarsRow {
 // and writing of data
 export interface ExecutiveHoursAndDollarsGrid {
   executiveHoursAndDollars: ExecutiveHoursAndDollarsRow[];
-  profitYear: number;
+  profitYear: number | null;
 }
 
 export interface ExecutiveHoursAndDollars {

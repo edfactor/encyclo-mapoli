@@ -158,10 +158,19 @@ export const yearsEndSlice = createSlice({
       state.executiveHoursAndDollarsGrid = action.payload;
     },
     // We would call this when a save is successful and pending changes should be cleared
-    clearExecutiveHoursAndDollarsRows: (state) => {
+    clearExecutiveHoursAndDollarsGridRows: (state) => {
       state.executiveHoursAndDollarsGrid = null;
     },
-    addExecutiveHoursAndDollarsRow: (state, action: PayloadAction<ExecutiveHoursAndDollarsGrid>) => {
+    // We would call this when a save is successful and pending changes should be cleared
+    setExecutiveHoursAndDollarsGridYear: (state, action: PayloadAction<number>) => {
+      if (state.executiveHoursAndDollarsGrid) {
+        state.executiveHoursAndDollarsGrid.profitYear = action.payload;
+      } else {
+        state.executiveHoursAndDollarsGrid = { profitYear: action.payload, executiveHoursAndDollars: [] };
+      }
+    },
+    // This is putting a new changed row into our structure to be saved later.
+    addExecutiveHoursAndDollarsGridRow: (state, action: PayloadAction<ExecutiveHoursAndDollarsGrid>) => {
       // So first, do we have a profit year for this?
       if (
         state.executiveHoursAndDollarsGrid &&
@@ -174,27 +183,45 @@ export const yearsEndSlice = createSlice({
         state.executiveHoursAndDollarsGrid = action.payload;
       }
     },
-    // We remove from pending changes when the user has changed a row back to original state,
+    updateExecutiveHoursAndDollarsGridRow: (state, action: PayloadAction<ExecutiveHoursAndDollarsGrid>) => {
+      // We get here when the profit year is decided and a row is already there. This will occur
+      // when the user edits a field more than once, or edits both values in a row
+
+      if (state.executiveHoursAndDollarsGrid) {
+        // just need to find the correct row with the correct badge number
+        for (const hoursDollarsRow of state.executiveHoursAndDollarsGrid.executiveHoursAndDollars) {
+          if (hoursDollarsRow.badgeNumber === action.payload.executiveHoursAndDollars[0].badgeNumber) {
+            hoursDollarsRow.executiveDollars = action.payload.executiveHoursAndDollars[0].executiveDollars;
+            hoursDollarsRow.executiveHours = action.payload.executiveHoursAndDollars[0].executiveHours;
+            break;
+          }
+        }
+      }
+    },
+    // We remove from pending changes when the user has changed a pending row change back to original state,
     // invalidating the need for an update
-    removeExecutiveHoursAndDollarsRow: (state, action: PayloadAction<ExecutiveHoursAndDollarsGrid>) => {
+    removeExecutiveHoursAndDollarsGridRow: (state, action: PayloadAction<ExecutiveHoursAndDollarsGrid>) => {
       // So first, do we have a profit year for this?
+      console.log("Profit year was: " + action.payload.profitYear);
       if (
         state.executiveHoursAndDollarsGrid &&
         state.executiveHoursAndDollarsGrid?.profitYear === action.payload.profitYear
       ) {
+        console.log("Found Grid and profit year: " + action.payload.profitYear);
         // So now we need to just remove one that has our badge number
         const newRows = state.executiveHoursAndDollarsGrid?.executiveHoursAndDollars.filter(function (pendingRow) {
           return pendingRow.badgeNumber !== action.payload.executiveHoursAndDollars[0].badgeNumber;
         });
         state.executiveHoursAndDollarsGrid.executiveHoursAndDollars = newRows;
+      } else {
+        // So if we do not have the year, or the grid is not there, we have nothing to do
+        console.log(
+          "Tried to remove a non-existent exec dollars and hours row with badge: " +
+            action.payload.executiveHoursAndDollars[0].badgeNumber +
+            " and profit year: " +
+            action.payload.profitYear
+        );
       }
-      // So if we do not have the year, or the grid is not there, we have nothing to do
-      console.log(
-        "Tried to remove a non-existent exec dollars and hours row with badge: " +
-          action.payload.executiveHoursAndDollars[0].badgeNumber +
-          " and profit year: " +
-          action.payload.profitYear
-      );
     },
     setEligibleEmployees: (state, action: PayloadAction<EligibleEmployeeResponseDto>) => {
       state.eligibleEmployees = action.payload;
@@ -378,8 +405,10 @@ export const {
   setProfitMasterRevertLoading,
   clearProfitMasterRevert,
 
-  removeExecutiveHoursAndDollarsRow,
-  clearExecutiveHoursAndDollarsRows,
-  addExecutiveHoursAndDollarsRow
+  setExecutiveHoursAndDollarsGridYear,
+  updateExecutiveHoursAndDollarsGridRow,
+  removeExecutiveHoursAndDollarsGridRow,
+  clearExecutiveHoursAndDollarsGridRows,
+  addExecutiveHoursAndDollarsGridRow
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;
