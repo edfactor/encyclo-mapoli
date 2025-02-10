@@ -39,7 +39,7 @@ const NegativeEtvaForSSNsOnPayprofitGrid = () => {
 
   const dummyETVAData: NegativeEtvaForSSNsOnPayProfit[] = [
     {
-      employeeBadge: 123456,
+      employeeBadge: 700127,
       employeeSsn: 123456789,
       etvaValue: -1234.56
     },

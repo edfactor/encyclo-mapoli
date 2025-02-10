@@ -1,10 +1,11 @@
-import { Divider, Tabs, Tab, Button } from "@mui/material";
+import { Divider, Tabs, Tab, Button, Stack, Breadcrumbs, Link } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { useState } from "react";
 import { Page } from "smart-ui-library";
 import CleanUpSummaryCards from "./CleanUpSummaryCards";
 import CleanUpSummaryGrids from "./CleanUpSummaryGrids";
 import { useNavigate } from "react-router";
+import StatusDropdown, { ProcessStatus } from "components/StatusDropdown";
 
 const CleanUpSummary = () => {
   const [selectedTab, setSelectedTab] = useState(0);
@@ -22,8 +23,30 @@ const CleanUpSummary = () => {
   };
   const navigate = useNavigate();
 
+  const handleStatusChange = async (newStatus: ProcessStatus) => {
+    console.info("Logging new status: ", newStatus);
+  };
+
+  const renderActionNode = () => {
+    if (selectedTab === 0) {
+      return (
+        <div className="flex items-center gap-2 h-10">
+          <StatusDropdown onStatusChange={handleStatusChange} />
+          <Button
+            onClick={() => navigate('/december-process-accordion')}
+            variant="outlined"
+            className="h-10 whitespace-nowrap min-w-fit"
+          >
+            December Flow
+          </Button>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
-    <Page label={selectedTab == 0 ? "Clean Up Process Summary" : tabs[selectedTab]} actionNode={selectedTab == 0 ? <Button onClick={() => navigate('/december-process-accordion')} variant="outlined">December Flow</Button> : null}>
+    <Page label={selectedTab == 0 ? "Clean Up Process Summary" : tabs[selectedTab]} actionNode={renderActionNode()}>
       <Grid2
         container
         width="100%"

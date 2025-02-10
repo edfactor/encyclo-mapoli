@@ -45,7 +45,7 @@ const TerminationGrid = () => {
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`PROFIT-TERM REPORT (${terminattion.response.total || 0})`}
+              {`TERMINATIONS REPORT (${terminattion.response.total || 0})`}
             </Typography>
           </div>
           <DSMGrid
