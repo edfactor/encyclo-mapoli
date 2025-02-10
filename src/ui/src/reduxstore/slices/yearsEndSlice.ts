@@ -22,7 +22,11 @@ import {
   EmployeeDetails,
   MasterInquiryResponseType,
   VestedAmountsByAge,
-  TerminationResponse, ProfitShareUpdateResponse, ProfitShareEditResponse, ProfitShareMasterResponse
+  TerminationResponse,
+  ProfitShareUpdateResponse,
+  ProfitShareEditResponse,
+  ProfitShareMasterResponse,
+  ExecutiveHoursAndDollarsGrid
 } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
 
@@ -37,6 +41,7 @@ export interface YearsEndState {
   militaryAndRehireProfitSummary: PagedReportResponse<MilitaryAndRehireProfitSummary> | null;
   distributionsAndForfeitures: PagedReportResponse<DistributionsAndForfeitures> | null;
   executiveHoursAndDollars: PagedReportResponse<ExecutiveHoursAndDollars> | null;
+  executiveHoursAndDollarsGrid: ExecutiveHoursAndDollarsGrid | null;
   eligibleEmployees: EligibleEmployeeResponseDto | null;
   masterInquiryData: Paged<MasterInquiryDetail> | null;
   masterInquiryEmployeeDetails: EmployeeDetails | null;
@@ -58,7 +63,7 @@ export interface YearsEndState {
   vestedAmountsByAge: VestedAmountsByAge | null;
   terminattion: TerminationResponse | null;
   militaryAndRehireEntryAndModification: EmployeeDetails | null;
-  profitSharingUpdate: ProfitShareUpdateResponse | ProfitShareEditResponse | ProfitShareMasterResponse | null ;
+  profitSharingUpdate: ProfitShareUpdateResponse | ProfitShareEditResponse | ProfitShareMasterResponse | null;
 }
 
 const initialState: YearsEndState = {
@@ -72,6 +77,7 @@ const initialState: YearsEndState = {
   militaryAndRehireProfitSummary: null,
   distributionsAndForfeitures: null,
   executiveHoursAndDollars: null,
+  executiveHoursAndDollarsGrid: null,
   eligibleEmployees: null,
   masterInquiryData: null,
   masterInquiryEmployeeDetails: null,
@@ -93,7 +99,7 @@ const initialState: YearsEndState = {
   vestedAmountsByAge: null,
   terminattion: null,
   profitSharingUpdate: null,
-  militaryAndRehireEntryAndModification: null,
+  militaryAndRehireEntryAndModification: null
 };
 
 export const yearsEndSlice = createSlice({
@@ -121,7 +127,10 @@ export const yearsEndSlice = createSlice({
     setMissingCommaInPYName: (state, action: PayloadAction<PagedReportResponse<MissingCommasInPYName>>) => {
       state.missingCommaInPYName = action.payload;
     },
-    setEmployeesOnMilitaryLeaveDetails: (state, action: PayloadAction<PagedReportResponse<EmployeesOnMilitaryLeaveResponse>>) => {
+    setEmployeesOnMilitaryLeaveDetails: (
+      state,
+      action: PayloadAction<PagedReportResponse<EmployeesOnMilitaryLeaveResponse>>
+    ) => {
       state.militaryAndRehire = action.payload;
     },
     setMilitaryAndRehireForfeituresDetails: (
@@ -144,6 +153,48 @@ export const yearsEndSlice = createSlice({
     },
     setExecutiveHoursAndDollars: (state, action: PayloadAction<PagedReportResponse<ExecutiveHoursAndDollars>>) => {
       state.executiveHoursAndDollars = action.payload;
+    },
+    setExecutiveHoursAndDollarsGrid: (state, action: PayloadAction<ExecutiveHoursAndDollarsGrid>) => {
+      state.executiveHoursAndDollarsGrid = action.payload;
+    },
+    // We would call this when a save is successful and pending changes should be cleared
+    clearExecutiveHoursAndDollarsRows: (state) => {
+      state.executiveHoursAndDollarsGrid = null;
+    },
+    addExecutiveHoursAndDollarsRow: (state, action: PayloadAction<ExecutiveHoursAndDollarsGrid>) => {
+      // So first, do we have a profit year for this?
+      if (
+        state.executiveHoursAndDollarsGrid &&
+        state.executiveHoursAndDollarsGrid?.profitYear === action.payload.profitYear
+      ) {
+        // So now we need to just add one
+        state.executiveHoursAndDollarsGrid.executiveHoursAndDollars.push(action.payload.executiveHoursAndDollars[0]);
+      } else {
+        // So we need to assign our new year and entry
+        state.executiveHoursAndDollarsGrid = action.payload;
+      }
+    },
+    // We remove from pending changes when the user has changed a row back to original state,
+    // invalidating the need for an update
+    removeExecutiveHoursAndDollarsRow: (state, action: PayloadAction<ExecutiveHoursAndDollarsGrid>) => {
+      // So first, do we have a profit year for this?
+      if (
+        state.executiveHoursAndDollarsGrid &&
+        state.executiveHoursAndDollarsGrid?.profitYear === action.payload.profitYear
+      ) {
+        // So now we need to just remove one that has our badge number
+        const newRows = state.executiveHoursAndDollarsGrid?.executiveHoursAndDollars.filter(function (pendingRow) {
+          return pendingRow.badgeNumber !== action.payload.executiveHoursAndDollars[0].badgeNumber;
+        });
+        state.executiveHoursAndDollarsGrid.executiveHoursAndDollars = newRows;
+      }
+      // So if we do not have the year, or the grid is not there, we have nothing to do
+      console.log(
+        "Tried to remove a non-existent exec dollars and hours row with badge: " +
+          action.payload.executiveHoursAndDollars[0].badgeNumber +
+          " and profit year: " +
+          action.payload.profitYear
+      );
     },
     setEligibleEmployees: (state, action: PayloadAction<EligibleEmployeeResponseDto>) => {
       state.eligibleEmployees = action.payload;
@@ -235,7 +286,7 @@ export const yearsEndSlice = createSlice({
     },
     setProfitUpdateLoading: (state) => {
       // @ts-ignore
-      state.profitSharingUpdate = { isLoading: true, reportName: "Profit Sharing Update"  };
+      state.profitSharingUpdate = { isLoading: true, reportName: "Profit Sharing Update" };
     },
     clearProfitUpdate: (state) => {
       // @ts-ignore
@@ -246,22 +297,22 @@ export const yearsEndSlice = createSlice({
     },
     setProfitEditLoading: (state) => {
       // @ts-ignore
-      state.profitSharingUpdate = { isLoading: true, reportName: "Profit Sharing Edit"  };
+      state.profitSharingUpdate = { isLoading: true, reportName: "Profit Sharing Edit" };
     },
     clearProfitEdit: (state) => {
       // @ts-ignore
       state.profitSharingUpdate = null;
     },
-    
+
     setProfitMasterApply: (state, action: PayloadAction<ProfitShareMasterResponse>) => {
       state.profitSharingUpdate = {
         ...action.payload,
-        reportName: "Apply",
+        reportName: "Apply"
       };
     },
     setProfitMasterApplyLoading: (state) => {
       // @ts-ignore
-      state.profitSharingUpdate = { isLoading: true, reportName: "Apply"  };
+      state.profitSharingUpdate = { isLoading: true, reportName: "Apply" };
     },
     clearProfitMasterApply: (state) => {
       // @ts-ignore
@@ -271,21 +322,21 @@ export const yearsEndSlice = createSlice({
     setProfitMasterRevert: (state, action: PayloadAction<ProfitShareMasterResponse>) => {
       state.profitSharingUpdate = {
         ...action.payload,
-        reportName: "Revert",
+        reportName: "Revert"
       };
     },
     setProfitMasterRevertLoading: (state) => {
       // @ts-ignore
-      state.profitSharingUpdate = { isLoading: true, reportName: "Revert"  };
+      state.profitSharingUpdate = { isLoading: true, reportName: "Revert" };
     },
     clearProfitMasterRevert: (state) => {
       // @ts-ignore
       state.profitSharingUpdate = null;
     },
-    
+
     setMilitaryAndRehireEntryAndModificationEmployeeDetails: (state, action: PayloadAction<EmployeeDetails>) => {
       state.militaryAndRehireEntryAndModification = action.payload;
-    },
+    }
   }
 });
 
@@ -310,11 +361,11 @@ export const {
   setBalanceByYears,
   setVestingAmountByAge,
   setTermination,
-    
+
   setProfitUpdate,
   setProfitUpdateLoading,
   clearProfitUpdate,
-  
+
   setProfitEdit,
   setProfitEditLoading,
   clearProfitEdit,
@@ -325,6 +376,10 @@ export const {
 
   setProfitMasterRevert,
   setProfitMasterRevertLoading,
-  clearProfitMasterRevert
+  clearProfitMasterRevert,
+
+  removeExecutiveHoursAndDollarsRow,
+  clearExecutiveHoursAndDollarsRows,
+  addExecutiveHoursAndDollarsRow
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;
