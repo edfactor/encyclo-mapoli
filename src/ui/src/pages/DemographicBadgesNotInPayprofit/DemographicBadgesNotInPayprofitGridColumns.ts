@@ -1,6 +1,5 @@
 import { ColDef } from "ag-grid-community";
-import { viewBadgeRenderer } from "../../utils/masterInquiryLink"; // Ensure this import path is correct
-
+import { viewBadgeRenderer } from "../../utils/masterInquiryLink";
 export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
   return [
     {
