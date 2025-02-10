@@ -1,6 +1,5 @@
 import { BrowserRouter, Route } from "react-router-dom";
 import RouteSecurity from "./RouteSecurity";
-import LandingPage from "./LandingPage";
 import { ImpersonationMultiSelect, MenuBar } from "smart-ui-library";
 import MenuData from "../../MenuData";
 import DemographicBadgesNotInPayprofit from "pages/DemographicBadgesNotInPayprofit/DemographicBadgesNotInPayprofit";
@@ -39,6 +38,7 @@ import Forfeit from "pages/Forfeit/Forfeit";
 import YearEndFlow from "pages/YearEndFlow/YearEndFlow";
 import { Box } from "@mui/material";
 import DSMDynamicBreadcrumbs from "components/DSMDynamicBreadcrumbs/DSMDynamicBreadcrumbs";
+import { ROUTES } from "../../constants";
 
 const Router = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -113,99 +113,95 @@ const Router = () => {
         </Box>
       </Box>
       <RouteSecurity oktaEnabled={oktaEnabled}>
+        
         <Route
-          path=""
-          element={<DecemberProcessAccordion />}></Route>
-        <Route
-          path="demographic-badges-not-in-payprofit"
+          path={ROUTES.DEMOGRAPHIC_BADGES}
+          
           element={<DemographicBadgesNotInPayprofit />}></Route>
         <Route
-          path="duplicate-ssns-demographics"
+          path={ROUTES.DUPLICATE_SSNS}
           element={<DuplicateSSNsOnDemographics />}></Route>
         <Route
-          path="negative-etva-for-ssns-on-payprofit"
+          path={ROUTES.NEGATIVE_ETVA}
           element={<NegativeEtvaForSSNsOnPayprofit />}></Route>
         <Route
-          path="duplicate-names-and-birthdays"
+          path={ROUTES.DUPLICATE_NAMES}
           element={<DuplicateNamesAndBirthdays />}></Route>
         <Route
-          path="missing-comma-in-py-name"
+          path={ROUTES.MISSING_COMMA}
           element={<MissingCommaInPyName />}></Route>
         <Route
-          path="employees-on-military-leave"
+          path={ROUTES.EMPLOYEES_MILITARY}
           element={<EmployeesOnMilitaryLeave />}></Route>
         <Route
-          path="military-and-rehire-forfeitures"
+          path={ROUTES.MILITARY_FORFEITURES}
           element={<MilitaryAndRehireForfeitures />}></Route>
         <Route
-          path="military-and-rehire-profit-summary"
+          path={ROUTES.MILITARY_PROFIT_SUMMARY}
           element={<MilitaryAndRehireProfitSummary />}></Route>
         <Route
-          path="distributions-and-forfeitures"
+          path={ROUTES.DISTRIBUTIONS_AND_FORFEITURES}
           element={<DistributionsAndForfeitures />}></Route>
         <Route
-          path="manage-executive-hours-and-dollars"
+          path={ROUTES.MANAGE_EXECUTIVE_HOURS}
           element={<ManageExecutiveHoursAndDollars />}></Route>
         <Route
-          path="eligible-employees"
+          path={ROUTES.ELIGIBLE_EMPLOYEES}
           element={<EligibleEmployees />}></Route>
         <Route
-          path="master-inquiry/:badgeNumber?"
+          path={`${ROUTES.MASTER_INQUIRY}/:badgeNumber?`}
           element={<MasterInquiry />}></Route>
         <Route
-          path="distributions-by-age"
+          path={ROUTES.DISTRIBUTIONS_BY_AGE}
           element={<DistributionByAge />}></Route>
         <Route
-          path="contributions-by-age"
+          path={ROUTES.CONTRIBUTIONS_BY_AGE}
           element={<ContributionsByAge />}></Route>
         <Route
-          path="forfeitures-by-age"
+          path={ROUTES.FORFEITURES_BY_AGE}
           element={<ForfeituresByAge />}></Route>
         <Route
-          path="balance-by-age"
+          path={ROUTES.BALANCE_BY_AGE}
           element={<BalanceByAge />}></Route>
         <Route
           path="clean-up-summary"
           element={<CleanUpSummary />}></Route>
         <Route
-          path="frozen-summary"
+          path={ROUTES.FROZEN_SUMMARY}
           element={<FrozenSummary />}></Route>
         <Route
-          path="balance-by-years"
+          path={ROUTES.BALANCE_BY_YEARS}
           element={<BalanceByYears />}></Route>
         <Route
-          path="vested-amounts-by-age"
+          path={ROUTES.VESTED_AMOUNTS_BY_AGE}
           element={<VestedAmountsByAge />}></Route>
         <Route
-          path="december-process"
-          element={<DecemberProcess />}></Route>
-        <Route
-          path="december-process-local"
-          element={<DecemberProcessLocalApi />}></Route>
-        <Route
-          path="december-process-accordion"
+          path={ROUTES.DECEMBER_PROCESS_ACCORDION}
           element={<DecemberProcessAccordion />}></Route>
         <Route
-          path="prof-term"
+          path={ROUTES.PROF_TERM}
           element={<Termination />}></Route>
         <Route
-          path="military-and-rehire-entry"
+          path={ROUTES.MILITARY_AND_REHIRE_ENTRY}
           element={<MilitaryAndRehireEntryAndModification />}></Route>
         <Route
-          path="profit-share-report"
+          path={ROUTES.PROFIT_SHARE_REPORT}
           element={<ProfitShareReport />}></Route>
         <Route
           path="forfeit/:badgeNumber?"
           element={<Forfeit />}></Route>
         <Route
-          path="yearend-flow"
+          path={ROUTES.YEAR_END_FLOW}
           element={<YearEndFlow />}></Route>
         <Route
-          path="profit-share-report"
+          path={ROUTES.PROFIT_SHARE_REPORT}
           element={<ProfitShareReport />}></Route>
         <Route
-          path="profit-share-update"
+          path={ROUTES.PROFIT_SHARE_UPDATE}
           element={<ProfitShareUpdate />}></Route>
+          <Route
+          path=""
+          element={<DecemberProcessAccordion />}></Route>
       </RouteSecurity>
     </BrowserRouter>
   );

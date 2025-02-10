@@ -6,11 +6,11 @@
         },
         "drop-recreate-db": {
             "commandName": "Project",
-            "commandLineArgs": "drop-recreate-db --connection-name ProfitSharing --source-schema \"PROFITSHARE\" --sql-file \"R:\\repos\\Demoulas\\smart-profit-sharing\\src\\database\\ready_import\\SQL copy all from ready to smart ps.sql\""
+            "commandLineArgs": "drop-recreate-db --connection-name ProfitSharing"
         },
         "import-from-ready": {
             "commandName": "Project",
-            "commandLineArgs": "import-from-ready --connection-name ProfitSharing --source-schema \"PROFITSHARE\" --sql-file \"R:\\repos\\Demoulas\\smart-profit-sharing\\src\\database\\ready_import\\SQL copy all from ready to smart ps.sql\""
+            "commandLineArgs": "import-from-ready --connection-name ProfitSharing --source-schema \"PROFITSHARE\" --sql-file \"..\\..\\..\\..\\..\\..\\..\\src\\database\\ready_import\\SQL copy all from ready to smart ps.sql\""
         },
         "create-dgml": {
             "commandName": "Project",
@@ -19,7 +19,10 @@
         "generate-markdown": {
             "commandName": "Project",
             "commandLineArgs": "generate-markdown --connection-name ProfitSharing --output-file \"output.md\""
+        },
+        "generate-upgrade-script": {
+            "commandName": "Project",
+            "commandLineArgs": "generate-upgrade-script --connection-name ProfitSharing --output-file \"migration.sql\""
         }
-
     }
 }

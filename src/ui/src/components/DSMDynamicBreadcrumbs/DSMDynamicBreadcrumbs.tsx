@@ -29,7 +29,6 @@ const DSMDynamicBreadcrumbs: React.FC<DSMDynamicBreadcrumbsProps> = ({
     
     if (!currentPaths.includes(location.pathname)) {
       const newHistory = [...navigationHistory, location];
-      console.log('New history:', newHistory.map(h => h.pathname));
       setNavigationHistory(newHistory);
       localStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
     }
@@ -45,41 +44,31 @@ const DSMDynamicBreadcrumbs: React.FC<DSMDynamicBreadcrumbsProps> = ({
   };
 
   const buildBreadcrumbItems = (): BreadcrumbItem[] => {
-    if (customItems) return customItems.slice(-3);
+    if (customItems) return customItems;
 
-    return navigationHistory.slice(-3).map((location, index, array) => ({
-      label: getReadablePathName(location.pathname),
-      path: location.pathname,
-      isActive: index === array.length - 1
-    }));
+    return navigationHistory
+      .slice(-4, -1) 
+      .map((location) => ({
+        label: getReadablePathName(location.pathname),
+        path: location.pathname
+      }));
   };
 
   const items = buildBreadcrumbItems();
 
   return (
     <Breadcrumbs separator={separator} maxItems={3}>
-      {items.map((item, index) => {
-        const isCurrentPath = item.path === location.pathname;
-        
-        if (item.isActive || isCurrentPath) {
-          return (
-            <div key={index} className="text-dsm-secondary">
-              {item.label}
-            </div>
-          );
-        }
-
-        return (
-          <Link
-            key={index}
-            color="inherit"
-            underline="hover"
-            onClick={() => handleClick(item.path, index)}
-          >
-            {item.label}
-          </Link>
-        );
-      })}
+      {items.map((item, index) => (
+        <Link
+          key={index}
+          color="inherit"
+          underline="hover"
+          onClick={() => handleClick(item.path, index)}
+          sx={{ cursor: 'pointer' }}
+        >
+          {item.label}
+        </Link>
+      ))}
     </Breadcrumbs>
   );
 };

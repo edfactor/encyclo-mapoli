@@ -1,1 +1,66 @@
 export const HISTORY_KEY = 'navigation_history' as const;
+
+export const MENU_LABELS = {
+  YEAR_END_FLOW: "Year End Flow",
+  DECEMBER_FLOW: "December Flow",
+  BENEFICIARIES: "Beneficiaries",
+  DISTRIBUTIONS: "Distributions",
+  RECONCILIATION: "Reconciliation",
+  MISCELLANEOUS: "Miscellaneous",
+} as const;
+
+export const ROUTES = {
+  YEAR_END_FLOW: "yearend-flow",
+  DISTRIBUTIONS_AND_FORFEITURES: "distributions-and-forfeitures",
+  MANAGE_EXECUTIVE_HOURS: "manage-executive-hours-and-dollars",
+  ELIGIBLE_EMPLOYEES: "eligible-employees",
+  DISTRIBUTIONS_BY_AGE: "distributions-by-age",
+  CONTRIBUTIONS_BY_AGE: "contributions-by-age",
+  FORFEITURES_BY_AGE: "forfeitures-by-age",
+  BALANCE_BY_AGE: "balance-by-age",
+  BALANCE_BY_YEARS: "balance-by-years",
+  VESTED_AMOUNTS_BY_AGE: "vested-amounts-by-age",
+  PROF_TERM: "prof-term",
+  MILITARY_AND_REHIRE_ENTRY: "military-and-rehire-entry",
+
+  DECEMBER_PROCESS_ACCORDION: "december-process-accordion",
+  DEMOGRAPHIC_BADGES: "demographic-badges-not-in-payprofit",
+  DUPLICATE_SSNS: "duplicate-ssns-demographics",
+  NEGATIVE_ETVA: "negative-etva-for-ssns-on-payprofit",
+  DUPLICATE_NAMES: "duplicate-names-and-birthdays",
+  MISSING_COMMA: "missing-comma-in-py-name",
+  EMPLOYEES_MILITARY: "employees-on-military-leave",
+  MILITARY_FORFEITURES: "military-and-rehire-forfeitures",
+  MILITARY_PROFIT_SUMMARY: "military-and-rehire-profit-summary",
+  PROFIT_SHARE_REPORT: "profit-share-report",
+  PROFIT_SHARE_UPDATE: "profit-share-update",
+
+  FROZEN_SUMMARY: "frozen-summary",
+  MASTER_INQUIRY: "master-inquiry",
+} as const;
+
+export const CAPTIONS = {
+  DISTRIBUTIONS_AND_FORFEITURES: "Distributions and Forfeitures",
+  MANAGE_EXECUTIVE_HOURS: "Manage Executive Hours and Dollars",
+  ELIGIBLE_EMPLOYEES: "Get Eligible Employees",
+  DISTRIBUTIONS_BY_AGE: "Get Distributions by Age (PROF 130)",
+  CONTRIBUTIONS_BY_AGE: "Get Contributions by Age (PROF 130)",
+  FORFEITURES_BY_AGE: "Get Forfeitures by Age (PROF 130)",
+  BALANCE_BY_AGE: "Get Balance by Age (PROF 130B)",
+  BALANCE_BY_YEARS: "Get Balance by Years (PROF 130Y)",
+  VESTED_AMOUNTS_BY_AGE: "Get Vested Amounts by Age (PROF 130V)",
+  PROF_TERM: "PROFTERM",
+  MILITARY_AND_REHIRE_ENTRY: "Military and Rehire Entry",
+  SUMMARY: "Summary",
+  DEMOGRAPHIC_BADGES: "Demographic Badges Not In Payprofit",
+  DUPLICATE_SSNS: "Duplicate SSNs in Demographics",
+  NEGATIVE_ETVA: "Negative ETVA for SSNs on Payprofit",
+  DUPLICATE_NAMES: "Duplicate Names and Birthdays",
+  MISSING_COMMA: "Missing Comma in Full Name",
+  EMPLOYEES_MILITARY: "Employees On Military Leave",
+  MILITARY_FORFEITURES: "Military and Rehire Forfeitures",
+  MILITARY_PROFIT_SUMMARY: "Military and Rehire Profit Summary",
+  PROFIT_SHARE_REPORT: "Profit Share Report",
+  PROFIT_SHARE_UPDATE: "Profit Share Update",
+  MASTER_INQUIRY: "Master Inquiry",
+} as const;

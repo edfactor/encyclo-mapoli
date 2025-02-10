@@ -1,70 +1,71 @@
 import { RouteCategory } from "smart-ui-library/dist/components/MenuBar/MenuBar";
+import { MENU_LABELS, ROUTES, CAPTIONS } from './constants';
 
 const yearEndReports: RouteCategory = {
-  menuLabel: "Year End Flow",
-  parentRoute: "/yearend-flow",
+  menuLabel: MENU_LABELS.YEAR_END_FLOW,
+  parentRoute: ROUTES.YEAR_END_FLOW,
   items: [
-    { caption: "Distributions and Forfeitures", route: "/distributions-and-forfeitures" },
-    { caption: "Manage Executive Hours and Dollars", route: "/manage-executive-hours-and-dollars"},
-    { caption: "Get Eligible Employees", route: "/eligible-employees" },
-    { caption: "Get Distributions by Age (PROF 130)", route: "/distributions-by-age" },
-    { caption: "Get Contributions by Age (PROF 130)", route: "/contributions-by-age" },
-    { caption: "Get Forfeitures by Age (PROF 130)", route: "/forfeitures-by-age" },
-    { caption: "Get Balance by Age (PROF 130B)", route: "/balance-by-age" },
-    { caption: "Get Balance by Years (PROF 130Y)", route: "/balance-by-years" },
-    { caption: "Get Vested Amounts by Age (PROF 130V)", route: "/vested-amounts-by-age" },
-    { caption: "Military and Rehire Entry", route: "/military-and-rehire-entry" },
+    { caption: CAPTIONS.DISTRIBUTIONS_AND_FORFEITURES, route: ROUTES.DISTRIBUTIONS_AND_FORFEITURES },
+    { caption: CAPTIONS.MANAGE_EXECUTIVE_HOURS, route: ROUTES.MANAGE_EXECUTIVE_HOURS },
+    { caption: CAPTIONS.ELIGIBLE_EMPLOYEES, route: ROUTES.ELIGIBLE_EMPLOYEES },
+    { caption: CAPTIONS.DISTRIBUTIONS_BY_AGE, route: ROUTES.DISTRIBUTIONS_BY_AGE },
+    { caption: CAPTIONS.CONTRIBUTIONS_BY_AGE, route: ROUTES.CONTRIBUTIONS_BY_AGE },
+    { caption: CAPTIONS.FORFEITURES_BY_AGE, route: ROUTES.FORFEITURES_BY_AGE },
+    { caption: CAPTIONS.BALANCE_BY_AGE, route: ROUTES.BALANCE_BY_AGE },
+    { caption: CAPTIONS.BALANCE_BY_YEARS, route: ROUTES.BALANCE_BY_YEARS },
+    { caption: CAPTIONS.VESTED_AMOUNTS_BY_AGE, route: ROUTES.VESTED_AMOUNTS_BY_AGE },
+    { caption: CAPTIONS.PROF_TERM, route: ROUTES.PROF_TERM },
+    { caption: CAPTIONS.MILITARY_AND_REHIRE_ENTRY, route: ROUTES.MILITARY_AND_REHIRE_ENTRY },
   ]
 };
 
 const decemberFlow: RouteCategory = {
-  menuLabel: "December Flow",
+  menuLabel: MENU_LABELS.DECEMBER_FLOW,
   parentRoute: "",
   items: [
-    { caption: "Summary", route: "/december-process-accordion" },
-    { caption: "Demographic Badges Not In Payprofit", route: "/demographic-badges-not-in-payprofit" },
-    { caption: "Duplicate SSNs in Demographics", route: "/duplicate-ssns-demographics" },
-    { caption: "Negative ETVA for SSNs on Payprofit", route: "/negative-etva-for-ssns-on-payprofit" },
-    { caption: "Duplicate Names and Birthdays", route: "/duplicate-names-and-birthdays" },
-    { caption: "Missing Comma in Full Name", route: "/missing-comma-in-py-name" },
-    { caption: "Employees On Military Leave", route: "/employees-on-military-leave" },
-    { caption: "Military and Rehire Forfeitures", route: "/military-and-rehire-forfeitures" },
-    { caption: "Military and Rehire Profit Summary", route: "/military-and-rehire-profit-summary" },
-    { caption: "Terminations", route: "/prof-term" },
-    { caption: "Profit Share Report", route: "/profit-share-report" },
-    { caption: "Profit Share Update", route: "/profit-share-update" }
+    { caption: CAPTIONS.SUMMARY, route: ROUTES.DECEMBER_PROCESS_ACCORDION },
+    { caption: CAPTIONS.DEMOGRAPHIC_BADGES, route: ROUTES.DEMOGRAPHIC_BADGES },
+    { caption: CAPTIONS.DUPLICATE_SSNS, route: ROUTES.DUPLICATE_SSNS },
+    { caption: CAPTIONS.NEGATIVE_ETVA, route: ROUTES.NEGATIVE_ETVA },
+    { caption: CAPTIONS.DUPLICATE_NAMES, route: ROUTES.DUPLICATE_NAMES },
+    { caption: CAPTIONS.MISSING_COMMA, route: ROUTES.MISSING_COMMA },
+    { caption: CAPTIONS.EMPLOYEES_MILITARY, route: ROUTES.EMPLOYEES_MILITARY },
+    { caption: CAPTIONS.MILITARY_FORFEITURES, route: ROUTES.MILITARY_FORFEITURES },
+    { caption: CAPTIONS.MILITARY_PROFIT_SUMMARY, route: ROUTES.MILITARY_PROFIT_SUMMARY },
+    { caption: CAPTIONS.PROFIT_SHARE_REPORT, route: ROUTES.PROFIT_SHARE_REPORT },
+    { caption: CAPTIONS.PROFIT_SHARE_UPDATE, route: ROUTES.PROFIT_SHARE_UPDATE }
   ]
 };
 
 const beneficiaries: RouteCategory = {
-  menuLabel: "Beneficiaries",
+  menuLabel: MENU_LABELS.BENEFICIARIES,
   parentRoute: "",
   items: [
-    { caption: "Summary", route: "/frozen-summary" }
+    { caption: CAPTIONS.SUMMARY, route: ROUTES.FROZEN_SUMMARY }
   ]
 };
 
 const distributions: RouteCategory = {
-  menuLabel: "Distributions",
+  menuLabel: MENU_LABELS.DISTRIBUTIONS,
   parentRoute: "",
   items: [
-    { caption: "Summary", route: "/frozen-summary" }
+    { caption: CAPTIONS.SUMMARY, route: ROUTES.FROZEN_SUMMARY }
   ]
 };
 
 const reconciliation: RouteCategory = {
-  menuLabel: "Reconciliation",
+  menuLabel: MENU_LABELS.RECONCILIATION,
   parentRoute: "",
   items: [
-    { caption: "Summary", route: "/frozen-summary" }
+    { caption: CAPTIONS.SUMMARY, route: ROUTES.FROZEN_SUMMARY }
   ]
 };
 
 const miscellaneous: RouteCategory = {
-  menuLabel: "Inquiries",
+  menuLabel: MENU_LABELS.MISCELLANEOUS,
   parentRoute: "",
   items: [
-    { caption: "Master Inquiry", route: "/master-inquiry" }
+    { caption: CAPTIONS.MASTER_INQUIRY, route: ROUTES.MASTER_INQUIRY }
   ]
 };
 
