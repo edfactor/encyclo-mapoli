@@ -5,6 +5,7 @@ import TerminationSearchFilter from "./TerminationSearchFilter";
 import TerminationGrid from "./TerminationGrid";
 import { useNavigate } from "react-router";
 import StatusDropdown, { ProcessStatus } from "components/StatusDropdown";
+import { CAPTIONS } from "../../constants";
 
 const Termination = () => {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ const Termination = () => {
   };
 
   return (
-    <Page label="TERMINATIONS" actionNode={renderActionNode()}>
+    <Page label={CAPTIONS.TERMINATIONS} actionNode={renderActionNode()}>
         <Grid2
           container
           rowSpacing="24px">

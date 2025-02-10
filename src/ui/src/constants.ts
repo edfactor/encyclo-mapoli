@@ -6,7 +6,7 @@ export const MENU_LABELS = {
   BENEFICIARIES: "Beneficiaries",
   DISTRIBUTIONS: "Distributions",
   RECONCILIATION: "Reconciliation",
-  MISCELLANEOUS: "Miscellaneous",
+  INQUIRIES: "Inquiries",
 } as const;
 
 export const ROUTES = {
@@ -49,7 +49,7 @@ export const CAPTIONS = {
   BALANCE_BY_AGE: "Get Balance by Age (PROF 130B)",
   BALANCE_BY_YEARS: "Get Balance by Years (PROF 130Y)",
   VESTED_AMOUNTS_BY_AGE: "Get Vested Amounts by Age (PROF 130V)",
-  PROF_TERM: "PROFTERM",
+  TERMINATIONS: "Terminations (QPAY066)",
   MILITARY_AND_REHIRE_ENTRY: "Military and Rehire Entry",
   SUMMARY: "Summary",
   DEMOGRAPHIC_BADGES: "Demographic Badges Not In Payprofit",

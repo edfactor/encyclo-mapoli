@@ -14,7 +14,7 @@ const yearEndReports: RouteCategory = {
     { caption: CAPTIONS.BALANCE_BY_AGE, route: ROUTES.BALANCE_BY_AGE },
     { caption: CAPTIONS.BALANCE_BY_YEARS, route: ROUTES.BALANCE_BY_YEARS },
     { caption: CAPTIONS.VESTED_AMOUNTS_BY_AGE, route: ROUTES.VESTED_AMOUNTS_BY_AGE },
-    { caption: CAPTIONS.PROF_TERM, route: ROUTES.PROF_TERM },
+    { caption: CAPTIONS.TERMINATIONS, route: ROUTES.PROF_TERM },
     { caption: CAPTIONS.MILITARY_AND_REHIRE_ENTRY, route: ROUTES.MILITARY_AND_REHIRE_ENTRY },
   ]
 };
@@ -62,7 +62,7 @@ const reconciliation: RouteCategory = {
 };
 
 const miscellaneous: RouteCategory = {
-  menuLabel: MENU_LABELS.MISCELLANEOUS,
+  menuLabel: MENU_LABELS.INQUIRIES,
   parentRoute: "",
   items: [
     { caption: CAPTIONS.MASTER_INQUIRY, route: ROUTES.MASTER_INQUIRY }
