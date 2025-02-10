@@ -161,7 +161,8 @@ export const yearsEndSlice = createSlice({
     clearExecutiveHoursAndDollarsGridRows: (state) => {
       state.executiveHoursAndDollarsGrid = null;
     },
-    // We would call this when a save is successful and pending changes should be cleared
+    // We would call this when a search is done and
+    // a profit year has been chosen.
     setExecutiveHoursAndDollarsGridYear: (state, action: PayloadAction<number>) => {
       if (state.executiveHoursAndDollarsGrid) {
         state.executiveHoursAndDollarsGrid.profitYear = action.payload;
@@ -202,12 +203,10 @@ export const yearsEndSlice = createSlice({
     // invalidating the need for an update
     removeExecutiveHoursAndDollarsGridRow: (state, action: PayloadAction<ExecutiveHoursAndDollarsGrid>) => {
       // So first, do we have a profit year for this?
-      console.log("Profit year was: " + action.payload.profitYear);
       if (
         state.executiveHoursAndDollarsGrid &&
         state.executiveHoursAndDollarsGrid?.profitYear === action.payload.profitYear
       ) {
-        console.log("Found Grid and profit year: " + action.payload.profitYear);
         // So now we need to just remove one that has our badge number
         const newRows = state.executiveHoursAndDollarsGrid?.executiveHoursAndDollars.filter(function (pendingRow) {
           return pendingRow.badgeNumber !== action.payload.executiveHoursAndDollars[0].badgeNumber;
@@ -216,7 +215,7 @@ export const yearsEndSlice = createSlice({
       } else {
         // So if we do not have the year, or the grid is not there, we have nothing to do
         console.log(
-          "Tried to remove a non-existent exec dollars and hours row with badge: " +
+          "WARN: Tried to remove a non-existent exec dollars and hours row with badge: " +
             action.payload.executiveHoursAndDollars[0].badgeNumber +
             " and profit year: " +
             action.payload.profitYear
