@@ -81,8 +81,8 @@ const ManageExecutiveHoursAndDollarsSearchFilter = () => {
       // profit year. We have to do it via redux because
       // the grid data has no mention of profit year,
       // but we need the year to submit changes.
-      // In this way, we can use the year when it is
-      // time to do updates
+      // Sending it to the store means we can use the year
+      // when it is time to do updates
       dispatch(setExecutiveHoursAndDollarsGridYear(data.profitYear));
     }
   });

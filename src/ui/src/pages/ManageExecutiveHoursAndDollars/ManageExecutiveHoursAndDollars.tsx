@@ -8,9 +8,18 @@ import { SaveOutlined } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { clearExecutiveHoursAndDollarsGridRows } from "reduxstore/slices/yearsEndSlice";
+import { useUpdateExecutiveHoursAndDollarsMutation } from "reduxstore/api/YearsEndApi";
 
-const RenderSaveButton = (pendingChanges: boolean) => {
+const RenderSaveButton = () => {
   const dispatch = useDispatch();
+  const [updateHoursAndDollars] = useUpdateExecutiveHoursAndDollarsMutation();
+  const { executiveHoursAndDollarsGrid } = useSelector((state: RootState) => state.yearsEnd);
+
+  const pendingChanges =
+    executiveHoursAndDollarsGrid !== undefined &&
+    executiveHoursAndDollarsGrid?.executiveHoursAndDollars !== undefined &&
+    executiveHoursAndDollarsGrid?.executiveHoursAndDollars.length != 0;
+
   const saveButton = (
     <Button
       disabled={!pendingChanges}
@@ -27,6 +36,10 @@ const RenderSaveButton = (pendingChanges: boolean) => {
 
         // Note that clearing the rows will also disable the save button,
         // which will be notified that there are no pending rows to save
+        updateHoursAndDollars(executiveHoursAndDollarsGrid)
+          .unwrap()
+          .then((payload) => console.log("Successfully updated hours and dollars. ", payload))
+          .catch((error) => console.error("ERROR: Did not update hours and dollars", error));
         dispatch(clearExecutiveHoursAndDollarsGridRows());
       }}>
       Save
@@ -46,19 +59,10 @@ const RenderSaveButton = (pendingChanges: boolean) => {
   }
 };
 const ManageExecutiveHoursAndDollars = () => {
-  const { executiveHoursAndDollarsGrid } = useSelector((state: RootState) => state.yearsEnd);
-
-  const pendingChanges =
-    executiveHoursAndDollarsGrid !== undefined &&
-    executiveHoursAndDollarsGrid?.executiveHoursAndDollars !== undefined &&
-    executiveHoursAndDollarsGrid?.executiveHoursAndDollars.length != 0;
-
   return (
     <Page
       label="Manage Executive Hours And Dollars"
-      actionNode={
-        <div style={{ gap: "24px", display: "flex", justifyContent: "end" }}>{RenderSaveButton(pendingChanges)}</div>
-      }>
+      actionNode={<div style={{ gap: "24px", display: "flex", justifyContent: "end" }}>{RenderSaveButton()}</div>}>
       <Grid2
         container
         rowSpacing="24px">
