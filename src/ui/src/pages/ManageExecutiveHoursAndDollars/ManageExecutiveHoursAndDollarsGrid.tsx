@@ -26,12 +26,13 @@ const ManageExecutiveHoursAndDollarsGrid = () => {
   const { executiveHoursAndDollars, executiveHoursAndDollarsGrid } = useSelector((state: RootState) => state.yearsEnd);
 
   // This function checks to see if we have a change for this badge number already pending for a save
-  const isRowAlreadyPending = (badge: number): boolean => {
+  const isRowStagedToSave = (badge: number): boolean => {
     const found = executiveHoursAndDollarsGrid?.executiveHoursAndDollars.find((obj) => obj.badgeNumber === badge);
     return found != undefined;
   };
 
-  const isThisTheOriginalRow = (badge: number, hours: number, dollars: number): boolean => {
+  //
+  const isTheEditTheOriginalRow = (badge: number, hours: number, dollars: number): boolean => {
     const found: ExecutiveHoursAndDollars | undefined = executiveHoursAndDollars?.response.results.find(
       (obj) => obj.badgeNumber === badge
     );
@@ -60,7 +61,7 @@ const ManageExecutiveHoursAndDollarsGrid = () => {
       profitYear: executiveHoursAndDollarsGrid?.profitYear || null
     };
 
-    if (isRowAlreadyPending(rowInQuestion.data.badgeNumber)) {
+    if (isRowStagedToSave(rowInQuestion.data.badgeNumber)) {
       console.log("Row pending already!");
 
       // But we have two situations with the row already there:
@@ -68,7 +69,7 @@ const ManageExecutiveHoursAndDollarsGrid = () => {
       // 2. The changes are additional changes that do not match
       //    what is in the database
       if (
-        isThisTheOriginalRow(
+        isTheEditTheOriginalRow(
           rowInQuestion.data.badgeNumber,
           rowInQuestion.data.hoursExecutive,
           rowInQuestion.data.incomeExecutive
@@ -122,7 +123,8 @@ const ManageExecutiveHoursAndDollarsGrid = () => {
               columnDefs: columnDefs,
               onCellValueChanged: (event: CellValueChangedEvent) => processRow(event),
               getRowStyle: (params) => {
-                if (isRowAlreadyPending(params.node.data.badgeNumber)) {
+                // Rows with unsaved changes will have yellow color
+                if (isRowStagedToSave(params.node.data.badgeNumber)) {
                   return { background: "lemonchiffon" };
                 } else {
                   return { background: "white" };
