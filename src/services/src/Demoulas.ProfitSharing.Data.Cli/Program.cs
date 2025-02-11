@@ -1,4 +1,5 @@
 ﻿using System.CommandLine;
+using System.CommandLine.Invocation;
 using System.Text;
 using Demoulas.ProfitSharing.Data.Cli.DiagramServices;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -113,6 +114,37 @@ public sealed class Program
             });
         });
 
+        var validateImportCommand = new Command("validate-import", "validate an import from ready against an existing database");
+        commonOptions.ForEach(validateImportCommand.AddOption);
+        validateImportCommand.Add(new Option<string>("--current-year", "Current year of profit sharing"));
+
+        validateImportCommand.SetHandler(async (InvocationContext iCtx) =>
+        {
+            await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async context =>
+            {
+                try
+                {
+                    var sqlFile = configuration["sql-file"];
+                    var sourceSchema = configuration["source-schema"];
+                    if (string.IsNullOrEmpty(sqlFile) || string.IsNullOrEmpty(sourceSchema))
+                    {
+                        throw new ArgumentNullException("SQL file path and schema must be provided.");
+                    }
+
+                    string sqlCommand = await File.ReadAllTextAsync(sqlFile);
+                    sqlCommand = sqlCommand.Replace("COMMIT ;", string.Empty)
+                        .Replace("{SOURCE_PROFITSHARE_SCHEMA}", sourceSchema)
+                        .Replace("{CURRENT_YEAR}", configuration["current-year"]).Trim();
+
+                    await context.Database.ExecuteSqlRawAsync(sqlCommand);
+                } 
+                catch (Exception e)
+                {
+                    iCtx.Console.WriteLine(e.ToString());
+                    iCtx.ExitCode = 1;
+                }
+            });
+        });
 
         rootCommand.AddCommand(upgradeDbCommand);
         rootCommand.AddCommand(dropRecreateDbCommand);
@@ -120,6 +152,7 @@ public sealed class Program
         rootCommand.AddCommand(generateDgmlCommand);
         rootCommand.AddCommand(generateMarkdownCommand);
         rootCommand.AddCommand(GenerateScriptHelper.CreateGenerateUpgradeScriptCommand(configuration, args, commonOptions));
+        rootCommand.AddCommand(validateImportCommand);
 
         return rootCommand.InvokeAsync(args);
     }
