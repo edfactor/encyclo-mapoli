@@ -5,7 +5,7 @@ using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Demographics;
 
-public class GetActiveFrozenDemographicEndpoint : EndpointWithoutRequest<SetFrozenStateResponse>
+public class GetActiveFrozenDemographicEndpoint : EndpointWithoutRequest<FrozenStateResponse>
 {
     private readonly IFrozenService _frozenService;
 
@@ -20,12 +20,12 @@ public class GetActiveFrozenDemographicEndpoint : EndpointWithoutRequest<SetFroz
         Summary(s =>
         {
             s.Summary = "Gets frozen demographic meta data";
-            s.ResponseExamples = new Dictionary<int, object> { { 200, new SetFrozenStateResponse { Id = 2, ProfitYear = Convert.ToInt16(DateTime.Now.Year) } } };
+            s.ResponseExamples = new Dictionary<int, object> { { 200, new FrozenStateResponse { Id = 2, ProfitYear = Convert.ToInt16(DateTime.Now.Year) } } };
         });
         Group<DemographicsGroup>();
     }
 
-    public override Task<SetFrozenStateResponse> ExecuteAsync(CancellationToken ct)
+    public override Task<FrozenStateResponse> ExecuteAsync(CancellationToken ct)
     {
         return _frozenService.GetActiveFrozenDemographic(ct);
     }

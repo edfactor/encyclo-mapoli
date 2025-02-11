@@ -6,7 +6,7 @@ using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Demographics;
 
-public class FreezeDemographicsEndpoint : Endpoint<SetFrozenStateRequest, SetFrozenStateResponse>
+public class FreezeDemographicsEndpoint : Endpoint<SetFrozenStateRequest, FrozenStateResponse>
 {
     private readonly IFrozenService _frozenService;
 
@@ -21,7 +21,7 @@ public class FreezeDemographicsEndpoint : Endpoint<SetFrozenStateRequest, SetFro
         Summary(s =>
         {
             s.Summary = "Freezes demographics for a specific profit year";
-            s.ResponseExamples = new Dictionary<int, object> { { 200, new SetFrozenStateResponse() { Id = 2, ProfitYear = Convert.ToInt16(DateTime.Now.Year) } } };
+            s.ResponseExamples = new Dictionary<int, object> { { 200, new FrozenStateResponse() { Id = 2, ProfitYear = Convert.ToInt16(DateTime.Now.Year) } } };
             s.ExampleRequest =
                 new SetFrozenStateRequest { AsOfDateTime = DateTime.Today, ProfitYear = (short)DateTime.Today.Year };
         });
@@ -29,7 +29,7 @@ public class FreezeDemographicsEndpoint : Endpoint<SetFrozenStateRequest, SetFro
         Group<DemographicsGroup>();
     }
 
-    public override Task<SetFrozenStateResponse> ExecuteAsync(SetFrozenStateRequest req, CancellationToken ct)
+    public override Task<FrozenStateResponse> ExecuteAsync(SetFrozenStateRequest req, CancellationToken ct)
     {
         return _frozenService.FreezeDemographics(req.ProfitYear, req.AsOfDateTime, ct);
     }

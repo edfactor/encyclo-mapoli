@@ -1,6 +1,6 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 
-public sealed record SetFrozenStateResponse
+public sealed record FrozenStateResponse
 {
     public int Id { get; set; }
     public short ProfitYear { get; set; }

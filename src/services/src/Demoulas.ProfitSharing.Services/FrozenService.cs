@@ -71,7 +71,7 @@ public class FrozenService: IFrozenService
     /// <param name="asOfDateTime"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async Task<SetFrozenStateResponse> FreezeDemographics(short profitYear, DateTime asOfDateTime, CancellationToken cancellationToken = default)
+    public async Task<FrozenStateResponse> FreezeDemographics(short profitYear, DateTime asOfDateTime, CancellationToken cancellationToken = default)
     {
         var validator = new InlineValidator<short>();
 
@@ -93,7 +93,7 @@ public class FrozenService: IFrozenService
 
             await ctx.SaveChangesAsync(cancellationToken);
 
-            return new SetFrozenStateResponse
+            return new FrozenStateResponse
             {
                 Id = frozenState.Id,
                 ProfitYear = profitYear,
@@ -112,14 +112,14 @@ public class FrozenService: IFrozenService
     /// </param>
     /// <returns>
     /// A task that represents the asynchronous operation. The task result contains a list of 
-    /// <see cref="SetFrozenStateResponse"/> objects representing the frozen demographic states.
+    /// <see cref="FrozenStateResponse"/> objects representing the frozen demographic states.
     /// </returns>
-    public Task<List<SetFrozenStateResponse>> GetFrozenDemographics(CancellationToken cancellationToken = default)
+    public Task<List<FrozenStateResponse>> GetFrozenDemographics(CancellationToken cancellationToken = default)
     {
         return _dataContextFactory.UseReadOnlyContext(ctx =>
         {
             //Inactivate any prior frozen states
-            return ctx.FrozenStates.Select(f=> new SetFrozenStateResponse
+            return ctx.FrozenStates.Select(f=> new FrozenStateResponse
             {
                 Id = f.Id,
                 ProfitYear = f.ProfitYear,
@@ -130,12 +130,12 @@ public class FrozenService: IFrozenService
         });
     }
 
-    public Task<SetFrozenStateResponse> GetActiveFrozenDemographic(CancellationToken cancellationToken = default)
+    public Task<FrozenStateResponse> GetActiveFrozenDemographic(CancellationToken cancellationToken = default)
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             //Inactivate any prior frozen states
-            var frozen = await ctx.FrozenStates.Where(f=> f.IsActive).Select(f => new SetFrozenStateResponse
+            var frozen = await ctx.FrozenStates.Where(f=> f.IsActive).Select(f => new FrozenStateResponse
             {
                 Id = f.Id,
                 ProfitYear = f.ProfitYear,
@@ -144,7 +144,7 @@ public class FrozenService: IFrozenService
                 IsActive = f.IsActive
             }).FirstOrDefaultAsync(cancellationToken);
             
-            return frozen ?? new SetFrozenStateResponse { ProfitYear = (short)DateTime.Today.Year, AsOfDateTime = DateTime.Now, IsActive = false};
+            return frozen ?? new FrozenStateResponse { ProfitYear = (short)DateTime.Today.Year, AsOfDateTime = DateTime.Now, IsActive = false};
         });
     }
 
