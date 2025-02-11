@@ -6,4 +6,5 @@ public interface IFrozenService
 {
     Task<SetFrozenStateResponse> FreezeDemographics(short profitYear, DateTime asOfDateTime, CancellationToken cancellationToken = default);
     Task<List<SetFrozenStateResponse>> GetFrozenDemographics(CancellationToken cancellationToken = default);
+    Task<SetFrozenStateResponse> GetActiveFrozenDemographic(CancellationToken cancellationToken = default);
 }

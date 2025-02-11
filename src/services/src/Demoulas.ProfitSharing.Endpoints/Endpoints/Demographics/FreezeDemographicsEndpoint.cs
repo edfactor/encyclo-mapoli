@@ -22,6 +22,8 @@ public class FreezeDemographicsEndpoint : Endpoint<SetFrozenStateRequest, SetFro
         {
             s.Summary = "Freezes demographics for a specific profit year";
             s.ResponseExamples = new Dictionary<int, object> { { 200, new SetFrozenStateResponse() { Id = 2, ProfitYear = Convert.ToInt16(DateTime.Now.Year) } } };
+            s.ExampleRequest =
+                new SetFrozenStateRequest { AsOfDateTime = DateTime.Today, ProfitYear = (short)DateTime.Today.Year };
         });
         Policies(Security.Policy.CanFreezeDemographics);
         Group<DemographicsGroup>();
