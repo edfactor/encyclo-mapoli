@@ -72,6 +72,6 @@ const miscellaneous: RouteCategory = {
   ]
 };
 
-const MenuData: RouteCategory[] = [beneficiaries, distributions, reconciliation, decemberFlow, yearEndReports, miscellaneous];
+const MenuData: RouteCategory[] = [miscellaneous, beneficiaries, distributions, reconciliation, decemberFlow, yearEndReports];
 
 export default MenuData;
