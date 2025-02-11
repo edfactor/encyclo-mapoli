@@ -3,8 +3,10 @@ import Grid2 from "@mui/material/Unstable_Grid2";
 import { useForm, Controller } from "react-hook-form";
 import { useLazyGetExecutiveHoursAndDollarsQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
+import { useDispatch } from "react-redux";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { setExecutiveHoursAndDollarsGridYear } from "reduxstore/slices/yearsEndSlice";
 
 interface ExecutiveHoursAndDollarsSearch {
   profitYear: number;
@@ -41,6 +43,8 @@ const schema = yup.object().shape({
 const ManageExecutiveHoursAndDollarsSearchFilter = () => {
   const [triggerSearch, { isFetching }] = useLazyGetExecutiveHoursAndDollarsQuery();
 
+  const dispatch = useDispatch();
+
   const {
     control,
     handleSubmit,
@@ -50,7 +54,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter = () => {
     resolver: yupResolver(schema),
     defaultValues: {
       profitYear: undefined,
-      fullNameContains: null,
+      fullNameContains: "",
       badgeNumber: null,
       socialSecurity: null,
       hasExecutiveHoursAndDollars: false
@@ -70,10 +74,21 @@ const ManageExecutiveHoursAndDollarsSearchFilter = () => {
         },
         false
       );
+      // Now we need to set the Grid pending state's
+      // profit year. We have to do it via redux because
+      // the grid data has no mention of profit year,
+      // but we need the year to submit changes.
+      dispatch(setExecutiveHoursAndDollarsGridYear(data.profitYear));
     }
   });
 
   const handleReset = () => {
+    // If we ever decide that the reset button should clear pending changes
+    // uncomment this next line...
+    // dispatch(clearExecutiveHoursAndDollarsGridRows());
+    // ... and then import clearExecutiveHoursAndDollarsGridRows
+    // from reduxstore/slices/yearsEndSlice
+
     reset({
       profitYear: undefined,
       fullNameContains: null,
