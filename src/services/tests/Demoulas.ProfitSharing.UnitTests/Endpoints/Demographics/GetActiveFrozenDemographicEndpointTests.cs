@@ -1,40 +1,35 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Response;
+﻿using Demoulas.ProfitSharing.Api;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Demographics;
+using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.UnitTests.Common.Base;
+using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
+using FastEndpoints;
+using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Demographics;
 
-public class GetActiveFrozenDemographicEndpointTests
+public class GetActiveFrozenDemographicEndpointTests : ApiTestBase<Program>
 {
-    private readonly Mock<IFrozenService> _frozenServiceMock;
-    private readonly GetActiveFrozenDemographicEndpoint _endpoint;
-
-    public GetActiveFrozenDemographicEndpointTests()
-    {
-        _frozenServiceMock = new Mock<IFrozenService>();
-        _endpoint = new GetActiveFrozenDemographicEndpoint(_frozenServiceMock.Object);
-    }
-
     [Fact]
     public async Task ExecuteAsync_ReturnsActiveFrozenDemographic()
     {
-        // Arrange
-        var expectedResponse = new FrozenStateResponse
-        {
-            Id = 1,
-            ProfitYear = 2023,
-            FrozenBy = "TestUser",
-            AsOfDateTime = DateTime.Now,
-            IsActive = true
-        };
-        _frozenServiceMock.Setup(service => service.GetActiveFrozenDemographic(It.IsAny<CancellationToken>()))
-                          .ReturnsAsync(expectedResponse);
+       
+        FrozenState frozenDemographics = await MockDbContextFactory.UseReadOnlyContext(c => c.FrozenStates.Where(f=> f.IsActive).FirstAsync());
 
-        // Act
-        var result = await _endpoint.ExecuteAsync(CancellationToken.None);
+        ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
+        TestResult<FrozenStateResponse> response = await ApiClient.GETAsync<GetActiveFrozenDemographicEndpoint, FrozenStateResponse>();
+        response.Should().NotBeNull();
+
+        
+        frozenDemographics.AsOfDateTime = frozenDemographics.AsOfDateTime.ToUniversalTime();
+        response.Result.AsOfDateTime = frozenDemographics.AsOfDateTime.ToUniversalTime();
 
         // Assert
-        Assert.Equal(expectedResponse, result);
+        frozenDemographics.Should().BeEquivalentTo(response.Result);
     }
 }
