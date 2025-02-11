@@ -35,10 +35,13 @@ import MilitaryAndRehireEntryAndModification from "pages/MilitaryAndRehireEntryA
 import ProfitShareReport from "pages/ProfitShareReport/ProfitShareReport";
 import ProfitShareUpdate from "../../pages/ProfitShareUpdate/ProfitShareUpdate";
 import Forfeit from "pages/Forfeit/Forfeit";
-import YearEndFlow from "pages/YearEndFlow/YearEndFlow";
 import { Box } from "@mui/material";
 import DSMDynamicBreadcrumbs from "components/DSMDynamicBreadcrumbs/DSMDynamicBreadcrumbs";
 import { ROUTES } from "../../constants";
+import FiscalFlow from "pages/YearEndFlow/YearEndFlow";
+import ProfitShareReportEditRun from "pages/FiscalFlow/ProfitShareReportEditRun/ProfitShareReportEditRun";
+import EighteenToTwenty from "pages/PAY426Reports/PAY426-1/EighteenToTwenty";
+import ProfitShareReportFinalRun from "pages/FiscalFlow/ProfitShareReportFinalRun/ProfitShareReportFinalRun";
 
 const Router = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -113,10 +116,10 @@ const Router = () => {
         </Box>
       </Box>
       <RouteSecurity oktaEnabled={oktaEnabled}>
-        
+
         <Route
           path={ROUTES.DEMOGRAPHIC_BADGES}
-          
+
           element={<DemographicBadgesNotInPayprofit />}></Route>
         <Route
           path={ROUTES.DUPLICATE_SSNS}
@@ -191,15 +194,20 @@ const Router = () => {
           path="forfeit/:badgeNumber?"
           element={<Forfeit />}></Route>
         <Route
-          path={ROUTES.YEAR_END_FLOW}
-          element={<YearEndFlow />}></Route>
+          path={ROUTES.FISCAL_CLOSE}
+          element={<FiscalFlow />}></Route>
         <Route
           path={ROUTES.PROFIT_SHARE_REPORT}
           element={<ProfitShareReport />}></Route>
         <Route
+          path={ROUTES.PROFIT_SHARE_REPORT_EDIT_RUN}
+          element={<ProfitShareReportEditRun />}></Route>
+        <Route path={ROUTES.PROFIT_SHARE_REPORT_FINAL_RUN} element={<ProfitShareReportFinalRun />}></Route>
+        <Route
           path={ROUTES.PROFIT_SHARE_UPDATE}
           element={<ProfitShareUpdate />}></Route>
-          <Route
+        <Route path={ROUTES.PAY426_ACTIVE_18_20} element={<EighteenToTwenty />}></Route>
+        <Route
           path=""
           element={<DecemberProcessAccordion />}></Route>
       </RouteSecurity>

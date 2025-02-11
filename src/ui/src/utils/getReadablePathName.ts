@@ -27,9 +27,11 @@ const pathToReadableName: Record<string, string> = {
     'military-and-rehire-entry': 'Military and Rehire Entry',
     'profit-share-report': 'Profit Share Report',
     'forfeit': 'Forfeit',
-    'yearend-flow': 'Year End Flow',
+    'fiscal-close': 'Year End Flow',
     'profit-share-update': 'Profit Share Update',
     'employees-on-military-leave': 'Employees on Military Leave',
+    'profit-share-report-edit-run': 'Profit Share Report Edit Run',
+    'profit-share-report-final-run': 'Profit Share Report Final Run',
 };
 
 export const getReadablePathName = (path: string): string => {

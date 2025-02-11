@@ -8,7 +8,7 @@ import { RootState } from "reduxstore/store";
 import { Page } from "smart-ui-library";
 
 
-const YearEndFlow = () => {
+const FiscalFlow = () => {
     const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
 
     useEffect(() => {
@@ -19,7 +19,7 @@ const YearEndFlow = () => {
     const navigate = useNavigate();
 
     return (
-        <Page label="Year End Flow">
+        <Page label="Fiscal Flow">
       <Grid2 container>
         <Grid2 xs={12} width={"100%"}>
           <Divider />
@@ -430,4 +430,4 @@ const YearEndFlow = () => {
     );
 };
 
-export default YearEndFlow;
+export default FiscalFlow;
