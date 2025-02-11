@@ -1,16 +1,48 @@
-import { Typography } from "@mui/material";
+import { Typography, Button, Tooltip } from "@mui/material";
 import { CellValueChangedEvent, IRowNode } from "ag-grid-community";
 import { useState, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetManageExecutiveHoursAndDollarsColumns } from "./ManageExecutiveHoursAndDollarsGridColumns";
-import { ExecutiveHoursAndDollars, ExecutiveHoursAndDollarsGrid } from "reduxstore/types";
+import { ExecutiveHoursAndDollars, ExecutiveHoursAndDollarsGrid, PagedReportResponse } from "reduxstore/types";
 import {
   addExecutiveHoursAndDollarsGridRow,
   removeExecutiveHoursAndDollarsGridRow,
   updateExecutiveHoursAndDollarsGridRow
 } from "reduxstore/slices/yearsEndSlice";
+import { AddOutlined } from "@mui/icons-material";
+
+const RenderAddExecutiveButton = (reportReponse: PagedReportResponse<ExecutiveHoursAndDollars> | null) => {
+  // We cannot add an employee if there is no result set there
+  const gridAvailable: boolean = reportReponse?.response != null && reportReponse?.response != undefined;
+
+  const addButton = (
+    <Button
+      disabled={!gridAvailable}
+      variant="outlined"
+      color="secondary"
+      size="medium"
+      startIcon={<AddOutlined color={gridAvailable ? "secondary" : "disabled"} />}
+      onClick={async () => {
+        console.log("Clicked!");
+      }}>
+      Add Executive
+    </Button>
+  );
+
+  if (!gridAvailable) {
+    return (
+      <Tooltip
+        placement="top"
+        title="You can only add an exec to a search result.">
+        <span>{addButton}</span>
+      </Tooltip>
+    );
+  } else {
+    return addButton;
+  }
+};
 
 const ManageExecutiveHoursAndDollarsGrid = () => {
   const [pageNumber, setPageNumber] = useState(0);
@@ -109,6 +141,9 @@ const ManageExecutiveHoursAndDollarsGrid = () => {
               sx={{ color: "#0258A5" }}>
               {`Manage Executive Hours and Dollars (${mutableCopyOfGridData?.response.total || 0})`}
             </Typography>
+          </div>
+          <div style={{ gap: "36px", display: "flex", justifyContent: "end", marginRight: 8 }}>
+            {RenderAddExecutiveButton(executiveHoursAndDollars)}
           </div>
           <DSMGrid
             preferenceKey={"DUPE_SSNS"}
