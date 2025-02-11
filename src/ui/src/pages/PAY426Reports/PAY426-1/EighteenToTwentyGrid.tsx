@@ -24,11 +24,12 @@ interface EmployeeData {
 }
 
 const sampleEmployeeData: EmployeeData[] = [
+    // HARDCODED DUMMY DATA
     {
         badge: 47425,
         employeeName: "POTTER, HARRY",
         store: 3,
-        type: "H",  // H for Hourly
+        type: "P", 
         dateOfBirth: "07/31/2004",
         age: 19,
         ssn: "***-**-7425",
@@ -44,7 +45,7 @@ const sampleEmployeeData: EmployeeData[] = [
         badge: 82424,
         employeeName: "WEASLEY, RONALD",
         store: 3,
-        type: "X",
+        type: "W",
         dateOfBirth: "03/01/2004",
         age: 20,
         ssn: "***-**-2424",
@@ -60,7 +61,7 @@ const sampleEmployeeData: EmployeeData[] = [
         badge: 85744,
         employeeName: "GRANGER, HERMIONE",
         store: 3,
-        type: "Y",
+        type: "H",
         dateOfBirth: "09/19/2004",
         age: 20,
         ssn: "***-**-5744",
@@ -76,7 +77,7 @@ const sampleEmployeeData: EmployeeData[] = [
         badge: 91532,
         employeeName: "LONGBOTTOM, NEVILLE",
         store: 3,
-        type: "H",
+        type: "L",
         dateOfBirth: "07/30/2004",
         age: 19,
         ssn: "***-**-1532",
@@ -92,7 +93,7 @@ const sampleEmployeeData: EmployeeData[] = [
         badge: 77889,
         employeeName: "LOVEGOOD, LUNA",
         store: 3,
-        type: "P",
+        type: "L",
         dateOfBirth: "02/13/2004",
         age: 20,
         ssn: "***-**-7889",
@@ -105,7 +106,6 @@ const sampleEmployeeData: EmployeeData[] = [
         svc: 1
     }
 ];
-
 
 const EighteenToTwentyGrid = () => {
 
@@ -129,7 +129,6 @@ const EighteenToTwentyGrid = () => {
         ];
     };
 
-
     const viewBadge = (params: ICellRendererParams) => {
         return (
             params.value && (
@@ -144,7 +143,6 @@ const EighteenToTwentyGrid = () => {
     };
 
     const dispatch = useDispatch();
-
     const columnDefs = useMemo(() => GetEighteenToTwentyGridColumns(viewBadge), []);
 
     return (
