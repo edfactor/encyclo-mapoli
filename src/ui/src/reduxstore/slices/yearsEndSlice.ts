@@ -157,14 +157,9 @@ export const yearsEndSlice = createSlice({
     setExecutiveHoursAndDollarsGrid: (state, action: PayloadAction<ExecutiveHoursAndDollarsGrid>) => {
       state.executiveHoursAndDollarsGrid = action.payload;
     },
-    /* 
-      We call this when a save is successful and pending changes should be cleared.
-    */
     clearExecutiveHoursAndDollarsGridRows: (state) => {
       state.executiveHoursAndDollarsGrid = null;
     },
-    // We would call this when a search is done and
-    // a profit year has been chosen.
     setExecutiveHoursAndDollarsGridYear: (state, action: PayloadAction<number>) => {
       if (state.executiveHoursAndDollarsGrid) {
         state.executiveHoursAndDollarsGrid.profitYear = action.payload;

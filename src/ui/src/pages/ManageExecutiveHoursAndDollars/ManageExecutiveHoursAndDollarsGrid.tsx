@@ -31,11 +31,6 @@ const ManageExecutiveHoursAndDollarsGrid = () => {
     return found != undefined;
   };
 
-  /*
-    If a user (intentionally or not) changes a row that was already changed without saving
-    we are in a situation where no save is needed. This function sees if the changes ended
-    up being what was in the original row.
-  */
   const isTheEditTheOriginalRow = (badge: number, hours: number, dollars: number): boolean => {
     const found: ExecutiveHoursAndDollars | undefined = executiveHoursAndDollars?.response.results.find(
       (obj) => obj.badgeNumber === badge
@@ -49,11 +44,6 @@ const ManageExecutiveHoursAndDollarsGrid = () => {
     return false;
   };
 
-  /*
-    Once a row is changed by the user, this function will sort out if
-    it needs to be recorded as a pending edit, and modifies the underlying
-    data structure
-  */
   const processEditedRow = function (event: CellValueChangedEvent): void {
     const rowInQuestion: IRowNode = event.node;
 
@@ -87,14 +77,12 @@ const ManageExecutiveHoursAndDollarsGrid = () => {
         dispatch(updateExecutiveHoursAndDollarsGridRow(rowRecord));
       }
     } else {
-      // The row is not there at all, so let us add it
       dispatch(addExecutiveHoursAndDollarsGridRow(rowRecord));
     }
 
     // Now we need to update this changed row in the grid's underlying
     // data or else it will be undone on the next re-render
     if (mutableCopyOfGridData) {
-      // Need to loop through data and find our row
       for (const element of mutableCopyOfGridData.response.results) {
         if (element.badgeNumber === rowInQuestion.data.badgeNumber) {
           element.incomeExecutive = rowInQuestion.data.incomeExecutive;

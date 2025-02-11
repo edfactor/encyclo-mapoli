@@ -15,8 +15,7 @@ const RenderSaveButton = () => {
   // update the hours and dollars on the back end
   const [updateHoursAndDollars] = useUpdateExecutiveHoursAndDollarsMutation();
 
-  // This Grid is the group of pending updates that are changed rows in the grid,
-  // but have not been sent to the back end
+  // This Grid is the group of pending updates that are changed rows in the grid
   const { executiveHoursAndDollarsGrid } = useSelector((state: RootState) => state.yearsEnd);
 
   const pendingChanges =
@@ -32,12 +31,6 @@ const RenderSaveButton = () => {
       size="medium"
       startIcon={<SaveOutlined color={pendingChanges ? "primary" : "disabled"} />}
       onClick={async () => {
-        // What do we need here?
-        // 1. We need to do the submit via a Redux api call
-        // 2. If fail, show an error and leave the grid unaltered
-        // 3. If success, clear the pending changes of the grid
-        // 4. Show some sort of confirmation message?
-
         // Note that clearing the rows will also disable the save button,
         // which will be notified that there are no pending rows to save,
         // that happens when we do the clear call below

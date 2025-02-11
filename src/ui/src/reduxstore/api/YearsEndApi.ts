@@ -99,8 +99,7 @@ export const YearsEndApi = createApi({
       })
       // Note that it seems as if we should do something here to the store
       // after we do the update. Yet the working copy in the grid is
-      // the correct data, so a refresh of either the grid or underlying
-      // data is not needed.
+      // the correct data, a refresh is not needed.
     }),
     getDuplicateSSNs: builder.query<PagedReportResponse<DuplicateSSNDetail>, DuplicateSSNsRequestDto>({
       query: (params) => ({
