@@ -94,6 +94,16 @@ public class FrozenService: IFrozenService
         }, cancellationToken);
     }
 
+    /// <summary>
+    /// Retrieves a list of frozen demographic states.
+    /// </summary>
+    /// <param name="cancellationToken">
+    /// A <see cref="CancellationToken"/> to observe while waiting for the task to complete.
+    /// </param>
+    /// <returns>
+    /// A task that represents the asynchronous operation. The task result contains a list of 
+    /// <see cref="SetFrozenStateResponse"/> objects representing the frozen demographic states.
+    /// </returns>
     public Task<List<SetFrozenStateResponse>> GetFrozenDemographics(CancellationToken cancellationToken = default)
     {
         return _dataContextFactory.UseReadOnlyContext(ctx =>
