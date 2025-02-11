@@ -45,7 +45,7 @@ const ManageExecutiveHoursAndDollarsGrid = () => {
     return false;
   };
 
-  const processRow = function (event: CellValueChangedEvent): void {
+  const processEditedRow = function (event: CellValueChangedEvent): void {
     const rowInQuestion: IRowNode = event.node;
     console.log("In process row. Badge was: " + rowInQuestion.data.badgeNumber);
     console.log("Column was: " + event.colDef.field);
@@ -85,9 +85,9 @@ const ManageExecutiveHoursAndDollarsGrid = () => {
     }
 
     // Now we need to update this value in the grid's data
-    if (copiedResponse) {
+    if (mutableCopyOfGridData) {
       // Need to loop through
-      for (const element of copiedResponse.response.results) {
+      for (const element of mutableCopyOfGridData.response.results) {
         if (element.badgeNumber === rowInQuestion.data.badgeNumber) {
           element.incomeExecutive = rowInQuestion.data.incomeExecutive;
           element.hoursExecutive = rowInQuestion.data.hoursExecutive;
@@ -101,17 +101,20 @@ const ManageExecutiveHoursAndDollarsGrid = () => {
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetManageExecutiveHoursAndDollarsColumns(), []);
-  const copiedResponse = useMemo(() => structuredClone(executiveHoursAndDollars), [executiveHoursAndDollars]);
+
+  // We memoize this because we only want to copy this once as there will be differences
+  // once edits are made
+  const mutableCopyOfGridData = useMemo(() => structuredClone(executiveHoursAndDollars), [executiveHoursAndDollars]);
 
   return (
     <>
-      {copiedResponse?.response && (
+      {mutableCopyOfGridData?.response && (
         <>
           <div className="px-[24px]">
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`Manage Executive Hours and Dollars (${copiedResponse?.response.total || 0})`}
+              {`Manage Executive Hours and Dollars (${mutableCopyOfGridData?.response.total || 0})`}
             </Typography>
           </div>
           <DSMGrid
@@ -119,9 +122,9 @@ const ManageExecutiveHoursAndDollarsGrid = () => {
             isLoading={false}
             handleSortChanged={sortEventHandler}
             providedOptions={{
-              rowData: copiedResponse?.response.results,
+              rowData: mutableCopyOfGridData?.response.results,
               columnDefs: columnDefs,
-              onCellValueChanged: (event: CellValueChangedEvent) => processRow(event),
+              onCellValueChanged: (event: CellValueChangedEvent) => processEditedRow(event),
               getRowStyle: (params) => {
                 // Rows with unsaved changes will have yellow color
                 if (isRowStagedToSave(params.node.data.badgeNumber)) {
@@ -134,7 +137,7 @@ const ManageExecutiveHoursAndDollarsGrid = () => {
           />
         </>
       )}
-      {!!copiedResponse && copiedResponse.response.results.length > 0 && (
+      {!!mutableCopyOfGridData && mutableCopyOfGridData.response.results.length > 0 && (
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
@@ -145,7 +148,7 @@ const ManageExecutiveHoursAndDollarsGrid = () => {
             setPageSize(value);
             setPageNumber(1);
           }}
-          recordCount={copiedResponse?.response.total}
+          recordCount={mutableCopyOfGridData?.response.total}
         />
       )}
     </>
