@@ -9,7 +9,7 @@ import {
   useLazyGetDistributionsByAgeQuery,
   useLazyGetForfeituresByAgeQuery
 } from "reduxstore/api/YearsEndApi";
-import { InfoCard } from "pages/CleanUpSummary/InfoCard";
+import { useLazyGetFrozenStateResponseQuery } from "reduxstore/api/FrozenApi";
 import { FrozenReportsByAgeRequestType } from "reduxstore/types";
 import { FlexibleInfoCard } from "./FlexibleInfoCard";
 import { numberToCurrency } from "smart-ui-library";
@@ -42,11 +42,22 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
     contributionsByAgePartTime
   } = useSelector((state: RootState) => state.yearsEnd);
 
+  const [fetchFrozenState, { data: frozenState, isLoading, isError }] = useLazyGetFrozenStateResponseQuery();
+
   useEffect(() => {
     if (hasToken) {
+      fetchFrozenState(undefined, false);
+    }
+  }, [hasToken]);
+
+
+  useEffect(() => {
+    if (hasToken && frozenState?.profitYear) {
+      const profitYear = frozenState.profitYear;
+      
       triggerBalanceSearch(
         {
-          profitYear: 2023,
+          profitYear: profitYear,
           reportType: FrozenReportsByAgeRequestType.Total,
           pagination: { skip: 0, take: 255 }
         },
@@ -54,7 +65,7 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
       );
       triggerBalanceSearch(
         {
-          profitYear: 2023,
+          profitYear: profitYear,
           reportType: FrozenReportsByAgeRequestType.FullTime,
           pagination: { skip: 0, take: 255 }
         },
@@ -62,7 +73,7 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
       );
       triggerBalanceSearch(
         {
-          profitYear: 2023,
+          profitYear: profitYear,
           reportType: FrozenReportsByAgeRequestType.PartTime,
           pagination: { skip: 0, take: 255 }
         },
@@ -71,7 +82,7 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
 
       triggerContributionsSearch(
         {
-          profitYear: 2023,
+          profitYear: profitYear,
           reportType: FrozenReportsByAgeRequestType.Total,
           pagination: { skip: 0, take: 255 }
         },
@@ -79,7 +90,7 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
       );
       triggerContributionsSearch(
         {
-          profitYear: 2023,
+          profitYear: profitYear,
           reportType: FrozenReportsByAgeRequestType.FullTime,
           pagination: { skip: 0, take: 255 }
         },
@@ -87,7 +98,7 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
       );
       triggerContributionsSearch(
         {
-          profitYear: 2023,
+          profitYear: profitYear,
           reportType: FrozenReportsByAgeRequestType.PartTime,
           pagination: { skip: 0, take: 255 }
         },
@@ -96,7 +107,7 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
 
       triggerDistributionsSearch(
         {
-          profitYear: 2023,
+          profitYear: profitYear,
           reportType: FrozenReportsByAgeRequestType.Total,
           pagination: { skip: 0, take: 255 }
         },
@@ -104,7 +115,7 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
       );
       triggerDistributionsSearch(
         {
-          profitYear: 2023,
+          profitYear: profitYear,
           reportType: FrozenReportsByAgeRequestType.FullTime,
           pagination: { skip: 0, take: 255 }
         },
@@ -112,7 +123,7 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
       );
       triggerDistributionsSearch(
         {
-          profitYear: 2023,
+          profitYear: profitYear,
           reportType: FrozenReportsByAgeRequestType.PartTime,
           pagination: { skip: 0, take: 255 }
         },
@@ -121,7 +132,7 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
 
       triggerForfeituresSearch(
         {
-          profitYear: 2023,
+          profitYear: profitYear,
           reportType: FrozenReportsByAgeRequestType.Total,
           pagination: { skip: 0, take: 255 }
         },
@@ -129,7 +140,7 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
       );
       triggerForfeituresSearch(
         {
-          profitYear: 2023,
+          profitYear: profitYear,
           reportType: FrozenReportsByAgeRequestType.FullTime,
           pagination: { skip: 0, take: 255 }
         },
@@ -144,7 +155,7 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
         false
       );
     }
-  }, [hasToken]);
+  }, [hasToken, frozenState]);
 
   const distributionsTotalChecksOut = useMemo(() => {
     if (!distributionsByAgeTotal || !distributionsByAgeFullTime || !distributionsByAgePartTime) return false;
@@ -243,7 +254,7 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
           sx={{
             color: "#0258A5"
           }}>
-          {`Frozen Summary As Of 12/9/2024`}
+          {`Frozen Summary As Of ${frozenState?.asOfDateTime ? new Date(frozenState.asOfDateTime).toLocaleDateString() : "Loading..."}`}
         </Typography>
       </Grid2>
 
