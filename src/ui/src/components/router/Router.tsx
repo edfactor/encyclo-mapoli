@@ -41,6 +41,7 @@ import { ROUTES } from "../../constants";
 import FiscalFlow from "pages/YearEndFlow/YearEndFlow";
 import ProfitShareReportEditRun from "pages/FiscalFlow/ProfitShareReportEditRun/ProfitShareReportEditRun";
 import EighteenToTwenty from "pages/PAY426Reports/PAY426-1/EighteenToTwenty";
+import ProfitShareReportFinalRun from "pages/FiscalFlow/ProfitShareReportFinalRun/ProfitShareReportFinalRun";
 
 const Router = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -201,6 +202,7 @@ const Router = () => {
         <Route
           path={ROUTES.PROFIT_SHARE_REPORT_EDIT_RUN}
           element={<ProfitShareReportEditRun />}></Route>
+        <Route path={ROUTES.PROFIT_SHARE_REPORT_FINAL_RUN} element={<ProfitShareReportFinalRun />}></Route>
         <Route
           path={ROUTES.PROFIT_SHARE_UPDATE}
           element={<ProfitShareUpdate />}></Route>

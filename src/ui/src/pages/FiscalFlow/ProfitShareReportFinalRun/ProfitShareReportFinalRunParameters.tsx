@@ -23,7 +23,7 @@ const schema = yup.object().shape({
     createSummaryReport: yup.boolean().default(false).required()
 });
 
-const ProfitShareReportEditRunParameters = () => {
+const ProfitShareReportFinalRunParameters = () => {
     const [triggerSearch, { isFetching }] = useLazyGetDistributionsAndForfeituresQuery();
 
     const {
@@ -143,4 +143,4 @@ const ProfitShareReportEditRunParameters = () => {
     );
 };
 
-export default ProfitShareReportEditRunParameters;
+export default ProfitShareReportFinalRunParameters;

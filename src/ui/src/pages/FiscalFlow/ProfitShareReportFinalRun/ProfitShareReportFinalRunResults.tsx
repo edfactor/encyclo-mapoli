@@ -1,6 +1,6 @@
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { Typography } from "@mui/material";
-import { InfoCard } from './InfoCard';
+import { InfoCard } from '../ProfitShareReportEditRun/InfoCard';
 import { useNavigate } from 'react-router-dom';
 import { CAPTIONS, ROUTES } from "../../../constants";
 
@@ -75,7 +75,7 @@ const profitShareCategories: ProfitShareCategory[] = [
   }
 ];
 
-const ProfitShareReportEditRunResults = () => {
+const ProfitShareReportFinalRunResults = () => {
 
   const navigate = useNavigate();
 
@@ -90,7 +90,7 @@ const ProfitShareReportEditRunResults = () => {
           sx={{
             color: "#0258A5"
           }}>
-          Profit Share Report - Edit Run (Pay 456)
+          {CAPTIONS.PROFIT_SHARE_REPORT_FINAL_RUN}
         </Typography>
       </Grid2>
 
@@ -119,4 +119,4 @@ const ProfitShareReportEditRunResults = () => {
   )
 };
 
-export default ProfitShareReportEditRunResults;
+export default ProfitShareReportFinalRunResults;

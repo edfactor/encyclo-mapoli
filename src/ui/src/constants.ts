@@ -34,6 +34,7 @@ export const ROUTES = {
   MILITARY_PROFIT_SUMMARY: "military-and-rehire-profit-summary",
   PROFIT_SHARE_REPORT: "profit-share-report",
   PROFIT_SHARE_REPORT_EDIT_RUN: "profit-share-report-edit-run",
+  PROFIT_SHARE_REPORT_FINAL_RUN: "profit-share-report-final-run",
   PROFIT_SHARE_UPDATE: "profit-share-update",
 
   FROZEN_SUMMARY: "frozen-summary",
@@ -76,6 +77,7 @@ export const CAPTIONS = {
   PROFIT_SHARE_UPDATE: "Profit Share Update",
   MASTER_INQUIRY: "Master Inquiry",
   PROFIT_SHARE_REPORT_EDIT_RUN: "Profit Share Report Edit Run (PAY456)",
+  PROFIT_SHARE_REPORT_FINAL_RUN: "Profit Share Report Final Run (PAY426)",
   PAY426_ACTIVE_18_20: "Active/inactive employees age 18 - 20 with 1000 hours or more",
   PAY426_ACTIVE_21_PLUS: "Active/inactive employees age 21 & with 1000 hours or more",
   PAY426_ACTIVE_UNDER_18: "Active/inactive employees under 18",

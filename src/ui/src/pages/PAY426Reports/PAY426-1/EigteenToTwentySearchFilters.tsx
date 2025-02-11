@@ -31,9 +31,9 @@ interface DateRangeSearchFilterProps {
     isFetching?: boolean;
 }
 
-const EighteenToTwentySearchFilter: React.FC<DateRangeSearchFilterProps> = ({ 
+const EighteenToTwentySearchFilter: React.FC<DateRangeSearchFilterProps> = ({
     onSearch,
-    isFetching = false 
+    isFetching = false
 }) => {
     const {
         control,
@@ -116,7 +116,7 @@ const EighteenToTwentySearchFilter: React.FC<DateRangeSearchFilterProps> = ({
                     )}
                 </Grid2>
             </Grid2>
-            
+
             <Grid2
                 width="100%"
                 paddingX="24px">

@@ -112,21 +112,21 @@ const EighteenToTwentyGrid = () => {
     const navigate = useNavigate();
 
     const getPinnedBottomRowData = (data: any[]) => {
-      
-      return [
-        {
-          employeeName: "Total EMPS",
-          store: 1,     
-          wages: 100.0,         
-          currentBalance: 0         
-        },
-        {
-          employeeName: "No Wages",
-          store: 0,                  
-          wages: 0,                 
-          currentBalance: 0          
-        }
-      ];
+
+        return [
+            {
+                employeeName: "Total EMPS",
+                store: 1,
+                wages: 100.0,
+                currentBalance: 0
+            },
+            {
+                employeeName: "No Wages",
+                store: 0,
+                wages: 0,
+                currentBalance: 0
+            }
+        ];
     };
 
 
