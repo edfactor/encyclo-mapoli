@@ -115,7 +115,7 @@ const DSMCollapsedAccordion: React.FC<DSMCollapsedAccordionProps> = ({
                             <Chip
                                 variant="outlined"
                                 label={status.label}
-                                color='secondary'
+                                color={status.color}
                                 size="small"
                             />
                         )}

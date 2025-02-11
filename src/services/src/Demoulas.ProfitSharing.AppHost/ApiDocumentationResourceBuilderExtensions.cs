@@ -3,7 +3,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Demoulas.ProfitSharing.AppHost;
 
-public static class ResourceBuilderExtensions
+public static class ApiDocumentationResourceBuilderExtensions
 {
     /// <summary>
     /// Configures the resource builder to include Swagger UI for API documentation.
