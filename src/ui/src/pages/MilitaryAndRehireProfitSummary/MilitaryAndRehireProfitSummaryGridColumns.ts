@@ -1,4 +1,5 @@
 import { ColDef } from "ag-grid-community";
+import { viewBadgeRenderer } from "../../utils/masterInquiryLink";
 
 export const GetMilitaryAndRehireProfitSummaryColumns = (): ColDef[] => {
   return [
@@ -10,7 +11,8 @@ export const GetMilitaryAndRehireProfitSummaryColumns = (): ColDef[] => {
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
-      sortable: true
+      sortable: true,
+      cellRenderer: (params) => viewBadgeRenderer({ value: params.data.badgeNumber }),
     },
     {
       headerName: "SSN",

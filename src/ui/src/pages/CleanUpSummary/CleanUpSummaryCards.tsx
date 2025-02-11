@@ -30,12 +30,12 @@ const CleanUpSummaryCards: React.FC<CleanUpSummaryCardsProps> = ({ setSelectedTa
 
   // "Duplicate Names and Birthdays"
 
-  const [triggerETVASearch, { isFetching: isFetchingETVA }] = useLazyGetNegativeEVTASSNQuery();
-  const [triggerPayrollDupeSsnsOnDemographics, { isFetching: isFetchingPayRollDupeSsns }] =
+  const [triggerETVASearch] = useLazyGetNegativeEVTASSNQuery();
+  const [triggerPayrollDupeSsnsOnDemographics] =
     useLazyGetDuplicateSSNsQuery();
-  const [triggerDemographicBadgesNotInPayprofit, { isFetching: isfetchingDemographicBadges }] =
+  const [triggerDemographicBadgesNotInPayprofit] =
     useLazyGetDemographicBadgesNotInPayprofitQuery();
-  const [triggerDuplicateNamesAndBirthdays, { isFetching: isFetchingDuplicateNames }] =
+  const [triggerDuplicateNamesAndBirthdays] =
     useLazyGetDuplicateNamesAndBirthdaysQuery();
 
   const { negativeEtvaForSSNsOnPayprofit, duplicateSSNsData, demographicBadges, duplicateNamesAndBirthday } =

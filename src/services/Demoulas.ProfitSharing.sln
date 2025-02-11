@@ -125,6 +125,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.Data
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ready import", "ready import", "{10F3A928-8DEB-4366-AAC4-F508D3E67C11}"
 	ProjectSection(SolutionItems) = preProject
+		..\database\ready_import\Import Validations.sql = ..\database\ready_import\Import Validations.sql
 		..\database\ready_import\Readme.txt = ..\database\ready_import\Readme.txt
 		..\database\ready_import\SQL copy all from ready to smart ps.sql = ..\database\ready_import\SQL copy all from ready to smart ps.sql
 		..\database\ready_import\SQL counts smart vs ready.sql = ..\database\ready_import\SQL counts smart vs ready.sql
