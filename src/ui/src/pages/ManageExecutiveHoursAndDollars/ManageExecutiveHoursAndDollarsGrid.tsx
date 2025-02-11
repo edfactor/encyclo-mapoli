@@ -120,7 +120,14 @@ const ManageExecutiveHoursAndDollarsGrid = () => {
             providedOptions={{
               rowData: copiedResponse?.response.results,
               columnDefs: columnDefs,
-              onCellValueChanged: (event: CellValueChangedEvent) => processRow(event)
+              onCellValueChanged: (event: CellValueChangedEvent) => processRow(event),
+              getRowStyle: (params) => {
+                if (isRowAlreadyPending(params.node.data.badgeNumber)) {
+                  return { background: "lemonchiffon" };
+                } else {
+                  return { background: "white" };
+                }
+              }
             }}
           />
         </>
