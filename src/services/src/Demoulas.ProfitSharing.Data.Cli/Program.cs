@@ -1,6 +1,7 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Text;
+using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping.Data;
 using Demoulas.ProfitSharing.Data.Cli.DiagramServices;
 using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -37,7 +38,28 @@ public sealed class Program
 
         upgradeDbCommand.SetHandler(async () =>
         {
-            await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async context => { await context.Database.MigrateAsync(); });
+            await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async context =>
+            {
+                await context.Database.MigrateAsync();
+
+                // Step 1: Get all existing AccountingPeriods from the database
+                var existingIds = await context.AccountingPeriods
+                    .Select(p => p.WeekendingDate) // Assuming 'Id' is the primary key
+                    .ToListAsync();
+
+                // Step 2: Find records that are NOT in the database
+                var newRecords = CaldarRecordSeeder.Records
+                    .Where(p => !existingIds.Contains(p.WeekendingDate))
+                    .ToList();
+
+                // Step 3: Insert only new records
+                if (newRecords.Any())
+                {
+                    context.AccountingPeriods.AddRange(newRecords);
+                    await context.SaveChangesAsync();
+                }
+
+            });
         });
 
         var dropRecreateDbCommand = new Command("drop-recreate-db", "Drop and recreate the database");

@@ -10,7 +10,7 @@
         },
         "import-from-ready": {
             "commandName": "Project",
-            "commandLineArgs": "import-from-ready --connection-name ProfitSharing --source-schema \"PROFITSHARE\" --sql-file \"..\\..\\..\\..\\..\\..\\..\\src\\database\\ready_import\\SQL copy all from ready to smart ps.sql\""
+            "commandLineArgs": "import-from-ready --connection-name ProfitSharing --source-schema \"PROFITSHARE\" --sql-file \"..\\..\\..\\..\\src\\database\\ready_import\\SQL copy all from ready to smart ps.sql\""
         },
         "create-dgml": {
             "commandName": "Project",

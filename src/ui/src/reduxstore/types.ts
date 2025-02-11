@@ -573,3 +573,11 @@ export interface ProfitShareMasterResponse {
   employeesEffected: number,
   etvasEffected: number
 }
+
+export interface frozenStateResponse {
+  id: number;
+  profitYear: number;
+  frozenBy: string;
+  asOfDateTime: string;
+  isActive: boolean;
+}
