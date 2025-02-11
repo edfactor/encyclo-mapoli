@@ -33,11 +33,15 @@ public class MasterInquiryService : IMasterInquiryService
             var rslt = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
                 var query = ctx.ProfitDetails
+                    .Include(pd => pd.ProfitCode)
+                    .Include(pd => pd.ZeroContributionReason)
+                    .Include(pd=> pd.TaxCode)
+                    .Include(pd=> pd.CommentType)
                             .Join(ctx.Demographics,
                                 pd => pd.Ssn,
                                 d => d.Ssn,
                                 (pd, d) => new { ProfitDetail = pd, Demographics = d })
-                            .Where(x => x.Demographics.PayFrequencyId == 1);
+                            .Where(x => x.Demographics.PayFrequencyId == PayFrequency.Constants.Weekly);
 
                 if (req.BadgeNumber.HasValue)
                 {
@@ -106,6 +110,7 @@ public class MasterInquiryService : IMasterInquiryService
                     ProfitYearIteration = x.ProfitDetail.ProfitYearIteration,
                     DistributionSequence = x.ProfitDetail.DistributionSequence,
                     ProfitCodeId = x.ProfitDetail.ProfitCodeId,
+                    ProfitCodeName = x.ProfitDetail.ProfitCode.Name,
                     Contribution = x.ProfitDetail.Contribution,
                     Earnings = x.ProfitDetail.Earnings,
                     Forfeiture = x.ProfitDetail.Forfeiture,
@@ -113,10 +118,13 @@ public class MasterInquiryService : IMasterInquiryService
                     YearToDate = x.ProfitDetail.YearToDate,
                     Remark = x.ProfitDetail.Remark,
                     ZeroContributionReasonId = x.ProfitDetail.ZeroContributionReasonId,
+                    ZeroContributionReasonName = x.ProfitDetail.ZeroContributionReason != null ? x.ProfitDetail.ZeroContributionReason.Name : string.Empty,
                     FederalTaxes = x.ProfitDetail.FederalTaxes,
                     StateTaxes = x.ProfitDetail.StateTaxes,
                     TaxCodeId = x.ProfitDetail.TaxCodeId,
+                    TaxCodeName = x.ProfitDetail.TaxCode != null ? x.ProfitDetail.TaxCode.Name : string.Empty,
                     CommentTypeId = x.ProfitDetail.CommentTypeId,
+                    CommentTypeName = x.ProfitDetail.CommentType != null ? x.ProfitDetail.CommentType.Name : string.Empty,
                     CommentRelatedCheckNumber = x.ProfitDetail.CommentRelatedCheckNumber,
                     CommentRelatedState = x.ProfitDetail.CommentRelatedState,
                     CommentRelatedOracleHcmId = x.ProfitDetail.CommentRelatedOracleHcmId,
@@ -171,7 +179,7 @@ public class MasterInquiryService : IMasterInquiryService
                             d.Address.PostalCode,
                             d.DateOfBirth,
                             d.Ssn,
-                            BadgeNumber = d.BadgeNumber,
+                            d.BadgeNumber,
                             d.ReHireDate,
                             d.HireDate,
                             d.TerminationDate,
