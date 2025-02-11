@@ -25,8 +25,12 @@ public sealed record MasterInquiryResponseDto
     public short? CommentRelatedPsnSuffix { get; set; }
     public bool? CommentIsPartialTransaction { get; set; }
     public int? BadgeNumber { get; set; }
+    public string? ProfitCodeName { get; set; }
+    public string? ZeroContributionReasonName { get; set; }
+    public string? TaxCodeName { get; set; }
+    public string? CommentTypeName { get; set; }
 
-     public static MasterInquiryResponseDto ResponseExample()
+    public static MasterInquiryResponseDto ResponseExample()
     {
         return new MasterInquiryResponseDto
         {

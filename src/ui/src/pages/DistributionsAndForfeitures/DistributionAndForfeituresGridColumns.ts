@@ -1,5 +1,6 @@
 import { ColDef } from "ag-grid-community";
 import { yyyyMMDDToMMDDYYYY } from "smart-ui-library";
+import { viewBadgeRenderer } from "../../utils/masterInquiryLink";
 
 export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
   return [
@@ -11,7 +12,8 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
-      sort: "asc"
+      sort: "asc",
+      cellRenderer: (params) => viewBadgeRenderer({ value: params.data.badgeNumber }),
     },
     {
       headerName: "Name",
