@@ -574,7 +574,7 @@ export interface ProfitShareMasterResponse {
   etvasEffected: number
 }
 
-export interface frozenStateResponse {
+export interface FrozenStateResponse {
   id: number;
   profitYear: number;
   frozenBy: string;

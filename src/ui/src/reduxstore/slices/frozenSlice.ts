@@ -1,52 +1,35 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
-  ContributionsByAge,
-  ForfeituresByAge,
-  BalanceByAge,
-  BalanceByYears,
-  DemographicBadgesNotInPayprofit,
-  DistributionsAndForfeitures,
-  DuplicateNameAndBirthday,
-  DuplicateSSNDetail,
-  EligibleEmployeeResponseDto,
-  ExecutiveHoursAndDollars,
-  FrozenReportsByAgeRequestType,
-  MasterInquiryDetail,
-  EmployeesOnMilitaryLeaveResponse,
-  MilitaryAndRehireForfeiture,
-  MilitaryAndRehireProfitSummary,
-  MissingCommasInPYName,
-  NegativeEtvaForSSNsOnPayProfit,
-  PagedReportResponse,
-  ProfitSharingDistributionsByAge,
-  EmployeeDetails,
-  MasterInquiryResponseType,
-  VestedAmountsByAge,
-  TerminationResponse, ProfitShareUpdateResponse, ProfitShareEditResponse, ProfitShareMasterResponse
+  FrozenStateResponse
 } from "reduxstore/types";
-import { Paged } from "smart-ui-library";
 
 export interface FrozenState {
-  duplicateSSNsData: PagedReportResponse<DuplicateSSNDetail> | null;
-  
+  frozenStateResponseData: FrozenStateResponse | null;
+  error: string | null;
 }
 
 const initialState: FrozenState = {
-  duplicateSSNsData: null,  
+  frozenStateResponseData: null,
+  error: null,
 };
 
 export const frozenSlice = createSlice({
-  name: "yearsEnd",
+  name: "frozen",
   initialState,
   reducers: {
-    setDuplicateSSNsData: (state, action: PayloadAction<PagedReportResponse<DuplicateSSNDetail>>) => {
-      state.duplicateSSNsData = action.payload;
+    setFrozenStateResponse: (state, action: PayloadAction<FrozenStateResponse | null>) => {
+      if (action.payload) {
+        state.frozenStateResponseData = action.payload;
+        state.error = null;
+      } else {
+        state.error = "Failed to fetch frozen state";
+      }
     }
   }
 });
 
+
 export const {
-  setDuplicateSSNsData,
-  
+  setFrozenStateResponse,  
 } = frozenSlice.actions;
 export default frozenSlice.reducer;

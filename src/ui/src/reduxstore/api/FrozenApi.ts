@@ -1,11 +1,9 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 import { RootState } from "reduxstore/store";
+import { FrozenStateResponse } from "reduxstore/types";
 import {
-    frozenStateResponse
-} from "reduxstore/types";
-import {
-    setDuplicateSSNsData,   
+    setFrozenStateResponse,   
 } from "reduxstore/slices/frozenSlice";
 import { url } from "./api";
 
@@ -29,24 +27,26 @@ export const FrozenApi = createApi({
     }),
     reducerPath: "frozenApi",
     endpoints: (builder) => ({
-        getDuplicateSSNs: builder.query<frozenStateResponse>({
-            query: (params) => ({
-                url: `yearend/duplicate-ssns`,
-                method: "GET"                
+        getFrozenStateResponse: builder.query<FrozenStateResponse, void>({
+            query: () => ({
+                url: `demographics/frozen/active`,
+                method: "GET",
             }),
             async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
                     const { data } = await queryFulfilled;
-                    dispatch(setDuplicateSSNsData(data));
+                    dispatch(setFrozenStateResponse(data));
                 } catch (err) {
-                    console.log("Err: " + err);
+                    console.error("Failed to fetch frozen state:", err);
+                    dispatch(setFrozenStateResponse(null)); // Handle API errors
                 }
             }
         })
+
     })
 });
 
 export const {
-    useLazygetDuplicateSSNQuery,
-    
+    useLazyGetFrozenStateResponseQuery, // Fix casing
 } = FrozenApi;
+
