@@ -31,7 +31,11 @@ const ManageExecutiveHoursAndDollarsGrid = () => {
     return found != undefined;
   };
 
-  //
+  /*
+    If a user (intentionally or not) changes a row that was already changed without saving
+    we are in a situation where no save is needed. This function sees if the changes ended
+    up being what was in the original row.
+  */
   const isTheEditTheOriginalRow = (badge: number, hours: number, dollars: number): boolean => {
     const found: ExecutiveHoursAndDollars | undefined = executiveHoursAndDollars?.response.results.find(
       (obj) => obj.badgeNumber === badge
@@ -45,12 +49,15 @@ const ManageExecutiveHoursAndDollarsGrid = () => {
     return false;
   };
 
+  /*
+    Once a row is changed by the user, this function will sort out if
+    it needs to be recorded as a pending edit, and modifies the underlying
+    data structure
+  */
   const processEditedRow = function (event: CellValueChangedEvent): void {
     const rowInQuestion: IRowNode = event.node;
-    console.log("In process row. Badge was: " + rowInQuestion.data.badgeNumber);
-    console.log("Column was: " + event.colDef.field);
 
-    const rowToAdd: ExecutiveHoursAndDollarsGrid = {
+    const rowRecord: ExecutiveHoursAndDollarsGrid = {
       executiveHoursAndDollars: [
         {
           badgeNumber: rowInQuestion.data.badgeNumber,
@@ -62,11 +69,9 @@ const ManageExecutiveHoursAndDollarsGrid = () => {
     };
 
     if (isRowStagedToSave(rowInQuestion.data.badgeNumber)) {
-      console.log("Row pending already!");
-
-      // But we have two situations with the row already there:
-      // 1. The changes are a reversion to what was in the database
-      // 2. The changes are additional changes that do not match
+      // We have two situations if the row is in the pending batch already:
+      // 1. The changes are a reversion to what is already in the database
+      // 2. The changes are additional unsaved changes that do not match
       //    what is in the database
       if (
         isTheEditTheOriginalRow(
@@ -75,28 +80,28 @@ const ManageExecutiveHoursAndDollarsGrid = () => {
           rowInQuestion.data.incomeExecutive
         )
       ) {
-        dispatch(removeExecutiveHoursAndDollarsGridRow(rowToAdd));
+        // We remove the pending row entirely as no changes are needed
+        dispatch(removeExecutiveHoursAndDollarsGridRow(rowRecord));
       } else {
-        dispatch(updateExecutiveHoursAndDollarsGridRow(rowToAdd));
+        // So these are additional edits that need to be saved
+        dispatch(updateExecutiveHoursAndDollarsGridRow(rowRecord));
       }
     } else {
-      console.log("Row not there, so... adding row");
-      dispatch(addExecutiveHoursAndDollarsGridRow(rowToAdd));
+      // The row is not there at all, so let us add it
+      dispatch(addExecutiveHoursAndDollarsGridRow(rowRecord));
     }
 
-    // Now we need to update this value in the grid's data
+    // Now we need to update this changed row in the grid's underlying
+    // data or else it will be undone on the next re-render
     if (mutableCopyOfGridData) {
-      // Need to loop through
+      // Need to loop through data and find our row
       for (const element of mutableCopyOfGridData.response.results) {
         if (element.badgeNumber === rowInQuestion.data.badgeNumber) {
           element.incomeExecutive = rowInQuestion.data.incomeExecutive;
           element.hoursExecutive = rowInQuestion.data.hoursExecutive;
         }
       }
-
-      return;
     }
-    return;
   };
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);

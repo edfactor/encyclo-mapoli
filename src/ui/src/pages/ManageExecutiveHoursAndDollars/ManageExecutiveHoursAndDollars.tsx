@@ -12,7 +12,12 @@ import { useUpdateExecutiveHoursAndDollarsMutation } from "reduxstore/api/YearsE
 
 const RenderSaveButton = () => {
   const dispatch = useDispatch();
+  // This next line the function that makes the HTTP PUT call to
+  // update the hours and dollars on the back end
   const [updateHoursAndDollars] = useUpdateExecutiveHoursAndDollarsMutation();
+
+  // This Grid is the group of pending updates that are changed rows in the grid,
+  // but have not been sent to the back end
   const { executiveHoursAndDollarsGrid } = useSelector((state: RootState) => state.yearsEnd);
 
   const pendingChanges =
@@ -35,7 +40,9 @@ const RenderSaveButton = () => {
         // 4. Show some sort of confirmation message?
 
         // Note that clearing the rows will also disable the save button,
-        // which will be notified that there are no pending rows to save
+        // which will be notified that there are no pending rows to save,
+        // that happens when we do the clear call below
+
         updateHoursAndDollars(executiveHoursAndDollarsGrid)
           .unwrap()
           .then((payload) => console.log("Successfully updated hours and dollars. ", payload))

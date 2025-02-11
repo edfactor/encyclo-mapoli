@@ -6,10 +6,7 @@ import { SearchAndReset } from "smart-ui-library";
 import { useDispatch } from "react-redux";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import {
-  clearExecutiveHoursAndDollarsGridRows,
-  setExecutiveHoursAndDollarsGridYear
-} from "reduxstore/slices/yearsEndSlice";
+import { setExecutiveHoursAndDollarsGridYear } from "reduxstore/slices/yearsEndSlice";
 
 interface ExecutiveHoursAndDollarsSearch {
   profitYear: number;
@@ -88,8 +85,12 @@ const ManageExecutiveHoursAndDollarsSearchFilter = () => {
   });
 
   const handleReset = () => {
-    // We need to clear pending changes also
-    dispatch(clearExecutiveHoursAndDollarsGridRows());
+    // If we ever decide that the reset button should clear pending changes
+    // uncomment this next line...
+    // dispatch(clearExecutiveHoursAndDollarsGridRows());
+    // ... and then import clearExecutiveHoursAndDollarsGridRows
+    // from reduxstore/slices/yearsEndSlice
+
     reset({
       profitYear: undefined,
       fullNameContains: null,

@@ -157,7 +157,9 @@ export const yearsEndSlice = createSlice({
     setExecutiveHoursAndDollarsGrid: (state, action: PayloadAction<ExecutiveHoursAndDollarsGrid>) => {
       state.executiveHoursAndDollarsGrid = action.payload;
     },
-    // We would call this when a save is successful and pending changes should be cleared
+    /* 
+      We call this when a save is successful and pending changes should be cleared.
+    */
     clearExecutiveHoursAndDollarsGridRows: (state) => {
       state.executiveHoursAndDollarsGrid = null;
     },
@@ -170,26 +172,30 @@ export const yearsEndSlice = createSlice({
         state.executiveHoursAndDollarsGrid = { profitYear: action.payload, executiveHoursAndDollars: [] };
       }
     },
-    // This is putting a new changed row into our structure to be saved later.
+    /*
+      This is putting a new changed row into our structure to be saved later after the button is pressed.
+    */
     addExecutiveHoursAndDollarsGridRow: (state, action: PayloadAction<ExecutiveHoursAndDollarsGrid>) => {
-      // So first, do we have a profit year for this?
+      // So first, do we have a profit year already set for this?
       if (
         state.executiveHoursAndDollarsGrid &&
         state.executiveHoursAndDollarsGrid?.profitYear === action.payload.profitYear
       ) {
-        // So now we need to just add one
+        // We have a structure and year alrady, so now we need to just add our row
         state.executiveHoursAndDollarsGrid.executiveHoursAndDollars.push(action.payload.executiveHoursAndDollars[0]);
       } else {
-        // So we need to assign our new year and entry
+        // So we don't have a year for some reason, or any other data. Let us just add our whole structure
         state.executiveHoursAndDollarsGrid = action.payload;
       }
     },
+    /* 
+      We get here when the profit year is decided and another pending change for this row
+      is already there. This will occur when the user edits a field more than once, or edits both 
+      values in one row
+    */
     updateExecutiveHoursAndDollarsGridRow: (state, action: PayloadAction<ExecutiveHoursAndDollarsGrid>) => {
-      // We get here when the profit year is decided and a row is already there. This will occur
-      // when the user edits a field more than once, or edits both values in a row
-
       if (state.executiveHoursAndDollarsGrid) {
-        // just need to find the correct row with the correct badge number
+        // just need to find the correct row with the correct badge number and update both fields
         for (const hoursDollarsRow of state.executiveHoursAndDollarsGrid.executiveHoursAndDollars) {
           if (hoursDollarsRow.badgeNumber === action.payload.executiveHoursAndDollars[0].badgeNumber) {
             hoursDollarsRow.executiveDollars = action.payload.executiveHoursAndDollars[0].executiveDollars;
@@ -199,8 +205,10 @@ export const yearsEndSlice = createSlice({
         }
       }
     },
-    // We remove from pending changes when the user has changed a pending row change back to original state,
-    // invalidating the need for an update
+    /*
+      We remove a row from pending changes when the user has changed a pending row change back to 
+      the original state of that unsaved row, which invalidates the need for an update
+    */
     removeExecutiveHoursAndDollarsGridRow: (state, action: PayloadAction<ExecutiveHoursAndDollarsGrid>) => {
       // So first, do we have a profit year for this?
       if (
