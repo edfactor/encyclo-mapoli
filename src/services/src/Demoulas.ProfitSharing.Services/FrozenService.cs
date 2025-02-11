@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -12,49 +13,12 @@ namespace Demoulas.ProfitSharing.Services;
 public class FrozenService: IFrozenService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
+    private readonly IAppUser _appUser;
 
-    public FrozenService(IProfitSharingDataContextFactory dataContextFactory)
+    public FrozenService(IProfitSharingDataContextFactory dataContextFactory, IAppUser appUser)
     {
         _dataContextFactory = dataContextFactory;
-    }
-
-    /// <summary>
-    /// Returns a query object representing Demographic data as of a certain date time
-    /// </summary>
-    /// <param name="ctx">The data context used for querying</param>
-    /// <param name="asOfDateTime">The UTC datetime for which data changed after this point in time will be disregarded.</param>
-    /// <returns></returns>
-    public static IQueryable<Demographic> GetDemographicSnapshot(IProfitSharingDbContext ctx, DateTime asOfDateTime)
-    {
-        return (
-            from dh in ctx.DemographicHistories
-            join d in ctx.Demographics on dh.DemographicId equals d.Id
-            where asOfDateTime >= dh.ValidFrom && asOfDateTime < dh.ValidTo
-            select new Demographic()
-            {
-                Id = dh.DemographicId,
-                OracleHcmId = dh.OracleHcmId,
-                Ssn = dh.Ssn,
-                BadgeNumber = dh.BadgeNumber,
-                LastModifiedDate = dh.ValidFrom,
-                StoreNumber = dh.StoreNumber,
-                PayClassificationId = dh.PayClassificationId,
-                ContactInfo = d.ContactInfo,
-                Address = d.Address,
-                DateOfBirth = dh.DateOfBirth,
-                FullTimeDate = d.FullTimeDate,
-                HireDate = dh.HireDate,
-                ReHireDate = dh.ReHireDate,
-                TerminationDate = dh.TerminationDate,
-                DepartmentId = dh.DepartmentId,
-                EmploymentTypeId = dh.EmploymentTypeId,
-                GenderId = d.GenderId,
-                PayFrequencyId = dh.PayFrequencyId,
-                TerminationCodeId = dh.TerminationCodeId,
-                EmploymentStatusId = dh.EmploymentStatusId,
-            }
-
-        );
+        _appUser = appUser;
     }
 
     /// <summary>
@@ -102,6 +66,7 @@ public class FrozenService: IFrozenService
     /// Sets the cutoff data for a particular profit year.  Deactivates any prior "Freezes" for the year.
     /// </summary>
     /// <param name="profitYear">Profit year for which to set the freeze date/time</param>
+    /// <param name="asOfDateTime"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     public Task<SetFrozenStateResponse> FreezeDemographics(short profitYear, DateTime asOfDateTime, CancellationToken cancellationToken = default)
@@ -113,16 +78,35 @@ public class FrozenService: IFrozenService
             await ctx.FrozenStates.Where(x => x.ProfitYear == profitYear && x.IsActive).ForEachAsync(x => x.IsActive = false, cancellationToken);
 
             //Create new record
-            var frozenState = new FrozenState() { IsActive = true, ProfitYear = profitYear, AsOfDateTime = asOfDateTime };
+            var frozenState = new FrozenState { IsActive = true, ProfitYear = profitYear, AsOfDateTime = asOfDateTime, FrozenBy = _appUser.UserName ?? "Unknown"};
             ctx.FrozenStates.Add(frozenState);
 
             await ctx.SaveChangesAsync(cancellationToken);
 
-            return new SetFrozenStateResponse()
+            return new SetFrozenStateResponse
             {
                 Id = frozenState.Id,
-                ProfitYear = profitYear
+                ProfitYear = profitYear,
+                FrozenBy = _appUser.UserName,
+                AsOfDateTime = asOfDateTime,
+                IsActive = true
             };
         }, cancellationToken);
+    }
+
+    public Task<List<SetFrozenStateResponse>> GetFrozenDemographics(CancellationToken cancellationToken = default)
+    {
+        return _dataContextFactory.UseReadOnlyContext(ctx =>
+        {
+            //Inactivate any prior frozen states
+            return ctx.FrozenStates.Select(f=> new SetFrozenStateResponse
+            {
+                Id = f.Id,
+                ProfitYear = f.ProfitYear,
+                FrozenBy = f.FrozenBy,
+                AsOfDateTime = f.AsOfDateTime,
+                IsActive = f.IsActive
+            }).ToListAsync(cancellationToken);
+        });
     }
 }

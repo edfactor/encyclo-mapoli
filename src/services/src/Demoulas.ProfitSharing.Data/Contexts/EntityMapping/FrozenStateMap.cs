@@ -19,6 +19,11 @@ internal sealed class FrozenStateMap : IEntityTypeConfiguration<FrozenState>
             .HasColumnName("PROFIT_YEAR")
             .IsRequired();
 
+        _ = builder.Property(x => x.FrozenBy)
+            .HasColumnName("FROZEN_BY")
+            .HasMaxLength(64)
+            .IsRequired();
+
         _ = builder.Property(x => x.AsOfDateTime)
             .HasColumnName("AS_OF_DATETIME")
             .IsRequired();
