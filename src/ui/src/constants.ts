@@ -1,7 +1,7 @@
 export const HISTORY_KEY = 'navigation_history' as const;
 
 export const MENU_LABELS = {
-  YEAR_END_FLOW: "Year End Flow",
+  FISCAL_CLOSE: "Fiscal Close",
   DECEMBER_FLOW: "December Flow",
   BENEFICIARIES: "Beneficiaries",
   DISTRIBUTIONS: "Distributions",
@@ -10,7 +10,7 @@ export const MENU_LABELS = {
 } as const;
 
 export const ROUTES = {
-  YEAR_END_FLOW: "yearend-flow",
+  FISCAL_CLOSE: "fiscal-close",
   DISTRIBUTIONS_AND_FORFEITURES: "distributions-and-forfeitures",
   MANAGE_EXECUTIVE_HOURS: "manage-executive-hours-and-dollars",
   ELIGIBLE_EMPLOYEES: "eligible-employees",
@@ -33,10 +33,32 @@ export const ROUTES = {
   MILITARY_FORFEITURES: "military-and-rehire-forfeitures",
   MILITARY_PROFIT_SUMMARY: "military-and-rehire-profit-summary",
   PROFIT_SHARE_REPORT: "profit-share-report",
+  PROFIT_SHARE_REPORT_EDIT_RUN: "profit-share-report-edit-run",
+  PROFIT_SHARE_REPORT_FINAL_RUN: "profit-share-report-final-run",
   PROFIT_SHARE_UPDATE: "profit-share-update",
 
   FROZEN_SUMMARY: "frozen-summary",
   MASTER_INQUIRY: "master-inquiry",
+
+  PAY426_ACTIVE_18_20: "pay426-1",
+  PAY426_ACTIVE_21_PLUS: "pay426-2",
+  PAY426_ACTIVE_UNDER_18: "pay426-3",
+  PAY426_ACTIVE_PRIOR_SHARING: "pay426-4",
+  PAY426_ACTIVE_NO_PRIOR: "pay426-5",
+  PAY426_TERMINATED_1000_PLUS: "pay426-6",
+  PAY426_TERMINATED_NO_PRIOR: "pay426-7",
+  PAY426_TERMINATED_PRIOR: "pay426-8",
+  PAY426_SUMMARY: "pay426-9",
+  PAY426_NON_EMPLOYEE: "pay426-10",
+  FORFEIT: "forfeit",
+  PAYMASTER_UPDATE: "paymaster-update",
+  PROFIT_SHARE_BY_STORE: "profit-share-by-store",
+  PROFIT_SHARE_GROSS_REPORT: "profit-share-gross-report",
+  PAY450_SUMMARY: "pay450-summary",
+  PROF_CTRLSHEET: "prof-control-sheet",
+    UNDER_21_REPORT: "under-21-report",
+    UNDER_21_TERM_ACTIVE: "under-21-term-active",
+    NEW_PS_LABELS: "new-ps-labels",
 } as const;
 
 export const CAPTIONS = {
@@ -63,4 +85,32 @@ export const CAPTIONS = {
   PROFIT_SHARE_REPORT: "Profit Share Report",
   PROFIT_SHARE_UPDATE: "Profit Share Update",
   MASTER_INQUIRY: "Master Inquiry",
+  PROFIT_SHARE_REPORT_EDIT_RUN: "Profit Share Report Edit Run (PAY456)",
+  PROFIT_SHARE_REPORT_FINAL_RUN: "Profit Share Report Final Run (PAY426)",
+  PAY426_ACTIVE_18_20: "Active/inactive employees age 18 - 20 with 1000 hours or more",
+  PAY426_ACTIVE_21_PLUS: "Active/inactive employees age 21 & with 1000 hours or more",
+  PAY426_ACTIVE_UNDER_18: "Active/inactive employees under 18",
+  PAY426_ACTIVE_PRIOR_SHARING: "Active/inactive employees 18 and older with prior profit sharing amounts and <1000 hours",
+  PAY426_ACTIVE_NO_PRIOR: "Active/inactive employees 18 and older with no prior profit sharing amounts and <1000 hours",
+  PAY426_TERMINATED_1000_PLUS: "Terminated employees 18 and older with 1000 hours or more",
+  PAY426_TERMINATED_NO_PRIOR: "Terminated employees 18 and older with no prior profit sharing amounts and < 1000 hours",
+  PAY426_TERMINATED_PRIOR: "Terminated employees 18 and older with prior profit sharing amounts and < 1000 hours",
+  PAY426_SUMMARY: "Profit sharing summary page",
+  PAY426_NON_EMPLOYEE: "All non-employee beneficiaries",
+  FORFEIT: "Forfeit",
+  PAYMASTER_UPDATE: "Paymaster Update",
+  PROFIT_SHARE_BY_STORE: "Profit Share by Store",
+  PROFIT_SHARE_GROSS_REPORT: "Profit Share Gross Report",
+  PAY450: "PAY450",
+  PROF_CTRLSHEET: "Prof-CTRL-SHEET",
+  PROFIT_SHARING_CONTROL_SHEET: "Profit Sharing Control Sheet",
+  PAY450_SUMMARY: "Update Summary for Profit Sharing (Pay450)",
+  PAY_SHARE_BY_STORE_REPORTS: "Pay Share By Store Reports",
+  UNDER_21_AGE_REPORT: "Under 21 Age Report",
+  UNDER_21_TERM_ACTIVE: "Under 21 Term Active Report",
+  NEW_PS_LABELS: "New PS Labels",
 } as const;
+
+
+
+export const VIEW = "View";

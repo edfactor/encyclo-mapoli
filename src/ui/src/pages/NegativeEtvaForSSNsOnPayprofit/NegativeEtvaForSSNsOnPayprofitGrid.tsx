@@ -16,19 +16,6 @@ const NegativeEtvaForSSNsOnPayprofitGrid = () => {
     isSortDescending: false
   });
   
-  const viewBadge = ({ value }: ICellRendererParams) => {
-    return (
-      value && (
-        <Link
-          style={{ height: "20px", textDecoration: "underline", textTransform: "none" }}
-          href={`/master-inquiry/${value}`}
-        >
-          {value}
-        </Link>
-      )
-    );
-  };
-
   const dispatch = useDispatch();
   const { negativeEtvaForSSNsOnPayprofit } = useSelector((state: RootState) => state.yearsEnd);
   const [_, { isLoading }] = useLazyGetNegativeEVTASSNQuery();

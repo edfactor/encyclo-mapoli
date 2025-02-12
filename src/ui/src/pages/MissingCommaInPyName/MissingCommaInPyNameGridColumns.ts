@@ -1,15 +1,17 @@
 import { ColDef } from "ag-grid-community";
+import { viewBadgeRenderer } from "../../utils/masterInquiryLink";
 
 export const GetMissingCommaInPyNameColumns = (): ColDef[] => {
     return [
       {
         headerName: "Badge",
-        field: "employeeBadge",
-        colId: "employeeBadge",
+        field: "badgeNumber",
+        colId: "badgeNumber",
         minWidth: 80,
         headerClass: "right-align",
         cellClass: "right-align",
-        resizable: true
+        resizable: true,
+        cellRenderer: (params) => viewBadgeRenderer({ value: params.data.badgeNumber }),
       },
       {
         headerName: "SSN",

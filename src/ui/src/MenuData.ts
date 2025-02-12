@@ -2,9 +2,10 @@ import { RouteCategory } from "smart-ui-library/dist/components/MenuBar/MenuBar"
 import { MENU_LABELS, ROUTES, CAPTIONS } from './constants';
 
 const yearEndReports: RouteCategory = {
-  menuLabel: MENU_LABELS.YEAR_END_FLOW,
-  parentRoute: ROUTES.YEAR_END_FLOW,
+  menuLabel: MENU_LABELS.FISCAL_CLOSE,
+  parentRoute: ROUTES.FISCAL_CLOSE,
   items: [
+    { caption: CAPTIONS.SUMMARY, route: ROUTES.FISCAL_CLOSE },
     { caption: CAPTIONS.DISTRIBUTIONS_AND_FORFEITURES, route: ROUTES.DISTRIBUTIONS_AND_FORFEITURES },
     { caption: CAPTIONS.MANAGE_EXECUTIVE_HOURS, route: ROUTES.MANAGE_EXECUTIVE_HOURS },
     { caption: CAPTIONS.ELIGIBLE_EMPLOYEES, route: ROUTES.ELIGIBLE_EMPLOYEES },
@@ -16,6 +17,13 @@ const yearEndReports: RouteCategory = {
     { caption: CAPTIONS.VESTED_AMOUNTS_BY_AGE, route: ROUTES.VESTED_AMOUNTS_BY_AGE },
     { caption: CAPTIONS.TERMINATIONS, route: ROUTES.PROF_TERM },
     { caption: CAPTIONS.MILITARY_AND_REHIRE_ENTRY, route: ROUTES.MILITARY_AND_REHIRE_ENTRY },
+    { caption: CAPTIONS.PROFIT_SHARE_REPORT_EDIT_RUN, route: ROUTES.PROFIT_SHARE_REPORT_EDIT_RUN },
+    { caption: CAPTIONS.PROFIT_SHARE_REPORT_FINAL_RUN, route: ROUTES.PROFIT_SHARE_REPORT_FINAL_RUN },
+    { caption: CAPTIONS.PAYMASTER_UPDATE, route: ROUTES.PAYMASTER_UPDATE },
+    { caption: CAPTIONS.PROFIT_SHARE_BY_STORE, route: ROUTES.PROFIT_SHARE_BY_STORE },
+    { caption: CAPTIONS.PROFIT_SHARE_GROSS_REPORT, route: ROUTES.PROFIT_SHARE_GROSS_REPORT },
+    { caption: CAPTIONS.FORFEIT, route: ROUTES.FORFEIT },
+    { caption: CAPTIONS.PAY450_SUMMARY, route: ROUTES.PAY450_SUMMARY },
   ]
 };
 
@@ -69,6 +77,6 @@ const miscellaneous: RouteCategory = {
   ]
 };
 
-const MenuData: RouteCategory[] = [beneficiaries, distributions, reconciliation, decemberFlow, yearEndReports, miscellaneous];
+const MenuData: RouteCategory[] = [miscellaneous, beneficiaries, distributions, reconciliation, decemberFlow, yearEndReports];
 
 export default MenuData;

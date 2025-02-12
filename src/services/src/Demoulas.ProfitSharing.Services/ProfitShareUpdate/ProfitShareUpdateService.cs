@@ -191,7 +191,10 @@ public class ProfitShareUpdateService : IInternalProfitShareUpdateService
     private async Task ProcessBeneficiaries(List<MemberFinancials> members, ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
         List<BeneficiaryFinancials> benes = await _dbContextFactory.UseReadOnlyContext(ctx =>
-            ctx.Beneficiaries.OrderBy(b => b.Contact!.ContactInfo.FullName)
+            ctx.Beneficiaries
+                .Include(b => b.Contact)
+                .ThenInclude(c=> c!.ContactInfo)
+                .OrderBy(b => b.Contact!.ContactInfo.FullName)
                 .ThenByDescending(b => b.BadgeNumber * 10000 + b.PsnSuffix).Select(b =>
                     new BeneficiaryFinancials
                     {

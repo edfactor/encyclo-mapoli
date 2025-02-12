@@ -110,6 +110,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         // This query loads the Beneficiary and then the employee they are related to
         var query = ctx.Beneficiaries
             .Include(b => b.Contact)
+            .ThenInclude(c => c!.ContactInfo)
             .Include(b => b.Demographic)
             .ThenInclude(d => d!.PayProfits.Where(p => p.ProfitYear == request.ProfitYear))
             .Where(b => b.Demographic != null)

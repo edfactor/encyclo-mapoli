@@ -33,11 +33,15 @@ public class MasterInquiryService : IMasterInquiryService
             var rslt = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
                 var query = ctx.ProfitDetails
+                    .Include(pd => pd.ProfitCode)
+                    .Include(pd => pd.ZeroContributionReason)
+                    .Include(pd=> pd.TaxCode)
+                    .Include(pd=> pd.CommentType)
                             .Join(ctx.Demographics,
                                 pd => pd.Ssn,
                                 d => d.Ssn,
                                 (pd, d) => new { ProfitDetail = pd, Demographics = d })
-                            .Where(x => x.Demographics.PayFrequencyId == 1);
+                            .Where(x => x.Demographics.PayFrequencyId == PayFrequency.Constants.Weekly);
 
                 if (req.BadgeNumber.HasValue)
                 {
@@ -106,6 +110,7 @@ public class MasterInquiryService : IMasterInquiryService
                     ProfitYearIteration = x.ProfitDetail.ProfitYearIteration,
                     DistributionSequence = x.ProfitDetail.DistributionSequence,
                     ProfitCodeId = x.ProfitDetail.ProfitCodeId,
+                    ProfitCodeName = x.ProfitDetail.ProfitCode.Name,
                     Contribution = x.ProfitDetail.Contribution,
                     Earnings = x.ProfitDetail.Earnings,
                     Forfeiture = x.ProfitDetail.Forfeiture,
@@ -113,10 +118,13 @@ public class MasterInquiryService : IMasterInquiryService
                     YearToDate = x.ProfitDetail.YearToDate,
                     Remark = x.ProfitDetail.Remark,
                     ZeroContributionReasonId = x.ProfitDetail.ZeroContributionReasonId,
+                    ZeroContributionReasonName = x.ProfitDetail.ZeroContributionReason != null ? x.ProfitDetail.ZeroContributionReason.Name : string.Empty,
                     FederalTaxes = x.ProfitDetail.FederalTaxes,
                     StateTaxes = x.ProfitDetail.StateTaxes,
                     TaxCodeId = x.ProfitDetail.TaxCodeId,
+                    TaxCodeName = x.ProfitDetail.TaxCode != null ? x.ProfitDetail.TaxCode.Name : string.Empty,
                     CommentTypeId = x.ProfitDetail.CommentTypeId,
+                    CommentTypeName = x.ProfitDetail.CommentType != null ? x.ProfitDetail.CommentType.Name : string.Empty,
                     CommentRelatedCheckNumber = x.ProfitDetail.CommentRelatedCheckNumber,
                     CommentRelatedState = x.ProfitDetail.CommentRelatedState,
                     CommentRelatedOracleHcmId = x.ProfitDetail.CommentRelatedOracleHcmId,
@@ -125,7 +133,7 @@ public class MasterInquiryService : IMasterInquiryService
                     BadgeNumber = x.Demographics.BadgeNumber,
                 })
                 .OrderByDescending(x => x.ProfitYear)
-                .ToPaginationResultsAsync(req, cancellationToken);
+                .ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken);
 
                 ISet<int> uniqueSsns = await query.Select(q => q.Demographics.Ssn).ToHashSetAsync(cancellationToken: cancellationToken);
                 EmployeeDetails? employeeDetails = null;
@@ -133,31 +141,8 @@ public class MasterInquiryService : IMasterInquiryService
                 if (uniqueSsns.Count == 1)
                 {
                     int ssn = uniqueSsns.First();
-                    short currentYear = (short)DateTime.Today.Year;
-                    short previousYear = (short)(currentYear - 1);
-
-                    BalanceEndpointResponse? previousBalance = null;
-                    BalanceEndpointResponse? currentBalance = null;
-                    try
-                    {
-                        previousBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(
-                            SearchBy.Ssn, ssn, previousYear, cancellationToken);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogWarning(ex, "Failed to retrieve previous year balance for SSN {SSN}", ssn);
-                    }
-                    try
-                    {
-                        currentBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(
-                            SearchBy.Ssn, ssn, currentYear, cancellationToken);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogWarning(ex, "Failed to retrieve current year balance for SSN {SSN}", ssn);
-                    }
-
-                    var maxProfitYear = req.EndProfitYear.HasValue ? req.EndProfitYear : short.MaxValue;
+                    var maxProfitYear = req.EndProfitYear ?? short.MaxValue;
+                    
 
                     var demographicData = await ctx.Demographics
                         .Where(d => d.Ssn == ssn)
@@ -171,7 +156,7 @@ public class MasterInquiryService : IMasterInquiryService
                             d.Address.PostalCode,
                             d.DateOfBirth,
                             d.Ssn,
-                            BadgeNumber = d.BadgeNumber,
+                            d.BadgeNumber,
                             d.ReHireDate,
                             d.HireDate,
                             d.TerminationDate,
@@ -186,6 +171,28 @@ public class MasterInquiryService : IMasterInquiryService
 
                     if (demographicData != null)
                     {
+                        short currentYear = (short)DateTime.Today.Year;
+                        short previousYear = (short)(currentYear - 1);
+                        BalanceEndpointResponse? currentBalance = null;
+                        BalanceEndpointResponse? previousBalance = null;
+                        try
+                        {
+                            Task<BalanceEndpointResponse?> previousBalanceTask = _totalService.GetVestingBalanceForSingleMemberAsync(
+                                SearchBy.Ssn, ssn, previousYear, cancellationToken);
+                       
+                            Task<BalanceEndpointResponse?> currentBalanceTask = _totalService.GetVestingBalanceForSingleMemberAsync(
+                                SearchBy.Ssn, ssn, currentYear, cancellationToken);
+
+                            await Task.WhenAll(previousBalanceTask, currentBalanceTask);
+
+                            currentBalance = await currentBalanceTask;
+                            previousBalance = await previousBalanceTask;
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, "Failed to retrieve balances for SSN {SSN}", ssn);
+                        }
+
                         employeeDetails = new EmployeeDetails
                         {
                             FirstName = demographicData.FirstName,
@@ -203,7 +210,7 @@ public class MasterInquiryService : IMasterInquiryService
                             TerminationDate = demographicData.TerminationDate,
                             StoreNumber = demographicData.StoreNumber,
                             PercentageVested = currentBalance?.VestingPercent ?? 0,
-                            ContributionsLastYear = previousBalance != null && previousBalance.CurrentBalance > 0,
+                            ContributionsLastYear = previousBalance is { CurrentBalance: > 0 },
                             Enrolled = demographicData.LatestPayProfit?.EnrollmentId != 0,
                             BadgeNumber = demographicData.BadgeNumber.ToString(),
                             BeginPSAmount = (long)(previousBalance?.CurrentBalance ?? 0),

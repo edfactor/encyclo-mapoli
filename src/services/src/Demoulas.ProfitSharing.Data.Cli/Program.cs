@@ -1,5 +1,7 @@
 ﻿using System.CommandLine;
+using System.CommandLine.Invocation;
 using System.Text;
+using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping.Data;
 using Demoulas.ProfitSharing.Data.Cli.DiagramServices;
 using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -36,7 +38,28 @@ public sealed class Program
 
         upgradeDbCommand.SetHandler(async () =>
         {
-            await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async context => { await context.Database.MigrateAsync(); });
+            await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async context =>
+            {
+                await context.Database.MigrateAsync();
+
+                // Step 1: Get all existing AccountingPeriods from the database
+                var existingIds = await context.AccountingPeriods
+                    .Select(p => p.WeekendingDate) // Assuming 'Id' is the primary key
+                    .ToListAsync();
+
+                // Step 2: Find records that are NOT in the database
+                var newRecords = CaldarRecordSeeder.Records
+                    .Where(p => !existingIds.Contains(p.WeekendingDate))
+                    .ToList();
+
+                // Step 3: Insert only new records
+                if (newRecords.Any())
+                {
+                    context.AccountingPeriods.AddRange(newRecords);
+                    await context.SaveChangesAsync();
+                }
+
+            });
         });
 
         var dropRecreateDbCommand = new Command("drop-recreate-db", "Drop and recreate the database");
@@ -113,6 +136,37 @@ public sealed class Program
             });
         });
 
+        var validateImportCommand = new Command("validate-import", "validate an import from ready against an existing database");
+        commonOptions.ForEach(validateImportCommand.AddOption);
+        validateImportCommand.Add(new Option<string>("--current-year", "Current year of profit sharing"));
+
+        validateImportCommand.SetHandler(async (InvocationContext iCtx) =>
+        {
+            await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async context =>
+            {
+                try
+                {
+                    var sqlFile = configuration["sql-file"];
+                    var sourceSchema = configuration["source-schema"];
+                    if (string.IsNullOrEmpty(sqlFile) || string.IsNullOrEmpty(sourceSchema))
+                    {
+                        throw new ArgumentNullException("SQL file path and schema must be provided.");
+                    }
+
+                    string sqlCommand = await File.ReadAllTextAsync(sqlFile);
+                    sqlCommand = sqlCommand.Replace("COMMIT ;", string.Empty)
+                        .Replace("{SOURCE_PROFITSHARE_SCHEMA}", sourceSchema)
+                        .Replace("{CURRENT_YEAR}", configuration["current-year"]).Trim();
+
+                    await context.Database.ExecuteSqlRawAsync(sqlCommand);
+                } 
+                catch (Exception e)
+                {
+                    iCtx.Console.WriteLine(e.ToString());
+                    iCtx.ExitCode = 1;
+                }
+            });
+        });
 
         rootCommand.AddCommand(upgradeDbCommand);
         rootCommand.AddCommand(dropRecreateDbCommand);
@@ -120,6 +174,7 @@ public sealed class Program
         rootCommand.AddCommand(generateDgmlCommand);
         rootCommand.AddCommand(generateMarkdownCommand);
         rootCommand.AddCommand(GenerateScriptHelper.CreateGenerateUpgradeScriptCommand(configuration, args, commonOptions));
+        rootCommand.AddCommand(validateImportCommand);
 
         return rootCommand.InvokeAsync(args);
     }

@@ -12,6 +12,7 @@ internal sealed class ProfitDetailMap : IEntityTypeConfiguration<ProfitDetail>
         _ = builder.HasKey(p => p.Id);
 
         _ = builder.HasIndex(p => new { p.Ssn, p.ProfitYear }, "IX_SSN_YEAR");
+        _ = builder.HasIndex(p => new { p.Ssn, p.ProfitYear, p.ProfitCodeId }, "IX_SSN_YEAR_PROFIT_CODE_ID");
 
         _ = builder.Property(e => e.Id).HasColumnName("ID").ValueGeneratedOnAdd();
         _ = builder.Property(x => x.ProfitYear).IsRequired().HasColumnName("PROFIT_YEAR");

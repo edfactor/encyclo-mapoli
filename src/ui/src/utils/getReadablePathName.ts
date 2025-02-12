@@ -27,9 +27,23 @@ const pathToReadableName: Record<string, string> = {
     'military-and-rehire-entry': 'Military and Rehire Entry',
     'profit-share-report': 'Profit Share Report',
     'forfeit': 'Forfeit',
-    'yearend-flow': 'Year End Flow',
+    'fiscal-close': 'Year End Flow',
     'profit-share-update': 'Profit Share Update',
     'employees-on-military-leave': 'Employees on Military Leave',
+    'profit-share-report-edit-run': 'Profit Share Report Edit Run',
+    'profit-share-report-final-run': 'Profit Share Report Final Run',
+    'paymaster-update': 'Paymaster Update',
+    'profit-share-by-store': 'Profit Share by Store',
+    'profit-share-gross-report': 'Profit Share Gross Report',
+    'pay426-1': 'Pay 426 Active 18-20',
+    'pay450-summary': 'Pay 450 Summary',
+    'prof-control-sheet': 'Control Sheet',
+    'under-21-report': 'Under 21 Age Report',
+    'under-21-term-active': 'Under 21 Term Active Report',
+    'new-ps-labels': 'New PS Labels',
+    'qpay066': 'QPAY066 - Under 21 Age Report',
+    'qpay066ta': 'QPAY066TA - Under 21 Term Active',
+    'new-ps-labels-report': 'New PS Labels Report'
 };
 
 export const getReadablePathName = (path: string): string => {

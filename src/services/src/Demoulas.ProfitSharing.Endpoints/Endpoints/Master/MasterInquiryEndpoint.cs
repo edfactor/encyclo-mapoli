@@ -22,7 +22,7 @@ public class MasterInquiryEndpoint : Endpoint<MasterInquiryRequest, MasterInquir
         Get("master-inquiry");
         Summary(s =>
         {
-            s.Summary = "PS Master Inquiry";
+            s.Summary = "PS Master Inquiry (008-10)";
             s.Description =
                 "This endpoint returns master inquiry details.";
 
