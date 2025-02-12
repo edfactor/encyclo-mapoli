@@ -190,7 +190,7 @@ public class MasterInquiryService : IMasterInquiryService
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning(ex, "Failed to retrieve current year balance for SSN {SSN}", ssn);
+                            _logger.LogWarning(ex, "Failed to retrieve balances for SSN {SSN}", ssn);
                         }
 
                         employeeDetails = new EmployeeDetails
