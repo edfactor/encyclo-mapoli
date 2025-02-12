@@ -49,7 +49,13 @@ export const ROUTES = {
   PAY426_TERMINATED_NO_PRIOR: "pay426-7",
   PAY426_TERMINATED_PRIOR: "pay426-8",
   PAY426_SUMMARY: "pay426-9",
-  PAY426_NON_EMPLOYEE: "pay426-10"
+  PAY426_NON_EMPLOYEE: "pay426-10",
+  FORFEIT: "forfeit",
+  PAYMASTER_UPDATE: "paymaster-update",
+  PROFIT_SHARE_BY_STORE: "profit-share-by-store",
+  PROFIT_SHARE_GROSS_REPORT: "profit-share-gross-report",
+  PAY450_SUMMARY: "pay450-summary",
+  PROF_CTRLSheet: "prof-control-sheet",
 } as const;
 
 export const CAPTIONS = {
@@ -87,7 +93,15 @@ export const CAPTIONS = {
   PAY426_TERMINATED_NO_PRIOR: "Terminated employees 18 and older with no prior profit sharing amounts and < 1000 hours",
   PAY426_TERMINATED_PRIOR: "Terminated employees 18 and older with prior profit sharing amounts and < 1000 hours",
   PAY426_SUMMARY: "Profit sharing summary page",
-  PAY426_NON_EMPLOYEE: "All non-employee beneficiaries"
+  PAY426_NON_EMPLOYEE: "All non-employee beneficiaries",
+  FORFEIT: "Forfeit",
+  PAYMASTER_UPDATE: "Paymaster Update",
+  PROFIT_SHARE_BY_STORE: "Profit Share by Store",
+  PROFIT_SHARE_GROSS_REPORT: "Profit Share Gross Report",
+  PAY450: "PAY450",
+  PROF_CTRLSheet: "Prof-CTRL-SHEET",
+  PROFIT_SHARING_CONTROL_SHEET: "Profit Sharing Control Sheet",
+  PAY450_SUMMARY: "Update Summary for Profit Sharing (Pay450)",
 } as const;
 
 

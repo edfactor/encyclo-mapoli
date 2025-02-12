@@ -3,7 +3,6 @@ import Grid2 from "@mui/material/Unstable_Grid2";
 import { useParams } from "react-router-dom";
 import { Page, DSMAccordion } from "smart-ui-library";
 
-
 const Forfeit = () => {
 
     const { badgeNumber } = useParams<{
