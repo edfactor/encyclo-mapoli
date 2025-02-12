@@ -311,7 +311,9 @@ public class CleanupReportService : ICleanupReportService
             var results = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
                 var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
-                var nameAndDobQuery = ctx.Demographics.Select(x => new
+                var nameAndDobQuery = ctx.Demographics
+                    .Include(d=> d.ContactInfo)
+                    .Select(x => new
                 {
                     x.Ssn,
                     x.ContactInfo.FirstName,
@@ -432,6 +434,8 @@ public class CleanupReportService : ICleanupReportService
             if (req.IncludeBeneficiaries)
             {
                 qry = from b in ctx.Beneficiaries
+                        .Include(b=> b.Contact)
+                        .ThenInclude(c=> c!.ContactInfo)
                       where (!ctx.Demographics.Any(x => x.Ssn == b.Contact!.Ssn)) //Filter out employees who are beneficiaries
                       select new
                       {
