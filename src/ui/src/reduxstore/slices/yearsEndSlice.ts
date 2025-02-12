@@ -109,6 +109,9 @@ export const yearsEndSlice = createSlice({
     setFrozenStateResponse: (state, action: PayloadAction<PagedReportResponse<DuplicateSSNDetail>>) => {
       state.duplicateSSNsData = action.payload;
     },
+    setDuplicateSSNsData: (state, action: PayloadAction<PagedReportResponse<DuplicateSSNDetail>>) => {
+      state.duplicateSSNsData = action.payload;
+    },
     setDemographicBadgesNotInPayprofitData: (
       state,
       action: PayloadAction<PagedReportResponse<DemographicBadgesNotInPayprofit>>
