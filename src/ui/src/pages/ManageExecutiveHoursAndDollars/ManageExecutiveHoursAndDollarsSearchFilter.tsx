@@ -49,15 +49,18 @@ const ManageExecutiveHoursAndDollarsSearchFilter = () => {
     control,
     handleSubmit,
     formState: { errors, isValid },
-    reset
+    reset,
+    trigger
   } = useForm<ExecutiveHoursAndDollarsSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: undefined,
+      profitYear: undefined
+      /*
       fullNameContains: "",
-      badgeNumber: null,
-      socialSecurity: null,
+      badgeNumber: "",
+      socialSecurity: "",
       hasExecutiveHoursAndDollars: false
+      */
     }
   });
 
@@ -147,6 +150,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter = () => {
                   onChange={(e) => {
                     field.onChange(e);
                   }}
+                  inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
                 />
               )}
             />
@@ -168,6 +172,12 @@ const ManageExecutiveHoursAndDollarsSearchFilter = () => {
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.socialSecurity}
+                  onChange={(e) => {
+                    if (!isNaN(Number(e.target.value))) {
+                      const parsedValue = e.target.value === "" ? null : Number(e.target.value);
+                      field.onChange(parsedValue);
+                    }
+                  }}
                 />
               )}
             />
@@ -186,12 +196,15 @@ const ManageExecutiveHoursAndDollarsSearchFilter = () => {
                   {...field}
                   fullWidth
                   variant="outlined"
+                  value={field.value ?? ""}
                   error={!!errors.badgeNumber}
                   onChange={(e) => {
-                    const parsedValue = e.target.value === "" ? null : Number(e.target.value);
-                    field.onChange(parsedValue);
+                    if (!isNaN(Number(e.target.value))) {
+                      const parsedValue = e.target.value === "" ? null : Number(e.target.value);
+                      field.onChange(parsedValue);
+                    }
                   }}
-                  inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                  //inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
                 />
               )}
             />
