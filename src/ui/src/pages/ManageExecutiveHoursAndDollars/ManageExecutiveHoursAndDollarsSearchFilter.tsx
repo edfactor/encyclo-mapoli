@@ -52,17 +52,11 @@ const ManageExecutiveHoursAndDollarsSearchFilter = () => {
     handleSubmit,
     formState: { errors, isValid },
     reset,
-    trigger
+    trigger // need this unused param to prevent errors
   } = useForm<ExecutiveHoursAndDollarsSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
       profitYear: undefined
-      /*
-      fullNameContains: "",
-      badgeNumber: "",
-      socialSecurity: "",
-      hasExecutiveHoursAndDollars: false
-      */
     }
   });
 
@@ -148,7 +142,6 @@ const ManageExecutiveHoursAndDollarsSearchFilter = () => {
                   onChange={(e) => {
                     field.onChange(e);
                   }}
-                  inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
                 />
               )}
             />

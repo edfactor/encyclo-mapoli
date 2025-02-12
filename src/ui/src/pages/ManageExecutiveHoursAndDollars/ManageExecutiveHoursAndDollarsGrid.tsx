@@ -47,6 +47,7 @@ const RenderAddExecutiveButton = (reportReponse: PagedReportResponse<ExecutiveHo
 const ManageExecutiveHoursAndDollarsGrid = () => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
+  const [openModal, setOpenModal] = useState<boolean>(false);
   const dispatch = useDispatch();
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
