@@ -184,6 +184,8 @@ definitions:
       runs-on:
         - windows
         - self.hosted
+      artifacts:
+        - dist\**
       script:
         - |
           $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
