@@ -21,9 +21,9 @@ const profitShareCategories: ProfitShareCategory[] = [
   },
   {
     code: "ProfCTRLSheet",
-    title: CAPTIONS.PROF_CTRLSheet,
+    title: CAPTIONS.PROF_CTRLSHEET,
     data: { "[Label]:": "[Value]" },
-    destinationUrl: ROUTES.PROF_CTRLSheet
+    destinationUrl: ROUTES.PROF_CTRLSHEET
   },
 ];
 

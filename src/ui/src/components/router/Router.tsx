@@ -219,7 +219,7 @@ const Router = () => {
         <Route path={ROUTES.PROFIT_SHARE_GROSS_REPORT} element={<ProfitShareByStore />}></Route>
         <Route path={ROUTES.PAYMASTER_UPDATE} element={<PaymasterUpdate />}></Route>
         <Route path={ROUTES.PAY450_SUMMARY} element={<Pay450Summary />}></Route>
-        <Route path={ROUTES.PROF_CTRLSheet} element={<ProfCtrlSheet />}></Route>
+        <Route path={ROUTES.PROF_CTRLSHEET} element={<ProfCtrlSheet />}></Route>
         <Route path={ROUTES.PROFIT_SHARE_BY_STORE} element={<ProfitShareByStore />}></Route>
         <Route path={ROUTES.UNDER_21_REPORT} element={<Under21Report />}> </Route>
       </RouteSecurity>

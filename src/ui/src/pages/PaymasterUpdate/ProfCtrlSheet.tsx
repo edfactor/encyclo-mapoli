@@ -10,7 +10,7 @@ const ProfCtrlSheet = () => {
 
 
     return (
-        <Page label={CAPTIONS.PROF_CTRLSheet}>
+        <Page label={CAPTIONS.PROF_CTRLSHEET}>
             <Grid2
                 container
                 rowSpacing="24px">
