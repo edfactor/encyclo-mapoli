@@ -141,31 +141,8 @@ public class MasterInquiryService : IMasterInquiryService
                 if (uniqueSsns.Count == 1)
                 {
                     int ssn = uniqueSsns.First();
-                    short currentYear = (short)DateTime.Today.Year;
-                    short previousYear = (short)(currentYear - 1);
-
-                    BalanceEndpointResponse? previousBalance = null;
-                    BalanceEndpointResponse? currentBalance = null;
-                    try
-                    {
-                        previousBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(
-                            SearchBy.Ssn, ssn, previousYear, cancellationToken);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogWarning(ex, "Failed to retrieve previous year balance for SSN {SSN}", ssn);
-                    }
-                    try
-                    {
-                        currentBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(
-                            SearchBy.Ssn, ssn, currentYear, cancellationToken);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogWarning(ex, "Failed to retrieve current year balance for SSN {SSN}", ssn);
-                    }
-
-                    var maxProfitYear = req.EndProfitYear.HasValue ? req.EndProfitYear : short.MaxValue;
+                    var maxProfitYear = req.EndProfitYear ?? short.MaxValue;
+                    
 
                     var demographicData = await ctx.Demographics
                         .Where(d => d.Ssn == ssn)
@@ -194,6 +171,28 @@ public class MasterInquiryService : IMasterInquiryService
 
                     if (demographicData != null)
                     {
+                        short currentYear = (short)DateTime.Today.Year;
+                        short previousYear = (short)(currentYear - 1);
+                        BalanceEndpointResponse? currentBalance = null;
+                        BalanceEndpointResponse? previousBalance = null;
+                        try
+                        {
+                            Task<BalanceEndpointResponse?> previousBalanceTask = _totalService.GetVestingBalanceForSingleMemberAsync(
+                                SearchBy.Ssn, ssn, previousYear, cancellationToken);
+                       
+                            Task<BalanceEndpointResponse?> currentBalanceTask = _totalService.GetVestingBalanceForSingleMemberAsync(
+                                SearchBy.Ssn, ssn, currentYear, cancellationToken);
+
+                            await Task.WhenAll(previousBalanceTask, currentBalanceTask);
+
+                            currentBalance = await currentBalanceTask;
+                            previousBalance = await previousBalanceTask;
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, "Failed to retrieve current year balance for SSN {SSN}", ssn);
+                        }
+
                         employeeDetails = new EmployeeDetails
                         {
                             FirstName = demographicData.FirstName,
@@ -211,7 +210,7 @@ public class MasterInquiryService : IMasterInquiryService
                             TerminationDate = demographicData.TerminationDate,
                             StoreNumber = demographicData.StoreNumber,
                             PercentageVested = currentBalance?.VestingPercent ?? 0,
-                            ContributionsLastYear = previousBalance != null && previousBalance.CurrentBalance > 0,
+                            ContributionsLastYear = previousBalance is { CurrentBalance: > 0 },
                             Enrolled = demographicData.LatestPayProfit?.EnrollmentId != 0,
                             BadgeNumber = demographicData.BadgeNumber.ToString(),
                             BeginPSAmount = (long)(previousBalance?.CurrentBalance ?? 0),
