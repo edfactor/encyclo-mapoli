@@ -5,7 +5,6 @@ using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping.Data;
 using Demoulas.ProfitSharing.Data.Cli.DiagramServices;
 using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 
 namespace Demoulas.ProfitSharing.Data.Cli;
