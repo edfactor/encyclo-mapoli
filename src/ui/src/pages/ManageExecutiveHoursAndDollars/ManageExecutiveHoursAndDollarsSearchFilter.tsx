@@ -28,6 +28,8 @@ const schema = yup.object().shape({
     .number()
     .typeError("Badge Number must be a number")
     .integer("Badge Number must be an integer")
+    .min(0, "Badge must be positive")
+    .max(9999999, "Badge must be 7 digits or less")
     .nullable(),
   socialSecurity: yup
     .number()
@@ -93,11 +95,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter = () => {
     // from reduxstore/slices/yearsEndSlice
 
     reset({
-      profitYear: undefined,
-      fullNameContains: null,
-      badgeNumber: null,
-      socialSecurity: null,
-      hasExecutiveHoursAndDollars: false
+      profitYear: undefined
     });
   };
 
