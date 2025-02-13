@@ -26,8 +26,8 @@ definitions:
         
         # Install .NET 9 SDK if not installed
         - if (-not $dotnetSdkInstalled) {
-            Invoke-WebRequest -Uri "https://download.visualstudio.microsoft.com/download/pr/38e45a81-a6a4-4a37-a986-bc46be78db16/33e64c0966ebdf0088d1a2b6597f62e5/dotnet-sdk-9.0.101-win-x64.exe" -OutFile "$env:TEMP\dotnet-sdk-9.0.101-win-x64.exe";
-            Start-Process -FilePath "$env:TEMP\dotnet-sdk-9.0.101-win-x64.exe" -ArgumentList "/quiet", "/norestart" -Wait;
+            Invoke-WebRequest -Uri "https://download.visualstudio.microsoft.com/download/pr/83c595a0-def1-4aba-8284-2fd98007aa3d/5e5b47fb819ee59b2a10485f8cf5a89a/dotnet-sdk-9.0.200-win-x64.exe" -OutFile "$env:TEMP\dotnet-sdk-9.0.200-win-x64.exe";
+            Start-Process -FilePath "$env:TEMP\dotnet-sdk-9.0.200-win-x64.exe" -ArgumentList "/quiet", "/norestart" -Wait;
           }
 
         # Run tests and generate JUnit reports
