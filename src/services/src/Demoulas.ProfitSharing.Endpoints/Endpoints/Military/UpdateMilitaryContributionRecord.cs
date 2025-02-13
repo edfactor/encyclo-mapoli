@@ -5,19 +5,19 @@ using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Military;
 
-public class CreateMilitaryContributionRecord : Endpoint<MilitaryContributionRequest>
+public class UpdateMilitaryContributionRecord : Endpoint<MilitaryContributionRequest>
 {
-    public CreateMilitaryContributionRecord()
+    public UpdateMilitaryContributionRecord()
     {
     
     }
 
     public override void Configure()
     {
-        Post(string.Empty);
+        Put(string.Empty);
         Summary(s =>
         {
-            s.Summary = "Create Military Contribution Record";
+            s.Summary = "Update Military Contribution Record";
             s.ResponseExamples = new Dictionary<int, object> { { 200, new MilitaryContributionResponse { ProfitYear = Convert.ToInt16(DateTime.Now.Year) } } };
         });
         Group<MilitaryGroup>();
