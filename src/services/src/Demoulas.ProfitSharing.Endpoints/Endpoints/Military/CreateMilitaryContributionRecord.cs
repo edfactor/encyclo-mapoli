@@ -4,10 +4,12 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.Military;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Military;
 
-public class CreateMilitaryContributionRecord : Endpoint<MilitaryContributionRequest, MilitaryContributionResponse>
+public class CreateMilitaryContributionRecord : Endpoint<MilitaryContributionRequest>
 {
     public CreateMilitaryContributionRecord()
     {
@@ -25,8 +27,21 @@ public class CreateMilitaryContributionRecord : Endpoint<MilitaryContributionReq
         Group<MilitaryGroup>();
     }
 
-    public override Task<MilitaryContributionResponse> ExecuteAsync(MilitaryContributionRequest req, CancellationToken ct)
+    public override Task HandleAsync(MilitaryContributionRequest req, CancellationToken ct)
     {
-        return Task.FromResult(new MilitaryContributionResponse());
+        var response = new MilitaryContributionResponse
+        {
+            BadgeNumber = req.BadgeNumber,
+            Amount = req.Amount,
+            CommentTypeId = req.CommentTypeId,
+            ContributionDate = req.ContributionDate,
+            ProfitYear = req.ProfitYear
+        };
+
+        return SendCreatedAtAsync<GetMilitaryContributionRecord>(
+            routeValues: new { id = 5 }, // Assuming 5 is the ID of the created record
+            responseBody: response,
+            cancellation: ct
+        );
     }
 }
