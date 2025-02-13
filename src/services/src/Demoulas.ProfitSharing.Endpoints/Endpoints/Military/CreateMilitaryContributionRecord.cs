@@ -1,5 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Military;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Response.Military;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
