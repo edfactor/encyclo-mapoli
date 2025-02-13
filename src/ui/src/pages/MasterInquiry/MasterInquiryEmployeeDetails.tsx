@@ -40,20 +40,20 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     { label: "", value: `${lastName}, ${firstName}` },
     { label: "", value: `${address}` },
     { label: "", value: `${addressCity}, ${addressState} ${addressZipCode}` },
+    { label: "Enrolled", value: enrolled ? "Yes" : "No" },
+  ];
+
+  const employeeSection = [
+    { label: "Badge Number", value: badgeNumber },
     { label: "DOB", value: mmDDYYFormat(dateOfBirth) },
     { label: "SSN", value: `${ssn}` }
   ];
-
+  
   const planSection = [
     { label: "YTD P/S Hours", value: yearToDateProfitSharingHours },
     { label: "Years In Plan", value: yearsInPlan },
     { label: "Percentage Vested", value: formatPercentage(percentageVested) },
     { label: "Cont Last Year", value: contributionsLastYear ? "Yes" : "No" }
-  ];
-
-  const employeeSection = [
-    { label: "Enrolled", value: enrolled ? "Yes" : "No" },
-    { label: "Emp", value: badgeNumber },
   ];
 
   const hireSection = [
@@ -94,12 +94,12 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
           </Grid2>
           <Grid2 xs={3}>
             <LabelValueSection
-              data={planSection}
+              data={employeeSection}
             />
           </Grid2>
           <Grid2 xs={2}>
             <LabelValueSection
-              data={employeeSection}
+              data={planSection}
             />
           </Grid2>
           <Grid2 xs={2}>
