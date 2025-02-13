@@ -1,12 +1,12 @@
-﻿namespace Demoulas.ProfitSharing.Services.ProfitShareUpdate;
+﻿namespace Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
 
 /// <summary>
 ///     A summary of financial information about an Employee
 /// </summary>
-public record EmployeeFinancials
+internal sealed record EmployeeFinancials
 {
     public string? Name { get; set; }
-    public long BadgeNumber { get; set; }
+    public int BadgeNumber { get; set; }
     public int Ssn { get; set; }
     public byte EnrolledId { get; set; }
     public short YearsInPlan { get; set; }

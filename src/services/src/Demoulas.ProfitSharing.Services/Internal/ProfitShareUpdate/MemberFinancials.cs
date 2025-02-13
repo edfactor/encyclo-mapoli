@@ -1,16 +1,16 @@
 ﻿using System.Diagnostics;
 
-namespace Demoulas.ProfitSharing.Services.ProfitShareUpdate;
+namespace Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
 
 /// <summary>
 ///     A summary of financial information about a Member
 /// </summary>
-public class MemberFinancials
+internal sealed record MemberFinancials
 {
     public MemberFinancials(EmployeeFinancials empl, ProfitDetailTotals profitDetailTotals, MemberTotals memberTotals)
     {
         IsEmployee = true;
-        Badge = empl.BadgeNumber;
+        BadgeNumber = empl.BadgeNumber;
         Psn = empl.BadgeNumber;
         Name = empl.Name;
         Ssn = empl.Ssn;
@@ -31,7 +31,7 @@ public class MemberFinancials
     public MemberFinancials(BeneficiaryFinancials bene, ProfitDetailTotals profitDetailTotals, MemberTotals memberTotals)
     {
         IsEmployee = false;
-        Badge = 0;
+        BadgeNumber = 0;
         Name = bene.Name;
         Ssn = bene.Ssn;
         Psn = bene.Psn;
@@ -58,7 +58,7 @@ public class MemberFinancials
     }
 
     public bool IsEmployee { get; set; }
-    public long Badge { get; set; }
+    public int BadgeNumber { get; set; }
     public long Psn { get; set; }
     public string? Name { get; set; }
     public int Ssn { get; set; }
