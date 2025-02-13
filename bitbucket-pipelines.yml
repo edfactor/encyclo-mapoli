@@ -228,6 +228,32 @@ definitions:
             .\output\Demoulas.ProfitSharing.Data.Cli validate-import --connection-name ProfitSharing --sql-file ".\src\database\ready_import\Import Validations.sql" --source-schema $sourceSchema --current-year $currentYear
             if ($LASTEXITCODE -ne 0) { Write-Error "Database import validation failed. Exiting"; exit 1 }
           }
+
+    audit-backend: &audit-backend
+      name: "Check API Backend for vulnerabilities"
+      runs-on:
+        - windows
+        - self.hosted
+      script:
+      # Set the following variable to the directory that houses your .sln file
+        - $env:SolutionDir = ".\src\Services"
+        - echo "Checking dotnet vulnerabilities"
+        - cd $env:SolutionDir
+        - dotnet restore -p:RestoreAdditionalProjectSources=https://api.nuget.org/v3/index.json
+        - dotnet list package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json
+- 
+    audit-frontend: &audit-frontend
+      name: "Check frontend for vulnerabilities"
+      runs-on:
+        - windows
+        - self.hosted
+        - volta
+      script:
+      # Set the following variable to your react project directory that houses your package.json file
+        - $env:ReactDir = ".\src\UI"
+        - echo "Checking npm vulnerabilities"
+        - cd $env:ReactDir
+        - npm audit --audit-level=moderate --production
           
 
 pipelines:
@@ -357,12 +383,16 @@ pipelines:
       - parallel:
           - step: *build-and-test-backend
           - step: *test-frontend
+          - step: *audit-frontend
+          - step: *audit-backend
 
   pull-requests:
     '**':
       - parallel:
           - step: *build-and-test-backend
           - step: *test-frontend
+          - step: *audit-frontend
+          - step: *audit-backend
   
   custom:
     profitsharing_database:

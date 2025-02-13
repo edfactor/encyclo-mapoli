@@ -263,6 +263,13 @@ LEFT join DEMOGRAPHIC d on PYBEN.PYBEN_PAYSSN = d.SSN
 LEFT join DEMOGRAPHIC d2 on TO_NUMBER(SUBSTR(LPAD(PYBEN_PSN,11,0),1,7)) = d2.BADGE_NUMBER
 LEFT JOIN {SOURCE_PROFITSHARE_SCHEMA}.PAYREL ON PYBEN.PYBEN_PSN = PAYREL.PYREL_PSN;
 
+--During import, the goal is to identify the employee to whom a beneficiary is most closely related.
+--Is the beneficiary an employee?
+--If yes, the DEMOGRAPHIC_ID is assigned based on the employee’s SSN, directly linking to their demographic record.
+--If the beneficiary is not an employee
+--The DEMOGRAPHIC_ID is assigned to the employee who designated them as a beneficiary.
+--This is determined using the badge number extracted from PYBEN_PSN to find the corresponding demographic record.
+
 --------------------------------------------------------------------------------------------------
 
 -- Simple BENEFICIARY validation
