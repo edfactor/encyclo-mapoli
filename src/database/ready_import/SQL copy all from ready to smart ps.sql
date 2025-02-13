@@ -265,7 +265,7 @@ LEFT JOIN {SOURCE_PROFITSHARE_SCHEMA}.PAYREL ON PYBEN.PYBEN_PSN = PAYREL.PYREL_P
 
 --During import, the goal is to identify the employee to whom a beneficiary is most closely related.
 --Is the beneficiary an employee?
---If yes, the DEMOGRAPHIC_ID is assigned based on the employee’s SSN, directly linking to their demographic record.
+--If yes, the DEMOGRAPHIC_ID is assigned based on the employee's SSN, directly linking to their demographic record.
 --If the beneficiary is not an employee
 --The DEMOGRAPHIC_ID is assigned to the employee who designated them as a beneficiary.
 --This is determined using the badge number extracted from PYBEN_PSN to find the corresponding demographic record.
