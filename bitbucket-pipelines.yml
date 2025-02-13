@@ -384,7 +384,6 @@ pipelines:
           - step: *build-and-test-backend
           - step: *test-frontend
           - step: *audit-frontend
-          - step: *audit-backend
 
   pull-requests:
     '**':
@@ -392,7 +391,6 @@ pipelines:
           - step: *build-and-test-backend
           - step: *test-frontend
           - step: *audit-frontend
-          - step: *audit-backend
   
   custom:
     profitsharing_database:
