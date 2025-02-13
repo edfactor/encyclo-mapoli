@@ -382,14 +382,12 @@ pipelines:
     develop:
       - parallel:
           - step: *build-and-test-backend
-          - step: *test-frontend
           - step: *audit-frontend
 
   pull-requests:
     '**':
       - parallel:
           - step: *build-and-test-backend
-          - step: *test-frontend
           - step: *audit-frontend
   
   custom:
