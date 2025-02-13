@@ -292,7 +292,6 @@ export interface MasterInquryRequest {
   socialSecurity?: number;
   comment?: string;
   pagination: PaginationParams;
-  employeeNumber?: string;
   paymentType?: number;
   memberType?: number;
   badgeNumber?: number;

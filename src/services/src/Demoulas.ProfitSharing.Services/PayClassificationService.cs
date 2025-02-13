@@ -1,7 +1,7 @@
 ﻿using System.Collections.Frozen;
 using Demoulas.Common.Caching.Interfaces;
 using Demoulas.ProfitSharing.Common.Caching;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Services.Caching.HostedServices;
 using Microsoft.Extensions.DependencyInjection;

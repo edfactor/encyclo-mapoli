@@ -5,10 +5,11 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Microsoft.EntityFrameworkCore;
 
-namespace Demoulas.ProfitSharing.Services.ProfitShareUpdate;
+namespace Demoulas.ProfitSharing.Services.ProfitShareEdit;
 
 /// <summary>
 ///     Does the Year And application of Earnings and Contributions to all employees and beneficiaries.
@@ -16,13 +17,15 @@ namespace Demoulas.ProfitSharing.Services.ProfitShareUpdate;
 ///
 ///     This class follows the name of the step in the Ready YE flow.    It could instead be named "View effect of YE update on members"
 /// </summary>
-public class ProfitShareUpdateService : IInternalProfitShareUpdateService
+internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateService
 {
     private readonly ICalendarService _calendarService;
     private readonly IProfitSharingDataContextFactory _dbContextFactory;
     private readonly ITotalService _totalService;
 
-    public ProfitShareUpdateService(IProfitSharingDataContextFactory dbContextFactory, ITotalService totalService, ICalendarService calendarService)
+    public ProfitShareUpdateService(IProfitSharingDataContextFactory dbContextFactory, 
+        ITotalService totalService, 
+        ICalendarService calendarService)
     {
         _dbContextFactory = dbContextFactory;
         _totalService = totalService;
@@ -35,7 +38,7 @@ public class ProfitShareUpdateService : IInternalProfitShareUpdateService
         List<ProfitShareUpdateMemberResponse> members = memberFinancials.Select(m => new ProfitShareUpdateMemberResponse
         {
             IsEmployee = m.IsEmployee,
-            Badge = m.Badge,
+            Badge = m.BadgeNumber,
             Psn = m.Psn,
             Name = m.Name,
             BeginningAmount = m.CurrentAmount,
@@ -71,7 +74,7 @@ public class ProfitShareUpdateService : IInternalProfitShareUpdateService
         {
             IsEmployee = m.IsEmployee,
             Ssn = m.Ssn,
-            Badge = m.Badge,
+            BadgeNumber = m.BadgeNumber,
             Psn = m.Psn,
             Name = m.Name,
             BeginningAmount = m.CurrentAmount,

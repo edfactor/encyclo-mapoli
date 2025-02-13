@@ -7,7 +7,7 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 public record ProfitShareEditMemberRecordResponse
 {
     public bool IsEmployee { get; init; }
-    public long Badge { get; set; }
+    public int BadgeNumber { get; set; }
     public long Psn { get; set; }
     public string? Name { get; set; }
     public byte Code { get; set; }
@@ -25,7 +25,7 @@ public record ProfitShareEditMemberRecordResponse
     {
         return new ProfitShareEditMemberRecordResponse()
         {
-            Badge = 123,
+            BadgeNumber = 123,
             Psn = 0,
             Name = "VILLANUEVA, ISAAC",
             ContributionAmount = 4350m,

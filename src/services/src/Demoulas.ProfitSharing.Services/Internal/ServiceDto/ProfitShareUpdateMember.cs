@@ -4,7 +4,7 @@ internal sealed record ProfitShareUpdateMember
 {
     internal bool IsEmployee { get; init; }
     internal int Ssn { get; set; }
-    internal long Badge { get; set; }
+    internal int BadgeNumber { get; set; }
     internal long Psn { get; set; }
     internal string? Name { get; set; }
     internal decimal BeginningAmount { get; set; }

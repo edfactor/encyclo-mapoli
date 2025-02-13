@@ -1,9 +1,9 @@
-﻿namespace Demoulas.ProfitSharing.Services.ProfitShareUpdate;
+﻿namespace Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
 
 /// <summary>
 ///     A summary of financial information about a Beneficiary
 /// </summary>
-public record BeneficiaryFinancials
+internal sealed record BeneficiaryFinancials
 {
     public long Psn { get; set; } // PIC 9(11).
     public int Ssn { get; set; } // PIC 9(9).
