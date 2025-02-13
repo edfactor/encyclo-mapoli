@@ -2,7 +2,9 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.Util.Extensions;
 using FastEndpoints;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 
@@ -30,6 +32,13 @@ public class CalendarRecordEndpoint : Endpoint<YearRequest, CalendarResponseDto>
             } };
         });
         Group<LookupGroup>();
+
+        if (!Env.IsTestEnvironment())
+        {
+            // Specify caching duration and store it in metadata
+            TimeSpan cacheDuration = TimeSpan.FromMinutes(5);
+            Options(x => x.CacheOutput(p => p.Expire(cacheDuration)));
+        }
     }
 
     public override Task<CalendarResponseDto> ExecuteAsync(YearRequest req, CancellationToken ct)
