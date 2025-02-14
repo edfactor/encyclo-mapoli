@@ -22,7 +22,7 @@ definitions:
         - mkdir -Force -Path $env:REPORTS_PATH
 
         # Check if .NET 9 SDK is installed
-        - $dotnetSdkInstalled = dotnet --list-sdks | Select-String "^9.0.200"
+        - $dotnetSdkInstalled = dotnet --list-sdks | Select-String "^9\."
         
         # Install .NET 9 SDK if not installed
         - if (-not $dotnetSdkInstalled) {
@@ -31,7 +31,6 @@ definitions:
           }
 
         - dotnet workload update
-        - dotnet workload install aspire --version 9.0.200
 
         # Run tests and generate JUnit reports
         - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml" -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
