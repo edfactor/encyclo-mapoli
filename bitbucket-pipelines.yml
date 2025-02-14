@@ -236,16 +236,21 @@ definitions:
 
     audit-backend: &audit-backend
       name: "Check API Backend for vulnerabilities"
-      runs-on:
-        - windows
-        - self.hosted
       script:
       # Set the following variable to the directory that houses your .sln file
-        - $env:SolutionDir = ".\src\Services"
+        - $env:SolutionDir = ".\src\Service\NextGenerationService"
         - echo "Checking dotnet vulnerabilities"
         - cd $env:SolutionDir
         - dotnet restore -p:RestoreAdditionalProjectSources=https://api.nuget.org/v3/index.json
-        - dotnet list package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json
+        - |
+          $output = dotnet list package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json
+          if ($output -match "has the following vulnerable packages") {
+            Write-Host "Vulnerabilities found!"
+            $output | Out-String | Write-Host
+            exit 1
+          } else {
+            Write-Host "No vulnerabilities found."
+          }
 
     audit-frontend: &audit-frontend
       name: "Check frontend for vulnerabilities"
@@ -388,12 +393,15 @@ pipelines:
       - parallel:
           - step: *build-and-test-backend
           - step: *audit-frontend
+          - step: *audit-backend
+
 
   pull-requests:
     '**':
       - parallel:
           - step: *build-and-test-backend
           - step: *audit-frontend
+          - step: *audit-backend
   
   custom:
     profitsharing_database:
