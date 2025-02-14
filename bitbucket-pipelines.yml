@@ -4,7 +4,6 @@
 # Application Name:
 #   - SMART Profit Sharing
 # ------------------------------------------------------------------------
-image: mcr.microsoft.com/dotnet/sdk:9.0
 
 definitions:
   steps:
@@ -237,22 +236,24 @@ definitions:
 
     audit-backend: &audit-backend
       name: "Check API Backend for vulnerabilities"
+      runs-on:
+        - windows
+        - self.hosted
       script:
-        # Set the directory containing the .sln file
-        - SOLUTION_DIR="./src/services"
-        - echo "Checking .NET vulnerabilities"
-        - cd $SOLUTION_DIR
+      # Set the following variable to the directory that houses your .sln file
+        - $env:SolutionDir = ".\src\services"
+        - echo "Checking dotnet vulnerabilities"
+        - cd $env:SolutionDir
         - dotnet restore -p:RestoreAdditionalProjectSources=https://api.nuget.org/v3/index.json
         - |
-          OUTPUT=$(dotnet list package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json)
-          if echo "$OUTPUT" | grep -q "has the following vulnerable packages"; then
-            echo "Vulnerabilities found!"
-            echo "$OUTPUT"
+          $output = dotnet list package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json
+          if ($output -match "has the following vulnerable packages") {
+            Write-Host "Vulnerabilities found!"
+            $output | Out-String | Write-Host
             exit 1
-          else
-            echo "No vulnerabilities found."
-          fi
-
+          } else {
+            Write-Host "No vulnerabilities found."
+          }
 
     audit-frontend: &audit-frontend
       name: "Check frontend for vulnerabilities"
