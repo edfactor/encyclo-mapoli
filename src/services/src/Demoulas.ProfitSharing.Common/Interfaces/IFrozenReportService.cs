@@ -14,4 +14,5 @@ public interface IFrozenReportService
     Task<BalanceByYears> GetBalanceByYearsAsync(FrozenReportsByAgeRequest req, CancellationToken cancellationToken = default);
     Task<VestedAmountsByAge> GetVestedAmountsByAgeYearAsync(ProfitYearAndAsOfDateRequest req, CancellationToken cancellationToken = default);
     Task<GrossWagesReportResponse> GetGrossWagesReport(GrossWagesReportRequest req, CancellationToken cancellationToken = default);
+    Task<UpdateSummaryReportResponse> GetUpdateSummaryReport(ProfitYearRequest req, CancellationToken cancellationToken = default);
 }
