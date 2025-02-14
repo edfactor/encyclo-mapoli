@@ -239,7 +239,7 @@ definitions:
       name: "Check API Backend for vulnerabilities"
       script:
         # Set the directory containing the .sln file
-        - SOLUTION_DIR="./src/Service/NextGenerationService"
+        - SOLUTION_DIR="./src/services"
         - echo "Checking .NET vulnerabilities"
         - cd $SOLUTION_DIR
         - dotnet restore -p:RestoreAdditionalProjectSources=https://api.nuget.org/v3/index.json
