@@ -237,20 +237,21 @@ definitions:
     audit-backend: &audit-backend
       name: "Check API Backend for vulnerabilities"
       script:
-      # Set the following variable to the directory that houses your .sln file
-        - $env:SolutionDir = ".\src\Service\NextGenerationService"
-        - echo "Checking dotnet vulnerabilities"
-        - cd $env:SolutionDir
+        # Set the directory containing the .sln file
+        - SOLUTION_DIR="./src/Service/NextGenerationService"
+        - echo "Checking .NET vulnerabilities"
+        - cd $SOLUTION_DIR
         - dotnet restore -p:RestoreAdditionalProjectSources=https://api.nuget.org/v3/index.json
         - |
-          $output = dotnet list package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json
-          if ($output -match "has the following vulnerable packages") {
-            Write-Host "Vulnerabilities found!"
-            $output | Out-String | Write-Host
+          OUTPUT=$(dotnet list package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json)
+          if echo "$OUTPUT" | grep -q "has the following vulnerable packages"; then
+            echo "Vulnerabilities found!"
+            echo "$OUTPUT"
             exit 1
-          } else {
-            Write-Host "No vulnerabilities found."
-          }
+          else
+            echo "No vulnerabilities found."
+          fi
+
 
     audit-frontend: &audit-frontend
       name: "Check frontend for vulnerabilities"
