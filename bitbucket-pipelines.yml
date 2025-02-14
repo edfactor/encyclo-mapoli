@@ -21,9 +21,6 @@ definitions:
         # Ensure the REPORTS_PATH directory exists
         - mkdir -Force -Path $env:REPORTS_PATH
 
-        - dotnet workload update
-        - dotnet workload install aspire
-
         # Check if .NET 9 SDK is installed
         - $dotnetSdkInstalled = dotnet --list-sdks | Select-String "^9\."
         
@@ -33,7 +30,8 @@ definitions:
             Start-Process -FilePath "$env:TEMP\dotnet-sdk-9.0.200-win-x64.exe" -ArgumentList "/quiet", "/norestart" -Wait;
           }
 
-        
+        - dotnet workload update
+        - dotnet workload install aspire --version 9.0.200
 
         # Run tests and generate JUnit reports
         - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml" -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
