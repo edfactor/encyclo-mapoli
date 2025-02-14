@@ -235,15 +235,15 @@ definitions:
           }
 
     audit-backend: &audit-backend
-      name: "Check API Backend for vulnerabilities"
+      name: "Check Backend API for vulnerabilities"
       runs-on:
         - windows
         - self.hosted
       script:
-      # Set the following variable to the directory that houses your .sln file
-        - $env:SolutionDir = ".\src\services"
+        - $env:SolutionDir = ".\src\services"        
         - echo "Checking dotnet vulnerabilities"
         - cd $env:SolutionDir
+        
         - dotnet restore -p:RestoreAdditionalProjectSources=https://api.nuget.org/v3/index.json
         - |
           $output = dotnet list package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json
