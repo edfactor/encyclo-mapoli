@@ -4,6 +4,7 @@
 # Application Name:
 #   - SMART Profit Sharing
 # ------------------------------------------------------------------------
+image: mcr.microsoft.com/dotnet/sdk:9.0
 
 definitions:
   steps:
