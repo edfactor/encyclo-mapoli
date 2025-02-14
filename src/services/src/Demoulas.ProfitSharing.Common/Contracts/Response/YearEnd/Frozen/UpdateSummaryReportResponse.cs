@@ -1,0 +1,37 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Demoulas.Common.Contracts.Contracts.Request;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
+public sealed record UpdateSummaryReportResponse : ReportResponseBase<UpdateSummaryReportDetail>
+{
+    public int TotalNumberOfEmployees { get; set; }
+    public int TotalNumberOfBeneficiaries { get; set; }
+    public Decimal TotalBeforeProfitSharingAmount { get; set; }
+    public Decimal TotalBeforeVestedAmount { get; set; }
+    public Decimal TotalAfterProfitSharingAmount { get; set; }
+    public Decimal TotalAfterVestedAmount { get; set; }
+
+    public static UpdateSummaryReportResponse ResponseExample()
+    {
+        return new UpdateSummaryReportResponse()
+        {
+            ReportName = "UPDATE SUMMARY FOR PROFIT SHARING",
+            ReportDate = DateTimeOffset.Now,
+            TotalNumberOfBeneficiaries = 2,
+            TotalNumberOfEmployees = 3,
+            TotalAfterProfitSharingAmount = 12500,
+            TotalAfterVestedAmount = 7400,
+            TotalBeforeProfitSharingAmount = 11500,
+            TotalBeforeVestedAmount = 6800,
+            Response = new Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<UpdateSummaryReportDetail>(new PaginationRequestDto())
+            {
+                Results = new List<UpdateSummaryReportDetail>() { UpdateSummaryReportDetail.ResponseExample()}
+            }
+        };
+    }
+}
