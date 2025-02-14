@@ -3,10 +3,10 @@
 namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 public record GrossWagesReportRequest : ProfitYearRequest
 {
-    const int DefaultGrossAmount = 50000;
+    private const int DefaultGrossAmount = 50000;
 
     [DefaultValue(DefaultGrossAmount)]
-    public decimal MinGrossAmount { get; set; } 
+    public decimal MinGrossAmount { get; set; }
 
     public static new GrossWagesReportRequest RequestExample()
     {
@@ -15,6 +15,5 @@ public record GrossWagesReportRequest : ProfitYearRequest
             ProfitYear = 2023,
             MinGrossAmount = DefaultGrossAmount
         };
-        
     }
 }

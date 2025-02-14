@@ -1,27 +1,59 @@
-﻿#pragma warning disable S125
-//using Demoulas.ProfitSharing.Data.Interfaces;
-#pragma warning restore S125
-//using Microsoft.EntityFrameworkCore;
+﻿using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.ProfitSharing.Common.Contracts.Request.Military;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Extensions;
+using Demoulas.ProfitSharing.Common.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
-//namespace Demoulas.ProfitSharing.Services.Military
-//{
-//    public class MilitaryService
-//    {
-//        private readonly IProfitSharingDataContextFactory _dataContextFactory;
+namespace Demoulas.ProfitSharing.Services.Military
+{
+    public class MilitaryService : IMilitaryService
+    {
+        private readonly IProfitSharingDataContextFactory _dataContextFactory;
 
-//        public MilitaryService(IProfitSharingDataContextFactory dataContextFactory)
-//        {
-//            _dataContextFactory = dataContextFactory;
-//        }
+        public MilitaryService(IProfitSharingDataContextFactory dataContextFactory)
+        {
+            _dataContextFactory = dataContextFactory;
+        }
 
-//        public async Task<MilitaryServiceRecord> GetMilitaryServiceRecordAsync(int employeeId)
-//        {
-//            using var context = _dataContextFactory.UseReadOnlyContext(c =>
-//            {
-//                c.ProfitDetails
-//                    .FirstOrDefaultAsync(x => x.EmployeeId == employeeId);
-//            });
-//        }
-//    }
-//    }
-//}
+        public Task<PaginatedResponseDto<MasterInquiryResponseDto>> GetMilitaryServiceRecordAsync(MilitaryContributionRequest req, CancellationToken cancellationToken = default)
+        {
+            return _dataContextFactory.UseReadOnlyContext(c =>
+            {
+                return c.ProfitDetails
+                    .Include(pd=> pd.CommentType)
+                    .Join(c.Demographics,   
+                        c => c.Ssn,
+                        cm => cm.Ssn,
+                        (pd, d) => new { pd , d})
+                    .Where(x => x.d.BadgeNumber == req.BadgeNumber
+                    && x.pd.ProfitYear == req.ProfitYear)
+                    .OrderByDescending(x => x.pd.ProfitYear)
+                    .ThenByDescending(x=> x.pd.CreatedUtc)
+                    .Select(x => new MasterInquiryResponseDto
+                    {
+                        Id = x.pd.Id,
+                        Ssn = x.pd.Ssn.MaskSsn(),
+                        ProfitYear = x.pd.ProfitYear,
+                        ProfitYearIteration = x.pd.ProfitYearIteration,
+                        DistributionSequence = x.pd.DistributionSequence,
+                        ProfitCodeId = x.pd.ProfitCodeId,
+                        ProfitCodeName = x.pd.ProfitCode.Name,
+                        Contribution = x.pd.Contribution,
+                        Earnings = x.pd.Earnings,
+                        Forfeiture = x.pd.Forfeiture,
+                        Remark = x.pd.Remark,
+                        CommentTypeId = x.pd.CommentTypeId,
+                        CommentTypeName = x.pd.CommentType!.Name,
+                        CommentRelatedCheckNumber = x.pd.CommentRelatedCheckNumber,
+                        CommentRelatedState = x.pd.CommentRelatedState,
+                        CommentRelatedOracleHcmId = x.pd.CommentRelatedOracleHcmId
+                    })
+                    .ToPaginationResultsAsync(req, cancellationToken);
+            });
+        }
+    }
+}
+

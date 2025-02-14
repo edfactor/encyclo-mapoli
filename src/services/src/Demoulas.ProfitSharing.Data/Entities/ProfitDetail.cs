@@ -34,4 +34,6 @@ public class ProfitDetail
     public long? CommentRelatedOracleHcmId { get; set; }
     public short? CommentRelatedPsnSuffix { get; set; }
     public bool? CommentIsPartialTransaction { get; set; }
+
+    public DateTimeOffset CreatedUtc { get; set; }
 }

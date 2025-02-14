@@ -1,16 +1,20 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Request.Military;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Military;
 
-public class GetMilitaryContributionRecords : Endpoint<SimpleRequest<int>, PaginatedResponseDto<MasterInquiryResponseDto>>
+public class GetMilitaryContributionRecords : Endpoint<MilitaryContributionRequest, PaginatedResponseDto<MasterInquiryResponseDto>>
 {
-    public GetMilitaryContributionRecords()
+    private readonly IMilitaryService _militaryService;
+
+    public GetMilitaryContributionRecords(IMilitaryService militaryService)
     {
-    
+        _militaryService = militaryService;
     }
 
     public override void Configure()
@@ -24,8 +28,8 @@ public class GetMilitaryContributionRecords : Endpoint<SimpleRequest<int>, Pagin
         Group<MilitaryGroup>();
     }
 
-    public override Task<PaginatedResponseDto<MasterInquiryResponseDto>> ExecuteAsync(SimpleRequest<int> req, CancellationToken ct)
+    public override Task<PaginatedResponseDto<MasterInquiryResponseDto>> ExecuteAsync(MilitaryContributionRequest req, CancellationToken ct)
     {
-        return Task.FromResult(new PaginatedResponseDto<MasterInquiryResponseDto>());
+        return _militaryService.GetMilitaryServiceRecordAsync(req, ct);
     }
 }

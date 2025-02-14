@@ -5,7 +5,7 @@ using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Military;
 
-public class UpdateMilitaryContributionRecord : Endpoint<MilitaryContributionRequest>
+public class UpdateMilitaryContributionRecord : Endpoint<CreateMilitaryContributionRequest>
 {
     public UpdateMilitaryContributionRecord()
     {
@@ -23,7 +23,7 @@ public class UpdateMilitaryContributionRecord : Endpoint<MilitaryContributionReq
         Group<MilitaryGroup>();
     }
 
-    public override Task HandleAsync(MilitaryContributionRequest req, CancellationToken ct)
+    public override Task HandleAsync(CreateMilitaryContributionRequest req, CancellationToken ct)
     {
         var response = new MilitaryContributionResponse
         {
