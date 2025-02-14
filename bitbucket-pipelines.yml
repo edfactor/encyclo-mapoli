@@ -22,7 +22,7 @@ definitions:
         - mkdir -Force -Path $env:REPORTS_PATH
 
         # Check if .NET 9 SDK is installed
-        - $dotnetSdkInstalled = dotnet --list-sdks | Select-String "^9\."
+        - $dotnetSdkInstalled = dotnet --list-sdks | Select-String "^9.0.200"
         
         # Install .NET 9 SDK if not installed
         - if (-not $dotnetSdkInstalled) {
