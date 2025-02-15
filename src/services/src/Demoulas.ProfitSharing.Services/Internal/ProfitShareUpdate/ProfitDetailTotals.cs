@@ -2,12 +2,12 @@
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace Demoulas.ProfitSharing.Services.ProfitShareUpdate;
+namespace Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
 
 /// <summary>
 /// A single year of totals extracted from Profit Detail records.
 /// </summary>
-public record ProfitDetailTotals(
+internal sealed record ProfitDetailTotals(
     decimal DistributionsTotal,
     decimal ForfeitsTotal,
     decimal AllocationsTotal,

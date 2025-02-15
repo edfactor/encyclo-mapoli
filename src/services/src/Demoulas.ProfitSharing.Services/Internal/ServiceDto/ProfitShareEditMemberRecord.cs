@@ -9,14 +9,14 @@ public record ProfitShareEditMemberRecord
     {
         IsEmployee = mr.IsEmployee;
         Ssn = mr.Ssn;
-        Badge = mr.Badge;
+        BadgeNumber = mr.BadgeNumber;
         Psn = mr.Psn;
         Name = mr.Name;
         Code = code;
     }
     internal bool IsEmployee { get; init; }
     internal int Ssn { get; set; }
-    internal long Badge { get; set; }
+    internal int BadgeNumber { get; set; }
     internal long Psn { get; set; }
     internal string? Name { get; set; }
     internal byte Code { get; set; }

@@ -1,4 +1,5 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -692,6 +693,104 @@ public class FrozenReportService : IFrozenReportService
             TotalPartTimeCount = details.Sum(d => d.PartTimeCount),
             Response = new PaginatedResponseDto<BalanceByYearsDetail>(req) { Results = details, Total = details.Count }
         };
+    }
+
+    public async Task<UpdateSummaryReportResponse> GetUpdateSummaryReport(ProfitYearRequest req, CancellationToken cancellationToken = default)
+    {
+        var lastYear = (short)(req.ProfitYear - 1);
+        var startEnd = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
+        var lyStartEnd = await _calendarService.GetYearStartAndEndAccountingDatesAsync(lastYear, cancellationToken);
+        var rawResult = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            //Get population of both employees and beneficiaries
+            var demoBase = FrozenService.GetDemographicSnapshot(ctx, req.ProfitYear).Select(x => new { Ssn = x.Ssn, FirstName = x.ContactInfo.FirstName, LastName = x.ContactInfo.LastName, BadgeNumber = x.BadgeNumber, DemographicId = x.Id, IsEmployee = true, StoreNumber = x.StoreNumber });
+            var beneficiaryBase = ctx.BeneficiaryContacts
+                        .Where(x => !ctx.Demographics.Any(d=>d.Ssn == x.Ssn))
+                        .Select(x => new { Ssn = x.Ssn, FirstName = x.ContactInfo.FirstName, LastName = x.ContactInfo.LastName, BadgeNumber = 0, DemographicId = 0, IsEmployee = false, StoreNumber = (short)0 });
+            var members = demoBase.Union(beneficiaryBase); //UnionBy throws an error, so beneficiaries that are also employees are filtered out, and the regular Union can be used since we've filtered out possible duplicates.
+
+
+            var baseQuery = await (
+                from m in members
+                join lyBalTbl in _totalService.TotalVestingBalance(ctx, lastYear, lyStartEnd.FiscalBeginDate)
+                    on m.Ssn equals lyBalTbl.Ssn into lyBalTmp
+                from lyBal in lyBalTmp.DefaultIfEmpty()
+                join lyPpTbl in ctx.PayProfits.Where(x => x.ProfitYear == lastYear)
+                    on m.DemographicId equals lyPpTbl.DemographicId into lyPpTmp
+                from lyPp in lyPpTmp.DefaultIfEmpty()
+                join bal in _totalService.TotalVestingBalance(ctx, req.ProfitYear, startEnd.FiscalBeginDate)
+                    on m.Ssn equals bal.Ssn
+                join ppTbl in ctx.PayProfits.Where(x => x.ProfitYear == req.ProfitYear)
+                    on m.DemographicId equals ppTbl.DemographicId into ppTmp
+                from pp in ppTmp.DefaultIfEmpty()
+                where bal.CurrentBalance != 0 && bal.VestedBalance != 0
+                select new
+                {
+                    m.BadgeNumber,
+                    m.FirstName,
+                    m.LastName,
+                    m.StoreNumber,
+                    m.IsEmployee,
+                    BeforeEnrollmentId = lyPp != null ? lyPp.EnrollmentId : 0,
+                    BeforeProfitSharingAmount = lyBal != null ? lyBal.CurrentBalance : 0,
+                    BeforeVestedProfitSharingAmount = lyBal != null ? lyBal.VestedBalance : 0,
+                    BeforeYearsInPlan = lyPp != null ? lyPp.YearsInPlan : (byte)0,
+                    AfterEnrollmentId = pp != null ? pp.EnrollmentId : 0,
+                    AfterProfitSharingAmount = bal != null ? bal.CurrentBalance : 0,
+                    AfterVestedProfitSharingAmount = bal != null ? bal.VestedBalance : 0,
+                    AfterYearsInPlan = pp != null ? pp.YearsInPlan : (byte)0
+                }
+            ).ToListAsync(cancellationToken); //Have to materialize. Something in this query seems to be unable to render as an expression with the current version of the oracle provider.
+
+            var totals = baseQuery.GroupBy(x => true).Select(x => new
+            {
+                TotalBeforeProfitSharing = x.Sum(c => c.BeforeProfitSharingAmount),
+                TotalBeforeVesting = x.Sum(c => c.BeforeVestedProfitSharingAmount),
+                TotalAfterProfitSharing = x.Sum(c => c.AfterProfitSharingAmount),
+                TotalAfterVesting = x.Sum(c => c.AfterVestedProfitSharingAmount),
+                TotalEmployees = x.Count(c => c.IsEmployee),
+                TotalBeneficiaries = x.Count(c => !c.IsEmployee)
+            }).First();
+
+            var resp = baseQuery.Select(x => new UpdateSummaryReportDetail()
+            {
+                BadgeNumber = x.BadgeNumber,
+                StoreNumber = x.StoreNumber,
+                Name = $"{x.LastName}, {x.FirstName}",
+                IsEmployee = x.IsEmployee,
+                Before = new UpdateSummaryReportPointInTimeDetail()
+                {
+                    ProfitSharingAmount = x.BeforeProfitSharingAmount,
+                    VestedProfitSharingAmount = x.BeforeVestedProfitSharingAmount,
+                    YearsInPlan = x.BeforeYearsInPlan,
+                    EnrollmentId = (byte)x.BeforeEnrollmentId
+                },
+                After = new UpdateSummaryReportPointInTimeDetail()
+                {
+                    ProfitSharingAmount = x.AfterProfitSharingAmount,
+                    VestedProfitSharingAmount = x.AfterVestedProfitSharingAmount,
+                    YearsInPlan = x.AfterYearsInPlan,
+                    EnrollmentId = (byte)x.AfterEnrollmentId
+                }
+            }).Skip(req.Skip ?? 0).Take(req.Take ?? int.MaxValue);
+
+            return new UpdateSummaryReportResponse()
+            {
+                ReportName = $"UPDATE SUMMARY FOR PROFIT SHARING :{req.ProfitYear}",
+                ReportDate = DateTimeOffset.Now,
+                Response = new PaginatedResponseDto<UpdateSummaryReportDetail>(req) { Results = resp, Total = baseQuery.Count},
+                TotalAfterProfitSharingAmount = totals.TotalAfterProfitSharing,
+                TotalAfterVestedAmount = totals.TotalAfterVesting,
+                TotalBeforeProfitSharingAmount = totals.TotalBeforeProfitSharing,
+                TotalBeforeVestedAmount = totals.TotalBeforeVesting,
+                TotalNumberOfBeneficiaries = totals.TotalBeneficiaries,
+                TotalNumberOfEmployees = totals.TotalEmployees
+            };
+        });
+
+
+        return rawResult;
+
     }
 
     private async Task<DateTime> GetAsOfDate(ProfitYearAndAsOfDateRequest req, CancellationToken cancellationToken)
