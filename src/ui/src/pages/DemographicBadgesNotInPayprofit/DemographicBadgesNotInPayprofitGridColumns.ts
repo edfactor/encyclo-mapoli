@@ -1,4 +1,4 @@
-import { ColDef } from "ag-grid-community";
+import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { viewBadgeRenderer } from "../../utils/masterInquiryLink";
 export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
   return [
@@ -11,10 +11,10 @@ export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
       cellClass: "right-align",
       resizable: true,
       sortable: true,
-      cellRenderer: (params) => viewBadgeRenderer({ value: params.data.badgeNumber }),
+      cellRenderer: (params: ICellRendererParams) => viewBadgeRenderer(params.data.badgeNumber),
       valueFormatter: (params) => {
         const badgeNumber = params.value;
-        return badgeNumber ? badgeNumber.toString().padStart(7, '0') : '';
+        return badgeNumber ? badgeNumber.toString().padStart(7, "0") : "";
       }
     },
     {
@@ -57,6 +57,6 @@ export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
         const statusName = params.data.statusName; // assuming 'statusName' is in the row data
         return `${statusName}(${status})`;
       }
-    },
+    }
   ];
-}
+};

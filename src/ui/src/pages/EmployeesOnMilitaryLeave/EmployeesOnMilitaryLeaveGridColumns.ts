@@ -1,4 +1,4 @@
-import { ColDef } from "ag-grid-community";
+import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { viewBadgeRenderer } from "../../utils/masterInquiryLink";
 
 export const GetMilitaryAndRehireColumns = (): ColDef[] => {
@@ -12,7 +12,7 @@ export const GetMilitaryAndRehireColumns = (): ColDef[] => {
       cellClass: "right-align",
       resizable: true,
       sortable: true,
-      cellRenderer: (params) => viewBadgeRenderer({ value: params.data.badgeNumber }),
+      cellRenderer: (params: ICellRendererParams) => viewBadgeRenderer(params.data.badgeNumber)
     },
     {
       headerName: "Full Name",
@@ -31,6 +31,6 @@ export const GetMilitaryAndRehireColumns = (): ColDef[] => {
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true
-    },
+    }
   ];
 };

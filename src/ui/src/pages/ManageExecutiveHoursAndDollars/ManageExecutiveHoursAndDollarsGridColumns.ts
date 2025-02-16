@@ -1,4 +1,4 @@
-import { ColDef } from "ag-grid-community";
+import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { viewBadgeRenderer } from "../../utils/masterInquiryLink";
 
 export const GetManageExecutiveHoursAndDollarsColumns = (): ColDef[] => {
@@ -12,7 +12,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (): ColDef[] => {
       cellClass: "right-align",
       resizable: true,
       sortable: true,
-      cellRenderer: (params) => viewBadgeRenderer({ value: params.data.badgeNumber }),
+      cellRenderer: (params: ICellRendererParams) => viewBadgeRenderer(params.data.badgeNumber)
     },
     {
       headerName: "Employee Name",
@@ -21,7 +21,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (): ColDef[] => {
       minWidth: 120,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true,
+      resizable: true
     },
     {
       headerName: "STR",
@@ -30,7 +30,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (): ColDef[] => {
       minWidth: 120,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true,
+      resizable: true
     },
     {
       headerName: "SSN",
@@ -97,27 +97,27 @@ export const GetManageExecutiveHoursAndDollarsColumns = (): ColDef[] => {
       cellClass: "left-align",
       resizable: true,
       valueFormatter: (params) => {
-        switch(params.value) { 
-          case 'i': { 
-             //statements;
-             return "Inactive" ;
+        switch (params.value) {
+          case "i": {
+            //statements;
+            return "Inactive";
           }
-          case 'a': { 
+          case "a": {
             //statements;
-            return "Active" ;
+            return "Active";
           }
-          case 't': { 
+          case "t": {
             //statements;
-            return "Terminated" ;
-          } 
-          case 'd': { 
+            return "Terminated";
+          }
+          case "d": {
             //statements;
-            return "Delete" ;
-          } 
-          default: { 
-             //statements; 
-             return "N/A";
-          } 
+            return "Delete";
+          }
+          default: {
+            //statements;
+            return "N/A";
+          }
         }
       }
     }
