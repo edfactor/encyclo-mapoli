@@ -1,4 +1,4 @@
-﻿
+﻿using System.Collections.Generic;
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,29 +6,30 @@ namespace Demoulas.ProfitSharing.Common.Contracts
 {
     public sealed record Error
     {
-        #region Boilerplate
-        private Error(int code, string description)
+        private Error(int code, string description, Dictionary<string, string[]>? validationErrors = null)
         {
             Code = code;
             Description = description;
+            ValidationErrors = validationErrors ?? new Dictionary<string, string[]>();
         }
 
         public string Description { get; init; }
-
         public int Code { get; init; }
-        #endregion
+        public Dictionary<string, string[]> ValidationErrors { get; init; }
+
+        public static Error Validation(Dictionary<string, string[]> errors) =>
+            new(400, "Validation error", errors);
 
         public static Error EmployeeNotFound => new(100, "Employee not found");
 
         public static implicit operator ProblemDetails(Error error)
         {
-            const string typeString = "https://www.shopmarketbasket.com/about-us/contact-us";
             return new ProblemDetails
             {
-                Title = error.Code.ToString(),
+                Title = "Validation Failed",
                 Detail = error.Description,
                 Status = (int)HttpStatusCode.BadRequest,
-                Type = typeString
+                Extensions = { ["errors"] = error.ValidationErrors }
             };
         }
     }

@@ -5,11 +5,8 @@ namespace Demoulas.ProfitSharing.Common.Contracts
     public sealed record Result<T>
     {
         public T? Value { get; }
-
         public Error? Error { get; }
-
         public bool IsSuccess { get; }
-
         public bool IsError => !IsSuccess;
 
         private Result(T value)
@@ -23,12 +20,14 @@ namespace Demoulas.ProfitSharing.Common.Contracts
         {
             Error = error ?? throw new ArgumentNullException(nameof(error), "Error cannot be null.");
             IsSuccess = false;
-            Error = error;
         }
 
         public static Result<T> Success(T value) => new(value);
 
         public static Result<T> Failure(Error error) => new(error);
+
+        public static Result<T> ValidationFailure(Dictionary<string, string[]> validationErrors) =>
+            new(Error.Validation(validationErrors));
 
         public TResult Match<TResult>(Func<T, TResult> onSuccess, Func<ProblemDetails, TResult> onError)
         {

@@ -29,7 +29,6 @@ public class UpdateMilitaryContributionRecord : Endpoint<CreateMilitaryContribut
         {
             BadgeNumber = req.BadgeNumber,
             Amount = req.ContributionAmount,
-            CommentTypeId = req.CommentTypeId,
             ContributionDate = req.ContributionDate,
             ProfitYear = req.ProfitYear
         };

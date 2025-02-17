@@ -7,8 +7,8 @@ using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
-using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using FluentValidation;
 
 namespace Demoulas.ProfitSharing.Services.Military
 {
@@ -24,6 +24,30 @@ namespace Demoulas.ProfitSharing.Services.Military
         public Task<Result<MasterInquiryResponseDto>> CreateMilitaryServiceRecordAsync(
             CreateMilitaryContributionRequest req, CancellationToken cancellationToken = default)
         {
+
+            var validator = new InlineValidator<CreateMilitaryContributionRequest>();
+
+            validator.RuleFor(r => r.ContributionAmount)
+                .GreaterThan(0)
+                .WithMessage($"The {nameof(CreateMilitaryContributionRequest.ContributionAmount)} must be greater than zero.");
+
+            validator.RuleFor(r => r.ContributionDate)
+                .NotEmpty()
+                .Must(date => date.ToDateTime(TimeOnly.MinValue) > DateTime.Today.AddYears(-3))
+                .WithMessage($"The {nameof(CreateMilitaryContributionRequest.ContributionDate)} must be within the last three years.");
+
+
+            var validationResult = validator.Validate(req);
+
+            if (!validationResult.IsValid)
+            {
+                var errors = validationResult.Errors
+                    .GroupBy(e => e.PropertyName)
+                    .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray());
+
+                return Task.FromResult(Result<MasterInquiryResponseDto>.ValidationFailure(errors));
+            }
+
             return _dataContextFactory.UseWritableContext(async c =>
             {
                 var d = await c.Demographics.FirstOrDefaultAsync(d => d.BadgeNumber == req.BadgeNumber,
