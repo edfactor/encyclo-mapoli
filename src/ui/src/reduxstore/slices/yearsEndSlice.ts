@@ -41,6 +41,7 @@ export interface YearsEndState {
   militaryAndRehireProfitSummary: PagedReportResponse<MilitaryAndRehireProfitSummary> | null;
   distributionsAndForfeitures: PagedReportResponse<DistributionsAndForfeitures> | null;
   executiveHoursAndDollars: PagedReportResponse<ExecutiveHoursAndDollars> | null;
+  additionalExecutives: PagedReportResponse<ExecutiveHoursAndDollars> | null;
   executiveHoursAndDollarsGrid: ExecutiveHoursAndDollarsGrid | null;
   eligibleEmployees: EligibleEmployeeResponseDto | null;
   masterInquiryData: Paged<MasterInquiryDetail> | null;
@@ -67,6 +68,7 @@ export interface YearsEndState {
 }
 
 const initialState: YearsEndState = {
+  additionalExecutives: null,
   duplicateSSNsData: null,
   demographicBadges: null,
   duplicateNamesAndBirthday: null,
@@ -156,6 +158,12 @@ export const yearsEndSlice = createSlice({
     },
     setExecutiveHoursAndDollars: (state, action: PayloadAction<PagedReportResponse<ExecutiveHoursAndDollars>>) => {
       state.executiveHoursAndDollars = action.payload;
+    },
+    setAdditionalExecutives: (state, action: PayloadAction<PagedReportResponse<ExecutiveHoursAndDollars>>) => {
+      state.additionalExecutives = action.payload;
+    },
+    clearAdditionalExecutives: (state, action: PayloadAction<PagedReportResponse<ExecutiveHoursAndDollars>>) => {
+      state.additionalExecutives = null;
     },
     setExecutiveHoursAndDollarsGrid: (state, action: PayloadAction<ExecutiveHoursAndDollarsGrid>) => {
       state.executiveHoursAndDollarsGrid = action.payload;
@@ -410,6 +418,8 @@ export const {
   setProfitMasterRevertLoading,
   clearProfitMasterRevert,
 
+  setAdditionalExecutives,
+  clearAdditionalExecutives,
   setExecutiveHoursAndDollarsGridYear,
   updateExecutiveHoursAndDollarsGridRow,
   removeExecutiveHoursAndDollarsGridRow,

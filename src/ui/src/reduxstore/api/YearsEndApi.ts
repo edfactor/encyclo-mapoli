@@ -67,7 +67,8 @@ import {
   setProfitEdit,
   clearProfitEdit,
   setProfitMasterApply,
-  setProfitMasterRevert
+  setProfitMasterRevert,
+  setAdditionalExecutives
 } from "reduxstore/slices/yearsEndSlice";
 import { url } from "./api";
 
@@ -361,6 +362,32 @@ export const YearsEndApi = createApi({
         }
       }
     }),
+    getAdditionalExecutives: builder.query<
+      PagedReportResponse<ExecutiveHoursAndDollars>,
+      ExecutiveHoursAndDollarsRequestDto
+    >({
+      query: (params) => ({
+        url: "yearend/executive-hours-and-dollars",
+        method: "GET",
+        params: {
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          profitYear: params.profitYear,
+          badgeNumber: params.badgeNumber,
+          ssn: params.socialSecurity,
+          fullNameContains: params.fullNameContains,
+          hasExecutiveHoursAndDollars: params.hasExecutiveHoursAndDollars
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setAdditionalExecutives(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
     getExecutiveHoursAndDollars: builder.query<
       PagedReportResponse<ExecutiveHoursAndDollars>,
       ExecutiveHoursAndDollarsRequestDto
@@ -642,6 +669,7 @@ export const YearsEndApi = createApi({
 });
 
 export const {
+  useLazyGetAdditionalExecutivesQuery,
   useLazyGetDemographicBadgesNotInPayprofitQuery,
   useLazyGetDuplicateSSNsQuery,
   useLazyGetDuplicateNamesAndBirthdaysQuery,
