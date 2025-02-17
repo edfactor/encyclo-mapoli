@@ -28,14 +28,14 @@ public class UpdateMilitaryContributionRecord : Endpoint<CreateMilitaryContribut
         var response = new MilitaryContributionResponse
         {
             BadgeNumber = req.BadgeNumber,
-            Amount = req.Amount,
+            Amount = req.ContributionAmount,
             CommentTypeId = req.CommentTypeId,
             ContributionDate = req.ContributionDate,
             ProfitYear = req.ProfitYear
         };
 
-        return SendCreatedAtAsync<GetMilitaryContributionRecord>(
-            routeValues: new { id = 5 }, // Assuming 5 is the ID of the created record
+        return SendCreatedAtAsync<GetMilitaryContributionRecords>(
+            routeValues: new MilitaryContributionRequest { BadgeNumber = req.BadgeNumber, ProfitYear = req.ProfitYear },
             responseBody: response,
             cancellation: ct
         );

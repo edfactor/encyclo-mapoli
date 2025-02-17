@@ -41,7 +41,8 @@ internal sealed class ProfitDetailMap : IEntityTypeConfiguration<ProfitDetail>
 
         _ = builder.Property(e => e.CreatedUtc)
             .HasColumnType("TIMESTAMP WITH TIME ZONE")
-            .HasDefaultValueSql("SYSTIMESTAMP");
+            .HasDefaultValueSql("SYSTIMESTAMP")
+            .HasColumnName("CREATED_UTC");
 
         _ = builder.HasOne(x => x.ProfitCode).WithMany().HasForeignKey(x => x.ProfitCodeId);
         _ = builder.HasOne(x => x.CommentType).WithMany().HasForeignKey(x => x.CommentTypeId);

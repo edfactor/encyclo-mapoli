@@ -1,5 +1,4 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Military;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -19,7 +18,7 @@ public class GetMilitaryContributionRecords : Endpoint<MilitaryContributionReque
 
     public override void Configure()
     {
-        Get("details");
+        Get(string.Empty);
         Summary(s =>
         {
             s.Summary = "Get All Military Contribution Records";

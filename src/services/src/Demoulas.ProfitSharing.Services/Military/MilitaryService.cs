@@ -1,10 +1,13 @@
 ﻿using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Military;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Military
@@ -16,6 +19,41 @@ namespace Demoulas.ProfitSharing.Services.Military
         public MilitaryService(IProfitSharingDataContextFactory dataContextFactory)
         {
             _dataContextFactory = dataContextFactory;
+        }
+
+        public Task<Result<MasterInquiryResponseDto>> CreateMilitaryServiceRecordAsync(
+            CreateMilitaryContributionRequest req, CancellationToken cancellationToken = default)
+        {
+            return _dataContextFactory.UseWritableContext(async c =>
+            {
+                var d = await c.Demographics.FirstOrDefaultAsync(d => d.BadgeNumber == req.BadgeNumber,
+                    cancellationToken);
+
+                if (d == null)
+                {
+                    return Result<MasterInquiryResponseDto>.Failure(Error.EmployeeNotFound);
+                }
+
+                c.ProfitDetails.Add(new ProfitDetail
+                {
+                    ProfitCodeId = /* 0 */ProfitCode.Constants.IncomingContributions,
+                    ProfitYear = req.ProfitYear,
+                    ProfitYearIteration = 1,
+                    CommentTypeId = /* 19 */CommentType.Constants.Military,
+                    Contribution = req.ContributionAmount,
+                    Ssn = d.Ssn
+                });
+
+                await c.SaveChangesAsync(cancellationToken);
+
+                return Result<MasterInquiryResponseDto>.Success(new MasterInquiryResponseDto
+                {
+                    BadgeNumber = req.BadgeNumber,
+                    Contribution = req.ContributionAmount,
+                    CommentTypeId = /* 19 */CommentType.Constants.Military,
+                    ProfitYear = req.ProfitYear
+                });
+            }, cancellationToken);
         }
 
         public Task<PaginatedResponseDto<MasterInquiryResponseDto>> GetMilitaryServiceRecordAsync(MilitaryContributionRequest req, CancellationToken cancellationToken = default)
