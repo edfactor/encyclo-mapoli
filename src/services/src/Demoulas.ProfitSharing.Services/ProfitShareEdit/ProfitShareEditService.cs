@@ -32,7 +32,7 @@ public class ProfitShareEditService : IInternalProfitShareEditService
         var responseRecords = records.Select(m => new ProfitShareEditMemberRecordResponse
         {
             IsEmployee = false,
-            Badge = m.Badge,
+            BadgeNumber = m.BadgeNumber,
             Psn = m.Psn,
             Name = m.Name,
             Code = m.Code,

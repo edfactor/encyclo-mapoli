@@ -108,9 +108,20 @@ app.UseDefaultEndpoints(OktaSettingsAction)
         settings.DocumentPath = "/swagger/Release 1.0/swagger.json"; // Single document
     });
 
+OktaSwaggerConfiguration oktaSwaggerConfiguration = OktaSwaggerConfiguration.Empty();
+OktaSettingsAction(oktaSwaggerConfiguration);
 app.MapScalarApiReference(options =>
 {
     options.OpenApiRoutePattern = "/swagger/Release 1.0/swagger.json";
+    options.Theme = ScalarTheme.DeepSpace;
+    options.Authentication = new ScalarAuthenticationOptions
+    {
+        OAuth2 = new OAuth2Options
+        {
+            ClientId = oktaSwaggerConfiguration.ClientId,
+            Scopes = oktaSwaggerConfiguration.Scopes
+        }
+    };
 });
 
 await app.RunAsync();

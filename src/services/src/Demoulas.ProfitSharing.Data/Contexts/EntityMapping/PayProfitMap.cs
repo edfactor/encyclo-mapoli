@@ -17,6 +17,7 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
             .ValueGeneratedNever()
             .HasColumnName("DEMOGRAPHIC_ID");
 
+        _ = builder.HasIndex(e => e.ProfitYear, "IX_ProfitYear");
         _ = builder.Property(e => e.ProfitYear)
             .HasPrecision(4)
             .ValueGeneratedNever()

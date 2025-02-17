@@ -58,4 +58,8 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Military\" />
+  </ItemGroup>
+
 </Project>

@@ -1,8 +1,10 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Response;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.Util.Extensions;
 using FastEndpoints;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 
@@ -17,7 +19,7 @@ public class PayClassificationLookupEndpoint : EndpointWithoutRequest<ISet<PayCl
 
     public override void Configure()
     {
-        Get("payclassification/all");
+        Get("pay-classifications");
         Policies(Security.Policy.CanViewPayClassificationTypes);
         Summary(s =>
         {
@@ -32,6 +34,13 @@ public class PayClassificationLookupEndpoint : EndpointWithoutRequest<ISet<PayCl
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR}, {Role.FINANCEMANAGER}, {Role.DISTRIBUTIONSCLERK}, or {Role.HARDSHIPADMINISTRATOR}";
         });
         Group<LookupGroup>();
+
+        if (!Env.IsTestEnvironment())
+        {
+            // Specify caching duration and store it in metadata
+            TimeSpan cacheDuration = TimeSpan.FromMinutes(5);
+            Options(x => x.CacheOutput(p => p.Expire(cacheDuration)));
+        }
     }
 
     public override Task<ISet<PayClassificationResponseDto>> ExecuteAsync(CancellationToken ct)

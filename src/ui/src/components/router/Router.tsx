@@ -42,6 +42,11 @@ import FiscalFlow from "pages/YearEndFlow/YearEndFlow";
 import ProfitShareReportEditRun from "pages/FiscalFlow/ProfitShareReportEditRun/ProfitShareReportEditRun";
 import EighteenToTwenty from "pages/PAY426Reports/PAY426-1/EighteenToTwenty";
 import ProfitShareReportFinalRun from "pages/FiscalFlow/ProfitShareReportFinalRun/ProfitShareReportFinalRun";
+import ProfitShareByStore from "pages/ProfitShareByStore/ProfitShareByStore";
+import PaymasterUpdate from "pages/PaymasterUpdate/PaymasterUpdate";
+import Pay450Summary from "pages/PaymasterUpdate/Pay450Summary";
+import ProfCtrlSheet from "pages/PaymasterUpdate/ProfCtrlSheet";
+import Under21Report from "pages/ProfitShareByStore/Under21Report";
 
 const Router = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -210,6 +215,13 @@ const Router = () => {
         <Route
           path=""
           element={<DecemberProcessAccordion />}></Route>
+        <Route path={ROUTES.PROFIT_SHARE_BY_STORE} element={<ProfitShareByStore />}></Route>
+        <Route path={ROUTES.PROFIT_SHARE_GROSS_REPORT} element={<ProfitShareByStore />}></Route>
+        <Route path={ROUTES.PAYMASTER_UPDATE} element={<PaymasterUpdate />}></Route>
+        <Route path={ROUTES.PAY450_SUMMARY} element={<Pay450Summary />}></Route>
+        <Route path={ROUTES.PROF_CTRLSHEET} element={<ProfCtrlSheet />}></Route>
+        <Route path={ROUTES.PROFIT_SHARE_BY_STORE} element={<ProfitShareByStore />}></Route>
+        <Route path={ROUTES.UNDER_21_REPORT} element={<Under21Report />}> </Route>
       </RouteSecurity>
     </BrowserRouter>
   );

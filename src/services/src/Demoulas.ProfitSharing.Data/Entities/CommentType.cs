@@ -8,31 +8,31 @@ public sealed class CommentType : ILookupTable<byte>
 
     public static class Constants
     {
-        public static CommentType TransferOut => new CommentType() { Id = 1, Name = "Transfer Out" };
-        public static CommentType TransferIn => new CommentType() { Id = 2, Name = "Transfer In" };
-        public static CommentType QdroOut => new CommentType() { Id = 3, Name = "QDRO Out" };
-        public static CommentType QdroIn => new CommentType() { Id = 4, Name = "QDRO In" };
-        public static CommentType VOnly => new CommentType() { Id = 5, Name = "V-Only" };
-        public static CommentType Forfeit => new CommentType() { Id = 6, Name = "Forfeit" };
-        public static CommentType UnForfeit => new CommentType() { Id = 7, Name = "Un-Forfeit" };
-        public static CommentType ClassAction => new CommentType() { Id = 8, Name = "Class Action" };
-        public static CommentType Voided => new CommentType() { Id = 9, Name = "Voided" };
-        public static CommentType Hardship => new CommentType() { Id = 10, Name = "Hardship" };
-        public static CommentType Distribution => new CommentType() { Id = 11, Name = "Distribution" };
-        public static CommentType Payoff  => new CommentType() { Id = 12, Name = "Payoff" };
-        public static CommentType Dirpay => new CommentType() { Id = 13, Name = "Dirpay" };
-        public static CommentType Rollover => new CommentType() { Id = 14, Name = "Rollover" };
-        public static CommentType RothIra => new CommentType() { Id = 15, Name = "Roth IRA" };
-        public static CommentType Over64OneYearVested => new CommentType() { Id = 16, Name = "> 64 - 1 Year Vested" };
-        public static CommentType Over64TwoYearsVested => new CommentType() { Id = 17, Name = "> 64 - 2 Year Vested" };
-        public static CommentType Over64ThreeYearsVested => new CommentType() { Id = 18, Name = "> 64 - 3 Year Vested" };
-        public static CommentType Military => new CommentType() { Id = 19, Name = "Military" };
-        public static CommentType Other => new CommentType() { Id = 20, Name = "Other" };
-        public static CommentType Rev => new CommentType() { Id = 21, Name = "Rev" };
-        public static CommentType Unrev => new CommentType() { Id = 22, Name = "Unrev" };
-        public static CommentType OneHundredPercentEarnings => new CommentType() { Id = 23, Name = "100% Earnings" };
+        public static CommentType TransferOut => new() { Id = 1, Name = "Transfer Out" };
+        public static CommentType TransferIn => new() { Id = 2, Name = "Transfer In" };
+        public static CommentType QdroOut => new() { Id = 3, Name = "QDRO Out" };
+        public static CommentType QdroIn => new() { Id = 4, Name = "QDRO In" };
+        public static CommentType VOnly => new() { Id = 5, Name = "V-Only" };
+        public static CommentType Forfeit => new() { Id = 6, Name = "Forfeit" };
+        public static CommentType UnForfeit => new() { Id = 7, Name = "Un-Forfeit" };
+        public static CommentType ClassAction => new() { Id = 8, Name = "Class Action" };
+        public static CommentType Voided => new() { Id = 9, Name = "Voided" };
+        public static CommentType Hardship => new() { Id = 10, Name = "Hardship" };
+        public static CommentType Distribution => new() { Id = 11, Name = "Distribution" };
+        public static CommentType Payoff  => new() { Id = 12, Name = "Payoff" };
+        public static CommentType Dirpay => new() { Id = 13, Name = "Dirpay" };
+        public static CommentType Rollover => new() { Id = 14, Name = "Rollover" };
+        public static CommentType RothIra => new() { Id = 15, Name = "Roth IRA" };
+        public static CommentType Over64OneYearVested => new() { Id = 16, Name = "> 64 - 1 Year Vested" };
+        public static CommentType Over64TwoYearsVested => new() { Id = 17, Name = "> 64 - 2 Year Vested" };
+        public static CommentType Over64ThreeYearsVested => new() { Id = 18, Name = "> 64 - 3 Year Vested" };
+        public static CommentType Military => new() { Id = 19, Name = "Military" };
+        public static CommentType Other => new() { Id = 20, Name = "Other" };
+        public static CommentType Rev => new() { Id = 21, Name = "Rev" };
+        public static CommentType Unrev => new() { Id = 22, Name = "Unrev" };
+        public static CommentType OneHundredPercentEarnings => new() { Id = 23, Name = "100% Earnings" };
         // The variable name here purposely corresponds to the ZeroContrbutionReason.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested name
-        public static CommentType SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested => new CommentType() { Id = 24, Name = ">64 & >5 100%" };
+        public static CommentType SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested => new() { Id = 24, Name = ">64 & >5 100%" };
     }
 
     // Override Equals method for correct comparison between materialized values and constants
