@@ -1,8 +1,10 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { viewBadgeRenderer } from "../../utils/masterInquiryLink";
 
-export const GetManageExecutiveHoursAndDollarsColumns = (): ColDef[] => {
-  return [
+// The default is to show all columns, but if the mini flag is set to true, only show the
+// badge, name, and ssn columns
+export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef[] => {
+  const columns: ColDef[] = [
     {
       headerName: "Badge",
       field: "badgeNumber",
@@ -122,4 +124,11 @@ export const GetManageExecutiveHoursAndDollarsColumns = (): ColDef[] => {
       }
     }
   ];
+
+  if (mini) {
+    return columns.filter(
+      (column) => column.colId === "badgeNumber" || column.colId === "fullName" || column.colId === "ssn"
+    );
+  }
+  return columns;
 };
