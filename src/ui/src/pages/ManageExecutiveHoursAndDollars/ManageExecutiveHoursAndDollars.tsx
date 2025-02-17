@@ -61,9 +61,7 @@ const ManageExecutiveHoursAndDollars = () => {
   return (
     <Page
       label="Manage Executive Hours And Dollars"
-      actionNode={
-        <div style={{ gap: "24px", display: "flex", justifyContent: "end", marginRight: 8 }}>{RenderSaveButton()}</div>
-      }>
+      actionNode={<div className="flex mr-2 justify-end gap-24">{RenderSaveButton()}</div>}>
       <Grid2
         container
         rowSpacing="24px">
@@ -72,11 +70,11 @@ const ManageExecutiveHoursAndDollars = () => {
         </Grid2>
         <Grid2 width={"100%"}>
           <DSMAccordion title="Filter">
-            <ManageExecutiveHoursAndDollarsSearchFilter />
+            <ManageExecutiveHoursAndDollarsSearchFilter modal={false} />
           </DSMAccordion>
         </Grid2>
         <Grid2 width="100%">
-          <ManageExecutiveHoursAndDollarsGrid />
+          <ManageExecutiveHoursAndDollarsGrid modal={false} />
         </Grid2>
       </Grid2>
     </Page>
