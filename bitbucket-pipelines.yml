@@ -31,7 +31,7 @@ definitions:
           }
 
         - dotnet workload update
-        - dotnet nuget add source $env:NUGET_ORG --name nuget.org
+        - dotnet nuget add source $env:NUGET_ORG --name nuget.org-v3
         - dotnet workload install aspire
 
         # Run tests and generate JUnit reports
