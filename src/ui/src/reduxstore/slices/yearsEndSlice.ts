@@ -41,8 +41,9 @@ export interface YearsEndState {
   militaryAndRehireProfitSummary: PagedReportResponse<MilitaryAndRehireProfitSummary> | null;
   distributionsAndForfeitures: PagedReportResponse<DistributionsAndForfeitures> | null;
   executiveHoursAndDollars: PagedReportResponse<ExecutiveHoursAndDollars> | null;
-  additionalExecutives: PagedReportResponse<ExecutiveHoursAndDollars> | null;
+  additionalExecutivesGrid: PagedReportResponse<ExecutiveHoursAndDollars> | null;
   executiveHoursAndDollarsGrid: ExecutiveHoursAndDollarsGrid | null;
+  additionalExecutivesChosen: ExecutiveHoursAndDollars[] | null;
   eligibleEmployees: EligibleEmployeeResponseDto | null;
   masterInquiryData: Paged<MasterInquiryDetail> | null;
   masterInquiryEmployeeDetails: EmployeeDetails | null;
@@ -68,7 +69,8 @@ export interface YearsEndState {
 }
 
 const initialState: YearsEndState = {
-  additionalExecutives: null,
+  additionalExecutivesGrid: null,
+  additionalExecutivesChosen: null,
   duplicateSSNsData: null,
   demographicBadges: null,
   duplicateNamesAndBirthday: null,
@@ -159,11 +161,17 @@ export const yearsEndSlice = createSlice({
     setExecutiveHoursAndDollars: (state, action: PayloadAction<PagedReportResponse<ExecutiveHoursAndDollars>>) => {
       state.executiveHoursAndDollars = action.payload;
     },
-    setAdditionalExecutives: (state, action: PayloadAction<PagedReportResponse<ExecutiveHoursAndDollars>>) => {
-      state.additionalExecutives = action.payload;
+    setAdditionalExecutivesGrid: (state, action: PayloadAction<PagedReportResponse<ExecutiveHoursAndDollars>>) => {
+      state.additionalExecutivesGrid = action.payload;
     },
-    clearAdditionalExecutives: (state, action: PayloadAction<PagedReportResponse<ExecutiveHoursAndDollars>>) => {
-      state.additionalExecutives = null;
+    setAdditionalExecutivesChosen: (state, action: PayloadAction<ExecutiveHoursAndDollars[]>) => {
+      state.additionalExecutivesChosen = action.payload;
+    },
+    clearAdditionalExecutivesGrid: (state) => {
+      state.additionalExecutivesGrid = null;
+    },
+    clearAdditionalExecutivesChosen: (state) => {
+      state.additionalExecutivesChosen = null;
     },
     setExecutiveHoursAndDollarsGrid: (state, action: PayloadAction<ExecutiveHoursAndDollarsGrid>) => {
       state.executiveHoursAndDollarsGrid = action.payload;
@@ -418,8 +426,10 @@ export const {
   setProfitMasterRevertLoading,
   clearProfitMasterRevert,
 
-  setAdditionalExecutives,
-  clearAdditionalExecutives,
+  setAdditionalExecutivesGrid,
+  clearAdditionalExecutivesGrid,
+  setAdditionalExecutivesChosen,
+  clearAdditionalExecutivesChosen,
   setExecutiveHoursAndDollarsGridYear,
   updateExecutiveHoursAndDollarsGridRow,
   removeExecutiveHoursAndDollarsGridRow,

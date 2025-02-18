@@ -68,7 +68,7 @@ import {
   clearProfitEdit,
   setProfitMasterApply,
   setProfitMasterRevert,
-  setAdditionalExecutives
+  setAdditionalExecutivesGrid
 } from "reduxstore/slices/yearsEndSlice";
 import { url } from "./api";
 
@@ -382,7 +382,7 @@ export const YearsEndApi = createApi({
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          dispatch(setAdditionalExecutives(data));
+          dispatch(setAdditionalExecutivesGrid(data));
         } catch (err) {
           console.log("Err: " + err);
         }
