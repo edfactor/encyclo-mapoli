@@ -14,6 +14,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       cellClass: "right-align",
       resizable: true,
       sortable: true,
+
       cellRenderer: (params: ICellRendererParams) => viewBadgeRenderer(params.data.badgeNumber)
     },
     {
@@ -32,7 +33,8 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       minWidth: 120,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true
+      resizable: true,
+      hide: mini
     },
     {
       headerName: "SSN",
@@ -41,7 +43,8 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       minWidth: 120,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true
+      resizable: true,
+      checkboxSelection: mini
     },
     {
       headerName: "Executive Hours",
@@ -51,7 +54,8 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      editable: true
+      editable: true,
+      hide: mini
     },
     {
       headerName: "Executive Dollars",
@@ -61,7 +65,8 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      editable: true
+      editable: true,
+      hide: mini
     },
     {
       headerName: "ORA HRS LAST",
@@ -70,7 +75,8 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       minWidth: 150,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true
+      resizable: true,
+      hide: mini
     },
     {
       headerName: "ORA DOLS LAST",
@@ -79,7 +85,8 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       minWidth: 150,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true
+      resizable: true,
+      hide: mini
     },
     {
       headerName: "FREQ",
@@ -88,7 +95,8 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       minWidth: 150,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true
+      resizable: true,
+      hide: mini
     },
     {
       headerName: "STATUS",
@@ -98,6 +106,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
+      hide: mini,
       valueFormatter: (params) => {
         switch (params.value) {
           case "i": {
@@ -124,11 +133,12 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       }
     }
   ];
-
+  /*
   if (mini) {
     return columns.filter(
       (column) => column.colId === "badgeNumber" || column.colId === "fullName" || column.colId === "ssn"
     );
   }
+  */
   return columns;
 };
