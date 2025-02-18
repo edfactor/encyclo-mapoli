@@ -52,7 +52,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      editable: true
+      editable: !mini
     },
     {
       headerName: "Executive Dollars",
@@ -62,7 +62,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      editable: true
+      editable: !mini
     },
     {
       headerName: "ORA HRS LAST",
