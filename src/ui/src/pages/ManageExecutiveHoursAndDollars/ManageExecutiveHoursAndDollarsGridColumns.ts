@@ -10,11 +10,11 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       field: "badgeNumber",
       colId: "badgeNumber",
       minWidth: 80,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      headerClass: mini ? "left-align" : "right-align",
+      cellClass: mini ? "left-align" : "right-align",
       resizable: true,
       sortable: true,
-
+      checkboxSelection: mini,
       cellRenderer: (params: ICellRendererParams) => viewBadgeRenderer(params.data.badgeNumber)
     },
     {
@@ -33,8 +33,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       minWidth: 120,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true,
-      hide: mini
+      resizable: true
     },
     {
       headerName: "SSN",
@@ -43,8 +42,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       minWidth: 120,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true,
-      checkboxSelection: mini
+      resizable: true
     },
     {
       headerName: "Executive Hours",
@@ -54,8 +52,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      editable: true,
-      hide: mini
+      editable: true
     },
     {
       headerName: "Executive Dollars",
@@ -65,8 +62,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      editable: true,
-      hide: mini
+      editable: true
     },
     {
       headerName: "ORA HRS LAST",
@@ -75,8 +71,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       minWidth: 150,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true,
-      hide: mini
+      resizable: true
     },
     {
       headerName: "ORA DOLS LAST",
@@ -85,8 +80,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       minWidth: 150,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true,
-      hide: mini
+      resizable: true
     },
     {
       headerName: "FREQ",
@@ -95,8 +89,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       minWidth: 150,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true,
-      hide: mini
+      resizable: true
     },
     {
       headerName: "STATUS",
@@ -106,7 +99,6 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      hide: mini,
       valueFormatter: (params) => {
         switch (params.value) {
           case "i": {
@@ -133,12 +125,18 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       }
     }
   ];
-  /*
+
+  // We could have a hide property in elements to be hidden and not filter this way,
+  // but in the modal, the column selection panel would show them
   if (mini) {
     return columns.filter(
-      (column) => column.colId === "badgeNumber" || column.colId === "fullName" || column.colId === "ssn"
+      (column) =>
+        column.colId === "badgeNumber" ||
+        column.colId === "fullName" ||
+        column.colId === "ssn" ||
+        column.colId === "hoursExecutive" ||
+        column.colId === "incomeExecutive"
     );
   }
-  */
   return columns;
 };
