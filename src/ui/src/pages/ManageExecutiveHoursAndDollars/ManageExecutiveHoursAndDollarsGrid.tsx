@@ -1,19 +1,41 @@
 import { Typography, Button, Tooltip } from "@mui/material";
-import { CellValueChangedEvent, IRowNode } from "ag-grid-community";
+import { CellValueChangedEvent, IRowNode, SelectionChangedEvent } from "ag-grid-community";
 import { useState, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { DSMGrid, ISortParams, Pagination, SmartModal } from "smart-ui-library";
 import { GetManageExecutiveHoursAndDollarsColumns } from "./ManageExecutiveHoursAndDollarsGridColumns";
-import { ExecutiveHoursAndDollars, ExecutiveHoursAndDollarsGrid, PagedReportResponse } from "reduxstore/types";
+import {
+  ExecutiveHoursAndDollars,
+  ExecutiveHoursAndDollarsGrid,
+  ExecutiveHoursAndDollarsRow,
+  PagedReportResponse
+} from "reduxstore/types";
 import {
   addExecutiveHoursAndDollarsGridRow,
+  clearAdditionalExecutivesChosen,
+  clearAdditionalExecutivesGrid,
+  clearExecutiveRowsSelected,
   removeExecutiveHoursAndDollarsGridRow,
+  setExecutiveRowsSelected,
   updateExecutiveHoursAndDollarsGridRow
 } from "reduxstore/slices/yearsEndSlice";
 import { AddOutlined } from "@mui/icons-material";
+import { WrapperProps } from "./ManageExecutiveHoursAndDollarsSearchFilter";
+import SearchAndAddExecutive from "./SearchAndAddExecutive";
 
-const RenderAddExecutiveButton = (reportReponse: PagedReportResponse<ExecutiveHoursAndDollars> | null) => {
+interface RenderAddExecutiveButtonProps {
+  reportReponse: PagedReportResponse<ExecutiveHoursAndDollars> | null;
+  isModal: boolean | undefined;
+  setOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const RenderAddExecutiveButton: React.FC<RenderAddExecutiveButtonProps> = ({
+  reportReponse,
+  isModal,
+  setOpenModal
+}) => {
+  const dispatch = useDispatch();
   // We cannot add an employee if there is no result set there
   const gridAvailable: boolean = reportReponse?.response != null && reportReponse?.response != undefined;
 
@@ -25,13 +47,17 @@ const RenderAddExecutiveButton = (reportReponse: PagedReportResponse<ExecutiveHo
       size="medium"
       startIcon={<AddOutlined color={gridAvailable ? "secondary" : "disabled"} />}
       onClick={async () => {
-        console.log("Clicked!");
+        // We need to clear out previous result rows in redux
+        dispatch(clearAdditionalExecutivesChosen());
+        dispatch(clearExecutiveRowsSelected());
+        dispatch(clearAdditionalExecutivesGrid());
+        setOpenModal(true);
       }}>
       Add Executive
     </Button>
   );
 
-  if (!gridAvailable) {
+  if (!isModal && !gridAvailable) {
     return (
       <Tooltip
         placement="top"
@@ -39,12 +65,14 @@ const RenderAddExecutiveButton = (reportReponse: PagedReportResponse<ExecutiveHo
         <span>{addButton}</span>
       </Tooltip>
     );
-  } else {
+  } else if (!isModal) {
     return addButton;
+  } else {
+    return null;
   }
 };
 
-const ManageExecutiveHoursAndDollarsGrid = () => {
+const ManageExecutiveHoursAndDollarsGrid = (props: WrapperProps) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [openModal, setOpenModal] = useState<boolean>(false);
@@ -56,11 +84,18 @@ const ManageExecutiveHoursAndDollarsGrid = () => {
     isSortDescending: false
   });
 
-  const { executiveHoursAndDollars, executiveHoursAndDollarsGrid } = useSelector((state: RootState) => state.yearsEnd);
+  const {
+    executiveHoursAndDollars,
+    additionalExecutivesChosen,
+    additionalExecutivesGrid,
+    executiveHoursAndDollarsGrid
+  } = useSelector((state: RootState) => state.yearsEnd);
 
   // This function checks to see if we have a change for this badge number already pending for a save
   const isRowStagedToSave = (badge: number): boolean => {
-    const found = executiveHoursAndDollarsGrid?.executiveHoursAndDollars.find((obj) => obj.badgeNumber === badge);
+    const found = executiveHoursAndDollarsGrid?.executiveHoursAndDollars.find(
+      (obj: ExecutiveHoursAndDollarsRow) => obj.badgeNumber === badge
+    );
     return found != undefined;
   };
 
@@ -126,33 +161,95 @@ const ManageExecutiveHoursAndDollarsGrid = () => {
   };
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
-  const columnDefs = useMemo(() => GetManageExecutiveHoursAndDollarsColumns(), []);
+  const columnDefs = useMemo(() => GetManageExecutiveHoursAndDollarsColumns(props.isModal), [props.isModal]);
 
   // We memoize this because we only want to copy this once as there will be differences
   // once edits are made
-  const mutableCopyOfGridData = useMemo(() => structuredClone(executiveHoursAndDollars), [executiveHoursAndDollars]);
+  const mutableCopyOfGridData = structuredClone(executiveHoursAndDollars);
+
+  // Let us add in the any selected execs in redux
+  if (additionalExecutivesChosen) {
+    const mutableAdditionalExecutiveRows = structuredClone(additionalExecutivesChosen);
+    console.log("First Exec row: " + mutableAdditionalExecutiveRows[0].fullName);
+    mutableCopyOfGridData?.response.results.unshift(...mutableAdditionalExecutiveRows);
+  }
+
+  const mutableCopyOfAdditionalExecutivesGrid = useMemo(
+    () => structuredClone(additionalExecutivesGrid),
+    [additionalExecutivesGrid]
+  );
+
+  const isRowDataThere = (isModal: boolean | undefined): boolean => {
+    if (isModal) {
+      return (
+        mutableCopyOfAdditionalExecutivesGrid?.response != null &&
+        mutableCopyOfAdditionalExecutivesGrid?.response != undefined
+      );
+    } else {
+      return mutableCopyOfGridData?.response != null && mutableCopyOfGridData?.response != undefined;
+    }
+  };
+
+  const isPaginationNeeded = (isModal: boolean | undefined): boolean => {
+    if (isModal) {
+      return (
+        !!mutableCopyOfAdditionalExecutivesGrid && mutableCopyOfAdditionalExecutivesGrid?.response?.results.length > 0
+      );
+    } else {
+      return !!mutableCopyOfGridData && mutableCopyOfGridData.response.results.length > 0;
+    }
+  };
 
   return (
     <>
-      {mutableCopyOfGridData?.response && (
+      {isRowDataThere(props.isModal) && (
         <>
-          <div className="px-[24px]">
-            <Typography
-              variant="h2"
-              sx={{ color: "#0258A5" }}>
-              {`Manage Executive Hours and Dollars (${mutableCopyOfGridData?.response.total || 0})`}
-            </Typography>
-          </div>
-          <div style={{ gap: "36px", display: "flex", justifyContent: "end", marginRight: 8 }}>
-            {RenderAddExecutiveButton(executiveHoursAndDollars)}
-          </div>
+          {!props.isModal && (
+            <>
+              <div className="px-[24px]">
+                <Typography
+                  variant="h2"
+                  sx={{ color: "#0258A5" }}>
+                  {`Manage Executive Hours and Dollars (${mutableCopyOfGridData?.response.total || 0})`}
+                </Typography>
+              </div>
+              <div style={{ gap: "36px", display: "flex", justifyContent: "end", marginRight: 8 }}>
+                <RenderAddExecutiveButton
+                  reportReponse={mutableCopyOfGridData}
+                  isModal={props.isModal}
+                  setOpenModal={setOpenModal}
+                />
+              </div>
+            </>
+          )}
+          {props.isModal && (
+            <>
+              <div className="px-[24px]">
+                <Typography
+                  variant="body1"
+                  sx={{ color: "#db1532" }}>
+                  {`Please select one executive and click the add button up top`}
+                </Typography>
+              </div>
+            </>
+          )}
           <DSMGrid
             preferenceKey={"DUPE_SSNS"}
             isLoading={false}
             handleSortChanged={sortEventHandler}
             providedOptions={{
-              rowData: mutableCopyOfGridData?.response.results,
+              rowData: props.isModal
+                ? mutableCopyOfAdditionalExecutivesGrid?.response.results
+                : mutableCopyOfGridData?.response.results,
               columnDefs: columnDefs,
+              rowSelection: props.isModal ? "single" : undefined,
+              onSelectionChanged: (event: SelectionChangedEvent) => {
+                dispatch(clearAdditionalExecutivesChosen());
+                if (props.isModal) {
+                  const selectedRows = event.api.getSelectedRows();
+                  dispatch(setExecutiveRowsSelected(selectedRows));
+                }
+              },
               onCellValueChanged: (event: CellValueChangedEvent) => processEditedRow(event),
               getRowStyle: (params) => {
                 // Rows with unsaved changes will have yellow color
@@ -166,7 +263,7 @@ const ManageExecutiveHoursAndDollarsGrid = () => {
           />
         </>
       )}
-      {!!mutableCopyOfGridData && mutableCopyOfGridData.response.results.length > 0 && (
+      {isPaginationNeeded(props.isModal) && (
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
@@ -177,9 +274,15 @@ const ManageExecutiveHoursAndDollarsGrid = () => {
             setPageSize(value);
             setPageNumber(1);
           }}
-          recordCount={mutableCopyOfGridData?.response.total}
+          recordCount={mutableCopyOfGridData?.response.total ?? 0}
         />
       )}
+
+      <SmartModal
+        open={openModal}
+        onClose={() => setOpenModal(false)}>
+        <SearchAndAddExecutive />
+      </SmartModal>
     </>
   );
 };
