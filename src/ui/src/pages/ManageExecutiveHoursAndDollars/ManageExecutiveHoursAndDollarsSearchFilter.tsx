@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { RootState } from "reduxstore/store";
-import { setExecutiveHoursAndDollarsGridYear } from "reduxstore/slices/yearsEndSlice";
+import { clearAdditionalExecutivesChosen, setExecutiveHoursAndDollarsGridYear } from "reduxstore/slices/yearsEndSlice";
 
 export interface WrapperProps {
   isModal?: boolean;
@@ -58,10 +58,6 @@ const ManageExecutiveHoursAndDollarsSearchFilter = (props: WrapperProps) => {
   const [triggerSearch, { isFetching }] = useLazyGetExecutiveHoursAndDollarsQuery();
   const [triggerModalSearch, { isFetching: isModalFetching }] = useLazyGetAdditionalExecutivesQuery();
 
-  // If we are using a modal, we must get the profit year from Redux from the
-  // search that was done before opening the modal
-  console.log("Was this a modal? " + props.isModal);
-
   const dispatch = useDispatch();
 
   let selectedProfitYear = undefined;
@@ -85,6 +81,10 @@ const ManageExecutiveHoursAndDollarsSearchFilter = (props: WrapperProps) => {
   });
 
   const validateAndSearch = handleSubmit((data) => {
+    // If there are any stored additional executives, we
+    // should delete them, regardless of modal or not
+    dispatch(clearAdditionalExecutivesChosen());
+
     if (isValid && !props.isModal) {
       triggerSearch(
         {
@@ -246,7 +246,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter = (props: WrapperProps) => {
             />
             {errors.badgeNumber && <FormHelperText error>{errors.badgeNumber.message}</FormHelperText>}
           </Grid2>
-          {props.isModal && (
+          {!props.isModal && (
             <Grid2
               xs={12}
               sm={6}
