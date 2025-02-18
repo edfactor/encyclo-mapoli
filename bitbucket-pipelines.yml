@@ -30,9 +30,10 @@ definitions:
             Start-Process -FilePath "$env:TEMP\dotnet-sdk-9.0.200-win-x64.exe" -ArgumentList "/quiet", "/norestart" -Wait;
           }
 
+        - dotnet nuget add source $env:NUGET_ORG --name tempnuget
         - dotnet workload update
-        - dotnet nuget add source $env:NUGET_ORG --name nuget.org-v3
         - dotnet workload install aspire
+        - dotnet nuget remove source tempnuget
 
         # Run tests and generate JUnit reports
         - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml" -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
