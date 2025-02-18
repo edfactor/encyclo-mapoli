@@ -34,8 +34,13 @@ namespace Demoulas.ProfitSharing.Services.Military
             validator.RuleFor(r => r.ContributionDate)
                 .NotEmpty()
                 .Must(date => date.ToDateTime(TimeOnly.MinValue) > DateTime.Today.AddYears(-3))
-                .WithMessage($"The {nameof(CreateMilitaryContributionRequest.ContributionDate)} must be within the last three years.");
+                .WithMessage($"The {nameof(CreateMilitaryContributionRequest.ContributionDate)} must be within the last three years.")
+                .Must(date => date.ToDateTime(TimeOnly.MinValue) < DateTime.Today.AddMonths(1))
+                .WithMessage($"The {nameof(CreateMilitaryContributionRequest.ContributionDate)} must not be more than one month in the future.");
 
+            validator.RuleFor(r => r.BadgeNumber)
+                .GreaterThan(0)
+                .WithMessage($"{nameof(CreateMilitaryContributionRequest.BadgeNumber)} must be greater than zero.");
 
             var validationResult = validator.Validate(req);
 
@@ -80,9 +85,32 @@ namespace Demoulas.ProfitSharing.Services.Military
             }, cancellationToken);
         }
 
-        public Task<PaginatedResponseDto<MasterInquiryResponseDto>> GetMilitaryServiceRecordAsync(MilitaryContributionRequest req, CancellationToken cancellationToken = default)
+        public async Task<Result<PaginatedResponseDto<MasterInquiryResponseDto>>> GetMilitaryServiceRecordAsync(MilitaryContributionRequest req, CancellationToken cancellationToken = default)
         {
-            return _dataContextFactory.UseReadOnlyContext(c =>
+            var validator = new InlineValidator<MilitaryContributionRequest>();
+
+            validator.RuleFor(r => r.BadgeNumber)
+                .GreaterThan(0)
+                .WithMessage($"{nameof(MilitaryContributionRequest.BadgeNumber)} must be greater than zero.");
+
+            validator.RuleFor(r => r.ProfitYear)
+                .GreaterThanOrEqualTo((short)2000)
+                .WithMessage($"{nameof(MilitaryContributionRequest.ProfitYear)} must not less than 2000.")
+                .LessThanOrEqualTo((short)DateTime.Today.Year)
+                .WithMessage($"{nameof(MilitaryContributionRequest.ProfitYear)} must not be greater than this year.");
+
+            var validationResult = await validator.ValidateAsync(req, cancellationToken);
+
+            if (!validationResult.IsValid)
+            {
+                var errors = validationResult.Errors
+                    .GroupBy(e => e.PropertyName)
+                    .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray());
+
+                return Result<PaginatedResponseDto<MasterInquiryResponseDto>>.ValidationFailure(errors);
+            }
+
+            var result = await _dataContextFactory.UseReadOnlyContext(c =>
             {
                 return c.ProfitDetails
                     .Include(pd=> pd.CommentType)
@@ -113,8 +141,10 @@ namespace Demoulas.ProfitSharing.Services.Military
                         CommentRelatedState = x.pd.CommentRelatedState,
                         CommentRelatedOracleHcmId = x.pd.CommentRelatedOracleHcmId
                     })
-                    .ToPaginationResultsAsync(req, cancellationToken);
+                    .ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken);
             });
+
+            return Result<PaginatedResponseDto<MasterInquiryResponseDto>>.Success(result);
         }
     }
 }

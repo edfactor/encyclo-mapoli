@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Net;
+﻿using System.Net;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Demoulas.ProfitSharing.Common.Contracts
@@ -29,7 +28,7 @@ namespace Demoulas.ProfitSharing.Common.Contracts
                 Title = "Validation Failed",
                 Detail = error.Description,
                 Status = (int)HttpStatusCode.BadRequest,
-                Extensions = { ["errors"] = error.ValidationErrors }
+                Extensions = { ["errors"] = error.ValidationErrors },
             };
         }
     }
