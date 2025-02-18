@@ -44,6 +44,7 @@ export interface YearsEndState {
   additionalExecutivesGrid: PagedReportResponse<ExecutiveHoursAndDollars> | null;
   executiveHoursAndDollarsGrid: ExecutiveHoursAndDollarsGrid | null;
   additionalExecutivesChosen: ExecutiveHoursAndDollars[] | null;
+  executiveRowsSelected: ExecutiveHoursAndDollars[] | null;
   eligibleEmployees: EligibleEmployeeResponseDto | null;
   masterInquiryData: Paged<MasterInquiryDetail> | null;
   masterInquiryEmployeeDetails: EmployeeDetails | null;
@@ -70,6 +71,7 @@ export interface YearsEndState {
 
 const initialState: YearsEndState = {
   additionalExecutivesGrid: null,
+  executiveRowsSelected: null,
   additionalExecutivesChosen: null,
   duplicateSSNsData: null,
   demographicBadges: null,
@@ -166,6 +168,12 @@ export const yearsEndSlice = createSlice({
     },
     setAdditionalExecutivesChosen: (state, action: PayloadAction<ExecutiveHoursAndDollars[]>) => {
       state.additionalExecutivesChosen = action.payload;
+    },
+    setExecutiveRowsSelected: (state, action: PayloadAction<ExecutiveHoursAndDollars[]>) => {
+      state.executiveRowsSelected = action.payload;
+    },
+    clearExecutiveRowsSelected: (state) => {
+      state.executiveRowsSelected = null;
     },
     clearAdditionalExecutivesGrid: (state) => {
       state.additionalExecutivesGrid = null;
@@ -426,6 +434,8 @@ export const {
   setProfitMasterRevertLoading,
   clearProfitMasterRevert,
 
+  setExecutiveRowsSelected,
+  clearExecutiveRowsSelected,
   setAdditionalExecutivesGrid,
   clearAdditionalExecutivesGrid,
   setAdditionalExecutivesChosen,
