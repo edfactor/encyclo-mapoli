@@ -197,7 +197,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         {
             await c.PayProfits.Take(negativeValues).ForEachAsync(pp =>
             {
-                pp.EarningsEtvaValue *= -1;
+                pp.Etva *= -1;
                 pp.ProfitYear = _paginationRequest.ProfitYear;
             });
 

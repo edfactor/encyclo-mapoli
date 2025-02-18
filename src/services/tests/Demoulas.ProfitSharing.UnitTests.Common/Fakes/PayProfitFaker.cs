@@ -45,6 +45,7 @@ internal sealed class PayProfitFaker : Faker<PayProfit>
             .RuleFor(pc => pc.CurrentIncomeYear, f => f.Finance.Amount(min: 100, max: 1_200_000, decimals: 2))
             .RuleFor(pc => pc.SecondaryEarnings, f => f.Finance.Amount(min: 100, max: 1_200_000, decimals: 2))
             .RuleFor(pc => pc.EarningsEtvaValue, f => f.Finance.Amount(min: 10, max: 2_000, decimals: 2))
+            .RuleFor(pc => pc.Etva, f => f.Finance.Amount(min: 10, max: 2_000, decimals: 2))
             .RuleFor(pc => pc.EnrollmentId, f => f.PickRandom(Enrollment.Constants.NotEnrolled,
                 Enrollment.Constants.NewVestingPlanHasContributions,
                 Enrollment.Constants.NewVestingPlanHasForfeitureRecords,
