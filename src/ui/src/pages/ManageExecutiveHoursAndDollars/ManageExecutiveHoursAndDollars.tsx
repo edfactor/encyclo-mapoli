@@ -70,11 +70,11 @@ const ManageExecutiveHoursAndDollars = () => {
         </Grid2>
         <Grid2 width={"100%"}>
           <DSMAccordion title="Filter">
-            <ManageExecutiveHoursAndDollarsSearchFilter isModal={false} />
+            <ManageExecutiveHoursAndDollarsSearchFilter />
           </DSMAccordion>
         </Grid2>
         <Grid2 width="100%">
-          <ManageExecutiveHoursAndDollarsGrid isModal={false} />
+          <ManageExecutiveHoursAndDollarsGrid />
         </Grid2>
       </Grid2>
     </Page>

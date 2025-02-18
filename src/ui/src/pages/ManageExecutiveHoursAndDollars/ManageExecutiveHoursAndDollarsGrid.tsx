@@ -13,7 +13,6 @@ import {
 } from "reduxstore/types";
 import {
   addExecutiveHoursAndDollarsGridRow,
-  clearAdditionalExecutivesChosen,
   clearAdditionalExecutivesGrid,
   clearExecutiveRowsSelected,
   removeExecutiveHoursAndDollarsGridRow,
@@ -48,7 +47,7 @@ const RenderAddExecutiveButton: React.FC<RenderAddExecutiveButtonProps> = ({
       startIcon={<AddOutlined color={gridAvailable ? "secondary" : "disabled"} />}
       onClick={async () => {
         // We need to clear out previous result rows in redux
-        dispatch(clearAdditionalExecutivesChosen());
+        //dispatch(clearAdditionalExecutivesChosen());
         dispatch(clearExecutiveRowsSelected());
         dispatch(clearAdditionalExecutivesGrid());
         setOpenModal(true);
@@ -61,7 +60,7 @@ const RenderAddExecutiveButton: React.FC<RenderAddExecutiveButtonProps> = ({
     return (
       <Tooltip
         placement="top"
-        title="You can only add an exec to a search result.">
+        title="You can only add an executive to search results.">
         <span>{addButton}</span>
       </Tooltip>
     );
@@ -163,16 +162,35 @@ const ManageExecutiveHoursAndDollarsGrid = (props: WrapperProps) => {
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetManageExecutiveHoursAndDollarsColumns(props.isModal), [props.isModal]);
 
-  // We memoize this because we only want to copy this once as there will be differences
-  // once edits are made
-  const mutableCopyOfGridData = structuredClone(executiveHoursAndDollars);
+  const combineGridWithAddedExecs = (
+    mainList: PagedReportResponse<ExecutiveHoursAndDollars> | null,
+    additionalResults: ExecutiveHoursAndDollars[] | null
+  ): PagedReportResponse<ExecutiveHoursAndDollars> | null => {
+    const mainGridStructureCopy = structuredClone(mainList);
+    const additionalResultsCopy = structuredClone(additionalResults);
 
-  // Let us add in the any selected execs in redux
-  if (additionalExecutivesChosen) {
-    const mutableAdditionalExecutiveRows = structuredClone(additionalExecutivesChosen);
-    console.log("First Exec row: " + mutableAdditionalExecutiveRows[0].fullName);
-    mutableCopyOfGridData?.response.results.unshift(...mutableAdditionalExecutiveRows);
-  }
+    if (!mainGridStructureCopy || !mainGridStructureCopy.response || !mainGridStructureCopy.response.results) {
+      return null;
+    }
+
+    if (!additionalResultsCopy || additionalResultsCopy.length === 0) {
+      return mainGridStructureCopy;
+    }
+
+    mainGridStructureCopy.response.results.unshift(...additionalResultsCopy);
+
+    return mainGridStructureCopy;
+  };
+
+  // We memoize this not just for performance, but also because we need to
+  // add in any execs chosen in the modal window, and also, because if we
+  // do not memoize it, editing a column value will cause the grid to re-render
+  // with the original values, even though the underlying data has changed
+
+  const mutableCopyOfGridData = useMemo(
+    () => combineGridWithAddedExecs(executiveHoursAndDollars, additionalExecutivesChosen),
+    [executiveHoursAndDollars, additionalExecutivesChosen]
+  );
 
   const mutableCopyOfAdditionalExecutivesGrid = useMemo(
     () => structuredClone(additionalExecutivesGrid),
@@ -190,6 +208,7 @@ const ManageExecutiveHoursAndDollarsGrid = (props: WrapperProps) => {
     }
   };
 
+  // This function checks for the need to have pagination for modal and non modal grids
   const isPaginationNeeded = (isModal: boolean | undefined): boolean => {
     if (isModal) {
       return (
@@ -213,7 +232,7 @@ const ManageExecutiveHoursAndDollarsGrid = (props: WrapperProps) => {
                   {`Manage Executive Hours and Dollars (${mutableCopyOfGridData?.response.total || 0})`}
                 </Typography>
               </div>
-              <div style={{ gap: "36px", display: "flex", justifyContent: "end", marginRight: 8 }}>
+              <div style={{ gap: "36px", display: "flex", justifyContent: "end", marginRight: 28 }}>
                 <RenderAddExecutiveButton
                   reportReponse={mutableCopyOfGridData}
                   isModal={props.isModal}
@@ -228,7 +247,7 @@ const ManageExecutiveHoursAndDollarsGrid = (props: WrapperProps) => {
                 <Typography
                   variant="body1"
                   sx={{ color: "#db1532" }}>
-                  {`Please select one executive and click the add button up top`}
+                  {`Please select rows then click the add button up top`}
                 </Typography>
               </div>
             </>
@@ -242,9 +261,8 @@ const ManageExecutiveHoursAndDollarsGrid = (props: WrapperProps) => {
                 ? mutableCopyOfAdditionalExecutivesGrid?.response.results
                 : mutableCopyOfGridData?.response.results,
               columnDefs: columnDefs,
-              rowSelection: props.isModal ? "single" : undefined,
+              rowSelection: props.isModal ? "multiple" : undefined,
               onSelectionChanged: (event: SelectionChangedEvent) => {
-                dispatch(clearAdditionalExecutivesChosen());
                 if (props.isModal) {
                   const selectedRows = event.api.getSelectedRows();
                   dispatch(setExecutiveRowsSelected(selectedRows));
@@ -277,7 +295,6 @@ const ManageExecutiveHoursAndDollarsGrid = (props: WrapperProps) => {
           recordCount={mutableCopyOfGridData?.response.total ?? 0}
         />
       )}
-
       <SmartModal
         open={openModal}
         onClose={() => setOpenModal(false)}>

@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { RootState } from "reduxstore/store";
-import { clearAdditionalExecutivesChosen, setExecutiveHoursAndDollarsGridYear } from "reduxstore/slices/yearsEndSlice";
+import { setExecutiveHoursAndDollarsGridYear } from "reduxstore/slices/yearsEndSlice";
 
 export interface WrapperProps {
   isModal?: boolean;
@@ -83,7 +83,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter = (props: WrapperProps) => {
   const validateAndSearch = handleSubmit((data) => {
     // If there are any stored additional executives, we
     // should delete them, regardless of modal or not
-    dispatch(clearAdditionalExecutivesChosen());
+    //dispatch(clearAdditionalExecutivesChosen());
 
     if (isValid && !props.isModal) {
       triggerSearch(
