@@ -7,10 +7,11 @@ using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.Common.Contracts.Contracts.Request;
 
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
-public class GetDuplicateSsNsEndpoint : EndpointWithCsvBase<ProfitYearRequest, PayrollDuplicateSsnResponseDto, GetDuplicateSsNsEndpoint.GetDuplicateSsNsResponseMap>
+public class GetDuplicateSsNsEndpoint : EndpointWithCsvBase<PaginationRequestDto, PayrollDuplicateSsnResponseDto, GetDuplicateSsNsEndpoint.GetDuplicateSsNsResponseMap>
 {
     private readonly ICleanupReportService _cleanupReportService;
 
@@ -24,7 +25,7 @@ public class GetDuplicateSsNsEndpoint : EndpointWithCsvBase<ProfitYearRequest, P
         Get("duplicate-ssns");
         Summary(s =>
         {
-            s.Summary = "Get SSNs that are duplicated in the demographics area";
+            s.Summary = "Get SSNs that are duplicated in the demographic table";
             s.ExampleRequest = SimpleExampleRequest;
             s.ResponseExamples = new Dictionary<int, object>
             {
@@ -52,7 +53,7 @@ public class GetDuplicateSsNsEndpoint : EndpointWithCsvBase<ProfitYearRequest, P
 
     public override string ReportFileName => "DuplicateSSns";
 
-    public override Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetResponse(ProfitYearRequest req, CancellationToken ct)
+    public override Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetResponse(PaginationRequestDto req, CancellationToken ct)
     {
         return _cleanupReportService.GetDuplicateSsnAsync(req, ct);
     }
@@ -75,8 +76,17 @@ public class GetDuplicateSsNsEndpoint : EndpointWithCsvBase<ProfitYearRequest, P
             Map(m => m.Status).Index(11).Name("ST");
             Map(m => m.StoreNumber).Index(12).Name("STR");
             Map(m => m.ProfitSharingRecords).Index(13).Name("PS RECS");
-            Map(m => m.HoursCurrentYear).Index(14).Name("CUR HRS");
-            Map(m => m.IncomeCurrentYear).Index(15).Name("CUR WAGE");
+
+            // Select the PayProfit object where LastUpdate is in May
+            Map(m => m.PayProfits
+                    .OrderByDescending(p => p.ProfitYear)
+                    .FirstOrDefault()!.CurrentHoursYear)
+                .Index(14).Name("CUR HRS");
+
+            Map(m => m.PayProfits
+                    .OrderByDescending(p => p.ProfitYear)
+                    .FirstOrDefault()!.CurrentIncomeYear)
+                .Index(15).Name("CUR WAGE");
         }
     }
 }
