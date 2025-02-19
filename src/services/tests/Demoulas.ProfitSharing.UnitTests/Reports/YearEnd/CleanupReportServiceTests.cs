@@ -7,9 +7,11 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareReport;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
+using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
 using FluentAssertions;
 using IdGen;
@@ -656,5 +658,26 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         {
             _ = await _cleanupReportClient.GetDemographicBadgesNotInPayProfitAsync(_paginationRequest, CancellationToken.None);
         });
+    }
+
+    [Fact(DisplayName = "GetYearEndProfitSharingSummaryReportAsync Tests")]
+    public async Task GetYearEndProfitSharingSummaryReportAsyncCheck()
+    {
+        var req = new FrozenProfitYearRequest() { ProfitYear = 2024, UseFrozenData = false };
+        var response  =
+            await ApiClient
+                .GETAsync<YearEndProfitSharingSummaryReportEndpoint,
+                    FrozenProfitYearRequest, YearEndProfitSharingReportSummaryResponse>(req);
+
+        response.Response.StatusCode.Should().Be(System.Net.HttpStatusCode.Unauthorized);
+
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+        response =
+            await ApiClient
+                .GETAsync<YearEndProfitSharingSummaryReportEndpoint,
+                    FrozenProfitYearRequest, YearEndProfitSharingReportSummaryResponse>(req);
+
+        response.Response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
+
     }
 }
