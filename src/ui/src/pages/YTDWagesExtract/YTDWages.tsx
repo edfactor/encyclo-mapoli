@@ -3,26 +3,26 @@ import Grid2 from "@mui/material/Unstable_Grid2";
 import { DSMAccordion, Page } from "smart-ui-library";
 import YTDWagesSearchFilter from "./YTDWagesSearchFilter";
 import YTDWagesGrid from "./YTDWagesGrid";
-import { useNavigate } from "react-router";
-import StatusDropdown, { ProcessStatus } from "components/StatusDropdown";
 import { CAPTIONS } from "../../constants";
+import { Download, Print } from "@mui/icons-material";
 
 const YTDWages = () => {
-  const navigate = useNavigate();
-
-  const handleStatusChange = async (newStatus: ProcessStatus) => {
-    console.info("Logging new status: ", newStatus);
-  };
-
   const renderActionNode = () => {
     return (
       <div className="flex items-center gap-2 h-10">
-        <StatusDropdown onStatusChange={handleStatusChange} />
         <Button
-          onClick={() => navigate("/december-process-accordion")}
+          onClick={() => {}}
           variant="outlined"
+          startIcon={<Download color={"primary"} />}
           className="h-10 whitespace-nowrap min-w-fit">
-          December Flow
+          Download
+        </Button>
+        <Button
+          onClick={() => {}}
+          variant="outlined"
+          startIcon={<Print color={"primary"} />}
+          className="h-10 whitespace-nowrap min-w-fit">
+          Print
         </Button>
       </div>
     );
@@ -30,7 +30,7 @@ const YTDWages = () => {
 
   return (
     <Page
-      label={CAPTIONS.YTDWagesS}
+      label={CAPTIONS.YTD_WAGES_EXTRACT}
       actionNode={renderActionNode()}>
       <Grid2
         container
