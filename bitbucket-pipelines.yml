@@ -234,7 +234,6 @@ definitions:
       runs-on:
         - windows
         - self.hosted
-        - appt125
       script:
         - $env:SolutionDir = ".\src\services"        
         - echo "Checking dotnet vulnerabilities"
@@ -242,9 +241,11 @@ definitions:
 
         - dotnet --info
         - dotnet nuget list source
-        - dotnet workload update
-        - dotnet workload install aspire
+        - dotnet workload update --source https://api.nuget.org/v3/index.json
+        - dotnet workload install aspire --source https://api.nuget.org/v3/index.json
         - dotnet restore -p:RestoreAdditionalProjectSources=https://api.nuget.org/v3/index.json
+
+
         - |
           $output = dotnet list package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json
           if ($output -match "has the following vulnerable packages") {
@@ -254,7 +255,8 @@ definitions:
           } else {
             Write-Host "No vulnerabilities found."
             exit 0
-          }
+          }        
+
 
     audit-frontend: &audit-frontend
       name: "Check frontend for vulnerabilities"
