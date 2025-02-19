@@ -240,6 +240,7 @@ definitions:
         - echo "Checking dotnet vulnerabilities"
         - cd $env:SolutionDir
 
+
         - dotnet --info
         - dotnet nuget list source
         - dotnet workload update
