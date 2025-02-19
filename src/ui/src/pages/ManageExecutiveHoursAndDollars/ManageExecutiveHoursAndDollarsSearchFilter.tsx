@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { RootState } from "reduxstore/store";
-import { setExecutiveHoursAndDollarsGridYear } from "reduxstore/slices/yearsEndSlice";
+import { clearAdditionalExecutivesChosen, setExecutiveHoursAndDollarsGridYear } from "reduxstore/slices/yearsEndSlice";
 
 export interface WrapperProps {
   isModal?: boolean;
@@ -105,6 +105,8 @@ const ManageExecutiveHoursAndDollarsSearchFilter = (props: WrapperProps) => {
       // the grid data has no mention of profit year,
       // but we need the year to submit changes.
       dispatch(setExecutiveHoursAndDollarsGridYear(data.profitYear));
+
+      dispatch(clearAdditionalExecutivesChosen());
     }
 
     // A difference in modal is that we are not filtering for having executive hours

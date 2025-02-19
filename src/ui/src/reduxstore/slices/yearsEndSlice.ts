@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { stat } from "fs";
 import {
   ContributionsByAge,
   ForfeituresByAge,
@@ -167,7 +168,11 @@ export const yearsEndSlice = createSlice({
       state.additionalExecutivesGrid = action.payload;
     },
     setAdditionalExecutivesChosen: (state, action: PayloadAction<ExecutiveHoursAndDollars[]>) => {
-      state.additionalExecutivesChosen = action.payload;
+      if (state.additionalExecutivesChosen === null) {
+        state.additionalExecutivesChosen = action.payload;
+      } else {
+        state.additionalExecutivesChosen.push(...action.payload);
+      }
     },
     setExecutiveRowsSelected: (state, action: PayloadAction<ExecutiveHoursAndDollars[]>) => {
       state.executiveRowsSelected = action.payload;
