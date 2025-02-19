@@ -111,12 +111,12 @@ public class CleanupReportService : ICleanupReportService
                     .Include(p => p.Demographic)
                     .Where(p => p.ProfitYear == req.ProfitYear
                                 && ssnUnion.Contains(p.Demographic!.Ssn)
-                                && p.EarningsEtvaValue < 0)
+                                && p.Etva < 0)
                     .Select(p => new NegativeEtvaForSsNsOnPayProfitResponse
                     {
                         BadgeNumber = p.Demographic!.BadgeNumber,
                         Ssn = p.Demographic.Ssn.MaskSsn(),
-                        EtvaValue = p.EarningsEtvaValue
+                        EtvaValue = p.Etva
                     })
                     .OrderBy(p => p.BadgeNumber)
                     .ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken);

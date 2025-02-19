@@ -1,18 +1,22 @@
-import { ColDef } from "ag-grid-community";
+import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { viewBadgeRenderer } from "../../utils/masterInquiryLink";
+import { currencyFormat } from "utils/numberUtils";
 
-export const GetManageExecutiveHoursAndDollarsColumns = (): ColDef[] => {
-  return [
+// The default is to show all columns, but if the mini flag is set to true, only show the
+// badge, name, and ssn columns
+export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef[] => {
+  const columns: ColDef[] = [
     {
       headerName: "Badge",
       field: "badgeNumber",
       colId: "badgeNumber",
       minWidth: 80,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      headerClass: mini ? "left-align" : "right-align",
+      cellClass: mini ? "left-align" : "right-align",
       resizable: true,
       sortable: true,
-      cellRenderer: (params) => viewBadgeRenderer({ value: params.data.badgeNumber }),
+      checkboxSelection: mini,
+      cellRenderer: (params: ICellRendererParams) => viewBadgeRenderer(params.data.badgeNumber)
     },
     {
       headerName: "Employee Name",
@@ -21,7 +25,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (): ColDef[] => {
       minWidth: 120,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true,
+      resizable: true
     },
     {
       headerName: "STR",
@@ -30,7 +34,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (): ColDef[] => {
       minWidth: 120,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true,
+      resizable: true
     },
     {
       headerName: "SSN",
@@ -49,7 +53,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (): ColDef[] => {
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      editable: true
+      editable: !mini
     },
     {
       headerName: "Executive Dollars",
@@ -59,7 +63,8 @@ export const GetManageExecutiveHoursAndDollarsColumns = (): ColDef[] => {
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      editable: true
+      editable: !mini,
+      valueFormatter: (params) => currencyFormat(params.value)
     },
     {
       headerName: "ORA HRS LAST",
@@ -77,7 +82,8 @@ export const GetManageExecutiveHoursAndDollarsColumns = (): ColDef[] => {
       minWidth: 150,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true
+      resizable: true,
+      valueFormatter: (params) => currencyFormat(params.value)
     },
     {
       headerName: "FREQ",
@@ -97,29 +103,43 @@ export const GetManageExecutiveHoursAndDollarsColumns = (): ColDef[] => {
       cellClass: "left-align",
       resizable: true,
       valueFormatter: (params) => {
-        switch(params.value) { 
-          case 'i': { 
-             //statements;
-             return "Inactive" ;
+        switch (params.value) {
+          case "i": {
+            //statements;
+            return "Inactive";
           }
-          case 'a': { 
+          case "a": {
             //statements;
-            return "Active" ;
+            return "Active";
           }
-          case 't': { 
+          case "t": {
             //statements;
-            return "Terminated" ;
-          } 
-          case 'd': { 
+            return "Terminated";
+          }
+          case "d": {
             //statements;
-            return "Delete" ;
-          } 
-          default: { 
-             //statements; 
-             return "N/A";
-          } 
+            return "Delete";
+          }
+          default: {
+            //statements;
+            return "N/A";
+          }
         }
       }
     }
   ];
+
+  // We could have a hide property in elements to be hidden and not filter this way,
+  // but in the modal, the column selection panel would show them
+  if (mini) {
+    return columns.filter(
+      (column) =>
+        column.colId === "badgeNumber" ||
+        column.colId === "fullName" ||
+        column.colId === "ssn" ||
+        column.colId === "hoursExecutive" ||
+        column.colId === "incomeExecutive"
+    );
+  }
+  return columns;
 };
