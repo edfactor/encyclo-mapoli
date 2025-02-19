@@ -4,7 +4,7 @@ using Demoulas.Common.Contracts.Contracts.Request;
 namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 public record ProfitYearRequest : PaginationRequestDto
 {
-    [DefaultValue(2023)]
+    [DefaultValue(2024)]
     public short ProfitYear { get; set; }
 
 

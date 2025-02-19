@@ -1,21 +1,26 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Request.Military;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Military;
 
-public class GetMilitaryContributionRecords : Endpoint<SimpleRequest<int>, PaginatedResponseDto<MasterInquiryResponseDto>>
+public class GetMilitaryContributionRecords : Endpoint<MilitaryContributionRequest, Results<Ok<PaginatedResponseDto<MasterInquiryResponseDto>>, ProblemHttpResult>>
 {
-    public GetMilitaryContributionRecords()
+    private readonly IMilitaryService _militaryService;
+
+    public GetMilitaryContributionRecords(IMilitaryService militaryService)
     {
-    
+        _militaryService = militaryService;
     }
 
     public override void Configure()
     {
-        Get("details");
+        Get(string.Empty);
         Summary(s =>
         {
             s.Summary = "Get All Military Contribution Records";
@@ -24,8 +29,13 @@ public class GetMilitaryContributionRecords : Endpoint<SimpleRequest<int>, Pagin
         Group<MilitaryGroup>();
     }
 
-    public override Task<PaginatedResponseDto<MasterInquiryResponseDto>> ExecuteAsync(SimpleRequest<int> req, CancellationToken ct)
+    public override async Task<Results<Ok<PaginatedResponseDto<MasterInquiryResponseDto>>, ProblemHttpResult>> ExecuteAsync(MilitaryContributionRequest req, CancellationToken ct)
     {
-        return Task.FromResult(new PaginatedResponseDto<MasterInquiryResponseDto>());
+        var response = await _militaryService.GetMilitaryServiceRecordAsync(req, ct);
+
+        return response.Match<Results<Ok<PaginatedResponseDto<MasterInquiryResponseDto>>, ProblemHttpResult>>(
+            success => TypedResults.Ok(success),
+            error => TypedResults.Problem(error)
+        );
     }
 }

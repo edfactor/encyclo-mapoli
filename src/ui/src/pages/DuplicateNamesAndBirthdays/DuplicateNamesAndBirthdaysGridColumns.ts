@@ -1,4 +1,4 @@
-import { ColDef } from "ag-grid-community";
+import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { yyyyMMDDToMMDDYYYY } from "smart-ui-library";
 import { viewBadgeRenderer } from "../../utils/masterInquiryLink";
 
@@ -12,8 +12,8 @@ export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
-      sort: 'asc',
-      cellRenderer: (params) => viewBadgeRenderer({ value: params.data.badgeNumber }),
+      sort: "asc",
+      cellRenderer: (params: ICellRendererParams) => viewBadgeRenderer(params.data.badgeNumber)
     },
     {
       headerName: "SSN",
@@ -41,7 +41,7 @@ export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      valueFormatter: (params) => params.value ? yyyyMMDDToMMDDYYYY(params.value) : ""
+      valueFormatter: (params) => (params.value ? yyyyMMDDToMMDDYYYY(params.value) : "")
     },
     {
       headerName: "Address",
@@ -53,7 +53,7 @@ export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
       resizable: true,
       valueGetter: (params) => {
         const addr = params.data.address;
-        return addr ? `${addr.street}${addr.street2 ? ', ' + addr.street2 : ''}` : "";
+        return addr ? `${addr.street}${addr.street2 ? ", " + addr.street2 : ""}` : "";
       }
     },
     {
@@ -91,7 +91,7 @@ export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      valueFormatter: (params) => params.value ? yyyyMMDDToMMDDYYYY(params.value) : ""
+      valueFormatter: (params) => (params.value ? yyyyMMDDToMMDDYYYY(params.value) : "")
     }
   ];
 };
