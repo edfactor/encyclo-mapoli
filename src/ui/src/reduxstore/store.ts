@@ -4,9 +4,8 @@ import securitySlice from "./slices/securitySlice";
 import yearsEndSlice from "./slices/yearsEndSlice";
 import { SecurityApi } from "./api/SecurityApi";
 import { YearsEndApi } from "./api/YearsEndApi";
-import { frozenSlice } from "./slices/frozenSlice";
+import frozenSlice from "./slices/frozenSlice";
 import { FrozenApi } from "./api/FrozenApi";
-
 
 export const store = configureStore({
   reducer: {
@@ -21,7 +20,10 @@ export const store = configureStore({
   },
 
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({ serializableCheck: false }).concat(SecurityApi.middleware).concat(YearsEndApi.middleware).concat(FrozenApi.middleware)
+    getDefaultMiddleware({ serializableCheck: false })
+      .concat(SecurityApi.middleware)
+      .concat(YearsEndApi.middleware)
+      .concat(FrozenApi.middleware)
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

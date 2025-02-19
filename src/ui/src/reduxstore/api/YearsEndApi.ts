@@ -40,7 +40,9 @@ import {
   ProfitShareUpdateRequest,
   ProfitShareUpdateResponse,
   ProfitShareEditResponse,
-  ProfitShareMasterResponse
+  ProfitShareMasterResponse,
+  EmployeeWagesForYear,
+  EmployeeWagesForYearRequestDto
 } from "reduxstore/types";
 import {
   setDemographicBadgesNotInPayprofitData,
@@ -68,7 +70,9 @@ import {
   clearProfitEdit,
   setProfitMasterApply,
   setProfitMasterRevert,
-  setAdditionalExecutivesGrid
+  setAdditionalExecutivesGrid,
+  setEmployeeWagesForCurrentYear,
+  setEmployeeWagesForPreviousYear
 } from "reduxstore/slices/yearsEndSlice";
 import { url } from "./api";
 
@@ -327,35 +331,45 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getWagesCurrentYear: builder.query({
+    getEmployeeWagesForCurrentYear: builder.query<
+      PagedReportResponse<EmployeeWagesForYear>,
+      EmployeeWagesForYearRequestDto
+    >({
       query: (params) => ({
         url: "yearend/wages-current-year",
         method: "GET",
         params: {
+          profitYear: params.profitYear,
           take: params.pagination.take,
           skip: params.pagination.skip
         }
       }),
-      async onQueryStarted({ dispatch, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
+          dispatch(setEmployeeWagesForCurrentYear(data));
         } catch (err) {
           console.log("Err: " + err);
         }
       }
     }),
-    getWagesPreviousYear: builder.query({
+    getEmployeeWagesForPreviousYear: builder.query<
+      PagedReportResponse<EmployeeWagesForYear>,
+      EmployeeWagesForYearRequestDto
+    >({
       query: (params) => ({
-        url: "yearend/wages-previous-year",
+        url: "yearend/wages-current-year",
         method: "GET",
         params: {
+          profitYear: params.profitYear,
           take: params.pagination.take,
           skip: params.pagination.skip
         }
       }),
-      async onQueryStarted({ dispatch, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
+          dispatch(setEmployeeWagesForPreviousYear(data));
         } catch (err) {
           console.log("Err: " + err);
         }
