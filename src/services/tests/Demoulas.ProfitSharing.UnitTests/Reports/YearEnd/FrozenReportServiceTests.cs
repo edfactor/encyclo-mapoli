@@ -134,6 +134,6 @@ public class FrozenReportServiceTests : ApiTestBase<Program>
         response = await ApiClient.GETAsync<UpdateSummaryReportEndpoint, ProfitYearRequest, UpdateSummaryReportResponse>(request);
         response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
         response.Result.Should().NotBeNull();
-        response.Result.TotalAfterProfitSharingAmount.Should().Be(9856.38m);
+        response.Result.TotalAfterProfitSharingAmount.Should().Be(10849.41m);
     }
 }

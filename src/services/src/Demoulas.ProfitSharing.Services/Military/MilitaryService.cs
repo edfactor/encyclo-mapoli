@@ -24,19 +24,18 @@ namespace Demoulas.ProfitSharing.Services.Military
         public Task<Result<MasterInquiryResponseDto>> CreateMilitaryServiceRecordAsync(
             CreateMilitaryContributionRequest req, CancellationToken cancellationToken = default)
         {
-
+            #region Validation
             var validator = new InlineValidator<CreateMilitaryContributionRequest>();
 
             validator.RuleFor(r => r.ContributionAmount)
                 .GreaterThan(0)
                 .WithMessage($"The {nameof(CreateMilitaryContributionRequest.ContributionAmount)} must be greater than zero.");
 
-            validator.RuleFor(r => r.ContributionDate)
-                .NotEmpty()
-                .Must(date => date.ToDateTime(TimeOnly.MinValue) > DateTime.Today.AddYears(-3))
-                .WithMessage($"The {nameof(CreateMilitaryContributionRequest.ContributionDate)} must be within the last three years.")
-                .Must(date => date.ToDateTime(TimeOnly.MinValue) < DateTime.Today.AddMonths(1))
-                .WithMessage($"The {nameof(CreateMilitaryContributionRequest.ContributionDate)} must not be more than one month in the future.");
+            validator.RuleFor(r => r.ProfitYear)
+                .GreaterThanOrEqualTo((short)2000)
+                .WithMessage($"{nameof(MilitaryContributionRequest.ProfitYear)} must not less than 2000.")
+                .LessThanOrEqualTo((short)DateTime.Today.Year)
+                .WithMessage($"{nameof(MilitaryContributionRequest.ProfitYear)} must not be greater than this year.");
 
             validator.RuleFor(r => r.BadgeNumber)
                 .GreaterThan(0)
@@ -52,7 +51,7 @@ namespace Demoulas.ProfitSharing.Services.Military
 
                 return Task.FromResult(Result<MasterInquiryResponseDto>.ValidationFailure(errors));
             }
-
+            #endregion
             return _dataContextFactory.UseWritableContext(async c =>
             {
                 var d = await c.Demographics.FirstOrDefaultAsync(d => d.BadgeNumber == req.BadgeNumber,
@@ -63,30 +62,38 @@ namespace Demoulas.ProfitSharing.Services.Military
                     return Result<MasterInquiryResponseDto>.Failure(Error.EmployeeNotFound);
                 }
 
-                c.ProfitDetails.Add(new ProfitDetail
+                var pd = new ProfitDetail
                 {
                     ProfitCodeId = /* 0 */ProfitCode.Constants.IncomingContributions,
                     ProfitYear = req.ProfitYear,
                     ProfitYearIteration = 1,
-                    CommentTypeId = /* 19 */CommentType.Constants.Military,
+                    CommentTypeId = /* 19 */CommentType.Constants.Military.Id,
                     Contribution = req.ContributionAmount,
                     Ssn = d.Ssn
-                });
+                };
+                c.ProfitDetails.Add(pd);
 
                 await c.SaveChangesAsync(cancellationToken);
 
                 return Result<MasterInquiryResponseDto>.Success(new MasterInquiryResponseDto
                 {
+                    Id = pd.Id,
+                    DistributionSequence = pd.DistributionSequence,
+                    ProfitCodeId = pd.ProfitCodeId,
                     BadgeNumber = req.BadgeNumber,
-                    Contribution = req.ContributionAmount,
+                    Contribution = pd.Contribution,
                     CommentTypeId = /* 19 */CommentType.Constants.Military,
-                    ProfitYear = req.ProfitYear
+                    ProfitYear = req.ProfitYear,
+                    ProfitYearIteration = pd.ProfitYearIteration,
+                    Ssn = pd.Ssn.MaskSsn()
                 });
             }, cancellationToken);
         }
 
         public async Task<Result<PaginatedResponseDto<MasterInquiryResponseDto>>> GetMilitaryServiceRecordAsync(MilitaryContributionRequest req, CancellationToken cancellationToken = default)
         {
+            #region Validation
+
             var validator = new InlineValidator<MilitaryContributionRequest>();
 
             validator.RuleFor(r => r.BadgeNumber)
@@ -110,6 +117,8 @@ namespace Demoulas.ProfitSharing.Services.Military
                 return Result<PaginatedResponseDto<MasterInquiryResponseDto>>.ValidationFailure(errors);
             }
 
+            #endregion
+
             var result = await _dataContextFactory.UseReadOnlyContext(c =>
             {
                 return c.ProfitDetails
@@ -119,7 +128,7 @@ namespace Demoulas.ProfitSharing.Services.Military
                         cm => cm.Ssn,
                         (pd, d) => new { pd , d})
                     .Where(x => x.d.BadgeNumber == req.BadgeNumber
-                    && x.pd.ProfitYear == req.ProfitYear)
+                    && x.pd.ProfitYear == req.ProfitYear && x.pd.CommentTypeId == CommentType.Constants.Military.Id)
                     .OrderByDescending(x => x.pd.ProfitYear)
                     .ThenByDescending(x=> x.pd.CreatedUtc)
                     .Select(x => new MasterInquiryResponseDto

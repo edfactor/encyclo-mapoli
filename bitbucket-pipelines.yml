@@ -234,12 +234,14 @@ definitions:
       runs-on:
         - windows
         - self.hosted
+        - appt125
       script:
         - $env:SolutionDir = ".\src\services"        
         - echo "Checking dotnet vulnerabilities"
         - cd $env:SolutionDir
 
         - dotnet --info
+        - dotnet nuget list source
         - dotnet workload update
         - dotnet workload install aspire
         - dotnet restore -p:RestoreAdditionalProjectSources=https://api.nuget.org/v3/index.json
