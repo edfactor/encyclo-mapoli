@@ -1,5 +1,5 @@
 import { RouteCategory } from "smart-ui-library/dist/components/MenuBar/MenuBar";
-import { MENU_LABELS, ROUTES, CAPTIONS } from './constants';
+import { MENU_LABELS, ROUTES, CAPTIONS } from "./constants";
 
 const yearEndReports: RouteCategory = {
   menuLabel: MENU_LABELS.FISCAL_CLOSE,
@@ -16,6 +16,7 @@ const yearEndReports: RouteCategory = {
     { caption: CAPTIONS.BALANCE_BY_YEARS, route: ROUTES.BALANCE_BY_YEARS },
     { caption: CAPTIONS.VESTED_AMOUNTS_BY_AGE, route: ROUTES.VESTED_AMOUNTS_BY_AGE },
     { caption: CAPTIONS.TERMINATIONS, route: ROUTES.PROF_TERM },
+    { caption: CAPTIONS.YTD_WAGES_EXTRACT, route: ROUTES.YTD_WAGES_EXTRACT },
     { caption: CAPTIONS.MILITARY_AND_REHIRE_ENTRY, route: ROUTES.MILITARY_AND_REHIRE_ENTRY },
     { caption: CAPTIONS.PROFIT_SHARE_REPORT_EDIT_RUN, route: ROUTES.PROFIT_SHARE_REPORT_EDIT_RUN },
     { caption: CAPTIONS.PROFIT_SHARE_REPORT_FINAL_RUN, route: ROUTES.PROFIT_SHARE_REPORT_FINAL_RUN },
@@ -23,7 +24,7 @@ const yearEndReports: RouteCategory = {
     { caption: CAPTIONS.PROFIT_SHARE_BY_STORE, route: ROUTES.PROFIT_SHARE_BY_STORE },
     { caption: CAPTIONS.PROFIT_SHARE_GROSS_REPORT, route: ROUTES.PROFIT_SHARE_GROSS_REPORT },
     { caption: CAPTIONS.FORFEIT, route: ROUTES.FORFEIT },
-    { caption: CAPTIONS.PAY450_SUMMARY, route: ROUTES.PAY450_SUMMARY },
+    { caption: CAPTIONS.PAY450_SUMMARY, route: ROUTES.PAY450_SUMMARY }
   ]
 };
 
@@ -48,35 +49,34 @@ const decemberFlow: RouteCategory = {
 const beneficiaries: RouteCategory = {
   menuLabel: MENU_LABELS.BENEFICIARIES,
   parentRoute: "",
-  items: [
-    { caption: CAPTIONS.SUMMARY, route: ROUTES.FROZEN_SUMMARY }
-  ]
+  items: [{ caption: CAPTIONS.SUMMARY, route: ROUTES.FROZEN_SUMMARY }]
 };
 
 const distributions: RouteCategory = {
   menuLabel: MENU_LABELS.DISTRIBUTIONS,
   parentRoute: "",
-  items: [
-    { caption: CAPTIONS.SUMMARY, route: ROUTES.FROZEN_SUMMARY }
-  ]
+  items: [{ caption: CAPTIONS.SUMMARY, route: ROUTES.FROZEN_SUMMARY }]
 };
 
 const reconciliation: RouteCategory = {
   menuLabel: MENU_LABELS.RECONCILIATION,
   parentRoute: "",
-  items: [
-    { caption: CAPTIONS.SUMMARY, route: ROUTES.FROZEN_SUMMARY }
-  ]
+  items: [{ caption: CAPTIONS.SUMMARY, route: ROUTES.FROZEN_SUMMARY }]
 };
 
 const miscellaneous: RouteCategory = {
   menuLabel: MENU_LABELS.INQUIRIES,
   parentRoute: "",
-  items: [
-    { caption: CAPTIONS.MASTER_INQUIRY, route: ROUTES.MASTER_INQUIRY }
-  ]
+  items: [{ caption: CAPTIONS.MASTER_INQUIRY, route: ROUTES.MASTER_INQUIRY }]
 };
 
-const MenuData: RouteCategory[] = [miscellaneous, beneficiaries, distributions, reconciliation, decemberFlow, yearEndReports];
+const MenuData: RouteCategory[] = [
+  miscellaneous,
+  beneficiaries,
+  distributions,
+  reconciliation,
+  decemberFlow,
+  yearEndReports
+];
 
 export default MenuData;

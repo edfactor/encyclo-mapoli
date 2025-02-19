@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { stat } from "fs";
+
 import {
   ContributionsByAge,
   ForfeituresByAge,
@@ -27,7 +27,8 @@ import {
   ProfitShareUpdateResponse,
   ProfitShareEditResponse,
   ProfitShareMasterResponse,
-  ExecutiveHoursAndDollarsGrid
+  ExecutiveHoursAndDollarsGrid,
+  EmployeeWagesForYear
 } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
 
@@ -68,6 +69,8 @@ export interface YearsEndState {
   terminattion: TerminationResponse | null;
   militaryAndRehireEntryAndModification: EmployeeDetails | null;
   profitSharingUpdate: ProfitShareUpdateResponse | ProfitShareEditResponse | ProfitShareMasterResponse | null;
+  employeeWagesForCurrentYear: PagedReportResponse<EmployeeWagesForYear> | null;
+  employeeWagesForPreviousYear: PagedReportResponse<EmployeeWagesForYear> | null;
 }
 
 const initialState: YearsEndState = {
@@ -106,16 +109,15 @@ const initialState: YearsEndState = {
   vestedAmountsByAge: null,
   terminattion: null,
   profitSharingUpdate: null,
-  militaryAndRehireEntryAndModification: null
+  militaryAndRehireEntryAndModification: null,
+  employeeWagesForCurrentYear: null,
+  employeeWagesForPreviousYear: null
 };
 
 export const yearsEndSlice = createSlice({
   name: "yearsEnd",
   initialState,
   reducers: {
-    setDuplicateSSNsData: (state, action: PayloadAction<PagedReportResponse<DuplicateSSNDetail>>) => {
-      state.duplicateSSNsData = action.payload;
-    },
     setDuplicateSSNsData: (state, action: PayloadAction<PagedReportResponse<DuplicateSSNDetail>>) => {
       state.duplicateSSNsData = action.payload;
     },
@@ -256,6 +258,12 @@ export const yearsEndSlice = createSlice({
             action.payload.profitYear
         );
       }
+    },
+    setEmployeeWagesForCurrentYear: (state, action: PayloadAction<PagedReportResponse<EmployeeWagesForYear>>) => {
+      state.employeeWagesForCurrentYear = action.payload;
+    },
+    setEmployeeWagesForPreviousYear: (state, action: PayloadAction<PagedReportResponse<EmployeeWagesForYear>>) => {
+      state.employeeWagesForPreviousYear = action.payload;
     },
     setEligibleEmployees: (state, action: PayloadAction<EligibleEmployeeResponseDto>) => {
       state.eligibleEmployees = action.payload;
@@ -449,6 +457,9 @@ export const {
   updateExecutiveHoursAndDollarsGridRow,
   removeExecutiveHoursAndDollarsGridRow,
   clearExecutiveHoursAndDollarsGridRows,
-  addExecutiveHoursAndDollarsGridRow
+  addExecutiveHoursAndDollarsGridRow,
+
+  setEmployeeWagesForCurrentYear,
+  setEmployeeWagesForPreviousYear
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

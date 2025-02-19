@@ -58,17 +58,17 @@ const VestedAmountsByAgeSearchFilter = () => {
   const handleDownloadCSV = handleSubmit(async (data) => {
     if (isValid) {
       try {
-        setIsFetching(true);
+        // setIsFetching(true); // This line is not needed as isFetching is managed by the hook
         const fetchPromise = triggerSearch({
           profitYear: data.profitYear,
           acceptHeader: "text/csv"
         });
         await downloadFileFromResponse(fetchPromise, `vesting-amounts-${data.profitYear}.csv`);
       } catch (error) {
-        console.error('Download failed:', error);
+        console.error("Download failed:", error);
         // Do we want to throw a formal Error for the react-error-boundary to catch?
       } finally {
-        setIsFetching(false);
+        //setIsFetching(false);
       }
     }
   });

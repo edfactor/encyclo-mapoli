@@ -106,6 +106,10 @@ export interface NegativeEtvaForSSNsOnPayprofitRequestDto extends ProfitYearRequ
   pagination: PaginationParams;
 }
 
+export interface EmployeeWagesForYearRequestDto extends ProfitYearRequest {
+  pagination: PaginationParams;
+}
+
 export interface DuplicateNameBirthdayAddress {
   street: string;
   street2: string | null;
@@ -229,6 +233,12 @@ export interface ExecutiveHoursAndDollars {
   currentIncomeYear: number;
   payFrequencyId: number;
   employmentStatusId: string;
+}
+
+export interface EmployeeWagesForYear {
+  badgeNumber: number;
+  hoursExecutive: number;
+  incomeExecutive: number;
 }
 
 export interface EligibleEmployeesRequestDto extends ProfitYearRequest {
@@ -577,9 +587,9 @@ export interface ProfitShareEditResponse {
 export interface ProfitShareMasterResponse {
   isLoading: boolean;
   reportName: string;
-  beneficiariesEffected: number,
-  employeesEffected: number,
-  etvasEffected: number
+  beneficiariesEffected: number;
+  employeesEffected: number;
+  etvasEffected: number;
 }
 
 export interface FrozenStateResponse {
