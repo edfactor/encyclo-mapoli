@@ -22,4 +22,6 @@ public sealed class Beneficiary
     public decimal SecondaryEarnings { get; set; }
     public required decimal Percent { get; set; }
     public Demographic? Demographic { get; set; }
+
+    public List<BeneficiarySsnChangeHistory>? BeneficiarySsnChangeHistories { get; set; }
 }

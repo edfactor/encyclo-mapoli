@@ -3,56 +3,63 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Interfaces;
 
 namespace Demoulas.ProfitSharing.Services
 {
-    public class FakeSsnService
+    public class FakeSsnService<THistory> where THistory : SsnChangeHistory, new()
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IProfitSharingDataContextFactory _dataContextFactory;
         private static readonly Random _random = new Random();
-        private static readonly HashSet<string> ReservedSsns = new() { "078-05-1120", "219-09-9999" };
-        private static readonly List<string> ReservedRange = Enumerable.Range(4320, 10).Select(n => $"987-65-{n:D4}").ToList();
+        private static readonly HashSet<int> ReservedSsns = new() { 78051120, 219099999 };
 
-        public FakeSsnService(ApplicationDbContext context)
+        private static readonly List<int> ReservedRange =
+            Enumerable.Range(4320, 10).Select(n => int.Parse($"98765{n:D4}")).ToList();
+
+        public FakeSsnService(IProfitSharingDataContextFactory dataContextFactory)
         {
-            _context = context;
+            _dataContextFactory = dataContextFactory;
         }
 
-        public string GenerateFakeSsn()
+        public async Task<int> GenerateFakeSsnAsync(CancellationToken cancellationToken)
         {
-            string ssn;
-            do
+            await _dataContextFactory.UseWritableContext(c =>
             {
-                int area = _random.Next(666, 667); // Always using 666 for clear indication of fake SSNs
-                int group = _random.Next(1, 100);
-                int serial = _random.Next(1, 10000);
+                int ssn;
+                do
+                {
+                    int area = 666; // Always using 666 for clear indication of fake SSNs
+                    int group = _random.Next(1, 100);
+                    int serial = _random.Next(1, 10000);
 
-                ssn = $"{area:D3}-{group:D2}-{serial:D4}";
-            } while (IsReservedOrExists(ssn));
+                    ssn = int.Parse($"{area:D3}{group:D2}{serial:D4}");
+                } while (IsReservedOrExists(ssn, c));
 
-            var fakeSsnEntry = new FakeSsn { Ssn = ssn };
-            _context.FakeSsns.Add(fakeSsnEntry);
-            _context.SaveChanges();
 
+                var fakeSsnEntry = new THistory { Ssn = ssn };
+                c.FakeSsns.Add(fakeSsnEntry);
+                return c.SaveChangesAsync(cancellationToken);
+            }, cancellationToken);
             return ssn;
         }
 
-        private bool IsReservedOrExists(string ssn)
+        private bool IsReservedOrExists(int ssn, IProfitSharingDbContext context)
         {
-            return ReservedSsns.Contains(ssn) || ReservedRange.Contains(ssn) || _context.FakeSsns.Any(f => f.Ssn == ssn);
+            return ReservedSsns.Contains(ssn) || ReservedRange.Contains(ssn) || context.FakeSsns.Any(f => f.Ssn == ssn);
         }
 
-        public void TrackSsnChange(string oldSsn, string newSsn)
+        public Task TrackSsnChangeAsync(int oldSsn, int newSsn, CancellationToken cancellationToken)
         {
-            var historyEntry = new SsnChangeHistory
+            _dataContextFactory.UseWritableContext(c =>
             {
-                OldSsn = oldSsn,
-                NewSsn = newSsn,
-                ChangeDate = DateTime.UtcNow
-            };
-            _context.SsnChangeHistories.Add(historyEntry);
-            _context.SaveChanges();
+                var historyEntry = new SsnChangeHistory
+                {
+                    OldSsn = oldSsn, NewSsn = newSsn, ChangeDateUtc = DateTimeOffset.UtcNow
+                };
+                c.SsnChangeHistories.Add(historyEntry);
+                c.SaveChanges();
+            }, cancellationToken);
         }
     }
-
 }

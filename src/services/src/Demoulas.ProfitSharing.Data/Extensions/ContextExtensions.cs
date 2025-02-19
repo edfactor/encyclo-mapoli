@@ -14,6 +14,7 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new BeneficiaryKindMap());
         modelBuilder.ApplyConfiguration(new BeneficiaryMap());
         modelBuilder.ApplyConfiguration(new BeneficiaryTypeMap());
+        modelBuilder.ApplyConfiguration(new BeneficiarySsnChangeHistoryMap());
         modelBuilder.ApplyConfiguration(new AccountingPeriodConfiguration { ExcludeFromMigrations = false, SeedDataAfterMigrations = true });
         modelBuilder.ApplyConfiguration(new CommentTypeMap());
         modelBuilder.ApplyConfiguration(new CountryMap());
