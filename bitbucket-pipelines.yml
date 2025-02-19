@@ -238,7 +238,10 @@ definitions:
         - $env:SolutionDir = ".\src\services"        
         - echo "Checking dotnet vulnerabilities"
         - cd $env:SolutionDir
-        
+
+        - dotnet --info
+        - dotnet workload update
+        - dotnet workload install aspire
         - dotnet restore -p:RestoreAdditionalProjectSources=https://api.nuget.org/v3/index.json
         - |
           $output = dotnet list package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json
