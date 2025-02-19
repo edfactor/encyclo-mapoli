@@ -24,7 +24,7 @@ public class SetExecutiveHoursAndDollarsEndpoint : Endpoint<SetExecutiveHoursAnd
             s.Description =
                 "This endpoint allows the executive hours and dollars to be set.";
 
-            s.ExampleRequest = SetExecutiveHoursAndDollarsRequest.Example();
+            s.ExampleRequest = SetExecutiveHoursAndDollarsRequest.RequestExample();
 
             s.Responses[204] = "Success, No Content";
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";

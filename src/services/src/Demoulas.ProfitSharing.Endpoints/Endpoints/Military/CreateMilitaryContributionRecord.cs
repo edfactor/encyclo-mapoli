@@ -22,7 +22,11 @@ public class CreateMilitaryContributionRecord : Endpoint<CreateMilitaryContribut
         Summary(s =>
         {
             s.Summary = "Create Military Contribution Record";
-            s.ResponseExamples = new Dictionary<int, object> { { 200, new MilitaryContributionResponse { ProfitYear = Convert.ToInt16(DateTime.Now.Year) } } };
+            s.ResponseExamples = new Dictionary<int, object>
+            {
+                { 200, new MilitaryContributionResponse { ProfitYear = Convert.ToInt16(DateTime.Now.Year) } }
+            };
+            s.ExampleRequest = CreateMilitaryContributionRequest.RequestExample();
         });
         Group<MilitaryGroup>();
     }
@@ -38,7 +42,7 @@ public class CreateMilitaryContributionRecord : Endpoint<CreateMilitaryContribut
                     routeValues: new MilitaryContributionRequest
                     {
                         BadgeNumber = req.BadgeNumber,
-                        ProfitYear = req.ProfitYear
+                        ProfitYear = req.ProfitYear,
                     },
                     responseBody: success,
                     cancellation: ct
