@@ -1,4 +1,4 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
+import { ColDef } from "ag-grid-community";
 import { yyyyMMDDToMMDDYYYY } from "smart-ui-library";
 
 export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
@@ -11,7 +11,7 @@ export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true
-    }
+    },
     {
       headerName: "SSN",
       field: "ssn",
