@@ -1,6 +1,5 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { yyyyMMDDToMMDDYYYY } from "smart-ui-library";
-import { viewBadgeRenderer } from "../../utils/masterInquiryLink";
 
 export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
   return [
@@ -11,9 +10,8 @@ export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
       minWidth: 80,
       headerClass: "right-align",
       cellClass: "right-align",
-      resizable: true,
-      cellRenderer: (params: ICellRendererParams) => viewBadgeRenderer(params.data.badgeNumber)
-    },
+      resizable: true
+    }
     {
       headerName: "SSN",
       field: "ssn",

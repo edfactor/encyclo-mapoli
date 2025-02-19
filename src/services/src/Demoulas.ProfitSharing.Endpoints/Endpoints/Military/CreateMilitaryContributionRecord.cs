@@ -1,15 +1,19 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Military;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Military;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
+using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Military;
 
-public class CreateMilitaryContributionRecord : Endpoint<MilitaryContributionRequest>
+public class CreateMilitaryContributionRecord : Endpoint<CreateMilitaryContributionRequest>
 {
-    public CreateMilitaryContributionRecord()
+    private readonly IMilitaryService _militaryService;
+
+    public CreateMilitaryContributionRecord(IMilitaryService militaryService)
     {
-    
+        _militaryService = militaryService ?? throw new ArgumentNullException(nameof(militaryService));
     }
 
     public override void Configure()
@@ -23,21 +27,28 @@ public class CreateMilitaryContributionRecord : Endpoint<MilitaryContributionReq
         Group<MilitaryGroup>();
     }
 
-    public override Task HandleAsync(MilitaryContributionRequest req, CancellationToken ct)
+    public override async Task HandleAsync(CreateMilitaryContributionRequest req, CancellationToken ct)
     {
-        var response = new MilitaryContributionResponse
-        {
-            BadgeNumber = req.BadgeNumber,
-            Amount = req.Amount,
-            CommentTypeId = req.CommentTypeId,
-            ContributionDate = req.ContributionDate,
-            ProfitYear = req.ProfitYear
-        };
+        var response = await _militaryService.CreateMilitaryServiceRecordAsync(req, ct);
 
-        return SendCreatedAtAsync<GetMilitaryContributionRecord>(
-            routeValues: new { id = 5 }, // Assuming 5 is the ID of the created record
-            responseBody: response,
-            cancellation: ct
+        await response.Match(
+            async success =>
+            {
+                await SendCreatedAtAsync<GetMilitaryContributionRecords>(
+                    routeValues: new MilitaryContributionRequest
+                    {
+                        BadgeNumber = req.BadgeNumber,
+                        ProfitYear = req.ProfitYear
+                    },
+                    responseBody: success,
+                    cancellation: ct
+                );
+            },
+            async error =>
+            {
+                await SendAsync(error, cancellation: ct);
+            }
         );
     }
+
 }

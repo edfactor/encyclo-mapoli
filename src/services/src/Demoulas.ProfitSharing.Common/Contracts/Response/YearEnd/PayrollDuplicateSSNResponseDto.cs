@@ -13,10 +13,8 @@ public sealed record PayrollDuplicateSsnResponseDto
     public DateOnly? RehireDate { get; set; }
     public required char Status { get; set; }
     public required short StoreNumber { get; set; }
-    public required int ProfitSharingRecords { get; set; }
-    public required decimal HoursCurrentYear { get; set; }
-    public decimal HoursLastYear { get; set; }
-    public required decimal IncomeCurrentYear { get; set; }
+    public int ProfitSharingRecords { get; set; }
+    public IEnumerable<PayProfitResponseDto> PayProfits { get; set; } = [];
 
     public static PayrollDuplicateSsnResponseDto ResponseExample()
     {
@@ -30,10 +28,7 @@ public sealed record PayrollDuplicateSsnResponseDto
             TerminationDate = DateTime.Today.ToDateOnly(),
             Status = 't',
             StoreNumber = 6,
-            ProfitSharingRecords = 17,
-            HoursCurrentYear = 1024,
-            HoursLastYear = 2048,
-            IncomeCurrentYear = ushort.MaxValue
+            ProfitSharingRecords = 17
         };
     }
 }

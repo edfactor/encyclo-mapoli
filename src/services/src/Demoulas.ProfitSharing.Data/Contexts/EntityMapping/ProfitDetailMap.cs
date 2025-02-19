@@ -18,7 +18,6 @@ internal sealed class ProfitDetailMap : IEntityTypeConfiguration<ProfitDetail>
         _ = builder.Property(x => x.ProfitYear).IsRequired().HasColumnName("PROFIT_YEAR");
         _ = builder.Property(x => x.ProfitYearIteration).IsRequired().HasColumnName("PROFIT_YEAR_ITERATION");
         _ = builder.Property(x => x.ProfitCodeId).IsRequired().HasColumnName("PROFIT_CODE_ID");
-        _ = builder.HasOne(x => x.ProfitCode).WithMany().HasForeignKey(x => x.ProfitCodeId);
         _ = builder.Property(x => x.Contribution).IsRequired().HasPrecision(9, 2).HasColumnName("CONTRIBUTION").HasComment("Contribution to plan from DMB");
         _ = builder.Property(x => x.Earnings).IsRequired().HasPrecision(9, 2).HasColumnName("EARNINGS");
         _ = builder.Property(x => x.Forfeiture).IsRequired().HasPrecision(9, 2).HasColumnName("FORFEITURE");
@@ -40,7 +39,12 @@ internal sealed class ProfitDetailMap : IEntityTypeConfiguration<ProfitDetail>
             .HasColumnName("COMMENT_RELATED_CHECK_NUMBER");
         _ = builder.Property(x => x.CommentIsPartialTransaction).HasColumnName("COMMENT_IS_PARTIAL_TRANSACTION");
 
+        _ = builder.Property(e => e.CreatedUtc)
+            .HasColumnType("TIMESTAMP WITH TIME ZONE")
+            .HasDefaultValueSql("SYSTIMESTAMP")
+            .HasColumnName("CREATED_UTC");
 
+        _ = builder.HasOne(x => x.ProfitCode).WithMany().HasForeignKey(x => x.ProfitCodeId);
         _ = builder.HasOne(x => x.CommentType).WithMany().HasForeignKey(x => x.CommentTypeId);
         _ = builder.HasOne(x => x.TaxCode).WithMany().HasForeignKey(t => t.TaxCodeId);
         _ = builder.HasOne(x => x.ProfitCode).WithMany().HasForeignKey(x => x.ProfitCodeId);
