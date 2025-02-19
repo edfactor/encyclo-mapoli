@@ -333,7 +333,7 @@ export const YearsEndApi = createApi({
     }),
     getEmployeeWagesForCurrentYear: builder.query<
       PagedReportResponse<EmployeeWagesForYear>,
-      EmployeeWagesForYearRequestDto
+      EmployeeWagesForYearRequestDto & { acceptHeader: string }
     >({
       query: (params) => ({
         url: "yearend/wages-current-year",
@@ -342,6 +342,15 @@ export const YearsEndApi = createApi({
           profitYear: params.profitYear,
           take: params.pagination.take,
           skip: params.pagination.skip
+        },
+        headers: {
+          Accept: params.acceptHeader
+        },
+        responseHandler: async (response) => {
+          if (params.acceptHeader === "text/csv") {
+            return response.blob();
+          }
+          return response.json();
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -355,7 +364,7 @@ export const YearsEndApi = createApi({
     }),
     getEmployeeWagesForPreviousYear: builder.query<
       PagedReportResponse<EmployeeWagesForYear>,
-      EmployeeWagesForYearRequestDto
+      EmployeeWagesForYearRequestDto & { acceptHeader: string }
     >({
       query: (params) => ({
         url: "yearend/wages-current-year",
@@ -364,6 +373,15 @@ export const YearsEndApi = createApi({
           profitYear: params.profitYear,
           take: params.pagination.take,
           skip: params.pagination.skip
+        },
+        headers: {
+          Accept: params.acceptHeader
+        },
+        responseHandler: async (response) => {
+          if (params.acceptHeader === "text/csv") {
+            return response.blob();
+          }
+          return response.json();
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
