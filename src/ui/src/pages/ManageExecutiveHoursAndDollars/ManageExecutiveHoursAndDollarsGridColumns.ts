@@ -1,5 +1,6 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { viewBadgeRenderer } from "../../utils/masterInquiryLink";
+import { currencyFormat } from "utils/numberUtils";
 
 // The default is to show all columns, but if the mini flag is set to true, only show the
 // badge, name, and ssn columns
@@ -62,7 +63,8 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      editable: !mini
+      editable: !mini,
+      valueFormatter: (params) => currencyFormat(params.value)
     },
     {
       headerName: "ORA HRS LAST",
@@ -80,7 +82,8 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       minWidth: 150,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true
+      resizable: true,
+      valueFormatter: (params) => currencyFormat(params.value)
     },
     {
       headerName: "FREQ",
