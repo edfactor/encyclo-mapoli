@@ -243,6 +243,7 @@ definitions:
 
         - dotnet --info
         - dotnet nuget list source
+        - dotnet nuget enable source nuget.org
         - dotnet workload update
         - dotnet workload install aspire
         - dotnet restore -p:RestoreAdditionalProjectSources=https://api.nuget.org/v3/index.json
@@ -256,6 +257,9 @@ definitions:
             Write-Host "No vulnerabilities found."
             exit 0
           }
+
+        - dotnet nuget disable source nuget.org
+
 
     audit-frontend: &audit-frontend
       name: "Check frontend for vulnerabilities"
