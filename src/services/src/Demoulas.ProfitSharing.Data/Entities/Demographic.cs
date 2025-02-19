@@ -68,6 +68,7 @@ public sealed class Demographic : Member
     public List<ProfitShareCheck> Checks { get; set; } = [];
     public List<DistributionRequest> DistributionRequests { get; set; } = [];
 
+    public List<DemographicSsnChangeHistory> DemographicSsnChangeHistories { get; set; } = [];
 
     /// <summary>
     /// Gets or sets the date and time when the demographic entity was last modified.

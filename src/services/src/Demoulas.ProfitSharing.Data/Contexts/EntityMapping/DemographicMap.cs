@@ -208,5 +208,9 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
 
         builder.HasMany(d => d.DistributionRequests).WithOne()
             .HasForeignKey(p => p.DemographicId);
+
+        builder.HasMany(d => d.DemographicSsnChangeHistories)
+            .WithOne(d=> d.Demographic)
+            .HasForeignKey(p => p.DemographicId);
     }
 }

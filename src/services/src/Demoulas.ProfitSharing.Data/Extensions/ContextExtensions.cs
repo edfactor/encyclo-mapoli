@@ -1,6 +1,7 @@
 ﻿using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.MassTransit;
+using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Data.Extensions;
@@ -21,6 +22,7 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new DemographicHistoryMap());
         modelBuilder.ApplyConfiguration(new DemographicSyncAuditMap());
         modelBuilder.ApplyConfiguration(new DistributionFrequencyMap());
+        modelBuilder.ApplyConfiguration(new DemographicSsnChangeHistoryMap());
         modelBuilder.ApplyConfiguration(new DistributionMap());
         modelBuilder.ApplyConfiguration(new DistributionPayeeMap());
         modelBuilder.ApplyConfiguration(new DistributionRequestMap());
