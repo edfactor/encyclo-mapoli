@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { stat } from "fs";
 import {
   ContributionsByAge,
   ForfeituresByAge,
@@ -41,7 +42,10 @@ export interface YearsEndState {
   militaryAndRehireProfitSummary: PagedReportResponse<MilitaryAndRehireProfitSummary> | null;
   distributionsAndForfeitures: PagedReportResponse<DistributionsAndForfeitures> | null;
   executiveHoursAndDollars: PagedReportResponse<ExecutiveHoursAndDollars> | null;
+  additionalExecutivesGrid: PagedReportResponse<ExecutiveHoursAndDollars> | null;
   executiveHoursAndDollarsGrid: ExecutiveHoursAndDollarsGrid | null;
+  additionalExecutivesChosen: ExecutiveHoursAndDollars[] | null;
+  executiveRowsSelected: ExecutiveHoursAndDollars[] | null;
   eligibleEmployees: EligibleEmployeeResponseDto | null;
   masterInquiryData: Paged<MasterInquiryDetail> | null;
   masterInquiryEmployeeDetails: EmployeeDetails | null;
@@ -67,6 +71,9 @@ export interface YearsEndState {
 }
 
 const initialState: YearsEndState = {
+  additionalExecutivesGrid: null,
+  executiveRowsSelected: null,
+  additionalExecutivesChosen: null,
   duplicateSSNsData: null,
   demographicBadges: null,
   duplicateNamesAndBirthday: null,
@@ -106,6 +113,9 @@ export const yearsEndSlice = createSlice({
   name: "yearsEnd",
   initialState,
   reducers: {
+    setDuplicateSSNsData: (state, action: PayloadAction<PagedReportResponse<DuplicateSSNDetail>>) => {
+      state.duplicateSSNsData = action.payload;
+    },
     setDuplicateSSNsData: (state, action: PayloadAction<PagedReportResponse<DuplicateSSNDetail>>) => {
       state.duplicateSSNsData = action.payload;
     },
@@ -153,6 +163,28 @@ export const yearsEndSlice = createSlice({
     },
     setExecutiveHoursAndDollars: (state, action: PayloadAction<PagedReportResponse<ExecutiveHoursAndDollars>>) => {
       state.executiveHoursAndDollars = action.payload;
+    },
+    setAdditionalExecutivesGrid: (state, action: PayloadAction<PagedReportResponse<ExecutiveHoursAndDollars>>) => {
+      state.additionalExecutivesGrid = action.payload;
+    },
+    setAdditionalExecutivesChosen: (state, action: PayloadAction<ExecutiveHoursAndDollars[]>) => {
+      if (state.additionalExecutivesChosen === null) {
+        state.additionalExecutivesChosen = action.payload;
+      } else {
+        state.additionalExecutivesChosen.push(...action.payload);
+      }
+    },
+    setExecutiveRowsSelected: (state, action: PayloadAction<ExecutiveHoursAndDollars[]>) => {
+      state.executiveRowsSelected = action.payload;
+    },
+    clearExecutiveRowsSelected: (state) => {
+      state.executiveRowsSelected = null;
+    },
+    clearAdditionalExecutivesGrid: (state) => {
+      state.additionalExecutivesGrid = null;
+    },
+    clearAdditionalExecutivesChosen: (state) => {
+      state.additionalExecutivesChosen = null;
     },
     setExecutiveHoursAndDollarsGrid: (state, action: PayloadAction<ExecutiveHoursAndDollarsGrid>) => {
       state.executiveHoursAndDollarsGrid = action.payload;
@@ -407,6 +439,12 @@ export const {
   setProfitMasterRevertLoading,
   clearProfitMasterRevert,
 
+  setExecutiveRowsSelected,
+  clearExecutiveRowsSelected,
+  setAdditionalExecutivesGrid,
+  clearAdditionalExecutivesGrid,
+  setAdditionalExecutivesChosen,
+  clearAdditionalExecutivesChosen,
   setExecutiveHoursAndDollarsGridYear,
   updateExecutiveHoursAndDollarsGridRow,
   removeExecutiveHoursAndDollarsGridRow,

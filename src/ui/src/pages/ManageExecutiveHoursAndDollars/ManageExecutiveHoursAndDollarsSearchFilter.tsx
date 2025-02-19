@@ -1,12 +1,20 @@
 import { Checkbox, FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { useForm, Controller } from "react-hook-form";
-import { useLazyGetExecutiveHoursAndDollarsQuery } from "reduxstore/api/YearsEndApi";
+import {
+  useLazyGetExecutiveHoursAndDollarsQuery,
+  useLazyGetAdditionalExecutivesQuery
+} from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { setExecutiveHoursAndDollarsGridYear } from "reduxstore/slices/yearsEndSlice";
+import { RootState } from "reduxstore/store";
+import { clearAdditionalExecutivesChosen, setExecutiveHoursAndDollarsGridYear } from "reduxstore/slices/yearsEndSlice";
+
+export interface WrapperProps {
+  isModal?: boolean;
+}
 
 interface ExecutiveHoursAndDollarsSearch {
   profitYear: number;
@@ -28,6 +36,8 @@ const schema = yup.object().shape({
     .number()
     .typeError("Badge Number must be a number")
     .integer("Badge Number must be an integer")
+    .min(0, "Badge must be positive")
+    .max(9999999, "Badge must be 7 digits or less")
     .nullable(),
   socialSecurity: yup
     .number()
@@ -40,29 +50,42 @@ const schema = yup.object().shape({
   hasExecutiveHoursAndDollars: yup.boolean().default(false).required()
 });
 
-const ManageExecutiveHoursAndDollarsSearchFilter = () => {
+// If we are using a modal window, we want a slimmed down version of the search filter
+// and we will
+const ManageExecutiveHoursAndDollarsSearchFilter = (props: WrapperProps) => {
+  const { executiveHoursAndDollarsGrid } = useSelector((state: RootState) => state.yearsEnd);
+
   const [triggerSearch, { isFetching }] = useLazyGetExecutiveHoursAndDollarsQuery();
+  const [triggerModalSearch, { isFetching: isModalFetching }] = useLazyGetAdditionalExecutivesQuery();
 
   const dispatch = useDispatch();
+
+  let selectedProfitYear = undefined;
+
+  if (props.isModal) {
+    selectedProfitYear = executiveHoursAndDollarsGrid?.profitYear || undefined;
+  }
 
   const {
     control,
     handleSubmit,
     formState: { errors, isValid },
-    reset
+    reset,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    trigger // need this unused param to prevent console errors. No idea why - EL
   } = useForm<ExecutiveHoursAndDollarsSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: undefined,
-      fullNameContains: "",
-      badgeNumber: null,
-      socialSecurity: null,
-      hasExecutiveHoursAndDollars: false
+      profitYear: selectedProfitYear
     }
   });
 
   const validateAndSearch = handleSubmit((data) => {
-    if (isValid) {
+    // If there are any stored additional executives, we
+    // should delete them, regardless of modal or not
+    //dispatch(clearAdditionalExecutivesChosen());
+
+    if (isValid && !props.isModal) {
       triggerSearch(
         {
           pagination: { skip: 0, take: 25 },
@@ -74,11 +97,32 @@ const ManageExecutiveHoursAndDollarsSearchFilter = () => {
         },
         false
       );
+      // If we are not in a modal, we need to set the profit year we are working with
+      // If we are in a modal, we already have this set
+
       // Now we need to set the Grid pending state's
       // profit year. We have to do it via redux because
       // the grid data has no mention of profit year,
       // but we need the year to submit changes.
       dispatch(setExecutiveHoursAndDollarsGridYear(data.profitYear));
+
+      dispatch(clearAdditionalExecutivesChosen());
+    }
+
+    // A difference in modal is that we are not filtering for having executive hours
+    // and dollars being there
+    if (isValid && props.isModal) {
+      triggerModalSearch(
+        {
+          pagination: { skip: 0, take: 25 },
+          profitYear: data.profitYear,
+          ...(!!data.socialSecurity && { socialSecurity: data.socialSecurity }),
+          ...(!!data.badgeNumber && { badgeNumber: data.badgeNumber }),
+          hasExecutiveHoursAndDollars: false,
+          ...(!!data.fullNameContains && { fullNameContains: data.fullNameContains })
+        },
+        false
+      );
     }
   });
 
@@ -90,11 +134,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter = () => {
     // from reduxstore/slices/yearsEndSlice
 
     reset({
-      profitYear: undefined,
-      fullNameContains: null,
-      badgeNumber: null,
-      socialSecurity: null,
-      hasExecutiveHoursAndDollars: false
+      profitYear: undefined
     });
   };
 
@@ -107,29 +147,31 @@ const ManageExecutiveHoursAndDollarsSearchFilter = () => {
           container
           spacing={3}
           width="100%">
-          <Grid2
-            xs={12}
-            sm={6}
-            md={3}>
-            <FormLabel>Profit Year</FormLabel>
-            <Controller
-              name="profitYear"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  variant="outlined"
-                  error={!!errors.profitYear}
-                  onChange={(e) => {
-                    field.onChange(e);
-                  }}
-                  inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
-                />
-              )}
-            />
-            {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
-          </Grid2>
+          {!props.isModal && (
+            <Grid2
+              xs={12}
+              sm={6}
+              md={3}>
+              <FormLabel>Profit Year</FormLabel>
+              <Controller
+                name="profitYear"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    variant="outlined"
+                    error={!!errors.profitYear}
+                    onChange={(e) => {
+                      field.onChange(e);
+                    }}
+                    inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                  />
+                )}
+              />
+              {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
+            </Grid2>
+          )}
           <Grid2
             xs={12}
             sm={6}
@@ -168,6 +210,12 @@ const ManageExecutiveHoursAndDollarsSearchFilter = () => {
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.socialSecurity}
+                  onChange={(e) => {
+                    if (!isNaN(Number(e.target.value))) {
+                      const parsedValue = e.target.value === "" ? null : Number(e.target.value);
+                      field.onChange(parsedValue);
+                    }
+                  }}
                 />
               )}
             />
@@ -186,46 +234,60 @@ const ManageExecutiveHoursAndDollarsSearchFilter = () => {
                   {...field}
                   fullWidth
                   variant="outlined"
+                  value={field.value ?? ""}
                   error={!!errors.badgeNumber}
                   onChange={(e) => {
-                    const parsedValue = e.target.value === "" ? null : Number(e.target.value);
-                    field.onChange(parsedValue);
+                    if (!isNaN(Number(e.target.value))) {
+                      const parsedValue = e.target.value === "" ? null : Number(e.target.value);
+                      field.onChange(parsedValue);
+                    }
                   }}
-                  inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                  //inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
                 />
               )}
             />
             {errors.badgeNumber && <FormHelperText error>{errors.badgeNumber.message}</FormHelperText>}
           </Grid2>
-          <Grid2
-            xs={12}
-            sm={6}
-            md={3}>
-            <FormLabel>Has Executive Hours and Dollars</FormLabel>
-            <Controller
-              name="hasExecutiveHoursAndDollars"
-              control={control}
-              render={({ field }) => (
-                <Checkbox
-                  checked={field.value}
-                  onChange={field.onChange}
-                />
+          {!props.isModal && (
+            <Grid2
+              xs={12}
+              sm={6}
+              md={3}>
+              <FormLabel>Has Executive Hours and Dollars</FormLabel>
+              <Controller
+                name="hasExecutiveHoursAndDollars"
+                control={control}
+                render={({ field }) => (
+                  <Checkbox
+                    checked={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+              {errors.hasExecutiveHoursAndDollars && (
+                <FormHelperText error>{errors.hasExecutiveHoursAndDollars.message}</FormHelperText>
               )}
-            />
-            {errors.hasExecutiveHoursAndDollars && (
-              <FormHelperText error>{errors.hasExecutiveHoursAndDollars.message}</FormHelperText>
-            )}
-          </Grid2>
+            </Grid2>
+          )}
         </Grid2>
       </Grid2>
       <Grid2
         width="100%"
         paddingX="24px">
-        <SearchAndReset
-          handleReset={handleReset}
-          handleSearch={validateAndSearch}
-          isFetching={isFetching}
-        />
+        {!props.isModal && (
+          <SearchAndReset
+            handleReset={handleReset}
+            handleSearch={validateAndSearch}
+            isFetching={isFetching}
+          />
+        )}
+        {props.isModal && (
+          <SearchAndReset
+            handleReset={handleReset}
+            handleSearch={validateAndSearch}
+            isFetching={isModalFetching}
+          />
+        )}
       </Grid2>
     </form>
   );
