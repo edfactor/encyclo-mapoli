@@ -18,6 +18,7 @@ import DistributionByAge from "../../pages/DistributionByAge/DistributionByAge";
 import ContributionsByAge from "../../pages/ContributionsByAge/ContributionsByAge";
 import ForfeituresByAge from "../../pages/ForfeituresByAge/ForfeituresByAge";
 import BalanceByAge from "../../pages/BalanceByAge/BalanceByAge";
+import YTDWages from "../../pages/YTDWagesExtract/YTDWages";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { setImpersonating } from "reduxstore/slices/securitySlice";
@@ -115,16 +116,13 @@ const Router = () => {
             paddingTop: "8px",
             marginLeft: "24px",
             marginRight: "24px"
-          }}
-        >
+          }}>
           <DSMDynamicBreadcrumbs />
         </Box>
       </Box>
       <RouteSecurity oktaEnabled={oktaEnabled}>
-
         <Route
           path={ROUTES.DEMOGRAPHIC_BADGES}
-
           element={<DemographicBadgesNotInPayprofit />}></Route>
         <Route
           path={ROUTES.DUPLICATE_SSNS}
@@ -156,6 +154,9 @@ const Router = () => {
         <Route
           path={ROUTES.ELIGIBLE_EMPLOYEES}
           element={<EligibleEmployees />}></Route>
+        <Route
+          path={ROUTES.YTD_WAGES_EXTRACT}
+          element={<YTDWages />}></Route>
         <Route
           path={`${ROUTES.MASTER_INQUIRY}/:badgeNumber?`}
           element={<MasterInquiry />}></Route>
@@ -207,21 +208,41 @@ const Router = () => {
         <Route
           path={ROUTES.PROFIT_SHARE_REPORT_EDIT_RUN}
           element={<ProfitShareReportEditRun />}></Route>
-        <Route path={ROUTES.PROFIT_SHARE_REPORT_FINAL_RUN} element={<ProfitShareReportFinalRun />}></Route>
+        <Route
+          path={ROUTES.PROFIT_SHARE_REPORT_FINAL_RUN}
+          element={<ProfitShareReportFinalRun />}></Route>
         <Route
           path={ROUTES.PROFIT_SHARE_UPDATE}
           element={<ProfitShareUpdate />}></Route>
-        <Route path={ROUTES.PAY426_ACTIVE_18_20} element={<EighteenToTwenty />}></Route>
+        <Route
+          path={ROUTES.PAY426_ACTIVE_18_20}
+          element={<EighteenToTwenty />}></Route>
         <Route
           path=""
           element={<DecemberProcessAccordion />}></Route>
-        <Route path={ROUTES.PROFIT_SHARE_BY_STORE} element={<ProfitShareByStore />}></Route>
-        <Route path={ROUTES.PROFIT_SHARE_GROSS_REPORT} element={<ProfitShareByStore />}></Route>
-        <Route path={ROUTES.PAYMASTER_UPDATE} element={<PaymasterUpdate />}></Route>
-        <Route path={ROUTES.PAY450_SUMMARY} element={<Pay450Summary />}></Route>
-        <Route path={ROUTES.PROF_CTRLSHEET} element={<ProfCtrlSheet />}></Route>
-        <Route path={ROUTES.PROFIT_SHARE_BY_STORE} element={<ProfitShareByStore />}></Route>
-        <Route path={ROUTES.UNDER_21_REPORT} element={<Under21Report />}> </Route>
+        <Route
+          path={ROUTES.PROFIT_SHARE_BY_STORE}
+          element={<ProfitShareByStore />}></Route>
+        <Route
+          path={ROUTES.PROFIT_SHARE_GROSS_REPORT}
+          element={<ProfitShareByStore />}></Route>
+        <Route
+          path={ROUTES.PAYMASTER_UPDATE}
+          element={<PaymasterUpdate />}></Route>
+        <Route
+          path={ROUTES.PAY450_SUMMARY}
+          element={<Pay450Summary />}></Route>
+        <Route
+          path={ROUTES.PROF_CTRLSHEET}
+          element={<ProfCtrlSheet />}></Route>
+        <Route
+          path={ROUTES.PROFIT_SHARE_BY_STORE}
+          element={<ProfitShareByStore />}></Route>
+        <Route
+          path={ROUTES.UNDER_21_REPORT}
+          element={<Under21Report />}>
+          {" "}
+        </Route>
       </RouteSecurity>
     </BrowserRouter>
   );
