@@ -234,7 +234,7 @@ definitions:
       runs-on:
         - windows
         - self.hosted
-        - appt167
+        - appt125
       script:
         - $env:SolutionDir = ".\src\services"        
         - echo "Checking dotnet vulnerabilities"
