@@ -1,20 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services
 {
-    public class FakeSsnService<THistory> where THistory : SsnChangeHistory, new()
+    public class FakeSsnService
     {
         private readonly IProfitSharingDataContextFactory _dataContextFactory;
         private static readonly Random _random = new Random();
-        private static readonly HashSet<int> ReservedSsns = new() { 78051120, 219099999 };
+        private static readonly HashSet<int> _reservedSsns = new() { 78051120, 219099999 };
 
-        private static readonly List<int> ReservedRange =
+        private static readonly List<int> _reservedRange =
             Enumerable.Range(4320, 10).Select(n => int.Parse($"98765{n:D4}")).ToList();
 
         public FakeSsnService(IProfitSharingDataContextFactory dataContextFactory)
@@ -22,9 +18,9 @@ namespace Demoulas.ProfitSharing.Services
             _dataContextFactory = dataContextFactory;
         }
 
-        public async Task<int> GenerateFakeSsnAsync(CancellationToken cancellationToken)
+        public Task<int> GenerateFakeSsnAsync(CancellationToken cancellationToken)
         {
-            await _dataContextFactory.UseWritableContext(c =>
+            return _dataContextFactory.UseWritableContext(async c =>
             {
                 int ssn;
                 do
@@ -34,31 +30,32 @@ namespace Demoulas.ProfitSharing.Services
                     int serial = _random.Next(1, 10000);
 
                     ssn = int.Parse($"{area:D3}{group:D2}{serial:D4}");
-                } while (IsReservedOrExists(ssn, c));
+                } while (await IsReservedOrExists(ssn, c, cancellationToken));
 
 
-                var fakeSsnEntry = new THistory { Ssn = ssn };
+                var fakeSsnEntry = new FakeSsn { Ssn = ssn };
                 c.FakeSsns.Add(fakeSsnEntry);
-                return c.SaveChangesAsync(cancellationToken);
+                await c.SaveChangesAsync(cancellationToken);
+
+                return ssn;
             }, cancellationToken);
-            return ssn;
         }
 
-        private bool IsReservedOrExists(int ssn, IProfitSharingDbContext context)
+        private static async Task<bool> IsReservedOrExists(int ssn, IProfitSharingDbContext context, CancellationToken cancellationToken)
         {
-            return ReservedSsns.Contains(ssn) || ReservedRange.Contains(ssn) || context.FakeSsns.Any(f => f.Ssn == ssn);
+            return _reservedSsns.Contains(ssn) || _reservedRange.Contains(ssn) || await context.FakeSsns.AnyAsync(f => f.Ssn == ssn, cancellationToken);
         }
 
-        public Task TrackSsnChangeAsync(int oldSsn, int newSsn, CancellationToken cancellationToken)
+        public Task TrackSsnChangeAsync<THistory>(int oldSsn, int newSsn, CancellationToken cancellationToken) where THistory : SsnChangeHistory, new()
         {
-            _dataContextFactory.UseWritableContext(c =>
+            return _dataContextFactory.UseWritableContext(async c =>
             {
-                var historyEntry = new SsnChangeHistory
+                var historyEntry = new THistory
                 {
                     OldSsn = oldSsn, NewSsn = newSsn, ChangeDateUtc = DateTimeOffset.UtcNow
                 };
-                c.SsnChangeHistories.Add(historyEntry);
-                c.SaveChanges();
+                c.Entry<THistory>(historyEntry);
+                await c.SaveChangesAsync(cancellationToken);
             }, cancellationToken);
         }
     }

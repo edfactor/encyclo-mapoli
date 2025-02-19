@@ -8,7 +8,8 @@ namespace Demoulas.ProfitSharing.Data.Extensions;
 internal static class ContextExtensions
 {
     public static ModelBuilder ApplyModelConfiguration(this ModelBuilder modelBuilder)
-    {
+    {   
+        modelBuilder.ApplyConfiguration(new FakeSsnMap());
         modelBuilder.ApplyConfiguration(new DataImportRecordMap());
         modelBuilder.ApplyConfiguration(new BeneficiaryContactMap());
         modelBuilder.ApplyConfiguration(new BeneficiaryKindMap());
