@@ -35,64 +35,65 @@ public class CleanupReportService : ICleanupReportService
 
     }
 
-    public Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsnAsync(ProfitYearRequest req, CancellationToken ct)
+    public Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsnAsync(PaginationRequestDto req, CancellationToken ct)
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var dupSsns = await ctx.Demographics.GroupBy(x => x.Ssn).Where(x => x.Count() > 1).Select(x => x.Key).ToListAsync(cancellationToken: ct);
+            int cutoffYear = DateTime.UtcNow.Year - 5;
 
-            var rslts = await (from dem in ctx.Demographics
-                               join pdJoin in ctx.ProfitDetails on dem.Ssn equals pdJoin.Ssn into demPdJoin
-                               from pd in demPdJoin.DefaultIfEmpty()
-                               join pp in ctx.PayProfits on dem.Id equals pp.DemographicId into DemPdPpJoin
-                               from DemPdPp in DemPdPpJoin.DefaultIfEmpty()
-                               where DemPdPp.ProfitYear == req.ProfitYear && dupSsns.Contains(dem.Ssn)
-                               group new { dem, DemPdPp }
-                                   by new
-                                   {
-                                       BadgeNumber = dem.BadgeNumber,
-                                       SSN = dem.Ssn,
-                                       dem.ContactInfo.FullName,
-                                       dem.Address.Street,
-                                       dem.Address.City,
-                                       dem.Address.State,
-                                       dem.Address.PostalCode,
-                                       dem.HireDate,
-                                       dem.TerminationDate,
-                                       dem.ReHireDate,
-                                       dem.EmploymentStatusId,
-                                       dem.StoreNumber,
-                                       DemPdPp.CurrentHoursYear,
-                                       DemPdPp.CurrentIncomeYear
-                                   }
-                    into grp
-                               select new PayrollDuplicateSsnResponseDto
-                               {
-                                   BadgeNumber = grp.Key.BadgeNumber,
-                                   Ssn = grp.Key.SSN.MaskSsn(),
-                                   Name = grp.Key.FullName,
-                                   Address = new AddressResponseDto
-                                   {
-                                       Street = grp.Key.Street,
-                                       City = grp.Key.City,
-                                       State = grp.Key.State,
-                                       PostalCode = grp.Key.PostalCode,
-                                       CountryIso = Country.Constants.Us
-                                   },
-                                   HireDate = grp.Key.HireDate,
-                                   TerminationDate = grp.Key.TerminationDate,
-                                   RehireDate = grp.Key.ReHireDate,
-                                   Status = grp.Key.EmploymentStatusId,
-                                   StoreNumber = grp.Key.StoreNumber,
-                                   ProfitSharingRecords = grp.Count(),
-                                   HoursCurrentYear = grp.Key.CurrentHoursYear,
-                                   IncomeCurrentYear = grp.Key.CurrentIncomeYear,
-                               }
-                ).ToPaginationResultsAsync(req, ct);
+            var dupSsns = await ctx.Demographics
+                .GroupBy(x => x.Ssn)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key)
+                .ToHashSetAsync(ct);
 
-            return new ReportResponseBase<PayrollDuplicateSsnResponseDto> { ReportDate = DateTimeOffset.Now, ReportName = "Duplicate SSNs", Response = rslts };
+            var rslts = await ctx.Demographics
+                .Where(dem => dupSsns.Contains(dem.Ssn))
+                .Select(dem => new PayrollDuplicateSsnResponseDto
+                {
+                    BadgeNumber = dem.BadgeNumber,
+                    Ssn = dem.Ssn.MaskSsn(),
+                    Name = dem.ContactInfo.FullName,
+                    Address = new AddressResponseDto
+                    {
+                        Street = dem.Address.Street,
+                        City = dem.Address.City,
+                        State = dem.Address.State,
+                        PostalCode = dem.Address.PostalCode,
+                        CountryIso = Country.Constants.Us
+                    },
+                    HireDate = dem.HireDate,
+                    TerminationDate = dem.TerminationDate,
+                    RehireDate = dem.ReHireDate,
+                    Status = dem.EmploymentStatusId,
+                    StoreNumber = dem.StoreNumber,
+                    ProfitSharingRecords = dem.PayProfits.Count(pp => pp.ProfitYear >= cutoffYear),
+                    PayProfits = dem.PayProfits
+                        .Where(pp => pp.ProfitYear >= cutoffYear)
+                        .OrderByDescending(pp => pp.ProfitYear)
+                        .Select(pp => new PayProfitResponseDto
+                        {
+                            DemographicId = pp.DemographicId,
+                            ProfitYear = pp.ProfitYear,
+                            CurrentHoursYear = pp.CurrentHoursYear,
+                            CurrentIncomeYear = pp.CurrentIncomeYear,
+                            WeeksWorkedYear = pp.WeeksWorkedYear,
+                            LastUpdate = pp.LastUpdate,
+                            PointsEarned = pp.PointsEarned,
+                            YearsInPlan = pp.YearsInPlan
+                        }).ToList()
+                })
+                .ToPaginationResultsAsync(req, forceSingleQuery: true, ct);
+
+            return new ReportResponseBase<PayrollDuplicateSsnResponseDto>
+            {
+                ReportDate = DateTimeOffset.Now,
+                ReportName = "Duplicate SSNs",
+                Response = rslts
+            };
         });
     }
+
 
     public async Task<ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>> GetNegativeETVAForSSNsOnPayProfitResponseAsync(ProfitYearRequest req,
         CancellationToken cancellationToken = default)

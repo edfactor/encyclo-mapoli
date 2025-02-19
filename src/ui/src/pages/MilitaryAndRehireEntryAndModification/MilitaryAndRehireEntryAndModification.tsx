@@ -29,7 +29,7 @@ const MilitaryAndRehireEntryAndModification = () => {
   };
 
   return (
-    <Page label="Military Entry and Modification" actionNode={renderActionNode()}>
+    <Page label="Military Entry and Modification (008-13)" actionNode={renderActionNode()}>
         <Grid2
           container
           rowSpacing="24px">

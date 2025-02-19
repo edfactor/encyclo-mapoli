@@ -11,8 +11,7 @@ export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
         minWidth: 80,
         headerClass: "right-align",
         cellClass: "right-align",
-        resizable: true,
-        cellRenderer: (params) => viewBadgeRenderer({ value: params.data.badgeNumber }),
+        resizable: true
       },
       {
         headerName: "SSN",
