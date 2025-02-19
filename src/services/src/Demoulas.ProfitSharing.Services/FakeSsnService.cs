@@ -1,10 +1,11 @@
 ﻿using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services
 {
-    public class FakeSsnService
+    public sealed class FakeSsnService : IFakeSsnService
     {
         private readonly IProfitSharingDataContextFactory _dataContextFactory;
         private static readonly Random _random = new Random();
