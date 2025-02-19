@@ -39,6 +39,7 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
     public virtual DbSet<AccountingPeriod> AccountingPeriods { get; set; }
 
     public virtual DbSet<DataImportRecord> DataImportRecords { get; set; }
+    public DbSet<FakeSsn> FakeSsns { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
