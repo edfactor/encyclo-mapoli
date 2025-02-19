@@ -1,10 +1,7 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request.Military
 {
-    public sealed record MilitaryContributionRequest : YearRequest
+    public sealed record MilitaryContributionRequest : ProfitYearRequest
     {
         public int BadgeNumber { get; init; }
-        public decimal Amount { get; init; }
-        public byte CommentTypeId { get; init; }
-        public DateOnly ContributionDate { get; init; }
     }
 }

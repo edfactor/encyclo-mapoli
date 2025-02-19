@@ -40,7 +40,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         var response = await _cleanupReportClient.GetDuplicateSsnAsync(_paginationRequest, CancellationToken.None);
         response.Should().NotBeNull();
-        response.Response.Results.Count().Should().Be(0); //Duplicate SSNs aren't allowed in our data model, prohibited by primary key on SSN in the demographics table.
+        response.Response.Results.Count().Should().Be(0); 
     }
 
     [Fact(DisplayName = "PS-147: Check Duplicate SSNs (CSV)")]

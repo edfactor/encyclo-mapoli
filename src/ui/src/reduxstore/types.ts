@@ -84,7 +84,7 @@ export interface DuplicateSSNDetail {
   incomeCurrentYear: number;
 }
 
-export interface DuplicateSSNsRequestDto extends ProfitYearRequest {
+export interface DuplicateSSNsRequestDto {
   pagination: PaginationParams;
 }
 
