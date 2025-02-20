@@ -1,15 +1,16 @@
 ﻿using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using EntityFramework.Exceptions.Common;
 using Microsoft.EntityFrameworkCore;
+using Oracle.ManagedDataAccess.Client;
 
 namespace Demoulas.ProfitSharing.Services
 {
     public sealed class FakeSsnService : IFakeSsnService
     {
         private readonly IProfitSharingDataContextFactory _dataContextFactory;
-        private static readonly Random _random = new Random();
-        private static readonly HashSet<int> _reservedSsns = [78051120, 219099999];
+        private static readonly HashSet<int> _reservedSsns = new HashSet<int> { 78051120, 219099999 };
 
         private static readonly List<int> _reservedRange =
             Enumerable.Range(4320, 10).Select(n => int.Parse($"98765{n:D4}")).ToList();
@@ -33,28 +34,59 @@ namespace Demoulas.ProfitSharing.Services
         {
             return _dataContextFactory.UseWritableContext(async c =>
             {
-                int ssn;
-                do
+                const int maxRetries = 10;
+                int tryCount = 0;
+                while (true)
                 {
-                    int area = 666; // Always using 666 for clear indication of fake SSNs
-                    int group = _random.Next(1, 100);
-                    int serial = _random.Next(1, 10000);
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (++tryCount > maxRetries)
+                    {
+                        throw new InvalidOperationException("Could not generate a unique fake SSN after multiple attempts.");
+                    }
 
-                    ssn = int.Parse($"{area:D3}{group:D2}{serial:D4}");
-                } while (await IsReservedOrExists(ssn, c, cancellationToken));
+                    int ssn = await GetNextAvailableSsnAsync(c, cancellationToken);
 
+                    if (await IsReservedOrExists(ssn, c, cancellationToken))
+                    {
+                        continue;
+                    }
 
-                var fakeSsnEntry = new FakeSsn { Ssn = ssn };
-                c.FakeSsns.Add(fakeSsnEntry);
-                await c.SaveChangesAsync(cancellationToken);
-
-                return ssn;
+                    var fakeSsnEntry = new FakeSsn { Ssn = ssn };
+                    c.FakeSsns.Add(fakeSsnEntry);
+                    try
+                    {
+                        await c.SaveChangesAsync(cancellationToken);
+                        return ssn;
+                    }
+                    catch (UniqueConstraintException)
+                    {
+                        // Duplicate key found, continue to try generating a new unique SSN
+                        c.Entry(fakeSsnEntry).State = EntityState.Detached;
+                    }
+                }
             }, cancellationToken);
+        }
+
+        private static async Task<int> GetNextAvailableSsnAsync(IProfitSharingDbContext context, CancellationToken cancellationToken)
+        {
+            int lastSsn = await context.FakeSsns
+                .OrderByDescending(f => f.Ssn)
+                .Select(f => f.Ssn)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            // Ensure the SSN starts with 666
+            if (lastSsn < 666000000)
+            {
+                return 666000001;
+            }
+
+            return lastSsn + 1;
         }
 
         private static async Task<bool> IsReservedOrExists(int ssn, IProfitSharingDbContext context, CancellationToken cancellationToken)
         {
-            return _reservedSsns.Contains(ssn) || _reservedRange.Contains(ssn) || await context.FakeSsns.AnyAsync(f => f.Ssn == ssn, cancellationToken);
+            return _reservedSsns.Contains(ssn) || _reservedRange.Contains(ssn) ||
+                   await context.FakeSsns.AnyAsync(f => f.Ssn == ssn, cancellationToken);
         }
 
         /// <summary>
@@ -73,7 +105,9 @@ namespace Demoulas.ProfitSharing.Services
             {
                 var historyEntry = new THistory
                 {
-                    OldSsn = oldSsn, NewSsn = newSsn, ChangeDateUtc = DateTimeOffset.UtcNow
+                    OldSsn = oldSsn,
+                    NewSsn = newSsn,
+                    ChangeDateUtc = DateTimeOffset.UtcNow
                 };
                 c.Entry(historyEntry);
                 await c.SaveChangesAsync(cancellationToken);
