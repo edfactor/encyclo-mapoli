@@ -55,7 +55,6 @@ const ProfitShareGrossReportParameters = () => {
                     xs={12}
                     sm={6}
                     md={2}>
-                    <FormLabel required>YDate</FormLabel>
                     <Controller
                         name="yDate"
                         control={control}

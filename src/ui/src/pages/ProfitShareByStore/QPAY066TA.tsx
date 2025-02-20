@@ -7,7 +7,7 @@ import Under21ReportSearchFilters from "./Under21SearchFilters";
 
 const QPAY066TA = () => {
     return (
-        <Page label={CAPTIONS.QPAY066TA_REPORT}>
+        <Page label={CAPTIONS.QPAY066TA_UNDER21}>
             <Grid2
                 container
                 rowSpacing="24px">
