@@ -37,7 +37,7 @@ namespace Demoulas.ProfitSharing.Services
 
         /// <summary>
         /// Retrieves the next available SSN value using a database sequence.
-        /// A migration must create the sequence “FakeSsnSeq” (e.g., via migrationBuilder.Sql("CREATE SEQUENCE FakeSsnSeq AS INT START WITH 666000001 INCREMENT BY 1;")).
+        /// A migration must create the sequence “FAKE_SSN_SEQ” (e.g., via migrationBuilder.Sql("CREATE SEQUENCE FAKE_SSN_SEQ AS INT START WITH 666000001 INCREMENT BY 1;")).
         /// </summary>
         private static async Task<int> GetNextSequenceSsnAsync(ProfitSharingDbContext context,
             CancellationToken cancellationToken)
