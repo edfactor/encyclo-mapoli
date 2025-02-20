@@ -5,6 +5,7 @@ import ProfitShareReportSearchFilter from "./ProfitShareReportSearchFilter";
 import ProfitShareReportGrid from "./ProfitShareReportGrid";
 import StatusDropdown, { ProcessStatus } from "components/StatusDropdown";
 import { useNavigate } from "react-router";
+import { MENU_LABELS } from "../../constants";
 
 const ProfitShareReport = () => {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ const ProfitShareReport = () => {
           variant="outlined"
           className="h-10 whitespace-nowrap min-w-fit"
         >
-          December Flow
+          {MENU_LABELS.DECEMBER_ACTIVITIES}
         </Button>
       </div>
     );
