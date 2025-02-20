@@ -1,7 +1,5 @@
 ﻿using System.Data.SqlTypes;
 using System.Runtime.CompilerServices;
-using Bogus;
-using Bogus.Extensions.UnitedStates;
 using Demoulas.ProfitSharing.Common.Contracts.Messaging;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
@@ -11,6 +9,7 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
 using Demoulas.ProfitSharing.OracleHcm.Validators;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.Util.Extensions;
 using MassTransit;
 using ValidationResult = FluentValidation.Results.ValidationResult;
@@ -21,15 +20,17 @@ internal class EmployeeSyncConsumer : IConsumer<MessageRequest<OracleEmployee>>
     private readonly OracleEmployeeValidator _employeeValidator;
     private readonly IDemographicsServiceInternal _demographicsService;
     private readonly OracleHcmConfig _oracleHcmConfig;
-    private readonly Faker _faker = new Faker();
+    private readonly IFakeSsnService _fakeSsnService;
 
     public EmployeeSyncConsumer(OracleEmployeeValidator employeeValidator,
         IDemographicsServiceInternal demographicsServiceInternal,
-        OracleHcmConfig oracleHcmConfig)
+        OracleHcmConfig oracleHcmConfig, 
+        IFakeSsnService fakeSsnService)
     {
         _employeeValidator = employeeValidator;
         _demographicsService = demographicsServiceInternal;
         _oracleHcmConfig = oracleHcmConfig;
+        _fakeSsnService = fakeSsnService;
     }
 
     public Task Consume(ConsumeContext<MessageRequest<OracleEmployee>> context)
@@ -63,7 +64,7 @@ internal class EmployeeSyncConsumer : IConsumer<MessageRequest<OracleEmployee>>
             DateOfBirth = employee.DateOfBirth,
             HireDate = employee.WorkRelationship?.StartDate ?? SqlDateTime.MinValue.Value.ToDateOnly(),
             TerminationDate = employee.WorkRelationship?.TerminationDate,
-            Ssn = (employee.NationalIdentifier?.NationalIdentifierNumber ?? _faker.Person.Ssn()).ConvertSsnToInt(),
+            Ssn = employee.NationalIdentifier?.NationalIdentifierNumber.ConvertSsnToInt() ?? await GetFakeSsn(),
             StoreNumber = employee.WorkRelationship?.Assignment.LocationCode ?? 0,
             DepartmentId = employee.WorkRelationship?.Assignment.GetDepartmentId() ?? 0,
             PayClassificationId = employee.WorkRelationship?.Assignment.JobCode ?? 0,
@@ -99,6 +100,11 @@ internal class EmployeeSyncConsumer : IConsumer<MessageRequest<OracleEmployee>>
                 CountryIso = employee.Address.Country
             }
         };
+        yield break;
+
+        Task<int> GetFakeSsn()
+        {
+            return _fakeSsnService.GenerateFakeSsnAsync(cancellationToken);
+        }
     }
 }
-
