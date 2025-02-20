@@ -3,7 +3,6 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using EntityFramework.Exceptions.Common;
 using Microsoft.EntityFrameworkCore;
-using Oracle.ManagedDataAccess.Client;
 
 namespace Demoulas.ProfitSharing.Services
 {
