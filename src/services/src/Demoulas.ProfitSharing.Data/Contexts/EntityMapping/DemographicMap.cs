@@ -95,7 +95,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             .HasConversion<DateOnlyConverter>();
 
         _ = builder.Property(e => e.EmploymentTypeId)
-            .HasMaxLength(2)
+            .HasMaxLength(1)
             .HasColumnName("EMPLOYMENT_TYPE_ID")
             .HasComment("EmploymentType");
 
