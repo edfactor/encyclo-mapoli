@@ -1,8 +1,10 @@
-﻿using Demoulas.ProfitSharing.Data.Contexts;
+﻿using System.Linq.Expressions;
+using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using Moq;
 
 namespace Demoulas.ProfitSharing.UnitTests
@@ -14,34 +16,49 @@ namespace Demoulas.ProfitSharing.UnitTests
         {
             // Arrange
             var fakeSsnList = new List<FakeSsn>();
-            var fakeSsnDbSetMock = new Mock<DbSet<FakeSsn>>();
-            var fakeSsnQueryable = fakeSsnList.AsQueryable();
-            fakeSsnDbSetMock.As<IQueryable<FakeSsn>>().Setup(m => m.Provider).Returns(fakeSsnQueryable.Provider);
-            fakeSsnDbSetMock.As<IQueryable<FakeSsn>>().Setup(m => m.Expression).Returns(fakeSsnQueryable.Expression);
-            fakeSsnDbSetMock.As<IQueryable<FakeSsn>>().Setup(m => m.ElementType).Returns(fakeSsnQueryable.ElementType);
-            fakeSsnDbSetMock.As<IQueryable<FakeSsn>>().Setup(m => m.GetEnumerator()).Returns(fakeSsnQueryable.GetEnumerator());
-            fakeSsnDbSetMock.Setup(d => d.Add(It.IsAny<FakeSsn>()))
+            var mockSet = new Mock<DbSet<FakeSsn>>();
+            var queryable = fakeSsnList.AsQueryable();
+
+            // Set up sync operations
+            mockSet.As<IQueryable<FakeSsn>>().Setup(m => m.Provider).Returns(queryable.Provider);
+            mockSet.As<IQueryable<FakeSsn>>().Setup(m => m.Expression).Returns(queryable.Expression);
+            mockSet.As<IQueryable<FakeSsn>>().Setup(m => m.ElementType).Returns(queryable.ElementType);
+            mockSet.As<IQueryable<FakeSsn>>().Setup(m => m.GetEnumerator()).Returns(() => queryable.GetEnumerator());
+
+            // Set up async operations
+            // Set up async operations
+            var asyncProvider = new Mock<IAsyncQueryProvider>();
+            asyncProvider
+                .Setup(m => m.ExecuteAsync<bool>(It.IsAny<Expression>(), It.IsAny<CancellationToken>()))
+                .Returns(false);  // Simulate no existing SSN found
+
+            mockSet.As<IQueryable<FakeSsn>>()
+                .Setup(m => m.Provider)
+                .Returns(asyncProvider.Object);
+
+
+            mockSet.Setup(d => d.Add(It.IsAny<FakeSsn>()))
                 .Callback<FakeSsn>(ssn => fakeSsnList.Add(ssn));
 
-            var fakeContextMock = new Mock<ProfitSharingDbContext>();
-            fakeContextMock.Setup(c => c.FakeSsns).Returns(fakeSsnDbSetMock.Object);
-            fakeContextMock.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            var contextMock = new Mock<ProfitSharingDbContext>();
+            contextMock.Setup(c => c.FakeSsns).Returns(mockSet.Object);
+            contextMock.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(1);
 
             var dataContextFactoryMock = new Mock<IProfitSharingDataContextFactory>();
             dataContextFactoryMock
                 .Setup(f => f.UseWritableContext(It.IsAny<Func<ProfitSharingDbContext, Task<int>>>(), It.IsAny<CancellationToken>()))
                 .Returns((Func<ProfitSharingDbContext, Task<int>> func, CancellationToken token) =>
-                    func(fakeContextMock.Object));
+                    func(contextMock.Object));
 
             var service = new FakeSsnService(dataContextFactoryMock.Object);
 
             // Act
             int resultSsn = await service.GenerateFakeSsnAsync(CancellationToken.None);
 
-            // Assert: Verify SSN is in fake format (area 666) and that SaveChangesAsync was invoked.
+            // Assert
             Assert.StartsWith("666", resultSsn.ToString());
-            fakeContextMock.Verify(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+            contextMock.Verify(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
             Assert.Contains(fakeSsnList, f => f.Ssn == resultSsn);
         }
 
@@ -68,12 +85,11 @@ namespace Demoulas.ProfitSharing.UnitTests
             // Act
             await service.TrackSsnChangeAsync<TestSsnChangeHistory>(oldSsn, newSsn, CancellationToken.None);
 
-            // Assert: Verify that the history entry was created and SaveChangesAsync was called once.
+            // Assert
             fakeContextMock.Verify(c => c.Entry(It.Is<TestSsnChangeHistory>(h => h.OldSsn == oldSsn && h.NewSsn == newSsn)), Times.Once);
             fakeContextMock.Verify(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
-        // Dummy implementation of a history record for testing purposes.
         public class TestSsnChangeHistory : SsnChangeHistory
         {
             public TestSsnChangeHistory()
