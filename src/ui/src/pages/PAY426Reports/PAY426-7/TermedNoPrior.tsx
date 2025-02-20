@@ -4,6 +4,7 @@ import { Divider } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import EighteenToTwentySearchFilter from "../PAY426-1/EigteenToTwentySearchFilters";
 import EighteenToTwentyGrid from "../PAY426-1/EighteenToTwentyGrid";
+import TermedNoPriorGrid from "./TermedNoPriorGrid";
 
 const TermedNoPrior = () => {
     return (
@@ -18,7 +19,7 @@ const TermedNoPrior = () => {
                     </DSMAccordion>
                 </Grid2>
                 <Grid2 width="100%">
-                    <EighteenToTwentyGrid />
+                    <TermedNoPriorGrid />
                 </Grid2>
             </Grid2>
         </Page>

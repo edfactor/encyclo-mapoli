@@ -28,7 +28,9 @@ import {
   ProfitShareEditResponse,
   ProfitShareMasterResponse,
   ExecutiveHoursAndDollarsGrid,
-  EmployeeWagesForYear
+  EmployeeWagesForYear,
+  YearEndProfitSharingReportResponse,
+  YearEndProfitSharingEmployee
 } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
 
@@ -71,6 +73,7 @@ export interface YearsEndState {
   profitSharingUpdate: ProfitShareUpdateResponse | ProfitShareEditResponse | ProfitShareMasterResponse | null;
   employeeWagesForCurrentYear: PagedReportResponse<EmployeeWagesForYear> | null;
   employeeWagesForPreviousYear: PagedReportResponse<EmployeeWagesForYear> | null;
+  yearEndProfitSharingReport: PagedReportResponse<YearEndProfitSharingEmployee> | null;
 }
 
 const initialState: YearsEndState = {
@@ -111,7 +114,8 @@ const initialState: YearsEndState = {
   profitSharingUpdate: null,
   militaryAndRehireEntryAndModification: null,
   employeeWagesForCurrentYear: null,
-  employeeWagesForPreviousYear: null
+  employeeWagesForPreviousYear: null,
+  yearEndProfitSharingReport: null
 };
 
 export const yearsEndSlice = createSlice({
@@ -253,9 +257,9 @@ export const yearsEndSlice = createSlice({
         // So if we do not have the year, or the grid is not there, we have nothing to do
         console.log(
           "WARN: Tried to remove a non-existent exec dollars and hours row with badge: " +
-            action.payload.executiveHoursAndDollars[0].badgeNumber +
-            " and profit year: " +
-            action.payload.profitYear
+          action.payload.executiveHoursAndDollars[0].badgeNumber +
+          " and profit year: " +
+          action.payload.profitYear
         );
       }
     },
@@ -405,6 +409,13 @@ export const yearsEndSlice = createSlice({
 
     setMilitaryAndRehireEntryAndModificationEmployeeDetails: (state, action: PayloadAction<EmployeeDetails>) => {
       state.militaryAndRehireEntryAndModification = action.payload;
+    },
+    setYearEndProfitSharingReport: (state, action: PayloadAction<YearEndProfitSharingReportResponse>) => {
+      state.yearEndProfitSharingReport = action.payload;
+    },
+    clearYearEndProfitSharingReport: (state) => {
+      state.yearEndProfitSharingReport = null;
+
     }
   }
 });
@@ -460,6 +471,9 @@ export const {
   addExecutiveHoursAndDollarsGridRow,
 
   setEmployeeWagesForCurrentYear,
-  setEmployeeWagesForPreviousYear
+  setEmployeeWagesForPreviousYear,
+
+  setYearEndProfitSharingReport,
+  clearYearEndProfitSharingReport
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

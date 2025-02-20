@@ -1,40 +1,20 @@
 import { Button, Typography } from "@mui/material";
-import { useEffect, useMemo } from "react";
-import { useDispatch } from "react-redux";
+import { useMemo, useEffect } from "react";
 import { DSMGrid } from "smart-ui-library";
-import { GetProfitSharingReportGridColumns } from "./EighteenToTwentyGridColumns";
 import { useNavigate } from "react-router";
-import { ICellRendererParams } from "ag-grid-community";
+import { GetProfitSharingReportGridColumns } from "../PAY426-1/EighteenToTwentyGridColumns";
 import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
 
-interface EmployeeData {
-    badge: number;
-    employeeName: string;
-    store: number;
-    type: string;
-    dateOfBirth: string;
-    age: number;
-    ssn: string;
-    wages: number;
-    hours: number;
-    points: number;
-    new: string;
-    termDate: string | null;
-    currentBalance: number;
-    svc: number;
-}
-
-const EighteenToTwentyGrid = () => {
-
+const TwentyOnePlusGrid = () => {
     const navigate = useNavigate();
-
-    const [trigger, { data, isLoading, error }] = useLazyGetYearEndProfitSharingReportQuery();
+    
+    const [trigger, { data, isLoading }] = useLazyGetYearEndProfitSharingReportQuery();
 
     useEffect(() => {
         trigger({
             isYearEnd: true,
-            minimumAgeInclusive: 17,
-            maximumAgeInclusive: 20,
+            minimumAgeInclusive: 21,
+            maximumAgeInclusive: 200,
             minimumHoursInclusive: 999.9,
             maximumHoursInclusive: 4000,
             includeActiveEmployees: true,
@@ -52,35 +32,18 @@ const EighteenToTwentyGrid = () => {
         });
     }, [trigger]);
 
-    const getPinnedBottomRowData = (data: any[]) => {
-
-        return [
-            {
-                employeeName: "Total EMPS",
-                store: 1,
-                wages: 100.0,
-                currentBalance: 0
-            },
-            {
-                employeeName: "No Wages",
-                store: 0,
-                wages: 0,
-                currentBalance: 0
-            }
-        ];
-    };
-
-    const viewBadge = (params: ICellRendererParams) => {
-        return (
-            params.value && (
+    const viewBadge = (params: any) => {
+        if (params.value) {
+            return (
                 <Button
                     variant="text"
                     onClick={() => navigate(`/master-inquiry/${params.value}`)}
                 >
                     {params.value}
                 </Button>
-            )
-        );
+            );
+        }
+        return null;
     };
 
     const columnDefs = useMemo(() => GetProfitSharingReportGridColumns(viewBadge), []);
@@ -91,11 +54,11 @@ const EighteenToTwentyGrid = () => {
                 <Typography
                     variant="h2"
                     sx={{ color: "#0258A5" }}>
-                    {`PROFIT-ELIGIBLE REPORT (${data?.response?.results?.length || 0})`}
+                    {`ACTIVE/INACTIVE 21+ REPORT (${data?.response?.results?.length || 0})`}
                 </Typography>
             </div>
             <DSMGrid
-                preferenceKey={"ELIGIBLE_EMPLOYEES"}
+                preferenceKey={"TWENTYONE_PLUS_EMPLOYEES"}
                 isLoading={isLoading}
                 handleSortChanged={(params) => { }}
                 providedOptions={{
@@ -104,8 +67,7 @@ const EighteenToTwentyGrid = () => {
                 }}
             />
         </>
-
     );
 };
 
-export default EighteenToTwentyGrid;
+export default TwentyOnePlusGrid;
