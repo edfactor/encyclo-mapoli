@@ -9,6 +9,7 @@ namespace Demoulas.ProfitSharing.Data.Entities;
 [DebuggerDisplay("Id={Id} OracleHcmId={OracleHcmId} BadgeNumber={BadgeNumber} FullName={ContactInfo.FullName} StoreNumber={StoreNumber}")]
 public sealed class Demographic : Member
 {
+    private int _ssn;
     public int Id { get; set; }
 
     /// <summary>
@@ -20,7 +21,38 @@ public sealed class Demographic : Member
     /// </value>
     public required long OracleHcmId { get; set; }
 
-    public required int Ssn { get; set; }
+    /// <summary>
+    /// Gets or sets the Social Security Number (SSN) associated with the demographic entity.
+    /// </summary>
+    /// <remarks>
+    /// Changing the value of this property will automatically record the change in the 
+    /// <see cref="DemographicSsnChangeHistory"/> collection, capturing the old and new SSN values
+    /// along with the timestamp of the change.
+    /// </remarks>
+    /// <value>
+    /// An integer representing the Social Security Number (SSN) of the demographic entity.
+    /// </value>
+    public required int Ssn
+    {
+        get
+        {
+            return _ssn;
+        }
+        set
+        {
+            if (_ssn != value)
+            {
+                DemographicSsnChangeHistories.Add(new DemographicSsnChangeHistory
+                {
+                    OldSsn = _ssn,
+                    NewSsn = value,
+                    ChangeDateUtc = DateTimeOffset.UtcNow
+                });
+                _ssn = value;
+            }
+        }
+    }
+
     public required int BadgeNumber { get; set; }
 
     public required short StoreNumber { get; set; }
@@ -93,7 +125,6 @@ public sealed class Demographic : Member
     public static bool DemographicHistoryEqual(Demographic demo1, Demographic demo2)
     {
         return demo1.OracleHcmId == demo2.OracleHcmId &&
-               //The Oracle HCM process seems to have a random SSN.  Until that settles down, not including SSN changes as a reason to create a new history record.  demo1.Ssn == demo2.Ssn &&
                demo1.BadgeNumber == demo2.BadgeNumber &&
                demo1.StoreNumber == demo2.StoreNumber &&
                demo1.PayClassificationId == demo2.PayClassificationId &&
@@ -106,5 +137,10 @@ public sealed class Demographic : Member
                demo1.PayFrequencyId == demo2.PayFrequencyId &&
                demo1.TerminationCodeId == demo2.TerminationCodeId &&
                demo1.EmploymentStatusId == demo2.EmploymentStatusId;
+    }
+
+    public static bool DemographicSsnHistoryEqual(Demographic demo1, Demographic demo2)
+    {
+        return demo1.Ssn == demo2.Ssn;
     }
 }

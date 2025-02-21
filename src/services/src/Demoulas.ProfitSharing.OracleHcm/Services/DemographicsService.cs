@@ -259,6 +259,8 @@ internal class DemographicsService : IDemographicsServiceInternal
                         newHistoryRecord.ValidFrom = oldHistoryRecord.ValidTo;
                         context.DemographicHistories.Add(newHistoryRecord);
                     }
+
+                    
                 }
             }
             

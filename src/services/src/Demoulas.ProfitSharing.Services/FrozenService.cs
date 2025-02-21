@@ -41,7 +41,7 @@ public class FrozenService: IFrozenService
             {
                 Id = dh.DemographicId,
                 OracleHcmId = dh.OracleHcmId,
-                Ssn = dh.Ssn,
+                Ssn = d.Ssn,
                 BadgeNumber = dh.BadgeNumber,
                 LastModifiedDate = dh.ValidFrom,
                 StoreNumber = dh.StoreNumber,
