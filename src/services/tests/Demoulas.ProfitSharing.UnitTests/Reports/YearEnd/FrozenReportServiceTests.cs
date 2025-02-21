@@ -120,4 +120,20 @@ public class FrozenReportServiceTests : ApiTestBase<Program>
         testRec.Should().NotBeNull();
         testRec.GrossWages.Should().Be(49995 + 25);
     }
+
+    [Fact(DisplayName = "Update Summary Report - PS-394")]
+    public async Task UpdateSummaryReportTests()
+    {
+        //Check unauthorized
+        var request = new ProfitYearRequest() { ProfitYear = 2023, Skip = 0, Take = 255 };
+        var response = await ApiClient.GETAsync<UpdateSummaryReportEndpoint, ProfitYearRequest, UpdateSummaryReportResponse>(request);
+
+        response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+        response = await ApiClient.GETAsync<UpdateSummaryReportEndpoint, ProfitYearRequest, UpdateSummaryReportResponse>(request);
+        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Result.Should().NotBeNull();
+        response.Result.TotalAfterProfitSharingAmount.Should().Be(10849.41m);
+    }
 }

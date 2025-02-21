@@ -28,11 +28,11 @@ public class ProfitShareEditService : IInternalProfitShareEditService
 
     public async Task<ProfitShareEditResponse> ProfitShareEdit(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
-        var records = await getRecords(profitShareUpdateRequest, cancellationToken);
+        var records = await ProfitShareEditRecords(profitShareUpdateRequest, cancellationToken);
         var responseRecords = records.Select(m => new ProfitShareEditMemberRecordResponse
         {
             IsEmployee = false,
-            Badge = m.Badge,
+            BadgeNumber = m.BadgeNumber,
             Psn = m.Psn,
             Name = m.Name,
             Code = m.Code,
@@ -58,12 +58,7 @@ public class ProfitShareEditService : IInternalProfitShareEditService
         };
     }
 
-    public Task<IEnumerable<ProfitShareEditMemberRecord>> ProfitShareEditRecords(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
-    {
-        return getRecords(profitShareUpdateRequest, cancellationToken);
-    }
-
-    private async Task<IEnumerable<ProfitShareEditMemberRecord>> getRecords(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
+    public async Task<IEnumerable<ProfitShareEditMemberRecord>> ProfitShareEditRecords(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
         ProfitShareUpdateResult psur = await _profitShareUpdateService.ProfitShareUpdateInternal(profitShareUpdateRequest, cancellationToken);
 

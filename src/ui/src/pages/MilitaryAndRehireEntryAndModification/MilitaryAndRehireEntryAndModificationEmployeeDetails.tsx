@@ -3,7 +3,7 @@ import Grid2 from "@mui/material/Unstable_Grid2";
 import LabelValueSection from "components/LabelValueSection";
 import React from "react";
 import { EmployeeDetails } from "reduxstore/types";
-import { mmDDYYFormat, numberToCurrency } from "smart-ui-library";
+import { mmDDYYFormat } from "smart-ui-library";
 import { formatPercentage } from "utils/formatPercentage";
 
 interface MilitaryAndRehireEntryAndModificationEmployeeDetailsProps {
@@ -25,35 +25,27 @@ const MilitaryAndRehireEntryAndModificationEmployeeDetails: React.FC<MilitaryAnd
     percentageVested,
     contributionsLastYear,
     enrolled,
-    employeeId,
-    hireDate,
-    terminationDate,
-    reHireDate,
-    storeNumber,
-    beginPSAmount,
-    currentPSAmount,
-    beginVestedAmount,
-    currentVestedAmount
+    badgeNumber
   } = details;
 
   const infoSection = [
     { label: "", value: `${lastName}, ${firstName}` },
     { label: "", value: `${address}` },
     { label: "", value: `${addressCity}, ${addressState} ${addressZipCode}` },
-    { label: "DOB", value: mmDDYYFormat(dateOfBirth) },
-    { label: "SSN", value: `${ssn}` }
+    { label: "Years In Plan", value: yearsInPlan },
   ];
 
   const planSection = [
-    { label: "YTD P/S Hours", value: yearToDateProfitSharingHours },
-    { label: "Years In Plan", value: yearsInPlan },
-    { label: "Percentage Vested", value: formatPercentage(percentageVested) },
-    { label: "Cont Last Year", value: contributionsLastYear ? "Yes" : "No" }
+    { label: "Badge Number", value: badgeNumber },
+    { label: "SSN", value: `${ssn}` },
+    { label: "DOB", value: mmDDYYFormat(dateOfBirth) }
   ];
 
   const employeeSection = [
     { label: "Enrolled", value: enrolled ? "Yes" : "No" },
-    { label: "Emp", value: employeeId },
+    { label: "YTD P/S Hours", value: yearToDateProfitSharingHours },
+    { label: "Percentage Vested", value: formatPercentage(percentageVested) },
+    { label: "Cont Last Year", value: contributionsLastYear ? "Yes" : "No" }
   ];
 
   return (

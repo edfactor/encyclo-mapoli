@@ -2,130 +2,45 @@
 public sealed record PayProfitResponseDto
 {
     /// <summary>
-    /// Profit Sharing Number
+    /// Gets or sets the Oracle HCM (Human Capital Management) identifier.
+    /// This identifier is used to uniquely associate the PayProfit entity with a Demographic/Oracle HCM record.
     /// </summary>
-    public required int BadgeNumber { get; set; }
+    public required int DemographicId { get; set; }
 
     /// <summary>
-    /// Employee social security number
+    /// Gets or sets the year for which the profit is being calculated.
     /// </summary>
-    public required string Ssn { get; set; }
+    /// <value>
+    /// The year represented as a short integer.
+    /// </value>
+    public short ProfitYear { get; set; }
 
     /// <summary>
     /// Hours towards Profit Sharing in the current year (updated weekly)
     /// </summary>
-    public required decimal HoursCurrentYear { get; set; }
+    public decimal CurrentHoursYear { get; set; }
+
 
     /// <summary>
-    /// hours towards PS last year 
+    /// Income (Wage) accumulated so far in the current year (updated weekly)
     /// </summary>
-    public decimal HoursLastYear { get; set; }
-
-    /// <summary>
-    /// Dollars earned by the employee in the current year (updated weekly)
-    /// </summary>
-    public required decimal IncomeCurrentYear { get; set; }
-
-    /// <summary>
-    /// Dollars earned by the employee last year
-    /// </summary>
-    public required decimal IncomeLastYear { get; set; }
-
-    /// <summary>
-    /// amount after applying vesting rules.This can be updated when new transactions occur.For example, QDRO.
-    /// </summary>
-    public required decimal EarningsAfterApplyingVestingRules { get; set; }
-
-    /// <summary>
-    /// earnings on the ETVA value 
-    /// </summary>
-    public required decimal EarningsEtvaValue { get; set; }
-
-    /// <summary>
-    /// secondary earnings 
-    /// </summary>
-    public decimal? SecondaryEarnings { get; set; }
-
-    /// <summary>
-    /// secondary ETVA earnings 
-    /// </summary>
-    public decimal? SecondaryEtvaEarnings { get; set; }
-
-    /// <summary>
-    /// populated when forfeiture happens 
-    /// </summary>
-    public decimal? EarningsPriorEtvaValue { get; set; }
+    public decimal CurrentIncomeYear { get; set; }
 
     /// <summary>
     /// Number of weeks worked in the current year
     /// </summary>
-    public required byte WeeksWorkedYear { get; set; }
+    public byte WeeksWorkedYear { get; set; }
+
+    public DateTime LastUpdate { get; set; }
 
     /// <summary>
-    /// Number of weeks worked last year
+    /// Points Earned (for the ProfitYear).
     /// </summary>
-    public required byte WeeksWorkedLastYear { get; set; }
+    public decimal? PointsEarned { get; set; }
 
     /// <summary>
-    /// Years the company has contributed to the employee 
+    /// Total number of years a member was in the plan.
     /// </summary>
-    public required byte CompanyContributionYears { get; set; }
-
-    /// <summary>
-    /// Date the last PS Certificate was issued
-    /// </summary>
-    public DateOnly? PsCertificateIssuedDate { get; set; }
-
-    /// <summary>
-    /// Year of initial contribution
-    /// </summary>
-    public short InitialContributionYear { get; set; }
-
-    /// <summary>
-    /// Employee net balance as of last year
-    /// </summary>
-    public decimal NetBalanceLastYear { get; set; }
-
-    /// <summary>
-    /// number of dollars earning in PS last year
-    /// </summary>
-    public decimal NumberOfDollarsEarningLastYear { get; set; }
-
-
-    /// <summary>
-    /// points earned last year
-    /// </summary>
-    public ushort PointsEarnedLastYear { get; set; }
-
-    /// <summary>
-    /// Employee vested balance as of last year
-    /// </summary>
-    public decimal VestedBalanceLastYear { get; set; }
-
-    /// <summary>
-    /// employees dollar contribution PS last year 
-    /// </summary>
-    public decimal ContributionAmountLastYear { get; set; }
-
-    /// <summary>
-    /// Employee amount forfeiture to plan last year 
-    /// </summary>
-    public decimal ForfeitureAmountLastYear { get; set; }
-
-    /// <summary>
-    /// Employee enrollment status
-    /// </summary>
-    public required EnrollmentResponseDto? Enrollment { get; set; }
-
-    /// <summary>
-    /// 0=Employee, 1=Beneficiary
-    /// </summary>
-    public required BeneficiaryTypeResponseDto? BeneficiaryType { get; set; }
-
-    /// <summary>
-    /// 0=NOT New in plan last year, 1=New last year    
-    /// </summary>
-    public required EmployeeTypeResponseDto? EmployeeType { get; set; }
-
-    public ZeroContributionReasonResponseDto? ZeroContributionReason { get; set; }
+    public byte YearsInPlan { get; set; }
+   
 }

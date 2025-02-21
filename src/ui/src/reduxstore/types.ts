@@ -84,7 +84,7 @@ export interface DuplicateSSNDetail {
   incomeCurrentYear: number;
 }
 
-export interface DuplicateSSNsRequestDto extends ProfitYearRequest {
+export interface DuplicateSSNsRequestDto {
   pagination: PaginationParams;
 }
 
@@ -103,6 +103,10 @@ export interface DuplicateNameAndBirthdayRequestDto extends ProfitYearRequest {
 }
 
 export interface NegativeEtvaForSSNsOnPayprofitRequestDto extends ProfitYearRequest {
+  pagination: PaginationParams;
+}
+
+export interface EmployeeWagesForYearRequestDto extends ProfitYearRequest {
   pagination: PaginationParams;
 }
 
@@ -231,6 +235,12 @@ export interface ExecutiveHoursAndDollars {
   employmentStatusId: string;
 }
 
+export interface EmployeeWagesForYear {
+  badgeNumber: number;
+  hoursExecutive: number;
+  incomeExecutive: number;
+}
+
 export interface EligibleEmployeesRequestDto extends ProfitYearRequest {
   pagination: PaginationParams;
 }
@@ -292,7 +302,6 @@ export interface MasterInquryRequest {
   socialSecurity?: number;
   comment?: string;
   pagination: PaginationParams;
-  employeeNumber?: string;
   paymentType?: number;
   memberType?: number;
   badgeNumber?: number;
@@ -578,9 +587,9 @@ export interface ProfitShareEditResponse {
 export interface ProfitShareMasterResponse {
   isLoading: boolean;
   reportName: string;
-  beneficiariesEffected: number,
-  employeesEffected: number,
-  etvasEffected: number
+  beneficiariesEffected: number;
+  employeesEffected: number;
+  etvasEffected: number;
 }
 
 export interface FrozenStateResponse {

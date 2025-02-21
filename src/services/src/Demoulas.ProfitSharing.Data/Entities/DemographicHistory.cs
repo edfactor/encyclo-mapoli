@@ -4,11 +4,10 @@ public class DemographicHistory
 {
     public long Id { get; set; }
     public int DemographicId { get; set; }
-    public DateTime ValidFrom { get; set; } = new DateTime(1900, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+    public DateTime ValidFrom { get; set; } = new DateTime(1917, 1, 1, 0, 0, 0, DateTimeKind.Utc);
     public DateTime ValidTo { get; set; } = new DateTime(2100, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
     public required long OracleHcmId { get; set; }
-    public int Ssn { get; set; }
     public int BadgeNumber { get; set; }
     public short StoreNumber { get; set; }
     public byte PayClassificationId { get; set; }
@@ -37,7 +36,6 @@ public class DemographicHistory
         {
             DemographicId = source.Id,
             OracleHcmId = source.OracleHcmId,
-            Ssn = source.Ssn,
             BadgeNumber = source.BadgeNumber,
             StoreNumber = source.StoreNumber,
             PayClassificationId = source.PayClassificationId,

@@ -25607,6 +25607,46 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BeneficiarySsnChangeHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(18)
+                        .HasColumnType("NUMBER(18)")
+                        .HasColumnName("ID");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BeneficiaryId")
+                        .HasPrecision(9)
+                        .HasColumnType("NUMBER(9)")
+                        .HasColumnName("BENEFICIARY_ID");
+
+                    b.Property<DateTimeOffset>("ChangeDateUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("CREATED_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
+
+                    b.Property<int>("NewSsn")
+                        .HasPrecision(9)
+                        .HasColumnType("NUMBER(9)")
+                        .HasColumnName("NEW_SSN");
+
+                    b.Property<int>("OldSsn")
+                        .HasPrecision(9)
+                        .HasColumnType("NUMBER(9)")
+                        .HasColumnName("OLD_SSN");
+
+                    b.HasKey("Id")
+                        .HasName("PK_BENEFICIARY_SSN_CHANGE_HISTORY");
+
+                    b.HasIndex(new[] { "BeneficiaryId" }, "IX_BENEFICIARY")
+                        .HasDatabaseName("IX_BENEFICIARY_SSN_CHANGE_HISTORY_BENEFICIARYID");
+
+                    b.ToTable("BENEFICIARY_SSN_CHANGE_HISTORY", (string)null);
+                });
+
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BeneficiaryType", b =>
                 {
                     b.Property<byte>("Id")
@@ -27225,8 +27265,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.Property<string>("EmploymentTypeId")
                         .IsRequired()
-                        .HasMaxLength(2)
-                        .HasColumnType("NVARCHAR2(2)")
+                        .HasMaxLength(1)
+                        .HasColumnType("NVARCHAR2(1)")
                         .HasColumnName("EMPLOYMENT_TYPE_ID")
                         .HasComment("EmploymentType");
 
@@ -27322,6 +27362,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasDatabaseName("IX_DEMOGRAPHIC_TERMINATIONCODEID");
 
                     b.HasIndex(new[] { "BadgeNumber" }, "IX_BadgeNumber")
+                        .IsUnique()
                         .HasDatabaseName("IX_DEMOGRAPHIC_BADGENUMBER");
 
                     b.HasIndex(new[] { "OracleHcmId" }, "IX_ORACLE_HCM_ID")
@@ -27330,6 +27371,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasIndex(new[] { "Ssn" }, "IX_SSN")
                         .HasDatabaseName("IX_DEMOGRAPHIC_SSN");
+
+                    b.HasIndex(new[] { "Ssn", "BadgeNumber" }, "IX_SSN_BADGE_NUMBER")
+                        .HasDatabaseName("IX_DEMOGRAPHIC_SSN_BADGENUMBER");
 
                     b.HasIndex(new[] { "Ssn", "OracleHcmId" }, "IX_SSN_ORACLE_HCM_ID")
                         .HasDatabaseName("IX_DEMOGRAPHIC_SSN_ORACLEHCMID");
@@ -27379,8 +27423,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.Property<string>("EmploymentTypeId")
                         .IsRequired()
-                        .HasMaxLength(2)
-                        .HasColumnType("NVARCHAR2(2)")
+                        .HasMaxLength(1)
+                        .HasColumnType("NVARCHAR2(1)")
                         .HasColumnName("EMPLOYMENT_TYPE_ID")
                         .HasComment("EmploymentType");
 
@@ -27410,11 +27454,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DATE")
                         .HasColumnName("REHIRE_DATE")
                         .HasComment("ReHireDate");
-
-                    b.Property<int>("Ssn")
-                        .HasPrecision(9)
-                        .HasColumnType("NUMBER(9)")
-                        .HasColumnName("SSN");
 
                     b.Property<short>("StoreNumber")
                         .HasPrecision(4)
@@ -27451,6 +27490,46 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasDatabaseName("IX_DEMOGRAPHIC_HISTORY_DEMOGRAPHICID");
 
                     b.ToTable("DEMOGRAPHIC_HISTORY", (string)null);
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.DemographicSsnChangeHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(18)
+                        .HasColumnType("NUMBER(18)")
+                        .HasColumnName("ID");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset>("ChangeDateUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("CREATED_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
+
+                    b.Property<int>("DemographicId")
+                        .HasPrecision(9)
+                        .HasColumnType("NUMBER(9)")
+                        .HasColumnName("DEMOGRAPHIC_ID");
+
+                    b.Property<int>("NewSsn")
+                        .HasPrecision(9)
+                        .HasColumnType("NUMBER(9)")
+                        .HasColumnName("NEW_SSN");
+
+                    b.Property<int>("OldSsn")
+                        .HasPrecision(9)
+                        .HasColumnType("NUMBER(9)")
+                        .HasColumnName("OLD_SSN");
+
+                    b.HasKey("Id")
+                        .HasName("PK_DEMOGRAPHIC_SSN_CHANGE_HISTORY");
+
+                    b.HasIndex(new[] { "DemographicId" }, "IX_DEMOGRAPHIC")
+                        .HasDatabaseName("IX_DEMOGRAPHIC_SSN_CHANGE_HISTORY_DEMOGRAPHICID");
+
+                    b.ToTable("DEMOGRAPHIC_SSN_CHANGE_HISTORY", (string)null);
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.DemographicSyncAudit", b =>
@@ -28286,6 +28365,30 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             Id = (byte)9,
                             Name = "Previous years enrollment is unknown. (History not previously tracked)"
                         });
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.FakeSsn", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Ssn")
+                        .HasPrecision(9)
+                        .HasColumnType("NUMBER(9)")
+                        .HasColumnName("SSN");
+
+                    b.HasKey("Id")
+                        .HasName("PK_FAKE_SSNS");
+
+                    b.HasIndex(new[] { "Ssn" }, "IX_FAKE_SSN")
+                        .IsUnique()
+                        .HasDatabaseName("IX_FAKE_SSNS_SSN");
+
+                    b.ToTable("FAKE_SSNS", (string)null);
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.FrozenState", b =>
@@ -29270,6 +29373,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("CONTRIBUTION")
                         .HasComment("Contribution to plan from DMB");
 
+                    b.Property<DateTimeOffset>("CreatedUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("CREATED_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
+
                     b.Property<int>("DistributionSequence")
                         .HasColumnType("NUMBER(10)")
                         .HasColumnName("DISTRIBUTION_SEQUENCE");
@@ -30011,6 +30120,18 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BeneficiarySsnChangeHistory", b =>
+                {
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Beneficiary", "Beneficiary")
+                        .WithMany("BeneficiarySsnChangeHistories")
+                        .HasForeignKey("BeneficiaryId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_BENEFICIARY_SSN_CHANGE_HISTORY_BENEFICIARY_BENEFICIARYID");
+
+                    b.Navigation("Beneficiary");
+                });
+
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Demographic", b =>
                 {
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.Department", "Department")
@@ -30214,6 +30335,18 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Navigation("PayFrequency");
 
                     b.Navigation("TerminationCode");
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.DemographicSsnChangeHistory", b =>
+                {
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Demographic", "Demographic")
+                        .WithMany("DemographicSsnChangeHistories")
+                        .HasForeignKey("DemographicId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_DEMOGRAPHIC_SSN_CHANGE_HISTORY_DEMOGRAPHIC_DEMOGRAPHICID");
+
+                    b.Navigation("Demographic");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Distribution", b =>
@@ -30594,6 +30727,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Navigation("TaxCode");
                 });
 
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Beneficiary", b =>
+                {
+                    b.Navigation("BeneficiarySsnChangeHistories");
+                });
+
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.BeneficiaryContact", b =>
                 {
                     b.Navigation("Beneficiaries");
@@ -30609,6 +30747,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Navigation("Beneficiaries");
 
                     b.Navigation("Checks");
+
+                    b.Navigation("DemographicSsnChangeHistories");
 
                     b.Navigation("DistributionRequests");
 

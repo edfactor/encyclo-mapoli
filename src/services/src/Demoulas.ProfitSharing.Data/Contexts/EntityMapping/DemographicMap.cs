@@ -18,6 +18,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
 
         _ = builder.HasIndex(e => e.Ssn, "IX_SSN");
         _ = builder.HasIndex(e => new {e.Ssn, e.OracleHcmId}, "IX_SSN_ORACLE_HCM_ID");
+        _ = builder.HasIndex(e => new { e.Ssn, e.BadgeNumber }, "IX_SSN_BADGE_NUMBER");
 
 
         _ = builder.Property(e => e.Id)
@@ -31,7 +32,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             .ValueGeneratedNever()
             .HasColumnName("SSN");
 
-        _ = builder.HasIndex(e => e.BadgeNumber, "IX_BadgeNumber");
+        _ = builder.HasIndex(e => e.BadgeNumber, "IX_BadgeNumber").IsUnique();
         _ = builder.Property(e => e.BadgeNumber)
             .HasPrecision(7)
             .HasColumnName("BADGE_NUMBER");
@@ -94,7 +95,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             .HasConversion<DateOnlyConverter>();
 
         _ = builder.Property(e => e.EmploymentTypeId)
-            .HasMaxLength(2)
+            .HasMaxLength(1)
             .HasColumnName("EMPLOYMENT_TYPE_ID")
             .HasComment("EmploymentType");
 
@@ -206,6 +207,10 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             .HasForeignKey(p => p.DemographicId);
 
         builder.HasMany(d => d.DistributionRequests).WithOne()
+            .HasForeignKey(p => p.DemographicId);
+
+        builder.HasMany(d => d.DemographicSsnChangeHistories)
+            .WithOne(d=> d.Demographic)
             .HasForeignKey(p => p.DemographicId);
     }
 }

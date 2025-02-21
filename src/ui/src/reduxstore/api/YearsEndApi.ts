@@ -40,7 +40,9 @@ import {
   ProfitShareUpdateRequest,
   ProfitShareUpdateResponse,
   ProfitShareEditResponse,
-  ProfitShareMasterResponse
+  ProfitShareMasterResponse,
+  EmployeeWagesForYear,
+  EmployeeWagesForYearRequestDto
 } from "reduxstore/types";
 import {
   setDemographicBadgesNotInPayprofitData,
@@ -67,7 +69,10 @@ import {
   setProfitEdit,
   clearProfitEdit,
   setProfitMasterApply,
-  setProfitMasterRevert
+  setProfitMasterRevert,
+  setAdditionalExecutivesGrid,
+  setEmployeeWagesForCurrentYear,
+  setEmployeeWagesForPreviousYear
 } from "reduxstore/slices/yearsEndSlice";
 import { url } from "./api";
 
@@ -107,8 +112,7 @@ export const YearsEndApi = createApi({
         method: "GET",
         params: {
           take: params.pagination.take,
-          skip: params.pagination.skip,
-          profitYear: params.profitYear
+          skip: params.pagination.skip
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -327,35 +331,89 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getWagesCurrentYear: builder.query({
+    getEmployeeWagesForCurrentYear: builder.query<
+      PagedReportResponse<EmployeeWagesForYear>,
+      EmployeeWagesForYearRequestDto & { acceptHeader: string }
+    >({
       query: (params) => ({
         url: "yearend/wages-current-year",
         method: "GET",
         params: {
+          profitYear: params.profitYear,
           take: params.pagination.take,
           skip: params.pagination.skip
+        },
+        headers: {
+          Accept: params.acceptHeader
+        },
+        responseHandler: async (response) => {
+          if (params.acceptHeader === "text/csv") {
+            return response.blob();
+          }
+          return response.json();
         }
       }),
-      async onQueryStarted({ dispatch, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
+          dispatch(setEmployeeWagesForCurrentYear(data));
         } catch (err) {
           console.log("Err: " + err);
         }
       }
     }),
-    getWagesPreviousYear: builder.query({
+    getEmployeeWagesForPreviousYear: builder.query<
+      PagedReportResponse<EmployeeWagesForYear>,
+      EmployeeWagesForYearRequestDto & { acceptHeader: string }
+    >({
       query: (params) => ({
-        url: "yearend/wages-previous-year",
+        url: "yearend/wages-current-year",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          take: params.pagination.take,
+          skip: params.pagination.skip
+        },
+        headers: {
+          Accept: params.acceptHeader
+        },
+        responseHandler: async (response) => {
+          if (params.acceptHeader === "text/csv") {
+            return response.blob();
+          }
+          return response.json();
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setEmployeeWagesForPreviousYear(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
+    getAdditionalExecutives: builder.query<
+      PagedReportResponse<ExecutiveHoursAndDollars>,
+      ExecutiveHoursAndDollarsRequestDto
+    >({
+      query: (params) => ({
+        url: "yearend/executive-hours-and-dollars",
         method: "GET",
         params: {
           take: params.pagination.take,
-          skip: params.pagination.skip
+          skip: params.pagination.skip,
+          profitYear: params.profitYear,
+          badgeNumber: params.badgeNumber,
+          ssn: params.socialSecurity,
+          fullNameContains: params.fullNameContains,
+          hasExecutiveHoursAndDollars: params.hasExecutiveHoursAndDollars
         }
       }),
-      async onQueryStarted({ dispatch, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
+          dispatch(setAdditionalExecutivesGrid(data));
         } catch (err) {
           console.log("Err: " + err);
         }
@@ -642,6 +700,7 @@ export const YearsEndApi = createApi({
 });
 
 export const {
+  useLazyGetAdditionalExecutivesQuery,
   useLazyGetDemographicBadgesNotInPayprofitQuery,
   useLazyGetDuplicateSSNsQuery,
   useLazyGetDuplicateNamesAndBirthdaysQuery,

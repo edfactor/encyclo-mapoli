@@ -34,9 +34,9 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
         _options = Constants.GetJsonSerializerOptions();
     }
 
-    public Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsnAsync(ProfitYearRequest req, CancellationToken ct)
+    public Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsnAsync(PaginationRequestDto req, CancellationToken ct)
     {
-        return CallReportEndpoint<PayrollDuplicateSsnResponseDto, ProfitYearRequest>(req, "duplicate-ssns", ct);
+        return CallReportEndpoint<PayrollDuplicateSsnResponseDto, PaginationRequestDto>(req, "duplicate-ssns", ct);
     }
 
     public Task<Stream> DownloadDuplicateSsNs(short profitYear, CancellationToken cancellationToken)
@@ -165,5 +165,10 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
             Query = query.ToString()
         };
         return uriBuilder;
+    }
+
+    public Task<YearEndProfitSharingReportSummaryResponse> GetYearEndProfitSharingSummaryReportAsync(FrozenProfitYearRequest req, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
     }
 }

@@ -1,20 +1,80 @@
-import { Typography } from "@mui/material";
-import { CellValueChangedEvent, IRowNode } from "ag-grid-community";
+import { Typography, Button, Tooltip } from "@mui/material";
+import { CellValueChangedEvent, IRowNode, SelectionChangedEvent } from "ag-grid-community";
 import { useState, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { DSMGrid, ISortParams, Pagination, SmartModal } from "smart-ui-library";
 import { GetManageExecutiveHoursAndDollarsColumns } from "./ManageExecutiveHoursAndDollarsGridColumns";
-import { ExecutiveHoursAndDollars, ExecutiveHoursAndDollarsGrid } from "reduxstore/types";
+import {
+  ExecutiveHoursAndDollars,
+  ExecutiveHoursAndDollarsGrid,
+  ExecutiveHoursAndDollarsRow,
+  PagedReportResponse
+} from "reduxstore/types";
 import {
   addExecutiveHoursAndDollarsGridRow,
+  clearAdditionalExecutivesGrid,
+  clearExecutiveRowsSelected,
   removeExecutiveHoursAndDollarsGridRow,
+  setExecutiveRowsSelected,
   updateExecutiveHoursAndDollarsGridRow
 } from "reduxstore/slices/yearsEndSlice";
+import { AddOutlined } from "@mui/icons-material";
+import { WrapperProps } from "./ManageExecutiveHoursAndDollarsSearchFilter";
+import SearchAndAddExecutive from "./SearchAndAddExecutive";
 
-const ManageExecutiveHoursAndDollarsGrid = () => {
+interface RenderAddExecutiveButtonProps {
+  reportReponse: PagedReportResponse<ExecutiveHoursAndDollars> | null;
+  isModal: boolean | undefined;
+  setOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const RenderAddExecutiveButton: React.FC<RenderAddExecutiveButtonProps> = ({
+  reportReponse,
+  isModal,
+  setOpenModal
+}) => {
+  const dispatch = useDispatch();
+  // We cannot add an employee if there is no result set there
+  const gridAvailable: boolean = reportReponse?.response != null && reportReponse?.response != undefined;
+
+  const addButton = (
+    <Button
+      disabled={!gridAvailable}
+      variant="outlined"
+      color="secondary"
+      size="medium"
+      startIcon={<AddOutlined color={gridAvailable ? "secondary" : "disabled"} />}
+      onClick={async () => {
+        // We need to clear out previous result rows in redux
+        //dispatch(clearAdditionalExecutivesChosen());
+        dispatch(clearExecutiveRowsSelected());
+        dispatch(clearAdditionalExecutivesGrid());
+        setOpenModal(true);
+      }}>
+      Add Executive
+    </Button>
+  );
+
+  if (!isModal && !gridAvailable) {
+    return (
+      <Tooltip
+        placement="top"
+        title="You can only add an executive to search results.">
+        <span>{addButton}</span>
+      </Tooltip>
+    );
+  } else if (!isModal) {
+    return addButton;
+  } else {
+    return null;
+  }
+};
+
+const ManageExecutiveHoursAndDollarsGrid = (props: WrapperProps) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
+  const [openModal, setOpenModal] = useState<boolean>(false);
   const dispatch = useDispatch();
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -23,11 +83,18 @@ const ManageExecutiveHoursAndDollarsGrid = () => {
     isSortDescending: false
   });
 
-  const { executiveHoursAndDollars, executiveHoursAndDollarsGrid } = useSelector((state: RootState) => state.yearsEnd);
+  const {
+    executiveHoursAndDollars,
+    additionalExecutivesChosen,
+    additionalExecutivesGrid,
+    executiveHoursAndDollarsGrid
+  } = useSelector((state: RootState) => state.yearsEnd);
 
   // This function checks to see if we have a change for this badge number already pending for a save
   const isRowStagedToSave = (badge: number): boolean => {
-    const found = executiveHoursAndDollarsGrid?.executiveHoursAndDollars.find((obj) => obj.badgeNumber === badge);
+    const found = executiveHoursAndDollarsGrid?.executiveHoursAndDollars.find(
+      (obj: ExecutiveHoursAndDollarsRow) => obj.badgeNumber === badge
+    );
     return found != undefined;
   };
 
@@ -93,30 +160,114 @@ const ManageExecutiveHoursAndDollarsGrid = () => {
   };
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
-  const columnDefs = useMemo(() => GetManageExecutiveHoursAndDollarsColumns(), []);
+  const columnDefs = useMemo(() => GetManageExecutiveHoursAndDollarsColumns(props.isModal), [props.isModal]);
 
-  // We memoize this because we only want to copy this once as there will be differences
-  // once edits are made
-  const mutableCopyOfGridData = useMemo(() => structuredClone(executiveHoursAndDollars), [executiveHoursAndDollars]);
+  const combineGridWithAddedExecs = (
+    mainList: PagedReportResponse<ExecutiveHoursAndDollars> | null,
+    additionalResults: ExecutiveHoursAndDollars[] | null
+  ): PagedReportResponse<ExecutiveHoursAndDollars> | null => {
+    const mainGridStructureCopy = structuredClone(mainList);
+    const additionalResultsCopy = structuredClone(additionalResults);
+
+    if (!mainGridStructureCopy || !mainGridStructureCopy.response || !mainGridStructureCopy.response.results) {
+      return null;
+    }
+
+    if (!additionalResultsCopy || additionalResultsCopy.length === 0) {
+      return mainGridStructureCopy;
+    }
+
+    mainGridStructureCopy.response.results.unshift(...additionalResultsCopy);
+
+    return mainGridStructureCopy;
+  };
+
+  // We memoize this not just for performance, but also because we need to
+  // add in any execs chosen in the modal window, and also, because if we
+  // do not memoize it, editing a column value will cause the grid to re-render
+  // with the original values, even though the underlying data has changed
+
+  const mutableCopyOfGridData = useMemo(
+    () => combineGridWithAddedExecs(executiveHoursAndDollars, additionalExecutivesChosen),
+    [executiveHoursAndDollars, additionalExecutivesChosen]
+  );
+
+  const mutableCopyOfAdditionalExecutivesGrid = useMemo(
+    () => structuredClone(additionalExecutivesGrid),
+    [additionalExecutivesGrid]
+  );
+
+  const isRowDataThere = (isModal: boolean | undefined): boolean => {
+    if (isModal) {
+      return (
+        mutableCopyOfAdditionalExecutivesGrid?.response != null &&
+        mutableCopyOfAdditionalExecutivesGrid?.response != undefined
+      );
+    } else {
+      return mutableCopyOfGridData?.response != null && mutableCopyOfGridData?.response != undefined;
+    }
+  };
+
+  // This function checks for the need to have pagination for modal and non modal grids
+  const isPaginationNeeded = (isModal: boolean | undefined): boolean => {
+    if (isModal) {
+      return (
+        !!mutableCopyOfAdditionalExecutivesGrid && mutableCopyOfAdditionalExecutivesGrid?.response?.results.length > 0
+      );
+    } else {
+      return !!mutableCopyOfGridData && mutableCopyOfGridData.response.results.length > 0;
+    }
+  };
 
   return (
     <>
-      {mutableCopyOfGridData?.response && (
+      {isRowDataThere(props.isModal) && (
         <>
-          <div className="px-[24px]">
-            <Typography
-              variant="h2"
-              sx={{ color: "#0258A5" }}>
-              {`Manage Executive Hours and Dollars (${mutableCopyOfGridData?.response.total || 0})`}
-            </Typography>
-          </div>
+          {!props.isModal && (
+            <>
+              <div className="px-[24px]">
+                <Typography
+                  variant="h2"
+                  sx={{ color: "#0258A5" }}>
+                  {`Manage Executive Hours and Dollars (${mutableCopyOfGridData?.response.total || 0})`}
+                </Typography>
+              </div>
+              <div style={{ gap: "36px", display: "flex", justifyContent: "end", marginRight: 28 }}>
+                <RenderAddExecutiveButton
+                  reportReponse={mutableCopyOfGridData}
+                  isModal={props.isModal}
+                  setOpenModal={setOpenModal}
+                />
+              </div>
+            </>
+          )}
+          {props.isModal && (
+            <>
+              <div className="px-[24px]">
+                <Typography
+                  variant="body1"
+                  sx={{ color: "#db1532" }}>
+                  {`Please select rows then click the add button up top`}
+                </Typography>
+              </div>
+            </>
+          )}
           <DSMGrid
             preferenceKey={"DUPE_SSNS"}
             isLoading={false}
             handleSortChanged={sortEventHandler}
             providedOptions={{
-              rowData: mutableCopyOfGridData?.response.results,
+              rowData: props.isModal
+                ? mutableCopyOfAdditionalExecutivesGrid?.response.results
+                : mutableCopyOfGridData?.response.results,
               columnDefs: columnDefs,
+              rowSelection: props.isModal ? "multiple" : undefined,
+              onSelectionChanged: (event: SelectionChangedEvent) => {
+                if (props.isModal) {
+                  const selectedRows = event.api.getSelectedRows();
+                  dispatch(setExecutiveRowsSelected(selectedRows));
+                }
+              },
               onCellValueChanged: (event: CellValueChangedEvent) => processEditedRow(event),
               getRowStyle: (params) => {
                 // Rows with unsaved changes will have yellow color
@@ -130,7 +281,7 @@ const ManageExecutiveHoursAndDollarsGrid = () => {
           />
         </>
       )}
-      {!!mutableCopyOfGridData && mutableCopyOfGridData.response.results.length > 0 && (
+      {isPaginationNeeded(props.isModal) && (
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
@@ -141,9 +292,14 @@ const ManageExecutiveHoursAndDollarsGrid = () => {
             setPageSize(value);
             setPageNumber(1);
           }}
-          recordCount={mutableCopyOfGridData?.response.total}
+          recordCount={mutableCopyOfGridData?.response.total ?? 0}
         />
       )}
+      <SmartModal
+        open={openModal}
+        onClose={() => setOpenModal(false)}>
+        <SearchAndAddExecutive />
+      </SmartModal>
     </>
   );
 };

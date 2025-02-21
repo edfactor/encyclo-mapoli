@@ -26,9 +26,9 @@ definitions:
         
         # Install .NET 9 SDK if not installed
         - if (-not $dotnetSdkInstalled) {
-            Invoke-WebRequest -Uri "https://download.visualstudio.microsoft.com/download/pr/38e45a81-a6a4-4a37-a986-bc46be78db16/33e64c0966ebdf0088d1a2b6597f62e5/dotnet-sdk-9.0.101-win-x64.exe" -OutFile "$env:TEMP\dotnet-sdk-9.0.101-win-x64.exe";
-            Start-Process -FilePath "$env:TEMP\dotnet-sdk-9.0.101-win-x64.exe" -ArgumentList "/quiet", "/norestart" -Wait;
-          }
+            Invoke-WebRequest -Uri "https://download.visualstudio.microsoft.com/download/pr/83c595a0-def1-4aba-8284-2fd98007aa3d/5e5b47fb819ee59b2a10485f8cf5a89a/dotnet-sdk-9.0.200-win-x64.exe" -OutFile "$env:TEMP\dotnet-sdk-9.0.200-win-x64.exe";
+            Start-Process -FilePath "$env:TEMP\dotnet-sdk-9.0.200-win-x64.exe" -ArgumentList "/quiet", "/norestart" -Wait;
+          }        
 
         # Run tests and generate JUnit reports
         - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml" -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
@@ -184,6 +184,8 @@ definitions:
       runs-on:
         - windows
         - self.hosted
+      artifacts:
+        - dist\**
       script:
         - |
           $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
@@ -222,8 +224,53 @@ definitions:
           .\output\Demoulas.ProfitSharing.Data.Cli $action --connection-name ProfitSharing --output-file ".\dist\migration.sql" --sql-file ".\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-schema $sourceSchema
           if ($LASTEXITCODE -ne 0) { Write-Error "Database upgrade failed. Exiting"; exit 1 }
 
-          # .\output\Demoulas.ProfitSharing.Data.Cli validate-import --connection-name ProfitSharing --sql-file ".\src\database\ready_import\Import Validations.sql" --source-schema $sourceSchema --current-year $currentYear
-          # if ($LASTEXITCODE -ne 0) { Write-Error "Database import validation failed. Exiting"; exit 1 }
+          if ($action -eq "validate-import") {
+            .\output\Demoulas.ProfitSharing.Data.Cli validate-import --connection-name ProfitSharing --sql-file ".\src\database\ready_import\Import Validations.sql" --source-schema $sourceSchema --current-year $currentYear
+            if ($LASTEXITCODE -ne 0) { Write-Error "Database import validation failed. Exiting"; exit 1 }
+          }
+
+    audit-backend: &audit-backend
+      name: "Check Backend API for vulnerabilities"
+      runs-on:
+        - windows
+        - self.hosted
+      script:
+        - $env:SolutionDir = ".\src\services"        
+        - echo "Checking dotnet vulnerabilities"
+        - cd $env:SolutionDir
+
+        - dotnet --info
+        - dotnet nuget list source
+        - dotnet workload update --source https://api.nuget.org/v3/index.json
+        - dotnet workload install aspire --source https://api.nuget.org/v3/index.json
+        - dotnet restore -p:RestoreAdditionalProjectSources=https://api.nuget.org/v3/index.json
+
+
+        - |
+          $output = dotnet list package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json
+          if ($output -match "has the following vulnerable packages") {
+            Write-Host "Vulnerabilities found!"
+            $output | Out-String | Write-Host
+            exit 1
+          } else {
+            Write-Host "No vulnerabilities found."
+            exit 0
+          }        
+
+
+    audit-frontend: &audit-frontend
+      name: "Check frontend for vulnerabilities"
+      runs-on:
+        - windows
+        - self.hosted
+        - volta
+      script:
+      # Set the following variable to your react project directory that houses your package.json file
+        - $env:ReactDir = ".\src\UI"
+        - echo "Checking npm vulnerabilities"
+        - cd $env:ReactDir
+        - npm audit --audit-level=moderate --production
+          
 
 pipelines:
   branches:
@@ -351,13 +398,16 @@ pipelines:
     develop:
       - parallel:
           - step: *build-and-test-backend
-          - step: *test-frontend
+          - step: *audit-frontend
+          - step: *audit-backend
+
 
   pull-requests:
     '**':
       - parallel:
           - step: *build-and-test-backend
-          - step: *test-frontend
+          - step: *audit-frontend
+          - step: *audit-backend
   
   custom:
     profitsharing_database:

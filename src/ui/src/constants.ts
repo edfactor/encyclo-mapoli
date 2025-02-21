@@ -1,4 +1,4 @@
-export const HISTORY_KEY = 'navigation_history' as const;
+export const HISTORY_KEY = "navigation_history" as const;
 
 export const MENU_LABELS = {
   FISCAL_CLOSE: "Fiscal Close",
@@ -6,7 +6,7 @@ export const MENU_LABELS = {
   BENEFICIARIES: "Beneficiaries",
   DISTRIBUTIONS: "Distributions",
   RECONCILIATION: "Reconciliation",
-  INQUIRIES: "Inquiries",
+  INQUIRIES: "Inquiries"
 } as const;
 
 export const ROUTES = {
@@ -14,6 +14,7 @@ export const ROUTES = {
   DISTRIBUTIONS_AND_FORFEITURES: "distributions-and-forfeitures",
   MANAGE_EXECUTIVE_HOURS: "manage-executive-hours-and-dollars",
   ELIGIBLE_EMPLOYEES: "eligible-employees",
+  YTD_WAGES_EXTRACT: "ytd-wages-extract",
   DISTRIBUTIONS_BY_AGE: "distributions-by-age",
   CONTRIBUTIONS_BY_AGE: "contributions-by-age",
   FORFEITURES_BY_AGE: "forfeitures-by-age",
@@ -56,15 +57,16 @@ export const ROUTES = {
   PROFIT_SHARE_GROSS_REPORT: "profit-share-gross-report",
   PAY450_SUMMARY: "pay450-summary",
   PROF_CTRLSHEET: "prof-control-sheet",
-    UNDER_21_REPORT: "under-21-report",
-    UNDER_21_TERM_ACTIVE: "under-21-term-active",
-    NEW_PS_LABELS: "new-ps-labels",
+  UNDER_21_REPORT: "under-21-report",
+  UNDER_21_TERM_ACTIVE: "under-21-term-active",
+  NEW_PS_LABELS: "new-ps-labels"
 } as const;
 
 export const CAPTIONS = {
   DISTRIBUTIONS_AND_FORFEITURES: "Distributions and Forfeitures",
   MANAGE_EXECUTIVE_HOURS: "Manage Executive Hours and Dollars",
   ELIGIBLE_EMPLOYEES: "Get Eligible Employees",
+  YTD_WAGES_EXTRACT: "YTD Wages Extract",
   DISTRIBUTIONS_BY_AGE: "Get Distributions by Age (PROF 130)",
   CONTRIBUTIONS_BY_AGE: "Get Contributions by Age (PROF 130)",
   FORFEITURES_BY_AGE: "Get Forfeitures by Age (PROF 130)",
@@ -90,7 +92,8 @@ export const CAPTIONS = {
   PAY426_ACTIVE_18_20: "Active/inactive employees age 18 - 20 with 1000 hours or more",
   PAY426_ACTIVE_21_PLUS: "Active/inactive employees age 21 & with 1000 hours or more",
   PAY426_ACTIVE_UNDER_18: "Active/inactive employees under 18",
-  PAY426_ACTIVE_PRIOR_SHARING: "Active/inactive employees 18 and older with prior profit sharing amounts and <1000 hours",
+  PAY426_ACTIVE_PRIOR_SHARING:
+    "Active/inactive employees 18 and older with prior profit sharing amounts and <1000 hours",
   PAY426_ACTIVE_NO_PRIOR: "Active/inactive employees 18 and older with no prior profit sharing amounts and <1000 hours",
   PAY426_TERMINATED_1000_PLUS: "Terminated employees 18 and older with 1000 hours or more",
   PAY426_TERMINATED_NO_PRIOR: "Terminated employees 18 and older with no prior profit sharing amounts and < 1000 hours",
@@ -108,9 +111,7 @@ export const CAPTIONS = {
   PAY_SHARE_BY_STORE_REPORTS: "Pay Share By Store Reports",
   UNDER_21_AGE_REPORT: "Under 21 Age Report",
   UNDER_21_TERM_ACTIVE: "Under 21 Term Active Report",
-  NEW_PS_LABELS: "New PS Labels",
+  NEW_PS_LABELS: "New PS Labels"
 } as const;
-
-
 
 export const VIEW = "View";

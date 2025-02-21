@@ -1,18 +1,21 @@
 ﻿using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.MassTransit;
+using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Data.Extensions;
 internal static class ContextExtensions
 {
     public static ModelBuilder ApplyModelConfiguration(this ModelBuilder modelBuilder)
-    {
+    {   
+        modelBuilder.ApplyConfiguration(new FakeSsnMap());
         modelBuilder.ApplyConfiguration(new DataImportRecordMap());
         modelBuilder.ApplyConfiguration(new BeneficiaryContactMap());
         modelBuilder.ApplyConfiguration(new BeneficiaryKindMap());
         modelBuilder.ApplyConfiguration(new BeneficiaryMap());
         modelBuilder.ApplyConfiguration(new BeneficiaryTypeMap());
+        modelBuilder.ApplyConfiguration(new BeneficiarySsnChangeHistoryMap());
         modelBuilder.ApplyConfiguration(new AccountingPeriodConfiguration { ExcludeFromMigrations = false, SeedDataAfterMigrations = true });
         modelBuilder.ApplyConfiguration(new CommentTypeMap());
         modelBuilder.ApplyConfiguration(new CountryMap());
@@ -21,6 +24,7 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new DemographicHistoryMap());
         modelBuilder.ApplyConfiguration(new DemographicSyncAuditMap());
         modelBuilder.ApplyConfiguration(new DistributionFrequencyMap());
+        modelBuilder.ApplyConfiguration(new DemographicSsnChangeHistoryMap());
         modelBuilder.ApplyConfiguration(new DistributionMap());
         modelBuilder.ApplyConfiguration(new DistributionPayeeMap());
         modelBuilder.ApplyConfiguration(new DistributionRequestMap());

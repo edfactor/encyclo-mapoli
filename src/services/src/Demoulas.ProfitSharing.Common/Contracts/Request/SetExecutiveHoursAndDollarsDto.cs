@@ -6,7 +6,7 @@ public sealed record SetExecutiveHoursAndDollarsDto
     public decimal ExecutiveHours { get; set; }
     public decimal ExecutiveDollars { get; set; }
 
-    public static SetExecutiveHoursAndDollarsDto Example()
+    public static SetExecutiveHoursAndDollarsDto RequestExample()
     {
         return new() { BadgeNumber = 9999, ExecutiveDollars = 721, ExecutiveHours = 1001 };
     }
