@@ -1,4 +1,4 @@
-import { FormHelperText } from "@mui/material";
+import { FormHelperText, MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
@@ -7,6 +7,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import { useLazyGetBalanceByAgeQuery } from "reduxstore/api/YearsEndApi";
+import { ProcessStatus } from "components/StatusDropdown";
 
 interface YTDWagesSearch {
   profitYear: Date;
@@ -23,6 +24,9 @@ const schema = yup.object().shape({
 
 const YTDWagesSearchFilter = () => {
   const [triggerSearch, { isFetching }] = useLazyGetBalanceByAgeQuery();
+
+  const thisYear = new Date().getFullYear();
+  const lastYear = thisYear - 1;
 
   const {
     control,
@@ -55,6 +59,11 @@ const YTDWagesSearchFilter = () => {
     });
   };
 
+  const options = [
+    { value: lastYear, label: `${lastYear}` },
+    { value: thisYear, label: `${thisYear}` }
+  ];
+
   return (
     <form onSubmit={validateAndSearch}>
       <Grid2
@@ -65,22 +74,19 @@ const YTDWagesSearchFilter = () => {
           xs={12}
           sm={6}
           md={3}>
-          <Controller
-            name="profitYear"
-            control={control}
-            render={({ field }) => (
-              <DsmDatePicker
-                id="profitYear"
-                onChange={(value: Date | null) => field.onChange(value)}
-                value={field.value ?? null}
-                required={true}
-                label="Profit Year"
-                disableFuture
-                views={["year"]}
-                error={errors.profitYear?.message}
-              />
-            )}
-          />
+          <Select
+            size="small"
+            defaultValue={options[0].value}
+            onChange={(e: SelectChangeEvent<number>) => {}}
+            fullWidth>
+            {options.map((option) => (
+              <MenuItem
+                key={option.value}
+                value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </Select>
         </Grid2>
       </Grid2>
       <Grid2
@@ -90,7 +96,6 @@ const YTDWagesSearchFilter = () => {
           handleReset={handleReset}
           handleSearch={validateAndSearch}
           isFetching={isFetching}
-          disabled={!isValid}
         />
       </Grid2>
     </form>
