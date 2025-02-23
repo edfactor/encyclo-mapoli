@@ -354,22 +354,18 @@ export const yearsEndSlice = createSlice({
       state.profitSharingUpdate = action.payload;
     },
     setProfitUpdateLoading: (state) => {
-      // @ts-ignore
       state.profitSharingUpdate = { isLoading: true, reportName: "Profit Sharing Update" };
     },
     clearProfitUpdate: (state) => {
-      // @ts-ignore
       state.profitSharingUpdate = null;
     },
     setProfitEdit: (state, action: PayloadAction<ProfitShareEditResponse>) => {
       state.profitSharingUpdate = action.payload;
     },
     setProfitEditLoading: (state) => {
-      // @ts-ignore
       state.profitSharingUpdate = { isLoading: true, reportName: "Profit Sharing Edit" };
     },
     clearProfitEdit: (state) => {
-      // @ts-ignore
       state.profitSharingUpdate = null;
     },
 
@@ -380,11 +376,9 @@ export const yearsEndSlice = createSlice({
       };
     },
     setProfitMasterApplyLoading: (state) => {
-      // @ts-ignore
       state.profitSharingUpdate = { isLoading: true, reportName: "Apply" };
     },
     clearProfitMasterApply: (state) => {
-      // @ts-ignore
       state.profitSharingUpdate = null;
     },
 
@@ -395,11 +389,9 @@ export const yearsEndSlice = createSlice({
       };
     },
     setProfitMasterRevertLoading: (state) => {
-      // @ts-ignore
       state.profitSharingUpdate = { isLoading: true, reportName: "Revert" };
     },
     clearProfitMasterRevert: (state) => {
-      // @ts-ignore
       state.profitSharingUpdate = null;
     },
 

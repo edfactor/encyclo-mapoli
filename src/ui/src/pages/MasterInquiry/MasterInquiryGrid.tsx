@@ -1,6 +1,6 @@
 import { Typography } from "@mui/material";
 import { useState, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { useLazyGetNegativeEVTASSNQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
@@ -9,12 +9,13 @@ import { GetMasterInquiryGridColumns } from "./MasterInquiryGridColumns";
 const MasterInquiryGrid = () => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
-  const [sortParams, setSortParams] = useState<ISortParams>({
+  const [_sortParams, setSortParams] = useState<ISortParams>({
     sortBy: "Badge",
     isSortDescending: false
   });
 
   const { masterInquiryData } = useSelector((state: RootState) => state.yearsEnd);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, { isLoading }] = useLazyGetNegativeEVTASSNQuery();
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
