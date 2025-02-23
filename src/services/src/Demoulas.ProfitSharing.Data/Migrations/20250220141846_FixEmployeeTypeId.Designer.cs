@@ -3,6 +3,7 @@ using System;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 
@@ -11,9 +12,11 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    partial class ProfitSharingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250220141846_FixEmployeeTypeId")]
+    partial class FixEmployeeTypeId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -27455,6 +27458,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("REHIRE_DATE")
                         .HasComment("ReHireDate");
 
+                    b.Property<int>("Ssn")
+                        .HasPrecision(9)
+                        .HasColumnType("NUMBER(9)")
+                        .HasColumnName("SSN");
+
                     b.Property<short>("StoreNumber")
                         .HasPrecision(4)
                         .HasColumnType("NUMBER(4)")
@@ -28383,10 +28391,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasKey("Id")
                         .HasName("PK_FAKE_SSNS");
-
-                    b.HasIndex(new[] { "Ssn" }, "IX_FAKE_SSN")
-                        .IsUnique()
-                        .HasDatabaseName("IX_FAKE_SSNS_SSN");
 
                     b.ToTable("FAKE_SSNS", (string)null);
                 });

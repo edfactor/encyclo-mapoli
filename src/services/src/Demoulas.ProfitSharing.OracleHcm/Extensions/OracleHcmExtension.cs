@@ -1,9 +1,5 @@
-﻿using System.Diagnostics;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Reflection.Metadata.Ecma335;
+﻿using System.Net.Http.Headers;
 using System.Text;
-using Demoulas.Common.Contracts.Configuration;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Clients;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
@@ -14,7 +10,9 @@ using Demoulas.ProfitSharing.OracleHcm.Jobs;
 using Demoulas.ProfitSharing.OracleHcm.Messaging;
 using Demoulas.ProfitSharing.OracleHcm.Services;
 using Demoulas.ProfitSharing.OracleHcm.Validators;
+using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Caching.Extensions;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -155,12 +153,16 @@ public static class OracleHcmExtension
         services.AddSingleton<DemographicMapper>();
         services.AddSingleton<AddressMapper>();
         services.AddSingleton<ContactInfoMapper>();
+        
 
         // Internal services
         services.AddSingleton<IDemographicsServiceInternal, DemographicsService>();
         services.AddSingleton<IEmployeeSyncService, EmployeeSyncService>();
         services.AddSingleton<IJobFactory, OracleHcmJobFactory>();
         services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
+
+        services.AddSingleton<IFakeSsnService, FakeSsnService>();
+        
     }
 
     /// <summary>

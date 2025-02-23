@@ -166,4 +166,9 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
         };
         return uriBuilder;
     }
+
+    public Task<YearEndProfitSharingReportSummaryResponse> GetYearEndProfitSharingSummaryReportAsync(FrozenProfitYearRequest req, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
 }

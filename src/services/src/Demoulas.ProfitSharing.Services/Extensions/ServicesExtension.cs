@@ -32,6 +32,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IWagesService, WagesService>();
         _ = builder.Services.AddScoped<IYearEndService, YearEndService>();
         _ = builder.Services.AddScoped<IMilitaryService, MilitaryService>();
+        _ = builder.Services.AddScoped<IFakeSsnService, FakeSsnService>();
 
         _ = builder.Services.AddScoped<TotalService>();
         _ = builder.Services.AddScoped<ContributionService>();
