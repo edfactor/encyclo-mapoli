@@ -69,8 +69,7 @@ export interface YearsEndState {
   terminattion: TerminationResponse | null;
   militaryAndRehireEntryAndModification: EmployeeDetails | null;
   profitSharingUpdate: ProfitShareUpdateResponse | ProfitShareEditResponse | ProfitShareMasterResponse | null;
-  employeeWagesForCurrentYear: PagedReportResponse<EmployeeWagesForYear> | null;
-  employeeWagesForPreviousYear: PagedReportResponse<EmployeeWagesForYear> | null;
+  employeeWagesForYear: PagedReportResponse<EmployeeWagesForYear> | null;
 }
 
 const initialState: YearsEndState = {
@@ -110,8 +109,7 @@ const initialState: YearsEndState = {
   terminattion: null,
   profitSharingUpdate: null,
   militaryAndRehireEntryAndModification: null,
-  employeeWagesForCurrentYear: null,
-  employeeWagesForPreviousYear: null
+  employeeWagesForYear: null
 };
 
 export const yearsEndSlice = createSlice({
@@ -259,11 +257,8 @@ export const yearsEndSlice = createSlice({
         );
       }
     },
-    setEmployeeWagesForCurrentYear: (state, action: PayloadAction<PagedReportResponse<EmployeeWagesForYear>>) => {
-      state.employeeWagesForCurrentYear = action.payload;
-    },
-    setEmployeeWagesForPreviousYear: (state, action: PayloadAction<PagedReportResponse<EmployeeWagesForYear>>) => {
-      state.employeeWagesForPreviousYear = action.payload;
+    setEmployeeWagesForYear: (state, action: PayloadAction<PagedReportResponse<EmployeeWagesForYear>>) => {
+      state.employeeWagesForYear = action.payload;
     },
     setEligibleEmployees: (state, action: PayloadAction<EligibleEmployeeResponseDto>) => {
       state.eligibleEmployees = action.payload;
@@ -451,7 +446,6 @@ export const {
   clearExecutiveHoursAndDollarsGridRows,
   addExecutiveHoursAndDollarsGridRow,
 
-  setEmployeeWagesForCurrentYear,
-  setEmployeeWagesForPreviousYear
+  setEmployeeWagesForYear
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

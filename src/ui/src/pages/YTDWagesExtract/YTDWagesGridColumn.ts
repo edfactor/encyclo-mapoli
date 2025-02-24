@@ -2,7 +2,7 @@ import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { viewBadgeRenderer } from "utils/masterInquiryLink";
 import { currencyFormat } from "utils/numberUtils";
 
-export const GetYTDWagesColumns = (viewBadge: (params: number) => string): ColDef[] => {
+export const GetYTDWagesColumns = (): ColDef[] => {
   const columns: ColDef[] = [
     {
       headerName: "Badge",

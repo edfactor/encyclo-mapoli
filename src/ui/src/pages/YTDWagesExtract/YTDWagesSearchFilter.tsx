@@ -1,63 +1,48 @@
-import { FormHelperText, MenuItem, Select, SelectChangeEvent } from "@mui/material";
+import { Button, CircularProgress, MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { SearchAndReset } from "smart-ui-library";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
-import { useLazyGetBalanceByAgeQuery } from "reduxstore/api/YearsEndApi";
-import { ProcessStatus } from "components/StatusDropdown";
+import { useForm } from "react-hook-form";
+import { useLazyGetEmployeeWagesForYearQuery } from "reduxstore/api/YearsEndApi";
 
 interface YTDWagesSearch {
-  profitYear: Date;
+  profitYear: number;
 }
 
-const schema = yup.object().shape({
-  profitYear: yup
-    .date()
-    .required("Year is required")
-    .min(new Date(2020, 0, 1), "Year must be 2020 or later")
-    .max(new Date(2100, 11, 31), "Year must be 2100 or earlier")
-    .typeError("Invalid date")
-});
-
 const YTDWagesSearchFilter = () => {
-  const [triggerSearch, { isFetching }] = useLazyGetBalanceByAgeQuery();
+  const [triggerSearch, { isFetching }] = useLazyGetEmployeeWagesForYearQuery();
 
   const thisYear = new Date().getFullYear();
   const lastYear = thisYear - 1;
 
+  const [chosenYear, setChosenYear] = useState<number>(lastYear);
+
   const {
     control,
     handleSubmit,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     formState: { errors, isValid },
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     reset,
     setValue
   } = useForm<YTDWagesSearch>({
-    resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: undefined
+      profitYear: chosenYear
     }
   });
 
   const validateAndSearch = handleSubmit((data) => {
-    if (isValid) {
-      triggerSearch(
-        {
-          profitYear: data.profitYear.getFullYear(),
-          pagination: { skip: 0, take: 25 }
-        },
-        false
-      );
-    }
-  });
+    console.log("Validating and submitting for profit year: " + data.profitYear);
 
-  const handleReset = () => {
-    reset({
-      profitYear: undefined
-    });
-  };
+    // Our form cannot be in an invalid state, so we can safely trigger the search
+    triggerSearch(
+      {
+        profitYear: data.profitYear,
+        pagination: { skip: 0, take: 25 },
+        acceptHeader: "application/json"
+      },
+      false
+    );
+  });
 
   const options = [
     { value: lastYear, label: `${lastYear}` },
@@ -77,7 +62,11 @@ const YTDWagesSearchFilter = () => {
           <Select
             size="small"
             defaultValue={options[0].value}
-            onChange={(e: SelectChangeEvent<number>) => {}}
+            onChange={(e: SelectChangeEvent<number>) => {
+              console.log("Changing year selection!");
+              setChosenYear(Number(e.target.value));
+              setValue("profitYear", Number(e.target.value));
+            }}
             fullWidth>
             {options.map((option) => (
               <MenuItem
@@ -92,11 +81,32 @@ const YTDWagesSearchFilter = () => {
       <Grid2
         width="100%"
         paddingX="24px">
-        <SearchAndReset
-          handleReset={handleReset}
-          handleSearch={validateAndSearch}
-          isFetching={isFetching}
-        />
+        <div className="search-buttons flex mt-5 justify-start">
+          <Button
+            variant="contained"
+            disabled={false || isFetching}
+            data-testid="searchButton"
+            type="submit"
+            onClick={validateAndSearch}
+            sx={{
+              "&.Mui-disabled": {
+                background: "#eaeaea",
+                color: "#c0c0c0"
+              }
+            }}>
+            {isFetching ? (
+              //Prevent loading spinner from shrinking button
+              <div className="spinner">
+                <CircularProgress
+                  color="inherit"
+                  size="20px"
+                />
+              </div>
+            ) : (
+              "Search"
+            )}
+          </Button>
+        </div>
       </Grid2>
     </form>
   );
