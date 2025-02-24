@@ -11,7 +11,6 @@ using Demoulas.ProfitSharing.OracleHcm.Clients;
 using FluentValidation.Results;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
-using static Quartz.Logging.OperationName;
 using Job = Demoulas.ProfitSharing.Data.Entities.MassTransit.Job;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services;

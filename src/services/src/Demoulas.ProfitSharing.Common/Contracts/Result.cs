@@ -2,6 +2,10 @@
 
 namespace Demoulas.ProfitSharing.Common.Contracts
 {
+    /// <summary>
+    /// Represents the result of an operation, encapsulating either a successful value or an error.
+    /// </summary>
+    /// <typeparam name="T">The type of the value returned in case of success.</typeparam>
     public sealed record Result<T>
     {
         public T? Value { get; }

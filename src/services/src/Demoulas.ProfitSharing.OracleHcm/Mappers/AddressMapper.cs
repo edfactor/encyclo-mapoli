@@ -1,6 +1,4 @@
-﻿// DemographicMapper.cs
-
-using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Data.Entities;
 using Riok.Mapperly.Abstractions;
 

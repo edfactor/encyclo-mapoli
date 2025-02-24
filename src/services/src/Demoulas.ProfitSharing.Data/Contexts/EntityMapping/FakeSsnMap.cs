@@ -18,7 +18,9 @@ namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping
             builder.Property(f => f.Ssn).HasPrecision(9)
                     .IsRequired()
                     .ValueGeneratedNever()
-                    .HasColumnName("SSN");            
+                    .HasColumnName("SSN");
+
+            builder.HasIndex(x => x.Ssn, "IX_FAKE_SSN").IsUnique();
         }
     }
 }
