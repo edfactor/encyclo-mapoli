@@ -11,18 +11,16 @@ import {
   TextField
 } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
-import {
-  useLazyGetProfitMasterInquiryQuery
-} from "reduxstore/api/YearsEndApi";
+import { useLazyGetProfitMasterInquiryQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { MasterInquryRequest } from "reduxstore/types";
 import { clearMasterInquiryData } from "reduxstore/slices/yearsEndSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { RootState } from "reduxstore/store";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 
@@ -118,29 +116,12 @@ const MasterInquirySearchFilter = () => {
 
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
 
-
-  useEffect(() => {
-    if (badgeNumber && hasToken) {
-      reset({
-        ...schema.getDefault(),
-        badgeNumber: Number(badgeNumber)
-      });
-
-      // Trigger search automatically when badge number is present
-      const searchParams: MasterInquryRequest = {
-        pagination: { skip: 0, take: 25 },
-        badgeNumber: Number(badgeNumber)
-      };
-
-      triggerSearch(searchParams, false);
-    }
-  }, [badgeNumber, hasToken]);
-
   const {
     control,
     handleSubmit,
     formState: { errors, isValid },
     reset,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     trigger
   } = useForm<MasterInquirySearch>({
     resolver: yupResolver(schema),
@@ -163,6 +144,23 @@ const MasterInquirySearchFilter = () => {
     }
   });
 
+  useEffect(() => {
+    if (badgeNumber && hasToken) {
+      reset({
+        ...schema.getDefault(),
+        badgeNumber: Number(badgeNumber)
+      });
+
+      // Trigger search automatically when badge number is present
+      const searchParams: MasterInquryRequest = {
+        pagination: { skip: 0, take: 25 },
+        badgeNumber: Number(badgeNumber)
+      };
+
+      triggerSearch(searchParams, false);
+    }
+  }, [badgeNumber, hasToken, reset, triggerSearch]);
+
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
       const searchParams: MasterInquryRequest = {
@@ -181,8 +179,7 @@ const MasterInquirySearchFilter = () => {
         ...(!!data.earnings && { earnings: data.earnings }),
         ...(!!data.forfeiture && { forfeiture: data.forfeiture }),
         ...(!!data.payment && { payment: data.payment }),
-        ...(!!data.voids && { voids: data.voids }),
-
+        ...(!!data.voids && { voids: data.voids })
       };
 
       triggerSearch(searchParams, false);
@@ -213,19 +210,27 @@ const MasterInquirySearchFilter = () => {
   const months = Array.from({ length: 12 }, (_, i) => i + 1);
 
   const selectSx = {
-    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#0258A5',
+    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+      borderColor: "#0258A5"
     },
-    '&:hover .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#0258A5',
-    },
+    "&:hover .MuiOutlinedInput-notchedOutline": {
+      borderColor: "#0258A5"
+    }
   };
 
   return (
     <form onSubmit={validateAndSearch}>
-      <Grid2 container paddingX="24px">
-        <Grid2 container spacing={3} width="100%">
-          <Grid2 xs={12} sm={6} md={3}>
+      <Grid2
+        container
+        paddingX="24px">
+        <Grid2
+          container
+          spacing={3}
+          width="100%">
+          <Grid2
+            xs={12}
+            sm={6}
+            md={3}>
             <Controller
               name="startProfitYear"
               control={control}
@@ -245,7 +250,10 @@ const MasterInquirySearchFilter = () => {
             {errors.startProfitYear && <FormHelperText error>{errors.startProfitYear.message}</FormHelperText>}
           </Grid2>
 
-          <Grid2 xs={12} sm={6} md={3}>
+          <Grid2
+            xs={12}
+            sm={6}
+            md={3}>
             <Controller
               name="endProfitYear"
               control={control}
@@ -265,7 +273,10 @@ const MasterInquirySearchFilter = () => {
             {errors.endProfitYear && <FormHelperText error>{errors.endProfitYear.message}</FormHelperText>}
           </Grid2>
 
-          <Grid2 xs={12} sm={6} md={3}>
+          <Grid2
+            xs={12}
+            sm={6}
+            md={3}>
             <FormLabel>Beginning Month</FormLabel>
             <Controller
               name="startProfitMonth"
@@ -273,18 +284,19 @@ const MasterInquirySearchFilter = () => {
               render={({ field }) => (
                 <Select
                   {...field}
-                  onChange={(e) => field.onChange(e.target.value === '' ? null : e.target.value)}
+                  onChange={(e) => field.onChange(e.target.value === "" ? null : e.target.value)}
                   sx={selectSx}
                   fullWidth
                   size="small"
-                  value={field.value ?? ''}
-                  error={!!errors.startProfitMonth}
-                >
+                  value={field.value ?? ""}
+                  error={!!errors.startProfitMonth}>
                   <MenuItem value="">
                     <em>None</em>
                   </MenuItem>
                   {months.map((month) => (
-                    <MenuItem key={month} value={month}>
+                    <MenuItem
+                      key={month}
+                      value={month}>
                       {month}
                     </MenuItem>
                   ))}
@@ -294,7 +306,10 @@ const MasterInquirySearchFilter = () => {
             {errors.startProfitMonth && <FormHelperText error>{errors.startProfitMonth.message}</FormHelperText>}
           </Grid2>
 
-          <Grid2 xs={12} sm={6} md={3}>
+          <Grid2
+            xs={12}
+            sm={6}
+            md={3}>
             <FormLabel>Ending Month</FormLabel>
             <Controller
               name="endProfitMonth"
@@ -302,18 +317,19 @@ const MasterInquirySearchFilter = () => {
               render={({ field }) => (
                 <Select
                   {...field}
-                  onChange={(e) => field.onChange(e.target.value === '' ? null : e.target.value)}
+                  onChange={(e) => field.onChange(e.target.value === "" ? null : e.target.value)}
                   sx={selectSx}
                   fullWidth
                   size="small"
-                  value={field.value ?? ''}
-                  error={!!errors.endProfitMonth}
-                >
+                  value={field.value ?? ""}
+                  error={!!errors.endProfitMonth}>
                   <MenuItem value="">
                     <em>None</em>
                   </MenuItem>
                   {months.map((month) => (
-                    <MenuItem key={month} value={month}>
+                    <MenuItem
+                      key={month}
+                      value={month}>
                       {month}
                     </MenuItem>
                   ))}
@@ -323,7 +339,10 @@ const MasterInquirySearchFilter = () => {
             {errors.endProfitMonth && <FormHelperText error>{errors.endProfitMonth.message}</FormHelperText>}
           </Grid2>
 
-          <Grid2 xs={12} sm={6} md={3}>
+          <Grid2
+            xs={12}
+            sm={6}
+            md={3}>
             <FormLabel>Social Security Number</FormLabel>
             <Controller
               name="socialSecurity"
@@ -334,7 +353,7 @@ const MasterInquirySearchFilter = () => {
                   fullWidth
                   size="small"
                   variant="outlined"
-                  value={field.value ?? ''}
+                  value={field.value ?? ""}
                   error={!!errors.socialSecurity}
                 />
               )}
@@ -342,7 +361,10 @@ const MasterInquirySearchFilter = () => {
             {errors.socialSecurity && <FormHelperText error>{errors.socialSecurity.message}</FormHelperText>}
           </Grid2>
 
-          <Grid2 xs={12} sm={6} md={3}>
+          <Grid2
+            xs={12}
+            sm={6}
+            md={3}>
             <FormLabel>Name</FormLabel>
             <Controller
               name="name"
@@ -353,7 +375,7 @@ const MasterInquirySearchFilter = () => {
                   fullWidth
                   size="small"
                   variant="outlined"
-                  value={field.value ?? ''}
+                  value={field.value ?? ""}
                   error={!!errors.name}
                 />
               )}
@@ -361,7 +383,10 @@ const MasterInquirySearchFilter = () => {
             {errors.name && <FormHelperText error>{errors.name.message}</FormHelperText>}
           </Grid2>
 
-          <Grid2 xs={12} sm={6} md={3}>
+          <Grid2
+            xs={12}
+            sm={6}
+            md={3}>
             <FormLabel>Badge Number</FormLabel>
             <Controller
               name="badgeNumber"
@@ -372,7 +397,7 @@ const MasterInquirySearchFilter = () => {
                   fullWidth
                   size="small"
                   variant="outlined"
-                  value={field.value ?? ''}
+                  value={field.value ?? ""}
                   error={!!errors.badgeNumber}
                 />
               )}
@@ -380,7 +405,10 @@ const MasterInquirySearchFilter = () => {
             {errors.badgeNumber && <FormHelperText error>{errors.badgeNumber.message}</FormHelperText>}
           </Grid2>
 
-          <Grid2 xs={12} sm={6} md={3}>
+          <Grid2
+            xs={12}
+            sm={6}
+            md={3}>
             <FormLabel>Comment</FormLabel>
             <Controller
               name="comment"
@@ -391,7 +419,7 @@ const MasterInquirySearchFilter = () => {
                   fullWidth
                   size="small"
                   variant="outlined"
-                  value={field.value ?? ''}
+                  value={field.value ?? ""}
                   error={!!errors.comment}
                 />
               )}
@@ -399,43 +427,86 @@ const MasterInquirySearchFilter = () => {
             {errors.comment && <FormHelperText error>{errors.comment.message}</FormHelperText>}
           </Grid2>
 
-          <Grid2 xs={12} sm={6}>
+          <Grid2
+            xs={12}
+            sm={6}>
             <FormControl error={!!errors.paymentType}>
               <FormLabel>Payment Type</FormLabel>
               <Controller
                 name="paymentType"
                 control={control}
                 render={({ field }) => (
-                  <RadioGroup {...field} row>
-                    <FormControlLabel value="all" control={<Radio size="small" />} label="All" />
-                    <FormControlLabel value="hardship" control={<Radio size="small" />} label="Hardship/Dis" />
-                    <FormControlLabel value="payoffs" control={<Radio size="small" />} label="Payoffs/Forfeit" />
-                    <FormControlLabel value="rollovers" control={<Radio size="small" />} label="Rollovers" />
+                  <RadioGroup
+                    {...field}
+                    row>
+                    <FormControlLabel
+                      value="all"
+                      control={<Radio size="small" />}
+                      label="All"
+                    />
+                    <FormControlLabel
+                      value="hardship"
+                      control={<Radio size="small" />}
+                      label="Hardship/Dis"
+                    />
+                    <FormControlLabel
+                      value="payoffs"
+                      control={<Radio size="small" />}
+                      label="Payoffs/Forfeit"
+                    />
+                    <FormControlLabel
+                      value="rollovers"
+                      control={<Radio size="small" />}
+                      label="Rollovers"
+                    />
                   </RadioGroup>
                 )}
               />
             </FormControl>
           </Grid2>
 
-          <Grid2 xs={12} sm={6}>
+          <Grid2
+            xs={12}
+            sm={6}>
             <FormControl error={!!errors.memberType}>
               <FormLabel>Member Type</FormLabel>
               <Controller
                 name="memberType"
                 control={control}
                 render={({ field }) => (
-                  <RadioGroup {...field} row>
-                    <FormControlLabel value="all" control={<Radio size="small" />} label="All" />
-                    <FormControlLabel value="employees" control={<Radio size="small" />} label="Employees" />
-                    <FormControlLabel value="beneficiaries" control={<Radio size="small" />} label="Beneficiaries" />
-                    <FormControlLabel value="none" control={<Radio size="small" />} label="None" />
+                  <RadioGroup
+                    {...field}
+                    row>
+                    <FormControlLabel
+                      value="all"
+                      control={<Radio size="small" />}
+                      label="All"
+                    />
+                    <FormControlLabel
+                      value="employees"
+                      control={<Radio size="small" />}
+                      label="Employees"
+                    />
+                    <FormControlLabel
+                      value="beneficiaries"
+                      control={<Radio size="small" />}
+                      label="Beneficiaries"
+                    />
+                    <FormControlLabel
+                      value="none"
+                      control={<Radio size="small" />}
+                      label="None"
+                    />
                   </RadioGroup>
                 )}
               />
             </FormControl>
           </Grid2>
 
-          <Grid2 xs={12} sm={6} md={3}>
+          <Grid2
+            xs={12}
+            sm={6}
+            md={3}>
             <FormLabel>Contribution</FormLabel>
             <Controller
               name="contribution"
@@ -446,7 +517,7 @@ const MasterInquirySearchFilter = () => {
                   fullWidth
                   size="small"
                   variant="outlined"
-                  value={field.value ?? ''}
+                  value={field.value ?? ""}
                   error={!!errors.contribution}
                 />
               )}
@@ -454,7 +525,10 @@ const MasterInquirySearchFilter = () => {
             {errors.contribution && <FormHelperText error>{errors.contribution.message}</FormHelperText>}
           </Grid2>
 
-          <Grid2 xs={12} sm={6} md={3}>
+          <Grid2
+            xs={12}
+            sm={6}
+            md={3}>
             <FormLabel>Earnings</FormLabel>
             <Controller
               name="earnings"
@@ -465,7 +539,7 @@ const MasterInquirySearchFilter = () => {
                   fullWidth
                   size="small"
                   variant="outlined"
-                  value={field.value ?? ''}
+                  value={field.value ?? ""}
                   error={!!errors.earnings}
                 />
               )}
@@ -473,7 +547,10 @@ const MasterInquirySearchFilter = () => {
             {errors.earnings && <FormHelperText error>{errors.earnings.message}</FormHelperText>}
           </Grid2>
 
-          <Grid2 xs={12} sm={6} md={3}>
+          <Grid2
+            xs={12}
+            sm={6}
+            md={3}>
             <FormLabel>Forfeiture</FormLabel>
             <Controller
               name="forfeiture"
@@ -484,7 +561,7 @@ const MasterInquirySearchFilter = () => {
                   fullWidth
                   size="small"
                   variant="outlined"
-                  value={field.value ?? ''}
+                  value={field.value ?? ""}
                   error={!!errors.forfeiture}
                 />
               )}
@@ -492,7 +569,10 @@ const MasterInquirySearchFilter = () => {
             {errors.forfeiture && <FormHelperText error>{errors.forfeiture.message}</FormHelperText>}
           </Grid2>
 
-          <Grid2 xs={12} sm={6} md={3}>
+          <Grid2
+            xs={12}
+            sm={6}
+            md={3}>
             <FormLabel>Payment</FormLabel>
             <Controller
               name="payment"
@@ -503,7 +583,7 @@ const MasterInquirySearchFilter = () => {
                   fullWidth
                   size="small"
                   variant="outlined"
-                  value={field.value ?? ''}
+                  value={field.value ?? ""}
                   error={!!errors.payment}
                 />
               )}

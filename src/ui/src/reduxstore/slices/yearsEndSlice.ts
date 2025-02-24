@@ -69,8 +69,7 @@ export interface YearsEndState {
   terminattion: TerminationResponse | null;
   militaryAndRehireEntryAndModification: EmployeeDetails | null;
   profitSharingUpdate: ProfitShareUpdateResponse | ProfitShareEditResponse | ProfitShareMasterResponse | null;
-  employeeWagesForCurrentYear: PagedReportResponse<EmployeeWagesForYear> | null;
-  employeeWagesForPreviousYear: PagedReportResponse<EmployeeWagesForYear> | null;
+  employeeWagesForYear: PagedReportResponse<EmployeeWagesForYear> | null;
 }
 
 const initialState: YearsEndState = {
@@ -110,8 +109,7 @@ const initialState: YearsEndState = {
   terminattion: null,
   profitSharingUpdate: null,
   militaryAndRehireEntryAndModification: null,
-  employeeWagesForCurrentYear: null,
-  employeeWagesForPreviousYear: null
+  employeeWagesForYear: null
 };
 
 export const yearsEndSlice = createSlice({
@@ -259,11 +257,8 @@ export const yearsEndSlice = createSlice({
         );
       }
     },
-    setEmployeeWagesForCurrentYear: (state, action: PayloadAction<PagedReportResponse<EmployeeWagesForYear>>) => {
-      state.employeeWagesForCurrentYear = action.payload;
-    },
-    setEmployeeWagesForPreviousYear: (state, action: PayloadAction<PagedReportResponse<EmployeeWagesForYear>>) => {
-      state.employeeWagesForPreviousYear = action.payload;
+    setEmployeeWagesForYear: (state, action: PayloadAction<PagedReportResponse<EmployeeWagesForYear>>) => {
+      state.employeeWagesForYear = action.payload;
     },
     setEligibleEmployees: (state, action: PayloadAction<EligibleEmployeeResponseDto>) => {
       state.eligibleEmployees = action.payload;
@@ -354,22 +349,18 @@ export const yearsEndSlice = createSlice({
       state.profitSharingUpdate = action.payload;
     },
     setProfitUpdateLoading: (state) => {
-      // @ts-ignore
       state.profitSharingUpdate = { isLoading: true, reportName: "Profit Sharing Update" };
     },
     clearProfitUpdate: (state) => {
-      // @ts-ignore
       state.profitSharingUpdate = null;
     },
     setProfitEdit: (state, action: PayloadAction<ProfitShareEditResponse>) => {
       state.profitSharingUpdate = action.payload;
     },
     setProfitEditLoading: (state) => {
-      // @ts-ignore
       state.profitSharingUpdate = { isLoading: true, reportName: "Profit Sharing Edit" };
     },
     clearProfitEdit: (state) => {
-      // @ts-ignore
       state.profitSharingUpdate = null;
     },
 
@@ -380,11 +371,9 @@ export const yearsEndSlice = createSlice({
       };
     },
     setProfitMasterApplyLoading: (state) => {
-      // @ts-ignore
       state.profitSharingUpdate = { isLoading: true, reportName: "Apply" };
     },
     clearProfitMasterApply: (state) => {
-      // @ts-ignore
       state.profitSharingUpdate = null;
     },
 
@@ -395,11 +384,9 @@ export const yearsEndSlice = createSlice({
       };
     },
     setProfitMasterRevertLoading: (state) => {
-      // @ts-ignore
       state.profitSharingUpdate = { isLoading: true, reportName: "Revert" };
     },
     clearProfitMasterRevert: (state) => {
-      // @ts-ignore
       state.profitSharingUpdate = null;
     },
 
@@ -459,7 +446,6 @@ export const {
   clearExecutiveHoursAndDollarsGridRows,
   addExecutiveHoursAndDollarsGridRow,
 
-  setEmployeeWagesForCurrentYear,
-  setEmployeeWagesForPreviousYear
+  setEmployeeWagesForYear
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

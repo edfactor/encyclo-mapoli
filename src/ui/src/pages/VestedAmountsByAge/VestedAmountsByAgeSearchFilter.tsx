@@ -1,6 +1,5 @@
 import { FormHelperText, FormLabel, TextField, Button } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useLazyGetVestingAmountByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
@@ -58,7 +57,6 @@ const VestedAmountsByAgeSearchFilter = () => {
   const handleDownloadCSV = handleSubmit(async (data) => {
     if (isValid) {
       try {
-        // setIsFetching(true); // This line is not needed as isFetching is managed by the hook
         const fetchPromise = triggerSearch({
           profitYear: data.profitYear,
           acceptHeader: "text/csv"
@@ -67,8 +65,6 @@ const VestedAmountsByAgeSearchFilter = () => {
       } catch (error) {
         console.error("Download failed:", error);
         // Do we want to throw a formal Error for the react-error-boundary to catch?
-      } finally {
-        //setIsFetching(false);
       }
     }
   });

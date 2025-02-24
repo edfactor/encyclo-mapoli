@@ -9,9 +9,9 @@ import Grid2 from "@mui/material/Unstable_Grid2";
 import { VestedAmountsByAge } from "../../reduxstore/types";
 
 const VestedAmountsByAgeGrid = () => {
-  const [sortParams, setSortParams] = useState<ISortParams>({
+  const [_sortParams, setSortParams] = useState<ISortParams>({
     sortBy: "Badge",
-    isSortDescending: false,
+    isSortDescending: false
   });
 
   const { vestedAmountsByAge } = useSelector((state: RootState) => state.yearsEnd);
@@ -35,11 +35,15 @@ const VestedAmountsByAgeGrid = () => {
       totalFullTimeCount: data?.totalFullTimeCount || 0,
       totalNotVestedCount: data?.totalNotVestedCount || 0,
       totalPartialVestedCount: data?.totalPartialVestedCount || 0,
-      reportDate: data?.reportDate || "N/A",
-    },
+      reportDate: data?.reportDate || "N/A"
+    }
   ];
 
-  const renderDSMGrid = (data: VestedAmountsByAge, columns: ReturnType<typeof GetVestedAmountsByAgeColumns>, key: string) => {
+  const renderDSMGrid = (
+    data: VestedAmountsByAge,
+    columns: ReturnType<typeof GetVestedAmountsByAgeColumns>,
+    key: string
+  ) => {
     const summaryRows = createSummaryRows(data);
 
     return (
@@ -67,10 +71,10 @@ const VestedAmountsByAgeGrid = () => {
                 { headerName: "Beneficiary Amount", field: "totalBeneficiaryAmount" },
                 { headerName: "FT Total Count", field: "totalFullTimeCount" },
                 { headerName: "Not Vested Count", field: "totalNotVestedCount" },
-                { headerName: "Partial Vested Count", field: "totalPartialVestedCount" },
-              ],
-            },
-          ],
+                { headerName: "Partial Vested Count", field: "totalPartialVestedCount" }
+              ]
+            }
+          ]
         }}
       />
     );
@@ -81,14 +85,16 @@ const VestedAmountsByAgeGrid = () => {
       {vestedAmountsByAge?.response && (
         <>
           <div style={{ padding: "0 24px 0 24px" }}>
-            <Typography variant="h2" sx={{ color: "#0258A5" }}>
+            <Typography
+              variant="h2"
+              sx={{ color: "#0258A5" }}>
               {vestedAmountsByAge.reportName}
             </Typography>
           </div>
-          <Grid2 container spacing={2}>
-            <Grid2 xs={12}>
-              {renderDSMGrid(vestedAmountsByAge, columnDefsTotal, "Vesting Amounts by Age")}
-            </Grid2>
+          <Grid2
+            container
+            spacing={2}>
+            <Grid2 xs={12}>{renderDSMGrid(vestedAmountsByAge, columnDefsTotal, "Vesting Amounts by Age")}</Grid2>
           </Grid2>
         </>
       )}
