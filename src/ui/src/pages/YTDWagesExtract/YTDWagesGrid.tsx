@@ -1,13 +1,18 @@
 import { Typography } from "@mui/material";
 import { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { useLazyGetEligibleEmployeesQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import { GetYTDWagesColumns } from "./YTDWagesGridColumn";
 
-const YTDWagesGrid = () => {
+import { RefObject } from "react";
+
+interface YTDWagesGridProps {
+  innerRef: RefObject<HTMLDivElement>;
+}
+
+const YTDWagesGrid = ({ innerRef }: YTDWagesGridProps) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -17,8 +22,6 @@ const YTDWagesGrid = () => {
   });
 
   const { employeeWagesForYear } = useSelector((state: RootState) => state.yearsEnd);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_, { isLoading }] = useLazyGetEligibleEmployeesQuery();
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetYTDWagesColumns(), []);
@@ -26,7 +29,7 @@ const YTDWagesGrid = () => {
   return (
     <>
       {employeeWagesForYear?.response && (
-        <>
+        <div ref={innerRef}>
           <div style={{ padding: "0 24px 0 24px" }}>
             <Typography
               variant="h2"
@@ -43,9 +46,10 @@ const YTDWagesGrid = () => {
               columnDefs: columnDefs
             }}
           />
-        </>
+        </div>
       )}
-      {!!employeeWagesForYear && employeeWagesForYear.response.results.length > 0 && (
+      {/* We need to check the response also because if the user asked for a CSV, this variable will exist, but have a blob in it instead of a response */}
+      {!!employeeWagesForYear && employeeWagesForYear.response && employeeWagesForYear.response.results.length > 0 && (
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {

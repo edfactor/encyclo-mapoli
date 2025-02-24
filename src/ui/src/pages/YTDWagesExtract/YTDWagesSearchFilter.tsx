@@ -1,6 +1,5 @@
 import { Button, CircularProgress, MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLazyGetEmployeeWagesForYearQuery } from "reduxstore/api/YearsEndApi";
 
@@ -8,36 +7,23 @@ interface YTDWagesSearch {
   profitYear: number;
 }
 
-const YTDWagesSearchFilter = () => {
+const YTDWagesSearchFilter = (props: { originalYear: number; setChosenYear: (year: number) => void }) => {
   const [triggerSearch, { isFetching }] = useLazyGetEmployeeWagesForYearQuery();
 
-  const thisYear = new Date().getFullYear();
-  const lastYear = thisYear - 1;
+  const { setChosenYear } = props;
 
-  const [chosenYear, setChosenYear] = useState<number>(lastYear);
-
-  const {
-    control,
-    handleSubmit,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    formState: { errors, isValid },
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    reset,
-    setValue
-  } = useForm<YTDWagesSearch>({
+  const { handleSubmit, setValue } = useForm<YTDWagesSearch>({
     defaultValues: {
-      profitYear: chosenYear
+      profitYear: props.originalYear
     }
   });
 
-  const validateAndSearch = handleSubmit((data) => {
-    console.log("Validating and submitting for profit year: " + data.profitYear);
-
-    // Our form cannot be in an invalid state, so we can safely trigger the search
+  const doSearch = handleSubmit((data) => {
+    // Our one-select 'form' cannot be in an invalid state, so we can safely trigger the search
     triggerSearch(
       {
         profitYear: data.profitYear,
-        pagination: { skip: 0, take: 25 },
+        pagination: { skip: 0, take: 255 },
         acceptHeader: "application/json"
       },
       false
@@ -45,12 +31,12 @@ const YTDWagesSearchFilter = () => {
   });
 
   const options = [
-    { value: lastYear, label: `${lastYear}` },
-    { value: thisYear, label: `${thisYear}` }
+    { value: props.originalYear, label: `${props.originalYear}` },
+    { value: props.originalYear + 1, label: `${props.originalYear + 1}` }
   ];
 
   return (
-    <form onSubmit={validateAndSearch}>
+    <form onSubmit={doSearch}>
       <Grid2
         container
         paddingX="24px"
@@ -63,7 +49,7 @@ const YTDWagesSearchFilter = () => {
             size="small"
             defaultValue={options[0].value}
             onChange={(e: SelectChangeEvent<number>) => {
-              console.log("Changing year selection!");
+              e.preventDefault();
               setChosenYear(Number(e.target.value));
               setValue("profitYear", Number(e.target.value));
             }}
@@ -87,7 +73,7 @@ const YTDWagesSearchFilter = () => {
             disabled={false || isFetching}
             data-testid="searchButton"
             type="submit"
-            onClick={validateAndSearch}
+            onClick={doSearch}
             sx={{
               "&.Mui-disabled": {
                 background: "#eaeaea",
