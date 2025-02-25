@@ -1,16 +1,15 @@
-import * as React from "react";
 import Box from "@mui/material/Box";
 import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import VestedAmountsByAgeGrid from "./VestedAmountsByAgeGrid";
-import { useState } from "react";
+import { SyntheticEvent, useState } from "react";
 
-export default function LabTabs() {
+export default function VestedAmountsByAgeTabs() {
   const [value, setValue] = useState("1");
 
-  const handleChange = (_event: React.SyntheticEvent, newValue: string) => {
+  const handleChange = (_event: SyntheticEvent, newValue: string) => {
     setValue(newValue);
   };
 
