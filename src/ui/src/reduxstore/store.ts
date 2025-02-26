@@ -6,6 +6,8 @@ import { SecurityApi } from "./api/SecurityApi";
 import { YearsEndApi } from "./api/YearsEndApi";
 import frozenSlice from "./slices/frozenSlice";
 import { FrozenApi } from "./api/FrozenApi";
+import { MilitaryApi } from "./api/MilitaryApi";
+import militarySlice from "./slices/militarySlice";
 
 export const store = configureStore({
   reducer: {
@@ -13,10 +15,12 @@ export const store = configureStore({
     security: securitySlice,
     yearsEnd: yearsEndSlice,
     frozen: frozenSlice,
+    military: militarySlice,
 
     [SecurityApi.reducerPath]: SecurityApi.reducer,
     [YearsEndApi.reducerPath]: YearsEndApi.reducer,
-    [FrozenApi.reducerPath]: FrozenApi.reducer
+    [FrozenApi.reducerPath]: FrozenApi.reducer,
+    [MilitaryApi.reducerPath]: MilitaryApi.reducer
   },
 
   middleware: (getDefaultMiddleware) =>
@@ -24,6 +28,7 @@ export const store = configureStore({
       .concat(SecurityApi.middleware)
       .concat(YearsEndApi.middleware)
       .concat(FrozenApi.middleware)
+      .concat(MilitaryApi.middleware)
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

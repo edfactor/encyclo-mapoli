@@ -7,8 +7,8 @@ import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 
 interface SearchFormData {
-  socialSecurity?: number; 
-  badgeNumber?: number;
+  socialSecurity?: string; 
+  badgeNumber?: string;
 }
 
 const validationSchema = yup.object().shape({
@@ -20,7 +20,6 @@ const validationSchema = yup.object().shape({
 
 const MilitaryAndRehireEntryAndModificationSearchFilter = () => {
   const [triggerSearch, { isFetching }] = useLazyGetProfitMasterInquiryQuery();
-
   const { register, handleSubmit, reset, formState: { errors } } = useForm<SearchFormData>({
     resolver: yupResolver(validationSchema)
   });
@@ -29,13 +28,12 @@ const MilitaryAndRehireEntryAndModificationSearchFilter = () => {
     triggerSearch(
       {
         pagination: { skip: 0, take: 25 },
-        ...(!!data.socialSecurity && { socialSecurity: data.socialSecurity }) ,  
-        ...(!!data.badgeNumber && { badgeNumber: data.badgeNumber })
+        ...(!!data.socialSecurity && { socialSecurity: Number(data.socialSecurity) }),
+        ...(!!data.badgeNumber && { badgeNumber: Number(data.badgeNumber) })
       },
       false
     );
   };
-
   const handleReset = () => {
     reset();
   };

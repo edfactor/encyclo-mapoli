@@ -24,7 +24,7 @@ const ProfitShareUpdateGrid = () => {
                     preferenceKey={"ProfitShareUpdateGrid"}
                     isLoading={profitSharingUpdate?.isLoading}
                     providedOptions={{
-                        rowData: profitSharingUpdate?.response?.results,
+                        rowData: 'response' in profitSharingUpdate ? profitSharingUpdate.response?.results : [],
                         columnDefs: columnDefs
                     }}
                 />
@@ -34,7 +34,7 @@ const ProfitShareUpdateGrid = () => {
                     preferenceKey={"ProfitShareEditGrid"}
                     isLoading={profitSharingUpdate?.isLoading}
                     providedOptions={{
-                        rowData: profitSharingUpdate?.response?.results,
+                        rowData: 'response' in profitSharingUpdate ? profitSharingUpdate.response?.results : [],
                         columnDefs: editColumnDefs
                     }}
                 />
