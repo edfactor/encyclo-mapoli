@@ -5,6 +5,7 @@ import MilitaryAndRehireSearchFilter from "./MilitaryAndRehireEntryAndModificati
 import MilitaryAndRehireEntryAndModificationGrid from "./MilitaryAndRehireEntryAndModificationGrid";
 import { useNavigate } from "react-router";
 import StatusDropdown, { ProcessStatus } from "components/StatusDropdown";
+import { MENU_LABELS } from "../../constants";
 
 const MilitaryAndRehireEntryAndModification = () => {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ const MilitaryAndRehireEntryAndModification = () => {
           variant="outlined"
           className="h-10 whitespace-nowrap min-w-fit"
         >
-          December Flow
+          {MENU_LABELS.DECEMBER_ACTIVITIES}
         </Button>
       </div>
     );

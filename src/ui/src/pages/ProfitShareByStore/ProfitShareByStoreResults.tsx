@@ -13,28 +13,28 @@ interface StoreReportCategory {
 
 const storeReportCategories: StoreReportCategory[] = [
   {
-    code: "QPAY066",
-    title: "QPAY066-UNDR21",
-    data: { "Label": "Value" },
-    destinationUrl: ROUTES.UNDER_21_REPORT
+      code: "QPAY066-UNDR21",
+      title: CAPTIONS.QPAY066_UNDER21,
+      data: { "Label": "Value" },
+      destinationUrl: ROUTES.QPAY066_UNDER21
   },
   {
-    code: "QPAY066TA",
-    title: "QPAY066TA-UNDR21",
-    data: { "Label": "Value" },
-    destinationUrl: ROUTES.UNDER_21_TERM_ACTIVE
+      code: "QPAY066TA-UNDR21",
+      title: CAPTIONS.QPAY066TA_UNDER21,
+      data: { "Label": "Value" },
+      destinationUrl: ROUTES.QPAY066TA_UNDER21
   },
   {
-    code: "NewPSLabels",
-    title: "QPAY066TA",
-    data: { "Label": "Value" },
-    destinationUrl: ROUTES.NEW_PS_LABELS
+      code: "QPAY066TA",
+      title: CAPTIONS.QPAY066TA,
+      data: { "Label": "Value" },
+      destinationUrl: ROUTES.QPAY066TA
   },
   {
-    code: "NewPSLabels",
-    title: "New PS Labels",
-    data: { "Label": "Value" },
-    destinationUrl: ROUTES.NEW_PS_LABELS
+      code: "NEW-PS-LABELS",
+      title: CAPTIONS.NEW_PS_LABELS,
+      data: { "Label": "Value" },
+      destinationUrl: ROUTES.NEW_PS_LABELS
   }
 ];
 

@@ -9,212 +9,20 @@ import { Page } from "smart-ui-library";
 
 
 const FiscalFlow = () => {
-    const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
 
-    useEffect(() => {
-        if (hasToken) {
-        }
-    }, [hasToken]);
+  useEffect(() => {
+    if (hasToken) {
+    }
+  }, [hasToken]);
 
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    return (
-        <Page label="Fiscal Flow">
+  return (
+    <Page label="Fiscal Flow">
       <Grid2 container>
         <Grid2 xs={12} width={"100%"}>
           <Divider />
-        </Grid2>
-
-        <Grid2 width="100%">
-          <DSMCollapsedAccordion
-            title="Pay 426"
-            expandable={false}
-            actionButtonText="START"
-            status={{
-              label: "Not Started",
-              color: "default"
-            }}
-            onActionClick={() => navigate('/pay-426')}
-            isCollapsedOnRender={true}
-          >
-            <></>
-          </DSMCollapsedAccordion>
-        </Grid2>
-
-        <Grid2 width="100%">
-          <DSMCollapsedAccordion
-            title="Pay 426-TOT"
-            expandable={false}
-            actionButtonText="START"
-            status={{
-              label: "Not Started",
-              color: "default"
-            }}
-            onActionClick={() => navigate('/pay-426-tot')}
-            isCollapsedOnRender={true}
-          >
-            <></>
-          </DSMCollapsedAccordion>
-        </Grid2>
-
-        <Grid2 width="100%">
-          <DSMCollapsedAccordion
-            title="Pay 426N-1"
-            expandable={false}
-            actionButtonText="START"
-            status={{
-              label: "Not Started",
-              color: "default"
-            }}
-            onActionClick={() => navigate('/pay-426n-1')}
-            isCollapsedOnRender={true}
-          >
-            <></>
-          </DSMCollapsedAccordion>
-        </Grid2>
-
-        <Grid2 width="100%">
-          <DSMCollapsedAccordion
-            title="Pay 426N-2"
-            expandable={false}
-            actionButtonText="START"
-            status={{
-              label: "Not Started",
-              color: "default"
-            }}
-            onActionClick={() => navigate('/pay-426n-2')}
-            isCollapsedOnRender={true}
-          >
-            <></>
-          </DSMCollapsedAccordion>
-        </Grid2>
-
-        <Grid2 width="100%">
-          <DSMCollapsedAccordion
-            title="Pay 426N-3"
-            expandable={false}
-            actionButtonText="START"
-            status={{
-              label: "Not Started",
-              color: "default"
-            }}
-            onActionClick={() => navigate('/pay-426n-3')}
-            isCollapsedOnRender={true}
-          >
-            <></>
-          </DSMCollapsedAccordion>
-        </Grid2>
-
-        <Grid2 width="100%">
-          <DSMCollapsedAccordion
-            title="Pay 426N-4"
-            expandable={false}
-            actionButtonText="START"
-            status={{
-              label: "Not Started",
-              color: "default"
-            }}
-            onActionClick={() => navigate('/pay-426n-4')}
-            isCollapsedOnRender={true}
-          >
-            <></>
-          </DSMCollapsedAccordion>
-        </Grid2>
-
-        <Grid2 width="100%">
-          <DSMCollapsedAccordion
-            title="Pay 426N-5"
-            expandable={false}
-            actionButtonText="START"
-            status={{
-              label: "Not Started",
-              color: "default"
-            }}
-            onActionClick={() => navigate('/pay-426n-5')}
-            isCollapsedOnRender={true}
-          >
-            <></>
-          </DSMCollapsedAccordion>
-        </Grid2>
-
-        <Grid2 width="100%">
-          <DSMCollapsedAccordion
-            title="Pay 426N-6"
-            expandable={false}
-            actionButtonText="START"
-            status={{
-              label: "Not Started",
-              color: "default"
-            }}
-            onActionClick={() => navigate('/pay-426n-6')}
-            isCollapsedOnRender={true}
-          >
-            <></>
-          </DSMCollapsedAccordion>
-        </Grid2>
-
-        <Grid2 width="100%">
-          <DSMCollapsedAccordion
-            title="Pay 426N-7"
-            expandable={false}
-            actionButtonText="START"
-            status={{
-              label: "Not Started",
-              color: "default"
-            }}
-            onActionClick={() => navigate('/pay-426n-7')}
-            isCollapsedOnRender={true}
-          >
-            <></>
-          </DSMCollapsedAccordion>
-        </Grid2>
-
-        <Grid2 width="100%">
-          <DSMCollapsedAccordion
-            title="Pay 426N-8"
-            expandable={false}
-            actionButtonText="START"
-            status={{
-              label: "Not Started",
-              color: "default"
-            }}
-            onActionClick={() => navigate('/pay-426n-8')}
-            isCollapsedOnRender={true}
-          >
-            <></>
-          </DSMCollapsedAccordion>
-        </Grid2>
-
-        <Grid2 width="100%">
-          <DSMCollapsedAccordion
-            title="Pay 426N-9"
-            expandable={false}
-            actionButtonText="START"
-            status={{
-              label: "Not Started",
-              color: "default"
-            }}
-            onActionClick={() => navigate('/pay-426n-9')}
-            isCollapsedOnRender={true}
-          >
-            <></>
-          </DSMCollapsedAccordion>
-        </Grid2>
-
-        <Grid2 width="100%">
-          <DSMCollapsedAccordion
-            title="Pay 426N-10"
-            expandable={false}
-            actionButtonText="START"
-            status={{
-              label: "Not Started",
-              color: "default"
-            }}
-            onActionClick={() => navigate('/pay-426n-10')}
-            isCollapsedOnRender={true}
-          >
-            <></>
-          </DSMCollapsedAccordion>
         </Grid2>
 
         <Grid2 width="100%">
@@ -258,7 +66,7 @@ const FiscalFlow = () => {
               label: "Not Started",
               color: "default"
             }}
-            onActionClick={() => navigate('/manage-executive-hours')}
+            onActionClick={() => navigate('/manage-executive-hours-and-dollars')}
             isCollapsedOnRender={true}
           >
             <></>
@@ -274,7 +82,7 @@ const FiscalFlow = () => {
               label: "Not Started",
               color: "default"
             }}
-            onActionClick={() => navigate('/profit-share-report-edit')}
+            onActionClick={() => navigate('/profit-share-report-edit-run')}
             isCollapsedOnRender={true}
           >
             <></>
@@ -290,7 +98,7 @@ const FiscalFlow = () => {
               label: "Not Started",
               color: "default"
             }}
-            onActionClick={() => navigate('/')}
+            onActionClick={() => navigate('/profit-share-report-final-run')}
             isCollapsedOnRender={true}
           >
             <></>
@@ -322,7 +130,7 @@ const FiscalFlow = () => {
               label: "Not Started",
               color: "default"
             }}
-            onActionClick={() => navigate('/profit-share-forfeit')}
+            onActionClick={() => navigate('/forfeit')}
             isCollapsedOnRender={true}
           >
             <></>
@@ -386,7 +194,7 @@ const FiscalFlow = () => {
               label: "Not Started",
               color: "default"
             }}
-            onActionClick={() => navigate('/prof-paymaster-upd')}
+            onActionClick={() => navigate('/paymaster-update')}
             isCollapsedOnRender={true}
           >
             <></>
@@ -424,10 +232,9 @@ const FiscalFlow = () => {
             <></>
           </DSMCollapsedAccordion>
         </Grid2>
-
       </Grid2>
     </Page>
-    );
+  );
 };
 
 export default FiscalFlow;
