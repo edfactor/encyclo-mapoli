@@ -600,9 +600,9 @@ export interface FrozenStateResponse {
   isActive: boolean;
 }
 
-export interface MilitaryContributionRequest {
+export interface MilitaryContributionRequest extends ProfitYearRequest{
   badgeNumber: number;
-
+  pagination: PaginationParams;
 }
 
 export interface YearEndProfitSharingReportRequest {
