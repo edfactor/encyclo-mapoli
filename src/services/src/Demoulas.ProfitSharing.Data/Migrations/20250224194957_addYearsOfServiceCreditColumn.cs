@@ -22,7 +22,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 defaultValue: (byte)0);
 
             migrationBuilder.Sql(@"UPDATE PROFIT_DETAIL pd 
-SET pd.YEARS_OF_SERVICE_CREDIT = CASE WHEN pd.Contribution > 0 OR pd.COMMENT_TYPE_ID IN (5, 16, 17, 17, 19, 24) THEN 1 ELSE 0 END;");
+SET pd.YEARS_OF_SERVICE_CREDIT = CASE WHEN pd.Contribution > 0 OR pd.COMMENT_TYPE_ID IN (5, 16, 17, 17, 19, 24) THEN 1 ELSE 0 END");
         }
 
         /// <inheritdoc />
