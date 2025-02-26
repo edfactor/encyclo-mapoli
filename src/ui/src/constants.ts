@@ -62,6 +62,7 @@ export const ROUTES = {
   QPAY066TA_UNDER21: "qpay066ta-under21",
   QPAY066TA: "qpay066ta",
   NEW_PS_LABELS: "new-ps-labels",
+  PROFALL: "profall",
 } as const;
 
 export const CAPTIONS = {

@@ -257,6 +257,7 @@ const Router = () => {
         <Route path={ROUTES.QPAY066TA_UNDER21} element={<Under21TA />} />
         <Route path={ROUTES.QPAY066TA} element={<QPAY066TA />} />
         <Route path={ROUTES.NEW_PS_LABELS} element={<NewPSLabels />} />
+        <Route path={ROUTES.PROFALL} element={<Profall />} />
       </RouteSecurity>
     </BrowserRouter>
   );
