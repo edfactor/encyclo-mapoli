@@ -1,11 +1,12 @@
 import { Divider } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { DSMAccordion, Page, TotalsGrid } from "smart-ui-library";
+import { DSMAccordion, Page } from "smart-ui-library";
 import VestedAmountsByAgeSearchFilter from "./VestedAmountsByAgeSearchFilter";
 import VestedAmountsByAgeTabs from "./VestedAmountsByAgeTabs";
 import { currencyFormat } from "utils/numberUtils";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
+import { TotalsGrid } from "./TotalsGrid";
 
 const options: Intl.DateTimeFormatOptions = {
   month: "2-digit",
@@ -66,7 +67,6 @@ const VestedAmountsByAge = () => {
                 ]}
                 leftColumnHeaders={[""]}
                 topRowHeaders={[
-                  "",
                   "FT 100%",
                   "FT Partial Vested",
                   "FT Not Vested",
