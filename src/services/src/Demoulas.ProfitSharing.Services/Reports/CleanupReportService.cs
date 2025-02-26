@@ -79,8 +79,7 @@ public class CleanupReportService : ICleanupReportService
                             CurrentIncomeYear = pp.CurrentIncomeYear,
                             WeeksWorkedYear = pp.WeeksWorkedYear,
                             LastUpdate = pp.LastUpdate,
-                            PointsEarned = pp.PointsEarned,
-                            YearsInPlan = pp.YearsInPlan
+                            PointsEarned = pp.PointsEarned
                         }).ToList()
                 })
                 .ToPaginationResultsAsync(req, forceSingleQuery: true, ct);
@@ -263,8 +262,8 @@ public class CleanupReportService : ICleanupReportService
                     join d in ctx.Demographics on yis.Ssn equals d.Ssn
                     select new
                     {
-                        BadgeNumber = d.BadgeNumber,
-                        Years = (byte)yis.Years
+                        d.BadgeNumber,
+                        yis.Years
                     }
                 ).ToDictionaryAsync(x => x.BadgeNumber, x => x.Years, cancellationToken: cancellationToken);
 
@@ -456,7 +455,7 @@ public class CleanupReportService : ICleanupReportService
                           CurrentIncomeYear = 0m,
                           IncomeExecutive = 0m,
                           PointsEarned = (decimal?)null,
-                          Years = (short)0
+                          Years = (byte)0
                       };
             }
 

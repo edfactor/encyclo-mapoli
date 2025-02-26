@@ -2,5 +2,5 @@
 internal sealed class ParticipantTotalYearsDto
 {
     internal required int Ssn { get; set; }
-    internal required short Years { get; set; }
+    internal required byte Years { get; set; }
 }
