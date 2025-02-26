@@ -204,7 +204,7 @@ public class MasterInquiryService : IMasterInquiryService
                             DateOfBirth = demographicData.DateOfBirth,
                             Ssn = demographicData.Ssn.MaskSsn(),
                             YearToDateProfitSharingHours = demographicData.LatestPayProfit?.CurrentHoursYear ?? 0,
-                            YearsInPlan = demographicData.LatestPayProfit?.YearsInPlan ?? 0,
+                            YearsInPlan = currentBalance?.YearsInPlan ?? (short)0,
                             HireDate = demographicData.HireDate,
                             ReHireDate = demographicData.ReHireDate,
                             TerminationDate = demographicData.TerminationDate,

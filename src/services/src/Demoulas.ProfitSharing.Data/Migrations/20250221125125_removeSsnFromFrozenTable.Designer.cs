@@ -3,6 +3,7 @@ using System;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 
@@ -11,9 +12,11 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    partial class ProfitSharingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250221125125_removeSsnFromFrozenTable")]
+    partial class removeSsnFromFrozenTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -29226,6 +29229,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(2)")
                         .HasColumnName("WEEKS_WORKED_YEAR");
 
+                    b.Property<byte>("YearsInPlan")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(2)
+                        .HasColumnType("NUMBER(2)")
+                        .HasDefaultValue((byte)0)
+                        .HasColumnName("YEARS_IN_PLAN");
+
                     b.Property<byte?>("ZeroContributionReasonId")
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("ZERO_CONTRIBUTION_REASON_ID");
@@ -29431,12 +29441,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasPrecision(4)
                         .HasColumnType("NUMBER(4,0)")
                         .HasColumnName("YEAR_TO_DATE");
-
-                    b.Property<byte>("YearsOfServiceCredit")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(3)")
-                        .HasDefaultValue((byte)0)
-                        .HasColumnName("YEARS_OF_SERVICE_CREDIT");
 
                     b.Property<byte?>("ZeroContributionReasonId")
                         .HasColumnType("NUMBER(3)")

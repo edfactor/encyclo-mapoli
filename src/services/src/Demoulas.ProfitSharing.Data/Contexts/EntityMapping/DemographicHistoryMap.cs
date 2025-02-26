@@ -32,12 +32,6 @@ internal sealed class DemographicHistoryMap : IEntityTypeConfiguration<Demograph
             .HasColumnName("VALID_TO")
             .IsRequired();
 
-        _ = builder.Property(e => e.Ssn)
-            .HasPrecision(9)
-            .IsRequired()
-            .ValueGeneratedNever()
-            .HasColumnName("SSN");
-
         _ = builder.HasIndex(e => e.BadgeNumber, "IX_BadgeNumber");
         _ = builder.Property(e => e.BadgeNumber)
             .HasPrecision(7)
@@ -94,7 +88,7 @@ internal sealed class DemographicHistoryMap : IEntityTypeConfiguration<Demograph
             .HasConversion<DateOnlyConverter>();
 
         _ = builder.Property(e => e.EmploymentTypeId)
-            .HasMaxLength(2)
+            .HasMaxLength(1)
             .HasColumnName("EMPLOYMENT_TYPE_ID")
             .HasComment("EmploymentType");
 

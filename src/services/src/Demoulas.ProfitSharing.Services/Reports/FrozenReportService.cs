@@ -632,11 +632,11 @@ public class FrozenReportService : IFrozenReportService
 
             var joinedQuery = from q in query
                 join yip in yearsInPlanQuery on q.Ssn equals yip.Ssn
-                join d in ctx.Demographics.Include(d => d.PayProfits.Where(p => p.YearsInPlan > 0)) on q.Ssn equals d.Ssn into demographics
+                join d in ctx.Demographics.Include(d => d.PayProfits) on q.Ssn equals d.Ssn into demographics
                 from demographic in demographics.DefaultIfEmpty()
                 join b in ctx.BeneficiaryContacts on q.Ssn equals b.Ssn into beneficiaries
                 from beneficiary in beneficiaries.DefaultIfEmpty()
-                where demographic != null || beneficiary != null
+                where (demographic != null || beneficiary != null) && yip.Years > 0
                 select new
                 {
                     q.CurrentBalance,
@@ -644,7 +644,7 @@ public class FrozenReportService : IFrozenReportService
                     EmploymentType =
                         demographic != null && demographic.EmploymentTypeId == EmploymentType.Constants.PartTime ? PT : FT,
                     IsBeneficiary = demographic == null && beneficiary != null,
-                    YearsInPlan = (byte)yip.Years
+                    YearsInPlan = yip.Years
                 };
 
             joinedQuery = req.ReportType switch
@@ -734,11 +734,11 @@ public class FrozenReportService : IFrozenReportService
                     BeforeEnrollmentId = lyPp != null ? lyPp.EnrollmentId : 0,
                     BeforeProfitSharingAmount = lyBal != null ? lyBal.CurrentBalance : 0,
                     BeforeVestedProfitSharingAmount = lyBal != null ? lyBal.VestedBalance : 0,
-                    BeforeYearsInPlan = lyPp != null ? lyPp.YearsInPlan : (byte)0,
+                    BeforeYearsInPlan = lyPp != null ? lyBal.YearsInPlan : (byte)0,
                     AfterEnrollmentId = pp != null ? pp.EnrollmentId : 0,
                     AfterProfitSharingAmount = bal != null ? bal.CurrentBalance : 0,
                     AfterVestedProfitSharingAmount = bal != null ? bal.VestedBalance : 0,
-                    AfterYearsInPlan = pp != null ? pp.YearsInPlan : (byte)0
+                    AfterYearsInPlan = pp != null ? bal.YearsInPlan : (byte)0
                 }
             ).ToListAsync(cancellationToken); //Have to materialize. Something in this query seems to be unable to render as an expression with the current version of the oracle provider.
 

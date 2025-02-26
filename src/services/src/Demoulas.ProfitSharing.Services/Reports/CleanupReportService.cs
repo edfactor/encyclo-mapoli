@@ -79,8 +79,7 @@ public class CleanupReportService : ICleanupReportService
                             CurrentIncomeYear = pp.CurrentIncomeYear,
                             WeeksWorkedYear = pp.WeeksWorkedYear,
                             LastUpdate = pp.LastUpdate,
-                            PointsEarned = pp.PointsEarned,
-                            YearsInPlan = pp.YearsInPlan
+                            PointsEarned = pp.PointsEarned
                         }).ToList()
                 })
                 .ToPaginationResultsAsync(req, forceSingleQuery: true, ct);
@@ -263,8 +262,8 @@ public class CleanupReportService : ICleanupReportService
                     join d in ctx.Demographics on yis.Ssn equals d.Ssn
                     select new
                     {
-                        BadgeNumber = d.BadgeNumber,
-                        Years = (byte)yis.Years
+                        d.BadgeNumber,
+                        yis.Years
                     }
                 ).ToDictionaryAsync(x => x.BadgeNumber, x => x.Years, cancellationToken: cancellationToken);
 
@@ -397,7 +396,9 @@ public class CleanupReportService : ICleanupReportService
                     p.pp.Demographic!.ContactInfo.LastName,
                     p.pp.Demographic!.ContactInfo.FirstName,
                     p.pp.Demographic!.StoreNumber,
-                    p.pp.Demographic!.EmploymentTypeId,
+                    EmploymentTypeId = p.pp.Demographic!.EmploymentTypeId.ToString(), //There seems to be some sort of issue in the oracle ef provider that struggles with the char type.  It maps this expression
+                                                                                      //to: NOT (CAST((BITXOR("s"."EMPLOYMENT_TYPE_ID", N'')) AS NUMBER(1)) )
+                                                                                      //Converting to a string appears to fix this issue.
                     p.pp.CurrentIncomeYear,
                     p.pp.IncomeExecutive,
                     p.pp.PointsEarned,
@@ -423,7 +424,7 @@ public class CleanupReportService : ICleanupReportService
                         d.ContactInfo.LastName,
                         d.ContactInfo.FirstName,
                         d.StoreNumber,
-                        d.EmploymentTypeId,
+                        EmploymentTypeId = d.EmploymentTypeId.ToString(),
                         pp.CurrentIncomeYear,
                         pp.IncomeExecutive,
                         pp.PointsEarned,
@@ -450,11 +451,11 @@ public class CleanupReportService : ICleanupReportService
                           b.Contact!.ContactInfo.LastName,
                           b.Contact!.ContactInfo.FirstName,
                           StoreNumber = (short)0,
-                          EmploymentTypeId = ' ',
+                          EmploymentTypeId = " ",
                           CurrentIncomeYear = 0m,
                           IncomeExecutive = 0m,
                           PointsEarned = (decimal?)null,
-                          Years = (short)0
+                          Years = (byte)0
                       };
             }
 
@@ -531,14 +532,14 @@ public class CleanupReportService : ICleanupReportService
                           BadgeNumber = x.pp.BadgeNumber,
                           EmployeeName = $"{x.pp.LastName}, {x.pp.FirstName}",
                           StoreNumber = x.pp.StoreNumber,
-                          EmployeeTypeCode = x.pp.EmploymentTypeId,
+                          EmployeeTypeCode = x.pp.EmploymentTypeId[0],
                           DateOfBirth = x.pp.DateOfBirth,
                           Age = 0, //Filled out below after materialization
                           Ssn = x.pp.Ssn.MaskSsn(),
                           Wages = x.pp.CurrentIncomeYear + x.pp.IncomeExecutive,
                           Hours = x.pp.CurrentHoursYear + x.pp.HoursExecutive,
                           Points = Convert.ToInt16(x.pp.PointsEarned),
-                          IsNew = x.pp.EmploymentTypeId == EmployeeType.Constants.NewLastYear,
+                          IsNew = x.pp.EmploymentTypeId == EmployeeType.Constants.NewLastYear.ToString(),
                           IsUnder21 = false, //Filled out below after materialization
                           EmployeeStatus = x.pp.EmploymentStatusId,
                           Balance = x.tot.Total,

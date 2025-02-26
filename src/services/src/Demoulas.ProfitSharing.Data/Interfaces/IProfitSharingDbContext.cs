@@ -1,5 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace Demoulas.ProfitSharing.Data.Interfaces;
 
@@ -9,8 +10,6 @@ public interface IProfitSharingDbContext
     DbSet<DemographicHistory> DemographicHistories { get; set; }
     DbSet<FrozenState> FrozenStates { get; set; }
     DbSet<Country> Countries { get; set; }
-    DbSet<PayClassification> PayClassifications { get; set; }
-
     DbSet<Beneficiary> Beneficiaries { get; set; }
     DbSet<PayProfit> PayProfits { get; set; }
     DbSet<ProfitDetail> ProfitDetails { get; set; }

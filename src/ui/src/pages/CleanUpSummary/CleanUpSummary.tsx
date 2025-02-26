@@ -1,4 +1,4 @@
-import { Divider, Tabs, Tab, Button, Stack, Breadcrumbs, Link } from "@mui/material";
+import { Divider, Tabs, Tab, Button } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { useState } from "react";
 import { Page } from "smart-ui-library";
@@ -33,10 +33,9 @@ const CleanUpSummary = () => {
         <div className="flex items-center gap-2 h-10">
           <StatusDropdown onStatusChange={handleStatusChange} />
           <Button
-            onClick={() => navigate('/december-process-accordion')}
+            onClick={() => navigate("/december-process-accordion")}
             variant="outlined"
-            className="h-10 whitespace-nowrap min-w-fit"
-          >
+            className="h-10 whitespace-nowrap min-w-fit">
             December Flow
           </Button>
         </div>
@@ -46,7 +45,9 @@ const CleanUpSummary = () => {
   };
 
   return (
-    <Page label={selectedTab == 0 ? "Clean Up Process Summary" : tabs[selectedTab]} actionNode={renderActionNode()}>
+    <Page
+      label={selectedTab == 0 ? "Clean Up Process Summary" : tabs[selectedTab]}
+      actionNode={renderActionNode()}>
       <Grid2
         container
         width="100%"

@@ -77,8 +77,7 @@ const ManageExecutiveHoursAndDollarsGrid = (props: WrapperProps) => {
   const [openModal, setOpenModal] = useState<boolean>(false);
   const dispatch = useDispatch();
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [sortParams, setSortParams] = useState<ISortParams>({
+  const [_sortParams, setSortParams] = useState<ISortParams>({
     sortBy: "Badge",
     isSortDescending: false
   });
