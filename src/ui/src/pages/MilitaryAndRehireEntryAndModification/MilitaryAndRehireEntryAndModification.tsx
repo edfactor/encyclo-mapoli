@@ -1,4 +1,4 @@
-import { Divider } from "@mui/material";
+import { Button, Divider } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { useEffect, useState } from "react";
@@ -9,13 +9,31 @@ import { useCreateMilitaryContributionMutation, useLazyGetMilitaryContributionsQ
 import MilitaryAndRehireEntryAndModificationSearchFilter from "./MilitaryAndRehireEntryAndModificationSearchFilter";
 import MilitaryContributionForm from "./MilitaryContributionForm";
 import { MilitaryContribution } from "reduxstore/types";
-import { CAPTIONS } from "../../constants";
+import { CAPTIONS, MENU_LABELS } from "../../constants";
+import StatusDropdown from "components/StatusDropdown";
+import { useNavigate } from "react-router";
 
 const MilitaryAndRehireEntryAndModification = () => {
   const [showContributions, setShowContributions] = useState(false);
   const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.yearsEnd);
   const [fetchContributions, { isFetching }] = useLazyGetMilitaryContributionsQuery();
   const [trigger] = useCreateMilitaryContributionMutation();
+  const navigate = useNavigate();
+
+  const renderActionNode = () => {
+    return (
+      <div className="flex items-center gap-2 h-10">
+        <StatusDropdown onStatusChange={() => { }} />
+        <Button
+          onClick={() => navigate('/december-process-accordion')}
+          variant="outlined"
+          className="h-10 whitespace-nowrap min-w-fit"
+        >
+          {MENU_LABELS.DECEMBER_ACTIVITIES}
+        </Button>
+      </div>
+    );
+  }
 
   const handleFetchContributions = () => {
     if (masterInquiryEmployeeDetails) {
@@ -48,7 +66,7 @@ const MilitaryAndRehireEntryAndModification = () => {
   };
 
   return (
-    <Page label={CAPTIONS.MILITARY_CONTRIBUTIONS}>
+    <Page label={CAPTIONS.MILITARY_CONTRIBUTIONS} actionNode={renderActionNode()}>
       <Grid2
         container
         rowSpacing="24px">
