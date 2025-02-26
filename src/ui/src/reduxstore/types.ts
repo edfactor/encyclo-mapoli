@@ -603,6 +603,8 @@ export interface FrozenStateResponse {
 export interface MilitaryContributionRequest {
   badgeNumber: number;
 
+}
+
 export interface YearEndProfitSharingReportRequest {
   isYearEnd: boolean;
   minimumAgeInclusive: number;
