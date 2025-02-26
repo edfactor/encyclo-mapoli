@@ -599,3 +599,12 @@ export interface FrozenStateResponse {
   asOfDateTime: string;
   isActive: boolean;
 }
+
+export interface ProfallData {
+  badge: number;
+  employeeName: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+}

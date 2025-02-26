@@ -44,7 +44,8 @@ const pathToReadableName: Record<string, string> = {
   "new-ps-labels": "New PS Labels",
   qpay066: "QPAY066 - Under 21 Age Report",
   qpay066ta: "QPAY066TA - Under 21 Term Active",
-  "new-ps-labels-report": "New PS Labels Report"
+  "new-ps-labels-report": "New PS Labels Report",
+  "profall": "Profall Report",
 };
 
 export const getReadablePathName = (path: string): string => {

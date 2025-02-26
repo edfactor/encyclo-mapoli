@@ -24,7 +24,8 @@ const yearEndReports: RouteCategory = {
     { caption: CAPTIONS.PROFIT_SHARE_BY_STORE, route: ROUTES.PROFIT_SHARE_BY_STORE },
     { caption: CAPTIONS.PROFIT_SHARE_GROSS_REPORT, route: ROUTES.PROFIT_SHARE_GROSS_REPORT },
     { caption: CAPTIONS.FORFEIT, route: ROUTES.FORFEIT },
-    { caption: CAPTIONS.PAY450_SUMMARY, route: ROUTES.PAY450_SUMMARY }
+    { caption: CAPTIONS.PAY450_SUMMARY, route: ROUTES.PAY450_SUMMARY },
+    { caption: CAPTIONS.PROFALL, route: ROUTES.PROFALL },
   ]
 };
 

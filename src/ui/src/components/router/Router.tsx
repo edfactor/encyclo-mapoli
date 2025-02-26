@@ -48,6 +48,7 @@ import PaymasterUpdate from "pages/PaymasterUpdate/PaymasterUpdate";
 import Pay450Summary from "pages/PaymasterUpdate/Pay450Summary";
 import ProfCtrlSheet from "pages/PaymasterUpdate/ProfCtrlSheet";
 import Under21Report from "pages/ProfitShareByStore/Under21Report";
+import Profall from "pages/Profall/Profall";
 
 const Router = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -243,6 +244,7 @@ const Router = () => {
           element={<Under21Report />}>
           {" "}
         </Route>
+        <Route path={ROUTES.PROFALL} element={<Profall />}></Route>
       </RouteSecurity>
     </BrowserRouter>
   );

@@ -59,7 +59,8 @@ export const ROUTES = {
   PROF_CTRLSHEET: "prof-control-sheet",
   UNDER_21_REPORT: "under-21-report",
   UNDER_21_TERM_ACTIVE: "under-21-term-active",
-  NEW_PS_LABELS: "new-ps-labels"
+  NEW_PS_LABELS: "new-ps-labels",
+  PROFALL: "profall"
 } as const;
 
 export const CAPTIONS = {
@@ -111,7 +112,8 @@ export const CAPTIONS = {
   PAY_SHARE_BY_STORE_REPORTS: "Pay Share By Store Reports",
   UNDER_21_AGE_REPORT: "Under 21 Age Report",
   UNDER_21_TERM_ACTIVE: "Under 21 Term Active Report",
-  NEW_PS_LABELS: "New PS Labels"
+  NEW_PS_LABELS: "New PS Labels",
+  PROFALL: "PROFALL Report"
 } as const;
 
 export const VIEW = "View";
