@@ -8,6 +8,7 @@ public sealed record BalanceEndpointResponse
     public decimal Etva { get; set; }
     public decimal VestingPercent { get; set; }
     public decimal CurrentBalance { get; set; }
+    public short YearsInPlan { get; set; }
 
     public static BalanceEndpointResponse ResponseExample() {
         return new BalanceEndpointResponse
@@ -18,7 +19,8 @@ public sealed record BalanceEndpointResponse
             TotalDistributions = 200,
             Etva = 250,
             VestingPercent = .4m,
-            CurrentBalance = 5000
+            CurrentBalance = 5000,
+            YearsInPlan = 4,
         };
     }
 }

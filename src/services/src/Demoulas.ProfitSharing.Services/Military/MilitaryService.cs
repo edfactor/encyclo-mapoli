@@ -69,7 +69,8 @@ namespace Demoulas.ProfitSharing.Services.Military
                     ProfitYearIteration = 1,
                     CommentTypeId = /* 19 */CommentType.Constants.Military.Id,
                     Contribution = req.ContributionAmount,
-                    Ssn = d.Ssn
+                    Ssn = d.Ssn,
+                    YearsOfServiceCredit = 1
                 };
                 c.ProfitDetails.Add(pd);
 

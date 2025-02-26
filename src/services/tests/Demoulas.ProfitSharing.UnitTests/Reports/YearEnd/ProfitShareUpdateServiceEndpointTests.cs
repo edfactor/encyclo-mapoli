@@ -144,13 +144,13 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
             foreach (PayProfit ppi in ppr)
             {
                 ppi.ProfitYear = 3000;
-                ppi.YearsInPlan = 0;
                 ppi.EnrollmentId = Enrollment.Constants.NotEnrolled; /*0*/
             }
             // This knocks all the profit details out of the way
             foreach (var pdx in ctx.ProfitDetails)
             {
                 pdx.ProfitYear = 3000;
+                pdx.YearsOfServiceCredit = 0;
             }
 
             // This knocks out all the bene's
@@ -182,7 +182,6 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
             PayProfit pp1 = ppx[1];
             pp1.DemographicId.Should().Be(demo.Id);
             pp1.ProfitYear = ProfitYear -1;
-            pp1.YearsInPlan = 0; // This is important, otherwise we have no Totals
             
             // Setup some initial money so the earnings have a number to work with.
             var pd = await ctx.ProfitDetails.FirstAsync(CancellationToken.None);
@@ -259,7 +258,6 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
             foreach (PayProfit ppi in ppr)
             {
                 ppi.ProfitYear = 3000;
-                ppi.YearsInPlan = 0;
                 ppi.EnrollmentId = Enrollment.Constants.NotEnrolled; /*0*/
             }
 
@@ -267,6 +265,7 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
             foreach (var pdx in ctx.ProfitDetails)
             {
                 pdx.ProfitYear = 3000;
+                pdx.YearsOfServiceCredit = 0;
             }
 
             // This knocks out all the bene's.   Why does this not have async nonsense?

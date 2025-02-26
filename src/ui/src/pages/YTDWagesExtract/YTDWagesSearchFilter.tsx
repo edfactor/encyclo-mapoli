@@ -1,62 +1,42 @@
-import { FormHelperText } from "@mui/material";
+import { Button, CircularProgress, MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { SearchAndReset } from "smart-ui-library";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
-import { useLazyGetBalanceByAgeQuery } from "reduxstore/api/YearsEndApi";
+import { useForm } from "react-hook-form";
+import { useLazyGetEmployeeWagesForYearQuery } from "reduxstore/api/YearsEndApi";
 
 interface YTDWagesSearch {
-  profitYear: Date;
+  profitYear: number;
 }
 
-const schema = yup.object().shape({
-  profitYear: yup
-    .date()
-    .required("Year is required")
-    .min(new Date(2020, 0, 1), "Year must be 2020 or later")
-    .max(new Date(2100, 11, 31), "Year must be 2100 or earlier")
-    .typeError("Invalid date")
-});
+const YTDWagesSearchFilter = (props: { originalYear: number; setChosenYear: (year: number) => void }) => {
+  const [triggerSearch, { isFetching }] = useLazyGetEmployeeWagesForYearQuery();
 
-const YTDWagesSearchFilter = () => {
-  const [triggerSearch, { isFetching }] = useLazyGetBalanceByAgeQuery();
+  const { setChosenYear } = props;
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors, isValid },
-    reset,
-    setValue
-  } = useForm<YTDWagesSearch>({
-    resolver: yupResolver(schema),
+  const { handleSubmit, setValue } = useForm<YTDWagesSearch>({
     defaultValues: {
-      profitYear: undefined
+      profitYear: props.originalYear
     }
   });
 
-  const validateAndSearch = handleSubmit((data) => {
-    if (isValid) {
-      triggerSearch(
-        {
-          profitYear: data.profitYear.getFullYear(),
-          pagination: { skip: 0, take: 25 }
-        },
-        false
-      );
-    }
+  const doSearch = handleSubmit((data) => {
+    // Our one-select 'form' cannot be in an invalid state, so we can safely trigger the search
+    triggerSearch(
+      {
+        profitYear: data.profitYear,
+        pagination: { skip: 0, take: 255 },
+        acceptHeader: "application/json"
+      },
+      false
+    );
   });
 
-  const handleReset = () => {
-    reset({
-      profitYear: undefined
-    });
-  };
+  const options = [
+    { value: props.originalYear, label: `${props.originalYear}` },
+    { value: props.originalYear + 1, label: `${props.originalYear + 1}` }
+  ];
 
   return (
-    <form onSubmit={validateAndSearch}>
+    <form onSubmit={doSearch}>
       <Grid2
         container
         paddingX="24px"
@@ -65,33 +45,54 @@ const YTDWagesSearchFilter = () => {
           xs={12}
           sm={6}
           md={3}>
-          <Controller
-            name="profitYear"
-            control={control}
-            render={({ field }) => (
-              <DsmDatePicker
-                id="profitYear"
-                onChange={(value: Date | null) => field.onChange(value)}
-                value={field.value ?? null}
-                required={true}
-                label="Profit Year"
-                disableFuture
-                views={["year"]}
-                error={errors.profitYear?.message}
-              />
-            )}
-          />
+          <Select
+            size="small"
+            defaultValue={options[0].value}
+            onChange={(e: SelectChangeEvent<number>) => {
+              e.preventDefault();
+              setChosenYear(Number(e.target.value));
+              setValue("profitYear", Number(e.target.value));
+            }}
+            fullWidth>
+            {options.map((option) => (
+              <MenuItem
+                key={option.value}
+                value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </Select>
         </Grid2>
       </Grid2>
       <Grid2
         width="100%"
         paddingX="24px">
-        <SearchAndReset
-          handleReset={handleReset}
-          handleSearch={validateAndSearch}
-          isFetching={isFetching}
-          disabled={!isValid}
-        />
+        <div className="search-buttons flex mt-5 justify-start">
+          <Button
+            variant="contained"
+            disabled={false || isFetching}
+            data-testid="searchButton"
+            type="submit"
+            onClick={doSearch}
+            sx={{
+              "&.Mui-disabled": {
+                background: "#eaeaea",
+                color: "#c0c0c0"
+              }
+            }}>
+            {isFetching ? (
+              //Prevent loading spinner from shrinking button
+              <div className="spinner">
+                <CircularProgress
+                  color="inherit"
+                  size="20px"
+                />
+              </div>
+            ) : (
+              "Search"
+            )}
+          </Button>
+        </div>
       </Grid2>
     </form>
   );

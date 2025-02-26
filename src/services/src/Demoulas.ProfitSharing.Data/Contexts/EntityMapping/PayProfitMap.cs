@@ -94,11 +94,6 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
             .HasColumnName("POINTS_EARNED")
             .HasPrecision(9, 2);
 
-        _ = builder.Property(e => e.YearsInPlan)
-            .HasColumnName("YEARS_IN_PLAN")
-            .HasPrecision(2)
-            .HasDefaultValue(0);
-
         _ = builder.HasOne(e => e.Enrollment)
             .WithMany()
             .HasForeignKey(p => p.EnrollmentId)

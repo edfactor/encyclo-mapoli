@@ -955,5 +955,16 @@ UPDATE profit_detail pd
 SET comment_type_id = 24
 WHERE REMARK = '>64 & >5 100%';
 
+-- Set flag on Profit Detail marking a year of elibility for Profit Sharing
+-- Comment types indicating years of service other than a contribution include:
+-- V-Only
+-- > 64 - 1 Year Vested
+-- > 64 - 2 Year Vested
+-- > 64 - 3 Year Vested
+-- >64 & >5 100%
+Military
+UPDATE PROFIT_DETAIL pd 
+SET pd.YEARS_OF_SERVICE_CREDIT = CASE WHEN pd.Contribution > 0 OR pd.COMMENT_TYPE_ID IN (5, 16, 17, 18, 19, 24) THEN 1 ELSE 0 END;
+
 END;
 COMMIT ;

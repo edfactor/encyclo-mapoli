@@ -587,9 +587,9 @@ export interface ProfitShareEditResponse {
 export interface ProfitShareMasterResponse {
   isLoading: boolean;
   reportName: string;
-  beneficiariesEffected: number;
-  employeesEffected: number;
-  etvasEffected: number;
+  beneficiariesEffected?: number;
+  employeesEffected?: number;
+  etvasEffected?: number;
 }
 
 export interface FrozenStateResponse {

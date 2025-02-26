@@ -2,28 +2,92 @@ import { Divider } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { DSMAccordion, Page } from "smart-ui-library";
 import VestedAmountsByAgeSearchFilter from "./VestedAmountsByAgeSearchFilter";
-import VestedAmountsByAgeGrid from "./VestedAmountsByAgeGrid";
+import VestedAmountsByAgeTabs from "./VestedAmountsByAgeTabs";
+import { currencyFormat } from "utils/numberUtils";
+import { useSelector } from "react-redux";
+import { RootState } from "reduxstore/store";
+import { TotalsGrid } from "./TotalsGrid";
 
+const options: Intl.DateTimeFormatOptions = {
+  month: "2-digit",
+  day: "2-digit",
+  year: "numeric"
+};
+
+function toCapitalCase(str: string): string {
+  return str.toLowerCase().replace(/(?:^|\s)\S/g, function (match) {
+    return match.toUpperCase();
+  });
+}
 const VestedAmountsByAge = () => {
+  const { vestedAmountsByAge } = useSelector((state: RootState) => state.yearsEnd);
   return (
     <Page label="Vested Amounts by Age">
-        <Grid2
-          container
-          rowSpacing="24px">
-          <Grid2 width={"100%"}>
-            <Divider />
-          </Grid2>
-          <Grid2
-            width={"100%"}>
-             <DSMAccordion title="Filter">
-              <VestedAmountsByAgeSearchFilter />
-             </DSMAccordion>
-          </Grid2>
-
-          <Grid2 width="100%">
-            <VestedAmountsByAgeGrid />
-          </Grid2>
+      <Grid2
+        container
+        rowSpacing="24px">
+        <Grid2 width={"100%"}>
+          <Divider />
         </Grid2>
+        <Grid2 width={"100%"}>
+          <DSMAccordion title="Filter">
+            <VestedAmountsByAgeSearchFilter />
+          </DSMAccordion>
+        </Grid2>
+
+        <Grid2
+          width={"100%"}
+          sx={{ overflowX: "inherit" }}>
+          {vestedAmountsByAge?.response && (
+            <div style={{ overflowX: "inherit" }}>
+              <div className="px-[24px]">
+                <h2 className="text-dsm-secondary">Summary</h2>
+                <h3 className="text-dsm-secondary">
+                  {toCapitalCase(vestedAmountsByAge.reportName)}
+                  {"  -   "}
+                  {new Date(vestedAmountsByAge.reportDate).toLocaleDateString("en-US", options)}
+                </h3>
+              </div>
+
+              <TotalsGrid
+                displayData={[
+                  [
+                    currencyFormat(vestedAmountsByAge?.totalFullTime100PercentAmount ?? 0),
+                    currencyFormat(vestedAmountsByAge?.totalPartTimePartialAmount ?? 0),
+                    currencyFormat(vestedAmountsByAge?.totalFullTimeNotVestedAmount ?? 0),
+                    currencyFormat(vestedAmountsByAge?.totalPartTime100PercentAmount ?? 0),
+                    currencyFormat(vestedAmountsByAge?.totalPartTimePartialAmount ?? 0),
+                    currencyFormat(vestedAmountsByAge?.totalPartTimeNotVestedAmount ?? 0),
+                    vestedAmountsByAge?.totalBeneficiaryCount ?? 0,
+                    currencyFormat(vestedAmountsByAge?.totalBeneficiaryAmount ?? 0),
+                    vestedAmountsByAge?.totalFullTimeCount ?? 0,
+                    vestedAmountsByAge?.totalNotVestedCount ?? 0,
+                    vestedAmountsByAge?.totalPartialVestedCount ?? 0
+                  ]
+                ]}
+                leftColumnHeaders={[""]}
+                topRowHeaders={[
+                  "FT 100%",
+                  "FT Partial Vested",
+                  "FT Not Vested",
+                  "PT 100% Vested",
+                  "PT Partial Vested",
+                  "PT Not Vested",
+                  "Beneficiaries",
+                  "Beneficiary Amount",
+                  "FT Total Count",
+                  "Not Vested",
+                  "Partial Vested"
+                ]}
+              />
+
+              <Grid2 width={"100%"}>
+                <VestedAmountsByAgeTabs />
+              </Grid2>
+            </div>
+          )}
+        </Grid2>
+      </Grid2>
     </Page>
   );
 };

@@ -76,6 +76,8 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
     {
         var query = from employee in terminatedEmployees
             join payProfit in ctx.PayProfits on employee.Demographic.Id equals payProfit.DemographicId
+            join yipTbl in _totalService.GetYearsOfService(ctx, request.ProfitYear) on payProfit.Demographic!.Ssn equals yipTbl.Ssn into yipTmp
+            from yip in yipTmp.DefaultIfEmpty()
             where payProfit.ProfitYear == request.ProfitYear
             select new MemberSlice
             {
@@ -89,7 +91,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 FirstName = employee.Demographic.ContactInfo.FirstName,
                 MiddleInitial = employee.Demographic.ContactInfo.MiddleName,
                 LastName = employee.Demographic.ContactInfo.LastName,
-                YearsInPs = payProfit.YearsInPlan,
+                YearsInPs = yip != null ? yip.Years : (byte)0,
                 TerminationDate = employee.Demographic.TerminationDate,
                 IncomeRegAndExecCurrentYear = payProfit.CurrentIncomeYear + payProfit.IncomeExecutive,
                 TerminationCode = employee.Demographic.TerminationCodeId,

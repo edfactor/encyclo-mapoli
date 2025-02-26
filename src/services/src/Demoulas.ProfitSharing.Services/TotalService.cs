@@ -149,17 +149,24 @@ public sealed class TotalService : ITotalService
     /// <param name="ctx">
     /// The database context used to access profit-sharing data.
     /// </param>
-    /// <param name="employeeYear">
+    /// <param name="profitYear">
     /// The employee year for which the total years of service are to be returned.
     /// </param>
     /// <returns>
     /// An <see cref="IQueryable{T}"/> of <see cref="ParticipantTotalYearsDto"/> containing the SSN and total years of service for each participant.
     /// </returns>
-    internal IQueryable<ParticipantTotalYearsDto> GetYearsOfService(IProfitSharingDbContext ctx, short employeeYear)
+    internal IQueryable<ParticipantTotalYearsDto> GetYearsOfService(IProfitSharingDbContext ctx, short profitYear)
     {
-        return (from pp in ctx.PayProfits.Include(p => p.Demographic)
-            where pp.ProfitYear == employeeYear
-            select new ParticipantTotalYearsDto { Ssn = pp.Demographic!.Ssn, Years = pp.YearsInPlan });
+        return 
+                (from pdx in 
+                     (from pd in ctx.ProfitDetails
+                      where pd.ProfitYear <= profitYear
+                      group pd by new { pd.Ssn, pd.ProfitYear } into pdGrp
+                      select new { pdGrp.Key.Ssn, pdGrp.Key.ProfitYear, YearsOfServiceCredit = pdGrp.Max(x => x.YearsOfServiceCredit) }
+                     ) // Get the max value per year, and use that.  This is so that if a year has more than one row, we're only counting the max value for that year.
+                group pdx by pdx.Ssn into pdxGrp
+                select new ParticipantTotalYearsDto() { Ssn = pdxGrp.Key, Years = (byte)pdxGrp.Sum(x=>x.YearsOfServiceCredit)}
+                );
     }
 
     /// <summary>
@@ -262,7 +269,7 @@ public sealed class TotalService : ITotalService
                 ZeroContributionReasonId = (byte?)null,
                 b.Contact.DateOfBirth,
                 FromBeneficiary = (short)1,
-                Years = (short)0,
+                Years = (byte)0,
                 Hours = (decimal)0
             }
         );
@@ -338,6 +345,7 @@ public sealed class TotalService : ITotalService
                 join e in GetTotalComputedEtva(ctx, employeeYear) on b.Ssn equals e.Ssn
                 join d in GetTotalDistributions(ctx, profitYear) on b.Ssn equals d.Ssn
                 join v in GetVestingRatio(ctx, employeeYear, asOfDate) on e.Ssn equals v.Ssn
+                join y in GetYearsOfService(ctx, employeeYear) on b.Ssn equals y.Ssn
                 select new ParticipantTotalVestingBalanceDto
                 {
                     Ssn = e.Ssn,
@@ -345,6 +353,7 @@ public sealed class TotalService : ITotalService
                     Etva = e.Total,
                     TotalDistributions = d.Total,
                     VestingPercent = v.Ratio,
+                    YearsInPlan = y.Years,
                     VestedBalance = ((b.Total + d.Total - e.Total) * v.Ratio) + e.Total - d.Total
                 }
             );
