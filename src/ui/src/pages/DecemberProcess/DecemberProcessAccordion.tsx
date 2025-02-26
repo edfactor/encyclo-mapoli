@@ -24,6 +24,7 @@ import TerminationSearchFilter from "pages/Termination/TerminationSearchFilter";
 import DistributionsAndForfeituresGrid from "pages/DistributionsAndForfeitures/DistributionAndForfeituresGrid";
 import DistributionsAndForfeituresSearchFilter from "pages/DistributionsAndForfeitures/DistributionAndForfeituresSearchFilter";
 import DSMCollapsedAccordion from "components/DSMCollapsedAccordion";
+import { MENU_LABELS } from "../../constants";
 
 const DecemberProcessAccordion = () => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
@@ -52,7 +53,7 @@ const DecemberProcessAccordion = () => {
 
   return (
     <Page
-      label="December Flow">
+      label={MENU_LABELS.DECEMBER_ACTIVITIES}>
       <Grid2
         container>
         <Grid2

@@ -42,7 +42,9 @@ import {
   ProfitShareEditResponse,
   ProfitShareMasterResponse,
   EmployeeWagesForYear,
-  EmployeeWagesForYearRequestDto
+  EmployeeWagesForYearRequestDto,
+  YearEndProfitSharingEmployee,
+  YearEndProfitSharingReportRequest
 } from "reduxstore/types";
 import {
   setDemographicBadgesNotInPayprofitData,
@@ -71,7 +73,9 @@ import {
   setProfitMasterApply,
   setProfitMasterRevert,
   setAdditionalExecutivesGrid,
-  setEmployeeWagesForYear
+  setYearEndProfitSharingReport,
+  clearYearEndProfitSharingReport,
+  setEmployeeWagesForYear,
 } from "reduxstore/slices/yearsEndSlice";
 import { url } from "./api";
 
@@ -663,7 +667,24 @@ export const YearsEndApi = createApi({
           dispatch(clearProfitEdit());
         }
       }
-    })
+    }),
+    getYearEndProfitSharingReport: builder.query<PagedReportResponse<YearEndProfitSharingEmployee>, YearEndProfitSharingReportRequest>({
+      query: (params) => ({
+          url: "yearend/yearend-profit-sharing-report",
+          method: "GET",
+          params: params
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+          try {
+              dispatch(clearYearEndProfitSharingReport());
+              const { data } = await queryFulfilled;
+              dispatch(setYearEndProfitSharingReport(data));
+          } catch (err) {
+              console.log("Err: " + err);
+              dispatch(clearYearEndProfitSharingReport());
+          }
+      }
+  })
   })
 });
 
@@ -693,5 +714,6 @@ export const {
   useLazyGetProfitShareEditQuery,
   useLazyGetMasterApplyQuery,
   useLazyGetMasterRevertQuery,
-  useUpdateExecutiveHoursAndDollarsMutation
+  useUpdateExecutiveHoursAndDollarsMutation,
+  useLazyGetYearEndProfitSharingReportQuery
 } = YearsEndApi;

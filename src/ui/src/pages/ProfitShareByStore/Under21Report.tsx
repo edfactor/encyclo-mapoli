@@ -14,7 +14,7 @@ const Under21Report = () => {
     ];
 
     return (
-        <Page label={CAPTIONS.UNDER_21_AGE_REPORT}>
+        <Page label={CAPTIONS.QPAY066_UNDER21}>
             <Grid2
                 container
                 rowSpacing="24px">

@@ -6,6 +6,7 @@ import CleanUpSummaryCards from "./CleanUpSummaryCards";
 import CleanUpSummaryGrids from "./CleanUpSummaryGrids";
 import { useNavigate } from "react-router";
 import StatusDropdown, { ProcessStatus } from "components/StatusDropdown";
+import { MENU_LABELS } from "../../constants";
 
 const CleanUpSummary = () => {
   const [selectedTab, setSelectedTab] = useState(0);
@@ -35,8 +36,9 @@ const CleanUpSummary = () => {
           <Button
             onClick={() => navigate("/december-process-accordion")}
             variant="outlined"
-            className="h-10 whitespace-nowrap min-w-fit">
-            December Flow
+            className="h-10 whitespace-nowrap min-w-fit"
+          >
+            {MENU_LABELS.DECEMBER_ACTIVITIES}
           </Button>
         </div>
       );

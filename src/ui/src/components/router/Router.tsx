@@ -48,6 +48,19 @@ import PaymasterUpdate from "pages/PaymasterUpdate/PaymasterUpdate";
 import Pay450Summary from "pages/PaymasterUpdate/Pay450Summary";
 import ProfCtrlSheet from "pages/PaymasterUpdate/ProfCtrlSheet";
 import Under21Report from "pages/ProfitShareByStore/Under21Report";
+import ProfitShareGrossReport from "pages/ProfitShareGrossReport/ProfitShareGrossReport";
+import TwentyOnePlus from "pages/PAY426Reports/PAY426-2/TwentyOnePlus";
+import Beneficiaries from "pages/PAY426Reports/PAY426-10/Beneficiaries";
+import UnderEighteen from "pages/PAY426Reports/PAY426-3/UnderEighteen";
+import PriorHours from "pages/PAY426Reports/PAY426-4/PriorHours";
+import NoPriorHours from "pages/PAY426Reports/PAY426-5/NoPriorHours";
+import TermedWithHours from "pages/PAY426Reports/PAY426-6/TermedWithHours";
+import TermedNoPrior from "pages/PAY426Reports/PAY426-7/TermedNoPrior";
+import TermedWithPrior from "pages/PAY426Reports/PAY426-8/TermedWithPrior";
+import ProfitSummary from "pages/PAY426Reports/PAY426-9/ProfitSummary";
+import NewPSLabels from "pages/ProfitShareByStore/NewPSLabels";
+import QPAY066TA from "pages/ProfitShareByStore/QPAY066TA";
+import Under21TA from "pages/ProfitShareByStore/Under21TA";
 
 const Router = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -220,29 +233,29 @@ const Router = () => {
         <Route
           path=""
           element={<DecemberProcessAccordion />}></Route>
-        <Route
-          path={ROUTES.PROFIT_SHARE_BY_STORE}
-          element={<ProfitShareByStore />}></Route>
-        <Route
-          path={ROUTES.PROFIT_SHARE_GROSS_REPORT}
-          element={<ProfitShareByStore />}></Route>
-        <Route
-          path={ROUTES.PAYMASTER_UPDATE}
-          element={<PaymasterUpdate />}></Route>
-        <Route
-          path={ROUTES.PAY450_SUMMARY}
-          element={<Pay450Summary />}></Route>
-        <Route
-          path={ROUTES.PROF_CTRLSHEET}
-          element={<ProfCtrlSheet />}></Route>
-        <Route
-          path={ROUTES.PROFIT_SHARE_BY_STORE}
-          element={<ProfitShareByStore />}></Route>
-        <Route
-          path={ROUTES.UNDER_21_REPORT}
-          element={<Under21Report />}>
-          {" "}
-        </Route>
+        <Route path={ROUTES.PROFIT_SHARE_BY_STORE} element={<ProfitShareByStore />}></Route>
+        <Route path={ROUTES.PROFIT_SHARE_GROSS_REPORT} element={<ProfitShareGrossReport />}></Route>
+        <Route path={ROUTES.PAYMASTER_UPDATE} element={<PaymasterUpdate />}></Route>
+        <Route path={ROUTES.PAY450_SUMMARY} element={<Pay450Summary />}></Route>
+        <Route path={ROUTES.PROF_CTRLSHEET} element={<ProfCtrlSheet />}></Route>
+        <Route path={ROUTES.PROFIT_SHARE_BY_STORE} element={<ProfitShareByStore />}></Route>
+        <Route path={ROUTES.UNDER_21_REPORT} element={<Under21Report />}> </Route>
+        <Route path={ROUTES.PAY426_ACTIVE_21_PLUS} element={<TwentyOnePlus />}></Route>
+        <Route path={ROUTES.PAY426_ACTIVE_18_20} element={<EighteenToTwenty />} />
+        <Route path={ROUTES.PAY426_ACTIVE_21_PLUS} element={<TwentyOnePlus />} />
+        <Route path={ROUTES.PAY426_ACTIVE_UNDER_18} element={<UnderEighteen />} />
+        <Route path={ROUTES.PAY426_ACTIVE_PRIOR_SHARING} element={<PriorHours />} />
+        <Route path={ROUTES.PAY426_ACTIVE_NO_PRIOR} element={<NoPriorHours />} />
+        <Route path={ROUTES.PAY426_TERMINATED_1000_PLUS} element={<TermedWithHours />} />
+        <Route path={ROUTES.PAY426_TERMINATED_NO_PRIOR} element={<TermedNoPrior />} />
+        <Route path={ROUTES.PAY426_TERMINATED_PRIOR} element={<TermedWithPrior />} />
+        <Route path={ROUTES.PAY426_SUMMARY} element={<ProfitSummary />} />
+        <Route path={ROUTES.PAY426_NON_EMPLOYEE} element={<Beneficiaries />} />
+        <Route path={ROUTES.PROFIT_SHARE_BY_STORE} element={<ProfitShareByStore />} />
+        <Route path={ROUTES.QPAY066_UNDER21} element={<Under21Report />} />
+        <Route path={ROUTES.QPAY066TA_UNDER21} element={<Under21TA />} />
+        <Route path={ROUTES.QPAY066TA} element={<QPAY066TA />} />
+        <Route path={ROUTES.NEW_PS_LABELS} element={<NewPSLabels />} />
       </RouteSecurity>
     </BrowserRouter>
   );

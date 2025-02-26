@@ -599,3 +599,40 @@ export interface FrozenStateResponse {
   asOfDateTime: string;
   isActive: boolean;
 }
+
+
+export interface YearEndProfitSharingReportRequest {
+  isYearEnd: boolean;
+  minimumAgeInclusive: number;
+  maximumAgeInclusive: number;
+  minimumHoursInclusive: number;
+  maximumHoursInclusive: number;
+  includeActiveEmployees: boolean;
+  includeInactiveEmployees: boolean;
+  includeEmployeesTerminatedThisYear: boolean;
+  includeTerminatedEmployees: boolean;
+  includeBeneficiaries: boolean;
+  includeEmployeesWithPriorProfitSharingAmounts: boolean;
+  includeEmployeesWithNoPriorProfitSharingAmounts: boolean;
+  profitYear: number;
+  pagination: PaginationParams;
+}
+
+export interface YearEndProfitSharingEmployee {
+  badgeNumber: number;
+  employeeName: string;
+  storeNumber: number;
+  employeeTypeCode: string;
+  dateOfBirth: string;
+  age: number;
+  ssn: string;
+  wages: number;
+  hours: number;
+  points: number;
+  isUnder21: boolean;
+  isNew: boolean;
+  employeeStatus: string;
+  balance: number;
+  yearsInPlan: number;
+}
+
