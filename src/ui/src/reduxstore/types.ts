@@ -609,6 +609,11 @@ export interface ProfallData {
   zipCode: string;
 }
 
+export interface MilitaryContributionRequest extends ProfitYearRequest{
+  badgeNumber: number;
+  pagination: PaginationParams;
+}
+
 export interface YearEndProfitSharingReportRequest {
   isYearEnd: boolean;
   minimumAgeInclusive: number;
@@ -626,6 +631,15 @@ export interface YearEndProfitSharingReportRequest {
   pagination: PaginationParams;
 }
 
+export interface CreateMilitaryContributionRequest extends ProfitYearRequest {
+  badgeNumber: number;
+  contributionAmount: number;
+}
+
+export interface MilitaryContribution {
+  contributionDate: Date | null;
+  contributionAmount: number | null;
+}
 export interface YearEndProfitSharingEmployee {
   badgeNumber: number;
   employeeName: string;
