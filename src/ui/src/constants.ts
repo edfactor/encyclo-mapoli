@@ -114,7 +114,8 @@ export const CAPTIONS = {
   QPAY066_UNDER21: "QPAY066-UNDR21",
   QPAY066TA_UNDER21: "QPAY066TA-UNDR21",
   QPAY066TA: "QPAY066TA",
-  NEW_PS_LABELS: "New PS Labels"
+  NEW_PS_LABELS: "New PS Labels",
+  MILITARY_CONTRIBUTIONS: "Military Contributions"
 } as const;
 
 export const VIEW = "View";

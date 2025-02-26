@@ -1,7 +1,6 @@
 import { Divider } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { DSMAccordion, Page } from "smart-ui-library";
-import { Search } from "@mui/icons-material";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
@@ -10,6 +9,7 @@ import { useCreateMilitaryContributionMutation, useLazyGetMilitaryContributionsQ
 import MilitaryAndRehireEntryAndModificationSearchFilter from "./MilitaryAndRehireEntryAndModificationSearchFilter";
 import MilitaryContributionForm from "./MilitaryContributionForm";
 import { MilitaryContribution } from "reduxstore/types";
+import { CAPTIONS } from "../../constants";
 
 const MilitaryAndRehireEntryAndModification = () => {
   const [showContributions, setShowContributions] = useState(false);
@@ -48,7 +48,7 @@ const MilitaryAndRehireEntryAndModification = () => {
   };
 
   return (
-    <Page label="Military Contributions">
+    <Page label={CAPTIONS.MILITARY_CONTRIBUTIONS}>
       <Grid2
         container
         rowSpacing="24px">
