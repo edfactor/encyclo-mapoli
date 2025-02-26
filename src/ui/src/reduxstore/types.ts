@@ -602,6 +602,20 @@ export interface FrozenStateResponse {
 
 export interface MilitaryContributionRequest {
   badgeNumber: number;
+
+export interface YearEndProfitSharingReportRequest {
+  isYearEnd: boolean;
+  minimumAgeInclusive: number;
+  maximumAgeInclusive: number;
+  minimumHoursInclusive: number;
+  maximumHoursInclusive: number;
+  includeActiveEmployees: boolean;
+  includeInactiveEmployees: boolean;
+  includeEmployeesTerminatedThisYear: boolean;
+  includeTerminatedEmployees: boolean;
+  includeBeneficiaries: boolean;
+  includeEmployeesWithPriorProfitSharingAmounts: boolean;
+  includeEmployeesWithNoPriorProfitSharingAmounts: boolean;
   profitYear: number;
   pagination: PaginationParams;
 }
@@ -615,3 +629,21 @@ export interface MilitaryContribution {
   contributionDate: Date | null;
   contributionAmount: number | null;
 }
+export interface YearEndProfitSharingEmployee {
+  badgeNumber: number;
+  employeeName: string;
+  storeNumber: number;
+  employeeTypeCode: string;
+  dateOfBirth: string;
+  age: number;
+  ssn: string;
+  wages: number;
+  hours: number;
+  points: number;
+  isUnder21: boolean;
+  isNew: boolean;
+  employeeStatus: string;
+  balance: number;
+  yearsInPlan: number;
+}
+

@@ -2,7 +2,7 @@ export const HISTORY_KEY = "navigation_history" as const;
 
 export const MENU_LABELS = {
   FISCAL_CLOSE: "Fiscal Close",
-  DECEMBER_FLOW: "December Flow",
+  DECEMBER_ACTIVITIES: "December Activities",
   BENEFICIARIES: "Beneficiaries",
   DISTRIBUTIONS: "Distributions",
   RECONCILIATION: "Reconciliation",
@@ -58,8 +58,10 @@ export const ROUTES = {
   PAY450_SUMMARY: "pay450-summary",
   PROF_CTRLSHEET: "prof-control-sheet",
   UNDER_21_REPORT: "under-21-report",
-  UNDER_21_TERM_ACTIVE: "under-21-term-active",
-  NEW_PS_LABELS: "new-ps-labels"
+  QPAY066_UNDER21: "qpay066-under21",
+  QPAY066TA_UNDER21: "qpay066ta-under21",
+  QPAY066TA: "qpay066ta",
+  NEW_PS_LABELS: "new-ps-labels",
 } as const;
 
 export const CAPTIONS = {
@@ -109,8 +111,9 @@ export const CAPTIONS = {
   PROFIT_SHARING_CONTROL_SHEET: "Profit Sharing Control Sheet",
   PAY450_SUMMARY: "Update Summary for Profit Sharing (Pay450)",
   PAY_SHARE_BY_STORE_REPORTS: "Pay Share By Store Reports",
-  UNDER_21_AGE_REPORT: "Under 21 Age Report",
-  UNDER_21_TERM_ACTIVE: "Under 21 Term Active Report",
+  QPAY066_UNDER21: "QPAY066-UNDR21",
+  QPAY066TA_UNDER21: "QPAY066TA-UNDR21",
+  QPAY066TA: "QPAY066TA",
   NEW_PS_LABELS: "New PS Labels"
 } as const;
 

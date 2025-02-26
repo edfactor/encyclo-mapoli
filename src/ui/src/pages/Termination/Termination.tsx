@@ -5,7 +5,7 @@ import TerminationSearchFilter from "./TerminationSearchFilter";
 import TerminationGrid from "./TerminationGrid";
 import { useNavigate } from "react-router";
 import StatusDropdown, { ProcessStatus } from "components/StatusDropdown";
-import { CAPTIONS } from "../../constants";
+import { CAPTIONS, MENU_LABELS } from "../../constants";
 
 const Termination = () => {
   const navigate = useNavigate();
@@ -23,7 +23,7 @@ const Termination = () => {
           variant="outlined"
           className="h-10 whitespace-nowrap min-w-fit"
         >
-          December Flow
+          {MENU_LABELS.DECEMBER_ACTIVITIES}
         </Button>
       </div>
     );
