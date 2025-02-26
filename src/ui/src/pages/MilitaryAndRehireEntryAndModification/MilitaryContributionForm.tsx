@@ -1,73 +1,58 @@
-import { Button, FormHelperText, FormLabel, TextField } from "@mui/material";
+import { Button, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { Controller, useForm } from "react-hook-form";
-import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
-import { useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
-import { useCreateMilitaryContributionMutation } from "reduxstore/api/MilitaryApi";
+import { useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { MilitaryContribution } from "reduxstore/types";
+
+
+
+interface FormData {
+  rows: MilitaryContribution[];
+}
 
 interface MilitaryContributionFormProps {
-  onSubmit: () => void;
+  onSubmit: (rows: MilitaryContribution[]) => void;
   onCancel: () => void;
+  initialData?: MilitaryContribution[];
+  isLoading?: boolean;
 }
 
-interface ContributionRow {
-  contributionDate: Date;
-  contributionAmount: string;
-}
-
-interface MilitaryContribution {
-  rows: ContributionRow[];
-}
-
-const rowSchema = yup.object().shape({
-  contributionDate: yup.date().required("Contribution date is required"),
-  contributionAmount: yup
-    .string()
-    .required("Amount is required")
-    .matches(/^\d*\.?\d{0,2}$/, "Must be a valid dollar amount")
-});
-
-const schema = yup.object().shape({
-  rows: yup.array().of(rowSchema).required().min(1)
-});
-
-const MilitaryContributionForm = ({ onSubmit, onCancel }: MilitaryContributionFormProps) => {
-  const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.yearsEnd);
-  const [createContribution, { isLoading }] = useCreateMilitaryContributionMutation();
-
-  const { control, handleSubmit, formState: { errors } } = useForm<MilitaryContribution>({
-    resolver: yupResolver(schema),
+const MilitaryContributionForm = ({
+  onSubmit,
+  onCancel,
+  initialData,
+  isLoading = false
+}: MilitaryContributionFormProps) => {
+  const { control, handleSubmit, reset } = useForm<FormData>({
     defaultValues: {
-      rows: Array(5).fill({
-        contributionDate: new Date(),
-        contributionAmount: ""
-      })
+      rows: Array(5).fill({ contributionDate: null, contributionAmount: null })
     }
   });
 
-  const handleFormSubmit = async (data: MilitaryContribution) => {
-    if (!masterInquiryEmployeeDetails?.badgeNumber) return;
+  useEffect(() => {
+    if (initialData) {
+      const sortedData = [...initialData]
+        .sort((a, b) => {
+          if (!a.contributionDate || !b.contributionDate) return 0;
+          return b.contributionDate.getTime() - a.contributionDate.getTime();
+        })
+        .slice(0, 5);
 
-    try {
-      // Filter out empty rows
-      const filledRows = data.rows.filter(row => row.contributionAmount.trim() !== "");
-      
-      // Create contributions for each filled row
-      await Promise.all(filledRows.map(row => 
-        createContribution({
-          badgeNumber: parseInt(masterInquiryEmployeeDetails.badgeNumber),
-          contributionAmount: parseFloat(row.contributionAmount),
-          profitYear: 2024 // Default to 2024
-        }).unwrap()
-      ));
+      const paddedData = [
+        ...sortedData,
+        ...Array(5 - sortedData.length).fill({ contributionDate: null, contributionAmount: null })
+      ];
 
-      onSubmit();
-    } catch (error) {
-      console.error('Failed to create military contribution:', error);
+      reset({ rows: paddedData });
     }
+  }, [initialData, reset]);
+
+  const handleFormSubmit = (data: FormData) => {
+    const validContributions = data.rows.filter(
+      row => row.contributionDate && row.contributionAmount !== null
+    );
+    onSubmit(validContributions);
   };
 
   return (
@@ -79,13 +64,13 @@ const MilitaryContributionForm = ({ onSubmit, onCancel }: MilitaryContributionFo
               <Controller
                 name={`rows.${index}.contributionDate`}
                 control={control}
-                render={({ field }) => (
+                render={({ field, fieldState: { error } }) => (
                   <DsmDatePicker
                     id={`contributionDate-${index}`}
                     label="Contribution Date"
                     onChange={(value: Date | null) => field.onChange(value)}
                     value={field.value ?? null}
-                    error={errors.rows?.[index]?.contributionDate?.message}
+                    error={error?.message}
                     required={false}
                   />
                 )}
@@ -96,17 +81,19 @@ const MilitaryContributionForm = ({ onSubmit, onCancel }: MilitaryContributionFo
               <Controller
                 name={`rows.${index}.contributionAmount`}
                 control={control}
-                render={({ field }) => (
+                render={({ field, fieldState: { error } }) => (
                   <TextField
                     {...field}
                     fullWidth
+                    type="number"
                     variant="outlined"
-                    error={!!errors.rows?.[index]?.contributionAmount}
-                    helperText={errors.rows?.[index]?.contributionAmount?.message}
-                    inputProps={{
-                      inputMode: "decimal",
-                      pattern: "^\\d*\\.?\\d{0,2}$"
+                    error={!!error}
+                    helperText={error?.message}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      field.onChange(value === "" ? null : Number(value));
                     }}
+                    value={field.value ?? ""}
                   />
                 )}
               />
@@ -114,21 +101,21 @@ const MilitaryContributionForm = ({ onSubmit, onCancel }: MilitaryContributionFo
           </Grid2>
         ))}
 
-        <Grid2 container xs={12} justifyContent="flex-end" spacing={2}>
-          <Grid2>
-            <Button
-              variant="outlined"
-              onClick={onCancel}
-              disabled={isLoading}>
-              Cancel
-            </Button>
-          </Grid2>
+        <Grid2 container xs={12} spacing={2} paddingTop='8px'>
           <Grid2>
             <Button
               variant="contained"
               type="submit"
               disabled={isLoading}>
               Save
+            </Button>
+          </Grid2>
+          <Grid2>
+            <Button
+              variant="outlined"
+              onClick={onCancel}
+              disabled={isLoading}>
+              Cancel
             </Button>
           </Grid2>
         </Grid2>

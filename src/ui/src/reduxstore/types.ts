@@ -599,3 +599,19 @@ export interface FrozenStateResponse {
   asOfDateTime: string;
   isActive: boolean;
 }
+
+export interface MilitaryContributionRequest {
+  badgeNumber: number;
+  profitYear: number;
+  pagination: PaginationParams;
+}
+
+export interface CreateMilitaryContributionRequest extends ProfitYearRequest {
+  badgeNumber: number;
+  contributionAmount: number;
+}
+
+export interface MilitaryContribution {
+  contributionDate: Date | null;
+  contributionAmount: number | null;
+}
