@@ -600,6 +600,15 @@ export interface FrozenStateResponse {
   isActive: boolean;
 }
 
+export interface ProfallData {
+  badge: number;
+  employeeName: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+}
+
 export interface MilitaryContributionRequest extends ProfitYearRequest{
   badgeNumber: number;
   pagination: PaginationParams;

@@ -48,6 +48,7 @@ import PaymasterUpdate from "pages/PaymasterUpdate/PaymasterUpdate";
 import Pay450Summary from "pages/PaymasterUpdate/Pay450Summary";
 import ProfCtrlSheet from "pages/PaymasterUpdate/ProfCtrlSheet";
 import Under21Report from "pages/ProfitShareByStore/Under21Report";
+import Profall from "pages/Profall/Profall";
 import ProfitShareGrossReport from "pages/ProfitShareGrossReport/ProfitShareGrossReport";
 import TwentyOnePlus from "pages/PAY426Reports/PAY426-2/TwentyOnePlus";
 import Beneficiaries from "pages/PAY426Reports/PAY426-10/Beneficiaries";
@@ -256,6 +257,7 @@ const Router = () => {
         <Route path={ROUTES.QPAY066TA_UNDER21} element={<Under21TA />} />
         <Route path={ROUTES.QPAY066TA} element={<QPAY066TA />} />
         <Route path={ROUTES.NEW_PS_LABELS} element={<NewPSLabels />} />
+        <Route path={ROUTES.PROFALL} element={<Profall />} />
       </RouteSecurity>
     </BrowserRouter>
   );

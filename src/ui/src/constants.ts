@@ -62,6 +62,7 @@ export const ROUTES = {
   QPAY066TA_UNDER21: "qpay066ta-under21",
   QPAY066TA: "qpay066ta",
   NEW_PS_LABELS: "new-ps-labels",
+  PROFALL: "profall",
 } as const;
 
 export const CAPTIONS = {
@@ -115,6 +116,7 @@ export const CAPTIONS = {
   QPAY066TA_UNDER21: "QPAY066TA-UNDR21",
   QPAY066TA: "QPAY066TA",
   NEW_PS_LABELS: "New PS Labels",
+  PROFALL: "PROFALL Report",
   MILITARY_CONTRIBUTIONS: "Military Contributions"
 } as const;
 
