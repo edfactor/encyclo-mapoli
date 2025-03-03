@@ -1,18 +1,19 @@
 import { agGridNumberToCurrency } from "smart-ui-library";
-import { ColDef } from "ag-grid-community";
+import { ColDef, ICellRendererParams } from "ag-grid-community";
+import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 
-export const GetProfitSharingReportGridColumns = (viewBadge: Function): ColDef[] => {
+export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
     {
       headerName: "Badge",
-      field: "badgeNumber",  
+      field: "badgeNumber",
       colId: "badgeNumber",
       minWidth: 100,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
       sortable: true,
-      cellRenderer: viewBadge
+      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, navFunction)
     },
     {
       headerName: "Employee Name",
@@ -26,7 +27,7 @@ export const GetProfitSharingReportGridColumns = (viewBadge: Function): ColDef[]
     },
     {
       headerName: "Store",
-      field: "storeNumber", 
+      field: "storeNumber",
       colId: "storeNumber",
       minWidth: 80,
       headerClass: "right-align",
@@ -35,7 +36,7 @@ export const GetProfitSharingReportGridColumns = (viewBadge: Function): ColDef[]
     },
     {
       headerName: "Type",
-      field: "employeeTypeCode",  
+      field: "employeeTypeCode",
       colId: "employeeTypeCode",
       minWidth: 80,
       headerClass: "center-align",
@@ -44,7 +45,7 @@ export const GetProfitSharingReportGridColumns = (viewBadge: Function): ColDef[]
     },
     {
       headerName: "Date of Birth",
-      field: "dateOfBirth",  
+      field: "dateOfBirth",
       colId: "dateOfBirth",
       minWidth: 120,
       headerClass: "center-align",
@@ -53,7 +54,7 @@ export const GetProfitSharingReportGridColumns = (viewBadge: Function): ColDef[]
     },
     {
       headerName: "Age",
-      field: "age",  
+      field: "age",
       colId: "age",
       minWidth: 80,
       headerClass: "right-align",
@@ -62,7 +63,7 @@ export const GetProfitSharingReportGridColumns = (viewBadge: Function): ColDef[]
     },
     {
       headerName: "SSN",
-      field: "ssn",  
+      field: "ssn",
       colId: "ssn",
       minWidth: 120,
       headerClass: "center-align",
@@ -71,7 +72,7 @@ export const GetProfitSharingReportGridColumns = (viewBadge: Function): ColDef[]
     },
     {
       headerName: "Wages",
-      field: "wages",  
+      field: "wages",
       colId: "wages",
       minWidth: 120,
       headerClass: "right-align",
@@ -81,7 +82,7 @@ export const GetProfitSharingReportGridColumns = (viewBadge: Function): ColDef[]
     },
     {
       headerName: "Hours",
-      field: "hours",  
+      field: "hours",
       colId: "hours",
       minWidth: 100,
       headerClass: "right-align",
@@ -90,7 +91,7 @@ export const GetProfitSharingReportGridColumns = (viewBadge: Function): ColDef[]
     },
     {
       headerName: "Points",
-      field: "points",  
+      field: "points",
       colId: "points",
       minWidth: 100,
       headerClass: "right-align",
@@ -99,7 +100,7 @@ export const GetProfitSharingReportGridColumns = (viewBadge: Function): ColDef[]
     },
     {
       headerName: "New",
-      field: "isNew",  
+      field: "isNew",
       colId: "isNew",
       minWidth: 100,
       headerClass: "center-align",
@@ -108,7 +109,7 @@ export const GetProfitSharingReportGridColumns = (viewBadge: Function): ColDef[]
     },
     {
       headerName: "Status",
-      field: "employeeStatus",  
+      field: "employeeStatus",
       colId: "employeeStatus",
       minWidth: 120,
       headerClass: "center-align",
@@ -117,7 +118,7 @@ export const GetProfitSharingReportGridColumns = (viewBadge: Function): ColDef[]
     },
     {
       headerName: "Balance",
-      field: "balance",  
+      field: "balance",
       colId: "balance",
       minWidth: 140,
       headerClass: "right-align",
@@ -127,7 +128,7 @@ export const GetProfitSharingReportGridColumns = (viewBadge: Function): ColDef[]
     },
     {
       headerName: "Years in Plan",
-      field: "yearsInPlan",  
+      field: "yearsInPlan",
       colId: "yearsInPlan",
       minWidth: 80,
       headerClass: "right-align",

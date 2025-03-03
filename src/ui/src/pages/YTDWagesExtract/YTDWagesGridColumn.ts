@@ -1,5 +1,5 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { viewBadgeRenderer } from "utils/masterInquiryLink";
+import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 import { currencyFormat } from "utils/numberUtils";
 
 export const GetYTDWagesColumns = (): ColDef[] => {
@@ -13,7 +13,7 @@ export const GetYTDWagesColumns = (): ColDef[] => {
       cellClass: "left-align",
       resizable: true,
       sortable: true,
-      cellRenderer: (params: ICellRendererParams) => viewBadgeRenderer(params.data.badgeNumber)
+      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber)
     },
     {
       headerName: "Hours Current Year",
