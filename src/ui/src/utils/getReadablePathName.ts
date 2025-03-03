@@ -8,7 +8,7 @@ const pathToReadableName: Record<string, string> = {
     'military-and-rehire': 'Military and Rehire',
     'military-and-rehire-forfeitures': 'Military and Rehire Forfeitures',
     'military-and-rehire-profit-summary': 'Military and Rehire Profit Summary',
-    'distributions-and-forfeitures': 'Distributions and Forfeitures',
+    'distributions-and-forfeitures': 'Distributions and Forfeitures (QPAY129)',
     'manage-executive-hours-and-dollars': 'Manage Executive Hours and Dollars',
     'eligible-employees': 'Eligible Employees',
     'master-inquiry': 'Master Inquiry',
