@@ -1,9 +1,8 @@
 import { Divider } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { DSMAccordion, Page } from "smart-ui-library";
+import { DSMAccordion, numberToCurrency, Page } from "smart-ui-library";
 import VestedAmountsByAgeSearchFilter from "./VestedAmountsByAgeSearchFilter";
 import VestedAmountsByAgeTabs from "./VestedAmountsByAgeTabs";
-import { currencyFormat } from "utils/numberUtils";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { TotalsGrid } from "./TotalsGrid";
@@ -52,14 +51,14 @@ const VestedAmountsByAge = () => {
               <TotalsGrid
                 displayData={[
                   [
-                    currencyFormat(vestedAmountsByAge?.totalFullTime100PercentAmount ?? 0),
-                    currencyFormat(vestedAmountsByAge?.totalPartTimePartialAmount ?? 0),
-                    currencyFormat(vestedAmountsByAge?.totalFullTimeNotVestedAmount ?? 0),
-                    currencyFormat(vestedAmountsByAge?.totalPartTime100PercentAmount ?? 0),
-                    currencyFormat(vestedAmountsByAge?.totalPartTimePartialAmount ?? 0),
-                    currencyFormat(vestedAmountsByAge?.totalPartTimeNotVestedAmount ?? 0),
+                    numberToCurrency(vestedAmountsByAge?.totalFullTime100PercentAmount ?? 0),
+                    numberToCurrency(vestedAmountsByAge?.totalPartTimePartialAmount ?? 0),
+                    numberToCurrency(vestedAmountsByAge?.totalFullTimeNotVestedAmount ?? 0),
+                    numberToCurrency(vestedAmountsByAge?.totalPartTime100PercentAmount ?? 0),
+                    numberToCurrency(vestedAmountsByAge?.totalPartTimePartialAmount ?? 0),
+                    numberToCurrency(vestedAmountsByAge?.totalPartTimeNotVestedAmount ?? 0),
                     vestedAmountsByAge?.totalBeneficiaryCount ?? 0,
-                    currencyFormat(vestedAmountsByAge?.totalBeneficiaryAmount ?? 0),
+                    numberToCurrency(vestedAmountsByAge?.totalBeneficiaryAmount ?? 0),
                     vestedAmountsByAge?.totalFullTimeCount ?? 0,
                     vestedAmountsByAge?.totalNotVestedCount ?? 0,
                     vestedAmountsByAge?.totalPartialVestedCount ?? 0

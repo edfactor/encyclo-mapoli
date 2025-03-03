@@ -6,7 +6,7 @@ import { DSMGrid, ISortParams, TotalsGrid } from "smart-ui-library";
 import { GetForfeituresByAgeColumns } from "./ForfeituresByAgeGridColumns";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { FrozenReportsByAgeRequestType } from "../../reduxstore/types";
-import { currencyFormat } from "utils/numberUtils"; // Import utility function
+import { numberToCurrency } from "smart-ui-library";
 
 const ForfeituresByAgeGrid = () => {
   const [_discard0, setSortParams] = useState<ISortParams>({
@@ -30,27 +30,33 @@ const ForfeituresByAgeGrid = () => {
       {forfeituresByAgeTotal?.response && (
         <>
           <div className="px-[24px]">
-          <h2 className="text-dsm-secondary">Summary</h2>
+            <h2 className="text-dsm-secondary">Summary</h2>
           </div>
           <div className="flex sticky top-0 z-10 bg-white">
-              <TotalsGrid 
-                displayData = {[[(forfeituresByAgeTotal?.totalEmployees || 0), currencyFormat(forfeituresByAgeTotal?.totalAmount)], 
-                  ]} 
-                  leftColumnHeaders = {['All']}
-                  topRowHeaders={['', 'EMPS', 'Amount']}
-              ></TotalsGrid>
-              <TotalsGrid 
-                displayData = {[[(forfeituresByAgeFullTime?.totalEmployees || 0), currencyFormat(forfeituresByAgeFullTime?.totalAmount || 0)], 
-                  ]} 
-                  leftColumnHeaders = {['FullTime']}
-                  topRowHeaders={['', 'EMPS', 'Amount']}
-              ></TotalsGrid>
-              <TotalsGrid 
-                displayData = {[[(forfeituresByAgePartTime?.totalEmployees || 0), currencyFormat(forfeituresByAgePartTime?.totalAmount || 0)], 
-                  ]} 
-                  leftColumnHeaders = {['PartTime']}
-                  topRowHeaders={['', 'EMPS', 'Amount']}
-              ></TotalsGrid>
+            <TotalsGrid
+              displayData={[
+                [forfeituresByAgeTotal?.totalEmployees || 0, numberToCurrency(forfeituresByAgeTotal?.totalAmount)]
+              ]}
+              leftColumnHeaders={["All"]}
+              topRowHeaders={["", "EMPS", "Amount"]}></TotalsGrid>
+            <TotalsGrid
+              displayData={[
+                [
+                  forfeituresByAgeFullTime?.totalEmployees || 0,
+                  numberToCurrency(forfeituresByAgeFullTime?.totalAmount || 0)
+                ]
+              ]}
+              leftColumnHeaders={["FullTime"]}
+              topRowHeaders={["", "EMPS", "Amount"]}></TotalsGrid>
+            <TotalsGrid
+              displayData={[
+                [
+                  forfeituresByAgePartTime?.totalEmployees || 0,
+                  numberToCurrency(forfeituresByAgePartTime?.totalAmount || 0)
+                ]
+              ]}
+              leftColumnHeaders={["PartTime"]}
+              topRowHeaders={["", "EMPS", "Amount"]}></TotalsGrid>
           </div>
           <Grid2
             container
