@@ -1,7 +1,8 @@
-import { ColDef } from "ag-grid-community";
+import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { agGridNumberToCurrency } from "smart-ui-library";
+import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 
-export const GetProfitShareForfeitColumns = (viewBadge: Function): ColDef[] => {
+export const GetProfitShareForfeitColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
     {
       headerName: "Badge #",
@@ -12,7 +13,7 @@ export const GetProfitShareForfeitColumns = (viewBadge: Function): ColDef[] => {
       cellClass: "right-align",
       resizable: true,
       sortable: true,
-      cellRenderer: viewBadge
+      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, navFunction)
     },
     {
       headerName: "Employee Name",

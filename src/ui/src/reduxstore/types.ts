@@ -137,7 +137,7 @@ export interface DuplicateNameAndBirthday {
 }
 
 export interface NegativeEtvaForSSNsOnPayProfit {
-  employeeBadge: number;
+  badgeNumber: number;
   ssn: number;
   etvaValue: number;
 }

@@ -1,5 +1,5 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { viewBadgeRenderer } from "../../utils/masterInquiryLink";
+import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
 import { currencyFormat } from "utils/numberUtils";
 
 // The default is to show all columns, but if the mini flag is set to true, only show the
@@ -16,7 +16,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       resizable: true,
       sortable: true,
       checkboxSelection: mini,
-      cellRenderer: (params: ICellRendererParams) => viewBadgeRenderer(params.data.badgeNumber)
+      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber)
     },
     {
       headerName: "Employee Name",
