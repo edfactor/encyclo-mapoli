@@ -1,6 +1,6 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
-import { currencyFormat } from "utils/numberUtils";
+import { agGridNumberToCurrency } from "smart-ui-library";
 
 export const GetYTDWagesColumns = (): ColDef[] => {
   const columns: ColDef[] = [
@@ -32,7 +32,7 @@ export const GetYTDWagesColumns = (): ColDef[] => {
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      valueFormatter: (params) => currencyFormat(params.value)
+      valueFormatter: agGridNumberToCurrency
     }
   ];
   return columns;
