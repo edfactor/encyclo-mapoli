@@ -1,6 +1,6 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
-import { currencyFormat } from "utils/numberUtils";
+import { agGridNumberToCurrency } from "smart-ui-library";
 
 // The default is to show all columns, but if the mini flag is set to true, only show the
 // badge, name, and ssn columns
@@ -64,7 +64,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       cellClass: "left-align",
       resizable: true,
       editable: !mini,
-      valueFormatter: (params) => currencyFormat(params.value)
+      valueFormatter: agGridNumberToCurrency
     },
     {
       headerName: "ORA HRS LAST",
@@ -83,7 +83,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      valueFormatter: (params) => currencyFormat(params.value)
+      valueFormatter: agGridNumberToCurrency
     },
     {
       headerName: "FREQ",

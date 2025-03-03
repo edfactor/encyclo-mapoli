@@ -6,7 +6,7 @@ import { DSMGrid, ISortParams, TotalsGrid } from "smart-ui-library";
 import { GetContributionsByAgeColumns } from "./ContributionsByAgeGridColumns";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { FrozenReportsByAgeRequestType } from "../../reduxstore/types";
-import { currencyFormat } from "utils/numberUtils"; // Import utility function
+import { numberToCurrency } from "smart-ui-library";
 
 const ContributionsByAgeGrid = () => {
   const [_discard0, setSortParams] = useState<ISortParams>({
@@ -30,27 +30,33 @@ const ContributionsByAgeGrid = () => {
       {contributionsByAgeTotal?.response && (
         <>
           <div className="px-[24px]">
-          <h2 className="text-dsm-secondary">Summary</h2>
+            <h2 className="text-dsm-secondary">Summary</h2>
           </div>
           <div className="flex sticky top-0 z-10 bg-white">
-          <TotalsGrid 
-            displayData = {[[(contributionsByAgeTotal?.totalEmployees || 0), currencyFormat(contributionsByAgeTotal?.totalAmount)], 
-              ]} 
-              leftColumnHeaders = {['All']}
-              topRowHeaders={['', 'EMPS', 'Amount']}
-          ></TotalsGrid>
-          <TotalsGrid 
-            displayData = {[[(contributionsByAgeFullTime?.totalEmployees || 0), currencyFormat(contributionsByAgeFullTime?.totalAmount || 0)], 
-              ]} 
-              leftColumnHeaders = {['FullTime']}
-              topRowHeaders={['', 'EMPS', 'Amount']}
-          ></TotalsGrid>
-          <TotalsGrid 
-            displayData = {[[(contributionsByAgePartTime?.totalEmployees || 0), currencyFormat(contributionsByAgePartTime?.totalAmount || 0)], 
-              ]} 
-              leftColumnHeaders = {['PartTime']}
-              topRowHeaders={['', 'EMPS', 'Amount']}
-          ></TotalsGrid>
+            <TotalsGrid
+              displayData={[
+                [contributionsByAgeTotal?.totalEmployees || 0, numberToCurrency(contributionsByAgeTotal?.totalAmount)]
+              ]}
+              leftColumnHeaders={["All"]}
+              topRowHeaders={["", "EMPS", "Amount"]}></TotalsGrid>
+            <TotalsGrid
+              displayData={[
+                [
+                  contributionsByAgeFullTime?.totalEmployees || 0,
+                  numberToCurrency(contributionsByAgeFullTime?.totalAmount || 0)
+                ]
+              ]}
+              leftColumnHeaders={["FullTime"]}
+              topRowHeaders={["", "EMPS", "Amount"]}></TotalsGrid>
+            <TotalsGrid
+              displayData={[
+                [
+                  contributionsByAgePartTime?.totalEmployees || 0,
+                  numberToCurrency(contributionsByAgePartTime?.totalAmount || 0)
+                ]
+              ]}
+              leftColumnHeaders={["PartTime"]}
+              topRowHeaders={["", "EMPS", "Amount"]}></TotalsGrid>
           </div>
           <Grid2
             container
@@ -62,7 +68,7 @@ const ContributionsByAgeGrid = () => {
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: contributionsByAgeTotal?.response.results,
-                  
+
                   columnDefs: [
                     {
                       headerName: columnDefsTotal.headerName,
@@ -79,7 +85,7 @@ const ContributionsByAgeGrid = () => {
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: contributionsByAgeFullTime?.response.results,
-                  
+
                   columnDefs: [
                     {
                       headerName: columnDefsFullTime.headerName,
@@ -96,7 +102,7 @@ const ContributionsByAgeGrid = () => {
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: contributionsByAgePartTime?.response.results,
-                  
+
                   columnDefs: [
                     {
                       headerName: columnDefsPartTime.headerName,

@@ -6,7 +6,7 @@ import { DSMGrid, ISortParams, TotalsGrid } from "smart-ui-library";
 import { GetBalanceByAgeColumns } from "./BalanceByAgeGridColumns";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { FrozenReportsByAgeRequestType } from "../../reduxstore/types";
-import { currencyFormat } from "utils/numberUtils"; // Import utility function
+import { numberToCurrency } from "smart-ui-library";
 
 const BalanceByAgeGrid = () => {
   const [_discard0, setSortParams] = useState<ISortParams>({
@@ -30,55 +30,70 @@ const BalanceByAgeGrid = () => {
       {balanceByAgeTotal?.response && (
         <>
           <div className="px-[24px]">
-          <h2 className="text-dsm-secondary">Summary</h2>
+            <h2 className="text-dsm-secondary">Summary</h2>
           </div>
           <div className="flex sticky top-0 z-10 bg-white">
-            <TotalsGrid 
-              displayData = {[
-                [(balanceByAgeTotal?.totalBeneficiaries || 0), 
-                currencyFormat(balanceByAgeTotal?.totalBeneficiariesAmount || 0), 
-                currencyFormat(balanceByAgeTotal?.totalBeneficiariesVestedAmount || 0)],
-                [(balanceByAgeTotal?.totalEmployee || 0), 
-                currencyFormat(balanceByAgeTotal?.totalEmployeeAmount || 0), 
-                currencyFormat(balanceByAgeTotal?.totalEmployeesVestedAmount || 0)],
-                [(balanceByAgeTotal?.totalMembers || 0), 
-                currencyFormat(balanceByAgeTotal?.balanceTotalAmount || 0), 
-                currencyFormat(balanceByAgeTotal?.vestedTotalAmount || 0)] 
-                ]} 
-                leftColumnHeaders = {['Beneficiaries', 'Employees', 'Total']}
-                topRowHeaders={['All', 'Count', 'Balance', 'Vested']}
-            ></TotalsGrid>
-            <TotalsGrid 
-              displayData = {[
-                [(balanceByAgeFullTime?.totalBeneficiaries || 0), 
-                currencyFormat(balanceByAgeFullTime?.totalBeneficiariesAmount || 0), 
-                currencyFormat(balanceByAgeFullTime?.totalBeneficiariesVestedAmount || 0)],
-                [(balanceByAgeFullTime?.totalEmployee || 0), 
-                currencyFormat(balanceByAgeFullTime?.totalEmployeeAmount || 0), 
-                currencyFormat(balanceByAgeFullTime?.totalEmployeesVestedAmount || 0)],
-                [(balanceByAgeFullTime?.totalMembers || 0), 
-                currencyFormat(balanceByAgeFullTime?.balanceTotalAmount || 0), 
-                currencyFormat(balanceByAgeFullTime?.vestedTotalAmount || 0)] 
-                ]} 
-                leftColumnHeaders = {['Beneficiaries', 'Employees', 'Total']}
-                topRowHeaders={['FullTime', 'Count', 'Balance', 'Vested']}
-            ></TotalsGrid>
-            <TotalsGrid 
-              displayData = {[
-                [(balanceByAgePartTime?.totalBeneficiaries || 0), 
-                currencyFormat(balanceByAgePartTime?.totalBeneficiariesAmount || 0), 
-                currencyFormat(balanceByAgePartTime?.totalBeneficiariesVestedAmount || 0)],
-                [(balanceByAgePartTime?.totalEmployee || 0), 
-                currencyFormat(balanceByAgePartTime?.totalEmployeeAmount || 0), 
-                currencyFormat(balanceByAgePartTime?.totalEmployeesVestedAmount || 0)],
-                [(balanceByAgePartTime?.totalMembers || 0), 
-                currencyFormat(balanceByAgePartTime?.balanceTotalAmount || 0), 
-                currencyFormat(balanceByAgePartTime?.vestedTotalAmount || 0)] 
-                ]} 
-                leftColumnHeaders = {['Beneficiaries', 'Employees', 'Total']}
-                topRowHeaders={['PartTime', 'Count', 'Balance', 'Vested']}
-            ></TotalsGrid>
-            </div>
+            <TotalsGrid
+              displayData={[
+                [
+                  balanceByAgeTotal?.totalBeneficiaries || 0,
+                  numberToCurrency(balanceByAgeTotal?.totalBeneficiariesAmount || 0),
+                  numberToCurrency(balanceByAgeTotal?.totalBeneficiariesVestedAmount || 0)
+                ],
+                [
+                  balanceByAgeTotal?.totalEmployee || 0,
+                  numberToCurrency(balanceByAgeTotal?.totalEmployeeAmount || 0),
+                  numberToCurrency(balanceByAgeTotal?.totalEmployeesVestedAmount || 0)
+                ],
+                [
+                  balanceByAgeTotal?.totalMembers || 0,
+                  numberToCurrency(balanceByAgeTotal?.balanceTotalAmount || 0),
+                  numberToCurrency(balanceByAgeTotal?.vestedTotalAmount || 0)
+                ]
+              ]}
+              leftColumnHeaders={["Beneficiaries", "Employees", "Total"]}
+              topRowHeaders={["All", "Count", "Balance", "Vested"]}></TotalsGrid>
+            <TotalsGrid
+              displayData={[
+                [
+                  balanceByAgeFullTime?.totalBeneficiaries || 0,
+                  numberToCurrency(balanceByAgeFullTime?.totalBeneficiariesAmount || 0),
+                  numberToCurrency(balanceByAgeFullTime?.totalBeneficiariesVestedAmount || 0)
+                ],
+                [
+                  balanceByAgeFullTime?.totalEmployee || 0,
+                  numberToCurrency(balanceByAgeFullTime?.totalEmployeeAmount || 0),
+                  numberToCurrency(balanceByAgeFullTime?.totalEmployeesVestedAmount || 0)
+                ],
+                [
+                  balanceByAgeFullTime?.totalMembers || 0,
+                  numberToCurrency(balanceByAgeFullTime?.balanceTotalAmount || 0),
+                  numberToCurrency(balanceByAgeFullTime?.vestedTotalAmount || 0)
+                ]
+              ]}
+              leftColumnHeaders={["Beneficiaries", "Employees", "Total"]}
+              topRowHeaders={["FullTime", "Count", "Balance", "Vested"]}></TotalsGrid>
+            <TotalsGrid
+              displayData={[
+                [
+                  balanceByAgePartTime?.totalBeneficiaries || 0,
+                  numberToCurrency(balanceByAgePartTime?.totalBeneficiariesAmount || 0),
+                  numberToCurrency(balanceByAgePartTime?.totalBeneficiariesVestedAmount || 0)
+                ],
+                [
+                  balanceByAgePartTime?.totalEmployee || 0,
+                  numberToCurrency(balanceByAgePartTime?.totalEmployeeAmount || 0),
+                  numberToCurrency(balanceByAgePartTime?.totalEmployeesVestedAmount || 0)
+                ],
+                [
+                  balanceByAgePartTime?.totalMembers || 0,
+                  numberToCurrency(balanceByAgePartTime?.balanceTotalAmount || 0),
+                  numberToCurrency(balanceByAgePartTime?.vestedTotalAmount || 0)
+                ]
+              ]}
+              leftColumnHeaders={["Beneficiaries", "Employees", "Total"]}
+              topRowHeaders={["PartTime", "Count", "Balance", "Vested"]}></TotalsGrid>
+          </div>
           <Grid2
             container
             xs={12}>
@@ -89,7 +104,7 @@ const BalanceByAgeGrid = () => {
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: balanceByAgeTotal?.response.results,
-                  
+
                   columnDefs: [
                     {
                       headerName: columnDefsTotal.headerName,
@@ -106,7 +121,7 @@ const BalanceByAgeGrid = () => {
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: balanceByAgeFullTime?.response.results,
-                  
+
                   columnDefs: [
                     {
                       headerName: columnDefsFullTime.headerName,
@@ -123,7 +138,7 @@ const BalanceByAgeGrid = () => {
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: balanceByAgePartTime?.response.results,
-                  
+
                   columnDefs: [
                     {
                       headerName: columnDefsPartTime.headerName,
