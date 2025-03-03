@@ -16,13 +16,11 @@ export const viewBadgeLinkRenderer = (badgeNumber: number, navigateFunction?: (p
     );
   } else {
     return (
-      badgeNumber && (
-        <Button
-          variant="text"
-          onClick={() => navigateFunction(`/master-inquiry/${safeValue}`)}>
-          {safeValue}
-        </Button>
-      )
+      <Button
+        variant="text"
+        onClick={() => navigateFunction(`/master-inquiry/${safeValue}`)}>
+        {safeValue}
+      </Button>
     );
   }
 };
