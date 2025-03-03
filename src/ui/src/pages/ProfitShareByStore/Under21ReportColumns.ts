@@ -1,7 +1,7 @@
-import { ColDef } from "ag-grid-community";
-import { agGridNumberToCurrency } from "smart-ui-library";
+import { ColDef, ICellRendererParams } from "ag-grid-community";
+import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 
-export const GetUnder21ReportColumns = (viewBadge: Function): ColDef[] => {
+export const GetUnder21ReportColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
     {
       headerName: "Badge",
@@ -12,7 +12,7 @@ export const GetUnder21ReportColumns = (viewBadge: Function): ColDef[] => {
       cellClass: "right-align",
       resizable: true,
       sortable: true,
-      cellRenderer: viewBadge
+      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badge, navFunction)
     },
     {
       headerName: "Full Name",

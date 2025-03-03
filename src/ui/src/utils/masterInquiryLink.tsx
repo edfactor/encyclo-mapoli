@@ -1,17 +1,26 @@
-// cellRenderers.ts (or any shared utility file)
-import Link from "@mui/material/Link"; // If you're using MUI Link
+import { Button } from "@mui/material";
+import Link from "@mui/material/Link";
 
-export function viewBadgeRenderer(badgeNumber: number) {
-  // Badge number must be between 5 and 7 digits
+// Some callers want a MUI Link, some want a Button with a react navigate function
+export const viewBadgeLinkRenderer = (badgeNumber: number, navigateFunction?: (path: string) => void) => {
   if (!badgeNumber || badgeNumber < 99999 || badgeNumber > 9999999) return "";
+  const safeValue = badgeNumber.toString(); // Ens
 
-  const safeValue = badgeNumber.toString(); // Ensure it's a string
-
-  return (
-    <Link
-      className="h-5 solid underline normal-case"
-      href={`/master-inquiry/${safeValue}`}>
-      {safeValue}
-    </Link>
-  );
-}
+  if (navigateFunction === undefined) {
+    return (
+      <Link
+        className="h-5 solid underline normal-case"
+        href={`/master-inquiry/${safeValue}`}>
+        {safeValue}
+      </Link>
+    );
+  } else {
+    return (
+      <Button
+        variant="text"
+        onClick={() => navigateFunction(`/master-inquiry/${safeValue}`)}>
+        {safeValue}
+      </Button>
+    );
+  }
+};

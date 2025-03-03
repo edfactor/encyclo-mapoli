@@ -1,5 +1,5 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { viewBadgeRenderer } from "../../utils/masterInquiryLink";
+import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
 
 export const GetMissingCommaInPyNameColumns = (): ColDef[] => {
   return [
@@ -11,7 +11,7 @@ export const GetMissingCommaInPyNameColumns = (): ColDef[] => {
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
-      cellRenderer: (params: ICellRendererParams) => viewBadgeRenderer(params.data.badgeNumber)
+      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber)
     },
     {
       headerName: "SSN",

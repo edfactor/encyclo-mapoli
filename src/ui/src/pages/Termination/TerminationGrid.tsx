@@ -1,12 +1,11 @@
-import { Button, Link, Typography } from "@mui/material";
-import { useState, useMemo } from "react";
+import { Typography } from "@mui/material";
+import { useCallback, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { Path, useNavigate } from "react-router";
 import { useLazyGetEligibleEmployeesQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetTerminationColumns } from "./TerminationGridColumn";
-import { ICellRendererParams } from "ag-grid-community";
-import { useNavigate } from "react-router";
 
 const TerminationGrid = () => {
   const [pageNumber, setPageNumber] = useState(0);
@@ -21,21 +20,17 @@ const TerminationGrid = () => {
   const [_, { isLoading }] = useLazyGetEligibleEmployeesQuery();
   const navigate = useNavigate();
 
-  const viewBadge = (params: ICellRendererParams) => {
-    return (
-      params.value && (
-        <Button
-          variant="text"
-          onClick={() => navigate(`/forfeit/${params.value}`)}
-        >
-          {params.value}
-        </Button>
-      )
-    );
-  };
+  // Wrapper to pass react function to non-react class
+  const handleNavigationForButton = useCallback(
+    (destination: string | Partial<Path>) => {
+      navigate(destination);
+    },
+    [navigate]
+  );
+
+  const columnDefs = useMemo(() => GetTerminationColumns(handleNavigationForButton), [handleNavigationForButton]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
-  const columnDefs = useMemo(() => GetTerminationColumns(viewBadge), []);
 
   return (
     <>
