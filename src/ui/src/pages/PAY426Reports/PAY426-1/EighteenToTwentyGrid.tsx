@@ -1,111 +1,102 @@
-import { Button, Typography } from "@mui/material";
-import { useEffect, useMemo } from "react";
-import { useDispatch } from "react-redux";
+import { Typography } from "@mui/material";
+import { useCallback, useEffect, useMemo } from "react";
 import { DSMGrid } from "smart-ui-library";
 import { GetProfitSharingReportGridColumns } from "./EighteenToTwentyGridColumns";
-import { useNavigate } from "react-router";
-import { ICellRendererParams } from "ag-grid-community";
+import { useNavigate, Path } from "react-router";
 import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
-
 interface EmployeeData {
-    badge: number;
-    employeeName: string;
-    store: number;
-    type: string;
-    dateOfBirth: string;
-    age: number;
-    ssn: string;
-    wages: number;
-    hours: number;
-    points: number;
-    new: string;
-    termDate: string | null;
-    currentBalance: number;
-    svc: number;
+  badge: number;
+  employeeName: string;
+  store: number;
+  type: string;
+  dateOfBirth: string;
+  age: number;
+  ssn: string;
+  wages: number;
+  hours: number;
+  points: number;
+  new: string;
+  termDate: string | null;
+  currentBalance: number;
+  svc: number;
 }
 
 const EighteenToTwentyGrid = () => {
+  const navigate = useNavigate();
 
-    const navigate = useNavigate();
+  const [trigger, { data, isLoading, error }] = useLazyGetYearEndProfitSharingReportQuery();
 
-    const [trigger, { data, isLoading, error }] = useLazyGetYearEndProfitSharingReportQuery();
+  useEffect(() => {
+    trigger({
+      isYearEnd: true,
+      minimumAgeInclusive: 17,
+      maximumAgeInclusive: 20,
+      minimumHoursInclusive: 999.9,
+      maximumHoursInclusive: 4000,
+      includeActiveEmployees: true,
+      includeInactiveEmployees: true,
+      includeEmployeesTerminatedThisYear: false,
+      includeTerminatedEmployees: false,
+      includeBeneficiaries: false,
+      includeEmployeesWithPriorProfitSharingAmounts: true,
+      includeEmployeesWithNoPriorProfitSharingAmounts: true,
+      profitYear: 2024,
+      pagination: {
+        skip: 0,
+        take: 25
+      }
+    });
+  }, [trigger]);
 
-    useEffect(() => {
-        trigger({
-            isYearEnd: true,
-            minimumAgeInclusive: 17,
-            maximumAgeInclusive: 20,
-            minimumHoursInclusive: 999.9,
-            maximumHoursInclusive: 4000,
-            includeActiveEmployees: true,
-            includeInactiveEmployees: true,
-            includeEmployeesTerminatedThisYear: false,
-            includeTerminatedEmployees: false,
-            includeBeneficiaries: false,
-            includeEmployeesWithPriorProfitSharingAmounts: true,
-            includeEmployeesWithNoPriorProfitSharingAmounts: true,
-            profitYear: 2024,
-            pagination: {
-                skip: 0,
-                take: 25
-            }
-        });
-    }, [trigger]);
+  const getPinnedBottomRowData = (data: any[]) => {
+    return [
+      {
+        employeeName: "Total EMPS",
+        store: 1,
+        wages: 100.0,
+        currentBalance: 0
+      },
+      {
+        employeeName: "No Wages",
+        store: 0,
+        wages: 0,
+        currentBalance: 0
+      }
+    ];
+  };
+  // Wrapper to pass react function to non-react class
+  const handleNavigationForButton = useCallback(
+    (destination: string | Partial<Path>) => {
+      navigate(destination);
+    },
+    [navigate]
+  );
 
-    const getPinnedBottomRowData = (data: any[]) => {
+  const columnDefs = useMemo(
+    () => GetProfitSharingReportGridColumns(handleNavigationForButton),
+    [handleNavigationForButton]
+  );
 
-        return [
-            {
-                employeeName: "Total EMPS",
-                store: 1,
-                wages: 100.0,
-                currentBalance: 0
-            },
-            {
-                employeeName: "No Wages",
-                store: 0,
-                wages: 0,
-                currentBalance: 0
-            }
-        ];
-    };
-
-    const viewBadge = (params: ICellRendererParams) => {
-        return (
-            params.value && (
-                <Button
-                    variant="text"
-                    onClick={() => navigate(`/master-inquiry/${params.value}`)}
-                >
-                    {params.value}
-                </Button>
-            )
-        );
-    };
-
-    const columnDefs = useMemo(() => GetProfitSharingReportGridColumns(viewBadge), []);
-
-    return (
-        <>
-            <div style={{ padding: "0 24px 0 24px" }}>
-                <Typography
-                    variant="h2"
-                    sx={{ color: "#0258A5" }}>
-                    {`PROFIT-ELIGIBLE REPORT (${data?.response?.results?.length || 0})`}
-                </Typography>
-            </div>
-            <DSMGrid
-                preferenceKey={"ELIGIBLE_EMPLOYEES"}
-                isLoading={isLoading}
-                handleSortChanged={(params) => { }}
-                providedOptions={{
-                    rowData: data?.response?.results || [],
-                    columnDefs: columnDefs
-                }}
-            />
-        </>
-
-    );
+  return (
+    <>
+      <div style={{ padding: "0 24px 0 24px" }}>
+        <Typography
+          variant="h2"
+          sx={{ color: "#0258A5" }}>
+          {`PROFIT-ELIGIBLE REPORT (${data?.response?.results?.length || 0})`}
+        </Typography>
+      </div>
+      <DSMGrid
+        preferenceKey={"ELIGIBLE_EMPLOYEES"}
+        isLoading={isLoading}
+        handleSortChanged={(_params) => {}}
+        providedOptions={{
+          rowData: data?.response?.results || [],
+          columnDefs: columnDefs
+        }}
+      />
+    </>
+  );
 };
 
 export default EighteenToTwentyGrid;
