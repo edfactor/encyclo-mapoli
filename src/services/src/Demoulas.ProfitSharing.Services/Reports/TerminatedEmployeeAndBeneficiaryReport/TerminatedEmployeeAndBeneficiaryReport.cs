@@ -169,10 +169,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         decimal totalBeneficiaryAllocation = 0;
 
         short lastYear = (short)(req.ProfitYear - 1);
-        short thisYear = req.ProfitYear;
-        var calendarInfoLastYear = await _calendarService.GetYearStartAndEndAccountingDatesAsync(lastYear, cancellationToken);
-        var calendarInfoThisYear = await _calendarService.GetYearStartAndEndAccountingDatesAsync(thisYear, cancellationToken);
-
+        
         var membersSummary = new List<TerminatedEmployeeAndBeneficiaryDataResponseDto>();
         foreach (var memberSlice in memberSliceUnion)
         {
