@@ -239,7 +239,7 @@ public class FrozenReportService : IFrozenReportService
                 {
                     Age = age,
                     EmploymentType = req.ReportType.ToString(),
-                    BadgeNumbers = new HashSet<int>(),
+                    BadgeNumbers = [],
                     HardshipEmployeeCount = 0,
                     RegularEmployeeCount = 0,
                     Amount = 0,
