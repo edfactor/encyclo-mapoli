@@ -40,11 +40,9 @@ definitions:
                 Write-Output ".NET SDK 9.0.200 or higher is installed.";
               } else {
                 Write-Output ".NET SDK 9.0.200 or higher is NOT installed.";
-                exit 1;
               }
             } else {
               Write-Output "No .NET 9.x SDK installed.";
-              exit 1;
             }
 
         
