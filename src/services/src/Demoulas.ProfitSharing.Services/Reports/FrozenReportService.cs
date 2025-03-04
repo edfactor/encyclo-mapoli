@@ -204,21 +204,6 @@ public class FrozenReportService : IFrozenReportService
             return query.ToListAsync(cancellationToken: cancellationToken);
         });
 
-
-        static ProfitSharingAggregates ComputeAggregates(List<DistributionsByAgeDetail> details)
-        {
-            return new ProfitSharingAggregates
-            {
-                RegularTotalEmployees = (short)details.Where(d => d.RegularAmount > 0).Sum(d => d.EmployeeCount),
-                RegularAmount = details.Sum(d => d.RegularAmount),
-                HardshipTotalEmployees = (short)details.Where(d => d.HardshipAmount > 0).Sum(d => d.EmployeeCount),
-                HardshipTotalAmount = details.Sum(d => d.HardshipAmount),
-                TotalEmployees = (short)details.Sum(d => d.EmployeeCount),
-                BothHardshipAndRegularEmployees = (short)details.Where(d => d is { RegularAmount: > 0, HardshipAmount: > 0 }).Sum(d => d.EmployeeCount),
-                BothHardshipAndRegularAmount = details.Where(d => d is { RegularAmount: > 0, HardshipAmount: > 0 }).Sum(d => d.RegularAmount + d.HardshipAmount)
-            };
-        }
-
         var details = queryResult.Select(x => new
         {
             Age = x.DateOfBirth.Age(asOfDate),
@@ -236,20 +221,52 @@ public class FrozenReportService : IFrozenReportService
                 HardshipEmployeeCount = g.Where(x => x.CommentTypeId == CommentType.Constants.Hardship).Select(x => x.BadgeNumber).ToHashSet().Count,
                 RegularEmployeeCount = g.Where(x => x.CommentTypeId != CommentType.Constants.Hardship).Select(x => x.BadgeNumber).ToHashSet().Count,
                 Amount = g.Sum(x => x.Amount),
-                // Compute the total hardship amount within the group
-                HardshipAmount = g
-                    .Where(x => x.CommentTypeId == CommentType.Constants.Hardship)
-                    .Sum(x => x.Amount),
-                // Compute the total regular amount within the group
-                RegularAmount = g
-                    .Where(x => x.CommentTypeId != CommentType.Constants.Hardship)
-                    .Sum(x => x.Amount)
+                HardshipAmount = g.Where(x => x.CommentTypeId == CommentType.Constants.Hardship).Sum(x => x.Amount),
+                RegularAmount = g.Where(x => x.CommentTypeId != CommentType.Constants.Hardship).Sum(x => x.Amount)
             })
             .OrderBy(x => x.Age)
             .ToList();
 
+        if (req.ReportType != FrozenReportsByAgeRequest.Report.Total)
+        {
+            var totalRequest = req with { ReportType = FrozenReportsByAgeRequest.Report.Total };
+            var totalDetails = await GetDistributionsByAgeYearAsync(totalRequest, cancellationToken);
+            var totalAges = totalDetails.Response.Results.Select(d => d.Age).ToHashSet();
+
+            foreach (var age in totalAges.Where(age => details.All(d => d.Age != age)))
+            {
+                details.Add(new DistributionsByAgeDetail
+                {
+                    Age = age,
+                    EmploymentType = req.ReportType.ToString(),
+                    BadgeNumbers = new HashSet<int>(),
+                    HardshipEmployeeCount = 0,
+                    RegularEmployeeCount = 0,
+                    Amount = 0,
+                    HardshipAmount = 0,
+                    RegularAmount = 0
+                });
+            }
+
+            details = details.OrderBy(d => d.Age).ToList();
+        }
+
         req = req with { Take = details.Count + 1 };
-        // Compute aggregates using helper method
+
+        static ProfitSharingAggregates ComputeAggregates(List<DistributionsByAgeDetail> details)
+        {
+            return new ProfitSharingAggregates
+            {
+                RegularTotalEmployees = (short)details.Where(d => d.RegularAmount > 0).Sum(d => d.EmployeeCount),
+                RegularAmount = details.Sum(d => d.RegularAmount),
+                HardshipTotalEmployees = (short)details.Where(d => d.HardshipAmount > 0).Sum(d => d.EmployeeCount),
+                HardshipTotalAmount = details.Sum(d => d.HardshipAmount),
+                TotalEmployees = (short)details.Sum(d => d.EmployeeCount),
+                BothHardshipAndRegularEmployees = (short)details.Where(d => d is { RegularAmount: > 0, HardshipAmount: > 0 }).Sum(d => d.EmployeeCount),
+                BothHardshipAndRegularAmount = details.Where(d => d is { RegularAmount: > 0, HardshipAmount: > 0 }).Sum(d => d.RegularAmount + d.HardshipAmount)
+            };
+        }
+
         var totalAggregates = ComputeAggregates(details);
 
         return new DistributionsByAge
@@ -363,7 +380,7 @@ public class FrozenReportService : IFrozenReportService
                                               Loans = lBal_lj != null ? lBal_lj.Total : 0,
                                               ProfitSharingAmount = psBal.Total,
                                               GrossWages = lyPP.CurrentIncomeYear + pp.IncomeExecutive
-                                          }).ToListAsync();
+                                          }).ToListAsync(cancellationToken: cancellationToken);
 
                 return reportDemographics;
             });
