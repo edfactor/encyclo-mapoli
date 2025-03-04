@@ -719,6 +719,7 @@ public class FrozenReportService : IFrozenReportService
 
         decimal totalBeneficiaryAmount = details.Sum(d => d.BeneficiaryAmount);
 
+
         // Build the final response
         req = req with { Take = details.Count + 1 };
 
@@ -804,10 +805,23 @@ public class FrozenReportService : IFrozenReportService
                 .ToListAsync(cancellationToken);
         });
 
+        if (req.ReportType != FrozenReportsByAgeRequest.Report.Total)
+        {
+            var totalRequest = req with { ReportType = FrozenReportsByAgeRequest.Report.Total };
+            var totalDetails = await GetBalanceByYearsAsync(totalRequest, cancellationToken);
+            var totalYears = totalDetails.Response.Results.Select(d => d.Years).ToHashSet();
+
+            foreach (var years in totalYears.Where(age => details.All(d => d.Years != age)))
+            {
+                details.Add(new BalanceByYearsDetail { EmployeeCount = 0, CurrentBalance = 0, Years = years});
+            }
+
+            details = details.OrderByDescending(d => d.Years).ToList();
+        }
+
         // Build the final response
-#pragma warning disable S2971
-        req = req with { Take = (details.Count() + 1) };
-#pragma warning restore S2971
+        req = req with { Take = (details.Count + 1) };
+
 
         return new BalanceByYears
         {
