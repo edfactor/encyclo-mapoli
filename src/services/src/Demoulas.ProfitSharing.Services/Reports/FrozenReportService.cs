@@ -338,6 +338,20 @@ public class FrozenReportService : IFrozenReportService
             .OrderBy(x => x.Age)
             .ToList();
 
+        if (req.ReportType != FrozenReportsByAgeRequest.Report.Total)
+        {
+            var totalRequest = req with { ReportType = FrozenReportsByAgeRequest.Report.Total };
+            var totalDetails = await GetContributionsByAgeYearAsync(totalRequest, cancellationToken);
+            var totalAges = totalDetails.Response.Results.Select(d => d.Age).ToHashSet();
+
+            foreach (var age in totalAges.Where(age => details.All(d => d.Age != age)))
+            {
+                details.Add(new ContributionsByAgeDetail { Age = age, Amount = 0, EmployeeCount = 0 });
+            }
+
+            details = details.OrderBy(d => d.Age).ToList();
+        }
+
         req = req with { Take = details.Count + 1 };
 
 
