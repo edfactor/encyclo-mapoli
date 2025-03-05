@@ -609,7 +609,7 @@ export interface ProfallData {
   zipCode: string;
 }
 
-export interface MilitaryContributionRequest extends ProfitYearRequest{
+export interface MilitaryContributionRequest extends ProfitYearRequest {
   badgeNumber: number;
   pagination: PaginationParams;
 }
@@ -657,4 +657,3 @@ export interface YearEndProfitSharingEmployee {
   balance: number;
   yearsInPlan: number;
 }
-

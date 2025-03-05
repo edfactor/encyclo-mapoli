@@ -1,4 +1,3 @@
-import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { useForm } from "react-hook-form";
 import { useLazyGetDuplicateSSNsQuery } from "reduxstore/api/YearsEndApi";
@@ -12,8 +11,8 @@ const DuplicateSSNsOnDemographicsSearchFilter = () => {
   const {
     handleSubmit,
     formState: { isValid },
-    reset    
-  } = useForm<DuplicateSSNsOnDemographicsSearch>({  });
+    reset
+  } = useForm<DuplicateSSNsOnDemographicsSearch>({});
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
