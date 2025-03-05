@@ -6,8 +6,14 @@ import DistributionsAndForfeituresGrid from "./DistributionAndForfeituresGrid";
 import StatusDropdown, { ProcessStatus } from "components/StatusDropdown";
 import { useNavigate } from "react-router";
 import { MENU_LABELS } from "../../constants";
+import { useState } from "react";
 
 const DistributionsAndForfeitures = () => {
+  const [profitYear, setProfitYear] = useState<number | null>(null);
+  const [startMonth, setStartMonth] = useState<number | null>(null);
+  const [endMonth, setEndMonth] = useState<number | null>(null);
+  const [includeOutgoingForfeitures, setIncludeOutgoingForfeitures] = useState(false);
+  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
 
   const navigate = useNavigate();
 
@@ -20,10 +26,9 @@ const DistributionsAndForfeitures = () => {
       <div className="flex items-center gap-2 h-10">
         <StatusDropdown onStatusChange={handleStatusChange} />
         <Button
-          onClick={() => navigate('/december-process-accordion')}
+          onClick={() => navigate("/december-process-accordion")}
           variant="outlined"
-          className="h-10 whitespace-nowrap min-w-fit"
-        >
+          className="h-10 whitespace-nowrap min-w-fit">
           {MENU_LABELS.DECEMBER_ACTIVITIES}
         </Button>
       </div>
@@ -31,24 +36,38 @@ const DistributionsAndForfeitures = () => {
   };
 
   return (
-    <Page label="Distributions And Forfeitures (QPAY129)" actionNode={renderActionNode()}>
-        <Grid2
-          container
-          rowSpacing="24px">
-          <Grid2 width={"100%"}>
-            <Divider />
-          </Grid2>
-          <Grid2
-            width={"100%"}>
-             <DSMAccordion title="Filter">
-              <DistributionsAndForfeituresSearchFilter />
-             </DSMAccordion>
-          </Grid2>
-
-          <Grid2 width="100%">
-            <DistributionsAndForfeituresGrid />
-          </Grid2>
+    <Page
+      label="Distributions And Forfeitures (QPAY129)"
+      actionNode={renderActionNode()}>
+      <Grid2
+        container
+        rowSpacing="24px">
+        <Grid2 width={"100%"}>
+          <Divider />
         </Grid2>
+        <Grid2 width={"100%"}>
+          <DSMAccordion title="Filter">
+            <DistributionsAndForfeituresSearchFilter
+              setProfitYear={setProfitYear}
+              setStartMonth={setStartMonth}
+              setEndMonth={setEndMonth}
+              setIncludeOutgoingForfeitures={setIncludeOutgoingForfeitures}
+              setInitialSearchLoaded={setInitialSearchLoaded}
+            />
+          </DSMAccordion>
+        </Grid2>
+
+        <Grid2 width="100%">
+          <DistributionsAndForfeituresGrid
+            profitYearCurrent={profitYear}
+            startMonthCurrent={startMonth}
+            endMonthCurrent={endMonth}
+            includeOutgoingForfeituresCurrent={includeOutgoingForfeitures}
+            setInitialSearchLoaded={setInitialSearchLoaded}
+            initialSearchLoaded={initialSearchLoaded}
+          />
+        </Grid2>
+      </Grid2>
     </Page>
   );
 };

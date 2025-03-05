@@ -1,12 +1,14 @@
+import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { useState } from "react";
+import { clear } from "console";
 import { Controller, useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
 import { useLazyGetForfeituresByAgeQuery } from "reduxstore/api/YearsEndApi";
-import { SearchAndReset } from "smart-ui-library";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
+import { clearForfeituresByAge } from "reduxstore/slices/yearsEndSlice";
 import { FrozenReportsByAgeRequestType } from "reduxstore/types";
+import { SearchAndReset } from "smart-ui-library";
+import * as yup from "yup";
 
 interface ForfeituresByAgeSearch {
   profitYear: number;
@@ -25,7 +27,7 @@ const schema = yup.object().shape({
 
 const ForfeituresByAgeSearchFilter = () => {
   const [triggerSearch, { isFetching }] = useLazyGetForfeituresByAgeQuery();
-
+  const dispatch = useDispatch();
   const {
     control,
     handleSubmit,
@@ -69,6 +71,7 @@ const ForfeituresByAgeSearchFilter = () => {
   });
 
   const handleReset = () => {
+    dispatch(clearForfeituresByAge());
     reset({
       profitYear: undefined,
       reportType: undefined

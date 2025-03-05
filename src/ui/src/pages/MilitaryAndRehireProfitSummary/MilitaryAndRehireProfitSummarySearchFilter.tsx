@@ -1,10 +1,11 @@
+import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { useLazyGetMilitaryAndRehireProfitSummaryQuery, useLazyGetNegativeEVTASSNQuery } from "reduxstore/api/YearsEndApi";
+import { Controller, useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
+import { useLazyGetMilitaryAndRehireProfitSummaryQuery } from "reduxstore/api/YearsEndApi";
+import { clearMilitaryAndRehireProfitSummaryDetails } from "reduxstore/slices/yearsEndSlice";
 import { SearchAndReset } from "smart-ui-library";
-import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 
 interface MilitaryAndRehireProfitSummarySearch {
@@ -20,14 +21,12 @@ const schema = yup.object().shape({
     .min(2020, "Year must be 2020 or later")
     .max(2100, "Year must be 2100 or earlier")
     .required("Year is required"),
-  reportingYear: yup
-    .string()
-    .required("Reporting Year is required")
+  reportingYear: yup.string().required("Reporting Year is required")
 });
 
 const MilitaryAndRehireProfitSummarySearchFilter = () => {
   const [triggerSearch, { isFetching }] = useLazyGetMilitaryAndRehireProfitSummaryQuery();
-
+  const dispatch = useDispatch();
   const {
     control,
     handleSubmit,
@@ -48,7 +47,7 @@ const MilitaryAndRehireProfitSummarySearchFilter = () => {
         {
           reportingYear: data.reportingYear,
           profitYear: data.profitYear,
-          pagination: { skip: 0, take: 25 },
+          pagination: { skip: 0, take: 25 }
         },
         false
       );
@@ -56,6 +55,7 @@ const MilitaryAndRehireProfitSummarySearchFilter = () => {
   });
 
   const handleReset = () => {
+    dispatch(clearMilitaryAndRehireProfitSummaryDetails());
     reset({
       profitYear: undefined
     });
