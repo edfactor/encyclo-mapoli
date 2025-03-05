@@ -16,10 +16,6 @@ import {
   setExecutiveHoursAndDollarsGridYear
 } from "reduxstore/slices/yearsEndSlice";
 
-export interface WrapperProps {
-  isModal?: boolean;
-}
-
 interface ExecutiveHoursAndDollarsSearch {
   profitYear: number;
   badgeNumber?: number | null;
@@ -56,7 +52,25 @@ const schema = yup.object().shape({
 
 // If we are using a modal window, we want a slimmed down version of the search filter
 // and we will
-const ManageExecutiveHoursAndDollarsSearchFilter = (props: WrapperProps) => {
+interface ManageExecutiveHoursAndDollarsSearchFilterProps {
+  isModal?: boolean;
+  setProfitYear: (year: number) => void;
+  setBadgeNumber: (badgeNumber: number | null) => void;
+  setSocialSecurity: (ssn: string | null) => void;
+  setFullNameContains: (ssn: string | null) => void;
+  setHasExecutiveHoursAndDollars: (include: boolean) => void;
+  setInitialSearchLoaded: (include: boolean) => void;
+}
+
+const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursAndDollarsSearchFilterProps> = ({
+  isModal,
+  setProfitYear,
+  setBadgeNumber,
+  setSocialSecurity,
+  setFullNameContains,
+  setHasExecutiveHoursAndDollars,
+  setInitialSearchLoaded
+}) => {
   const { executiveHoursAndDollarsGrid } = useSelector((state: RootState) => state.yearsEnd);
 
   const [triggerSearch, { isFetching }] = useLazyGetExecutiveHoursAndDollarsQuery();
@@ -66,7 +80,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter = (props: WrapperProps) => {
 
   let selectedProfitYear = undefined;
 
-  if (props.isModal) {
+  if (isModal) {
     selectedProfitYear = executiveHoursAndDollarsGrid?.profitYear || undefined;
   }
 
@@ -89,7 +103,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter = (props: WrapperProps) => {
     // should delete them, regardless of modal or not
     //dispatch(clearAdditionalExecutivesChosen());
 
-    if (isValid && !props.isModal) {
+    if (isValid && !isModal) {
       triggerSearch(
         {
           pagination: { skip: 0, take: 25 },
@@ -115,7 +129,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter = (props: WrapperProps) => {
 
     // A difference in modal is that we are not filtering for having executive hours
     // and dollars being there
-    if (isValid && props.isModal) {
+    if (isValid && isModal) {
       triggerModalSearch(
         {
           pagination: { skip: 0, take: 25 },
@@ -136,6 +150,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter = (props: WrapperProps) => {
     // dispatch(clearExecutiveHoursAndDollarsGridRows());
     // ... and then import clearExecutiveHoursAndDollarsGridRows
     // from reduxstore/slices/yearsEndSlice
+    setInitialSearchLoaded(false);
     dispatch(clearExecutiveHoursAndDollars());
     reset({
       profitYear: undefined
@@ -151,7 +166,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter = (props: WrapperProps) => {
           container
           spacing={3}
           width="100%">
-          {!props.isModal && (
+          {!isModal && (
             <Grid2
               xs={12}
               sm={6}
@@ -168,6 +183,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter = (props: WrapperProps) => {
                     error={!!errors.profitYear}
                     onChange={(e) => {
                       field.onChange(e);
+                      setProfitYear(Number(e.target.value));
                     }}
                     inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
                   />
@@ -192,6 +208,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter = (props: WrapperProps) => {
                   error={!!errors.fullNameContains}
                   onChange={(e) => {
                     field.onChange(e);
+                    setFullNameContains(e.target.value);
                   }}
                 />
               )}
@@ -218,6 +235,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter = (props: WrapperProps) => {
                     if (!isNaN(Number(e.target.value))) {
                       const parsedValue = e.target.value === "" ? null : Number(e.target.value);
                       field.onChange(parsedValue);
+                      setSocialSecurity(e.target.value);
                     }
                   }}
                 />
@@ -244,6 +262,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter = (props: WrapperProps) => {
                     if (!isNaN(Number(e.target.value))) {
                       const parsedValue = e.target.value === "" ? null : Number(e.target.value);
                       field.onChange(parsedValue);
+                      setBadgeNumber(parsedValue);
                     }
                   }}
                   //inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
@@ -252,7 +271,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter = (props: WrapperProps) => {
             />
             {errors.badgeNumber && <FormHelperText error>{errors.badgeNumber.message}</FormHelperText>}
           </Grid2>
-          {!props.isModal && (
+          {!isModal && (
             <Grid2
               xs={12}
               sm={6}
@@ -264,7 +283,10 @@ const ManageExecutiveHoursAndDollarsSearchFilter = (props: WrapperProps) => {
                 render={({ field }) => (
                   <Checkbox
                     checked={field.value}
-                    onChange={field.onChange}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      setHasExecutiveHoursAndDollars(e.target.checked);
+                    }}
                   />
                 )}
               />
@@ -278,14 +300,14 @@ const ManageExecutiveHoursAndDollarsSearchFilter = (props: WrapperProps) => {
       <Grid2
         width="100%"
         paddingX="24px">
-        {!props.isModal && (
+        {!isModal && (
           <SearchAndReset
             handleReset={handleReset}
             handleSearch={validateAndSearch}
             isFetching={isFetching}
           />
         )}
-        {props.isModal && (
+        {isModal && (
           <SearchAndReset
             handleReset={handleReset}
             handleSearch={validateAndSearch}

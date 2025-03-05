@@ -1,6 +1,6 @@
 import { Typography, Button, Tooltip } from "@mui/material";
 import { CellValueChangedEvent, IRowNode, SelectionChangedEvent } from "ag-grid-community";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination, SmartModal } from "smart-ui-library";
@@ -20,8 +20,8 @@ import {
   updateExecutiveHoursAndDollarsGridRow
 } from "reduxstore/slices/yearsEndSlice";
 import { AddOutlined } from "@mui/icons-material";
-import { WrapperProps } from "./ManageExecutiveHoursAndDollarsSearchFilter";
 import SearchAndAddExecutive from "./SearchAndAddExecutive";
+import { useLazyGetExecutiveHoursAndDollarsQuery } from "reduxstore/api/YearsEndApi";
 
 interface RenderAddExecutiveButtonProps {
   reportReponse: PagedReportResponse<ExecutiveHoursAndDollars> | null;
@@ -71,7 +71,27 @@ const RenderAddExecutiveButton: React.FC<RenderAddExecutiveButtonProps> = ({
   }
 };
 
-const ManageExecutiveHoursAndDollarsGrid = (props: WrapperProps) => {
+interface ManageExecutiveHoursAndDollarsGridSearchProps {
+  isModal?: boolean;
+  profitYearCurrent: number | null;
+  badgeNumberCurrent: number | null;
+  socialSecurityCurrent: string | null;
+  fullNameContainsCurrent: string | null;
+  hasExecutiveHoursAndDollarsCurrent: boolean;
+  initialSearchLoaded: boolean;
+  setInitialSearchLoaded: (loaded: boolean) => void;
+}
+
+const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollarsGridSearchProps> = ({
+  isModal,
+  profitYearCurrent,
+  badgeNumberCurrent,
+  socialSecurityCurrent,
+  fullNameContainsCurrent,
+  hasExecutiveHoursAndDollarsCurrent,
+  initialSearchLoaded,
+  setInitialSearchLoaded
+}) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [openModal, setOpenModal] = useState<boolean>(false);
@@ -88,6 +108,36 @@ const ManageExecutiveHoursAndDollarsGrid = (props: WrapperProps) => {
     additionalExecutivesGrid,
     executiveHoursAndDollarsGrid
   } = useSelector((state: RootState) => state.yearsEnd);
+
+  const [triggerSearch, { isFetching }] = useLazyGetExecutiveHoursAndDollarsQuery();
+
+  const onSearch = useCallback(async () => {
+    const request = {
+      profitYear: profitYearCurrent ?? 0,
+      ...(badgeNumberCurrent && { badgeNumber: badgeNumberCurrent }),
+      ...(socialSecurityCurrent !== null && { socialSecurity: Number(socialSecurityCurrent) }),
+      ...(fullNameContainsCurrent && { fullNameContains: fullNameContainsCurrent }),
+      hasExecutiveHoursAndDollars: hasExecutiveHoursAndDollarsCurrent ?? false,
+      pagination: { skip: pageNumber * pageSize, take: pageSize }
+    };
+
+    await triggerSearch(request, false);
+  }, [
+    profitYearCurrent,
+    badgeNumberCurrent,
+    socialSecurityCurrent,
+    fullNameContainsCurrent,
+    hasExecutiveHoursAndDollarsCurrent,
+    pageNumber,
+    pageSize,
+    triggerSearch
+  ]);
+
+  useEffect(() => {
+    if (initialSearchLoaded) {
+      onSearch();
+    }
+  }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
 
   // This function checks to see if we have a change for this badge number already pending for a save
   const isRowStagedToSave = (badge: number): boolean => {
@@ -159,7 +209,7 @@ const ManageExecutiveHoursAndDollarsGrid = (props: WrapperProps) => {
   };
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
-  const columnDefs = useMemo(() => GetManageExecutiveHoursAndDollarsColumns(props.isModal), [props.isModal]);
+  const columnDefs = useMemo(() => GetManageExecutiveHoursAndDollarsColumns(isModal), [isModal]);
 
   const combineGridWithAddedExecs = (
     mainList: PagedReportResponse<ExecutiveHoursAndDollars> | null,
@@ -220,9 +270,9 @@ const ManageExecutiveHoursAndDollarsGrid = (props: WrapperProps) => {
 
   return (
     <>
-      {isRowDataThere(props.isModal) && (
+      {isRowDataThere(isModal) && (
         <>
-          {!props.isModal && (
+          {!isModal && (
             <>
               <div className="px-[24px]">
                 <Typography
@@ -234,13 +284,13 @@ const ManageExecutiveHoursAndDollarsGrid = (props: WrapperProps) => {
               <div style={{ gap: "36px", display: "flex", justifyContent: "end", marginRight: 28 }}>
                 <RenderAddExecutiveButton
                   reportReponse={mutableCopyOfGridData}
-                  isModal={props.isModal}
+                  isModal={isModal}
                   setOpenModal={setOpenModal}
                 />
               </div>
             </>
           )}
-          {props.isModal && (
+          {isModal && (
             <>
               <div className="px-[24px]">
                 <Typography
@@ -256,13 +306,13 @@ const ManageExecutiveHoursAndDollarsGrid = (props: WrapperProps) => {
             isLoading={false}
             handleSortChanged={sortEventHandler}
             providedOptions={{
-              rowData: props.isModal
+              rowData: isModal
                 ? mutableCopyOfAdditionalExecutivesGrid?.response.results
                 : mutableCopyOfGridData?.response.results,
               columnDefs: columnDefs,
-              rowSelection: props.isModal ? "multiple" : undefined,
+              rowSelection: isModal ? "multiple" : undefined,
               onSelectionChanged: (event: SelectionChangedEvent) => {
-                if (props.isModal) {
+                if (isModal) {
                   const selectedRows = event.api.getSelectedRows();
                   dispatch(setExecutiveRowsSelected(selectedRows));
                 }
@@ -280,16 +330,18 @@ const ManageExecutiveHoursAndDollarsGrid = (props: WrapperProps) => {
           />
         </>
       )}
-      {isPaginationNeeded(props.isModal) && (
+      {isPaginationNeeded(isModal) && (
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
             setPageNumber(value - 1);
+            setInitialSearchLoaded(true);
           }}
           pageSize={pageSize}
           setPageSize={(value: number) => {
             setPageSize(value);
             setPageNumber(1);
+            setInitialSearchLoaded(true);
           }}
           recordCount={mutableCopyOfGridData?.response.total ?? 0}
         />
