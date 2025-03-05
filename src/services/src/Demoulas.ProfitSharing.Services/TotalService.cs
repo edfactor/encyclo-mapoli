@@ -269,7 +269,7 @@ public sealed class TotalService : ITotalService
                 ZeroContributionReasonId = (byte?)null,
                 b.Contact.DateOfBirth,
                 FromBeneficiary = (short)1,
-                Years = (byte)0,
+                Years = (byte?)0,
                 Hours = (decimal)0
             }
         );
@@ -348,13 +348,13 @@ public sealed class TotalService : ITotalService
                 join y in GetYearsOfService(ctx, employeeYear) on b.Ssn equals y.Ssn
                 select new ParticipantTotalVestingBalanceDto
                 {
-                    Ssn = e.Ssn,
-                    CurrentBalance = b.Total,
-                    Etva = e.Total,
-                    TotalDistributions = d.Total,
+                    Ssn = e.Ssn ?? 0,
+                    CurrentBalance = b.Total ?? 0,
+                    Etva = e.Total ?? 0,
+                    TotalDistributions = d.Total ?? 0,
                     VestingPercent = v.Ratio,
-                    YearsInPlan = y.Years,
-                    VestedBalance = ((b.Total + d.Total - e.Total) * v.Ratio) + e.Total - d.Total
+                    YearsInPlan = y.Years ?? 0,
+                    VestedBalance = (((b.Total ?? 0) + (d.Total ?? 0) - (e.Total ?? 0)) * v.Ratio) + (e.Total ?? 0) - (d.Total ?? 0)
                 }
             );
     }

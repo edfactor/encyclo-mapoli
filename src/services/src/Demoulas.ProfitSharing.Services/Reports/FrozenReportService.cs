@@ -791,7 +791,7 @@ public class FrozenReportService : IFrozenReportService
                 .GroupBy(item => item.YearsInPlan)
                 .Select(group => new BalanceByYearsDetail
                 {
-                    Years = group.Key,
+                    Years = group.Key ?? 0,
                     CurrentBalance = group.Sum(e => e.CurrentBalance),
                     CurrentBeneficiaryBalance = group.Sum(e => e.IsBeneficiary ? e.CurrentBalance : 0),
                     CurrentBeneficiaryVestedBalance = group.Sum(e => e.IsBeneficiary ? e.VestedBalance : 0),
@@ -1001,9 +1001,9 @@ public class FrozenReportService : IFrozenReportService
                         EmployeeName = d.ContactInfo.FullName ?? "",
                         DateOfBirth = d.DateOfBirth,
                         Ssn = d.Ssn.MaskSsn(),
-                        Forfeitures = fBal_lj != null ? fBal_lj.Total : 0,
-                        Loans = lBal_lj != null ? lBal_lj.Total : 0,
-                        ProfitSharingAmount = psBal.Total,
+                        Forfeitures = fBal_lj != null ? (fBal_lj.Total ?? 0) : 0,
+                        Loans = lBal_lj != null ? (lBal_lj.Total ?? 0) : 0,
+                        ProfitSharingAmount = (psBal.Total ?? 0m),
                         GrossWages = lyPP.CurrentIncomeYear + pp.IncomeExecutive
                     }).ToListAsync(cancellationToken: cancellationToken);
 

@@ -263,7 +263,7 @@ public class CleanupReportService : ICleanupReportService
                     select new
                     {
                         d.BadgeNumber,
-                        yis.Years
+                        Years = yis.Years ?? 0
                     }
                 ).ToDictionaryAsync(x => x.BadgeNumber, x => x.Years, cancellationToken: cancellationToken);
 
@@ -455,7 +455,7 @@ public class CleanupReportService : ICleanupReportService
                           CurrentIncomeYear = 0m,
                           IncomeExecutive = 0m,
                           PointsEarned = (decimal?)null,
-                          Years = (byte)0
+                          Years = (byte?)0
                       };
             }
 
@@ -542,8 +542,8 @@ public class CleanupReportService : ICleanupReportService
                           IsNew = x.pp.EmploymentTypeId == EmployeeType.Constants.NewLastYear.ToString(),
                           IsUnder21 = false, //Filled out below after materialization
                           EmployeeStatus = x.pp.EmploymentStatusId,
-                          Balance = x.tot.Total,
-                          YearsInPlan = x.pp.Years
+                          Balance = x.tot.Total ?? 0,
+                          YearsInPlan = x.pp.Years ?? 0
                       })
                       .ToPaginationResultsAsync(req, cancellationToken);
         });
@@ -589,7 +589,7 @@ public class CleanupReportService : ICleanupReportService
                 LineItemTitle = "AGE 18-20 WITH >= 1000 PS HOURS",
                 NumberOfMembers = x.Count(),
                 TotalWages = x.Sum(y => y.pp.IncomeExecutive + y.pp.CurrentIncomeYear),
-                TotalBalance = x.Sum(y => y.tot.Total)
+                TotalBalance = x.Sum(y => y.tot.Total ?? 0)
             }).FirstOrDefaultAsync(cancellationToken);
             if (lineItem != null) { response.LineItems.Add(lineItem); }
 
@@ -606,7 +606,7 @@ public class CleanupReportService : ICleanupReportService
                 LineItemTitle = ">= AGE 21 WITH >= 1000 PS HOURS",
                 NumberOfMembers = x.Count(),
                 TotalWages = x.Sum(y => y.pp.IncomeExecutive + y.pp.CurrentIncomeYear),
-                TotalBalance = x.Sum(y => y.tot.Total)
+                TotalBalance = x.Sum(y => y.tot.Total ?? 0)
             }).FirstOrDefaultAsync(cancellationToken);
             if (lineItem != null) { response.LineItems.Add(lineItem); }
 
@@ -623,7 +623,7 @@ public class CleanupReportService : ICleanupReportService
                 LineItemTitle = "<  AGE 18",
                 NumberOfMembers = x.Count(),
                 TotalWages = x.Sum(y => y.pp.IncomeExecutive + y.pp.CurrentIncomeYear),
-                TotalBalance = x.Sum(y => y.tot.Total)
+                TotalBalance = x.Sum(y => y.tot.Total ?? 0)
             }).FirstOrDefaultAsync(cancellationToken);
             if (lineItem != null) { response.LineItems.Add(lineItem); }
 
@@ -641,7 +641,7 @@ public class CleanupReportService : ICleanupReportService
                 LineItemTitle = ">= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT",
                 NumberOfMembers = x.Count(),
                 TotalWages = x.Sum(y => y.pp.IncomeExecutive + y.pp.CurrentIncomeYear),
-                TotalBalance = x.Sum(y => y.tot.Total)
+                TotalBalance = x.Sum(y => y.tot.Total ?? 0)
             })
             .FirstOrDefaultAsync(cancellationToken);
             if (lineItem != null) { response.LineItems.Add(lineItem); }
@@ -660,7 +660,7 @@ public class CleanupReportService : ICleanupReportService
                 LineItemTitle = ">= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT",
                 NumberOfMembers = x.Count(),
                 TotalWages = x.Sum(y => y.pp.IncomeExecutive + y.pp.CurrentIncomeYear),
-                TotalBalance = x.Sum(y => y.tot.Total)
+                TotalBalance = x.Sum(y => y.tot.Total ?? 0)
             })
             .FirstOrDefaultAsync(cancellationToken);
             if (lineItem != null) { response.LineItems.Add(lineItem); }
@@ -678,7 +678,7 @@ public class CleanupReportService : ICleanupReportService
                 LineItemTitle = ">= AGE 18 WITH >= 1000 PS HOURS",
                 NumberOfMembers = x.Count(),
                 TotalWages = x.Sum(y => y.pp.IncomeExecutive + y.pp.CurrentIncomeYear),
-                TotalBalance = x.Sum(y => y.tot.Total)
+                TotalBalance = x.Sum(y => y.tot.Total ?? 0)
             }).FirstOrDefaultAsync(cancellationToken);
             if (lineItem != null) { response.LineItems.Add(lineItem); }
 
@@ -696,7 +696,7 @@ public class CleanupReportService : ICleanupReportService
                 LineItemTitle = ">= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT",
                 NumberOfMembers = x.Count(),
                 TotalWages = x.Sum(y => y.pp.IncomeExecutive + y.pp.CurrentIncomeYear),
-                TotalBalance = x.Sum(y => y.tot.Total)
+                TotalBalance = x.Sum(y => y.tot.Total ?? 0)
             }).FirstOrDefaultAsync(cancellationToken);
             if (lineItem != null) { response.LineItems.Add(lineItem); }
 
@@ -714,7 +714,7 @@ public class CleanupReportService : ICleanupReportService
                 LineItemTitle = ">= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT",
                 NumberOfMembers = x.Count(),
                 TotalWages = x.Sum(y => y.pp.IncomeExecutive + y.pp.CurrentIncomeYear),
-                TotalBalance = x.Sum(y => y.tot.Total)
+                TotalBalance = x.Sum(y => y.tot.Total ?? 0)
             }).FirstOrDefaultAsync(cancellationToken);
             if (lineItem != null) { response.LineItems.Add(lineItem); }
 
@@ -731,7 +731,7 @@ public class CleanupReportService : ICleanupReportService
                 LineItemTitle = "<  AGE 18           NO WAGES :   0",
                 NumberOfMembers = x.Count(),
                 TotalWages = x.Sum(y => y.pp.IncomeExecutive + y.pp.CurrentIncomeYear),
-                TotalBalance = x.Sum(y => y.tot.Total)
+                TotalBalance = x.Sum(y => y.tot.Total ?? 0)
             }).FirstOrDefaultAsync(cancellationToken);
             if (lineItem != null) { response.LineItems.Add(lineItem); }
 
@@ -745,7 +745,7 @@ public class CleanupReportService : ICleanupReportService
                 LineItemTitle = "NON-EMPLOYEE BENEFICIARIES",
                 NumberOfMembers = x.Count(),
                 TotalWages = 0,
-                TotalBalance = x.Sum(y => y.tot.Total)
+                TotalBalance = x.Sum(y => y.tot.Total ?? 0)
             }).FirstOrDefaultAsync(cancellationToken);
             if (lineItem != null) { response.LineItems.Add(lineItem); }
 
