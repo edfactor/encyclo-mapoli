@@ -1,4 +1,5 @@
 import { Paged, PaginationParams } from "smart-ui-library";
+import { boolean } from "yup";
 
 export enum ImpersonationRoles {
   FinanceManager = "Finance-Manager",
@@ -592,6 +593,23 @@ export interface ProfitShareMasterResponse {
   etvasEffected?: number;
 }
 
+export interface YearEndProfitSharingReportResponse {
+  badgeNumber: number;
+  employeeName: string;
+  storeNumber: number;
+  employeeTypeCode: string;
+  dateOfBirth: Date;
+  age: number;
+  ssn: string;
+  wages: number;
+  hours: number;
+  points: number;
+  isUnder21: boolean;
+  isNew: boolean;
+  employeeStatus: string;
+  balance: number;
+  yearsInPlan: number;
+}
 export interface FrozenStateResponse {
   id: number;
   profitYear: number;

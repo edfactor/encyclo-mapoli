@@ -165,6 +165,9 @@ export const yearsEndSlice = createSlice({
     ) => {
       state.distributionsAndForfeitures = action.payload;
     },
+    clearDistributionsAndForfeitures: (state) => {
+      state.distributionsAndForfeitures = null;
+    },
     setExecutiveHoursAndDollars: (state, action: PayloadAction<PagedReportResponse<ExecutiveHoursAndDollars>>) => {
       state.executiveHoursAndDollars = action.payload;
     },
@@ -255,9 +258,9 @@ export const yearsEndSlice = createSlice({
         // So if we do not have the year, or the grid is not there, we have nothing to do
         console.log(
           "WARN: Tried to remove a non-existent exec dollars and hours row with badge: " +
-          action.payload.executiveHoursAndDollars[0].badgeNumber +
-          " and profit year: " +
-          action.payload.profitYear
+            action.payload.executiveHoursAndDollars[0].badgeNumber +
+            " and profit year: " +
+            action.payload.profitYear
         );
       }
     },
@@ -402,7 +405,6 @@ export const yearsEndSlice = createSlice({
     },
     clearYearEndProfitSharingReport: (state) => {
       state.yearEndProfitSharingReport = null;
-
     }
   }
 });
@@ -458,6 +460,8 @@ export const {
   addExecutiveHoursAndDollarsGridRow,
   setYearEndProfitSharingReport,
   clearYearEndProfitSharingReport,
-  setEmployeeWagesForYear
+  setEmployeeWagesForYear,
+
+  clearDistributionsAndForfeitures
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;
