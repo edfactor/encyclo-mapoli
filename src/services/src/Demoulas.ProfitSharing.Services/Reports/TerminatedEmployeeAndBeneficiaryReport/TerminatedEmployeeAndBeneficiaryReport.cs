@@ -324,11 +324,9 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
         return false;
     }
-
+    
     private static Task<InternalProfitDetailDto?> RetrieveProfitDetail(IQueryable<ProfitDetail> profitDetails, CancellationToken cancellationToken)
     {
-#pragma warning disable S3358
-
         var pdQuery = profitDetails
             .GroupBy(details => details.Ssn)
             .Select(g => new
@@ -365,8 +363,6 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 Distribution = r.Distribution,
                 BeneficiaryAllocation = r.BeneficiaryAllocation
             }).FirstOrDefaultAsync(cancellationToken);
-#pragma warning restore S3358
-
         return pdQuery;
     }
 }

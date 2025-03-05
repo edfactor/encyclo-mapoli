@@ -1,6 +1,6 @@
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
-public class MemberYearSummaryDto
+public record MemberYearSummaryDto
 {
     public short StoreNumber { get; init; }
     public int EnrollmentId { get; set; }

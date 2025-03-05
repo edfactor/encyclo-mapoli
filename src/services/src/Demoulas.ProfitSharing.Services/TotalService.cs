@@ -54,7 +54,6 @@ public sealed class TotalService : ITotalService
             /*9*/ ProfitCode.Constants.Outgoing100PercentVestedPayment.Id
         };
 
-#pragma warning disable S3358 // Ternary operators should not be nested
         return (from pd in ctx.ProfitDetails
             where pd.ProfitYear <= profitYear
             group pd by pd.Ssn
@@ -67,7 +66,6 @@ public sealed class TotalService : ITotalService
                         ? (-x.Forfeiture + x.Contribution + x.Earnings)
                         : (x.Contribution + x.Earnings + x.Forfeiture)) //Just add the columns
             });
-#pragma warning restore S3358 // Ternary operators should not be nested
     }
 
     /// <summary>
@@ -275,7 +273,6 @@ public sealed class TotalService : ITotalService
         var hoursWorkedRequirement = ContributionService.MinimumHoursForContribution();
 
 #pragma warning disable S1244 // Floating point numbers should not be tested for equality
-#pragma warning disable S3358 // Ternary operators should not be nested
         return (
             from db in demoOrBeneficiary
             select new ParticipantTotalRatioDto

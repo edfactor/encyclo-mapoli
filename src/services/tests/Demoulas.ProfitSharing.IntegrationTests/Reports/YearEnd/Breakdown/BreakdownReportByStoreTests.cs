@@ -19,7 +19,7 @@ public class BreakdownReportByStoreTests
     private readonly IBreakdownService _breakdownService;
     private readonly CalendarService _calendarService;
     private readonly IProfitSharingDataContextFactory _dbFactory;
-    private readonly ITotalService _totalService;
+    private readonly TotalService _totalService;
 
     public BreakdownReportByStoreTests()
     {

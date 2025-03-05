@@ -12,18 +12,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Reports.Breakdown;
 
-// Cope with LINQ / Oracle -- Ternary optimzation issue
-#pragma warning disable S3358
-
 public class BreakdownReportService : IBreakdownService
 {
     private readonly ICalendarService _calendarService;
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
-    private readonly ITotalService _totalService;
+    private readonly TotalService _totalService;
 
     public BreakdownReportService(IProfitSharingDataContextFactory dataContextFactory,
         ICalendarService calendarService,
-        ITotalService totalService)
+        TotalService totalService)
     {
         _dataContextFactory = dataContextFactory;
         _calendarService = calendarService;
@@ -36,15 +33,14 @@ public class BreakdownReportService : IBreakdownService
         {
             CalendarResponseDto dates = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
             short priorYear = (short)(request.ProfitYear - 1);
-            TotalService totalService = (TotalService)_totalService; // slight cheat, so we can access its internal methods 
             
             var employeesQuery = ctx.PayProfits.Include(p => p.Demographic)
                 .Where(pp => pp.ProfitYear == request.ProfitYear)
-                .Join(totalService.GetVestingRatio(ctx, request.ProfitYear, dates.FiscalEndDate),
+                .Join(_totalService.GetVestingRatio(ctx, request.ProfitYear, dates.FiscalEndDate),
                     pp => pp.Demographic!.Ssn,
                     vr => vr.Ssn,
                     (pp, vr) => new { pp, VestingRatio = vr.Ratio })
-                .Join(totalService.GetTotalBalanceSet(ctx, priorYear),
+                .Join(_totalService.GetTotalBalanceSet(ctx, priorYear),
                     ppAndVestingRatio => ppAndVestingRatio.pp.Demographic!.Ssn,
                     tbs => tbs.Ssn,
                     (ppAndRatio, tbs) => new { ppAndRatio.pp, ppAndRatio.VestingRatio, BeginningBalance = tbs.Total })
