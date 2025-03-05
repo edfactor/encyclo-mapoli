@@ -51,34 +51,34 @@ public class BreakdownReportService : IBreakdownService
                 .Join(TotalService.GetTransactionsBySsnForProfitYear(ctx, request.ProfitYear),
                     collected => collected.pp.Demographic!.Ssn,
                     transactionSums => transactionSums.Ssn,
-                    (collected, transactionSums) => new
+                    (s, transactionSums) => new
                     {
-                        collected.pp,
-                        d = collected.pp.Demographic,
-                        collected.VestingRatio,
-                        collected.BeginningBalance,
+                        s.pp,
+                        d = s.pp.Demographic,
+                        s.VestingRatio,
+                        s.BeginningBalance,
                         transactionSums,
-                        EndingBalance = collected.BeginningBalance + transactionSums.TotalContributions + transactionSums.TotalEarnings + transactionSums.TotalForfeitures +
-                                        transactionSums.Distribution + transactionSums.BeneficiaryAllocation
-                    }
-                )
-                .OrderBy(s=>s.d!.StoreNumber).ThenBy(s =>
+                        EndingBalance = s.BeginningBalance + transactionSums.TotalContributions + transactionSums.TotalEarnings + transactionSums.TotalForfeitures +
+                                        transactionSums.Distribution + transactionSums.BeneficiaryAllocation,
+                        EmployeeRank =
                         // This ranks the managers above the employees.  Search for " 120 " in,
                         // https://bitbucket.org/demoulas/hpux/raw/fcd54cd50e1660f050b23a1f5ae44799458b51c0/iqs-source/QPAY066TA.pco
-                        s.d!.DepartmentId == Department.Constants.Grocery && s.d!.PayClassificationId == PayClassification.Constants.Manager ? 10
-                        : s.d!.DepartmentId == Department.Constants.Grocery && s.d!.PayClassificationId == PayClassification.Constants.AssistantManager ? 20
-                        : s.d!.DepartmentId == Department.Constants.Grocery && s.d!.PayClassificationId == PayClassification.Constants.Merchandiser ? 30
-                        : s.d!.DepartmentId == Department.Constants.Grocery && s.d!.PayClassificationId == PayClassification.Constants.FrontEndManager ? 40
-                        : s.d!.DepartmentId == Department.Constants.Grocery && s.d!.PayClassificationId == PayClassification.Constants.GroceryManager ? 50
-                        : s.d!.DepartmentId == Department.Constants.Meat && s.d!.PayClassificationId == PayClassification.Constants.Manager ? 60
-                        : s.d!.DepartmentId == Department.Constants.Meat && s.d!.PayClassificationId == PayClassification.Constants.AssistantManager ? 70
-                        : s.d!.DepartmentId == Department.Constants.Deli && s.d!.PayClassificationId == PayClassification.Constants.Manager ? 80
-                        : s.d!.DepartmentId == Department.Constants.Produce && s.d!.PayClassificationId == PayClassification.Constants.Manager ? 90
-                        : s.d!.DepartmentId == Department.Constants.Dairy && s.d!.PayClassificationId == PayClassification.Constants.Manager ? 100
-                        : s.d!.DepartmentId == Department.Constants.Bakery && s.d!.PayClassificationId == PayClassification.Constants.Manager ? 110
-                        : s.d!.DepartmentId == Department.Constants.BeerAndWine && s.d!.PayClassificationId == PayClassification.Constants.Manager ? 120
-                        : 1999) // Default value
-                    .ThenBy(s => s.d!.ContactInfo.FullName)
+                        (s.pp.Demographic!.DepartmentId == Department.Constants.Grocery && s.pp.Demographic.PayClassificationId == PayClassification.Constants.Manager ? 10
+                        : s.pp.Demographic.DepartmentId == Department.Constants.Grocery && s.pp.Demographic.PayClassificationId == PayClassification.Constants.AssistantManager ? 20
+                        : s.pp.Demographic.DepartmentId == Department.Constants.Grocery && s.pp.Demographic.PayClassificationId == PayClassification.Constants.Merchandiser ? 30
+                        : s.pp.Demographic.DepartmentId == Department.Constants.Grocery && s.pp.Demographic.PayClassificationId == PayClassification.Constants.FrontEndManager ? 40
+                        : s.pp.Demographic.DepartmentId == Department.Constants.Grocery && s.pp.Demographic.PayClassificationId == PayClassification.Constants.GroceryManager ? 50
+                        : s.pp.Demographic.DepartmentId == Department.Constants.Meat && s.pp.Demographic.PayClassificationId == PayClassification.Constants.Manager ? 60
+                        : s.pp.Demographic.DepartmentId == Department.Constants.Meat && s.pp.Demographic.PayClassificationId == PayClassification.Constants.AssistantManager ? 70
+                        : s.pp.Demographic.DepartmentId == Department.Constants.Deli && s.pp.Demographic.PayClassificationId == PayClassification.Constants.Manager ? 80
+                        : s.pp.Demographic.DepartmentId == Department.Constants.Produce && s.pp.Demographic.PayClassificationId == PayClassification.Constants.Manager ? 90
+                        : s.pp.Demographic.DepartmentId == Department.Constants.Dairy && s.pp.Demographic.PayClassificationId == PayClassification.Constants.Manager ? 100
+                        : s.pp.Demographic.DepartmentId == Department.Constants.Bakery && s.pp.Demographic.PayClassificationId == PayClassification.Constants.Manager ? 110
+                        : s.pp.Demographic.DepartmentId == Department.Constants.BeerAndWine && s.pp.Demographic.PayClassificationId == PayClassification.Constants.Manager ? 120
+                        : 1999) /* Regular Associate */
+                    }
+                )
+                .OrderBy(s=>s.d!.StoreNumber).ThenBy(s=>s.EmployeeRank).ThenBy(s => s.d!.ContactInfo.FullName)
                 .Select(coll => new MemberYearSummaryDto
                 {
                     BadgeNumber = coll.d!.BadgeNumber,
@@ -97,7 +97,8 @@ public class BreakdownReportService : IBreakdownService
                     EndingBalance = coll.EndingBalance,
                     VestedAmount = coll.EndingBalance * coll.VestingRatio,
                     VestedPercentage = coll.VestingRatio * 100,
-                    EmploymentStatusId = coll.d.EmploymentStatusId
+                    EmploymentStatusId = coll.d.EmploymentStatusId,
+                    EmployeeRank = (short)coll.EmployeeRank
                 })
                 .ToPaginationResultsAsync(request, cancellationToken);
 

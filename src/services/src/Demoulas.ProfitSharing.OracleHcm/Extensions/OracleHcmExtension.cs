@@ -261,7 +261,9 @@ public static class OracleHcmExtension
     {
         OracleHcmConfig config = services.GetRequiredService<OracleHcmConfig>();
         if (config.Username == null)
+        {
             return;
+        }
         string authToken = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{config.Username}:{config.Password}"));
 
         client.BaseAddress = new Uri(config.BaseAddress, UriKind.Absolute);
