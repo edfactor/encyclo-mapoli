@@ -184,7 +184,7 @@ const DecemberProcessAccordion = () => {
 
         <Grid2 width="100%">
           <DSMCollapsedAccordion
-            title="Profit Share Totals Report (QPAY426)"
+            title="Profit Share Totals Report (PAY426)"
             expandable={false}
             status={{
               label: "Not Started",

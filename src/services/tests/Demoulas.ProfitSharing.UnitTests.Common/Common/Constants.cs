@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace Demoulas.ProfitSharing.Client.Common;
+namespace Demoulas.ProfitSharing.UnitTests.Common.Common;
 internal static class Constants
 {
     public static class Http

@@ -3,7 +3,7 @@ using System.Net.Http.Headers;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Demoulas.ProfitSharing.Client;
+namespace Demoulas.ProfitSharing.UnitTests.Common.Common;
 
 public class ClientBase
 {
