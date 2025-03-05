@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.Util.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 
 namespace Demoulas.ProfitSharing.Endpoints.Base;
 
@@ -47,6 +48,12 @@ public abstract class EndpointWithCsvTotalsBase<ReqType, RespType, ItemType, Map
     public sealed override async Task HandleAsync(ReqType req, CancellationToken ct)
     {
         string acceptHeader = HttpContext.Request.Headers.Accept.ToString().ToLower(CultureInfo.InvariantCulture);
+
+        if (acceptHeader.Contains("text/csv"))
+        {
+            // Ignore pagination for CSV reports
+            req = req with { Skip = 0, Take = int.MaxValue };
+        }
         var response = await GetResponse(req, ct);
 
         if (acceptHeader.Contains("text/csv"))

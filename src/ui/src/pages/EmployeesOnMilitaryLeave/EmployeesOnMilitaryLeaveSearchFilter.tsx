@@ -1,11 +1,11 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
-import { isValid } from "date-fns";
-import { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { clear } from "console";
+import { Controller, useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
 import { useLazyGetEmployeesOnMilitaryLeaveQuery } from "reduxstore/api/YearsEndApi";
+import { clearEmployeesOnMilitaryLeaveDetails } from "reduxstore/slices/yearsEndSlice";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 
@@ -25,8 +25,13 @@ const schema = yup.object().shape({
 
 const EmployeesOnMilitaryLeaveSearchFilter = () => {
   const [triggerSearch, { isFetching }] = useLazyGetEmployeesOnMilitaryLeaveQuery();
-
-  const { control, handleSubmit, formState: { errors, isValid }, reset } = useForm<ISearchForm>({
+  const dispatch = useDispatch();
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isValid },
+    reset
+  } = useForm<ISearchForm>({
     resolver: yupResolver(schema),
     defaultValues: {
       profitYear: undefined
@@ -35,17 +40,17 @@ const EmployeesOnMilitaryLeaveSearchFilter = () => {
 
   const validateAndSearch = (data: ISearchForm) => {
     triggerSearch(
-       {
-         pagination: { skip: 0, take: 25 }
-       },
-       false
-     );
+      {
+        pagination: { skip: 0, take: 25 }
+      },
+      false
+    );
   };
 
   const handleReset = () => {
+    dispatch(clearEmployeesOnMilitaryLeaveDetails());
     reset();
   };
-
 
   return (
     <form onSubmit={handleSubmit(validateAndSearch)}>

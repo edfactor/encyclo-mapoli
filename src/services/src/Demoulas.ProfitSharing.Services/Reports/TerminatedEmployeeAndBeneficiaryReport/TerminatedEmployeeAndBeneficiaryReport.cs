@@ -91,7 +91,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 FirstName = employee.Demographic.ContactInfo.FirstName,
                 MiddleInitial = employee.Demographic.ContactInfo.MiddleName,
                 LastName = employee.Demographic.ContactInfo.LastName,
-                YearsInPs = yip != null ? yip.Years : (byte)0,
+                YearsInPs = yip != null ? (yip.Years ?? 0): (byte)0,
                 TerminationDate = employee.Demographic.TerminationDate,
                 IncomeRegAndExecCurrentYear = payProfit.CurrentIncomeYear + payProfit.IncomeExecutive,
                 TerminationCode = employee.Demographic.TerminationCodeId,
