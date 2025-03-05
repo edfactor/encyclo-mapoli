@@ -22,7 +22,15 @@ const schema = yup.object().shape({
     .required("Year is required")
 });
 
-const EligibleEmployeesSearchFilter = () => {
+interface EligibleEmployeesSearchFilterProps {
+  setProfitYear: (year: number) => void;
+  setInitialSearchLoaded: (include: boolean) => void;
+}
+
+const EligibleEmployeesSearchFilter: React.FC<EligibleEmployeesSearchFilterProps> = ({
+  setProfitYear,
+  setInitialSearchLoaded
+}) => {
   const [triggerSearch, { isFetching }] = useLazyGetEligibleEmployeesQuery();
   const dispatch = useDispatch();
   const {
@@ -51,6 +59,7 @@ const EligibleEmployeesSearchFilter = () => {
   });
 
   const handleReset = () => {
+    setInitialSearchLoaded(false);
     dispatch(clearEligibleEmployees());
     reset({
       profitYear: undefined
@@ -79,6 +88,7 @@ const EligibleEmployeesSearchFilter = () => {
                 error={!!errors.profitYear}
                 onChange={(e) => {
                   field.onChange(e);
+                  setProfitYear(parseInt(e.target.value));
                 }}
                 inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
               />

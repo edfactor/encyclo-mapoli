@@ -21,6 +21,7 @@ const YTDWages: React.FC = () => {
   const { employeeWagesForYear } = useSelector((state: RootState) => state.yearsEnd);
   const thisYear = new Date().getFullYear();
   const lastYear = thisYear - 1;
+  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
 
   const componentRef = useRef<HTMLDivElement>(null);
 
@@ -99,7 +100,11 @@ const YTDWages: React.FC = () => {
         </Grid2>
 
         <Grid2 width="100%">
-          <YTDWagesGrid innerRef={componentRef} />
+          <YTDWagesGrid innerRef={componentRef}
+            initialSearchLoaded={initialSearchLoaded}
+            setInitialSearchLoaded={setInitialSearchLoaded}
+            profitYearCurrent={chosenYear}
+          />
         </Grid2>
       </Grid2>
     </Page>

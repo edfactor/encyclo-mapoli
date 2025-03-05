@@ -7,7 +7,13 @@ import { SearchAndReset } from "smart-ui-library";
 
 interface DuplicateSSNsOnDemographicsSearch {}
 
-const DuplicateSSNsOnDemographicsSearchFilter = () => {
+interface DuplicateSSNsOnDemographicsSearchFilterProps {
+  setInitialSearchLoaded: (include: boolean) => void;
+}
+
+const DuplicateSSNsOnDemographicsSearchFilter: React.FC<DuplicateSSNsOnDemographicsSearchFilterProps> = ({
+  setInitialSearchLoaded
+}) => {
   const [triggerSearch, { isFetching }] = useLazyGetDuplicateSSNsQuery();
   const dispatch = useDispatch();
   const {
@@ -28,6 +34,7 @@ const DuplicateSSNsOnDemographicsSearchFilter = () => {
   });
 
   const handleReset = () => {
+    setInitialSearchLoaded(false);
     dispatch(clearDuplicateSSNsData());
     reset();
   };
