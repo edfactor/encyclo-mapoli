@@ -7,8 +7,6 @@ import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetMissingCommaInPyNameColumns } from "./MissingCommaInPyNameGridColumns";
 
 interface MissingCommaInPyNameGridProps {
-  profitYearCurrent: number | null;
-  reportingYearCurrent: string | null;
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
 }
