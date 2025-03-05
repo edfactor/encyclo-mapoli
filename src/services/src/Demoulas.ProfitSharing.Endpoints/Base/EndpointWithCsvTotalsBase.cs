@@ -48,9 +48,12 @@ public abstract class EndpointWithCsvTotalsBase<ReqType, RespType, ItemType, Map
     public sealed override async Task HandleAsync(ReqType req, CancellationToken ct)
     {
         string acceptHeader = HttpContext.Request.Headers.Accept.ToString().ToLower(CultureInfo.InvariantCulture);
-        
-        // Ignore pagination for CSV reports
-        req = req with {Skip = 0, Take = int.MaxValue };
+
+        if (acceptHeader.Contains("text/csv"))
+        {
+            // Ignore pagination for CSV reports
+            req = req with { Skip = 0, Take = int.MaxValue };
+        }
         var response = await GetResponse(req, ct);
 
         if (acceptHeader.Contains("text/csv"))
