@@ -158,18 +158,21 @@ RunNpmInstall(ui.Resource.WorkingDirectory);
 
 var fullSync = builder.AddProject<Demoulas_ProfitSharing_EmployeeFull_Sync>(name: "ProfitSharing-EmployeeFull-Sync")
     .WaitFor(api)
-    .WaitFor(ui);
+    .WaitFor(ui)
+    .WithExplicitStart();
 
 var payroll = builder.AddProject<Demoulas_ProfitSharing_EmployeePayroll_Sync>(name: "ProfitSharing-EmployeePayroll-Sync")
     .WaitFor(api)
     .WaitFor(ui)
-    .WaitFor(fullSync);
+    .WaitFor(fullSync)
+    .WithExplicitStart();
 
 builder.AddProject<Demoulas_ProfitSharing_EmployeeDelta_Sync>(name: "ProfitSharing-EmployeeDelta-Sync")
     .WaitFor(api)
     .WaitFor(ui)
     .WaitFor(fullSync)
-    .WaitFor(payroll);
+    .WaitFor(payroll)
+    .WithExplicitStart();
 
 
 await using DistributedApplication host = builder.Build();
