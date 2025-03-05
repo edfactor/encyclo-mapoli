@@ -99,7 +99,7 @@ public class TotalServiceIntegrationTests
                     (p, tot) => new { BadgeNumber = p.Demographic!.BadgeNumber, Years = tot.Years }
                 ).ToDictionaryAsync(
                     keySelector: p => p.BadgeNumber, // Use BadgeNumber as the key
-                    elementSelector: p => (int)p.Years // Use Years as the value
+                    elementSelector: p => (int)p.Years! // Use Years as the value
                 );
             _output.WriteLine($"SMART data count {ddata.Count}");
             return ddata;
