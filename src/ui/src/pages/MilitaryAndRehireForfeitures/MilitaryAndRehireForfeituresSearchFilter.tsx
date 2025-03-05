@@ -1,10 +1,11 @@
+import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
 import { useLazyGetMilitaryAndRehireForfeituresQuery } from "reduxstore/api/YearsEndApi";
+import { clearMilitaryAndRehireForfeituresDetails } from "reduxstore/slices/yearsEndSlice";
 import { SearchAndReset } from "smart-ui-library";
-import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 interface MilitaryAndRehireForfeituresSearch {
   profitYear: number;
@@ -22,9 +23,19 @@ const schema = yup.object().shape({
   reportingYear: yup.string().required("Reporting Year is required")
 });
 
-const MilitaryAndRehireForfeituresSearchFilter = () => {
-  const [triggerSearch, { isFetching }] = useLazyGetMilitaryAndRehireForfeituresQuery();
+interface MilitaryAndRehireForfeituresSearchFilterProps {
+  setProfitYear: (year: number) => void;
+  setReportingYear: (year: string) => void;
+  setInitialSearchLoaded: (include: boolean) => void;
+}
 
+const MilitaryAndRehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearchFilterProps> = ({
+  setProfitYear,
+  setReportingYear,
+  setInitialSearchLoaded
+}) => {
+  const [triggerSearch, { isFetching }] = useLazyGetMilitaryAndRehireForfeituresQuery();
+  const dispatch = useDispatch();
   const {
     control,
     handleSubmit,
@@ -53,6 +64,8 @@ const MilitaryAndRehireForfeituresSearchFilter = () => {
   });
 
   const handleReset = () => {
+    setInitialSearchLoaded(false);
+    dispatch(clearMilitaryAndRehireForfeituresDetails());
     reset({
       profitYear: undefined
     });
@@ -80,6 +93,7 @@ const MilitaryAndRehireForfeituresSearchFilter = () => {
                 error={!!errors.profitYear}
                 onChange={(e) => {
                   field.onChange(e);
+                  setProfitYear(parseInt(e.target.value));
                 }}
                 inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
               />
@@ -103,6 +117,7 @@ const MilitaryAndRehireForfeituresSearchFilter = () => {
                 error={!!errors.reportingYear}
                 onChange={(e) => {
                   field.onChange(e);
+                  setReportingYear(e.target.value);
                 }}
                 inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
               />

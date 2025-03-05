@@ -91,7 +91,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 FirstName = employee.Demographic.ContactInfo.FirstName,
                 MiddleInitial = employee.Demographic.ContactInfo.MiddleName,
                 LastName = employee.Demographic.ContactInfo.LastName,
-                YearsInPs = yip != null ? yip.Years : (byte)0,
+                YearsInPs = yip != null ? (yip.Years ?? 0): (byte)0,
                 TerminationDate = employee.Demographic.TerminationDate,
                 IncomeRegAndExecCurrentYear = payProfit.CurrentIncomeYear + payProfit.IncomeExecutive,
                 TerminationCode = employee.Demographic.TerminationCodeId,
@@ -169,10 +169,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         decimal totalBeneficiaryAllocation = 0;
 
         short lastYear = (short)(req.ProfitYear - 1);
-        short thisYear = req.ProfitYear;
-        var calendarInfoLastYear = await _calendarService.GetYearStartAndEndAccountingDatesAsync(lastYear, cancellationToken);
-        var calendarInfoThisYear = await _calendarService.GetYearStartAndEndAccountingDatesAsync(thisYear, cancellationToken);
-
+        
         var membersSummary = new List<TerminatedEmployeeAndBeneficiaryDataResponseDto>();
         foreach (var memberSlice in memberSliceUnion)
         {
@@ -327,11 +324,9 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
         return false;
     }
-
+    
     private static Task<InternalProfitDetailDto?> RetrieveProfitDetail(IQueryable<ProfitDetail> profitDetails, CancellationToken cancellationToken)
     {
-#pragma warning disable S3358
-
         var pdQuery = profitDetails
             .GroupBy(details => details.Ssn)
             .Select(g => new
@@ -368,8 +363,6 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 Distribution = r.Distribution,
                 BeneficiaryAllocation = r.BeneficiaryAllocation
             }).FirstOrDefaultAsync(cancellationToken);
-#pragma warning restore S3358
-
         return pdQuery;
     }
 }

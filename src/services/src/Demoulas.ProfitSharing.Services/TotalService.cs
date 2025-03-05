@@ -50,10 +50,10 @@ public sealed class TotalService : ITotalService
             /*1*/ ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
             /*2*/ ProfitCode.Constants.OutgoingForfeitures.Id,
             /*3*/ ProfitCode.Constants.OutgoingDirectPayments.Id,
-            /*5*/ ProfitCode.Constants.OutgoingXferBeneficiary.Id
+            /*5*/ ProfitCode.Constants.OutgoingXferBeneficiary.Id,
+            /*9*/ ProfitCode.Constants.Outgoing100PercentVestedPayment.Id
         };
 
-#pragma warning disable S3358 // Ternary operators should not be nested
         return (from pd in ctx.ProfitDetails
             where pd.ProfitYear <= profitYear
             group pd by pd.Ssn
@@ -61,16 +61,11 @@ public sealed class TotalService : ITotalService
             select new ParticipantTotalDto
             {
                 Ssn = pd_g.Key,
-                Total = pd_g.Sum(x => x.ProfitCodeId == /*9*/ ProfitCode.Constants.Outgoing100PercentVestedPayment.Id
-                    ?
-                    x.Forfeiture * -1
-                    : //Just look at forfeiture
+                Total = pd_g.Sum(x =>
                     sumAllFieldProfitCodeTypes.Contains(x.ProfitCodeId)
-                        ? -x.Forfeiture + x.Contribution + x.Earnings
-                        : //Invert forfeiture, and add columns
-                        x.Contribution + x.Earnings + x.Forfeiture) //Just add the columns
+                        ? (-x.Forfeiture + x.Contribution + x.Earnings)
+                        : (x.Contribution + x.Earnings + x.Forfeiture)) //Just add the columns
             });
-#pragma warning restore S3358 // Ternary operators should not be nested
     }
 
     /// <summary>
@@ -269,7 +264,7 @@ public sealed class TotalService : ITotalService
                 ZeroContributionReasonId = (byte?)null,
                 b.Contact.DateOfBirth,
                 FromBeneficiary = (short)1,
-                Years = (byte)0,
+                Years = (byte?)0,
                 Hours = (decimal)0
             }
         );
@@ -278,7 +273,6 @@ public sealed class TotalService : ITotalService
         var hoursWorkedRequirement = ContributionService.MinimumHoursForContribution();
 
 #pragma warning disable S1244 // Floating point numbers should not be tested for equality
-#pragma warning disable S3358 // Ternary operators should not be nested
         return (
             from db in demoOrBeneficiary
             select new ParticipantTotalRatioDto
@@ -305,7 +299,6 @@ public sealed class TotalService : ITotalService
                     (db.Hours >= hoursWorkedRequirement ? 1 : 0) + db.Years > 6 ? 1m : 0
             }
         );
-#pragma warning restore S3358 // Ternary operators should not be nested
 #pragma warning restore S1244 // Floating point numbers should not be tested for equality
     }
 
@@ -348,13 +341,13 @@ public sealed class TotalService : ITotalService
                 join y in GetYearsOfService(ctx, employeeYear) on b.Ssn equals y.Ssn
                 select new ParticipantTotalVestingBalanceDto
                 {
-                    Ssn = e.Ssn,
-                    CurrentBalance = b.Total,
-                    Etva = e.Total,
-                    TotalDistributions = d.Total,
+                    Ssn = e.Ssn ?? 0,
+                    CurrentBalance = b.Total ?? 0,
+                    Etva = e.Total ?? 0,
+                    TotalDistributions = d.Total ?? 0,
                     VestingPercent = v.Ratio,
-                    YearsInPlan = y.Years,
-                    VestedBalance = ((b.Total + d.Total - e.Total) * v.Ratio) + e.Total - d.Total
+                    YearsInPlan = y.Years ?? 0,
+                    VestedBalance = (((b.Total ?? 0) + (d.Total ?? 0) - (e.Total ?? 0)) * v.Ratio) + (e.Total ?? 0) - (d.Total ?? 0)
                 }
             );
     }
@@ -422,5 +415,47 @@ public sealed class TotalService : ITotalService
                 });
 
         }
+    }
+
+    public static IQueryable<InternalProfitDetailDto> GetTransactionsBySsnForProfitYear(IProfitSharingDbContext ctx, short profitYear)
+    {
+        return ctx.ProfitDetails
+            .Where(pd=>pd.ProfitYear == profitYear)
+            .GroupBy(details => details.Ssn)
+            .Select(g => new
+            {
+                Ssn = g.Key,
+                TotalContributions = g.Sum(x => x.Contribution),
+                TotalEarnings = g.Sum(x => x.Earnings),
+                TotalForfeitures = g.Sum(x =>
+                    x.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id
+                        ? x.Forfeiture
+                        : (x.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id ? -x.Forfeiture : 0)),
+                TotalPayments = g.Sum(x => x.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0),
+                Distribution = g.Sum(x =>
+                    (x.ProfitCodeId == ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id ||
+                     x.ProfitCodeId == ProfitCode.Constants.OutgoingDirectPayments.Id ||
+                     x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id)
+                        ? -x.Forfeiture
+                        : 0),
+                BeneficiaryAllocation = g.Sum(x =>
+                    (x.ProfitCodeId == ProfitCode.Constants.OutgoingXferBeneficiary.Id) ? -x.Forfeiture :
+                    (x.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary.Id) ? x.Contribution : 0),
+                CurrentBalance = g.Sum(x =>
+                    x.Contribution + x.Earnings +
+                    (x.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0) -
+                    (x.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0))
+            })
+            .Select(r => new InternalProfitDetailDto
+            {
+                Ssn = r.Ssn,
+                TotalContributions = r.TotalContributions,
+                TotalEarnings = r.TotalEarnings,
+                TotalForfeitures = r.TotalForfeitures,
+                TotalPayments = r.TotalPayments,
+                CurrentAmount = r.CurrentBalance,
+                Distribution = r.Distribution,
+                BeneficiaryAllocation = r.BeneficiaryAllocation
+            });
     }
 }

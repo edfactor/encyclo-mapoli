@@ -1,10 +1,11 @@
+import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
 import { useLazyGetEligibleEmployeesQuery } from "reduxstore/api/YearsEndApi";
+import { clearEligibleEmployees } from "reduxstore/slices/yearsEndSlice";
 import { SearchAndReset } from "smart-ui-library";
-import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 
 interface EligibleEmployeesSearch {
@@ -21,9 +22,17 @@ const schema = yup.object().shape({
     .required("Year is required")
 });
 
-const EligibleEmployeesSearchFilter = () => {
-  const [triggerSearch, { isFetching }] = useLazyGetEligibleEmployeesQuery();
+interface EligibleEmployeesSearchFilterProps {
+  setProfitYear: (year: number) => void;
+  setInitialSearchLoaded: (include: boolean) => void;
+}
 
+const EligibleEmployeesSearchFilter: React.FC<EligibleEmployeesSearchFilterProps> = ({
+  setProfitYear,
+  setInitialSearchLoaded
+}) => {
+  const [triggerSearch, { isFetching }] = useLazyGetEligibleEmployeesQuery();
+  const dispatch = useDispatch();
   const {
     control,
     handleSubmit,
@@ -50,6 +59,8 @@ const EligibleEmployeesSearchFilter = () => {
   });
 
   const handleReset = () => {
+    setInitialSearchLoaded(false);
+    dispatch(clearEligibleEmployees());
     reset({
       profitYear: undefined
     });
@@ -77,6 +88,7 @@ const EligibleEmployeesSearchFilter = () => {
                 error={!!errors.profitYear}
                 onChange={(e) => {
                   field.onChange(e);
+                  setProfitYear(parseInt(e.target.value));
                 }}
                 inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
               />

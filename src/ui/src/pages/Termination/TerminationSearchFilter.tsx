@@ -7,28 +7,36 @@ import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
+import { useDispatch } from "react-redux";
+import { clearTermination } from "reduxstore/slices/yearsEndSlice";
 
 interface TerminationSearch {
   profitYear: Date;
 }
 
 const schema = yup.object().shape({
-  profitYear: yup.date()
+  profitYear: yup
+    .date()
     .required("Year is required")
     .min(new Date(2020, 0, 1), "Year must be 2020 or later")
     .max(new Date(2100, 11, 31), "Year must be 2100 or earlier")
     .typeError("Invalid date")
 });
 
-const TerminationSearchFilter = () => {
-  const [triggerSearch, { isFetching }] = useLazyGetTerminationReportQuery();
+interface TerminationSearchFilterProps {
+  setProfitYear: (year: number) => void;
+  setInitialSearchLoaded: (include: boolean) => void;
+}
 
+const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({ setProfitYear, setInitialSearchLoaded }) => {
+  const [triggerSearch, { isFetching }] = useLazyGetTerminationReportQuery();
+  const dispatch = useDispatch();
   const {
     control,
     handleSubmit,
     formState: { errors, isValid },
     reset,
-    setValue,
+    setValue
   } = useForm<TerminationSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
@@ -49,6 +57,8 @@ const TerminationSearchFilter = () => {
   });
 
   const handleReset = () => {
+    setInitialSearchLoaded(false);
+    dispatch(clearTermination());
     reset({
       profitYear: undefined
     });
@@ -56,15 +66,24 @@ const TerminationSearchFilter = () => {
 
   return (
     <form onSubmit={validateAndSearch}>
-      <Grid2 container paddingX="24px" gap="24px">
-        <Grid2 xs={12} sm={6} md={3}>
+      <Grid2
+        container
+        paddingX="24px"
+        gap="24px">
+        <Grid2
+          xs={12}
+          sm={6}
+          md={3}>
           <Controller
             name="profitYear"
             control={control}
             render={({ field }) => (
               <DsmDatePicker
                 id="profitYear"
-                onChange={(value: Date | null) => field.onChange(value)}
+                onChange={(value: Date | null) => {
+                  field.onChange(value);
+                  setProfitYear(Number(e.target.value));
+                }}
                 value={field.value ?? null}
                 required={true}
                 label="Profit Year"
@@ -76,7 +95,9 @@ const TerminationSearchFilter = () => {
           />
         </Grid2>
       </Grid2>
-      <Grid2 width="100%" paddingX="24px">
+      <Grid2
+        width="100%"
+        paddingX="24px">
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={validateAndSearch}

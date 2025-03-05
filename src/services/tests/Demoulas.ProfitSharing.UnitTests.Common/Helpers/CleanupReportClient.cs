@@ -4,13 +4,13 @@ using System.Text.Json;
 using System.Web;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
-using Demoulas.ProfitSharing.Client.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.UnitTests.Common.Common;
 
-namespace Demoulas.ProfitSharing.Client.Reports.YearEnd;
+namespace Demoulas.ProfitSharing.UnitTests.Common.Helpers;
 public sealed class CleanupReportClient : ClientBase, ICleanupReportService
 {
     private const string BaseApiPath = "api/yearend";
@@ -37,11 +37,6 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
     public Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsnAsync(PaginationRequestDto req, CancellationToken ct)
     {
         return CallReportEndpoint<PayrollDuplicateSsnResponseDto, PaginationRequestDto>(req, "duplicate-ssns", ct);
-    }
-
-    public Task<Stream> DownloadDuplicateSsNs(short profitYear, CancellationToken cancellationToken)
-    {
-        return DownloadCsvReport(profitYear,"duplicate-ssns", cancellationToken);
     }
 
     public Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfitAsync(PaginationRequestDto req, CancellationToken cancellationToken = default)

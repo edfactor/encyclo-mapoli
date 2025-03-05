@@ -1,11 +1,12 @@
 import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useLazyGetNegativeEVTASSNQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { useDispatch } from "react-redux";
+import { clearNegativeEtvaForSssnsOnPayprofit } from "reduxstore/slices/yearsEndSlice";
 
 interface NegativeEtvaForSSNsOnPayprofitSearch {
   profitYear: number;
@@ -21,9 +22,17 @@ const schema = yup.object().shape({
     .required("Year is required")
 });
 
-const NegativeEtvaForSSNsOnPayprofitSearchFilter = () => {
-  const [triggerSearch, { isFetching }] = useLazyGetNegativeEVTASSNQuery();
+interface NegativeEtvaForSSNsOnPayprofitSearchFilterProps {
+  setProfitYear: (year: number) => void;
+  setInitialSearchLoaded: (include: boolean) => void;
+}
 
+const NegativeEtvaForSSNsOnPayprofitSearchFilter: React.FC<NegativeEtvaForSSNsOnPayprofitSearchFilterProps> = ({
+  setProfitYear,
+  setInitialSearchLoaded
+}) => {
+  const [triggerSearch, { isFetching }] = useLazyGetNegativeEVTASSNQuery();
+  const dispatch = useDispatch();
   const {
     control,
     handleSubmit,
@@ -50,6 +59,8 @@ const NegativeEtvaForSSNsOnPayprofitSearchFilter = () => {
   });
 
   const handleReset = () => {
+    setInitialSearchLoaded(false);
+    dispatch(clearNegativeEtvaForSssnsOnPayprofit());
     reset({
       profitYear: undefined
     });
@@ -77,6 +88,7 @@ const NegativeEtvaForSSNsOnPayprofitSearchFilter = () => {
                 error={!!errors.profitYear}
                 onChange={(e) => {
                   field.onChange(e);
+                  setProfitYear(parseInt(e.target.value));
                 }}
                 inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
               />

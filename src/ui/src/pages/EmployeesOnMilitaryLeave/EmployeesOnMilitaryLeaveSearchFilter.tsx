@@ -1,11 +1,10 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
-import { isValid } from "date-fns";
-import { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
 import { useLazyGetEmployeesOnMilitaryLeaveQuery } from "reduxstore/api/YearsEndApi";
+import { clearEmployeesOnMilitaryLeaveDetails } from "reduxstore/slices/yearsEndSlice";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 
@@ -23,29 +22,43 @@ const schema = yup.object().shape({
     .required("Year is required")
 });
 
-const EmployeesOnMilitaryLeaveSearchFilter = () => {
-  const [triggerSearch, { isFetching }] = useLazyGetEmployeesOnMilitaryLeaveQuery();
+interface EmployeesOnMilitaryLeaveSearchFilterProps {
+  setProfitYear: (year: number) => void;
+  setInitialSearchLoaded: (include: boolean) => void;
+}
 
-  const { control, handleSubmit, formState: { errors, isValid }, reset } = useForm<ISearchForm>({
+const EmployeesOnMilitaryLeaveSearchFilter: React.FC<EmployeesOnMilitaryLeaveSearchFilterProps> = ({
+  setProfitYear,
+  setInitialSearchLoaded
+}) => {
+  const [triggerSearch, { isFetching }] = useLazyGetEmployeesOnMilitaryLeaveQuery();
+  const dispatch = useDispatch();
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isValid },
+    reset
+  } = useForm<ISearchForm>({
     resolver: yupResolver(schema),
     defaultValues: {
       profitYear: undefined
     }
   });
 
-  const validateAndSearch = (data: ISearchForm) => {
+  const validateAndSearch = () => {
     triggerSearch(
-       {
-         pagination: { skip: 0, take: 25 }
-       },
-       false
-     );
+      {
+        pagination: { skip: 0, take: 25 }
+      },
+      false
+    );
   };
 
   const handleReset = () => {
+    setInitialSearchLoaded(false);
+    dispatch(clearEmployeesOnMilitaryLeaveDetails());
     reset();
   };
-
 
   return (
     <form onSubmit={handleSubmit(validateAndSearch)}>
@@ -69,6 +82,7 @@ const EmployeesOnMilitaryLeaveSearchFilter = () => {
                 error={!!errors.profitYear}
                 onChange={(e) => {
                   field.onChange(e);
+                  setProfitYear(parseInt(e.target.value));
                 }}
                 inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
               />

@@ -13,15 +13,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\ExecutiveHoursAndDollars year=this.csv" />
-    <None Remove="Resources\terminatedEmployeeAndBeneficiaryReport-correct.txt" />
-    <None Remove="Resources\psupdate-*.txt" />
+    <None Remove="Resources\*.csv" />
+    <None Remove="Resources\*.txt" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Resources\ExecutiveHoursAndDollars year=this.csv" />
-    <EmbeddedResource Include="Resources\psupdate-*.txt" />
-    <EmbeddedResource Include="Resources\terminatedEmployeeAndBeneficiaryReport-correct.txt" />
+    <EmbeddedResource Include="Resources\*.csv" />
+    <EmbeddedResource Include="Resources\*.txt" />
   </ItemGroup>
 
   <ItemGroup>
@@ -53,7 +51,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Demoulas.ProfitSharing.Api\Demoulas.ProfitSharing.Api.csproj" />
-    <ProjectReference Include="..\..\src\Demoulas.ProfitSharing.Client\Demoulas.ProfitSharing.Client.csproj" />
     <ProjectReference Include="..\..\src\Demoulas.ProfitSharing.Security\Demoulas.ProfitSharing.Security.csproj" />
     <ProjectReference Include="..\Demoulas.ProfitSharing.UnitTests.Common\Demoulas.ProfitSharing.UnitTests.Common.csproj" />
   </ItemGroup>

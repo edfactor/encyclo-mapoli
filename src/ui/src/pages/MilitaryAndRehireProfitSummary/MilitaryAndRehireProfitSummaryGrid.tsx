@@ -1,12 +1,24 @@
 import { Typography } from "@mui/material";
-import { useState, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useLazyGetNegativeEVTASSNQuery } from "reduxstore/api/YearsEndApi";
+import { useState, useMemo, useCallback, useEffect } from "react";
+import { useSelector } from "react-redux";
+import { useLazyGetMilitaryAndRehireProfitSummaryQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetMilitaryAndRehireProfitSummaryColumns } from "./MilitaryAndRehireProfitSummaryGridColumns";
 
-const MilitaryAndRehireProfitSummaryGrid = () => {
+interface MilitaryAndRehireForfeituresGridSearchProps {
+  profitYearCurrent: number | null;
+  reportingYearCurrent: string | null;
+  initialSearchLoaded: boolean;
+  setInitialSearchLoaded: (loaded: boolean) => void;
+}
+
+const MilitaryAndRehireProfitSummaryGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProps> = ({
+  profitYearCurrent,
+  reportingYearCurrent,
+  initialSearchLoaded,
+  setInitialSearchLoaded
+}) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
@@ -14,9 +26,25 @@ const MilitaryAndRehireProfitSummaryGrid = () => {
     isSortDescending: false
   });
 
-  const dispatch = useDispatch();
   const { militaryAndRehireProfitSummary } = useSelector((state: RootState) => state.yearsEnd);
-  const [_, { isLoading }] = useLazyGetNegativeEVTASSNQuery();
+
+  const [triggerSearch, { isFetching }] = useLazyGetMilitaryAndRehireProfitSummaryQuery();
+
+  const onSearch = useCallback(async () => {
+    const request = {
+      profitYear: profitYearCurrent ?? 0,
+      reportingYear: reportingYearCurrent ?? "",
+      pagination: { skip: pageNumber * pageSize, take: pageSize }
+    };
+
+    await triggerSearch(request, false);
+  }, [profitYearCurrent, reportingYearCurrent, pageNumber, pageSize, triggerSearch]);
+
+  useEffect(() => {
+    if (initialSearchLoaded) {
+      onSearch();
+    }
+  }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetMilitaryAndRehireProfitSummaryColumns(), []);
@@ -48,11 +76,13 @@ const MilitaryAndRehireProfitSummaryGrid = () => {
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
             setPageNumber(value - 1);
+            setInitialSearchLoaded(true);
           }}
           pageSize={pageSize}
           setPageSize={(value: number) => {
             setPageSize(value);
             setPageNumber(1);
+            setInitialSearchLoaded(true);
           }}
           recordCount={militaryAndRehireProfitSummary.response.total}
         />

@@ -8,6 +8,8 @@ using Oracle.ManagedDataAccess.Client;
 
 namespace Demoulas.ProfitSharing.IntegrationTests;
 
+#pragma warning disable S125 // allow commented out code
+
 public class TotalServiceIntegrationTests
 {
     // ReSharper disable once NotAccessedField.Local
@@ -61,7 +63,16 @@ public class TotalServiceIntegrationTests
             }
             else
             {
-                _ = ppSmartYis[entry.Key] == entry.Value.Years ? yisAgree++ : yisDisagree++;
+                if (ppSmartYis[entry.Key] == entry.Value.Years)
+                {
+                    yisAgree++;
+                }
+                else
+                {
+                    yisDisagree++;
+
+                    _output.WriteLine("badge: " + entry.Key + "  SMART YIS: " + ppSmartYis[entry.Key] + "  READY YIS: " + entry.Value.Years);
+                }
             }
 
             if (!ssnToSmartTotals.ContainsKey(entry.Value.Ssn))
@@ -96,10 +107,10 @@ public class TotalServiceIntegrationTests
                     _totalService.GetYearsOfService(ctx, employeeYear),
                     x => x.Demographic!.Ssn,
                     x => x.Ssn,
-                    (p, tot) => new { BadgeNumber = p.Demographic!.BadgeNumber, Years = tot.Years }
+                    (p, tot) => new { BadgeNumber = p.Demographic!.BadgeNumber, Years = tot.Years ?? 0 }
                 ).ToDictionaryAsync(
                     keySelector: p => p.BadgeNumber, // Use BadgeNumber as the key
-                    elementSelector: p => (int)p.Years // Use Years as the value
+                    elementSelector: p => (int)p.Years! // Use Years as the value
                 );
             _output.WriteLine($"SMART data count {ddata.Count}");
             return ddata;
@@ -130,8 +141,8 @@ public class TotalServiceIntegrationTests
     {
         await _connection.OpenAsync();
 
-        string query =
-            "select payprof_badge, PAYPROF_SSN, PY_PS_YEARS, PY_PS_AMT, PY_PS_ETVA from PROFITSHARE.PAYPROFIT";
+        // string query = "select payprof_badge, PAYPROF_SSN, PY_PS_YEARS, PY_PS_AMT, PY_PS_ETVA from PROFITSHARE.PAYPROFIT";
+        string query = "select payprof_badge, PAYPROF_SSN, PY_PS_YEARS, PY_PS_AMT, PY_PS_ETVA from TBHERRMANN.PAYPROFIT";
 
         var data = new Dictionary<int, PayProfitReady>();
         var command = new OracleCommand(query, _connection);

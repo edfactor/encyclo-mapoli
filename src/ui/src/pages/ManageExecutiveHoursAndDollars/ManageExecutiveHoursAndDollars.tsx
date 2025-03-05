@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { clearExecutiveHoursAndDollarsGridRows } from "reduxstore/slices/yearsEndSlice";
 import { useUpdateExecutiveHoursAndDollarsMutation } from "reduxstore/api/YearsEndApi";
+import { useState } from "react";
 
 const RenderSaveButton = () => {
   const dispatch = useDispatch();
@@ -58,6 +59,12 @@ const RenderSaveButton = () => {
   }
 };
 const ManageExecutiveHoursAndDollars = () => {
+  const [profitYear, setProfitYear] = useState<number | null>(null);
+  const [badgeNumber, setBadgeNumber] = useState<number | null>(null);
+  const [socialSecurity, setSocialSecurity] = useState<string | null>(null);
+  const [fullNameContains, setFullNameContains] = useState<string | null>(null);
+  const [hasExecutiveHoursAndDollars, setHasExecutiveHoursAndDollars] = useState(false);
+  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   return (
     <Page
       label="Manage Executive Hours And Dollars"
@@ -70,11 +77,26 @@ const ManageExecutiveHoursAndDollars = () => {
         </Grid2>
         <Grid2 width={"100%"}>
           <DSMAccordion title="Filter">
-            <ManageExecutiveHoursAndDollarsSearchFilter />
+            <ManageExecutiveHoursAndDollarsSearchFilter
+              setProfitYear={setProfitYear}
+              setBadgeNumber={setBadgeNumber}
+              setSocialSecurity={setSocialSecurity}
+              setFullNameContains={setFullNameContains}
+              setHasExecutiveHoursAndDollars={setHasExecutiveHoursAndDollars}
+              setInitialSearchLoaded={setInitialSearchLoaded}
+            />
           </DSMAccordion>
         </Grid2>
         <Grid2 width="100%">
-          <ManageExecutiveHoursAndDollarsGrid />
+          <ManageExecutiveHoursAndDollarsGrid
+            profitYearCurrent={profitYear}
+            badgeNumberCurrent={badgeNumber}
+            socialSecurityCurrent={socialSecurity}
+            fullNameContainsCurrent={fullNameContains}
+            hasExecutiveHoursAndDollarsCurrent={hasExecutiveHoursAndDollars}
+            setInitialSearchLoaded={setInitialSearchLoaded}
+            initialSearchLoaded={initialSearchLoaded}
+          />
         </Grid2>
       </Grid2>
     </Page>

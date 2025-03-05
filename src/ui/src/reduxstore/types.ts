@@ -1,4 +1,5 @@
 import { Paged, PaginationParams } from "smart-ui-library";
+import { boolean } from "yup";
 
 export enum ImpersonationRoles {
   FinanceManager = "Finance-Manager",
@@ -289,7 +290,7 @@ export interface MasterInquiryDetail extends ProfitYearRequest {
   commentTypeName?: string;
 }
 
-export interface MasterInquryRequest {
+export interface MasterInquiryRequest {
   startProfitYear?: number;
   endProfitYear?: number;
   startProfitMonth?: number;
@@ -300,6 +301,7 @@ export interface MasterInquryRequest {
   forfeitureAmount?: number;
   paymentAmount?: number;
   socialSecurity?: number;
+  name?: string;
   comment?: string;
   pagination: PaginationParams;
   paymentType?: number;
@@ -592,6 +594,23 @@ export interface ProfitShareMasterResponse {
   etvasEffected?: number;
 }
 
+export interface YearEndProfitSharingReportResponse {
+  badgeNumber: number;
+  employeeName: string;
+  storeNumber: number;
+  employeeTypeCode: string;
+  dateOfBirth: Date;
+  age: number;
+  ssn: string;
+  wages: number;
+  hours: number;
+  points: number;
+  isUnder21: boolean;
+  isNew: boolean;
+  employeeStatus: string;
+  balance: number;
+  yearsInPlan: number;
+}
 export interface FrozenStateResponse {
   id: number;
   profitYear: number;
@@ -609,7 +628,7 @@ export interface ProfallData {
   zipCode: string;
 }
 
-export interface MilitaryContributionRequest extends ProfitYearRequest{
+export interface MilitaryContributionRequest extends ProfitYearRequest {
   badgeNumber: number;
   pagination: PaginationParams;
 }
@@ -657,4 +676,3 @@ export interface YearEndProfitSharingEmployee {
   balance: number;
   yearsInPlan: number;
 }
-

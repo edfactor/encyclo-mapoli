@@ -17,12 +17,13 @@ import { useLazyGetProfitMasterInquiryQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { MasterInquryRequest } from "reduxstore/types";
+import { MasterInquiryRequest } from "reduxstore/types";
 import { clearMasterInquiryData } from "reduxstore/slices/yearsEndSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { RootState } from "reduxstore/store";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
+import { paymentTypeMap, memberTypeMap } from "./MasterInquiryFunctions";
 
 interface MasterInquirySearch {
   startProfitYear?: Date | null;
@@ -92,21 +93,43 @@ const schema = yup.object().shape({
   voids: yup.boolean().default(false).required()
 });
 
-const paymentTypeMap: Record<string, number> = {
-  all: 0,
-  hardship: 1,
-  payoffs: 2,
-  rollovers: 3
-};
+interface MasterInquirySearchFilterProps {
+  setStartProfitYear: (year: Date) => void;
+  setEndProfitYear: (year: Date) => void;
+  setStartProfitMonth: (month: number | null) => void;
+  setEndProfitMonth: (month: number | null) => void;
+  setSocialSecurity: (ssn: number | null) => void;
+  setName: (name: string | null) => void;
+  setBadgeNumber: (badgeNumber: number | null) => void;
+  setComment: (comment: string | null) => void;
+  setPaymentType: (paymentType: "all" | "hardship" | "payoffs" | "rollovers") => void;
+  setMemberType: (memberType: "all" | "employees" | "beneficiaries" | "none") => void;
+  setContribution: (contribution: number | null) => void;
+  setEarnings: (earnings: number | null) => void;
+  setForfeiture: (forfeiture: number | null) => void;
+  setPayment: (payment: number | null) => void;
+  //setVoids: (voids: boolean) => void;
+  setInitialSearchLoaded: (include: boolean) => void;
+}
 
-const memberTypeMap: Record<string, number> = {
-  all: 0,
-  employees: 1,
-  beneficiaries: 2,
-  none: 3
-};
-
-const MasterInquirySearchFilter = () => {
+const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
+  setStartProfitYear,
+  setEndProfitYear,
+  setStartProfitMonth,
+  setEndProfitMonth,
+  setSocialSecurity,
+  setName,
+  setBadgeNumber,
+  setComment,
+  setPaymentType,
+  setMemberType,
+  setContribution,
+  setEarnings,
+  setForfeiture,
+  setPayment,
+  //setVoids,
+  setInitialSearchLoaded
+}) => {
   const [triggerSearch, { isFetching }] = useLazyGetProfitMasterInquiryQuery();
   const dispatch = useDispatch();
 
@@ -152,7 +175,7 @@ const MasterInquirySearchFilter = () => {
       });
 
       // Trigger search automatically when badge number is present
-      const searchParams: MasterInquryRequest = {
+      const searchParams: MasterInquiryRequest = {
         pagination: { skip: 0, take: 25 },
         badgeNumber: Number(badgeNumber)
       };
@@ -163,7 +186,7 @@ const MasterInquirySearchFilter = () => {
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
-      const searchParams: MasterInquryRequest = {
+      const searchParams: MasterInquiryRequest = {
         pagination: { skip: 0, take: 25 },
         ...(!!data.startProfitYear && { startProfitYear: data.startProfitYear.getFullYear() }),
         ...(!!data.endProfitYear && { endProfitYear: data.endProfitYear.getFullYear() }),
@@ -178,8 +201,8 @@ const MasterInquirySearchFilter = () => {
         ...(!!data.contribution && { contribution: data.contribution }),
         ...(!!data.earnings && { earnings: data.earnings }),
         ...(!!data.forfeiture && { forfeiture: data.forfeiture }),
-        ...(!!data.payment && { payment: data.payment }),
-        ...(!!data.voids && { voids: data.voids })
+        ...(!!data.payment && { payment: data.payment })
+        //...(!!data.voids && { voids: data.voids })
       };
 
       triggerSearch(searchParams, false);
@@ -187,6 +210,7 @@ const MasterInquirySearchFilter = () => {
   });
 
   const handleReset = () => {
+    setInitialSearchLoaded(false);
     reset({
       startProfitYear: undefined,
       endProfitYear: undefined,
@@ -237,7 +261,12 @@ const MasterInquirySearchFilter = () => {
               render={({ field }) => (
                 <DsmDatePicker
                   id="Beginning Year"
-                  onChange={(value: Date | null) => field.onChange(value)}
+                  onChange={(value: Date | null) => {
+                    if (value) {
+                      field.onChange(value);
+                      setStartProfitYear(value);
+                    }
+                  }}
                   value={field.value ?? null}
                   required={true}
                   label="Profit Year"
@@ -260,7 +289,12 @@ const MasterInquirySearchFilter = () => {
               render={({ field }) => (
                 <DsmDatePicker
                   id="End Year"
-                  onChange={(value: Date | null) => field.onChange(value)}
+                  onChange={(value: Date | null) => {
+                    if (value) {
+                      field.onChange(value);
+                      setEndProfitYear(value);
+                    }
+                  }}
                   value={field.value ?? null}
                   required={true}
                   label="End Year"
@@ -284,7 +318,10 @@ const MasterInquirySearchFilter = () => {
               render={({ field }) => (
                 <Select
                   {...field}
-                  onChange={(e) => field.onChange(e.target.value === "" ? null : e.target.value)}
+                  onChange={(e) => {
+                    field.onChange(e.target.value === "" ? null : e.target.value);
+                    setStartProfitMonth(e.target.value === "" ? null : Number(e.target.value));
+                  }}
                   sx={selectSx}
                   fullWidth
                   size="small"
@@ -317,7 +354,10 @@ const MasterInquirySearchFilter = () => {
               render={({ field }) => (
                 <Select
                   {...field}
-                  onChange={(e) => field.onChange(e.target.value === "" ? null : e.target.value)}
+                  onChange={(e) => {
+                    field.onChange(e.target.value === "" ? null : e.target.value);
+                    setEndProfitMonth(e.target.value === "" ? null : Number(e.target.value));
+                  }}
                   sx={selectSx}
                   fullWidth
                   size="small"
@@ -355,6 +395,11 @@ const MasterInquirySearchFilter = () => {
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.socialSecurity}
+                  onChange={(e) => {
+                    const parsedValue = e.target.value === "" ? null : Number(e.target.value);
+                    field.onChange(parsedValue);
+                    setSocialSecurity(parsedValue);
+                  }}
                 />
               )}
             />
@@ -377,6 +422,10 @@ const MasterInquirySearchFilter = () => {
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.name}
+                  onChange={(e) => {
+                    field.onChange(e.target.value);
+                    setName(e.target.value);
+                  }}
                 />
               )}
             />
@@ -399,6 +448,11 @@ const MasterInquirySearchFilter = () => {
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.badgeNumber}
+                  onChange={(e) => {
+                    const parsedValue = e.target.value === "" ? null : Number(e.target.value);
+                    field.onChange(parsedValue);
+                    setBadgeNumber(parsedValue);
+                  }}
                 />
               )}
             />
@@ -421,6 +475,10 @@ const MasterInquirySearchFilter = () => {
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.comment}
+                  onChange={(e) => {
+                    field.onChange(e.target.value);
+                    setComment(e.target.value);
+                  }}
                 />
               )}
             />
@@ -438,6 +496,11 @@ const MasterInquirySearchFilter = () => {
                 render={({ field }) => (
                   <RadioGroup
                     {...field}
+                    onChange={(e) => {
+                      // We need to translate from the string value to the number value
+
+                      setPaymentType(e.target.value as "all" | "hardship" | "payoffs" | "rollovers");
+                    }}
                     row>
                     <FormControlLabel
                       value="all"
@@ -476,6 +539,11 @@ const MasterInquirySearchFilter = () => {
                 render={({ field }) => (
                   <RadioGroup
                     {...field}
+                    onChange={(e) => {
+                      // We need to translate from the string value to the number value
+
+                      setMemberType(e.target.value as "all" | "employees" | "beneficiaries" | "none");
+                    }}
                     row>
                     <FormControlLabel
                       value="all"
@@ -519,6 +587,11 @@ const MasterInquirySearchFilter = () => {
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.contribution}
+                  onChange={(e) => {
+                    const parsedValue = e.target.value === "" ? null : Number(e.target.value);
+                    field.onChange(parsedValue);
+                    setContribution(parsedValue);
+                  }}
                 />
               )}
             />
@@ -541,6 +614,11 @@ const MasterInquirySearchFilter = () => {
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.earnings}
+                  onChange={(e) => {
+                    const parsedValue = e.target.value === "" ? null : Number(e.target.value);
+                    field.onChange(parsedValue);
+                    setEarnings(parsedValue);
+                  }}
                 />
               )}
             />
@@ -563,6 +641,11 @@ const MasterInquirySearchFilter = () => {
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.forfeiture}
+                  onChange={(e) => {
+                    const parsedValue = e.target.value === "" ? null : Number(e.target.value);
+                    field.onChange(parsedValue);
+                    setForfeiture(parsedValue);
+                  }}
                 />
               )}
             />
@@ -585,6 +668,11 @@ const MasterInquirySearchFilter = () => {
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.payment}
+                  onChange={(e) => {
+                    const parsedValue = e.target.value === "" ? null : Number(e.target.value);
+                    field.onChange(parsedValue);
+                    setPayment(parsedValue);
+                  }}
                 />
               )}
             />
@@ -602,6 +690,10 @@ const MasterInquirySearchFilter = () => {
                       {...field}
                       size="small"
                       checked={field.value}
+                      onChange={(e) => {
+                        field.onChange(e.target.checked);
+                        setVoids(e.target.checked);
+                      }}
                     />
                   )}
                 />

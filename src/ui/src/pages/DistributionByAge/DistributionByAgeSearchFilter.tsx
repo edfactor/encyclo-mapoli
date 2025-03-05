@@ -1,11 +1,13 @@
+import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { Controller, useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
 import { useLazyGetDistributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
-import { SearchAndReset } from "smart-ui-library";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
+import { clearDistributionsByAge } from "reduxstore/slices/yearsEndSlice";
 import { FrozenReportsByAgeRequestType } from "reduxstore/types";
+import { SearchAndReset } from "smart-ui-library";
+import * as yup from "yup";
 import DsmDatePicker from "../../components/DsmDatePicker/DsmDatePicker";
 
 interface DistributionByAgeSearch {
@@ -25,6 +27,7 @@ const schema = yup.object().shape({
 
 const DistributionByAgeSearchFilter = () => {
   const [triggerSearch, { isFetching }] = useLazyGetDistributionsByAgeQuery();
+  const dispatch = useDispatch();
 
   const {
     control,
@@ -69,6 +72,7 @@ const DistributionByAgeSearchFilter = () => {
   });
 
   const handleReset = () => {
+    dispatch(clearDistributionsByAge());
     reset({
       profitYear: undefined,
       reportType: undefined

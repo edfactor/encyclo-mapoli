@@ -15,7 +15,7 @@ import {
   EligibleEmployeesRequestDto,
   ExecutiveHoursAndDollars,
   ExecutiveHoursAndDollarsRequestDto,
-  MasterInquryRequest,
+  MasterInquiryRequest,
   EmployeesOnMilitaryLeaveResponse,
   MilitaryAndRehireForfeiture,
   MilitaryAndRehireForfeituresRequestDto,
@@ -75,7 +75,7 @@ import {
   setAdditionalExecutivesGrid,
   setYearEndProfitSharingReport,
   clearYearEndProfitSharingReport,
-  setEmployeeWagesForYear,
+  setEmployeeWagesForYear
 } from "reduxstore/slices/yearsEndSlice";
 import { url } from "./api";
 
@@ -527,7 +527,7 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getProfitMasterInquiry: builder.query<MasterInquiryResponseType, MasterInquryRequest>({
+    getProfitMasterInquiry: builder.query<MasterInquiryResponseType, MasterInquiryRequest>({
       query: (params) => ({
         url: "master/master-inquiry",
         method: "GET",
@@ -668,23 +668,26 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getYearEndProfitSharingReport: builder.query<PagedReportResponse<YearEndProfitSharingEmployee>, YearEndProfitSharingReportRequest>({
+    getYearEndProfitSharingReport: builder.query<
+      PagedReportResponse<YearEndProfitSharingEmployee>,
+      YearEndProfitSharingReportRequest
+    >({
       query: (params) => ({
-          url: "yearend/yearend-profit-sharing-report",
-          method: "GET",
-          params: params
+        url: "yearend/yearend-profit-sharing-report",
+        method: "GET",
+        params: params
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-          try {
-              dispatch(clearYearEndProfitSharingReport());
-              const { data } = await queryFulfilled;
-              dispatch(setYearEndProfitSharingReport(data));
-          } catch (err) {
-              console.log("Err: " + err);
-              dispatch(clearYearEndProfitSharingReport());
-          }
+        try {
+          dispatch(clearYearEndProfitSharingReport());
+          const { data } = await queryFulfilled;
+          dispatch(setYearEndProfitSharingReport(data));
+        } catch (err) {
+          console.log("Err: " + err);
+          dispatch(clearYearEndProfitSharingReport());
+        }
       }
-  })
+    })
   })
 });
 
