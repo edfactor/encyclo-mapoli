@@ -8,6 +8,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import { useDispatch } from "react-redux";
+import { clearTermination } from "reduxstore/slices/yearsEndSlice";
 
 interface TerminationSearch {
   profitYear: Date;
@@ -22,7 +23,12 @@ const schema = yup.object().shape({
     .typeError("Invalid date")
 });
 
-const TerminationSearchFilter = () => {
+interface TerminationSearchFilterProps {
+  setProfitYear: (year: number) => void;
+  setInitialSearchLoaded: (include: boolean) => void;
+}
+
+const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({ setProfitYear, setInitialSearchLoaded }) => {
   const [triggerSearch, { isFetching }] = useLazyGetTerminationReportQuery();
   const dispatch = useDispatch();
   const {
@@ -51,6 +57,8 @@ const TerminationSearchFilter = () => {
   });
 
   const handleReset = () => {
+    setInitialSearchLoaded(false);
+    dispatch(clearTermination());
     reset({
       profitYear: undefined
     });
@@ -72,7 +80,10 @@ const TerminationSearchFilter = () => {
             render={({ field }) => (
               <DsmDatePicker
                 id="profitYear"
-                onChange={(value: Date | null) => field.onChange(value)}
+                onChange={(value: Date | null) => {
+                  field.onChange(value);
+                  setProfitYear(Number(e.target.value));
+                }}
                 value={field.value ?? null}
                 required={true}
                 label="Profit Year"

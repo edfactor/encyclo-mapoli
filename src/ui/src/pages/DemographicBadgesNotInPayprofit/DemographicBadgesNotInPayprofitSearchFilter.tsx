@@ -6,7 +6,15 @@ import { useLazyGetDemographicBadgesNotInPayprofitQuery } from "reduxstore/api/Y
 import { clearDemographicBadgesNotInPayprofitData } from "reduxstore/slices/yearsEndSlice";
 import { SearchAndReset } from "smart-ui-library";
 
-const DemographicBadgesNotInPayprofitSearchFilter = () => {
+interface DemographicBadgesNotInPayprofitSearchFilterProps {
+  setProfitYear: (year: number) => void;
+  setInitialSearchLoaded: (include: boolean) => void;
+}
+
+const DemographicBadgesNotInPayprofitSearchFilter: React.FC<DemographicBadgesNotInPayprofitSearchFilterProps> = ({
+  setProfitYear,
+  setInitialSearchLoaded
+}) => {
   const [triggerSearch, { isFetching }] = useLazyGetDemographicBadgesNotInPayprofitQuery();
   const dispatch = useDispatch();
 
@@ -16,6 +24,7 @@ const DemographicBadgesNotInPayprofitSearchFilter = () => {
   };
 
   const handleReset = () => {
+    setInitialSearchLoaded(false);
     dispatch(clearDemographicBadgesNotInPayprofitData());
     // TODO - handle reset
   };
@@ -35,6 +44,9 @@ const DemographicBadgesNotInPayprofitSearchFilter = () => {
           <TextField
             fullWidth
             variant="outlined"
+            onChange={(e) => {
+              setProfitYear(Number(e.target.value));
+            }}
             inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
           />
         </Grid2>

@@ -22,7 +22,15 @@ const schema = yup.object().shape({
     .required("Year is required")
 });
 
-const DuplicateNamesAndBirthdaysSearchFilter = () => {
+interface DuplicateNamesAndBirthdaysSearchFilterProps {
+  setProfitYear: (year: number) => void;
+  setInitialSearchLoaded: (include: boolean) => void;
+}
+
+const DuplicateNamesAndBirthdaysSearchFilter: React.FC<DuplicateNamesAndBirthdaysSearchFilterProps> = ({
+  setProfitYear,
+  setInitialSearchLoaded
+}) => {
   const [triggerSearch, { isFetching }] = useLazyGetDuplicateNamesAndBirthdaysQuery();
   const dispatch = useDispatch();
   const {
@@ -51,6 +59,7 @@ const DuplicateNamesAndBirthdaysSearchFilter = () => {
   });
 
   const handleReset = () => {
+    setInitialSearchLoaded(false);
     dispatch(clearDuplicateNamesAndBirthdays());
     reset({
       profitYear: undefined
@@ -79,6 +88,7 @@ const DuplicateNamesAndBirthdaysSearchFilter = () => {
                 error={!!errors.profitYear}
                 onChange={(e) => {
                   field.onChange(e);
+                  setProfitYear(parseInt(e.target.value));
                 }}
                 inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
               />

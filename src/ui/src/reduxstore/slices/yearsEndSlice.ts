@@ -32,7 +32,7 @@ import {
   YearEndProfitSharingReportResponse,
   YearEndProfitSharingEmployee
 } from "reduxstore/types";
-import { Paged } from "smart-ui-library";
+import { NULL_DATE, Paged } from "smart-ui-library";
 
 export interface YearsEndState {
   duplicateSSNsData: PagedReportResponse<DuplicateSSNDetail> | null;
@@ -68,7 +68,7 @@ export interface YearsEndState {
   balanceByYearsFullTime: BalanceByAge | null;
   balanceByYearsPartTime: BalanceByAge | null;
   vestedAmountsByAge: VestedAmountsByAge | null;
-  terminattion: TerminationResponse | null;
+  termination: TerminationResponse | null;
   militaryAndRehireEntryAndModification: EmployeeDetails | null;
   profitSharingUpdate: ProfitShareUpdateResponse | ProfitShareEditResponse | ProfitShareMasterResponse | null;
   employeeWagesForYear: PagedReportResponse<EmployeeWagesForYear> | null;
@@ -109,7 +109,7 @@ const initialState: YearsEndState = {
   balanceByYearsFullTime: null,
   balanceByYearsPartTime: null,
   vestedAmountsByAge: null,
-  terminattion: null,
+  termination: null,
   profitSharingUpdate: null,
   militaryAndRehireEntryAndModification: null,
   yearEndProfitSharingReport: null,
@@ -412,7 +412,10 @@ export const yearsEndSlice = createSlice({
       state.vestedAmountsByAge = action.payload;
     },
     setTermination: (state, action: PayloadAction<TerminationResponse>) => {
-      state.terminattion = action.payload;
+      state.termination = action.payload;
+    },
+    clearTermination: (state) => {
+      state.termination = null;
     },
     setProfitUpdate: (state, action: PayloadAction<ProfitShareUpdateResponse>) => {
       state.profitSharingUpdate = action.payload;
@@ -524,6 +527,7 @@ export const {
   clearYearEndProfitSharingReport,
   setEmployeeWagesForYear,
 
+  clearTermination,
   clearNegativeEtvaForSssnsOnPayprofit,
   clearMilitaryAndRehireForfeituresDetails,
   clearMilitaryAndRehireProfitSummaryDetails,

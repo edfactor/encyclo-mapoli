@@ -1,19 +1,42 @@
-import React, { useEffect, useMemo, useState } from "react";
 import { Typography } from "@mui/material";
-import { useSelector, useDispatch } from "react-redux";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { RootState } from "reduxstore/store";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
 import { useLazyGetDemographicBadgesNotInPayprofitQuery } from "reduxstore/api/YearsEndApi";
+import { RootState } from "reduxstore/store";
+import { DSMGrid, Pagination } from "smart-ui-library";
 import { GetDemographicBadgesNotInPayprofitColumns } from "./DemographicBadgesNotInPayprofitGridColumns";
-import { setDemographicBadgesNotInPayprofitData } from "reduxstore/slices/yearsEndSlice";
-import { ImpersonationRoles } from "reduxstore/types";
 
-const DemographicBadgesNotInPayprofitGrid: React.FC = () => {
+interface DemographicBadgesNotInPayprofitGridSearchProps {
+  profitYearCurrent: number | null;
+  initialSearchLoaded: boolean;
+  setInitialSearchLoaded: (loaded: boolean) => void;
+}
+
+const DemographicBadgesNotInPayprofitGrid: React.FC<DemographicBadgesNotInPayprofitGridSearchProps> = ({
+  profitYearCurrent,
+  initialSearchLoaded,
+  setInitialSearchLoaded
+}) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
 
   const { demographicBadges } = useSelector((state: RootState) => state.yearsEnd);
-  const [_, { isLoading }] = useLazyGetDemographicBadgesNotInPayprofitQuery();
+  const [triggerSearch, { isLoading }] = useLazyGetDemographicBadgesNotInPayprofitQuery();
+
+  const onSearch = useCallback(async () => {
+    const request = {
+      profitYear: profitYearCurrent ?? 0,
+      pagination: { skip: pageNumber * pageSize, take: pageSize }
+    };
+
+    await triggerSearch(request, false);
+  }, [profitYearCurrent, pageNumber, pageSize, triggerSearch]);
+
+  useEffect(() => {
+    if (initialSearchLoaded) {
+      onSearch();
+    }
+  }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
 
   const columnDefs = useMemo(() => GetDemographicBadgesNotInPayprofitColumns(), []);
 
@@ -43,11 +66,13 @@ const DemographicBadgesNotInPayprofitGrid: React.FC = () => {
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
             setPageNumber(value - 1);
+            setInitialSearchLoaded(true);
           }}
           pageSize={pageSize}
           setPageSize={(value: number) => {
             setPageSize(value);
             setPageNumber(1);
+            setInitialSearchLoaded(true);
           }}
           recordCount={demographicBadges.response.total}
         />
