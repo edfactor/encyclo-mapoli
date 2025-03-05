@@ -8,6 +8,8 @@ using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareReport;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
@@ -48,15 +50,16 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
     [Fact(DisplayName = "PS-147: Check Duplicate SSNs (CSV)")]
     public async Task GetDuplicateSsNsTestCsv()
     {
-        _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        var stream = await _cleanupReportClient.DownloadDuplicateSsNs(_paginationRequest.ProfitYear, CancellationToken.None);
-        stream.Should().NotBeNull();
+        DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+        var response = await DownloadClient
+            .GETAsync <GetDuplicateSsNsEndpoint, PaginationRequestDto, PayrollDuplicateSsnResponseDto>(_paginationRequest);
 
-        using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
-        string result = await reader.ReadToEndAsync(CancellationToken.None);
-        result.Should().NotBeNullOrEmpty();
 
-        _testOutputHelper.WriteLine(result);
+        string content = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
+
+        content.Should().NotBeNullOrEmpty();
+
+        _testOutputHelper.WriteLine(content);
     }
 
     [Fact(DisplayName = "PS-151: Demographic badges without payprofit (JSON)")]

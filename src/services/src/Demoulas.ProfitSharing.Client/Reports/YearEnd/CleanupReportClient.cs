@@ -39,11 +39,6 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
         return CallReportEndpoint<PayrollDuplicateSsnResponseDto, PaginationRequestDto>(req, "duplicate-ssns", ct);
     }
 
-    public Task<Stream> DownloadDuplicateSsNs(short profitYear, CancellationToken cancellationToken)
-    {
-        return DownloadCsvReport(profitYear,"duplicate-ssns", cancellationToken);
-    }
-
     public Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfitAsync(PaginationRequestDto req, CancellationToken cancellationToken = default)
     {
         return CallReportEndpoint<DemographicBadgesNotInPayProfitResponse, PaginationRequestDto>(req, "demographic-badges-not-in-payprofit", cancellationToken);
