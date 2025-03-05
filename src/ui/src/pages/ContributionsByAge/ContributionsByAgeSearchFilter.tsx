@@ -1,14 +1,13 @@
+import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
 import { useLazyGetContributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
+import { clearContributionsByAge } from "reduxstore/slices/yearsEndSlice";
+import { FrozenReportsByAgeRequestType } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
-import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { ImpersonationRoles, FrozenReportsByAgeRequestType } from "reduxstore/types";
-import { useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
 
 interface ContributionsByAgeSearch {
   profitYear: number;
@@ -26,9 +25,8 @@ const schema = yup.object().shape({
 });
 
 const ContributionsByAgeSearchFilter = () => {
-
   const [triggerSearch, { isFetching }] = useLazyGetContributionsByAgeQuery();
-
+  const dispatch = useDispatch();
   const {
     control,
     handleSubmit,
@@ -72,6 +70,7 @@ const ContributionsByAgeSearchFilter = () => {
   });
 
   const handleReset = () => {
+    dispatch(clearContributionsByAge());
     reset({
       profitYear: undefined,
       reportType: undefined

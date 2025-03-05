@@ -1,12 +1,14 @@
 import { FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { isValid } from "date-fns";
-import { useState } from "react";
+import { useDispatch } from "react-redux";
 import { useLazyGetDemographicBadgesNotInPayprofitQuery } from "reduxstore/api/YearsEndApi";
+import { clearDemographicBadgesNotInPayprofitData } from "reduxstore/slices/yearsEndSlice";
 import { SearchAndReset } from "smart-ui-library";
 
 const DemographicBadgesNotInPayprofitSearchFilter = () => {
   const [triggerSearch, { isFetching }] = useLazyGetDemographicBadgesNotInPayprofitQuery();
+  const dispatch = useDispatch();
 
   const validateAndSearch = (event: any) => {
     event.preventDefault();
@@ -14,6 +16,7 @@ const DemographicBadgesNotInPayprofitSearchFilter = () => {
   };
 
   const handleReset = () => {
+    dispatch(clearDemographicBadgesNotInPayprofitData());
     // TODO - handle reset
   };
 

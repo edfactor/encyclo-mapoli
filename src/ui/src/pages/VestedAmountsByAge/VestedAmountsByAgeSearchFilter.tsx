@@ -6,6 +6,7 @@ import { SearchAndReset } from "smart-ui-library";
 import { downloadFileFromResponse } from "utils/fileDownload"; // Import utility function
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { useDispatch } from "react-redux";
 
 interface VestingAmountByAgeSearch {
   profitYear: number;
@@ -23,7 +24,7 @@ const schema = yup.object().shape({
 
 const VestedAmountsByAgeSearchFilter = () => {
   const [triggerSearch, { isFetching }] = useLazyGetVestingAmountByAgeQuery();
-
+  const dispatch = useDispatch();
   const {
     control,
     handleSubmit,

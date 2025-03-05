@@ -2,28 +2,37 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
 import { useLazyGetProfitMasterInquiryQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 
 interface SearchFormData {
-  socialSecurity?: string; 
+  socialSecurity?: string;
   badgeNumber?: string;
 }
 
-const validationSchema = yup.object().shape({
-  socialSecurity: yup.string().optional(),
-  badgeNumber: yup.string().optional()
-}).test('at-least-one-required', 'At least one field must be provided',
-  (values) => Boolean(values.socialSecurity || values.badgeNumber)
-);
+const validationSchema = yup
+  .object()
+  .shape({
+    socialSecurity: yup.string().optional(),
+    badgeNumber: yup.string().optional()
+  })
+  .test("at-least-one-required", "At least one field must be provided", (values) =>
+    Boolean(values.socialSecurity || values.badgeNumber)
+  );
 
 const MilitaryAndRehireEntryAndModificationSearchFilter = () => {
   const [triggerSearch, { isFetching }] = useLazyGetProfitMasterInquiryQuery();
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<SearchFormData>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors }
+  } = useForm<SearchFormData>({
     resolver: yupResolver(validationSchema)
   });
-
+  const dispatch = useDispatch();
   const onSubmit = (data: SearchFormData) => {
     triggerSearch(
       {
@@ -56,7 +65,7 @@ const MilitaryAndRehireEntryAndModificationSearchFilter = () => {
             error={!!errors.socialSecurity}
             helperText={errors.socialSecurity?.message}
           />
-        </Grid2>       
+        </Grid2>
         <Grid2
           xs={12}
           sm={6}

@@ -1,10 +1,11 @@
+import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
 import { useLazyGetEligibleEmployeesQuery } from "reduxstore/api/YearsEndApi";
+import { clearEligibleEmployees } from "reduxstore/slices/yearsEndSlice";
 import { SearchAndReset } from "smart-ui-library";
-import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 
 interface EligibleEmployeesSearch {
@@ -23,7 +24,7 @@ const schema = yup.object().shape({
 
 const EligibleEmployeesSearchFilter = () => {
   const [triggerSearch, { isFetching }] = useLazyGetEligibleEmployeesQuery();
-
+  const dispatch = useDispatch();
   const {
     control,
     handleSubmit,
@@ -50,6 +51,7 @@ const EligibleEmployeesSearchFilter = () => {
   });
 
   const handleReset = () => {
+    dispatch(clearEligibleEmployees());
     reset({
       profitYear: undefined
     });

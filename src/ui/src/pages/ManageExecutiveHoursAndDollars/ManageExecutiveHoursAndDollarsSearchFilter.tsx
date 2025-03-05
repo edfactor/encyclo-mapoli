@@ -10,7 +10,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { RootState } from "reduxstore/store";
-import { clearAdditionalExecutivesChosen, setExecutiveHoursAndDollarsGridYear } from "reduxstore/slices/yearsEndSlice";
+import {
+  clearAdditionalExecutivesChosen,
+  clearExecutiveHoursAndDollars,
+  setExecutiveHoursAndDollarsGridYear
+} from "reduxstore/slices/yearsEndSlice";
 
 export interface WrapperProps {
   isModal?: boolean;
@@ -132,7 +136,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter = (props: WrapperProps) => {
     // dispatch(clearExecutiveHoursAndDollarsGridRows());
     // ... and then import clearExecutiveHoursAndDollarsGridRows
     // from reduxstore/slices/yearsEndSlice
-
+    dispatch(clearExecutiveHoursAndDollars());
     reset({
       profitYear: undefined
     });

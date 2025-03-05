@@ -123,20 +123,32 @@ export const yearsEndSlice = createSlice({
     setDuplicateSSNsData: (state, action: PayloadAction<PagedReportResponse<DuplicateSSNDetail>>) => {
       state.duplicateSSNsData = action.payload;
     },
+    clearDuplicateSSNsData: (state) => {
+      state.duplicateSSNsData = null;
+    },
     setDemographicBadgesNotInPayprofitData: (
       state,
       action: PayloadAction<PagedReportResponse<DemographicBadgesNotInPayprofit>>
     ) => {
       state.demographicBadges = action.payload;
     },
+    clearDemographicBadgesNotInPayprofitData: (state) => {
+      state.demographicBadges = null;
+    },
     setDuplicateNamesAndBirthdays: (state, action: PayloadAction<PagedReportResponse<DuplicateNameAndBirthday>>) => {
       state.duplicateNamesAndBirthday = action.payload;
+    },
+    clearDuplicateNamesAndBirthdays: (state) => {
+      state.duplicateNamesAndBirthday = null;
     },
     setNegativeEtvaForSssnsOnPayprofit: (
       state,
       action: PayloadAction<PagedReportResponse<NegativeEtvaForSSNsOnPayProfit>>
     ) => {
       state.negativeEtvaForSSNsOnPayprofit = action.payload;
+    },
+    clearNegativeEtvaForSssnsOnPayprofit: (state) => {
+      state.negativeEtvaForSSNsOnPayprofit = null;
     },
     setMissingCommaInPYName: (state, action: PayloadAction<PagedReportResponse<MissingCommasInPYName>>) => {
       state.missingCommaInPYName = action.payload;
@@ -147,17 +159,26 @@ export const yearsEndSlice = createSlice({
     ) => {
       state.militaryAndRehire = action.payload;
     },
+    clearEmployeesOnMilitaryLeaveDetails: (state) => {
+      state.militaryAndRehire = null;
+    },
     setMilitaryAndRehireForfeituresDetails: (
       state,
       action: PayloadAction<PagedReportResponse<MilitaryAndRehireForfeiture>>
     ) => {
       state.militaryAndRehireForfeitures = action.payload;
     },
+    clearMilitaryAndRehireForfeituresDetails: (state) => {
+      state.militaryAndRehireForfeitures = null;
+    },
     setMilitaryAndRehireProfitSummaryDetails: (
       state,
       action: PayloadAction<PagedReportResponse<MilitaryAndRehireProfitSummary>>
     ) => {
       state.militaryAndRehireProfitSummary = action.payload;
+    },
+    clearMilitaryAndRehireProfitSummaryDetails: (state) => {
+      state.militaryAndRehireProfitSummary = null;
     },
     setDistributionsAndForfeitures: (
       state,
@@ -170,6 +191,9 @@ export const yearsEndSlice = createSlice({
     },
     setExecutiveHoursAndDollars: (state, action: PayloadAction<PagedReportResponse<ExecutiveHoursAndDollars>>) => {
       state.executiveHoursAndDollars = action.payload;
+    },
+    clearExecutiveHoursAndDollars: (state) => {
+      state.executiveHoursAndDollars = null;
     },
     setAdditionalExecutivesGrid: (state, action: PayloadAction<PagedReportResponse<ExecutiveHoursAndDollars>>) => {
       state.additionalExecutivesGrid = action.payload;
@@ -270,6 +294,9 @@ export const yearsEndSlice = createSlice({
     setEligibleEmployees: (state, action: PayloadAction<EligibleEmployeeResponseDto>) => {
       state.eligibleEmployees = action.payload;
     },
+    clearEligibleEmployees: (state) => {
+      state.eligibleEmployees = null;
+    },
     setMasterInquiryData: (state, action: PayloadAction<MasterInquiryResponseType>) => {
       state.masterInquiryData = action.payload.inquiryResults;
 
@@ -294,6 +321,13 @@ export const yearsEndSlice = createSlice({
         state.distributionsByAgePartTime = action.payload;
       }
     },
+    clearDistributionsByAge: (state) => {
+      state.distributionsByAgeTotal = null;
+
+      state.distributionsByAgeFullTime = null;
+
+      state.distributionsByAgePartTime = null;
+    },
     setContributionsByAge: (state, action: PayloadAction<ContributionsByAge>) => {
       if (action.payload.reportType == FrozenReportsByAgeRequestType.Total) {
         state.contributionsByAgeTotal = action.payload;
@@ -306,6 +340,13 @@ export const yearsEndSlice = createSlice({
       if (action.payload.reportType == FrozenReportsByAgeRequestType.PartTime) {
         state.contributionsByAgePartTime = action.payload;
       }
+    },
+    clearContributionsByAge: (state) => {
+      state.contributionsByAgeTotal = null;
+
+      state.contributionsByAgeFullTime = null;
+
+      state.contributionsByAgePartTime = null;
     },
     setForfeituresByAge: (state, action: PayloadAction<ForfeituresByAge>) => {
       if (action.payload.reportType == FrozenReportsByAgeRequestType.Total) {
@@ -320,6 +361,13 @@ export const yearsEndSlice = createSlice({
         state.forfeituresByAgePartTime = action.payload;
       }
     },
+    clearForfeituresByAge: (state) => {
+      state.forfeituresByAgeTotal = null;
+
+      state.forfeituresByAgeFullTime = null;
+
+      state.forfeituresByAgePartTime = null;
+    },
     setBalanceByAge: (state, action: PayloadAction<BalanceByAge>) => {
       if (action.payload.reportType == FrozenReportsByAgeRequestType.Total) {
         state.balanceByAgeTotal = action.payload;
@@ -333,6 +381,20 @@ export const yearsEndSlice = createSlice({
         state.balanceByAgePartTime = action.payload;
       }
     },
+    clearBalanceByAge: (state) => {
+      state.balanceByAgeTotal = null;
+
+      state.balanceByAgeFullTime = null;
+
+      state.balanceByAgePartTime = null;
+    },
+    clearBalanceByYears: (state) => {
+      state.balanceByYearsTotal = null;
+
+      state.balanceByYearsFullTime = null;
+
+      state.balanceByYearsFullTime = null;
+    },
     setBalanceByYears: (state, action: PayloadAction<BalanceByYears>) => {
       if (action.payload.reportType == FrozenReportsByAgeRequestType.Total) {
         state.balanceByYearsTotal = action.payload;
@@ -343,7 +405,7 @@ export const yearsEndSlice = createSlice({
       }
 
       if (action.payload.reportType == FrozenReportsByAgeRequestType.PartTime) {
-        state.balanceByYearsPartTime = action.payload;
+        state.balanceByYearsFullTime = action.payload;
       }
     },
     setVestingAmountByAge: (state, action: PayloadAction<VestedAmountsByAge>) => {
@@ -462,6 +524,20 @@ export const {
   clearYearEndProfitSharingReport,
   setEmployeeWagesForYear,
 
+  clearNegativeEtvaForSssnsOnPayprofit,
+  clearMilitaryAndRehireForfeituresDetails,
+  clearMilitaryAndRehireProfitSummaryDetails,
+  clearExecutiveHoursAndDollars,
+  clearEmployeesOnMilitaryLeaveDetails,
+  clearForfeituresByAge,
+  clearDuplicateSSNsData,
+  clearEligibleEmployees,
+  clearDuplicateNamesAndBirthdays,
+  clearDistributionsByAge,
+  clearDemographicBadgesNotInPayprofitData,
+  clearContributionsByAge,
+  clearBalanceByAge,
+  clearBalanceByYears,
   clearDistributionsAndForfeitures
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;
