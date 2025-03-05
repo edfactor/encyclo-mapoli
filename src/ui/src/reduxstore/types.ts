@@ -290,7 +290,7 @@ export interface MasterInquiryDetail extends ProfitYearRequest {
   commentTypeName?: string;
 }
 
-export interface MasterInquryRequest {
+export interface MasterInquiryRequest {
   startProfitYear?: number;
   endProfitYear?: number;
   startProfitMonth?: number;
@@ -301,6 +301,7 @@ export interface MasterInquryRequest {
   forfeitureAmount?: number;
   paymentAmount?: number;
   socialSecurity?: number;
+  name?: string;
   comment?: string;
   pagination: PaginationParams;
   paymentType?: number;
