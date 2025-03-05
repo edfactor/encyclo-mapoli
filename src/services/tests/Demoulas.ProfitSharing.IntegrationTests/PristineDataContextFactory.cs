@@ -1,4 +1,5 @@
-﻿using Demoulas.Common.Data.Services.Entities.Contexts;
+﻿using System.Diagnostics;
+using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -14,19 +15,24 @@ internal sealed class PristineDataContextFactory : IProfitSharingDataContextFact
 {
     private readonly ProfitSharingReadOnlyDbContext _readOnlyCtx;
 
-    public PristineDataContextFactory(string connectionString)
+    public PristineDataContextFactory(string connectionString, bool debug = false)
     {
-#if false
-        // Dumps sql
-        DbContextOptions<ProfitSharingReadOnlyDbContext> readOnlyOptions =
-            new DbContextOptionsBuilder<ProfitSharingReadOnlyDbContext>().UseOracle(connectionString)
-                .EnableSensitiveDataLogging().LogTo(s => Debug.WriteLine(s)).Options;
-#else
-        DbContextOptions<ProfitSharingReadOnlyDbContext> readOnlyOptions =
-            new DbContextOptionsBuilder<ProfitSharingReadOnlyDbContext>().UseOracle(connectionString)
-                .Options;
-#endif
+        DbContextOptions<ProfitSharingReadOnlyDbContext> readOnlyOptions;
+        if (debug)
+        {
+            // Dumps sql
+            readOnlyOptions =
+                new DbContextOptionsBuilder<ProfitSharingReadOnlyDbContext>().UseOracle(connectionString)
+                    .EnableSensitiveDataLogging().LogTo(s => Debug.WriteLine(s)).Options;
+        }
+        else
+        {
 
+            readOnlyOptions =
+                new DbContextOptionsBuilder<ProfitSharingReadOnlyDbContext>().UseOracle(connectionString)
+                    .Options;
+        }
+        
         ProfitSharingReadOnlyDbContext readOnlyCtx = new ProfitSharingReadOnlyDbContext(readOnlyOptions);
 
         _readOnlyCtx = readOnlyCtx;
