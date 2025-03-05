@@ -7,14 +7,17 @@ interface YTDWagesSearch {
   profitYear: number;
 }
 
-const YTDWagesSearchFilter = (props: { originalYear: number; setChosenYear: (year: number) => void }) => {
-  const [triggerSearch, { isFetching }] = useLazyGetEmployeeWagesForYearQuery();
+interface YTDWagesSearchFilterProps {
+  originalYear: number;
+  setChosenYear: (year: number) => void;
+}
 
-  const { setChosenYear } = props;
+const YTDWagesSearchFilter: React.FC<YTDWagesSearchFilterProps> = ({ originalYear, setChosenYear }) => {
+  const [triggerSearch, { isFetching }] = useLazyGetEmployeeWagesForYearQuery();
 
   const { handleSubmit, setValue } = useForm<YTDWagesSearch>({
     defaultValues: {
-      profitYear: props.originalYear
+      profitYear: originalYear
     }
   });
 
@@ -23,7 +26,7 @@ const YTDWagesSearchFilter = (props: { originalYear: number; setChosenYear: (yea
     triggerSearch(
       {
         profitYear: data.profitYear,
-        pagination: { skip: 0, take: 255 },
+        pagination: { skip: 0, take: 25 },
         acceptHeader: "application/json"
       },
       false
@@ -31,8 +34,8 @@ const YTDWagesSearchFilter = (props: { originalYear: number; setChosenYear: (yea
   });
 
   const options = [
-    { value: props.originalYear, label: `${props.originalYear}` },
-    { value: props.originalYear + 1, label: `${props.originalYear + 1}` }
+    { value: originalYear, label: `${originalYear}` },
+    { value: originalYear + 1, label: `${originalYear + 1}` }
   ];
 
   return (
