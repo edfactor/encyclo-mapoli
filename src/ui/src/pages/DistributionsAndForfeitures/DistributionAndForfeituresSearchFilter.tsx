@@ -1,10 +1,11 @@
-import { Checkbox, FormHelperText, FormLabel, TextField, Typography } from "@mui/material";
-import Grid2 from "@mui/material/Unstable_Grid2";
-import { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { useLazyGetDistributionsAndForfeituresQuery } from "reduxstore/api/YearsEndApi";
-import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { Checkbox, FormHelperText, FormLabel, TextField } from "@mui/material";
+import Grid2 from "@mui/material/Unstable_Grid2";
+import { Controller, useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
+import { useLazyGetDistributionsAndForfeituresQuery } from "reduxstore/api/YearsEndApi";
+import { clearDistributionsAndForfeitures } from "reduxstore/slices/yearsEndSlice";
+import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 
 interface DistributionsAndForfeituresSearch {
@@ -39,9 +40,23 @@ const schema = yup.object().shape({
   includeOutgoingForfeitures: yup.boolean().default(false).required()
 });
 
-const DistributionsAndForfeituresSearchFilter = () => {
-  const [triggerSearch, { isFetching }] = useLazyGetDistributionsAndForfeituresQuery();
+interface DistributionsAndForfeituresSearchFilterProps {
+  setProfitYear: (year: number) => void;
+  setStartMonth: (month: number | null) => void;
+  setEndMonth: (month: number | null) => void;
+  setIncludeOutgoingForfeitures: (include: boolean) => void;
+  setInitialSearchLoaded: (include: boolean) => void;
+}
 
+const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeituresSearchFilterProps> = ({
+  setProfitYear,
+  setStartMonth,
+  setEndMonth,
+  setIncludeOutgoingForfeitures,
+  setInitialSearchLoaded
+}) => {
+  const [triggerSearch, { isFetching }] = useLazyGetDistributionsAndForfeituresQuery();
+  const dispatch = useDispatch();
   const {
     control,
     handleSubmit,
@@ -74,6 +89,8 @@ const DistributionsAndForfeituresSearchFilter = () => {
   });
 
   const handleReset = () => {
+    setInitialSearchLoaded(false);
+    dispatch(clearDistributionsAndForfeitures());
     reset({
       profitYear: undefined
     });
@@ -101,6 +118,7 @@ const DistributionsAndForfeituresSearchFilter = () => {
                 error={!!errors.profitYear}
                 onChange={(e) => {
                   field.onChange(e);
+                  setProfitYear(Number(e.target.value));
                 }}
                 inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
               />
@@ -125,6 +143,7 @@ const DistributionsAndForfeituresSearchFilter = () => {
                 onChange={(e) => {
                   const parsedValue = e.target.value === "" ? null : Number(e.target.value);
                   field.onChange(parsedValue);
+                  setStartMonth(parsedValue);
                 }}
                 inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
               />
@@ -149,6 +168,7 @@ const DistributionsAndForfeituresSearchFilter = () => {
                 onChange={(e) => {
                   const parsedValue = e.target.value === "" ? null : Number(e.target.value);
                   field.onChange(parsedValue);
+                  setEndMonth(parsedValue);
                 }}
                 inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
               />
@@ -167,7 +187,10 @@ const DistributionsAndForfeituresSearchFilter = () => {
             render={({ field }) => (
               <Checkbox
                 checked={field.value}
-                onChange={field.onChange}
+                onChange={(e) => {
+                  setIncludeOutgoingForfeitures(e.target.checked);
+                  field.onChange(e.target.checked);
+                }}
               />
             )}
           />

@@ -1,12 +1,13 @@
+import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
 import { useLazyGetBalanceByAgeQuery } from "reduxstore/api/YearsEndApi";
-import { SearchAndReset } from "smart-ui-library";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
+import { clearBalanceByAge } from "reduxstore/slices/yearsEndSlice";
 import { FrozenReportsByAgeRequestType } from "reduxstore/types";
+import { SearchAndReset } from "smart-ui-library";
+import * as yup from "yup";
 
 interface BalanceByAgeSearch {
   profitYear: number;
@@ -24,8 +25,9 @@ const schema = yup.object().shape({
 });
 
 const BalanceByAgeSearchFilter = () => {
-
   const [triggerSearch, { isFetching }] = useLazyGetBalanceByAgeQuery();
+
+  const dispatch = useDispatch();
 
   const {
     control,
@@ -70,6 +72,7 @@ const BalanceByAgeSearchFilter = () => {
   });
 
   const handleReset = () => {
+    dispatch(clearBalanceByAge());
     reset({
       profitYear: undefined,
       reportType: undefined

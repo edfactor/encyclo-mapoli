@@ -32,7 +32,7 @@ import {
   YearEndProfitSharingReportResponse,
   YearEndProfitSharingEmployee
 } from "reduxstore/types";
-import { Paged } from "smart-ui-library";
+import { NULL_DATE, Paged } from "smart-ui-library";
 
 export interface YearsEndState {
   duplicateSSNsData: PagedReportResponse<DuplicateSSNDetail> | null;
@@ -68,7 +68,7 @@ export interface YearsEndState {
   balanceByYearsFullTime: BalanceByAge | null;
   balanceByYearsPartTime: BalanceByAge | null;
   vestedAmountsByAge: VestedAmountsByAge | null;
-  terminattion: TerminationResponse | null;
+  termination: TerminationResponse | null;
   militaryAndRehireEntryAndModification: EmployeeDetails | null;
   profitSharingUpdate: ProfitShareUpdateResponse | ProfitShareEditResponse | ProfitShareMasterResponse | null;
   employeeWagesForYear: PagedReportResponse<EmployeeWagesForYear> | null;
@@ -109,7 +109,7 @@ const initialState: YearsEndState = {
   balanceByYearsFullTime: null,
   balanceByYearsPartTime: null,
   vestedAmountsByAge: null,
-  terminattion: null,
+  termination: null,
   profitSharingUpdate: null,
   militaryAndRehireEntryAndModification: null,
   yearEndProfitSharingReport: null,
@@ -123,20 +123,32 @@ export const yearsEndSlice = createSlice({
     setDuplicateSSNsData: (state, action: PayloadAction<PagedReportResponse<DuplicateSSNDetail>>) => {
       state.duplicateSSNsData = action.payload;
     },
+    clearDuplicateSSNsData: (state) => {
+      state.duplicateSSNsData = null;
+    },
     setDemographicBadgesNotInPayprofitData: (
       state,
       action: PayloadAction<PagedReportResponse<DemographicBadgesNotInPayprofit>>
     ) => {
       state.demographicBadges = action.payload;
     },
+    clearDemographicBadgesNotInPayprofitData: (state) => {
+      state.demographicBadges = null;
+    },
     setDuplicateNamesAndBirthdays: (state, action: PayloadAction<PagedReportResponse<DuplicateNameAndBirthday>>) => {
       state.duplicateNamesAndBirthday = action.payload;
+    },
+    clearDuplicateNamesAndBirthdays: (state) => {
+      state.duplicateNamesAndBirthday = null;
     },
     setNegativeEtvaForSssnsOnPayprofit: (
       state,
       action: PayloadAction<PagedReportResponse<NegativeEtvaForSSNsOnPayProfit>>
     ) => {
       state.negativeEtvaForSSNsOnPayprofit = action.payload;
+    },
+    clearNegativeEtvaForSssnsOnPayprofit: (state) => {
+      state.negativeEtvaForSSNsOnPayprofit = null;
     },
     setMissingCommaInPYName: (state, action: PayloadAction<PagedReportResponse<MissingCommasInPYName>>) => {
       state.missingCommaInPYName = action.payload;
@@ -147,11 +159,17 @@ export const yearsEndSlice = createSlice({
     ) => {
       state.militaryAndRehire = action.payload;
     },
+    clearEmployeesOnMilitaryLeaveDetails: (state) => {
+      state.militaryAndRehire = null;
+    },
     setMilitaryAndRehireForfeituresDetails: (
       state,
       action: PayloadAction<PagedReportResponse<MilitaryAndRehireForfeiture>>
     ) => {
       state.militaryAndRehireForfeitures = action.payload;
+    },
+    clearMilitaryAndRehireForfeituresDetails: (state) => {
+      state.militaryAndRehireForfeitures = null;
     },
     setMilitaryAndRehireProfitSummaryDetails: (
       state,
@@ -159,14 +177,23 @@ export const yearsEndSlice = createSlice({
     ) => {
       state.militaryAndRehireProfitSummary = action.payload;
     },
+    clearMilitaryAndRehireProfitSummaryDetails: (state) => {
+      state.militaryAndRehireProfitSummary = null;
+    },
     setDistributionsAndForfeitures: (
       state,
       action: PayloadAction<PagedReportResponse<DistributionsAndForfeitures>>
     ) => {
       state.distributionsAndForfeitures = action.payload;
     },
+    clearDistributionsAndForfeitures: (state) => {
+      state.distributionsAndForfeitures = null;
+    },
     setExecutiveHoursAndDollars: (state, action: PayloadAction<PagedReportResponse<ExecutiveHoursAndDollars>>) => {
       state.executiveHoursAndDollars = action.payload;
+    },
+    clearExecutiveHoursAndDollars: (state) => {
+      state.executiveHoursAndDollars = null;
     },
     setAdditionalExecutivesGrid: (state, action: PayloadAction<PagedReportResponse<ExecutiveHoursAndDollars>>) => {
       state.additionalExecutivesGrid = action.payload;
@@ -255,9 +282,9 @@ export const yearsEndSlice = createSlice({
         // So if we do not have the year, or the grid is not there, we have nothing to do
         console.log(
           "WARN: Tried to remove a non-existent exec dollars and hours row with badge: " +
-          action.payload.executiveHoursAndDollars[0].badgeNumber +
-          " and profit year: " +
-          action.payload.profitYear
+            action.payload.executiveHoursAndDollars[0].badgeNumber +
+            " and profit year: " +
+            action.payload.profitYear
         );
       }
     },
@@ -266,6 +293,9 @@ export const yearsEndSlice = createSlice({
     },
     setEligibleEmployees: (state, action: PayloadAction<EligibleEmployeeResponseDto>) => {
       state.eligibleEmployees = action.payload;
+    },
+    clearEligibleEmployees: (state) => {
+      state.eligibleEmployees = null;
     },
     setMasterInquiryData: (state, action: PayloadAction<MasterInquiryResponseType>) => {
       state.masterInquiryData = action.payload.inquiryResults;
@@ -291,6 +321,13 @@ export const yearsEndSlice = createSlice({
         state.distributionsByAgePartTime = action.payload;
       }
     },
+    clearDistributionsByAge: (state) => {
+      state.distributionsByAgeTotal = null;
+
+      state.distributionsByAgeFullTime = null;
+
+      state.distributionsByAgePartTime = null;
+    },
     setContributionsByAge: (state, action: PayloadAction<ContributionsByAge>) => {
       if (action.payload.reportType == FrozenReportsByAgeRequestType.Total) {
         state.contributionsByAgeTotal = action.payload;
@@ -303,6 +340,13 @@ export const yearsEndSlice = createSlice({
       if (action.payload.reportType == FrozenReportsByAgeRequestType.PartTime) {
         state.contributionsByAgePartTime = action.payload;
       }
+    },
+    clearContributionsByAge: (state) => {
+      state.contributionsByAgeTotal = null;
+
+      state.contributionsByAgeFullTime = null;
+
+      state.contributionsByAgePartTime = null;
     },
     setForfeituresByAge: (state, action: PayloadAction<ForfeituresByAge>) => {
       if (action.payload.reportType == FrozenReportsByAgeRequestType.Total) {
@@ -317,6 +361,13 @@ export const yearsEndSlice = createSlice({
         state.forfeituresByAgePartTime = action.payload;
       }
     },
+    clearForfeituresByAge: (state) => {
+      state.forfeituresByAgeTotal = null;
+
+      state.forfeituresByAgeFullTime = null;
+
+      state.forfeituresByAgePartTime = null;
+    },
     setBalanceByAge: (state, action: PayloadAction<BalanceByAge>) => {
       if (action.payload.reportType == FrozenReportsByAgeRequestType.Total) {
         state.balanceByAgeTotal = action.payload;
@@ -330,6 +381,20 @@ export const yearsEndSlice = createSlice({
         state.balanceByAgePartTime = action.payload;
       }
     },
+    clearBalanceByAge: (state) => {
+      state.balanceByAgeTotal = null;
+
+      state.balanceByAgeFullTime = null;
+
+      state.balanceByAgePartTime = null;
+    },
+    clearBalanceByYears: (state) => {
+      state.balanceByYearsTotal = null;
+
+      state.balanceByYearsFullTime = null;
+
+      state.balanceByYearsFullTime = null;
+    },
     setBalanceByYears: (state, action: PayloadAction<BalanceByYears>) => {
       if (action.payload.reportType == FrozenReportsByAgeRequestType.Total) {
         state.balanceByYearsTotal = action.payload;
@@ -340,14 +405,17 @@ export const yearsEndSlice = createSlice({
       }
 
       if (action.payload.reportType == FrozenReportsByAgeRequestType.PartTime) {
-        state.balanceByYearsPartTime = action.payload;
+        state.balanceByYearsFullTime = action.payload;
       }
     },
     setVestingAmountByAge: (state, action: PayloadAction<VestedAmountsByAge>) => {
       state.vestedAmountsByAge = action.payload;
     },
     setTermination: (state, action: PayloadAction<TerminationResponse>) => {
-      state.terminattion = action.payload;
+      state.termination = action.payload;
+    },
+    clearTermination: (state) => {
+      state.termination = null;
     },
     setProfitUpdate: (state, action: PayloadAction<ProfitShareUpdateResponse>) => {
       state.profitSharingUpdate = action.payload;
@@ -402,7 +470,6 @@ export const yearsEndSlice = createSlice({
     },
     clearYearEndProfitSharingReport: (state) => {
       state.yearEndProfitSharingReport = null;
-
     }
   }
 });
@@ -458,6 +525,23 @@ export const {
   addExecutiveHoursAndDollarsGridRow,
   setYearEndProfitSharingReport,
   clearYearEndProfitSharingReport,
-  setEmployeeWagesForYear
+  setEmployeeWagesForYear,
+
+  clearTermination,
+  clearNegativeEtvaForSssnsOnPayprofit,
+  clearMilitaryAndRehireForfeituresDetails,
+  clearMilitaryAndRehireProfitSummaryDetails,
+  clearExecutiveHoursAndDollars,
+  clearEmployeesOnMilitaryLeaveDetails,
+  clearForfeituresByAge,
+  clearDuplicateSSNsData,
+  clearEligibleEmployees,
+  clearDuplicateNamesAndBirthdays,
+  clearDistributionsByAge,
+  clearDemographicBadgesNotInPayprofitData,
+  clearContributionsByAge,
+  clearBalanceByAge,
+  clearBalanceByYears,
+  clearDistributionsAndForfeitures
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

@@ -1,19 +1,20 @@
-import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
 import { useLazyGetDuplicateSSNsQuery } from "reduxstore/api/YearsEndApi";
+import { clearDuplicateSSNsData } from "reduxstore/slices/yearsEndSlice";
 import { SearchAndReset } from "smart-ui-library";
 
 interface DuplicateSSNsOnDemographicsSearch {}
 
 const DuplicateSSNsOnDemographicsSearchFilter = () => {
   const [triggerSearch, { isFetching }] = useLazyGetDuplicateSSNsQuery();
-
+  const dispatch = useDispatch();
   const {
     handleSubmit,
     formState: { isValid },
-    reset    
-  } = useForm<DuplicateSSNsOnDemographicsSearch>({  });
+    reset
+  } = useForm<DuplicateSSNsOnDemographicsSearch>({});
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
@@ -27,6 +28,7 @@ const DuplicateSSNsOnDemographicsSearchFilter = () => {
   });
 
   const handleReset = () => {
+    dispatch(clearDuplicateSSNsData());
     reset();
   };
 
