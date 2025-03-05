@@ -13,7 +13,7 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.2" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.2" />
     <PackageVersion Include="Demoulas.Util" Version="2.5.0" />
-    <PackageVersion Include="FastEndpoints.Testing" Version="5.34.0" />
+    <PackageVersion Include="FastEndpoints.Testing" Version="5.35.0" />
     <PackageVersion Include="IdGen" Version="3.0.7" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.2" />
     <PackageVersion Include="Microsoft.Extensions.Hosting.Systemd" Version="9.0.2" />
@@ -35,7 +35,7 @@
     <PackageVersion Include="FluentAssertions.Analyzers" Version="0.34.1" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.2" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
-    <PackageVersion Include="FastEndpoints" Version="5.34.0" />
+    <PackageVersion Include="FastEndpoints" Version="5.35.0" />
     <PackageVersion Include="AspNetCore.HealthChecks.UI.Client" Version="8.0.1" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.13.12" />
     <PackageVersion Include="Bogus" Version="35.6.2" />
@@ -67,7 +67,7 @@
     <PackageVersion Include="Quartz" Version="3.13.1" />
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.13.1" />
     <PackageVersion Include="Riok.Mapperly" Version="4.1.1" />
-    <PackageVersion Include="Scalar.AspNetCore" Version="2.0.22" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.0.23" />
     <PackageVersion Include="Serilog.AspNetCore" Version="8.0.2" />
     <PackageVersion Include="Serilog.Enrichers.Environment" Version="3.0.1" />
     <PackageVersion Include="Serilog.Enrichers.MassTransit" Version="2.0.4" />

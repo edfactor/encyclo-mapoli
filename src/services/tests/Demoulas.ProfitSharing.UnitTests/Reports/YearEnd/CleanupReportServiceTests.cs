@@ -2,7 +2,6 @@
 using System.Text.Json;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Api;
-using Demoulas.ProfitSharing.Client.Reports.YearEnd;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -14,6 +13,7 @@ using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareRepo
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
+using Demoulas.ProfitSharing.UnitTests.Common.Helpers;
 using FastEndpoints;
 using FluentAssertions;
 using IdGen;

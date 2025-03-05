@@ -22,7 +22,15 @@ const schema = yup.object().shape({
     .required("Year is required")
 });
 
-const NegativeEtvaForSSNsOnPayprofitSearchFilter = () => {
+interface NegativeEtvaForSSNsOnPayprofitSearchFilterProps {
+  setProfitYear: (year: number) => void;
+  setInitialSearchLoaded: (include: boolean) => void;
+}
+
+const NegativeEtvaForSSNsOnPayprofitSearchFilter: React.FC<NegativeEtvaForSSNsOnPayprofitSearchFilterProps> = ({
+  setProfitYear,
+  setInitialSearchLoaded
+}) => {
   const [triggerSearch, { isFetching }] = useLazyGetNegativeEVTASSNQuery();
   const dispatch = useDispatch();
   const {
@@ -51,6 +59,7 @@ const NegativeEtvaForSSNsOnPayprofitSearchFilter = () => {
   });
 
   const handleReset = () => {
+    setInitialSearchLoaded(false);
     dispatch(clearNegativeEtvaForSssnsOnPayprofit());
     reset({
       profitYear: undefined
@@ -79,6 +88,7 @@ const NegativeEtvaForSSNsOnPayprofitSearchFilter = () => {
                 error={!!errors.profitYear}
                 onChange={(e) => {
                   field.onChange(e);
+                  setProfitYear(parseInt(e.target.value));
                 }}
                 inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
               />

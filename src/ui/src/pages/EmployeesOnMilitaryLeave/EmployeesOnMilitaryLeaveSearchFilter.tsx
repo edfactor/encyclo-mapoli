@@ -1,7 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { clear } from "console";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { useLazyGetEmployeesOnMilitaryLeaveQuery } from "reduxstore/api/YearsEndApi";
@@ -23,7 +22,15 @@ const schema = yup.object().shape({
     .required("Year is required")
 });
 
-const EmployeesOnMilitaryLeaveSearchFilter = () => {
+interface EmployeesOnMilitaryLeaveSearchFilterProps {
+  setProfitYear: (year: number) => void;
+  setInitialSearchLoaded: (include: boolean) => void;
+}
+
+const EmployeesOnMilitaryLeaveSearchFilter: React.FC<EmployeesOnMilitaryLeaveSearchFilterProps> = ({
+  setProfitYear,
+  setInitialSearchLoaded
+}) => {
   const [triggerSearch, { isFetching }] = useLazyGetEmployeesOnMilitaryLeaveQuery();
   const dispatch = useDispatch();
   const {
@@ -38,7 +45,7 @@ const EmployeesOnMilitaryLeaveSearchFilter = () => {
     }
   });
 
-  const validateAndSearch = (data: ISearchForm) => {
+  const validateAndSearch = () => {
     triggerSearch(
       {
         pagination: { skip: 0, take: 25 }
@@ -48,6 +55,7 @@ const EmployeesOnMilitaryLeaveSearchFilter = () => {
   };
 
   const handleReset = () => {
+    setInitialSearchLoaded(false);
     dispatch(clearEmployeesOnMilitaryLeaveDetails());
     reset();
   };
@@ -74,6 +82,7 @@ const EmployeesOnMilitaryLeaveSearchFilter = () => {
                 error={!!errors.profitYear}
                 onChange={(e) => {
                   field.onChange(e);
+                  setProfitYear(parseInt(e.target.value));
                 }}
                 inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
               />
