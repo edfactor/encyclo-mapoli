@@ -67,7 +67,7 @@ internal class PayrollSyncClient
     /// <exception cref="Exception">
     /// Logs critical errors if an exception occurs during the payroll synchronization process.
     /// </exception>
-    public async Task RetrievePayrollBalancesAsync(string requestedBy = "System", CancellationToken cancellationToken = default)
+    public async Task RetrievePayrollBalancesAsync(string requestedBy = Constants.SystemAccountName, CancellationToken cancellationToken = default)
     {
         using Activity? activity = OracleHcmActivitySource.Instance.StartActivity(nameof(RetrievePayrollBalancesAsync), ActivityKind.Internal);
 
@@ -192,7 +192,7 @@ internal class PayrollSyncClient
         foreach (long id in missingPersonIds)
         {
             IAsyncEnumerable<OracleEmployee?> oracleHcmEmployees = _oracleEmployeeDataSyncClient.GetEmployee(id, cancellationToken);
-            await _employeeSyncService.QueueEmployee("System", oracleHcmEmployees, cancellationToken);
+            await _employeeSyncService.QueueEmployee(Constants.SystemAccountName, oracleHcmEmployees, cancellationToken);
         }
     }
 

@@ -46,7 +46,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         var terminatedEmployees = GetTerminatedEmployees(ctx, request, startEnd);
         var terminatedWithContributions = GetEmployeesAsMembers(ctx, request, terminatedEmployees);
         var beneficiaries = GetBeneficiaries(ctx, request);
-        return await CombineEmployeeAndBeneficiarySlices(terminatedWithContributions, beneficiaries, request.Skip);
+        return await CombineEmployeeAndBeneficiarySlices(terminatedWithContributions, beneficiaries, cancellationToken);
     }
 
     private IQueryable<TerminatedEmployeeDto> GetTerminatedEmployees(IProfitSharingDbContext ctx, ProfitYearRequest request,
@@ -145,11 +145,11 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
     }
 
     private static async Task<List<MemberSlice>> CombineEmployeeAndBeneficiarySlices(IQueryable<MemberSlice> terminatedWithContributions,
-        IQueryable<MemberSlice> beneficiaries, int? skip)
+        IQueryable<MemberSlice> beneficiaries, CancellationToken cancellation)
     {
         // NOTE: the server side union fails
-        var benes = await beneficiaries.ToListAsync();
-        var employees = await terminatedWithContributions.ToListAsync();
+        var benes = await beneficiaries.ToListAsync(cancellation);
+        var employees = await terminatedWithContributions.ToListAsync(cancellation);
         return benes.Concat(employees)
             // NOTE: Sort using same character handling that ready uses (ie "Mc" sorts after "ME") aka the Ordinal sort.
             // Failture to use this sort, causes READY and SMART reports to not match.

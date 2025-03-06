@@ -4,6 +4,7 @@ using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Mappers;
 using EntityFramework.Exceptions.Common;
 using FluentValidation.Results;
@@ -164,7 +165,7 @@ internal class DemographicsService : IDemographicsServiceInternal
                     OracleHcmId = d.OracleHcmId,
                     InvalidValue = d.Ssn.MaskSsn(),
                     Message = "Duplicate SSNs found in the database.",
-                    UserName = "System",
+                    UserName = Constants.SystemAccountName,
                     PropertyName = "SSN"
                 }).ToList();
 

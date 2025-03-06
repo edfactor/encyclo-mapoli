@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.UnitTests.Common.Fakes;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using MockQueryable.Moq;
 using Moq;
@@ -26,6 +27,18 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
 
         _profitSharingReadOnlyDbContext = new Mock<ProfitSharingReadOnlyDbContext>();
         _storeInfoDbContext = new Mock<DemoulasCommonDataContext>();
+
+        // Assuming you have a DbContext type called ProfitSharingReadOnlyDbContext
+        var mockContext = new Mock<ProfitSharingReadOnlyDbContext>( /* options if needed */ );
+        var mockDatabaseFacade = new Mock<DatabaseFacade>(mockContext.Object);
+
+        // Setup the ProviderName property to return the in-memory provider value
+        mockDatabaseFacade.SetupGet(db => db.ProviderName)
+            .Returns("Microsoft.EntityFrameworkCore.InMemory");
+
+        // Make sure that when your context.Database is accessed, it returns our mocked DatabaseFacade
+        mockContext.SetupGet(ctx => ctx.Database)
+            .Returns(mockDatabaseFacade.Object);
 
 
         List<Country>? countries = new CountryFaker().Generate(10);

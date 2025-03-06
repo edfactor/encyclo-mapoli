@@ -62,19 +62,13 @@ internal class AtomFeedClient
             {
 
                 HttpResponseMessage response = await _httpClient.GetAsync(url, cancellationToken);
-
-                if (Debugger.IsAttached)
-                {
-                    _logger.LogInformation(url);
-                }
-
                 response.EnsureSuccessStatusCode();
 
                 feedRoot = await response.Content.ReadFromJsonAsync<AtomFeedResponse<TContextType>>(cancellationToken);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error fetching Atom feed: {Url}", url);
+                _logger.LogError(ex, "Error fetching Atom feed: {Url}", Uri.EscapeDataString(url));
                 yield break;
             }
 

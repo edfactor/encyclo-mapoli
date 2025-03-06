@@ -4,10 +4,9 @@ import { DSMAccordion, Page } from "smart-ui-library";
 import YTDWagesSearchFilter from "./YTDWagesSearchFilter";
 import YTDWagesGrid from "./YTDWagesGrid";
 import { CAPTIONS } from "../../constants";
-import { Download, Print } from "@mui/icons-material";
+import { Download } from "@mui/icons-material";
 import { useLazyGetEmployeeWagesForYearQuery } from "reduxstore/api/YearsEndApi";
 import { downloadFileFromResponse } from "utils/fileDownload";
-import { useReactToPrint } from "react-to-print";
 import { useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
@@ -24,11 +23,6 @@ const YTDWages: React.FC = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
 
   const componentRef = useRef<HTMLDivElement>(null);
-
-  const handlePrint = useReactToPrint({
-    contentRef: componentRef,
-    documentTitle: "Print Document"
-  });
 
   const [chosenYear, setChosenYear] = useState<number>(lastYear);
 
@@ -63,19 +57,7 @@ const YTDWages: React.FC = () => {
           startIcon={<Download color={"primary"} />}
           className="h-10 whitespace-nowrap min-w-fit">
           Download
-        </Button>
-        <Button
-          onClick={() => {
-            handlePrint();
-          }}
-          disabled={
-            employeeWagesForYear?.response?.results == undefined || employeeWagesForYear?.response?.results.length === 0
-          }
-          variant="outlined"
-          startIcon={<Print color={"primary"} />}
-          className="h-10 whitespace-nowrap min-w-fit">
-          Print
-        </Button>
+        </Button>      
       </div>
     );
   };
