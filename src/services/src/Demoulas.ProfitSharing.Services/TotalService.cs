@@ -341,7 +341,7 @@ public sealed class TotalService : ITotalService
                 join y in GetYearsOfService(ctx, employeeYear) on b.Ssn equals y.Ssn
                 select new ParticipantTotalVestingBalanceDto
                 {
-                    Ssn = e.Ssn ?? 0,
+                    Ssn = e.Ssn,
                     CurrentBalance = b.Total ?? 0,
                     Etva = e.Total ?? 0,
                     TotalDistributions = d.Total ?? 0,
