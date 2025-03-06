@@ -429,25 +429,27 @@ public class CleanupReportService : ICleanupReportService
         {
             var qry = ctx.PayProfits.Include(x => x.Demographic).Where(p => p.ProfitYear == req.ProfitYear)
                 .Join(_totalService.GetYearsOfService(ctx, req.ProfitYear), x => x.Demographic!.Ssn, x => x.Ssn, (p, tot) => new { pp = p, yip = tot })
+                .Join(ctx.EmploymentTypes, x => x.pp.Demographic!.EmploymentTypeId, x => x.Id, (pp, et) => new {pp, et})
                 .Select(p => new
                 {
-                    BadgeNumber = p.pp.Demographic!.BadgeNumber,
-                    p.pp.CurrentHoursYear,
-                    p.pp.HoursExecutive,
-                    p.pp.Demographic!.DateOfBirth,
-                    p.pp.Demographic!.EmploymentStatusId,
-                    p.pp.Demographic!.TerminationDate,
-                    p.pp.Demographic!.Ssn,
-                    p.pp.Demographic!.ContactInfo.LastName,
-                    p.pp.Demographic!.ContactInfo.FirstName,
-                    p.pp.Demographic!.StoreNumber,
-                    EmploymentTypeId = p.pp.Demographic!.EmploymentTypeId.ToString(), //There seems to be some sort of issue in the oracle ef provider that struggles with the char type.  It maps this expression
-                                                                                      //to: NOT (CAST((BITXOR("s"."EMPLOYMENT_TYPE_ID", N'')) AS NUMBER(1)) )
-                                                                                      //Converting to a string appears to fix this issue.
-                    p.pp.CurrentIncomeYear,
-                    p.pp.IncomeExecutive,
-                    p.pp.PointsEarned,
-                    p.yip.Years
+                    BadgeNumber = p.pp.pp.Demographic!.BadgeNumber,
+                    p.pp.pp.CurrentHoursYear,
+                    p.pp.pp.HoursExecutive,
+                    p.pp.pp.Demographic!.DateOfBirth,
+                    p.pp.pp.Demographic!.EmploymentStatusId,
+                    p.pp.pp.Demographic!.TerminationDate,
+                    p.pp.pp.Demographic!.Ssn,
+                    p.pp.pp.Demographic!.ContactInfo.LastName,
+                    p.pp.pp.Demographic!.ContactInfo.FirstName,
+                    p.pp.pp.Demographic!.StoreNumber,
+                    EmploymentTypeId = p.pp.pp.Demographic!.EmploymentTypeId.ToString(), //There seems to be some sort of issue in the oracle ef provider that struggles with the char type.  It maps this expression
+                                                                                         //to: NOT (CAST((BITXOR("s"."EMPLOYMENT_TYPE_ID", N'')) AS NUMBER(1)) )
+                                                                                         //Converting to a string appears to fix this issue.
+                    EmploymentTypeName = p.et.Name,
+                    p.pp.pp.CurrentIncomeYear,
+                    p.pp.pp.IncomeExecutive,
+                    p.pp.pp.PointsEarned,
+                    p.pp.yip.Years
                 });
 
             if (req.IsYearEnd)
@@ -456,6 +458,7 @@ public class CleanupReportService : ICleanupReportService
                     from pp in ctx.PayProfits
                     join d in FrozenService.GetDemographicSnapshot(ctx, req.ProfitYear) on pp.DemographicId equals d.Id
                     join t in _totalService.GetYearsOfService(ctx, req.ProfitYear) on d.Ssn equals t.Ssn
+                    join et in ctx.EmploymentTypes on d.EmploymentTypeId equals et.Id
                     where pp.ProfitYear == req.ProfitYear
                     select new
                     {
@@ -470,6 +473,7 @@ public class CleanupReportService : ICleanupReportService
                         d.ContactInfo.FirstName,
                         d.StoreNumber,
                         EmploymentTypeId = d.EmploymentTypeId.ToString(),
+                        EmploymentTypeName = et.Name,
                         pp.CurrentIncomeYear,
                         pp.IncomeExecutive,
                         pp.PointsEarned,
@@ -497,6 +501,7 @@ public class CleanupReportService : ICleanupReportService
                           b.Contact!.ContactInfo.FirstName,
                           StoreNumber = (short)0,
                           EmploymentTypeId = " ",
+                          EmploymentTypeName = "",
                           CurrentIncomeYear = 0m,
                           IncomeExecutive = 0m,
                           PointsEarned = (decimal?)null,
@@ -578,6 +583,7 @@ public class CleanupReportService : ICleanupReportService
                           EmployeeName = $"{x.pp.LastName}, {x.pp.FirstName}",
                           StoreNumber = x.pp.StoreNumber,
                           EmployeeTypeCode = x.pp.EmploymentTypeId[0],
+                          EmployeeTypeName = x.pp.EmploymentTypeName,
                           DateOfBirth = x.pp.DateOfBirth,
                           Age = 0, //Filled out below after materialization
                           Ssn = x.pp.Ssn.MaskSsn(),

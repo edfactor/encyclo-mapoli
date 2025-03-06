@@ -61,6 +61,17 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(m => m.TaxCodes).Returns(mockTaxCodes.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.TaxCodes).Returns(mockTaxCodes.Object);
 
+        var employmentTypes = new List<EmploymentType>()
+        {
+            new EmploymentType() {Id=EmploymentType.Constants.FullTimeAccruedPaidHolidays,Name=EmploymentType.Constants.FullTimeAccruedPaidHolidays.ToString() },
+            new EmploymentType() {Id=EmploymentType.Constants.FullTimeEightPaidHolidays,Name=EmploymentType.Constants.FullTimeEightPaidHolidays.ToString() },
+            new EmploymentType() {Id=EmploymentType.Constants.FullTimeStraightSalary,Name=EmploymentType.Constants.FullTimeStraightSalary.ToString() },
+            new EmploymentType() {Id=EmploymentType.Constants.PartTime,Name=EmploymentType.Constants.PartTime.ToString() }
+        };
+        var mockEmploymentTypes = employmentTypes.AsQueryable().BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.EmploymentTypes).Returns(mockEmploymentTypes.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.EmploymentTypes).Returns(mockEmploymentTypes.Object);
+
         List<Demographic>? demographics = new DemographicFaker().Generate(500);
         List<DemographicHistory>? demographicHistories = new DemographicHistoryFaker(demographics).Generate(demographics.Count);
 
@@ -104,7 +115,6 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         Mock<DbSet<FrozenState>> mockFrozenStates = frozenStates.AsQueryable().BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.FrozenStates).Returns(mockFrozenStates.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.FrozenStates).Returns(mockFrozenStates.Object);
-
 
         _profitSharingDbContext.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()));
         _profitSharingDbContext.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()))

@@ -599,6 +599,7 @@ export interface YearEndProfitSharingReportResponse {
   employeeName: string;
   storeNumber: number;
   employeeTypeCode: string;
+  employmentTypeName: string;
   dateOfBirth: Date;
   age: number;
   ssn: string;
