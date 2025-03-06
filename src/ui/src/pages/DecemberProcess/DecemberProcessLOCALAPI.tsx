@@ -237,15 +237,14 @@ const DecemberProcessLocalApi: React.FC = () => {
   const [triggerDuplicateNamesAndBirthdays, { isFetching: isFetchingDuplicateNames }] =
     useLazyGetDuplicateNamesAndBirthdaysQuery();
 
-  const { negativeEtvaForSSNsOnPayprofit, duplicateSSNsData, demographicBadges, duplicateNamesAndBirthday } =
-    useSelector((state: RootState) => state.yearsEnd);
+  const { _ } = useSelector((state: RootState) => state.yearsEnd);
 
   useEffect(() => {
     if (hasToken) {
-      triggerETVASearch({ profitYear: 2023, pagination: { take: 25, skip: 0 } });
-      triggerPayrollDupeSsnsOnDemographics({ profitYear: 2023, pagination: { take: 25, skip: 0 } });
+      triggerETVASearch({ profitYear: 2024, pagination: { take: 25, skip: 0 } });
+      triggerPayrollDupeSsnsOnDemographics({ pagination: { take: 25, skip: 0 } });
       triggerDemographicBadgesNotInPayprofit({ pagination: { take: 25, skip: 0 } });
-      triggerDuplicateNamesAndBirthdays({ profitYear: 2023, pagination: { take: 25, skip: 0 } });
+      triggerDuplicateNamesAndBirthdays({ profitYear: 2024, pagination: { take: 25, skip: 0 } });
     }
   }, [hasToken]);
   return (

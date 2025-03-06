@@ -35,7 +35,7 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
             s.Summary = "Provide the Terminated Employee and Beneficiary Report (QPAY066) report.";
             s.Description =
                 "Reports on beneficiaries with a non-zero balance and employees who were terminated (and not retired) in the specified date range.";
-            s.ExampleRequest = new ProfitYearRequest() { ProfitYear = 2023 };
+            s.ExampleRequest = new ProfitYearRequest() { ProfitYear = 2024 };
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
