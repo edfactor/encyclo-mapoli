@@ -8,6 +8,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Clients;
+using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using FluentValidation.Results;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
@@ -40,7 +41,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         _employeeSyncBus = employeeSyncBus;
     }
 
-    public async Task ExecuteFullSyncAsync(string requestedBy = "System", CancellationToken cancellationToken = default)
+    public async Task ExecuteFullSyncAsync(string requestedBy = Constants.SystemAccountName, CancellationToken cancellationToken = default)
     {
         using Activity? activity = OracleHcmActivitySource.Instance.StartActivity(nameof(ExecuteFullSyncAsync), ActivityKind.Internal);
 
@@ -88,7 +89,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         }
     }
 
-    public async Task ExecuteDeltaSyncAsync(string requestedBy = "System", CancellationToken cancellationToken = default)
+    public async Task ExecuteDeltaSyncAsync(string requestedBy = Constants.SystemAccountName, CancellationToken cancellationToken = default)
     {
         using Activity? activity = OracleHcmActivitySource.Instance.StartActivity(nameof(ExecuteDeltaSyncAsync), ActivityKind.Internal);
 

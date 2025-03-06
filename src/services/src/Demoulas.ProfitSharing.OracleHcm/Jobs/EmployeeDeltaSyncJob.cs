@@ -1,4 +1,5 @@
 ﻿using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Quartz;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Jobs;
@@ -27,8 +28,8 @@ internal sealed class EmployeeDeltaSyncJob : IJob
     {
         if (_debugOracleHcmIdSet?.Any() ?? false)
         {
-            return _employeeSyncService.TrySyncEmployeeFromOracleHcm(requestedBy: "System", _debugOracleHcmIdSet, context.CancellationToken);
+            return _employeeSyncService.TrySyncEmployeeFromOracleHcm(requestedBy: Constants.SystemAccountName, _debugOracleHcmIdSet, context.CancellationToken);
         }
-        return _employeeSyncService.ExecuteDeltaSyncAsync(requestedBy: "System", context.CancellationToken);
+        return _employeeSyncService.ExecuteDeltaSyncAsync(requestedBy: Constants.SystemAccountName, context.CancellationToken);
     }
 }

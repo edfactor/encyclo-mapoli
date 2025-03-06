@@ -103,14 +103,21 @@ internal class PayrollSyncService
                 else
                 {
                     _logger.LogError("Failed to get balance types for PersonId {PersonId}/ObjectActionId {ObjectActionId}: {ResponseReasonPhrase}",
-                        item.PersonId, item.ObjectActionId,
+                        item.PersonId,
+                        item.ObjectActionId,
+                        SanitizeInput(response.ReasonPhrase));
+                    _logger.LogError("Failed to get balance types for PersonId {PersonId}/ObjectActionId {ObjectActionId}: {ResponseReasonPhrase}",
+                        item.PersonId, 
+                        item.ObjectActionId,
                         response.ReasonPhrase);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error fetching balance types for PersonId {PersonId}/ObjectActionId {ObjectActionId}: {Message}", item.PersonId,
-                    item.ObjectActionId, ex.Message);
+                _logger.LogError(ex, "Error fetching balance types for PersonId {PersonId}/ObjectActionId {ObjectActionId}: {Message}", 
+                    item.PersonId,
+                    item.ObjectActionId, 
+                    ex.Message);
             }
         }
         await CalculateAndUpdatePayProfitRecord(item.PersonId, year, balanceTypeTotals, cancellationToken);
@@ -192,5 +199,9 @@ internal class PayrollSyncService
             }
 
         }, cancellationToken);
+    }
+    private static string? SanitizeInput(string? input)
+    {
+        return input?.Replace("\r", string.Empty).Replace("\n", string.Empty);
     }
 }
