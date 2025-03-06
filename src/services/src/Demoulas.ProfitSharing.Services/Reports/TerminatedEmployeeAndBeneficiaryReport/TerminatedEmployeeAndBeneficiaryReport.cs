@@ -333,7 +333,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             Response = new PaginatedResponseDto<TerminatedEmployeeAndBeneficiaryDataResponseDto>(req)
             {
                 Results = membersSummary,
-                Total = membersSummary.Count
+                Total = memberSliceUnion.Count
             }
         };
     }
