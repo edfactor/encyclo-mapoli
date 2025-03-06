@@ -202,20 +202,29 @@ public class CleanupReportService : ICleanupReportService
             var results = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
                     string dupQuery =
-                    @"SELECT p1.Id, p1.FULL_NAME as FullName, p1.DATE_OF_BIRTH as DateOfBirth, UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) AS Distance
-FROM DEMOGRAPHIC p1
-         JOIN DEMOGRAPHIC p2
-              ON p1.Id < p2.Id  -- Avoid self-joins and duplicate pairs
-                  AND UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) < 2  -- Threshold for similarity
-                  AND SOUNDEX(p1.FULL_NAME) = SOUNDEX(p2.FULL_NAME)  -- Phonetic match
-union
-SELECT p2.Id AS DuplicateId, p2.FULL_NAME AS FullName, p2.DATE_OF_BIRTH DateOfBirth,
-       UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) AS Distance
-FROM DEMOGRAPHIC p1
-         JOIN DEMOGRAPHIC p2
-              ON p1.Id < p2.Id  -- Avoid self-joins and duplicate pairs
-                  AND UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) < 2  -- Threshold for similarity
-                  AND SOUNDEX(p1.FULL_NAME) = SOUNDEX(p2.FULL_NAME)  -- Phonetic match";
+                    @"SELECT p1.Id, p1.FULL_NAME as FullName, p1.DATE_OF_BIRTH as DateOfBirth,  UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) AS NameDistance
+            FROM DEMOGRAPHIC p1
+            JOIN DEMOGRAPHIC p2
+                ON p1.Id < p2.Id  -- Avoid self-joins and duplicate pairs
+                  AND UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) < 3  -- Name similarity threshold
+                  AND SOUNDEX(p1.FULL_NAME) = SOUNDEX(p2.FULL_NAME)  -- Phonetic similarity
+                  AND (
+                     p1.DATE_OF_BIRTH = p2.DATE_OF_BIRTH  -- Exact DOB match
+                         OR ABS(TRUNC(p1.DATE_OF_BIRTH) - TRUNC(p2.DATE_OF_BIRTH)) <= 3  -- Allow 3-day difference
+                         OR EXTRACT(YEAR FROM p1.DATE_OF_BIRTH) = EXTRACT(YEAR FROM p2.DATE_OF_BIRTH)  -- Same birth year
+                     )
+            union
+            SELECT p2.Id, p2.FULL_NAME as FullName, p2.DATE_OF_BIRTH as DateOfBirth,  UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) AS NameDistance
+            FROM DEMOGRAPHIC p1
+            JOIN DEMOGRAPHIC p2
+                ON p1.Id < p2.Id  -- Avoid self-joins and duplicate pairs
+                  AND UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) < 3  -- Name similarity threshold
+                  AND SOUNDEX(p1.FULL_NAME) = SOUNDEX(p2.FULL_NAME)  -- Phonetic similarity
+                  AND (
+                     p1.DATE_OF_BIRTH = p2.DATE_OF_BIRTH  -- Exact DOB match
+                         OR ABS(TRUNC(p1.DATE_OF_BIRTH) - TRUNC(p2.DATE_OF_BIRTH)) <= 3  -- Allow 3-day difference
+                         OR EXTRACT(YEAR FROM p1.DATE_OF_BIRTH) = EXTRACT(YEAR FROM p2.DATE_OF_BIRTH)  -- Same birth year
+                     )";
 
                     var dupNameSlashDateOfBirth = ctx.Database
                         .SqlQueryRaw<DemographicMatchDto>(dupQuery);

@@ -5,5 +5,6 @@ namespace Demoulas.ProfitSharing.Services.Internal.ServiceDto
     {
         public required string FullName { get; set; }
         public DateTime DateOfBirth { get; set; }
+        public byte NameDistance { get; set; }
     }
 }
