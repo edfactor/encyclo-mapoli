@@ -7,8 +7,10 @@ using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
@@ -20,17 +22,20 @@ public class CleanupReportService : ICleanupReportService
     private readonly ICalendarService _calendarService;
     private readonly ILogger<CleanupReportService> _logger;
     private readonly TotalService _totalService;
+    private readonly IHostEnvironment _host;
 
     public CleanupReportService(IProfitSharingDataContextFactory dataContextFactory,
         ContributionService contributionService,
         ILoggerFactory factory,
         ICalendarService calendarService,
-        TotalService totalService)
+        TotalService totalService,
+        IHostEnvironment host)
     {
         _dataContextFactory = dataContextFactory;
         _contributionService = contributionService;
         _calendarService = calendarService;
         _totalService = totalService;
+        _host = host;
         _logger = factory.CreateLogger<CleanupReportService>();
 
     }
@@ -199,18 +204,58 @@ public class CleanupReportService : ICleanupReportService
             var dict = new Dictionary<int, byte>();
             var results = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                var dupNameSlashDateOfBirth = (from dem in ctx.Demographics
-                                               group dem by new { dem.ContactInfo.FullName, dem.DateOfBirth }
-                    into g
-                                               where g.Count() > 1
-                                               select g.Key.FullName);
+                IQueryable<DemographicMatchDto> dupNameSlashDateOfBirth;
+
+                // Fallback for mocked (in-memory) db context which does not support raw SQL
+                if (_host.IsTestEnvironment())
+                {
+                    dupNameSlashDateOfBirth = ctx.Demographics
+                        .Include(d=> d.ContactInfo)
+                        .Select(d => new DemographicMatchDto
+                        {
+                            FullName = d.ContactInfo.FullName!,
+                            DateOfBirth = d.DateOfBirth,
+                            NameDistance = 0 // Default value since inline SQL isn't supported
+                        });
+                }
+                else
+                {
+                    string dupQuery =
+                        @"SELECT p1.Id, p1.FULL_NAME as FullName, p1.DATE_OF_BIRTH as DateOfBirth,  UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) AS NameDistance
+            FROM DEMOGRAPHIC p1
+            JOIN DEMOGRAPHIC p2
+                ON p1.Id < p2.Id  -- Avoid self-joins and duplicate pairs
+                  AND UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) < 3  -- Name similarity threshold
+                  AND SOUNDEX(p1.FULL_NAME) = SOUNDEX(p2.FULL_NAME)  -- Phonetic similarity
+                  AND (
+                     p1.DATE_OF_BIRTH = p2.DATE_OF_BIRTH  -- Exact DOB match
+                         OR ABS(TRUNC(p1.DATE_OF_BIRTH) - TRUNC(p2.DATE_OF_BIRTH)) <= 3  -- Allow 3-day difference
+                         OR EXTRACT(YEAR FROM p1.DATE_OF_BIRTH) = EXTRACT(YEAR FROM p2.DATE_OF_BIRTH)  -- Same birth year
+                     )
+            union
+            SELECT p2.Id, p2.FULL_NAME as FullName, p2.DATE_OF_BIRTH as DateOfBirth,  UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) AS NameDistance
+            FROM DEMOGRAPHIC p1
+            JOIN DEMOGRAPHIC p2
+                ON p1.Id < p2.Id  -- Avoid self-joins and duplicate pairs
+                  AND UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) < 3  -- Name similarity threshold
+                  AND SOUNDEX(p1.FULL_NAME) = SOUNDEX(p2.FULL_NAME)  -- Phonetic similarity
+                  AND (
+                     p1.DATE_OF_BIRTH = p2.DATE_OF_BIRTH  -- Exact DOB match
+                         OR ABS(TRUNC(p1.DATE_OF_BIRTH) - TRUNC(p2.DATE_OF_BIRTH)) <= 3  -- Allow 3-day difference
+                         OR EXTRACT(YEAR FROM p1.DATE_OF_BIRTH) = EXTRACT(YEAR FROM p2.DATE_OF_BIRTH)  -- Same birth year
+                     )";
+
+                    dupNameSlashDateOfBirth = ctx.Database
+                        .SqlQueryRaw<DemographicMatchDto>(dupQuery);
+                }
+
 
                 var query = from dem in ctx.Demographics
                             join ppLj in ctx.PayProfits on new { DemographicId = dem.Id, req.ProfitYear } equals new { ppLj.DemographicId, ppLj.ProfitYear } into tmpPayProfit
                             from pp in tmpPayProfit.DefaultIfEmpty()
                             join pdLj in ctx.ProfitDetails on new { dem.Ssn, req.ProfitYear } equals new { pdLj.Ssn, pdLj.ProfitYear } into tmpProfitDetails
                             from pd in tmpProfitDetails.DefaultIfEmpty()
-                            where dupNameSlashDateOfBirth.Contains(dem.ContactInfo.FullName)
+                            where dupNameSlashDateOfBirth.Select(d=> d.FullName).Contains(dem.ContactInfo.FullName)
                             group new { dem, pp, pd } by new
                             {
                                 dem.BadgeNumber,
