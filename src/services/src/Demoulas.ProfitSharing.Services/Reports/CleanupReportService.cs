@@ -1,4 +1,5 @@
-﻿using Demoulas.Common.Contracts.Contracts.Request;
+﻿using System.ComponentModel;
+using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -7,6 +8,7 @@ using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -199,18 +201,33 @@ public class CleanupReportService : ICleanupReportService
             var dict = new Dictionary<int, byte>();
             var results = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                var dupNameSlashDateOfBirth = (from dem in ctx.Demographics
-                                               group dem by new { dem.ContactInfo.FullName, dem.DateOfBirth }
-                    into g
-                                               where g.Count() > 1
-                                               select g.Key.FullName);
+                    string dupQuery =
+                    @"SELECT p1.Id, p1.FULL_NAME as FullName, p1.DATE_OF_BIRTH as DateOfBirth, UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) AS Distance
+FROM DEMOGRAPHIC p1
+         JOIN DEMOGRAPHIC p2
+              ON p1.Id < p2.Id  -- Avoid self-joins and duplicate pairs
+                  AND UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) < 2  -- Threshold for similarity
+                  AND SOUNDEX(p1.FULL_NAME) = SOUNDEX(p2.FULL_NAME)  -- Phonetic match
+union
+SELECT p2.Id AS DuplicateId, p2.FULL_NAME AS FullName, p2.DATE_OF_BIRTH DateOfBirth,
+       UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) AS Distance
+FROM DEMOGRAPHIC p1
+         JOIN DEMOGRAPHIC p2
+              ON p1.Id < p2.Id  -- Avoid self-joins and duplicate pairs
+                  AND UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) < 2  -- Threshold for similarity
+                  AND SOUNDEX(p1.FULL_NAME) = SOUNDEX(p2.FULL_NAME)  -- Phonetic match";
+
+                    var dupNameSlashDateOfBirth = ctx.Database
+                        .SqlQueryRaw<DemographicMatchDto>(dupQuery);
+
+
 
                 var query = from dem in ctx.Demographics
                             join ppLj in ctx.PayProfits on new { DemographicId = dem.Id, req.ProfitYear } equals new { ppLj.DemographicId, ppLj.ProfitYear } into tmpPayProfit
                             from pp in tmpPayProfit.DefaultIfEmpty()
                             join pdLj in ctx.ProfitDetails on new { dem.Ssn, req.ProfitYear } equals new { pdLj.Ssn, pdLj.ProfitYear } into tmpProfitDetails
                             from pd in tmpProfitDetails.DefaultIfEmpty()
-                            where dupNameSlashDateOfBirth.Contains(dem.ContactInfo.FullName)
+                            where dupNameSlashDateOfBirth.Select(d=> d.FullName).Contains(dem.ContactInfo.FullName)
                             group new { dem, pp, pd } by new
                             {
                                 dem.BadgeNumber,
