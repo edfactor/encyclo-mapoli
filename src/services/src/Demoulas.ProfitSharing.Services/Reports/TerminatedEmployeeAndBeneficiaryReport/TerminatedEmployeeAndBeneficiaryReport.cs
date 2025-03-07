@@ -47,7 +47,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         var terminatedEmployees = GetTerminatedEmployees(ctx, request, startEnd);
         var terminatedWithContributions = GetEmployeesAsMembers(ctx, request, terminatedEmployees);
         var beneficiaries = GetBeneficiaries(ctx, request);
-        return await CombineEmployeeAndBeneficiarySlices(request, terminatedWithContributions, beneficiaries, cancellationToken);
+        return await CombineEmployeeAndBeneficiarySlices(terminatedWithContributions, beneficiaries, cancellationToken);
     }
 
     private IQueryable<TerminatedEmployeeDto> GetTerminatedEmployees(IProfitSharingDbContext ctx, ProfitYearRequest request,
@@ -145,7 +145,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         return query;
     }
 
-    private static async Task<List<MemberSlice>> CombineEmployeeAndBeneficiarySlices(ProfitYearRequest request, IQueryable<MemberSlice> terminatedWithContributions,
+    private static async Task<List<MemberSlice>> CombineEmployeeAndBeneficiarySlices(IQueryable<MemberSlice> terminatedWithContributions,
         IQueryable<MemberSlice> beneficiaries, CancellationToken cancellation)
     {
         // NOTE: the server side union fails
@@ -156,7 +156,6 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             // Failure to use this sort, causes READY and SMART reports to not match.
             .OrderBy(x => x.FullName, StringComparer.Ordinal)
             .ThenBy(x => x.BadgeNumber)
-            .Skip(request.Skip ?? 0)
             .ToList();
     }
 
@@ -215,7 +214,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         var membersSummary = new List<TerminatedEmployeeAndBeneficiaryDataResponseDto>();
 
         // Refactored loop using bulk loaded dictionary lookup
-        foreach (var memberSlice in memberSliceUnion)
+        foreach (var memberSlice in memberSliceUnion.Skip(req.Skip ?? 0))
         {
             // Lookup profit details; if missing, use a default instance.
             if (!profitDetailsDict.TryGetValue(memberSlice.Ssn, out InternalProfitDetailDto? transactionsThisYear))
