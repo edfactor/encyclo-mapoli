@@ -31,7 +31,6 @@ import {
   EmployeeWagesForYear,
   YearEndProfitSharingReportResponse,
   BaseQueryParams,
-  MasterInquiryRequest,
   MasterInquirySearch
 } from "reduxstore/types";
 

@@ -17,7 +17,7 @@ import { useLazyGetProfitMasterInquiryQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { MasterInquiryRequest } from "reduxstore/types";
+import { MasterInquiryRequest, MasterInquirySearch } from "reduxstore/types";
 import {
   clearMasterInquiryData,
   clearMasterInquiryRequestParams,
@@ -27,36 +27,18 @@ import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { RootState } from "reduxstore/store";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
-import { paymentTypeMap, memberTypeMap } from "./MasterInquiryFunctions";
-
-interface MasterInquirySearch {
-  startProfitYear?: Date | null;
-  endProfitYear?: Date | null;
-  startProfitMonth?: number | null;
-  endProfitMonth?: number | null;
-  socialSecurity?: number | null;
-  name?: string | null;
-  badgeNumber?: number | null;
-  comment?: string | null;
-  paymentType: "all" | "hardship" | "payoffs" | "rollovers";
-  memberType: "all" | "employees" | "beneficiaries" | "none";
-  contribution?: number | null;
-  earnings?: number | null;
-  forfeiture?: number | null;
-  payment?: number | null;
-  voids: boolean;
-}
+import { paymentTypeGetNumberMap, memberTypeGetNumberMap } from "./MasterInquiryFunctions";
 
 const schema = yup.object().shape({
   startProfitYear: yup
     .date()
-    .min(new Date(2020, 0, 1), "Year must be 2020 or later")
+    .min(new Date(2015, 0, 1), "Year must be 2020 or later")
     .max(new Date(2100, 11, 31), "Year must be 2100 or earlier")
     .typeError("Invalid date")
     .nullable(),
   endProfitYear: yup
     .date()
-    .min(new Date(2020, 0, 1), "Year must be 2020 or later")
+    .min(new Date(2015, 0, 1), "Year must be 2020 or later")
     .max(new Date(2100, 11, 31), "Year must be 2100 or earlier")
     .typeError("Invalid date")
     .nullable(),
@@ -98,39 +80,10 @@ const schema = yup.object().shape({
 });
 
 interface MasterInquirySearchFilterProps {
-  setStartProfitYear: (year: Date) => void;
-  setEndProfitYear: (year: Date) => void;
-  setStartProfitMonth: (month: number | null) => void;
-  setEndProfitMonth: (month: number | null) => void;
-  setSocialSecurity: (ssn: number | null) => void;
-  setName: (name: string | null) => void;
-  setBadgeNumber: (badgeNumber: number | null) => void;
-  setComment: (comment: string | null) => void;
-  setPaymentType: (paymentType: "all" | "hardship" | "payoffs" | "rollovers") => void;
-  setMemberType: (memberType: "all" | "employees" | "beneficiaries" | "none") => void;
-  setContribution: (contribution: number | null) => void;
-  setEarnings: (earnings: number | null) => void;
-  setForfeiture: (forfeiture: number | null) => void;
-  setPayment: (payment: number | null) => void;
-  //setVoids: (voids: boolean) => void;
   setInitialSearchLoaded: (include: boolean) => void;
 }
 
 const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
-  setStartProfitYear,
-  setEndProfitYear,
-  setStartProfitMonth,
-  setEndProfitMonth,
-  setSocialSecurity,
-  setName,
-  setBadgeNumber,
-  setComment,
-  setPaymentType,
-  setMemberType,
-  setContribution,
-  setEarnings,
-  setForfeiture,
-  setPayment,
   //setVoids,
   setInitialSearchLoaded
 }) => {
@@ -156,34 +109,21 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
     resolver: yupResolver(schema),
     defaultValues: {
       startProfitYear: masterInquiryRequestParams?.startProfitYear
-        ? new Date(masterInquiryRequestParams.startProfitYear, 0, 1)
+        ? masterInquiryRequestParams.startProfitYear
         : undefined,
-      endProfitYear: masterInquiryRequestParams?.endProfitYear
-        ? new Date(masterInquiryRequestParams.endProfitYear, 0, 1)
-        : undefined,
+      endProfitYear: masterInquiryRequestParams?.endProfitYear ? masterInquiryRequestParams.endProfitYear : undefined,
       startProfitMonth: masterInquiryRequestParams?.startProfitMonth || undefined,
       endProfitMonth: masterInquiryRequestParams?.endProfitMonth || undefined,
       socialSecurity: masterInquiryRequestParams?.socialSecurity || undefined,
       name: masterInquiryRequestParams?.name || undefined,
       badgeNumber: masterInquiryRequestParams?.badgeNumber || undefined,
       comment: masterInquiryRequestParams?.comment || undefined,
-      paymentType: masterInquiryRequestParams?.paymentType
-        ? (Object.keys(paymentTypeMap).find(
-            (key) => paymentTypeMap[key] === masterInquiryRequestParams?.paymentType
-          ) as "all" | "hardship" | "payoffs" | "rollovers" | undefined)
-        : "all",
-      memberType: masterInquiryRequestParams?.memberType
-        ? (Object.keys(memberTypeMap).find((key) => memberTypeMap[key] === masterInquiryRequestParams?.memberType) as
-            | "all"
-            | "employees"
-            | "beneficiaries"
-            | "none"
-            | undefined)
-        : "all",
-      contribution: masterInquiryRequestParams?.contributionAmount || undefined,
-      earnings: masterInquiryRequestParams?.earningsAmount || undefined,
-      forfeiture: masterInquiryRequestParams?.forfeitureAmount || undefined,
-      payment: masterInquiryRequestParams?.paymentAmount || undefined,
+      paymentType: masterInquiryRequestParams?.paymentType ? masterInquiryRequestParams?.paymentType : "all",
+      memberType: masterInquiryRequestParams?.memberType ? masterInquiryRequestParams?.memberType : "all",
+      contribution: masterInquiryRequestParams?.contribution || undefined,
+      earnings: masterInquiryRequestParams?.earnings || undefined,
+      forfeiture: masterInquiryRequestParams?.forfeiture || undefined,
+      payment: masterInquiryRequestParams?.payment || undefined,
       voids: false // masterInquiryRequestParams?.voids false
     }
   });
@@ -217,8 +157,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
         ...(!!data.name && { name: data.name }),
         ...(!!data.badgeNumber && { badgeNumber: data.badgeNumber }),
         ...(!!data.comment && { comment: data.comment }),
-        ...(!!data.paymentType && { paymentType: paymentTypeMap[data.paymentType] }),
-        ...(!!data.memberType && { memberType: memberTypeMap[data.memberType] }),
+        ...(!!data.paymentType && { paymentType: paymentTypeGetNumberMap[data.paymentType] }),
+        ...(!!data.memberType && { memberType: memberTypeGetNumberMap[data.memberType] }),
         ...(!!data.contribution && { contribution: data.contribution }),
         ...(!!data.earnings && { earnings: data.earnings }),
         ...(!!data.forfeiture && { forfeiture: data.forfeiture }),
@@ -233,6 +173,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
 
   const handleReset = () => {
     setInitialSearchLoaded(false);
+    dispatch(clearMasterInquiryRequestParams());
+    dispatch(clearMasterInquiryData());
     reset({
       startProfitYear: undefined,
       endProfitYear: undefined,
@@ -250,8 +192,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
       payment: undefined,
       voids: false
     });
-    dispatch(clearMasterInquiryRequestParams());
-    dispatch(clearMasterInquiryData());
   };
 
   const months = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -287,7 +227,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
                   onChange={(value: Date | null) => {
                     if (value) {
                       field.onChange(value);
-                      setStartProfitYear(value);
                     }
                   }}
                   value={field.value ?? null}
@@ -315,7 +254,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
                   onChange={(value: Date | null) => {
                     if (value) {
                       field.onChange(value);
-                      setEndProfitYear(value);
                     }
                   }}
                   value={field.value ?? null}
@@ -343,7 +281,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
                   {...field}
                   onChange={(e) => {
                     field.onChange(e.target.value === "" ? null : e.target.value);
-                    setStartProfitMonth(e.target.value === "" ? null : Number(e.target.value));
                   }}
                   sx={selectSx}
                   fullWidth
@@ -379,7 +316,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
                   {...field}
                   onChange={(e) => {
                     field.onChange(e.target.value === "" ? null : e.target.value);
-                    setEndProfitMonth(e.target.value === "" ? null : Number(e.target.value));
                   }}
                   sx={selectSx}
                   fullWidth
@@ -421,7 +357,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
                   onChange={(e) => {
                     const parsedValue = e.target.value === "" ? null : Number(e.target.value);
                     field.onChange(parsedValue);
-                    setSocialSecurity(parsedValue);
                   }}
                 />
               )}
@@ -447,7 +382,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
                   error={!!errors.name}
                   onChange={(e) => {
                     field.onChange(e.target.value);
-                    setName(e.target.value);
                   }}
                 />
               )}
@@ -474,7 +408,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
                   onChange={(e) => {
                     const parsedValue = e.target.value === "" ? null : Number(e.target.value);
                     field.onChange(parsedValue);
-                    setBadgeNumber(parsedValue);
                   }}
                 />
               )}
@@ -500,7 +433,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
                   error={!!errors.comment}
                   onChange={(e) => {
                     field.onChange(e.target.value);
-                    setComment(e.target.value);
                   }}
                 />
               )}
@@ -519,11 +451,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
                 render={({ field }) => (
                   <RadioGroup
                     {...field}
-                    onChange={(e) => {
-                      // We need to translate from the string value to the number value
-
-                      setPaymentType(e.target.value as "all" | "hardship" | "payoffs" | "rollovers");
-                    }}
                     row>
                     <FormControlLabel
                       value="all"
@@ -562,11 +489,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
                 render={({ field }) => (
                   <RadioGroup
                     {...field}
-                    onChange={(e) => {
-                      // We need to translate from the string value to the number value
-
-                      setMemberType(e.target.value as "all" | "employees" | "beneficiaries" | "none");
-                    }}
                     row>
                     <FormControlLabel
                       value="all"
@@ -613,7 +535,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
                   onChange={(e) => {
                     const parsedValue = e.target.value === "" ? null : Number(e.target.value);
                     field.onChange(parsedValue);
-                    setContribution(parsedValue);
                   }}
                 />
               )}
@@ -640,7 +561,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
                   onChange={(e) => {
                     const parsedValue = e.target.value === "" ? null : Number(e.target.value);
                     field.onChange(parsedValue);
-                    setEarnings(parsedValue);
                   }}
                 />
               )}
@@ -667,7 +587,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
                   onChange={(e) => {
                     const parsedValue = e.target.value === "" ? null : Number(e.target.value);
                     field.onChange(parsedValue);
-                    setForfeiture(parsedValue);
                   }}
                 />
               )}
@@ -694,7 +613,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
                   onChange={(e) => {
                     const parsedValue = e.target.value === "" ? null : Number(e.target.value);
                     field.onChange(parsedValue);
-                    setPayment(parsedValue);
                   }}
                 />
               )}
@@ -715,7 +633,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
                       checked={field.value}
                       onChange={(e) => {
                         field.onChange(e.target.checked);
-                        setVoids(e.target.checked);
                       }}
                     />
                   )}

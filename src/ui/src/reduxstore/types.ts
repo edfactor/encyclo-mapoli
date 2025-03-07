@@ -264,6 +264,23 @@ export interface EligibleEmployeeResponseDto {
 export interface BaseQueryParams {
   profitYear: number;
 }
+export interface MasterInquirySearch {
+  startProfitYear?: Date | null;
+  endProfitYear?: Date | null;
+  startProfitMonth?: number | null;
+  endProfitMonth?: number | null;
+  socialSecurity?: number | null;
+  name?: string | null;
+  badgeNumber?: number | null;
+  comment?: string | null;
+  paymentType: "all" | "hardship" | "payoffs" | "rollovers";
+  memberType: "all" | "employees" | "beneficiaries" | "none";
+  contribution?: number | null;
+  earnings?: number | null;
+  forfeiture?: number | null;
+  payment?: number | null;
+  voids: boolean;
+}
 
 export interface MasterInquiryDetail extends ProfitYearRequest {
   id: number;

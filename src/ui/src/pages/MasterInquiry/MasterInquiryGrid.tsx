@@ -6,46 +6,13 @@ import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetMasterInquiryGridColumns } from "./MasterInquiryGridColumns";
 import { MasterInquiryRequest } from "reduxstore/types";
-import { paymentTypeMap, memberTypeMap } from "./MasterInquiryFunctions";
+import { paymentTypeGetNumberMap, memberTypeGetNumberMap } from "./MasterInquiryFunctions";
 interface MasterInquiryGridProps {
-  startProfitYearCurrent: Date | null;
-  endProfitYearCurrent: Date | null;
-  startProfitMonthCurrent: number | null;
-  endProfitMonthCurrent: number | null;
-  socialSecurityCurrent: number | null;
-  nameCurrent: string | null;
-  badgeNumberCurrent: number | null;
-  commentCurrent: string | null;
-  paymentTypeCurrent: "all" | "hardship" | "payoffs" | "rollovers";
-  memberTypeCurrent: "all" | "employees" | "beneficiaries" | "none";
-  contributionCurrent: number | null;
-  earningsCurrent: number | null;
-  forfeitureCurrent: number | null;
-  paymentCurrent: number | null;
-  //voidsCurrent: boolean;
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
 }
 
-const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({
-  startProfitYearCurrent,
-  endProfitYearCurrent,
-  startProfitMonthCurrent,
-  endProfitMonthCurrent,
-  socialSecurityCurrent,
-  nameCurrent,
-  badgeNumberCurrent,
-  commentCurrent,
-  paymentTypeCurrent,
-  memberTypeCurrent,
-  contributionCurrent,
-  earningsCurrent,
-  forfeitureCurrent,
-  paymentCurrent,
-  //voidsCurrent,
-  initialSearchLoaded,
-  setInitialSearchLoaded
-}) => {
+const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoaded, setInitialSearchLoaded }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [_sortParams, setSortParams] = useState<ISortParams>({
@@ -53,7 +20,7 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({
     isSortDescending: false
   });
 
-  const { masterInquiryData } = useSelector((state: RootState) => state.yearsEnd);
+  const { masterInquiryData, masterInquiryRequestParams } = useSelector((state: RootState) => state.yearsEnd);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [triggerSearch, { isFetching }] = useLazyGetProfitMasterInquiryQuery();
 
@@ -61,46 +28,39 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({
   const columnDefs = useMemo(() => GetMasterInquiryGridColumns(), []);
 
   const onSearch = useCallback(async () => {
+    if (!masterInquiryRequestParams) return;
+
     const request: MasterInquiryRequest = {
       pagination: { skip: pageNumber * pageSize, take: pageSize },
-      ...(!!startProfitYearCurrent && { startProfitYear: startProfitYearCurrent.getFullYear() }),
-      ...(!!endProfitYearCurrent && { endProfitYear: endProfitYearCurrent.getFullYear() }),
-      ...(!!startProfitMonthCurrent && { startProfitMonth: startProfitMonthCurrent }),
-      ...(!!endProfitMonthCurrent && { endProfitMonth: endProfitMonthCurrent }),
-      ...(!!socialSecurityCurrent && { socialSecurity: socialSecurityCurrent }),
-      ...(!!nameCurrent && { name: nameCurrent }),
-      ...(!!badgeNumberCurrent && { badgeNumber: badgeNumberCurrent }),
-      ...(!!commentCurrent && { comment: commentCurrent }),
-      ...(!!paymentTypeCurrent && { paymentType: paymentTypeMap[paymentTypeCurrent] }),
-      ...(!!memberTypeCurrent && { memberType: memberTypeMap[memberTypeCurrent] }),
-      ...(!!contributionCurrent && { contribution: contributionCurrent }),
-      ...(!!earningsCurrent && { earnings: earningsCurrent }),
-      ...(!!forfeitureCurrent && { forfeiture: forfeitureCurrent }),
-      ...(!!paymentCurrent && { payment: paymentCurrent })
+      ...(!!masterInquiryRequestParams.startProfitYear && {
+        startProfitYear: masterInquiryRequestParams.startProfitYear.getFullYear()
+      }),
+      ...(!!masterInquiryRequestParams.endProfitYear && {
+        endProfitYear: masterInquiryRequestParams.endProfitYear.getFullYear()
+      }),
+      ...(!!masterInquiryRequestParams.startProfitMonth && {
+        startProfitMonth: masterInquiryRequestParams.startProfitMonth
+      }),
+      ...(!!masterInquiryRequestParams.endProfitMonth && { endProfitMonth: masterInquiryRequestParams.endProfitMonth }),
+      ...(!!masterInquiryRequestParams.socialSecurity && { socialSecurity: masterInquiryRequestParams.socialSecurity }),
+      ...(!!masterInquiryRequestParams.name && { name: masterInquiryRequestParams.name }),
+      ...(!!masterInquiryRequestParams.badgeNumber && { badgeNumber: masterInquiryRequestParams.badgeNumber }),
+      ...(!!masterInquiryRequestParams.comment && { comment: masterInquiryRequestParams.comment }),
+      ...(!!masterInquiryRequestParams.paymentType && {
+        paymentType: paymentTypeGetNumberMap[masterInquiryRequestParams.paymentType]
+      }),
+      ...(!!masterInquiryRequestParams.memberType && {
+        memberType: memberTypeGetNumberMap[masterInquiryRequestParams.memberType]
+      }),
+      ...(!!masterInquiryRequestParams.contribution && { contribution: masterInquiryRequestParams.contribution }),
+      ...(!!masterInquiryRequestParams.earnings && { earnings: masterInquiryRequestParams.earnings }),
+      ...(!!masterInquiryRequestParams.forfeiture && { forfeiture: masterInquiryRequestParams.forfeiture }),
+      ...(!!masterInquiryRequestParams.payment && { payment: masterInquiryRequestParams.payment })
       //voids: voidsCurrent,
     };
 
     await triggerSearch(request, false);
-  }, [
-    startProfitYearCurrent,
-    endProfitYearCurrent,
-    startProfitMonthCurrent,
-    endProfitMonthCurrent,
-    socialSecurityCurrent,
-    nameCurrent,
-    badgeNumberCurrent,
-    commentCurrent,
-    paymentTypeCurrent,
-    memberTypeCurrent,
-    contributionCurrent,
-    earningsCurrent,
-    forfeitureCurrent,
-    paymentCurrent,
-    //voidsCurrent,
-    pageNumber,
-    pageSize,
-    triggerSearch
-  ]);
+  }, [pageNumber, pageSize, triggerSearch, masterInquiryRequestParams]);
 
   useEffect(() => {
     if (initialSearchLoaded) {
