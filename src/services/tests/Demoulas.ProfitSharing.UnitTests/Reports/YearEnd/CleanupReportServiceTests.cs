@@ -386,7 +386,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             //Prevent any payprofit records from being returned
             foreach (var pp in ctx.PayProfits)
             {
-                pp.ProfitYear = 1999;
+                pp.ProfitYear = 2100;
             }
 
             //Setup employee to be returned

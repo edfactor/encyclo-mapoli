@@ -104,13 +104,15 @@ export const GetProfitShareReportColumns = (): ColDef[] => {
       resizable: true
     },
     {
-      headerName: "Is new",
-      field: "isNew",
+      headerName: "",
       colId: "isNew",
       minWidth: 150,
       headerClass: "center-align",
       cellClass: "center-align",
       resizable: true,
+      valueFormatter: (params) => {
+        return params.data.isUnder21 ? "< 21" : params.data.isNew ? "New" : "";
+      }
     }
   ];
 };

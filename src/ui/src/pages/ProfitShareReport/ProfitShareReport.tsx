@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button, Divider } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { DSMAccordion, Page } from "smart-ui-library";
@@ -8,6 +9,7 @@ import { useNavigate } from "react-router";
 import { MENU_LABELS } from "../../constants";
 
 const ProfitShareReport = () => {
+  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const navigate = useNavigate();
 
   const handleStatusChange = async (newStatus: ProcessStatus) => {
@@ -46,7 +48,10 @@ const ProfitShareReport = () => {
           </Grid2>
 
           <Grid2 width="100%">
-            <ProfitShareReportGrid />
+            <ProfitShareReportGrid
+              initialSearchLoaded={initialSearchLoaded}
+              setInitialSearchLoaded={setInitialSearchLoaded}
+             />
           </Grid2>
         </Grid2>
     </Page>
