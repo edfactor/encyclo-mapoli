@@ -212,9 +212,11 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             .ToDictionaryAsync(x => x.Ssn, cancellationToken);
 
         var membersSummary = new List<TerminatedEmployeeAndBeneficiaryDataResponseDto>();
+        var unions = memberSliceUnion.Skip(req.Skip ?? 0).ToList();
+        var count = memberSliceUnion.Count;
 
         // Refactored loop using bulk loaded dictionary lookup
-        foreach (var memberSlice in memberSliceUnion.Skip(req.Skip ?? 0))
+        foreach (var memberSlice in unions)
         {
             // Lookup profit details; if missing, use a default instance.
             if (!profitDetailsDict.TryGetValue(memberSlice.Ssn, out InternalProfitDetailDto? transactionsThisYear))
@@ -262,6 +264,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             // If not interesting, skip.
             if (!IsInteresting(member))
             {
+                count--;
                 continue;
             }
 
@@ -333,7 +336,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             Response = new PaginatedResponseDto<TerminatedEmployeeAndBeneficiaryDataResponseDto>(req)
             {
                 Results = membersSummary,
-                Total = memberSliceUnion.Count
+                Total = count
             }
         };
     }
