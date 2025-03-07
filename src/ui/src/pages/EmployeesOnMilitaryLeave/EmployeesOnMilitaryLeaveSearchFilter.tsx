@@ -1,54 +1,24 @@
-import { yupResolver } from "@hookform/resolvers/yup";
-import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { Controller, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { useLazyGetEmployeesOnMilitaryLeaveQuery } from "reduxstore/api/YearsEndApi";
 import { clearEmployeesOnMilitaryLeaveDetails } from "reduxstore/slices/yearsEndSlice";
 import { SearchAndReset } from "smart-ui-library";
-import * as yup from "yup";
-
-interface ISearchForm {
-  profitYear: number;
-}
-
-const schema = yup.object().shape({
-  profitYear: yup
-    .number()
-    .typeError("Year must be a number")
-    .integer("Year must be an integer")
-    .min(2020, "Year must be 2020 or later")
-    .max(2100, "Year must be 2100 or earlier")
-    .required("Year is required")
-});
 
 interface EmployeesOnMilitaryLeaveSearchFilterProps {
-  setProfitYear: (year: number) => void;
   setInitialSearchLoaded: (include: boolean) => void;
 }
 
 const EmployeesOnMilitaryLeaveSearchFilter: React.FC<EmployeesOnMilitaryLeaveSearchFilterProps> = ({
-  setProfitYear,
   setInitialSearchLoaded
 }) => {
   const [triggerSearch, { isFetching }] = useLazyGetEmployeesOnMilitaryLeaveQuery();
-  const dispatch = useDispatch();
-  const {
-    control,
-    handleSubmit,
-    formState: { errors, isValid },
-    reset
-  } = useForm<ISearchForm>({
-    resolver: yupResolver(schema),
-    defaultValues: {
-      profitYear: undefined
-    }
-  });
 
-  const validateAndSearch = () => {
+  const dispatch = useDispatch();
+
+  const search = () => {
     triggerSearch(
       {
-        pagination: { skip: 0, take: 25 }
+        pagination: { skip: 0, take: 100 }
       },
       false
     );
@@ -57,47 +27,18 @@ const EmployeesOnMilitaryLeaveSearchFilter: React.FC<EmployeesOnMilitaryLeaveSea
   const handleReset = () => {
     setInitialSearchLoaded(false);
     dispatch(clearEmployeesOnMilitaryLeaveDetails());
-    reset();
+    // Leaving this stub here in case we do want this page to have search filters. If we don't, this entire file and
+    // its reference in the MissingCommaInPyName page component.
   };
 
   return (
-    <form onSubmit={handleSubmit(validateAndSearch)}>
-      <Grid2
-        container
-        paddingX="24px"
-        gap="24px">
-        <Grid2
-          xs={12}
-          sm={6}
-          md={3}>
-          <FormLabel>Year</FormLabel>
-          <Controller
-            name="profitYear"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                fullWidth
-                variant="outlined"
-                error={!!errors.profitYear}
-                onChange={(e) => {
-                  field.onChange(e);
-                  setProfitYear(parseInt(e.target.value));
-                }}
-                inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
-              />
-            )}
-          />
-          {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
-        </Grid2>
-      </Grid2>
+    <form onSubmit={search}>
       <Grid2
         width="100%"
         paddingX="24px">
         <SearchAndReset
-          disabled={!isValid}
           handleReset={handleReset}
-          handleSearch={handleSubmit(validateAndSearch)}
+          handleSearch={search}
           isFetching={isFetching}
         />
       </Grid2>
