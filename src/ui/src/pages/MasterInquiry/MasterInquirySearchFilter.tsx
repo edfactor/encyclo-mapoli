@@ -18,7 +18,11 @@ import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { MasterInquiryRequest } from "reduxstore/types";
-import { clearMasterInquiryData } from "reduxstore/slices/yearsEndSlice";
+import {
+  clearMasterInquiryData,
+  clearMasterInquiryRequestParams,
+  setMasterInquiryRequestParams
+} from "reduxstore/slices/yearsEndSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { RootState } from "reduxstore/store";
@@ -131,6 +135,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
   setInitialSearchLoaded
 }) => {
   const [triggerSearch, { isFetching }] = useLazyGetProfitMasterInquiryQuery();
+  const { masterInquiryRequestParams } = useSelector((state: RootState) => state.yearsEnd);
+
   const dispatch = useDispatch();
 
   const { badgeNumber } = useParams<{
@@ -149,21 +155,36 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
   } = useForm<MasterInquirySearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      startProfitYear: undefined,
-      endProfitYear: undefined,
-      startProfitMonth: undefined,
-      endProfitMonth: undefined,
-      socialSecurity: undefined,
-      name: undefined,
-      badgeNumber: undefined,
-      comment: undefined,
-      paymentType: "all",
-      memberType: "all",
-      contribution: undefined,
-      earnings: undefined,
-      forfeiture: undefined,
-      payment: undefined,
-      voids: false
+      startProfitYear: masterInquiryRequestParams?.startProfitYear
+        ? new Date(masterInquiryRequestParams.startProfitYear, 0, 1)
+        : undefined,
+      endProfitYear: masterInquiryRequestParams?.endProfitYear
+        ? new Date(masterInquiryRequestParams.endProfitYear, 0, 1)
+        : undefined,
+      startProfitMonth: masterInquiryRequestParams?.startProfitMonth || undefined,
+      endProfitMonth: masterInquiryRequestParams?.endProfitMonth || undefined,
+      socialSecurity: masterInquiryRequestParams?.socialSecurity || undefined,
+      name: masterInquiryRequestParams?.name || undefined,
+      badgeNumber: masterInquiryRequestParams?.badgeNumber || undefined,
+      comment: masterInquiryRequestParams?.comment || undefined,
+      paymentType: masterInquiryRequestParams?.paymentType
+        ? (Object.keys(paymentTypeMap).find(
+            (key) => paymentTypeMap[key] === masterInquiryRequestParams?.paymentType
+          ) as "all" | "hardship" | "payoffs" | "rollovers" | undefined)
+        : "all",
+      memberType: masterInquiryRequestParams?.memberType
+        ? (Object.keys(memberTypeMap).find((key) => memberTypeMap[key] === masterInquiryRequestParams?.memberType) as
+            | "all"
+            | "employees"
+            | "beneficiaries"
+            | "none"
+            | undefined)
+        : "all",
+      contribution: masterInquiryRequestParams?.contributionAmount || undefined,
+      earnings: masterInquiryRequestParams?.earningsAmount || undefined,
+      forfeiture: masterInquiryRequestParams?.forfeitureAmount || undefined,
+      payment: masterInquiryRequestParams?.paymentAmount || undefined,
+      voids: false // masterInquiryRequestParams?.voids false
     }
   });
 
@@ -205,7 +226,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
         //...(!!data.voids && { voids: data.voids })
       };
 
-      triggerSearch(searchParams, false);
+      triggerSearch(searchParams, false).unwrap();
+      dispatch(setMasterInquiryRequestParams(data));
     }
   });
 
@@ -228,6 +250,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
       payment: undefined,
       voids: false
     });
+    dispatch(clearMasterInquiryRequestParams());
     dispatch(clearMasterInquiryData());
   };
 

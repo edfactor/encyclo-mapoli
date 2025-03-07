@@ -30,7 +30,9 @@ import {
   ExecutiveHoursAndDollarsGrid,
   EmployeeWagesForYear,
   YearEndProfitSharingReportResponse,
-  BaseQueryParams
+  BaseQueryParams,
+  MasterInquiryRequest,
+  MasterInquirySearch
 } from "reduxstore/types";
 
 export interface YearsEndState {
@@ -68,6 +70,7 @@ export interface YearsEndState {
   forfeituresByAgeTotal: ForfeituresByAge | null;
   masterInquiryData: MasterInquiryResponseType | null;
   masterInquiryEmployeeDetails: EmployeeDetails | null;
+  masterInquiryRequestParams: MasterInquirySearch | null;
   militaryAndRehire: PagedReportResponse<EmployeesOnMilitaryLeaveResponse> | null;
   militaryAndRehireQueryParams: BaseQueryParams | null;
   forfeituresByAgeQueryParams: BaseQueryParams | null;
@@ -121,6 +124,7 @@ const initialState: YearsEndState = {
   forfeituresByAgeQueryParams: null,
   masterInquiryData: null,
   masterInquiryEmployeeDetails: null,
+  masterInquiryRequestParams: null,
   militaryAndRehire: null,
   militaryAndRehireQueryParams: null,
   militaryAndRehireEntryAndModification: null,
@@ -353,6 +357,13 @@ export const yearsEndSlice = createSlice({
     clearEligibleEmployees: (state) => {
       state.eligibleEmployees = null;
     },
+    setMasterInquiryRequestParams: (state, action: PayloadAction<MasterInquirySearch>) => {
+      state.masterInquiryRequestParams = action.payload;
+    },
+    clearMasterInquiryRequestParams: (state) => {
+      state.masterInquiryRequestParams = null;
+    },
+
     setMasterInquiryData: (state, action: PayloadAction<MasterInquiryResponseType>) => {
       state.masterInquiryData = action.payload.inquiryResults;
       /*
@@ -658,6 +669,8 @@ export const {
   setTerminationQueryParams,
   clearTerminationQueryParams,
   setBalanceByYearsQueryParams,
-  clearBalanceByYearsQueryParams
+  clearBalanceByYearsQueryParams,
+  setMasterInquiryRequestParams,
+  clearMasterInquiryRequestParams
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;
