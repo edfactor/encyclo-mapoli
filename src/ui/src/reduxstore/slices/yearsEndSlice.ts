@@ -365,12 +365,8 @@ export const yearsEndSlice = createSlice({
     },
 
     setMasterInquiryData: (state, action: PayloadAction<MasterInquiryResponseType>) => {
-      state.masterInquiryData = action.payload.inquiryResults;
-      /*
-      if (state.masterInquiryData) {
-        state.masterInquiryData.inquiryResults = action.payload.inquiryResults;
-      }
-      */
+      state.masterInquiryData = action.payload;
+
       if (action.payload.employeeDetails) {
         state.masterInquiryEmployeeDetails = action.payload.employeeDetails;
       }

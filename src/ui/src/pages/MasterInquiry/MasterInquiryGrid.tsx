@@ -116,7 +116,7 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`Master Inquiry (${masterInquiryData?.total || 0})`}
+              {`Master Inquiry (${masterInquiryData?.inquiryResults.total || 0})`}
             </Typography>
           </div>
           <DSMGrid
@@ -124,13 +124,13 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({
             isLoading={false}
             handleSortChanged={sortEventHandler}
             providedOptions={{
-              rowData: masterInquiryData?.results,
+              rowData: masterInquiryData?.inquiryResults.results,
               columnDefs: columnDefs
             }}
           />
         </>
       )}
-      {!!masterInquiryData && masterInquiryData.results.length > 0 && (
+      {!!masterInquiryData && masterInquiryData.inquiryResults.results.length > 0 && (
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
@@ -143,7 +143,7 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({
             setPageNumber(1);
             setInitialSearchLoaded(true);
           }}
-          recordCount={masterInquiryData.total}
+          recordCount={masterInquiryData.inquiryResults.total}
         />
       )}
     </>
