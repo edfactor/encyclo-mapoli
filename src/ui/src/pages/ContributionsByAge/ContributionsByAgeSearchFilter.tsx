@@ -2,9 +2,15 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { Controller, useForm } from "react-hook-form";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetContributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
-import { clearContributionsByAge } from "reduxstore/slices/yearsEndSlice";
+import {
+  clearContributionsByAge,
+  clearContributionsByAgeQueryParams,
+  setContributionsByAge,
+  setContributionsByAgeQueryParams
+} from "reduxstore/slices/yearsEndSlice";
+import { RootState } from "reduxstore/store";
 import { FrozenReportsByAgeRequestType } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
@@ -26,6 +32,7 @@ const schema = yup.object().shape({
 
 const ContributionsByAgeSearchFilter = () => {
   const [triggerSearch, { isFetching }] = useLazyGetContributionsByAgeQuery();
+  const { contributionsByAgeQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const dispatch = useDispatch();
   const {
     control,
@@ -35,7 +42,7 @@ const ContributionsByAgeSearchFilter = () => {
   } = useForm<ContributionsByAgeSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: undefined,
+      profitYear: contributionsByAgeQueryParams?.profitYear || undefined,
       reportType: undefined
     }
   });
@@ -49,7 +56,7 @@ const ContributionsByAgeSearchFilter = () => {
           pagination: { skip: 0, take: 255 }
         },
         false
-      );
+      ).unwrap();
       triggerSearch(
         {
           profitYear: data.profitYear,
@@ -57,7 +64,7 @@ const ContributionsByAgeSearchFilter = () => {
           pagination: { skip: 0, take: 255 }
         },
         false
-      );
+      ).unwrap();
       triggerSearch(
         {
           profitYear: data.profitYear,
@@ -65,11 +72,13 @@ const ContributionsByAgeSearchFilter = () => {
           pagination: { skip: 0, take: 255 }
         },
         false
-      );
+      ).unwrap();
+      dispatch(setContributionsByAgeQueryParams(data.profitYear));
     }
   });
 
   const handleReset = () => {
+    dispatch(clearContributionsByAgeQueryParams());
     dispatch(clearContributionsByAge());
     reset({
       profitYear: undefined,

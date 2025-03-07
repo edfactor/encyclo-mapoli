@@ -11,30 +11,25 @@ import { useLazyGetEmployeeWagesForYearQuery } from "reduxstore/api/YearsEndApi"
 
 interface YTDWagesGridProps {
   innerRef: RefObject<HTMLDivElement>;
-  profitYearCurrent: number | null;
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
 }
 
-const YTDWagesGrid = ({
-  innerRef,
-  profitYearCurrent,
-  initialSearchLoaded,
-  setInitialSearchLoaded
-}: YTDWagesGridProps) => {
+const YTDWagesGrid = ({ innerRef, initialSearchLoaded, setInitialSearchLoaded }: YTDWagesGridProps) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [triggerSearch, { isFetching }] = useLazyGetEmployeeWagesForYearQuery();
+  const { employeeWagesForYearQueryParams } = useSelector((state: RootState) => state.yearsEnd);
 
   const onSearch = useCallback(async () => {
     const request = {
-      profitYear: profitYearCurrent ?? 0,
+      profitYear: employeeWagesForYearQueryParams?.profitYear ?? 0,
       pagination: { skip: pageNumber * pageSize, take: pageSize },
       acceptHeader: "application/json"
     };
 
     await triggerSearch(request, false);
-  }, [profitYearCurrent, pageNumber, pageSize, triggerSearch]);
+  }, [pageNumber, pageSize, triggerSearch, employeeWagesForYearQueryParams?.profitYear]);
 
   useEffect(() => {
     if (initialSearchLoaded) {

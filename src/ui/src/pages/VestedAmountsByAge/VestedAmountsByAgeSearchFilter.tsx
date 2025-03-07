@@ -6,7 +6,9 @@ import { SearchAndReset } from "smart-ui-library";
 import { downloadFileFromResponse } from "utils/fileDownload"; // Import utility function
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "reduxstore/store";
+import { clearVestedAmountsByAgeQueryParams, setVestedAmountsByAgeQueryParams } from "reduxstore/slices/yearsEndSlice";
 
 interface VestingAmountByAgeSearch {
   profitYear: number;
@@ -24,6 +26,9 @@ const schema = yup.object().shape({
 
 const VestedAmountsByAgeSearchFilter = () => {
   const [triggerSearch, { isFetching }] = useLazyGetVestingAmountByAgeQuery();
+  const { vestedAmountsByAgeQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const thisYear = new Date().getFullYear();
+  const lastYear = thisYear - 1;
   const dispatch = useDispatch();
   const {
     control,
@@ -33,7 +38,7 @@ const VestedAmountsByAgeSearchFilter = () => {
   } = useForm<VestingAmountByAgeSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: undefined
+      profitYear: vestedAmountsByAgeQueryParams?.profitYear || undefined
     }
   });
 
@@ -45,11 +50,13 @@ const VestedAmountsByAgeSearchFilter = () => {
           acceptHeader: "application/json"
         },
         false
-      );
+      ).unwrap();
+      dispatch(setVestedAmountsByAgeQueryParams(data.profitYear));
     }
   });
 
   const handleReset = () => {
+    dispatch(clearVestedAmountsByAgeQueryParams());
     reset({
       profitYear: undefined
     });
