@@ -5,6 +5,7 @@ public sealed record YearEndProfitSharingReportResponse
     public required string EmployeeName { get; set; }
     public required short StoreNumber { get; set; }
     public required char EmployeeTypeCode { get; set; }
+    public required string EmployeeTypeName { get; set; }
     public required DateOnly DateOfBirth { get; set; }
     public required byte Age { get; set; }
     public required string Ssn { get; set; }
@@ -24,7 +25,8 @@ public sealed record YearEndProfitSharingReportResponse
             BadgeNumber = 135,
             EmployeeName = "John Doe",
             StoreNumber = 23,
-            EmployeeTypeCode = 'a',
+            EmployeeTypeCode = 'p',
+            EmployeeTypeName = "Part Time",
             DateOfBirth = new DateOnly(1996, 9, 21),
             Age = 28,
             Ssn = "XXX-XX-1234",
