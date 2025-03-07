@@ -4,7 +4,12 @@ import Grid2 from "@mui/material/Unstable_Grid2";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetForfeituresByAgeQuery } from "reduxstore/api/YearsEndApi";
-import { clearForfeituresByAge, clearForfeituresByAgeQueryParams } from "reduxstore/slices/yearsEndSlice";
+import {
+  clearForfeituresByAge,
+  clearForfeituresByAgeQueryParams,
+  setForfeituresByAge,
+  setForfeituresByAgeQueryParams
+} from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { FrozenReportsByAgeRequestType } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
@@ -51,7 +56,7 @@ const ForfeituresByAgeSearchFilter = () => {
           pagination: { skip: 0, take: 255 }
         },
         false
-      );
+      ).unwrap();
       triggerSearch(
         {
           profitYear: data.profitYear,
@@ -59,7 +64,7 @@ const ForfeituresByAgeSearchFilter = () => {
           pagination: { skip: 0, take: 255 }
         },
         false
-      );
+      ).unwrap();
       triggerSearch(
         {
           profitYear: data.profitYear,
@@ -67,7 +72,9 @@ const ForfeituresByAgeSearchFilter = () => {
           pagination: { skip: 0, take: 255 }
         },
         false
-      );
+      ).unwrap();
+
+      dispatch(setForfeituresByAgeQueryParams(data.profitYear));
     }
   });
 

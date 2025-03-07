@@ -385,9 +385,7 @@ export const yearsEndSlice = createSlice({
       state.contributionsByAgePartTime = null;
     },
     setForfeituresByAgeQueryParams: (state, action: PayloadAction<number>) => {
-      if (state.forfeituresByAgeQueryParams) {
-        state.forfeituresByAgeQueryParams.profitYear = action.payload;
-      }
+      state.forfeituresByAgeQueryParams = { profitYear: action.payload };
     },
     clearForfeituresByAgeQueryParams: (state) => {
       state.forfeituresByAgeQueryParams = null;

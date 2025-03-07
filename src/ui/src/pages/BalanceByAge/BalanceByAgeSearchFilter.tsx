@@ -4,7 +4,11 @@ import Grid2 from "@mui/material/Unstable_Grid2";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetBalanceByAgeQuery } from "reduxstore/api/YearsEndApi";
-import { clearBalanceByAge, clearBalanceByAgeQueryParams } from "reduxstore/slices/yearsEndSlice";
+import {
+  clearBalanceByAge,
+  clearBalanceByAgeQueryParams,
+  setBalanceByAgeQueryParams
+} from "reduxstore/slices/yearsEndSlice";
 import { FrozenReportsByAgeRequestType } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
@@ -52,7 +56,7 @@ const BalanceByAgeSearchFilter = () => {
           pagination: { skip: 0, take: 255 }
         },
         false
-      );
+      ).unwrap();
       triggerSearch(
         {
           profitYear: data.profitYear,
@@ -60,7 +64,7 @@ const BalanceByAgeSearchFilter = () => {
           pagination: { skip: 0, take: 255 }
         },
         false
-      );
+      ).unwrap();
       triggerSearch(
         {
           profitYear: data.profitYear,
@@ -68,7 +72,8 @@ const BalanceByAgeSearchFilter = () => {
           pagination: { skip: 0, take: 255 }
         },
         false
-      );
+      ).unwrap();
+      dispatch(setBalanceByAgeQueryParams(data.profitYear));
     }
   });
 
