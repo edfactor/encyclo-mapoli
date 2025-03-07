@@ -2,9 +2,14 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { Controller, useForm } from "react-hook-form";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetEligibleEmployeesQuery } from "reduxstore/api/YearsEndApi";
-import { clearEligibleEmployees } from "reduxstore/slices/yearsEndSlice";
+import {
+  clearEligibleEmployees,
+  clearEligibleEmployeesQueryParams,
+  setEligibleEmployeesQueryParams
+} from "reduxstore/slices/yearsEndSlice";
+import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 
@@ -23,14 +28,13 @@ const schema = yup.object().shape({
 });
 
 interface EligibleEmployeesSearchFilterProps {
-  setProfitYear: (year: number) => void;
   setInitialSearchLoaded: (include: boolean) => void;
 }
 
-const EligibleEmployeesSearchFilter: React.FC<EligibleEmployeesSearchFilterProps> = ({
-  setProfitYear,
-  setInitialSearchLoaded
-}) => {
+const EligibleEmployeesSearchFilter: React.FC<EligibleEmployeesSearchFilterProps> = ({ setInitialSearchLoaded }) => {
+  // Need to see if we have saved query params
+  const { eligibleEmployeesQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+
   const [triggerSearch, { isFetching }] = useLazyGetEligibleEmployeesQuery();
   const dispatch = useDispatch();
   const {
@@ -42,7 +46,7 @@ const EligibleEmployeesSearchFilter: React.FC<EligibleEmployeesSearchFilterProps
   } = useForm<EligibleEmployeesSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: undefined
+      profitYear: eligibleEmployeesQueryParams?.profitYear || undefined
     }
   });
 
@@ -54,13 +58,15 @@ const EligibleEmployeesSearchFilter: React.FC<EligibleEmployeesSearchFilterProps
           pagination: { skip: 0, take: 25 }
         },
         false
-      );
+      ).unwrap();
+      dispatch(setEligibleEmployeesQueryParams(data.profitYear));
     }
   });
 
   const handleReset = () => {
     setInitialSearchLoaded(false);
     dispatch(clearEligibleEmployees());
+    dispatch(clearEligibleEmployeesQueryParams());
     reset({
       profitYear: undefined
     });
@@ -88,7 +94,6 @@ const EligibleEmployeesSearchFilter: React.FC<EligibleEmployeesSearchFilterProps
                 error={!!errors.profitYear}
                 onChange={(e) => {
                   field.onChange(e);
-                  setProfitYear(parseInt(e.target.value));
                 }}
                 inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
               />

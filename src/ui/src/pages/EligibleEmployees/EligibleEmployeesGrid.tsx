@@ -7,13 +7,11 @@ import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetEligibleEmployeesColumns } from "./EligibleEmployeesGridColumn";
 
 interface EligibleEmployeesGridProps {
-  profitYearCurrent: number | null;
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
 }
 
 const EligibleEmployeesGrid: React.FC<EligibleEmployeesGridProps> = ({
-  profitYearCurrent,
   initialSearchLoaded,
   setInitialSearchLoaded
 }) => {
@@ -24,7 +22,7 @@ const EligibleEmployeesGrid: React.FC<EligibleEmployeesGridProps> = ({
     isSortDescending: false
   });
 
-  const { eligibleEmployees } = useSelector((state: RootState) => state.yearsEnd);
+  const { eligibleEmployees, eligibleEmployeesQueryParams } = useSelector((state: RootState) => state.yearsEnd);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetEligibleEmployeesColumns(), []);
@@ -33,12 +31,12 @@ const EligibleEmployeesGrid: React.FC<EligibleEmployeesGridProps> = ({
 
   const onSearch = useCallback(async () => {
     const request = {
-      profitYear: profitYearCurrent ?? 0,
+      profitYear: eligibleEmployeesQueryParams?.profitYear ?? 0,
       pagination: { skip: pageNumber * pageSize, take: pageSize }
     };
 
     await triggerSearch(request, false);
-  }, [profitYearCurrent, pageNumber, pageSize, triggerSearch]);
+  }, [eligibleEmployeesQueryParams?.profitYear, pageNumber, pageSize, triggerSearch]);
 
   useEffect(() => {
     if (initialSearchLoaded) {

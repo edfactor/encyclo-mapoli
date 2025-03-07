@@ -6,17 +6,9 @@ import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetMissingCommaInPyNameColumns } from "./MissingCommaInPyNameGridColumns";
 
-interface MissingCommaInPyNameGridProps {
-  initialSearchLoaded: boolean;
-  setInitialSearchLoaded: (loaded: boolean) => void;
-}
-
-const MissingCommaInPyNameGrid: React.FC<MissingCommaInPyNameGridProps> = ({
-  initialSearchLoaded,
-  setInitialSearchLoaded
-}) => {
+const MissingCommaInPyNameGrid: React.FC = () => {
   const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
+  const [pageSize, setPageSize] = useState(100);
   const [sortParams, setSortParams] = useState<ISortParams>({
     sortBy: "Badge",
     isSortDescending: false
@@ -26,19 +18,17 @@ const MissingCommaInPyNameGrid: React.FC<MissingCommaInPyNameGridProps> = ({
 
   const [triggerSearch, { isFetching }] = useLazyGetNamesMissingCommasQuery();
 
-  const onSearch = useCallback(async () => {
-    const request = {
-      pagination: { skip: pageNumber * pageSize, take: pageSize }
+  useEffect(() => {
+    const fetchData = async () => {
+      const request = {
+        pagination: { skip: pageNumber * pageSize, take: pageSize }
+      };
+
+      await triggerSearch(request, false);
     };
 
-    await triggerSearch(request, false);
+    fetchData();
   }, [pageNumber, pageSize, triggerSearch]);
-
-  useEffect(() => {
-    if (initialSearchLoaded) {
-      onSearch();
-    }
-  }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetMissingCommaInPyNameColumns(), []);
@@ -51,7 +41,7 @@ const MissingCommaInPyNameGrid: React.FC<MissingCommaInPyNameGridProps> = ({
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`MISSING COMMA IN PY_NAME (${missingCommaInPYName?.response.total || 0})`}
+              {`(${missingCommaInPYName?.response.total || 0})`}
             </Typography>
           </div>
           <DSMGrid
@@ -70,13 +60,13 @@ const MissingCommaInPyNameGrid: React.FC<MissingCommaInPyNameGridProps> = ({
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
             setPageNumber(value - 1);
-            setInitialSearchLoaded(true);
+            //setInitialSearchLoaded(true);
           }}
           pageSize={pageSize}
           setPageSize={(value: number) => {
             setPageSize(value);
             setPageNumber(1);
-            setInitialSearchLoaded(true);
+            //setInitialSearchLoaded(true);
           }}
           recordCount={missingCommaInPYName.response.total}
         />

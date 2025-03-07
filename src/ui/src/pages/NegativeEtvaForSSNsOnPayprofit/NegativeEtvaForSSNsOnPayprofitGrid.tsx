@@ -8,13 +8,11 @@ import { GetNegativeEtvaForSSNsOnPayProfitColumns } from "./NegativeEtvaForSSNsO
 import { Path, useNavigate } from "react-router";
 
 interface NegativeEtvaForSSNsOnPayprofitGridProps {
-  profitYearCurrent: number | null;
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
 }
 
 const NegativeEtvaForSSNsOnPayprofitGrid: React.FC<NegativeEtvaForSSNsOnPayprofitGridProps> = ({
-  profitYearCurrent,
   initialSearchLoaded,
   setInitialSearchLoaded
 }) => {
@@ -25,18 +23,20 @@ const NegativeEtvaForSSNsOnPayprofitGrid: React.FC<NegativeEtvaForSSNsOnPayprofi
     isSortDescending: false
   });
 
-  const { negativeEtvaForSSNsOnPayprofit } = useSelector((state: RootState) => state.yearsEnd);
+  const { negativeEtvaForSSNsOnPayprofit, negativeEtvaForSSNsOnPayprofitParams } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
 
   const [triggerSearch, { isFetching }] = useLazyGetNegativeEVTASSNQuery();
 
   const onSearch = useCallback(async () => {
     const request = {
-      profitYear: profitYearCurrent ?? 0,
+      profitYear: negativeEtvaForSSNsOnPayprofitParams?.profitYear ?? 0,
       pagination: { skip: pageNumber * pageSize, take: pageSize }
     };
 
     await triggerSearch(request, false);
-  }, [profitYearCurrent, pageNumber, pageSize, triggerSearch]);
+  }, [pageNumber, pageSize, triggerSearch, negativeEtvaForSSNsOnPayprofitParams?.profitYear]);
 
   useEffect(() => {
     if (initialSearchLoaded) {

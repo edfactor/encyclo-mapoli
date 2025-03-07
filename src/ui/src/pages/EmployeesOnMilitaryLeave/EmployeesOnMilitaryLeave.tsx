@@ -6,7 +6,6 @@ import EmployeesOnMilitaryLeaveSearchFilter from "./EmployeesOnMilitaryLeaveSear
 import EmployeesOnMilitaryLeaveGrid from "./EmployeesOnMilitaryLeaveGrid";
 
 const EmployeesOnMilitaryLeave = () => {
-  const [profitYear, setProfitYear] = useState<number | null>(null);
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
 
   return (
@@ -17,21 +16,9 @@ const EmployeesOnMilitaryLeave = () => {
         <Grid2 width={"100%"}>
           <Divider />
         </Grid2>
-        <Grid2 width={"100%"}>
-          <DSMAccordion title="Filter">
-            <EmployeesOnMilitaryLeaveSearchFilter
-              setProfitYear={setProfitYear}
-              setInitialSearchLoaded={setInitialSearchLoaded}
-            />
-          </DSMAccordion>
-        </Grid2>
 
         <Grid2 width="100%">
-          <EmployeesOnMilitaryLeaveGrid
-            profitYearCurrent={profitYear}
-            initialSearchLoaded={initialSearchLoaded}
-            setInitialSearchLoaded={setInitialSearchLoaded}
-          />
+          <EmployeesOnMilitaryLeaveGrid />
         </Grid2>
       </Grid2>
     </Page>

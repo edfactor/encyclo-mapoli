@@ -2,9 +2,13 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { Controller, useForm } from "react-hook-form";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetBalanceByAgeQuery } from "reduxstore/api/YearsEndApi";
-import { clearBalanceByAge } from "reduxstore/slices/yearsEndSlice";
+import {
+  clearBalanceByAge,
+  clearBalanceByAgeQueryParams,
+  setBalanceByAgeQueryParams
+} from "reduxstore/slices/yearsEndSlice";
 import { FrozenReportsByAgeRequestType } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
@@ -26,6 +30,7 @@ const schema = yup.object().shape({
 
 const BalanceByAgeSearchFilter = () => {
   const [triggerSearch, { isFetching }] = useLazyGetBalanceByAgeQuery();
+  const { balanceByAgeQueryParams } = useSelector((state: RootState) => state.yearsEnd);
 
   const dispatch = useDispatch();
 
@@ -37,7 +42,7 @@ const BalanceByAgeSearchFilter = () => {
   } = useForm<BalanceByAgeSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: undefined,
+      profitYear: balanceByAgeQueryParams?.profitYear || undefined,
       reportType: undefined
     }
   });
@@ -51,7 +56,7 @@ const BalanceByAgeSearchFilter = () => {
           pagination: { skip: 0, take: 255 }
         },
         false
-      );
+      ).unwrap();
       triggerSearch(
         {
           profitYear: data.profitYear,
@@ -59,7 +64,7 @@ const BalanceByAgeSearchFilter = () => {
           pagination: { skip: 0, take: 255 }
         },
         false
-      );
+      ).unwrap();
       triggerSearch(
         {
           profitYear: data.profitYear,
@@ -67,11 +72,13 @@ const BalanceByAgeSearchFilter = () => {
           pagination: { skip: 0, take: 255 }
         },
         false
-      );
+      ).unwrap();
+      dispatch(setBalanceByAgeQueryParams(data.profitYear));
     }
   });
 
   const handleReset = () => {
+    dispatch(clearBalanceByAgeQueryParams());
     dispatch(clearBalanceByAge());
     reset({
       profitYear: undefined,

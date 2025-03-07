@@ -6,7 +6,6 @@ import NegativeEtvaForSSNsOnPayprofitSearchFilter from "./NegativeEtvaForSSNsOnP
 import NegativeEtvaForSSNsOnPayprofitGrid from "./NegativeEtvaForSSNsOnPayprofitGrid";
 
 const NegativeEtvaForSSNsOnPayprofit = () => {
-  const [profitYear, setProfitYear] = useState<number | null>(null);
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   return (
     <Page label="Negative ETVA for SSNs on Payprofit">
@@ -18,16 +17,12 @@ const NegativeEtvaForSSNsOnPayprofit = () => {
         </Grid2>
         <Grid2 width={"100%"}>
           <DSMAccordion title="Filter">
-            <NegativeEtvaForSSNsOnPayprofitSearchFilter
-              setProfitYear={setProfitYear}
-              setInitialSearchLoaded={setInitialSearchLoaded}
-            />
+            <NegativeEtvaForSSNsOnPayprofitSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
           </DSMAccordion>
         </Grid2>
 
         <Grid2 width="100%">
           <NegativeEtvaForSSNsOnPayprofitGrid
-            profitYearCurrent={profitYear}
             initialSearchLoaded={initialSearchLoaded}
             setInitialSearchLoaded={setInitialSearchLoaded}
           />
