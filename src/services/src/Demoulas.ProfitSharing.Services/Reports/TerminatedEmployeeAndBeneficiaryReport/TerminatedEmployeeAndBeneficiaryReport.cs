@@ -153,7 +153,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         var employees = await terminatedWithContributions.ToListAsync(cancellation);
         return benes.Concat(employees)
             // NOTE: Sort using same character handling that ready uses (ie "Mc" sorts after "ME") aka the Ordinal sort.
-            // Failture to use this sort, causes READY and SMART reports to not match.
+            // Failure to use this sort, causes READY and SMART reports to not match.
             .OrderBy(x => x.FullName, StringComparer.Ordinal)
             .ThenBy(x => x.BadgeNumber)
             .ToList();
@@ -173,7 +173,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         var today = DateOnly.FromDateTime(DateTime.Today);
 
         // Extract SSNs needed in the loop
-        var ssns = memberSliceUnion.Select(ms => ms.Ssn).Distinct().ToList();
+        var ssns = memberSliceUnion.Select(ms => ms.Ssn).ToHashSet();
 
         // Bulk load profit details for this profit year, grouped by SSN.
         var profitDetailsDict = await ctx.ProfitDetails
@@ -212,9 +212,10 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             .ToDictionaryAsync(x => x.Ssn, cancellationToken);
 
         var membersSummary = new List<TerminatedEmployeeAndBeneficiaryDataResponseDto>();
-
+        var unions = memberSliceUnion.ToList();
+        
         // Refactored loop using bulk loaded dictionary lookup
-        foreach (var memberSlice in memberSliceUnion)
+        foreach (var memberSlice in unions)
         {
             // Lookup profit details; if missing, use a default instance.
             if (!profitDetailsDict.TryGetValue(memberSlice.Ssn, out InternalProfitDetailDto? transactionsThisYear))
@@ -262,6 +263,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             // If not interesting, skip.
             if (!IsInteresting(member))
             {
+                memberSliceUnion.Remove(memberSlice);
                 continue;
             }
 
@@ -315,12 +317,13 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             totalForfeit += member.ForfeitAmount;
             totalEndingBalance += member.EndingBalance;
             totalBeneficiaryAllocation += member.BeneficiaryAllocation;
-
-            if (membersSummary.Count >= req.Take)
-            {
-                break;
-            }
         }
+
+        // Calculate total count before pagination
+        int totalCount = membersSummary.Count;
+
+        // Apply pagination
+        var paginatedResults = membersSummary.Skip(req.Skip ?? 0).Take(req.Take ?? byte.MaxValue).ToList();
 
         return new TerminatedEmployeeAndBeneficiaryResponse
         {
@@ -332,8 +335,8 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             TotalBeneficiaryAllocation = totalBeneficiaryAllocation,
             Response = new PaginatedResponseDto<TerminatedEmployeeAndBeneficiaryDataResponseDto>(req)
             {
-                Results = membersSummary,
-                Total = memberSliceUnion.Count
+                Results = paginatedResults,
+                Total = totalCount
             }
         };
     }

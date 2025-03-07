@@ -20,7 +20,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
 }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
-  const [sortParams, setSortParams] = useState<ISortParams>({
+  const [setSortParams] = useState<ISortParams>({
     sortBy: "Badge",
     isSortDescending: false
   });
@@ -30,6 +30,11 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   const navigate = useNavigate();
 
   const onSearch = useCallback(async () => {
+
+    if (!profitYearCurrent) {
+      console.error("profitYearCurrent is missing or invalid, defaulting to 0");
+    }
+
     const request = {
       profitYear: profitYearCurrent ?? 0,
       pagination: { skip: pageNumber * pageSize, take: pageSize }
