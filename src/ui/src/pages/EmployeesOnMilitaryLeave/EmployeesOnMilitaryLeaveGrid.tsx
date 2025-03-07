@@ -6,39 +6,27 @@ import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetMilitaryAndRehireColumns } from "./EmployeesOnMilitaryLeaveGridColumns";
 
-interface EmployeesOnMilitaryLeaveGridProps {
-  profitYearCurrent: number | null;
-  initialSearchLoaded: boolean;
-  setInitialSearchLoaded: (loaded: boolean) => void;
-}
-
-const EmployeesOnMilitaryLeaveGrid: React.FC<EmployeesOnMilitaryLeaveGridProps> = ({
-  profitYearCurrent,
-  initialSearchLoaded,
-  setInitialSearchLoaded
-}) => {
+const EmployeesOnMilitaryLeaveGrid: React.FC = () => {
   const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
+  const [pageSize, setPageSize] = useState(100);
+  const { militaryAndRehireQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const [setSortParams] = useState<ISortParams>({
     sortBy: "Badge",
     isSortDescending: false
   });
   const [triggerSearch, { isFetching }] = useLazyGetEmployeesOnMilitaryLeaveQuery();
 
-  const onSearch = useCallback(async () => {
-    const request = {
-      profitYear: profitYearCurrent ?? 0,
-      pagination: { skip: pageNumber * pageSize, take: pageSize }
+  useEffect(() => {
+    const fetchData = async () => {
+      const request = {
+        pagination: { skip: pageNumber * pageSize, take: pageSize }
+      };
+
+      await triggerSearch(request, false);
     };
 
-    await triggerSearch(request, false);
-  }, [profitYearCurrent, pageNumber, pageSize, triggerSearch]);
-
-  useEffect(() => {
-    if (initialSearchLoaded) {
-      onSearch();
-    }
-  }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
+    fetchData();
+  }, [pageNumber, pageSize, triggerSearch]);
 
   const { militaryAndRehire: employeesOnMilitaryLeave } = useSelector((state: RootState) => state.yearsEnd);
 
@@ -53,7 +41,7 @@ const EmployeesOnMilitaryLeaveGrid: React.FC<EmployeesOnMilitaryLeaveGridProps> 
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`Employees on Military Leave (${employeesOnMilitaryLeave?.response.total || 0})`}
+              {`(${employeesOnMilitaryLeave?.response.total || 0})`}
             </Typography>
           </div>
           <DSMGrid
@@ -72,13 +60,11 @@ const EmployeesOnMilitaryLeaveGrid: React.FC<EmployeesOnMilitaryLeaveGridProps> 
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
             setPageNumber(value - 1);
-            setInitialSearchLoaded(true);
           }}
           pageSize={pageSize}
           setPageSize={(value: number) => {
             setPageSize(value);
             setPageNumber(1);
-            setInitialSearchLoaded(true);
           }}
           recordCount={employeesOnMilitaryLeave.response.total}
         />

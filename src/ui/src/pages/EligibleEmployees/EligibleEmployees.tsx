@@ -6,7 +6,6 @@ import EligibleEmployeesSearchFilter from "./EligibleEmployeesSearchFilter";
 import EligibleEmployeesGrid from "./EligibleEmployeesGrid";
 
 const EligibleEmployees = () => {
-  const [profitYear, setProfitYear] = useState<number | null>(null);
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
 
   return (
@@ -19,16 +18,12 @@ const EligibleEmployees = () => {
         </Grid2>
         <Grid2 width={"100%"}>
           <DSMAccordion title="Filter">
-            <EligibleEmployeesSearchFilter
-              setProfitYear={setProfitYear}
-              setInitialSearchLoaded={setInitialSearchLoaded}
-            />
+            <EligibleEmployeesSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
           </DSMAccordion>
         </Grid2>
 
         <Grid2 width="100%">
           <EligibleEmployeesGrid
-            profitYearCurrent={profitYear}
             initialSearchLoaded={initialSearchLoaded}
             setInitialSearchLoaded={setInitialSearchLoaded}
           />

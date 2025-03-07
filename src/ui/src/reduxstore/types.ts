@@ -261,6 +261,10 @@ export interface EligibleEmployeeResponseDto {
   response: Paged<EligibleEmployee>;
 }
 
+export interface BaseQueryParams {
+  profitYear: number;
+}
+
 export interface MasterInquiryDetail extends ProfitYearRequest {
   id: number;
   ssn: number;

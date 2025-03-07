@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { PagedReportResponse, NegativeEtvaForSSNsOnPayProfit } from "reduxstore/types";
 import { GetNegativeEtvaForSSNsOnPayProfitColumns } from "pages/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofitGridColumn";
-import { setNegativeEtvaForSssnsOnPayprofit } from "reduxstore/slices/yearsEndSlice";
+import { setNegativeEtvaForSSNsOnPayprofit } from "reduxstore/slices/yearsEndSlice";
 import { DSMGrid } from "smart-ui-library";
 
 const staticData: PagedReportResponse<NegativeEtvaForSSNsOnPayProfit> = {
@@ -57,7 +57,7 @@ const NegativeETVA: React.FC = () => {
     if (storedData && !negativeEtvaData) {
       try {
         const parsedData = JSON.parse(storedData) as PagedReportResponse<NegativeEtvaForSSNsOnPayProfit>;
-        dispatch(setNegativeEtvaForSssnsOnPayprofit(parsedData));
+        dispatch(setNegativeEtvaForSSNsOnPayprofit(parsedData));
       } catch (error) {
         console.error("Error parsing stored ETVA data:", error);
         localStorage.removeItem(STORAGE_KEY);
@@ -67,15 +67,14 @@ const NegativeETVA: React.FC = () => {
 
   const handleRunReport = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(staticData));
-    dispatch(setNegativeEtvaForSssnsOnPayprofit(staticData));
+    dispatch(setNegativeEtvaForSSNsOnPayprofit(staticData));
   };
 
   return (
-    <Stack
-      spacing={2}>
+    <Stack spacing={2}>
       <Typography
         variant="h6"
-        sx={{ color: "#0258A5", paddingLeft: '24px' }}>
+        sx={{ color: "#0258A5", paddingLeft: "24px" }}>
         NEGATIVE ETVA FOR SSNs ON PAYPROFIT
       </Typography>
 
