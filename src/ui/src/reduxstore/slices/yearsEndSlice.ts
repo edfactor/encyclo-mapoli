@@ -46,16 +46,19 @@ export interface YearsEndState {
   contributionsByAgeFullTime: ContributionsByAge | null;
   contributionsByAgePartTime: ContributionsByAge | null;
   contributionsByAgeTotal: ContributionsByAge | null;
+  contributionsByAgeQueryParams: BaseQueryParams | null;
   demographicBadges: PagedReportResponse<DemographicBadgesNotInPayprofit> | null;
   distributionsAndForfeitures: PagedReportResponse<DistributionsAndForfeitures> | null;
   distributionsByAgeFullTime: ProfitSharingDistributionsByAge | null;
   distributionsByAgePartTime: ProfitSharingDistributionsByAge | null;
   distributionsByAgeTotal: ProfitSharingDistributionsByAge | null;
+  distributionsByAgeQueryParams: BaseQueryParams | null;
   duplicateNamesAndBirthday: PagedReportResponse<DuplicateNameAndBirthday> | null;
   duplicateSSNsData: PagedReportResponse<DuplicateSSNDetail> | null;
   eligibleEmployees: EligibleEmployeeResponseDto | null;
   eligibleEmployeesQueryParams: BaseQueryParams | null;
   employeeWagesForYear: PagedReportResponse<EmployeeWagesForYear> | null;
+  employeeWagesForYearQueryParams: BaseQueryParams | null;
   executiveHoursAndDollars: PagedReportResponse<ExecutiveHoursAndDollars> | null;
   executiveHoursAndDollarsGrid: ExecutiveHoursAndDollarsGrid | null;
   executiveRowsSelected: ExecutiveHoursAndDollars[] | null;
@@ -76,6 +79,7 @@ export interface YearsEndState {
   profitSharingUpdate: ProfitShareUpdateResponse | ProfitShareEditResponse | ProfitShareMasterResponse | null;
   termination: TerminationResponse | null;
   vestedAmountsByAge: VestedAmountsByAge | null;
+  vestedAmountsByAgeQueryParams: BaseQueryParams | null;
   yearEndProfitSharingReport: PagedReportResponse<YearEndProfitSharingReportResponse> | null;
 }
 
@@ -92,16 +96,19 @@ const initialState: YearsEndState = {
   contributionsByAgeFullTime: null,
   contributionsByAgePartTime: null,
   contributionsByAgeTotal: null,
+  contributionsByAgeQueryParams: null,
   demographicBadges: null,
   distributionsAndForfeitures: null,
   distributionsByAgeFullTime: null,
   distributionsByAgePartTime: null,
   distributionsByAgeTotal: null,
-  duplicateNamesAndBirthday: null,
+  distributionsByAgeQueryParams: null,
   duplicateSSNsData: null,
+  duplicateNamesAndBirthday: null,
   eligibleEmployees: null,
   eligibleEmployeesQueryParams: null,
   employeeWagesForYear: null,
+  employeeWagesForYearQueryParams: null,
   executiveHoursAndDollars: null,
   executiveHoursAndDollarsGrid: null,
   executiveRowsSelected: null,
@@ -122,6 +129,7 @@ const initialState: YearsEndState = {
   profitSharingUpdate: null,
   termination: null,
   vestedAmountsByAge: null,
+  vestedAmountsByAgeQueryParams: null,
   yearEndProfitSharingReport: null
 };
 
@@ -317,6 +325,12 @@ export const yearsEndSlice = createSlice({
     setEmployeeWagesForYear: (state, action: PayloadAction<PagedReportResponse<EmployeeWagesForYear>>) => {
       state.employeeWagesForYear = action.payload;
     },
+    setEmployeeWagesForYearQueryParams: (state, action: PayloadAction<number>) => {
+      state.employeeWagesForYearQueryParams = { profitYear: action.payload };
+    },
+    clearEmployeeWagesForYearQueryParams: (state) => {
+      state.employeeWagesForYearQueryParams = null;
+    },
     setEligibleEmployees: (state, action: PayloadAction<EligibleEmployeeResponseDto>) => {
       state.eligibleEmployees = action.payload;
     },
@@ -364,6 +378,12 @@ export const yearsEndSlice = createSlice({
 
       state.distributionsByAgePartTime = null;
     },
+    clearDistributionsByAgeQueryParams: (state) => {
+      state.distributionsByAgeQueryParams = null;
+    },
+    setDistributionsByAgeQueryParams: (state, action: PayloadAction<number>) => {
+      state.distributionsByAgeQueryParams = { profitYear: action.payload };
+    },
     setContributionsByAge: (state, action: PayloadAction<ContributionsByAge>) => {
       if (action.payload.reportType == FrozenReportsByAgeRequestType.Total) {
         state.contributionsByAgeTotal = action.payload;
@@ -383,6 +403,12 @@ export const yearsEndSlice = createSlice({
       state.contributionsByAgeFullTime = null;
 
       state.contributionsByAgePartTime = null;
+    },
+    setContributionsByAgeQueryParams: (state, action: PayloadAction<number>) => {
+      state.contributionsByAgeQueryParams = { profitYear: action.payload };
+    },
+    clearContributionsByAgeQueryParams: (state) => {
+      state.contributionsByAgeQueryParams = null;
     },
     setForfeituresByAgeQueryParams: (state, action: PayloadAction<number>) => {
       state.forfeituresByAgeQueryParams = { profitYear: action.payload };
@@ -456,8 +482,14 @@ export const yearsEndSlice = createSlice({
         state.balanceByYearsFullTime = action.payload;
       }
     },
-    setVestingAmountByAge: (state, action: PayloadAction<VestedAmountsByAge>) => {
+    setVestedAmountByAge: (state, action: PayloadAction<VestedAmountsByAge>) => {
       state.vestedAmountsByAge = action.payload;
+    },
+    setVestedAmountsByAgeQueryParams: (state, action: PayloadAction<number>) => {
+      state.vestedAmountsByAgeQueryParams = { profitYear: action.payload };
+    },
+    clearVestedAmountsByAgeQueryParams: (state) => {
+      state.vestedAmountsByAgeQueryParams = null;
     },
     setTermination: (state, action: PayloadAction<TerminationResponse>) => {
       state.termination = action.payload;
@@ -592,12 +624,20 @@ export const {
   setProfitUpdate,
   setProfitUpdateLoading,
   setTermination,
-  setVestingAmountByAge,
+  setVestedAmountByAge,
   setYearEndProfitSharingReport,
   updateExecutiveHoursAndDollarsGridRow,
   setNegativeEtvaForSSNsOnPayprofitQueryParams,
   clearNegativeEtvaForSSNsOnPayprofitQueryParams,
   setBalanceByAgeQueryParams,
-  clearBalanceByAgeQueryParams
+  clearBalanceByAgeQueryParams,
+  setDistributionsByAgeQueryParams,
+  clearDistributionsByAgeQueryParams,
+  setContributionsByAgeQueryParams,
+  clearContributionsByAgeQueryParams,
+  setVestedAmountsByAgeQueryParams,
+  clearVestedAmountsByAgeQueryParams,
+  clearEmployeeWagesForYearQueryParams,
+  setEmployeeWagesForYearQueryParams
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;
