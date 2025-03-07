@@ -14,7 +14,7 @@ const BalanceByAgeGrid = () => {
     isSortDescending: false
   });
 
-  const { balanceByAgeTotal, balanceByAgeFullTime, balanceByAgePartTime } = useSelector(
+  const { balanceByAgeTotal, balanceByAgeFullTime, balanceByAgePartTime, balanceByAgeQueryParams } = useSelector(
     (state: RootState) => state.yearsEnd
   );
   const [_discard1, { isLoading }] = useLazyGetBalanceByAgeQuery();

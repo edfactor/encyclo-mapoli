@@ -5,8 +5,13 @@ import { useLazyGetNegativeEVTASSNQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { useDispatch } from "react-redux";
-import { clearNegativeEtvaForSssnsOnPayprofit } from "reduxstore/slices/yearsEndSlice";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  clearNegativeEtvaForSSNsOnPayprofit,
+  clearNegativeEtvaForSSNsOnPayprofitQueryParams,
+  setNegativeEtvaForSSNsOnPayprofitQueryParams
+} from "reduxstore/slices/yearsEndSlice";
+import NegativeEtvaForSSNsOnPayprofit from "./NegativeEtvaForSSNsOnPayprofit";
 
 interface NegativeEtvaForSSNsOnPayprofitSearch {
   profitYear: number;
@@ -23,15 +28,14 @@ const schema = yup.object().shape({
 });
 
 interface NegativeEtvaForSSNsOnPayprofitSearchFilterProps {
-  setProfitYear: (year: number) => void;
   setInitialSearchLoaded: (include: boolean) => void;
 }
 
 const NegativeEtvaForSSNsOnPayprofitSearchFilter: React.FC<NegativeEtvaForSSNsOnPayprofitSearchFilterProps> = ({
-  setProfitYear,
   setInitialSearchLoaded
 }) => {
   const [triggerSearch, { isFetching }] = useLazyGetNegativeEVTASSNQuery();
+  const { negativeEtvaForSSNsOnPayprofitParams } = useSelector((state: RootState) => state.yearsEnd);
   const dispatch = useDispatch();
   const {
     control,
@@ -42,7 +46,7 @@ const NegativeEtvaForSSNsOnPayprofitSearchFilter: React.FC<NegativeEtvaForSSNsOn
   } = useForm<NegativeEtvaForSSNsOnPayprofitSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: undefined
+      profitYear: negativeEtvaForSSNsOnPayprofitParams?.profitYear || undefined
     }
   });
 
@@ -54,13 +58,15 @@ const NegativeEtvaForSSNsOnPayprofitSearchFilter: React.FC<NegativeEtvaForSSNsOn
           pagination: { skip: 0, take: 25 }
         },
         false
-      );
+      ).unwrap();
+      dispatch(setNegativeEtvaForSSNsOnPayprofitQueryParams(data.profitYear));
     }
   });
 
   const handleReset = () => {
     setInitialSearchLoaded(false);
-    dispatch(clearNegativeEtvaForSssnsOnPayprofit());
+    dispatch(clearNegativeEtvaForSSNsOnPayprofitQueryParams());
+    dispatch(clearNegativeEtvaForSSNsOnPayprofit());
     reset({
       profitYear: undefined
     });
@@ -88,7 +94,6 @@ const NegativeEtvaForSSNsOnPayprofitSearchFilter: React.FC<NegativeEtvaForSSNsOn
                 error={!!errors.profitYear}
                 onChange={(e) => {
                   field.onChange(e);
-                  setProfitYear(parseInt(e.target.value));
                 }}
                 inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
               />
