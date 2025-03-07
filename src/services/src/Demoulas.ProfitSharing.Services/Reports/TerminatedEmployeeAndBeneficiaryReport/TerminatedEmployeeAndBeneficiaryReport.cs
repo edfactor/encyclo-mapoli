@@ -214,7 +214,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         var membersSummary = new List<TerminatedEmployeeAndBeneficiaryDataResponseDto>();
 
         // Refactored loop using bulk loaded dictionary lookup
-        foreach (var memberSlice in memberSliceUnion)
+        foreach (var memberSlice in memberSliceUnion.Skip(req.Skip ?? 0))
         {
             // Lookup profit details; if missing, use a default instance.
             if (!profitDetailsDict.TryGetValue(memberSlice.Ssn, out InternalProfitDetailDto? transactionsThisYear))

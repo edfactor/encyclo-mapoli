@@ -35,8 +35,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({ setPr
     control,
     handleSubmit,
     formState: { errors, isValid },
-    reset,
-    setValue
+    reset
   } = useForm<TerminationSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
@@ -80,9 +79,9 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({ setPr
             render={({ field }) => (
               <DsmDatePicker
                 id="profitYear"
-                onChange={(value: Date | null) => {
-                  field.onChange(value);
-                  setProfitYear(Number(e.target.value));
+                onChange={(e: Date | null) => {
+                  field.onChange(e);
+                  setProfitYear(e?.getFullYear() ?? 0);
                 }}
                 value={field.value ?? null}
                 required={true}
