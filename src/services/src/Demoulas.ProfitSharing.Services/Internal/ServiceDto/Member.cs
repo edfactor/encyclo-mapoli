@@ -13,7 +13,7 @@ internal sealed record Member
     internal DateOnly? Birthday { get; init; }
     internal decimal HoursCurrentYear { get; init; }
     internal decimal EarningsCurrentYear { get; init; }
-    internal long Ssn { get; init; }
+    internal int Ssn { get; init; }
     internal DateOnly? TerminationDate { get; init; }
     internal char? TerminationCode { get; init; }
     internal decimal DistributionAmount { get; init; }
