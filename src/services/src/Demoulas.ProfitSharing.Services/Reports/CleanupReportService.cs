@@ -427,59 +427,59 @@ public class CleanupReportService : ICleanupReportService
 
         var rslt = await _dataContextFactory.UseReadOnlyContext(ctx =>
         {
-            var qry = ctx.PayProfits.Include(x => x.Demographic).Where(p => p.ProfitYear == req.ProfitYear)
-                .Join(_totalService.GetYearsOfService(ctx, req.ProfitYear), x => x.Demographic!.Ssn, x => x.Ssn, (p, tot) => new { pp = p, yip = tot })
-                .Join(ctx.EmploymentTypes, x => x.pp.Demographic!.EmploymentTypeId, x => x.Id, (pp, et) => new {pp, et})
-                .Select(p => new
-                {
-                    BadgeNumber = p.pp.pp.Demographic!.BadgeNumber,
-                    p.pp.pp.CurrentHoursYear,
-                    p.pp.pp.HoursExecutive,
-                    p.pp.pp.Demographic!.DateOfBirth,
-                    p.pp.pp.Demographic!.EmploymentStatusId,
-                    p.pp.pp.Demographic!.TerminationDate,
-                    p.pp.pp.Demographic!.Ssn,
-                    p.pp.pp.Demographic!.ContactInfo.LastName,
-                    p.pp.pp.Demographic!.ContactInfo.FirstName,
-                    p.pp.pp.Demographic!.StoreNumber,
-                    EmploymentTypeId = p.pp.pp.Demographic!.EmploymentTypeId.ToString(), //There seems to be some sort of issue in the oracle ef provider that struggles with the char type.  It maps this expression
-                                                                                         //to: NOT (CAST((BITXOR("s"."EMPLOYMENT_TYPE_ID", N'')) AS NUMBER(1)) )
-                                                                                         //Converting to a string appears to fix this issue.
-                    EmploymentTypeName = p.et.Name,
-                    p.pp.pp.CurrentIncomeYear,
-                    p.pp.pp.IncomeExecutive,
-                    p.pp.pp.PointsEarned,
-                    p.pp.yip.Years
-                });
-
+            var qry = from pp in ctx.PayProfits.Include(p => p.Demographic).Where(p=>p.ProfitYear == req.ProfitYear)
+                      join et in ctx.EmploymentTypes on pp.Demographic!.EmploymentTypeId equals et.Id
+                      join yipTbl in _totalService.GetYearsOfService(ctx, req.ProfitYear) on pp.Demographic!.Ssn equals yipTbl.Ssn into yipTmp
+                      from yip in yipTmp.DefaultIfEmpty()
+                      select new
+                      {
+                          pp.Demographic!.BadgeNumber,
+                          pp.CurrentHoursYear,
+                          pp.HoursExecutive,
+                          pp.Demographic!.DateOfBirth,
+                          pp.Demographic!.EmploymentStatusId,
+                          pp.Demographic!.TerminationDate,
+                          pp.Demographic!.Ssn,
+                          pp.Demographic!.ContactInfo.LastName,
+                          pp.Demographic!.ContactInfo.FirstName,
+                          pp.Demographic!.StoreNumber,
+                          EmploymentTypeId = pp.Demographic!.EmploymentTypeId.ToString(), //There seems to be some sort of issue in the oracle ef provider that struggles with the char type.  It maps this expression
+                                                                                          //.CAST((BITXOR("s"."EMPLOYMENT_TYPE_ID", N'')) AS NUMBER(1)) )
+                                                                                          //Converting to .fix this issue.
+                          EmploymentTypeName = et.Name,
+                          pp.CurrentIncomeYear,
+                          pp.IncomeExecutive,
+                          pp.PointsEarned,
+                          yip.Years
+                      };
             if (req.IsYearEnd)
             {
-                qry = (
-                    from pp in ctx.PayProfits
-                    join d in FrozenService.GetDemographicSnapshot(ctx, req.ProfitYear) on pp.DemographicId equals d.Id
-                    join t in _totalService.GetYearsOfService(ctx, req.ProfitYear) on d.Ssn equals t.Ssn
-                    join et in ctx.EmploymentTypes on d.EmploymentTypeId equals et.Id
-                    where pp.ProfitYear == req.ProfitYear
-                    select new
-                    {
-                        BadgeNumber = d.BadgeNumber,
-                        pp.CurrentHoursYear,
-                        pp.HoursExecutive,
-                        d.DateOfBirth,
-                        d.EmploymentStatusId,
-                        d.TerminationDate,
-                        d.Ssn,
-                        d.ContactInfo.LastName,
-                        d.ContactInfo.FirstName,
-                        d.StoreNumber,
-                        EmploymentTypeId = d.EmploymentTypeId.ToString(),
-                        EmploymentTypeName = et.Name,
-                        pp.CurrentIncomeYear,
-                        pp.IncomeExecutive,
-                        pp.PointsEarned,
-                        t.Years
-                    }
-                );
+                qry = from pp in ctx.PayProfits.Include(p => p.Demographic).Where(p => p.ProfitYear == req.ProfitYear)
+                      join d in FrozenService.GetDemographicSnapshot(ctx, req.ProfitYear) on pp.DemographicId equals d.Id
+                      join et in ctx.EmploymentTypes on pp.Demographic!.EmploymentTypeId equals et.Id
+                      join yipTbl in _totalService.GetYearsOfService(ctx, req.ProfitYear) on pp.Demographic!.Ssn equals yipTbl.Ssn into yipTmp
+                      from yip in yipTmp.DefaultIfEmpty()
+                      select new
+                      {
+                          pp.Demographic!.BadgeNumber,
+                          pp.CurrentHoursYear,
+                          pp.HoursExecutive,
+                          pp.Demographic!.DateOfBirth,
+                          pp.Demographic!.EmploymentStatusId,
+                          pp.Demographic!.TerminationDate,
+                          pp.Demographic!.Ssn,
+                          pp.Demographic!.ContactInfo.LastName,
+                          pp.Demographic!.ContactInfo.FirstName,
+                          pp.Demographic!.StoreNumber,
+                          EmploymentTypeId = pp.Demographic!.EmploymentTypeId.ToString(), 
+                          EmploymentTypeName = et.Name,
+                          pp.CurrentIncomeYear,
+                          pp.IncomeExecutive,
+                          pp.PointsEarned,
+                          yip.Years
+                      };
+
+                
             }
 
             if (req.IncludeBeneficiaries)
@@ -561,8 +561,10 @@ public class CleanupReportService : ICleanupReportService
 
             }
 
-            var joinedQry = qry
-                      .Join(_totalService.GetTotalBalanceSet(ctx, req.ProfitYear), x => x.Ssn, x => x.Ssn, (pp, tot) => new { pp, tot });
+            var joinedQry = from pp in qry
+                        join totTbl in _totalService.GetTotalBalanceSet(ctx, req.ProfitYear) on pp.Ssn equals totTbl.Ssn into totTmp
+                        from tot in totTmp.DefaultIfEmpty()
+                        select new { pp, tot };
 
 
             if (req is { IncludeEmployeesWithNoPriorProfitSharingAmounts: false, IncludeEmployeesWithPriorProfitSharingAmounts: true })
@@ -574,7 +576,27 @@ public class CleanupReportService : ICleanupReportService
                 joinedQry = joinedQry.Where(jq => jq.tot.Total == 0);
             }
 
-            return joinedQry
+            var firstContributionSubquery = from pd in ctx.ProfitDetails
+                                            where pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id
+                                            group pd by pd.Ssn into pdGrp
+                                            select new
+                                            {
+                                                Ssn = pdGrp.Key,
+                                                FirstContributionYear = (short?)pdGrp.Min(x => x.ProfitYear)
+                                            };
+
+            var qryWithContributionYear = from j in joinedQry
+                                          join fcTbl in firstContributionSubquery on j.pp.Ssn equals fcTbl.Ssn into fcTmp
+                                          from fc in fcTmp.DefaultIfEmpty()
+                                          select new
+                                          {
+                                              j.pp,
+                                              j.tot,
+                                              fc.FirstContributionYear
+                                          };
+                                           
+
+            return qryWithContributionYear
                       .OrderBy(p => p.pp.LastName)
                       .ThenBy(p => p.pp.FirstName)
                       .Select(x => new YearEndProfitSharingReportResponse()
@@ -590,7 +612,7 @@ public class CleanupReportService : ICleanupReportService
                           Wages = x.pp.CurrentIncomeYear + x.pp.IncomeExecutive,
                           Hours = x.pp.CurrentHoursYear + x.pp.HoursExecutive,
                           Points = Convert.ToInt16(x.pp.PointsEarned),
-                          IsNew = x.pp.EmploymentTypeId == EmployeeType.Constants.NewLastYear.ToString(),
+                          IsNew = (x.FirstContributionYear == null && x.pp.HoursExecutive + x.pp.CurrentHoursYear > 1000),
                           IsUnder21 = false, //Filled out below after materialization
                           EmployeeStatus = x.pp.EmploymentStatusId,
                           Balance = x.tot.Total ?? 0,
