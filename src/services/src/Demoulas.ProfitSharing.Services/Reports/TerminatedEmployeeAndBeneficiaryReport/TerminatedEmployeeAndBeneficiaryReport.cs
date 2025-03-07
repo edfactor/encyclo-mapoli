@@ -173,7 +173,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         var today = DateOnly.FromDateTime(DateTime.Today);
 
         // Extract SSNs needed in the loop
-        var ssns = memberSliceUnion.Select(ms => ms.Ssn).Distinct().ToList();
+        var ssns = memberSliceUnion.Select(ms => ms.Ssn).ToHashSet();
 
         // Bulk load profit details for this profit year, grouped by SSN.
         var profitDetailsDict = await ctx.ProfitDetails
@@ -212,9 +212,8 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             .ToDictionaryAsync(x => x.Ssn, cancellationToken);
 
         var membersSummary = new List<TerminatedEmployeeAndBeneficiaryDataResponseDto>();
-        var unions = memberSliceUnion.Skip(req.Skip ?? 0).ToList();
-        var count = memberSliceUnion.Count;
-
+        var unions = memberSliceUnion.ToList();
+        
         // Refactored loop using bulk loaded dictionary lookup
         foreach (var memberSlice in unions)
         {
@@ -264,7 +263,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             // If not interesting, skip.
             if (!IsInteresting(member))
             {
-                count--;
+                memberSliceUnion.Remove(memberSlice);
                 continue;
             }
 
@@ -318,12 +317,13 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             totalForfeit += member.ForfeitAmount;
             totalEndingBalance += member.EndingBalance;
             totalBeneficiaryAllocation += member.BeneficiaryAllocation;
-
-            if (membersSummary.Count >= req.Take)
-            {
-                break;
-            }
         }
+
+        // Calculate total count before pagination
+        int totalCount = membersSummary.Count;
+
+        // Apply pagination
+        var paginatedResults = membersSummary.Skip(req.Skip ?? 0).Take(req.Take ?? byte.MaxValue).ToList();
 
         return new TerminatedEmployeeAndBeneficiaryResponse
         {
@@ -335,8 +335,8 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             TotalBeneficiaryAllocation = totalBeneficiaryAllocation,
             Response = new PaginatedResponseDto<TerminatedEmployeeAndBeneficiaryDataResponseDto>(req)
             {
-                Results = membersSummary,
-                Total = count
+                Results = paginatedResults,
+                Total = totalCount
             }
         };
     }
