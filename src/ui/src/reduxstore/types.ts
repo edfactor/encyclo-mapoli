@@ -264,6 +264,11 @@ export interface EligibleEmployeeResponseDto {
 export interface BaseQueryParams {
   profitYear: number;
 }
+
+export interface BaseDateRangeParams {
+  startDate: Date;
+  endDate: Date;
+}
 export interface MasterInquirySearch {
   startProfitYear?: Date | null;
   endProfitYear?: Date | null;
@@ -686,7 +691,8 @@ export interface YearEndProfitSharingEmployee {
   employeeName: string;
   storeNumber: number;
   employeeTypeCode: string;
-  dateOfBirth: string;
+  employmentTypeName: string;
+  dateOfBirth: Date;
   age: number;
   ssn: string;
   wages: number;

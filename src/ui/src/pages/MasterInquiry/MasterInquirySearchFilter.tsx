@@ -41,6 +41,7 @@ const schema = yup.object().shape({
     .min(new Date(2015, 0, 1), "Year must be 2020 or later")
     .max(new Date(2100, 11, 31), "Year must be 2100 or earlier")
     .typeError("Invalid date")
+    .min(yup.ref("startProfitYear"), "End year must be after start year")
     .nullable(),
   startProfitMonth: yup
     .number()
@@ -55,6 +56,7 @@ const schema = yup.object().shape({
     .integer("Ending Month must be an integer")
     .min(1, "Ending Month must be between 1 and 12")
     .max(12, "Ending Month must be between 1 and 12")
+    .min(yup.ref("startProfitMonth"), "End month must be after start month")
     .nullable(),
   socialSecurity: yup
     .number()
