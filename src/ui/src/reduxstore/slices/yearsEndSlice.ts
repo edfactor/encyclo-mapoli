@@ -30,7 +30,8 @@ import {
   ExecutiveHoursAndDollarsGrid,
   EmployeeWagesForYear,
   YearEndProfitSharingReportResponse,
-  BaseQueryParams
+  BaseQueryParams,
+  MasterInquirySearch
 } from "reduxstore/types";
 
 export interface YearsEndState {
@@ -43,6 +44,7 @@ export interface YearsEndState {
   balanceByYearsFullTime: BalanceByAge | null;
   balanceByYearsPartTime: BalanceByAge | null;
   balanceByYearsTotal: BalanceByAge | null;
+  balanceByYearsQueryParams: BaseQueryParams | null;
   contributionsByAgeFullTime: ContributionsByAge | null;
   contributionsByAgePartTime: ContributionsByAge | null;
   contributionsByAgeTotal: ContributionsByAge | null;
@@ -67,6 +69,7 @@ export interface YearsEndState {
   forfeituresByAgeTotal: ForfeituresByAge | null;
   masterInquiryData: MasterInquiryResponseType | null;
   masterInquiryEmployeeDetails: EmployeeDetails | null;
+  masterInquiryRequestParams: MasterInquirySearch | null;
   militaryAndRehire: PagedReportResponse<EmployeesOnMilitaryLeaveResponse> | null;
   militaryAndRehireQueryParams: BaseQueryParams | null;
   forfeituresByAgeQueryParams: BaseQueryParams | null;
@@ -78,6 +81,7 @@ export interface YearsEndState {
   negativeEtvaForSSNsOnPayprofitParams: BaseQueryParams | null;
   profitSharingUpdate: ProfitShareUpdateResponse | ProfitShareEditResponse | ProfitShareMasterResponse | null;
   termination: TerminationResponse | null;
+  terminationQueryParams: BaseQueryParams | null;
   vestedAmountsByAge: VestedAmountsByAge | null;
   vestedAmountsByAgeQueryParams: BaseQueryParams | null;
   yearEndProfitSharingReport: PagedReportResponse<YearEndProfitSharingReportResponse> | null;
@@ -93,6 +97,7 @@ const initialState: YearsEndState = {
   balanceByYearsFullTime: null,
   balanceByYearsPartTime: null,
   balanceByYearsTotal: null,
+  balanceByYearsQueryParams: null,
   contributionsByAgeFullTime: null,
   contributionsByAgePartTime: null,
   contributionsByAgeTotal: null,
@@ -118,6 +123,7 @@ const initialState: YearsEndState = {
   forfeituresByAgeQueryParams: null,
   masterInquiryData: null,
   masterInquiryEmployeeDetails: null,
+  masterInquiryRequestParams: null,
   militaryAndRehire: null,
   militaryAndRehireQueryParams: null,
   militaryAndRehireEntryAndModification: null,
@@ -128,6 +134,7 @@ const initialState: YearsEndState = {
   negativeEtvaForSSNsOnPayprofitParams: null,
   profitSharingUpdate: null,
   termination: null,
+  terminationQueryParams: null,
   vestedAmountsByAge: null,
   vestedAmountsByAgeQueryParams: null,
   yearEndProfitSharingReport: null
@@ -137,6 +144,12 @@ export const yearsEndSlice = createSlice({
   name: "yearsEnd",
   initialState,
   reducers: {
+    setBalanceByYearsQueryParams: (state, action: PayloadAction<number>) => {
+      state.balanceByYearsQueryParams = { profitYear: action.payload };
+    },
+    clearBalanceByYearsQueryParams: (state) => {
+      state.balanceByYearsQueryParams = null;
+    },
     setDuplicateSSNsData: (state, action: PayloadAction<PagedReportResponse<DuplicateSSNDetail>>) => {
       state.duplicateSSNsData = action.payload;
     },
@@ -343,13 +356,16 @@ export const yearsEndSlice = createSlice({
     clearEligibleEmployees: (state) => {
       state.eligibleEmployees = null;
     },
+    setMasterInquiryRequestParams: (state, action: PayloadAction<MasterInquirySearch>) => {
+      state.masterInquiryRequestParams = action.payload;
+    },
+    clearMasterInquiryRequestParams: (state) => {
+      state.masterInquiryRequestParams = null;
+    },
+
     setMasterInquiryData: (state, action: PayloadAction<MasterInquiryResponseType>) => {
-      state.masterInquiryData = action.payload.inquiryResults;
-      /*
-      if (state.masterInquiryData) {
-        state.masterInquiryData.inquiryResults = action.payload.inquiryResults;
-      }
-      */
+      state.masterInquiryData = action.payload;
+
       if (action.payload.employeeDetails) {
         state.masterInquiryEmployeeDetails = action.payload.employeeDetails;
       }
@@ -497,6 +513,12 @@ export const yearsEndSlice = createSlice({
     clearTermination: (state) => {
       state.termination = null;
     },
+    setTerminationQueryParams: (state, action: PayloadAction<number>) => {
+      state.terminationQueryParams = { profitYear: action.payload };
+    },
+    clearTerminationQueryParams: (state) => {
+      state.terminationQueryParams = null;
+    },
     setProfitUpdate: (state, action: PayloadAction<ProfitShareUpdateResponse>) => {
       state.profitSharingUpdate = action.payload;
     },
@@ -638,6 +660,12 @@ export const {
   setVestedAmountsByAgeQueryParams,
   clearVestedAmountsByAgeQueryParams,
   clearEmployeeWagesForYearQueryParams,
-  setEmployeeWagesForYearQueryParams
+  setEmployeeWagesForYearQueryParams,
+  setTerminationQueryParams,
+  clearTerminationQueryParams,
+  setBalanceByYearsQueryParams,
+  clearBalanceByYearsQueryParams,
+  setMasterInquiryRequestParams,
+  clearMasterInquiryRequestParams
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

@@ -12,7 +12,6 @@ interface ProfitShareReportRow {
   oracleHcmId: string;
 }
 
-
 const ProfitShareReportGrid = () => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -22,31 +21,31 @@ const ProfitShareReportGrid = () => {
   });
 
   const dispatch = useDispatch();
-  const {yearEndProfitSharingReport} = useSelector((state: RootState) => state.yearsEnd);
+  const { yearEndProfitSharingReport } = useSelector((state: RootState) => state.yearsEnd);
   const [_, { isLoading }] = useLazyGetYearEndProfitSharingReportQuery();
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetProfitShareReportColumns(), []);
-  
+
   return (
     <>
       {!!yearEndProfitSharingReport && (
-          <div style={{ padding: "0 24px 0 24px" }}>
-            <Typography
-              variant="h2"
-              sx={{ color: "#0258A5" }}>
-              {`PROFIT-ELIGIBLE REPORT (5)`}
-            </Typography>
-          </div>
+        <div style={{ padding: "0 24px 0 24px" }}>
+          <Typography
+            variant="h2"
+            sx={{ color: "#0258A5" }}>
+            {`PROFIT-ELIGIBLE REPORT (5)`}
+          </Typography>
+        </div>
       )}
       {!!yearEndProfitSharingReport && yearEndProfitSharingReport.response.results.length && (
-          <DSMGrid
-            preferenceKey={"ProfitShareReportGrid"}
-            isLoading={isLoading}
-            providedOptions={{
-                rowData: yearEndProfitSharingReport?.response.results,
-                columnDefs: columnDefs
-            }}
+        <DSMGrid
+          preferenceKey={"ProfitShareReportGrid"}
+          isLoading={isLoading}
+          providedOptions={{
+            rowData: yearEndProfitSharingReport?.response.results,
+            columnDefs: columnDefs
+          }}
         />
       )}
     </>
