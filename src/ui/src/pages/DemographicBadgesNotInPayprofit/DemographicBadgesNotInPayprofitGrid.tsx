@@ -6,17 +6,7 @@ import { RootState } from "reduxstore/store";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import { GetDemographicBadgesNotInPayprofitColumns } from "./DemographicBadgesNotInPayprofitGridColumns";
 
-interface DemographicBadgesNotInPayprofitGridSearchProps {
-  profitYearCurrent: number | null;
-  initialSearchLoaded: boolean;
-  setInitialSearchLoaded: (loaded: boolean) => void;
-}
-
-const DemographicBadgesNotInPayprofitGrid: React.FC<DemographicBadgesNotInPayprofitGridSearchProps> = ({
-  profitYearCurrent,
-  initialSearchLoaded,
-  setInitialSearchLoaded
-}) => {
+const DemographicBadgesNotInPayprofitGrid: React.FC = () => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
 
@@ -25,18 +15,15 @@ const DemographicBadgesNotInPayprofitGrid: React.FC<DemographicBadgesNotInPaypro
 
   const onSearch = useCallback(async () => {
     const request = {
-      profitYear: profitYearCurrent ?? 0,
       pagination: { skip: pageNumber * pageSize, take: pageSize }
     };
 
     await triggerSearch(request, false);
-  }, [profitYearCurrent, pageNumber, pageSize, triggerSearch]);
+  }, [pageNumber, pageSize, triggerSearch]);
 
   useEffect(() => {
-    if (initialSearchLoaded) {
-      onSearch();
-    }
-  }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
+    onSearch();
+  }, [pageNumber, pageSize, onSearch]);
 
   const columnDefs = useMemo(() => GetDemographicBadgesNotInPayprofitColumns(), []);
 
@@ -48,7 +35,7 @@ const DemographicBadgesNotInPayprofitGrid: React.FC<DemographicBadgesNotInPaypro
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`DEMOGRAPHICS BADGES NOT ON PAYPROFIT (${demographicBadges?.response.total || 0})`}
+              {`(${demographicBadges?.response.total || 0})`}
             </Typography>
           </div>
           <DSMGrid
@@ -66,13 +53,11 @@ const DemographicBadgesNotInPayprofitGrid: React.FC<DemographicBadgesNotInPaypro
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
             setPageNumber(value - 1);
-            setInitialSearchLoaded(true);
           }}
           pageSize={pageSize}
           setPageSize={(value: number) => {
             setPageSize(value);
             setPageNumber(1);
-            setInitialSearchLoaded(true);
           }}
           recordCount={demographicBadges.response.total}
         />
