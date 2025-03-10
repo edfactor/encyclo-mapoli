@@ -9,10 +9,6 @@ import { MENU_LABELS } from "../../constants";
 import { useState } from "react";
 
 const DistributionsAndForfeitures = () => {
-  const [profitYear, setProfitYear] = useState<number | null>(null);
-  const [startMonth, setStartMonth] = useState<number | null>(null);
-  const [endMonth, setEndMonth] = useState<number | null>(null);
-  const [includeOutgoingForfeitures, setIncludeOutgoingForfeitures] = useState(false);
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
 
   const navigate = useNavigate();
@@ -47,22 +43,12 @@ const DistributionsAndForfeitures = () => {
         </Grid2>
         <Grid2 width={"100%"}>
           <DSMAccordion title="Filter">
-            <DistributionsAndForfeituresSearchFilter
-              setProfitYear={setProfitYear}
-              setStartMonth={setStartMonth}
-              setEndMonth={setEndMonth}
-              setIncludeOutgoingForfeitures={setIncludeOutgoingForfeitures}
-              setInitialSearchLoaded={setInitialSearchLoaded}
-            />
+            <DistributionsAndForfeituresSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
           </DSMAccordion>
         </Grid2>
 
         <Grid2 width="100%">
           <DistributionsAndForfeituresGrid
-            profitYearCurrent={profitYear}
-            startMonthCurrent={startMonth}
-            endMonthCurrent={endMonth}
-            includeOutgoingForfeituresCurrent={includeOutgoingForfeitures}
             setInitialSearchLoaded={setInitialSearchLoaded}
             initialSearchLoaded={initialSearchLoaded}
           />

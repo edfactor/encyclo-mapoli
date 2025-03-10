@@ -8,16 +8,11 @@ import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetTerminationColumns } from "./TerminationGridColumn";
 
 interface TerminationGridSearchProps {
-  profitYearCurrent: number | null;
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
 }
 
-const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
-  profitYearCurrent,
-  initialSearchLoaded,
-  setInitialSearchLoaded
-}) => {
+const TerminationGrid: React.FC<TerminationGridSearchProps> = ({ initialSearchLoaded, setInitialSearchLoaded }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [setSortParams] = useState<ISortParams>({
@@ -25,23 +20,18 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     isSortDescending: false
   });
 
-  const { termination } = useSelector((state: RootState) => state.yearsEnd);
+  const { termination, terminationQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const [triggerSearch, { isFetching }] = useLazyGetTerminationReportQuery();
   const navigate = useNavigate();
 
   const onSearch = useCallback(async () => {
-
-    if (!profitYearCurrent) {
-      console.error("profitYearCurrent is missing or invalid, defaulting to 0");
-    }
-
     const request = {
-      profitYear: profitYearCurrent ?? 0,
+      profitYear: terminationQueryParams?.profitYear ?? 0,
       pagination: { skip: pageNumber * pageSize, take: pageSize }
     };
 
     await triggerSearch(request, false);
-  }, [profitYearCurrent, pageNumber, pageSize, triggerSearch]);
+  }, [pageNumber, pageSize, terminationQueryParams?.profitYear, triggerSearch]);
 
   useEffect(() => {
     if (initialSearchLoaded) {

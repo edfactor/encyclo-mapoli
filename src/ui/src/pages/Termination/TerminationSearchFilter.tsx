@@ -1,14 +1,17 @@
-import { FormHelperText } from "@mui/material";
-import Grid2 from "@mui/material/Unstable_Grid2";
-import { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { useLazyGetTerminationReportQuery } from "reduxstore/api/YearsEndApi";
-import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
+import Grid2 from "@mui/material/Unstable_Grid2";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
-import { useDispatch } from "react-redux";
-import { clearTermination } from "reduxstore/slices/yearsEndSlice";
+import { Controller, useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
+import { useLazyGetTerminationReportQuery } from "reduxstore/api/YearsEndApi";
+import {
+  clearTermination,
+  clearTerminationQueryParams,
+  setTerminationQueryParams
+} from "reduxstore/slices/yearsEndSlice";
+import { RootState } from "reduxstore/store";
+import { SearchAndReset } from "smart-ui-library";
+import * as yup from "yup";
 
 interface TerminationSearch {
   profitYear: Date;
@@ -24,11 +27,11 @@ const schema = yup.object().shape({
 });
 
 interface TerminationSearchFilterProps {
-  setProfitYear: (year: number) => void;
   setInitialSearchLoaded: (include: boolean) => void;
 }
 
-const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({ setProfitYear, setInitialSearchLoaded }) => {
+const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({ setInitialSearchLoaded }) => {
+  const { terminationQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const [triggerSearch, { isFetching }] = useLazyGetTerminationReportQuery();
   const dispatch = useDispatch();
   const {
@@ -39,7 +42,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({ setPr
   } = useForm<TerminationSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: undefined
+      profitYear: terminationQueryParams?.profitYear ? new Date(terminationQueryParams.profitYear, 0, 1) : undefined
     }
   });
 
@@ -51,12 +54,14 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({ setPr
           pagination: { skip: 0, take: 25 }
         },
         false
-      );
+      ).unwrap();
+      dispatch(setTerminationQueryParams(data.profitYear.getFullYear()));
     }
   });
 
   const handleReset = () => {
     setInitialSearchLoaded(false);
+    dispatch(clearTerminationQueryParams());
     dispatch(clearTermination());
     reset({
       profitYear: undefined
@@ -81,7 +86,6 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({ setPr
                 id="profitYear"
                 onChange={(e: Date | null) => {
                   field.onChange(e);
-                  setProfitYear(e?.getFullYear() ?? 0);
                 }}
                 value={field.value ?? null}
                 required={true}
