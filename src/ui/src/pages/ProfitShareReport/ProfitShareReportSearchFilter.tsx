@@ -1,12 +1,11 @@
+import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
-import { SearchAndReset } from "smart-ui-library";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
 import { YearEndProfitSharingReportRequest } from "reduxstore/types";
+import { SearchAndReset } from "smart-ui-library";
+import * as yup from "yup";
 
 interface ProfitShareReportSearch {
   profitYear: number;
@@ -44,17 +43,19 @@ const ProfitShareReportSearchFilter = () => {
         isYearEnd: true,
         minimumAgeInclusive: 18,
         minimumHoursInclusive: 1000,
+        maximumAgeInclusive: 65,
+        maximumHoursInclusive: 2000,
         includeActiveEmployees: true,
         includeInactiveEmployees: true,
         includeEmployeesWithPriorProfitSharingAmounts: false,
         includeEmployeesWithNoPriorProfitSharingAmounts: false,
+        includeEmployeesTerminatedThisYear: false,
+        includeTerminatedEmployees: false,
+        includeBeneficiaries: false,
         profitYear: data.profitYear,
         pagination: { skip: 0, take: 25 }
       };
-      triggerSearch(
-        req,
-        false
-      );
+      triggerSearch(req, false);
     }
   });
 
