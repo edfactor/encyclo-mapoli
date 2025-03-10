@@ -405,7 +405,8 @@ export const YearsEndApi = createApi({
           badgeNumber: params.badgeNumber,
           ssn: params.socialSecurity,
           fullNameContains: params.fullNameContains,
-          hasExecutiveHoursAndDollars: params.hasExecutiveHoursAndDollars
+          hasExecutiveHoursAndDollars: params.hasExecutiveHoursAndDollars,
+          hasMonthlyPayments: params.hasMonthlyPayments
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {

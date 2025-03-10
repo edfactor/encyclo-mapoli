@@ -266,6 +266,14 @@ export interface BaseQueryParams {
   profitYear: number;
 }
 
+export interface ExecutiveHoursAndDollarsQueryParams extends BaseQueryParams {
+  badgeNumber: number;
+  socialSecurity: number;
+  fullNameContains: string;
+  hasExecutiveHoursAndDollars: boolean;
+  hasMonthlyPayments: boolean;
+}
+
 export interface DistributionsAndForfeituresQueryParams extends BaseQueryParams {
   startMonth?: number;
   endMonth?: number;

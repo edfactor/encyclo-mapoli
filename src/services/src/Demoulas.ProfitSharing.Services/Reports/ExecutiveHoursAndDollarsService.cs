@@ -44,7 +44,9 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
             }
             
             // Executives often have a pay frequency value of 2
-            query = query.Where(pp => pp.Demographic!.PayFrequencyId == request.hasMonthlyPayments.value);
+            if (request.HasMonthlyPayments.HasValue && request.HasMonthlyPayments.Value) {
+                query = query.Where(pp => pp.Demographic!.PayFrequencyId == PayFrequency.Constants.Monthly);
+            }
 
             if (request.Ssn!= null)
             {

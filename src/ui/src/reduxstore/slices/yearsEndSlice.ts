@@ -32,7 +32,8 @@ import {
   YearEndProfitSharingReportResponse,
   BaseQueryParams,
   MasterInquirySearch,
-  DistributionsAndForfeituresQueryParams
+  DistributionsAndForfeituresQueryParams,
+  ExecutiveHoursAndDollarsQueryParams
 } from "reduxstore/types";
 
 export interface YearsEndState {
@@ -67,6 +68,7 @@ export interface YearsEndState {
   executiveHoursAndDollars: PagedReportResponse<ExecutiveHoursAndDollars> | null;
   executiveHoursAndDollarsGrid: ExecutiveHoursAndDollarsGrid | null;
   executiveRowsSelected: ExecutiveHoursAndDollars[] | null;
+  executiveHoursAndDollarsQueryParams: ExecutiveHoursAndDollarsQueryParams | null;
   forfeituresByAgeFullTime: ForfeituresByAge | null;
   forfeituresByAgePartTime: ForfeituresByAge | null;
   forfeituresByAgeTotal: ForfeituresByAge | null;
@@ -123,6 +125,7 @@ const initialState: YearsEndState = {
   executiveHoursAndDollars: null,
   executiveHoursAndDollarsGrid: null,
   executiveRowsSelected: null,
+  executiveHoursAndDollarsQueryParams: null,
   forfeituresByAgeFullTime: null,
   forfeituresByAgePartTime: null,
   forfeituresByAgeTotal: null,
@@ -356,6 +359,12 @@ export const yearsEndSlice = createSlice({
             action.payload.profitYear
         );
       }
+    },
+    setExecutiveHoursAndDollarsQueryParams: (state, action: PayloadAction<ExecutiveHoursAndDollarsQueryParams>) => {
+      state.executiveHoursAndDollarsQueryParams = action.payload;
+    },
+    clearExecutiveHoursAndDollarsQueryParams: (state) => {
+      state.executiveHoursAndDollarsQueryParams = null;
     },
     setEmployeeWagesForYear: (state, action: PayloadAction<PagedReportResponse<EmployeeWagesForYear>>) => {
       state.employeeWagesForYear = action.payload;
@@ -700,6 +709,8 @@ export const {
   setYearEndProfitSharingReportQueryParams,
   clearYearEndProfitSharingReportQueryParams,
   setDistributionsAndForfeituresQueryParams,
-  clearDistributionsAndForfeituresQueryParams
+  clearDistributionsAndForfeituresQueryParams,
+  setExecutiveHoursAndDollarsQueryParams,
+  clearExecutiveHoursAndDollarsQueryParams
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;
