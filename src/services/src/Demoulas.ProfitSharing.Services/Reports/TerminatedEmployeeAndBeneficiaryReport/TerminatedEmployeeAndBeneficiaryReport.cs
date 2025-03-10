@@ -310,7 +310,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 VestedBalance = vestedBalance,
                 DateTerm = member.TerminationDate,
                 YtdPsHours = member.HoursCurrentYear,
-                VestedPercent = vestingPercent * 100,
+                VestedPercent = vestingPercent,
                 Age = age,
                 EnrollmentCode = enrollmentId
             });
