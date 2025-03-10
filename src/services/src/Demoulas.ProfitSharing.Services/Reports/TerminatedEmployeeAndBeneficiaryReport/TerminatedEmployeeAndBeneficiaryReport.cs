@@ -284,7 +284,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
             if (memberSlice.IsOnlyBeneficiary)
             {
-                vestingPercent = 100;
+                vestingPercent = 1; // = 100%
             }
             if (member.EndingBalance == 0 && vestedBalance == 0)
             {
