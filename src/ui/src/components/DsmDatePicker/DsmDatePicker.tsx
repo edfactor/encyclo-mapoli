@@ -66,9 +66,20 @@ const DsmDatePicker: FC<MyProps> = ({
       fullWidth
       error={isInvalid}
       onError={(err) => {}}
-      onKeyDown={(e: KeyboardEvent<HTMLDivElement>) => {
-        if (onKeyDown) {
-          onKeyDown(e);
+      onKeyUp={(e: React.KeyboardEvent<HTMLDivElement>) => {
+        // This wild code is meant to enable the search button without leaving the
+        // field with a blur event.
+        const numberValue = parseInt((e.target as HTMLInputElement).value);
+
+        if (numberValue > 1950 && numberValue < 2100) {
+          const simulatedFocusEvent = {
+            ...e,
+            target: e.target as HTMLInputElement,
+            relatedTarget: null
+          } as unknown as React.FocusEvent<HTMLInputElement>;
+          // The function below will let the search button be enabled if
+          // we get a reasonable year
+          handleTextFieldBlur(simulatedFocusEvent);
         }
       }}
       onBlur={handleTextFieldBlur}
