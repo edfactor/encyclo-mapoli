@@ -12,15 +12,7 @@ export const GetTerminationColumns = (navFunction: (badgeNumber: string) => void
       cellClass: "left-align",
       resizable: true,
       sortable: true,
-      cellRenderer: (params: ICellRendererParams) => {
-        const badgePSn = params.data.badgePSn;
-
-        if (badgePSn > 9999999) {
-          return badgePSn;
-        }
-
-        return viewBadgeLinkRenderer(params.data.badgeNumber, navFunction);
-      }
+      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgePSn, navFunction)
     },
     {
       headerName: "Name",
