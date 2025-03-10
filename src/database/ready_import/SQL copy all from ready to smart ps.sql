@@ -2,8 +2,8 @@
 ---TO "YOUR CURRENT SCHEMA" FROM - {SOURCE_PROFITSHARE_SCHEMA}
 -------------------------------------------------------------------------------------
 DECLARE
-    this_year NUMBER := 2024; -- Set this to the current year
-    last_year NUMBER := 2023; -- Set this to the previous year
+    this_year NUMBER := 2025; -- Set this to the current year
+    last_year NUMBER := 2024; -- Set this to the previous year
 BEGIN
 
 -- FIRST EMPTY OUT THE TABLE

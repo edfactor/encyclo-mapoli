@@ -7,13 +7,11 @@ import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetDuplicateNamesAndBirthdayColumns } from "./DuplicateNamesAndBirthdaysGridColumns";
 
 interface DuplicateNamesAndBirthdaysGridSearchProps {
-  profitYearCurrent: number | null;
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
 }
 
 const DuplicateNamesAndBirthdaysGrid: React.FC<DuplicateNamesAndBirthdaysGridSearchProps> = ({
-  profitYearCurrent,
   initialSearchLoaded,
   setInitialSearchLoaded
 }) => {
@@ -24,17 +22,19 @@ const DuplicateNamesAndBirthdaysGrid: React.FC<DuplicateNamesAndBirthdaysGridSea
     isSortDescending: false
   });
 
-  const { duplicateNamesAndBirthday } = useSelector((state: RootState) => state.yearsEnd);
+  const { duplicateNamesAndBirthdays, duplicateNamesAndBirthdaysQueryParams } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
   const [triggerSearch, { isLoading }] = useLazyGetDuplicateNamesAndBirthdaysQuery();
 
   const onSearch = useCallback(async () => {
     const request = {
-      profitYear: profitYearCurrent ?? 0,
+      profitYear: duplicateNamesAndBirthdaysQueryParams?.profitYear ?? 0,
       pagination: { skip: pageNumber * pageSize, take: pageSize }
     };
 
     await triggerSearch(request, false);
-  }, [profitYearCurrent, pageNumber, pageSize, triggerSearch]);
+  }, [duplicateNamesAndBirthdaysQueryParams?.profitYear, pageNumber, pageSize, triggerSearch]);
 
   useEffect(() => {
     if (initialSearchLoaded) {
@@ -47,13 +47,13 @@ const DuplicateNamesAndBirthdaysGrid: React.FC<DuplicateNamesAndBirthdaysGridSea
 
   return (
     <>
-      {duplicateNamesAndBirthday?.response && (
+      {duplicateNamesAndBirthdays?.response && (
         <>
           <div style={{ padding: "0 24px 0 24px" }}>
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`DUPLICATE NAMES AND BIRTHDAYS (${duplicateNamesAndBirthday?.response.total || 0})`}
+              {`DUPLICATE NAMES AND BIRTHDAYS (${duplicateNamesAndBirthdays?.response.total || 0})`}
             </Typography>
           </div>
           <DSMGrid
@@ -61,13 +61,13 @@ const DuplicateNamesAndBirthdaysGrid: React.FC<DuplicateNamesAndBirthdaysGridSea
             isLoading={false}
             handleSortChanged={sortEventHandler}
             providedOptions={{
-              rowData: duplicateNamesAndBirthday?.response.results,
+              rowData: duplicateNamesAndBirthdays?.response.results,
               columnDefs: columnDefs
             }}
           />
         </>
       )}
-      {!!duplicateNamesAndBirthday && duplicateNamesAndBirthday.response.results.length > 0 && (
+      {!!duplicateNamesAndBirthdays && duplicateNamesAndBirthdays.response.results.length > 0 && (
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
@@ -80,7 +80,7 @@ const DuplicateNamesAndBirthdaysGrid: React.FC<DuplicateNamesAndBirthdaysGridSea
             setPageNumber(1);
             setInitialSearchLoaded(true);
           }}
-          recordCount={duplicateNamesAndBirthday.response.total}
+          recordCount={duplicateNamesAndBirthdays.response.total}
         />
       )}
     </>

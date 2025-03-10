@@ -266,6 +266,12 @@ export interface BaseQueryParams {
   profitYear: number;
 }
 
+export interface DistributionsAndForfeituresQueryParams extends BaseQueryParams {
+  startMonth?: number;
+  endMonth?: number;
+  includeOutgoingForfeitures?: boolean;
+}
+
 export interface BaseDateRangeParams {
   startDate: Date;
   endDate: Date;
@@ -516,7 +522,8 @@ export interface TerminationRequest {
 }
 
 export interface TerminationDetail {
-  badgePSn: string;
+  badgeNumber: number;
+  psnSuffix: number;
   name: string;
   beginningBalance: number;
   beneficiaryAllocation: number;
