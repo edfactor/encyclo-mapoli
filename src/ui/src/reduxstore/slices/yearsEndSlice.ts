@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { set } from "date-fns";
 
 import {
   ContributionsByAge,
@@ -30,7 +31,8 @@ import {
   EmployeeWagesForYear,
   YearEndProfitSharingReportResponse,
   BaseQueryParams,
-  MasterInquirySearch
+  MasterInquirySearch,
+  DistributionsAndForfeituresQueryParams
 } from "reduxstore/types";
 
 export interface YearsEndState {
@@ -50,6 +52,7 @@ export interface YearsEndState {
   contributionsByAgeQueryParams: BaseQueryParams | null;
   demographicBadges: PagedReportResponse<DemographicBadgesNotInPayprofit> | null;
   distributionsAndForfeitures: PagedReportResponse<DistributionsAndForfeitures> | null;
+  distributionsAndForfeituresQueryParams: DistributionsAndForfeituresQueryParams | null;
   distributionsByAgeFullTime: ProfitSharingDistributionsByAge | null;
   distributionsByAgePartTime: ProfitSharingDistributionsByAge | null;
   distributionsByAgeTotal: ProfitSharingDistributionsByAge | null;
@@ -85,6 +88,7 @@ export interface YearsEndState {
   vestedAmountsByAge: VestedAmountsByAge | null;
   vestedAmountsByAgeQueryParams: BaseQueryParams | null;
   yearEndProfitSharingReport: PagedReportResponse<YearEndProfitSharingReportResponse> | null;
+  yearEndProfitSharingReportQueryParams: BaseQueryParams | null;
 }
 
 const initialState: YearsEndState = {
@@ -104,6 +108,7 @@ const initialState: YearsEndState = {
   contributionsByAgeQueryParams: null,
   demographicBadges: null,
   distributionsAndForfeitures: null,
+  distributionsAndForfeituresQueryParams: null,
   distributionsByAgeFullTime: null,
   distributionsByAgePartTime: null,
   distributionsByAgeTotal: null,
@@ -138,7 +143,8 @@ const initialState: YearsEndState = {
   terminationQueryParams: null,
   vestedAmountsByAge: null,
   vestedAmountsByAgeQueryParams: null,
-  yearEndProfitSharingReport: null
+  yearEndProfitSharingReport: null,
+  yearEndProfitSharingReportQueryParams: null
 };
 
 export const yearsEndSlice = createSlice({
@@ -242,6 +248,15 @@ export const yearsEndSlice = createSlice({
     },
     clearDistributionsAndForfeitures: (state) => {
       state.distributionsAndForfeitures = null;
+    },
+    setDistributionsAndForfeituresQueryParams: (
+      state,
+      action: PayloadAction<DistributionsAndForfeituresQueryParams>
+    ) => {
+      state.distributionsAndForfeituresQueryParams = action.payload;
+    },
+    clearDistributionsAndForfeituresQueryParams: (state) => {
+      state.distributionsAndForfeituresQueryParams = null;
     },
     setExecutiveHoursAndDollars: (state, action: PayloadAction<PagedReportResponse<ExecutiveHoursAndDollars>>) => {
       state.executiveHoursAndDollars = action.payload;
@@ -582,6 +597,12 @@ export const yearsEndSlice = createSlice({
     },
     clearYearEndProfitSharingReport: (state) => {
       state.yearEndProfitSharingReport = null;
+    },
+    setYearEndProfitSharingReportQueryParams: (state, action: PayloadAction<number>) => {
+      state.yearEndProfitSharingReportQueryParams = { profitYear: action.payload };
+    },
+    clearYearEndProfitSharingReportQueryParams: (state) => {
+      state.yearEndProfitSharingReportQueryParams = null; // This is the query params for the year end profit sharing report
     }
   }
 });
@@ -675,6 +696,10 @@ export const {
   setMasterInquiryRequestParams,
   clearMasterInquiryRequestParams,
   setDuplicateNamesAndBirthdaysQueryParams,
-  clearDuplicateNamesAndBirthdaysQueryParams
+  clearDuplicateNamesAndBirthdaysQueryParams,
+  setYearEndProfitSharingReportQueryParams,
+  clearYearEndProfitSharingReportQueryParams,
+  setDistributionsAndForfeituresQueryParams,
+  clearDistributionsAndForfeituresQueryParams
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

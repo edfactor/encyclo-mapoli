@@ -7,43 +7,41 @@ import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetDistributionsAndForfeituresColumns } from "./DistributionAndForfeituresGridColumns";
 
 interface DistributionsAndForfeituresGridSearchProps {
-  profitYearCurrent: number | null;
-  startMonthCurrent?: number | null;
-  endMonthCurrent?: number | null;
-  includeOutgoingForfeituresCurrent: boolean;
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
 }
 
 const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridSearchProps> = ({
-  profitYearCurrent,
-  startMonthCurrent,
-  endMonthCurrent,
-  includeOutgoingForfeituresCurrent,
   initialSearchLoaded,
   setInitialSearchLoaded
 }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
 
-  const { distributionsAndForfeitures } = useSelector((state: RootState) => state.yearsEnd);
+  const { distributionsAndForfeitures, distributionsAndForfeituresQueryParams } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
   const [triggerSearch, { isFetching }] = useLazyGetDistributionsAndForfeituresQuery();
 
   const onSearch = useCallback(async () => {
     const request = {
-      profitYear: profitYearCurrent ?? 0,
-      ...(startMonthCurrent && { startMonth: startMonthCurrent }),
-      ...(endMonthCurrent && { endMonth: endMonthCurrent }),
-      includeOutgoingForfeitures: includeOutgoingForfeituresCurrent ?? false,
+      profitYear: distributionsAndForfeituresQueryParams?.profitYear ?? 0,
+      ...(distributionsAndForfeituresQueryParams?.startMonth && {
+        startMonth: distributionsAndForfeituresQueryParams?.startMonth
+      }),
+      ...(distributionsAndForfeituresQueryParams?.endMonth && {
+        endMonth: distributionsAndForfeituresQueryParams?.endMonth
+      }),
+      includeOutgoingForfeitures: distributionsAndForfeituresQueryParams?.includeOutgoingForfeitures ?? false,
       pagination: { skip: pageNumber * pageSize, take: pageSize }
     };
 
     await triggerSearch(request, false);
   }, [
-    profitYearCurrent,
-    startMonthCurrent,
-    endMonthCurrent,
-    includeOutgoingForfeituresCurrent,
+    distributionsAndForfeituresQueryParams?.endMonth,
+    distributionsAndForfeituresQueryParams?.includeOutgoingForfeitures,
+    distributionsAndForfeituresQueryParams?.profitYear,
+    distributionsAndForfeituresQueryParams?.startMonth,
     pageNumber,
     pageSize,
     triggerSearch

@@ -7,12 +7,6 @@ import { YearEndProfitSharingReportRequest } from "reduxstore/types";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetProfitShareReportColumns } from "./ProfitShareReportGridColumn";
 
-interface ProfitShareReportRow {
-  badgeNumber: string;
-  fullName: string;
-  oracleHcmId: string;
-}
-
 interface ProfitShareReportGridSearchProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
