@@ -83,8 +83,14 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
     resolver: yupResolver(schema),
     defaultValues: {
       profitYear: executiveHoursAndDollarsQueryParams?.profitYear ?? undefined,
-      badgeNumber: executiveHoursAndDollarsQueryParams?.badgeNumber ?? undefined,
-      socialSecurity: executiveHoursAndDollarsQueryParams?.socialSecurity ?? undefined,
+      badgeNumber:
+        executiveHoursAndDollarsQueryParams?.badgeNumber && executiveHoursAndDollarsQueryParams.badgeNumber !== 0
+          ? executiveHoursAndDollarsQueryParams.badgeNumber
+          : undefined,
+      socialSecurity:
+        executiveHoursAndDollarsQueryParams?.socialSecurity && executiveHoursAndDollarsQueryParams.socialSecurity !== 0
+          ? executiveHoursAndDollarsQueryParams.socialSecurity
+          : undefined,
       fullNameContains: executiveHoursAndDollarsQueryParams?.fullNameContains ?? undefined,
       hasExecutiveHoursAndDollars: executiveHoursAndDollarsQueryParams?.hasExecutiveHoursAndDollars ?? true,
       hasMonthlyPayments: executiveHoursAndDollarsQueryParams?.hasMonthlyPayments ?? false
