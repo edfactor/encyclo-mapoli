@@ -2,16 +2,21 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { Controller, useForm } from "react-hook-form";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetDistributionsAndForfeituresQuery } from "reduxstore/api/YearsEndApi";
-import { clearDistributionsAndForfeitures } from "reduxstore/slices/yearsEndSlice";
+import {
+  clearDistributionsAndForfeitures,
+  clearDistributionsAndForfeituresQueryParams,
+  setDistributionsAndForfeituresQueryParams
+} from "reduxstore/slices/yearsEndSlice";
+import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 
 interface DistributionsAndForfeituresSearch {
   profitYear: number;
-  startMonth?: number | null;
-  endMonth?: number | null;
+  startMonth?: number | undefined;
+  endMonth?: number | null | undefined;
   includeOutgoingForfeitures: boolean;
 }
 
@@ -29,7 +34,7 @@ const schema = yup.object().shape({
     .integer("Start Month must be an integer")
     .min(1, "Start Month must be 1 or higher")
     .max(12, "Start Month must be 12 or lower")
-    .nullable(),
+    .transform((value) => (isNaN(value) ? undefined : value)),
   endMonth: yup
     .number()
     .typeError("End Month must be a number")
@@ -42,21 +47,15 @@ const schema = yup.object().shape({
 
 interface DistributionsAndForfeituresSearchFilterProps {
   setProfitYear: (year: number) => void;
-  setStartMonth: (month: number | null) => void;
-  setEndMonth: (month: number | null) => void;
-  setIncludeOutgoingForfeitures: (include: boolean) => void;
   setInitialSearchLoaded: (include: boolean) => void;
 }
 
 const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeituresSearchFilterProps> = ({
-  setProfitYear,
-  setStartMonth,
-  setEndMonth,
-  setIncludeOutgoingForfeitures,
   setInitialSearchLoaded
 }) => {
   const [triggerSearch, { isFetching }] = useLazyGetDistributionsAndForfeituresQuery();
   const dispatch = useDispatch();
+  const { distributionsAndForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const {
     control,
     handleSubmit,
@@ -66,10 +65,10 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
   } = useForm<DistributionsAndForfeituresSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: undefined,
-      startMonth: null,
-      endMonth: null,
-      includeOutgoingForfeitures: false
+      profitYear: distributionsAndForfeituresQueryParams?.profitYear || undefined,
+      startMonth: distributionsAndForfeituresQueryParams?.startMonth || undefined,
+      endMonth: distributionsAndForfeituresQueryParams?.endMonth || undefined,
+      includeOutgoingForfeitures: distributionsAndForfeituresQueryParams?.includeOutgoingForfeitures || false
     }
   });
 
@@ -84,13 +83,15 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
           pagination: { skip: 0, take: 25 }
         },
         false
-      );
+      ).unwrap();
+      dispatch(setDistributionsAndForfeituresQueryParams(data));
     }
   });
 
   const handleReset = () => {
     setInitialSearchLoaded(false);
     dispatch(clearDistributionsAndForfeitures());
+    dispatch(clearDistributionsAndForfeituresQueryParams());
     reset({
       profitYear: undefined
     });
@@ -118,7 +119,6 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
                 error={!!errors.profitYear}
                 onChange={(e) => {
                   field.onChange(e);
-                  setProfitYear(Number(e.target.value));
                 }}
                 inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
               />
@@ -143,7 +143,6 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
                 onChange={(e) => {
                   const parsedValue = e.target.value === "" ? null : Number(e.target.value);
                   field.onChange(parsedValue);
-                  setStartMonth(parsedValue);
                 }}
                 inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
               />
@@ -168,7 +167,6 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
                 onChange={(e) => {
                   const parsedValue = e.target.value === "" ? null : Number(e.target.value);
                   field.onChange(parsedValue);
-                  setEndMonth(parsedValue);
                 }}
                 inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
               />
@@ -188,7 +186,6 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
               <Checkbox
                 checked={field.value}
                 onChange={(e) => {
-                  setIncludeOutgoingForfeitures(e.target.checked);
                   field.onChange(e.target.checked);
                 }}
               />
