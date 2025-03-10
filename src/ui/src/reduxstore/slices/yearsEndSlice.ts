@@ -12,7 +12,6 @@ import {
   EligibleEmployeeResponseDto,
   ExecutiveHoursAndDollars,
   FrozenReportsByAgeRequestType,
-  MasterInquiryDetail,
   EmployeesOnMilitaryLeaveResponse,
   MilitaryAndRehireForfeiture,
   MilitaryAndRehireProfitSummary,
@@ -55,7 +54,8 @@ export interface YearsEndState {
   distributionsByAgePartTime: ProfitSharingDistributionsByAge | null;
   distributionsByAgeTotal: ProfitSharingDistributionsByAge | null;
   distributionsByAgeQueryParams: BaseQueryParams | null;
-  duplicateNamesAndBirthday: PagedReportResponse<DuplicateNameAndBirthday> | null;
+  duplicateNamesAndBirthdays: PagedReportResponse<DuplicateNameAndBirthday> | null;
+  duplicateNamesAndBirthdaysQueryParams: BaseQueryParams | null;
   duplicateSSNsData: PagedReportResponse<DuplicateSSNDetail> | null;
   eligibleEmployees: EligibleEmployeeResponseDto | null;
   eligibleEmployeesQueryParams: BaseQueryParams | null;
@@ -109,7 +109,8 @@ const initialState: YearsEndState = {
   distributionsByAgeTotal: null,
   distributionsByAgeQueryParams: null,
   duplicateSSNsData: null,
-  duplicateNamesAndBirthday: null,
+  duplicateNamesAndBirthdays: null,
+  duplicateNamesAndBirthdaysQueryParams: null,
   eligibleEmployees: null,
   eligibleEmployeesQueryParams: null,
   employeeWagesForYear: null,
@@ -166,10 +167,16 @@ export const yearsEndSlice = createSlice({
       state.demographicBadges = null;
     },
     setDuplicateNamesAndBirthdays: (state, action: PayloadAction<PagedReportResponse<DuplicateNameAndBirthday>>) => {
-      state.duplicateNamesAndBirthday = action.payload;
+      state.duplicateNamesAndBirthdays = action.payload;
     },
     clearDuplicateNamesAndBirthdays: (state) => {
-      state.duplicateNamesAndBirthday = null;
+      state.duplicateNamesAndBirthdays = null;
+    },
+    setDuplicateNamesAndBirthdaysQueryParams: (state, action: PayloadAction<number>) => {
+      state.duplicateNamesAndBirthdaysQueryParams = { profitYear: action.payload };
+    },
+    clearDuplicateNamesAndBirthdaysQueryParams: (state) => {
+      state.duplicateNamesAndBirthdaysQueryParams = null;
     },
     setNegativeEtvaForSSNsOnPayprofitQueryParams: (state, action: PayloadAction<number>) => {
       state.negativeEtvaForSSNsOnPayprofitParams = { profitYear: action.payload };
@@ -666,6 +673,8 @@ export const {
   setBalanceByYearsQueryParams,
   clearBalanceByYearsQueryParams,
   setMasterInquiryRequestParams,
-  clearMasterInquiryRequestParams
+  clearMasterInquiryRequestParams,
+  setDuplicateNamesAndBirthdaysQueryParams,
+  clearDuplicateNamesAndBirthdaysQueryParams
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;
