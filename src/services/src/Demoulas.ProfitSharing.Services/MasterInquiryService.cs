@@ -212,7 +212,7 @@ public class MasterInquiryService : IMasterInquiryService
                             PercentageVested = currentBalance?.VestingPercent ?? 0,
                             ContributionsLastYear = previousBalance is { CurrentBalance: > 0 },
                             Enrolled = demographicData.LatestPayProfit?.EnrollmentId != 0,
-                            BadgeNumber = demographicData.BadgeNumber.ToString(),
+                            BadgeNumber = demographicData.BadgeNumber,
                             BeginPSAmount = (long)(previousBalance?.CurrentBalance ?? 0),
                             CurrentPSAmount = (long)(currentBalance?.CurrentBalance ?? 0),
                             BeginVestedAmount = (long)(previousBalance?.VestedBalance ?? 0),
