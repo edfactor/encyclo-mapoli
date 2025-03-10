@@ -7,5 +7,5 @@ namespace Demoulas.ProfitSharing.Common.Interfaces;
 
 public interface IBreakdownService
 {
-    Task<ReportResponseBase<MemberYearSummaryDto>> GetActiveMembersByStore(ProfitYearRequest request, CancellationToken cancellationToken);
+    Task<ReportResponseBase<MemberYearSummaryDto>> GetActiveMembersByStore(BreakdownByStoreRequest breakdownByStoreRequest, CancellationToken cancellationToken);
 }

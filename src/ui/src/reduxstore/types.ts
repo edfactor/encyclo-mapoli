@@ -265,6 +265,12 @@ export interface BaseQueryParams {
   profitYear: number;
 }
 
+export interface DistributionsAndForfeituresQueryParams extends BaseQueryParams {
+  startMonth?: number;
+  endMonth?: number;
+  includeOutgoingForfeitures?: boolean;
+}
+
 export interface BaseDateRangeParams {
   startDate: Date;
   endDate: Date;
