@@ -64,11 +64,6 @@ interface ManageExecutiveHoursAndDollarsSearchFilterProps {
 
 const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursAndDollarsSearchFilterProps> = ({
   isModal,
-  setProfitYear,
-  setBadgeNumber,
-  setSocialSecurity,
-  setFullNameContains,
-  setHasExecutiveHoursAndDollars,
   setInitialSearchLoaded
 }) => {
   const { executiveHoursAndDollarsGrid } = useSelector((state: RootState) => state.yearsEnd);
@@ -272,28 +267,52 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
             {errors.badgeNumber && <FormHelperText error>{errors.badgeNumber.message}</FormHelperText>}
           </Grid2>
           {!isModal && (
-            <Grid2
-              xs={12}
-              sm={6}
-              md={3}>
-              <FormLabel>Has Executive Hours and Dollars</FormLabel>
-              <Controller
-                name="hasExecutiveHoursAndDollars"
-                control={control}
-                render={({ field }) => (
-                  <Checkbox
-                    checked={field.value}
-                    onChange={(e) => {
-                      field.onChange(e);
-                      setHasExecutiveHoursAndDollars(e.target.checked);
-                    }}
-                  />
+            <>
+              <Grid2
+                xs={12}
+                sm={6}
+                md={3}>
+                <FormLabel>Has Executive Hours and Dollars</FormLabel>
+                <Controller
+                  name="hasExecutiveHoursAndDollars"
+                  control={control}
+                  render={({ field }) => (
+                    <Checkbox
+                      checked={field.value}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        setHasExecutiveHoursAndDollars(e.target.checked);
+                      }}
+                    />
+                  )}
+                />
+                {errors.hasExecutiveHoursAndDollars && (
+                  <FormHelperText error>{errors.hasExecutiveHoursAndDollars.message}</FormHelperText>
                 )}
-              />
-              {errors.hasExecutiveHoursAndDollars && (
-                <FormHelperText error>{errors.hasExecutiveHoursAndDollars.message}</FormHelperText>
-              )}
-            </Grid2>
+              </Grid2>
+              <Grid2
+                xs={12}
+                sm={6}
+                md={3}>
+                <FormLabel>Has Monthly Payments</FormLabel>
+                <Controller
+                  name="hasMonthlyPayments"
+                  control={control}
+                  render={({ field }) => (
+                    <Checkbox
+                      checked={field.value}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        setHasMonthlyPayments(e.target.checked);
+                      }}
+                    />
+                  )}
+                />
+                {errors.hasMonthlyPayments && (
+                  <FormHelperText error>{errors.hasMonthlyPayments.message}</FormHelperText>
+                )}
+              </Grid2>
+            </>
           )}
         </Grid2>
       </Grid2>

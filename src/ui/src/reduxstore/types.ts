@@ -205,6 +205,7 @@ export interface ExecutiveHoursAndDollarsRequestDto extends ProfitYearRequest {
   socialSecurity?: number;
   fullNameContains?: string;
   hasExecutiveHoursAndDollars: boolean;
+  hasMonthlyPayments: boolean;
   pagination: PaginationParams;
 }
 
