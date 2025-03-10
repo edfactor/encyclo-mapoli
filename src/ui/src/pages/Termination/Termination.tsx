@@ -7,10 +7,11 @@ import { useNavigate } from "react-router";
 import StatusDropdown, { ProcessStatus } from "components/StatusDropdown";
 import { CAPTIONS, MENU_LABELS } from "../../constants";
 import { useState } from "react";
+import { useSelector } from "react-redux";
 
 const Termination = () => {
   const navigate = useNavigate();
-  const [profitYear, setProfitYear] = useState<number | null>(null);
+
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
 
   const handleStatusChange = async (newStatus: ProcessStatus) => {
@@ -43,16 +44,12 @@ const Termination = () => {
         </Grid2>
         <Grid2 width={"100%"}>
           <DSMAccordion title="Filter">
-            <TerminationSearchFilter
-              setProfitYear={setProfitYear}
-              setInitialSearchLoaded={setInitialSearchLoaded}
-            />
+            <TerminationSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
           </DSMAccordion>
         </Grid2>
 
         <Grid2 width="100%">
           <TerminationGrid
-            profitYearCurrent={profitYear}
             setInitialSearchLoaded={setInitialSearchLoaded}
             initialSearchLoaded={initialSearchLoaded}
           />
