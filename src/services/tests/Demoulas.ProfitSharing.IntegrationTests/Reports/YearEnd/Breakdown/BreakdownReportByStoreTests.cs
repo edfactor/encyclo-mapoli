@@ -18,35 +18,59 @@ public class BreakdownReportByStoreTests
     private readonly AccountingPeriodsService _aps = new();
     private readonly IBreakdownService _breakdownService;
     private readonly CalendarService _calendarService;
-    private readonly IProfitSharingDataContextFactory _dbFactory;
+    private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly TotalService _totalService;
 
     public BreakdownReportByStoreTests()
     {
         IConfigurationRoot configuration = new ConfigurationBuilder().AddUserSecrets<ProfitShareUpdateTests>().Build();
         string connectionString = configuration["ConnectionStrings:ProfitSharing"]!;
-        _dbFactory = new PristineDataContextFactory(connectionString);
-        _calendarService = new CalendarService(_dbFactory, _aps);
-        _totalService = new TotalService(_dbFactory, _calendarService);
-        _breakdownService = new BreakdownReportService(_dbFactory, _calendarService, _totalService);
+        _dataContextFactory = new PristineDataContextFactory(connectionString);
+        _calendarService = new CalendarService(_dataContextFactory, _aps);
+        _totalService = new TotalService(_dataContextFactory, _calendarService);
+        _breakdownService = new BreakdownReportService(_dataContextFactory, _calendarService, _totalService);
     }
 
     [Fact]
     public async Task RunReport()
     {
         ReportResponseBase<MemberYearSummaryDto> results =
-            await _breakdownService.GetActiveMembersByStore(new ProfitYearRequest { ProfitYear = 2024, Take = 100_000 }, CancellationToken.None);
+            await _breakdownService.GetActiveMembersByStore(new BreakdownByStoreRequest { ProfitYear = 2024, Under21Only = false, Take = int.MaxValue }, CancellationToken.None);
 
-        var groupedEmployees = results.Response.Results
+        List<(short Key, List<MemberYearSummaryDto>)> groupedEmployees = results.Response.Results
             .GroupBy(m => m.StoreNumber)
             .OrderBy(g => g.Key)
-            .Select(storeGroup => new { StoreNumber = storeGroup.Key, employees = storeGroup.OrderBy(e => e.FullName).ToList() })
+            .Select(storeGroup => (storeGroup.Key, storeGroup.OrderBy(e => e.FullName).ToList()))
             .ToList();
 
+        string actual = CreateTextReport(groupedEmployees);
+        string expected = ProfitShareUpdateTests.LoadExpectedReport("QPAY066TA-18Feb2025-by-store.txt");
+        ProfitShareUpdateTests.AssertReportsAreEquivalent(expected, actual);
+    }
+
+    [Fact]
+    public async Task RunReportUnder21()
+    {
+        ReportResponseBase<MemberYearSummaryDto> results =
+            await _breakdownService.GetActiveMembersByStore(new BreakdownByStoreRequest { ProfitYear = 2024, Under21Only = true, Take = int.MaxValue }, CancellationToken.None);
+
+        List<(short Key, List<MemberYearSummaryDto>)> groupedEmployees = results.Response.Results
+            .GroupBy(m => m.StoreNumber)
+            .OrderBy(g => g.Key)
+            .Select(storeGroup => (storeGroup.Key, storeGroup.OrderBy(e => e.FullName).ToList()))
+            .ToList();
+
+        string actual = CreateTextReport(groupedEmployees);
+        string expected = ProfitShareUpdateTests.LoadExpectedReport("QPAY066TA-18Feb2025-by-store.txt");
+        ProfitShareUpdateTests.AssertReportsAreEquivalent(expected, actual);
+    }
+
+    private static string CreateTextReport(List<(short StoreNumber, List<MemberYearSummaryDto> employees)> groupedEmployees)
+    {
         bool first = true;
         int pageNumber = 1;
         StringBuilder sb = new();
-        foreach (var store in groupedEmployees)
+        foreach ((short StoreNumber, List<MemberYearSummaryDto> employees) store in groupedEmployees)
         {
             bool isIndianRidge = store.StoreNumber == StoreTypes.IndianRidge;
             // if there are no active employees with a balance, skip this store
@@ -98,11 +122,10 @@ public class BreakdownReportByStoreTests
             sb.Append("\n");
         }
 
-        string expected = ProfitShareUpdateTests.LoadExpectedReport("QPAY066TA-18Feb2025-by-store.txt");
-        ProfitShareUpdateTests.AssertReportsAreEquivalent(expected, sb.ToString());
+        return sb.ToString();
     }
 
-    private static string PrintEmployee(MemberYearSummaryDto member)
+    public static string PrintEmployee(MemberYearSummaryDto member)
     {
         // BADGE #     EMPLOYEE NAME              BEGINNING     EARNINGS         CONT         FORF        DIST.       ENDING      V E S T E D E
         //                                          BALANCE                                                          BALANCE       AMOUNT  %  C
