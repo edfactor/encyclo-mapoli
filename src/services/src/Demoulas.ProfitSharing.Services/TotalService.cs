@@ -391,7 +391,8 @@ public sealed class TotalService : ITotalService
                             Etva = t.Etva,
                             TotalDistributions = t.TotalDistributions,
                             VestedBalance = t.VestedBalance,
-                            VestingPercent = t.VestingPercent
+                            VestingPercent = t.VestingPercent,
+                            YearsInPlan = t.YearsInPlan
                         }).FirstOrDefaultAsync(cancellationToken);
                     return rslt;
                 });
@@ -409,7 +410,8 @@ public sealed class TotalService : ITotalService
                             Etva = t.Etva,
                             TotalDistributions = t.TotalDistributions,
                             VestedBalance = t.VestedBalance,
-                            VestingPercent = t.VestingPercent
+                            VestingPercent = t.VestingPercent,
+                            YearsInPlan = t.YearsInPlan
                         }).FirstOrDefaultAsync(cancellationToken);
                     return rslt;
                 });
