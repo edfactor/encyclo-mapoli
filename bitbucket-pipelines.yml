@@ -268,11 +268,11 @@ definitions:
         - dotnet nuget list source
         - dotnet workload update --source https://api.nuget.org/v3/index.json
         - dotnet workload install aspire --source https://api.nuget.org/v3/index.json
-        - dotnet restore -p:RestoreAdditionalProjectSources=https://api.nuget.org/v3/index.json
+        - dotnet restore Demoulas.ProfitSharing.sln -p:RestoreAdditionalProjectSources=https://api.nuget.org/v3/index.json
 
 
         - |
-          $output = dotnet list package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json
+          $output = dotnet list Demoulas.ProfitSharing.sln package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json
           if ($output -match "has the following vulnerable packages") {
             Write-Host "Vulnerabilities found!"
             $output | Out-String | Write-Host
