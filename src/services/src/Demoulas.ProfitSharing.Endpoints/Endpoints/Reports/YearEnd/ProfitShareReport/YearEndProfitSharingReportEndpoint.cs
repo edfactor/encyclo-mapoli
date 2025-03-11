@@ -9,7 +9,7 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareReport;
-public class YearEndProfitSharingReportEndpoint: EndpointWithCsvBase<YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse, YearEndProfitSharingReportEndpoint.YearEndProfitSharingReportClassMap>
+public class YearEndProfitSharingReportEndpoint: EndpointWithCsvTotalsBase<YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse,YearEndProfitSharingReportDetail, YearEndProfitSharingReportEndpoint.YearEndProfitSharingReportClassMap>
 {
     private readonly ICleanupReportService _cleanupReportService;
 
@@ -51,14 +51,14 @@ public class YearEndProfitSharingReportEndpoint: EndpointWithCsvBase<YearEndProf
 
         base.Configure();
     }
-    public override Task<ReportResponseBase<YearEndProfitSharingReportResponse>> GetResponse(YearEndProfitSharingReportRequest req, CancellationToken ct)
+    public override Task<YearEndProfitSharingReportResponse> GetResponse(YearEndProfitSharingReportRequest req, CancellationToken ct)
     {
         return _cleanupReportService.GetYearEndProfitSharingReportAsync(req, ct);
     }
 
     public override string ReportFileName => "yearend-profit-sharing-report";
 
-    public class YearEndProfitSharingReportClassMap: ClassMap<YearEndProfitSharingReportResponse>
+    public class YearEndProfitSharingReportClassMap: ClassMap<YearEndProfitSharingReportDetail>
     {
         public YearEndProfitSharingReportClassMap()
         {
