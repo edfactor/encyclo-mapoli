@@ -1,0 +1,114 @@
+<Solution>
+  <Folder Name="/Analyzer/">
+    <Project Path="src/Demoulas.ProfitSharing.Analyzers/Demoulas.ProfitSharing.Analyzers.csproj" />
+  </Folder>
+  <Folder Name="/Background Services/">
+    <Project Path="src/Demoulas.ProfitSharing.EmployeeDelta.Sync/Demoulas.ProfitSharing.EmployeeDelta.Sync.csproj" />
+    <Project Path="src/Demoulas.ProfitSharing.EmployeeFull.Sync/Demoulas.ProfitSharing.EmployeeFull.Sync.csproj" />
+    <Project Path="src/Demoulas.ProfitSharing.EmployeePayroll.Sync/Demoulas.ProfitSharing.EmployeePayroll.Sync.csproj" />
+  </Folder>
+  <Folder Name="/Database/" />
+  <Folder Name="/Database/ddl/">
+    <File Path="../database/ddl/ddl.sql" />
+    <File Path="../database/ddl/profit_sharing_ddl.png" />
+  </Folder>
+  <Folder Name="/Database/Obfuscation/" />
+  <Folder Name="/Database/Obfuscation/scripts/">
+    <File Path="../database/obfuscation/scripts/CHANGELOG.txt" />
+    <File Path="../database/obfuscation/scripts/check_psn_orphans.sql" />
+    <File Path="../database/obfuscation/scripts/create_employee_obf_table.sql" />
+    <File Path="../database/obfuscation/scripts/create_indexes.sql" />
+    <File Path="../database/obfuscation/scripts/create_key_lookup_tables.sql" />
+    <File Path="../database/obfuscation/scripts/create_log_table.sql" />
+    <File Path="../database/obfuscation/scripts/create_task_tables.sql" />
+    <File Path="../database/obfuscation/scripts/delete_audit_data.sql" />
+    <File Path="../database/obfuscation/scripts/delete_employees_data.sql" />
+    <File Path="../database/obfuscation/scripts/delete_framework_data.sql" />
+    <File Path="../database/obfuscation/scripts/delete_orphan_records.sql" />
+    <File Path="../database/obfuscation/scripts/fill_profit_detail_psns_table.sql" />
+    <File Path="../database/obfuscation/scripts/fill_profit_ss_detail_psns_table.sql" />
+    <File Path="../database/obfuscation/scripts/fill_psn_orphan_tables.sql" />
+    <File Path="../database/obfuscation/scripts/fill_psn_task_tables.sql" />
+    <File Path="../database/obfuscation/scripts/fill_ssn_psn_lookup_tables.sql" />
+    <File Path="../database/obfuscation/scripts/fill_ssn_task_tables_ben.sql" />
+    <File Path="../database/obfuscation/scripts/fill_ssn_task_tables_emp.sql" />
+    <File Path="../database/obfuscation/scripts/fill_store_tables.sql" />
+    <File Path="../database/obfuscation/scripts/functions_core.sql" />
+    <File Path="../database/obfuscation/scripts/functions_fill_task_tables.sql" />
+    <File Path="../database/obfuscation/scripts/functions_random.sql" />
+    <File Path="../database/obfuscation/scripts/obfuscate_beneficiaries.sql" />
+    <File Path="../database/obfuscation/scripts/obfuscate_beneficiary_psns.sql" />
+    <File Path="../database/obfuscation/scripts/obfuscate_beneficiary_ssns.sql" />
+    <File Path="../database/obfuscation/scripts/obfuscate_employees.sql" />
+    <File Path="../database/obfuscation/scripts/obfuscate_employee_psns.sql" />
+    <File Path="../database/obfuscation/scripts/obfuscate_employee_ssns.sql" />
+    <File Path="../database/obfuscation/scripts/obfuscate_emp_distribution_state.sql" />
+    <File Path="../database/obfuscation/scripts/obfuscate_master.sql" />
+    <File Path="../database/obfuscation/scripts/obfuscate_other_fields.sql" />
+    <File Path="../database/obfuscation/scripts/obfuscate_start_run.sql" />
+    <File Path="../database/obfuscation/scripts/obfuscate_validation.sql" />
+    <File Path="../database/obfuscation/scripts/obfuscation_setup.sql" />
+    <File Path="../database/obfuscation/scripts/reset_sequences.sql" />
+    <File Path="../database/obfuscation/scripts/target_build_ben_lookups.sql" />
+    <File Path="../database/obfuscation/scripts/target_build_emp_lookups.sql" />
+    <File Path="../database/obfuscation/scripts/target_delete_checks.sql" />
+    <File Path="../database/obfuscation/scripts/target_delete_details.sql" />
+    <File Path="../database/obfuscation/scripts/target_delete_others.sql" />
+    <File Path="../database/obfuscation/scripts/target_master.sql" />
+    <File Path="../database/obfuscation/scripts/target_report.sql" />
+    <File Path="../database/obfuscation/scripts/target_seed_all.sql" />
+    <File Path="../database/obfuscation/scripts/target_setup.sql" />
+    <File Path="../database/obfuscation/scripts/test_bulk_data_create.sql" />
+    <File Path="../database/obfuscation/scripts/test_create_data.sql" />
+    <File Path="../database/obfuscation/scripts/test_insert_orphan_records.sql" />
+    <File Path="../database/obfuscation/scripts/test_load_emp_ssns.sql" />
+    <File Path="../database/obfuscation/scripts/test_view_data.sql" />
+    <File Path="../database/ready_import/SQL update comment types.sql" />
+  </Folder>
+  <Folder Name="/Database/ready import/">
+    <File Path="../database/ready_import/Import Validations.sql" />
+    <File Path="../database/ready_import/Readme.txt" />
+    <File Path="../database/ready_import/SQL copy all from ready to smart ps.sql" />
+    <File Path="../database/ready_import/SQL counts smart vs ready.sql" />
+  </Folder>
+  <Folder Name="/Database/SQL calculations view/">
+    <File Path="../database/SQL calculations view/SQL READY Profit Sharing view creation for calculations includes bene and zeroc-check.sql" />
+    <File Path="../database/SQL calculations view/SQL SMART Profit Sharing view creation for calculations includes bene and zeroc-check.sql" />
+    <File Path="../database/SQL calculations view/SQL SMART vs READY SQL comparison of vesting balance.sql" />
+  </Folder>
+  <Folder Name="/Deployment Configuration Files/">
+    <File Path="configuration/credsettings.json" />
+  </Folder>
+  <Folder Name="/Pipelines/">
+    <File Path="../../bitbucket-pipelines.yml" />
+    <File Path="../../scripts/Check-Health.ps1" />
+    <File Path="../../scripts/credsettings.ps1" />
+    <File Path="../../scripts/servicesDeploy.ps1" />
+    <File Path="../../scripts/webDeploy.ps1" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="../../README.md" />
+  </Folder>
+  <Folder Name="/Solution Items/Backend/">
+    <File Path=".editorconfig" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="tests/Demoulas.ProfitSharing.IntegrationTests/Demoulas.ProfitSharing.IntegrationTests.csproj" />
+    <Project Path="tests/Demoulas.ProfitSharing.UnitTests.Common/Demoulas.ProfitSharing.UnitTests.Common.csproj" />
+    <Project Path="tests/Demoulas.ProfitSharing.UnitTests/Demoulas.ProfitSharing.UnitTests.csproj" />
+  </Folder>
+  <Project Path="src/Demoulas.ProfitSharing.Api/Demoulas.ProfitSharing.Api.csproj" />
+  <Project Path="src/Demoulas.ProfitSharing.AppHost/Demoulas.ProfitSharing.AppHost.csproj" />
+  <Project Path="src/Demoulas.ProfitSharing.CachingServices/Demoulas.ProfitSharing.Services.Caching.csproj" />
+  <Project Path="src/Demoulas.ProfitSharing.Common/Demoulas.ProfitSharing.Common.csproj" />
+  <Project Path="src/Demoulas.ProfitSharing.Data.Cli/Demoulas.ProfitSharing.Data.Cli.csproj" />
+  <Project Path="src/Demoulas.ProfitSharing.Data/Demoulas.ProfitSharing.Data.csproj" />
+  <Project Path="src/Demoulas.ProfitSharing.Endpoints/Demoulas.ProfitSharing.Endpoints.csproj" />
+  <Project Path="src/Demoulas.ProfitSharing.OracleHcm/Demoulas.ProfitSharing.OracleHcm.csproj" />
+  <Project Path="src/Demoulas.ProfitSharing.Security/Demoulas.ProfitSharing.Security.csproj" />
+  <Project Path="src/Demoulas.ProfitSharing.Services/Demoulas.ProfitSharing.Services.csproj" />
+</Solution>
