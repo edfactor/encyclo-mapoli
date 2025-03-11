@@ -27,4 +27,8 @@ public record YearEndProfitSharingReportRequest:ProfitYearRequest
     public bool IncludeEmployeesWithPriorProfitSharingAmounts { get; set; } = true;
     [DefaultValue(true)]
     public bool IncludeEmployeesWithNoPriorProfitSharingAmounts { get; set; } = true;
+    [DefaultValue(true)]
+    public bool IncludeTotals { get; set; } = true;
+    [DefaultValue(true)]
+    public bool IncludeDetails { get; set; } = true;
 }
