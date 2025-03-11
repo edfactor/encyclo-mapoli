@@ -142,7 +142,8 @@ public class MasterInquiryService : IMasterInquiryService
                 {
                     int ssn = uniqueSsns.First();
                     var maxProfitYear = req.EndProfitYear ?? short.MaxValue;
-                    
+                    short currentYear = (short)DateTime.Today.Year;
+                    short previousYear = (short)(currentYear - 1);
 
                     var demographicData = await ctx.Demographics
                         .Where(d => d.Ssn == ssn)
@@ -162,17 +163,15 @@ public class MasterInquiryService : IMasterInquiryService
                             d.TerminationDate,
                             d.StoreNumber,
                             DemographicId = d.Id,
-                            LatestPayProfit = d.PayProfits
-                             .Where(x => x.ProfitYear <= maxProfitYear)
-                             .OrderByDescending(p => p.ProfitYear)
-                             .FirstOrDefault()
+                            CurrentPayProfit = d.PayProfits
+                                .FirstOrDefault(x => x.ProfitYear == currentYear),
+                            PreviousPayProfit = d.PayProfits
+                                .FirstOrDefault(x => x.ProfitYear == currentYear)
                         })
                         .FirstOrDefaultAsync(cancellationToken);
 
                     if (demographicData != null)
                     {
-                        short currentYear = (short)DateTime.Today.Year;
-                        short previousYear = (short)(currentYear - 1);
                         BalanceEndpointResponse? currentBalance = null;
                         BalanceEndpointResponse? previousBalance = null;
                         try
@@ -203,7 +202,7 @@ public class MasterInquiryService : IMasterInquiryService
                             AddressZipCode = demographicData.PostalCode!,
                             DateOfBirth = demographicData.DateOfBirth,
                             Ssn = demographicData.Ssn.MaskSsn(),
-                            YearToDateProfitSharingHours = demographicData.LatestPayProfit?.CurrentHoursYear ?? 0,
+                            YearToDateProfitSharingHours = demographicData.CurrentPayProfit?.CurrentHoursYear ?? 0,
                             YearsInPlan = currentBalance?.YearsInPlan ?? (short)0,
                             HireDate = demographicData.HireDate,
                             ReHireDate = demographicData.ReHireDate,
@@ -211,12 +210,14 @@ public class MasterInquiryService : IMasterInquiryService
                             StoreNumber = demographicData.StoreNumber,
                             PercentageVested = currentBalance?.VestingPercent ?? 0,
                             ContributionsLastYear = previousBalance is { CurrentBalance: > 0 },
-                            Enrolled = demographicData.LatestPayProfit?.EnrollmentId != 0,
+                            Enrolled = demographicData.CurrentPayProfit?.EnrollmentId != 0,
                             BadgeNumber = demographicData.BadgeNumber,
-                            BeginPSAmount = (long)(previousBalance?.CurrentBalance ?? 0),
-                            CurrentPSAmount = (long)(currentBalance?.CurrentBalance ?? 0),
-                            BeginVestedAmount = (long)(previousBalance?.VestedBalance ?? 0),
-                            CurrentVestedAmount = (long)(currentBalance?.VestedBalance ?? 0)
+                            BeginPSAmount = (previousBalance?.CurrentBalance ?? 0),
+                            CurrentPSAmount = (currentBalance?.CurrentBalance ?? 0),
+                            BeginVestedAmount = (previousBalance?.VestedBalance ?? 0),
+                            CurrentVestedAmount = (currentBalance?.VestedBalance ?? 0),
+                            CurrentEtva = demographicData.CurrentPayProfit?.Etva ?? 0,
+                            PreviousEtva = demographicData.PreviousPayProfit?.Etva ?? 0,
                         };
                     }
                 }

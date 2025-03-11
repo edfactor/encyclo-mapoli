@@ -33,7 +33,8 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     beginPSAmount,
     currentPSAmount,
     beginVestedAmount,
-    currentVestedAmount
+    currentVestedAmount,
+    currentEtva,
   } = details;
 
   const infoSection = [
@@ -46,8 +47,9 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
   const employeeSection = [
     { label: "Badge Number", value: badgeNumber },
     { label: "DOB", value: mmDDYYFormat(dateOfBirth) },
-    { label: "SSN", value: `${ssn}` }
-  ];
+    { label: "SSN", value: `${ssn}` },
+    { label: "ETVA", value: currentEtva }
+  ].filter(field => field.value !== 0);
   
   const planSection = [
     { label: "YTD P/S Hours", value: yearToDateProfitSharingHours },
