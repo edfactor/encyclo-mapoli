@@ -1,5 +1,5 @@
 import { Divider, Tabs, Tab } from "@mui/material";
-import Grid2 from "@mui/material/Unstable_Grid2";
+import Grid2 from '@mui/material/Grid2';
 import { useState } from "react";
 import { Page } from "smart-ui-library";
 import CleanUpSummaryCards from "./FrozenSummaryCards";

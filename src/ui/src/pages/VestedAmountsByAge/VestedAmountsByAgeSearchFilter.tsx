@@ -1,5 +1,5 @@
 import { FormHelperText, FormLabel, TextField, Button } from "@mui/material";
-import Grid2 from "@mui/material/Unstable_Grid2";
+import Grid2 from '@mui/material/Grid2';
 import { Controller, useForm } from "react-hook-form";
 import { useLazyGetVestingAmountByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
@@ -83,10 +83,7 @@ const VestedAmountsByAgeSearchFilter = () => {
         container
         paddingX="24px"
         gap="24px">
-        <Grid2
-          xs={12}
-          sm={6}
-          md={3}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }} >
           <FormLabel>Year</FormLabel>
           <Controller
             name="profitYear"

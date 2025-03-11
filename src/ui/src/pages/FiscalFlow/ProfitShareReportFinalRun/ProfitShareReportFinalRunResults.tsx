@@ -1,4 +1,4 @@
-import Grid2 from "@mui/material/Unstable_Grid2";
+import Grid2 from '@mui/material/Grid2';
 import { Typography } from "@mui/material";
 import { InfoCard } from '../ProfitShareReportEditRun/InfoCard';
 import { useNavigate } from 'react-router-dom';
@@ -100,11 +100,7 @@ const ProfitShareReportFinalRunResults = () => {
         paddingLeft="24px"
         width="100%">
         {profitShareCategories.map((category) => (
-          <Grid2
-            key={category.code}
-            xs={12}
-            md={6}
-            lg={6}>
+          <Grid2 size={{ xs: 12, md: 6, lg: 6 }} key={category.code} >
             <InfoCard
               buttonDisabled={false}
               title={category.title}
