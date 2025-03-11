@@ -6,8 +6,6 @@ import MilitaryAndRehireProfitSummarySearchFilter from "./MilitaryAndRehireProfi
 import MilitaryAndRehireProfitSummaryGrid from "./MilitaryAndRehireProfitSummaryGrid";
 
 const MilitaryAndRehireProfitSummary = () => {
-  const [profitYear, setProfitYear] = useState<number | null>(null);
-  const [reportingYear, setReportingYear] = useState<string | null>(null);
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   return (
     <Page label="Military and Rehire Profit Summary">
@@ -19,18 +17,12 @@ const MilitaryAndRehireProfitSummary = () => {
         </Grid2>
         <Grid2 width={"100%"}>
           <DSMAccordion title="Filter">
-            <MilitaryAndRehireProfitSummarySearchFilter
-              setProfitYear={setProfitYear}
-              setReportingYear={setReportingYear}
-              setInitialSearchLoaded={setInitialSearchLoaded}
-            />
+            <MilitaryAndRehireProfitSummarySearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
           </DSMAccordion>
         </Grid2>
 
         <Grid2 width="100%">
           <MilitaryAndRehireProfitSummaryGrid
-            profitYearCurrent={profitYear}
-            reportingYearCurrent={reportingYear}
             initialSearchLoaded={initialSearchLoaded}
             setInitialSearchLoaded={setInitialSearchLoaded}
           />

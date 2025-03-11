@@ -21,10 +21,9 @@ const ProfitShareReport = () => {
       <div className="flex items-center gap-2 h-10">
         <StatusDropdown onStatusChange={handleStatusChange} />
         <Button
-          onClick={() => navigate('/december-process-accordion')}
+          onClick={() => navigate("/december-process-accordion")}
           variant="outlined"
-          className="h-10 whitespace-nowrap min-w-fit"
-        >
+          className="h-10 whitespace-nowrap min-w-fit">
           {MENU_LABELS.DECEMBER_ACTIVITIES}
         </Button>
       </div>
@@ -32,28 +31,28 @@ const ProfitShareReport = () => {
   };
 
   return (
-    <Page label="Profit Share Report" actionNode={renderActionNode()}>
-        <Grid2
-          container
-          rowSpacing="24px">
-          <Grid2 width={"100%"}>
-            <Divider />
-          </Grid2>
-          <Grid2
-            width={"100%"}>
-              <DSMAccordion title="Filter">
-                <ProfitShareReportSearchFilter />
-              </DSMAccordion>
-             
-          </Grid2>
-
-          <Grid2 width="100%">
-            <ProfitShareReportGrid
-              initialSearchLoaded={initialSearchLoaded}
-              setInitialSearchLoaded={setInitialSearchLoaded}
-             />
-          </Grid2>
+    <Page
+      label="Profit Share Report"
+      actionNode={renderActionNode()}>
+      <Grid2
+        container
+        rowSpacing="24px">
+        <Grid2 width={"100%"}>
+          <Divider />
         </Grid2>
+        <Grid2 width={"100%"}>
+          <DSMAccordion title="Filter">
+            <ProfitShareReportSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
+          </DSMAccordion>
+        </Grid2>
+
+        <Grid2 width="100%">
+          <ProfitShareReportGrid
+            initialSearchLoaded={initialSearchLoaded}
+            setInitialSearchLoaded={setInitialSearchLoaded}
+          />
+        </Grid2>
+      </Grid2>
     </Page>
   );
 };
