@@ -272,7 +272,7 @@ definitions:
 
 
         - |
-          $output = dotnet list package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json
+          $output = dotnet list Demoulas.ProfitSharing.sln package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json
           if ($output -match "has the following vulnerable packages") {
             Write-Host "Vulnerabilities found!"
             $output | Out-String | Write-Host
