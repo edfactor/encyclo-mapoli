@@ -89,9 +89,9 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
         return CallReportEndpoint<DistributionsAndForfeitureResponse, DistributionsAndForfeituresRequest>(req, "distributions-and-forfeitures", cancellationToken);
     }
 
-    public Task<ReportResponseBase<YearEndProfitSharingReportResponse>> GetYearEndProfitSharingReportAsync(YearEndProfitSharingReportRequest req, CancellationToken cancellationToken = default)
+    public Task<YearEndProfitSharingReportResponse> GetYearEndProfitSharingReportAsync(YearEndProfitSharingReportRequest req, CancellationToken cancellationToken = default)
     {
-        return CallReportEndpoint<YearEndProfitSharingReportResponse, YearEndProfitSharingReportRequest>(req, "yearend-profit-sharing-report", cancellationToken);
+        throw new NotImplementedException();
     }
 
     private async Task<ReportResponseBase<TResponseDto>> CallReportEndpoint<TResponseDto, TPaginatedRequest>(TPaginatedRequest req, string endpointRoute, CancellationToken cancellationToken) where TResponseDto : class where TPaginatedRequest : PaginationRequestDto
