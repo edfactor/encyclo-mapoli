@@ -312,7 +312,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             await ctx.SaveChangesAsync(CancellationToken.None);
         });
 
-        var response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, ReportResponseBase<YearEndProfitSharingReportResponse>>(req);
+        var response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
 
         response.Should().NotBeNull();
         response.Result.ReportName.Should().BeEquivalentTo($"PROFIT SHARE YEAR END REPORT FOR {req.ProfitYear}");
@@ -334,7 +334,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             await ctx.SaveChangesAsync(CancellationToken.None);
         });
 
-        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, ReportResponseBase<YearEndProfitSharingReportResponse>>(req);
+        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
 
         response.Result.Should().NotBeNull();
         response.Result.Response.Total.Should().Be(0);
@@ -354,7 +354,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             await ctx.SaveChangesAsync(CancellationToken.None);
         });
 
-        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, ReportResponseBase<YearEndProfitSharingReportResponse>>(req);
+        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
 
         response.Result.Should().NotBeNull();
         response.Result.Response.Total.Should().Be(0);
@@ -368,7 +368,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
     {
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         var profitYear = (short)Math.Min(DateTime.Now.Year - 1, 2023);
-        var req = new YearEndProfitSharingReportRequest() { Skip = 0, Take = byte.MaxValue, ProfitYear = profitYear, IsYearEnd = true };
+        var req = new YearEndProfitSharingReportRequest() { Skip = 0, Take = byte.MaxValue, ProfitYear = profitYear, IsYearEnd = true, IncludeTotals = false };
         var testHours = 1001;
         await MockDbContextFactory.UseWritableContext(async ctx =>
         {
@@ -421,35 +421,35 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             await ctx.SaveChangesAsync(CancellationToken.None);
         });
 
-        var response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, ReportResponseBase<YearEndProfitSharingReportResponse>>(req);
+        var response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
         response.Should().NotBeNull();
         response.Result.ReportName.Should().BeEquivalentTo($"PROFIT SHARE YEAR END REPORT FOR {req.ProfitYear}");
         response.Result.Response.Total.Should().Be(1);
         response.Result.Response.Results.Count().Should().Be(1);
 
         req.IncludeActiveEmployees = false; //Test Active filter
-        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, ReportResponseBase<YearEndProfitSharingReportResponse>>(req);
+        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
         response.Should().NotBeNull();
         response.Result.Response.Total.Should().Be(0);
         response.Result.Response.Results.Count().Should().Be(0);
 
         req.IncludeActiveEmployees = true;
         req.MaximumAgeInclusive = 20; //Test Max Age filter
-        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, ReportResponseBase<YearEndProfitSharingReportResponse>>(req);
+        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
         response.Should().NotBeNull();
         response.Result.Response.Total.Should().Be(0);
         response.Result.Response.Results.Count().Should().Be(0);
 
         req.MaximumAgeInclusive = null;
         req.MinimumAgeInclusive = 30; //Test Min Age filter
-        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, ReportResponseBase<YearEndProfitSharingReportResponse>>(req);
+        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
         response.Should().NotBeNull();
         response.Result.Response.Total.Should().Be(0);
         response.Result.Response.Results.Count().Should().Be(0);
 
         req.MinimumAgeInclusive = null;
         req.MinimumHoursInclusive = (short?)(testHours + 1); //Test Minimum hours
-        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, ReportResponseBase<YearEndProfitSharingReportResponse>>(req);
+        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
         response.Should().NotBeNull();
         response.Result.Response.Total.Should().Be(0);
         response.Result.Response.Results.Count().Should().Be(0);
