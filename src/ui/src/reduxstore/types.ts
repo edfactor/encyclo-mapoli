@@ -1,5 +1,4 @@
 import { Paged, PaginationParams } from "smart-ui-library";
-import { boolean } from "yup";
 
 export enum ImpersonationRoles {
   FinanceManager = "Finance-Manager",
@@ -266,6 +265,9 @@ export interface BaseQueryParams {
   profitYear: number;
 }
 
+export interface ProfitAndReportingQueryParams extends BaseQueryParams {
+  reportingYear: string;
+}
 export interface ExecutiveHoursAndDollarsQueryParams extends BaseQueryParams {
   badgeNumber: number;
   socialSecurity: number;

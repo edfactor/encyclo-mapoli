@@ -6,8 +6,6 @@ import MilitaryAndRehireForfeituresGrid from "./MilitaryAndRehireForfeituresGrid
 import { useState } from "react";
 
 const MilitaryAndRehireForfeitures = () => {
-  const [profitYear, setProfitYear] = useState<number | null>(null);
-  const [reportingYear, setReportingYear] = useState<string | null>(null);
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
 
   return (
@@ -21,8 +19,6 @@ const MilitaryAndRehireForfeitures = () => {
         <Grid2 width={"100%"}>
           <DSMAccordion title="Filter">
             <MilitaryAndRehireForfeituresSearchFilter
-              setProfitYear={setProfitYear}
-              setReportingYear={setReportingYear}
               setInitialSearchLoaded={setInitialSearchLoaded}
             />
           </DSMAccordion>
@@ -30,8 +26,6 @@ const MilitaryAndRehireForfeitures = () => {
 
         <Grid2 width="100%">
           <MilitaryAndRehireForfeituresGrid
-            profitYearCurrent={profitYear}
-            reportingYearCurrent={reportingYear}
             initialSearchLoaded={initialSearchLoaded}
             setInitialSearchLoaded={setInitialSearchLoaded}
           />
