@@ -2,7 +2,14 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { Controller, useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetForfeituresAndPointsQuery } from "reduxstore/api/YearsEndApi";
+import {
+  clearForfeituresAndPoints,
+  clearForfeituresAndPointsQueryParams,
+  setForfeituresAndPointsQueryParams
+} from "reduxstore/slices/yearsEndSlice";
+import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 
@@ -24,6 +31,8 @@ const schema = yup.object().shape({
 
 const ForfeitSearchParameters = () => {
   const [triggerSearch, { isFetching }] = useLazyGetForfeituresAndPointsQuery();
+  const { forfeituresAndPointsQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const dispatch = useDispatch();
 
   const {
     control,
@@ -33,8 +42,8 @@ const ForfeitSearchParameters = () => {
   } = useForm<ForfeitSearchParams>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: undefined,
-      useFrozenData: true
+      profitYear: forfeituresAndPointsQueryParams?.profitYear || undefined,
+      useFrozenData: forfeituresAndPointsQueryParams?.useFrozenData || true
     }
   });
 
@@ -48,10 +57,13 @@ const ForfeitSearchParameters = () => {
         },
         false
       ).unwrap();
+      dispatch(setForfeituresAndPointsQueryParams(data));
     }
   });
 
   const handleReset = () => {
+    dispatch(clearForfeituresAndPoints());
+    dispatch(clearForfeituresAndPointsQueryParams());
     reset({
       profitYear: undefined,
       useFrozenData: true

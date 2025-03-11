@@ -265,6 +265,10 @@ export interface BaseQueryParams {
   profitYear: number;
 }
 
+export interface ForfeituresAndPointsQueryParams extends BaseQueryParams {
+  useFrozenData: boolean;
+}
+
 export interface ProfitAndReportingQueryParams extends BaseQueryParams {
   reportingYear: string;
 }

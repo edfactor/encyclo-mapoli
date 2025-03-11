@@ -19,6 +19,7 @@ import {
   ExecutiveHoursAndDollarsQueryParams,
   ForfeituresAndPoints,
   ForfeituresAndPointsDetail,
+  ForfeituresAndPointsQueryParams,
   ForfeituresByAge,
   FrozenReportsByAgeRequestType,
   MasterInquiryResponseType,
@@ -75,6 +76,7 @@ export interface YearsEndState {
   forfeituresByAgePartTime: ForfeituresByAge | null;
   forfeituresByAgeTotal: ForfeituresByAge | null;
   forfeituresAndPoints: ForfeituresAndPoints | null;
+  forfeituresAndPointsQueryParams: ForfeituresAndPointsQueryParams | null;
   masterInquiryData: MasterInquiryResponseType | null;
   masterInquiryEmployeeDetails: EmployeeDetails | null;
   masterInquiryRequestParams: MasterInquirySearch | null;
@@ -136,6 +138,7 @@ const initialState: YearsEndState = {
   forfeituresByAgeTotal: null,
   forfeituresByAgeQueryParams: null,
   forfeituresAndPoints: null,
+  forfeituresAndPointsQueryParams: null,
   masterInquiryData: null,
   masterInquiryEmployeeDetails: null,
   masterInquiryRequestParams: null,
@@ -221,6 +224,12 @@ export const yearsEndSlice = createSlice({
     },
     clearMissingCommaInPYName: (state) => {
       state.missingCommaInPYName = null;
+    },
+    setForfeituresAndPointsQueryParams: (state, action: PayloadAction<ForfeituresAndPointsQueryParams>) => {
+      state.forfeituresAndPointsQueryParams = action.payload;
+    },
+    clearForfeituresAndPointsQueryParams: (state) => {
+      state.forfeituresAndPointsQueryParams = null;
     },
     setMilitaryAndRehireProfitSummaryQueryParams: (state, action: PayloadAction<ProfitAndReportingQueryParams>) => {
       state.militaryAndRehireProfitSummaryQueryParams = action.payload;
@@ -743,6 +752,8 @@ export const {
   setMilitaryAndRehireProfitSummaryQueryParams,
   clearMilitaryAndRehireProfitSummaryQueryParams,
   setForfeituresAndPoints,
-  clearForfeituresAndPoints
+  clearForfeituresAndPoints,
+  setForfeituresAndPointsQueryParams,
+  clearForfeituresAndPointsQueryParams
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;
