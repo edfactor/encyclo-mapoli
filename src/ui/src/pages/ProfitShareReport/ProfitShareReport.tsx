@@ -6,7 +6,7 @@ import ProfitShareReportSearchFilter from "./ProfitShareReportSearchFilter";
 import ProfitShareReportGrid from "./ProfitShareReportGrid";
 import StatusDropdown, { ProcessStatus } from "components/StatusDropdown";
 import { useNavigate } from "react-router";
-import { MENU_LABELS } from "../../constants";
+import { MENU_LABELS, CAPTIONS } from "../../constants";
 
 const ProfitShareReport = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
@@ -32,7 +32,7 @@ const ProfitShareReport = () => {
   };
 
   return (
-    <Page label="Profit Share Report" actionNode={renderActionNode()}>
+    <Page label={CAPTIONS.PROFIT_SHARE_REPORT} actionNode={renderActionNode()}>
         <Grid2
           container
           rowSpacing="24px">
