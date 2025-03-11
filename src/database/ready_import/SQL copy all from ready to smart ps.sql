@@ -562,10 +562,12 @@ BEGIN
             WHEN TRIM(PROFIT_CMNT) = '' THEN NULL
             ELSE TRIM(PROFIT_CMNT)
             END as pcmnt,
-        CASE
-            WHEN TO_NUMBER(PROFIT_YDTE) >= 59 THEN '19' || PROFIT_YDTE
-            ELSE '20' || PROFIT_YDTE
-            END AS FOUR_DIGIT_YEAR
+        CASE 
+        WHEN TO_NUMBER(PROFIT_YDTE) = 0 THEN '0'
+        WHEN TO_NUMBER(PROFIT_YDTE) >= 59 THEN '19' || PROFIT_YDTE
+        ELSE '20' || LPAD(PROFIT_YDTE, 2, '0')
+        END AS FOUR_DIGIT_YEAR
+
     FROM {SOURCE_PROFITSHARE_SCHEMA}.PROFIT_DETAIL;
 
     -----------------THIS IS THE OTHER TABLE THAT ALSO GOES TO PROFIT_DETAIL----------------
@@ -611,10 +613,12 @@ BEGIN
             WHEN TRIM(PROFIT_SS_CMNT) = '' THEN NULL
             ELSE TRIM(PROFIT_SS_CMNT)
             END as pcmnt,
-        CASE
+        CASE           
+            WHEN TO_NUMBER(PROFIT_SS_YDTE) = 0 THEN '0'
             WHEN TO_NUMBER(PROFIT_SS_YDTE) >= 59 THEN '19' || PROFIT_SS_YDTE
-            ELSE '20' || PROFIT_SS_YDTE
+            ELSE '20' || LPAD(PROFIT_SS_YDTE, 2, '0') 
             END AS FOUR_DIGIT_YEAR
+
     FROM {SOURCE_PROFITSHARE_SCHEMA}.PROFIT_SS_DETAIL;
 
     ---------------------------------------------------------------------------------------------------------------------
