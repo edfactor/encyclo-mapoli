@@ -121,7 +121,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             .Where(x => x.PayProfit != null)
             .Select(x => new MemberSlice
             {
-                PsnSuffix = (x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn) ? 0 : x.Beneficiary.PsnSuffix,
+                PsnSuffix = x.Beneficiary.PsnSuffix,
                 BadgeNumber = (x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn) ? x.Demographic.BadgeNumber : x.Beneficiary!.BadgeNumber,
                 Ssn = x.Beneficiary.Contact!.Ssn,
                 BirthDate = x.Beneficiary.Contact!.DateOfBirth,
@@ -236,7 +236,8 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             // Construct member record.
             var member = new Member
             {
-                Psn = memberSlice.PsnSuffix > 0 ? $"{memberSlice.BadgeNumber}{memberSlice.PsnSuffix}" : memberSlice.BadgeNumber.ToString(),
+                BadgeNumber = memberSlice.BadgeNumber,
+                PsnSuffix = memberSlice.PsnSuffix,
                 FullName = memberSlice.FullName,
                 FirstName = memberSlice.FirstName,
                 LastName = memberSlice.LastName,
@@ -283,7 +284,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
             if (memberSlice.IsOnlyBeneficiary)
             {
-                vestingPercent = 100;
+                vestingPercent = 1; // = 100%
             }
             if (member.EndingBalance == 0 && vestedBalance == 0)
             {
@@ -298,7 +299,8 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
             membersSummary.Add(new TerminatedEmployeeAndBeneficiaryDataResponseDto
             {
-                BadgePSn = member.Psn,
+                BadgeNumber = member.BadgeNumber,
+                PsnSuffix = member.PsnSuffix,
                 Name = member.FullName,
                 BeginningBalance = member.BeginningAmount,
                 BeneficiaryAllocation = member.BeneficiaryAllocation,

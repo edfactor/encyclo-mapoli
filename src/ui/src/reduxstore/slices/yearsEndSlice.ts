@@ -1,40 +1,39 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { clear } from "console";
-import { set } from "date-fns";
 
 import {
-  ContributionsByAge,
-  ForfeituresByAge,
   BalanceByAge,
   BalanceByYears,
+  BaseQueryParams,
+  ContributionsByAge,
   DemographicBadgesNotInPayprofit,
   DistributionsAndForfeitures,
+  DistributionsAndForfeituresQueryParams,
   DuplicateNameAndBirthday,
   DuplicateSSNDetail,
   EligibleEmployeeResponseDto,
-  ExecutiveHoursAndDollars,
-  FrozenReportsByAgeRequestType,
+  EmployeeDetails,
   EmployeesOnMilitaryLeaveResponse,
+  EmployeeWagesForYear,
+  ExecutiveHoursAndDollars,
+  ExecutiveHoursAndDollarsGrid,
+  ExecutiveHoursAndDollarsQueryParams,
+  ForfeituresByAge,
+  FrozenReportsByAgeRequestType,
+  MasterInquiryResponseType,
+  MasterInquirySearch,
   MilitaryAndRehireForfeiture,
   MilitaryAndRehireProfitSummary,
   MissingCommasInPYName,
   NegativeEtvaForSSNsOnPayProfit,
   PagedReportResponse,
-  ProfitSharingDistributionsByAge,
-  EmployeeDetails,
-  MasterInquiryResponseType,
-  VestedAmountsByAge,
-  TerminationResponse,
-  ProfitShareUpdateResponse,
+  ProfitAndReportingQueryParams,
   ProfitShareEditResponse,
   ProfitShareMasterResponse,
-  ExecutiveHoursAndDollarsGrid,
-  EmployeeWagesForYear,
-  YearEndProfitSharingReportResponse,
-  BaseQueryParams,
-  MasterInquirySearch,
-  DistributionsAndForfeituresQueryParams,
-  ProfitAndReportingQueryParams
+  ProfitShareUpdateResponse,
+  ProfitSharingDistributionsByAge,
+  TerminationResponse,
+  VestedAmountsByAge,
+  YearEndProfitSharingReportResponse
 } from "reduxstore/types";
 
 export interface YearsEndState {
@@ -69,6 +68,7 @@ export interface YearsEndState {
   executiveHoursAndDollars: PagedReportResponse<ExecutiveHoursAndDollars> | null;
   executiveHoursAndDollarsGrid: ExecutiveHoursAndDollarsGrid | null;
   executiveRowsSelected: ExecutiveHoursAndDollars[] | null;
+  executiveHoursAndDollarsQueryParams: ExecutiveHoursAndDollarsQueryParams | null;
   forfeituresByAgeFullTime: ForfeituresByAge | null;
   forfeituresByAgePartTime: ForfeituresByAge | null;
   forfeituresByAgeTotal: ForfeituresByAge | null;
@@ -126,6 +126,7 @@ const initialState: YearsEndState = {
   executiveHoursAndDollars: null,
   executiveHoursAndDollarsGrid: null,
   executiveRowsSelected: null,
+  executiveHoursAndDollarsQueryParams: null,
   forfeituresByAgeFullTime: null,
   forfeituresByAgePartTime: null,
   forfeituresByAgeTotal: null,
@@ -366,6 +367,12 @@ export const yearsEndSlice = createSlice({
             action.payload.profitYear
         );
       }
+    },
+    setExecutiveHoursAndDollarsQueryParams: (state, action: PayloadAction<ExecutiveHoursAndDollarsQueryParams>) => {
+      state.executiveHoursAndDollarsQueryParams = action.payload;
+    },
+    clearExecutiveHoursAndDollarsQueryParams: (state) => {
+      state.executiveHoursAndDollarsQueryParams = null;
     },
     setEmployeeWagesForYear: (state, action: PayloadAction<PagedReportResponse<EmployeeWagesForYear>>) => {
       state.employeeWagesForYear = action.payload;
@@ -712,6 +719,8 @@ export const {
   setDistributionsAndForfeituresQueryParams,
   clearDistributionsAndForfeituresQueryParams,
   setMilitaryAndRehireForfeituresQueryParams,
-  clearMilitaryAndRehireForfeituresQueryParams
+  clearMilitaryAndRehireForfeituresQueryParams,
+  setExecutiveHoursAndDollarsQueryParams,
+  clearExecutiveHoursAndDollarsQueryParams
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

@@ -1,5 +1,4 @@
 import { Paged, PaginationParams } from "smart-ui-library";
-import { boolean } from "yup";
 
 export enum ImpersonationRoles {
   FinanceManager = "Finance-Manager",
@@ -205,6 +204,7 @@ export interface ExecutiveHoursAndDollarsRequestDto extends ProfitYearRequest {
   socialSecurity?: number;
   fullNameContains?: string;
   hasExecutiveHoursAndDollars: boolean;
+  hasMonthlyPayments: boolean;
   pagination: PaginationParams;
 }
 
@@ -267,6 +267,13 @@ export interface BaseQueryParams {
 
 export interface ProfitAndReportingQueryParams extends BaseQueryParams {
   reportingYear: string;
+}
+export interface ExecutiveHoursAndDollarsQueryParams extends BaseQueryParams {
+  badgeNumber: number;
+  socialSecurity: number;
+  fullNameContains: string;
+  hasExecutiveHoursAndDollars: boolean;
+  hasMonthlyPayments: boolean;
 }
 
 export interface DistributionsAndForfeituresQueryParams extends BaseQueryParams {
@@ -525,7 +532,8 @@ export interface TerminationRequest {
 }
 
 export interface TerminationDetail {
-  badgePSn: string;
+  badgeNumber: number;
+  psnSuffix: number;
   name: string;
   beginningBalance: number;
   beneficiaryAllocation: number;
