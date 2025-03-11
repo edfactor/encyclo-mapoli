@@ -7,15 +7,11 @@ import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetMilitaryAndRehireForfeituresColumns } from "./MilitaryAndRehireForfeituresGridColumns";
 
 interface MilitaryAndRehireForfeituresGridSearchProps {
-  profitYearCurrent: number | null;
-  reportingYearCurrent: string | null;
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
 }
 
 const MilitaryAndRehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProps> = ({
-  profitYearCurrent,
-  reportingYearCurrent,
   initialSearchLoaded,
   setInitialSearchLoaded
 }) => {
@@ -26,19 +22,27 @@ const MilitaryAndRehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGri
     isSortDescending: false
   });
 
-  const { militaryAndRehireForfeitures } = useSelector((state: RootState) => state.yearsEnd);
+  const { militaryAndRehireForfeitures, militaryAndRehireForfeituresQueryParams } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
 
   const [triggerSearch, { isFetching }] = useLazyGetMilitaryAndRehireForfeituresQuery();
 
   const onSearch = useCallback(async () => {
     const request = {
-      profitYear: profitYearCurrent ?? 0,
-      reportingYear: reportingYearCurrent ?? "",
+      profitYear: militaryAndRehireForfeituresQueryParams?.profitYear ?? 0,
+      reportingYear: militaryAndRehireForfeituresQueryParams?.reportingYear ?? "",
       pagination: { skip: pageNumber * pageSize, take: pageSize }
     };
 
     await triggerSearch(request, false);
-  }, [profitYearCurrent, reportingYearCurrent, pageNumber, pageSize, triggerSearch]);
+  }, [
+    pageNumber,
+    pageSize,
+    triggerSearch,
+    militaryAndRehireForfeituresQueryParams?.profitYear,
+    militaryAndRehireForfeituresQueryParams?.reportingYear
+  ]);
 
   useEffect(() => {
     if (initialSearchLoaded) {
