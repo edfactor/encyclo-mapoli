@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, TextField } from "@mui/material";
-import Grid2 from "@mui/material/Unstable_Grid2";
+import Grid2 from '@mui/material/Grid2';
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetMilitaryAndRehireForfeituresQuery } from "reduxstore/api/YearsEndApi";
@@ -87,10 +87,7 @@ const MilitaryAndRehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfei
         container
         paddingX="24px"
         gap="24px">
-        <Grid2
-          xs={12}
-          sm={6}
-          md={3}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }} >
           <FormLabel>Profit Year</FormLabel>
           <Controller
             name="profitYear"
@@ -110,10 +107,7 @@ const MilitaryAndRehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfei
           />
           {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
         </Grid2>
-        <Grid2
-          xs={12}
-          sm={6}
-          md={3}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }} >
           <FormLabel>Reporting Year</FormLabel>
           <Controller
             name="reportingYear"

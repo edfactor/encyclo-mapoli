@@ -4,7 +4,7 @@ import { useLazyGetDistributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, TotalsGrid } from "smart-ui-library";
 import { GetDistributionsByAgeColumns } from "./DistributionByAgeGridColumns";
-import Grid2 from "@mui/material/Unstable_Grid2";
+import Grid2 from '@mui/material/Grid2';
 import { FrozenReportsByAgeRequestType } from "../../reduxstore/types";
 import { numberToCurrency } from "smart-ui-library";
 
@@ -86,10 +86,8 @@ const DistributionByAgeGrid = () => {
               topRowHeaders={["PartTime", "EMPS", "Amount"]}></TotalsGrid>
           </div>
 
-          <Grid2
-            container
-            xs={12}>
-            <Grid2 xs={4}>
+          <Grid2 size={{ xs: 12 }} container >
+            <Grid2 size={{ xs: 4 }} >
               <DSMGrid
                 preferenceKey={"AGE_Total"}
                 isLoading={isLoading}
@@ -106,7 +104,7 @@ const DistributionByAgeGrid = () => {
                 }}
               />
             </Grid2>
-            <Grid2 xs={4}>
+            <Grid2 size={{ xs: 4 }} >
               <DSMGrid
                 preferenceKey={"AGE_FullTime"}
                 isLoading={isLoading}
@@ -123,7 +121,7 @@ const DistributionByAgeGrid = () => {
                 }}
               />
             </Grid2>
-            <Grid2 xs={4}>
+            <Grid2 size={{ xs: 4 }} >
               <DSMGrid
                 preferenceKey={"AGE_PartTime"}
                 isLoading={isLoading}

@@ -1,5 +1,5 @@
 import { Divider } from "@mui/material";
-import Grid2 from "@mui/material/Unstable_Grid2";
+import Grid2 from '@mui/material/Grid2';
 import DSMCollapsedAccordion from "components/DSMCollapsedAccordion";
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
@@ -21,7 +21,7 @@ const FiscalFlow = () => {
   return (
     <Page label="Fiscal Flow">
       <Grid2 container>
-        <Grid2 xs={12} width={"100%"}>
+        <Grid2 size={{ xs: 12 }} width={"100%"}>
           <Divider />
         </Grid2>
 

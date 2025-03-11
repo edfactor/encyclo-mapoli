@@ -1,4 +1,4 @@
-import Grid2 from "@mui/material/Unstable_Grid2";
+import Grid2 from '@mui/material/Grid2';
 import {useForm, Controller} from "react-hook-form";
 import {
     FormHelperText,
@@ -158,7 +158,7 @@ const ProfitShareUpdateInputPanel = () => {
         <form onSubmit={validateAndView}>
             <Grid2 container paddingX="24px">
                 <Grid2 container spacing={3} width="100%">
-                    <Grid2 xs={12} sm={6} md={2}>
+                    <Grid2 size={{ xs: 12, sm: 6, md: 2 }} >
                         <Controller
                             name="startProfitYear"
                             control={control}
@@ -179,7 +179,7 @@ const ProfitShareUpdateInputPanel = () => {
                             <FormHelperText error>{errors.startProfitYear.message}</FormHelperText>}
                     </Grid2>
 
-                    <Grid2 xs={12} sm={6} md={2}>
+                    <Grid2 size={{ xs: 12, sm: 6, md: 2 }} >
                         <FormLabel>Contribution %</FormLabel>
                         <Controller
                             name="contributionPercent"
@@ -199,7 +199,7 @@ const ProfitShareUpdateInputPanel = () => {
                             <FormHelperText error>{errors.contributionPercent.message}</FormHelperText>}
                     </Grid2>
 
-                    <Grid2 xs={12} sm={6} md={2}>
+                    <Grid2 size={{ xs: 12, sm: 6, md: 2 }} >
                         <FormLabel>Earnings %</FormLabel>
                         <Controller
                             name="earningsPercent"
@@ -219,7 +219,7 @@ const ProfitShareUpdateInputPanel = () => {
                             <FormHelperText error>{errors.earningsPercent.message}</FormHelperText>}
                     </Grid2>
 
-                    <Grid2 xs={12} sm={6} md={2}>
+                    <Grid2 size={{ xs: 12, sm: 6, md: 2 }} >
                         <FormLabel>Incoming Forfeiture %</FormLabel>
                         <Controller
                             name="incomingForfeiturePercent"
@@ -238,7 +238,7 @@ const ProfitShareUpdateInputPanel = () => {
                         {errors.incomingForfeiturePercent &&
                             <FormHelperText error>{errors.incomingForfeiturePercent.message}</FormHelperText>}
                     </Grid2>
-                    <Grid2 xs={12} sm={6} md={2}>
+                    <Grid2 size={{ xs: 12, sm: 6, md: 2 }} >
                         <FormLabel>Secondary Earnings %</FormLabel>
                         <Controller
                             name="secondaryEarningsPercent"
@@ -258,7 +258,7 @@ const ProfitShareUpdateInputPanel = () => {
                             <FormHelperText error>{errors.secondaryEarningsPercent.message}</FormHelperText>}
                     </Grid2>
 
-                    <Grid2 xs={12} sm={6} md={2}>
+                    <Grid2 size={{ xs: 12, sm: 6, md: 2 }} >
                         <FormLabel>Max Allowed Contributions</FormLabel>
                         <Controller
                             name="maxAllowedContributions"
@@ -281,7 +281,7 @@ const ProfitShareUpdateInputPanel = () => {
                 </Grid2>
 
                 <Grid2 container spacing={3} width="100%">
-                    <Grid2 xs={12} sm={6} md={2}>
+                    <Grid2 size={{ xs: 12, sm: 6, md: 2 }} >
                         <FormLabel>Adjustment Badge</FormLabel>
                         <Controller
                             name="adjustmentBadge"
@@ -300,7 +300,7 @@ const ProfitShareUpdateInputPanel = () => {
                         {errors.adjustmentBadge &&
                             <FormHelperText error>{errors.adjustmentBadge.message}</FormHelperText>}
                     </Grid2>
-                    <Grid2 xs={12} sm={6} md={2}>
+                    <Grid2 size={{ xs: 12, sm: 6, md: 2 }} >
                         <FormLabel>Adjust Contribution Amount</FormLabel>
                         <Controller
                             name="adjustmentContributionAmount"
@@ -320,7 +320,7 @@ const ProfitShareUpdateInputPanel = () => {
                             <FormHelperText error>{errors.adjustmentContributionAmount.message}</FormHelperText>}
                     </Grid2>
 
-                    <Grid2 xs={12} sm={6} md={2}>
+                    <Grid2 size={{ xs: 12, sm: 6, md: 2 }} >
                         <FormLabel>Adjust Earnings Amount</FormLabel>
                         <Controller
                             name="adjustmentEarningsAmount"
@@ -340,7 +340,7 @@ const ProfitShareUpdateInputPanel = () => {
                             <FormHelperText error>{errors.adjustmentEarningsAmount.message}</FormHelperText>}
                     </Grid2>
 
-                    <Grid2 xs={12} sm={6} md={2}>
+                    <Grid2 size={{ xs: 12, sm: 6, md: 2 }} >
                         <FormLabel>Adjust Incoming Forfeiture Amount</FormLabel>
                         <Controller
                             name="adjustmentIncomingForfeitureAmount"
@@ -363,7 +363,7 @@ const ProfitShareUpdateInputPanel = () => {
                 </Grid2>
 
                 <Grid2 container spacing={3} width="100%">
-                    <Grid2 xs={12} sm={6} md={2}>
+                    <Grid2 size={{ xs: 12, sm: 6, md: 2 }} >
                         <FormLabel>Adjust Secondary Badge</FormLabel>
                         <Controller
                             name="adjustmentSecondaryBadge"
@@ -383,7 +383,7 @@ const ProfitShareUpdateInputPanel = () => {
                             <FormHelperText error>{errors.adjustmentSecondaryBadge.message}</FormHelperText>}
                     </Grid2>
 
-                    <Grid2 xs={12} sm={6} md={2}>
+                    <Grid2 size={{ xs: 12, sm: 6, md: 2 }} >
                         <FormLabel>Adjust Secondary Earnings Amount</FormLabel>
                         <Controller
                             name="adjustmentSecondaryEarningsAmount"
@@ -404,7 +404,7 @@ const ProfitShareUpdateInputPanel = () => {
                     </Grid2>
 
                 </Grid2>
-                <Grid2 xs={12} sm={12} md={12} className="mt-4">
+                <Grid2 size={{ xs: 12, sm: 12, md: 12 }} className="mt-4">
                     <div className="flex gap-4">
                         <Button variant="contained" type="submit" value="preview updates" onClick={validateAndView}>
                             Preview Updates

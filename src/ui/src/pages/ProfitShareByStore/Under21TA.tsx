@@ -1,5 +1,5 @@
 import { Divider, Typography } from "@mui/material";
-import Grid2 from "@mui/material/Unstable_Grid2";
+import Grid2 from '@mui/material/Grid2';
 import { DSMAccordion, Page, TotalsGrid } from "smart-ui-library";
 import Under21ReportSearchFilters from "./Under21SearchFilters";
 import { CAPTIONS } from "../../constants";
