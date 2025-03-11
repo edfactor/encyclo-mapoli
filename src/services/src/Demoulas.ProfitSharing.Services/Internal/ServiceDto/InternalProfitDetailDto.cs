@@ -1,16 +1,17 @@
 ﻿namespace Demoulas.ProfitSharing.Services.Internal.ServiceDto;
-internal sealed record InternalProfitDetailDto
+public sealed record InternalProfitDetailDto
 {
-    internal long OracleHcmId { get; set; }
-    internal int BadgeNumber { get; set; }
+    public int Ssn { get; set; }
+    public long OracleHcmId { get; set; }
+    public int BadgeNumber { get; set; }
 
-    internal decimal TotalContributions { get; set; }
-    internal decimal TotalEarnings { get; set; }
-    internal decimal TotalForfeitures { get; set; }
-    internal decimal TotalPayments { get; set; }
-    internal decimal TotalFederalTaxes { get; set; }
-    internal decimal TotalStateTaxes { get; set; }
-    internal decimal CurrentAmount { get; set; }
-    internal decimal Distribution { get; set; }
-    internal decimal BeneficiaryAllocation { get; set; }
+    public decimal TotalContributions { get; set; }
+    public decimal TotalEarnings { get; set; }
+    public decimal TotalForfeitures { get; set; }
+    public decimal TotalPayments { get; set; }
+    public decimal TotalFederalTaxes { get; set; }
+    public decimal TotalStateTaxes { get; set; }
+    public decimal CurrentAmount { get; set; }
+    public decimal Distribution { get; set; }
+    public decimal BeneficiaryAllocation { get; set; }
 }

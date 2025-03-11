@@ -1,4 +1,5 @@
 import { Paged, PaginationParams } from "smart-ui-library";
+import { boolean } from "yup";
 
 export enum ImpersonationRoles {
   FinanceManager = "Finance-Manager",
@@ -204,6 +205,7 @@ export interface ExecutiveHoursAndDollarsRequestDto extends ProfitYearRequest {
   socialSecurity?: number;
   fullNameContains?: string;
   hasExecutiveHoursAndDollars: boolean;
+  hasMonthlyPayments: boolean;
   pagination: PaginationParams;
 }
 
@@ -260,6 +262,46 @@ export interface EligibleEmployeeResponseDto {
   response: Paged<EligibleEmployee>;
 }
 
+export interface BaseQueryParams {
+  profitYear: number;
+}
+
+export interface ExecutiveHoursAndDollarsQueryParams extends BaseQueryParams {
+  badgeNumber: number;
+  socialSecurity: number;
+  fullNameContains: string;
+  hasExecutiveHoursAndDollars: boolean;
+  hasMonthlyPayments: boolean;
+}
+
+export interface DistributionsAndForfeituresQueryParams extends BaseQueryParams {
+  startMonth?: number;
+  endMonth?: number;
+  includeOutgoingForfeitures?: boolean;
+}
+
+export interface BaseDateRangeParams {
+  startDate: Date;
+  endDate: Date;
+}
+export interface MasterInquirySearch {
+  startProfitYear?: Date | null;
+  endProfitYear?: Date | null;
+  startProfitMonth?: number | null;
+  endProfitMonth?: number | null;
+  socialSecurity?: number | null;
+  name?: string | null;
+  badgeNumber?: number | null;
+  comment?: string | null;
+  paymentType: "all" | "hardship" | "payoffs" | "rollovers";
+  memberType: "all" | "employees" | "beneficiaries" | "none";
+  contribution?: number | null;
+  earnings?: number | null;
+  forfeiture?: number | null;
+  payment?: number | null;
+  voids: boolean;
+}
+
 export interface MasterInquiryDetail extends ProfitYearRequest {
   id: number;
   ssn: number;
@@ -289,7 +331,7 @@ export interface MasterInquiryDetail extends ProfitYearRequest {
   commentTypeName?: string;
 }
 
-export interface MasterInquryRequest {
+export interface MasterInquiryRequest {
   startProfitYear?: number;
   endProfitYear?: number;
   startProfitMonth?: number;
@@ -300,6 +342,7 @@ export interface MasterInquryRequest {
   forfeitureAmount?: number;
   paymentAmount?: number;
   socialSecurity?: number;
+  name?: string;
   comment?: string;
   pagination: PaginationParams;
   paymentType?: number;
@@ -487,7 +530,8 @@ export interface TerminationRequest {
 }
 
 export interface TerminationDetail {
-  badgePSn: string;
+  badgeNumber: number;
+  psnSuffix: number;
   name: string;
   beginningBalance: number;
   beneficiaryAllocation: number;
@@ -592,6 +636,24 @@ export interface ProfitShareMasterResponse {
   etvasEffected?: number;
 }
 
+export interface YearEndProfitSharingReportResponse {
+  badgeNumber: number;
+  employeeName: string;
+  storeNumber: number;
+  employeeTypeCode: string;
+  employmentTypeName: string;
+  dateOfBirth: Date;
+  age: number;
+  ssn: string;
+  wages: number;
+  hours: number;
+  points: number;
+  isUnder21: boolean;
+  isNew: boolean;
+  employeeStatus: string;
+  balance: number;
+  yearsInPlan: number;
+}
 export interface FrozenStateResponse {
   id: number;
   profitYear: number;
@@ -609,7 +671,7 @@ export interface ProfallData {
   zipCode: string;
 }
 
-export interface MilitaryContributionRequest extends ProfitYearRequest{
+export interface MilitaryContributionRequest extends ProfitYearRequest {
   badgeNumber: number;
   pagination: PaginationParams;
 }
@@ -645,7 +707,8 @@ export interface YearEndProfitSharingEmployee {
   employeeName: string;
   storeNumber: number;
   employeeTypeCode: string;
-  dateOfBirth: string;
+  employmentTypeName: string;
+  dateOfBirth: Date;
   age: number;
   ssn: string;
   wages: number;
@@ -657,4 +720,3 @@ export interface YearEndProfitSharingEmployee {
   balance: number;
   yearsInPlan: number;
 }
-

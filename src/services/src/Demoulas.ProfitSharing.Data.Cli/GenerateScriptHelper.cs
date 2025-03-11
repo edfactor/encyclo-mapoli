@@ -56,6 +56,15 @@ internal static class GenerateScriptHelper
 
                 if (!string.IsNullOrWhiteSpace(outputPath))
                 {
+                    // Validate the output path to prevent path traversal
+                    var fullPath = Path.GetFullPath(outputPath);
+                    var basePath = Path.GetFullPath(AppContext.BaseDirectory);
+
+                    if (!fullPath.StartsWith(basePath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        throw new InvalidOperationException("Invalid output path.");
+                    }
+
                     var directory = Path.GetDirectoryName(outputPath);
                     if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory))
                     {
@@ -63,8 +72,8 @@ internal static class GenerateScriptHelper
                     }
 
                     // Write the script to a file
-                    await File.WriteAllTextAsync(outputPath, script);
-                    Console.WriteLine($"SQL upgrade script generated at: {outputPath}");
+                    await File.WriteAllTextAsync(fullPath, script);
+                    Console.WriteLine($"SQL upgrade script generated at: {fullPath}");
                 }
                 else
                 {

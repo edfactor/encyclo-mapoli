@@ -30152,7 +30152,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasForeignKey("EmploymentTypeId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
-                        .HasConstraintName("FK_DEMOGRAPHIC_EMPLOYMENTTYPE_EMPLOYMENTTYPEID");
+                        .HasConstraintName("FK_DEMOGRAPHIC_EMPLOYMENTTYPES_EMPLOYMENTTYPEID");
 
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.Gender", "Gender")
                         .WithMany("Demographics")
@@ -30307,6 +30307,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                                 .HasColumnName("PHONE_NUMBER");
 
                             b1.HasKey("DemographicId");
+
+                            b1.HasIndex(new[] { "FullName" }, "IX_FULL_NAME")
+                                .HasDatabaseName("IX_DEMOGRAPHIC_FULL_NAME");
 
                             b1.ToTable("DEMOGRAPHIC");
 

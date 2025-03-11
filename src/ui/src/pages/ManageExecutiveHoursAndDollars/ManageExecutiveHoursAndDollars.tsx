@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { clearExecutiveHoursAndDollarsGridRows } from "reduxstore/slices/yearsEndSlice";
 import { useUpdateExecutiveHoursAndDollarsMutation } from "reduxstore/api/YearsEndApi";
+import { useState } from "react";
 
 const RenderSaveButton = () => {
   const dispatch = useDispatch();
@@ -58,6 +59,7 @@ const RenderSaveButton = () => {
   }
 };
 const ManageExecutiveHoursAndDollars = () => {
+  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   return (
     <Page
       label="Manage Executive Hours And Dollars"
@@ -70,11 +72,14 @@ const ManageExecutiveHoursAndDollars = () => {
         </Grid2>
         <Grid2 width={"100%"}>
           <DSMAccordion title="Filter">
-            <ManageExecutiveHoursAndDollarsSearchFilter />
+            <ManageExecutiveHoursAndDollarsSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
           </DSMAccordion>
         </Grid2>
         <Grid2 width="100%">
-          <ManageExecutiveHoursAndDollarsGrid />
+          <ManageExecutiveHoursAndDollarsGrid
+            setInitialSearchLoaded={setInitialSearchLoaded}
+            initialSearchLoaded={initialSearchLoaded}
+          />
         </Grid2>
       </Grid2>
     </Page>

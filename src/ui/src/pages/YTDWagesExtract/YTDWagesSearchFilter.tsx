@@ -1,20 +1,23 @@
 import { Button, CircularProgress, MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetEmployeeWagesForYearQuery } from "reduxstore/api/YearsEndApi";
+import { setEmployeeWagesForYearQueryParams } from "reduxstore/slices/yearsEndSlice";
+import { RootState } from "reduxstore/store";
 
 interface YTDWagesSearch {
   profitYear: number;
 }
 
-const YTDWagesSearchFilter = (props: { originalYear: number; setChosenYear: (year: number) => void }) => {
+const YTDWagesSearchFilter: React.FC = () => {
   const [triggerSearch, { isFetching }] = useLazyGetEmployeeWagesForYearQuery();
-
-  const { setChosenYear } = props;
+  const { employeeWagesForYearQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const dispatch = useDispatch();
 
   const { handleSubmit, setValue } = useForm<YTDWagesSearch>({
     defaultValues: {
-      profitYear: props.originalYear
+      profitYear: employeeWagesForYearQueryParams?.profitYear || undefined
     }
   });
 
@@ -23,16 +26,19 @@ const YTDWagesSearchFilter = (props: { originalYear: number; setChosenYear: (yea
     triggerSearch(
       {
         profitYear: data.profitYear,
-        pagination: { skip: 0, take: 255 },
+        pagination: { skip: 0, take: 25 },
         acceptHeader: "application/json"
       },
       false
-    );
+    ).unwrap();
+    dispatch(setEmployeeWagesForYearQueryParams(data.profitYear));
   });
+  const thisYear = new Date().getFullYear();
+  const lastYear = thisYear - 1;
 
   const options = [
-    { value: props.originalYear, label: `${props.originalYear}` },
-    { value: props.originalYear + 1, label: `${props.originalYear + 1}` }
+    { value: lastYear, label: `${lastYear}` },
+    { value: thisYear, label: `${thisYear}` }
   ];
 
   return (
@@ -47,10 +53,9 @@ const YTDWagesSearchFilter = (props: { originalYear: number; setChosenYear: (yea
           md={3}>
           <Select
             size="small"
-            defaultValue={options[0].value}
+            defaultValue={employeeWagesForYearQueryParams?.profitYear || lastYear}
             onChange={(e: SelectChangeEvent<number>) => {
               e.preventDefault();
-              setChosenYear(Number(e.target.value));
               setValue("profitYear", Number(e.target.value));
             }}
             fullWidth>

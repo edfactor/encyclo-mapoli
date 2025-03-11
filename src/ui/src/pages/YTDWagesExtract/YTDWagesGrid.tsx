@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
@@ -7,14 +7,35 @@ import { CAPTIONS } from "../../constants";
 import { GetYTDWagesColumns } from "./YTDWagesGridColumn";
 
 import { RefObject } from "react";
+import { useLazyGetEmployeeWagesForYearQuery } from "reduxstore/api/YearsEndApi";
 
 interface YTDWagesGridProps {
   innerRef: RefObject<HTMLDivElement>;
+  initialSearchLoaded: boolean;
+  setInitialSearchLoaded: (loaded: boolean) => void;
 }
 
-const YTDWagesGrid = ({ innerRef }: YTDWagesGridProps) => {
+const YTDWagesGrid = ({ innerRef, initialSearchLoaded, setInitialSearchLoaded }: YTDWagesGridProps) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
+  const [triggerSearch, { isFetching }] = useLazyGetEmployeeWagesForYearQuery();
+  const { employeeWagesForYearQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+
+  const onSearch = useCallback(async () => {
+    const request = {
+      profitYear: employeeWagesForYearQueryParams?.profitYear ?? 0,
+      pagination: { skip: pageNumber * pageSize, take: pageSize },
+      acceptHeader: "application/json"
+    };
+
+    await triggerSearch(request, false);
+  }, [pageNumber, pageSize, triggerSearch, employeeWagesForYearQueryParams?.profitYear]);
+
+  useEffect(() => {
+    if (initialSearchLoaded) {
+      onSearch();
+    }
+  }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [sortParams, setSortParams] = useState<ISortParams>({
     sortBy: "Badge",
@@ -54,11 +75,13 @@ const YTDWagesGrid = ({ innerRef }: YTDWagesGridProps) => {
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
             setPageNumber(value - 1);
+            setInitialSearchLoaded(true);
           }}
           pageSize={pageSize}
           setPageSize={(value: number) => {
             setPageSize(value);
             setPageNumber(1);
+            setInitialSearchLoaded(true);
           }}
           recordCount={employeeWagesForYear.response.total}
         />

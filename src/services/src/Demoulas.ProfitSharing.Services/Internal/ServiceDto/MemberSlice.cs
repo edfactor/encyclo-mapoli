@@ -6,9 +6,9 @@
 /// </summary>
 internal sealed record MemberSlice
 {
-    internal int PsnSuffix { get; init; }
+    internal short PsnSuffix { get; init; }
     internal required int BadgeNumber { get; init; }
-    internal long Ssn { get; init; }
+    internal int Ssn { get; init; }
     internal decimal HoursCurrentYear { get; init; }
     internal char EmploymentStatusCode { get; init; }
     internal string? FullName { get; init; } = string.Empty;

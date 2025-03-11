@@ -4,10 +4,9 @@ import { DSMAccordion, Page } from "smart-ui-library";
 import YTDWagesSearchFilter from "./YTDWagesSearchFilter";
 import YTDWagesGrid from "./YTDWagesGrid";
 import { CAPTIONS } from "../../constants";
-import { Download, Print } from "@mui/icons-material";
+import { Download } from "@mui/icons-material";
 import { useLazyGetEmployeeWagesForYearQuery } from "reduxstore/api/YearsEndApi";
 import { downloadFileFromResponse } from "utils/fileDownload";
-import { useReactToPrint } from "react-to-print";
 import { useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
@@ -18,18 +17,12 @@ interface SearchData {
 
 const YTDWages: React.FC = () => {
   const [triggerSearch] = useLazyGetEmployeeWagesForYearQuery();
-  const { employeeWagesForYear } = useSelector((state: RootState) => state.yearsEnd);
+  const { employeeWagesForYearQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const thisYear = new Date().getFullYear();
   const lastYear = thisYear - 1;
+  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
 
   const componentRef = useRef<HTMLDivElement>(null);
-
-  const handlePrint = useReactToPrint({
-    contentRef: componentRef,
-    documentTitle: "Print Document"
-  });
-
-  const [chosenYear, setChosenYear] = useState<number>(lastYear);
 
   const handleDownloadCSV = async (data: SearchData) => {
     try {
@@ -38,7 +31,10 @@ const YTDWages: React.FC = () => {
         acceptHeader: "text/csv",
         pagination: { skip: 0, take: 20000 }
       });
-      await downloadFileFromResponse(fetchCSVPromise, `ytd-employee-wage-extract-${chosenYear}.csv`);
+      await downloadFileFromResponse(
+        fetchCSVPromise,
+        `ytd-employee-wage-extract-${employeeWagesForYearQueryParams?.profitYear || lastYear}.csv`
+      );
 
       // We need to restore the grid with the original JSON, not the CSV blob
       // that we just downloaded that displaced the json we had before
@@ -56,24 +52,12 @@ const YTDWages: React.FC = () => {
       <div className="flex items-center gap-2 h-10">
         <Button
           onClick={() => {
-            handleDownloadCSV({ profitYear: chosenYear });
+            handleDownloadCSV({ profitYear: employeeWagesForYearQueryParams?.profitYear || lastYear });
           }}
           variant="outlined"
           startIcon={<Download color={"primary"} />}
           className="h-10 whitespace-nowrap min-w-fit">
           Download
-        </Button>
-        <Button
-          onClick={() => {
-            handlePrint();
-          }}
-          disabled={
-            employeeWagesForYear?.response?.results == undefined || employeeWagesForYear?.response?.results.length === 0
-          }
-          variant="outlined"
-          startIcon={<Print color={"primary"} />}
-          className="h-10 whitespace-nowrap min-w-fit">
-          Print
         </Button>
       </div>
     );
@@ -91,15 +75,16 @@ const YTDWages: React.FC = () => {
         </Grid2>
         <Grid2 width={"100%"}>
           <DSMAccordion title="Filter">
-            <YTDWagesSearchFilter
-              originalYear={lastYear}
-              setChosenYear={setChosenYear}
-            />
+            <YTDWagesSearchFilter />
           </DSMAccordion>
         </Grid2>
 
         <Grid2 width="100%">
-          <YTDWagesGrid innerRef={componentRef} />
+          <YTDWagesGrid
+            innerRef={componentRef}
+            initialSearchLoaded={initialSearchLoaded}
+            setInitialSearchLoaded={setInitialSearchLoaded}
+          />
         </Grid2>
       </Grid2>
     </Page>

@@ -14,6 +14,9 @@ public sealed class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<Pro
         {
             builder.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19);
         });
+#if DEBUG
+        _ = optionsBuilder.EnableDetailedErrors();
+#endif
         _ = optionsBuilder.UseUpperCaseNamingConvention();
 
         return new ProfitSharingDbContext(optionsBuilder.Options);

@@ -1,4 +1,5 @@
 ﻿using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Quartz;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Jobs;
@@ -17,6 +18,6 @@ internal sealed class EmployeeFullSyncJob : IJob
 
     public Task Execute(IJobExecutionContext context)
     {
-        return _employeeSyncService.ExecuteFullSyncAsync(requestedBy: "System", context.CancellationToken);
+        return _employeeSyncService.ExecuteFullSyncAsync(requestedBy: Constants.SystemAccountName, context.CancellationToken);
     }
 }

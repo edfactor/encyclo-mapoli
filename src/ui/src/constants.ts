@@ -66,8 +66,8 @@ export const ROUTES = {
 } as const;
 
 export const CAPTIONS = {
-  DISTRIBUTIONS_AND_FORFEITURES: "Distributions and Forfeitures",
-  MANAGE_EXECUTIVE_HOURS: "Manage Executive Hours and Dollars",
+  DISTRIBUTIONS_AND_FORFEITURES: "Distributions and Forfeitures (QPAY129)",
+  MANAGE_EXECUTIVE_HOURS: "Manage Executive Hours and Dollars (TPR008-09)",
   ELIGIBLE_EMPLOYEES: "Get Eligible Employees",
   YTD_WAGES_EXTRACT: "YTD Wages Extract",
   DISTRIBUTIONS_BY_AGE: "Get Distributions by Age (PROF 130)",
@@ -87,7 +87,7 @@ export const CAPTIONS = {
   EMPLOYEES_MILITARY: "Employees On Military Leave",
   MILITARY_FORFEITURES: "Military and Rehire Forfeitures",
   MILITARY_PROFIT_SUMMARY: "Military and Rehire Profit Summary",
-  PROFIT_SHARE_REPORT: "Profit Share Report",
+  PROFIT_SHARE_REPORT: "Profit Share Report (PAY426)",
   PROFIT_SHARE_UPDATE: "Profit Share Update",
   MASTER_INQUIRY: "Master Inquiry",
   PROFIT_SHARE_REPORT_EDIT_RUN: "Profit Share Report Edit Run (PAY456)",

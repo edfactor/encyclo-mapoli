@@ -1,12 +1,20 @@
 import { Typography } from "@mui/material";
-import { useState, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useMemo, useState, useCallback, useEffect } from "react";
+import { useSelector } from "react-redux";
 import { useLazyGetEligibleEmployeesQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetEligibleEmployeesColumns } from "./EligibleEmployeesGridColumn";
 
-const EligibleEmployeesGrid = () => {
+interface EligibleEmployeesGridProps {
+  initialSearchLoaded: boolean;
+  setInitialSearchLoaded: (loaded: boolean) => void;
+}
+
+const EligibleEmployeesGrid: React.FC<EligibleEmployeesGridProps> = ({
+  initialSearchLoaded,
+  setInitialSearchLoaded
+}) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
@@ -14,12 +22,27 @@ const EligibleEmployeesGrid = () => {
     isSortDescending: false
   });
 
-  const dispatch = useDispatch();
-  const { eligibleEmployees } = useSelector((state: RootState) => state.yearsEnd);
-  const [_, { isLoading }] = useLazyGetEligibleEmployeesQuery();
+  const { eligibleEmployees, eligibleEmployeesQueryParams } = useSelector((state: RootState) => state.yearsEnd);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetEligibleEmployeesColumns(), []);
+
+  const [triggerSearch, { isFetching }] = useLazyGetEligibleEmployeesQuery();
+
+  const onSearch = useCallback(async () => {
+    const request = {
+      profitYear: eligibleEmployeesQueryParams?.profitYear ?? 0,
+      pagination: { skip: pageNumber * pageSize, take: pageSize }
+    };
+
+    await triggerSearch(request, false);
+  }, [eligibleEmployeesQueryParams?.profitYear, pageNumber, pageSize, triggerSearch]);
+
+  useEffect(() => {
+    if (initialSearchLoaded) {
+      onSearch();
+    }
+  }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
 
   return (
     <>
@@ -48,11 +71,13 @@ const EligibleEmployeesGrid = () => {
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
             setPageNumber(value - 1);
+            setInitialSearchLoaded(true);
           }}
           pageSize={pageSize}
           setPageSize={(value: number) => {
             setPageSize(value);
             setPageNumber(1);
+            setInitialSearchLoaded(true);
           }}
           recordCount={eligibleEmployees.response.total}
         />

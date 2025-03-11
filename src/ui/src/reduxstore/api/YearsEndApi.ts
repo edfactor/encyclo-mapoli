@@ -2,80 +2,80 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 import { RootState } from "reduxstore/store";
 import {
+  BalanceByAge,
+  BalanceByYears,
+  ContributionsByAge,
   DemographicBadgesNotInPayprofitRequestDto,
   DemographicBadgesNotInPayprofitResponse,
   DistributionsAndForfeitures,
   DistributionsAndForfeituresRequestDto,
-  FrozenReportsByAgeRequest,
   DuplicateNameAndBirthday,
   DuplicateNameAndBirthdayRequestDto,
   DuplicateSSNDetail,
   DuplicateSSNsRequestDto,
   EligibleEmployeeResponseDto,
   EligibleEmployeesRequestDto,
+  EmployeesOnMilitaryLeaveRequestDto,
+  EmployeesOnMilitaryLeaveResponse,
+  EmployeeWagesForYear,
+  EmployeeWagesForYearRequestDto,
   ExecutiveHoursAndDollars,
   ExecutiveHoursAndDollarsRequestDto,
-  MasterInquryRequest,
-  EmployeesOnMilitaryLeaveResponse,
+  ForfeituresByAge,
+  FrozenReportsByAgeRequest,
+  MasterInquiryRequest,
+  MasterInquiryResponseType,
   MilitaryAndRehireForfeiture,
   MilitaryAndRehireForfeituresRequestDto,
   MilitaryAndRehireProfitSummary,
   MilitaryAndRehireProfitSummaryRequestDto,
-  EmployeesOnMilitaryLeaveRequestDto,
   MissingCommasInPYName,
   MissingCommasInPYNameRequestDto,
   NegativeEtvaForSSNsOnPayProfit,
   NegativeEtvaForSSNsOnPayprofitRequestDto,
   PagedReportResponse,
-  ProfitSharingDistributionsByAge,
-  ContributionsByAge,
-  ForfeituresByAge,
-  BalanceByAge,
-  VestedAmountsByAge,
-  MasterInquiryResponseType,
-  ProfitYearRequest,
-  BalanceByYears,
-  TerminationResponse,
-  TerminationRequest,
-  ProfitShareUpdateRequest,
-  ProfitShareUpdateResponse,
   ProfitShareEditResponse,
   ProfitShareMasterResponse,
-  EmployeeWagesForYear,
-  EmployeeWagesForYearRequestDto,
+  ProfitShareUpdateRequest,
+  ProfitShareUpdateResponse,
+  ProfitSharingDistributionsByAge,
+  ProfitYearRequest,
+  TerminationRequest,
+  TerminationResponse,
+  VestedAmountsByAge,
   YearEndProfitSharingEmployee,
   YearEndProfitSharingReportRequest
 } from "reduxstore/types";
 import {
+  clearProfitEdit,
+  clearProfitUpdate,
+  clearYearEndProfitSharingReport,
+  setAdditionalExecutivesGrid,
+  setBalanceByAge,
+  setBalanceByYears,
+  setContributionsByAge,
   setDemographicBadgesNotInPayprofitData,
   setDistributionsAndForfeitures,
   setDistributionsByAge,
-  setContributionsByAge,
-  setForfeituresByAge,
-  setBalanceByAge,
   setDuplicateNamesAndBirthdays,
   setDuplicateSSNsData,
   setEligibleEmployees,
-  setExecutiveHoursAndDollars,
-  setMasterInquiryData,
   setEmployeesOnMilitaryLeaveDetails,
+  setEmployeeWagesForYear,
+  setExecutiveHoursAndDollars,
+  setForfeituresByAge,
+  setMasterInquiryData,
   setMilitaryAndRehireForfeituresDetails,
   setMilitaryAndRehireProfitSummaryDetails,
   setMissingCommaInPYName,
-  setVestingAmountByAge,
-  setNegativeEtvaForSssnsOnPayprofit,
-  setBalanceByYears,
-  setTermination,
-  setProfitUpdate,
-  clearProfitUpdate,
+  setNegativeEtvaForSSNsOnPayprofit,
   setProfitEdit,
-  clearProfitEdit,
   setProfitMasterApply,
   setProfitMasterRevert,
-  setAdditionalExecutivesGrid,
-  setYearEndProfitSharingReport,
-  clearYearEndProfitSharingReport,
-  setEmployeeWagesForYear,
+  setProfitUpdate,
+  setTermination,
+  setVestedAmountByAge,
+  setYearEndProfitSharingReport
 } from "reduxstore/slices/yearsEndSlice";
 import { url } from "./api";
 
@@ -311,7 +311,7 @@ export const YearsEndApi = createApi({
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          dispatch(setNegativeEtvaForSssnsOnPayprofit(data));
+          dispatch(setNegativeEtvaForSSNsOnPayprofit(data));
         } catch (err) {
           console.log("Err: " + err);
         }
@@ -405,7 +405,8 @@ export const YearsEndApi = createApi({
           badgeNumber: params.badgeNumber,
           ssn: params.socialSecurity,
           fullNameContains: params.fullNameContains,
-          hasExecutiveHoursAndDollars: params.hasExecutiveHoursAndDollars
+          hasExecutiveHoursAndDollars: params.hasExecutiveHoursAndDollars,
+          hasMonthlyPayments: params.hasMonthlyPayments
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -427,7 +428,7 @@ export const YearsEndApi = createApi({
           skip: params.pagination.skip
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(params: EligibleEmployeesRequestDto, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setEligibleEmployees(data));
@@ -527,7 +528,7 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getProfitMasterInquiry: builder.query<MasterInquiryResponseType, MasterInquryRequest>({
+    getProfitMasterInquiry: builder.query<MasterInquiryResponseType, MasterInquiryRequest>({
       query: (params) => ({
         url: "master/master-inquiry",
         method: "GET",
@@ -579,7 +580,7 @@ export const YearsEndApi = createApi({
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          dispatch(setVestingAmountByAge(data));
+          dispatch(setVestedAmountByAge(data));
         } catch (err) {
           console.log("Err: " + err);
         }
@@ -668,23 +669,30 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getYearEndProfitSharingReport: builder.query<PagedReportResponse<YearEndProfitSharingEmployee>, YearEndProfitSharingReportRequest>({
+    getYearEndProfitSharingReport: builder.query<
+      PagedReportResponse<YearEndProfitSharingEmployee>,
+      YearEndProfitSharingReportRequest
+    >({
       query: (params) => ({
-          url: "yearend/yearend-profit-sharing-report",
-          method: "GET",
-          params: params
+        url: "yearend/yearend-profit-sharing-report",
+        method: "GET",
+        params: {
+          ...params,
+          take: params.pagination.take,
+          skip: params.pagination.skip
+        }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-          try {
-              dispatch(clearYearEndProfitSharingReport());
-              const { data } = await queryFulfilled;
-              dispatch(setYearEndProfitSharingReport(data));
-          } catch (err) {
-              console.log("Err: " + err);
-              dispatch(clearYearEndProfitSharingReport());
-          }
+        try {
+          dispatch(clearYearEndProfitSharingReport());
+          const { data } = await queryFulfilled;
+          dispatch(setYearEndProfitSharingReport(data));
+        } catch (err) {
+          console.log("Err: " + err);
+          dispatch(clearYearEndProfitSharingReport());
+        }
       }
-  })
+    })
   })
 });
 

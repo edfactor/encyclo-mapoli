@@ -1,11 +1,17 @@
 import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useLazyGetNegativeEVTASSNQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  clearNegativeEtvaForSSNsOnPayprofit,
+  clearNegativeEtvaForSSNsOnPayprofitQueryParams,
+  setNegativeEtvaForSSNsOnPayprofitQueryParams
+} from "reduxstore/slices/yearsEndSlice";
+import NegativeEtvaForSSNsOnPayprofit from "./NegativeEtvaForSSNsOnPayprofit";
 
 interface NegativeEtvaForSSNsOnPayprofitSearch {
   profitYear: number;
@@ -21,9 +27,16 @@ const schema = yup.object().shape({
     .required("Year is required")
 });
 
-const NegativeEtvaForSSNsOnPayprofitSearchFilter = () => {
-  const [triggerSearch, { isFetching }] = useLazyGetNegativeEVTASSNQuery();
+interface NegativeEtvaForSSNsOnPayprofitSearchFilterProps {
+  setInitialSearchLoaded: (include: boolean) => void;
+}
 
+const NegativeEtvaForSSNsOnPayprofitSearchFilter: React.FC<NegativeEtvaForSSNsOnPayprofitSearchFilterProps> = ({
+  setInitialSearchLoaded
+}) => {
+  const [triggerSearch, { isFetching }] = useLazyGetNegativeEVTASSNQuery();
+  const { negativeEtvaForSSNsOnPayprofitParams } = useSelector((state: RootState) => state.yearsEnd);
+  const dispatch = useDispatch();
   const {
     control,
     handleSubmit,
@@ -33,7 +46,7 @@ const NegativeEtvaForSSNsOnPayprofitSearchFilter = () => {
   } = useForm<NegativeEtvaForSSNsOnPayprofitSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: undefined
+      profitYear: negativeEtvaForSSNsOnPayprofitParams?.profitYear || undefined
     }
   });
 
@@ -45,11 +58,15 @@ const NegativeEtvaForSSNsOnPayprofitSearchFilter = () => {
           pagination: { skip: 0, take: 25 }
         },
         false
-      );
+      ).unwrap();
+      dispatch(setNegativeEtvaForSSNsOnPayprofitQueryParams(data.profitYear));
     }
   });
 
   const handleReset = () => {
+    setInitialSearchLoaded(false);
+    dispatch(clearNegativeEtvaForSSNsOnPayprofitQueryParams());
+    dispatch(clearNegativeEtvaForSSNsOnPayprofit());
     reset({
       profitYear: undefined
     });

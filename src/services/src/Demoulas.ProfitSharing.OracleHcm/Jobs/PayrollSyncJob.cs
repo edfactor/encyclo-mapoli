@@ -1,4 +1,5 @@
 ﻿using Demoulas.ProfitSharing.OracleHcm.Clients;
+using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Quartz;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Jobs;
@@ -18,6 +19,6 @@ internal sealed class PayrollSyncJob : IJob
 
     public Task Execute(IJobExecutionContext context)
     {
-        return _payrollSyncClient.RetrievePayrollBalancesAsync(requestedBy: "System", context.CancellationToken);
+        return _payrollSyncClient.RetrievePayrollBalancesAsync(requestedBy: Constants.SystemAccountName, context.CancellationToken);
     }
 }

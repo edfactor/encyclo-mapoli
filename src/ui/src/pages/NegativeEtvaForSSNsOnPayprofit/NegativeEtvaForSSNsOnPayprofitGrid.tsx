@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetNegativeEVTASSNQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
@@ -7,7 +7,15 @@ import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetNegativeEtvaForSSNsOnPayProfitColumns } from "./NegativeEtvaForSSNsOnPayprofitGridColumn";
 import { Path, useNavigate } from "react-router";
 
-const NegativeEtvaForSSNsOnPayprofitGrid = () => {
+interface NegativeEtvaForSSNsOnPayprofitGridProps {
+  initialSearchLoaded: boolean;
+  setInitialSearchLoaded: (loaded: boolean) => void;
+}
+
+const NegativeEtvaForSSNsOnPayprofitGrid: React.FC<NegativeEtvaForSSNsOnPayprofitGridProps> = ({
+  initialSearchLoaded,
+  setInitialSearchLoaded
+}) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
@@ -15,8 +23,26 @@ const NegativeEtvaForSSNsOnPayprofitGrid = () => {
     isSortDescending: false
   });
 
-  const { negativeEtvaForSSNsOnPayprofit } = useSelector((state: RootState) => state.yearsEnd);
-  const [_, { isLoading }] = useLazyGetNegativeEVTASSNQuery();
+  const { negativeEtvaForSSNsOnPayprofit, negativeEtvaForSSNsOnPayprofitParams } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
+
+  const [triggerSearch, { isFetching }] = useLazyGetNegativeEVTASSNQuery();
+
+  const onSearch = useCallback(async () => {
+    const request = {
+      profitYear: negativeEtvaForSSNsOnPayprofitParams?.profitYear ?? 0,
+      pagination: { skip: pageNumber * pageSize, take: pageSize }
+    };
+
+    await triggerSearch(request, false);
+  }, [pageNumber, pageSize, triggerSearch, negativeEtvaForSSNsOnPayprofitParams?.profitYear]);
+
+  useEffect(() => {
+    if (initialSearchLoaded) {
+      onSearch();
+    }
+  }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
@@ -61,11 +87,13 @@ const NegativeEtvaForSSNsOnPayprofitGrid = () => {
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
             setPageNumber(value - 1);
+            setInitialSearchLoaded(true);
           }}
           pageSize={pageSize}
           setPageSize={(value: number) => {
             setPageSize(value);
             setPageNumber(1);
+            setInitialSearchLoaded(true);
           }}
           recordCount={negativeEtvaForSSNsOnPayprofit.response.total}
         />

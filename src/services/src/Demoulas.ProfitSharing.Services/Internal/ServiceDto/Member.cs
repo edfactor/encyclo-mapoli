@@ -5,7 +5,9 @@
 /// </summary>
 internal sealed record Member
 {
-    internal required string Psn { get; init; }
+    public required int BadgeNumber { get; init; }
+    public required short PsnSuffix { get; init; }
+    internal int Ssn { get; init; }
     internal string? FullName { get; init; } = string.Empty;
     internal string FirstName { get; init; } = string.Empty;
     internal string? MiddleInitial { get; init; } = string.Empty;
@@ -13,7 +15,6 @@ internal sealed record Member
     internal DateOnly? Birthday { get; init; }
     internal decimal HoursCurrentYear { get; init; }
     internal decimal EarningsCurrentYear { get; init; }
-    internal long Ssn { get; init; }
     internal DateOnly? TerminationDate { get; init; }
     internal char? TerminationCode { get; init; }
     internal decimal DistributionAmount { get; init; }
