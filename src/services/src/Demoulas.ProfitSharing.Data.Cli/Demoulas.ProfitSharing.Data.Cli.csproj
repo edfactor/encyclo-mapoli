@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" />
+    <PackageReference Include="OpenTelemetry.Api" />
     <PackageReference Include="System.CommandLine" />
   </ItemGroup>
 

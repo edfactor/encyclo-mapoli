@@ -466,6 +466,8 @@ export interface EmployeeDetails {
   currentPSAmount: number;
   beginVestedAmount: number;
   currentVestedAmount: number;
+  currentEtva: number;
+  previousEtva: number;
 }
 
 export interface MasterInquiryResponseType {
