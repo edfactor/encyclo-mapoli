@@ -3,6 +3,8 @@ import { useCallback, useMemo } from "react";
 import { Path, useNavigate } from "react-router";
 import { DSMGrid } from "smart-ui-library";
 import { GetProfitShareForfeitColumns } from "./ForfeitGridColumns";
+import { useSelector } from "react-redux";
+import { RootState } from "reduxstore/store";
 
 const sampleData = [
   {
@@ -33,6 +35,7 @@ const totalsRow = {
 
 const ForfeitGrid = () => {
   const navigate = useNavigate();
+  const { forfeituresAndPoints } = useSelector((state: RootState) => state.yearsEnd);
   // Wrapper to pass react function to non-react class
   const handleNavigationForButton = useCallback(
     (destination: string | Partial<Path>) => {
@@ -48,23 +51,28 @@ const ForfeitGrid = () => {
 
   return (
     <>
-      <div style={{ padding: "0 24px 0 24px" }}>
-        <Typography
-          variant="h2"
-          sx={{ color: "#0258A5" }}>
-          {`PROFIT SHARE FORFEIT (PAY443) (${sampleData.length || 0})`}
-        </Typography>
-      </div>
-      <DSMGrid
-        preferenceKey={"PROFIT_SHARE_FORFEIT"}
-        isLoading={false}
-        handleSortChanged={(params) => {}}
-        providedOptions={{
-          rowData: sampleData,
-          pinnedBottomRowData: [totalsRow],
-          columnDefs: columnDefs
-        }}
-      />
+      {forfeituresAndPoints?.response && (
+        <>
+          <div style={{ padding: "0 24px 0 24px" }}>
+            <Typography
+              variant="h2"
+              sx={{ color: "#0258A5" }}>
+              {`PROFIT SHARE FORFEIT [PAY443] (${forfeituresAndPoints?.response.results.length || 0})`}
+            </Typography>
+          </div>
+          <DSMGrid
+            preferenceKey={"PROFIT_SHARE_FORFEIT"}
+            isLoading={false}
+            handleSortChanged={(_params) => {}}
+            providedOptions={{
+              rowData: forfeituresAndPoints?.response.results,
+              pinnedBottomRowData: [totalsRow],
+              columnDefs: columnDefs
+            }}
+          />
+        </>
+      )}
+      ;
     </>
   );
 };

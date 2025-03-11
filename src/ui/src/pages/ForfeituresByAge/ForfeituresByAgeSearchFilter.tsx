@@ -7,7 +7,6 @@ import { useLazyGetForfeituresByAgeQuery } from "reduxstore/api/YearsEndApi";
 import {
   clearForfeituresByAge,
   clearForfeituresByAgeQueryParams,
-  setForfeituresByAge,
   setForfeituresByAgeQueryParams
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";

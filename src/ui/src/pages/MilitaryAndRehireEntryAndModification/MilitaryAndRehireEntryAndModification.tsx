@@ -1,11 +1,14 @@
 import { Button, Divider } from "@mui/material";
-import Grid2 from '@mui/material/Grid2';
+import Grid2 from "@mui/material/Grid2";
 import { DSMAccordion, Page } from "smart-ui-library";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import MilitaryAndRehireEntryAndModificationEmployeeDetails from "./MilitaryAndRehireEntryAndModificationEmployeeDetails";
-import { useCreateMilitaryContributionMutation, useLazyGetMilitaryContributionsQuery } from "reduxstore/api/MilitaryApi";
+import {
+  useCreateMilitaryContributionMutation,
+  useLazyGetMilitaryContributionsQuery
+} from "reduxstore/api/MilitaryApi";
 import MilitaryAndRehireEntryAndModificationSearchFilter from "./MilitaryAndRehireEntryAndModificationSearchFilter";
 import MilitaryContributionForm from "./MilitaryContributionForm";
 import { MilitaryContribution } from "reduxstore/types";
@@ -23,19 +26,18 @@ const MilitaryAndRehireEntryAndModification = () => {
   const renderActionNode = () => {
     return (
       <div className="flex items-center gap-2 h-10">
-        <StatusDropdown onStatusChange={() => { }} />
+        <StatusDropdown onStatusChange={() => {}} />
         <Button
-          onClick={() => navigate('/december-process-accordion')}
+          onClick={() => navigate("/december-process-accordion")}
           variant="outlined"
-          className="h-10 whitespace-nowrap min-w-fit"
-        >
+          className="h-10 whitespace-nowrap min-w-fit">
           {MENU_LABELS.DECEMBER_ACTIVITIES}
         </Button>
       </div>
     );
-  }
+  };
 
-  const handleFetchContributions = () => {
+  const handleFetchContributions = useCallback(() => {
     if (masterInquiryEmployeeDetails) {
       fetchContributions({
         badgeNumber: Number(masterInquiryEmployeeDetails.badgeNumber),
@@ -44,13 +46,13 @@ const MilitaryAndRehireEntryAndModification = () => {
       });
       setShowContributions(true);
     }
-  };
+  }, [masterInquiryEmployeeDetails, fetchContributions]);
 
   useEffect(() => {
     if (masterInquiryEmployeeDetails) {
       handleFetchContributions();
     }
-  }, [masterInquiryEmployeeDetails]);
+  }, [handleFetchContributions, masterInquiryEmployeeDetails]);
 
   const handleSubmitForRows = (rows: MilitaryContribution[]) => {
     if (!masterInquiryEmployeeDetails) return;
@@ -60,13 +62,15 @@ const MilitaryAndRehireEntryAndModification = () => {
           badgeNumber: Number(masterInquiryEmployeeDetails.badgeNumber),
           profitYear: 2024,
           contributionAmount: row.contributionAmount
-        })
+        });
       }
-    })
+    });
   };
 
   return (
-    <Page label={CAPTIONS.MILITARY_CONTRIBUTIONS} actionNode={renderActionNode()}>
+    <Page
+      label={CAPTIONS.MILITARY_CONTRIBUTIONS}
+      actionNode={renderActionNode()}>
       <Grid2
         container
         rowSpacing="24px">
@@ -82,17 +86,19 @@ const MilitaryAndRehireEntryAndModification = () => {
         {masterInquiryEmployeeDetails && (
           <>
             <Grid2 width="100%">
-              <MilitaryAndRehireEntryAndModificationEmployeeDetails
-                details={masterInquiryEmployeeDetails}
-              />
+              <MilitaryAndRehireEntryAndModificationEmployeeDetails details={masterInquiryEmployeeDetails} />
             </Grid2>
 
             {showContributions && (
-              <Grid2 size={{ xs: 6 }} paddingX="24px">
+              <Grid2
+                size={{ xs: 6 }}
+                paddingX="24px">
                 <MilitaryContributionForm
-                  onSubmit={handleSubmitForRows} onCancel={function (): void {
+                  onSubmit={handleSubmitForRows}
+                  onCancel={function (): void {
                     throw new Error("Function not implemented.");
-                  }} />
+                  }}
+                />
               </Grid2>
             )}
           </>

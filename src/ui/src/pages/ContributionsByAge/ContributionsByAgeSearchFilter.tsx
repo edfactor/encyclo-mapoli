@@ -7,7 +7,6 @@ import { useLazyGetContributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import {
   clearContributionsByAge,
   clearContributionsByAgeQueryParams,
-  setContributionsByAge,
   setContributionsByAgeQueryParams
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";

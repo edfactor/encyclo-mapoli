@@ -17,6 +17,9 @@ import {
   ExecutiveHoursAndDollars,
   ExecutiveHoursAndDollarsGrid,
   ExecutiveHoursAndDollarsQueryParams,
+  ForfeituresAndPoints,
+  ForfeituresAndPointsDetail,
+  ForfeituresAndPointsQueryParams,
   ForfeituresByAge,
   FrozenReportsByAgeRequestType,
   MasterInquiryResponseType,
@@ -72,6 +75,8 @@ export interface YearsEndState {
   forfeituresByAgeFullTime: ForfeituresByAge | null;
   forfeituresByAgePartTime: ForfeituresByAge | null;
   forfeituresByAgeTotal: ForfeituresByAge | null;
+  forfeituresAndPoints: ForfeituresAndPoints | null;
+  forfeituresAndPointsQueryParams: ForfeituresAndPointsQueryParams | null;
   masterInquiryData: MasterInquiryResponseType | null;
   masterInquiryEmployeeDetails: EmployeeDetails | null;
   masterInquiryRequestParams: MasterInquirySearch | null;
@@ -132,6 +137,8 @@ const initialState: YearsEndState = {
   forfeituresByAgePartTime: null,
   forfeituresByAgeTotal: null,
   forfeituresByAgeQueryParams: null,
+  forfeituresAndPoints: null,
+  forfeituresAndPointsQueryParams: null,
   masterInquiryData: null,
   masterInquiryEmployeeDetails: null,
   masterInquiryRequestParams: null,
@@ -191,6 +198,12 @@ export const yearsEndSlice = createSlice({
     clearDuplicateNamesAndBirthdaysQueryParams: (state) => {
       state.duplicateNamesAndBirthdaysQueryParams = null;
     },
+    setForfeituresAndPoints: (state, action: PayloadAction<ForfeituresAndPoints>) => {
+      state.forfeituresAndPoints = action.payload;
+    },
+    clearForfeituresAndPoints: (state) => {
+      state.forfeituresAndPoints = null;
+    },
     setNegativeEtvaForSSNsOnPayprofitQueryParams: (state, action: PayloadAction<number>) => {
       state.negativeEtvaForSSNsOnPayprofitParams = { profitYear: action.payload };
     },
@@ -211,6 +224,12 @@ export const yearsEndSlice = createSlice({
     },
     clearMissingCommaInPYName: (state) => {
       state.missingCommaInPYName = null;
+    },
+    setForfeituresAndPointsQueryParams: (state, action: PayloadAction<ForfeituresAndPointsQueryParams>) => {
+      state.forfeituresAndPointsQueryParams = action.payload;
+    },
+    clearForfeituresAndPointsQueryParams: (state) => {
+      state.forfeituresAndPointsQueryParams = null;
     },
     setMilitaryAndRehireProfitSummaryQueryParams: (state, action: PayloadAction<ProfitAndReportingQueryParams>) => {
       state.militaryAndRehireProfitSummaryQueryParams = action.payload;
@@ -731,6 +750,10 @@ export const {
   setExecutiveHoursAndDollarsQueryParams,
   clearExecutiveHoursAndDollarsQueryParams,
   setMilitaryAndRehireProfitSummaryQueryParams,
-  clearMilitaryAndRehireProfitSummaryQueryParams
+  clearMilitaryAndRehireProfitSummaryQueryParams,
+  setForfeituresAndPoints,
+  clearForfeituresAndPoints,
+  setForfeituresAndPointsQueryParams,
+  clearForfeituresAndPointsQueryParams
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;
