@@ -4,7 +4,7 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import Grid2 from "@mui/material/Unstable_Grid2";
+import Grid2 from '@mui/material/Grid2';
 import React from "react";
 
 export type totalsGridProps = {
@@ -55,12 +55,7 @@ export const TotalsGrid: React.FC<totalsGridProps> = ({
   };
 
   return (
-    <Grid2
-      xs={12}
-      md={12}
-      lg={12}
-      xl={12}
-      padding={tablePadding ?? "24px"}>
+    <Grid2 size={{ xs: 12, md: 12, lg: 12, xl: 12 }} padding={tablePadding ?? "24px"}>
       <TableContainer>
         <Table size="small">
           <TableHead>

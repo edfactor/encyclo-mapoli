@@ -1,5 +1,5 @@
 import { Button, Divider } from "@mui/material";
-import Grid2 from "@mui/material/Unstable_Grid2";
+import Grid2 from '@mui/material/Grid2';
 import { DSMAccordion, Page } from "smart-ui-library";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -88,7 +88,7 @@ const MilitaryAndRehireEntryAndModification = () => {
             </Grid2>
 
             {showContributions && (
-              <Grid2 xs={6} paddingX="24px">
+              <Grid2 size={{ xs: 6 }} paddingX="24px">
                 <MilitaryContributionForm
                   onSubmit={handleSubmitForRows} onCancel={function (): void {
                     throw new Error("Function not implemented.");

@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, FormControlLabel, FormHelperText } from "@mui/material";
-import Grid2 from "@mui/material/Unstable_Grid2";
+import Grid2 from '@mui/material/Grid2';
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import { Controller, useForm } from "react-hook-form";
 import { useLazyGetDistributionsAndForfeituresQuery } from "reduxstore/api/YearsEndApi";
@@ -58,10 +58,7 @@ const ProfitShareReportEditRunParameters = () => {
         paddingX="24px"
         alignItems={"flex-end"}
         gap="24px">
-        <Grid2
-          xs={12}
-          sm={6}
-          md={3}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }} >
           <Controller
             name="cutoffDate"
             control={control}
@@ -80,10 +77,7 @@ const ProfitShareReportEditRunParameters = () => {
           {errors.cutoffDate && <FormHelperText error>{errors.cutoffDate.message}</FormHelperText>}
         </Grid2>
 
-        <Grid2
-          xs={12}
-          sm={6}
-          md={2}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 2 }} >
           <FormControlLabel
             control={
               <Controller
@@ -101,10 +95,7 @@ const ProfitShareReportEditRunParameters = () => {
           />
           {errors.useDemographics && <FormHelperText error>{errors.useDemographics.message}</FormHelperText>}
         </Grid2>
-        <Grid2
-          xs={12}
-          sm={6}
-          md={3}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }} >
           <FormControlLabel
             control={
               <Controller

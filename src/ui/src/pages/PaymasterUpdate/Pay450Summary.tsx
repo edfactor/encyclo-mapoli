@@ -1,5 +1,5 @@
 import { Divider } from "@mui/material";
-import Grid2 from "@mui/material/Unstable_Grid2";
+import Grid2 from '@mui/material/Grid2';
 import { Page, DSMAccordion } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import Pay450SearchFilters from "./Pay450SearchFilters";
@@ -28,7 +28,7 @@ const Pay450Summary = () => {
                     </DSMAccordion>
                 </Grid2>
 
-                <Grid2 paddingX="24px" xs={2}>
+                <Grid2 size={{ xs: 2 }} paddingX="24px" >
                     <LabelValueSection
                         data={updateSummarySection}
                     />

@@ -1,4 +1,4 @@
-import Grid2 from "@mui/material/Unstable_Grid2";
+import Grid2 from '@mui/material/Grid2';
 import ForfeituresByAgeGrid from "pages/ForfeituresByAge/ForfeituresByAgeGrid";
 
 export const Forfeitures = () => {

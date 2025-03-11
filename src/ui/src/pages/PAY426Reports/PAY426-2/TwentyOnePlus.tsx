@@ -1,7 +1,7 @@
 import { CAPTIONS } from "../../../constants";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { Divider } from "@mui/material";
-import Grid2 from "@mui/material/Unstable_Grid2";
+import Grid2 from '@mui/material/Grid2';
 import EighteenToTwentyGrid from "../PAY426-1/EighteenToTwentyGrid";
 import TwentyOnePlusGrid from "./TwentyOnePlusGrid";
 import EighteenToTwentySearchFilter from "../PAY426-1/EigteenToTwentySearchFilters";

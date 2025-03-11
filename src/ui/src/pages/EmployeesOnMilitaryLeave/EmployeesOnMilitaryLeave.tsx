@@ -1,6 +1,6 @@
 import { Divider } from "@mui/material";
 import { useState } from "react";
-import Grid2 from "@mui/material/Unstable_Grid2";
+import Grid2 from '@mui/material/Grid2';
 import { DSMAccordion, Page } from "smart-ui-library";
 import EmployeesOnMilitaryLeaveSearchFilter from "./EmployeesOnMilitaryLeaveSearchFilter";
 import EmployeesOnMilitaryLeaveGrid from "./EmployeesOnMilitaryLeaveGrid";

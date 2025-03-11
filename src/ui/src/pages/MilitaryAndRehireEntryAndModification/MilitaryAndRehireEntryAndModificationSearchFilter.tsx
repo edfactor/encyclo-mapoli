@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormLabel, TextField } from "@mui/material";
-import Grid2 from "@mui/material/Unstable_Grid2";
+import Grid2 from '@mui/material/Grid2';
 import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { useLazyGetProfitMasterInquiryQuery } from "reduxstore/api/YearsEndApi";
@@ -53,10 +53,7 @@ const MilitaryAndRehireEntryAndModificationSearchFilter = () => {
         container
         paddingX="24px"
         gap="24px">
-        <Grid2
-          xs={12}
-          sm={6}
-          md={3}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }} >
           <FormLabel>SSN</FormLabel>
           <TextField
             fullWidth
@@ -66,10 +63,7 @@ const MilitaryAndRehireEntryAndModificationSearchFilter = () => {
             helperText={errors.socialSecurity?.message}
           />
         </Grid2>
-        <Grid2
-          xs={12}
-          sm={6}
-          md={3}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }} >
           <FormLabel>Badge Number</FormLabel>
           <TextField
             fullWidth
