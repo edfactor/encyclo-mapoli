@@ -21,8 +21,12 @@ import {
   EmployeeWagesForYearRequestDto,
   ExecutiveHoursAndDollars,
   ExecutiveHoursAndDollarsRequestDto,
+  ForfeituresAndPoints,
   ForfeituresByAge,
+  FrozenForfeituresAndPoints,
   FrozenReportsByAgeRequest,
+  FrozenReportsForfeituresAndPoints,
+  FrozenReportsForfeituresAndPointsRequest,
   MasterInquiryRequest,
   MasterInquiryResponseType,
   MilitaryAndRehireForfeiture,
@@ -63,6 +67,7 @@ import {
   setEmployeesOnMilitaryLeaveDetails,
   setEmployeeWagesForYear,
   setExecutiveHoursAndDollars,
+  setForfeituresAndPoints,
   setForfeituresByAge,
   setMasterInquiryData,
   setMilitaryAndRehireForfeituresDetails,
@@ -78,6 +83,7 @@ import {
   setYearEndProfitSharingReport
 } from "reduxstore/slices/yearsEndSlice";
 import { url } from "./api";
+import { useForkRef } from "@mui/material";
 
 export const YearsEndApi = createApi({
   baseQuery: fetchBaseQuery({
@@ -492,6 +498,24 @@ export const YearsEndApi = createApi({
         }
       }
     }),
+    getForfeituresAndPoints: builder.query<ForfeituresAndPoints, FrozenReportsForfeituresAndPointsRequest>({
+      query: (params) => ({
+        url: "yearend/frozen/forfeitures-and-points",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          useFrozenData: params.useFrozenData
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setForfeituresAndPoints(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
     getBalanceByAge: builder.query<BalanceByAge, FrozenReportsByAgeRequest>({
       query: (params) => ({
         url: "yearend/frozen/balance-by-age",
@@ -723,5 +747,6 @@ export const {
   useLazyGetMasterApplyQuery,
   useLazyGetMasterRevertQuery,
   useUpdateExecutiveHoursAndDollarsMutation,
-  useLazyGetYearEndProfitSharingReportQuery
+  useLazyGetYearEndProfitSharingReportQuery,
+  useLazyGetForfeituresAndPointsQuery
 } = YearsEndApi;

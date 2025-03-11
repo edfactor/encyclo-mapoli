@@ -362,6 +362,10 @@ export interface FrozenReportsByAgeRequest extends ProfitYearRequest {
   pagination: PaginationParams;
   reportType: FrozenReportsByAgeRequestType;
 }
+export interface FrozenReportsForfeituresAndPointsRequest extends ProfitYearRequest {
+  pagination: PaginationParams;
+  useFrozenData: boolean;
+}
 export interface ProfitSharingDistributionsByAge {
   reportName: string;
   reportDate: string;
@@ -411,6 +415,22 @@ export interface ForfeituresByAge {
   totalEmployees: number;
   totalAmount: number;
   response: Paged<ForfeituresByAgeDetail>;
+}
+
+export interface ForfeituresAndPointsDetail {
+  badgeNumber: number;
+  employeeName: string;
+  ssn: string;
+  forfeitures: number;
+  forfeiturePoints: number;
+  earningPoints: number;
+  benefificaryPsn: number;
+}
+export interface ForfeituresAndPoints {
+  reportName: string;
+  reportDate: string;
+  useFrozenData: boolean;
+  response: Paged<ForfeituresAndPointsDetail>;
 }
 
 export interface ForfeituresByAgeDetail {
