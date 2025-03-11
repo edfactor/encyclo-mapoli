@@ -1,6 +1,6 @@
 
 import { Checkbox, FormControlLabel, FormHelperText, FormLabel, TextField, Typography } from "@mui/material";
-import Grid2 from "@mui/material/Unstable_Grid2";
+import Grid2 from '@mui/material/Grid2';
 import { useForm, Controller } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";

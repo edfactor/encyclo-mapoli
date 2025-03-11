@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import Grid2 from "@mui/material/Unstable_Grid2";
+import Grid2 from '@mui/material/Grid2';
 import LabelValueSection from "components/LabelValueSection";
 import React from "react";
 import { EmployeeDetails } from "reduxstore/types";

@@ -10,7 +10,7 @@ import {
   Select,
   TextField
 } from "@mui/material";
-import Grid2 from "@mui/material/Unstable_Grid2";
+import Grid2 from '@mui/material/Grid2';
 import { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useLazyGetProfitMasterInquiryQuery } from "reduxstore/api/YearsEndApi";

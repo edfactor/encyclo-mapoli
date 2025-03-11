@@ -1,4 +1,4 @@
-import Grid2 from "@mui/material/Unstable_Grid2";
+import Grid2 from '@mui/material/Grid2';
 import { Typography } from "@mui/material";
 import { InfoCard } from './InfoCard';
 import { useNavigate } from 'react-router-dom';

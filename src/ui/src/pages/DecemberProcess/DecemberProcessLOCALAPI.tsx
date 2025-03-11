@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Filter, FilterList, CheckCircle, RadioButtonUnchecked, Warning } from "@mui/icons-material";
 import { Box, Button, Divider, Stack, Typography, Chip } from "@mui/material";
-import Grid2 from "@mui/material/Unstable_Grid2";
+import Grid2 from '@mui/material/Grid2';
 import { DSMAccordion, Page } from "smart-ui-library";
 import { useSelector } from "react-redux";
 import DuplicateSSNsOnDemographicsGrid from "pages/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographicsGrid";
