@@ -265,6 +265,10 @@ export interface BaseQueryParams {
   profitYear: number;
 }
 
+export interface ProfitAndReportingQueryParams extends BaseQueryParams {
+  reportingYear: string;
+}
+
 export interface DistributionsAndForfeituresQueryParams extends BaseQueryParams {
   startMonth?: number;
   endMonth?: number;

@@ -2,9 +2,14 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { Controller, useForm } from "react-hook-form";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetMilitaryAndRehireForfeituresQuery } from "reduxstore/api/YearsEndApi";
-import { clearMilitaryAndRehireForfeituresDetails } from "reduxstore/slices/yearsEndSlice";
+import {
+  clearMilitaryAndRehireForfeituresDetails,
+  clearMilitaryAndRehireForfeituresQueryParams,
+  setMilitaryAndRehireForfeituresQueryParams
+} from "reduxstore/slices/yearsEndSlice";
+import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 interface MilitaryAndRehireForfeituresSearch {
@@ -24,17 +29,14 @@ const schema = yup.object().shape({
 });
 
 interface MilitaryAndRehireForfeituresSearchFilterProps {
-  setProfitYear: (year: number) => void;
-  setReportingYear: (year: string) => void;
   setInitialSearchLoaded: (include: boolean) => void;
 }
 
 const MilitaryAndRehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearchFilterProps> = ({
-  setProfitYear,
-  setReportingYear,
   setInitialSearchLoaded
 }) => {
   const [triggerSearch, { isFetching }] = useLazyGetMilitaryAndRehireForfeituresQuery();
+  const { militaryAndRehireForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const dispatch = useDispatch();
   const {
     control,
@@ -45,8 +47,8 @@ const MilitaryAndRehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfei
   } = useForm<MilitaryAndRehireForfeituresSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: undefined,
-      reportingYear: undefined
+      profitYear: militaryAndRehireForfeituresQueryParams?.profitYear || undefined,
+      reportingYear: militaryAndRehireForfeituresQueryParams?.reportingYear || undefined
     }
   });
 
@@ -59,15 +61,18 @@ const MilitaryAndRehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfei
           pagination: { skip: 0, take: 25 }
         },
         false
-      );
+      ).unwrap();
+      dispatch(setMilitaryAndRehireForfeituresQueryParams(data));
     }
   });
 
   const handleReset = () => {
     setInitialSearchLoaded(false);
+    dispatch(clearMilitaryAndRehireForfeituresQueryParams());
     dispatch(clearMilitaryAndRehireForfeituresDetails());
     reset({
-      profitYear: undefined
+      profitYear: undefined,
+      reportingYear: undefined
     });
   };
 
@@ -93,7 +98,6 @@ const MilitaryAndRehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfei
                 error={!!errors.profitYear}
                 onChange={(e) => {
                   field.onChange(e);
-                  setProfitYear(parseInt(e.target.value));
                 }}
                 inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
               />
@@ -117,7 +121,6 @@ const MilitaryAndRehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfei
                 error={!!errors.reportingYear}
                 onChange={(e) => {
                   field.onChange(e);
-                  setReportingYear(e.target.value);
                 }}
                 inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
               />

@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { clear } from "console";
 import { set } from "date-fns";
 
 import {
@@ -32,7 +33,8 @@ import {
   YearEndProfitSharingReportResponse,
   BaseQueryParams,
   MasterInquirySearch,
-  DistributionsAndForfeituresQueryParams
+  DistributionsAndForfeituresQueryParams,
+  ProfitAndReportingQueryParams
 } from "reduxstore/types";
 
 export interface YearsEndState {
@@ -78,6 +80,7 @@ export interface YearsEndState {
   forfeituresByAgeQueryParams: BaseQueryParams | null;
   militaryAndRehireEntryAndModification: EmployeeDetails | null;
   militaryAndRehireForfeitures: PagedReportResponse<MilitaryAndRehireForfeiture> | null;
+  militaryAndRehireForfeituresQueryParams: ProfitAndReportingQueryParams | null;
   militaryAndRehireProfitSummary: PagedReportResponse<MilitaryAndRehireProfitSummary> | null;
   missingCommaInPYName: PagedReportResponse<MissingCommasInPYName> | null;
   negativeEtvaForSSNsOnPayprofit: PagedReportResponse<NegativeEtvaForSSNsOnPayProfit> | null;
@@ -135,6 +138,7 @@ const initialState: YearsEndState = {
   militaryAndRehireEntryAndModification: null,
   militaryAndRehireForfeitures: null,
   militaryAndRehireProfitSummary: null,
+  militaryAndRehireForfeituresQueryParams: null,
   missingCommaInPYName: null,
   negativeEtvaForSSNsOnPayprofit: null,
   negativeEtvaForSSNsOnPayprofitParams: null,
@@ -230,6 +234,12 @@ export const yearsEndSlice = createSlice({
     },
     clearMilitaryAndRehireForfeituresDetails: (state) => {
       state.militaryAndRehireForfeitures = null;
+    },
+    setMilitaryAndRehireForfeituresQueryParams: (state, action: PayloadAction<ProfitAndReportingQueryParams>) => {
+      state.militaryAndRehireForfeituresQueryParams = action.payload;
+    },
+    clearMilitaryAndRehireForfeituresQueryParams: (state) => {
+      state.militaryAndRehireForfeituresQueryParams = null;
     },
     setMilitaryAndRehireProfitSummaryDetails: (
       state,
@@ -700,6 +710,8 @@ export const {
   setYearEndProfitSharingReportQueryParams,
   clearYearEndProfitSharingReportQueryParams,
   setDistributionsAndForfeituresQueryParams,
-  clearDistributionsAndForfeituresQueryParams
+  clearDistributionsAndForfeituresQueryParams,
+  setMilitaryAndRehireForfeituresQueryParams,
+  clearMilitaryAndRehireForfeituresQueryParams
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;
