@@ -64,10 +64,7 @@ const ForfeitSearchParameters = () => {
         paddingX="24px"
         alignItems="flex-end"
         gap="24px">
-        <Grid2
-          xs={12}
-          sm={6}
-          md={2}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 2 }} >
           <FormLabel>Badge #</FormLabel>
           <Controller
             name="employeeId"
@@ -83,10 +80,7 @@ const ForfeitSearchParameters = () => {
           />
         </Grid2>
 
-        <Grid2
-          xs={12}
-          sm={6}
-          md={2}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 2 }} >
           <FormLabel>Name</FormLabel>
           <Controller
             name="name"
@@ -102,10 +96,7 @@ const ForfeitSearchParameters = () => {
           />
         </Grid2>
 
-        <Grid2
-          xs={12}
-          sm={6}
-          md={2}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 2 }} >
           <FormLabel>SSN</FormLabel>
           <Controller
             name="ssn"
@@ -121,10 +112,7 @@ const ForfeitSearchParameters = () => {
           />
         </Grid2>
 
-        <Grid2
-          xs={12}
-          sm={6}
-          md={2}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 2 }} >
           <Controller
             name="startDate"
             control={control}
@@ -142,10 +130,7 @@ const ForfeitSearchParameters = () => {
           />
         </Grid2>
 
-        <Grid2
-          xs={12}
-          sm={6}
-          md={2}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 2 }} >
           <Controller
             name="endDate"
             control={control}

@@ -57,21 +57,17 @@ const DecemberProcess = () => {
       <Grid2
         container
         rowSpacing="24px">
-        <Grid2
-          xs={12}
-          width={"100%"}>
+        <Grid2 size={{ xs: 12 }} width={"100%"}>
           <Divider />
         </Grid2>
-        <Grid2 xs={10}>
+        <Grid2 size={{ xs: 10 }} >
           <Typography
             variant="h2"
             sx={{ color: "#0258A5", paddingLeft: "24px" }}>
             Clean Up Reports
           </Typography>
         </Grid2>
-        <Grid2
-          sx={{ justifyContent: "flex-end", paddingRight: "24px" }}
-          xs={2}>
+        <Grid2 size={{ xs: 2 }} sx={{ justifyContent: "flex-end", paddingRight: "24px" }} >
           <Link to="/clean-up-summary">
             <Button variant="outlined">View Details</Button>
           </Link>

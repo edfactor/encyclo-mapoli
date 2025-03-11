@@ -61,10 +61,7 @@ const Under21ReportSearchFilters = () => {
                 paddingX="24px"
                 alignItems="flex-end"
                 gap="24px">
-                <Grid2
-                    xs={12}
-                    sm={6}
-                    md={3}>
+                <Grid2 size={{ xs: 12, sm: 6, md: 3 }} >
                     <Controller
                         name="startDate"
                         control={control}
@@ -85,10 +82,7 @@ const Under21ReportSearchFilters = () => {
                     )}
                 </Grid2>
 
-                <Grid2
-                    xs={12}
-                    sm={6}
-                    md={3}>
+                <Grid2 size={{ xs: 12, sm: 6, md: 3 }} >
                     <Controller
                         name="endDate"
                         control={control}

@@ -217,9 +217,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           spacing={3}
           width="100%">
           <Grid2
-            xs={12}
-            sm={6}
-            md={3}>
+            size={{ xs: 12, sm: 6, md: 3 }}>
             <Controller
               name="startProfitYear"
               control={control}
@@ -244,9 +242,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           </Grid2>
 
           <Grid2
-            xs={12}
-            sm={6}
-            md={3}>
+            size={{ xs: 12, sm: 6, md: 3 }}>
             <Controller
               name="endProfitYear"
               control={control}
@@ -271,9 +267,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           </Grid2>
 
           <Grid2
-            xs={12}
-            sm={6}
-            md={3}>
+            size={{ xs: 12, sm: 6, md: 3 }}>
             <FormLabel>Beginning Month</FormLabel>
             <Controller
               name="startProfitMonth"
@@ -306,9 +300,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           </Grid2>
 
           <Grid2
-            xs={12}
-            sm={6}
-            md={3}>
+            size={{ xs: 12, sm: 6, md: 3 }}>
             <FormLabel>Ending Month</FormLabel>
             <Controller
               name="endProfitMonth"
@@ -341,9 +333,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           </Grid2>
 
           <Grid2
-            xs={12}
-            sm={6}
-            md={3}>
+            size={{ xs: 12, sm: 6, md: 3 }}>
             <FormLabel>Social Security Number</FormLabel>
             <Controller
               name="socialSecurity"
@@ -367,9 +357,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           </Grid2>
 
           <Grid2
-            xs={12}
-            sm={6}
-            md={3}>
+            size={{ xs: 12, sm: 6, md: 3 }}>
             <FormLabel>Name</FormLabel>
             <Controller
               name="name"
@@ -392,9 +380,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           </Grid2>
 
           <Grid2
-            xs={12}
-            sm={6}
-            md={3}>
+            size={{ xs: 12, sm: 6, md: 3 }}>
             <FormLabel>Badge Number</FormLabel>
             <Controller
               name="badgeNumber"
@@ -418,9 +404,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           </Grid2>
 
           <Grid2
-            xs={12}
-            sm={6}
-            md={3}>
+            size={{ xs: 12, sm: 6, md: 3 }}>
             <FormLabel>Comment</FormLabel>
             <Controller
               name="comment"
@@ -443,8 +427,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           </Grid2>
 
           <Grid2
-            xs={12}
-            sm={6}>
+            size={{ xs: 12, sm: 6, md: 6 }}>
             <FormControl error={!!errors.paymentType}>
               <FormLabel>Payment Type</FormLabel>
               <Controller
@@ -481,8 +464,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           </Grid2>
 
           <Grid2
-            xs={12}
-            sm={6}>
+            size={{ xs: 12, sm: 6, md: 6 }}>
             <FormControl error={!!errors.memberType}>
               <FormLabel>Member Type</FormLabel>
               <Controller
@@ -519,9 +501,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           </Grid2>
 
           <Grid2
-            xs={12}
-            sm={6}
-            md={3}>
+            size={{ xs: 12, sm: 6, md: 3 }}>
             <FormLabel>Contribution</FormLabel>
             <Controller
               name="contribution"
@@ -545,9 +525,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           </Grid2>
 
           <Grid2
-            xs={12}
-            sm={6}
-            md={3}>
+            size={{ xs: 12, sm: 6, md: 3 }}>
             <FormLabel>Earnings</FormLabel>
             <Controller
               name="earnings"
@@ -571,9 +549,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           </Grid2>
 
           <Grid2
-            xs={12}
-            sm={6}
-            md={3}>
+            size={{ xs: 12, sm: 6, md: 3 }}>
             <FormLabel>Forfeiture</FormLabel>
             <Controller
               name="forfeiture"
@@ -597,9 +573,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           </Grid2>
 
           <Grid2
-            xs={12}
-            sm={6}
-            md={3}>
+            size={{ xs: 12, sm: 6, md: 3 }}>
             <FormLabel>Payment</FormLabel>
             <Controller
               name="payment"
@@ -622,7 +596,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
             {errors.payment && <FormHelperText error>{errors.payment.message}</FormHelperText>}
           </Grid2>
 
-          <Grid2 xs={12}>
+          <Grid2
+            size={{ xs: 12 }}>
             <FormControlLabel
               control={
                 <Controller
@@ -645,12 +620,16 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           </Grid2>
         </Grid2>
 
-        <SearchAndReset
-          handleReset={handleReset}
-          handleSearch={validateAndSearch}
-          isFetching={isFetching}
-          disabled={!isValid}
-        />
+        <Grid2 container justifyContent="flex-end" paddingY="16px">
+          <Grid2 size={{ xs: 12 }}>
+            <SearchAndReset
+              handleReset={handleReset}
+              handleSearch={validateAndSearch}
+              isFetching={isFetching}
+              disabled={!isValid}
+            />
+          </Grid2>
+        </Grid2>
       </Grid2>
     </form>
   );

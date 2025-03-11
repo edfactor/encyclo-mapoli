@@ -18,10 +18,10 @@ const MasterInquiry = () => {
       <Grid2
         container
         rowSpacing="24px">
-        <Grid2 width={"100%"}>
+        <Grid2 size={{ xs: 12 }} width={"100%"}>
           <Divider />
         </Grid2>
-        <Grid2 width={"100%"}>
+        <Grid2 size={{ xs: 12 }} width={"100%"}>
           <DSMAccordion title="Filter">
             <MasterInquirySearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
           </DSMAccordion>
@@ -29,7 +29,7 @@ const MasterInquiry = () => {
 
         {masterInquiryEmployeeDetails && <MasterInquiryEmployeeDetails details={masterInquiryEmployeeDetails} />}
 
-        <Grid2 width="100%">
+        <Grid2 size={{ xs: 12 }} width="100%">
           <MasterInquiryGrid
             initialSearchLoaded={initialSearchLoaded}
             setInitialSearchLoaded={setInitialSearchLoaded}

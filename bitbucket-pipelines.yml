@@ -128,7 +128,7 @@ definitions:
             registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
             //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=$env:JFROG_WORKSPACE_VARIABLE
             "@ | Out-File -FilePath .npmrc -Encoding ASCII
-        - npm install --legacy-peer-deps;
+        - npm install;
         - npm run build:${env:ENV}
         
         - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
@@ -160,8 +160,8 @@ definitions:
             //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=$env:JFROG_WORKSPACE_VARIABLE
             "@ | Out-File -FilePath .npmrc -Encoding ASCII
 
-        # Install dependencies with legacy peer deps
-        - npm install --legacy-peer-deps
+        # Install dependencies
+        - npm install;
 
         # Run the build process for the specified environment
         - npm run build:${env:ENV}
@@ -193,7 +193,7 @@ definitions:
         - ${env:ENV} = "prod"
         - if (!(Test-Path -Path ".\src\UI")) { Write-Error "UI source directory not found. Exiting."; exit 1 }
         - cd .\src\UI
-        - ${env:NPM} install --legacy-peer-deps;
+        - ${env:NPM} install;
         - ${env:NPM} run build:${env:ENV}
         - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.$env:ENV.zip" -Force
     

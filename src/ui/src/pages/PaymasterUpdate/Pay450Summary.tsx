@@ -28,7 +28,7 @@ const Pay450Summary = () => {
                     </DSMAccordion>
                 </Grid2>
 
-                <Grid2 paddingX="24px" xs={2}>
+                <Grid2 size={{ xs: 2 }} paddingX="24px" >
                     <LabelValueSection
                         data={updateSummarySection}
                     />

@@ -74,10 +74,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({ setIn
         container
         paddingX="24px"
         gap="24px">
-        <Grid2
-          xs={12}
-          sm={6}
-          md={3}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }} >
           <Controller
             name="profitYear"
             control={control}

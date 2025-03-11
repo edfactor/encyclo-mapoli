@@ -75,7 +75,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     container
     paddingX="24px"
     width={"100%"}>
-      <Grid2 xs={12}>
+      <Grid2 size={{ xs: 12 }}>
         <Typography
           variant="h2"
           sx={{ color: "#0258A5" }}>
@@ -83,31 +83,31 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
         </Typography>
       </Grid2>
 
-      <Grid2 xs={12}>
+      <Grid2 size={{ xs: 12 }}>
         <Grid2
           container
           spacing={3}>
-          <Grid2 xs={2}>
+          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
             <LabelValueSection
               data={infoSection}
             />
           </Grid2>
-          <Grid2 xs={3}>
+          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
             <LabelValueSection
               data={employeeSection}
             />
           </Grid2>
-          <Grid2 xs={2}>
+          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
             <LabelValueSection
               data={planSection}
             />
           </Grid2>
-          <Grid2 xs={2}>
+          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
             <LabelValueSection
               data={hireSection}
             />
           </Grid2>
-          <Grid2 xs={3}>
+          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
             <LabelValueSection
               data={amountsSection}
             />

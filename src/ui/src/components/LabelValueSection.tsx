@@ -31,7 +31,7 @@ const LabelValueSection: React.FC<LabelValueSectionProps> = ({ title, data }) =>
             </Typography>
           </Grid2>
         )}
-        <Grid2 xs={!!label && label != "" ? 6 : 12}>
+        <Grid2 size={{ xs: !!label && label != "" ? 6 : 12 }}>
           <Typography variant="body2">{value}</Typography>
         </Grid2>
       </Grid2>

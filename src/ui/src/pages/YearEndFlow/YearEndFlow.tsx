@@ -21,7 +21,7 @@ const FiscalFlow = () => {
   return (
     <Page label="Fiscal Flow">
       <Grid2 container>
-        <Grid2 xs={12} width={"100%"}>
+        <Grid2 size={{ xs: 12 }} width={"100%"}>
           <Divider />
         </Grid2>
 

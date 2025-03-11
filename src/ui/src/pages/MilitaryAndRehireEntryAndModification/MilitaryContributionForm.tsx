@@ -60,7 +60,7 @@ const MilitaryContributionForm = ({
       <Grid2 container spacing={3}>
         {Array.from({ length: 5 }).map((_, index) => (
           <Grid2 container key={index} spacing={2}>
-            <Grid2 xs={6}>
+            <Grid2 size={{ xs: 6 }} >
               <Controller
                 name={`rows.${index}.contributionDate`}
                 control={control}
@@ -76,7 +76,7 @@ const MilitaryContributionForm = ({
                 )}
               />
             </Grid2>
-            <Grid2 xs={6}>
+            <Grid2 size={{ xs: 6 }} >
               <FormLabel>Contribution Amount</FormLabel>
               <Controller
                 name={`rows.${index}.contributionAmount`}
@@ -101,7 +101,7 @@ const MilitaryContributionForm = ({
           </Grid2>
         ))}
 
-        <Grid2 container xs={12} spacing={2} paddingTop='8px'>
+        <Grid2 size={{ xs: 12 }} container spacing={2} paddingTop='8px'>
           <Grid2>
             <Button
               variant="contained"

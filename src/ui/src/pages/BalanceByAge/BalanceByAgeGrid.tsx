@@ -94,10 +94,8 @@ const BalanceByAgeGrid = () => {
               leftColumnHeaders={["Beneficiaries", "Employees", "Total"]}
               topRowHeaders={["PartTime", "Count", "Balance", "Vested"]}></TotalsGrid>
           </div>
-          <Grid2
-            container
-            xs={12}>
-            <Grid2 xs={4}>
+          <Grid2 size={{ xs: 12 }} container >
+            <Grid2 size={{ xs: 4 }} >
               <DSMGrid
                 preferenceKey={"AGE_Total"}
                 isLoading={isLoading}
@@ -114,7 +112,7 @@ const BalanceByAgeGrid = () => {
                 }}
               />
             </Grid2>
-            <Grid2 xs={4}>
+            <Grid2 size={{ xs: 4 }} >
               <DSMGrid
                 preferenceKey={"AGE_FullTime"}
                 isLoading={isLoading}
@@ -131,7 +129,7 @@ const BalanceByAgeGrid = () => {
                 }}
               />
             </Grid2>
-            <Grid2 xs={4}>
+            <Grid2 size={{ xs: 4 }} >
               <DSMGrid
                 preferenceKey={"AGE_PartTime"}
                 isLoading={isLoading}

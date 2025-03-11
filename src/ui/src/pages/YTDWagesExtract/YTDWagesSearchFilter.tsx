@@ -47,10 +47,7 @@ const YTDWagesSearchFilter: React.FC = () => {
         container
         paddingX="24px"
         gap="24px">
-        <Grid2
-          xs={12}
-          sm={6}
-          md={3}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }} >
           <Select
             size="small"
             defaultValue={employeeWagesForYearQueryParams?.profitYear || lastYear}

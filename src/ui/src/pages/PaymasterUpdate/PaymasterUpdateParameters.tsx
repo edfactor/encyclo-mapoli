@@ -59,10 +59,7 @@ const PaymasterUpdateParameters = () => {
                 paddingX="24px"
                 alignItems={"flex-end"}
                 gap="24px">
-                <Grid2
-                    xs={12}
-                    sm={6}
-                    md={3}>
+                <Grid2 size={{ xs: 12, sm: 6, md: 3 }} >
                     <Controller
                         name="cutoffDate"
                         control={control}
@@ -81,10 +78,7 @@ const PaymasterUpdateParameters = () => {
                     {errors.cutoffDate && <FormHelperText error>{errors.cutoffDate.message}</FormHelperText>}
                 </Grid2>
 
-                <Grid2
-                    xs={12}
-                    sm={6}
-                    md={2}>
+                <Grid2 size={{ xs: 12, sm: 6, md: 2 }} >
                     <FormControlLabel
                         control={
                             <Controller
@@ -103,10 +97,7 @@ const PaymasterUpdateParameters = () => {
                         <FormHelperText error>{errors.useDemographics.message}</FormHelperText>
                     )}
                 </Grid2>
-                <Grid2
-                    xs={12}
-                    sm={6}
-                    md={3}>
+                <Grid2 size={{ xs: 12, sm: 6, md: 3 }} >
                     <FormControlLabel
                         control={
                             <Controller

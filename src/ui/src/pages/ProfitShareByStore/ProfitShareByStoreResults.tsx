@@ -62,10 +62,7 @@ const ProfitShareByStoreResults = () => {
         paddingLeft="24px"
         width="100%">
         {storeReportCategories.map((category) => (
-          <Grid2
-            key={category.code}
-            xs={12}
-            md={6}>
+          <Grid2 size={{ xs: 12, md: 6 }} key={category.code} >
             <InfoCard
               buttonDisabled={false}
               title={category.title}

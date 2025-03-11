@@ -55,12 +55,7 @@ export const TotalsGrid: React.FC<totalsGridProps> = ({
   };
 
   return (
-    <Grid2
-      xs={12}
-      md={12}
-      lg={12}
-      xl={12}
-      padding={tablePadding ?? "24px"}>
+    <Grid2 size={{ xs: 12, md: 12, lg: 12, xl: 12 }} padding={tablePadding ?? "24px"}>
       <TableContainer>
         <Table size="small">
           <TableHead>

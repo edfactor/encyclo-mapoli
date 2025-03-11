@@ -253,13 +253,11 @@ const DecemberProcessLocalApi: React.FC = () => {
       <Grid2
         container
         rowSpacing="24px">
-        <Grid2
-          xs={12}
-          width="100%">
+        <Grid2 size={{ xs: 12 }} width="100%">
           <Divider />
         </Grid2>
 
-        <Grid2 xs={10}>
+        <Grid2 size={{ xs: 10 }} >
           <Stack
             direction="row"
             spacing={2}

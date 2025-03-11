@@ -88,7 +88,7 @@ const MilitaryAndRehireEntryAndModification = () => {
             </Grid2>
 
             {showContributions && (
-              <Grid2 xs={6} paddingX="24px">
+              <Grid2 size={{ xs: 6 }} paddingX="24px">
                 <MilitaryContributionForm
                   onSubmit={handleSubmitForRows} onCancel={function (): void {
                     throw new Error("Function not implemented.");
