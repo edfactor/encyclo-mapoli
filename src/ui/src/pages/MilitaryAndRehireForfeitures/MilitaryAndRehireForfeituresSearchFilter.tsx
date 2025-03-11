@@ -17,6 +17,8 @@ interface MilitaryAndRehireForfeituresSearch {
   reportingYear: string;
 }
 
+const digitsOnly: (value: string | undefined) => boolean = (value) => (value ? /^\d+$/.test(value) : false);
+
 const schema = yup.object().shape({
   profitYear: yup
     .number()
@@ -25,7 +27,10 @@ const schema = yup.object().shape({
     .min(2020, "Year must be 2020 or later")
     .max(2100, "Profit Year must be 2100 or earlier")
     .required("Profit Year is required"),
-  reportingYear: yup.string().required("Reporting Year is required")
+  reportingYear: yup
+    .string()
+    .test("Digits only", "This field should have digits only", digitsOnly)
+    .required("Reporting Year is required")
 });
 
 interface MilitaryAndRehireForfeituresSearchFilterProps {

@@ -76,7 +76,8 @@ export interface YearsEndState {
   masterInquiryEmployeeDetails: EmployeeDetails | null;
   masterInquiryRequestParams: MasterInquirySearch | null;
   militaryAndRehire: PagedReportResponse<EmployeesOnMilitaryLeaveResponse> | null;
-  militaryAndRehireQueryParams: BaseQueryParams | null;
+  militaryAndRehireQueryParams: ProfitAndReportingQueryParams | null;
+  militaryAndRehireProfitSummaryQueryParams: ProfitAndReportingQueryParams | null;
   forfeituresByAgeQueryParams: BaseQueryParams | null;
   militaryAndRehireEntryAndModification: EmployeeDetails | null;
   militaryAndRehireForfeitures: PagedReportResponse<MilitaryAndRehireForfeiture> | null;
@@ -140,6 +141,7 @@ const initialState: YearsEndState = {
   militaryAndRehireForfeitures: null,
   militaryAndRehireProfitSummary: null,
   militaryAndRehireForfeituresQueryParams: null,
+  militaryAndRehireProfitSummaryQueryParams: null,
   missingCommaInPYName: null,
   negativeEtvaForSSNsOnPayprofit: null,
   negativeEtvaForSSNsOnPayprofitParams: null,
@@ -209,6 +211,12 @@ export const yearsEndSlice = createSlice({
     },
     clearMissingCommaInPYName: (state) => {
       state.missingCommaInPYName = null;
+    },
+    setMilitaryAndRehireProfitSummaryQueryParams: (state, action: PayloadAction<ProfitAndReportingQueryParams>) => {
+      state.militaryAndRehireProfitSummaryQueryParams = action.payload;
+    },
+    clearMilitaryAndRehireProfitSummaryQueryParams: (state) => {
+      state.militaryAndRehireProfitSummaryQueryParams = null;
     },
     setEmployeesOnMilitaryLeaveDetails: (
       state,
@@ -721,6 +729,8 @@ export const {
   setMilitaryAndRehireForfeituresQueryParams,
   clearMilitaryAndRehireForfeituresQueryParams,
   setExecutiveHoursAndDollarsQueryParams,
-  clearExecutiveHoursAndDollarsQueryParams
+  clearExecutiveHoursAndDollarsQueryParams,
+  setMilitaryAndRehireProfitSummaryQueryParams,
+  clearMilitaryAndRehireProfitSummaryQueryParams
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;
