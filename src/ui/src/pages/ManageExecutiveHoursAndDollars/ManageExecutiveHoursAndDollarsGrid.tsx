@@ -73,22 +73,12 @@ const RenderAddExecutiveButton: React.FC<RenderAddExecutiveButtonProps> = ({
 
 interface ManageExecutiveHoursAndDollarsGridSearchProps {
   isModal?: boolean;
-  profitYearCurrent: number | null;
-  badgeNumberCurrent: number | null;
-  socialSecurityCurrent: string | null;
-  fullNameContainsCurrent: string | null;
-  hasExecutiveHoursAndDollarsCurrent: boolean;
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
 }
 
 const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollarsGridSearchProps> = ({
   isModal,
-  profitYearCurrent,
-  badgeNumberCurrent,
-  socialSecurityCurrent,
-  fullNameContainsCurrent,
-  hasExecutiveHoursAndDollarsCurrent,
   initialSearchLoaded,
   setInitialSearchLoaded
 }) => {
@@ -96,6 +86,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
   const [pageSize, setPageSize] = useState(25);
   const [openModal, setOpenModal] = useState<boolean>(false);
   const dispatch = useDispatch();
+  const { executiveHoursAndDollarsQueryParams } = useSelector((state: RootState) => state.yearsEnd);
 
   const [_sortParams, setSortParams] = useState<ISortParams>({
     sortBy: "Badge",
@@ -112,26 +103,26 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
   const [triggerSearch, { isFetching }] = useLazyGetExecutiveHoursAndDollarsQuery();
 
   const onSearch = useCallback(async () => {
+    if (!executiveHoursAndDollarsQueryParams) return;
+
     const request = {
-      profitYear: profitYearCurrent ?? 0,
-      ...(badgeNumberCurrent && { badgeNumber: badgeNumberCurrent }),
-      ...(socialSecurityCurrent !== null && { socialSecurity: Number(socialSecurityCurrent) }),
-      ...(fullNameContainsCurrent && { fullNameContains: fullNameContainsCurrent }),
-      hasExecutiveHoursAndDollars: hasExecutiveHoursAndDollarsCurrent ?? false,
+      profitYear: executiveHoursAndDollarsQueryParams.profitYear ?? 0,
+      ...(executiveHoursAndDollarsQueryParams.badgeNumber && {
+        badgeNumber: executiveHoursAndDollarsQueryParams.badgeNumber
+      }),
+      ...(executiveHoursAndDollarsQueryParams.socialSecurity !== null && {
+        socialSecurity: executiveHoursAndDollarsQueryParams.socialSecurity
+      }),
+      ...(executiveHoursAndDollarsQueryParams.fullNameContains && {
+        fullNameContains: executiveHoursAndDollarsQueryParams.fullNameContains
+      }),
+      hasExecutiveHoursAndDollars: executiveHoursAndDollarsQueryParams.hasExecutiveHoursAndDollars ?? false,
+      hasMonthlyPayments: executiveHoursAndDollarsQueryParams.hasMonthlyPayments ?? false,
       pagination: { skip: pageNumber * pageSize, take: pageSize }
     };
 
     await triggerSearch(request, false);
-  }, [
-    profitYearCurrent,
-    badgeNumberCurrent,
-    socialSecurityCurrent,
-    fullNameContainsCurrent,
-    hasExecutiveHoursAndDollarsCurrent,
-    pageNumber,
-    pageSize,
-    triggerSearch
-  ]);
+  }, [executiveHoursAndDollarsQueryParams, pageNumber, pageSize, triggerSearch]);
 
   useEffect(() => {
     if (initialSearchLoaded) {

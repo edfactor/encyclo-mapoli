@@ -6,7 +6,6 @@ import DuplicateNamesAndBirthdaysGrid from "./DuplicateNamesAndBirthdaysGrid";
 import { useState } from "react";
 
 const DuplicateNamesAndBirthdays = () => {
-  const [profitYear, setProfitYear] = useState<number | null>(null);
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   return (
     <Page label="Duplicate Names and Birthdays">
@@ -18,16 +17,12 @@ const DuplicateNamesAndBirthdays = () => {
         </Grid2>
         <Grid2 width={"100%"}>
           <DSMAccordion title="Filter">
-            <DuplicateNamesAndBirthdaysSearchFilter
-              setProfitYear={setProfitYear}
-              setInitialSearchLoaded={setInitialSearchLoaded}
-            />
+            <DuplicateNamesAndBirthdaysSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
           </DSMAccordion>
         </Grid2>
 
         <Grid2 width="100%">
           <DuplicateNamesAndBirthdaysGrid
-            profitYearCurrent={profitYear}
             setInitialSearchLoaded={setInitialSearchLoaded}
             initialSearchLoaded={initialSearchLoaded}
           />

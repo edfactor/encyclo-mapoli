@@ -2,9 +2,14 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { Controller, useForm } from "react-hook-form";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetDuplicateNamesAndBirthdaysQuery } from "reduxstore/api/YearsEndApi";
-import { clearDuplicateNamesAndBirthdays } from "reduxstore/slices/yearsEndSlice";
+import {
+  clearDuplicateNamesAndBirthdays,
+  clearDuplicateNamesAndBirthdaysQueryParams,
+  setDuplicateNamesAndBirthdaysQueryParams
+} from "reduxstore/slices/yearsEndSlice";
+import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 
@@ -23,15 +28,14 @@ const schema = yup.object().shape({
 });
 
 interface DuplicateNamesAndBirthdaysSearchFilterProps {
-  setProfitYear: (year: number) => void;
   setInitialSearchLoaded: (include: boolean) => void;
 }
 
 const DuplicateNamesAndBirthdaysSearchFilter: React.FC<DuplicateNamesAndBirthdaysSearchFilterProps> = ({
-  setProfitYear,
   setInitialSearchLoaded
 }) => {
   const [triggerSearch, { isFetching }] = useLazyGetDuplicateNamesAndBirthdaysQuery();
+  const { duplicateNamesAndBirthdaysQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const dispatch = useDispatch();
   const {
     control,
@@ -42,7 +46,7 @@ const DuplicateNamesAndBirthdaysSearchFilter: React.FC<DuplicateNamesAndBirthday
   } = useForm<DuplicateNamesAndBirthdaysSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: undefined
+      profitYear: duplicateNamesAndBirthdaysQueryParams?.profitYear || undefined
     }
   });
 
@@ -54,12 +58,14 @@ const DuplicateNamesAndBirthdaysSearchFilter: React.FC<DuplicateNamesAndBirthday
           pagination: { skip: 0, take: 25 }
         },
         false
-      );
+      ).unwrap();
+      dispatch(setDuplicateNamesAndBirthdaysQueryParams(data.profitYear));
     }
   });
 
   const handleReset = () => {
     setInitialSearchLoaded(false);
+    dispatch(clearDuplicateNamesAndBirthdaysQueryParams());
     dispatch(clearDuplicateNamesAndBirthdays());
     reset({
       profitYear: undefined
@@ -88,7 +94,6 @@ const DuplicateNamesAndBirthdaysSearchFilter: React.FC<DuplicateNamesAndBirthday
                 error={!!errors.profitYear}
                 onChange={(e) => {
                   field.onChange(e);
-                  setProfitYear(parseInt(e.target.value));
                 }}
                 inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
               />

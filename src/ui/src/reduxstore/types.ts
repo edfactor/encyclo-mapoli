@@ -205,6 +205,7 @@ export interface ExecutiveHoursAndDollarsRequestDto extends ProfitYearRequest {
   socialSecurity?: number;
   fullNameContains?: string;
   hasExecutiveHoursAndDollars: boolean;
+  hasMonthlyPayments: boolean;
   pagination: PaginationParams;
 }
 
@@ -263,6 +264,20 @@ export interface EligibleEmployeeResponseDto {
 
 export interface BaseQueryParams {
   profitYear: number;
+}
+
+export interface ExecutiveHoursAndDollarsQueryParams extends BaseQueryParams {
+  badgeNumber: number;
+  socialSecurity: number;
+  fullNameContains: string;
+  hasExecutiveHoursAndDollars: boolean;
+  hasMonthlyPayments: boolean;
+}
+
+export interface DistributionsAndForfeituresQueryParams extends BaseQueryParams {
+  startMonth?: number;
+  endMonth?: number;
+  includeOutgoingForfeitures?: boolean;
 }
 
 export interface BaseDateRangeParams {
@@ -515,7 +530,8 @@ export interface TerminationRequest {
 }
 
 export interface TerminationDetail {
-  badgePSn: string;
+  badgeNumber: number;
+  psnSuffix: number;
   name: string;
   beginningBalance: number;
   beneficiaryAllocation: number;

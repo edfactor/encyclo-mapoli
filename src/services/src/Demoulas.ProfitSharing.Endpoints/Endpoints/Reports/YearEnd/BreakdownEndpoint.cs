@@ -9,7 +9,7 @@ using Demoulas.ProfitSharing.Security;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 
-public class BreakdownEndpoint : EndpointWithCsvBase<ProfitYearRequest, MemberYearSummaryDto, BreakdownEndpoint.BreakdownEndpointMap>
+public class BreakdownEndpoint : EndpointWithCsvBase<BreakdownByStoreRequest, MemberYearSummaryDto, BreakdownEndpoint.BreakdownEndpointMap>
 {
     private readonly IBreakdownService _breakdownService;
 
@@ -32,9 +32,9 @@ public class BreakdownEndpoint : EndpointWithCsvBase<ProfitYearRequest, MemberYe
         base.Configure();
     }
 
-    public override Task<ReportResponseBase<MemberYearSummaryDto>> GetResponse(ProfitYearRequest req, CancellationToken ct)
+    public override Task<ReportResponseBase<MemberYearSummaryDto>> GetResponse(BreakdownByStoreRequest breakdownByStoreRequest, CancellationToken ct)
     {
-        return _breakdownService.GetActiveMembersByStore(req, ct);
+        return _breakdownService.GetActiveMembersByStore(breakdownByStoreRequest, ct);
     }
 
     public sealed class BreakdownEndpointMap : ClassMap<MemberYearSummaryDto>

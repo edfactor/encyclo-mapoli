@@ -6,15 +6,7 @@ import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetDuplicateSSNsOnDemographicsColumns } from "./DuplicateSSNsOnDemographicsGridColumns";
 
-interface DuplicateSSNsOnDemographicsGridProps {
-  initialSearchLoaded: boolean;
-  setInitialSearchLoaded: (loaded: boolean) => void;
-}
-
-const DuplicateSSNsOnDemographicsGrid: React.FC<DuplicateSSNsOnDemographicsGridProps> = ({
-  initialSearchLoaded,
-  setInitialSearchLoaded
-}) => {
+const DuplicateSSNsOnDemographicsGrid: React.FC = () => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
@@ -35,10 +27,8 @@ const DuplicateSSNsOnDemographicsGrid: React.FC<DuplicateSSNsOnDemographicsGridP
   }, [pageNumber, pageSize, triggerSearch]);
 
   useEffect(() => {
-    if (initialSearchLoaded) {
-      onSearch();
-    }
-  }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
+    onSearch();
+  }, [pageNumber, pageSize, onSearch]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetDuplicateSSNsOnDemographicsColumns(), []);
@@ -51,7 +41,7 @@ const DuplicateSSNsOnDemographicsGrid: React.FC<DuplicateSSNsOnDemographicsGridP
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`DUPLICATE SSNs ON DEMOGRAPHICS (${duplicateSSNsData?.response.total || 0})`}
+              {`(${duplicateSSNsData?.response.total || 0})`}
             </Typography>
           </div>
           <DSMGrid
@@ -70,13 +60,11 @@ const DuplicateSSNsOnDemographicsGrid: React.FC<DuplicateSSNsOnDemographicsGridP
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
             setPageNumber(value - 1);
-            setInitialSearchLoaded(true);
           }}
           pageSize={pageSize}
           setPageSize={(value: number) => {
             setPageSize(value);
             setPageNumber(1);
-            setInitialSearchLoaded(true);
           }}
           recordCount={duplicateSSNsData.response.total}
         />

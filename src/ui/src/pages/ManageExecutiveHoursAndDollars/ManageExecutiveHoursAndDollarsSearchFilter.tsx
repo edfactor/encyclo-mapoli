@@ -12,8 +12,10 @@ import * as yup from "yup";
 import { RootState } from "reduxstore/store";
 import {
   clearAdditionalExecutivesChosen,
+  clearEligibleEmployeesQueryParams,
   clearExecutiveHoursAndDollars,
-  setExecutiveHoursAndDollarsGridYear
+  setExecutiveHoursAndDollarsGridYear,
+  setExecutiveHoursAndDollarsQueryParams
 } from "reduxstore/slices/yearsEndSlice";
 
 interface ExecutiveHoursAndDollarsSearch {
@@ -21,7 +23,8 @@ interface ExecutiveHoursAndDollarsSearch {
   badgeNumber?: number | null;
   socialSecurity?: number | null;
   fullNameContains?: string | null;
-  hasExecutiveHoursAndDollars: boolean;
+  hasExecutiveHoursAndDollars: NonNullable<boolean>;
+  hasMonthlyPayments: NonNullable<boolean>;
 }
 
 const schema = yup.object().shape({
@@ -47,42 +50,27 @@ const schema = yup.object().shape({
     .max(999999999, "SSN must be 9 digits or less")
     .nullable(),
   fullNameContains: yup.string().typeError("Full Name must be a string").nullable(),
-  hasExecutiveHoursAndDollars: yup.boolean().default(false).required()
+  hasExecutiveHoursAndDollars: yup.boolean().default(true).required(),
+  hasMonthlyPayments: yup.boolean().default(false).required()
 });
 
 // If we are using a modal window, we want a slimmed down version of the search filter
 // and we will
 interface ManageExecutiveHoursAndDollarsSearchFilterProps {
   isModal?: boolean;
-  setProfitYear: (year: number) => void;
-  setBadgeNumber: (badgeNumber: number | null) => void;
-  setSocialSecurity: (ssn: string | null) => void;
-  setFullNameContains: (ssn: string | null) => void;
-  setHasExecutiveHoursAndDollars: (include: boolean) => void;
   setInitialSearchLoaded: (include: boolean) => void;
 }
 
 const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursAndDollarsSearchFilterProps> = ({
   isModal,
-  setProfitYear,
-  setBadgeNumber,
-  setSocialSecurity,
-  setFullNameContains,
-  setHasExecutiveHoursAndDollars,
   setInitialSearchLoaded
 }) => {
-  const { executiveHoursAndDollarsGrid } = useSelector((state: RootState) => state.yearsEnd);
+  const { executiveHoursAndDollarsQueryParams } = useSelector((state: RootState) => state.yearsEnd);
 
   const [triggerSearch, { isFetching }] = useLazyGetExecutiveHoursAndDollarsQuery();
   const [triggerModalSearch, { isFetching: isModalFetching }] = useLazyGetAdditionalExecutivesQuery();
 
   const dispatch = useDispatch();
-
-  let selectedProfitYear = undefined;
-
-  if (isModal) {
-    selectedProfitYear = executiveHoursAndDollarsGrid?.profitYear || undefined;
-  }
 
   const {
     control,
@@ -94,7 +82,18 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
   } = useForm<ExecutiveHoursAndDollarsSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: selectedProfitYear
+      profitYear: executiveHoursAndDollarsQueryParams?.profitYear ?? undefined,
+      badgeNumber:
+        executiveHoursAndDollarsQueryParams?.badgeNumber && executiveHoursAndDollarsQueryParams.badgeNumber !== 0
+          ? executiveHoursAndDollarsQueryParams.badgeNumber
+          : undefined,
+      socialSecurity:
+        executiveHoursAndDollarsQueryParams?.socialSecurity && executiveHoursAndDollarsQueryParams.socialSecurity !== 0
+          ? executiveHoursAndDollarsQueryParams.socialSecurity
+          : undefined,
+      fullNameContains: executiveHoursAndDollarsQueryParams?.fullNameContains ?? undefined,
+      hasExecutiveHoursAndDollars: executiveHoursAndDollarsQueryParams?.hasExecutiveHoursAndDollars ?? true,
+      hasMonthlyPayments: executiveHoursAndDollarsQueryParams?.hasMonthlyPayments ?? false
     }
   });
 
@@ -111,17 +110,22 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
           ...(!!data.socialSecurity && { socialSecurity: data.socialSecurity }),
           ...(!!data.badgeNumber && { badgeNumber: data.badgeNumber }),
           hasExecutiveHoursAndDollars: data.hasExecutiveHoursAndDollars ?? false,
+          hasMonthlyPayments: data.hasMonthlyPayments !== undefined ? data.hasMonthlyPayments : false,
           ...(!!data.fullNameContains && { fullNameContains: data.fullNameContains })
         },
         false
+      ).unwrap();
+      dispatch(
+        setExecutiveHoursAndDollarsQueryParams({
+          ...data,
+          badgeNumber: data.badgeNumber ?? 0,
+          socialSecurity: data.socialSecurity ?? 0,
+          fullNameContains: data.fullNameContains ?? "",
+          hasExecutiveHoursAndDollars: data.hasExecutiveHoursAndDollars ?? false,
+          hasMonthlyPayments: data.hasMonthlyPayments ?? false
+        })
       );
-      // If we are not in a modal, we need to set the profit year we are working with
-      // If we are in a modal, we already have this set
 
-      // Now we need to set the Grid pending state's
-      // profit year. We have to do it via redux because
-      // the grid data has no mention of profit year,
-      // but we need the year to submit changes.
       dispatch(setExecutiveHoursAndDollarsGridYear(data.profitYear));
 
       dispatch(clearAdditionalExecutivesChosen());
@@ -137,6 +141,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
           ...(!!data.socialSecurity && { socialSecurity: data.socialSecurity }),
           ...(!!data.badgeNumber && { badgeNumber: data.badgeNumber }),
           hasExecutiveHoursAndDollars: false,
+          hasMonthlyPayments: data.hasMonthlyPayments ?? false,
           ...(!!data.fullNameContains && { fullNameContains: data.fullNameContains })
         },
         false
@@ -152,6 +157,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
     // from reduxstore/slices/yearsEndSlice
     setInitialSearchLoaded(false);
     dispatch(clearExecutiveHoursAndDollars());
+    dispatch(clearEligibleEmployeesQueryParams());
     reset({
       profitYear: undefined
     });
@@ -183,7 +189,6 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
                     error={!!errors.profitYear}
                     onChange={(e) => {
                       field.onChange(e);
-                      setProfitYear(Number(e.target.value));
                     }}
                     inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
                   />
@@ -208,7 +213,6 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
                   error={!!errors.fullNameContains}
                   onChange={(e) => {
                     field.onChange(e);
-                    setFullNameContains(e.target.value);
                   }}
                 />
               )}
@@ -235,7 +239,6 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
                     if (!isNaN(Number(e.target.value))) {
                       const parsedValue = e.target.value === "" ? null : Number(e.target.value);
                       field.onChange(parsedValue);
-                      setSocialSecurity(e.target.value);
                     }
                   }}
                 />
@@ -262,7 +265,6 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
                     if (!isNaN(Number(e.target.value))) {
                       const parsedValue = e.target.value === "" ? null : Number(e.target.value);
                       field.onChange(parsedValue);
-                      setBadgeNumber(parsedValue);
                     }
                   }}
                   //inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
@@ -272,28 +274,55 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
             {errors.badgeNumber && <FormHelperText error>{errors.badgeNumber.message}</FormHelperText>}
           </Grid2>
           {!isModal && (
-            <Grid2
-              xs={12}
-              sm={6}
-              md={3}>
-              <FormLabel>Has Executive Hours and Dollars</FormLabel>
-              <Controller
-                name="hasExecutiveHoursAndDollars"
-                control={control}
-                render={({ field }) => (
-                  <Checkbox
-                    checked={field.value}
-                    onChange={(e) => {
-                      field.onChange(e);
-                      setHasExecutiveHoursAndDollars(e.target.checked);
-                    }}
+            <>
+              <Grid2
+                container
+                paddingX="8px"
+                width={"100%"}>
+                <Grid2
+                  xs={3}
+                  sm={3}
+                  md={3}>
+                  <FormLabel>Has Executive Hours and Dollars</FormLabel>
+                  <Controller
+                    name="hasExecutiveHoursAndDollars"
+                    control={control}
+                    render={({ field }) => (
+                      <Checkbox
+                        checked={field.value}
+                        onChange={(e) => {
+                          field.onChange(e);
+                        }}
+                      />
+                    )}
                   />
-                )}
-              />
-              {errors.hasExecutiveHoursAndDollars && (
-                <FormHelperText error>{errors.hasExecutiveHoursAndDollars.message}</FormHelperText>
-              )}
-            </Grid2>
+                  {errors.hasExecutiveHoursAndDollars && (
+                    <FormHelperText error>{errors.hasExecutiveHoursAndDollars.message}</FormHelperText>
+                  )}
+                </Grid2>
+                <Grid2
+                  xs={3}
+                  sm={3}
+                  md={3}>
+                  <FormLabel>Has Monthly Payments</FormLabel>
+                  <Controller
+                    name="hasMonthlyPayments"
+                    control={control}
+                    render={({ field }) => (
+                      <Checkbox
+                        checked={field.value}
+                        onChange={(e) => {
+                          field.onChange(e);
+                        }}
+                      />
+                    )}
+                  />
+                  {errors.hasMonthlyPayments && (
+                    <FormHelperText error>{errors.hasMonthlyPayments.message}</FormHelperText>
+                  )}
+                </Grid2>
+              </Grid2>
+            </>
           )}
         </Grid2>
       </Grid2>

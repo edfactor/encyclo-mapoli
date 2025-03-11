@@ -15,7 +15,7 @@ public sealed record EmployeeDetails
     public decimal PercentageVested { get; init; }
     public bool ContributionsLastYear { get; init; }
     public bool Enrolled { get; init; }
-    public string BadgeNumber { get; init; } = string.Empty;
+    public int BadgeNumber { get; init; }
     public DateOnly HireDate { get; init; }
     public DateOnly? TerminationDate { get; init; } = null;
     public DateOnly? ReHireDate { get; init; } = null;

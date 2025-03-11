@@ -44,7 +44,7 @@ await builder.SetDefaultLoggerConfigurationAsync(smartConfig, fileSystemLog);
 _ = builder.Services.AddTransient<IClaimsTransformation, ImpersonationAndEnvironmentAwareClaimsTransformation>();
 
 var rolePermissionService = new RolePermissionService();
-if (!builder.Environment.IsTestEnvironment())
+if (!builder.Environment.IsTestEnvironment() && Environment.GetEnvironmentVariable("YEMATCH_USE_TEST_CERTS") == null)
 {
     builder.Services.AddOktaSecurity(builder.Configuration, rolePermissionService);
 }

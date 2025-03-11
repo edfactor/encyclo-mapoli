@@ -31,14 +31,11 @@ const CleanUpSummaryCards: React.FC<CleanUpSummaryCardsProps> = ({ setSelectedTa
   // "Duplicate Names and Birthdays"
 
   const [triggerETVASearch] = useLazyGetNegativeEVTASSNQuery();
-  const [triggerPayrollDupeSsnsOnDemographics] =
-    useLazyGetDuplicateSSNsQuery();
-  const [triggerDemographicBadgesNotInPayprofit] =
-    useLazyGetDemographicBadgesNotInPayprofitQuery();
-  const [triggerDuplicateNamesAndBirthdays] =
-    useLazyGetDuplicateNamesAndBirthdaysQuery();
+  const [triggerPayrollDupeSsnsOnDemographics] = useLazyGetDuplicateSSNsQuery();
+  const [triggerDemographicBadgesNotInPayprofit] = useLazyGetDemographicBadgesNotInPayprofitQuery();
+  const [triggerDuplicateNamesAndBirthdays] = useLazyGetDuplicateNamesAndBirthdaysQuery();
 
-  const { negativeEtvaForSSNsOnPayprofit, duplicateSSNsData, demographicBadges, duplicateNamesAndBirthday } =
+  const { negativeEtvaForSSNsOnPayprofit, duplicateSSNsData, demographicBadges, duplicateNamesAndBirthdays } =
     useSelector((state: RootState) => state.yearsEnd);
 
   useEffect(() => {
@@ -122,14 +119,14 @@ const CleanUpSummaryCards: React.FC<CleanUpSummaryCardsProps> = ({ setSelectedTa
           xs={12}
           md={6}
           lg={6}>
-          {!!duplicateNamesAndBirthday && (
+          {!!duplicateNamesAndBirthdays && (
             <InfoCard
               buttonDisabled={disableButtons}
               title="Duplicate Names and Birthdays"
               handleClick={() => setSelectedTab(4)}
-              valid={duplicateNamesAndBirthday.response.total == 0}
+              valid={duplicateNamesAndBirthdays.response.total == 0}
               data={{
-                "Duplicate Names and Birthdays:": duplicateNamesAndBirthday.response.total.toString()
+                "Duplicate Names and Birthdays:": duplicateNamesAndBirthdays.response.total.toString()
               }}
             />
           )}

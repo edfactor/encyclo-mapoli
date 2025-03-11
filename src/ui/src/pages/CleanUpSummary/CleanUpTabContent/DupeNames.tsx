@@ -6,7 +6,6 @@ import { useState } from "react";
 import { DSMAccordion } from "smart-ui-library";
 
 export const DupeNames = () => {
-  const [profitYear, setProfitYear] = useState<number | null>(null);
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   return (
     <Grid2
@@ -17,16 +16,12 @@ export const DupeNames = () => {
       </Grid2>
       <Grid2 width={"100%"}>
         <DSMAccordion title="Filter">
-          <DuplicateNamesAndBirthdaysSearchFilter
-            setProfitYear={setProfitYear}
-            setInitialSearchLoaded={setInitialSearchLoaded}
-          />
+          <DuplicateNamesAndBirthdaysSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
         </DSMAccordion>
       </Grid2>
 
       <Grid2 width="100%">
         <DuplicateNamesAndBirthdaysGrid
-          profitYearCurrent={profitYear}
           setInitialSearchLoaded={setInitialSearchLoaded}
           initialSearchLoaded={initialSearchLoaded}
         />
