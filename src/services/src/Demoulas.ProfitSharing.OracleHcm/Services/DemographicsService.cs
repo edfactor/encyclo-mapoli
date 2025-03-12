@@ -87,7 +87,7 @@ internal class DemographicsService : IDemographicsServiceInternal
                         _logger.LogError("Duplicate OracleHcmId: {OracleHcmId} found; skipping....", demoRequest.OracleHcmId);
                     }
 
-                    if (batch.Count == batchSize)
+                    if (batch.Count >= batchSize)
                     {
                         break;
                     }
