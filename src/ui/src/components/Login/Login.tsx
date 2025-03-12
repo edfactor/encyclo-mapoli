@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
 import { useOktaAuth } from "@okta/okta-react";
-import { useDispatch, useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 
 import { Outlet } from "react-router";
 import { setToken } from "reduxstore/slices/securitySlice";
