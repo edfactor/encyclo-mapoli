@@ -117,7 +117,8 @@ export const CAPTIONS = {
   SUMMARY: "Summary",
   TERMINATIONS: "Terminations (QPAY066)",
   VESTED_AMOUNTS_BY_AGE: "Get Vested Amounts by Age (PROF 130V)",
-  YTD_WAGES_EXTRACT: "YTD Wages Extract"
+  YTD_WAGES_EXTRACT: "YTD Wages Extract",
+  BREAKDOWN_REPORT: "Breakdown Report (QPAY066TA)"
 } as const;
 
 export const VIEW = "View";
