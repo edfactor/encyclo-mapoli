@@ -227,19 +227,19 @@ public class CleanupReportService : ICleanupReportService
             FROM DEMOGRAPHIC p1
             JOIN DEMOGRAPHIC p2
                 ON p1.Id < p2.Id  -- Avoid self-joins and duplicate pairs
-                  AND UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) < 3  -- Name similarity threshold
+                  AND UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) < 2  -- Name similarity threshold
                   AND SOUNDEX(p1.FULL_NAME) = SOUNDEX(p2.FULL_NAME)  -- Phonetic similarity
                   AND (
                      p1.DATE_OF_BIRTH = p2.DATE_OF_BIRTH  -- Exact DOB match
                          OR ABS(TRUNC(p1.DATE_OF_BIRTH) - TRUNC(p2.DATE_OF_BIRTH)) <= 3  -- Allow 3-day difference
                          OR EXTRACT(YEAR FROM p1.DATE_OF_BIRTH) = EXTRACT(YEAR FROM p2.DATE_OF_BIRTH)  -- Same birth year
                      )
-            union
+            union all
             SELECT p2.Id, p2.FULL_NAME as FullName, p2.DATE_OF_BIRTH as DateOfBirth,  UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) AS NameDistance
             FROM DEMOGRAPHIC p1
             JOIN DEMOGRAPHIC p2
                 ON p1.Id < p2.Id  -- Avoid self-joins and duplicate pairs
-                  AND UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) < 3  -- Name similarity threshold
+                  AND UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) < 2  -- Name similarity threshold
                   AND SOUNDEX(p1.FULL_NAME) = SOUNDEX(p2.FULL_NAME)  -- Phonetic similarity
                   AND (
                      p1.DATE_OF_BIRTH = p2.DATE_OF_BIRTH  -- Exact DOB match
@@ -251,13 +251,17 @@ public class CleanupReportService : ICleanupReportService
                         .SqlQueryRaw<DemographicMatchDto>(dupQuery);
                 }
 
+                var names = await dupNameSlashDateOfBirth
+                    .Where(d => !string.IsNullOrEmpty(d.FullName))
+                    .Select(d => d.FullName)
+                    .ToHashSetAsync(cancellationToken);
 
                 var query = from dem in ctx.Demographics
                             join ppLj in ctx.PayProfits on new { DemographicId = dem.Id, req.ProfitYear } equals new { ppLj.DemographicId, ppLj.ProfitYear } into tmpPayProfit
                             from pp in tmpPayProfit.DefaultIfEmpty()
                             join pdLj in ctx.ProfitDetails on new { dem.Ssn, req.ProfitYear } equals new { pdLj.Ssn, pdLj.ProfitYear } into tmpProfitDetails
                             from pd in tmpProfitDetails.DefaultIfEmpty()
-                            where dupNameSlashDateOfBirth.Select(d=> d.FullName).Contains(dem.ContactInfo.FullName)
+                            where dem.ContactInfo.FullName != null && names.Contains(dem!.ContactInfo!.FullName!)
                             group new { dem, pp, pd } by new
                             {
                                 dem.BadgeNumber,
@@ -285,7 +289,7 @@ public class CleanupReportService : ICleanupReportService
                                 Ssn = g.Key.SSN.MaskSsn(),
                                 Name = g.Key.FullName,
                                 DateOfBirth = g.Key.DateOfBirth,
-                                Address = new AddressResponseDto()
+                                Address = new AddressResponseDto
                                 {
                                     City = g.Key.City,
                                     State = g.Key.State,
