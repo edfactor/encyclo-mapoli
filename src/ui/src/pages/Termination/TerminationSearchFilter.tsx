@@ -1,17 +1,16 @@
-import { yupResolver } from "@hookform/resolvers/yup";
-import Grid2 from '@mui/material/Grid2';
-import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
-import { Controller, useForm } from "react-hook-form";
-import { useDispatch, useSelector } from "react-redux";
-import { useLazyGetTerminationReportQuery } from "reduxstore/api/YearsEndApi";
+import DsmDatePicker from 'components/DsmDatePicker/DsmDatePicker';
+import { Controller, useForm } from 'react-hook-form';
+import { useDispatch, useSelector } from 'react-redux';
+import { useLazyGetTerminationReportQuery } from 'reduxstore/api/YearsEndApi';
 import {
-  clearTermination,
-  clearTerminationQueryParams,
-  setTerminationQueryParams
-} from "reduxstore/slices/yearsEndSlice";
-import { RootState } from "reduxstore/store";
-import { SearchAndReset } from "smart-ui-library";
-import * as yup from "yup";
+    clearTermination, clearTerminationQueryParams, setTerminationQueryParams
+} from 'reduxstore/slices/yearsEndSlice';
+import { RootState } from 'reduxstore/store';
+import { SearchAndReset } from 'smart-ui-library';
+import * as yup from 'yup';
+
+import { yupResolver } from '@hookform/resolvers/yup';
+import Grid2 from '@mui/material/Grid2';
 
 interface TerminationSearch {
   profitYear: Date;

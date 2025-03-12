@@ -1,6 +1,5 @@
-import React from "react";
-import { useDispatch } from "react-redux";
 import { LoginCallback } from "@okta/okta-react";
+import { useDispatch } from "react-redux";
 
 const OktaLoginCallback = () => {
   const dispatch = useDispatch();

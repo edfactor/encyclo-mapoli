@@ -1,5 +1,5 @@
 import { Checkbox, FormHelperText, FormLabel, TextField } from "@mui/material";
-import Grid2 from '@mui/material/Grid2';
+import Grid2 from "@mui/material/Grid2";
 import { useForm, Controller } from "react-hook-form";
 import {
   useLazyGetExecutiveHoursAndDollarsQuery,
@@ -173,7 +173,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
           spacing={3}
           width="100%">
           {!isModal && (
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }} >
+            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
               <FormLabel>Profit Year</FormLabel>
               <Controller
                 name="profitYear"
@@ -187,14 +187,14 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
                     onChange={(e) => {
                       field.onChange(e);
                     }}
-                    inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                    type="number"
                   />
                 )}
               />
               {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
             </Grid2>
           )}
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }} >
+          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
             <FormLabel>Full Name</FormLabel>
             <Controller
               name="fullNameContains"
@@ -213,7 +213,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
             />
             {errors.fullNameContains && <FormHelperText error>{errors.fullNameContains.message}</FormHelperText>}
           </Grid2>
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }} >
+          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
             <FormLabel>SSN</FormLabel>
             <Controller
               name="socialSecurity"
@@ -237,7 +237,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
             />
             {errors.socialSecurity && <FormHelperText error>{errors.socialSecurity.message}</FormHelperText>}
           </Grid2>
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }} >
+          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
             <FormLabel>Badge Number</FormLabel>
             <Controller
               name="badgeNumber"
@@ -255,7 +255,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
                       field.onChange(parsedValue);
                     }
                   }}
-                  //inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                  type="number"
                 />
               )}
             />
@@ -267,7 +267,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
                 container
                 paddingX="8px"
                 width={"100%"}>
-                <Grid2 size={{ xs: 3, sm: 3, md: 3 }} >
+                <Grid2 size={{ xs: 3, sm: 3, md: 3 }}>
                   <FormLabel>Has Executive Hours and Dollars</FormLabel>
                   <Controller
                     name="hasExecutiveHoursAndDollars"
@@ -285,7 +285,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
                     <FormHelperText error>{errors.hasExecutiveHoursAndDollars.message}</FormHelperText>
                   )}
                 </Grid2>
-                <Grid2 size={{ xs: 3, sm: 3, md: 3 }} >
+                <Grid2 size={{ xs: 3, sm: 3, md: 3 }}>
                   <FormLabel>Has Monthly Payments</FormLabel>
                   <Controller
                     name="hasMonthlyPayments"
