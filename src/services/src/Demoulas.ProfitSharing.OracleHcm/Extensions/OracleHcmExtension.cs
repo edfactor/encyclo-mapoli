@@ -117,7 +117,8 @@ public static class OracleHcmExtension
         RegisterOracleHcmServices(builder.Services);
         ConfigureHttpClients(builder.Services);
 
-        builder.Services.AddHealthChecks().AddCheck<OracleHcmHealthCheck>("OracleHcm");
+        builder.Services.AddHealthChecks().AddCheck<OracleHcmHealthCheck>("OracleHcm")
+            .AddProcessAllocatedMemoryHealthCheck(maximumMegabytesAllocated: 1024);
         builder.AddProjectCachingServices();
         builder.AddOracleHcmMessaging();
 
@@ -143,11 +144,11 @@ public static class OracleHcmExtension
     private static void RegisterOracleHcmServices(IServiceCollection services)
     {
         // General services
-        services.AddSingleton<OracleEmployeeValidator>();
+        services.AddScoped<OracleEmployeeValidator>();
         services.AddSingleton<EmployeeFullSyncJob>();
         services.AddSingleton<EmployeeDeltaSyncJob>();
         services.AddSingleton<PayrollSyncJob>();
-        services.AddSingleton<DemographicsService>();
+        services.AddScoped<DemographicsService>();
         
         // Mappers
         services.AddSingleton<DemographicMapper>();
@@ -157,8 +158,8 @@ public static class OracleHcmExtension
 
         // Internal services
         services.AddSingleton<IDemographicsServiceInternal, DemographicsService>();
-        services.AddSingleton<IEmployeeSyncService, EmployeeSyncService>();
-        services.AddSingleton<IJobFactory, OracleHcmJobFactory>();
+        services.AddScoped<IEmployeeSyncService, EmployeeSyncService>();
+        services.AddScoped<IJobFactory, OracleHcmJobFactory>();
         services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
 
         services.AddSingleton<IFakeSsnService, FakeSsnService>();
@@ -180,11 +181,22 @@ public static class OracleHcmExtension
     {
         HttpResilienceOptions commonHttpOptions = new HttpResilienceOptions
         {
-            CircuitBreakerOptions = new HttpCircuitBreakerStrategyOptions { SamplingDuration = TimeSpan.FromMinutes(2) },
-            AttemptTimeoutOptions = new HttpTimeoutStrategyOptions { Timeout = TimeSpan.FromMinutes(1) },
-            TotalRequestTimeoutOptions = new HttpTimeoutStrategyOptions { Timeout = TimeSpan.FromMinutes(2) }
+            CircuitBreakerOptions = new HttpCircuitBreakerStrategyOptions
+            {
+                SamplingDuration = TimeSpan.FromMinutes(2),
+                MinimumThroughput = 10, // Add minimum throughput
+                FailureRatio = 0.5 // Add failure ratio
+            },
+            AttemptTimeoutOptions = new HttpTimeoutStrategyOptions
+            {
+                Timeout = TimeSpan.FromMinutes(1)
+            },
+            TotalRequestTimeoutOptions = new HttpTimeoutStrategyOptions
+            {
+                Timeout = TimeSpan.FromMinutes(2)
+            }
         };
-        
+
         services.AddHttpClient<AtomFeedClient>("AtomFeedSync", BuildOracleHcmAuthClient)
             .AddStandardResilienceHandler(options => ApplyResilienceOptions(options, commonHttpOptions));
 
