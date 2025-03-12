@@ -4,7 +4,7 @@ using Demoulas.ProfitSharing.OracleHcm.Services;
 using MassTransit;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Messaging;
-internal class PayrollSyncConsumer : IConsumer<MessageRequest<PayrollItem>>
+internal class PayrollSyncConsumer : IConsumer<MessageRequest<PayrollItem[]>>
 {
     private readonly PayrollSyncService _payrollSyncService;
     
@@ -13,10 +13,12 @@ internal class PayrollSyncConsumer : IConsumer<MessageRequest<PayrollItem>>
         _payrollSyncService = payrollSyncService;
     }
 
-    public Task Consume(ConsumeContext<MessageRequest<PayrollItem>> context)
+    public async Task Consume(ConsumeContext<MessageRequest<PayrollItem[]>> context)
     {
-        return _payrollSyncService.GetBalanceTypesForProcessResultsAsync(context.Message.Body, context.CancellationToken);
+        foreach (var item in context.Message.Body)
+        {
+            await _payrollSyncService.GetBalanceTypesForProcessResultsAsync(item, context.CancellationToken);
+        }
     }
-    
 }
 

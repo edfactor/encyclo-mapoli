@@ -150,9 +150,9 @@ internal class PayrollSyncClient
 
             // Queue Here
             const string requestedBy = "System";
-            foreach (PayrollItem item in results!.Items)
+            foreach (PayrollItem[] items in results!.Items.Chunk(10))
             {
-                MessageRequest<PayrollItem> message = new MessageRequest<PayrollItem> { ApplicationName = nameof(PayrollSyncClient), Body = item, UserId = requestedBy };
+                MessageRequest<PayrollItem[]> message = new() { ApplicationName = nameof(PayrollSyncClient), Body = items, UserId = requestedBy };
 
                 await _payrollSyncBus.Publish(message, cancellationToken);
 

@@ -156,22 +156,19 @@ var ui = builder.AddNpmApp("ProfitSharing-Ui", "../../../ui/", "dev")
     .WithHttpEndpoint(port: uiPort, isProxied: false);
 RunNpmInstall(ui.Resource.WorkingDirectory);
 
-var fullSync = builder.AddProject<Demoulas_ProfitSharing_EmployeeFull_Sync>(name: "ProfitSharing-EmployeeFull-Sync")
+_ = builder.AddProject<Demoulas_ProfitSharing_EmployeeFull_Sync>(name: "ProfitSharing-EmployeeFull-Sync")
     .WaitFor(api)
     .WaitFor(ui)
     .WithExplicitStart();
 
-var payroll = builder.AddProject<Demoulas_ProfitSharing_EmployeePayroll_Sync>(name: "ProfitSharing-EmployeePayroll-Sync")
+_ = builder.AddProject<Demoulas_ProfitSharing_EmployeePayroll_Sync>(name: "ProfitSharing-EmployeePayroll-Sync")
     .WaitFor(api)
     .WaitFor(ui)
-    .WaitFor(fullSync)
     .WithExplicitStart();
 
-builder.AddProject<Demoulas_ProfitSharing_EmployeeDelta_Sync>(name: "ProfitSharing-EmployeeDelta-Sync")
+_ = builder.AddProject<Demoulas_ProfitSharing_EmployeeDelta_Sync>(name: "ProfitSharing-EmployeeDelta-Sync")
     .WaitFor(api)
     .WaitFor(ui)
-    .WaitFor(fullSync)
-    .WaitFor(payroll)
     .WithExplicitStart();
 
 

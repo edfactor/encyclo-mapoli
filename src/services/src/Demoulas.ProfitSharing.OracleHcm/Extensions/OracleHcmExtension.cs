@@ -117,7 +117,8 @@ public static class OracleHcmExtension
         RegisterOracleHcmServices(builder.Services);
         ConfigureHttpClients(builder.Services);
 
-        builder.Services.AddHealthChecks().AddCheck<OracleHcmHealthCheck>("OracleHcm");
+        builder.Services.AddHealthChecks().AddCheck<OracleHcmHealthCheck>("OracleHcm")
+            .AddProcessAllocatedMemoryHealthCheck(maximumMegabytesAllocated: 1024);
         builder.AddProjectCachingServices();
         builder.AddOracleHcmMessaging();
 
@@ -180,11 +181,22 @@ public static class OracleHcmExtension
     {
         HttpResilienceOptions commonHttpOptions = new HttpResilienceOptions
         {
-            CircuitBreakerOptions = new HttpCircuitBreakerStrategyOptions { SamplingDuration = TimeSpan.FromMinutes(2) },
-            AttemptTimeoutOptions = new HttpTimeoutStrategyOptions { Timeout = TimeSpan.FromMinutes(1) },
-            TotalRequestTimeoutOptions = new HttpTimeoutStrategyOptions { Timeout = TimeSpan.FromMinutes(2) }
+            CircuitBreakerOptions = new HttpCircuitBreakerStrategyOptions
+            {
+                SamplingDuration = TimeSpan.FromMinutes(2),
+                MinimumThroughput = 10, // Add minimum throughput
+                FailureRatio = 0.5 // Add failure ratio
+            },
+            AttemptTimeoutOptions = new HttpTimeoutStrategyOptions
+            {
+                Timeout = TimeSpan.FromMinutes(1)
+            },
+            TotalRequestTimeoutOptions = new HttpTimeoutStrategyOptions
+            {
+                Timeout = TimeSpan.FromMinutes(2)
+            }
         };
-        
+
         services.AddHttpClient<AtomFeedClient>("AtomFeedSync", BuildOracleHcmAuthClient)
             .AddStandardResilienceHandler(options => ApplyResilienceOptions(options, commonHttpOptions));
 
