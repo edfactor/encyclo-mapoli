@@ -39,81 +39,81 @@ internal class DemographicsService : IDemographicsServiceInternal
         _requests = new ConcurrentQueue<DemographicsRequest>();
     }
 
-   /// <summary>
-   /// Asynchronously processes a stream of demographic requests and batches them for upsert operations.
-   /// </summary>
-   /// <param name="employees">
-   /// An asynchronous enumerable of <see cref="DemographicsRequest"/> objects representing the demographic data to be processed.
-   /// </param>
-   /// <param name="batchSize">
-   /// The maximum number of requests to process in a single batch. Defaults to <see cref="byte.MaxValue"/>.
-   /// </param>
-   /// <param name="cancellationToken">
-   /// A <see cref="CancellationToken"/> to observe while waiting for the task to complete. Defaults to <see cref="CancellationToken.None"/>.
-   /// </param>
-   /// <returns>
-   /// A <see cref="Task"/> that represents the asynchronous operation.
-   /// </returns>
-   /// <remarks>
-   /// This method enqueues incoming demographic requests and processes them in batches. 
-   /// Once the batch size is reached, the requests are upserted into the database.
-   /// </remarks>
-   /// <exception cref="OperationCanceledException">
-   /// Thrown if the operation is canceled via the provided <paramref name="cancellationToken"/>.
-   /// </exception>
-   public async Task AddDemographicsStreamAsync(IAsyncEnumerable<DemographicsRequest> employees, byte batchSize = byte.MaxValue,
-       CancellationToken cancellationToken = default)
-   {
-       const int throttleLimit = 10_000; // Max queue size for safety (configurable)
-       Dictionary<long, DemographicsRequest> batch = new Dictionary<long, DemographicsRequest>();
-       bool batchProcessed = false;
-       await foreach (DemographicsRequest employee in employees.WithCancellation(cancellationToken))
-       {
-           // Throttle queue size
-           while (_requests.Count >= throttleLimit)
-           {
-               await Task.Delay(50, cancellationToken); // Wait to prevent unbounded growth
-           }
+    /// <summary>
+    /// Asynchronously processes a stream of demographic requests and batches them for upsert operations.
+    /// </summary>
+    /// <param name="employees">
+    /// An asynchronous enumerable of <see cref="DemographicsRequest"/> objects representing the demographic data to be processed.
+    /// </param>
+    /// <param name="batchSize">
+    /// The maximum number of requests to process in a single batch. Defaults to <see cref="byte.MaxValue"/>.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A <see cref="CancellationToken"/> to observe while waiting for the task to complete. Defaults to <see cref="CancellationToken.None"/>.
+    /// </param>
+    /// <returns>
+    /// A <see cref="Task"/> that represents the asynchronous operation.
+    /// </returns>
+    /// <remarks>
+    /// This method enqueues incoming demographic requests and processes them in batches. 
+    /// Once the batch size is reached, the requests are upserted into the database.
+    /// </remarks>
+    /// <exception cref="OperationCanceledException">
+    /// Thrown if the operation is canceled via the provided <paramref name="cancellationToken"/>.
+    /// </exception>
+    public async Task AddDemographicsStreamAsync(IAsyncEnumerable<DemographicsRequest> employees, byte batchSize = byte.MaxValue,
+        CancellationToken cancellationToken = default)
+    {
+        const int throttleLimit = 5_000; // Max queue size for safety
+        Dictionary<long, DemographicsRequest> batch = new Dictionary<long, DemographicsRequest>();
+        bool batchProcessed = false;
+        await foreach (DemographicsRequest employee in employees.WithCancellation(cancellationToken))
+        {
+            // Throttle queue size
+            while (_requests.Count >= throttleLimit)
+            {
+                await Task.Delay(50, cancellationToken); // Wait to prevent unbounded growth
+            }
 
-           _requests.Enqueue(employee);
+            _requests.Enqueue(employee);
 
-           // Process batch when batchSize is reached during enqueue
-           if (_requests.Count >= batchSize)
-           {
-               while (_requests.TryDequeue(out DemographicsRequest? demoRequest))
-               {
-                   if (!batch.TryAdd(demoRequest.OracleHcmId, demoRequest))
-                   {
-                       _logger.LogError("Duplicate OracleHcmId: {OracleHcmId} found; skipping....", demoRequest.OracleHcmId);
-                   }
+            // Process batch when batchSize is reached during enqueue
+            if (_requests.Count >= batchSize)
+            {
+                while (_requests.TryDequeue(out DemographicsRequest? demoRequest))
+                {
+                    if (!batch.TryAdd(demoRequest.OracleHcmId, demoRequest))
+                    {
+                        _logger.LogError("Duplicate OracleHcmId: {OracleHcmId} found; skipping....", demoRequest.OracleHcmId);
+                    }
 
-                   if (batch.Count == batchSize)
-                   {
-                       break;
-                   }
-               }
+                    if (batch.Count == batchSize)
+                    {
+                        break;
+                    }
+                }
 
-               if (batch.Count > 0)
-               {
-                   batchProcessed = await ProcessBatch();
-               }
-           }
-       }
+                if (batch.Count > 0)
+                {
+                    batchProcessed = await ProcessBatch();
+                }
+            }
+        }
 
-       // Process any leftover requests in the batch
-       if (batch.Count > 0 && batchProcessed)
-       {
-           _ = await ProcessBatch();
-       }
+        // Process any leftover requests in the batch
+        if (batch.Count > 0 && batchProcessed)
+        {
+            _ = await ProcessBatch();
+        }
 
-       async Task<bool> ProcessBatch()
-       {
-           await UpsertDemographicsAsync(batch.Values, cancellationToken);
-           batchProcessed = true;
-           batch.Clear(); // Clear batch after processing
-           return batchProcessed;
-       }
-   }
+        async Task<bool> ProcessBatch()
+        {
+            await UpsertDemographicsAsync(batch.Values, cancellationToken);
+            batchProcessed = true;
+            batch.Clear(); // Clear batch after processing
+            return batchProcessed;
+        }
+    }
 
     /// <summary>
     /// Asynchronously inserts or updates a collection of demographic records in the database.
@@ -251,20 +251,20 @@ internal class DemographicsService : IDemographicsServiceInternal
                     {
                         DemographicHistory newHistoryRecord = DemographicHistory.FromDemographic(incomingEntity, existingEntity.Id);
                         DemographicHistory oldHistoryRecord = await context.DemographicHistories
-                            .Where(x => x.DemographicId == existingEntity.Id 
-                                        && DateTime.UtcNow >= x.ValidFrom 
+                            .Where(x => x.DemographicId == existingEntity.Id
+                                        && DateTime.UtcNow >= x.ValidFrom
                                         && DateTime.UtcNow < x.ValidTo)
                             .FirstAsync(cancellationToken: cancellationToken);
-                        
+
                         oldHistoryRecord.ValidTo = DateTime.UtcNow;
                         newHistoryRecord.ValidFrom = oldHistoryRecord.ValidTo;
                         context.DemographicHistories.Add(newHistoryRecord);
                     }
 
-                    
+
                 }
             }
-            
+
             // Save all changes to the database
             try
             {
@@ -274,7 +274,7 @@ internal class DemographicsService : IDemographicsServiceInternal
             {
                 _logger.LogCritical(e, "Failed to save batch: {DemographicsRequests}", demographicsRequests);
             }
-            
+
         }, cancellationToken);
     }
 

@@ -144,11 +144,11 @@ public static class OracleHcmExtension
     private static void RegisterOracleHcmServices(IServiceCollection services)
     {
         // General services
-        services.AddScoped<OracleEmployeeValidator>();
+        services.AddSingleton<OracleEmployeeValidator>();
         services.AddSingleton<EmployeeFullSyncJob>();
         services.AddSingleton<EmployeeDeltaSyncJob>();
         services.AddSingleton<PayrollSyncJob>();
-        services.AddScoped<DemographicsService>();
+        services.AddSingleton<DemographicsService>();
         
         // Mappers
         services.AddSingleton<DemographicMapper>();
@@ -158,8 +158,8 @@ public static class OracleHcmExtension
 
         // Internal services
         services.AddSingleton<IDemographicsServiceInternal, DemographicsService>();
-        services.AddScoped<IEmployeeSyncService, EmployeeSyncService>();
-        services.AddScoped<IJobFactory, OracleHcmJobFactory>();
+        services.AddSingleton<IEmployeeSyncService, EmployeeSyncService>();
+        services.AddSingleton<IJobFactory, OracleHcmJobFactory>();
         services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
 
         services.AddSingleton<IFakeSsnService, FakeSsnService>();
