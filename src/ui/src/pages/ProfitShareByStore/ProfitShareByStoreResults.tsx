@@ -41,6 +41,10 @@ const storeReportCategories: StoreReportCategory[] = [
 const ProfitShareByStoreResults = () => {
   const navigate = useNavigate();
 
+  const handleCategoryClick = (category: StoreReportCategory) => {
+    navigate(`/${category.destinationUrl}`);
+  };
+
   return (
     <Grid2
       container
@@ -66,7 +70,7 @@ const ProfitShareByStoreResults = () => {
             <InfoCard
               buttonDisabled={false}
               title={category.title}
-              handleClick={() => navigate(`/${category.destinationUrl}`)}
+              handleClick={() => handleCategoryClick(category)}
               data={category.data}
               valid={true}
             />
