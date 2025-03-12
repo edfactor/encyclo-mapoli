@@ -6,6 +6,7 @@ import { RootState } from "reduxstore/store";
 import { YearEndProfitSharingReportRequest } from "reduxstore/types";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetProfitShareReportColumns } from "./ProfitShareReportGridColumn";
+import { CAPTIONS } from "../../constants";
 
 interface ProfitShareReportGridSearchProps {
   initialSearchLoaded: boolean;
@@ -34,17 +35,17 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridSearchProps> = ({
 
   const onSearch = useCallback(async () => {
     const request: YearEndProfitSharingReportRequest = {
-      isYearEnd: true,
+      isYearEnd: false,
       minimumAgeInclusive: 18,
+      maximumAgeInclusive: 98,
       minimumHoursInclusive: 1000,
+      maximumHoursInclusive: 2000,
       includeActiveEmployees: true,
       includeInactiveEmployees: true,
-      includeEmployeesWithPriorProfitSharingAmounts: false,
-      includeEmployeesWithNoPriorProfitSharingAmounts: false,
+      includeEmployeesWithPriorProfitSharingAmounts: true,
+      includeEmployeesWithNoPriorProfitSharingAmounts: true,
       profitYear: yearEndProfitSharingReportQueryParams?.profitYear ?? 0,
       pagination: { skip: pageNumber * pageSize, take: pageSize },
-      maximumAgeInclusive: 0,
-      maximumHoursInclusive: 0,
       includeEmployeesTerminatedThisYear: false,
       includeTerminatedEmployees: false,
       includeBeneficiaries: false
@@ -66,11 +67,11 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridSearchProps> = ({
           <Typography
             variant="h2"
             sx={{ color: "#0258A5" }}>
-            {`PROFIT-ELIGIBLE REPORT (5)`}
+            {`${CAPTIONS.PROFIT_SHARE_REPORT} (${yearEndProfitSharingReport.response.results.length})`}
           </Typography>
         </div>
       )}
-      {!!yearEndProfitSharingReport && yearEndProfitSharingReport.response.results.length && (
+      {!!yearEndProfitSharingReport && (
         <DSMGrid
           preferenceKey={"ProfitShareReportGrid"}
           isLoading={isLoading}
