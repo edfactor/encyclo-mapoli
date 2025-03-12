@@ -18,7 +18,6 @@ import {
   ExecutiveHoursAndDollarsGrid,
   ExecutiveHoursAndDollarsQueryParams,
   ForfeituresAndPoints,
-  ForfeituresAndPointsDetail,
   ForfeituresAndPointsQueryParams,
   ForfeituresByAge,
   FrozenReportsByAgeRequestType,
