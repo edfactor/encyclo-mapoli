@@ -1,5 +1,5 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { yyyyMMDDToMMDDYYYY } from "smart-ui-library";
+import { agGridNumberToCurrency, yyyyMMDDToMMDDYYYY } from "smart-ui-library";
 import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
 
 export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
@@ -92,6 +92,44 @@ export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
       cellClass: "left-align",
       resizable: true,
       valueFormatter: (params) => (params.value ? yyyyMMDDToMMDDYYYY(params.value) : "")
+    },
+    {
+      headerName: "Store #",
+      field: "storeNumber",
+      colId: "storeNumber",
+      minWidth: 60,
+      headerClass: "right-align",
+      cellClass: "right-align",
+      resizable: true
+    },
+    {
+      headerName: "Hours",
+      field: "hoursCurrentYear",
+      colId: "hoursCurrentYear",
+      minWidth: 60,
+      headerClass: "right-align",
+      cellClass: "right-align",
+      resizable: true
+    },
+    {
+      headerName: "Balance",
+      field: "netBalance",
+      colId: "netBalance",
+      minWidth: 60,
+      headerClass: "right-align",
+      cellClass: "right-align",
+      resizable: true,
+      valueFormatter: agGridNumberToCurrency
+    },
+    {
+      headerName: "Income",
+      field: "incomeCurrentYear",
+      colId: "incomeCurrentYear",
+      minWidth: 60,
+      headerClass: "right-align",
+      cellClass: "right-align",
+      resizable: true,
+      valueFormatter: agGridNumberToCurrency
     }
   ];
 };
