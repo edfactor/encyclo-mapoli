@@ -1,4 +1,4 @@
-import { MenuItem, Select, TextField } from "@mui/material";
+import { MenuItem, Select, TextField, FormLabel } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
 import { useForm, Controller } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
@@ -69,11 +69,9 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
 
     const validateAndSubmit = handleSubmit((data) => {
         if (isValid) {
-
             if (onStoreChange && data.store) {
                 onStoreChange(data.store);
             }
-
         }
     });
 
@@ -107,9 +105,9 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
                         control={control}
                         render={({ field }) => (
                             <>
-                                <label htmlFor="store-select" className="block text-sm font-medium text-gray-700 mb-1">
+                                <FormLabel htmlFor="store-select" sx={{ display: 'block', marginBottom: '8px' }}>
                                     Store
-                                </label>
+                                </FormLabel>
                                 <Select
                                     id="store-select"
                                     {...field}
@@ -141,9 +139,9 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
                                 control={control}
                                 render={({ field }) => (
                                     <>
-                                        <label htmlFor="status-select" className="block text-sm font-medium text-gray-700 mb-1">
+                                        <FormLabel htmlFor="status-select">
                                             Employee Status
-                                        </label>
+                                        </FormLabel>
                                         <Select
                                             id="status-select"
                                             {...field}
@@ -170,9 +168,9 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
                                 control={control}
                                 render={({ field }) => (
                                     <>
-                                        <label htmlFor="badge-id" className="block text-sm font-medium text-gray-700 mb-1">
+                                        <FormLabel htmlFor="badge-id">
                                             Badge ID
-                                        </label>
+                                        </FormLabel>
                                         <TextField
                                             id="badge-id"
                                             {...field}
@@ -190,9 +188,9 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
                                 control={control}
                                 render={({ field }) => (
                                     <>
-                                        <label htmlFor="employee-name" className="block text-sm font-medium text-gray-700 mb-1">
+                                        <FormLabel htmlFor="employee-name">
                                             Employee Name
-                                        </label>
+                                        </FormLabel>
                                         <TextField
                                             id="employee-name"
                                             {...field}
