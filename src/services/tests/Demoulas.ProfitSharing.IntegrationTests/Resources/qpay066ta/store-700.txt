@@ -1,0 +1,13 @@
+QPAY066TA               PROFIT SHARING BREAKDOWN REPORT    DATE MAR 10, 2025  YEAR:   2024.0     PAGE:   00180
+
+   STORE  700
+
+BADGE #     EMPLOYEE NAME              BEGINNING     EARNINGS         CONT         FORF        DIST.       ENDING      V E S T E D E
+                                         BALANCE                                                          BALANCE       AMOUNT  %  C
+
+RETIRED - DRAWING PENSION
+
+     701269 BARNETT, RAYMOND           46,775.64       840.00                              30,000.00-   17,615.64    17,615.64 100 1
+     701250 SHAH, LINCOLN              32,527.25     1,540.00                               1,758.23-   32,309.02    32,309.02 100 1
+     701132 SONY, LEAH                 57,187.79     2,380.00                               9,600.00-   49,967.79    49,967.79 100 1
+

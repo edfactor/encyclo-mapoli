@@ -1,0 +1,22 @@
+
+
+ALL EMPLOYEES (BY REPORT SECTION)
+
+                   STR 1-140   700       701       800       801       802       900      TOTALS
+                   --------- --------- --------- --------- --------- --------- ---------  ------
+   100%   VESTED       2,672         3         0       972       180         0         0     3,827
+PARTIALLY VESTED       1,439         0         0       309         0         0         0     1,748
+    NOT   VESTED       1,022         0         0        63     1,586        95         0     2,766
+
+    GRAND TOTALS       5,133         3         0     1,344     1,766        95         0     8,341
+
+
+UNDER 21 EMPLOYEES (INCLUDED IN ABOVE TOTALS)
+
+   100%   VESTED           0         0         0         0         1         0         0         1
+PARTIALLY VESTED           3         0         0         0         0         0         3         0
+    NOT   VESTED         176         0         0         0         7         0         0       183
+
+ UNDER 21 TOTALS         179         0         0         0         8         0         0       187
+
+
