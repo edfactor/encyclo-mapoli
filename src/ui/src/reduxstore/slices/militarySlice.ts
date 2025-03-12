@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { MasterInquiryDetail, MasterInquiryResponseType, PagedReportResponse } from "reduxstore/types";
-
+import { MasterInquiryDetail, PagedReportResponse } from "reduxstore/types";
 
 export interface MilitaryState {
   militaryContributionsData: PagedReportResponse<MasterInquiryDetail> | null;
@@ -9,17 +8,14 @@ export interface MilitaryState {
 
 const initialState: MilitaryState = {
   militaryContributionsData: null,
-  error: null,
+  error: null
 };
 
 export const militarySlice = createSlice({
   name: "military",
   initialState,
   reducers: {
-    setMilitaryContributions: (
-      state, 
-      action: PayloadAction<PagedReportResponse<MasterInquiryDetail> | null>
-    ) => {
+    setMilitaryContributions: (state, action: PayloadAction<PagedReportResponse<MasterInquiryDetail> | null>) => {
       if (action.payload) {
         state.militaryContributionsData = action.payload;
         state.error = null;
@@ -38,10 +34,6 @@ export const militarySlice = createSlice({
   }
 });
 
-export const {
-  setMilitaryContributions,
-  clearMilitaryContributions,
-  setMilitaryError
-} = militarySlice.actions;
+export const { setMilitaryContributions, clearMilitaryContributions, setMilitaryError } = militarySlice.actions;
 
 export default militarySlice.reducer;

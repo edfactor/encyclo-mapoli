@@ -31,7 +31,7 @@ const Login = () => {
         }
       }
     }
-  }, [authState, oktaAuth]);
+  }, [authState, dispatch, oktaAuth, oktaEnabled]);
   /*
   useEffect(() => {
     const logout = async () => oktaAuth.signOut({ postLogoutRedirectUri });

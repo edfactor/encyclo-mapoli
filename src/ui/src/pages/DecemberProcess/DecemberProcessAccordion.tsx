@@ -1,13 +1,11 @@
-import { FilterList } from "@mui/icons-material";
 import { Button, Divider, Stack, Typography } from "@mui/material";
-import Grid2 from '@mui/material/Grid2';
+import Grid2 from "@mui/material/Grid2";
+import DSMCollapsedAccordion from "components/DSMCollapsedAccordion";
 import DuplicateNamesAndBirthdaysGrid from "pages/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdaysGrid";
 import DuplicateSSNsOnDemographicsGrid from "pages/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographicsGrid";
-import MasterInquiryGrid from "pages/MasterInquiry/MasterInquiryGrid";
-import MasterInquirySearchFilter from "pages/MasterInquiry/MasterInquirySearchFilter";
-import EmployeesOnMilitaryLeave from "pages/EmployeesOnMilitaryLeave/EmployeesOnMilitaryLeave";
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router";
 import {
   useLazyGetDemographicBadgesNotInPayprofitQuery,
   useLazyGetDuplicateNamesAndBirthdaysQuery,
@@ -15,20 +13,14 @@ import {
   useLazyGetNegativeEVTASSNQuery
 } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMAccordion, Page } from "smart-ui-library";
-import NegativeETVA from "./NegativeETVA";
-import { useNavigate } from "react-router";
-import MasterInquiryEmployeeDetails from "pages/MasterInquiry/MasterInquiryEmployeeDetails";
-import TerminationGrid from "pages/Termination/TerminationGrid";
-import TerminationSearchFilter from "pages/Termination/TerminationSearchFilter";
-import DistributionsAndForfeituresGrid from "pages/DistributionsAndForfeitures/DistributionAndForfeituresGrid";
-import DistributionsAndForfeituresSearchFilter from "pages/DistributionsAndForfeitures/DistributionAndForfeituresSearchFilter";
-import DSMCollapsedAccordion from "components/DSMCollapsedAccordion";
+import { Page } from "smart-ui-library";
 import { MENU_LABELS } from "../../constants";
+import NegativeETVA from "./NegativeETVA";
 
 const DecemberProcessAccordion = () => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [triggerETVASearch, { isFetching: isFetchingETVA }] = useLazyGetNegativeEVTASSNQuery();
+  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [triggerPayrollDupeSsnsOnDemographics, { isFetching: isFetchingPayRollDupeSsns }] =
     useLazyGetDuplicateSSNsQuery();
   const [triggerDemographicBadgesNotInPayprofit, { isFetching: isfetchingDemographicBadges }] =
@@ -47,14 +39,21 @@ const DecemberProcessAccordion = () => {
       triggerDemographicBadgesNotInPayprofit({ pagination: { take: 25, skip: 0 } });
       triggerDuplicateNamesAndBirthdays({ profitYear: 2023, pagination: { take: 25, skip: 0 } });
     }
-  }, [hasToken]);
+  }, [
+    hasToken,
+    triggerDemographicBadgesNotInPayprofit,
+    triggerDuplicateNamesAndBirthdays,
+    triggerPayrollDupeSsnsOnDemographics
+  ]);
 
   const navigate = useNavigate();
 
   return (
     <Page label={MENU_LABELS.DECEMBER_ACTIVITIES}>
       <Grid2 container>
-        <Grid2 size={{ xs: 12 }} width={"100%"}>
+        <Grid2
+          size={{ xs: 12 }}
+          width={"100%"}>
           <Divider />
         </Grid2>
 
@@ -76,7 +75,10 @@ const DecemberProcessAccordion = () => {
               <DuplicateSSNsOnDemographicsGrid />
             </Grid2>
             <Grid2 width="100%">
-              <DuplicateNamesAndBirthdaysGrid />
+              <DuplicateNamesAndBirthdaysGrid
+                initialSearchLoaded={initialSearchLoaded}
+                setInitialSearchLoaded={setInitialSearchLoaded}
+              />
             </Grid2>
             <Grid2 width="100%">
               <Stack paddingX="24px">

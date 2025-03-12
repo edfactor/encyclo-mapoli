@@ -1,5 +1,5 @@
 import { Typography, CircularProgress } from "@mui/material";
-import Grid2 from '@mui/material/Grid2';
+import Grid2 from "@mui/material/Grid2";
 import React, { useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
@@ -48,13 +48,12 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
     if (hasToken) {
       fetchFrozenState(undefined, false);
     }
-  }, [hasToken]);
-
+  }, [fetchFrozenState, hasToken]);
 
   useEffect(() => {
     if (hasToken && frozenState?.profitYear) {
       const profitYear = frozenState.profitYear;
-      
+
       triggerBalanceSearch(
         {
           profitYear: profitYear,
@@ -155,7 +154,14 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
         false
       );
     }
-  }, [hasToken, frozenState]);
+  }, [
+    hasToken,
+    frozenState,
+    triggerBalanceSearch,
+    triggerContributionsSearch,
+    triggerDistributionsSearch,
+    triggerForfeituresSearch
+  ]);
 
   const distributionsTotalChecksOut = useMemo(() => {
     if (!distributionsByAgeTotal || !distributionsByAgeFullTime || !distributionsByAgePartTime) return false;
@@ -263,7 +269,7 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
         spacing={"24px"}
         paddingLeft={"24px"}
         width={"100%"}>
-        <Grid2 size={{ xs: 12, md: 6, lg: 6 }} >
+        <Grid2 size={{ xs: 12, md: 6, lg: 6 }}>
           {!!distributionsByAgeFullTime && !!distributionsByAgeFullTime && !!distributionsByAgePartTime && (
             <FlexibleInfoCard
               buttonDisabled={disableButtons}
@@ -329,7 +335,7 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
             />
           )}
         </Grid2>
-        <Grid2 size={{ xs: 12, md: 6, lg: 6 }} >
+        <Grid2 size={{ xs: 12, md: 6, lg: 6 }}>
           {!!contributionsByAgeTotal && !!contributionsByAgeFullTime && !!contributionsByAgePartTime && (
             <FlexibleInfoCard
               buttonDisabled={disableButtons}
@@ -353,7 +359,7 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
             />
           )}
         </Grid2>
-        <Grid2 size={{ xs: 12, md: 6, lg: 6 }} >
+        <Grid2 size={{ xs: 12, md: 6, lg: 6 }}>
           {!!forfeituresByAgeTotal && !!forfeituresByAgePartTime && !!forfeituresByAgePartTime && (
             <FlexibleInfoCard
               buttonDisabled={disableButtons}
@@ -377,7 +383,7 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
             />
           )}
         </Grid2>
-        <Grid2 size={{ xs: 12, md: 6, lg: 6 }} >
+        <Grid2 size={{ xs: 12, md: 6, lg: 6 }}>
           {!!balanceByAgeTotal && !!balanceByAgePartTime && !!balanceByAgeFullTime && (
             <FlexibleInfoCard
               buttonDisabled={disableButtons}
@@ -436,7 +442,10 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
         </Grid2>
       </Grid2>
       <div style={{ display: "grid", verticalAlign: "middle", height: "100%" }}>
-        <Grid2 size={{ xs: 2, md: 1, lg: 0.5 }} paddingY={"48px"} justifySelf={"center"}>
+        <Grid2
+          size={{ xs: 2, md: 1, lg: 0.5 }}
+          paddingY={"48px"}
+          justifySelf={"center"}>
           <CircularProgress size={"100%"} />
         </Grid2>
       </div>

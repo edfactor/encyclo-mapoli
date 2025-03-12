@@ -1,17 +1,16 @@
+import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
-import { useForm, Controller } from "react-hook-form";
-import { useLazyGetNegativeEVTASSNQuery } from "reduxstore/api/YearsEndApi";
-import { SearchAndReset } from "smart-ui-library";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
+import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
+import { useLazyGetNegativeEVTASSNQuery } from "reduxstore/api/YearsEndApi";
 import {
   clearNegativeEtvaForSSNsOnPayprofit,
   clearNegativeEtvaForSSNsOnPayprofitQueryParams,
   setNegativeEtvaForSSNsOnPayprofitQueryParams
 } from "reduxstore/slices/yearsEndSlice";
-import NegativeEtvaForSSNsOnPayprofit from "./NegativeEtvaForSSNsOnPayprofit";
+import { SearchAndReset } from "smart-ui-library";
+import * as yup from "yup";
 
 interface NegativeEtvaForSSNsOnPayprofitSearch {
   profitYear: number;

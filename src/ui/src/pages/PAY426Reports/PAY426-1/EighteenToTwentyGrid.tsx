@@ -83,7 +83,7 @@ const EighteenToTwentyGrid = () => {
         <Typography
           variant="h2"
           sx={{ color: "#0258A5" }}>
-          {`PROFIT-ELIGIBLE REPORT (${data?.response?.results?.length || 0})`}
+          {`PROFIT-ELIGIBLE REPORT (${data?.response?.total || 0})`}
         </Typography>
       </div>
       <DSMGrid

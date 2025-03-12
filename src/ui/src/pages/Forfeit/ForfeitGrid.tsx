@@ -57,7 +57,7 @@ const ForfeitGrid = () => {
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`PROFIT SHARE FORFEIT [PAY443] (${forfeituresAndPoints?.response.results.length || 0})`}
+              {`PROFIT SHARE FORFEIT [PAY443] (${forfeituresAndPoints?.response.total || 0})`}
             </Typography>
           </div>
           <DSMGrid
