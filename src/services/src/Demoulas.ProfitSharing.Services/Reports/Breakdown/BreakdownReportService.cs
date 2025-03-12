@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -7,6 +8,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Reports.Breakdown;
@@ -29,33 +31,57 @@ public class BreakdownReportService : IBreakdownService
 
     public async Task<ReportResponseBase<MemberYearSummaryDto>> GetActiveMembersByStore(BreakdownByStoreRequest breakdownByStoreRequest, CancellationToken cancellationToken)
     {
-        List<MemberYearSummaryDto> response = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        List<MemberYearSummaryDto> employees = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             CalendarResponseDto calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(breakdownByStoreRequest.ProfitYear, cancellationToken);
             short priorYear = (short)(breakdownByStoreRequest.ProfitYear - 1);
             DateOnly birthDate21 = calInfo.FiscalEndDate.AddYears(-21);
 
-            List<PayProfit> employees = await ctx.PayProfits
+            IQueryable<PayProfit> employeesBase = ctx.PayProfits
                 .Include(p => p.Demographic)
                 .ThenInclude(demographic => demographic!.ContactInfo)
-                .Where(pp => pp.ProfitYear == breakdownByStoreRequest.ProfitYear)
-                .Where(pp => !breakdownByStoreRequest.Under21Only || pp.Demographic!.DateOfBirth > birthDate21)
+                .Where(pp => pp.ProfitYear == breakdownByStoreRequest.ProfitYear);
+            // .Where(pp => pp.Demographic!.StoreNumber < 3)
+
+            // This branching based on report requested is going to get more complex as more report types are added,
+            // it will likely graduate to a switch statment, or some other more sophistiacated form of dispatch.
+            if (breakdownByStoreRequest.StoreNumber == null)
+            {
+                employeesBase = employeesBase.Where(pp => pp.Demographic!.EmploymentStatusId == EmploymentStatus.Constants.Active
+                                                          && pp.Demographic.StoreNumber < StoreTypes.PsPensionRetired
+                                                          && pp.EnrollmentId > 0);
+                if (breakdownByStoreRequest.Under21Only)
+                {
+                    employeesBase = employeesBase.Where(pp => pp.Demographic!.DateOfBirth > birthDate21);
+                }
+            }
+            else if (breakdownByStoreRequest.StoreNumber == StoreTypes.PsPensionRetired)
+            {
+                employeesBase = employeesBase.Where(pp => pp.Demographic!.TerminationCodeId == TerminationCode.Constants.RetiredReceivingPension);
+            }
+            else
+            {
+                throw new BadHttpRequestException("Unexpected store number encountered.");
+            }
+
+            List<PayProfit> employees = await employeesBase
                 .ToListAsync(cancellationToken);
+
             HashSet<int> employeeSsns = employees.Select(pp => pp.Demographic!.Ssn).ToHashSet();
 
-            Dictionary<int, int?> employeeVestingRatios = await _totalService
+            Dictionary<int, decimal> employeeVestingRatios = await _totalService
                 .GetVestingRatio(ctx, breakdownByStoreRequest.ProfitYear, calInfo.FiscalEndDate)
                 .Where(vr => employeeSsns.Contains(vr.Ssn ?? 0))
-                .ToDictionaryAsync(vr => vr.Ssn ?? 0, vr => vr.Ssn, cancellationToken);
+                .ToDictionaryAsync(vr => vr.Ssn ?? 0, vr => vr.Ratio, cancellationToken);
 
             if (employeeVestingRatios.ContainsKey(0))
             {
                 throw new InvalidOperationException("Unexpected 0 SSN encountered.");
             }
 
-            Dictionary<int, decimal?> endingBalanceLastYearBySsn = await _totalService.GetTotalBalanceSet(ctx, priorYear)
+            Dictionary<int, decimal> endingBalanceLastYearBySsn = await _totalService.GetTotalBalanceSet(ctx, priorYear)
                 .Where(tbs => employeeSsns.Contains(tbs.Ssn))
-                .ToDictionaryAsync(tbs => tbs.Ssn, tbs => tbs.Total, cancellationToken);
+                .ToDictionaryAsync(tbs => tbs.Ssn, tbs => tbs.Total ?? 0, cancellationToken);
 
             Dictionary<int, InternalProfitDetailDto> txnsForProfitYear = await TotalService.GetTransactionsBySsnForProfitYear(ctx, breakdownByStoreRequest.ProfitYear)
                 .Where(txns => employeeSsns.Contains(txns.Ssn))
@@ -64,10 +90,11 @@ public class BreakdownReportService : IBreakdownService
             return employees
                 .Select(employee =>
                 {
-                    int vestingRatio = employeeVestingRatios.GetValueOrDefault(employee.Demographic!.Ssn) ?? 0;
-                    decimal beginningBalance = endingBalanceLastYearBySsn.GetValueOrDefault(employee.Demographic!.Ssn) ?? 0;
+                    decimal vestingRatio = employeeVestingRatios.GetValueOrDefault(employee.Demographic!.Ssn);
+                    decimal beginningBalance = endingBalanceLastYearBySsn.GetValueOrDefault(employee.Demographic!.Ssn);
                     Demographic d = employee.Demographic!;
                     InternalProfitDetailDto txns = txnsForProfitYear.GetValueOrDefault(employee.Demographic!.Ssn) ?? new InternalProfitDetailDto();
+                    short employeeRank = EmployeeSortRank(breakdownByStoreRequest.StoreNumber, d.DepartmentId, d.PayClassificationId);
 
                     return new MemberYearSummaryDto
                     {
@@ -76,7 +103,7 @@ public class BreakdownReportService : IBreakdownService
                         Ssn = d.Ssn.MaskSsn(),
                         PayFrequencyId = d.PayFrequencyId,
                         EnrollmentId = employee.EnrollmentId,
-                        StoreNumber = d.StoreNumber,
+                        StoreNumber = breakdownByStoreRequest.StoreNumber == null ? d.StoreNumber : breakdownByStoreRequest.StoreNumber ?? 0,
                         DepartmentId = d.DepartmentId,
                         PayClassificationId = d.PayClassificationId,
                         BeginningBalance = beginningBalance,
@@ -90,31 +117,64 @@ public class BreakdownReportService : IBreakdownService
                                         txns.Distribution + txns.BeneficiaryAllocation) * vestingRatio,
                         VestedPercentage = vestingRatio * 100,
                         EmploymentStatusId = d.EmploymentStatusId,
-                        EmployeeRank = (short)EmployeeRank(employee.Demographic.DepartmentId, employee.Demographic.PayClassificationId)
+                        EmployeeCategory = EmployeeCategory(breakdownByStoreRequest.StoreNumber, employeeRank),
+                        EmployeeSortRank = employeeRank // This may not need to go the client, but I think its presence helps explain that ordering has intention
                     };
                 })
-                .OrderBy(s => s.StoreNumber).ThenBy(s => s.EmployeeRank).ThenBy(s => s.FullName)
+                .OrderBy(s => s.StoreNumber)
+                .ThenBy(s => s.EmployeeSortRank)
+                // NOTE: Sort using same character handling that READY uses (ie "Mc" sorts after "ME") aka the Ordinal sort.
+                // Failure to use this sort, causes READY and SMART reports to not match - tears.
+                .ThenBy(s => s.FullName, StringComparer.Ordinal)
                 .ToList();
         });
 
+        // This post filtering is slightly odd, but the idea is to keep the main member code working for all stores.   As more breakdown reports are added, this will evolve.
+        if (!breakdownByStoreRequest.Under21Only)
+        {
+            employees = employees.Where(e => !(e is { BeginningBalance: 0, EndingBalance: 0 })).ToList();
+        }
+
         // This report is broken down by store, so pagination is TBD (as you do not want to split up a store.)
         // We currently have no pagination for this report, so we are just returning the full list.
-        PaginatedResponseDto<MemberYearSummaryDto> paginatedResponseDto = new() { Results = response, Total = response.Count };
+        // This strategy will be revisited
+        PaginatedResponseDto<MemberYearSummaryDto> paginatedResponseDto = new() { Results = employees, Total = employees.Count };
+        
         return new ReportResponseBase<MemberYearSummaryDto>
         {
             ReportDate = DateTimeOffset.Now, ReportName = $"Breakdown Report for {breakdownByStoreRequest.ProfitYear}", Response = paginatedResponseDto
         };
     }
 
-    private static int EmployeeRank(byte departmentId, byte payClassificationId)
+    private static string EmployeeCategory(short? requestedStoreNumber, short employeeRank)
     {
-        // Not sure if we need anything other than the 1999 rank for the regular associates, and then another number for managers,
-        // but for now we are holding on to this until we finish the breakdown report work, at which point it should be clear if
-        // this amount of ordering specificity is required.
-        //
-        // This ranks the managers above the employees.  Search for " 120 " in,
+        if (requestedStoreNumber == StoreTypes.PsPensionRetired)
+        {
+            return "RETIRED - DRAWING PENSION";
+        }
+
+        if (employeeRank == ASSOCIATE_SORT_RANK_1999)
+        {
+            return "ASSOCIATES";
+        }
+
+        return "STORE MANAGEMENT";
+    }
+
+    public readonly static short ASSOCIATE_SORT_RANK_1999 = 1999;
+
+    private static short EmployeeSortRank(short? requestedStoreNumber, byte departmentId, byte payClassificationId)
+    {
+        if (requestedStoreNumber != null)
+        {
+            return 1; // Specific "Virtual Stores" dont do categories. right?
+        }
+        
+
+        // the managers have a sort order used in the reports which is reflected in this expression.
+        // The source for this ranking can be found in the cobol link below.  Search for " 120 " in,
         // https://bitbucket.org/demoulas/hpux/raw/fcd54cd50e1660f050b23a1f5ae44799458b51c0/iqs-source/QPAY066TA.pco
-        return departmentId == Department.Constants.Grocery && payClassificationId == PayClassification.Constants.Manager ? 10
+        return (short)(departmentId == Department.Constants.Grocery && payClassificationId == PayClassification.Constants.Manager ? 10
             : departmentId == Department.Constants.Grocery && payClassificationId == PayClassification.Constants.AssistantManager ? 20
             : departmentId == Department.Constants.Grocery && payClassificationId == PayClassification.Constants.Merchandiser ? 30
             : departmentId == Department.Constants.Grocery && payClassificationId == PayClassification.Constants.FrontEndManager ? 40
@@ -126,6 +186,6 @@ public class BreakdownReportService : IBreakdownService
             : departmentId == Department.Constants.Dairy && payClassificationId == PayClassification.Constants.Manager ? 100
             : departmentId == Department.Constants.Bakery && payClassificationId == PayClassification.Constants.Manager ? 110
             : departmentId == Department.Constants.BeerAndWine && payClassificationId == PayClassification.Constants.Manager ? 120
-            : 1999 /* Regular Associate */;
+            : ASSOCIATE_SORT_RANK_1999);
     }
 }
