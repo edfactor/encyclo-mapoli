@@ -213,20 +213,15 @@ public class CleanupReportService : ICleanupReportService
                 {
                     dupNameSlashDateOfBirth = ctx.Demographics
                         .Include(d=> d.ContactInfo)
-                        .Select(d => new DemographicMatchDto
-                        {
-                            FullName = d.ContactInfo.FullName!,
-                            DateOfBirth = d.DateOfBirth,
-                            NameDistance = 0 // Default value since inline SQL isn't supported
-                        });
+                        .Select(d => new DemographicMatchDto { FullName =  d.ContactInfo.FullName! });
                 }
                 else
                 {
                     string dupQuery =
-                        @"SELECT p1.Id, p1.FULL_NAME as FullName, p1.DATE_OF_BIRTH as DateOfBirth,  UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) AS NameDistance
-            FROM DEMOGRAPHIC p1
-            JOIN DEMOGRAPHIC p2
-                ON p1.Id < p2.Id  -- Avoid self-joins and duplicate pairs
+                        @"SELECT p1.FULL_NAME as FullName
+FROM DEMOGRAPHIC p1
+         JOIN DEMOGRAPHIC p2
+              ON p1.Id < p2.Id  -- Avoid self-joins and duplicate pairs
                   AND UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) < 2  -- Name similarity threshold
                   AND SOUNDEX(p1.FULL_NAME) = SOUNDEX(p2.FULL_NAME)  -- Phonetic similarity
                   AND (
@@ -234,11 +229,11 @@ public class CleanupReportService : ICleanupReportService
                          OR ABS(TRUNC(p1.DATE_OF_BIRTH) - TRUNC(p2.DATE_OF_BIRTH)) <= 3  -- Allow 3-day difference
                          OR EXTRACT(YEAR FROM p1.DATE_OF_BIRTH) = EXTRACT(YEAR FROM p2.DATE_OF_BIRTH)  -- Same birth year
                      )
-            union all
-            SELECT p2.Id, p2.FULL_NAME as FullName, p2.DATE_OF_BIRTH as DateOfBirth,  UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) AS NameDistance
-            FROM DEMOGRAPHIC p1
-            JOIN DEMOGRAPHIC p2
-                ON p1.Id < p2.Id  -- Avoid self-joins and duplicate pairs
+union all
+SELECT p2.FULL_NAME as FullName
+FROM DEMOGRAPHIC p1
+         JOIN DEMOGRAPHIC p2
+              ON p1.Id < p2.Id  -- Avoid self-joins and duplicate pairs
                   AND UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) < 2  -- Name similarity threshold
                   AND SOUNDEX(p1.FULL_NAME) = SOUNDEX(p2.FULL_NAME)  -- Phonetic similarity
                   AND (
@@ -253,7 +248,7 @@ public class CleanupReportService : ICleanupReportService
 
                 var names = await dupNameSlashDateOfBirth
                     .Where(d => !string.IsNullOrEmpty(d.FullName))
-                    .Select(d => d.FullName)
+                    .Select(d=> d.FullName)
                     .ToHashSetAsync(cancellationToken);
 
                 var query = from dem in ctx.Demographics
