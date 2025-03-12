@@ -43,23 +43,23 @@ export interface YearsEndState {
   additionalExecutivesGrid: PagedReportResponse<ExecutiveHoursAndDollars> | null;
   balanceByAgeFullTime: BalanceByAge | null;
   balanceByAgePartTime: BalanceByAge | null;
-  balanceByAgeTotal: BalanceByAge | null;
   balanceByAgeQueryParams: BaseQueryParams | null;
+  balanceByAgeTotal: BalanceByAge | null;
   balanceByYearsFullTime: BalanceByAge | null;
   balanceByYearsPartTime: BalanceByAge | null;
-  balanceByYearsTotal: BalanceByAge | null;
   balanceByYearsQueryParams: BaseQueryParams | null;
+  balanceByYearsTotal: BalanceByAge | null;
   contributionsByAgeFullTime: ContributionsByAge | null;
   contributionsByAgePartTime: ContributionsByAge | null;
-  contributionsByAgeTotal: ContributionsByAge | null;
   contributionsByAgeQueryParams: BaseQueryParams | null;
+  contributionsByAgeTotal: ContributionsByAge | null;
   demographicBadges: PagedReportResponse<DemographicBadgesNotInPayprofit> | null;
   distributionsAndForfeitures: PagedReportResponse<DistributionsAndForfeitures> | null;
   distributionsAndForfeituresQueryParams: DistributionsAndForfeituresQueryParams | null;
   distributionsByAgeFullTime: ProfitSharingDistributionsByAge | null;
   distributionsByAgePartTime: ProfitSharingDistributionsByAge | null;
-  distributionsByAgeTotal: ProfitSharingDistributionsByAge | null;
   distributionsByAgeQueryParams: BaseQueryParams | null;
+  distributionsByAgeTotal: ProfitSharingDistributionsByAge | null;
   duplicateNamesAndBirthdays: PagedReportResponse<DuplicateNameAndBirthday> | null;
   duplicateNamesAndBirthdaysQueryParams: BaseQueryParams | null;
   duplicateSSNsData: PagedReportResponse<DuplicateSSNDetail> | null;
@@ -69,24 +69,24 @@ export interface YearsEndState {
   employeeWagesForYearQueryParams: BaseQueryParams | null;
   executiveHoursAndDollars: PagedReportResponse<ExecutiveHoursAndDollars> | null;
   executiveHoursAndDollarsGrid: ExecutiveHoursAndDollarsGrid | null;
-  executiveRowsSelected: ExecutiveHoursAndDollars[] | null;
   executiveHoursAndDollarsQueryParams: ExecutiveHoursAndDollarsQueryParams | null;
-  forfeituresByAgeFullTime: ForfeituresByAge | null;
-  forfeituresByAgePartTime: ForfeituresByAge | null;
-  forfeituresByAgeTotal: ForfeituresByAge | null;
+  executiveRowsSelected: ExecutiveHoursAndDollars[] | null;
   forfeituresAndPoints: ForfeituresAndPoints | null;
   forfeituresAndPointsQueryParams: ForfeituresAndPointsQueryParams | null;
+  forfeituresByAgeFullTime: ForfeituresByAge | null;
+  forfeituresByAgePartTime: ForfeituresByAge | null;
+  forfeituresByAgeQueryParams: BaseQueryParams | null;
+  forfeituresByAgeTotal: ForfeituresByAge | null;
   masterInquiryData: MasterInquiryResponseType | null;
   masterInquiryEmployeeDetails: EmployeeDetails | null;
   masterInquiryRequestParams: MasterInquirySearch | null;
   militaryAndRehire: PagedReportResponse<EmployeesOnMilitaryLeaveResponse> | null;
-  militaryAndRehireQueryParams: ProfitAndReportingQueryParams | null;
-  militaryAndRehireProfitSummaryQueryParams: ProfitAndReportingQueryParams | null;
-  forfeituresByAgeQueryParams: BaseQueryParams | null;
   militaryAndRehireEntryAndModification: EmployeeDetails | null;
   militaryAndRehireForfeitures: PagedReportResponse<MilitaryAndRehireForfeiture> | null;
   militaryAndRehireForfeituresQueryParams: ProfitAndReportingQueryParams | null;
   militaryAndRehireProfitSummary: PagedReportResponse<MilitaryAndRehireProfitSummary> | null;
+  militaryAndRehireProfitSummaryQueryParams: ProfitAndReportingQueryParams | null;
+  militaryAndRehireQueryParams: ProfitAndReportingQueryParams | null;
   missingCommaInPYName: PagedReportResponse<MissingCommasInPYName> | null;
   negativeEtvaForSSNsOnPayprofit: PagedReportResponse<NegativeEtvaForSSNsOnPayProfit> | null;
   negativeEtvaForSSNsOnPayprofitParams: BaseQueryParams | null;
@@ -655,104 +655,104 @@ export const {
   clearAdditionalExecutivesChosen,
   clearAdditionalExecutivesGrid,
   clearBalanceByAge,
+  clearBalanceByAgeQueryParams,
   clearBalanceByYears,
+  clearBalanceByYearsQueryParams,
   clearContributionsByAge,
+  clearContributionsByAgeQueryParams,
   clearDemographicBadgesNotInPayprofitData,
   clearDistributionsAndForfeitures,
+  clearDistributionsAndForfeituresQueryParams,
   clearDistributionsByAge,
+  clearDistributionsByAgeQueryParams,
   clearDuplicateNamesAndBirthdays,
+  clearDuplicateNamesAndBirthdaysQueryParams,
   clearDuplicateSSNsData,
   clearEligibleEmployees,
   clearEligibleEmployeesQueryParams,
   clearEmployeesOnMilitaryLeaveDetails,
+  clearEmployeesOnMilitaryLeaveDetailsQueryParams,
+  clearEmployeeWagesForYearQueryParams,
   clearExecutiveHoursAndDollars,
   clearExecutiveHoursAndDollarsGridRows,
+  clearExecutiveHoursAndDollarsQueryParams,
   clearExecutiveRowsSelected,
+  clearForfeituresAndPoints,
+  clearForfeituresAndPointsQueryParams,
   clearForfeituresByAge,
+  clearForfeituresByAgeQueryParams,
   clearMasterInquiryData,
+  clearMasterInquiryRequestParams,
   clearMilitaryAndRehireForfeituresDetails,
+  clearMilitaryAndRehireForfeituresQueryParams,
   clearMilitaryAndRehireProfitSummaryDetails,
+  clearMilitaryAndRehireProfitSummaryQueryParams,
+  clearMissingCommaInPYName,
   clearNegativeEtvaForSSNsOnPayprofit,
+  clearNegativeEtvaForSSNsOnPayprofitQueryParams,
   clearProfitEdit,
   clearProfitMasterApply,
   clearProfitMasterRevert,
   clearProfitUpdate,
   clearTermination,
+  clearTerminationQueryParams,
+  clearVestedAmountsByAgeQueryParams,
   clearYearEndProfitSharingReport,
+  clearYearEndProfitSharingReportQueryParams,
   removeExecutiveHoursAndDollarsGridRow,
   setAdditionalExecutivesChosen,
   setAdditionalExecutivesGrid,
   setBalanceByAge,
+  setBalanceByAgeQueryParams,
   setBalanceByYears,
+  setBalanceByYearsQueryParams,
   setContributionsByAge,
-  setEmployeesOnMilitaryLeaveDetailsQueryParams,
-  clearEmployeesOnMilitaryLeaveDetailsQueryParams,
+  setContributionsByAgeQueryParams,
   setDemographicBadgesNotInPayprofitData,
   setDistributionsAndForfeitures,
+  setDistributionsAndForfeituresQueryParams,
   setDistributionsByAge,
+  setDistributionsByAgeQueryParams,
   setDuplicateNamesAndBirthdays,
+  setDuplicateNamesAndBirthdaysQueryParams,
   setDuplicateSSNsData,
   setEligibleEmployees,
   setEligibleEmployeesQueryParams,
   setEmployeesOnMilitaryLeaveDetails,
+  setEmployeesOnMilitaryLeaveDetailsQueryParams,
   setEmployeeWagesForYear,
+  setEmployeeWagesForYearQueryParams,
   setExecutiveHoursAndDollars,
   setExecutiveHoursAndDollarsGridYear,
+  setExecutiveHoursAndDollarsQueryParams,
   setExecutiveRowsSelected,
+  setForfeituresAndPoints,
+  setForfeituresAndPointsQueryParams,
   setForfeituresByAge,
-  setMasterInquiryData,
-  setMilitaryAndRehireForfeituresDetails,
   setForfeituresByAgeQueryParams,
-  clearForfeituresByAgeQueryParams,
+  setMasterInquiryData,
+  setMasterInquiryRequestParams,
+  setMilitaryAndRehireForfeituresDetails,
+  setMilitaryAndRehireForfeituresQueryParams,
   setMilitaryAndRehireProfitSummaryDetails,
+  setMilitaryAndRehireProfitSummaryQueryParams,
   setMissingCommaInPYName,
   setNegativeEtvaForSSNsOnPayprofit,
+  setNegativeEtvaForSSNsOnPayprofitQueryParams,
   setProfitEdit,
   setProfitEditLoading,
   setProfitMasterApply,
   setProfitMasterApplyLoading,
   setProfitMasterRevert,
-  clearMissingCommaInPYName,
   setProfitMasterRevertLoading,
   setProfitUpdate,
   setProfitUpdateLoading,
   setTermination,
-  setVestedAmountByAge,
-  setYearEndProfitSharingReport,
-  updateExecutiveHoursAndDollarsGridRow,
-  setNegativeEtvaForSSNsOnPayprofitQueryParams,
-  clearNegativeEtvaForSSNsOnPayprofitQueryParams,
-  setBalanceByAgeQueryParams,
-  clearBalanceByAgeQueryParams,
-  setDistributionsByAgeQueryParams,
-  clearDistributionsByAgeQueryParams,
-  setContributionsByAgeQueryParams,
-  clearContributionsByAgeQueryParams,
-  setVestedAmountsByAgeQueryParams,
-  clearVestedAmountsByAgeQueryParams,
-  clearEmployeeWagesForYearQueryParams,
-  setEmployeeWagesForYearQueryParams,
   setTerminationQueryParams,
-  clearTerminationQueryParams,
-  setBalanceByYearsQueryParams,
-  clearBalanceByYearsQueryParams,
-  setMasterInquiryRequestParams,
-  clearMasterInquiryRequestParams,
-  setDuplicateNamesAndBirthdaysQueryParams,
-  clearDuplicateNamesAndBirthdaysQueryParams,
+  setVestedAmountByAge,
+  setVestedAmountsByAgeQueryParams,
+  setYearEndProfitSharingReport,
   setYearEndProfitSharingReportQueryParams,
-  clearYearEndProfitSharingReportQueryParams,
-  setDistributionsAndForfeituresQueryParams,
-  clearDistributionsAndForfeituresQueryParams,
-  setMilitaryAndRehireForfeituresQueryParams,
-  clearMilitaryAndRehireForfeituresQueryParams,
-  setExecutiveHoursAndDollarsQueryParams,
-  clearExecutiveHoursAndDollarsQueryParams,
-  setMilitaryAndRehireProfitSummaryQueryParams,
-  clearMilitaryAndRehireProfitSummaryQueryParams,
-  setForfeituresAndPoints,
-  clearForfeituresAndPoints,
-  setForfeituresAndPointsQueryParams,
-  clearForfeituresAndPointsQueryParams
+  updateExecutiveHoursAndDollarsGridRow
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

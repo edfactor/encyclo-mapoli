@@ -1,13 +1,14 @@
-import { Button, Divider } from "@mui/material";
-import Grid2 from '@mui/material/Grid2';
-import { DSMAccordion, Page } from "smart-ui-library";
-import TerminationSearchFilter from "./TerminationSearchFilter";
-import TerminationGrid from "./TerminationGrid";
-import { useNavigate } from "react-router";
 import StatusDropdown, { ProcessStatus } from "components/StatusDropdown";
-import { CAPTIONS, MENU_LABELS } from "../../constants";
 import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useNavigate } from "react-router";
+import { DSMAccordion, Page } from "smart-ui-library";
+
+import { Button, Divider } from "@mui/material";
+import Grid2 from "@mui/material/Grid2";
+
+import { CAPTIONS, MENU_LABELS } from "../../constants";
+import TerminationGrid from "./TerminationGrid";
+import TerminationSearchFilter from "./TerminationSearchFilter";
 
 const Termination = () => {
   const navigate = useNavigate();

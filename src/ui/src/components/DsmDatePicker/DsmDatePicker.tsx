@@ -2,8 +2,8 @@ import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { FC, KeyboardEvent, useState } from "react";
 import { parseISO } from "date-fns";
+import { FC, KeyboardEvent } from "react";
 
 type MyProps = {
   id: string;
@@ -11,27 +11,15 @@ type MyProps = {
   value: Date | null;
   disableFuture?: boolean;
   error?: string;
-  setError?: Function;
+  setError?: (error: string) => void;
   required: boolean;
   label: string;
-  onKeyDown?: Function;
+  onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void;
   ref?: React.ForwardedRef<unknown>;
   views?: Array<"year" | "month" | "day">;
 };
 
-const DsmDatePicker: FC<MyProps> = ({
-  error,
-  views,
-  onChange,
-  value,
-  disableFuture,
-  setError,
-  required,
-  label,
-  onKeyDown,
-  ref,
-  id
-}) => {
+const DsmDatePicker: FC<MyProps> = ({ error, views, onChange, value, disableFuture, required, label, ref, id }) => {
   const isInvalid = error ? error?.length > 0 : false;
   const isYearOnly = views?.length === 1 && views[0] === "year";
 
@@ -65,7 +53,7 @@ const DsmDatePicker: FC<MyProps> = ({
       data-your-attrib={id}
       fullWidth
       error={isInvalid}
-      onError={(err) => {}}
+      onError={(_err) => {}}
       onKeyUp={(e: React.KeyboardEvent<HTMLDivElement>) => {
         // This wild code is meant to enable the search button without leaving the
         // field with a blur event.
