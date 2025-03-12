@@ -36,7 +36,7 @@ import ProfCtrlSheet from "pages/PaymasterUpdate/ProfCtrlSheet";
 import Profall from "pages/Profall/Profall";
 import NewPSLabels from "pages/ProfitShareByStore/NewPSLabels";
 import ProfitShareByStore from "pages/ProfitShareByStore/ProfitShareByStore";
-import QPAY066TA from "pages/ProfitShareByStore/QPAY066TA";
+import QPAY066TA from "pages/ProfitShareByStore/BreakdownReport/QPAY066TA";
 import Under21Report from "pages/ProfitShareByStore/Under21Report";
 import Under21TA from "pages/ProfitShareByStore/Under21TA";
 import ProfitShareGrossReport from "pages/ProfitShareGrossReport/ProfitShareGrossReport";
