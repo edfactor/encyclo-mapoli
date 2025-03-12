@@ -6,11 +6,11 @@ import { EmployeeDetails } from "reduxstore/types";
 import { mmDDYYFormat } from "smart-ui-library";
 import { formatPercentage } from "utils/formatPercentage";
 
-interface MilitaryAndRehireEntryAndModificationEmployeeDetailsProps {
+interface MilitaryEntryAndModificationEmployeeDetailsProps {
   details: EmployeeDetails;
 }
 
-const MilitaryAndRehireEntryAndModificationEmployeeDetails: React.FC<MilitaryAndRehireEntryAndModificationEmployeeDetailsProps> = ({ details }) => {
+const MilitaryEntryAndModificationEmployeeDetails: React.FC<MilitaryEntryAndModificationEmployeeDetailsProps> = ({ details }) => {
   const {
     firstName,
     lastName,
@@ -86,4 +86,4 @@ const MilitaryAndRehireEntryAndModificationEmployeeDetails: React.FC<MilitaryAnd
   );
 };
 
-export default MilitaryAndRehireEntryAndModificationEmployeeDetails;
+export default MilitaryEntryAndModificationEmployeeDetails;

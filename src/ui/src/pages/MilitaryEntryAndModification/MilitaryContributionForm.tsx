@@ -5,8 +5,6 @@ import { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { MilitaryContribution } from "reduxstore/types";
 
-
-
 interface FormData {
   rows: MilitaryContribution[];
 }

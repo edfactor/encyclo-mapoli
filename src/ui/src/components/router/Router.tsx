@@ -15,7 +15,6 @@ import Forfeit from "pages/Forfeit/Forfeit";
 import FrozenSummary from "pages/FrozenSummary/FrozenSummary";
 import ManageExecutiveHoursAndDollars from "pages/ManageExecutiveHoursAndDollars/ManageExecutiveHoursAndDollars";
 import MasterInquiry from "pages/MasterInquiry/MasterInquiry";
-import MilitaryAndRehireEntryAndModification from "pages/MilitaryAndRehireEntryAndModification/MilitaryAndRehireEntryAndModification";
 import MilitaryAndRehireForfeitures from "pages/MilitaryAndRehireForfeitures/MilitaryAndRehireForfeitures";
 import MilitaryAndRehireProfitSummary from "pages/MilitaryAndRehireProfitSummary/MilitaryAndRehireProfitSummary";
 import MissingCommaInPyName from "pages/MissingCommaInPyName/MissingCommaInPyName";
@@ -60,6 +59,7 @@ import ForfeituresByAge from "../../pages/ForfeituresByAge/ForfeituresByAge";
 import ProfitShareUpdate from "../../pages/ProfitShareUpdate/ProfitShareUpdate";
 import YTDWages from "../../pages/YTDWagesExtract/YTDWages";
 import RouteSecurity from "./RouteSecurity";
+import MilitaryEntryAndModification from "pages/MilitaryEntryAndModification/MilitaryEntryAndModification";
 
 const Router = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -203,8 +203,8 @@ const Router = () => {
           path={ROUTES.PROF_TERM}
           element={<Termination />}></Route>
         <Route
-          path={ROUTES.MILITARY_AND_REHIRE_ENTRY}
-          element={<MilitaryAndRehireEntryAndModification />}></Route>
+          path={ROUTES.MILITARY_ENTRY_AND_MODIFICATION}
+          element={<MilitaryEntryAndModification />}></Route>
         <Route
           path={ROUTES.PROFIT_SHARE_REPORT}
           element={<ProfitShareReport />}></Route>
