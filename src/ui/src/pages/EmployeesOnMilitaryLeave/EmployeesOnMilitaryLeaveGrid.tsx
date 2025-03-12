@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetEmployeesOnMilitaryLeaveQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
@@ -10,7 +10,7 @@ const EmployeesOnMilitaryLeaveGrid: React.FC = () => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(100);
   const { militaryAndRehireQueryParams } = useSelector((state: RootState) => state.yearsEnd);
-  const [setSortParams] = useState<ISortParams>({
+  const [_, setSortParams] = useState<ISortParams>({
     sortBy: "Badge",
     isSortDescending: false
   });

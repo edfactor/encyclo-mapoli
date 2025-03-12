@@ -1,6 +1,5 @@
-import Grid2 from '@mui/material/Grid2';
+import Grid2 from "@mui/material/Grid2";
 import DistributionByAgeGrid from "pages/DistributionByAge/DistributionByAgeGrid";
-import DuplicateNamesAndBirthdaysGrid from "pages/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdaysGrid";
 
 export const Distributions = () => {
   return (

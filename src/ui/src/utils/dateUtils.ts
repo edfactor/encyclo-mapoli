@@ -93,8 +93,8 @@ export function currentDateZeroHour(): Date {
 }
 
 export function dateComparator(date1: string, date2: string) {
-  var date1Number = new Date(date1).getTime();
-  var date2Number = new Date(date2).getTime();
+  const date1Number = new Date(date1).getTime();
+  const date2Number = new Date(date2).getTime();
 
   if (date1Number == null && date2Number == null) {
     return 0;
@@ -119,13 +119,13 @@ export function toDisplayDateFull(date?: Date) {
   const year = today.getFullYear();
   const day = today.getDate();
 
-  var hours = today.getHours();
-  var minutes = today.getMinutes();
-  var ampm = hours >= 12 ? "PM" : "AM";
+  let hours = today.getHours();
+  let minutes = today.getMinutes();
+  const ampm = hours >= 12 ? "PM" : "AM";
   hours = hours % 12;
   hours = hours ? hours : 12; // the hour '0' should be '12'
   minutes = minutes < 10 ? Number("0" + minutes) : minutes;
-  var strTime = hours + ":" + minutes + " " + ampm;
+  const strTime = hours + ":" + minutes + " " + ampm;
 
   return `${month} ${day}, ${year} ${strTime}`;
 }
