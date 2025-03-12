@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, TextField } from "@mui/material";
-import Grid2 from '@mui/material/Grid2';
+import Grid2 from "@mui/material/Grid2";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
@@ -52,10 +52,10 @@ const ProfitShareReportSearchFilter: React.FC<ProfitShareReportSearchFilterProps
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
       const req: YearEndProfitSharingReportRequest = {
-        isYearEnd: true,
+        isYearEnd: false,
         minimumAgeInclusive: 18,
+        maximumAgeInclusive: 98,
         minimumHoursInclusive: 1000,
-        maximumAgeInclusive: 65,
         maximumHoursInclusive: 2000,
         includeActiveEmployees: true,
         includeInactiveEmployees: true,
@@ -87,7 +87,7 @@ const ProfitShareReportSearchFilter: React.FC<ProfitShareReportSearchFilterProps
         container
         paddingX="24px"
         gap="24px">
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }} >
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
           <FormLabel>Year</FormLabel>
           <Controller
             name="profitYear"
@@ -101,7 +101,7 @@ const ProfitShareReportSearchFilter: React.FC<ProfitShareReportSearchFilterProps
                 onChange={(e) => {
                   field.onChange(e);
                 }}
-                inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                slotProps={{ htmlInput: { min: 1975, max: 2075 } }}
               />
             )}
           />
