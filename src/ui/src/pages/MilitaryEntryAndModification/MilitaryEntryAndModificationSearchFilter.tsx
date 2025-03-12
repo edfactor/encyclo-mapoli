@@ -22,7 +22,7 @@ const validationSchema = yup
     Boolean(values.socialSecurity || values.badgeNumber)
   );
 
-const MilitaryAndRehireEntryAndModificationSearchFilter = () => {
+const MilitaryEntryAndModificationSearchFilter = () => {
   const [triggerSearch, { isFetching }] = useLazyGetProfitMasterInquiryQuery();
   const {
     register,
@@ -87,4 +87,4 @@ const MilitaryAndRehireEntryAndModificationSearchFilter = () => {
   );
 };
 
-export default MilitaryAndRehireEntryAndModificationSearchFilter;
+export default MilitaryEntryAndModificationSearchFilter;

@@ -4,19 +4,19 @@ import { DSMAccordion, Page } from "smart-ui-library";
 import { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
-import MilitaryAndRehireEntryAndModificationEmployeeDetails from "./MilitaryAndRehireEntryAndModificationEmployeeDetails";
+import MilitaryAndRehireEntryAndModificationEmployeeDetails from "./MilitaryEntryAndModificationEmployeeDetails";
 import {
   useCreateMilitaryContributionMutation,
   useLazyGetMilitaryContributionsQuery
 } from "reduxstore/api/MilitaryApi";
-import MilitaryAndRehireEntryAndModificationSearchFilter from "./MilitaryAndRehireEntryAndModificationSearchFilter";
+import MilitaryAndRehireEntryAndModificationSearchFilter from "./MilitaryEntryAndModificationSearchFilter";
 import MilitaryContributionForm from "./MilitaryContributionForm";
 import { MilitaryContribution } from "reduxstore/types";
 import { CAPTIONS, MENU_LABELS } from "../../constants";
 import StatusDropdown from "components/StatusDropdown";
 import { useNavigate } from "react-router";
 
-const MilitaryAndRehireEntryAndModification = () => {
+const MilitaryEntryAndModification = () => {
   const [showContributions, setShowContributions] = useState(false);
   const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.yearsEnd);
   const [fetchContributions, { isFetching }] = useLazyGetMilitaryContributionsQuery();
@@ -108,4 +108,4 @@ const MilitaryAndRehireEntryAndModification = () => {
   );
 };
 
-export default MilitaryAndRehireEntryAndModification;
+export default MilitaryEntryAndModification;

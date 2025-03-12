@@ -22,7 +22,7 @@ export const ROUTES = {
   BALANCE_BY_YEARS: "balance-by-years",
   VESTED_AMOUNTS_BY_AGE: "vested-amounts-by-age",
   PROF_TERM: "prof-term",
-  MILITARY_AND_REHIRE_ENTRY: "military-and-rehire-entry",
+  MILITARY_ENTRY_AND_MODIFICATION: "military-entry-and-modification",
 
   DECEMBER_PROCESS_ACCORDION: "december-process-accordion",
   DEMOGRAPHIC_BADGES: "demographic-badges-not-in-payprofit",
@@ -80,7 +80,7 @@ export const CAPTIONS = {
   FORFEITURES_BY_AGE: "Get Forfeitures by Age (PROF 130)",
   MANAGE_EXECUTIVE_HOURS: "Manage Executive Hours and Dollars (TPR008-09)",
   MASTER_INQUIRY: "Master Inquiry",
-  MILITARY_AND_REHIRE_ENTRY: "Military and Rehire Entry",
+  MILITARY_ENTRY_AND_MODIFICATION: "Military Entry and Modification",
   MILITARY_CONTRIBUTIONS: "Military Contributions",
   MILITARY_FORFEITURES: "Military and Rehire Forfeitures",
   MILITARY_PROFIT_SUMMARY: "Military and Rehire Profit Summary",

@@ -81,7 +81,7 @@ export interface YearsEndState {
   masterInquiryEmployeeDetails: EmployeeDetails | null;
   masterInquiryRequestParams: MasterInquirySearch | null;
   militaryAndRehire: PagedReportResponse<EmployeesOnMilitaryLeaveResponse> | null;
-  militaryAndRehireEntryAndModification: EmployeeDetails | null;
+  militaryEntryAndModification: EmployeeDetails | null;
   militaryAndRehireForfeitures: PagedReportResponse<MilitaryAndRehireForfeiture> | null;
   militaryAndRehireForfeituresQueryParams: ProfitAndReportingQueryParams | null;
   militaryAndRehireProfitSummary: PagedReportResponse<MilitaryAndRehireProfitSummary> | null;
@@ -143,7 +143,7 @@ const initialState: YearsEndState = {
   masterInquiryRequestParams: null,
   militaryAndRehire: null,
   militaryAndRehireQueryParams: null,
-  militaryAndRehireEntryAndModification: null,
+  militaryEntryAndModification: null,
   militaryAndRehireForfeitures: null,
   militaryAndRehireProfitSummary: null,
   militaryAndRehireForfeituresQueryParams: null,
@@ -629,8 +629,8 @@ export const yearsEndSlice = createSlice({
       state.profitSharingUpdate = null;
     },
 
-    setMilitaryAndRehireEntryAndModificationEmployeeDetails: (state, action: PayloadAction<EmployeeDetails>) => {
-      state.militaryAndRehireEntryAndModification = action.payload;
+    setMilitaryEntryAndModificationEmployeeDetails: (state, action: PayloadAction<EmployeeDetails>) => {
+      state.militaryEntryAndModification = action.payload;
     },
     setYearEndProfitSharingReport: (
       state,
