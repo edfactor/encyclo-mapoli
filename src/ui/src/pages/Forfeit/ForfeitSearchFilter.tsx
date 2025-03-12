@@ -80,10 +80,7 @@ const ForfeitSearchParameters = () => {
           container
           spacing={3}
           width="100%">
-          <Grid2
-            xs={12}
-            sm={6}
-            md={3}>
+          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
             <FormLabel>Profit Year</FormLabel>
             <Controller
               name="profitYear"
@@ -92,22 +89,19 @@ const ForfeitSearchParameters = () => {
                 <TextField
                   {...field}
                   fullWidth
+                  type="number"
                   variant="outlined"
                   error={!!errors.profitYear}
                   onChange={(e) => {
                     field.onChange(e);
                   }}
-                  inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
                 />
               )}
             />
             {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
           </Grid2>
         </Grid2>
-        <Grid2
-          xs={12}
-          sm={6}
-          md={3}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
           <FormLabel>Use Frozen Data</FormLabel>
           <Controller
             name="useFrozenData"

@@ -13,13 +13,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\*.csv" />
-    <None Remove="Resources\*.txt" />
+    <None Remove="Resources\**\*.csv" />
+    <None Remove="Resources\**\*.txt" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Resources\*.csv" />
-    <EmbeddedResource Include="Resources\*.txt" />
+    <EmbeddedResource Include="Resources\**\*.csv" />
+    <EmbeddedResource Include="Resources\**\*.txt" />
   </ItemGroup>
 
   <ItemGroup>
@@ -89,6 +89,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Resources\qpay066ta\" />
   </ItemGroup>
 
 </Project>

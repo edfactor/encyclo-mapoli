@@ -2,7 +2,7 @@
 
 namespace Demoulas.ProfitSharing.Data.Entities;
 
-[DebuggerDisplay("Id={DemographicId} ProfitYear={ProfitYear} EnrollmentId={EnrollmentId}")]
+[DebuggerDisplay($"Id={{DemographicId}} ProfitYear={{ProfitYear}} EnrollmentId={{EnrollmentId}} EmploymentStatus={{Demographic!.EmploymentStatusId}} TerminationCodeId={{Demographic!.TerminationCodeId}} Name:{{Demographic!.ContactInfo.FullName}}")]
 public sealed class PayProfit
 {
     /// <summary>

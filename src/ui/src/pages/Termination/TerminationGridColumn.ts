@@ -1,5 +1,5 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
+import { ColDef, ICellRendererParams } from 'ag-grid-community';
+import { viewBadgeLinkRenderer } from 'utils/masterInquiryLink';
 
 export const GetTerminationColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [

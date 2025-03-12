@@ -23,6 +23,8 @@ public record MemberYearSummaryDto
 
     public decimal VestedPercentage { get; set; }
     public char EmploymentStatusId { get; set; }
-    public short EmployeeRank { get; set; }
+    public string? EmployeeCategory { get; set; }
+    public short EmployeeSortRank { get; set; }
+    
 }
 
