@@ -90,7 +90,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
 
             _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
 
-            var oneRecord = new PaginationRequestDto { Skip = 0, Take = 1 };
+            var oneRecord = new SortedPaginationRequestDto { Skip = 0, Take = 1 };
             response = await _cleanupReportClient.GetDemographicBadgesNotInPayProfitAsync(oneRecord, CancellationToken.None);
             response.Should().NotBeNull();
             response.Response.Results.Should().HaveCount(1);
@@ -137,7 +137,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         return MockDbContextFactory.UseWritableContext(async ctx =>
         {
-            var request = new PaginationRequestDto() { Skip = 0, Take = 1000 };
+            var request = new SortedPaginationRequestDto() { Skip = 0, Take = 1000 };
             var response = await _cleanupReportClient.GetNamesMissingCommaAsync(request, CancellationToken.None);
             response.Should().NotBeNull();
             response.Response.Results.Count().Should().Be(0);
@@ -158,7 +158,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
 
             _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
 
-            var oneRecord = new PaginationRequestDto { Skip = 0, Take = 1 };
+            var oneRecord = new SortedPaginationRequestDto { Skip = 0, Take = 1 };
             response = await _cleanupReportClient.GetNamesMissingCommaAsync(oneRecord, CancellationToken.None);
             response.Should().NotBeNull();
             response.Response.Results.Should().HaveCount(1);

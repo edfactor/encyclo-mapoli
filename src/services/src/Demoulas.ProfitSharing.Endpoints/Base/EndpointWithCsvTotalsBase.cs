@@ -23,7 +23,7 @@ namespace Demoulas.ProfitSharing.Endpoints.Base;
 public abstract class EndpointWithCsvTotalsBase<ReqType, RespType, ItemType, MapType>
     : FastEndpoints.Endpoint<ReqType, RespType>
     where RespType : ReportResponseBase<ItemType>
-    where ReqType : PaginationRequestDto
+    where ReqType : SortedPaginationRequestDto 
     where ItemType : class
     where MapType : ClassMap<ItemType>
 {

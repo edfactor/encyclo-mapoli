@@ -2,7 +2,7 @@
 using Demoulas.Common.Contracts.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Request;
-public record MasterInquiryRequest : PaginationRequestDto
+public record MasterInquiryRequest : SortedPaginationRequestDto 
 {
     [DefaultValue(2023)]
     public short? StartProfitYear { get; set; }

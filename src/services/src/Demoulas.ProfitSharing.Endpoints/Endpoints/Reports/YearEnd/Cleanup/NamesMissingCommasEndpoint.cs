@@ -9,7 +9,7 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
-public class NamesMissingCommasEndpoint : EndpointWithCsvBase<PaginationRequestDto, NamesMissingCommaResponse, NamesMissingCommasEndpoint.NamesMissingCommasResponseMap>
+public class NamesMissingCommasEndpoint : EndpointWithCsvBase<SortedPaginationRequestDto, NamesMissingCommaResponse, NamesMissingCommasEndpoint.NamesMissingCommasResponseMap>
 {
     private readonly ICleanupReportService _cleanupReportService;
 
@@ -51,7 +51,7 @@ public class NamesMissingCommasEndpoint : EndpointWithCsvBase<PaginationRequestD
 
     public override string ReportFileName => "NAMES-MISSING-COMMAS";
 
-    public override Task<ReportResponseBase<NamesMissingCommaResponse>> GetResponse(PaginationRequestDto req, CancellationToken ct)
+    public override Task<ReportResponseBase<NamesMissingCommaResponse>> GetResponse(SortedPaginationRequestDto req, CancellationToken ct)
     {
         return _cleanupReportService.GetNamesMissingCommaAsync(req, ct);
     }
