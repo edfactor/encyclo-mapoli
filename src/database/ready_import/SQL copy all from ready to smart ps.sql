@@ -388,7 +388,7 @@ BEGIN
         0 AS SECONDARY_ETVA_EARNINGS, -- History not previously tracked
         PY_WEEKS_WORK_LAST AS WEEKS_WORKED_YEAR,
         NULL AS PS_CERTIFICATE_ISSUED_DATE,
-        9 AS ENROLLMENT_ID, -- 9/History not previously tracked
+        ENROLLMENT_ID,
         PY_PROF_BENEFICIARY AS BENEFICIARY_ID,
         CASE
             WHEN PY_PROF_NEWEMP = '1' THEN 0
