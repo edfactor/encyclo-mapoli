@@ -1,6 +1,6 @@
 import { TextField } from "@mui/material";
-import { CustomCellEditorProps, CustomCellRendererProps } from "ag-grid-react";
-import { memo, useState } from "react";
+import { CustomCellRendererProps } from "ag-grid-react";
+import { memo } from "react";
 
 interface DSMTextCellRendererProps extends CustomCellRendererProps {
   errorMsg: string;

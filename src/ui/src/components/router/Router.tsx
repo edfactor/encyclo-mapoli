@@ -1,53 +1,65 @@
-import { BrowserRouter, Route } from "react-router-dom";
-import RouteSecurity from "./RouteSecurity";
-import { ImpersonationMultiSelect, MenuBar } from "smart-ui-library";
-import MenuData from "../../MenuData";
-import DemographicBadgesNotInPayprofit from "pages/DemographicBadgesNotInPayprofit/DemographicBadgesNotInPayprofit";
-import DuplicateSSNsOnDemographics from "pages/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographics";
-import NegativeEtvaForSSNsOnPayprofit from "pages/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofit";
-import DuplicateNamesAndBirthdays from "pages/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdays";
-import MissingCommaInPyName from "pages/MissingCommaInPyName/MissingCommaInPyName";
-import EmployeesOnMilitaryLeave from "pages/EmployeesOnMilitaryLeave/EmployeesOnMilitaryLeave";
-import MilitaryAndRehireForfeitures from "pages/MilitaryAndRehireForfeitures/MilitaryAndRehireForfeitures";
-import MilitaryAndRehireProfitSummary from "pages/MilitaryAndRehireProfitSummary/MilitaryAndRehireProfitSummary";
-import DistributionsAndForfeitures from "pages/DistributionsAndForfeitures/DistributionAndForfeitures";
-import ManageExecutiveHoursAndDollars from "pages/ManageExecutiveHoursAndDollars/ManageExecutiveHoursAndDollars";
-import EligibleEmployees from "pages/EligibleEmployees/EligibleEmployees";
-import MasterInquiry from "pages/MasterInquiry/MasterInquiry";
-import DistributionByAge from "../../pages/DistributionByAge/DistributionByAge";
-import ContributionsByAge from "../../pages/ContributionsByAge/ContributionsByAge";
-import ForfeituresByAge from "../../pages/ForfeituresByAge/ForfeituresByAge";
-import BalanceByAge from "../../pages/BalanceByAge/BalanceByAge";
-import YTDWages from "../../pages/YTDWagesExtract/YTDWages";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
-import { setImpersonating } from "reduxstore/slices/securitySlice";
-import { ImpersonationRoles } from "reduxstore/types";
-import CleanUpSummary from "pages/CleanUpSummary/CleanUpSummary";
-import { useEffect } from "react";
-import FrozenSummary from "pages/FrozenSummary/FrozenSummary";
-import BalanceByYears from "pages/BalanceByYears/BalanceByYears";
-import VestedAmountsByAge from "pages/VestedAmountsByAge/VestedAmountsByAge";
-import DecemberProcess from "pages/DecemberProcess/DecemberProcess";
-import DecemberProcessAccordion from "pages/DecemberProcess/DecemberProcessAccordion";
-import DecemberProcessLocalApi from "pages/DecemberProcess/DecemberProcessLOCALAPI";
-import Termination from "pages/Termination/Termination";
-import MilitaryAndRehireEntryAndModification from "pages/MilitaryAndRehireEntryAndModification/MilitaryAndRehireEntryAndModification";
-import ProfitShareReport from "pages/ProfitShareReport/ProfitShareReport";
-import ProfitShareUpdate from "../../pages/ProfitShareUpdate/ProfitShareUpdate";
-import Forfeit from "pages/Forfeit/Forfeit";
 import { Box } from "@mui/material";
 import DSMDynamicBreadcrumbs from "components/DSMDynamicBreadcrumbs/DSMDynamicBreadcrumbs";
-import { ROUTES } from "../../constants";
-import FiscalFlow from "pages/YearEndFlow/YearEndFlow";
+import BalanceByYears from "pages/BalanceByYears/BalanceByYears";
+import CleanUpSummary from "pages/CleanUpSummary/CleanUpSummary";
+import DecemberProcessAccordion from "pages/DecemberProcess/DecemberProcessAccordion";
+import DemographicBadgesNotInPayprofit from "pages/DemographicBadgesNotInPayprofit/DemographicBadgesNotInPayprofit";
+import DistributionsAndForfeitures from "pages/DistributionsAndForfeitures/DistributionAndForfeitures";
+import DuplicateNamesAndBirthdays from "pages/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdays";
+import DuplicateSSNsOnDemographics from "pages/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographics";
+import EligibleEmployees from "pages/EligibleEmployees/EligibleEmployees";
+import EmployeesOnMilitaryLeave from "pages/EmployeesOnMilitaryLeave/EmployeesOnMilitaryLeave";
 import ProfitShareReportEditRun from "pages/FiscalFlow/ProfitShareReportEditRun/ProfitShareReportEditRun";
-import EighteenToTwenty from "pages/PAY426Reports/PAY426-1/EighteenToTwenty";
 import ProfitShareReportFinalRun from "pages/FiscalFlow/ProfitShareReportFinalRun/ProfitShareReportFinalRun";
-import ProfitShareByStore from "pages/ProfitShareByStore/ProfitShareByStore";
-import PaymasterUpdate from "pages/PaymasterUpdate/PaymasterUpdate";
+import Forfeit from "pages/Forfeit/Forfeit";
+import FrozenSummary from "pages/FrozenSummary/FrozenSummary";
+import ManageExecutiveHoursAndDollars from "pages/ManageExecutiveHoursAndDollars/ManageExecutiveHoursAndDollars";
+import MasterInquiry from "pages/MasterInquiry/MasterInquiry";
+import MilitaryAndRehireForfeitures from "pages/MilitaryAndRehireForfeitures/MilitaryAndRehireForfeitures";
+import MilitaryAndRehireProfitSummary from "pages/MilitaryAndRehireProfitSummary/MilitaryAndRehireProfitSummary";
+import MissingCommaInPyName from "pages/MissingCommaInPyName/MissingCommaInPyName";
+import NegativeEtvaForSSNsOnPayprofit from "pages/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofit";
+import EighteenToTwenty from "pages/PAY426Reports/PAY426-1/EighteenToTwenty";
+import Beneficiaries from "pages/PAY426Reports/PAY426-10/Beneficiaries";
+import TwentyOnePlus from "pages/PAY426Reports/PAY426-2/TwentyOnePlus";
+import UnderEighteen from "pages/PAY426Reports/PAY426-3/UnderEighteen";
+import PriorHours from "pages/PAY426Reports/PAY426-4/PriorHours";
+import NoPriorHours from "pages/PAY426Reports/PAY426-5/NoPriorHours";
+import TermedWithHours from "pages/PAY426Reports/PAY426-6/TermedWithHours";
+import TermedNoPrior from "pages/PAY426Reports/PAY426-7/TermedNoPrior";
+import TermedWithPrior from "pages/PAY426Reports/PAY426-8/TermedWithPrior";
+import ProfitSummary from "pages/PAY426Reports/PAY426-9/ProfitSummary";
 import Pay450Summary from "pages/PaymasterUpdate/Pay450Summary";
+import PaymasterUpdate from "pages/PaymasterUpdate/PaymasterUpdate";
 import ProfCtrlSheet from "pages/PaymasterUpdate/ProfCtrlSheet";
+import Profall from "pages/Profall/Profall";
+import NewPSLabels from "pages/ProfitShareByStore/NewPSLabels";
+import ProfitShareByStore from "pages/ProfitShareByStore/ProfitShareByStore";
+import QPAY066TA from "pages/ProfitShareByStore/BreakdownReport/QPAY066TA";
 import Under21Report from "pages/ProfitShareByStore/Under21Report";
+import Under21TA from "pages/ProfitShareByStore/Under21TA";
+import ProfitShareGrossReport from "pages/ProfitShareGrossReport/ProfitShareGrossReport";
+import ProfitShareReport from "pages/ProfitShareReport/ProfitShareReport";
+import Termination from "pages/Termination/Termination";
+import VestedAmountsByAge from "pages/VestedAmountsByAge/VestedAmountsByAge";
+import FiscalFlow from "pages/YearEndFlow/YearEndFlow";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { BrowserRouter, Route } from "react-router-dom";
+import { setImpersonating } from "reduxstore/slices/securitySlice";
+import { RootState } from "reduxstore/store";
+import { ImpersonationRoles } from "reduxstore/types";
+import { ImpersonationMultiSelect, MenuBar } from "smart-ui-library";
+import { ROUTES } from "../../constants";
+import MenuData from "../../MenuData";
+import BalanceByAge from "../../pages/BalanceByAge/BalanceByAge";
+import ContributionsByAge from "../../pages/ContributionsByAge/ContributionsByAge";
+import DistributionByAge from "../../pages/DistributionByAge/DistributionByAge";
+import ForfeituresByAge from "../../pages/ForfeituresByAge/ForfeituresByAge";
+import ProfitShareUpdate from "../../pages/ProfitShareUpdate/ProfitShareUpdate";
+import YTDWages from "../../pages/YTDWagesExtract/YTDWages";
+import RouteSecurity from "./RouteSecurity";
+import MilitaryEntryAndModification from "pages/MilitaryEntryAndModification/MilitaryEntryAndModification";
 
 const Router = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -64,7 +76,7 @@ const Router = () => {
     if (!!localStorageImpersonating && !impersonating) {
       dispatch(setImpersonating(localStorageImpersonating as ImpersonationRoles));
     }
-  }, [impersonating, localStorageImpersonating]);
+  }, [dispatch, impersonating, localStorageImpersonating]);
 
   return (
     <BrowserRouter>
@@ -191,8 +203,8 @@ const Router = () => {
           path={ROUTES.PROF_TERM}
           element={<Termination />}></Route>
         <Route
-          path={ROUTES.MILITARY_AND_REHIRE_ENTRY}
-          element={<MilitaryAndRehireEntryAndModification />}></Route>
+          path={ROUTES.MILITARY_ENTRY_AND_MODIFICATION}
+          element={<MilitaryEntryAndModification />}></Route>
         <Route
           path={ROUTES.PROFIT_SHARE_REPORT}
           element={<ProfitShareReport />}></Route>
@@ -225,7 +237,7 @@ const Router = () => {
           element={<ProfitShareByStore />}></Route>
         <Route
           path={ROUTES.PROFIT_SHARE_GROSS_REPORT}
-          element={<ProfitShareByStore />}></Route>
+          element={<ProfitShareGrossReport />}></Route>
         <Route
           path={ROUTES.PAYMASTER_UPDATE}
           element={<PaymasterUpdate />}></Route>
@@ -243,6 +255,73 @@ const Router = () => {
           element={<Under21Report />}>
           {" "}
         </Route>
+        <Route
+          path={ROUTES.PAY426_ACTIVE_21_PLUS}
+          element={<TwentyOnePlus />}></Route>
+        <Route
+          path={ROUTES.PAY426_ACTIVE_18_20}
+          element={<EighteenToTwenty />}
+        />
+        <Route
+          path={ROUTES.PAY426_ACTIVE_21_PLUS}
+          element={<TwentyOnePlus />}
+        />
+        <Route
+          path={ROUTES.PAY426_ACTIVE_UNDER_18}
+          element={<UnderEighteen />}
+        />
+        <Route
+          path={ROUTES.PAY426_ACTIVE_PRIOR_SHARING}
+          element={<PriorHours />}
+        />
+        <Route
+          path={ROUTES.PAY426_ACTIVE_NO_PRIOR}
+          element={<NoPriorHours />}
+        />
+        <Route
+          path={ROUTES.PAY426_TERMINATED_1000_PLUS}
+          element={<TermedWithHours />}
+        />
+        <Route
+          path={ROUTES.PAY426_TERMINATED_NO_PRIOR}
+          element={<TermedNoPrior />}
+        />
+        <Route
+          path={ROUTES.PAY426_TERMINATED_PRIOR}
+          element={<TermedWithPrior />}
+        />
+        <Route
+          path={ROUTES.PAY426_SUMMARY}
+          element={<ProfitSummary />}
+        />
+        <Route
+          path={ROUTES.PAY426_NON_EMPLOYEE}
+          element={<Beneficiaries />}
+        />
+        <Route
+          path={ROUTES.PROFIT_SHARE_BY_STORE}
+          element={<ProfitShareByStore />}
+        />
+        <Route
+          path={ROUTES.QPAY066_UNDER21}
+          element={<Under21Report />}
+        />
+        <Route
+          path={ROUTES.QPAY066TA_UNDER21}
+          element={<Under21TA />}
+        />
+        <Route
+          path={ROUTES.QPAY066TA}
+          element={<QPAY066TA />}
+        />
+        <Route
+          path={ROUTES.NEW_PS_LABELS}
+          element={<NewPSLabels />}
+        />
+        <Route
+          path={ROUTES.PROFALL}
+          element={<Profall />}
+        />
       </RouteSecurity>
     </BrowserRouter>
   );

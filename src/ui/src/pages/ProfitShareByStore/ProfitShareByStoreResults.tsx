@@ -1,4 +1,4 @@
-import Grid2 from "@mui/material/Unstable_Grid2";
+import Grid2 from '@mui/material/Grid2';
 import { Typography } from "@mui/material";
 import { InfoCard } from '../FiscalFlow/ProfitShareReportEditRun/InfoCard';
 import { useNavigate } from 'react-router-dom';
@@ -13,33 +13,37 @@ interface StoreReportCategory {
 
 const storeReportCategories: StoreReportCategory[] = [
   {
-    code: "QPAY066",
-    title: "QPAY066-UNDR21",
-    data: { "Label": "Value" },
-    destinationUrl: ROUTES.UNDER_21_REPORT
+      code: "QPAY066-UNDR21",
+      title: CAPTIONS.QPAY066_UNDER21,
+      data: { "Label": "Value" },
+      destinationUrl: ROUTES.QPAY066_UNDER21
   },
   {
-    code: "QPAY066TA",
-    title: "QPAY066TA-UNDR21",
-    data: { "Label": "Value" },
-    destinationUrl: ROUTES.UNDER_21_TERM_ACTIVE
+      code: "QPAY066TA-UNDR21",
+      title: CAPTIONS.QPAY066TA_UNDER21,
+      data: { "Label": "Value" },
+      destinationUrl: ROUTES.QPAY066TA_UNDER21
   },
   {
-    code: "NewPSLabels",
-    title: "QPAY066TA",
-    data: { "Label": "Value" },
-    destinationUrl: ROUTES.NEW_PS_LABELS
+      code: "QPAY066TA",
+      title: CAPTIONS.QPAY066TA,
+      data: { "Label": "Value" },
+      destinationUrl: ROUTES.QPAY066TA
   },
   {
-    code: "NewPSLabels",
-    title: "New PS Labels",
-    data: { "Label": "Value" },
-    destinationUrl: ROUTES.NEW_PS_LABELS
+      code: "NEW-PS-LABELS",
+      title: CAPTIONS.NEW_PS_LABELS,
+      data: { "Label": "Value" },
+      destinationUrl: ROUTES.NEW_PS_LABELS
   }
 ];
 
 const ProfitShareByStoreResults = () => {
   const navigate = useNavigate();
+
+  const handleCategoryClick = (category: StoreReportCategory) => {
+    navigate(`/${category.destinationUrl}`);
+  };
 
   return (
     <Grid2
@@ -62,14 +66,11 @@ const ProfitShareByStoreResults = () => {
         paddingLeft="24px"
         width="100%">
         {storeReportCategories.map((category) => (
-          <Grid2
-            key={category.code}
-            xs={12}
-            md={6}>
+          <Grid2 size={{ xs: 12, md: 6 }} key={category.code} >
             <InfoCard
               buttonDisabled={false}
               title={category.title}
-              handleClick={() => navigate(`/${category.destinationUrl}`)}
+              handleClick={() => handleCategoryClick(category)}
               data={category.data}
               valid={true}
             />

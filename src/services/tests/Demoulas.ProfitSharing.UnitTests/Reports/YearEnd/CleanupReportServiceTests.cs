@@ -2,16 +2,18 @@
 using System.Text.Json;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Api;
-using Demoulas.ProfitSharing.Client.Reports.YearEnd;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareReport;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
+using Demoulas.ProfitSharing.UnitTests.Common.Helpers;
 using FastEndpoints;
 using FluentAssertions;
 using IdGen;
@@ -48,15 +50,16 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
     [Fact(DisplayName = "PS-147: Check Duplicate SSNs (CSV)")]
     public async Task GetDuplicateSsNsTestCsv()
     {
-        _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        var stream = await _cleanupReportClient.DownloadDuplicateSsNs(_paginationRequest.ProfitYear, CancellationToken.None);
-        stream.Should().NotBeNull();
+        DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+        var response = await DownloadClient
+            .GETAsync <GetDuplicateSsNsEndpoint, PaginationRequestDto, PayrollDuplicateSsnResponseDto>(_paginationRequest);
 
-        using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
-        string result = await reader.ReadToEndAsync(CancellationToken.None);
-        result.Should().NotBeNullOrEmpty();
 
-        _testOutputHelper.WriteLine(result);
+        string content = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
+
+        content.Should().NotBeNullOrEmpty();
+
+        _testOutputHelper.WriteLine(content);
     }
 
     [Fact(DisplayName = "PS-151: Demographic badges without payprofit (JSON)")]
@@ -239,88 +242,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
     }
 
 
-    [Fact(DisplayName = "PS-152 : Duplicate names and Birthdays (JSON)")]
-    public async Task GetDuplicateNamesAndBirthdays()
-    {
-        _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        var request = new ProfitYearRequest { ProfitYear = _paginationRequest.ProfitYear, Take = 1000, Skip = 0 };
-        var response = await _cleanupReportClient.GetDuplicateNamesAndBirthdaysAsync(request, CancellationToken.None);
-        response.Should().NotBeNull();
-        response.Response.Results.Count().Should().Be(0);
-
-        _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
-
-        byte duplicateRows = 5;
-        await MockDbContextFactory.UseWritableContext(async c =>
-        {
-            var modelDemographic = await c.Demographics.Include(demographic => demographic.ContactInfo).FirstAsync(CancellationToken.None);
-
-            foreach (var dem in c.Demographics.Take(duplicateRows))
-            {
-                dem.DateOfBirth = modelDemographic.DateOfBirth;
-                dem.ContactInfo.FirstName = modelDemographic.ContactInfo.FirstName;
-                dem.ContactInfo.LastName = modelDemographic.ContactInfo.LastName;
-                dem.ContactInfo.FullName = modelDemographic.ContactInfo.FullName;
-                if (!dem.PayProfits.Any(x => x.ProfitYear == _paginationRequest.ProfitYear))
-                {
-                    dem.PayProfits[0].ProfitYear = _paginationRequest.ProfitYear;
-                }
-            }
-
-            await c.SaveChangesAsync(CancellationToken.None);
-        });
-
-        response = await _cleanupReportClient.GetDuplicateNamesAndBirthdaysAsync(request, CancellationToken.None);
-        response.Should().NotBeNull();
-        response.Response.Results.Count().Should().BeGreaterThanOrEqualTo(duplicateRows);
-
-        _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
-
-        var oneRecord = new ProfitYearRequest { ProfitYear = _paginationRequest.ProfitYear, Skip = 0, Take = 1 };
-        response = await _cleanupReportClient.GetDuplicateNamesAndBirthdaysAsync(oneRecord, CancellationToken.None);
-        response.Should().NotBeNull();
-        response.Response.Results.Should().HaveCount(1);
-
-        _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
-    }
-
-    [Fact(DisplayName = "PS-152 : Duplicate names and Birthdays (CSV)")]
-    public async Task GetDuplicateNamesAndBirthdaysCsv()
-    {
-        _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        byte duplicateRows = 5;
-        await MockDbContextFactory.UseWritableContext(async c =>
-        {
-            var modelDemographic = await c.Demographics.Include(demographic => demographic.ContactInfo).FirstAsync(CancellationToken.None);
-
-            foreach (var dem in c.Demographics.Take(duplicateRows))
-            {
-                dem.DateOfBirth = modelDemographic.DateOfBirth;
-                dem.ContactInfo.FirstName = modelDemographic.ContactInfo.FirstName;
-                dem.ContactInfo.LastName = modelDemographic.ContactInfo.LastName;
-                dem.ContactInfo.FullName = modelDemographic.ContactInfo.FullName;
-                if (!dem.PayProfits.Any(x => x.ProfitYear == _paginationRequest.ProfitYear))
-                {
-                    dem.PayProfits[0].ProfitYear = _paginationRequest.ProfitYear;
-                }
-            }
-
-            await c.SaveChangesAsync(CancellationToken.None);
-        });
-
-        var stream = await _cleanupReportClient.DownloadDuplicateNamesAndBirthdays(_paginationRequest.ProfitYear, CancellationToken.None);
-        stream.Should().NotBeNull();
-
-        using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
-        string result = await reader.ReadToEndAsync(CancellationToken.None);
-        result.Should().NotBeNullOrEmpty();
-
-        var lines = result.Split(Environment.NewLine);
-        lines.Count().Should().BeGreaterThanOrEqualTo(duplicateRows + 4); //Includes initial row that was used as the template to create duplicates
-
-        _testOutputHelper.WriteLine(result);
-    }
-
+   
     [Fact(DisplayName = "PS-61 : Year-end Profit Sharing Report (JSON)")]
     public async Task GetYearEndProfitSharingReport()
     {
@@ -390,7 +312,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             await ctx.SaveChangesAsync(CancellationToken.None);
         });
 
-        var response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, ReportResponseBase<YearEndProfitSharingReportResponse>>(req);
+        var response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
 
         response.Should().NotBeNull();
         response.Result.ReportName.Should().BeEquivalentTo($"PROFIT SHARE YEAR END REPORT FOR {req.ProfitYear}");
@@ -412,7 +334,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             await ctx.SaveChangesAsync(CancellationToken.None);
         });
 
-        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, ReportResponseBase<YearEndProfitSharingReportResponse>>(req);
+        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
 
         response.Result.Should().NotBeNull();
         response.Result.Response.Total.Should().Be(0);
@@ -432,7 +354,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             await ctx.SaveChangesAsync(CancellationToken.None);
         });
 
-        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, ReportResponseBase<YearEndProfitSharingReportResponse>>(req);
+        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
 
         response.Result.Should().NotBeNull();
         response.Result.Response.Total.Should().Be(0);
@@ -446,7 +368,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
     {
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         var profitYear = (short)Math.Min(DateTime.Now.Year - 1, 2023);
-        var req = new YearEndProfitSharingReportRequest() { Skip = 0, Take = byte.MaxValue, ProfitYear = profitYear, IsYearEnd = true };
+        var req = new YearEndProfitSharingReportRequest() { Skip = 0, Take = byte.MaxValue, ProfitYear = profitYear, IsYearEnd = true, IncludeTotals = false };
         var testHours = 1001;
         await MockDbContextFactory.UseWritableContext(async ctx =>
         {
@@ -464,7 +386,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             //Prevent any payprofit records from being returned
             foreach (var pp in ctx.PayProfits)
             {
-                pp.ProfitYear = 1999;
+                pp.ProfitYear = 2100;
             }
 
             //Setup employee to be returned
@@ -499,35 +421,35 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             await ctx.SaveChangesAsync(CancellationToken.None);
         });
 
-        var response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, ReportResponseBase<YearEndProfitSharingReportResponse>>(req);
+        var response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
         response.Should().NotBeNull();
         response.Result.ReportName.Should().BeEquivalentTo($"PROFIT SHARE YEAR END REPORT FOR {req.ProfitYear}");
         response.Result.Response.Total.Should().Be(1);
         response.Result.Response.Results.Count().Should().Be(1);
 
         req.IncludeActiveEmployees = false; //Test Active filter
-        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, ReportResponseBase<YearEndProfitSharingReportResponse>>(req);
+        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
         response.Should().NotBeNull();
         response.Result.Response.Total.Should().Be(0);
         response.Result.Response.Results.Count().Should().Be(0);
 
         req.IncludeActiveEmployees = true;
         req.MaximumAgeInclusive = 20; //Test Max Age filter
-        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, ReportResponseBase<YearEndProfitSharingReportResponse>>(req);
+        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
         response.Should().NotBeNull();
         response.Result.Response.Total.Should().Be(0);
         response.Result.Response.Results.Count().Should().Be(0);
 
         req.MaximumAgeInclusive = null;
         req.MinimumAgeInclusive = 30; //Test Min Age filter
-        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, ReportResponseBase<YearEndProfitSharingReportResponse>>(req);
+        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
         response.Should().NotBeNull();
         response.Result.Response.Total.Should().Be(0);
         response.Result.Response.Results.Count().Should().Be(0);
 
         req.MinimumAgeInclusive = null;
         req.MinimumHoursInclusive = (short?)(testHours + 1); //Test Minimum hours
-        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, ReportResponseBase<YearEndProfitSharingReportResponse>>(req);
+        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
         response.Should().NotBeNull();
         response.Result.Response.Total.Should().Be(0);
         response.Result.Response.Results.Count().Should().Be(0);

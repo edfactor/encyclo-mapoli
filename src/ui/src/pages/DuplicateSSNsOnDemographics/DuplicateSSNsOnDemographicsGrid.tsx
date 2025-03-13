@@ -1,12 +1,12 @@
 import { Typography } from "@mui/material";
-import { useState, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useMemo, useState, useEffect, useCallback } from "react";
+import { useSelector } from "react-redux";
 import { useLazyGetDuplicateSSNsQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetDuplicateSSNsOnDemographicsColumns } from "./DuplicateSSNsOnDemographicsGridColumns";
 
-const DuplicateSSNsOnDemographicsGrid = () => {
+const DuplicateSSNsOnDemographicsGrid: React.FC = () => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
@@ -14,9 +14,21 @@ const DuplicateSSNsOnDemographicsGrid = () => {
     isSortDescending: false
   });
 
-  const dispatch = useDispatch();
   const { duplicateSSNsData } = useSelector((state: RootState) => state.yearsEnd);
-  const [_, { isLoading }] = useLazyGetDuplicateSSNsQuery();
+
+  const [triggerSearch, { isFetching }] = useLazyGetDuplicateSSNsQuery();
+
+  const onSearch = useCallback(async () => {
+    const request = {
+      pagination: { skip: pageNumber * pageSize, take: pageSize }
+    };
+
+    await triggerSearch(request, false);
+  }, [pageNumber, pageSize, triggerSearch]);
+
+  useEffect(() => {
+    onSearch();
+  }, [pageNumber, pageSize, onSearch]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetDuplicateSSNsOnDemographicsColumns(), []);
@@ -29,7 +41,7 @@ const DuplicateSSNsOnDemographicsGrid = () => {
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`DUPLICATE SSNs ON DEMOGRAPHICS (${duplicateSSNsData?.response.total || 0})`}
+              {`(${duplicateSSNsData?.response.total || 0})`}
             </Typography>
           </div>
           <DSMGrid

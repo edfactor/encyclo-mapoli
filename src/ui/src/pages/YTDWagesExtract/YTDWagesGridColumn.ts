@@ -1,8 +1,8 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { viewBadgeRenderer } from "utils/masterInquiryLink";
-import { currencyFormat } from "utils/numberUtils";
+import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
+import { agGridNumberToCurrency } from "smart-ui-library";
 
-export const GetYTDWagesColumns = (viewBadge: (params: number) => string): ColDef[] => {
+export const GetYTDWagesColumns = (): ColDef[] => {
   const columns: ColDef[] = [
     {
       headerName: "Badge",
@@ -13,7 +13,7 @@ export const GetYTDWagesColumns = (viewBadge: (params: number) => string): ColDe
       cellClass: "left-align",
       resizable: true,
       sortable: true,
-      cellRenderer: (params: ICellRendererParams) => viewBadgeRenderer(params.data.badgeNumber)
+      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber)
     },
     {
       headerName: "Hours Current Year",
@@ -32,7 +32,7 @@ export const GetYTDWagesColumns = (viewBadge: (params: number) => string): ColDe
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      valueFormatter: (params) => currencyFormat(params.value)
+      valueFormatter: agGridNumberToCurrency
     }
   ];
   return columns;

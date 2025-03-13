@@ -1,14 +1,18 @@
-import { FormHelperText, FormLabel, TextField } from "@mui/material";
-import Grid2 from "@mui/material/Unstable_Grid2";
-import { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { useLazyGetContributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
-import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import { ImpersonationRoles, FrozenReportsByAgeRequestType } from "reduxstore/types";
-import { useSelector } from "react-redux";
+import { FormHelperText, FormLabel, TextField } from "@mui/material";
+import Grid2 from "@mui/material/Grid2";
+import { Controller, useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
+import { useLazyGetContributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
+import {
+  clearContributionsByAge,
+  clearContributionsByAgeQueryParams,
+  setContributionsByAgeQueryParams
+} from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
+import { FrozenReportsByAgeRequestType } from "reduxstore/types";
+import { SearchAndReset } from "smart-ui-library";
+import * as yup from "yup";
 
 interface ContributionsByAgeSearch {
   profitYear: number;
@@ -26,9 +30,9 @@ const schema = yup.object().shape({
 });
 
 const ContributionsByAgeSearchFilter = () => {
-
   const [triggerSearch, { isFetching }] = useLazyGetContributionsByAgeQuery();
-
+  const { contributionsByAgeQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const dispatch = useDispatch();
   const {
     control,
     handleSubmit,
@@ -37,7 +41,7 @@ const ContributionsByAgeSearchFilter = () => {
   } = useForm<ContributionsByAgeSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: undefined,
+      profitYear: contributionsByAgeQueryParams?.profitYear || undefined,
       reportType: undefined
     }
   });
@@ -51,7 +55,7 @@ const ContributionsByAgeSearchFilter = () => {
           pagination: { skip: 0, take: 255 }
         },
         false
-      );
+      ).unwrap();
       triggerSearch(
         {
           profitYear: data.profitYear,
@@ -59,7 +63,7 @@ const ContributionsByAgeSearchFilter = () => {
           pagination: { skip: 0, take: 255 }
         },
         false
-      );
+      ).unwrap();
       triggerSearch(
         {
           profitYear: data.profitYear,
@@ -67,11 +71,14 @@ const ContributionsByAgeSearchFilter = () => {
           pagination: { skip: 0, take: 255 }
         },
         false
-      );
+      ).unwrap();
+      dispatch(setContributionsByAgeQueryParams(data.profitYear));
     }
   });
 
   const handleReset = () => {
+    dispatch(clearContributionsByAgeQueryParams());
+    dispatch(clearContributionsByAge());
     reset({
       profitYear: undefined,
       reportType: undefined
@@ -84,10 +91,7 @@ const ContributionsByAgeSearchFilter = () => {
         container
         paddingX="24px"
         gap="24px">
-        <Grid2
-          xs={12}
-          sm={6}
-          md={3}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
           <FormLabel>Year</FormLabel>
           <Controller
             name="profitYear"
@@ -101,7 +105,7 @@ const ContributionsByAgeSearchFilter = () => {
                 onChange={(e) => {
                   field.onChange(e);
                 }}
-                inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                type="number"
               />
             )}
           />

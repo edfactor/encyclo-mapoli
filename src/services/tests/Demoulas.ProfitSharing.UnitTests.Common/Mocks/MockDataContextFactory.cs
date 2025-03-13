@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.UnitTests.Common.Fakes;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using MockQueryable.Moq;
 using Moq;
@@ -26,6 +27,18 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
 
         _profitSharingReadOnlyDbContext = new Mock<ProfitSharingReadOnlyDbContext>();
         _storeInfoDbContext = new Mock<DemoulasCommonDataContext>();
+
+        // Assuming you have a DbContext type called ProfitSharingReadOnlyDbContext
+        var mockContext = new Mock<ProfitSharingReadOnlyDbContext>( /* options if needed */ );
+        var mockDatabaseFacade = new Mock<DatabaseFacade>(mockContext.Object);
+
+        // Setup the ProviderName property to return the in-memory provider value
+        mockDatabaseFacade.SetupGet(db => db.ProviderName)
+            .Returns("Microsoft.EntityFrameworkCore.InMemory");
+
+        // Make sure that when your context.Database is accessed, it returns our mocked DatabaseFacade
+        mockContext.SetupGet(ctx => ctx.Database)
+            .Returns(mockDatabaseFacade.Object);
 
 
         List<Country>? countries = new CountryFaker().Generate(10);
@@ -47,6 +60,17 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         var mockTaxCodes = taxCodes.AsQueryable().BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.TaxCodes).Returns(mockTaxCodes.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.TaxCodes).Returns(mockTaxCodes.Object);
+
+        var employmentTypes = new List<EmploymentType>()
+        {
+            new EmploymentType() {Id=EmploymentType.Constants.FullTimeAccruedPaidHolidays,Name=EmploymentType.Constants.FullTimeAccruedPaidHolidays.ToString() },
+            new EmploymentType() {Id=EmploymentType.Constants.FullTimeEightPaidHolidays,Name=EmploymentType.Constants.FullTimeEightPaidHolidays.ToString() },
+            new EmploymentType() {Id=EmploymentType.Constants.FullTimeStraightSalary,Name=EmploymentType.Constants.FullTimeStraightSalary.ToString() },
+            new EmploymentType() {Id=EmploymentType.Constants.PartTime,Name=EmploymentType.Constants.PartTime.ToString() }
+        };
+        var mockEmploymentTypes = employmentTypes.AsQueryable().BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.EmploymentTypes).Returns(mockEmploymentTypes.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.EmploymentTypes).Returns(mockEmploymentTypes.Object);
 
         List<Demographic>? demographics = new DemographicFaker().Generate(500);
         List<DemographicHistory>? demographicHistories = new DemographicHistoryFaker(demographics).Generate(demographics.Count);
@@ -91,7 +115,6 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         Mock<DbSet<FrozenState>> mockFrozenStates = frozenStates.AsQueryable().BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.FrozenStates).Returns(mockFrozenStates.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.FrozenStates).Returns(mockFrozenStates.Object);
-
 
         _profitSharingDbContext.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()));
         _profitSharingDbContext.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()))

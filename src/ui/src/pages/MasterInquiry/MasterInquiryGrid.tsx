@@ -1,24 +1,72 @@
 import { Typography } from "@mui/material";
-import { useState, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useLazyGetNegativeEVTASSNQuery } from "reduxstore/api/YearsEndApi";
+import { useState, useMemo, useCallback, useEffect } from "react";
+import { useSelector } from "react-redux";
+import { useLazyGetProfitMasterInquiryQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetMasterInquiryGridColumns } from "./MasterInquiryGridColumns";
+import { MasterInquiryRequest } from "reduxstore/types";
+import { paymentTypeGetNumberMap, memberTypeGetNumberMap } from "./MasterInquiryFunctions";
+interface MasterInquiryGridProps {
+  initialSearchLoaded: boolean;
+  setInitialSearchLoaded: (loaded: boolean) => void;
+}
 
-const MasterInquiryGrid = () => {
+const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoaded, setInitialSearchLoaded }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
-  const [sortParams, setSortParams] = useState<ISortParams>({
+  const [_sortParams, setSortParams] = useState<ISortParams>({
     sortBy: "Badge",
     isSortDescending: false
   });
 
-  const { masterInquiryData } = useSelector((state: RootState) => state.yearsEnd);
-  const [_, { isLoading }] = useLazyGetNegativeEVTASSNQuery();
+  const { masterInquiryData, masterInquiryRequestParams } = useSelector((state: RootState) => state.yearsEnd);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [triggerSearch, { isFetching }] = useLazyGetProfitMasterInquiryQuery();
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetMasterInquiryGridColumns(), []);
+
+  const onSearch = useCallback(async () => {
+    if (!masterInquiryRequestParams) return;
+
+    const request: MasterInquiryRequest = {
+      pagination: { skip: pageNumber * pageSize, take: pageSize },
+      ...(!!masterInquiryRequestParams.startProfitYear && {
+        startProfitYear: masterInquiryRequestParams.startProfitYear.getFullYear()
+      }),
+      ...(!!masterInquiryRequestParams.endProfitYear && {
+        endProfitYear: masterInquiryRequestParams.endProfitYear.getFullYear()
+      }),
+      ...(!!masterInquiryRequestParams.startProfitMonth && {
+        startProfitMonth: masterInquiryRequestParams.startProfitMonth
+      }),
+      ...(!!masterInquiryRequestParams.endProfitMonth && { endProfitMonth: masterInquiryRequestParams.endProfitMonth }),
+      ...(!!masterInquiryRequestParams.socialSecurity && { socialSecurity: masterInquiryRequestParams.socialSecurity }),
+      ...(!!masterInquiryRequestParams.name && { name: masterInquiryRequestParams.name }),
+      ...(!!masterInquiryRequestParams.badgeNumber && { badgeNumber: masterInquiryRequestParams.badgeNumber }),
+      ...(!!masterInquiryRequestParams.comment && { comment: masterInquiryRequestParams.comment }),
+      ...(!!masterInquiryRequestParams.paymentType && {
+        paymentType: paymentTypeGetNumberMap[masterInquiryRequestParams.paymentType]
+      }),
+      ...(!!masterInquiryRequestParams.memberType && {
+        memberType: memberTypeGetNumberMap[masterInquiryRequestParams.memberType]
+      }),
+      ...(!!masterInquiryRequestParams.contribution && { contribution: masterInquiryRequestParams.contribution }),
+      ...(!!masterInquiryRequestParams.earnings && { earnings: masterInquiryRequestParams.earnings }),
+      ...(!!masterInquiryRequestParams.forfeiture && { forfeiture: masterInquiryRequestParams.forfeiture }),
+      ...(!!masterInquiryRequestParams.payment && { payment: masterInquiryRequestParams.payment })
+      //voids: voidsCurrent,
+    };
+
+    await triggerSearch(request, false);
+  }, [pageNumber, pageSize, triggerSearch, masterInquiryRequestParams]);
+
+  useEffect(() => {
+    if (initialSearchLoaded) {
+      onSearch();
+    }
+  }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
 
   return (
     <>
@@ -28,7 +76,7 @@ const MasterInquiryGrid = () => {
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`Master Inquiry (${masterInquiryData?.total || 0})`}
+              {`Master Inquiry (${masterInquiryData?.inquiryResults.total || 0})`}
             </Typography>
           </div>
           <DSMGrid
@@ -36,24 +84,26 @@ const MasterInquiryGrid = () => {
             isLoading={false}
             handleSortChanged={sortEventHandler}
             providedOptions={{
-              rowData: masterInquiryData?.results,
+              rowData: masterInquiryData?.inquiryResults.results,
               columnDefs: columnDefs
             }}
           />
         </>
       )}
-      {!!masterInquiryData && masterInquiryData.results.length > 0 && (
+      {!!masterInquiryData && masterInquiryData.inquiryResults.results.length > 0 && (
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
             setPageNumber(value - 1);
+            setInitialSearchLoaded(true);
           }}
           pageSize={pageSize}
           setPageSize={(value: number) => {
             setPageSize(value);
             setPageNumber(1);
+            setInitialSearchLoaded(true);
           }}
-          recordCount={masterInquiryData.total}
+          recordCount={masterInquiryData.inquiryResults.total}
         />
       )}
     </>

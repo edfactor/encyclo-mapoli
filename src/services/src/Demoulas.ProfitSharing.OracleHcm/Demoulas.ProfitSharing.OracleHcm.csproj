@@ -13,6 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AspNetCore.HealthChecks.System" />
+    <PackageReference Include="OpenTelemetry.Api" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Quartz" />
     <PackageReference Include="Quartz" />
     <PackageReference Include="MassTransit" />

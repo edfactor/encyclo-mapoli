@@ -18,7 +18,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .UseCollation("USING_NLS_COMP")
-                .HasAnnotation("ProductVersion", "9.0.2")
+                .HasAnnotation("ProductVersion", "9.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             OracleModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -27365,6 +27365,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_DEMOGRAPHIC_BADGENUMBER");
 
+                    b.HasIndex(new[] { "DateOfBirth" }, "IX_DOB")
+                        .HasDatabaseName("IX_DEMOGRAPHIC_DATEOFBIRTH");
+
                     b.HasIndex(new[] { "OracleHcmId" }, "IX_ORACLE_HCM_ID")
                         .IsUnique()
                         .HasDatabaseName("IX_DEMOGRAPHIC_ORACLEHCMID");
@@ -29226,13 +29229,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(2)")
                         .HasColumnName("WEEKS_WORKED_YEAR");
 
-                    b.Property<byte>("YearsInPlan")
-                        .ValueGeneratedOnAdd()
-                        .HasPrecision(2)
-                        .HasColumnType("NUMBER(2)")
-                        .HasDefaultValue((byte)0)
-                        .HasColumnName("YEARS_IN_PLAN");
-
                     b.Property<byte?>("ZeroContributionReasonId")
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("ZERO_CONTRIBUTION_REASON_ID");
@@ -29438,6 +29434,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasPrecision(4)
                         .HasColumnType("NUMBER(4,0)")
                         .HasColumnName("YEAR_TO_DATE");
+
+                    b.Property<byte>("YearsOfServiceCredit")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(3)")
+                        .HasDefaultValue((byte)0)
+                        .HasColumnName("YEARS_OF_SERVICE_CREDIT");
 
                     b.Property<byte?>("ZeroContributionReasonId")
                         .HasColumnType("NUMBER(3)")
@@ -30153,7 +30155,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasForeignKey("EmploymentTypeId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
-                        .HasConstraintName("FK_DEMOGRAPHIC_EMPLOYMENTTYPE_EMPLOYMENTTYPEID");
+                        .HasConstraintName("FK_DEMOGRAPHIC_EMPLOYMENTTYPES_EMPLOYMENTTYPEID");
 
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.Gender", "Gender")
                         .WithMany("Demographics")
@@ -30308,6 +30310,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                                 .HasColumnName("PHONE_NUMBER");
 
                             b1.HasKey("DemographicId");
+
+                            b1.HasIndex(new[] { "FullName" }, "IX_FULL_NAME")
+                                .HasDatabaseName("IX_DEMOGRAPHIC_FULL_NAME");
 
                             b1.ToTable("DEMOGRAPHIC");
 

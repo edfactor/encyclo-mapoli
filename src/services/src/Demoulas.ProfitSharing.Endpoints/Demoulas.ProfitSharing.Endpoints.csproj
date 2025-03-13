@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="CsvHelper" />
     <PackageReference Include="Demoulas.Common.Api" />
+    <PackageReference Include="OpenTelemetry.Api" />
   </ItemGroup>
 
   <ItemGroup>

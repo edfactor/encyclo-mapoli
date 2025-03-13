@@ -1,11 +1,10 @@
-import React from "react";
-import Router from "./components/router/Router";
-import { DSMLayout, themeOptions } from "smart-ui-library";
-import Logout from "components/Logout/Logout";
 import { createTheme, ThemeProvider } from "@mui/material";
-import "smart-ui-library/dist/smart-ui-library.css";
-import buildInfo from "./.buildinfo.json";
 import AppErrorBoundary from "components/ErrorBoundary";
+import { DSMLayout, themeOptions } from "smart-ui-library";
+import "smart-ui-library/dist/smart-ui-library.css";
+import "../agGridConfig";
+import buildInfo from "./.buildinfo.json";
+import Router from "./components/router/Router";
 
 const App = () => {
   const onClick = (e: any) => {};
@@ -15,13 +14,14 @@ const App = () => {
       <DSMLayout
         onClick={onClick}
         appTitle="Profit Sharing"
-        Logout={<Logout />}
-        versionNmber={`${buildInfo.BuildNumber}.${buildInfo.BuildId}`}
-        username={"TEST"}>
-          <AppErrorBoundary>
+        logout={() => alert("Logout")}
+        buildVersionNumber={`${buildInfo.BuildNumber}.${buildInfo.BuildId}`}
+        userName={"TEST"}
+        environmentMode={"development"}
+        oktaEnabled={true}>
+        <AppErrorBoundary>
           <Router />
-          </AppErrorBoundary>
-        
+        </AppErrorBoundary>
       </DSMLayout>
     </ThemeProvider>
   );

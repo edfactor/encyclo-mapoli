@@ -7,4 +7,5 @@ internal sealed class ParticipantTotalVestingBalanceDto
     internal decimal Etva { get; set; }
     internal decimal VestingPercent { get; set; }
     internal decimal CurrentBalance { get; set; }
+    internal byte YearsInPlan { get; set; }
 }

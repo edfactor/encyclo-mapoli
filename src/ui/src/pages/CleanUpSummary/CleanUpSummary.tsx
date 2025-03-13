@@ -1,11 +1,12 @@
-import { Divider, Tabs, Tab, Button, Stack, Breadcrumbs, Link } from "@mui/material";
-import Grid2 from "@mui/material/Unstable_Grid2";
+import { Divider, Tabs, Tab, Button } from "@mui/material";
+import Grid2 from '@mui/material/Grid2';
 import { useState } from "react";
 import { Page } from "smart-ui-library";
 import CleanUpSummaryCards from "./CleanUpSummaryCards";
 import CleanUpSummaryGrids from "./CleanUpSummaryGrids";
 import { useNavigate } from "react-router";
 import StatusDropdown, { ProcessStatus } from "components/StatusDropdown";
+import { MENU_LABELS } from "../../constants";
 
 const CleanUpSummary = () => {
   const [selectedTab, setSelectedTab] = useState(0);
@@ -33,11 +34,11 @@ const CleanUpSummary = () => {
         <div className="flex items-center gap-2 h-10">
           <StatusDropdown onStatusChange={handleStatusChange} />
           <Button
-            onClick={() => navigate('/december-process-accordion')}
+            onClick={() => navigate("/december-process-accordion")}
             variant="outlined"
             className="h-10 whitespace-nowrap min-w-fit"
           >
-            December Flow
+            {MENU_LABELS.DECEMBER_ACTIVITIES}
           </Button>
         </div>
       );
@@ -46,7 +47,9 @@ const CleanUpSummary = () => {
   };
 
   return (
-    <Page label={selectedTab == 0 ? "Clean Up Process Summary" : tabs[selectedTab]} actionNode={renderActionNode()}>
+    <Page
+      label={selectedTab == 0 ? "Clean Up Process Summary" : tabs[selectedTab]}
+      actionNode={renderActionNode()}>
       <Grid2
         container
         width="100%"

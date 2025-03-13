@@ -1,12 +1,14 @@
 import { FormHelperText, FormLabel, TextField, Button } from "@mui/material";
-import Grid2 from "@mui/material/Unstable_Grid2";
-import { useState } from "react";
+import Grid2 from "@mui/material/Grid2";
 import { Controller, useForm } from "react-hook-form";
 import { useLazyGetVestingAmountByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
 import { downloadFileFromResponse } from "utils/fileDownload"; // Import utility function
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "reduxstore/store";
+import { clearVestedAmountsByAgeQueryParams, setVestedAmountsByAgeQueryParams } from "reduxstore/slices/yearsEndSlice";
 
 interface VestingAmountByAgeSearch {
   profitYear: number;
@@ -24,7 +26,10 @@ const schema = yup.object().shape({
 
 const VestedAmountsByAgeSearchFilter = () => {
   const [triggerSearch, { isFetching }] = useLazyGetVestingAmountByAgeQuery();
-
+  const { vestedAmountsByAgeQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const thisYear = new Date().getFullYear();
+  const lastYear = thisYear - 1;
+  const dispatch = useDispatch();
   const {
     control,
     handleSubmit,
@@ -33,7 +38,7 @@ const VestedAmountsByAgeSearchFilter = () => {
   } = useForm<VestingAmountByAgeSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: undefined
+      profitYear: vestedAmountsByAgeQueryParams?.profitYear || undefined
     }
   });
 
@@ -45,11 +50,13 @@ const VestedAmountsByAgeSearchFilter = () => {
           acceptHeader: "application/json"
         },
         false
-      );
+      ).unwrap();
+      dispatch(setVestedAmountsByAgeQueryParams(data.profitYear));
     }
   });
 
   const handleReset = () => {
+    dispatch(clearVestedAmountsByAgeQueryParams());
     reset({
       profitYear: undefined
     });
@@ -58,7 +65,6 @@ const VestedAmountsByAgeSearchFilter = () => {
   const handleDownloadCSV = handleSubmit(async (data) => {
     if (isValid) {
       try {
-        // setIsFetching(true); // This line is not needed as isFetching is managed by the hook
         const fetchPromise = triggerSearch({
           profitYear: data.profitYear,
           acceptHeader: "text/csv"
@@ -67,8 +73,6 @@ const VestedAmountsByAgeSearchFilter = () => {
       } catch (error) {
         console.error("Download failed:", error);
         // Do we want to throw a formal Error for the react-error-boundary to catch?
-      } finally {
-        //setIsFetching(false);
       }
     }
   });
@@ -79,10 +83,7 @@ const VestedAmountsByAgeSearchFilter = () => {
         container
         paddingX="24px"
         gap="24px">
-        <Grid2
-          xs={12}
-          sm={6}
-          md={3}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
           <FormLabel>Year</FormLabel>
           <Controller
             name="profitYear"
@@ -96,7 +97,7 @@ const VestedAmountsByAgeSearchFilter = () => {
                 onChange={(e) => {
                   field.onChange(e);
                 }}
-                inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                type="number"
               />
             )}
           />

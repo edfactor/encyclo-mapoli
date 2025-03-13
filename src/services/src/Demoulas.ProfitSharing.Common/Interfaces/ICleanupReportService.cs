@@ -10,7 +10,7 @@ public interface ICleanupReportService
 
     Task<ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>> GetNegativeETVAForSSNsOnPayProfitResponseAsync(ProfitYearRequest req, CancellationToken cancellationToken = default);
     Task<ReportResponseBase<NamesMissingCommaResponse>> GetNamesMissingCommaAsync(PaginationRequestDto req, CancellationToken cancellationToken = default);
-    Task<ReportResponseBase<YearEndProfitSharingReportResponse>> GetYearEndProfitSharingReportAsync(YearEndProfitSharingReportRequest req, CancellationToken cancellationToken = default);
+    Task<YearEndProfitSharingReportResponse> GetYearEndProfitSharingReportAsync(YearEndProfitSharingReportRequest req, CancellationToken cancellationToken = default);
     Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetDuplicateNamesAndBirthdaysAsync(ProfitYearRequest req, CancellationToken cancellationToken = default);
     Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfitAsync(PaginationRequestDto req,CancellationToken cancellationToken = default);
     Task<ReportResponseBase<DistributionsAndForfeitureResponse>> GetDistributionsAndForfeitureAsync(DistributionsAndForfeituresRequest req, CancellationToken cancellationToken = default);

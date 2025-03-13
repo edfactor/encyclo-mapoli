@@ -2,7 +2,7 @@
 
 namespace Demoulas.ProfitSharing.Data.Entities;
 
-[DebuggerDisplay("Id={DemographicId} ProfitYear={ProfitYear} YearsInPlan={YearsInPlan} EnrollmentId={EnrollmentId}")]
+[DebuggerDisplay($"Id={{DemographicId}} ProfitYear={{ProfitYear}} EnrollmentId={{EnrollmentId}} EmploymentStatus={{Demographic!.EmploymentStatusId}} TerminationCodeId={{Demographic!.TerminationCodeId}} Name:{{Demographic!.ContactInfo.FullName}}")]
 public sealed class PayProfit
 {
     /// <summary>
@@ -102,11 +102,6 @@ public sealed class PayProfit
     /// Points Earned (for the ProfitYear).
     /// </summary>
     public decimal? PointsEarned { get; set; }
-
-    /// <summary>
-    /// Total number of years a member was in the plan.
-    /// </summary>
-    public byte YearsInPlan { get; set; }
 
 
     public Demographic? Demographic { get; set; }

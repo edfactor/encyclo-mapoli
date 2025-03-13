@@ -1,6 +1,7 @@
-import { ColDef } from "ag-grid-community";
+import { ColDef, ICellRendererParams } from 'ag-grid-community';
+import { viewBadgeLinkRenderer } from 'utils/masterInquiryLink';
 
-export const GetTerminationColumns = (viewBadge: Function): ColDef[] => {
+export const GetTerminationColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
     {
       headerName: "Badge",
@@ -11,7 +12,7 @@ export const GetTerminationColumns = (viewBadge: Function): ColDef[] => {
       cellClass: "left-align",
       resizable: true,
       sortable: true,
-      cellRenderer: viewBadge
+      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgePSn, navFunction)
     },
     {
       headerName: "Name",
@@ -32,7 +33,7 @@ export const GetTerminationColumns = (viewBadge: Function): ColDef[] => {
       cellClass: "right-align",
       resizable: true,
       sortable: true,
-      valueFormatter: (params) => params.value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+      valueFormatter: (params) => params.value.toLocaleString("en-US", { style: "currency", currency: "USD" })
     },
     {
       headerName: "Beneficiary Allocation",
@@ -43,7 +44,7 @@ export const GetTerminationColumns = (viewBadge: Function): ColDef[] => {
       cellClass: "right-align",
       resizable: true,
       sortable: true,
-      valueFormatter: (params) => params.value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+      valueFormatter: (params) => params.value.toLocaleString("en-US", { style: "currency", currency: "USD" })
     },
     {
       headerName: "Distribution Amount",
@@ -54,7 +55,7 @@ export const GetTerminationColumns = (viewBadge: Function): ColDef[] => {
       cellClass: "right-align",
       resizable: true,
       sortable: true,
-      valueFormatter: (params) => params.value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+      valueFormatter: (params) => params.value.toLocaleString("en-US", { style: "currency", currency: "USD" })
     },
     {
       headerName: "Forfeit",
@@ -65,7 +66,7 @@ export const GetTerminationColumns = (viewBadge: Function): ColDef[] => {
       cellClass: "right-align",
       resizable: true,
       sortable: true,
-      valueFormatter: (params) => params.value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+      valueFormatter: (params) => params.value.toLocaleString("en-US", { style: "currency", currency: "USD" })
     },
     {
       headerName: "Ending Balance",
@@ -76,7 +77,7 @@ export const GetTerminationColumns = (viewBadge: Function): ColDef[] => {
       cellClass: "right-align",
       resizable: true,
       sortable: true,
-      valueFormatter: (params) => params.value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+      valueFormatter: (params) => params.value.toLocaleString("en-US", { style: "currency", currency: "USD" })
     },
     {
       headerName: "Vested Balance",
@@ -87,7 +88,7 @@ export const GetTerminationColumns = (viewBadge: Function): ColDef[] => {
       cellClass: "right-align",
       resizable: true,
       sortable: true,
-      valueFormatter: (params) => params.value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+      valueFormatter: (params) => params.value.toLocaleString("en-US", { style: "currency", currency: "USD" })
     },
     {
       headerName: "Term Date",

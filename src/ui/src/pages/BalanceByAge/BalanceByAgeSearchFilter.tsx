@@ -1,12 +1,17 @@
-import { FormHelperText, FormLabel, TextField } from "@mui/material";
-import Grid2 from "@mui/material/Unstable_Grid2";
-import { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { useLazyGetBalanceByAgeQuery } from "reduxstore/api/YearsEndApi";
-import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
+import { FormHelperText, FormLabel, TextField } from "@mui/material";
+import Grid2 from "@mui/material/Grid2";
+import { Controller, useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
+import { useLazyGetBalanceByAgeQuery } from "reduxstore/api/YearsEndApi";
+import {
+  clearBalanceByAge,
+  clearBalanceByAgeQueryParams,
+  setBalanceByAgeQueryParams
+} from "reduxstore/slices/yearsEndSlice";
 import { FrozenReportsByAgeRequestType } from "reduxstore/types";
+import { SearchAndReset } from "smart-ui-library";
+import * as yup from "yup";
 
 interface BalanceByAgeSearch {
   profitYear: number;
@@ -24,8 +29,10 @@ const schema = yup.object().shape({
 });
 
 const BalanceByAgeSearchFilter = () => {
-
   const [triggerSearch, { isFetching }] = useLazyGetBalanceByAgeQuery();
+  const { balanceByAgeQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+
+  const dispatch = useDispatch();
 
   const {
     control,
@@ -35,7 +42,7 @@ const BalanceByAgeSearchFilter = () => {
   } = useForm<BalanceByAgeSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: undefined,
+      profitYear: balanceByAgeQueryParams?.profitYear || undefined,
       reportType: undefined
     }
   });
@@ -49,7 +56,7 @@ const BalanceByAgeSearchFilter = () => {
           pagination: { skip: 0, take: 255 }
         },
         false
-      );
+      ).unwrap();
       triggerSearch(
         {
           profitYear: data.profitYear,
@@ -57,7 +64,7 @@ const BalanceByAgeSearchFilter = () => {
           pagination: { skip: 0, take: 255 }
         },
         false
-      );
+      ).unwrap();
       triggerSearch(
         {
           profitYear: data.profitYear,
@@ -65,11 +72,14 @@ const BalanceByAgeSearchFilter = () => {
           pagination: { skip: 0, take: 255 }
         },
         false
-      );
+      ).unwrap();
+      dispatch(setBalanceByAgeQueryParams(data.profitYear));
     }
   });
 
   const handleReset = () => {
+    dispatch(clearBalanceByAgeQueryParams());
+    dispatch(clearBalanceByAge());
     reset({
       profitYear: undefined,
       reportType: undefined
@@ -82,10 +92,7 @@ const BalanceByAgeSearchFilter = () => {
         container
         paddingX="24px"
         gap="24px">
-        <Grid2
-          xs={12}
-          sm={6}
-          md={3}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
           <FormLabel>Year</FormLabel>
           <Controller
             name="profitYear"
@@ -99,7 +106,7 @@ const BalanceByAgeSearchFilter = () => {
                 onChange={(e) => {
                   field.onChange(e);
                 }}
-                inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                type="number"
               />
             )}
           />

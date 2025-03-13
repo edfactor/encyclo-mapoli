@@ -38,6 +38,7 @@ internal sealed class ProfitDetailMap : IEntityTypeConfiguration<ProfitDetail>
             .HasMaxLength(9)
             .HasColumnName("COMMENT_RELATED_CHECK_NUMBER");
         _ = builder.Property(x => x.CommentIsPartialTransaction).HasColumnName("COMMENT_IS_PARTIAL_TRANSACTION");
+        _ = builder.Property(x => x.YearsOfServiceCredit).HasColumnName("YEARS_OF_SERVICE_CREDIT").HasDefaultValue(0).IsRequired();
 
         _ = builder.Property(e => e.CreatedUtc)
             .HasColumnType("TIMESTAMP WITH TIME ZONE")

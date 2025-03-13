@@ -1,10 +1,16 @@
-import { FormHelperText, FormLabel, TextField } from "@mui/material";
-import Grid2 from "@mui/material/Unstable_Grid2";
-import { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { useLazyGetDuplicateNamesAndBirthdaysQuery } from "reduxstore/api/YearsEndApi";
-import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { FormHelperText, FormLabel, TextField } from "@mui/material";
+import Grid2 from "@mui/material/Grid2";
+import { Controller, useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
+import { useLazyGetDuplicateNamesAndBirthdaysQuery } from "reduxstore/api/YearsEndApi";
+import {
+  clearDuplicateNamesAndBirthdays,
+  clearDuplicateNamesAndBirthdaysQueryParams,
+  setDuplicateNamesAndBirthdaysQueryParams
+} from "reduxstore/slices/yearsEndSlice";
+import { RootState } from "reduxstore/store";
+import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 
 interface DuplicateNamesAndBirthdaysSearch {
@@ -21,9 +27,16 @@ const schema = yup.object().shape({
     .required("Year is required")
 });
 
-const DuplicateNamesAndBirthdaysSearchFilter = () => {
-  const [triggerSearch, { isFetching }] = useLazyGetDuplicateNamesAndBirthdaysQuery();
+interface DuplicateNamesAndBirthdaysSearchFilterProps {
+  setInitialSearchLoaded: (include: boolean) => void;
+}
 
+const DuplicateNamesAndBirthdaysSearchFilter: React.FC<DuplicateNamesAndBirthdaysSearchFilterProps> = ({
+  setInitialSearchLoaded
+}) => {
+  const [triggerSearch, { isFetching }] = useLazyGetDuplicateNamesAndBirthdaysQuery();
+  const { duplicateNamesAndBirthdaysQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const dispatch = useDispatch();
   const {
     control,
     handleSubmit,
@@ -33,7 +46,7 @@ const DuplicateNamesAndBirthdaysSearchFilter = () => {
   } = useForm<DuplicateNamesAndBirthdaysSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: undefined
+      profitYear: duplicateNamesAndBirthdaysQueryParams?.profitYear || undefined
     }
   });
 
@@ -45,11 +58,15 @@ const DuplicateNamesAndBirthdaysSearchFilter = () => {
           pagination: { skip: 0, take: 25 }
         },
         false
-      );
+      ).unwrap();
+      dispatch(setDuplicateNamesAndBirthdaysQueryParams(data.profitYear));
     }
   });
 
   const handleReset = () => {
+    setInitialSearchLoaded(false);
+    dispatch(clearDuplicateNamesAndBirthdaysQueryParams());
+    dispatch(clearDuplicateNamesAndBirthdays());
     reset({
       profitYear: undefined
     });
@@ -61,10 +78,7 @@ const DuplicateNamesAndBirthdaysSearchFilter = () => {
         container
         paddingX="24px"
         gap="24px">
-        <Grid2
-          xs={12}
-          sm={6}
-          md={3}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
           <FormLabel>Year</FormLabel>
           <Controller
             name="profitYear"
@@ -78,7 +92,7 @@ const DuplicateNamesAndBirthdaysSearchFilter = () => {
                 onChange={(e) => {
                   field.onChange(e);
                 }}
-                inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                type="number"
               />
             )}
           />

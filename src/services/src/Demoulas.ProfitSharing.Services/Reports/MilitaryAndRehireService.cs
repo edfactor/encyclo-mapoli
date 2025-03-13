@@ -160,7 +160,7 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
                     demographics.TerminationDate,
                     demographics.ReHireDate,
                     demographics.StoreNumber,
-                    CompanyContributionYears = payProfit.YearsInPlan,
+                    //CompanyContributionYears = payProfit.YearsInPlan,
                     payProfit.EnrollmentId,
                     payProfit.CurrentHoursYear,
                     //payProfit.NetBalanceLastYear,

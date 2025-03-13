@@ -1,19 +1,29 @@
-import React, { useEffect, useMemo, useState } from "react";
 import { Typography } from "@mui/material";
-import { useSelector, useDispatch } from "react-redux";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { RootState } from "reduxstore/store";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
 import { useLazyGetDemographicBadgesNotInPayprofitQuery } from "reduxstore/api/YearsEndApi";
+import { RootState } from "reduxstore/store";
+import { DSMGrid, Pagination } from "smart-ui-library";
 import { GetDemographicBadgesNotInPayprofitColumns } from "./DemographicBadgesNotInPayprofitGridColumns";
-import { setDemographicBadgesNotInPayprofitData } from "reduxstore/slices/yearsEndSlice";
-import { ImpersonationRoles } from "reduxstore/types";
 
 const DemographicBadgesNotInPayprofitGrid: React.FC = () => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
 
   const { demographicBadges } = useSelector((state: RootState) => state.yearsEnd);
-  const [_, { isLoading }] = useLazyGetDemographicBadgesNotInPayprofitQuery();
+  const [triggerSearch, { isLoading }] = useLazyGetDemographicBadgesNotInPayprofitQuery();
+
+  const onSearch = useCallback(async () => {
+    const request = {
+      pagination: { skip: pageNumber * pageSize, take: pageSize }
+    };
+
+    await triggerSearch(request, false);
+  }, [pageNumber, pageSize, triggerSearch]);
+
+  useEffect(() => {
+    onSearch();
+  }, [pageNumber, pageSize, onSearch]);
 
   const columnDefs = useMemo(() => GetDemographicBadgesNotInPayprofitColumns(), []);
 
@@ -25,7 +35,7 @@ const DemographicBadgesNotInPayprofitGrid: React.FC = () => {
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`DEMOGRAPHICS BADGES NOT ON PAYPROFIT (${demographicBadges?.response.total || 0})`}
+              {`(${demographicBadges?.response.total || 0})`}
             </Typography>
           </div>
           <DSMGrid

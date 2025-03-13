@@ -137,7 +137,7 @@ export interface DuplicateNameAndBirthday {
 }
 
 export interface NegativeEtvaForSSNsOnPayProfit {
-  employeeBadge: number;
+  badgeNumber: number;
   ssn: number;
   etvaValue: number;
 }
@@ -204,6 +204,7 @@ export interface ExecutiveHoursAndDollarsRequestDto extends ProfitYearRequest {
   socialSecurity?: number;
   fullNameContains?: string;
   hasExecutiveHoursAndDollars: boolean;
+  hasMonthlyPayments: boolean;
   pagination: PaginationParams;
 }
 
@@ -260,6 +261,53 @@ export interface EligibleEmployeeResponseDto {
   response: Paged<EligibleEmployee>;
 }
 
+export interface BaseQueryParams {
+  profitYear: number;
+}
+
+export interface ForfeituresAndPointsQueryParams extends BaseQueryParams {
+  useFrozenData: boolean;
+}
+
+export interface ProfitAndReportingQueryParams extends BaseQueryParams {
+  reportingYear: string;
+}
+export interface ExecutiveHoursAndDollarsQueryParams extends BaseQueryParams {
+  badgeNumber: number;
+  socialSecurity: number;
+  fullNameContains: string;
+  hasExecutiveHoursAndDollars: boolean;
+  hasMonthlyPayments: boolean;
+}
+
+export interface DistributionsAndForfeituresQueryParams extends BaseQueryParams {
+  startMonth?: number;
+  endMonth?: number;
+  includeOutgoingForfeitures?: boolean;
+}
+
+export interface BaseDateRangeParams {
+  startDate: Date;
+  endDate: Date;
+}
+export interface MasterInquirySearch {
+  startProfitYear?: Date | null;
+  endProfitYear?: Date | null;
+  startProfitMonth?: number | null;
+  endProfitMonth?: number | null;
+  socialSecurity?: number | null;
+  name?: string | null;
+  badgeNumber?: number | null;
+  comment?: string | null;
+  paymentType: "all" | "hardship" | "payoffs" | "rollovers";
+  memberType: "all" | "employees" | "beneficiaries" | "none";
+  contribution?: number | null;
+  earnings?: number | null;
+  forfeiture?: number | null;
+  payment?: number | null;
+  voids: boolean;
+}
+
 export interface MasterInquiryDetail extends ProfitYearRequest {
   id: number;
   ssn: number;
@@ -289,7 +337,7 @@ export interface MasterInquiryDetail extends ProfitYearRequest {
   commentTypeName?: string;
 }
 
-export interface MasterInquryRequest {
+export interface MasterInquiryRequest {
   startProfitYear?: number;
   endProfitYear?: number;
   startProfitMonth?: number;
@@ -300,6 +348,7 @@ export interface MasterInquryRequest {
   forfeitureAmount?: number;
   paymentAmount?: number;
   socialSecurity?: number;
+  name?: string;
   comment?: string;
   pagination: PaginationParams;
   paymentType?: number;
@@ -316,6 +365,10 @@ export enum FrozenReportsByAgeRequestType {
 export interface FrozenReportsByAgeRequest extends ProfitYearRequest {
   pagination: PaginationParams;
   reportType: FrozenReportsByAgeRequestType;
+}
+export interface FrozenReportsForfeituresAndPointsRequest extends ProfitYearRequest {
+  pagination: PaginationParams;
+  useFrozenData: boolean;
 }
 export interface ProfitSharingDistributionsByAge {
   reportName: string;
@@ -368,6 +421,22 @@ export interface ForfeituresByAge {
   response: Paged<ForfeituresByAgeDetail>;
 }
 
+export interface ForfeituresAndPointsDetail {
+  badgeNumber: number;
+  employeeName: string;
+  ssn: string;
+  forfeitures: number;
+  forfeiturePoints: number;
+  earningPoints: number;
+  benefificaryPsn: number;
+}
+export interface ForfeituresAndPoints {
+  reportName: string;
+  reportDate: string;
+  useFrozenData: boolean;
+  response: Paged<ForfeituresAndPointsDetail>;
+}
+
 export interface ForfeituresByAgeDetail {
   age: number;
   employeeCount: number;
@@ -397,6 +466,8 @@ export interface EmployeeDetails {
   currentPSAmount: number;
   beginVestedAmount: number;
   currentVestedAmount: number;
+  currentEtva: number;
+  previousEtva: number;
 }
 
 export interface MasterInquiryResponseType {
@@ -487,7 +558,8 @@ export interface TerminationRequest {
 }
 
 export interface TerminationDetail {
-  badgePSn: string;
+  badgeNumber: number;
+  psnSuffix: number;
   name: string;
   beginningBalance: number;
   beneficiaryAllocation: number;
@@ -587,15 +659,92 @@ export interface ProfitShareEditResponse {
 export interface ProfitShareMasterResponse {
   isLoading: boolean;
   reportName: string;
-  beneficiariesEffected: number;
-  employeesEffected: number;
-  etvasEffected: number;
+  beneficiariesEffected?: number;
+  employeesEffected?: number;
+  etvasEffected?: number;
 }
 
+export interface YearEndProfitSharingReportResponse {
+  badgeNumber: number;
+  employeeName: string;
+  storeNumber: number;
+  employeeTypeCode: string;
+  employmentTypeName: string;
+  dateOfBirth: Date;
+  age: number;
+  ssn: string;
+  wages: number;
+  hours: number;
+  points: number;
+  isUnder21: boolean;
+  isNew: boolean;
+  employeeStatus: string;
+  balance: number;
+  yearsInPlan: number;
+}
 export interface FrozenStateResponse {
   id: number;
   profitYear: number;
   frozenBy: string;
   asOfDateTime: string;
   isActive: boolean;
+}
+
+export interface ProfallData {
+  badge: number;
+  employeeName: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+}
+
+export interface MilitaryContributionRequest extends ProfitYearRequest {
+  badgeNumber: number;
+  pagination: PaginationParams;
+}
+
+export interface YearEndProfitSharingReportRequest {
+  isYearEnd: boolean;
+  minimumAgeInclusive: number;
+  maximumAgeInclusive: number;
+  minimumHoursInclusive: number;
+  maximumHoursInclusive: number;
+  includeActiveEmployees: boolean;
+  includeInactiveEmployees: boolean;
+  includeEmployeesTerminatedThisYear: boolean;
+  includeTerminatedEmployees: boolean;
+  includeBeneficiaries: boolean;
+  includeEmployeesWithPriorProfitSharingAmounts: boolean;
+  includeEmployeesWithNoPriorProfitSharingAmounts: boolean;
+  profitYear: number;
+  pagination: PaginationParams;
+}
+
+export interface CreateMilitaryContributionRequest extends ProfitYearRequest {
+  badgeNumber: number;
+  contributionAmount: number;
+}
+
+export interface MilitaryContribution {
+  contributionDate: Date | null;
+  contributionAmount: number | null;
+}
+export interface YearEndProfitSharingEmployee {
+  badgeNumber: number;
+  employeeName: string;
+  storeNumber: number;
+  employeeTypeCode: string;
+  employmentTypeName: string;
+  dateOfBirth: Date;
+  age: number;
+  ssn: string;
+  wages: number;
+  hours: number;
+  points: number;
+  isUnder21: boolean;
+  isNew: boolean;
+  employeeStatus: string;
+  balance: number;
+  yearsInPlan: number;
 }

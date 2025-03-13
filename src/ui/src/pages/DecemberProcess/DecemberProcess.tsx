@@ -1,15 +1,11 @@
-import { Filter, FilterList } from "@mui/icons-material";
-import { Box, Button, Divider, Stack, Typography } from "@mui/material";
-import Grid2 from "@mui/material/Unstable_Grid2";
+import { FilterList } from "@mui/icons-material";
+import { Button, Divider, Stack, Typography } from "@mui/material";
+import Grid2 from "@mui/material/Grid2";
 import DuplicateNamesAndBirthdaysGrid from "pages/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdaysGrid";
 import DuplicateSSNsOnDemographicsGrid from "pages/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographicsGrid";
+import EmployeesOnMilitaryLeave from "pages/EmployeesOnMilitaryLeave/EmployeesOnMilitaryLeave";
 import MasterInquiryGrid from "pages/MasterInquiry/MasterInquiryGrid";
 import MasterInquirySearchFilter from "pages/MasterInquiry/MasterInquirySearchFilter";
-import EmployeesOnMilitaryLeave from "pages/EmployeesOnMilitaryLeave/EmployeesOnMilitaryLeave";
-import MissingCommaInPyNameGrid from "pages/MissingCommaInPyName/MissingCommaInPyNameGrid";
-import NegativeEtvaForSSNsOnPayprofit from "pages/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofit";
-import NegativeEtvaForSSNsOnPayprofitGrid from "pages/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofitGrid";
-import VestedAmountsByAgeSearchFilter from "pages/VestedAmountsByAge/VestedAmountsByAgeSearchFilter";
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
@@ -26,6 +22,7 @@ import NegativeETVA from "./NegativeETVA";
 const DecemberProcess = () => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [triggerETVASearch, { isFetching: isFetchingETVA }] = useLazyGetNegativeEVTASSNQuery();
+  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [triggerPayrollDupeSsnsOnDemographics, { isFetching: isFetchingPayRollDupeSsns }] =
     useLazyGetDuplicateSSNsQuery();
   const [triggerDemographicBadgesNotInPayprofit, { isFetching: isfetchingDemographicBadges }] =
@@ -33,7 +30,7 @@ const DecemberProcess = () => {
   const [triggerDuplicateNamesAndBirthdays, { isFetching: isFetchingDuplicateNames }] =
     useLazyGetDuplicateNamesAndBirthdaysQuery();
 
-  const { negativeEtvaForSSNsOnPayprofit, duplicateSSNsData, demographicBadges, duplicateNamesAndBirthday } =
+  const { negativeEtvaForSSNsOnPayprofit, duplicateSSNsData, demographicBadges, duplicateNamesAndBirthdays } =
     useSelector((state: RootState) => state.yearsEnd);
 
   useEffect(() => {
@@ -42,7 +39,12 @@ const DecemberProcess = () => {
       triggerDemographicBadgesNotInPayprofit({ pagination: { take: 25, skip: 0 } });
       triggerDuplicateNamesAndBirthdays({ profitYear: 2023, pagination: { take: 25, skip: 0 } });
     }
-  }, [hasToken]);
+  }, [
+    hasToken,
+    triggerDemographicBadgesNotInPayprofit,
+    triggerDuplicateNamesAndBirthdays,
+    triggerPayrollDupeSsnsOnDemographics
+  ]);
 
   return (
     <Page
@@ -58,11 +60,11 @@ const DecemberProcess = () => {
         container
         rowSpacing="24px">
         <Grid2
-          xs={12}
+          size={{ xs: 12 }}
           width={"100%"}>
           <Divider />
         </Grid2>
-        <Grid2 xs={10}>
+        <Grid2 size={{ xs: 10 }}>
           <Typography
             variant="h2"
             sx={{ color: "#0258A5", paddingLeft: "24px" }}>
@@ -70,8 +72,8 @@ const DecemberProcess = () => {
           </Typography>
         </Grid2>
         <Grid2
-          sx={{ justifyContent: "flex-end", paddingRight: "24px" }}
-          xs={2}>
+          size={{ xs: 2 }}
+          sx={{ justifyContent: "flex-end", paddingRight: "24px" }}>
           <Link to="/clean-up-summary">
             <Button variant="outlined">View Details</Button>
           </Link>
@@ -84,7 +86,10 @@ const DecemberProcess = () => {
           <DuplicateSSNsOnDemographicsGrid />
         </Grid2>
         <Grid2 width="100%">
-          <DuplicateNamesAndBirthdaysGrid />
+          <DuplicateNamesAndBirthdaysGrid
+            initialSearchLoaded={initialSearchLoaded}
+            setInitialSearchLoaded={setInitialSearchLoaded}
+          />
         </Grid2>
         <Grid2 width="100%">
           <Stack paddingX="24px">

@@ -1,10 +1,13 @@
 import { Divider } from "@mui/material";
-import Grid2 from "@mui/material/Unstable_Grid2";
+import Grid2 from '@mui/material/Grid2';
 import NegativeEtvaForSSNsOnPayprofitGrid from "pages/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofitGrid";
 import NegativeEtvaForSSNsOnPayprofitSearchFilter from "pages/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofitSearchFilter";
+import { useState } from "react";
 import { DSMAccordion } from "smart-ui-library";
 
 export const NegativeEtvaTab = () => {
+  const [profitYear, setProfitYear] = useState<number | null>(null);
+  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   return (
     <Grid2
       container
@@ -12,16 +15,21 @@ export const NegativeEtvaTab = () => {
       <Grid2 width={"100%"}>
         <Divider />
       </Grid2>
-      <Grid2
-        width={"100%"}>
+      <Grid2 width={"100%"}>
         <DSMAccordion title="Filter">
-          <NegativeEtvaForSSNsOnPayprofitSearchFilter />
+          <NegativeEtvaForSSNsOnPayprofitSearchFilter
+            setProfitYear={setProfitYear}
+            setInitialSearchLoaded={setInitialSearchLoaded}
+          />
         </DSMAccordion>
-
       </Grid2>
 
       <Grid2 width="100%">
-        <NegativeEtvaForSSNsOnPayprofitGrid />
+        <NegativeEtvaForSSNsOnPayprofitGrid
+          profitYearCurrent={profitYear}
+          setInitialSearchLoaded={setInitialSearchLoaded}
+          initialSearchLoaded={initialSearchLoaded}
+        />
       </Grid2>
     </Grid2>
   );

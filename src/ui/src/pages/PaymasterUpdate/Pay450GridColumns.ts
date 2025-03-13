@@ -1,7 +1,8 @@
 import { agGridNumberToCurrency } from "smart-ui-library";
-import { ColDef } from "ag-grid-community";
+import { ColDef, ICellRendererParams } from "ag-grid-community";
+import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 
-export const GetPay450GridColumns = (viewBadge: Function): ColDef[] => {
+export const GetPay450GridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
     {
       headerName: "Badge",
@@ -12,7 +13,7 @@ export const GetPay450GridColumns = (viewBadge: Function): ColDef[] => {
       cellClass: "right-align",
       resizable: true,
       sortable: true,
-      cellRenderer: viewBadge
+      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badge, navFunction)
     },
     {
       headerName: "Employee Name",

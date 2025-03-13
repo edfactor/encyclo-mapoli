@@ -1,0 +1,68 @@
+import { Typography } from "@mui/material";
+import { useMemo, useEffect, useCallback } from "react";
+import { DSMGrid } from "smart-ui-library";
+import { Path, useNavigate } from "react-router";
+import { GetProfitSharingReportGridColumns } from "../PAY426-1/EighteenToTwentyGridColumns";
+import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
+
+const TermedWithHoursGrid = () => {
+  const navigate = useNavigate();
+  const [trigger, { data, isLoading }] = useLazyGetYearEndProfitSharingReportQuery();
+
+  useEffect(() => {
+    trigger({
+      isYearEnd: true,
+      minimumAgeInclusive: 18,
+      maximumAgeInclusive: 200,
+      minimumHoursInclusive: 1000,
+      maximumHoursInclusive: 4000,
+      includeActiveEmployees: false,
+      includeInactiveEmployees: false,
+      includeEmployeesTerminatedThisYear: true,
+      includeTerminatedEmployees: true,
+      includeBeneficiaries: false,
+      includeEmployeesWithPriorProfitSharingAmounts: true,
+      includeEmployeesWithNoPriorProfitSharingAmounts: true,
+      profitYear: 2024,
+      pagination: {
+        skip: 0,
+        take: 25
+      }
+    });
+  }, [trigger]);
+
+  const handleNavigationForButton = useCallback(
+    (destination: string | Partial<Path>) => {
+      navigate(destination);
+    },
+    [navigate]
+  );
+
+  const columnDefs = useMemo(
+    () => GetProfitSharingReportGridColumns(handleNavigationForButton),
+    [handleNavigationForButton]
+  );
+
+  return (
+    <>
+      <div style={{ padding: "0 24px 0 24px" }}>
+        <Typography
+          variant="h2"
+          sx={{ color: "#0258A5" }}>
+          {`TERMED WITH 1000+ HOURS REPORT (${data?.response?.results?.length || 0})`}
+        </Typography>
+      </div>
+      <DSMGrid
+        preferenceKey={"TERMED_WITH_HOURS_EMPLOYEES"}
+        isLoading={isLoading}
+        handleSortChanged={(_params) => {}}
+        providedOptions={{
+          rowData: data?.response?.results || [],
+          columnDefs: columnDefs
+        }}
+      />
+    </>
+  );
+};
+
+export default TermedWithHoursGrid;

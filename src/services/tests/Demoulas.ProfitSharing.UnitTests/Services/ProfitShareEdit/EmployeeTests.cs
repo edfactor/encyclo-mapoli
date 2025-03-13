@@ -55,7 +55,7 @@ public class EmployeeTests : ApiTestBase<Program>
     {
         // Arrange
         _payProfit.EnrollmentId = /*0*/ Enrollment.Constants.NotEnrolled;
-        _payProfit.YearsInPlan = 0;
+        _profitDetails[0].YearsOfServiceCredit= 0;
 
         // Act
         ProfitShareEditResponse response = await _service.ProfitShareEdit(DefaultRequest(), CancellationToken.None);
@@ -70,7 +70,6 @@ public class EmployeeTests : ApiTestBase<Program>
     {
         // Arrange
         _payProfit.EnrollmentId = /*2*/ Enrollment.Constants.NewVestingPlanHasContributions;
-        _payProfit.YearsInPlan = 0;
 
         // Act
         ProfitShareEditResponse response = await _service.ProfitShareEdit(DefaultRequest(), CancellationToken.None);
@@ -85,7 +84,7 @@ public class EmployeeTests : ApiTestBase<Program>
     {
         // Arrange
         _payProfit.EnrollmentId = /*2*/ Enrollment.Constants.NewVestingPlanHasContributions;
-        _payProfit.YearsInPlan = 1;
+        _profitDetails[0].YearsOfServiceCredit = 1;
 
         // Act
         ProfitShareEditResponse response = await _service.ProfitShareEdit(DefaultRequest(), CancellationToken.None);

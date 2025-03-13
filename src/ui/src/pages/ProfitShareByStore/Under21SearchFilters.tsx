@@ -1,5 +1,5 @@
 import { FormHelperText } from "@mui/material";
-import Grid2 from "@mui/material/Unstable_Grid2";
+import Grid2 from '@mui/material/Grid2';
 import { useForm, Controller } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -61,10 +61,7 @@ const Under21ReportSearchFilters = () => {
                 paddingX="24px"
                 alignItems="flex-end"
                 gap="24px">
-                <Grid2
-                    xs={12}
-                    sm={6}
-                    md={3}>
+                <Grid2 size={{ xs: 12, sm: 6, md: 3 }} >
                     <Controller
                         name="startDate"
                         control={control}
@@ -85,10 +82,7 @@ const Under21ReportSearchFilters = () => {
                     )}
                 </Grid2>
 
-                <Grid2
-                    xs={12}
-                    sm={6}
-                    md={3}>
+                <Grid2 size={{ xs: 12, sm: 6, md: 3 }} >
                     <Controller
                         name="endDate"
                         control={control}

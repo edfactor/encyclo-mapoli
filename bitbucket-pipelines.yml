@@ -22,13 +22,31 @@ definitions:
         - mkdir -Force -Path $env:REPORTS_PATH
 
         # Check if .NET 9 SDK is installed
-        - $dotnetSdkInstalled = dotnet --list-sdks | Select-String "^9\."
-        
-        # Install .NET 9 SDK if not installed
-        - if (-not $dotnetSdkInstalled) {
-            Invoke-WebRequest -Uri "https://download.visualstudio.microsoft.com/download/pr/83c595a0-def1-4aba-8284-2fd98007aa3d/5e5b47fb819ee59b2a10485f8cf5a89a/dotnet-sdk-9.0.200-win-x64.exe" -OutFile "$env:TEMP\dotnet-sdk-9.0.200-win-x64.exe";
-            Start-Process -FilePath "$env:TEMP\dotnet-sdk-9.0.200-win-x64.exe" -ArgumentList "/quiet", "/norestart" -Wait;
-          }        
+        - echo "Checking installed .NET SDK versions..."
+        - $dotnetSdkInstalled = dotnet --list-sdks | Select-String "^9\.(\d+)\.(\d+)"
+        - if ($dotnetSdkInstalled) {
+              $isSdkValid = $false;
+              foreach ($sdk in $dotnetSdkInstalled) {
+                if ($sdk -match "^9\.(\d+)\.(\d+)") {
+                  $minor = [int]$matches[1];
+                  $patch = [int]$matches[2];
+                  if ($minor -gt 0 -or $patch -ge 200) {
+                    $isSdkValid = $true;
+                    break;
+                  }
+                }
+              }
+              if ($isSdkValid) {
+                Write-Output ".NET SDK 9.0.200 or higher is installed.";
+              } else {
+                Write-Output ".NET SDK 9.0.200 or higher is NOT installed.";
+                Invoke-WebRequest -Uri "https://download.visualstudio.microsoft.com/download/pr/83c595a0-def1-4aba-8284-2fd98007aa3d/5e5b47fb819ee59b2a10485f8cf5a89a/dotnet-sdk-9.0.200-win-x64.exe" -OutFile "$env:TEMP\dotnet-sdk-9.0.200-win-x64.exe";
+                Start-Process -FilePath "$env:TEMP\dotnet-sdk-9.0.200-win-x64.exe" -ArgumentList "/quiet", "/norestart" -Wait;
+              }
+            } else {
+              Write-Output "No .NET 9.x SDK installed.";
+            }        
+          
 
         # Run tests and generate JUnit reports
         - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml" -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
@@ -110,7 +128,9 @@ definitions:
             registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
             //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=$env:JFROG_WORKSPACE_VARIABLE
             "@ | Out-File -FilePath .npmrc -Encoding ASCII
-        - npm install --legacy-peer-deps;
+        - if (Test-Path -Path "node_modules") { Remove-Item -Recurse -Force "node_modules" }
+        - if (Test-Path -Path "package-lock.json") { Remove-Item -Force "package-lock.json" }
+        - npm install;
         - npm run build:${env:ENV}
         
         - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
@@ -142,8 +162,12 @@ definitions:
             //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=$env:JFROG_WORKSPACE_VARIABLE
             "@ | Out-File -FilePath .npmrc -Encoding ASCII
 
-        # Install dependencies with legacy peer deps
-        - npm install --legacy-peer-deps
+        # Clean node_modules and package-lock.json to resolve npm optional dependency bug
+        - if (Test-Path -Path "node_modules") { Remove-Item -Recurse -Force "node_modules" }
+        - if (Test-Path -Path "package-lock.json") { Remove-Item -Force "package-lock.json" }
+
+        # Install dependencies
+        - npm install;
 
         # Run the build process for the specified environment
         - npm run build:${env:ENV}
@@ -175,7 +199,10 @@ definitions:
         - ${env:ENV} = "prod"
         - if (!(Test-Path -Path ".\src\UI")) { Write-Error "UI source directory not found. Exiting."; exit 1 }
         - cd .\src\UI
-        - ${env:NPM} install --legacy-peer-deps;
+        # Clean node_modules and package-lock.json to resolve npm optional dependency bug
+        - if (Test-Path -Path "node_modules") { Remove-Item -Recurse -Force "node_modules" }
+        - if (Test-Path -Path "package-lock.json") { Remove-Item -Force "package-lock.json" }
+        - ${env:NPM} install;
         - ${env:NPM} run build:${env:ENV}
         - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.$env:ENV.zip" -Force
     
@@ -219,8 +246,6 @@ definitions:
           Write-Host "Source schema: $sourceSchema"
           Write-Host "Current directory: $(Get-Location)"
 
-          New-Item -ItemType Directory -Path "dist"          
-          
           .\output\Demoulas.ProfitSharing.Data.Cli $action --connection-name ProfitSharing --output-file ".\dist\migration.sql" --sql-file ".\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-schema $sourceSchema
           if ($LASTEXITCODE -ne 0) { Write-Error "Database upgrade failed. Exiting"; exit 1 }
 
@@ -243,11 +268,11 @@ definitions:
         - dotnet nuget list source
         - dotnet workload update --source https://api.nuget.org/v3/index.json
         - dotnet workload install aspire --source https://api.nuget.org/v3/index.json
-        - dotnet restore -p:RestoreAdditionalProjectSources=https://api.nuget.org/v3/index.json
+        - dotnet restore Demoulas.ProfitSharing.sln -p:RestoreAdditionalProjectSources=https://api.nuget.org/v3/index.json
 
 
         - |
-          $output = dotnet list package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json
+          $output = dotnet list Demoulas.ProfitSharing.sln package --vulnerable --include-transitive --source https://api.nuget.org/v3/index.json
           if ($output -match "has the following vulnerable packages") {
             Write-Host "Vulnerabilities found!"
             $output | Out-String | Write-Host

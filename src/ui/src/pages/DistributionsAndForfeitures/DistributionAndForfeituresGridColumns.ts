@@ -1,6 +1,7 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { yyyyMMDDToMMDDYYYY } from "smart-ui-library";
-import { viewBadgeRenderer } from "../../utils/masterInquiryLink";
+import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
+import { agGridNumberToCurrency } from "smart-ui-library";
 
 export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
   return [
@@ -13,7 +14,7 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       cellClass: "right-align",
       resizable: true,
       sort: "asc",
-      cellRenderer: (params: ICellRendererParams) => viewBadgeRenderer(params.data.badgeNumber)
+      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data?.badgeNumber)
     },
     {
       headerName: "Name",
@@ -50,7 +51,8 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       minWidth: 120,
       headerClass: "right-align",
       cellClass: "right-align",
-      resizable: true
+      resizable: true,
+      valueFormatter: agGridNumberToCurrency
     },
     {
       headerName: "State Tax",
@@ -59,7 +61,8 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       minWidth: 120,
       headerClass: "right-align",
       cellClass: "right-align",
-      resizable: true
+      resizable: true,
+      valueFormatter: agGridNumberToCurrency
     },
     {
       headerName: "Federal Tax",
@@ -68,7 +71,8 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       minWidth: 120,
       headerClass: "right-align",
       cellClass: "right-align",
-      resizable: true
+      resizable: true,
+      valueFormatter: agGridNumberToCurrency
     },
     {
       headerName: "Forfeit Amount",
@@ -77,7 +81,8 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       minWidth: 120,
       headerClass: "right-align",
       cellClass: "right-align",
-      resizable: true
+      resizable: true,
+      valueFormatter: agGridNumberToCurrency
     },
     {
       headerName: "Age",

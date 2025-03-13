@@ -1,50 +1,61 @@
-import { Button, Link, Typography } from "@mui/material";
-import { useState, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useLazyGetEligibleEmployeesQuery } from "reduxstore/api/YearsEndApi";
+import { Typography } from "@mui/material";
+import { useCallback, useMemo, useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { CAPTIONS } from "../../constants";
 import { GetYTDWagesColumns } from "./YTDWagesGridColumn";
-import { ICellRendererParams } from "ag-grid-community";
-import { useNavigate } from "react-router";
 
-const YTDWagesGrid = () => {
+import { RefObject } from "react";
+import { useLazyGetEmployeeWagesForYearQuery } from "reduxstore/api/YearsEndApi";
+
+interface YTDWagesGridProps {
+  innerRef: RefObject<HTMLDivElement>;
+  initialSearchLoaded: boolean;
+  setInitialSearchLoaded: (loaded: boolean) => void;
+}
+
+const YTDWagesGrid = ({ innerRef, initialSearchLoaded, setInitialSearchLoaded }: YTDWagesGridProps) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
+  const [triggerSearch, { isFetching }] = useLazyGetEmployeeWagesForYearQuery();
+  const { employeeWagesForYearQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+
+  const onSearch = useCallback(async () => {
+    const request = {
+      profitYear: employeeWagesForYearQueryParams?.profitYear ?? 0,
+      pagination: { skip: pageNumber * pageSize, take: pageSize },
+      acceptHeader: "application/json"
+    };
+
+    await triggerSearch(request, false);
+  }, [pageNumber, pageSize, triggerSearch, employeeWagesForYearQueryParams?.profitYear]);
+
+  useEffect(() => {
+    if (initialSearchLoaded) {
+      onSearch();
+    }
+  }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [sortParams, setSortParams] = useState<ISortParams>({
     sortBy: "Badge",
     isSortDescending: false
   });
 
-  const dispatch = useDispatch();
-  const { terminattion } = useSelector((state: RootState) => state.yearsEnd);
-  const [_, { isLoading }] = useLazyGetEligibleEmployeesQuery();
-  const navigate = useNavigate();
-
-  const viewBadge = (params: ICellRendererParams) => {
-    return (
-      params.value && (
-        <Button
-          variant="text"
-          onClick={() => navigate(`/forfeit/${params.value}`)}>
-          {params.value}
-        </Button>
-      )
-    );
-  };
+  const { employeeWagesForYear } = useSelector((state: RootState) => state.yearsEnd);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
-  const columnDefs = useMemo(() => GetYTDWagesColumns(viewBadge), []);
+  const columnDefs = useMemo(() => GetYTDWagesColumns(), []);
 
   return (
     <>
-      {terminattion?.response && (
-        <>
+      {employeeWagesForYear?.response && (
+        <div ref={innerRef}>
           <div style={{ padding: "0 24px 0 24px" }}>
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`YTDWagesS REPORT (${terminattion.response.total || 0})`}
+              {`${CAPTIONS.YTD_WAGES_EXTRACT} (${employeeWagesForYear.response.total || 0})`}
             </Typography>
           </div>
           <DSMGrid
@@ -52,24 +63,27 @@ const YTDWagesGrid = () => {
             isLoading={false}
             handleSortChanged={sortEventHandler}
             providedOptions={{
-              rowData: terminattion?.response.results,
+              rowData: employeeWagesForYear?.response.results,
               columnDefs: columnDefs
             }}
           />
-        </>
+        </div>
       )}
-      {!!terminattion && terminattion.response.results.length > 0 && (
+      {/* We need to check the response also because if the user asked for a CSV, this variable will exist, but have a blob in it instead of a response */}
+      {!!employeeWagesForYear && employeeWagesForYear.response && employeeWagesForYear.response.results.length > 0 && (
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
             setPageNumber(value - 1);
+            setInitialSearchLoaded(true);
           }}
           pageSize={pageSize}
           setPageSize={(value: number) => {
             setPageSize(value);
             setPageNumber(1);
+            setInitialSearchLoaded(true);
           }}
-          recordCount={terminattion.response.total}
+          recordCount={employeeWagesForYear.response.total}
         />
       )}
     </>

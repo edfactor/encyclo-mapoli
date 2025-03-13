@@ -1,15 +1,23 @@
-import { FormHelperText, FormLabel, TextField } from "@mui/material";
-import Grid2 from "@mui/material/Unstable_Grid2";
-import { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { useLazyGetMilitaryAndRehireForfeituresQuery } from "reduxstore/api/YearsEndApi";
-import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { FormHelperText, FormLabel, TextField } from "@mui/material";
+import Grid2 from "@mui/material/Grid2";
+import { Controller, useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
+import { useLazyGetMilitaryAndRehireForfeituresQuery } from "reduxstore/api/YearsEndApi";
+import {
+  clearMilitaryAndRehireForfeituresDetails,
+  clearMilitaryAndRehireForfeituresQueryParams,
+  setMilitaryAndRehireForfeituresQueryParams
+} from "reduxstore/slices/yearsEndSlice";
+import { RootState } from "reduxstore/store";
+import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 interface MilitaryAndRehireForfeituresSearch {
   profitYear: number;
   reportingYear: string;
 }
+
+const digitsOnly: (value: string | undefined) => boolean = (value) => (value ? /^\d+$/.test(value) : false);
 
 const schema = yup.object().shape({
   profitYear: yup
@@ -19,12 +27,22 @@ const schema = yup.object().shape({
     .min(2020, "Year must be 2020 or later")
     .max(2100, "Profit Year must be 2100 or earlier")
     .required("Profit Year is required"),
-  reportingYear: yup.string().required("Reporting Year is required")
+  reportingYear: yup
+    .string()
+    .test("Digits only", "This field should have digits only", digitsOnly)
+    .required("Reporting Year is required")
 });
 
-const MilitaryAndRehireForfeituresSearchFilter = () => {
-  const [triggerSearch, { isFetching }] = useLazyGetMilitaryAndRehireForfeituresQuery();
+interface MilitaryAndRehireForfeituresSearchFilterProps {
+  setInitialSearchLoaded: (include: boolean) => void;
+}
 
+const MilitaryAndRehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearchFilterProps> = ({
+  setInitialSearchLoaded
+}) => {
+  const [triggerSearch, { isFetching }] = useLazyGetMilitaryAndRehireForfeituresQuery();
+  const { militaryAndRehireForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const dispatch = useDispatch();
   const {
     control,
     handleSubmit,
@@ -34,8 +52,8 @@ const MilitaryAndRehireForfeituresSearchFilter = () => {
   } = useForm<MilitaryAndRehireForfeituresSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: undefined,
-      reportingYear: undefined
+      profitYear: militaryAndRehireForfeituresQueryParams?.profitYear || undefined,
+      reportingYear: militaryAndRehireForfeituresQueryParams?.reportingYear || undefined
     }
   });
 
@@ -48,13 +66,18 @@ const MilitaryAndRehireForfeituresSearchFilter = () => {
           pagination: { skip: 0, take: 25 }
         },
         false
-      );
+      ).unwrap();
+      dispatch(setMilitaryAndRehireForfeituresQueryParams(data));
     }
   });
 
   const handleReset = () => {
+    setInitialSearchLoaded(false);
+    dispatch(clearMilitaryAndRehireForfeituresQueryParams());
+    dispatch(clearMilitaryAndRehireForfeituresDetails());
     reset({
-      profitYear: undefined
+      profitYear: undefined,
+      reportingYear: undefined
     });
   };
 
@@ -64,10 +87,7 @@ const MilitaryAndRehireForfeituresSearchFilter = () => {
         container
         paddingX="24px"
         gap="24px">
-        <Grid2
-          xs={12}
-          sm={6}
-          md={3}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
           <FormLabel>Profit Year</FormLabel>
           <Controller
             name="profitYear"
@@ -77,20 +97,17 @@ const MilitaryAndRehireForfeituresSearchFilter = () => {
                 {...field}
                 fullWidth
                 variant="outlined"
+                type="number"
                 error={!!errors.profitYear}
                 onChange={(e) => {
                   field.onChange(e);
                 }}
-                inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
               />
             )}
           />
           {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
         </Grid2>
-        <Grid2
-          xs={12}
-          sm={6}
-          md={3}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
           <FormLabel>Reporting Year</FormLabel>
           <Controller
             name="reportingYear"
@@ -104,7 +121,7 @@ const MilitaryAndRehireForfeituresSearchFilter = () => {
                 onChange={(e) => {
                   field.onChange(e);
                 }}
-                inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                type="number"
               />
             )}
           />

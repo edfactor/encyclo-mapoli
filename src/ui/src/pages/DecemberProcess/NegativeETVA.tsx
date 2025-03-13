@@ -1,11 +1,11 @@
-import React, { useEffect } from "react";
-import { Stack, Typography, Button } from "@mui/material";
-import { AgGridReact } from "ag-grid-react";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
-import { PagedReportResponse, NegativeEtvaForSSNsOnPayProfit } from "reduxstore/types";
+import { Button, Stack, Typography } from "@mui/material";
 import { GetNegativeEtvaForSSNsOnPayProfitColumns } from "pages/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofitGridColumn";
-import { setNegativeEtvaForSssnsOnPayprofit } from "reduxstore/slices/yearsEndSlice";
+import React, { useCallback, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Path, useNavigate } from "react-router";
+import { setNegativeEtvaForSSNsOnPayprofit } from "reduxstore/slices/yearsEndSlice";
+import { RootState } from "reduxstore/store";
+import { NegativeEtvaForSSNsOnPayProfit, PagedReportResponse } from "reduxstore/types";
 import { DSMGrid } from "smart-ui-library";
 
 const staticData: PagedReportResponse<NegativeEtvaForSSNsOnPayProfit> = {
@@ -14,28 +14,28 @@ const staticData: PagedReportResponse<NegativeEtvaForSSNsOnPayProfit> = {
   response: {
     results: [
       {
-        employeeBadge: 700127,
-        employeeSsn: 123456789,
+        badgeNumber: 700127,
+        ssn: 123456789,
         etvaValue: -500
       },
       {
-        employeeBadge: 234567,
-        employeeSsn: 987654321,
+        badgeNumber: 234567,
+        ssn: 987654321,
         etvaValue: -750
       },
       {
-        employeeBadge: 345678,
-        employeeSsn: 456789123,
+        badgeNumber: 345678,
+        ssn: 456789123,
         etvaValue: -1000
       },
       {
-        employeeBadge: 456789,
-        employeeSsn: 789123456,
+        badgeNumber: 456789,
+        ssn: 789123456,
         etvaValue: -250
       },
       {
-        employeeBadge: 567890,
-        employeeSsn: 321654987,
+        badgeNumber: 567890,
+        ssn: 321654987,
         etvaValue: -800
       }
     ],
@@ -57,7 +57,7 @@ const NegativeETVA: React.FC = () => {
     if (storedData && !negativeEtvaData) {
       try {
         const parsedData = JSON.parse(storedData) as PagedReportResponse<NegativeEtvaForSSNsOnPayProfit>;
-        dispatch(setNegativeEtvaForSssnsOnPayprofit(parsedData));
+        dispatch(setNegativeEtvaForSSNsOnPayprofit(parsedData));
       } catch (error) {
         console.error("Error parsing stored ETVA data:", error);
         localStorage.removeItem(STORAGE_KEY);
@@ -67,15 +67,22 @@ const NegativeETVA: React.FC = () => {
 
   const handleRunReport = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(staticData));
-    dispatch(setNegativeEtvaForSssnsOnPayprofit(staticData));
+    dispatch(setNegativeEtvaForSSNsOnPayprofit(staticData));
   };
+  const navigate = useNavigate();
+  // Wrapper to pass react function to non-react class
+  const handleNavigationForButton = useCallback(
+    (destination: string | Partial<Path>) => {
+      navigate(destination);
+    },
+    [navigate]
+  );
 
   return (
-    <Stack
-      spacing={2}>
+    <Stack spacing={2}>
       <Typography
         variant="h6"
-        sx={{ color: "#0258A5", paddingLeft: '24px' }}>
+        sx={{ color: "#0258A5", paddingLeft: "24px" }}>
         NEGATIVE ETVA FOR SSNs ON PAYPROFIT
       </Typography>
 
@@ -99,7 +106,7 @@ const NegativeETVA: React.FC = () => {
           handleSortChanged={() => {}}
           providedOptions={{
             rowData: negativeEtvaData.response.results,
-            columnDefs: GetNegativeEtvaForSSNsOnPayProfitColumns()
+            columnDefs: GetNegativeEtvaForSSNsOnPayProfitColumns(handleNavigationForButton)
           }}
         />
       )}

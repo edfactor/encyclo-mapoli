@@ -1,16 +1,22 @@
-import { Checkbox, FormHelperText, FormLabel, TextField, Typography } from "@mui/material";
-import Grid2 from "@mui/material/Unstable_Grid2";
-import { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { useLazyGetDistributionsAndForfeituresQuery } from "reduxstore/api/YearsEndApi";
-import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { Checkbox, FormHelperText, FormLabel, TextField } from "@mui/material";
+import Grid2 from "@mui/material/Grid2";
+import { Controller, useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
+import { useLazyGetDistributionsAndForfeituresQuery } from "reduxstore/api/YearsEndApi";
+import {
+  clearDistributionsAndForfeitures,
+  clearDistributionsAndForfeituresQueryParams,
+  setDistributionsAndForfeituresQueryParams
+} from "reduxstore/slices/yearsEndSlice";
+import { RootState } from "reduxstore/store";
+import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 
 interface DistributionsAndForfeituresSearch {
   profitYear: number;
-  startMonth?: number | null;
-  endMonth?: number | null;
+  startMonth?: number | undefined;
+  endMonth?: number | null | undefined;
   includeOutgoingForfeitures: boolean;
 }
 
@@ -28,7 +34,7 @@ const schema = yup.object().shape({
     .integer("Start Month must be an integer")
     .min(1, "Start Month must be 1 or higher")
     .max(12, "Start Month must be 12 or lower")
-    .nullable(),
+    .transform((value) => (isNaN(value) ? undefined : value)),
   endMonth: yup
     .number()
     .typeError("End Month must be a number")
@@ -39,9 +45,17 @@ const schema = yup.object().shape({
   includeOutgoingForfeitures: yup.boolean().default(false).required()
 });
 
-const DistributionsAndForfeituresSearchFilter = () => {
-  const [triggerSearch, { isFetching }] = useLazyGetDistributionsAndForfeituresQuery();
+interface DistributionsAndForfeituresSearchFilterProps {
+  setProfitYear: (year: number) => void;
+  setInitialSearchLoaded: (include: boolean) => void;
+}
 
+const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeituresSearchFilterProps> = ({
+  setInitialSearchLoaded
+}) => {
+  const [triggerSearch, { isFetching }] = useLazyGetDistributionsAndForfeituresQuery();
+  const dispatch = useDispatch();
+  const { distributionsAndForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const {
     control,
     handleSubmit,
@@ -51,10 +65,10 @@ const DistributionsAndForfeituresSearchFilter = () => {
   } = useForm<DistributionsAndForfeituresSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: undefined,
-      startMonth: null,
-      endMonth: null,
-      includeOutgoingForfeitures: false
+      profitYear: distributionsAndForfeituresQueryParams?.profitYear || undefined,
+      startMonth: distributionsAndForfeituresQueryParams?.startMonth || undefined,
+      endMonth: distributionsAndForfeituresQueryParams?.endMonth || undefined,
+      includeOutgoingForfeitures: distributionsAndForfeituresQueryParams?.includeOutgoingForfeitures || false
     }
   });
 
@@ -69,11 +83,15 @@ const DistributionsAndForfeituresSearchFilter = () => {
           pagination: { skip: 0, take: 25 }
         },
         false
-      );
+      ).unwrap();
+      dispatch(setDistributionsAndForfeituresQueryParams(data));
     }
   });
 
   const handleReset = () => {
+    setInitialSearchLoaded(false);
+    dispatch(clearDistributionsAndForfeitures());
+    dispatch(clearDistributionsAndForfeituresQueryParams());
     reset({
       profitYear: undefined
     });
@@ -85,10 +103,7 @@ const DistributionsAndForfeituresSearchFilter = () => {
         container
         paddingX="24px"
         gap="24px">
-        <Grid2
-          xs={12}
-          sm={6}
-          md={3}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
           <FormLabel>Profit Year</FormLabel>
           <Controller
             name="profitYear"
@@ -102,16 +117,13 @@ const DistributionsAndForfeituresSearchFilter = () => {
                 onChange={(e) => {
                   field.onChange(e);
                 }}
-                inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                type="number"
               />
             )}
           />
           {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
         </Grid2>
-        <Grid2
-          xs={12}
-          sm={6}
-          md={3}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
           <FormLabel>Start Month</FormLabel>
           <Controller
             name="startMonth"
@@ -126,16 +138,13 @@ const DistributionsAndForfeituresSearchFilter = () => {
                   const parsedValue = e.target.value === "" ? null : Number(e.target.value);
                   field.onChange(parsedValue);
                 }}
-                inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                type="number"
               />
             )}
           />
           {errors.startMonth && <FormHelperText error>{errors.startMonth.message}</FormHelperText>}
         </Grid2>
-        <Grid2
-          xs={12}
-          sm={6}
-          md={3}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
           <FormLabel>End Month</FormLabel>
           <Controller
             name="endMonth"
@@ -150,16 +159,13 @@ const DistributionsAndForfeituresSearchFilter = () => {
                   const parsedValue = e.target.value === "" ? null : Number(e.target.value);
                   field.onChange(parsedValue);
                 }}
-                inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                type="number"
               />
             )}
           />
           {errors.endMonth && <FormHelperText error>{errors.endMonth.message}</FormHelperText>}
         </Grid2>
-        <Grid2
-          xs={12}
-          sm={6}
-          md={3}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
           <FormLabel>Include Outgoing Forfeitures</FormLabel>
           <Controller
             name="includeOutgoingForfeitures"
@@ -167,7 +173,9 @@ const DistributionsAndForfeituresSearchFilter = () => {
             render={({ field }) => (
               <Checkbox
                 checked={field.value}
-                onChange={field.onChange}
+                onChange={(e) => {
+                  field.onChange(e.target.checked);
+                }}
               />
             )}
           />

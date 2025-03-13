@@ -1,51 +1,67 @@
-import { Button, Link, Typography } from "@mui/material";
-import { useState, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useLazyGetEligibleEmployeesQuery } from "reduxstore/api/YearsEndApi";
-import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { GetTerminationColumns } from "./TerminationGridColumn";
-import { ICellRendererParams } from "ag-grid-community";
-import { useNavigate } from "react-router";
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { Path, useNavigate } from 'react-router';
+import { useLazyGetTerminationReportQuery } from 'reduxstore/api/YearsEndApi';
+import { RootState } from 'reduxstore/store';
+import { DSMGrid, ISortParams, Pagination } from 'smart-ui-library';
 
-const TerminationGrid = () => {
+import { Typography } from '@mui/material';
+
+import { GetTerminationColumns } from './TerminationGridColumn';
+
+interface TerminationGridSearchProps {
+  initialSearchLoaded: boolean;
+  setInitialSearchLoaded: (loaded: boolean) => void;
+}
+
+const TerminationGrid: React.FC<TerminationGridSearchProps> = ({ initialSearchLoaded, setInitialSearchLoaded }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
-  const [sortParams, setSortParams] = useState<ISortParams>({
+  const [setSortParams] = useState<ISortParams>({
     sortBy: "Badge",
     isSortDescending: false
   });
 
-  const dispatch = useDispatch();
-  const { terminattion } = useSelector((state: RootState) => state.yearsEnd);
-  const [_, { isLoading }] = useLazyGetEligibleEmployeesQuery();
+  const { termination, terminationQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const [triggerSearch, { isFetching }] = useLazyGetTerminationReportQuery();
   const navigate = useNavigate();
 
-  const viewBadge = (params: ICellRendererParams) => {
-    return (
-      params.value && (
-        <Button
-          variant="text"
-          onClick={() => navigate(`/forfeit/${params.value}`)}
-        >
-          {params.value}
-        </Button>
-      )
-    );
-  };
+  const onSearch = useCallback(async () => {
+    const request = {
+      profitYear: terminationQueryParams?.profitYear ?? 0,
+      pagination: { skip: pageNumber * pageSize, take: pageSize }
+    };
+
+    await triggerSearch(request, false);
+  }, [pageNumber, pageSize, terminationQueryParams?.profitYear, triggerSearch]);
+
+  useEffect(() => {
+    if (initialSearchLoaded) {
+      onSearch();
+    }
+  }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
+
+  // Wrapper to pass react function to non-react class
+  const handleNavigationForButton = useCallback(
+    (destination: string | Partial<Path>) => {
+      navigate(destination);
+    },
+    [navigate]
+  );
+
+  const columnDefs = useMemo(() => GetTerminationColumns(handleNavigationForButton), [handleNavigationForButton]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
-  const columnDefs = useMemo(() => GetTerminationColumns(viewBadge), []);
 
   return (
     <>
-      {terminattion?.response && (
+      {termination?.response && (
         <>
           <div style={{ padding: "0 24px 0 24px" }}>
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`TERMINATIONS REPORT (${terminattion.response.total || 0})`}
+              {`TERMINATIONS REPORT (${termination.response.total || 0})`}
             </Typography>
           </div>
           <DSMGrid
@@ -53,24 +69,26 @@ const TerminationGrid = () => {
             isLoading={false}
             handleSortChanged={sortEventHandler}
             providedOptions={{
-              rowData: terminattion?.response.results,
+              rowData: termination?.response.results,
               columnDefs: columnDefs
             }}
           />
         </>
       )}
-      {!!terminattion && terminattion.response.results.length > 0 && (
+      {!!termination && termination.response.results.length > 0 && (
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
             setPageNumber(value - 1);
+            setInitialSearchLoaded(true);
           }}
           pageSize={pageSize}
           setPageSize={(value: number) => {
             setPageSize(value);
             setPageNumber(1);
+            setInitialSearchLoaded(true);
           }}
-          recordCount={terminattion.response.total}
+          recordCount={termination.response.total}
         />
       )}
     </>

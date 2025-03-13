@@ -23,6 +23,7 @@ export const InfoCard: FC<InfoCardProps> = ({
     <Button
       size="medium"
       color="secondary"
+      sx={{minWidth: "80px"}}
       variant="outlined"
       onClick={handleClick}
       disabled={buttonDisabled}
@@ -52,7 +53,8 @@ export const InfoCard: FC<InfoCardProps> = ({
         <Typography
           variant="h2"
           sx={{
-            color: "#0258A5"
+            color: "#0258A5",
+            paddingRight: "8px"
           }}>
           {title}
         </Typography>

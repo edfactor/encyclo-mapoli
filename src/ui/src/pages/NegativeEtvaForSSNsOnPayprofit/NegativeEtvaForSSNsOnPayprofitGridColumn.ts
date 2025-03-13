@@ -1,7 +1,7 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { viewBadgeRenderer } from "../../utils/masterInquiryLink";
+import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
 
-export const GetNegativeEtvaForSSNsOnPayProfitColumns = (): ColDef[] => {
+export const GetNegativeEtvaForSSNsOnPayProfitColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
     {
       headerName: "Badge",
@@ -12,7 +12,7 @@ export const GetNegativeEtvaForSSNsOnPayProfitColumns = (): ColDef[] => {
       cellClass: "right-align",
       resizable: true,
       sortable: true,
-      cellRenderer: (params: ICellRendererParams) => viewBadgeRenderer(params.data.badgeNumber)
+      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, navFunction)
     },
     {
       headerName: "SSN",

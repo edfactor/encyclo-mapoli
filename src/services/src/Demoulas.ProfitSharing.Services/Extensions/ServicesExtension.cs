@@ -8,6 +8,7 @@ using Demoulas.ProfitSharing.Services.Military;
 using Demoulas.ProfitSharing.Services.ProfitMaster;
 using Demoulas.ProfitSharing.Services.ProfitShareEdit;
 using Demoulas.ProfitSharing.Services.Reports;
+using Demoulas.ProfitSharing.Services.Reports.Breakdown;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -49,8 +50,10 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IProfitShareEditService, ProfitShareEditService>();
         _ = builder.Services.AddScoped<IInternalProfitShareEditService, ProfitShareEditService>();
         _ = builder.Services.AddScoped<IProfitMasterService, ProfitMasterService>();
+        _ = builder.Services.AddScoped<IPostFrozenService, PostFrozenService>();
 
         _ = builder.Services.AddSingleton<IPayProfitUpdateService, PayProfitUpdateService>();
+        _ = builder.Services.AddScoped<IBreakdownService, BreakdownReportService>();
 
         #region Mappers
 

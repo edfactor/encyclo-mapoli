@@ -57,6 +57,13 @@ public abstract class EndpointWithCsvBase<ReqType, RespType, MapType> : FastEndp
     public sealed override async Task HandleAsync(ReqType req, CancellationToken ct)
     {
         string acceptHeader = HttpContext.Request.Headers.Accept.ToString().ToLower(CultureInfo.InvariantCulture);
+
+        if (acceptHeader.Contains("text/csv"))
+        {
+            // Ignore pagination for CSV reports
+            req = req with { Skip = 0, Take = int.MaxValue };
+        }
+
         ReportResponseBase<RespType> response = await GetResponse(req, ct);
 
         if (acceptHeader.Contains("text/csv"))

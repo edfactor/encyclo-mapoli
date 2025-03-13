@@ -1,79 +1,85 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
+import {
+  clearProfitEdit,
+  clearProfitUpdate,
+  clearYearEndProfitSharingReport,
+  setAdditionalExecutivesGrid,
+  setBalanceByAge,
+  setBalanceByYears,
+  setContributionsByAge,
+  setDemographicBadgesNotInPayprofitData,
+  setDistributionsAndForfeitures,
+  setDistributionsByAge,
+  setDuplicateNamesAndBirthdays,
+  setDuplicateSSNsData,
+  setEligibleEmployees,
+  setEmployeesOnMilitaryLeaveDetails,
+  setEmployeeWagesForYear,
+  setExecutiveHoursAndDollars,
+  setForfeituresAndPoints,
+  setForfeituresByAge,
+  setMasterInquiryData,
+  setMilitaryAndRehireForfeituresDetails,
+  setMilitaryAndRehireProfitSummaryDetails,
+  setMissingCommaInPYName,
+  setNegativeEtvaForSSNsOnPayprofit,
+  setProfitEdit,
+  setProfitMasterApply,
+  setProfitMasterRevert,
+  setProfitUpdate,
+  setTermination,
+  setVestedAmountByAge,
+  setYearEndProfitSharingReport
+} from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import {
+  BalanceByAge,
+  BalanceByYears,
+  ContributionsByAge,
   DemographicBadgesNotInPayprofitRequestDto,
   DemographicBadgesNotInPayprofitResponse,
   DistributionsAndForfeitures,
   DistributionsAndForfeituresRequestDto,
-  FrozenReportsByAgeRequest,
   DuplicateNameAndBirthday,
   DuplicateNameAndBirthdayRequestDto,
   DuplicateSSNDetail,
   DuplicateSSNsRequestDto,
   EligibleEmployeeResponseDto,
   EligibleEmployeesRequestDto,
+  EmployeesOnMilitaryLeaveRequestDto,
+  EmployeesOnMilitaryLeaveResponse,
+  EmployeeWagesForYear,
+  EmployeeWagesForYearRequestDto,
   ExecutiveHoursAndDollars,
   ExecutiveHoursAndDollarsRequestDto,
-  MasterInquryRequest,
-  EmployeesOnMilitaryLeaveResponse,
+  ForfeituresAndPoints,
+  ForfeituresByAge,
+  FrozenReportsByAgeRequest,
+  FrozenReportsForfeituresAndPointsRequest,
+  MasterInquiryRequest,
+  MasterInquiryResponseType,
   MilitaryAndRehireForfeiture,
   MilitaryAndRehireForfeituresRequestDto,
   MilitaryAndRehireProfitSummary,
   MilitaryAndRehireProfitSummaryRequestDto,
-  EmployeesOnMilitaryLeaveRequestDto,
   MissingCommasInPYName,
   MissingCommasInPYNameRequestDto,
   NegativeEtvaForSSNsOnPayProfit,
   NegativeEtvaForSSNsOnPayprofitRequestDto,
   PagedReportResponse,
-  ProfitSharingDistributionsByAge,
-  ContributionsByAge,
-  ForfeituresByAge,
-  BalanceByAge,
-  VestedAmountsByAge,
-  MasterInquiryResponseType,
-  ProfitYearRequest,
-  BalanceByYears,
-  TerminationResponse,
-  TerminationRequest,
-  ProfitShareUpdateRequest,
-  ProfitShareUpdateResponse,
   ProfitShareEditResponse,
   ProfitShareMasterResponse,
-  EmployeeWagesForYear,
-  EmployeeWagesForYearRequestDto
+  ProfitShareUpdateRequest,
+  ProfitShareUpdateResponse,
+  ProfitSharingDistributionsByAge,
+  ProfitYearRequest,
+  TerminationRequest,
+  TerminationResponse,
+  VestedAmountsByAge,
+  YearEndProfitSharingEmployee,
+  YearEndProfitSharingReportRequest
 } from "reduxstore/types";
-import {
-  setDemographicBadgesNotInPayprofitData,
-  setDistributionsAndForfeitures,
-  setDistributionsByAge,
-  setContributionsByAge,
-  setForfeituresByAge,
-  setBalanceByAge,
-  setDuplicateNamesAndBirthdays,
-  setDuplicateSSNsData,
-  setEligibleEmployees,
-  setExecutiveHoursAndDollars,
-  setMasterInquiryData,
-  setEmployeesOnMilitaryLeaveDetails,
-  setMilitaryAndRehireForfeituresDetails,
-  setMilitaryAndRehireProfitSummaryDetails,
-  setMissingCommaInPYName,
-  setVestingAmountByAge,
-  setNegativeEtvaForSssnsOnPayprofit,
-  setBalanceByYears,
-  setTermination,
-  setProfitUpdate,
-  clearProfitUpdate,
-  setProfitEdit,
-  clearProfitEdit,
-  setProfitMasterApply,
-  setProfitMasterRevert,
-  setAdditionalExecutivesGrid,
-  setEmployeeWagesForCurrentYear,
-  setEmployeeWagesForPreviousYear
-} from "reduxstore/slices/yearsEndSlice";
 import { url } from "./api";
 
 export const YearsEndApi = createApi({
@@ -308,7 +314,7 @@ export const YearsEndApi = createApi({
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          dispatch(setNegativeEtvaForSssnsOnPayprofit(data));
+          dispatch(setNegativeEtvaForSSNsOnPayprofit(data));
         } catch (err) {
           console.log("Err: " + err);
         }
@@ -331,7 +337,7 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getEmployeeWagesForCurrentYear: builder.query<
+    getEmployeeWagesForYear: builder.query<
       PagedReportResponse<EmployeeWagesForYear>,
       EmployeeWagesForYearRequestDto & { acceptHeader: string }
     >({
@@ -356,38 +362,7 @@ export const YearsEndApi = createApi({
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          dispatch(setEmployeeWagesForCurrentYear(data));
-        } catch (err) {
-          console.log("Err: " + err);
-        }
-      }
-    }),
-    getEmployeeWagesForPreviousYear: builder.query<
-      PagedReportResponse<EmployeeWagesForYear>,
-      EmployeeWagesForYearRequestDto & { acceptHeader: string }
-    >({
-      query: (params) => ({
-        url: "yearend/wages-current-year",
-        method: "GET",
-        params: {
-          profitYear: params.profitYear,
-          take: params.pagination.take,
-          skip: params.pagination.skip
-        },
-        headers: {
-          Accept: params.acceptHeader
-        },
-        responseHandler: async (response) => {
-          if (params.acceptHeader === "text/csv") {
-            return response.blob();
-          }
-          return response.json();
-        }
-      }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-          dispatch(setEmployeeWagesForPreviousYear(data));
+          dispatch(setEmployeeWagesForYear(data));
         } catch (err) {
           console.log("Err: " + err);
         }
@@ -433,7 +408,8 @@ export const YearsEndApi = createApi({
           badgeNumber: params.badgeNumber,
           ssn: params.socialSecurity,
           fullNameContains: params.fullNameContains,
-          hasExecutiveHoursAndDollars: params.hasExecutiveHoursAndDollars
+          hasExecutiveHoursAndDollars: params.hasExecutiveHoursAndDollars,
+          hasMonthlyPayments: params.hasMonthlyPayments
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -455,7 +431,7 @@ export const YearsEndApi = createApi({
           skip: params.pagination.skip
         }
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(params: EligibleEmployeesRequestDto, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setEligibleEmployees(data));
@@ -519,6 +495,24 @@ export const YearsEndApi = createApi({
         }
       }
     }),
+    getForfeituresAndPoints: builder.query<ForfeituresAndPoints, FrozenReportsForfeituresAndPointsRequest>({
+      query: (params) => ({
+        url: "yearend/frozen/forfeitures-and-points",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          useFrozenData: params.useFrozenData
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setForfeituresAndPoints(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
     getBalanceByAge: builder.query<BalanceByAge, FrozenReportsByAgeRequest>({
       query: (params) => ({
         url: "yearend/frozen/balance-by-age",
@@ -555,7 +549,7 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getProfitMasterInquiry: builder.query<MasterInquiryResponseType, MasterInquryRequest>({
+    getProfitMasterInquiry: builder.query<MasterInquiryResponseType, MasterInquiryRequest>({
       query: (params) => ({
         url: "master/master-inquiry",
         method: "GET",
@@ -607,7 +601,7 @@ export const YearsEndApi = createApi({
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          dispatch(setVestingAmountByAge(data));
+          dispatch(setVestedAmountByAge(data));
         } catch (err) {
           console.log("Err: " + err);
         }
@@ -695,34 +689,61 @@ export const YearsEndApi = createApi({
           dispatch(clearProfitEdit());
         }
       }
+    }),
+    getYearEndProfitSharingReport: builder.query<
+      PagedReportResponse<YearEndProfitSharingEmployee>,
+      YearEndProfitSharingReportRequest
+    >({
+      query: (params) => ({
+        url: "yearend/yearend-profit-sharing-report",
+        method: "GET",
+        params: {
+          ...params,
+          take: params.pagination.take,
+          skip: params.pagination.skip
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          dispatch(clearYearEndProfitSharingReport());
+          const { data } = await queryFulfilled;
+          dispatch(setYearEndProfitSharingReport(data));
+        } catch (err) {
+          console.log("Err: " + err);
+          dispatch(clearYearEndProfitSharingReport());
+        }
+      }
     })
   })
 });
 
 export const {
   useLazyGetAdditionalExecutivesQuery,
-  useLazyGetDemographicBadgesNotInPayprofitQuery,
-  useLazyGetDuplicateSSNsQuery,
-  useLazyGetDuplicateNamesAndBirthdaysQuery,
-  useLazyGetMilitaryAndRehireForfeituresQuery,
-  useLazyGetMilitaryAndRehireProfitSummaryQuery,
-  useLazyGetEmployeesOnMilitaryLeaveQuery,
-  useLazyGetNamesMissingCommasQuery,
-  useLazyGetNegativeEVTASSNQuery,
-  useLazyGetDistributionsAndForfeituresQuery,
-  useLazyGetExecutiveHoursAndDollarsQuery,
-  useLazyGetEligibleEmployeesQuery,
-  useLazyGetDistributionsByAgeQuery,
-  useLazyGetContributionsByAgeQuery,
-  useLazyGetForfeituresByAgeQuery,
   useLazyGetBalanceByAgeQuery,
   useLazyGetBalanceByYearsQuery,
-  useLazyGetProfitMasterInquiryQuery,
-  useLazyGetVestingAmountByAgeQuery,
-  useLazyGetTerminationReportQuery,
-  useLazyGetProfitShareUpdateQuery,
-  useLazyGetProfitShareEditQuery,
+  useLazyGetContributionsByAgeQuery,
+  useLazyGetDemographicBadgesNotInPayprofitQuery,
+  useLazyGetDistributionsAndForfeituresQuery,
+  useLazyGetDistributionsByAgeQuery,
+  useLazyGetDuplicateNamesAndBirthdaysQuery,
+  useLazyGetDuplicateSSNsQuery,
+  useLazyGetEligibleEmployeesQuery,
+  useLazyGetEmployeesOnMilitaryLeaveQuery,
+  useLazyGetEmployeeWagesForYearQuery,
+  useLazyGetExecutiveHoursAndDollarsQuery,
+  useLazyGetForfeituresAndPointsQuery,
+  useLazyGetForfeituresByAgeQuery,
   useLazyGetMasterApplyQuery,
   useLazyGetMasterRevertQuery,
+  useLazyGetMilitaryAndRehireForfeituresQuery,
+  useLazyGetMilitaryAndRehireProfitSummaryQuery,
+  useLazyGetNamesMissingCommasQuery,
+  useLazyGetNegativeEVTASSNQuery,
+  useLazyGetProfitMasterInquiryQuery,
+  useLazyGetProfitShareEditQuery,
+  useLazyGetProfitShareUpdateQuery,
+  useLazyGetTerminationReportQuery,
+  useLazyGetVestingAmountByAgeQuery,
+  useLazyGetYearEndProfitSharingReportQuery,
   useUpdateExecutiveHoursAndDollarsMutation
 } = YearsEndApi;

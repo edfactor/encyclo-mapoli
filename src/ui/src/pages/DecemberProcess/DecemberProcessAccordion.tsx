@@ -1,13 +1,11 @@
-import { FilterList } from "@mui/icons-material";
 import { Button, Divider, Stack, Typography } from "@mui/material";
-import Grid2 from "@mui/material/Unstable_Grid2";
+import Grid2 from "@mui/material/Grid2";
+import DSMCollapsedAccordion from "components/DSMCollapsedAccordion";
 import DuplicateNamesAndBirthdaysGrid from "pages/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdaysGrid";
 import DuplicateSSNsOnDemographicsGrid from "pages/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographicsGrid";
-import MasterInquiryGrid from "pages/MasterInquiry/MasterInquiryGrid";
-import MasterInquirySearchFilter from "pages/MasterInquiry/MasterInquirySearchFilter";
-import EmployeesOnMilitaryLeave from "pages/EmployeesOnMilitaryLeave/EmployeesOnMilitaryLeave";
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router";
 import {
   useLazyGetDemographicBadgesNotInPayprofitQuery,
   useLazyGetDuplicateNamesAndBirthdaysQuery,
@@ -15,19 +13,14 @@ import {
   useLazyGetNegativeEVTASSNQuery
 } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMAccordion, Page } from "smart-ui-library";
+import { Page } from "smart-ui-library";
+import { MENU_LABELS } from "../../constants";
 import NegativeETVA from "./NegativeETVA";
-import { useNavigate } from "react-router";
-import MasterInquiryEmployeeDetails from "pages/MasterInquiry/MasterInquiryEmployeeDetails";
-import TerminationGrid from "pages/Termination/TerminationGrid";
-import TerminationSearchFilter from "pages/Termination/TerminationSearchFilter";
-import DistributionsAndForfeituresGrid from "pages/DistributionsAndForfeitures/DistributionAndForfeituresGrid";
-import DistributionsAndForfeituresSearchFilter from "pages/DistributionsAndForfeitures/DistributionAndForfeituresSearchFilter";
-import DSMCollapsedAccordion from "components/DSMCollapsedAccordion";
 
 const DecemberProcessAccordion = () => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [triggerETVASearch, { isFetching: isFetchingETVA }] = useLazyGetNegativeEVTASSNQuery();
+  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [triggerPayrollDupeSsnsOnDemographics, { isFetching: isFetchingPayRollDupeSsns }] =
     useLazyGetDuplicateSSNsQuery();
   const [triggerDemographicBadgesNotInPayprofit, { isFetching: isfetchingDemographicBadges }] =
@@ -35,7 +28,7 @@ const DecemberProcessAccordion = () => {
   const [triggerDuplicateNamesAndBirthdays, { isFetching: isFetchingDuplicateNames }] =
     useLazyGetDuplicateNamesAndBirthdaysQuery();
 
-  const { negativeEtvaForSSNsOnPayprofit, duplicateSSNsData, demographicBadges, duplicateNamesAndBirthday } =
+  const { negativeEtvaForSSNsOnPayprofit, duplicateSSNsData, demographicBadges, duplicateNamesAndBirthdays } =
     useSelector((state: RootState) => state.yearsEnd);
 
   const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.yearsEnd);
@@ -46,17 +39,20 @@ const DecemberProcessAccordion = () => {
       triggerDemographicBadgesNotInPayprofit({ pagination: { take: 25, skip: 0 } });
       triggerDuplicateNamesAndBirthdays({ profitYear: 2023, pagination: { take: 25, skip: 0 } });
     }
-  }, [hasToken]);
+  }, [
+    hasToken,
+    triggerDemographicBadgesNotInPayprofit,
+    triggerDuplicateNamesAndBirthdays,
+    triggerPayrollDupeSsnsOnDemographics
+  ]);
 
   const navigate = useNavigate();
 
   return (
-    <Page
-      label="December Flow">
-      <Grid2
-        container>
+    <Page label={MENU_LABELS.DECEMBER_ACTIVITIES}>
+      <Grid2 container>
         <Grid2
-          xs={12}
+          size={{ xs: 12 }}
           width={"100%"}>
           <Divider />
         </Grid2>
@@ -70,11 +66,8 @@ const DecemberProcessAccordion = () => {
               label: "In Progress",
               color: "success"
             }}
-            onActionClick={() =>
-              navigate('/clean-up-summary')
-            }
-            isCollapsedOnRender={true}
-          >
+            onActionClick={() => navigate("/clean-up-summary")}
+            isCollapsedOnRender={true}>
             <Grid2 width="100%">
               <NegativeETVA />
             </Grid2>
@@ -82,7 +75,10 @@ const DecemberProcessAccordion = () => {
               <DuplicateSSNsOnDemographicsGrid />
             </Grid2>
             <Grid2 width="100%">
-              <DuplicateNamesAndBirthdaysGrid />
+              <DuplicateNamesAndBirthdaysGrid
+                initialSearchLoaded={initialSearchLoaded}
+                setInitialSearchLoaded={setInitialSearchLoaded}
+              />
             </Grid2>
             <Grid2 width="100%">
               <Stack paddingX="24px">
@@ -110,11 +106,9 @@ const DecemberProcessAccordion = () => {
               label: "Not Started",
               color: "secondary"
             }}
-            onActionClick={() => navigate('/military-and-rehire-entry')}
-            actionButtonText="START"
-          >
-            <>
-            </>
+            onActionClick={() => navigate("/military-entry-and-modification")}
+            actionButtonText="START">
+            <></>
           </DSMCollapsedAccordion>
         </Grid2>
 
@@ -126,9 +120,8 @@ const DecemberProcessAccordion = () => {
               label: "Not Started",
               color: "secondary"
             }}
-            onActionClick={() => navigate('/military-and-rehire')}
-            actionButtonText="START"
-          >
+            onActionClick={() => navigate("/military-and-rehire")}
+            actionButtonText="START">
             <></>
           </DSMCollapsedAccordion>
         </Grid2>
@@ -142,9 +135,8 @@ const DecemberProcessAccordion = () => {
               color: "secondary"
             }}
             actionButtonText="START"
-            onActionClick={() => navigate('/prof-term')}
-            isCollapsedOnRender={true}
-          >
+            onActionClick={() => navigate("/prof-term")}
+            isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
         </Grid2>
@@ -158,9 +150,8 @@ const DecemberProcessAccordion = () => {
               color: "secondary"
             }}
             actionButtonText="START"
-            onActionClick={() => navigate('/distributions-and-forfeitures')}
-            isCollapsedOnRender={true}
-          >
+            onActionClick={() => navigate("/distributions-and-forfeitures")}
+            isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
         </Grid2>
@@ -175,27 +166,24 @@ const DecemberProcessAccordion = () => {
             }}
             onActionClick={() => navigate("/manage-executive-hours-and-dollars")}
             actionButtonText="START"
-            isCollapsedOnRender={true}
-          >
+            isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
         </Grid2>
 
         <Grid2 width="100%">
           <DSMCollapsedAccordion
-            title="Profit Share Totals Report (QPAY426)"
+            title="Profit Share Totals Report (PAY426)"
             expandable={false}
             status={{
               label: "Not Started",
               color: "secondary"
             }}
-            onActionClick={() => navigate('/profit-share-report')}
-            actionButtonText="START"
-          >
+            onActionClick={() => navigate("/profit-share-report")}
+            actionButtonText="START">
             <></>
           </DSMCollapsedAccordion>
         </Grid2>
-
       </Grid2>
     </Page>
   );

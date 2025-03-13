@@ -15,13 +15,15 @@ public sealed record EmployeeDetails
     public decimal PercentageVested { get; init; }
     public bool ContributionsLastYear { get; init; }
     public bool Enrolled { get; init; }
-    public string BadgeNumber { get; init; } = string.Empty;
+    public int BadgeNumber { get; init; }
     public DateOnly HireDate { get; init; }
     public DateOnly? TerminationDate { get; init; } = null;
     public DateOnly? ReHireDate { get; init; } = null;
     public short StoreNumber { get; set; }
-    public long BeginPSAmount { get; set; }
-    public long CurrentPSAmount { get; set; }
-    public long BeginVestedAmount { get; set; }
-    public long CurrentVestedAmount { get; set;}
+    public decimal BeginPSAmount { get; set; }
+    public decimal CurrentPSAmount { get; set; }
+    public decimal BeginVestedAmount { get; set; }
+    public decimal CurrentVestedAmount { get; set;}
+    public decimal CurrentEtva { get; set; }
+    public decimal PreviousEtva { get; set; }
 }

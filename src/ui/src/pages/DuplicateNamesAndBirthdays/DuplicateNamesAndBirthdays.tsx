@@ -1,29 +1,33 @@
 import { Divider } from "@mui/material";
-import Grid2 from "@mui/material/Unstable_Grid2";
+import Grid2 from '@mui/material/Grid2';
 import { DSMAccordion, Page } from "smart-ui-library";
 import DuplicateNamesAndBirthdaysSearchFilter from "./DuplicateNamesAndBirthdaysSearchFilter";
 import DuplicateNamesAndBirthdaysGrid from "./DuplicateNamesAndBirthdaysGrid";
+import { useState } from "react";
 
 const DuplicateNamesAndBirthdays = () => {
+  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   return (
     <Page label="Duplicate Names and Birthdays">
-        <Grid2
-          container
-          rowSpacing="24px">
-          <Grid2 width={"100%"}>
-            <Divider />
-          </Grid2>
-          <Grid2
-            width={"100%"}>
-             <DSMAccordion title="Filter">
-              <DuplicateNamesAndBirthdaysSearchFilter />
-             </DSMAccordion>
-          </Grid2>
-
-          <Grid2 width="100%">
-            <DuplicateNamesAndBirthdaysGrid />
-          </Grid2>
+      <Grid2
+        container
+        rowSpacing="24px">
+        <Grid2 width={"100%"}>
+          <Divider />
         </Grid2>
+        <Grid2 width={"100%"}>
+          <DSMAccordion title="Filter">
+            <DuplicateNamesAndBirthdaysSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
+          </DSMAccordion>
+        </Grid2>
+
+        <Grid2 width="100%">
+          <DuplicateNamesAndBirthdaysGrid
+            setInitialSearchLoaded={setInitialSearchLoaded}
+            initialSearchLoaded={initialSearchLoaded}
+          />
+        </Grid2>
+      </Grid2>
     </Page>
   );
 };

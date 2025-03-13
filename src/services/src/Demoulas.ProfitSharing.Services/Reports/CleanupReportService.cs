@@ -1,5 +1,7 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -7,8 +9,10 @@ using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
@@ -20,17 +24,20 @@ public class CleanupReportService : ICleanupReportService
     private readonly ICalendarService _calendarService;
     private readonly ILogger<CleanupReportService> _logger;
     private readonly TotalService _totalService;
+    private readonly IHostEnvironment _host;
 
     public CleanupReportService(IProfitSharingDataContextFactory dataContextFactory,
         ContributionService contributionService,
         ILoggerFactory factory,
         ICalendarService calendarService,
-        TotalService totalService)
+        TotalService totalService,
+        IHostEnvironment host)
     {
         _dataContextFactory = dataContextFactory;
         _contributionService = contributionService;
         _calendarService = calendarService;
         _totalService = totalService;
+        _host = host;
         _logger = factory.CreateLogger<CleanupReportService>();
 
     }
@@ -79,8 +86,7 @@ public class CleanupReportService : ICleanupReportService
                             CurrentIncomeYear = pp.CurrentIncomeYear,
                             WeeksWorkedYear = pp.WeeksWorkedYear,
                             LastUpdate = pp.LastUpdate,
-                            PointsEarned = pp.PointsEarned,
-                            YearsInPlan = pp.YearsInPlan
+                            PointsEarned = pp.PointsEarned
                         }).ToList()
                 })
                 .ToPaginationResultsAsync(req, forceSingleQuery: true, ct);
@@ -200,18 +206,57 @@ public class CleanupReportService : ICleanupReportService
             var dict = new Dictionary<int, byte>();
             var results = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                var dupNameSlashDateOfBirth = (from dem in ctx.Demographics
-                                               group dem by new { dem.ContactInfo.FullName, dem.DateOfBirth }
-                    into g
-                                               where g.Count() > 1
-                                               select g.Key.FullName);
+                IQueryable<DemographicMatchDto> dupNameSlashDateOfBirth;
+
+                // Fallback for mocked (in-memory) db context which does not support raw SQL
+                if (_host.IsTestEnvironment())
+                {
+                    dupNameSlashDateOfBirth = ctx.Demographics
+                        .Include(d=> d.ContactInfo)
+                        .Select(d => new DemographicMatchDto { FullName =  d.ContactInfo.FullName! });
+                }
+                else
+                {
+                    string dupQuery =
+                        @"SELECT p1.FULL_NAME as FullName
+FROM DEMOGRAPHIC p1
+         JOIN DEMOGRAPHIC p2
+              ON p1.Id < p2.Id  -- Avoid self-joins and duplicate pairs
+                  AND UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) < 2  -- Name similarity threshold
+                  AND SOUNDEX(p1.FULL_NAME) = SOUNDEX(p2.FULL_NAME)  -- Phonetic similarity
+                  AND (
+                     p1.DATE_OF_BIRTH = p2.DATE_OF_BIRTH  -- Exact DOB match
+                         OR ABS(TRUNC(p1.DATE_OF_BIRTH) - TRUNC(p2.DATE_OF_BIRTH)) <= 3  -- Allow 3-day difference
+                         OR EXTRACT(YEAR FROM p1.DATE_OF_BIRTH) = EXTRACT(YEAR FROM p2.DATE_OF_BIRTH)  -- Same birth year
+                     )
+union all
+SELECT p2.FULL_NAME as FullName
+FROM DEMOGRAPHIC p1
+         JOIN DEMOGRAPHIC p2
+              ON p1.Id < p2.Id  -- Avoid self-joins and duplicate pairs
+                  AND UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) < 2  -- Name similarity threshold
+                  AND SOUNDEX(p1.FULL_NAME) = SOUNDEX(p2.FULL_NAME)  -- Phonetic similarity
+                  AND (
+                     p1.DATE_OF_BIRTH = p2.DATE_OF_BIRTH  -- Exact DOB match
+                         OR ABS(TRUNC(p1.DATE_OF_BIRTH) - TRUNC(p2.DATE_OF_BIRTH)) <= 3  -- Allow 3-day difference
+                         OR EXTRACT(YEAR FROM p1.DATE_OF_BIRTH) = EXTRACT(YEAR FROM p2.DATE_OF_BIRTH)  -- Same birth year
+                     )";
+
+                    dupNameSlashDateOfBirth = ctx.Database
+                        .SqlQueryRaw<DemographicMatchDto>(dupQuery);
+                }
+
+                var names = await dupNameSlashDateOfBirth
+                    .Where(d => !string.IsNullOrEmpty(d.FullName))
+                    .Select(d=> d.FullName)
+                    .ToHashSetAsync(cancellationToken);
 
                 var query = from dem in ctx.Demographics
                             join ppLj in ctx.PayProfits on new { DemographicId = dem.Id, req.ProfitYear } equals new { ppLj.DemographicId, ppLj.ProfitYear } into tmpPayProfit
                             from pp in tmpPayProfit.DefaultIfEmpty()
                             join pdLj in ctx.ProfitDetails on new { dem.Ssn, req.ProfitYear } equals new { pdLj.Ssn, pdLj.ProfitYear } into tmpProfitDetails
                             from pd in tmpProfitDetails.DefaultIfEmpty()
-                            where dupNameSlashDateOfBirth.Contains(dem.ContactInfo.FullName)
+                            where dem.ContactInfo.FullName != null && names.Contains(dem!.ContactInfo!.FullName!)
                             group new { dem, pp, pd } by new
                             {
                                 dem.BadgeNumber,
@@ -239,7 +284,7 @@ public class CleanupReportService : ICleanupReportService
                                 Ssn = g.Key.SSN.MaskSsn(),
                                 Name = g.Key.FullName,
                                 DateOfBirth = g.Key.DateOfBirth,
-                                Address = new AddressResponseDto()
+                                Address = new AddressResponseDto
                                 {
                                     City = g.Key.City,
                                     State = g.Key.State,
@@ -263,8 +308,8 @@ public class CleanupReportService : ICleanupReportService
                     join d in ctx.Demographics on yis.Ssn equals d.Ssn
                     select new
                     {
-                        BadgeNumber = d.BadgeNumber,
-                        Years = (byte)yis.Years
+                        d.BadgeNumber,
+                        Years = yis.Years ?? 0
                     }
                 ).ToDictionaryAsync(x => x.BadgeNumber, x => x.Years, cancellationToken: cancellationToken);
 
@@ -376,62 +421,74 @@ public class CleanupReportService : ICleanupReportService
         }
     }
 
-    public async Task<ReportResponseBase<YearEndProfitSharingReportResponse>> GetYearEndProfitSharingReportAsync(YearEndProfitSharingReportRequest req, CancellationToken cancellationToken = default)
+    public async Task<YearEndProfitSharingReportResponse> GetYearEndProfitSharingReportAsync(YearEndProfitSharingReportRequest req, CancellationToken cancellationToken = default)
     {
-        var response = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
-        var over18BirthDate = response.FiscalEndDate.AddYears(-18);
+        var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
+        var over18BirthDate = calInfo.FiscalEndDate.AddYears(-18);
+        var birthDate21 = calInfo.FiscalEndDate.AddYears(-21);
 
-        var rslt = await _dataContextFactory.UseReadOnlyContext(ctx =>
+        var response = new YearEndProfitSharingReportResponse
         {
-            var qry = ctx.PayProfits.Include(x => x.Demographic).Where(p => p.ProfitYear == req.ProfitYear)
-                .Join(_totalService.GetYearsOfService(ctx, req.ProfitYear), x => x.Demographic!.Ssn, x => x.Ssn, (p, tot) => new { pp = p, yip = tot })
-                .Select(p => new
-                {
-                    BadgeNumber = p.pp.Demographic!.BadgeNumber,
-                    p.pp.CurrentHoursYear,
-                    p.pp.HoursExecutive,
-                    p.pp.Demographic!.DateOfBirth,
-                    p.pp.Demographic!.EmploymentStatusId,
-                    p.pp.Demographic!.TerminationDate,
-                    p.pp.Demographic!.Ssn,
-                    p.pp.Demographic!.ContactInfo.LastName,
-                    p.pp.Demographic!.ContactInfo.FirstName,
-                    p.pp.Demographic!.StoreNumber,
-                    EmploymentTypeId = p.pp.Demographic!.EmploymentTypeId.ToString(), //There seems to be some sort of issue in the oracle ef provider that struggles with the char type.  It maps this expression
-                                                                                      //to: NOT (CAST((BITXOR("s"."EMPLOYMENT_TYPE_ID", N'')) AS NUMBER(1)) )
-                                                                                      //Converting to a string appears to fix this issue.
-                    p.pp.CurrentIncomeYear,
-                    p.pp.IncomeExecutive,
-                    p.pp.PointsEarned,
-                    p.yip.Years
-                });
+            ReportDate = DateTimeOffset.Now,
+            ReportName = $"PROFIT SHARE YEAR END REPORT FOR {req.ProfitYear}",
+            Response = new PaginatedResponseDto<YearEndProfitSharingReportDetail>()
+        };
 
+        var rslt = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            var qry = from pp in ctx.PayProfits.Include(p => p.Demographic).Where(p=>p.ProfitYear == req.ProfitYear)
+                      join et in ctx.EmploymentTypes on pp.Demographic!.EmploymentTypeId equals et.Id
+                      join yipTbl in _totalService.GetYearsOfService(ctx, req.ProfitYear) on pp.Demographic!.Ssn equals yipTbl.Ssn into yipTmp
+                      from yip in yipTmp.DefaultIfEmpty()
+                      select new
+                      {
+                          pp.Demographic!.BadgeNumber,
+                          pp.CurrentHoursYear,
+                          pp.HoursExecutive,
+                          pp.Demographic!.DateOfBirth,
+                          pp.Demographic!.EmploymentStatusId,
+                          pp.Demographic!.TerminationDate,
+                          pp.Demographic!.Ssn,
+                          pp.Demographic!.ContactInfo.LastName,
+                          pp.Demographic!.ContactInfo.FirstName,
+                          pp.Demographic!.StoreNumber,
+                          EmploymentTypeId = pp.Demographic!.EmploymentTypeId.ToString(), //There seems to be some sort of issue in the oracle ef provider that struggles with the char type.  It maps this expression
+                                                                                          //.CAST((BITXOR("s"."EMPLOYMENT_TYPE_ID", N'')) AS NUMBER(1)) )
+                                                                                          //Converting to .fix this issue.
+                          EmploymentTypeName = et.Name,
+                          pp.CurrentIncomeYear,
+                          pp.IncomeExecutive,
+                          pp.PointsEarned,
+                          yip.Years
+                      };
             if (req.IsYearEnd)
             {
-                qry = (
-                    from pp in ctx.PayProfits
-                    join d in FrozenService.GetDemographicSnapshot(ctx, req.ProfitYear) on pp.DemographicId equals d.Id
-                    join t in _totalService.GetYearsOfService(ctx, req.ProfitYear) on d.Ssn equals t.Ssn
-                    where pp.ProfitYear == req.ProfitYear
-                    select new
-                    {
-                        BadgeNumber = d.BadgeNumber,
-                        pp.CurrentHoursYear,
-                        pp.HoursExecutive,
-                        d.DateOfBirth,
-                        d.EmploymentStatusId,
-                        d.TerminationDate,
-                        d.Ssn,
-                        d.ContactInfo.LastName,
-                        d.ContactInfo.FirstName,
-                        d.StoreNumber,
-                        EmploymentTypeId = d.EmploymentTypeId.ToString(),
-                        pp.CurrentIncomeYear,
-                        pp.IncomeExecutive,
-                        pp.PointsEarned,
-                        t.Years
-                    }
-                );
+                qry = from pp in ctx.PayProfits.Include(p => p.Demographic).Where(p => p.ProfitYear == req.ProfitYear)
+                      join d in FrozenService.GetDemographicSnapshot(ctx, req.ProfitYear) on pp.DemographicId equals d.Id
+                      join et in ctx.EmploymentTypes on pp.Demographic!.EmploymentTypeId equals et.Id
+                      join yipTbl in _totalService.GetYearsOfService(ctx, req.ProfitYear) on pp.Demographic!.Ssn equals yipTbl.Ssn into yipTmp
+                      from yip in yipTmp.DefaultIfEmpty()
+                      select new
+                      {
+                          pp.Demographic!.BadgeNumber,
+                          pp.CurrentHoursYear,
+                          pp.HoursExecutive,
+                          pp.Demographic!.DateOfBirth,
+                          pp.Demographic!.EmploymentStatusId,
+                          pp.Demographic!.TerminationDate,
+                          pp.Demographic!.Ssn,
+                          pp.Demographic!.ContactInfo.LastName,
+                          pp.Demographic!.ContactInfo.FirstName,
+                          pp.Demographic!.StoreNumber,
+                          EmploymentTypeId = pp.Demographic!.EmploymentTypeId.ToString(), 
+                          EmploymentTypeName = et.Name,
+                          pp.CurrentIncomeYear,
+                          pp.IncomeExecutive,
+                          pp.PointsEarned,
+                          yip.Years
+                      };
+
+                
             }
 
             if (req.IncludeBeneficiaries)
@@ -453,10 +510,11 @@ public class CleanupReportService : ICleanupReportService
                           b.Contact!.ContactInfo.FirstName,
                           StoreNumber = (short)0,
                           EmploymentTypeId = " ",
+                          EmploymentTypeName = "",
                           CurrentIncomeYear = 0m,
                           IncomeExecutive = 0m,
                           PointsEarned = (decimal?)null,
-                          Years = (short)0
+                          Years = (byte?)0
                       };
             }
 
@@ -470,12 +528,12 @@ public class CleanupReportService : ICleanupReportService
             }
             if (req.MinimumAgeInclusive.HasValue)
             {
-                var minBirthDate = response.FiscalEndDate.AddYears(req.MinimumAgeInclusive.Value * -1);
+                var minBirthDate = calInfo.FiscalEndDate.AddYears(req.MinimumAgeInclusive.Value * -1);
                 qry = qry.Where(p => p.DateOfBirth <= minBirthDate);
             }
             if (req.MaximumAgeInclusive.HasValue)
             {
-                var maxBirthDate = response.FiscalEndDate.AddYears((req.MaximumAgeInclusive.Value + 1) * -1).AddDays(1);
+                var maxBirthDate = calInfo.FiscalEndDate.AddYears((req.MaximumAgeInclusive.Value + 1) * -1).AddDays(1);
                 qry = qry.Where(p => p.DateOfBirth >= maxBirthDate);
             }
             if (!req.IncludeBeneficiaries && (!req.IncludeActiveEmployees || !req.IncludeEmployeesTerminatedThisYear || !req.IncludeInactiveEmployees))
@@ -495,15 +553,15 @@ public class CleanupReportService : ICleanupReportService
                 }
                 if (req is { IncludeActiveEmployees: true, IncludeEmployeesTerminatedThisYear: false })
                 {
-                    qry = qry.Where(p => validStatus.Contains(p.EmploymentStatusId) || p.TerminationDate > response.FiscalEndDate);
+                    qry = qry.Where(p => validStatus.Contains(p.EmploymentStatusId) || p.TerminationDate > calInfo.FiscalEndDate);
                 }
                 else if (req.IncludeEmployeesTerminatedThisYear && req is { IncludeActiveEmployees: false, IncludeInactiveEmployees: false })
                 {
-                    qry = qry.Where(p => validStatus.Contains(p.EmploymentStatusId) && p.TerminationDate <= response.FiscalEndDate && p.TerminationDate >= response.FiscalBeginDate);
+                    qry = qry.Where(p => validStatus.Contains(p.EmploymentStatusId) && p.TerminationDate <= calInfo.FiscalEndDate && p.TerminationDate >= calInfo.FiscalBeginDate);
                 }
                 else if (req.IncludeTerminatedEmployees && req is { IncludeInactiveEmployees: false, IncludeActiveEmployees: false })
                 {
-                    qry = qry.Where(p => validStatus.Contains(p.EmploymentStatusId) && p.TerminationDate <= response.FiscalEndDate);
+                    qry = qry.Where(p => validStatus.Contains(p.EmploymentStatusId) && p.TerminationDate <= calInfo.FiscalEndDate);
                 }
                 else
                 {
@@ -512,8 +570,10 @@ public class CleanupReportService : ICleanupReportService
 
             }
 
-            var joinedQry = qry
-                      .Join(_totalService.GetTotalBalanceSet(ctx, req.ProfitYear), x => x.Ssn, x => x.Ssn, (pp, tot) => new { pp, tot });
+            var joinedQry = from pp in qry
+                        join totTbl in _totalService.GetTotalBalanceSet(ctx, req.ProfitYear) on pp.Ssn equals totTbl.Ssn into totTmp
+                        from tot in totTmp.DefaultIfEmpty()
+                        select new { pp, tot };
 
 
             if (req is { IncludeEmployeesWithNoPriorProfitSharingAmounts: false, IncludeEmployeesWithPriorProfitSharingAmounts: true })
@@ -525,33 +585,93 @@ public class CleanupReportService : ICleanupReportService
                 joinedQry = joinedQry.Where(jq => jq.tot.Total == 0);
             }
 
-            return joinedQry
-                      .OrderBy(p => p.pp.LastName)
-                      .ThenBy(p => p.pp.FirstName)
-                      .Select(x => new YearEndProfitSharingReportResponse()
-                      {
-                          BadgeNumber = x.pp.BadgeNumber,
-                          EmployeeName = $"{x.pp.LastName}, {x.pp.FirstName}",
-                          StoreNumber = x.pp.StoreNumber,
-                          EmployeeTypeCode = x.pp.EmploymentTypeId[0],
-                          DateOfBirth = x.pp.DateOfBirth,
-                          Age = 0, //Filled out below after materialization
-                          Ssn = x.pp.Ssn.MaskSsn(),
-                          Wages = x.pp.CurrentIncomeYear + x.pp.IncomeExecutive,
-                          Hours = x.pp.CurrentHoursYear + x.pp.HoursExecutive,
-                          Points = Convert.ToInt16(x.pp.PointsEarned),
-                          IsNew = x.pp.EmploymentTypeId == EmployeeType.Constants.NewLastYear.ToString(),
-                          IsUnder21 = false, //Filled out below after materialization
-                          EmployeeStatus = x.pp.EmploymentStatusId,
-                          Balance = x.tot.Total,
-                          YearsInPlan = x.pp.Years
-                      })
-                      .ToPaginationResultsAsync(req, cancellationToken);
+            var firstContributionSubquery = from pd in ctx.ProfitDetails
+                                            where pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id
+                                            group pd by pd.Ssn into pdGrp
+                                            select new
+                                            {
+                                                Ssn = pdGrp.Key,
+                                                FirstContributionYear = (short?)pdGrp.Min(x => x.ProfitYear)
+                                            };
+
+            var qryWithContributionYear = from j in joinedQry
+                                          join fcTbl in firstContributionSubquery on j.pp.Ssn equals fcTbl.Ssn into fcTmp
+                                          from fc in fcTmp.DefaultIfEmpty()
+                                          select new
+                                          {
+                                              j.pp,
+                                              j.tot,
+                                              fc.FirstContributionYear
+                                          };
+
+
+            if (req.IncludeTotals)
+            {
+                var totalsQry = from q in qryWithContributionYear
+                             group q by true into qGrp
+                             select new
+                             {
+                                 WagesTotal = qGrp.Sum(x => x.pp.IncomeExecutive + x.pp.CurrentIncomeYear),
+                                 HoursTotal = qGrp.Sum(x => x.pp.HoursExecutive + x.pp.CurrentHoursYear),
+                                 PointsTotal = qGrp.Sum(x => x.pp.PointsEarned),
+                                 TerminatedWagesTotal = qGrp.Where(x=>x.pp.EmploymentStatusId == EmploymentStatus.Constants.Terminated && x.pp.TerminationDate < calInfo.FiscalEndDate).Sum(x => x.pp.IncomeExecutive + x.pp.CurrentIncomeYear),
+                                 TerminatedHoursTotal = qGrp.Where(x => x.pp.EmploymentStatusId == EmploymentStatus.Constants.Terminated && x.pp.TerminationDate < calInfo.FiscalEndDate).Sum(x => x.pp.HoursExecutive + x.pp.CurrentHoursYear),
+                                 NumberOfEmployees = qGrp.Count(),
+                                 NumberOfNewEmployees = qGrp.Count(x => x.FirstContributionYear == null && (x.pp.HoursExecutive + x.pp.CurrentHoursYear) > ReferenceData.MinimumHoursForContribution()),
+                                 NumberOfEmployeesUnder21 = qGrp.Count(x => x.pp.DateOfBirth > birthDate21),
+                             };
+
+                var totals = await totalsQry.FirstOrDefaultAsync(cancellationToken);
+                if (totals != null)
+                {
+                    response.WagesTotal = totals.WagesTotal;
+                    response.HoursTotal = totals.HoursTotal;
+                    response.PointsTotal = totals.PointsTotal ?? 0m;
+                    response.TerminatedWagesTotal = totals.TerminatedWagesTotal;
+                    response.TerminatedHoursTotal = totals.TerminatedHoursTotal;
+                    response.NumberOfEmployees = totals.NumberOfEmployees;
+                    response.NumberOfNewEmployees = totals.NumberOfNewEmployees;
+                    response.NumberOfEmployeesInPlan = totals.NumberOfEmployees - totals.NumberOfEmployeesUnder21 - totals.NumberOfNewEmployees;
+                    response.NumberOfEmployeesUnder21 = totals.NumberOfEmployeesUnder21;
+                    
+                }
+
+            }
+
+            if (req.IncludeDetails)
+            {
+
+                return await qryWithContributionYear
+                          .OrderBy(p => p.pp.LastName)
+                          .ThenBy(p => p.pp.FirstName)
+                          .Select(x => new YearEndProfitSharingReportDetail()
+                          {
+                              BadgeNumber = x.pp.BadgeNumber,
+                              EmployeeName = $"{x.pp.LastName}, {x.pp.FirstName}",
+                              StoreNumber = x.pp.StoreNumber,
+                              EmployeeTypeCode = x.pp.EmploymentTypeId[0],
+                              EmployeeTypeName = x.pp.EmploymentTypeName,
+                              DateOfBirth = x.pp.DateOfBirth,
+                              Age = 0, //Filled out below after materialization
+                              Ssn = x.pp.Ssn.MaskSsn(),
+                              Wages = x.pp.CurrentIncomeYear + x.pp.IncomeExecutive,
+                              Hours = x.pp.CurrentHoursYear + x.pp.HoursExecutive,
+                              Points = Convert.ToInt16(x.pp.PointsEarned),
+                              IsNew = (x.FirstContributionYear == null && x.pp.HoursExecutive + x.pp.CurrentHoursYear > ReferenceData.MinimumHoursForContribution()),
+                              IsUnder21 = false, //Filled out below after materialization
+                              EmployeeStatus = x.pp.EmploymentStatusId,
+                              Balance = x.tot.Total ?? 0,
+                              YearsInPlan = x.pp.Years ?? 0
+                          })
+                          .ToPaginationResultsAsync(req, cancellationToken);
+            }
+
+            return new PaginatedResponseDto<YearEndProfitSharingReportDetail>();
         });
 
         foreach (var item in rslt.Results)
         {
-            item.Age = (byte)((response.FiscalEndDate.Year - item.DateOfBirth.Year) - (response.FiscalEndDate.DayOfYear < item.DateOfBirth.DayOfYear ? 1 : 0));
+            item.Age = (byte)((calInfo.FiscalEndDate.Year - item.DateOfBirth.Year) - (calInfo.FiscalEndDate.DayOfYear < item.DateOfBirth.DayOfYear ? 1 : 0));
             if (item.Age < 21)
             {
                 item.IsUnder21 = true;
@@ -559,12 +679,9 @@ public class CleanupReportService : ICleanupReportService
             }
         }
 
-        return new ReportResponseBase<YearEndProfitSharingReportResponse>
-        {
-            ReportDate = DateTimeOffset.Now,
-            ReportName = $"PROFIT SHARE YEAR END REPORT FOR {req.ProfitYear}",
-            Response = rslt
-        };
+        response.Response = rslt;
+
+        return response;
     }
 
     public async Task<YearEndProfitSharingReportSummaryResponse> GetYearEndProfitSharingSummaryReportAsync(FrozenProfitYearRequest req, CancellationToken cancellationToken = default)
@@ -590,7 +707,7 @@ public class CleanupReportService : ICleanupReportService
                 LineItemTitle = "AGE 18-20 WITH >= 1000 PS HOURS",
                 NumberOfMembers = x.Count(),
                 TotalWages = x.Sum(y => y.pp.IncomeExecutive + y.pp.CurrentIncomeYear),
-                TotalBalance = x.Sum(y => y.tot.Total)
+                TotalBalance = x.Sum(y => y.tot.Total ?? 0)
             }).FirstOrDefaultAsync(cancellationToken);
             if (lineItem != null) { response.LineItems.Add(lineItem); }
 
@@ -607,7 +724,7 @@ public class CleanupReportService : ICleanupReportService
                 LineItemTitle = ">= AGE 21 WITH >= 1000 PS HOURS",
                 NumberOfMembers = x.Count(),
                 TotalWages = x.Sum(y => y.pp.IncomeExecutive + y.pp.CurrentIncomeYear),
-                TotalBalance = x.Sum(y => y.tot.Total)
+                TotalBalance = x.Sum(y => y.tot.Total ?? 0)
             }).FirstOrDefaultAsync(cancellationToken);
             if (lineItem != null) { response.LineItems.Add(lineItem); }
 
@@ -624,7 +741,7 @@ public class CleanupReportService : ICleanupReportService
                 LineItemTitle = "<  AGE 18",
                 NumberOfMembers = x.Count(),
                 TotalWages = x.Sum(y => y.pp.IncomeExecutive + y.pp.CurrentIncomeYear),
-                TotalBalance = x.Sum(y => y.tot.Total)
+                TotalBalance = x.Sum(y => y.tot.Total ?? 0)
             }).FirstOrDefaultAsync(cancellationToken);
             if (lineItem != null) { response.LineItems.Add(lineItem); }
 
@@ -642,7 +759,7 @@ public class CleanupReportService : ICleanupReportService
                 LineItemTitle = ">= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT",
                 NumberOfMembers = x.Count(),
                 TotalWages = x.Sum(y => y.pp.IncomeExecutive + y.pp.CurrentIncomeYear),
-                TotalBalance = x.Sum(y => y.tot.Total)
+                TotalBalance = x.Sum(y => y.tot.Total ?? 0)
             })
             .FirstOrDefaultAsync(cancellationToken);
             if (lineItem != null) { response.LineItems.Add(lineItem); }
@@ -661,7 +778,7 @@ public class CleanupReportService : ICleanupReportService
                 LineItemTitle = ">= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT",
                 NumberOfMembers = x.Count(),
                 TotalWages = x.Sum(y => y.pp.IncomeExecutive + y.pp.CurrentIncomeYear),
-                TotalBalance = x.Sum(y => y.tot.Total)
+                TotalBalance = x.Sum(y => y.tot.Total ?? 0)
             })
             .FirstOrDefaultAsync(cancellationToken);
             if (lineItem != null) { response.LineItems.Add(lineItem); }
@@ -679,7 +796,7 @@ public class CleanupReportService : ICleanupReportService
                 LineItemTitle = ">= AGE 18 WITH >= 1000 PS HOURS",
                 NumberOfMembers = x.Count(),
                 TotalWages = x.Sum(y => y.pp.IncomeExecutive + y.pp.CurrentIncomeYear),
-                TotalBalance = x.Sum(y => y.tot.Total)
+                TotalBalance = x.Sum(y => y.tot.Total ?? 0)
             }).FirstOrDefaultAsync(cancellationToken);
             if (lineItem != null) { response.LineItems.Add(lineItem); }
 
@@ -697,7 +814,7 @@ public class CleanupReportService : ICleanupReportService
                 LineItemTitle = ">= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT",
                 NumberOfMembers = x.Count(),
                 TotalWages = x.Sum(y => y.pp.IncomeExecutive + y.pp.CurrentIncomeYear),
-                TotalBalance = x.Sum(y => y.tot.Total)
+                TotalBalance = x.Sum(y => y.tot.Total ?? 0)
             }).FirstOrDefaultAsync(cancellationToken);
             if (lineItem != null) { response.LineItems.Add(lineItem); }
 
@@ -715,7 +832,7 @@ public class CleanupReportService : ICleanupReportService
                 LineItemTitle = ">= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT",
                 NumberOfMembers = x.Count(),
                 TotalWages = x.Sum(y => y.pp.IncomeExecutive + y.pp.CurrentIncomeYear),
-                TotalBalance = x.Sum(y => y.tot.Total)
+                TotalBalance = x.Sum(y => y.tot.Total ?? 0)
             }).FirstOrDefaultAsync(cancellationToken);
             if (lineItem != null) { response.LineItems.Add(lineItem); }
 
@@ -732,7 +849,7 @@ public class CleanupReportService : ICleanupReportService
                 LineItemTitle = "<  AGE 18           NO WAGES :   0",
                 NumberOfMembers = x.Count(),
                 TotalWages = x.Sum(y => y.pp.IncomeExecutive + y.pp.CurrentIncomeYear),
-                TotalBalance = x.Sum(y => y.tot.Total)
+                TotalBalance = x.Sum(y => y.tot.Total ?? 0)
             }).FirstOrDefaultAsync(cancellationToken);
             if (lineItem != null) { response.LineItems.Add(lineItem); }
 
@@ -746,7 +863,7 @@ public class CleanupReportService : ICleanupReportService
                 LineItemTitle = "NON-EMPLOYEE BENEFICIARIES",
                 NumberOfMembers = x.Count(),
                 TotalWages = 0,
-                TotalBalance = x.Sum(y => y.tot.Total)
+                TotalBalance = x.Sum(y => y.tot.Total ?? 0)
             }).FirstOrDefaultAsync(cancellationToken);
             if (lineItem != null) { response.LineItems.Add(lineItem); }
 

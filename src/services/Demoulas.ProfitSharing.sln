@@ -1,8 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.8.0.0
-MinimumVisualStudioVersion = 17.8.0.0
+VisualStudioVersion = 17.13.2.0
+MinimumVisualStudioVersion = 17.13.0.0
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.AppHost", "src\Demoulas.ProfitSharing.AppHost\Demoulas.ProfitSharing.AppHost.csproj", "{92A3B192-25F3-40C4-94BD-A13779CF0B81}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D1297442-67BE-4098-A95F-727F04A68FA3}"
@@ -32,8 +32,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pipelines", "Pipelines", "{
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.Common", "src\Demoulas.ProfitSharing.Common\Demoulas.ProfitSharing.Common.csproj", "{B6B0D1E4-9EAC-4656-BC8A-FE517F1D8FEA}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demoulas.ProfitSharing.Client", "src\Demoulas.ProfitSharing.Client\Demoulas.ProfitSharing.Client.csproj", "{85083A70-BCEF-4479-866C-85E6A64D438F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Backend", "Backend", "{66B0DDDA-624B-4BF3-A4C7-CAEBC3E3DA62}"
 	ProjectSection(SolutionItems) = preProject
@@ -186,10 +184,6 @@ Global
 		{B6B0D1E4-9EAC-4656-BC8A-FE517F1D8FEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B6B0D1E4-9EAC-4656-BC8A-FE517F1D8FEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B6B0D1E4-9EAC-4656-BC8A-FE517F1D8FEA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{85083A70-BCEF-4479-866C-85E6A64D438F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{85083A70-BCEF-4479-866C-85E6A64D438F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{85083A70-BCEF-4479-866C-85E6A64D438F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{85083A70-BCEF-4479-866C-85E6A64D438F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{93F3EDAE-4D3C-4358-97F6-869C4EDA549F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{93F3EDAE-4D3C-4358-97F6-869C4EDA549F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{93F3EDAE-4D3C-4358-97F6-869C4EDA549F}.Release|Any CPU.ActiveCfg = Release|Any CPU

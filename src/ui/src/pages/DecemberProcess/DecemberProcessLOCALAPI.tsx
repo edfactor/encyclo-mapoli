@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Filter, FilterList, CheckCircle, RadioButtonUnchecked, Warning } from "@mui/icons-material";
 import { Box, Button, Divider, Stack, Typography, Chip } from "@mui/material";
-import Grid2 from "@mui/material/Unstable_Grid2";
+import Grid2 from '@mui/material/Grid2';
 import { DSMAccordion, Page } from "smart-ui-library";
 import { useSelector } from "react-redux";
 import DuplicateSSNsOnDemographicsGrid from "pages/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographicsGrid";
@@ -237,15 +237,14 @@ const DecemberProcessLocalApi: React.FC = () => {
   const [triggerDuplicateNamesAndBirthdays, { isFetching: isFetchingDuplicateNames }] =
     useLazyGetDuplicateNamesAndBirthdaysQuery();
 
-  const { negativeEtvaForSSNsOnPayprofit, duplicateSSNsData, demographicBadges, duplicateNamesAndBirthday } =
-    useSelector((state: RootState) => state.yearsEnd);
+  const { _ } = useSelector((state: RootState) => state.yearsEnd);
 
   useEffect(() => {
     if (hasToken) {
-      triggerETVASearch({ profitYear: 2023, pagination: { take: 25, skip: 0 } });
-      triggerPayrollDupeSsnsOnDemographics({ profitYear: 2023, pagination: { take: 25, skip: 0 } });
+      triggerETVASearch({ profitYear: 2024, pagination: { take: 25, skip: 0 } });
+      triggerPayrollDupeSsnsOnDemographics({ pagination: { take: 25, skip: 0 } });
       triggerDemographicBadgesNotInPayprofit({ pagination: { take: 25, skip: 0 } });
-      triggerDuplicateNamesAndBirthdays({ profitYear: 2023, pagination: { take: 25, skip: 0 } });
+      triggerDuplicateNamesAndBirthdays({ profitYear: 2024, pagination: { take: 25, skip: 0 } });
     }
   }, [hasToken]);
   return (
@@ -254,13 +253,11 @@ const DecemberProcessLocalApi: React.FC = () => {
       <Grid2
         container
         rowSpacing="24px">
-        <Grid2
-          xs={12}
-          width="100%">
+        <Grid2 size={{ xs: 12 }} width="100%">
           <Divider />
         </Grid2>
 
-        <Grid2 xs={10}>
+        <Grid2 size={{ xs: 10 }} >
           <Stack
             direction="row"
             spacing={2}

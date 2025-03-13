@@ -1,22 +1,34 @@
 import { Typography } from "@mui/material";
-import { useState, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useLazyGetEmployeesOnMilitaryLeaveQuery, useLazyGetNegativeEVTASSNQuery } from "reduxstore/api/YearsEndApi";
+import { useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import { useLazyGetEmployeesOnMilitaryLeaveQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetMilitaryAndRehireColumns } from "./EmployeesOnMilitaryLeaveGridColumns";
 
-const EmployeesOnMilitaryLeaveGrid = () => {
+const EmployeesOnMilitaryLeaveGrid: React.FC = () => {
   const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
-  const [setSortParams] = useState<ISortParams>({
+  const [pageSize, setPageSize] = useState(100);
+  const { militaryAndRehireQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const [_, setSortParams] = useState<ISortParams>({
     sortBy: "Badge",
     isSortDescending: false
   });
+  const [triggerSearch, { isFetching }] = useLazyGetEmployeesOnMilitaryLeaveQuery();
 
-  const dispatch = useDispatch();
+  useEffect(() => {
+    const fetchData = async () => {
+      const request = {
+        pagination: { skip: pageNumber * pageSize, take: pageSize }
+      };
+
+      await triggerSearch(request, false);
+    };
+
+    fetchData();
+  }, [pageNumber, pageSize, triggerSearch]);
+
   const { militaryAndRehire: employeesOnMilitaryLeave } = useSelector((state: RootState) => state.yearsEnd);
-  const [_, { isLoading }] = useLazyGetEmployeesOnMilitaryLeaveQuery();
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetMilitaryAndRehireColumns(), []);
@@ -29,7 +41,7 @@ const EmployeesOnMilitaryLeaveGrid = () => {
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`Employees on Military Leave (${employeesOnMilitaryLeave?.response.total || 0})`}
+              {`(${employeesOnMilitaryLeave?.response.total || 0})`}
             </Typography>
           </div>
           <DSMGrid
