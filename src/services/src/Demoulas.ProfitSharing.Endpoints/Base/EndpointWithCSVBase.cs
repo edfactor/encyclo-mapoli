@@ -19,7 +19,7 @@ namespace Demoulas.ProfitSharing.Endpoints.Base;
 /// <typeparam name="RespType">Response type of the endpoint.</typeparam>
 /// <typeparam name="MapType">A mapping class that converts from a dto to a CSV format</typeparam>
 public abstract class EndpointWithCsvBase<ReqType, RespType, MapType> : FastEndpoints.Endpoint<ReqType, ReportResponseBase<RespType>>
-    where ReqType : PaginationRequestDto
+    where ReqType : SortedPaginationRequestDto 
     where RespType : class
     where MapType : ClassMap<RespType>
 {

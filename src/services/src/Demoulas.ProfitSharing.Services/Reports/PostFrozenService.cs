@@ -1,5 +1,7 @@
-﻿using Demoulas.Common.Data.Contexts.Extensions;
+﻿using System.Threading;
+using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -7,7 +9,9 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Demoulas.Util.Extensions;
+using Microsoft.AspNetCore.SignalR.Protocol;
 using Microsoft.EntityFrameworkCore;
+using static FastEndpoints.Ep;
 
 namespace Demoulas.ProfitSharing.Services.Reports
 {
@@ -128,6 +132,94 @@ namespace Demoulas.ProfitSharing.Services.Reports
                 return response;
             });
             return rslt;
+        }
+
+        public async Task<ReportResponseBase<ProfitSharingUnder21BreakdownByStoreResponse>> ProfitSharingUnder21BreakdownByStore(ProfitYearRequest request, CancellationToken cancellation)
+        {
+            var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellation);
+            var age21 = calInfo.FiscalEndDate.AddYears(-21);
+            short lastYear = (short)(request.ProfitYear - 1);
+            var earningsProfitCodes = new List<int> 
+            { 
+                ProfitCode.Constants.IncomingContributions.Id,
+                ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
+                ProfitCode.Constants.OutgoingForfeitures.Id,
+                ProfitCode.Constants.OutgoingDirectPayments.Id,
+                ProfitCode.Constants.Incoming100PercentVestedEarnings.Id,
+            };
+            var contributionProfitCodes = new[]
+            {
+                ProfitCode.Constants.IncomingContributions.Id,
+                ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
+                ProfitCode.Constants.OutgoingForfeitures.Id,
+                ProfitCode.Constants.OutgoingDirectPayments.Id,
+            };
+            var distributionProfitCodes = new[]
+            {
+                ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
+                ProfitCode.Constants.OutgoingForfeitures.Id,
+                ProfitCode.Constants.Outgoing100PercentVestedPayment.Id,
+            };
+
+
+            var rslt = await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx => {
+
+                var qry = (
+                    from pp in ctx.PayProfits.Where(x => x.ProfitYear == request.ProfitYear)
+                    join d in ctx.Demographics.Include(d => d.ContactInfo) on pp.DemographicId equals d.Id
+                    join lyTotTbl in _totalService.GetTotalBalanceSet(ctx, lastYear) on d.Ssn equals lyTotTbl.Ssn into lyTotTmp
+                    from lyTot in lyTotTmp.DefaultIfEmpty()
+                    join tyTotTbl in _totalService.TotalVestingBalance(ctx, request.ProfitYear, calInfo.FiscalEndDate) on d.Ssn equals tyTotTbl.Ssn into tyTotalTmp
+                    from tyTot in tyTotalTmp.DefaultIfEmpty()
+                    join tyPdGrpTbl in (
+                            from pd in ctx.ProfitDetails.Where(x => x.ProfitYear == request.ProfitYear)
+                            group pd by pd.Ssn into pdGrp
+                            select new
+                            {
+                                Ssn = pdGrp.Key,
+                                Earnings = pdGrp.Where(x=>earningsProfitCodes.Contains(x.ProfitCodeId)).Sum(x=>x.Earnings),
+                                Contributions = pdGrp.Where(x=>contributionProfitCodes.Contains(x.ProfitCodeId)).Sum(x=>x.Contribution),
+                                Forfeitures = pdGrp.Where(x=>x.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id).Sum(x=>x.Forfeiture) - 
+                                                pdGrp.Where(x=>x.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id).Sum(x=>x.Forfeiture),
+                                Distributions = pdGrp.Where(x=>distributionProfitCodes.Contains(x.ProfitCodeId)).Sum(x=>x.Forfeiture * -1)
+                            }
+                          ) on d.Ssn equals tyPdGrpTbl.Ssn into tyPdGrpTmp
+                    from tyPdGrp in tyPdGrpTmp.DefaultIfEmpty()
+                    where d.DateOfBirth > age21
+                    orderby d.StoreNumber, d.ContactInfo.LastName, d.ContactInfo.FirstName
+                    select new ProfitSharingUnder21BreakdownByStoreResponse()
+                    {
+                        StoreNumber = d.StoreNumber,
+                        BadgeNumber = d.BadgeNumber,
+                        FullName = $"{d.ContactInfo.LastName}, {d.ContactInfo.FirstName}",
+                        BeginningBalance = lyTot.Total ?? 0,
+                        Earnings = tyPdGrp.Earnings,
+                        Contributions = tyPdGrp.Contributions,
+                        Forfeitures = tyPdGrp.Forfeitures,
+                        Distributions = tyPdGrp.Distributions,
+                        VestedAmount = tyTot.VestedBalance,
+                        EndingBalance = tyTot.CurrentBalance,
+                        VestingPercentage = tyTot.VestingPercent,
+                        DateOfBirth = d.DateOfBirth,
+                        Age = 0, //To be determined after materializing
+                        EnrollmentId = pp.EnrollmentId
+                    }
+                );
+                var pagedResults = await qry.ToPaginationResultsAsync(request, cancellation);
+                var fiscalEndDateTime = calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+                foreach (var row in pagedResults.Results)
+                {
+                    row.Age = (byte)row.DateOfBirth.Age(fiscalEndDateTime);
+                }
+                return pagedResults;
+            });
+
+            return new ReportResponseBase<ProfitSharingUnder21BreakdownByStoreResponse>()
+            {
+                ReportDate = DateTime.UtcNow,
+                ReportName = ProfitSharingUnder21BreakdownByStoreResponse.REPORT_NAME,
+                Response = rslt
+            };
         }
 
         internal class Under21IntermediaryResult
