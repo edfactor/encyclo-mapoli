@@ -24,7 +24,7 @@ const pathToReadableName: Record<string, string> = {
     'december-process-local': 'December Process Local',
     'december-process-accordion': 'December Activities Summary',
     'prof-term': 'Termination',
-    'military-entry-and-modification': 'Military Entry and Modification',
+    'military-entry-and-modification': 'Military Contributions',
     'profit-share-report': 'Profit Share Report',
     'forfeit': 'Forfeit',
     'fiscal-close': 'Year End Flow',

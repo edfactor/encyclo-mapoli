@@ -169,7 +169,7 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
                                 render={({ field }) => (
                                     <>
                                         <FormLabel htmlFor="badge-id">
-                                            Badge ID
+                                            Badge Number
                                         </FormLabel>
                                         <TextField
                                             id="badge-id"
