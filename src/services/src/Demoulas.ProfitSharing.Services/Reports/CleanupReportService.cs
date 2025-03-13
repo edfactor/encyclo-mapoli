@@ -42,7 +42,7 @@ public class CleanupReportService : ICleanupReportService
 
     }
 
-    public Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsnAsync(PaginationRequestDto req, CancellationToken ct)
+    public Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsnAsync(SortedPaginationRequestDto req, CancellationToken ct)
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
@@ -139,7 +139,7 @@ public class CleanupReportService : ICleanupReportService
         }
     }
 
-    public async Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfitAsync(PaginationRequestDto req,
+    public async Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfitAsync(SortedPaginationRequestDto req,
         CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("Request BEGIN DEMOGRAPHIC BADGES NOT IN PAY PROFIT"))
@@ -172,7 +172,7 @@ public class CleanupReportService : ICleanupReportService
         }
     }
 
-    public async Task<ReportResponseBase<NamesMissingCommaResponse>> GetNamesMissingCommaAsync(PaginationRequestDto req,
+    public async Task<ReportResponseBase<NamesMissingCommaResponse>> GetNamesMissingCommaAsync(SortedPaginationRequestDto req,
         CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("Request BEGIN DEMOGRAPHIC BADGES NOT IN PAY PROFIT"))

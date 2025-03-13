@@ -11,7 +11,7 @@ using Demoulas.ProfitSharing.Security;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
 
-public class EmployeesOnMilitaryLeaveEndpoint : EndpointWithCsvBase<PaginationRequestDto, EmployeesOnMilitaryLeaveResponse, EmployeesOnMilitaryLeaveEndpoint.EmployeesOnMilitaryLeaveResponseMap>
+public class EmployeesOnMilitaryLeaveEndpoint : EndpointWithCsvBase<SortedPaginationRequestDto, EmployeesOnMilitaryLeaveResponse, EmployeesOnMilitaryLeaveEndpoint.EmployeesOnMilitaryLeaveResponseMap>
 {
     private readonly IMilitaryAndRehireService _reportService;
 
@@ -53,7 +53,7 @@ public class EmployeesOnMilitaryLeaveEndpoint : EndpointWithCsvBase<PaginationRe
 
     public override string ReportFileName => "EMPLOYEES ON MILITARY LEAVE";
 
-    public override Task<ReportResponseBase<EmployeesOnMilitaryLeaveResponse>> GetResponse(PaginationRequestDto req, CancellationToken ct)
+    public override Task<ReportResponseBase<EmployeesOnMilitaryLeaveResponse>> GetResponse(SortedPaginationRequestDto req, CancellationToken ct)
     {
         return _reportService.GetMilitaryAndRehireReportAsync(req, ct);
     }

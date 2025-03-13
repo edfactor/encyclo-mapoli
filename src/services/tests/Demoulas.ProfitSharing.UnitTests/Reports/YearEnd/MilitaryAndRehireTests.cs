@@ -92,7 +92,7 @@ public class MilitaryAndRehireTests : ApiTestBase<Program>
     public async Task GetResponse_Should_HandleEmptyResults()
     {
         // Arrange
-        var request = new PaginationRequestDto { Skip = 0, Take = 10 };
+        var request = new SortedPaginationRequestDto { Skip = 0, Take = 10 };
         var cancellationToken = CancellationToken.None;
         var expectedResponse = new ReportResponseBase<EmployeesOnMilitaryLeaveResponse>
         {
@@ -113,7 +113,7 @@ public class MilitaryAndRehireTests : ApiTestBase<Program>
     public async Task GetResponse_Should_HandleNullResults()
     {
         // Arrange
-        var request = new PaginationRequestDto { Skip = 0, Take = 10 };
+        var request = new SortedPaginationRequestDto { Skip = 0, Take = 10 };
         var cancellationToken = CancellationToken.None;
         var expectedResponse = new ReportResponseBase<EmployeesOnMilitaryLeaveResponse>
         {

@@ -11,7 +11,7 @@ using Demoulas.Common.Contracts.Contracts.Request;
 
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
-public class GetDuplicateSsNsEndpoint : EndpointWithCsvBase<PaginationRequestDto, PayrollDuplicateSsnResponseDto, GetDuplicateSsNsEndpoint.GetDuplicateSsNsResponseMap>
+public class GetDuplicateSsNsEndpoint : EndpointWithCsvBase<SortedPaginationRequestDto, PayrollDuplicateSsnResponseDto, GetDuplicateSsNsEndpoint.GetDuplicateSsNsResponseMap>
 {
     private readonly ICleanupReportService _cleanupReportService;
 
@@ -53,7 +53,7 @@ public class GetDuplicateSsNsEndpoint : EndpointWithCsvBase<PaginationRequestDto
 
     public override string ReportFileName => "DuplicateSSns";
 
-    public override Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetResponse(PaginationRequestDto req, CancellationToken ct)
+    public override Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetResponse(SortedPaginationRequestDto req, CancellationToken ct)
     {
         return _cleanupReportService.GetDuplicateSsnAsync(req, ct);
     }

@@ -34,14 +34,14 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
         _options = Constants.GetJsonSerializerOptions();
     }
 
-    public Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsnAsync(PaginationRequestDto req, CancellationToken ct)
+    public Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsnAsync(SortedPaginationRequestDto req, CancellationToken ct)
     {
-        return CallReportEndpoint<PayrollDuplicateSsnResponseDto, PaginationRequestDto>(req, "duplicate-ssns", ct);
+        return CallReportEndpoint<PayrollDuplicateSsnResponseDto, SortedPaginationRequestDto>(req, "duplicate-ssns", ct);
     }
 
-    public Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfitAsync(PaginationRequestDto req, CancellationToken cancellationToken = default)
+    public Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfitAsync(SortedPaginationRequestDto req, CancellationToken cancellationToken = default)
     {
-        return CallReportEndpoint<DemographicBadgesNotInPayProfitResponse, PaginationRequestDto>(req, "demographic-badges-not-in-payprofit", cancellationToken);
+        return CallReportEndpoint<DemographicBadgesNotInPayProfitResponse, SortedPaginationRequestDto>(req, "demographic-badges-not-in-payprofit", cancellationToken);
     }
 
     public Task<Stream> DownloadDemographicBadgesNotInPayProfit(CancellationToken ct = default)
@@ -64,9 +64,9 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
     #endregion
     
 
-    public Task<ReportResponseBase<NamesMissingCommaResponse>> GetNamesMissingCommaAsync(PaginationRequestDto req, CancellationToken cancellationToken = default)
+    public Task<ReportResponseBase<NamesMissingCommaResponse>> GetNamesMissingCommaAsync(SortedPaginationRequestDto req, CancellationToken cancellationToken = default)
     {
-        return CallReportEndpoint<NamesMissingCommaResponse, PaginationRequestDto>(req, "names-missing-commas", cancellationToken);
+        return CallReportEndpoint<NamesMissingCommaResponse, SortedPaginationRequestDto>(req, "names-missing-commas", cancellationToken);
     }
 
     public Task<Stream> DownloadNamesMissingComma(CancellationToken cancellationToken = default)
@@ -76,7 +76,7 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
 
     public Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetDuplicateNamesAndBirthdaysAsync(ProfitYearRequest req, CancellationToken cancellationToken = default)
     {
-        return CallReportEndpoint<DuplicateNamesAndBirthdaysResponse, ProfitYearRequest>(req, "duplicate-names-and-birthdays", cancellationToken);
+        return CallReportEndpoint<DuplicateNamesAndBirthdaysResponse, SortedPaginationRequestDto>(req, "duplicate-names-and-birthdays", cancellationToken);
     }
 
     public Task<Stream> DownloadDuplicateNamesAndBirthdays(short profitYear, CancellationToken cancellationToken = default)
@@ -94,7 +94,7 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
         throw new NotImplementedException();
     }
 
-    private async Task<ReportResponseBase<TResponseDto>> CallReportEndpoint<TResponseDto, TPaginatedRequest>(TPaginatedRequest req, string endpointRoute, CancellationToken cancellationToken) where TResponseDto : class where TPaginatedRequest : PaginationRequestDto
+    private async Task<ReportResponseBase<TResponseDto>> CallReportEndpoint<TResponseDto, TPaginatedRequest>(TPaginatedRequest req, string endpointRoute, CancellationToken cancellationToken) where TResponseDto : class where TPaginatedRequest : SortedPaginationRequestDto 
     {
         UriBuilder uriBuilder = BuildPaginatedUrl(req, endpointRoute);
         var response = await _httpClient.GetAsync(uriBuilder.Uri, cancellationToken);
@@ -114,7 +114,7 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
         return _httpDownloadClient.GetStreamAsync(uriBuilder.Uri, cancellationToken);
     }
 
-    private UriBuilder BuildPaginatedUrl<TPaginatedRequest>(TPaginatedRequest req, string endpointRoute) where TPaginatedRequest : PaginationRequestDto
+    private UriBuilder BuildPaginatedUrl<TPaginatedRequest>(TPaginatedRequest req, string endpointRoute) where TPaginatedRequest : SortedPaginationRequestDto 
     {
         var query = HttpUtility.ParseQueryString(string.Empty);
 

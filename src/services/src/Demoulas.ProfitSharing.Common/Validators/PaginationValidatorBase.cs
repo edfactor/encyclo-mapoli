@@ -4,7 +4,7 @@ using FluentValidation;
 
 namespace Demoulas.ProfitSharing.Common.Validators;
 
-public abstract class PaginationValidatorBase<TPagination> : Validator<TPagination> where TPagination : PaginationRequestDto
+public abstract class PaginationValidatorBase<TPagination> : Validator<TPagination> where TPagination : SortedPaginationRequestDto 
 {
     protected PaginationValidatorBase()
     {
