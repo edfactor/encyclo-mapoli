@@ -222,7 +222,7 @@ public class CleanupReportService : ICleanupReportService
 FROM DEMOGRAPHIC p1
          JOIN DEMOGRAPHIC p2
               ON p1.Id < p2.Id  -- Avoid self-joins and duplicate pairs
-                  AND UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) < 2  -- Name similarity threshold
+                  AND UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) < 3  -- Name similarity threshold
                   AND SOUNDEX(p1.FULL_NAME) = SOUNDEX(p2.FULL_NAME)  -- Phonetic similarity
                   AND (
                      p1.DATE_OF_BIRTH = p2.DATE_OF_BIRTH  -- Exact DOB match
@@ -234,7 +234,7 @@ SELECT p2.FULL_NAME as FullName
 FROM DEMOGRAPHIC p1
          JOIN DEMOGRAPHIC p2
               ON p1.Id < p2.Id  -- Avoid self-joins and duplicate pairs
-                  AND UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) < 2  -- Name similarity threshold
+                  AND UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) < 3  -- Name similarity threshold
                   AND SOUNDEX(p1.FULL_NAME) = SOUNDEX(p2.FULL_NAME)  -- Phonetic similarity
                   AND (
                      p1.DATE_OF_BIRTH = p2.DATE_OF_BIRTH  -- Exact DOB match
