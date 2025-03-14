@@ -4,8 +4,8 @@ import InputLabel from "@mui/material/InputLabel";
 import ListItemText from "@mui/material/ListItemText";
 import MenuItem from "@mui/material/MenuItem";
 import OutlinedInput from "@mui/material/OutlinedInput";
-import Select from "@mui/material/Select";
-import { FC } from "react";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
+import { FC, SyntheticEvent } from "react";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -21,8 +21,8 @@ const MenuProps = {
 type myProps = {
   label: string;
   options: string[];
-  handleChange: Function;
-  handleClose: Function;
+  handleChange: (event: SelectChangeEvent<string[]>) => void;
+  handleClose: (event: SyntheticEvent) => void;
   value: string[];
 };
 
@@ -42,7 +42,7 @@ export const MultipleSelectCheckmarks: FC<myProps> = ({ label, options, handleCh
           multiple
           value={value}
           onChange={(e) => handleChange(e)}
-          onClose={() => handleClose()}
+          onClose={(e) => handleClose(e)}
           input={<OutlinedInput label={`${label}`} />}
           renderValue={(selected: string[]) => selected.join(", ")}
           MenuProps={MenuProps}>

@@ -1,15 +1,12 @@
 import { Divider } from "@mui/material";
-import { useState } from "react";
-import Grid2 from '@mui/material/Grid2';
-import { DSMAccordion, Page } from "smart-ui-library";
-import EmployeesOnMilitaryLeaveSearchFilter from "./EmployeesOnMilitaryLeaveSearchFilter";
+import Grid2 from "@mui/material/Grid2";
+import { Page } from "smart-ui-library";
 import EmployeesOnMilitaryLeaveGrid from "./EmployeesOnMilitaryLeaveGrid";
+import { CAPTIONS } from "../../constants";
 
 const EmployeesOnMilitaryLeave = () => {
-  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
-
   return (
-    <Page label="Employees on Military Leave">
+    <Page label={`${CAPTIONS.EMPLOYEES_MILITARY}`}>
       <Grid2
         container
         rowSpacing="24px">
