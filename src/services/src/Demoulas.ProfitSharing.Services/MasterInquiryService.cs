@@ -133,7 +133,8 @@ public class MasterInquiryService : IMasterInquiryService
                     BadgeNumber = x.Demographics.BadgeNumber,
                 });
                 
-                var results = await formattedQuery.ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken);
+                var results = await formattedQuery
+                    .ToPaginationResultsAsync(req, forceSingleQuery: false, cancellationToken);
 
                 ISet<int> uniqueSsns = await query.Select(q => q.Demographics.Ssn).ToHashSetAsync(cancellationToken: cancellationToken);
                 EmployeeDetails? employeeDetails = null;
