@@ -8,5 +8,5 @@ public sealed record ExecutiveHoursAndDollarsRequest : ProfitYearRequest
 #pragma warning restore DSM001
     public string? FullNameContains { get; set; }
     public bool? HasExecutiveHoursAndDollars { get; set; }
-    public bool? HasMonthlyPayments { get; set; }
+    public bool? isMonthlyPayroll { get; set; }
 }

@@ -24,7 +24,7 @@ interface ExecutiveHoursAndDollarsSearch {
   socialSecurity?: number | null;
   fullNameContains?: string | null;
   hasExecutiveHoursAndDollars: NonNullable<boolean>;
-  hasMonthlyPayments: NonNullable<boolean>;
+  isMonthlyPayroll: NonNullable<boolean>;
 }
 
 const schema = yup.object().shape({
@@ -51,7 +51,7 @@ const schema = yup.object().shape({
     .nullable(),
   fullNameContains: yup.string().typeError("Full Name must be a string").nullable(),
   hasExecutiveHoursAndDollars: yup.boolean().default(true).required(),
-  hasMonthlyPayments: yup.boolean().default(false).required()
+  isMonthlyPayroll: yup.boolean().default(false).required()
 });
 
 // If we are using a modal window, we want a slimmed down version of the search filter
@@ -93,7 +93,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
           : undefined,
       fullNameContains: executiveHoursAndDollarsQueryParams?.fullNameContains ?? undefined,
       hasExecutiveHoursAndDollars: executiveHoursAndDollarsQueryParams?.hasExecutiveHoursAndDollars ?? true,
-      hasMonthlyPayments: executiveHoursAndDollarsQueryParams?.hasMonthlyPayments ?? false
+      isMonthlyPayroll: executiveHoursAndDollarsQueryParams?.isMonthlyPayroll ?? false
     }
   });
 
@@ -110,7 +110,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
           ...(!!data.socialSecurity && { socialSecurity: data.socialSecurity }),
           ...(!!data.badgeNumber && { badgeNumber: data.badgeNumber }),
           hasExecutiveHoursAndDollars: data.hasExecutiveHoursAndDollars ?? false,
-          hasMonthlyPayments: data.hasMonthlyPayments !== undefined ? data.hasMonthlyPayments : false,
+          isMonthlyPayroll: data.isMonthlyPayroll !== undefined ? data.isMonthlyPayroll : false,
           ...(!!data.fullNameContains && { fullNameContains: data.fullNameContains })
         },
         false
@@ -122,7 +122,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
           socialSecurity: data.socialSecurity ?? 0,
           fullNameContains: data.fullNameContains ?? "",
           hasExecutiveHoursAndDollars: data.hasExecutiveHoursAndDollars ?? false,
-          hasMonthlyPayments: data.hasMonthlyPayments ?? false
+          isMonthlyPayroll: data.isMonthlyPayroll ?? false
         })
       );
 
@@ -141,7 +141,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
           ...(!!data.socialSecurity && { socialSecurity: data.socialSecurity }),
           ...(!!data.badgeNumber && { badgeNumber: data.badgeNumber }),
           hasExecutiveHoursAndDollars: false,
-          hasMonthlyPayments: data.hasMonthlyPayments ?? false,
+          isMonthlyPayroll: data.isMonthlyPayroll ?? false,
           ...(!!data.fullNameContains && { fullNameContains: data.fullNameContains })
         },
         false
@@ -161,7 +161,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
     reset({
       profitYear: undefined,
       hasExecutiveHoursAndDollars: true,
-      hasMonthlyPayments: false
+      isMonthlyPayroll: false
     });
   };
 
@@ -288,9 +288,9 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
                   )}
                 </Grid2>
                 <Grid2 size={{ xs: 3, sm: 3, md: 3 }}>
-                  <FormLabel>Has Monthly Payments</FormLabel>
+                  <FormLabel>Monthly Payroll</FormLabel>
                   <Controller
-                    name="hasMonthlyPayments"
+                    name="isMonthlyPayroll"
                     control={control}
                     render={({ field }) => (
                       <Checkbox
@@ -301,9 +301,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
                       />
                     )}
                   />
-                  {errors.hasMonthlyPayments && (
-                    <FormHelperText error>{errors.hasMonthlyPayments.message}</FormHelperText>
-                  )}
+                  {errors.isMonthlyPayroll && <FormHelperText error>{errors.isMonthlyPayroll.message}</FormHelperText>}
                 </Grid2>
               </Grid2>
             </>

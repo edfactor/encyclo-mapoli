@@ -117,7 +117,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
         fullNameContains: executiveHoursAndDollarsQueryParams.fullNameContains
       }),
       hasExecutiveHoursAndDollars: executiveHoursAndDollarsQueryParams.hasExecutiveHoursAndDollars ?? false,
-      hasMonthlyPayments: executiveHoursAndDollarsQueryParams.hasMonthlyPayments ?? false,
+      isMonthlyPayroll: executiveHoursAndDollarsQueryParams.isMonthlyPayroll ?? false,
       pagination: { skip: pageNumber * pageSize, take: pageSize }
     };
 
