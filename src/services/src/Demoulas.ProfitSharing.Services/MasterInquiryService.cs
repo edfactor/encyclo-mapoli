@@ -141,7 +141,6 @@ public class MasterInquiryService : IMasterInquiryService
                 if (uniqueSsns.Count == 1)
                 {
                     int ssn = uniqueSsns.First();
-                    var maxProfitYear = req.EndProfitYear ?? short.MaxValue;
                     short currentYear = (short)DateTime.Today.Year;
                     short previousYear = (short)(currentYear - 1);
 
