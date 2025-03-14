@@ -7,7 +7,7 @@ import buildInfo from "./.buildinfo.json";
 import Router from "./components/router/Router";
 
 const App = () => {
-  const onClick = (e: any) => {};
+  const onClick = (_e: React.MouseEvent<HTMLDivElement>) => {};
   const theme = createTheme(themeOptions);
   return (
     <ThemeProvider theme={theme}>

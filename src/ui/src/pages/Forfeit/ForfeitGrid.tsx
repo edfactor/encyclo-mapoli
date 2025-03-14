@@ -6,7 +6,7 @@ import { GetProfitShareForfeitColumns } from "./ForfeitGridColumns";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 
-const sampleData = [
+const _sampleData = [
   {
     badgeNumber: 47425,
     employeeName: "BACHELDER, JAKE R",
