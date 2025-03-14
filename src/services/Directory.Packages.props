@@ -87,6 +87,7 @@
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="MockQueryable.Moq" Version="7.0.3" />
     <PackageVersion Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+    <PackageVersion Include="System.Configuration.ConfigurationManager" Version="9.0.3" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.6.0" />
     <PackageVersion Include="System.Net.Http" Version="4.3.4" />
     <PackageVersion Include="System.Text.RegularExpressions" Version="4.3.1" />

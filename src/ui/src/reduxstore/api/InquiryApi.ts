@@ -45,7 +45,9 @@ export const InquiryApi = createApi({
           memberType: params.memberType,
           comment: params.comment,
           take: params.pagination.take,
-          skip: params.pagination.skip
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {

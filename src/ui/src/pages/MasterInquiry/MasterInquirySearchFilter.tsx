@@ -139,7 +139,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
 
       // Trigger search automatically when badge number is present
       const searchParams: MasterInquiryRequest = {
-        pagination: { skip: 0, take: 25, sortBy: "profitYear", isSortDescending: true },
+        pagination: { skip: 0, take: 25, sortBy: "DistributionSequence", isSortDescending: true },
         badgeNumber: Number(badgeNumber)
       };
 
@@ -150,7 +150,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
       const searchParams: MasterInquiryRequest = {
-        pagination: { skip: 0, take: 25, sortBy: "profitYear", isSortDescending: true },
+        pagination: { skip: 0, take: 25, sortBy: "DistributionSequence", isSortDescending: false },
         ...(!!data.startProfitYear && { startProfitYear: data.startProfitYear.getFullYear() }),
         ...(!!data.endProfitYear && { endProfitYear: data.endProfitYear.getFullYear() }),
         ...(!!data.startProfitMonth && { startProfitMonth: data.startProfitMonth }),
