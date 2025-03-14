@@ -12,6 +12,7 @@ import {
 import { FrozenReportsByAgeRequestType } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import { RootState } from "reduxstore/store";
 
 interface BalanceByAgeSearch {
   profitYear: number;
