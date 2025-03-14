@@ -1,7 +1,7 @@
 import { Typography } from "@mui/material";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useLazyGetProfitMasterInquiryQuery } from "reduxstore/api/YearsEndApi";
+import { useLazyGetProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetMasterInquiryGridColumns } from "./MasterInquiryGridColumns";
@@ -20,7 +20,7 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
     isSortDescending: false
   });
 
-  const { masterInquiryData, masterInquiryRequestParams } = useSelector((state: RootState) => state.yearsEnd);
+  const { masterInquiryData, masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [triggerSearch, { isFetching }] = useLazyGetProfitMasterInquiryQuery();
 
@@ -31,7 +31,7 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
     if (!masterInquiryRequestParams) return;
 
     const request: MasterInquiryRequest = {
-      pagination: { skip: pageNumber * pageSize, take: pageSize },
+      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: _sortParams.sortBy, isSortDescending: _sortParams.isSortDescending },
       ...(!!masterInquiryRequestParams.startProfitYear && {
         startProfitYear: masterInquiryRequestParams.startProfitYear.getFullYear()
       }),

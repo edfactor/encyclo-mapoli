@@ -3,7 +3,7 @@ import { FormLabel, TextField } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
 import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
-import { useLazyGetProfitMasterInquiryQuery } from "reduxstore/api/YearsEndApi";
+import { useLazyGetProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 
@@ -36,7 +36,7 @@ const MilitaryEntryAndModificationSearchFilter = () => {
   const onSubmit = (data: SearchFormData) => {
     triggerSearch(
       {
-        pagination: { skip: 0, take: 25 },
+        pagination: { skip: 0, take: 25, sortBy: "profitYear", isSortDescending: false },
         ...(!!data.socialSecurity && { socialSecurity: Number(data.socialSecurity) }),
         ...(!!data.badgeNumber && { badgeNumber: Number(data.badgeNumber) })
       },

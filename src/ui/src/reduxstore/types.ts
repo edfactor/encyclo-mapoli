@@ -1,10 +1,13 @@
-import { Paged, PaginationParams } from "smart-ui-library";
+import { ISortParams, Paged, PaginationParams } from "smart-ui-library";
 
 export enum ImpersonationRoles {
   FinanceManager = "Finance-Manager",
   DistributionsClerk = "Distributions-Clerk",
   HardshipAdministrator = "Hardship-Administrator",
   ProfitSharingAdministrator = "Profit-Sharing-Administrator"
+}
+
+export interface SortedPaginationRequestDto extends PaginationParams, ISortParams {
 }
 
 export interface ProfitYearRequest {
@@ -261,18 +264,14 @@ export interface EligibleEmployeeResponseDto {
   response: Paged<EligibleEmployee>;
 }
 
-export interface BaseQueryParams {
-  profitYear: number;
-}
-
-export interface ForfeituresAndPointsQueryParams extends BaseQueryParams {
+export interface ForfeituresAndPointsQueryParams extends ProfitYearRequest {
   useFrozenData: boolean;
 }
 
-export interface ProfitAndReportingQueryParams extends BaseQueryParams {
+export interface ProfitAndReportingQueryParams extends ProfitYearRequest {
   reportingYear: string;
 }
-export interface ExecutiveHoursAndDollarsQueryParams extends BaseQueryParams {
+export interface ExecutiveHoursAndDollarsQueryParams extends ProfitYearRequest {
   badgeNumber: number;
   socialSecurity: number;
   fullNameContains: string;
@@ -280,7 +279,7 @@ export interface ExecutiveHoursAndDollarsQueryParams extends BaseQueryParams {
   hasMonthlyPayments: boolean;
 }
 
-export interface DistributionsAndForfeituresQueryParams extends BaseQueryParams {
+export interface DistributionsAndForfeituresQueryParams extends ProfitYearRequest {
   startMonth?: number;
   endMonth?: number;
   includeOutgoingForfeitures?: boolean;
@@ -337,7 +336,7 @@ export interface MasterInquiryDetail extends ProfitYearRequest {
   commentTypeName?: string;
 }
 
-export interface MasterInquiryRequest {
+export interface MasterInquiryRequest  {
   startProfitYear?: number;
   endProfitYear?: number;
   startProfitMonth?: number;
@@ -350,10 +349,10 @@ export interface MasterInquiryRequest {
   socialSecurity?: number;
   name?: string;
   comment?: string;
-  pagination: PaginationParams;
   paymentType?: number;
   memberType?: number;
   badgeNumber?: number;
+  pagination: SortedPaginationRequestDto;
 }
 
 export enum FrozenReportsByAgeRequestType {
