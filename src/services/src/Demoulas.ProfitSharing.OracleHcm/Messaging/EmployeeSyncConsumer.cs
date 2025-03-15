@@ -51,16 +51,31 @@ internal class EmployeeSyncConsumer : IConsumer<MessageRequest<OracleEmployee[]>
         string requestedBy, CancellationToken cancellationToken)
     {
 
-        async Task<int> GetFakeSsn(long oracleHcmId)
+        async Task<Dictionary<long, int>> GetFakeSsns(List<long> oracleHcmIds)
         {
-            var existing = await _contextFactory.UseReadOnlyContext(c =>
+            // Get existing SSN mappings from database
+            Dictionary<long, int> empSsnDic = await _contextFactory.UseReadOnlyContext(c =>
             {
-                return c.Demographics.Select(d => new { d.OracleHcmId, d.Ssn })
-                    .FirstOrDefaultAsync(d => d.OracleHcmId == oracleHcmId, cancellationToken);
+                return c.Demographics.Where(d => oracleHcmIds.Contains(d.OracleHcmId))
+                    .Select(d => new { d.OracleHcmId, d.Ssn })
+                    .ToDictionaryAsync(d => d.OracleHcmId, d => d.Ssn, cancellationToken);
             });
 
-            return existing?.Ssn ?? await _fakeSsnService.GenerateFakeSsnAsync(cancellationToken);
+            // Find which IDs need new SSNs
+            var missingIds = oracleHcmIds.Where(id => !empSsnDic.ContainsKey(id)).ToList();
+
+            var newSsns = await _fakeSsnService.GenerateFakeSsnBatchAsync(missingIds.Count, cancellationToken);
+            // Generate new SSNs for missing IDs
+            for (int i = 0; i < missingIds.Count; i++)
+            {
+
+                empSsnDic.Add(missingIds[i], newSsns[i]);
+            }
+
+            return empSsnDic;
         }
+
+        var empSsnDic = await GetFakeSsns(employees.Select(e => e.PersonId).ToList());
 
         List<DemographicsRequest> requests = new();
         foreach (var employee in employees)
@@ -89,7 +104,7 @@ internal class EmployeeSyncConsumer : IConsumer<MessageRequest<OracleEmployee[]>
                 TerminationDate = employee.WorkRelationship?.TerminationDate,
                 Ssn =
                     employee.NationalIdentifier?.NationalIdentifierNumber.ConvertSsnToInt() ??
-                    await GetFakeSsn(employee.PersonId),
+                    empSsnDic[employee.PersonId],
                 StoreNumber = employee.WorkRelationship?.Assignment.LocationCode ?? 0,
                 DepartmentId = employee.WorkRelationship?.Assignment.GetDepartmentId() ?? 0,
                 PayClassificationId = employee.WorkRelationship?.Assignment.JobCode ?? 0,
