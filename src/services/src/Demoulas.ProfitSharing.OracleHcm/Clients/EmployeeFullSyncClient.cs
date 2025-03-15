@@ -8,15 +8,16 @@ using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Clients;
 
-internal sealed class OracleEmployeeDataSyncClient
+internal sealed class EmployeeFullSyncClient
 {
     private readonly HttpClient _httpClient;
     private readonly OracleHcmConfig _oracleHcmConfig;
-    private readonly ILogger<OracleEmployeeDataSyncClient> _logger;
+    private readonly ILogger<EmployeeFullSyncClient> _logger;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
 
 
-    public OracleEmployeeDataSyncClient(HttpClient httpClient, OracleHcmConfig oracleHcmConfig, ILogger<OracleEmployeeDataSyncClient> logger)
+    public EmployeeFullSyncClient(HttpClient httpClient, OracleHcmConfig oracleHcmConfig, 
+        ILogger<EmployeeFullSyncClient> logger)
     {
         _httpClient = httpClient;
         _oracleHcmConfig = oracleHcmConfig;
@@ -30,10 +31,9 @@ internal sealed class OracleEmployeeDataSyncClient
     /// </summary>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async IAsyncEnumerable<OracleEmployee?> GetAllEmployees([EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<OracleEmployee[]> GetAllEmployees([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         string url = await BuildUrl(cancellationToken: cancellationToken);
-
         while (true)
         {
             using HttpResponseMessage response = await GetOracleHcmValue(url, cancellationToken);
@@ -44,9 +44,9 @@ internal sealed class OracleEmployeeDataSyncClient
                 break;
             }
 
-            foreach (OracleEmployee emp in demographics.Employees)
+            foreach (var emps in demographics.Employees.Chunk(50))
             {
-                yield return emp;
+              yield return emps;
             }
 
             if (!demographics.HasMore)
@@ -72,23 +72,14 @@ internal sealed class OracleEmployeeDataSyncClient
     /// <param name="oracleHcmId"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    internal async IAsyncEnumerable<OracleEmployee?> GetEmployee(long oracleHcmId, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    internal async Task<OracleEmployee[]> GetEmployee(long oracleHcmId, CancellationToken cancellationToken = default)
     {
         string url = await BuildUrl(oracleHcmId: oracleHcmId, cancellationToken: cancellationToken);
 
         using HttpResponseMessage response = await GetOracleHcmValue(url, cancellationToken);
         OracleDemographics? demographics = await response.Content.ReadFromJsonAsync<OracleDemographics>(_jsonSerializerOptions, cancellationToken);
 
-        if (demographics?.Employees == null)
-        {
-            yield return null;
-        }
-
-
-        foreach (OracleEmployee emp in demographics!.Employees)
-        {
-            yield return emp;
-        }
+        return demographics?.Employees.ToArray() ?? [];
     }
 
     private async Task<string> BuildUrl(int offset = 0, long? oracleHcmId = null, CancellationToken cancellationToken = default)

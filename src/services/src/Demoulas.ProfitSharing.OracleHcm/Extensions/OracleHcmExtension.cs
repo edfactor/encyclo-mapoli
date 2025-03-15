@@ -200,7 +200,7 @@ public static class OracleHcmExtension
         services.AddHttpClient<AtomFeedClient>("AtomFeedSync", BuildOracleHcmAuthClient)
             .AddStandardResilienceHandler(options => ApplyResilienceOptions(options, commonHttpOptions));
 
-        services.AddHttpClient<OracleEmployeeDataSyncClient>("EmployeeSync", BuildOracleHcmAuthClient)
+        services.AddHttpClient<EmployeeFullSyncClient>("EmployeeSync", BuildOracleHcmAuthClient)
             .AddStandardResilienceHandler(options => ApplyResilienceOptions(options, commonHttpOptions));
 
         services.AddHttpClient<PayrollSyncClient>("PayrollSyncClient", BuildOracleHcmAuthClient)
