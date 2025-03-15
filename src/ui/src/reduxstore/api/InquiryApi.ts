@@ -46,8 +46,8 @@ export const InquiryApi = createApi({
           comment: params.comment,
           take: params.pagination.take,
           skip: params.pagination.skip,
-          sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
+          sortBy: params.pagination.sortBy || "profitYear",
+          isSortDescending: params.pagination.isSortDescending || true
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {

@@ -89,7 +89,7 @@ public class CleanupReportService : ICleanupReportService
                             PointsEarned = pp.PointsEarned
                         }).ToList()
                 })
-                .ToPaginationResultsAsync(req, forceSingleQuery: true, ct);
+                .ToPaginationResultsAsync(req, ct);
 
             return new ReportResponseBase<PayrollDuplicateSsnResponseDto>
             {
@@ -125,7 +125,7 @@ public class CleanupReportService : ICleanupReportService
                         EtvaValue = p.Etva
                     })
                     .OrderBy(p => p.BadgeNumber)
-                    .ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken);
+                    .ToPaginationResultsAsync(req, cancellationToken);
             });
 
             _logger.LogWarning("Returned {Results} records", results.Results.Count());
@@ -158,7 +158,7 @@ public class CleanupReportService : ICleanupReportService
                                 StatusName = dem.EmploymentStatus!.Name,
                                 Store = dem.StoreNumber,
                             };
-                return query.ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken: cancellationToken);
+                return query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
             });
 
             _logger.LogInformation("Returned {Results} records", results.Results.Count());
@@ -184,7 +184,7 @@ public class CleanupReportService : ICleanupReportService
                             where dem.ContactInfo.FullName == null || !dem.ContactInfo.FullName.Contains(",")
 #pragma warning restore CA1847
                             select new NamesMissingCommaResponse { BadgeNumber = dem.BadgeNumber, Ssn = dem.Ssn.MaskSsn(), EmployeeName = dem.ContactInfo.FullName ?? "", };
-                return await query.ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken: cancellationToken);
+                return await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
             });
 
             _logger.LogInformation("Returned {Results} records", results.Results.Count());

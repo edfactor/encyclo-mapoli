@@ -134,7 +134,7 @@ public class MasterInquiryService : IMasterInquiryService
                 });
                 
                 var results = await formattedQuery
-                    .ToPaginationResultsAsync(req, forceSingleQuery: false, cancellationToken);
+                    .ToPaginationResultsAsync(req, cancellationToken);
 
                 ISet<int> uniqueSsns = await query.Select(q => q.Demographics.Ssn).ToHashSetAsync(cancellationToken: cancellationToken);
                 EmployeeDetails? employeeDetails = null;
