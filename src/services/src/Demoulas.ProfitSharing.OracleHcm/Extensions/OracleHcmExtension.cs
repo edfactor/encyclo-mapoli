@@ -65,7 +65,7 @@ public static class OracleHcmExtension
         builder.AddOracleHcmSynchronization(oracleHcmConfig);
 
 #if DEBUG
-        builder.Services.AddSingleton(debugOracleHcmIdSet ?? new HashSet<long>());
+        builder.Services.AddTransient((_)=> debugOracleHcmIdSet ?? new HashSet<long>());
 #endif
 
         builder.Services.AddHostedService<EmployeeDeltaSyncService>();
@@ -112,7 +112,7 @@ public static class OracleHcmExtension
     public static IHostApplicationBuilder AddOracleHcmSynchronization(this IHostApplicationBuilder builder,
         OracleHcmConfig oracleHcmConfig)
     {
-        builder.Services.AddSingleton(oracleHcmConfig);
+        builder.Services.AddTransient((_)=> oracleHcmConfig);
 
         RegisterOracleHcmServices(builder.Services);
         ConfigureHttpClients(builder.Services);
@@ -144,25 +144,25 @@ public static class OracleHcmExtension
     private static void RegisterOracleHcmServices(IServiceCollection services)
     {
         // General services
-        services.AddSingleton<OracleEmployeeValidator>();
-        services.AddSingleton<EmployeeFullSyncJob>();
-        services.AddSingleton<EmployeeDeltaSyncJob>();
-        services.AddSingleton<PayrollSyncJob>();
-        services.AddSingleton<DemographicsService>();
+        services.AddTransient<OracleEmployeeValidator>();
+        services.AddTransient<EmployeeFullSyncJob>();
+        services.AddTransient<EmployeeDeltaSyncJob>();
+        services.AddTransient<PayrollSyncJob>();
+        services.AddTransient<DemographicsService>();
         
         // Mappers
-        services.AddSingleton<DemographicMapper>();
-        services.AddSingleton<AddressMapper>();
-        services.AddSingleton<ContactInfoMapper>();
+        services.AddTransient<DemographicMapper>();
+        services.AddTransient<AddressMapper>();
+        services.AddTransient<ContactInfoMapper>();
         
 
         // Internal services
-        services.AddSingleton<IDemographicsServiceInternal, DemographicsService>();
-        services.AddSingleton<IEmployeeSyncService, EmployeeSyncService>();
-        services.AddSingleton<IJobFactory, OracleHcmJobFactory>();
-        services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
+        services.AddTransient<IDemographicsServiceInternal, DemographicsService>();
+        services.AddTransient<IEmployeeSyncService, EmployeeSyncService>();
+        services.AddTransient<IJobFactory, OracleHcmJobFactory>();
+        services.AddTransient<ISchedulerFactory, StdSchedulerFactory>();
 
-        services.AddSingleton<IFakeSsnService, FakeSsnService>();
+        services.AddTransient<IFakeSsnService, FakeSsnService>();
         
     }
 
