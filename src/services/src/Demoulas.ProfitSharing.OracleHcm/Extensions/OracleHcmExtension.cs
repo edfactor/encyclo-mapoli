@@ -127,6 +127,7 @@ public static class OracleHcmExtension
             tracing.AddQuartzInstrumentation();
         });
 
+        builder.Services.AddHostedService<MemoryMonitoringService>();
 
         return builder;
     }
