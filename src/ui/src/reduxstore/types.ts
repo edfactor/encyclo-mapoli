@@ -1,5 +1,9 @@
 import { ISortParams, Paged, PaginationParams } from "smart-ui-library";
 
+export enum GridKeys {
+  MasterInquiry = "MI"
+}
+
 export enum ImpersonationRoles {
   FinanceManager = "Finance-Manager",
   DistributionsClerk = "Distributions-Clerk",
