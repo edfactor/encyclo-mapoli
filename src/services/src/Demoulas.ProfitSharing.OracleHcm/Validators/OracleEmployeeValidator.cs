@@ -116,14 +116,14 @@ public sealed class OracleEmployeeValidator : Validator<OracleEmployee>
 
     private async Task<bool> ValidatePayClassificationAsync(byte? jobCode, CancellationToken ct)
     {
-        ISet<LookupTableCache<byte>> lookup = await _accountCache.GetAllAsync(ct);
+        ISet<LookupTableCache<byte>> lookup = await _accountCache.GetAllAsync(ct).ConfigureAwait(false);
         HashSet<byte> codes = lookup.Select(p => p.Id).ToHashSet();
         return codes.Contains(jobCode ?? 0);
     }
 
     private async Task<bool> ValidateDepartmentIdAsync(byte departmentId, CancellationToken ct)
     {
-        ISet<LookupTableCache<byte>> lookup = await _depCache.GetAllAsync(ct);
+        ISet<LookupTableCache<byte>> lookup = await _depCache.GetAllAsync(ct).ConfigureAwait(false);
         HashSet<byte> codes = lookup.Select(p => p.Id).ToHashSet();
         return codes.Contains(departmentId);
     }

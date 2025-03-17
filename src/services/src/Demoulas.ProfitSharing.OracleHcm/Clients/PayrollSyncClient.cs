@@ -84,13 +84,13 @@ internal class PayrollSyncClient
         {
             db.Jobs.Add(job);
             return db.SaveChangesAsync(cancellationToken);
-        }, cancellationToken);
+        }, cancellationToken).ConfigureAwait(false);
 
         bool success = true;
         try
         {
             // Step 1: Get payroll process results (ObjectActionIds) for each PersonId
-            await GetPayrollProcessResultsAsync(cancellationToken);
+            await GetPayrollProcessResultsAsync(cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -105,7 +105,7 @@ internal class PayrollSyncClient
                         .SetProperty(b => b.Completed, b => DateTime.Now)
                         .SetProperty(b => b.JobStatusId, b => success ? JobStatus.Constants.Completed : JobStatus.Constants.Failed),
                     cancellationToken: cancellationToken);
-            }, cancellationToken);
+            }, cancellationToken).ConfigureAwait(false);
 
 #pragma warning disable S1215
             GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
@@ -130,23 +130,23 @@ internal class PayrollSyncClient
     private async Task GetPayrollProcessResultsAsync(CancellationToken cancellationToken)
     {
 
-        string url = await BuildUrl(cancellationToken: cancellationToken);
+        string url = await BuildUrl(cancellationToken: cancellationToken).ConfigureAwait(false);
         while (true)
         {
-            using HttpResponseMessage response = await GetOraclePayrollValue(url, cancellationToken);
+            using HttpResponseMessage response = await GetOraclePayrollValue(url, cancellationToken).ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
             {
                 break;
             }
 
-            PayrollRoot? results = await response.Content.ReadFromJsonAsync<PayrollRoot>(_jsonSerializerOptions, cancellationToken);
+            PayrollRoot? results = await response.Content.ReadFromJsonAsync<PayrollRoot>(_jsonSerializerOptions, cancellationToken).ConfigureAwait(false);
             if ((results?.Count ?? 0) == 0)
             {
                 return;
             }
 
-            await TrySyncMissingEmployees(results!.Items, cancellationToken);
+            await TrySyncMissingEmployees(results!.Items, cancellationToken).ConfigureAwait(false);
 
             // Queue Here
             const string requestedBy = "System";
@@ -154,7 +154,7 @@ internal class PayrollSyncClient
             {
                 MessageRequest<PayrollItem[]> message = new() { ApplicationName = nameof(PayrollSyncClient), Body = items, UserId = requestedBy };
 
-                await _payrollSyncBus.Publish(message, cancellationToken);
+                await _payrollSyncBus.Publish(message, cancellationToken).ConfigureAwait(false);
 
             }
 
@@ -164,7 +164,7 @@ internal class PayrollSyncClient
             }
 
             // Construct the next URL for pagination
-            string nextUrl = await BuildUrl(results.Count + results.Offset, cancellationToken: cancellationToken);
+            string nextUrl = await BuildUrl(results.Count + results.Offset, cancellationToken: cancellationToken).ConfigureAwait(false);
             if (string.IsNullOrEmpty(nextUrl))
             {
                 break;
@@ -183,16 +183,16 @@ internal class PayrollSyncClient
             HashSet<long> existingPersonIds = await c.Demographics
                 .Where(d => existsCollection.Contains(d.OracleHcmId))
                 .Select(d => d.OracleHcmId)
-                .ToHashSetAsync(cancellationToken);
+                .ToHashSetAsync(cancellationToken).ConfigureAwait(false);
 
             // Find PersonIds that are in existsCollection but not in the database
             return existsCollection.Except(existingPersonIds).ToList();
-        });
+        }).ConfigureAwait(false);
 
         foreach (long id in missingPersonIds)
         {
-            OracleEmployee[] oracleHcmEmployees = await _oracleEmployeeDataSyncClient.GetEmployee(id, cancellationToken);
-            await _employeeSyncService.QueueEmployee(Constants.SystemAccountName, oracleHcmEmployees, cancellationToken);
+            OracleEmployee[] oracleHcmEmployees = await _oracleEmployeeDataSyncClient.GetEmployee(id, cancellationToken).ConfigureAwait(false);
+            await _employeeSyncService.QueueEmployee(Constants.SystemAccountName, oracleHcmEmployees, cancellationToken).ConfigureAwait(false);
         }
     }
 
@@ -229,7 +229,7 @@ internal class PayrollSyncClient
         };
 
         string url = string.Concat(_oracleHcmConfig.BaseAddress, _oracleHcmConfig.PayrollUrl);
-        UriBuilder initialUriBuilder = new UriBuilder(url) { Query = await new FormUrlEncodedContent(initialQuery).ReadAsStringAsync(cancellationToken) };
+        UriBuilder initialUriBuilder = new UriBuilder(url) { Query = await new FormUrlEncodedContent(initialQuery).ReadAsStringAsync(cancellationToken).ConfigureAwait(false) };
         return initialUriBuilder.Uri.ToString();
     }
 
@@ -254,12 +254,12 @@ internal class PayrollSyncClient
     private async Task<HttpResponseMessage> GetOraclePayrollValue(string url, CancellationToken cancellationToken)
     {
         using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
-        HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken);
+        HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode && Debugger.IsAttached)
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine();
-            Console.WriteLine(await response.Content.ReadAsStringAsync(cancellationToken));
+            Console.WriteLine(await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false));
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.White;
         }
