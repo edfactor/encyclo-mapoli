@@ -26,6 +26,19 @@ public class CleanupReportService : ICleanupReportService
     private readonly TotalService _totalService;
     private readonly IHostEnvironment _host;
 
+    private readonly byte[] _distributionProfitCodes = [
+        ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
+        ProfitCode.Constants.OutgoingDirectPayments.Id,
+        ProfitCode.Constants.Outgoing100PercentVestedPayment.Id
+    ];
+
+    private readonly byte[] _validProfitCodes = [
+        ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
+        ProfitCode.Constants.OutgoingForfeitures.Id,
+        ProfitCode.Constants.OutgoingDirectPayments.Id,
+        ProfitCode.Constants.Outgoing100PercentVestedPayment.Id
+    ];
+
     public CleanupReportService(IProfitSharingDataContextFactory dataContextFactory,
         ContributionService contributionService,
         ILoggerFactory factory,
@@ -342,19 +355,7 @@ FROM DEMOGRAPHIC p1
     {
         using (_logger.BeginScope("Request BEGIN DISTRIBUTIONS AND FORFEITURES"))
         {
-            var distributionProfitCodes = new byte[]
-            {
-                ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id, ProfitCode.Constants.OutgoingDirectPayments.Id,
-                ProfitCode.Constants.Outgoing100PercentVestedPayment.Id
-            };
-
-            var validProfitCodes = new byte[]
-            {
-                ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id, ProfitCode.Constants.OutgoingForfeitures.Id,
-                ProfitCode.Constants.OutgoingDirectPayments.Id, ProfitCode.Constants.Outgoing100PercentVestedPayment.Id
-            };
-
-            var results = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+           var results = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
                 var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
                 var nameAndDobQuery = ctx.Demographics
@@ -389,7 +390,7 @@ FROM DEMOGRAPHIC p1
                 var query = from pd in ctx.ProfitDetails
                             join nameAndDob in nameAndDobQuery on pd.Ssn equals nameAndDob.Ssn
                             where pd.ProfitYear == req.ProfitYear &&
-                                  validProfitCodes.Contains(pd.ProfitCodeId) &&
+                                  _validProfitCodes.Contains(pd.ProfitCodeId) &&
                                   (pd.ProfitCodeId != ProfitCode.Constants.Outgoing100PercentVestedPayment.Id || (pd.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id && (!pd.CommentTypeId.HasValue || !transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)))) &&
                                   (req.StartMonth == 0 || pd.MonthToDate >= req.StartMonth) &&
                                   (req.EndMonth == 0 || pd.MonthToDate <= req.EndMonth)
@@ -399,7 +400,7 @@ FROM DEMOGRAPHIC p1
                                 BadgeNumber = nameAndDob.BadgeNumber,
                                 Ssn = pd.Ssn.MaskSsn(),
                                 EmployeeName = $"{nameAndDob.LastName}, {nameAndDob.FirstName}",
-                                DistributionAmount = distributionProfitCodes.Contains(pd.ProfitCodeId) ? pd.Forfeiture : 0,
+                                DistributionAmount = _distributionProfitCodes.Contains(pd.ProfitCodeId) ? pd.Forfeiture : 0,
                                 TaxCode = pd.TaxCodeId,
                                 StateTax = pd.StateTaxes,
                                 FederalTax = pd.FederalTaxes,
