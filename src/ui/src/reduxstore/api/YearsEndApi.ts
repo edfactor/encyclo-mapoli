@@ -19,7 +19,6 @@ import {
   setExecutiveHoursAndDollars,
   setForfeituresAndPoints,
   setForfeituresByAge,
-  setMasterInquiryData,
   setMilitaryAndRehireForfeituresDetails,
   setMilitaryAndRehireProfitSummaryDetails,
   setMissingCommaInPYName,
@@ -57,8 +56,6 @@ import {
   ForfeituresByAge,
   FrozenReportsByAgeRequest,
   FrozenReportsForfeituresAndPointsRequest,
-  MasterInquiryRequest,
-  MasterInquiryResponseType,
   MilitaryAndRehireForfeiture,
   MilitaryAndRehireForfeituresRequestDto,
   MilitaryAndRehireProfitSummary,
@@ -549,38 +546,6 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getProfitMasterInquiry: builder.query<MasterInquiryResponseType, MasterInquiryRequest>({
-      query: (params) => ({
-        url: "master/master-inquiry",
-        method: "GET",
-        params: {
-          badgeNumber: params.badgeNumber,
-          startProfitYear: params.startProfitYear,
-          endProfitYear: params.endProfitYear,
-          startProfitMonth: params.startProfitMonth,
-          endProfitMonth: params.endProfitMonth,
-          profitCode: params.profitCode,
-          contributionAmount: params.contributionAmount,
-          earningsAmount: params.earningsAmount,
-          forfeitureAmount: params.forfeitureAmount,
-          paymentAmount: params.paymentAmount,
-          socialSecurity: params.socialSecurity,
-          paymentType: params.paymentType,
-          memberType: params.memberType,
-          comment: params.comment,
-          take: params.pagination.take,
-          skip: params.pagination.skip
-        }
-      }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-          dispatch(setMasterInquiryData(data));
-        } catch (err) {
-          console.log("Err: " + err);
-        }
-      }
-    }),
     getVestingAmountByAge: builder.query<VestedAmountsByAge, ProfitYearRequest & { acceptHeader: string }>({
       query: (params) => ({
         url: "yearend/frozen/vested-amounts-by-age",
@@ -739,7 +704,6 @@ export const {
   useLazyGetMilitaryAndRehireProfitSummaryQuery,
   useLazyGetNamesMissingCommasQuery,
   useLazyGetNegativeEVTASSNQuery,
-  useLazyGetProfitMasterInquiryQuery,
   useLazyGetProfitShareEditQuery,
   useLazyGetProfitShareUpdateQuery,
   useLazyGetTerminationReportQuery,

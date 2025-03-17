@@ -101,7 +101,7 @@ public class MasterInquiryService : IMasterInquiryService
                         x.ProfitDetail.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id &&
                         x.ProfitDetail.Forfeiture == req.PaymentAmount);
                 }
-                var results = await query
+                var formattedQuery = query
                 .Select(x => new MasterInquiryResponseDto
                 {
                     Id = x.ProfitDetail.Id,
@@ -131,9 +131,10 @@ public class MasterInquiryService : IMasterInquiryService
                     CommentRelatedPsnSuffix = x.ProfitDetail.CommentRelatedPsnSuffix,
                     CommentIsPartialTransaction = x.ProfitDetail.CommentIsPartialTransaction,
                     BadgeNumber = x.Demographics.BadgeNumber,
-                })
-                .OrderByDescending(x => x.ProfitYear)
-                .ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken);
+                });
+                
+                var results = await formattedQuery
+                    .ToPaginationResultsAsync(req, cancellationToken);
 
                 ISet<int> uniqueSsns = await query.Select(q => q.Demographics.Ssn).ToHashSetAsync(cancellationToken: cancellationToken);
                 EmployeeDetails? employeeDetails = null;

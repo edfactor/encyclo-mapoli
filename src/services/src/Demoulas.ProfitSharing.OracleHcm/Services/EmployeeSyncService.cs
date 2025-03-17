@@ -22,14 +22,14 @@ namespace Demoulas.ProfitSharing.OracleHcm.Services;
 /// </summary>
 internal sealed class EmployeeSyncService : IEmployeeSyncService
 {
-    private readonly OracleEmployeeDataSyncClient _oracleEmployeeDataSyncClient;
+    private readonly EmployeeFullSyncClient _oracleEmployeeDataSyncClient;
     private readonly IDemographicsServiceInternal _demographicsService;
     private readonly AtomFeedClient _atomFeedClient;
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
     private readonly IBus _employeeSyncBus;
 
     public EmployeeSyncService(AtomFeedClient atomFeedClient,
-        OracleEmployeeDataSyncClient oracleEmployeeDataSyncClient,
+        EmployeeFullSyncClient oracleEmployeeDataSyncClient,
         IDemographicsServiceInternal demographicsService,
         IProfitSharingDataContextFactory profitSharingDataContextFactory,
         IBus employeeSyncBus)
@@ -64,8 +64,10 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         try
         {
             await _demographicsService.CleanAuditError(cancellationToken);
-            IAsyncEnumerable<OracleEmployee?> oracleHcmEmployees = _oracleEmployeeDataSyncClient.GetAllEmployees(cancellationToken);
-            await QueueEmployee(requestedBy, oracleHcmEmployees, cancellationToken);
+            await foreach (OracleEmployee[] oracleHcmEmployees in _oracleEmployeeDataSyncClient.GetAllEmployees(cancellationToken) )
+            {
+                await QueueEmployee(requestedBy, oracleHcmEmployees, cancellationToken);
+            }
         }
         catch (Exception ex)
         {
@@ -153,7 +155,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         {
             foreach (long oracleHcmId in people)
             {
-                IAsyncEnumerable<OracleEmployee?> oracleHcmEmployees = _oracleEmployeeDataSyncClient.GetEmployee(oracleHcmId, cancellationToken);
+                OracleEmployee[] oracleHcmEmployees = await _oracleEmployeeDataSyncClient.GetEmployee(oracleHcmId, cancellationToken);
                 await QueueEmployee(requestedBy, oracleHcmEmployees, cancellationToken);
             }
         }
@@ -163,22 +165,14 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         }
     }
 
-    public async Task QueueEmployee(string requestedBy, IAsyncEnumerable<OracleEmployee?> oracleHcmEmployees, CancellationToken cancellationToken)
+    public Task QueueEmployee(string requestedBy, OracleEmployee[] employees, CancellationToken cancellationToken)
     {
-        await foreach (OracleEmployee? employee in oracleHcmEmployees.WithCancellation(cancellationToken))
+        MessageRequest<OracleEmployee[]> message = new MessageRequest<OracleEmployee[]>
         {
-            if (employee == null)
-            {
-                continue;
-            }
+            ApplicationName = nameof(EmployeeSyncService), Body = employees, UserId = requestedBy
+        };
 
-            MessageRequest<OracleEmployee> message = new MessageRequest<OracleEmployee>
-            {
-                ApplicationName = nameof(EmployeeSyncService), Body = employee, UserId = requestedBy
-            };
-                        
-            await _employeeSyncBus.Publish(message, cancellationToken);
-        }
+        return _employeeSyncBus.Publish(message, cancellationToken);
     }
 
 

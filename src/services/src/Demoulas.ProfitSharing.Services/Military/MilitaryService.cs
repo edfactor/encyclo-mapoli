@@ -151,7 +151,7 @@ namespace Demoulas.ProfitSharing.Services.Military
                         CommentRelatedState = x.pd.CommentRelatedState,
                         CommentRelatedOracleHcmId = x.pd.CommentRelatedOracleHcmId
                     })
-                    .ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken);
+                    .ToPaginationResultsAsync(req, cancellationToken);
             });
 
             return Result<PaginatedResponseDto<MasterInquiryResponseDto>>.Success(result);

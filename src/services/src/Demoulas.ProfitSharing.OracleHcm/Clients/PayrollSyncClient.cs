@@ -24,7 +24,7 @@ internal class PayrollSyncClient
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
     private readonly IEmployeeSyncService _employeeSyncService;
     private readonly OracleHcmConfig _oracleHcmConfig;
-    private readonly OracleEmployeeDataSyncClient _oracleEmployeeDataSyncClient;
+    private readonly EmployeeFullSyncClient _oracleEmployeeDataSyncClient;
     private readonly ILogger<PayrollSyncClient> _logger;
     private readonly IBus _payrollSyncBus;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
@@ -34,7 +34,7 @@ internal class PayrollSyncClient
         IProfitSharingDataContextFactory profitSharingDataContextFactory,
         IEmployeeSyncService employeeSyncService,
         OracleHcmConfig oracleHcmConfig,
-        OracleEmployeeDataSyncClient oracleEmployeeDataSyncClient,
+        EmployeeFullSyncClient oracleEmployeeDataSyncClient,
         ILogger<PayrollSyncClient> logger,
         IBus payrollSyncBus)
     {
@@ -191,7 +191,7 @@ internal class PayrollSyncClient
 
         foreach (long id in missingPersonIds)
         {
-            IAsyncEnumerable<OracleEmployee?> oracleHcmEmployees = _oracleEmployeeDataSyncClient.GetEmployee(id, cancellationToken);
+            OracleEmployee[] oracleHcmEmployees = await _oracleEmployeeDataSyncClient.GetEmployee(id, cancellationToken);
             await _employeeSyncService.QueueEmployee(Constants.SystemAccountName, oracleHcmEmployees, cancellationToken);
         }
     }

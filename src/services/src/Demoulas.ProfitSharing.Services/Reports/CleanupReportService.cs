@@ -89,7 +89,7 @@ public class CleanupReportService : ICleanupReportService
                             PointsEarned = pp.PointsEarned
                         }).ToList()
                 })
-                .ToPaginationResultsAsync(req, forceSingleQuery: true, ct);
+                .ToPaginationResultsAsync(req, ct);
 
             return new ReportResponseBase<PayrollDuplicateSsnResponseDto>
             {
@@ -125,7 +125,7 @@ public class CleanupReportService : ICleanupReportService
                         EtvaValue = p.Etva
                     })
                     .OrderBy(p => p.BadgeNumber)
-                    .ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken);
+                    .ToPaginationResultsAsync(req, cancellationToken);
             });
 
             _logger.LogWarning("Returned {Results} records", results.Results.Count());
@@ -158,7 +158,7 @@ public class CleanupReportService : ICleanupReportService
                                 StatusName = dem.EmploymentStatus!.Name,
                                 Store = dem.StoreNumber,
                             };
-                return query.ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken: cancellationToken);
+                return query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
             });
 
             _logger.LogInformation("Returned {Results} records", results.Results.Count());
@@ -184,7 +184,7 @@ public class CleanupReportService : ICleanupReportService
                             where dem.ContactInfo.FullName == null || !dem.ContactInfo.FullName.Contains(",")
 #pragma warning restore CA1847
                             select new NamesMissingCommaResponse { BadgeNumber = dem.BadgeNumber, Ssn = dem.Ssn.MaskSsn(), EmployeeName = dem.ContactInfo.FullName ?? "", };
-                return await query.ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken: cancellationToken);
+                return await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
             });
 
             _logger.LogInformation("Returned {Results} records", results.Results.Count());
@@ -222,7 +222,7 @@ public class CleanupReportService : ICleanupReportService
 FROM DEMOGRAPHIC p1
          JOIN DEMOGRAPHIC p2
               ON p1.Id < p2.Id  -- Avoid self-joins and duplicate pairs
-                  AND UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) < 2  -- Name similarity threshold
+                  AND UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) < 3  -- Name similarity threshold
                   AND SOUNDEX(p1.FULL_NAME) = SOUNDEX(p2.FULL_NAME)  -- Phonetic similarity
                   AND (
                      p1.DATE_OF_BIRTH = p2.DATE_OF_BIRTH  -- Exact DOB match
@@ -234,7 +234,7 @@ SELECT p2.FULL_NAME as FullName
 FROM DEMOGRAPHIC p1
          JOIN DEMOGRAPHIC p2
               ON p1.Id < p2.Id  -- Avoid self-joins and duplicate pairs
-                  AND UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) < 2  -- Name similarity threshold
+                  AND UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) < 3  -- Name similarity threshold
                   AND SOUNDEX(p1.FULL_NAME) = SOUNDEX(p2.FULL_NAME)  -- Phonetic similarity
                   AND (
                      p1.DATE_OF_BIRTH = p2.DATE_OF_BIRTH  -- Exact DOB match

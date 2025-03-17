@@ -13,7 +13,7 @@ import {
 import Grid2 from '@mui/material/Grid2';
 import { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { useLazyGetProfitMasterInquiryQuery } from "reduxstore/api/YearsEndApi";
+import { useLazyGetProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -22,7 +22,7 @@ import {
   clearMasterInquiryData,
   clearMasterInquiryRequestParams,
   setMasterInquiryRequestParams
-} from "reduxstore/slices/yearsEndSlice";
+} from "reduxstore/slices/inquirySlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { RootState } from "reduxstore/store";
@@ -90,7 +90,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
   setInitialSearchLoaded
 }) => {
   const [triggerSearch, { isFetching }] = useLazyGetProfitMasterInquiryQuery();
-  const { masterInquiryRequestParams } = useSelector((state: RootState) => state.yearsEnd);
+  const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
 
   const dispatch = useDispatch();
 
@@ -139,7 +139,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
 
       // Trigger search automatically when badge number is present
       const searchParams: MasterInquiryRequest = {
-        pagination: { skip: 0, take: 25 },
+        pagination: { skip: 0, take: 25, sortBy: "DistributionSequence", isSortDescending: true },
         badgeNumber: Number(badgeNumber)
       };
 
@@ -150,7 +150,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
       const searchParams: MasterInquiryRequest = {
-        pagination: { skip: 0, take: 25 },
+        pagination: { skip: 0, take: 25, sortBy: "DistributionSequence", isSortDescending: false },
         ...(!!data.startProfitYear && { startProfitYear: data.startProfitYear.getFullYear() }),
         ...(!!data.endProfitYear && { endProfitYear: data.endProfitYear.getFullYear() }),
         ...(!!data.startProfitMonth && { startProfitMonth: data.startProfitMonth }),
@@ -165,7 +165,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
         ...(!!data.earnings && { earnings: data.earnings }),
         ...(!!data.forfeiture && { forfeiture: data.forfeiture }),
         ...(!!data.payment && { payment: data.payment })
-        //...(!!data.voids && { voids: data.voids })
       };
 
       triggerSearch(searchParams, false).unwrap();
