@@ -309,6 +309,7 @@ export interface MasterInquirySearch {
   forfeiture?: number | null;
   payment?: number | null;
   voids: boolean;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface MasterInquiryDetail extends ProfitYearRequest {

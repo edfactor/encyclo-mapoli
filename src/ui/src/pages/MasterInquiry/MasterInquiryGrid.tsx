@@ -16,7 +16,7 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [_sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "Badge",
+    sortBy: "ProfitYear",
     isSortDescending: false
   });
 
@@ -60,13 +60,13 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
     };
 
     await triggerSearch(request, false);
-  }, [pageNumber, pageSize, triggerSearch, masterInquiryRequestParams]);
+  }, [pageNumber, pageSize, _sortParams, triggerSearch, masterInquiryRequestParams]);
 
   useEffect(() => {
     if (initialSearchLoaded) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
+  }, [initialSearchLoaded, pageNumber, pageSize, _sortParams, onSearch]);
 
   return (
     <>

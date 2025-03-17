@@ -126,7 +126,13 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
       earnings: masterInquiryRequestParams?.earnings || undefined,
       forfeiture: masterInquiryRequestParams?.forfeiture || undefined,
       payment: masterInquiryRequestParams?.payment || undefined,
-      voids: false // masterInquiryRequestParams?.voids false
+      voids: false,
+      pagination: {
+        skip: 0,
+        take: 25,
+        sortBy: "ProfitYear",
+        isSortDescending: true
+      }
     }
   });
 
@@ -139,7 +145,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
 
       // Trigger search automatically when badge number is present
       const searchParams: MasterInquiryRequest = {
-        pagination: { skip: 0, take: 25, sortBy: "DistributionSequence", isSortDescending: true },
+        pagination: { skip: 0, take: 25, sortBy: "ProfitYear", isSortDescending: true },
         badgeNumber: Number(badgeNumber)
       };
 
@@ -150,7 +156,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
       const searchParams: MasterInquiryRequest = {
-        pagination: { skip: 0, take: 25, sortBy: "DistributionSequence", isSortDescending: false },
+        pagination: { skip: data.pagination.skip, take: data.pagination.take, sortBy: data.pagination.sortBy, isSortDescending: data.pagination.isSortDescending },
         ...(!!data.startProfitYear && { startProfitYear: data.startProfitYear.getFullYear() }),
         ...(!!data.endProfitYear && { endProfitYear: data.endProfitYear.getFullYear() }),
         ...(!!data.startProfitMonth && { startProfitMonth: data.startProfitMonth }),
