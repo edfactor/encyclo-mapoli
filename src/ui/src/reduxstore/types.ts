@@ -207,7 +207,7 @@ export interface ExecutiveHoursAndDollarsRequestDto extends ProfitYearRequest {
   socialSecurity?: number;
   fullNameContains?: string;
   hasExecutiveHoursAndDollars: boolean;
-  hasMonthlyPayments: boolean;
+  isMonthlyPayroll: boolean;
   pagination: PaginationParams;
 }
 
@@ -276,7 +276,7 @@ export interface ExecutiveHoursAndDollarsQueryParams extends ProfitYearRequest {
   socialSecurity: number;
   fullNameContains: string;
   hasExecutiveHoursAndDollars: boolean;
-  hasMonthlyPayments: boolean;
+  isMonthlyPayroll: boolean;
 }
 
 export interface DistributionsAndForfeituresQueryParams extends ProfitYearRequest {

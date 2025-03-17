@@ -406,7 +406,7 @@ export const YearsEndApi = createApi({
           ssn: params.socialSecurity,
           fullNameContains: params.fullNameContains,
           hasExecutiveHoursAndDollars: params.hasExecutiveHoursAndDollars,
-          hasMonthlyPayments: params.hasMonthlyPayments
+          isMonthlyPayroll: params.isMonthlyPayroll
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
