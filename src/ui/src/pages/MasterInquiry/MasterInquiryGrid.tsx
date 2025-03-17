@@ -10,9 +10,10 @@ import { paymentTypeGetNumberMap, memberTypeGetNumberMap } from "./MasterInquiry
 interface MasterInquiryGridProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
+  handleSortChanged: (sort: ISortParams) => void;
 }
 
-const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoaded, setInitialSearchLoaded }) => {
+const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoaded, setInitialSearchLoaded, handleSortChanged }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [_sortParams, setSortParams] = useState<ISortParams>({

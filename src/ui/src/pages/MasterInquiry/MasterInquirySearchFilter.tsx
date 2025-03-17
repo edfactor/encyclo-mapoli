@@ -197,7 +197,13 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
       earnings: undefined,
       forfeiture: undefined,
       payment: undefined,
-      voids: false
+      voids: false,
+      pagination: {
+        skip: 0,
+        take: 25,
+        sortBy: "ProfitYear",
+        isSortDescending: true
+      }
     });
   };
 
