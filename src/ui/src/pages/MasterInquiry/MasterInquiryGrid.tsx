@@ -13,7 +13,7 @@ interface MasterInquiryGridProps {
   handleSortChanged: (sort: ISortParams) => void;
 }
 
-const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoaded, setInitialSearchLoaded, handleSortChanged }) => {
+const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoaded, setInitialSearchLoaded }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [_sortParams, setSortParams] = useState<ISortParams>({
@@ -25,7 +25,12 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [triggerSearch, { isFetching }] = useLazyGetProfitMasterInquiryQuery();
 
-  const sortEventHandler = (update: ISortParams) => setSortParams(update);
+  const sortEventHandler = (update: ISortParams) => {
+    setSortParams(update);
+    setPageNumber(0); // Reset to the first page on sorting change
+    onSearch(); // Trigger API call with new sorting
+  };
+
   const columnDefs = useMemo(() => GetMasterInquiryGridColumns(), []);
 
   const onSearch = useCallback(async () => {
@@ -81,9 +86,9 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
             </Typography>
           </div>
           <DSMGrid
-            preferenceKey={"DUPE_SSNS"}
+            preferenceKey={"ProfitYear"}
             isLoading={false}
-            handleSortChanged={handleSortChanged}
+            handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: masterInquiryData?.inquiryResults.results,
               columnDefs: columnDefs
