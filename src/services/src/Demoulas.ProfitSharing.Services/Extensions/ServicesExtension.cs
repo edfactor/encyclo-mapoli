@@ -40,10 +40,10 @@ public static class ServicesExtension
 
         _ = builder.Services.AddScoped<ITerminatedEmployeeAndBeneficiaryReportService, TerminatedEmployeeAndBeneficiaryReportService>();
 
-        _ = builder.Services.AddSingleton<IFrozenService, FrozenService>();
-        _ = builder.Services.AddSingleton<IStoreService, StoreService>();
-        _ = builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
-        _ = builder.Services.AddSingleton<ICalendarService, CalendarService>();
+        _ = builder.Services.AddScoped<IFrozenService, FrozenService>();
+        _ = builder.Services.AddScoped<IStoreService, StoreService>();
+        _ = builder.Services.AddScoped<IAccountingPeriodsService, AccountingPeriodsService>();
+        _ = builder.Services.AddScoped<ICalendarService, CalendarService>();
 
         _ = builder.Services.AddScoped<IProfitShareUpdateService, ProfitShareUpdateService>();
         _ = builder.Services.AddScoped<IInternalProfitShareUpdateService, ProfitShareUpdateService>();
@@ -52,7 +52,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IProfitMasterService, ProfitMasterService>();
         _ = builder.Services.AddScoped<IPostFrozenService, PostFrozenService>();
 
-        _ = builder.Services.AddSingleton<IPayProfitUpdateService, PayProfitUpdateService>();
+        _ = builder.Services.AddScoped<IPayProfitUpdateService, PayProfitUpdateService>();
         _ = builder.Services.AddScoped<IBreakdownService, BreakdownReportService>();
 
         #region Mappers
