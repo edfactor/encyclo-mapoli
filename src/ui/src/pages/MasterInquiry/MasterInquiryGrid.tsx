@@ -18,7 +18,7 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
   const [pageSize, setPageSize] = useState(10);
   const [_sortParams, setSortParams] = useState<ISortParams>({
     sortBy: "profitYear",
-    isSortDescending: false
+    isSortDescending: true
   });
 
   const { masterInquiryData, masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
@@ -67,7 +67,7 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
   const sortEventHandler = (update: ISortParams) => {
     if (update.sortBy === "") {
       update.sortBy = "profitYear";
-      update.isSortDescending = false;
+      update.isSortDescending = true;
     }
     setSortParams(update);
     setPageNumber(0);

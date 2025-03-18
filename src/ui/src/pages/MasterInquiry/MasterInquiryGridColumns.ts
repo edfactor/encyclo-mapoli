@@ -30,6 +30,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
     },    
     {
       headerName: "Distribution Sequence",
+      headerTooltip: "Distribution Sequence",
       field: "distributionSequence",
       colId: "distributionSequence",
       minWidth: 100,
@@ -83,6 +84,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
     },
     {
       headerName: "Month to Date",
+      headerTooltip: "Month to Date",
       field: "monthToDate",
       colId: "monthToDate",
       minWidth: 100,
@@ -92,6 +94,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
     },
     {
       headerName: "Year To Date",
+      headerTooltip: "Year To Date",
       field: "yearToDate",
       colId: "yearToDate",
       minWidth: 100,
@@ -101,6 +104,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
     },
     {
       headerName: "Zero Contribution Reason",
+      headerTooltip: "Zero Contribution Reason",
       field: "zeroContributionReasonName",
       colId: "zeroContributionReasonName",
       minWidth: 150,
@@ -175,6 +179,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
     },
     {
       headerName: "Comment Type",
+      headerTooltip: "Comment Type",
       field: "commentTypeName",
       colId: "commentTypeName",
       minWidth: 100,
@@ -184,6 +189,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
     },
     {
       headerName: "Check Number",
+      headerTooltip: "Check Number",
       field: "commentRelatedCheckNumber",
       colId: "commentRelatedCheckNumber",
       minWidth: 120,
@@ -195,7 +201,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       headerName: "State",
       field: "commentRelatedState",
       colId: "commentRelatedState",
-      minWidth: 80,
+      minWidth: 60,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true
