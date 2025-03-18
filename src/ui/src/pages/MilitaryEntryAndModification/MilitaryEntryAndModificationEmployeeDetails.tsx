@@ -24,7 +24,7 @@ const MilitaryEntryAndModificationEmployeeDetails: React.FC<MilitaryEntryAndModi
     yearsInPlan,
     percentageVested,
     contributionsLastYear,
-    enrolled,
+    enrollmentId,
     badgeNumber
   } = details;
 
@@ -42,7 +42,7 @@ const MilitaryEntryAndModificationEmployeeDetails: React.FC<MilitaryEntryAndModi
   ];
 
   const employeeSection = [
-    { label: "Enrolled", value: enrolled ? "Yes" : "No" },
+    { label: "Enrolled", value: enrollmentId ? "Yes" : "No" },
     { label: "YTD P/S Hours", value: yearToDateProfitSharingHours },
     { label: "Percentage Vested", value: formatPercentage(percentageVested) },
     { label: "Cont Last Year", value: contributionsLastYear ? "Yes" : "No" }

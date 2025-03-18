@@ -17,7 +17,7 @@ internal class PayrollSyncConsumer : IConsumer<MessageRequest<PayrollItem[]>>
     {
         foreach (var item in context.Message.Body)
         {
-            await _payrollSyncService.GetBalanceTypesForProcessResultsAsync(item, context.CancellationToken);
+            await _payrollSyncService.GetBalanceTypesForProcessResultsAsync(item, context.CancellationToken).ConfigureAwait(false);
         }
     }
 }

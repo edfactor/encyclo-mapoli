@@ -58,21 +58,21 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         {
             db.Jobs.Add(job);
             return db.SaveChangesAsync(cancellationToken);
-        }, cancellationToken);
+        }, cancellationToken).ConfigureAwait(false);
 
         bool success = true;
         try
         {
-            await _demographicsService.CleanAuditError(cancellationToken);
-            await foreach (OracleEmployee[] oracleHcmEmployees in _oracleEmployeeDataSyncClient.GetAllEmployees(cancellationToken) )
+            await _demographicsService.CleanAuditError(cancellationToken).ConfigureAwait(false);
+            await foreach (OracleEmployee[] oracleHcmEmployees in _oracleEmployeeDataSyncClient.GetAllEmployees(cancellationToken).ConfigureAwait(false) )
             {
-                await QueueEmployee(requestedBy, oracleHcmEmployees, cancellationToken);
+                await QueueEmployee(requestedBy, oracleHcmEmployees, cancellationToken).ConfigureAwait(false);
             }
         }
         catch (Exception ex)
         {
             success = false;
-            await _demographicsService.AuditError(0, 0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken);
+            await _demographicsService.AuditError(0, 0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
@@ -82,7 +82,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
                         .SetProperty(b => b.Completed, b => DateTime.Now)
                         .SetProperty(b => b.JobStatusId, b => success ? JobStatus.Constants.Completed : JobStatus.Constants.Failed),
                     cancellationToken: cancellationToken);
-            }, cancellationToken);
+            }, cancellationToken).ConfigureAwait(false);
 
 #pragma warning disable S1215
             GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
@@ -108,7 +108,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         {
             db.Jobs.Add(job);
             return db.SaveChangesAsync(cancellationToken);
-        }, cancellationToken);
+        }, cancellationToken).ConfigureAwait(false);
         bool success = true;
         try
         {
@@ -116,7 +116,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
             DateTime minDate = await _profitSharingDataContextFactory.UseReadOnlyContext(c =>
             {
                 return c.Demographics.MinAsync(d => d.LastModifiedDate - TimeSpan.FromDays(7), cancellationToken: cancellationToken);
-            });
+            }).ConfigureAwait(false);
 
             IAsyncEnumerable<NewHireContext> newHires = _atomFeedClient.GetFeedDataAsync<NewHireContext>("newhire", minDate, maxDate, cancellationToken);
             IAsyncEnumerable<AssignmentContext> assignments = _atomFeedClient.GetFeedDataAsync<AssignmentContext>("empassignment", minDate, maxDate, cancellationToken);
@@ -124,18 +124,18 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
             IAsyncEnumerable<TerminationContext> terminations = _atomFeedClient.GetFeedDataAsync<TerminationContext>("termination", minDate, maxDate, cancellationToken);
 
             HashSet<long> people = new HashSet<long>();
-            await foreach (DeltaContextBase record in MergeAsyncEnumerables(newHires, updates, terminations, assignments, cancellationToken))
+            await foreach (DeltaContextBase record in MergeAsyncEnumerables(newHires, updates, terminations, assignments, cancellationToken).ConfigureAwait(false))
             {
                 people.Add(record.PersonId);
             }
 
-            await TrySyncEmployeeFromOracleHcm(requestedBy, people, cancellationToken);
+            await TrySyncEmployeeFromOracleHcm(requestedBy, people, cancellationToken).ConfigureAwait(false);
 
         }
         catch (Exception ex)
         {
             success = false;
-            await _demographicsService.AuditError(0, 0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken);
+            await _demographicsService.AuditError(0, 0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
@@ -145,7 +145,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
                         .SetProperty(b => b.Completed, b => DateTime.Now)
                         .SetProperty(b => b.JobStatusId, b => success ? JobStatus.Constants.Completed : JobStatus.Constants.Failed),
                     cancellationToken: cancellationToken);
-            }, cancellationToken);
+            }, cancellationToken).ConfigureAwait(false);
         }
     }
 
@@ -155,13 +155,13 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         {
             foreach (long oracleHcmId in people)
             {
-                OracleEmployee[] oracleHcmEmployees = await _oracleEmployeeDataSyncClient.GetEmployee(oracleHcmId, cancellationToken);
-                await QueueEmployee(requestedBy, oracleHcmEmployees, cancellationToken);
+                OracleEmployee[] oracleHcmEmployees = await _oracleEmployeeDataSyncClient.GetEmployee(oracleHcmId, cancellationToken).ConfigureAwait(false);
+                await QueueEmployee(requestedBy, oracleHcmEmployees, cancellationToken).ConfigureAwait(false);
             }
         }
         catch (Exception ex)
         {
-            await _demographicsService.AuditError(0, 0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken);
+            await _demographicsService.AuditError(0, 0, [new ValidationFailure("Error", ex.Message)], requestedBy, cancellationToken).ConfigureAwait(false);
         }
     }
 
@@ -193,22 +193,22 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         IAsyncEnumerable<DeltaContextBase> fourth,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        await foreach (DeltaContextBase item in first.WithCancellation(cancellationToken))
+        await foreach (DeltaContextBase item in first.WithCancellation(cancellationToken).ConfigureAwait(false))
         {
             yield return item;
         }
 
-        await foreach (DeltaContextBase item in second.WithCancellation(cancellationToken))
+        await foreach (DeltaContextBase item in second.WithCancellation(cancellationToken).ConfigureAwait(false))
         {
             yield return item;
         }
 
-        await foreach (DeltaContextBase item in third.WithCancellation(cancellationToken))
+        await foreach (DeltaContextBase item in third.WithCancellation(cancellationToken).ConfigureAwait(false))
         {
             yield return item;
         }
 
-        await foreach (DeltaContextBase item in fourth.WithCancellation(cancellationToken))
+        await foreach (DeltaContextBase item in fourth.WithCancellation(cancellationToken).ConfigureAwait(false))
         {
             yield return item;
         }

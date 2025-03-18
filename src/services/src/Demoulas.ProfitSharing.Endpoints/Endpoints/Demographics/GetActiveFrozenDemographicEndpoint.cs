@@ -20,7 +20,13 @@ public class GetActiveFrozenDemographicEndpoint : EndpointWithoutRequest<FrozenS
         Summary(s =>
         {
             s.Summary = "Gets frozen demographic meta data";
-            s.ResponseExamples = new Dictionary<int, object> { { 200, new FrozenStateResponse { Id = 2, ProfitYear = Convert.ToInt16(DateTime.Now.Year) } } };
+            s.ResponseExamples = new Dictionary<int, object>
+            {
+                {
+                    200,
+                    new FrozenStateResponse { Id = 2, ProfitYear = Convert.ToInt16(DateTime.Now.Year), IsActive = true }
+                }
+            };
         });
         Group<DemographicsGroup>();
     }

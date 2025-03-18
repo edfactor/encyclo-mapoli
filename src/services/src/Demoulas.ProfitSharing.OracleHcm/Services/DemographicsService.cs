@@ -84,7 +84,7 @@ internal class DemographicsService : IDemographicsServiceInternal
             List<Demographic> existingEntities = await context.Demographics
                 .Where(dbEntity => demographicOracleHcmIdLookup.Keys.Contains(dbEntity.OracleHcmId) ||
                                    (ssnCollection.Contains(dbEntity.Ssn) && dobCollection.Contains(dbEntity.DateOfBirth)))
-                .ToListAsync(cancellationToken);
+                .ToListAsync(cancellationToken).ConfigureAwait(false);
 
             // Handle potential duplicates in the existing database (SSN duplicates)
             List<Demographic> duplicateSsnEntities = existingEntities.GroupBy(e => e.Ssn)
@@ -135,7 +135,7 @@ internal class DemographicsService : IDemographicsServiceInternal
                         _logger.LogCritical(e, "Failed to process Demographic/OracleHCM employee record for BadgeNumber {BadgeNumber}", entity.BadgeNumber);
                         try
                         {
-                            await context.SaveChangesAsync(cancellationToken);
+                            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                         }
                         catch (CannotInsertNullException exception)
                         {
@@ -190,7 +190,7 @@ internal class DemographicsService : IDemographicsServiceInternal
                             .Where(x => x.DemographicId == existingEntity.Id
                                         && DateTime.UtcNow >= x.ValidFrom
                                         && DateTime.UtcNow < x.ValidTo)
-                            .FirstAsync(cancellationToken: cancellationToken);
+                            .FirstAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
                         oldHistoryRecord.ValidTo = DateTime.UtcNow;
                         newHistoryRecord.ValidFrom = oldHistoryRecord.ValidTo;
@@ -204,7 +204,7 @@ internal class DemographicsService : IDemographicsServiceInternal
             // Save all changes to the database
             try
             {
-                await context.SaveChangesAsync(cancellationToken);
+                await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {

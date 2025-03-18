@@ -305,6 +305,7 @@ export interface MasterInquirySearch {
   forfeiture?: number | null;
   payment?: number | null;
   voids: boolean;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface MasterInquiryDetail extends ProfitYearRequest {
@@ -455,7 +456,8 @@ export interface EmployeeDetails {
   yearsInPlan: number;
   percentageVested: number;
   contributionsLastYear: boolean;
-  enrolled: boolean;
+  enrollmentId: number;
+  enrollment: string;
   badgeNumber: string;
   hireDate: string;
   terminationDate: string | null;

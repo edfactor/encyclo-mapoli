@@ -28,7 +28,7 @@ public class MemoryMonitoringService : BackgroundService
                 Environment.Exit(1);
             }
 
-            await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken); // Check every 10 seconds
+            await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken).ConfigureAwait(false); // Check every 10 seconds
         }
     }
 }

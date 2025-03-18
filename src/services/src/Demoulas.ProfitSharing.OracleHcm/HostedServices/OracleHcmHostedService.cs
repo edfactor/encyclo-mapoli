@@ -33,14 +33,14 @@ internal abstract class OracleHcmHostedServiceBase : IHostedService
             return;
         }
 
-        _scheduler = await _schedulerFactory.GetScheduler(cancellationToken);
+        _scheduler = await _schedulerFactory.GetScheduler(cancellationToken).ConfigureAwait(false);
         _scheduler.JobFactory = _jobFactory;
 
         // Schedule all jobs
 
-        await ConfigureJob(cancellationToken);
+        await ConfigureJob(cancellationToken).ConfigureAwait(false);
 
-        await _scheduler.Start(cancellationToken);
+        await _scheduler.Start(cancellationToken).ConfigureAwait(false);
     }
 
     protected abstract Task ConfigureJob(CancellationToken cancellationToken);
@@ -72,7 +72,7 @@ internal abstract class OracleHcmHostedServiceBase : IHostedService
     {
         if (_scheduler != null)
         {
-            await _scheduler.Shutdown(cancellationToken);
+            await _scheduler.Shutdown(cancellationToken).ConfigureAwait(false);
         }
     }
 }

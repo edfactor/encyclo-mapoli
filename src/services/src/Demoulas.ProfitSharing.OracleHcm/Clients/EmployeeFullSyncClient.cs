@@ -33,11 +33,11 @@ internal sealed class EmployeeFullSyncClient
     /// <returns></returns>
     public async IAsyncEnumerable<OracleEmployee[]> GetAllEmployees([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        string url = await BuildUrl(cancellationToken: cancellationToken);
+        string url = await BuildUrl(cancellationToken: cancellationToken).ConfigureAwait(false);
         while (true)
         {
-            using HttpResponseMessage response = await GetOracleHcmValue(url, cancellationToken);
-            OracleDemographics? demographics = await response.Content.ReadFromJsonAsync<OracleDemographics>(_jsonSerializerOptions, cancellationToken);
+            using HttpResponseMessage response = await GetOracleHcmValue(url, cancellationToken).ConfigureAwait(false);
+            OracleDemographics? demographics = await response.Content.ReadFromJsonAsync<OracleDemographics>(_jsonSerializerOptions, cancellationToken).ConfigureAwait(false);
 
             if (demographics?.Employees == null)
             {
@@ -55,7 +55,7 @@ internal sealed class EmployeeFullSyncClient
             }
 
             // Construct the next URL for pagination
-            string nextUrl = await BuildUrl(demographics.Count + demographics.Offset, cancellationToken: cancellationToken);
+            string nextUrl = await BuildUrl(demographics.Count + demographics.Offset, cancellationToken: cancellationToken).ConfigureAwait(false);
             if (string.IsNullOrEmpty(nextUrl))
             {
                 break;
@@ -74,10 +74,10 @@ internal sealed class EmployeeFullSyncClient
     /// <returns></returns>
     internal async Task<OracleEmployee[]> GetEmployee(long oracleHcmId, CancellationToken cancellationToken = default)
     {
-        string url = await BuildUrl(oracleHcmId: oracleHcmId, cancellationToken: cancellationToken);
+        string url = await BuildUrl(oracleHcmId: oracleHcmId, cancellationToken: cancellationToken).ConfigureAwait(false);
 
-        using HttpResponseMessage response = await GetOracleHcmValue(url, cancellationToken);
-        OracleDemographics? demographics = await response.Content.ReadFromJsonAsync<OracleDemographics>(_jsonSerializerOptions, cancellationToken);
+        using HttpResponseMessage response = await GetOracleHcmValue(url, cancellationToken).ConfigureAwait(false);
+        OracleDemographics? demographics = await response.Content.ReadFromJsonAsync<OracleDemographics>(_jsonSerializerOptions, cancellationToken).ConfigureAwait(false);
 
         return demographics?.Employees.ToArray() ?? [];
     }
@@ -103,7 +103,7 @@ internal sealed class EmployeeFullSyncClient
         }
 
         UriBuilder initialUriBuilder = new UriBuilder(url);
-        string initialQueryString = await new FormUrlEncodedContent(initialQuery).ReadAsStringAsync(cancellationToken);
+        string initialQueryString = await new FormUrlEncodedContent(initialQuery).ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
         initialUriBuilder.Query = initialQueryString;
         string returnUrl = initialUriBuilder.Uri.ToString();
 
@@ -119,12 +119,12 @@ internal sealed class EmployeeFullSyncClient
     private async Task<HttpResponseMessage> GetOracleHcmValue(string url, CancellationToken cancellationToken)
     {
         using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
-        HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken);
+        HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode && Debugger.IsAttached)
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine();
-            Console.WriteLine(await response.Content.ReadAsStringAsync(cancellationToken));
+            Console.WriteLine(await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false));
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.White;
         }
