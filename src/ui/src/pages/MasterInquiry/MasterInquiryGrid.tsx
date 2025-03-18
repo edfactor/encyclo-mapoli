@@ -58,6 +58,11 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
   };
 
   const sortEventHandler = (update: ISortParams) => {
+    
+    if ( update.sortBy === "" )
+    {
+      update.sortBy = "ProfitYear";
+    }
     setSortParams(update);
     setPageNumber(0); 
     
@@ -78,7 +83,7 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
     if (!request) return;
 
     await triggerSearch(request, false);
-  }, [pageNumber, pageSize, _sortParams, triggerSearch, masterInquiryRequestParams]);
+  }, [createMasterInquiryRequest, pageNumber, pageSize, _sortParams, triggerSearch]);
 
   useEffect(() => {
     if (initialSearchLoaded) {
