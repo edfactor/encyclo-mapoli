@@ -43,13 +43,16 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
 
             var result = await c.PayProfits
                 .Include(p => p.Demographic)
+                .ThenInclude(d=> d!.Department)
                 .Where(p =>  p.ProfitYear == request.ProfitYear)
                 .Where(p => p.Demographic!.DateOfBirth <= birthDateOfExactly21YearsOld /*over 21*/  && p.CurrentHoursYear >= hoursWorkedRequirement && p.Demographic!.EmploymentStatusId != EmploymentStatus.Constants.Terminated)
-                .Select(p => new GetEligibleEmployeesResponseDto()
+                .Select(p => new EligibleEmployee
                 {
                     OracleHcmId = p.Demographic!.OracleHcmId,
                     BadgeNumber = p.Demographic!.BadgeNumber,
                     FullName = p.Demographic!.ContactInfo.FullName!,
+                    DepartmentId = p.Demographic.DepartmentId,
+                    Department = p.Demographic.Department!.Name
                 })
                 .OrderBy(p => p.FullName)
                 .ToPaginationResultsAsync(request, cancellationToken);

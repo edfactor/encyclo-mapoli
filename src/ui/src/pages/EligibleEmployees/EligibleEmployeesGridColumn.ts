@@ -30,7 +30,12 @@ export const GetEligibleEmployeesColumns = (): ColDef[] => {
       minWidth: 150,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true
+      resizable: true,
+      valueFormatter: (params) => {
+        const name = params.data.department; // assuming 'statusName' is in the row data
+        const id = params.data.departmentId; // assuming 'status' is in the row data
+        return `${name} (${id})`;
+      }
     }
   ];
 };
