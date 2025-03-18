@@ -16,22 +16,18 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       headerName: "Profit Year",
       field: "profitYear",
       colId: "profitYear",
-      minWidth: 100,
+      minWidth: 120,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
       sortable: true,
-      unSortIcon: true
-    },
-    {
-      headerName: "Iteration",
-      field: "profitYearIteration",
-      colId: "profitYearIteration",
-      minWidth: 80,
-      headerClass: "right-align",
-      cellClass: "right-align",
-      resizable: true
-    },
+      unSortIcon: true,
+      valueFormatter: (params) => {
+        const year = params.data.profitYear; // assuming 'status' is in the row data
+        const iter = params.data.profitYearIteration; // assuming 'statusName' is in the row data
+        return `${year}.${iter}`;
+      }
+    },    
     {
       headerName: "Distribution Sequence",
       field: "distributionSequence",
