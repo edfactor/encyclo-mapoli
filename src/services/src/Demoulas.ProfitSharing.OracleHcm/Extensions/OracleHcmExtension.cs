@@ -13,6 +13,7 @@ using Demoulas.ProfitSharing.OracleHcm.Validators;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Caching.Extensions;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.Util.Extensions;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -127,7 +128,10 @@ public static class OracleHcmExtension
             tracing.AddQuartzInstrumentation();
         });
 
-        builder.Services.AddHostedService<MemoryMonitoringService>();
+        if (!builder.Environment.IsTestEnvironment())
+        {
+            builder.Services.AddHostedService<MemoryMonitoringService>();
+        }
 
         return builder;
     }
