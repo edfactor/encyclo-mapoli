@@ -11,14 +11,14 @@ public record MilitaryAndRehireProfitSummaryResponse
     public required DateOnly HireDate { get; set; }
     public required DateOnly? TerminationDate { get; set; }
     public required DateOnly ReHiredDate { get; set; }
-    public required byte CompanyContributionYears { get; set; }
+    public required byte? CompanyContributionYears { get; set; }
     public required decimal HoursCurrentYear { get; set; }
     public required short ProfitYear { get; set; }
     public required decimal Forfeiture { get; set; }
     public required string? Remark { get; set; }
     public required byte EnrollmentId { get; set; }
-    public decimal NetBalanceLastYear { get; set; }
-    public decimal VestedBalanceLastYear { get; set; }
+    public decimal? NetBalanceLastYear { get; set; }
+    public decimal? VestedBalanceLastYear { get; set; }
     public char EmploymentStatusId { get; set; }
     public byte ProfitCodeId { get; set; }
 
