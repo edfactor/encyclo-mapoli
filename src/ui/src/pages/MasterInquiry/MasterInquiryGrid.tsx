@@ -15,7 +15,7 @@ interface MasterInquiryGridProps {
 
 const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoaded, setInitialSearchLoaded }) => {
   const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
+  const [pageSize, setPageSize] = useState(10);
   const [_sortParams, setSortParams] = useState<ISortParams>({
     sortBy: "profitYear",
     isSortDescending: false
