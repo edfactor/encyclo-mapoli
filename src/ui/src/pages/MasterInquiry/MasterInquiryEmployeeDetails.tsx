@@ -24,7 +24,8 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     yearsInPlan,
     percentageVested,
     contributionsLastYear,
-    enrolled,
+    enrollmentId,
+    enrollment,
     badgeNumber,
     hireDate,
     terminationDate,
@@ -41,7 +42,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     { label: "", value: `${lastName}, ${firstName}` },
     { label: "", value: `${address}` },
     { label: "", value: `${addressCity}, ${addressState} ${addressZipCode}` },
-    { label: "Enrolled", value: enrolled ? "Yes" : "No" },
+    { label: "Enrolled", value: `${enrollment} (${enrollmentId})`},
   ];
 
   const employeeSection = [

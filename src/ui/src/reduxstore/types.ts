@@ -1,4 +1,5 @@
 import { ISortParams, Paged, PaginationParams } from "smart-ui-library";
+import { number } from "yup";
 
 export enum GridKeys {
   MasterInquiry = "MI"
@@ -460,7 +461,8 @@ export interface EmployeeDetails {
   yearsInPlan: number;
   percentageVested: number;
   contributionsLastYear: boolean;
-  enrolled: boolean;
+  enrollmentId: number;
+  enrollment: string;
   badgeNumber: string;
   hireDate: string;
   terminationDate: string | null;
