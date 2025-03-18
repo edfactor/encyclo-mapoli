@@ -71,7 +71,7 @@ public class GetEligibleEmployeesEndpoint : EndpointWithCsvTotalsBase<ProfitYear
     {
         public GetEligibleEmployeesResponseDtoMap()
         {
-            Map(m => m.OracleHcmId).Index(1).Name("ORACLE_HCM_ID");
+            Map(m => m.DepartmentId).Index(1).Name("ASSIGNMENT_ID");
             Map(m => m.BadgeNumber).Index(2).Name("BADGE_PSN");
             Map(m => m.FullName).Index(3).Name("NAME");
         }
