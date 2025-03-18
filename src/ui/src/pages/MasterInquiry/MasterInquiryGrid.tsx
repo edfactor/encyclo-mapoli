@@ -25,19 +25,11 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [triggerSearch, { isFetching }] = useLazyGetProfitMasterInquiryQuery();
 
-  const sortEventHandler = (update: ISortParams) => {
-    setSortParams(update);
-    setPageNumber(0); // Reset to the first page on sorting change
-    onSearch(); // Trigger API call with new sorting
-  };
+  const createMasterInquiryRequest = (skip: number, sortBy: string, isSortDescending: boolean): MasterInquiryRequest | null => {
+    if (!masterInquiryRequestParams) return null;
 
-  const columnDefs = useMemo(() => GetMasterInquiryGridColumns(), []);
-
-  const onSearch = useCallback(async () => {
-    if (!masterInquiryRequestParams) return;
-
-    const request: MasterInquiryRequest = {
-      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: _sortParams.sortBy, isSortDescending: _sortParams.isSortDescending },
+    return {
+      pagination: { skip, take: pageSize, sortBy, isSortDescending },
       ...(!!masterInquiryRequestParams.startProfitYear && {
         startProfitYear: masterInquiryRequestParams.startProfitYear.getFullYear()
       }),
@@ -62,8 +54,28 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
       ...(!!masterInquiryRequestParams.earnings && { earnings: masterInquiryRequestParams.earnings }),
       ...(!!masterInquiryRequestParams.forfeiture && { forfeiture: masterInquiryRequestParams.forfeiture }),
       ...(!!masterInquiryRequestParams.payment && { payment: masterInquiryRequestParams.payment })
-      //voids: voidsCurrent,
     };
+  };
+
+  const sortEventHandler = (update: ISortParams) => {
+    setSortParams(update);
+    setPageNumber(0); 
+    
+    const request = createMasterInquiryRequest(0, update.sortBy, update.isSortDescending);
+    if (!request) return;
+
+    triggerSearch(request, false);
+  };
+
+  const columnDefs = useMemo(() => GetMasterInquiryGridColumns(), []);
+
+  const onSearch = useCallback(async () => {
+    const request = createMasterInquiryRequest(
+      pageNumber * pageSize, 
+      _sortParams.sortBy, 
+      _sortParams.isSortDescending
+    );
+    if (!request) return;
 
     await triggerSearch(request, false);
   }, [pageNumber, pageSize, _sortParams, triggerSearch, masterInquiryRequestParams]);
@@ -87,11 +99,12 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
           </div>
           <DSMGrid
             preferenceKey={"ProfitYear"}
-            isLoading={false}
+            isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: masterInquiryData?.inquiryResults.results,
-              columnDefs: columnDefs
+              columnDefs: columnDefs,
+              suppressMultiSort: true
             }}
           />
         </>
