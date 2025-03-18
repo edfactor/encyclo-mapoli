@@ -18,11 +18,16 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ICalendarService _calendarService;
+    private readonly TotalService _totalService;
 
-    public MilitaryAndRehireService(IProfitSharingDataContextFactory dataContextFactory, ICalendarService calendarService)
+    public MilitaryAndRehireService(
+        IProfitSharingDataContextFactory dataContextFactory, 
+        ICalendarService calendarService,
+        TotalService totalService)
     {
         _dataContextFactory = dataContextFactory;
         _calendarService = calendarService;
+        _totalService = totalService;
     }
 
     /// <summary>
@@ -106,9 +111,38 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
 
     public async Task<ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>> GetMilitaryAndRehireProfitSummaryReportAsync(ProfitYearRequest req, CancellationToken cancellationToken)
     {
+        var bracket = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
+
         var militaryMembers = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
-            var query = await GetMilitaryAndRehireProfitQueryBase(context, req, cancellationToken);
+            short lastYear = (short)(req.ProfitYear - 1);
+            var query = (
+                from b in await GetMilitaryAndRehireProfitQueryBase(context, req, cancellationToken)
+                join yipTbl in _totalService.GetYearsOfService(context, req.ProfitYear) on b.Ssn equals yipTbl.Ssn into yipTmp
+                from yip in yipTmp.DefaultIfEmpty()
+                join lyBalTbl in _totalService.TotalVestingBalance(context, lastYear, bracket.FiscalEndDate) on b.Ssn equals lyBalTbl.Ssn into lyBalTmp
+                from lyBal in lyBalTmp.DefaultIfEmpty()
+                select new
+                {
+                    b.BadgeNumber,
+                    b.FullName,
+                    b.Ssn,
+                    b.HireDate,
+                    b.TerminationDate,
+                    b.ReHiredDate,
+                    b.StoreNumber,
+                    CompanyContributionYears = yip.Years,
+                    b.EnrollmentId,
+                    b.HoursCurrentYear,
+                    NetBalanceLastYear = lyBal.VestedBalance,
+                    VestedBalanceLastYear = lyBal.CurrentBalance,
+                    b.EmploymentStatusId,
+                    b.Forfeiture,
+                    b.Remark,
+                    b.ProfitYear,
+                    b.ProfitCodeId
+                }
+            );
             return await query
                 .Select(d => new MilitaryAndRehireProfitSummaryResponse
                 {
@@ -145,7 +179,6 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
     {
         var bracket = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
 
-        //Question: The columns that aren't be filled in here, are they a necessary part of the query, or should be put values to them?
         var query = context.Demographics
             .Join(
                 context.PayProfits.Where(x=>x.ProfitYear == req.ProfitYear), // Table to join with (PayProfit)
@@ -153,18 +186,15 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
                 payProfit => payProfit.DemographicId, // Foreign key selector from PayProfit
                 (demographics, payProfit) => new // Result selector after joining
                 {
-                    BadgeNumber = demographics.BadgeNumber,
+                    demographics.BadgeNumber,
                     demographics.ContactInfo.FullName,
                     demographics.Ssn,
                     demographics.HireDate,
                     demographics.TerminationDate,
                     demographics.ReHireDate,
                     demographics.StoreNumber,
-                    //CompanyContributionYears = payProfit.YearsInPlan,
                     payProfit.EnrollmentId,
                     payProfit.CurrentHoursYear,
-                    //payProfit.NetBalanceLastYear,
-                    //payProfit.VestedBalanceLastYear,
                     demographics.EmploymentStatusId
                 }
             )
@@ -186,11 +216,8 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
                     member.TerminationDate,
                     member.ReHireDate,
                     member.StoreNumber,
-                    //member.CompanyContributionYears,
                     member.EnrollmentId,
                     member.CurrentHoursYear,
-                    //member.NetBalanceLastYear,
-                    //member.VestedBalanceLastYear,
                     member.EmploymentStatusId,
                     profitDetail.Forfeiture,
                     profitDetail.Remark,
@@ -209,11 +236,11 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
                 TerminationDate = d.TerminationDate,
                 ReHiredDate = d.ReHireDate ?? SqlDateTime.MinValue.Value.ToDateOnly(DateTimeKind.Local),
                 StoreNumber = d.StoreNumber,
-                CompanyContributionYears = 0, //d.CompanyContributionYears,
+                CompanyContributionYears = 0, //Filled out in detail report
                 EnrollmentId = d.EnrollmentId,
                 HoursCurrentYear = d.CurrentHoursYear,
-                NetBalanceLastYear = 0, //d.NetBalanceLastYear,
-                VestedBalanceLastYear = 0, //d.VestedBalanceLastYear,
+                NetBalanceLastYear = 0, //Filled out in detail report
+                VestedBalanceLastYear = 0, //Filled out in detail report
                 EmploymentStatusId = d.EmploymentStatusId,
                 Forfeiture = d.Forfeiture,
                 Remark = d.Remark,
