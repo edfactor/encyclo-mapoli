@@ -83,7 +83,7 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
           <DSMGrid
             preferenceKey={"DUPE_SSNS"}
             isLoading={false}
-            handleSortChanged={sortEventHandler}
+            handleSortChanged={handleSortChanged}
             providedOptions={{
               rowData: masterInquiryData?.inquiryResults.results,
               columnDefs: columnDefs
