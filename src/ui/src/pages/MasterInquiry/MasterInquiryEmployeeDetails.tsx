@@ -42,7 +42,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     { label: "", value: `${lastName}, ${firstName}` },
     { label: "", value: `${address}` },
     { label: "", value: `${addressCity}, ${addressState} ${addressZipCode}` },
-    { label: "Enrolled", value: `${enrollment} (${enrollmentId})`},
+    { label: "Enrollment", value: `${enrollment} (${enrollmentId})`},
   ];
 
   const employeeSection = [
