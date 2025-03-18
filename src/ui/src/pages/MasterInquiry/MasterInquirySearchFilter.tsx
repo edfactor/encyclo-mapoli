@@ -130,7 +130,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
       pagination: {
         skip: 0,
         take: 25,
-        sortBy: "ProfitYear",
+        sortBy: "profitYear",
         isSortDescending: true
       }
     }
@@ -145,7 +145,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
 
       // Trigger search automatically when badge number is present
       const searchParams: MasterInquiryRequest = {
-        pagination: { skip: 0, take: 25, sortBy: "ProfitYear", isSortDescending: true },
+        pagination: { skip: 0, take: 25, sortBy: "profitYear", isSortDescending: true },
         badgeNumber: Number(badgeNumber)
       };
 
@@ -201,7 +201,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
       pagination: {
         skip: 0,
         take: 25,
-        sortBy: "ProfitYear",
+        sortBy: "profitYear",
         isSortDescending: true
       }
     });
