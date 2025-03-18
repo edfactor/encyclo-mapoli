@@ -253,6 +253,8 @@ export interface EligibleEmployee {
   oracleHcmId: number;
   badgeNumber: number;
   fullName: string;
+  departmentId : number;
+  department : string;
 }
 
 export interface EligibleEmployeeResponseDto {

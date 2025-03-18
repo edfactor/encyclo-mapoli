@@ -61,7 +61,7 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
             // Assert
             response.Result.ReportName.Should().Be($"Get Eligible Employees for Year {TestProfitYear}");
             var dto = response.Result.Response.Results.First(e => e.BadgeNumber == te.BadgeNumber);
-            dto.Should().BeEquivalentTo(new GetEligibleEmployeesResponseDto { OracleHcmId = te.OracleHcmId, BadgeNumber = te.BadgeNumber, FullName = te.FullName }
+            dto.Should().BeEquivalentTo(new EligibleEmployee { OracleHcmId = te.OracleHcmId, BadgeNumber = te.BadgeNumber, FullName = te.FullName }
             );
 
             return Task.CompletedTask;

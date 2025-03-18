@@ -55,7 +55,7 @@ const EligibleEmployeesSearchFilter: React.FC<EligibleEmployeesSearchFilterProps
       triggerSearch(
         {
           profitYear: data.profitYear,
-          pagination: { skip: 0, take: 25 }
+          pagination: { skip: 0, take: 10 }
         },
         false
       ).unwrap();

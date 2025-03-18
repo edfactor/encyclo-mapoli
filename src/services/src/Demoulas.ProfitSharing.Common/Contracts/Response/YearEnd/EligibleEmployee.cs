@@ -1,17 +1,22 @@
 ﻿
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
-public sealed record  GetEligibleEmployeesResponseDto {
+public sealed record  EligibleEmployee {
     public required long OracleHcmId { get; set; }
     public required int BadgeNumber { get; set; }
     public required string FullName { get; set; }
-    public static GetEligibleEmployeesResponseDto Example()
+    public byte DepartmentId { get; set; }
+    public string? Department { get; set; }
+
+    public static EligibleEmployee Example()
     {
-        return new GetEligibleEmployeesResponseDto
+        return new EligibleEmployee
         {
             OracleHcmId = 42,
             BadgeNumber = 721,
-            FullName = "John, Null E"
+            FullName = "John, Null E",
+            Department = "Grocery",
+            DepartmentId = 1
         };
     }
 }
