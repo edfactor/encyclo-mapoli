@@ -20,7 +20,8 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
-      sortable: true
+      sortable: true,
+      unSortIcon: true
     },
     {
       headerName: "Iteration",
