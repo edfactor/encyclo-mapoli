@@ -1,11 +1,13 @@
+using System.Diagnostics.CodeAnalysis;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.ProfitShareEdit;
 
-public static class BeneficiariesProcessing
+internal static class BeneficiariesProcessingHelper
 {
     internal static async Task ProcessBeneficiaries(IProfitSharingDataContextFactory dbContextFactory, List<MemberFinancials> members,
         ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
@@ -18,7 +20,7 @@ public static class BeneficiariesProcessing
                 .ThenByDescending(b => b.BadgeNumber * 10000 + b.PsnSuffix).Select(b =>
                     new BeneficiaryFinancials
                     {
-                        Psn = Convert.ToInt64(b.Psn),
+                        Psn = b.Psn,
                         Ssn = b.Contact!.Ssn,
                         Name = b.Contact.ContactInfo.FullName,
                         CurrentAmount = b.Amount // Should be computing this from the ProfitDetail via TotalService
@@ -26,7 +28,7 @@ public static class BeneficiariesProcessing
         );
 
         Dictionary<int, ProfitDetailTotals> thisYearsTotalsBySSn =
-            await ProfitDetailTotals.GetProfitDetailTotalsForASingleYear(dbContextFactory, profitShareUpdateRequest.ProfitYear, [.. benes.Select(ef => ef.Ssn)], cancellationToken);
+            await TotalService.GetProfitDetailTotalsForASingleYear(dbContextFactory, profitShareUpdateRequest.ProfitYear, [.. benes.Select(ef => ef.Ssn)], cancellationToken);
 
         foreach (BeneficiaryFinancials bene in benes)
         {
@@ -35,11 +37,10 @@ public static class BeneficiariesProcessing
             if (employee != null)
             {
                 // If an employee has an ETVA amount and no years on the plan he is a beneficiary
-                if (employee.Etva > 0 && employee.EmployeeTypeId == 0 && /* Beginning Amount */ employee.CurrentAmount == 0)
+                if (employee.Etva > 0 && employee.EmployeeTypeId == /*0*/ EmployeeType.Constants.NotNewLastYear && /* Beginning Amount */ employee.CurrentAmount == 0)
                 {
-                    // This is mildly awkward that beneficiary processing modifies an existing employee.   This happens because
-                    // employees can also be beneficiaries.
-                    employee.EmployeeTypeId = 2; // Beneficiary
+                    // We flag the employee as also being a beneficiary
+                    employee.TreatAsBeneficiary = true;
                 }
                 continue;
             }

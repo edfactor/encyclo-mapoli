@@ -23,8 +23,8 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
     private readonly IProfitSharingDataContextFactory _dbContextFactory;
     private readonly ITotalService _totalService;
 
-    public ProfitShareUpdateService(IProfitSharingDataContextFactory dbContextFactory, 
-        ITotalService totalService, 
+    public ProfitShareUpdateService(IProfitSharingDataContextFactory dbContextFactory,
+        ITotalService totalService,
         ICalendarService calendarService)
     {
         _dbContextFactory = dbContextFactory;
@@ -55,7 +55,8 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
             EtvaEarnings = m.EarningsOnEtva,
             SecondaryEtvaEarnings = m.SecondaryEtvaEarnings,
             EndingBalance = m.EndingBalance,
-            ZeroContributionReasonId = m.ZeroContributionReasonId
+            ZeroContributionReasonId = m.ZeroContributionReasonId,
+            TreatAsBeneficiary = m.TreatAsBeneficiary
         }).ToList();
 
         return new ProfitShareUpdateResponse
@@ -94,11 +95,7 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
             ZeroContributionReasonId = m.ZeroContributionReasonId
         }).ToList();
 
-        return new ProfitShareUpdateResult()
-        {
-            HasExceededMaximumContributions = employeeExceededMaxContribution,
-            Members = members
-        };
+        return new ProfitShareUpdateResult() { HasExceededMaximumContributions = employeeExceededMaxContribution, Members = members };
     }
 
     /// <summary>
@@ -106,21 +103,17 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
     /// </summary>
     public async Task<ProfitShareUpdateOutcome> ProfitSharingUpdatePaginated(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
-        // Values collected for an "Adjustment Report" that we do not yet generate
+        // Values collected for an "Adjustment Report" that we do not yet generate (see https://demoulas.atlassian.net/browse/PS-900)
         AdjustmentReportData adjustmentReportData = new();
 
-        // Start off with nothing
-        List<MemberFinancials> members = [];
-        
-        // Go fetch some employees
-        bool employeeExceededMaxContribution = await EmployeesProcessor.ProcessEmployees(_dbContextFactory, _calendarService, _totalService, members, profitShareUpdateRequest, adjustmentReportData, cancellationToken);
-        
-        // Go get the Bene's.  May modify some employees if they are both bene and employee (thats why "members" is passed in.)
-        await BeneficiariesProcessing.ProcessBeneficiaries(_dbContextFactory, members, profitShareUpdateRequest, cancellationToken);
+        // Start off loading the employees.
+        (List<MemberFinancials> members, bool employeeExceededMaxContribution) = await EmployeeProcessorHelper.ProcessEmployees(_dbContextFactory, _calendarService, _totalService,
+            profitShareUpdateRequest, adjustmentReportData, cancellationToken);
+
+        // Go get the Bene's.  NOTE: May modify some employees if they are both bene and employee (that's why "members" is passed in - to lookup loaded employees and see if they are also Bene's)
+        await BeneficiariesProcessingHelper.ProcessBeneficiaries(_dbContextFactory, members, profitShareUpdateRequest, cancellationToken);
 
         // Use the list of members to build up response for client.
         return new(members, adjustmentReportData, employeeExceededMaxContribution);
     }
-
-
 }

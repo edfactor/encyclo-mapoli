@@ -1,3 +1,4 @@
+using System.Collections;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -9,10 +10,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.ProfitShareEdit;
 
-internal static class EmployeesProcessor
+internal static class EmployeeProcessorHelper
 {
-    public static async Task<bool> ProcessEmployees(IProfitSharingDataContextFactory dbContextFactory, ICalendarService calendarService, ITotalService totalService,
-        List<MemberFinancials> members, ProfitShareUpdateRequest profitShareUpdateRequest,
+    public static async Task<(List<MemberFinancials>, bool)> ProcessEmployees(IProfitSharingDataContextFactory dbContextFactory, ICalendarService calendarService,
+        ITotalService totalService, ProfitShareUpdateRequest profitShareUpdateRequest,
         AdjustmentReportData adjustmentReportData,
         CancellationToken cancellationToken)
     {
@@ -39,8 +40,9 @@ internal static class EmployeesProcessor
                     x.ZeroContributionReasonId,
                     x.Etva
                 }).ToListAsync(cancellationToken);
+
             // Get employee SSNs
-            IEnumerable<int> ssns = employees.Select(e => e.Ssn);
+            HashSet<int> ssns = employees.Select(e => e.Ssn).ToHashSet();
 
             // For each SSN, Get Transaction Summary (not every employee will have this.)
             List<ParticipantTotalVestingBalanceDto> totalVestingBalances = await ((TotalService)totalService)
@@ -77,9 +79,10 @@ internal static class EmployeesProcessor
 
         // Lookup all the transactions for this year. (not all employees will have them.)
         Dictionary<int, ProfitDetailTotals> thisYearsTotalsBySSn =
-            await ProfitDetailTotals.GetProfitDetailTotalsForASingleYear(dbContextFactory, profitShareUpdateRequest.ProfitYear, [.. employeeFinancialsList.Select(ef => ef.Ssn)],
+            await TotalService.GetProfitDetailTotalsForASingleYear(dbContextFactory, profitShareUpdateRequest.ProfitYear, [.. employeeFinancialsList.Select(ef => ef.Ssn)],
                 cancellationToken);
 
+        List<MemberFinancials> members = new();
         foreach (EmployeeFinancials empl in employeeFinancialsList)
         {
             if (empl.EnrolledId != Enrollment.Constants.NotEnrolled || empl.YearsInPlan != 0 || empl.EmployeeTypeId > 0 || thisYearsTotalsBySSn.ContainsKey(empl.Ssn))
@@ -92,7 +95,7 @@ internal static class EmployeesProcessor
             }
         }
 
-        return employeeExceededMaxContribution;
+        return (members, employeeExceededMaxContribution);
     }
 
     private static (MemberFinancials, bool) ProcessEmployee(EmployeeFinancials empl, ProfitDetailTotals profitDetailTotals, ProfitShareUpdateRequest profitShareUpdateRequest,
