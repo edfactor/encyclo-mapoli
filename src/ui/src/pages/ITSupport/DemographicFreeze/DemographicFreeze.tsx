@@ -2,13 +2,13 @@ import { Divider } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
 import { DSMAccordion, Page } from "smart-ui-library";
 import DemographicFreezeManager from "./DemographicFreezeManager";
-import DemographicFreeze from "./DemographicFreezeGrid";
+import DemographicFreezeGrid from "./DemographicFreezeGrid";
 import { useState } from "react";
 
 const DemographicFreeze = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   return (
-    <Page label="Duplicate Names and Birthdays">
+    <Page label="Demographic Freeze">
       <Grid2
         container
         rowSpacing="24px">
@@ -22,7 +22,7 @@ const DemographicFreeze = () => {
         </Grid2>
 
         <Grid2 width="100%">
-          <DemographicFreeze
+          <DemographicFreezeGrid
             setInitialSearchLoaded={setInitialSearchLoaded}
             initialSearchLoaded={initialSearchLoaded}
           />
