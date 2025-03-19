@@ -53,7 +53,7 @@ const DemographicFreeze: React.FC<DuplicateNamesAndBirthdaysGridSearchProps> = (
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`DUPLICATE NAMES AND BIRTHDAYS (${duplicateNamesAndBirthdays?.response.total || 0})`}
+              {`Previous Freezes`}
             </Typography>
           </div>
           <DSMGrid

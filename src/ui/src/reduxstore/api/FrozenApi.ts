@@ -3,7 +3,8 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { RootState } from "reduxstore/store";
 import { FrozenStateResponse } from "reduxstore/types";
 import {
-    setFrozenStateResponse,   
+    setFrozenStateResponse,
+    setFrozenStateCollectionResponse
 } from "reduxstore/slices/frozenSlice";
 import { url } from "./api";
 
@@ -41,12 +42,26 @@ export const FrozenApi = createApi({
                     dispatch(setFrozenStateResponse(null)); // Handle API errors
                 }
             }
+        }),
+        getHistoricalFrozenStateResponse: builder.query<FrozenStateResponse[], void>({
+            query: () => ({
+                url: `demographics/frozen`,
+                method: "GET",
+            }),
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+                try {
+                    const { data } = await queryFulfilled;
+                    dispatch(setFrozenStateCollectionResponse(data));
+                } catch (err) {
+                    console.error("Failed to fetch frozen state collection:", err);
+                    dispatch(setFrozenStateCollectionResponse(null)); // Handle API errors
+                }
+            }
         })
-
     })
 });
 
 export const {
-    useLazyGetFrozenStateResponseQuery, // Fix casing
+    useLazyGetFrozenStateResponseQuery,
+    useLazyGetHistoricalFrozenStateResponseQuery    
 } = FrozenApi;
-
