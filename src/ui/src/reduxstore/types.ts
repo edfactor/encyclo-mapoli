@@ -4,7 +4,8 @@ export enum ImpersonationRoles {
   FinanceManager = "Finance-Manager",
   DistributionsClerk = "Distributions-Clerk",
   HardshipAdministrator = "Hardship-Administrator",
-  ProfitSharingAdministrator = "Profit-Sharing-Administrator"
+  ProfitSharingAdministrator = "Profit-Sharing-Administrator",
+  ItSupport = "IT-Support",
 }
 
 export interface SortedPaginationRequestDto extends PaginationParams, ISortParams {}

@@ -108,6 +108,9 @@ const Router = () => {
                   case ImpersonationRoles.ProfitSharingAdministrator:
                     dispatch(setImpersonating(ImpersonationRoles.ProfitSharingAdministrator));
                     break;
+                  case ImpersonationRoles.ItSupport:
+                    dispatch(setImpersonating(ImpersonationRoles.ItSupport));
+                    break;
                   default:
                     localStorage.removeItem("impersonatingRole");
                     dispatch(setImpersonating(null));
