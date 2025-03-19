@@ -13,6 +13,7 @@ import { RootState } from "reduxstore/store";
 import { FrozenReportsByAgeRequestType } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 
 interface ForfeituresByAgeSearch {
   profitYear: number;
@@ -32,6 +33,7 @@ const schema = yup.object().shape({
 const ForfeituresByAgeSearchFilter = () => {
   const [triggerSearch, { isFetching }] = useLazyGetForfeituresByAgeQuery();
   const { forfeituresByAgeQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
   const {
     control,
@@ -41,7 +43,7 @@ const ForfeituresByAgeSearchFilter = () => {
   } = useForm<ForfeituresByAgeSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: forfeituresByAgeQueryParams?.profitYear || undefined,
+      profitYear: fiscalCloseProfitYear || forfeituresByAgeQueryParams?.profitYear || undefined,
       reportType: undefined
     }
   });
@@ -50,7 +52,7 @@ const ForfeituresByAgeSearchFilter = () => {
     if (isValid) {
       triggerSearch(
         {
-          profitYear: data.profitYear,
+          profitYear: fiscalCloseProfitYear,
           reportType: FrozenReportsByAgeRequestType.Total,
           pagination: { skip: 0, take: 255 }
         },
@@ -58,7 +60,7 @@ const ForfeituresByAgeSearchFilter = () => {
       ).unwrap();
       triggerSearch(
         {
-          profitYear: data.profitYear,
+          profitYear: fiscalCloseProfitYear,
           reportType: FrozenReportsByAgeRequestType.FullTime,
           pagination: { skip: 0, take: 255 }
         },
@@ -66,22 +68,21 @@ const ForfeituresByAgeSearchFilter = () => {
       ).unwrap();
       triggerSearch(
         {
-          profitYear: data.profitYear,
+          profitYear: fiscalCloseProfitYear,
           reportType: FrozenReportsByAgeRequestType.PartTime,
           pagination: { skip: 0, take: 255 }
         },
         false
       ).unwrap();
-
-      dispatch(setForfeituresByAgeQueryParams(data.profitYear));
+      dispatch(setForfeituresByAgeQueryParams(fiscalCloseProfitYear));
     }
   });
 
   const handleReset = () => {
-    dispatch(clearForfeituresByAge());
     dispatch(clearForfeituresByAgeQueryParams());
+    dispatch(clearForfeituresByAge());
     reset({
-      profitYear: undefined,
+      profitYear: fiscalCloseProfitYear,
       reportType: undefined
     });
   };
@@ -106,7 +107,8 @@ const ForfeituresByAgeSearchFilter = () => {
                 onChange={(e) => {
                   field.onChange(e);
                 }}
-                itype="number"
+                type="number"
+                disabled={true}
               />
             )}
           />

@@ -36,6 +36,8 @@ import {
 } from "reduxstore/types";
 
 export interface YearsEndState {
+  selectedProfitYearForDecemberActivities: number;
+  selectedProfitYearForFiscalClose: number;
   additionalExecutivesChosen: ExecutiveHoursAndDollars[] | null;
   additionalExecutivesGrid: PagedReportResponse<ExecutiveHoursAndDollars> | null;
   balanceByAgeFullTime: BalanceByAge | null;
@@ -93,6 +95,8 @@ export interface YearsEndState {
 }
 
 const initialState: YearsEndState = {
+  selectedProfitYearForDecemberActivities: 2024,
+  selectedProfitYearForFiscalClose: 2024,
   additionalExecutivesChosen: null,
   additionalExecutivesGrid: null,
   balanceByAgeFullTime: null,
@@ -153,6 +157,12 @@ export const yearsEndSlice = createSlice({
   name: "yearsEnd",
   initialState,
   reducers: {
+    setSelectedProfitYearForDecemberActivities: (state, action: PayloadAction<number>) => {
+      state.selectedProfitYearForDecemberActivities = action.payload;
+    },
+    setSelectedProfitYearForFiscalClose: (state, action: PayloadAction<number>) => {
+      state.selectedProfitYearForFiscalClose = action.payload;
+    },
     setBalanceByYearsQueryParams: (state, action: PayloadAction<number>) => {
       state.balanceByYearsQueryParams = { profitYear: action.payload };
     },
@@ -603,6 +613,8 @@ export const yearsEndSlice = createSlice({
 });
 
 export const {
+  setSelectedProfitYearForDecemberActivities,
+  setSelectedProfitYearForFiscalClose,
   addExecutiveHoursAndDollarsGridRow,
   clearAdditionalExecutivesChosen,
   clearAdditionalExecutivesGrid,

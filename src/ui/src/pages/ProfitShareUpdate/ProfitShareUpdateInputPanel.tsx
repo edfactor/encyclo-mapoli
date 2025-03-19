@@ -17,6 +17,7 @@ import {
   setProfitMasterRevertLoading,
   setProfitUpdateLoading
 } from "../../reduxstore/slices/yearsEndSlice";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 
 interface ProfitShareUpdateInputPanelProps {
   startProfitYear?: Date | null;
@@ -83,7 +84,10 @@ const ProfitShareUpdateInputPanel = () => {
   const [previewEdit] = useLazyGetProfitShareEditQuery();
   const [masterApply] = useLazyGetMasterApplyQuery();
   const [masterRevert] = useLazyGetMasterRevertQuery();
+  const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
+
+  const fiscalCloseProfitYearAsDate = new Date(fiscalCloseProfitYear, 0, 1);
 
   const {
     control,
@@ -92,7 +96,7 @@ const ProfitShareUpdateInputPanel = () => {
   } = useForm<ProfitShareUpdateInputPanelProps>({
     resolver: yupResolver(schema),
     defaultValues: {
-      startProfitYear: new Date(),
+      startProfitYear: fiscalCloseProfitYearAsDate,
       contributionPercent: null,
       earningsPercent: null,
       incomingForfeiturePercent: null,
@@ -112,7 +116,7 @@ const ProfitShareUpdateInputPanel = () => {
   const validateAndView = handleSubmit((data, event?: React.BaseSyntheticEvent) => {
     if (isValid) {
       const viewParams: ProfitShareUpdateInputPanelProps = {
-        ...(!!data.startProfitYear && { profitYear: data.startProfitYear.getFullYear() - 1 }),
+        profitYear: fiscalCloseProfitYear,
         ...(!!data.contributionPercent && { contributionPercent: data.contributionPercent }),
         ...(!!data.earningsPercent && { earningsPercent: data.earningsPercent }),
         ...(!!data.incomingForfeiturePercent && { incomingForfeitPercent: data.incomingForfeiturePercent }),
@@ -174,6 +178,7 @@ const ProfitShareUpdateInputPanel = () => {
                   disableFuture
                   views={["year"]}
                   error={errors.startProfitYear?.message}
+                  disabled={true}
                 />
               )}
             />

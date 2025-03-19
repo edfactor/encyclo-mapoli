@@ -12,6 +12,7 @@ import {
 import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 
 interface DistributionsAndForfeituresSearch {
   profitYear: number;
@@ -56,6 +57,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
   const [triggerSearch, { isFetching }] = useLazyGetDistributionsAndForfeituresQuery();
   const dispatch = useDispatch();
   const { distributionsAndForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const profitYear = useDecemberFlowProfitYear();
   const {
     control,
     handleSubmit,
@@ -65,7 +67,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
   } = useForm<DistributionsAndForfeituresSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: distributionsAndForfeituresQueryParams?.profitYear || undefined,
+      profitYear: profitYear || distributionsAndForfeituresQueryParams?.profitYear || undefined,
       startMonth: distributionsAndForfeituresQueryParams?.startMonth || undefined,
       endMonth: distributionsAndForfeituresQueryParams?.endMonth || undefined,
       includeOutgoingForfeitures: distributionsAndForfeituresQueryParams?.includeOutgoingForfeitures || false
@@ -84,7 +86,12 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
         },
         false
       ).unwrap();
-      dispatch(setDistributionsAndForfeituresQueryParams(data));
+      dispatch(setDistributionsAndForfeituresQueryParams({
+        profitYear: data.profitYear,
+        startMonth: data.startMonth,
+        endMonth: data.endMonth || undefined,
+        includeOutgoingForfeitures: data.includeOutgoingForfeitures
+      }));
     }
   });
 
@@ -118,6 +125,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
                   field.onChange(e);
                 }}
                 type="number"
+                disabled={true}
               />
             )}
           />

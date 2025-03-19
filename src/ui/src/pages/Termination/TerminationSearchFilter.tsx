@@ -8,6 +8,7 @@ import {
 import { RootState } from 'reduxstore/store';
 import { SearchAndReset } from 'smart-ui-library';
 import * as yup from 'yup';
+import useDecemberFlowProfitYear from 'hooks/useDecemberFlowProfitYear';
 
 import { yupResolver } from '@hookform/resolvers/yup';
 import Grid2 from '@mui/material/Grid2';
@@ -32,7 +33,15 @@ interface TerminationSearchFilterProps {
 const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({ setInitialSearchLoaded }) => {
   const { terminationQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const [triggerSearch, { isFetching }] = useLazyGetTerminationReportQuery();
+  const decemberProfitYear = useDecemberFlowProfitYear();
   const dispatch = useDispatch();
+  
+  const decemberProfitYearAsDate = decemberProfitYear ? new Date(decemberProfitYear, 0, 1) : undefined;
+  // May not be needed if no longer setting the query params using the filters
+  const terminationProfitYearAsDate = terminationQueryParams?.profitYear 
+    ? new Date(terminationQueryParams.profitYear, 0, 1) 
+    : undefined;
+  
   const {
     control,
     handleSubmit,
@@ -41,7 +50,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({ setIn
   } = useForm<TerminationSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: terminationQueryParams?.profitYear ? new Date(terminationQueryParams.profitYear, 0, 1) : undefined
+      profitYear: decemberProfitYearAsDate || terminationProfitYearAsDate || undefined
     }
   });
 
@@ -89,6 +98,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({ setIn
                 disableFuture
                 views={["year"]}
                 error={errors.profitYear?.message}
+                disabled={true}
               />
             )}
           />

@@ -1,25 +1,47 @@
-import { Divider } from "@mui/material";
+import {Divider, MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
 import DSMCollapsedAccordion from "components/DSMCollapsedAccordion";
 import { useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router";
 import { RootState } from "reduxstore/store";
 import { Page } from "smart-ui-library";
+import { setSelectedProfitYearForFiscalClose } from "reduxstore/slices/yearsEndSlice";
 
 
 const FiscalFlow = () => {
-  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
+  const { selectedProfitYearForFiscalClose } = useSelector((state: RootState) => state.yearsEnd);
+  const dispatch = useDispatch();
 
-  useEffect(() => {
-    if (hasToken) {
-    }
-  }, [hasToken]);
 
   const navigate = useNavigate();
 
+  const ProfitYearSelector = () => {
+    const handleChange = (event: SelectChangeEvent) => {
+      dispatch(setSelectedProfitYearForFiscalClose(Number(event.target.value)));
+    };
+
+    return (
+      <div className="flex items-center gap-2 h-10 min-w-[174px]">
+        <Select
+          labelId="fiscal-flow-profit-year-select"
+          id="fiscal-flow-profit-year-select"
+          defaultValue="2024"
+          value={selectedProfitYearForFiscalClose.toString()}
+          size="small"
+          fullWidth
+          onChange={handleChange}
+        >
+          <MenuItem value={2024}>2024</MenuItem>
+          <MenuItem value={2025}>2025</MenuItem>
+          <MenuItem value={2026}>2026</MenuItem>
+        </Select>
+      </div>
+    );
+  };
+
   return (
-    <Page label="Fiscal Flow">
+    <Page label="Fiscal Flow" actionNode={<ProfitYearSelector />}>
       <Grid2 container>
         <Grid2 size={{ xs: 12 }} width={"100%"}>
           <Divider />
