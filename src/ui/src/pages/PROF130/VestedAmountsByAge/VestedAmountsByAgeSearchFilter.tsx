@@ -1,21 +1,17 @@
-import { yupResolver } from "@hookform/resolvers/yup";
-import { FormHelperText, FormLabel, TextField } from "@mui/material";
+import { FormHelperText } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import { Controller, useForm } from "react-hook-form";
-import { useDispatch, useSelector } from "react-redux";
-import { useLazyGetDuplicateNamesAndBirthdaysQuery } from "reduxstore/api/YearsEndApi";
-import {
-  clearDuplicateNamesAndBirthdays,
-  clearDuplicateNamesAndBirthdaysQueryParams,
-  setDuplicateNamesAndBirthdaysQueryParams
-} from "reduxstore/slices/yearsEndSlice";
-import { RootState } from "reduxstore/store";
+import { useLazyGetVestingAmountByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { SearchAndReset } from "smart-ui-library";
+import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
-import DsmDatePicker from "../../components/DsmDatePicker/DsmDatePicker";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "reduxstore/store";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { clearVestedAmountsByAgeQueryParams, setVestedAmountsByAgeQueryParams } from "reduxstore/slices/yearsEndSlice";
+import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 
-interface DuplicateNamesAndBirthdaysSearch {
+interface VestingAmountByAgeSearch {
   profitYear: number;
 }
 
@@ -29,27 +25,20 @@ const schema = yup.object().shape({
     .required("Year is required")
 });
 
-interface DuplicateNamesAndBirthdaysSearchFilterProps {
-  setInitialSearchLoaded: (include: boolean) => void;
-}
-
-const DuplicateNamesAndBirthdaysSearchFilter: React.FC<DuplicateNamesAndBirthdaysSearchFilterProps> = ({
-  setInitialSearchLoaded
-}) => {
-  const [triggerSearch, { isFetching }] = useLazyGetDuplicateNamesAndBirthdaysQuery();
-  const { duplicateNamesAndBirthdaysQueryParams } = useSelector((state: RootState) => state.yearsEnd);
-  const profitYear = useDecemberFlowProfitYear();
+const VestedAmountsByAgeSearchFilter = () => {
+  const [triggerSearch, { isFetching }] = useLazyGetVestingAmountByAgeQuery();
+  const { vestedAmountsByAgeQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
   const {
     control,
     handleSubmit,
     formState: { errors, isValid },
-    reset,
-    trigger
-  } = useForm<DuplicateNamesAndBirthdaysSearch>({
+    reset
+  } = useForm<VestingAmountByAgeSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: profitYear || duplicateNamesAndBirthdaysQueryParams?.profitYear || undefined
+      profitYear: fiscalCloseProfitYear || vestedAmountsByAgeQueryParams?.profitYear || undefined
     }
   });
 
@@ -57,21 +46,19 @@ const DuplicateNamesAndBirthdaysSearchFilter: React.FC<DuplicateNamesAndBirthday
     if (isValid) {
       triggerSearch(
         {
-          profitYear: data.profitYear,
-          pagination: { skip: 0, take: 25 }
+          profitYear: fiscalCloseProfitYear,
+          acceptHeader: "application/json"
         },
         false
       ).unwrap();
-      dispatch(setDuplicateNamesAndBirthdaysQueryParams(data.profitYear));
+      dispatch(setVestedAmountsByAgeQueryParams(fiscalCloseProfitYear));
     }
   });
 
   const handleReset = () => {
-    setInitialSearchLoaded(false);
-    dispatch(clearDuplicateNamesAndBirthdaysQueryParams());
-    dispatch(clearDuplicateNamesAndBirthdays());
+    dispatch(clearVestedAmountsByAgeQueryParams());
     reset({
-      profitYear: undefined
+      profitYear: fiscalCloseProfitYear
     });
   };
 
@@ -81,7 +68,7 @@ const DuplicateNamesAndBirthdaysSearchFilter: React.FC<DuplicateNamesAndBirthday
         container
         paddingX="24px"
         gap="24px">
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }} >
           <Controller
             name="profitYear"
             control={control}
@@ -104,7 +91,9 @@ const DuplicateNamesAndBirthdaysSearchFilter: React.FC<DuplicateNamesAndBirthday
       </Grid2>
       <Grid2
         width="100%"
-        paddingX="24px">
+        paddingX="24px"
+        display="flex"
+        gap="16px">
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={validateAndSearch}
@@ -116,4 +105,4 @@ const DuplicateNamesAndBirthdaysSearchFilter: React.FC<DuplicateNamesAndBirthday
   );
 };
 
-export default DuplicateNamesAndBirthdaysSearchFilter;
+export default VestedAmountsByAgeSearchFilter;

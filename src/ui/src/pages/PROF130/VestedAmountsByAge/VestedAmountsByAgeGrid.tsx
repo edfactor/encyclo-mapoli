@@ -5,7 +5,7 @@ import { useLazyGetVestingAmountByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams } from "smart-ui-library";
 import { GetVestedAmountsByAgeColumns } from "./VestedAmountsByAgeGridColumns";
-import { VestedAmountsByAge } from "../../reduxstore/types";
+import { VestedAmountsByAge } from "../../../reduxstore/types";
 
 interface VestedAmountsByAgeGridProps {
   gridTitle: string;

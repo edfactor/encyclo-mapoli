@@ -1,21 +1,22 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormHelperText, FormLabel, TextField } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { FormHelperText } from "@mui/material";
+import Grid2 from '@mui/material/Grid2';
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { useLazyGetContributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
+import { useLazyGetDistributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import {
-  clearContributionsByAge,
-  clearContributionsByAgeQueryParams,
-  setContributionsByAgeQueryParams
+  clearDistributionsByAge,
+  clearDistributionsByAgeQueryParams,
+  setDistributionsByAgeQueryParams
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { FrozenReportsByAgeRequestType } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 
-interface ContributionsByAgeSearch {
+interface DistributionByAgeSearch {
   profitYear: number;
   reportType?: FrozenReportsByAgeRequestType;
 }
@@ -30,20 +31,21 @@ const schema = yup.object().shape({
     .required("Year is required")
 });
 
-const ContributionsByAgeSearchFilter = () => {
-  const [triggerSearch, { isFetching }] = useLazyGetContributionsByAgeQuery();
-  const { contributionsByAgeQueryParams } = useSelector((state: RootState) => state.yearsEnd);
-  const fiscalCloseProfitYear = useFiscalCloseProfitYear();
+const DistributionByAgeSearchFilter = () => {
+  const [triggerSearch, { isFetching }] = useLazyGetDistributionsByAgeQuery();
   const dispatch = useDispatch();
+  const { distributionsByAgeQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const fiscalCloseProfitYear = useFiscalCloseProfitYear();
+
   const {
     control,
     handleSubmit,
     formState: { errors, isValid },
     reset
-  } = useForm<ContributionsByAgeSearch>({
+  } = useForm<DistributionByAgeSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: fiscalCloseProfitYear || contributionsByAgeQueryParams?.profitYear || undefined,
+      profitYear: fiscalCloseProfitYear || distributionsByAgeQueryParams?.profitYear || undefined,
       reportType: undefined
     }
   });
@@ -74,13 +76,13 @@ const ContributionsByAgeSearchFilter = () => {
         },
         false
       ).unwrap();
-      dispatch(setContributionsByAgeQueryParams(fiscalCloseProfitYear));
+      dispatch(setDistributionsByAgeQueryParams(fiscalCloseProfitYear));
     }
   });
 
   const handleReset = () => {
-    dispatch(clearContributionsByAgeQueryParams());
-    dispatch(clearContributionsByAge());
+    dispatch(clearDistributionsByAge());
+    dispatch(clearDistributionsByAgeQueryParams());
     reset({
       profitYear: fiscalCloseProfitYear,
       reportType: undefined
@@ -93,21 +95,20 @@ const ContributionsByAgeSearchFilter = () => {
         container
         paddingX="24px"
         gap="24px">
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-          <FormLabel>Year</FormLabel>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }} >
           <Controller
             name="profitYear"
             control={control}
             render={({ field }) => (
-              <TextField
-                {...field}
-                fullWidth
-                variant="outlined"
-                error={!!errors.profitYear}
-                onChange={(e) => {
-                  field.onChange(e);
-                }}
-                type="number"
+              <DsmDatePicker
+                id="Beginning Year"
+                onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
+                value={field.value ? new Date(field.value, 0) : null}
+                required={true}
+                label="Profit Year"
+                disableFuture
+                views={["year"]}
+                error={errors.profitYear?.message}
                 disabled={true}
               />
             )}
@@ -129,4 +130,4 @@ const ContributionsByAgeSearchFilter = () => {
   );
 };
 
-export default ContributionsByAgeSearchFilter;
+export default DistributionByAgeSearchFilter;
