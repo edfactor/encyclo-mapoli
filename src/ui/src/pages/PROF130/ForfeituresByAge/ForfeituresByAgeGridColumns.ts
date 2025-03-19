@@ -1,15 +1,13 @@
 import { agGridNumberToCurrency } from "smart-ui-library";
-import { FrozenReportsByAgeRequestType } from "../../reduxstore/types";
+import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 import { ColDef } from "ag-grid-community";
 
-export interface IDistributionByAgeGridColumns {
+export interface IForfeitureByAgeGridColumns {
   headerName: string;
   children?: ColDef[];
 }
 
-export const GetDistributionsByAgeColumns = (
-  reportType: FrozenReportsByAgeRequestType
-): IDistributionByAgeGridColumns => {
+export const GetForfeituresByAgeColumns = (  reportType: FrozenReportsByAgeRequestType): IForfeitureByAgeGridColumns => {
   return {
     headerName: reportType,
     children: [
@@ -26,23 +24,23 @@ export const GetDistributionsByAgeColumns = (
       },
       {
         headerName: "EMPS",
-        field: "regularEmployeeCount",
-        colId: "regularEmployeeCount",
+        field: "employeeCount",
+        colId: "employeeCount",
         minWidth: 100,
-        headerClass: "right-align",
-        cellClass: "right-align",
-        resizable: true        
+        headerClass: "left-align",
+        cellClass: "left-align",
+        resizable: true
       },
       {
         headerName: "Amount",
-        field: "regularAmount",
-        colId: "regularAmount",
+        field: "amount",
+        colId: "amount",
         minWidth: 150,
-        headerClass: "right-align",
-        cellClass: "right-align",
+        headerClass: "left-align",
+        cellClass: "left-align",
         resizable: true,
         valueFormatter: agGridNumberToCurrency
-      }     
+      }
     ]
   };
 };

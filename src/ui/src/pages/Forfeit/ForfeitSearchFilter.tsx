@@ -12,6 +12,7 @@ import {
 import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 
 interface ForfeitSearchParams {
   profitYear: number;
@@ -32,6 +33,7 @@ const schema = yup.object().shape({
 const ForfeitSearchParameters = () => {
   const [triggerSearch, { isFetching }] = useLazyGetForfeituresAndPointsQuery();
   const { forfeituresAndPointsQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
 
   const {
@@ -42,7 +44,7 @@ const ForfeitSearchParameters = () => {
   } = useForm<ForfeitSearchParams>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: forfeituresAndPointsQueryParams?.profitYear || undefined,
+      profitYear: fiscalCloseProfitYear || forfeituresAndPointsQueryParams?.profitYear || undefined,
       useFrozenData: forfeituresAndPointsQueryParams?.useFrozenData || true
     }
   });
@@ -51,13 +53,16 @@ const ForfeitSearchParameters = () => {
     if (isValid) {
       triggerSearch(
         {
-          profitYear: data.profitYear,
+          profitYear: fiscalCloseProfitYear,
           useFrozenData: data.useFrozenData,
           pagination: { skip: 0, take: 255 }
         },
         false
       ).unwrap();
-      dispatch(setForfeituresAndPointsQueryParams(data));
+      dispatch(setForfeituresAndPointsQueryParams({
+        profitYear: fiscalCloseProfitYear,
+        useFrozenData: data.useFrozenData
+      }));
     }
   });
 
@@ -65,7 +70,7 @@ const ForfeitSearchParameters = () => {
     dispatch(clearForfeituresAndPoints());
     dispatch(clearForfeituresAndPointsQueryParams());
     reset({
-      profitYear: undefined,
+      profitYear: fiscalCloseProfitYear,
       useFrozenData: true
     });
   };
@@ -95,6 +100,7 @@ const ForfeitSearchParameters = () => {
                   onChange={(e) => {
                     field.onChange(e);
                   }}
+                  disabled={true}
                 />
               )}
             />

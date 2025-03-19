@@ -3,18 +3,20 @@ import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { useLazyGetForfeituresByAgeQuery } from "reduxstore/api/YearsEndApi";
+import { useLazyGetContributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import {
-  clearForfeituresByAge,
-  clearForfeituresByAgeQueryParams,
-  setForfeituresByAgeQueryParams
+  clearContributionsByAge,
+  clearContributionsByAgeQueryParams,
+  setContributionsByAgeQueryParams
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { FrozenReportsByAgeRequestType } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 
-interface ForfeituresByAgeSearch {
+interface ContributionsByAgeSearch {
   profitYear: number;
   reportType?: FrozenReportsByAgeRequestType;
 }
@@ -29,19 +31,20 @@ const schema = yup.object().shape({
     .required("Year is required")
 });
 
-const ForfeituresByAgeSearchFilter = () => {
-  const [triggerSearch, { isFetching }] = useLazyGetForfeituresByAgeQuery();
-  const { forfeituresByAgeQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+const ContributionsByAgeSearchFilter = () => {
+  const [triggerSearch, { isFetching }] = useLazyGetContributionsByAgeQuery();
+  const { contributionsByAgeQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
   const {
     control,
     handleSubmit,
     formState: { errors, isValid },
     reset
-  } = useForm<ForfeituresByAgeSearch>({
+  } = useForm<ContributionsByAgeSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: forfeituresByAgeQueryParams?.profitYear || undefined,
+      profitYear: fiscalCloseProfitYear || contributionsByAgeQueryParams?.profitYear || undefined,
       reportType: undefined
     }
   });
@@ -50,7 +53,7 @@ const ForfeituresByAgeSearchFilter = () => {
     if (isValid) {
       triggerSearch(
         {
-          profitYear: data.profitYear,
+          profitYear: fiscalCloseProfitYear,
           reportType: FrozenReportsByAgeRequestType.Total,
           pagination: { skip: 0, take: 255 }
         },
@@ -58,7 +61,7 @@ const ForfeituresByAgeSearchFilter = () => {
       ).unwrap();
       triggerSearch(
         {
-          profitYear: data.profitYear,
+          profitYear: fiscalCloseProfitYear,
           reportType: FrozenReportsByAgeRequestType.FullTime,
           pagination: { skip: 0, take: 255 }
         },
@@ -66,22 +69,21 @@ const ForfeituresByAgeSearchFilter = () => {
       ).unwrap();
       triggerSearch(
         {
-          profitYear: data.profitYear,
+          profitYear: fiscalCloseProfitYear,
           reportType: FrozenReportsByAgeRequestType.PartTime,
           pagination: { skip: 0, take: 255 }
         },
         false
       ).unwrap();
-
-      dispatch(setForfeituresByAgeQueryParams(data.profitYear));
+      dispatch(setContributionsByAgeQueryParams(fiscalCloseProfitYear));
     }
   });
 
   const handleReset = () => {
-    dispatch(clearForfeituresByAge());
-    dispatch(clearForfeituresByAgeQueryParams());
+    dispatch(clearContributionsByAgeQueryParams());
+    dispatch(clearContributionsByAge());
     reset({
-      profitYear: undefined,
+      profitYear: fiscalCloseProfitYear,
       reportType: undefined
     });
   };
@@ -93,20 +95,20 @@ const ForfeituresByAgeSearchFilter = () => {
         paddingX="24px"
         gap="24px">
         <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-          <FormLabel>Year</FormLabel>
           <Controller
             name="profitYear"
             control={control}
             render={({ field }) => (
-              <TextField
-                {...field}
-                fullWidth
-                variant="outlined"
-                error={!!errors.profitYear}
-                onChange={(e) => {
-                  field.onChange(e);
-                }}
-                itype="number"
+              <DsmDatePicker
+                id="profitYear"
+                onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
+                value={field.value ? new Date(field.value, 0) : null}
+                required={true}
+                label="Profit Year"
+                disableFuture
+                views={["year"]}
+                error={errors.profitYear?.message}
+                disabled={true}
               />
             )}
           />
@@ -127,4 +129,4 @@ const ForfeituresByAgeSearchFilter = () => {
   );
 };
 
-export default ForfeituresByAgeSearchFilter;
+export default ContributionsByAgeSearchFilter;

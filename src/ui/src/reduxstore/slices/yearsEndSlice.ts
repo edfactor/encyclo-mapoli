@@ -21,7 +21,6 @@ import {
   ForfeituresByAge,
   FrozenReportsByAgeRequestType,
   MilitaryAndRehireForfeiture,
-  MilitaryAndRehireProfitSummary,
   MissingCommasInPYName,
   NegativeEtvaForSSNsOnPayProfit,
   PagedReportResponse,
@@ -29,13 +28,16 @@ import {
   ProfitShareEditResponse,
   ProfitShareMasterResponse,
   ProfitShareUpdateResponse,
-  ProfitSharingDistributionsByAge, ProfitYearRequest,
+  ProfitSharingDistributionsByAge,
+  ProfitYearRequest,
   TerminationResponse,
   VestedAmountsByAge,
   YearEndProfitSharingReportResponse
 } from "reduxstore/types";
 
 export interface YearsEndState {
+  selectedProfitYearForDecemberActivities: number;
+  selectedProfitYearForFiscalClose: number;
   additionalExecutivesChosen: ExecutiveHoursAndDollars[] | null;
   additionalExecutivesGrid: PagedReportResponse<ExecutiveHoursAndDollars> | null;
   balanceByAgeFullTime: BalanceByAge | null;
@@ -78,7 +80,6 @@ export interface YearsEndState {
   militaryEntryAndModification: EmployeeDetails | null;
   militaryAndRehireForfeitures: PagedReportResponse<MilitaryAndRehireForfeiture> | null;
   militaryAndRehireForfeituresQueryParams: ProfitAndReportingQueryParams | null;
-  militaryAndRehireProfitSummary: PagedReportResponse<MilitaryAndRehireProfitSummary> | null;
   militaryAndRehireProfitSummaryQueryParams: ProfitAndReportingQueryParams | null;
   militaryAndRehireQueryParams: ProfitAndReportingQueryParams | null;
   missingCommaInPYName: PagedReportResponse<MissingCommasInPYName> | null;
@@ -94,6 +95,8 @@ export interface YearsEndState {
 }
 
 const initialState: YearsEndState = {
+  selectedProfitYearForDecemberActivities: 2024,
+  selectedProfitYearForFiscalClose: 2024,
   additionalExecutivesChosen: null,
   additionalExecutivesGrid: null,
   balanceByAgeFullTime: null,
@@ -136,7 +139,6 @@ const initialState: YearsEndState = {
   militaryAndRehireQueryParams: null,
   militaryEntryAndModification: null,
   militaryAndRehireForfeitures: null,
-  militaryAndRehireProfitSummary: null,
   militaryAndRehireForfeituresQueryParams: null,
   militaryAndRehireProfitSummaryQueryParams: null,
   missingCommaInPYName: null,
@@ -155,6 +157,12 @@ export const yearsEndSlice = createSlice({
   name: "yearsEnd",
   initialState,
   reducers: {
+    setSelectedProfitYearForDecemberActivities: (state, action: PayloadAction<number>) => {
+      state.selectedProfitYearForDecemberActivities = action.payload;
+    },
+    setSelectedProfitYearForFiscalClose: (state, action: PayloadAction<number>) => {
+      state.selectedProfitYearForFiscalClose = action.payload;
+    },
     setBalanceByYearsQueryParams: (state, action: PayloadAction<number>) => {
       state.balanceByYearsQueryParams = { profitYear: action.payload };
     },
@@ -258,15 +266,6 @@ export const yearsEndSlice = createSlice({
     },
     clearMilitaryAndRehireForfeituresQueryParams: (state) => {
       state.militaryAndRehireForfeituresQueryParams = null;
-    },
-    setMilitaryAndRehireProfitSummaryDetails: (
-      state,
-      action: PayloadAction<PagedReportResponse<MilitaryAndRehireProfitSummary>>
-    ) => {
-      state.militaryAndRehireProfitSummary = action.payload;
-    },
-    clearMilitaryAndRehireProfitSummaryDetails: (state) => {
-      state.militaryAndRehireProfitSummary = null;
     },
     setDistributionsAndForfeitures: (
       state,
@@ -411,7 +410,7 @@ export const yearsEndSlice = createSlice({
     },
     clearEligibleEmployees: (state) => {
       state.eligibleEmployees = null;
-    },    
+    },
     setDistributionsByAge: (state, action: PayloadAction<ProfitSharingDistributionsByAge>) => {
       if (action.payload.reportType == FrozenReportsByAgeRequestType.Total) {
         state.distributionsByAgeTotal = action.payload;
@@ -614,6 +613,8 @@ export const yearsEndSlice = createSlice({
 });
 
 export const {
+  setSelectedProfitYearForDecemberActivities,
+  setSelectedProfitYearForFiscalClose,
   addExecutiveHoursAndDollarsGridRow,
   clearAdditionalExecutivesChosen,
   clearAdditionalExecutivesGrid,
@@ -641,7 +642,6 @@ export const {
   clearForfeituresByAgeQueryParams,
   clearMilitaryAndRehireForfeituresDetails,
   clearMilitaryAndRehireForfeituresQueryParams,
-  clearMilitaryAndRehireProfitSummaryDetails,
   clearMilitaryAndRehireProfitSummaryQueryParams,
   clearMissingCommaInPYName,
   clearNegativeEtvaForSSNsOnPayprofit,
@@ -685,7 +685,6 @@ export const {
   setForfeituresByAgeQueryParams,
   setMilitaryAndRehireForfeituresDetails,
   setMilitaryAndRehireForfeituresQueryParams,
-  setMilitaryAndRehireProfitSummaryDetails,
   setMilitaryAndRehireProfitSummaryQueryParams,
   setMissingCommaInPYName,
   setNegativeEtvaForSSNsOnPayprofit,

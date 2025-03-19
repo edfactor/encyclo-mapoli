@@ -12,6 +12,8 @@ import {
 import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import DsmDatePicker from "../../components/DsmDatePicker/DsmDatePicker";
 
 interface EligibleEmployeesSearch {
   profitYear: number;
@@ -34,6 +36,7 @@ interface EligibleEmployeesSearchFilterProps {
 const EligibleEmployeesSearchFilter: React.FC<EligibleEmployeesSearchFilterProps> = ({ setInitialSearchLoaded }) => {
   // Need to see if we have saved query params
   const { eligibleEmployeesQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const fiscalCloseProfitYear = useFiscalCloseProfitYear();
 
   const [triggerSearch, { isFetching }] = useLazyGetEligibleEmployeesQuery();
   const dispatch = useDispatch();
@@ -46,7 +49,7 @@ const EligibleEmployeesSearchFilter: React.FC<EligibleEmployeesSearchFilterProps
   } = useForm<EligibleEmployeesSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: eligibleEmployeesQueryParams?.profitYear || undefined
+      profitYear: fiscalCloseProfitYear || eligibleEmployeesQueryParams?.profitYear || undefined
     }
   });
 
@@ -54,12 +57,12 @@ const EligibleEmployeesSearchFilter: React.FC<EligibleEmployeesSearchFilterProps
     if (isValid) {
       triggerSearch(
         {
-          profitYear: data.profitYear,
-          pagination: { skip: 0, take: 10 }
+          profitYear: fiscalCloseProfitYear,
+          pagination: { skip: 0, take: 25 }
         },
         false
       ).unwrap();
-      dispatch(setEligibleEmployeesQueryParams(data.profitYear));
+      dispatch(setEligibleEmployeesQueryParams(fiscalCloseProfitYear));
     }
   });
 
@@ -68,7 +71,7 @@ const EligibleEmployeesSearchFilter: React.FC<EligibleEmployeesSearchFilterProps
     dispatch(clearEligibleEmployees());
     dispatch(clearEligibleEmployeesQueryParams());
     reset({
-      profitYear: undefined
+      profitYear: fiscalCloseProfitYear
     });
   };
 
@@ -79,20 +82,20 @@ const EligibleEmployeesSearchFilter: React.FC<EligibleEmployeesSearchFilterProps
         paddingX="24px"
         gap="24px">
         <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-          <FormLabel>Year</FormLabel>
           <Controller
             name="profitYear"
             control={control}
             render={({ field }) => (
-              <TextField
-                {...field}
-                fullWidth
-                variant="outlined"
-                error={!!errors.profitYear}
-                onChange={(e) => {
-                  field.onChange(e);
-                }}
-                type="number"
+              <DsmDatePicker
+                id="profitYear"
+                onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
+                value={field.value ? new Date(field.value, 0) : null}
+                required={true}
+                label="Profit Year"
+                disableFuture
+                views={["year"]}
+                error={errors.profitYear?.message}
+                disabled={true}
               />
             )}
           />

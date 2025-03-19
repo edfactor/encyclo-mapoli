@@ -672,7 +672,7 @@ FROM DEMOGRAPHIC p1
 
         foreach (var item in rslt.Results)
         {
-            item.Age = (byte)((calInfo.FiscalEndDate.Year - item.DateOfBirth.Year) - (calInfo.FiscalEndDate.DayOfYear < item.DateOfBirth.DayOfYear ? 1 : 0));
+            item.Age = (byte)item.DateOfBirth.Age(calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Local));
             if (item.Age < 21)
             {
                 item.IsUnder21 = true;

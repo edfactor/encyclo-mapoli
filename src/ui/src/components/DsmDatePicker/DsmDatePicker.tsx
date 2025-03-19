@@ -17,9 +17,10 @@ type MyProps = {
   onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void;
   ref?: React.ForwardedRef<unknown>;
   views?: Array<"year" | "month" | "day">;
+  disabled?: boolean;
 };
 
-const DsmDatePicker: FC<MyProps> = ({ error, views, onChange, value, disableFuture, required, label, ref, id }) => {
+const DsmDatePicker: FC<MyProps> = ({ error, views, onChange, value, disableFuture, required, label, ref, id, disabled }) => {
   const isInvalid = error ? error?.length > 0 : false;
   const isYearOnly = views?.length === 1 && views[0] === "year";
 
@@ -54,6 +55,7 @@ const DsmDatePicker: FC<MyProps> = ({ error, views, onChange, value, disableFutu
       fullWidth
       error={isInvalid}
       onError={(_err) => {}}
+      disabled={disabled}
       onKeyUp={(e: React.KeyboardEvent<HTMLDivElement>) => {
         // This wild code is meant to enable the search button without leaving the
         // field with a blur event.
@@ -97,6 +99,7 @@ const DsmDatePicker: FC<MyProps> = ({ error, views, onChange, value, disableFutu
           openTo={views?.[0]}
           disableFuture={disableFuture}
           value={value}
+          disabled={disabled}
         />
       </LocalizationProvider>
       {!!error && <FormHelperText error>{error}</FormHelperText>}
