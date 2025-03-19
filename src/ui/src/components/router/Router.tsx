@@ -60,6 +60,7 @@ import ProfitShareUpdate from "../../pages/ProfitShareUpdate/ProfitShareUpdate";
 import YTDWages from "../../pages/YTDWagesExtract/YTDWages";
 import RouteSecurity from "./RouteSecurity";
 import MilitaryEntryAndModification from "pages/MilitaryEntryAndModification/MilitaryEntryAndModification";
+import DemographicFreeze from "../../pages/ITSupport/DemographicFreeze/DemographicFreeze";
 
 const Router = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -318,6 +319,10 @@ const Router = () => {
         <Route
           path={ROUTES.PROFALL}
           element={<Profall />}
+        />
+        <Route
+          path={ROUTES.DEMO_FREEZE}
+          element={<DemographicFreeze />}
         />
       </RouteSecurity>
     </BrowserRouter>
