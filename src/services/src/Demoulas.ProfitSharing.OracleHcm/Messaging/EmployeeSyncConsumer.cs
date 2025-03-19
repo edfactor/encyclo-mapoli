@@ -42,9 +42,9 @@ internal class EmployeeSyncConsumer : IConsumer<MessageRequest<OracleEmployee[]>
     public async Task Consume(ConsumeContext<MessageRequest<OracleEmployee[]>> context)
     {
         OracleEmployee[] employees = context.Message.Body;
-        DemographicsRequest[] requestDtoEnumerable = await ConvertToRequestDto(employees, context.Message.UserId, context.CancellationToken);
+        DemographicsRequest[] requestDtoEnumerable = await ConvertToRequestDto(employees, context.Message.UserId, context.CancellationToken).ConfigureAwait(false);
         await _demographicsService.AddDemographicsStreamAsync(requestDtoEnumerable, _oracleHcmConfig.Limit,
-            context.CancellationToken);
+            context.CancellationToken).ConfigureAwait(false);
     }
 
     private async Task<DemographicsRequest[]> ConvertToRequestDto(OracleEmployee[] employees,
@@ -59,12 +59,12 @@ internal class EmployeeSyncConsumer : IConsumer<MessageRequest<OracleEmployee[]>
                 return c.Demographics.Where(d => oracleHcmIds.Contains(d.OracleHcmId))
                     .Select(d => new { d.OracleHcmId, d.Ssn })
                     .ToDictionaryAsync(d => d.OracleHcmId, d => d.Ssn, cancellationToken);
-            });
+            }).ConfigureAwait(false);
 
             // Find which IDs need new SSNs
             var missingIds = oracleHcmIds.Where(id => !empSsnDic.ContainsKey(id)).ToList();
 
-            var newSsns = await _fakeSsnService.GenerateFakeSsnBatchAsync(missingIds.Count, cancellationToken);
+            var newSsns = await _fakeSsnService.GenerateFakeSsnBatchAsync(missingIds.Count, cancellationToken).ConfigureAwait(false);
             // Generate new SSNs for missing IDs
             for (int i = 0; i < missingIds.Count; i++)
             {
@@ -75,7 +75,7 @@ internal class EmployeeSyncConsumer : IConsumer<MessageRequest<OracleEmployee[]>
             return empSsnDic;
         }
 
-        var empSsnDic = await GetFakeSsns(employees.Select(e => e.PersonId).ToList());
+        var empSsnDic = await GetFakeSsns(employees.Select(e => e.PersonId).ToList()).ConfigureAwait(false);
 
         List<DemographicsRequest> requests = new();
         foreach (var employee in employees)
@@ -87,11 +87,11 @@ internal class EmployeeSyncConsumer : IConsumer<MessageRequest<OracleEmployee[]>
                 continue;
             }
 
-            ValidationResult? result = await _employeeValidator.ValidateAsync(employee!, cancellationToken);
+            ValidationResult? result = await _employeeValidator.ValidateAsync(employee!, cancellationToken).ConfigureAwait(false);
             if (!result.IsValid)
             {
                 await _demographicsService.AuditError(badgeNumber, employee?.PersonId ?? 0, result.Errors, requestedBy,
-                    cancellationToken);
+                    cancellationToken).ConfigureAwait(false);
                 continue;
             }
 

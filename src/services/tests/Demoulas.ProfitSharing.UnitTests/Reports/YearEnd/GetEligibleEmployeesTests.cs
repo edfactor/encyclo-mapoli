@@ -20,6 +20,8 @@ internal sealed record TestEmployee
     public int Id { get; init; }
     public int OracleHcmId { get; init; }
     public int BadgeNumber { get; init; }
+    public byte DepartmentId { get; init; }
+    public string? Department { get; init; }
     public required string FullName { get; init; }
     public int Age { get; init; }
     public int HoursWorked { get; init; }
@@ -61,7 +63,7 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
             // Assert
             response.Result.ReportName.Should().Be($"Get Eligible Employees for Year {TestProfitYear}");
             var dto = response.Result.Response.Results.First(e => e.BadgeNumber == te.BadgeNumber);
-            dto.Should().BeEquivalentTo(new GetEligibleEmployeesResponseDto { OracleHcmId = te.OracleHcmId, BadgeNumber = te.BadgeNumber, FullName = te.FullName }
+            dto.Should().BeEquivalentTo(new EligibleEmployee { OracleHcmId = te.OracleHcmId, BadgeNumber = te.BadgeNumber, FullName = te.FullName, DepartmentId = te.DepartmentId, Department = te.Department}
             );
 
             return Task.CompletedTask;
@@ -115,9 +117,9 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
             lines[4].Should().Be($"Number not selected,{numberNotSelected}");
             lines[5].Should().Be($"Number written,{numberWritten}");
 
-            lines[6].Should().Be("ORACLE_HCM_ID,BADGE_PSN,NAME");
+            lines[6].Should().Be("ASSIGNMENT_ID,BADGE_PSN,NAME");
 
-            lines.Skip(7).Should().Contain($"{te.OracleHcmId},{te.BadgeNumber},\"{te.FullName}\"");
+            lines.Skip(7).Should().Contain($"{te.DepartmentId},{te.BadgeNumber},\"{te.FullName}\"");
 
             return Task.CompletedTask;
         });
@@ -203,20 +205,28 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
         FullName = "Smith, Joe K",
         Age = 44,
         HoursWorked = 1010,
-        EmploymentStatusId = EmploymentStatus.Constants.Active
+        EmploymentStatusId = EmploymentStatus.Constants.Active,
+        DepartmentId = Department.Constants.Grocery,
+        Department = nameof(Department.Constants.Grocery)
     };
 
 
     private static async Task save(TestEmployee testEmployee, ProfitSharingDbContext ctx)
     {
-        var pp = await ctx.PayProfits.Include(payProfit => payProfit.Demographic!)
-            .ThenInclude(demographic => demographic.ContactInfo).Include(p => p.Demographic != null).FirstAsync(CancellationToken.None);
+        var pp = await ctx.PayProfits
+            .Include(payProfit => payProfit.Demographic!) // Include Demographic
+            .ThenInclude(demographic => demographic.ContactInfo) // Include ContactInfo
+            .Include(payProfit => payProfit.Demographic!) // Re-include Demographic to enable another ThenInclude
+            .ThenInclude(demographic => demographic.Department) // Include Department (child of Demographic)
+             .FirstAsync(CancellationToken.None);
         pp.ProfitYear = TestProfitYear;
         pp.DemographicId = testEmployee.Id;
         pp.CurrentHoursYear = testEmployee.HoursWorked;
         var demo = pp.Demographic!;
         demo.OracleHcmId = testEmployee.OracleHcmId;
         demo.Id = testEmployee.Id;
+        demo.DepartmentId = testEmployee.DepartmentId;
+            demo.Department = new Department {Id = Department.Constants.Grocery, Name = testEmployee.Department ?? nameof(Department.Constants.Grocery) };
         demo.ContactInfo.FullName = testEmployee.FullName;
         demo.BadgeNumber = testEmployee.BadgeNumber;
         demo.DateOfBirth = convertAgeToBirthDate(TestProfitYear, testEmployee.Age);
@@ -226,7 +236,8 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
         // The fake PayProfits entities share fake Demographic entities. (see demographicQueue in PayProfitFaker)
         // PayProfit and Demographic are 1-1 in the database, to prevent errors - we assign the PayProfits sharing this
         // Demographic new Demographics.
-        var otherPayProfitsUsingOurDemograhic = await ctx.PayProfits.Where(ppo => ppo != pp && ppo.Demographic == demo).ToListAsync(CancellationToken.None);
+        var otherPayProfitsUsingOurDemograhic = await ctx.PayProfits.Where(ppo => ppo != pp && ppo.Demographic == demo)
+            .ToListAsync(CancellationToken.None);
         otherPayProfitsUsingOurDemograhic.ForEach(pp => pp.Demographic = df.Generate());
 
         await ctx.SaveChangesAsync(CancellationToken.None);

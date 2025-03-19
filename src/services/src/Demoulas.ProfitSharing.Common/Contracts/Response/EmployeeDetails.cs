@@ -14,7 +14,8 @@ public sealed record EmployeeDetails
     public int YearsInPlan { get; init; }
     public decimal PercentageVested { get; init; }
     public bool ContributionsLastYear { get; init; }
-    public bool Enrolled { get; init; }
+    public byte? EnrollmentId { get; init; }
+    public string? Enrollment { get; init; }
     public int BadgeNumber { get; init; }
     public DateOnly HireDate { get; init; }
     public DateOnly? TerminationDate { get; init; } = null;

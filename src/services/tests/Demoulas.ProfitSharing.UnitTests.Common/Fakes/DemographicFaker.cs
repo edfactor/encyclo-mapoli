@@ -25,7 +25,7 @@ public sealed class DemographicFaker : Faker<Demographic>
             .RuleFor(d => d.Ssn, f => f.Person.Ssn().ConvertSsnToInt())
             .RuleFor(d => d.OracleHcmId, f => _oracleHcmIdCounter++)
             .RuleFor(d => d.StoreNumber, f => f.Random.Short(1, 99))
-            .RuleFor(d => d.DepartmentId, f => f.PickRandom<byte>(1, 2, 3, 4, 5, 6, 7))
+            .RuleFor(d => d.DepartmentId, f => f.PickRandom<byte>(Department.Constants.Grocery, Department.Constants.Bakery, Department.Constants.BeerAndWine, Department.Constants.Dairy, Department.Constants.Deli, Department.Constants.Meat, Department.Constants.Produce))
             .RuleFor(d => d.PayClassification, f => payClassificationFaker.Generate())
             .RuleFor(d => d.PayClassificationId, f => f.Random.Byte(1, 98))
             .RuleFor(d => d.ContactInfo, f => contactInfoFaker.Generate())

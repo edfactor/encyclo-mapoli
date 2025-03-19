@@ -14,42 +14,56 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ICalendarService _calendarService;
 
-    public GetEligibleEmployeesService(IProfitSharingDataContextFactory dataContextFactory, ICalendarService calendarService)
+    public GetEligibleEmployeesService(IProfitSharingDataContextFactory dataContextFactory,
+        ICalendarService calendarService)
     {
         _dataContextFactory = dataContextFactory;
         _calendarService = calendarService;
     }
 
-    public async Task<GetEligibleEmployeesResponse> GetEligibleEmployeesAsync(ProfitYearRequest request, CancellationToken cancellationToken)
+    public async Task<GetEligibleEmployeesResponse> GetEligibleEmployeesAsync(ProfitYearRequest request,
+        CancellationToken cancellationToken)
     {
-        var response = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
+        var response =
+            await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
         var birthDateOfExactly21YearsOld = response.FiscalEndDate.AddYears(-21);
         var hoursWorkedRequirement = ContributionService.MinimumHoursForContribution();
 
-        return  await _dataContextFactory.UseReadOnlyContext(async c =>
+        return await _dataContextFactory.UseReadOnlyContext(async c =>
         {
-            int numberReadOnFrozen = await c.PayProfits.Where(p => p.ProfitYear == request.ProfitYear).CountAsync(cancellationToken);
+            int numberReadOnFrozen = await c.PayProfits.Where(p => p.ProfitYear == request.ProfitYear)
+                .CountAsync(cancellationToken);
 
             int numberNotSelected = await c.PayProfits
-            .Include(p => p.Demographic)
-            .Where(p => p.ProfitYear == request.ProfitYear)
-            .Where(p => p.Demographic!.DateOfBirth > birthDateOfExactly21YearsOld /*too young*/ || p.CurrentHoursYear < hoursWorkedRequirement || p.Demographic!.EmploymentStatusId == EmploymentStatus.Constants.Terminated)
-            .CountAsync(cancellationToken: cancellationToken);
+                .Include(p => p.Demographic)
+                .Where(p => p.ProfitYear == request.ProfitYear)
+                .Where(p => p.Demographic!.DateOfBirth > birthDateOfExactly21YearsOld /*too young*/ ||
+                            p.CurrentHoursYear < hoursWorkedRequirement || p.Demographic!.EmploymentStatusId ==
+                            EmploymentStatus.Constants.Terminated)
+                .CountAsync(cancellationToken: cancellationToken);
 
             var totalEligible = await c.PayProfits
-           .Include(p => p.Demographic)
-           .Where(p => p.ProfitYear == request.ProfitYear)
-           .Where(p => p.Demographic!.DateOfBirth <= birthDateOfExactly21YearsOld /*over 21*/  && p.CurrentHoursYear >= hoursWorkedRequirement && p.Demographic!.EmploymentStatusId != EmploymentStatus.Constants.Terminated).CountAsync(cancellationToken);
+                .Include(p => p.Demographic)
+                .Where(p => p.ProfitYear == request.ProfitYear)
+                .Where(p => p.Demographic!.DateOfBirth <= birthDateOfExactly21YearsOld /*over 21*/ &&
+                            p.CurrentHoursYear >= hoursWorkedRequirement &&
+                            p.Demographic!.EmploymentStatusId != EmploymentStatus.Constants.Terminated)
+                .CountAsync(cancellationToken);
 
             var result = await c.PayProfits
                 .Include(p => p.Demographic)
-                .Where(p =>  p.ProfitYear == request.ProfitYear)
-                .Where(p => p.Demographic!.DateOfBirth <= birthDateOfExactly21YearsOld /*over 21*/  && p.CurrentHoursYear >= hoursWorkedRequirement && p.Demographic!.EmploymentStatusId != EmploymentStatus.Constants.Terminated)
-                .Select(p => new GetEligibleEmployeesResponseDto()
+                .ThenInclude(d => d!.Department)
+                .Where(p => p.ProfitYear == request.ProfitYear)
+                .Where(p => p.Demographic!.DateOfBirth <= birthDateOfExactly21YearsOld /*over 21*/ &&
+                            p.CurrentHoursYear >= hoursWorkedRequirement && p.Demographic!.EmploymentStatusId !=
+                            EmploymentStatus.Constants.Terminated)
+                .Select(p => new EligibleEmployee
                 {
                     OracleHcmId = p.Demographic!.OracleHcmId,
                     BadgeNumber = p.Demographic!.BadgeNumber,
                     FullName = p.Demographic!.ContactInfo.FullName!,
+                    DepartmentId = p.Demographic.DepartmentId,
+                    Department = p.Demographic.Department != null ? p.Demographic.Department.Name : p.Demographic.DepartmentId.ToString()
                 })
                 .OrderBy(p => p.FullName)
                 .ToPaginationResultsAsync(request, cancellationToken);
@@ -65,8 +79,5 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
             };
 
         });
-
-
     }
-
 }

@@ -10,63 +10,88 @@ import { paymentTypeGetNumberMap, memberTypeGetNumberMap } from "./MasterInquiry
 interface MasterInquiryGridProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
+  handleSortChanged: (sort: ISortParams) => void;
 }
 
 const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoaded, setInitialSearchLoaded }) => {
   const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
+  const [pageSize, setPageSize] = useState(10);
   const [_sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "Badge",
-    isSortDescending: false
+    sortBy: "profitYear",
+    isSortDescending: true
   });
 
   const { masterInquiryData, masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [triggerSearch, { isFetching }] = useLazyGetProfitMasterInquiryQuery();
 
-  const sortEventHandler = (update: ISortParams) => setSortParams(update);
+  const createMasterInquiryRequest = useCallback(
+    (skip: number, sortBy: string, isSortDescending: boolean): MasterInquiryRequest | null => {
+      if (!masterInquiryRequestParams) return null;
+
+      return {
+        pagination: { skip, take: pageSize, sortBy, isSortDescending },
+        ...(!!masterInquiryRequestParams.startProfitYear && {
+          startProfitYear: masterInquiryRequestParams.startProfitYear.getFullYear()
+        }),
+        ...(!!masterInquiryRequestParams.endProfitYear && {
+          endProfitYear: masterInquiryRequestParams.endProfitYear.getFullYear()
+        }),
+        ...(!!masterInquiryRequestParams.startProfitMonth && {
+          startProfitMonth: masterInquiryRequestParams.startProfitMonth
+        }),
+        ...(!!masterInquiryRequestParams.endProfitMonth && {
+          endProfitMonth: masterInquiryRequestParams.endProfitMonth
+        }),
+        ...(!!masterInquiryRequestParams.socialSecurity && {
+          socialSecurity: masterInquiryRequestParams.socialSecurity
+        }),
+        ...(!!masterInquiryRequestParams.name && { name: masterInquiryRequestParams.name }),
+        ...(!!masterInquiryRequestParams.badgeNumber && { badgeNumber: masterInquiryRequestParams.badgeNumber }),
+        ...(!!masterInquiryRequestParams.comment && { comment: masterInquiryRequestParams.comment }),
+        ...(!!masterInquiryRequestParams.paymentType && {
+          paymentType: paymentTypeGetNumberMap[masterInquiryRequestParams.paymentType]
+        }),
+        ...(!!masterInquiryRequestParams.memberType && {
+          memberType: memberTypeGetNumberMap[masterInquiryRequestParams.memberType]
+        }),
+        ...(!!masterInquiryRequestParams.contribution && { contribution: masterInquiryRequestParams.contribution }),
+        ...(!!masterInquiryRequestParams.earnings && { earnings: masterInquiryRequestParams.earnings }),
+        ...(!!masterInquiryRequestParams.forfeiture && { forfeiture: masterInquiryRequestParams.forfeiture }),
+        ...(!!masterInquiryRequestParams.payment && { payment: masterInquiryRequestParams.payment })
+      };
+    },
+    [masterInquiryRequestParams, pageSize]
+  );
+
+  const sortEventHandler = (update: ISortParams) => {
+    if (update.sortBy === "") {
+      update.sortBy = "profitYear";
+      update.isSortDescending = true;
+    }
+    setSortParams(update);
+    setPageNumber(0);
+
+    const request = createMasterInquiryRequest(0, update.sortBy, update.isSortDescending);
+    if (!request) return;
+
+    triggerSearch(request, false);
+  };
+
   const columnDefs = useMemo(() => GetMasterInquiryGridColumns(), []);
 
   const onSearch = useCallback(async () => {
-    if (!masterInquiryRequestParams) return;
-
-    const request: MasterInquiryRequest = {
-      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: _sortParams.sortBy, isSortDescending: _sortParams.isSortDescending },
-      ...(!!masterInquiryRequestParams.startProfitYear && {
-        startProfitYear: masterInquiryRequestParams.startProfitYear.getFullYear()
-      }),
-      ...(!!masterInquiryRequestParams.endProfitYear && {
-        endProfitYear: masterInquiryRequestParams.endProfitYear.getFullYear()
-      }),
-      ...(!!masterInquiryRequestParams.startProfitMonth && {
-        startProfitMonth: masterInquiryRequestParams.startProfitMonth
-      }),
-      ...(!!masterInquiryRequestParams.endProfitMonth && { endProfitMonth: masterInquiryRequestParams.endProfitMonth }),
-      ...(!!masterInquiryRequestParams.socialSecurity && { socialSecurity: masterInquiryRequestParams.socialSecurity }),
-      ...(!!masterInquiryRequestParams.name && { name: masterInquiryRequestParams.name }),
-      ...(!!masterInquiryRequestParams.badgeNumber && { badgeNumber: masterInquiryRequestParams.badgeNumber }),
-      ...(!!masterInquiryRequestParams.comment && { comment: masterInquiryRequestParams.comment }),
-      ...(!!masterInquiryRequestParams.paymentType && {
-        paymentType: paymentTypeGetNumberMap[masterInquiryRequestParams.paymentType]
-      }),
-      ...(!!masterInquiryRequestParams.memberType && {
-        memberType: memberTypeGetNumberMap[masterInquiryRequestParams.memberType]
-      }),
-      ...(!!masterInquiryRequestParams.contribution && { contribution: masterInquiryRequestParams.contribution }),
-      ...(!!masterInquiryRequestParams.earnings && { earnings: masterInquiryRequestParams.earnings }),
-      ...(!!masterInquiryRequestParams.forfeiture && { forfeiture: masterInquiryRequestParams.forfeiture }),
-      ...(!!masterInquiryRequestParams.payment && { payment: masterInquiryRequestParams.payment })
-      //voids: voidsCurrent,
-    };
+    const request = createMasterInquiryRequest(pageNumber * pageSize, _sortParams.sortBy, _sortParams.isSortDescending);
+    if (!request) return;
 
     await triggerSearch(request, false);
-  }, [pageNumber, pageSize, triggerSearch, masterInquiryRequestParams]);
+  }, [createMasterInquiryRequest, pageNumber, pageSize, _sortParams, triggerSearch]);
 
   useEffect(() => {
     if (initialSearchLoaded) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
+  }, [initialSearchLoaded, pageNumber, pageSize, _sortParams, onSearch]);
 
   return (
     <>
@@ -80,12 +105,13 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
             </Typography>
           </div>
           <DSMGrid
-            preferenceKey={"DUPE_SSNS"}
-            isLoading={false}
+            preferenceKey={"ProfitYear"}
+            isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: masterInquiryData?.inquiryResults.results,
-              columnDefs: columnDefs
+              columnDefs: columnDefs,
+              suppressMultiSort: true
             }}
           />
         </>

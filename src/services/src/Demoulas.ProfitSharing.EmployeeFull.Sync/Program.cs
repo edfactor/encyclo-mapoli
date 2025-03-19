@@ -31,7 +31,7 @@ builder.Configuration.Bind("Logging:Smart", smartConfig);
 FileSystemLogConfig fileSystemLog = new FileSystemLogConfig();
 builder.Configuration.Bind("Logging:FileSystem", fileSystemLog);
 
-await builder.SetDefaultLoggerConfigurationAsync(smartConfig, fileSystemLog);
+await builder.SetDefaultLoggerConfigurationAsync(smartConfig, fileSystemLog).ConfigureAwait(false);
 
 
 List<ContextFactoryRequest> list =
@@ -54,4 +54,4 @@ else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
 }
 
 var host = builder.Build();
-await host.RunAsync();
+await host.RunAsync().ConfigureAwait(false);

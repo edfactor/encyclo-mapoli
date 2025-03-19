@@ -222,6 +222,57 @@ namespace Demoulas.ProfitSharing.Services.Reports
             };
         }
 
+        public async Task<ReportResponseBase<ProfitSharingUnder21InactiveNoBalanceResponse>> ProfitSharingUnder21InactiveNoBalance(ProfitYearRequest request, CancellationToken cancellationToken)
+        {
+            var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
+            var age21 = calInfo.FiscalEndDate.AddYears(-21);
+            short lastYear = (short)(request.ProfitYear - 1);
+            var rslt = await _profitSharingDataContextFactory.UseReadOnlyContext(ctx =>
+            {
+                return (
+                    from d in FrozenService.GetDemographicSnapshot(ctx, request.ProfitYear).Where(x => x.DateOfBirth >= age21)
+                    join pp in ctx.PayProfits.Where(x=>x.ProfitYear == request.ProfitYear) on d.Id equals pp.DemographicId
+                    join balTbl in _totalService.TotalVestingBalance(ctx, request.ProfitYear, calInfo.FiscalEndDate)
+                        on d.Ssn equals balTbl.Ssn into balTmp
+                    from bal in balTmp.DefaultIfEmpty()
+                    where 
+                        d.TerminationCodeId != TerminationCode.Constants.Retired &&
+                        (
+                            d.EmploymentStatusId == EmploymentStatus.Constants.Inactive ||
+                            (
+                                d.EmploymentStatusId == EmploymentStatus.Constants.Terminated
+                            )
+                        )
+                        && (bal.VestedBalance > 0 || bal.YearsInPlan > 0)
+                        && (bal.CurrentBalance <= 0)
+                    orderby d.ContactInfo.LastName, d.ContactInfo.FirstName
+                    select new ProfitSharingUnder21InactiveNoBalanceResponse()
+                    {
+                        BadgeNumber = d.BadgeNumber,
+                        LastName = d.ContactInfo.LastName,
+                        FirstName = d.ContactInfo.FirstName,
+                        BirthDate = d.DateOfBirth,
+                        HireDate = d.HireDate,
+                        TerminationDate = d.TerminationDate,
+                        Age = 0,
+                        EnrollmentId = pp.EnrollmentId
+                    }
+                ).ToPaginationResultsAsync(request, cancellationToken);
+            });
+
+            var fiscalEndDateTime = calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+            foreach (var row in rslt.Results) {
+                row.Age = (byte)row.BirthDate.Age(fiscalEndDateTime);
+            }
+
+            return new ReportResponseBase<ProfitSharingUnder21InactiveNoBalanceResponse>() 
+            {
+                ReportDate = DateTime.UtcNow,
+                ReportName = ProfitSharingUnder21InactiveNoBalanceResponse.REPORT_NAME,
+                Response = rslt
+            };
+        }
+
         internal class Under21IntermediaryResult
         {
             internal required Demographic d { get; set; }
