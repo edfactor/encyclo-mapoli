@@ -1,7 +1,7 @@
 import { FilterList } from "@mui/icons-material";
 import { Button, Divider, Stack, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
-import DuplicateNamesAndBirthdaysGrid from "pages/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdaysGrid";
+import DuplicateNamesAndBirthdaysGrid from "pages/DecemberActivities/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdaysGrid";
 import DuplicateSSNsOnDemographicsGrid from "pages/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographicsGrid";
 import EmployeesOnMilitaryLeave from "pages/EmployeesOnMilitaryLeave/EmployeesOnMilitaryLeave";
 import MasterInquiryGrid from "pages/MasterInquiry/MasterInquiryGrid";

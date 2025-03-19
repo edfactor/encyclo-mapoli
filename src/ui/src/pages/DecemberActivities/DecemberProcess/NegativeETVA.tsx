@@ -1,5 +1,5 @@
 import { Button, Stack, Typography } from "@mui/material";
-import { GetNegativeEtvaForSSNsOnPayProfitColumns } from "pages/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofitGridColumn";
+import { GetNegativeEtvaForSSNsOnPayProfitColumns } from "pages/DecemberActivities/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofitGridColumn";
 import React, { useCallback, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Path, useNavigate } from "react-router";

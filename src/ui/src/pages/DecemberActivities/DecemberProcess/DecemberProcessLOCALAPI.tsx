@@ -15,7 +15,7 @@ import {
   useLazyGetDuplicateNamesAndBirthdaysQuery
 } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import NegativeEtvaForSSNsOnPayprofitGrid from "pages/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofitGrid";
+import NegativeEtvaForSSNsOnPayprofitGrid from "pages/DecemberActivities/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofitGrid";
 
 /*
 
