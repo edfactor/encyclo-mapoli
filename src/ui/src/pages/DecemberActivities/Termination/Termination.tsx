@@ -6,7 +6,7 @@ import { DSMAccordion, Page } from "smart-ui-library";
 import { Button, Divider } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 
-import { CAPTIONS, MENU_LABELS } from "../../constants";
+import { CAPTIONS, MENU_LABELS } from "../../../constants";
 import TerminationGrid from "./TerminationGrid";
 import TerminationSearchFilter from "./TerminationSearchFilter";
 

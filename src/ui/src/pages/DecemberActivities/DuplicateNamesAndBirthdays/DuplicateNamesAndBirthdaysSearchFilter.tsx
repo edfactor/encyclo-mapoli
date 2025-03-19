@@ -13,7 +13,7 @@ import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
-import DsmDatePicker from "../../components/DsmDatePicker/DsmDatePicker";
+import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 
 interface DuplicateNamesAndBirthdaysSearch {
   profitYear: number;

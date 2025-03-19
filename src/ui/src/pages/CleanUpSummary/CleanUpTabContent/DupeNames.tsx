@@ -1,7 +1,7 @@
 import { Divider } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
-import DuplicateNamesAndBirthdaysGrid from "pages/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdaysGrid";
-import DuplicateNamesAndBirthdaysSearchFilter from "pages/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdaysSearchFilter";
+import DuplicateNamesAndBirthdaysGrid from "pages/DecemberActivities/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdaysGrid";
+import DuplicateNamesAndBirthdaysSearchFilter from "pages/DecemberActivities/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdaysSearchFilter";
 import { useState } from "react";
 import { DSMAccordion } from "smart-ui-library";
 

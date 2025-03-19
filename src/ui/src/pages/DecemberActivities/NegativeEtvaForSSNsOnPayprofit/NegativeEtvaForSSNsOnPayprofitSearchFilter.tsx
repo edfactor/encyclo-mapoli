@@ -13,7 +13,7 @@ import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { RootState } from "reduxstore/store";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
-import DsmDatePicker from "../../components/DsmDatePicker/DsmDatePicker";
+import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 
 interface NegativeEtvaForSSNsOnPayprofitSearch {
   profitYear: number;

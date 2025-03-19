@@ -2,13 +2,13 @@ import { Button, Divider, MenuItem, Select, SelectChangeEvent, Stack, Typography
 import Grid2 from "@mui/material/Grid2";
 import DSMCollapsedAccordion from "components/DSMCollapsedAccordion";
 import DuplicateNamesAndBirthdaysGrid from "pages/DecemberActivities/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdaysGrid";
-import DuplicateSSNsOnDemographicsGrid from "pages/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographicsGrid";
+import DuplicateSSNsOnDemographicsGrid from "pages/DecemberActivities/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographicsGrid";
 import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router";
 import { RootState } from "reduxstore/store";
 import { Page } from "smart-ui-library";
-import { MENU_LABELS } from "../../constants";
+import { MENU_LABELS } from "../../../constants";
 import NegativeETVA from "./NegativeETVA";
 import { setSelectedProfitYearForDecemberActivities } from "reduxstore/slices/yearsEndSlice";
 

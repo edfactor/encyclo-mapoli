@@ -5,7 +5,7 @@ import DistributionsAndForfeituresSearchFilter from "./DistributionAndForfeiture
 import DistributionsAndForfeituresGrid from "./DistributionAndForfeituresGrid";
 import StatusDropdown, { ProcessStatus } from "components/StatusDropdown";
 import { useNavigate } from "react-router";
-import { MENU_LABELS } from "../../constants";
+import { MENU_LABELS } from "../../../constants";
 import { useState } from "react";
 
 const DistributionsAndForfeitures = () => {

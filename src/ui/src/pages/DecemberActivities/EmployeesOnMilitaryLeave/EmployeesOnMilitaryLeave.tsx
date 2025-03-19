@@ -2,7 +2,7 @@ import { Divider } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import { Page } from "smart-ui-library";
 import EmployeesOnMilitaryLeaveGrid from "./EmployeesOnMilitaryLeaveGrid";
-import { CAPTIONS } from "../../constants";
+import { CAPTIONS } from "../../../constants";
 
 const EmployeesOnMilitaryLeave = () => {
   return (
