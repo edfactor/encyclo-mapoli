@@ -14,6 +14,7 @@ import { FrozenReportsByAgeRequestType } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 
 interface BalanceByYearsSearch {
   profitYear: number;
@@ -94,20 +95,19 @@ const BalanceByYearsSearchFilter = () => {
         paddingX="24px"
         gap="24px">
         <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-          <FormLabel>Year</FormLabel>
           <Controller
             name="profitYear"
             control={control}
             render={({ field }) => (
-              <TextField
-                {...field}
-                fullWidth
-                variant="outlined"
-                error={!!errors.profitYear}
-                onChange={(e) => {
-                  field.onChange(e);
-                }}
-                type="number"
+              <DsmDatePicker
+                id="profitYear"
+                onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
+                value={field.value ? new Date(field.value, 0) : null}
+                required={true}
+                label="Profit Year"
+                disableFuture
+                views={["year"]}
+                error={errors.profitYear?.message}
                 disabled={true}
               />
             )}

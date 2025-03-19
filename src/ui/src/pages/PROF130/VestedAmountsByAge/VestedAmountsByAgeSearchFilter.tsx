@@ -7,9 +7,6 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
-import {
- clearVestedAmountsByAgeQueryParams, setVestedAmountsByAgeQueryParams
-} from "reduxstore/slices/yearsEndSlice";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { clearVestedAmountsByAgeQueryParams, setVestedAmountsByAgeQueryParams } from "reduxstore/slices/yearsEndSlice";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
