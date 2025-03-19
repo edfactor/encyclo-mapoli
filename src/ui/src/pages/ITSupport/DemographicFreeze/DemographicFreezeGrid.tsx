@@ -11,10 +11,8 @@ interface DemoFreezeSearchProps {
   setInitialSearchLoaded: (loaded: boolean) => void;
 }
 
-const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({
-                                                                                  initialSearchLoaded,
-                                                                                  setInitialSearchLoaded
-                                                                                }) => {
+const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({initialSearchLoaded, setInitialSearchLoaded }) => {
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
 

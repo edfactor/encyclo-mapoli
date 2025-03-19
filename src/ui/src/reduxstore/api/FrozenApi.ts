@@ -12,8 +12,9 @@ export const FrozenApi = createApi({
     baseQuery: fetchBaseQuery({
         baseUrl: `${url}/api/`,
         prepareHeaders: (headers, { getState }) => {
-            const token = (getState() as RootState).security.token;
-            const impersonating = (getState() as RootState).security.impersonating;
+            const root = (getState() as RootState);
+            const token = root.security.token;
+            const impersonating = root.security.impersonating;
             if (token) {
                 headers.set("authorization", `Bearer ${token}`);
             }
