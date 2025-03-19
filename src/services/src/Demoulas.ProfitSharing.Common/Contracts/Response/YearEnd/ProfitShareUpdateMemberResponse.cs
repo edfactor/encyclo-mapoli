@@ -4,7 +4,7 @@ public record ProfitShareUpdateMemberResponse
 {
     public bool IsEmployee { get; init; }
     public long Badge { get; set; }
-    public long Psn { get; set; }
+    public string? Psn { get; set; }
     public string? Name { get; set; }
     public decimal BeginningAmount { get; set; }
     public decimal Distributions { get; set; }
@@ -21,4 +21,5 @@ public record ProfitShareUpdateMemberResponse
     public decimal Etva { get; set; } // PAYPROFIT.PY_PS_ETVA
     public decimal EtvaEarnings { get; set; } // PY-PROF-ETVA  (a portion of Earnings which applies to ETVA)
     public decimal SecondaryEtvaEarnings { get; set; } // PY_PROF_ETVA2 (portion of Secondary Earnings which applies to ETVA)
+    public bool TreatAsBeneficiary { get; set; }
 }
