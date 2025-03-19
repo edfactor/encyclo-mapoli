@@ -7,6 +7,7 @@ public sealed class EmployeeType : ILookupTable<byte>
     {
         public const byte NotNewLastYear = 0;
         public const byte NewLastYear = 1;
+        public const byte Beneficiary = 2; /* This is used only in Reporting, not in the database */
     }
 
     public byte Id { get; set; }

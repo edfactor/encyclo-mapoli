@@ -55,7 +55,7 @@ public class EmployeeTests : ApiTestBase<Program>
     {
         // Arrange
         _payProfit.EnrollmentId = /*0*/ Enrollment.Constants.NotEnrolled;
-        _profitDetails[0].YearsOfServiceCredit= 0;
+        _profitDetails[0].YearsOfServiceCredit = 0;
 
         // Act
         ProfitShareEditResponse response = await _service.ProfitShareEdit(DefaultRequest(), CancellationToken.None);
@@ -134,22 +134,17 @@ public class EmployeeTests : ApiTestBase<Program>
         m.ForfeitureAmount.Should().Be(0);
         m.Remark.Should().BeNull();
     }
-    
+
     [Fact]
     public async Task employee_with_ETVA_expect_earnings_on_both_an_8_record_and_a_0_record()
     {
         // Arrange
-        // In the future, this could simply be
-        //      _payProfit.Etva = 1000m
-        // but for now we rely on using the TotalService ETA calculation.   So we setup an employee
-        // with 2000 in contribution, and 1000 in ETVA
+        _payProfit.Etva = 1000m;
+
         _profitDetails[0].ProfitCodeId.Should().Be(0);
-        _profitDetails[0].Contribution = 2000m;
+        _profitDetails[0].Contribution = 3000m;
 
-        _profitDetails[1].ProfitCodeId.Should().Be(8);
-        _profitDetails[1].Earnings = 1000m; // Etva Amount
-
-        // Balance is 3000 in profit details
+        // Balance is 2000 in profit details
         // ETVA is 1000
         // Earnings is 5%
         // rec 0 should have 2000 * %5 = 100
@@ -175,7 +170,7 @@ public class EmployeeTests : ApiTestBase<Program>
     public async Task secondary_earnings_no_etva_happy_path()
     {
         // Arrange
-        var req = new ProfitShareUpdateRequest { ProfitYear = _thisYear, SecondaryEarningsPercent = 3 };
+        ProfitShareUpdateRequest req = new() { ProfitYear = _thisYear, SecondaryEarningsPercent = 3 };
 
         // Act
         ProfitShareEditResponse response = await _service.ProfitShareEdit(req, CancellationToken.None);
@@ -184,7 +179,7 @@ public class EmployeeTests : ApiTestBase<Program>
         List<ProfitShareEditMemberRecordResponse> records = response.Response.Results.ToList();
         records.Count.Should().Be(1);
         ProfitShareEditMemberRecordResponse m = records[0];
-        
+
         // test's default balance is 1000. test's default requested earnings 5%
         m.YearExtension.Should().Be(2);
         m.EarningsAmount.Should().Be(1000 * .03m);
@@ -194,15 +189,13 @@ public class EmployeeTests : ApiTestBase<Program>
     public async Task secondary_earnings_with_etva()
     {
         // Arrange
-        // FYI: In the future: _payProfit.Etva = 1000m
+        _payProfit.Etva = 1000m;
+
         // 0 record has Vested amounts
         _profitDetails[0].ProfitCodeId.Should().Be(0);
-        _profitDetails[0].Contribution = 2000m;
-        // 8 record holds ETVA amount
-        _profitDetails[1].ProfitCodeId.Should().Be(8);
-        _profitDetails[1].Earnings = 1000m; // Etva Amount
-        
-        var req = new ProfitShareUpdateRequest { ProfitYear = _thisYear, SecondaryEarningsPercent = 3 };
+        _profitDetails[0].Contribution = 3000m;
+
+        ProfitShareUpdateRequest req = new() { ProfitYear = _thisYear, SecondaryEarningsPercent = 3 };
 
         // Act
         ProfitShareEditResponse response = await _service.ProfitShareEdit(req, CancellationToken.None);
@@ -213,7 +206,7 @@ public class EmployeeTests : ApiTestBase<Program>
         ProfitShareEditMemberRecordResponse r1 = records[0];
         ProfitShareEditMemberRecordResponse r2 = records[1];
 
-        // 3% of 3000 = 90 
+        // 3% of 3000 = 90
         r1.Code.Should().Be( /*8*/ ProfitCode.Constants.Incoming100PercentVestedEarnings);
         r1.YearExtension.Should().Be(2);
         r1.EarningsAmount.Should().Be(30 /*1000 * .03m*/);

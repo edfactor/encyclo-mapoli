@@ -1,4 +1,5 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate.Formatters;
 using Demoulas.ProfitSharing.Services;
@@ -97,7 +98,7 @@ internal sealed class ProfitShareUpdateReport
 
         ReportLine report_line = new();
         ReportLine2 report_line_2 = new();
-        if (memberFinancials.BadgeNumber > 0)
+        if (memberFinancials.Psn == memberFinancials.BadgeNumber)
         {
             report_line.BADGE_NBR = memberFinancials.BadgeNumber;
             report_line.EMP_NAME = memberFinancials.Name?.Length > 24
@@ -107,15 +108,17 @@ internal sealed class ProfitShareUpdateReport
             report_line.BEG_BAL = memberFinancials.CurrentAmount;
             report_line.PR_DIST1 = memberFinancials.Distributions;
 
-            if (memberFinancials.EmployeeTypeId == 1)
+            if (memberFinancials.EmployeeTypeId == /*1*/ EmployeeType.Constants.NewLastYear)
             {
                 report_line.PR_NEWEMP = "NEW";
+            } else if (memberFinancials.EmployeeTypeId == /*2*/ EmployeeType.Constants.Beneficiary)
+            {
+                report_line.PR_NEWEMP = "BEN";
             }
             else
             {
                 report_line.PR_NEWEMP = " ";
             }
-
 
             report_line.PR_CONT = memberFinancials.Contributions + memberFinancials.Xfer;
             report_line.PR_MIL = memberFinancials.Military - memberFinancials.Pxfer;
@@ -127,8 +130,7 @@ internal sealed class ProfitShareUpdateReport
             report_line.END_BAL = memberFinancials.EndingBalance;
         }
 
-
-        if (memberFinancials.BadgeNumber == 0)
+        if (memberFinancials.Psn != memberFinancials.BadgeNumber)
         {
             report_line_2.PR2_EMP_NAME =
                 memberFinancials.Name?.Length > 24 ? memberFinancials.Name.Substring(0, 24) : memberFinancials.Name;
