@@ -75,14 +75,20 @@ const reconciliation: RouteCategory = {
   items: [{ caption: CAPTIONS.SUMMARY, route: ROUTES.FROZEN_SUMMARY }]
 };
 
-const miscellaneous: RouteCategory = {
+const inquiries: RouteCategory = {
   menuLabel: MENU_LABELS.INQUIRIES,
   parentRoute: "",
   items: [{ caption: CAPTIONS.MASTER_INQUIRY, route: ROUTES.MASTER_INQUIRY }]
 };
 
+const it_support: RouteCategory = {
+  menuLabel: MENU_LABELS.IT_SUPPORT,
+  parentRoute: "",
+  items: [{ caption: CAPTIONS.DEMOGRAOHIC_FREEZE, route: ROUTES.DEMO_FREEZE }]
+};
+
 const MenuData: RouteCategory[] = [
-  miscellaneous,
+  inquiries,
   beneficiaries,
   distributions,
   reconciliation,

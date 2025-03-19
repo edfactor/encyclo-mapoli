@@ -6,7 +6,8 @@ export const MENU_LABELS = {
   BENEFICIARIES: "Beneficiaries",
   DISTRIBUTIONS: "Distributions",
   RECONCILIATION: "Reconciliation",
-  INQUIRIES: "Inquiries"
+  INQUIRIES: "Inquiries",
+  IT_SUPPORT: "IT Support",
 } as const;
 
 export const ROUTES = {
@@ -61,7 +62,8 @@ export const ROUTES = {
   QPAY066TA_UNDER21: "qpay066ta-under21",
   QPAY066TA: "qpay066ta",
   NEW_PS_LABELS: "new-ps-labels",
-  PROFALL: "profall"
+  PROFALL: "profall",
+  DEMO_FREEZE: "demographic-freeze"
 } as const;
 
 export const CAPTIONS = {
@@ -116,7 +118,8 @@ export const CAPTIONS = {
   TERMINATIONS: "Terminations (QPAY066)",
   VESTED_AMOUNTS_BY_AGE: "Get Vested Amounts by Age (PROF 130V)",
   YTD_WAGES_EXTRACT: "YTD Wages Extract",
-  BREAKDOWN_REPORT: "Breakdown Report (QPAY066TA)"
+  BREAKDOWN_REPORT: "Breakdown Report (QPAY066TA)",
+  DEMOGRAOHIC_FREEZE: "Demographic Freeze"
 } as const;
 
 export const VIEW = "View";
