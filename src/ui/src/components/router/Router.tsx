@@ -155,9 +155,6 @@ const Router = () => {
           path={ROUTES.MILITARY_FORFEITURES}
           element={<MilitaryAndRehireForfeitures />}></Route>
         <Route
-          path={ROUTES.MILITARY_PROFIT_SUMMARY}
-          element={<MilitaryAndRehireProfitSummary />}></Route>
-        <Route
           path={ROUTES.DISTRIBUTIONS_AND_FORFEITURES}
           element={<DistributionsAndForfeitures />}></Route>
         <Route

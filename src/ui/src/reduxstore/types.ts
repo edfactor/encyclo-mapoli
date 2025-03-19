@@ -7,8 +7,7 @@ export enum ImpersonationRoles {
   ProfitSharingAdministrator = "Profit-Sharing-Administrator"
 }
 
-export interface SortedPaginationRequestDto extends PaginationParams, ISortParams {
-}
+export interface SortedPaginationRequestDto extends PaginationParams, ISortParams {}
 
 export interface ProfitYearRequest {
   profitYear: number;
@@ -178,30 +177,6 @@ export interface MilitaryAndRehireForfeiture {
   details: ForfeitureDetail[];
 }
 
-export interface MilitaryAndRehireProfitSummaryRequestDto extends ProfitYearRequest {
-  reportingYear: string;
-  pagination: PaginationParams;
-}
-
-export interface MilitaryAndRehireProfitSummary extends ProfitYearRequest {
-  badgeNumber: number;
-  fullName: string;
-  ssn: string;
-  storeNumber: number;
-  hireDate: string;
-  terminationDate: string;
-  reHiredDate: string;
-  companyContributionYears: number;
-  hoursCurrentYear: number;
-  forfeiture: number;
-  remark: string;
-  enrollmentId: number;
-  netBalanceLastYear: number;
-  vestedBalanceLastYear: number;
-  employmentStatusId: string;
-  profitCodeId: number;
-}
-
 export interface ExecutiveHoursAndDollarsRequestDto extends ProfitYearRequest {
   badgeNumber?: number;
   socialSecurity?: number;
@@ -253,8 +228,8 @@ export interface EligibleEmployee {
   oracleHcmId: number;
   badgeNumber: number;
   fullName: string;
-  departmentId : number;
-  department : string;
+  departmentId: number;
+  department: string;
 }
 
 export interface EligibleEmployeeResponseDto {
@@ -339,7 +314,7 @@ export interface MasterInquiryDetail extends ProfitYearRequest {
   commentTypeName?: string;
 }
 
-export interface MasterInquiryRequest  {
+export interface MasterInquiryRequest {
   startProfitYear?: number;
   endProfitYear?: number;
   startProfitMonth?: number;

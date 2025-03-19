@@ -21,7 +21,6 @@ import {
   ForfeituresByAge,
   FrozenReportsByAgeRequestType,
   MilitaryAndRehireForfeiture,
-  MilitaryAndRehireProfitSummary,
   MissingCommasInPYName,
   NegativeEtvaForSSNsOnPayProfit,
   PagedReportResponse,
@@ -29,7 +28,8 @@ import {
   ProfitShareEditResponse,
   ProfitShareMasterResponse,
   ProfitShareUpdateResponse,
-  ProfitSharingDistributionsByAge, ProfitYearRequest,
+  ProfitSharingDistributionsByAge,
+  ProfitYearRequest,
   TerminationResponse,
   VestedAmountsByAge,
   YearEndProfitSharingReportResponse
@@ -78,7 +78,6 @@ export interface YearsEndState {
   militaryEntryAndModification: EmployeeDetails | null;
   militaryAndRehireForfeitures: PagedReportResponse<MilitaryAndRehireForfeiture> | null;
   militaryAndRehireForfeituresQueryParams: ProfitAndReportingQueryParams | null;
-  militaryAndRehireProfitSummary: PagedReportResponse<MilitaryAndRehireProfitSummary> | null;
   militaryAndRehireProfitSummaryQueryParams: ProfitAndReportingQueryParams | null;
   militaryAndRehireQueryParams: ProfitAndReportingQueryParams | null;
   missingCommaInPYName: PagedReportResponse<MissingCommasInPYName> | null;
@@ -136,7 +135,6 @@ const initialState: YearsEndState = {
   militaryAndRehireQueryParams: null,
   militaryEntryAndModification: null,
   militaryAndRehireForfeitures: null,
-  militaryAndRehireProfitSummary: null,
   militaryAndRehireForfeituresQueryParams: null,
   militaryAndRehireProfitSummaryQueryParams: null,
   missingCommaInPYName: null,
@@ -258,15 +256,6 @@ export const yearsEndSlice = createSlice({
     },
     clearMilitaryAndRehireForfeituresQueryParams: (state) => {
       state.militaryAndRehireForfeituresQueryParams = null;
-    },
-    setMilitaryAndRehireProfitSummaryDetails: (
-      state,
-      action: PayloadAction<PagedReportResponse<MilitaryAndRehireProfitSummary>>
-    ) => {
-      state.militaryAndRehireProfitSummary = action.payload;
-    },
-    clearMilitaryAndRehireProfitSummaryDetails: (state) => {
-      state.militaryAndRehireProfitSummary = null;
     },
     setDistributionsAndForfeitures: (
       state,
@@ -411,7 +400,7 @@ export const yearsEndSlice = createSlice({
     },
     clearEligibleEmployees: (state) => {
       state.eligibleEmployees = null;
-    },    
+    },
     setDistributionsByAge: (state, action: PayloadAction<ProfitSharingDistributionsByAge>) => {
       if (action.payload.reportType == FrozenReportsByAgeRequestType.Total) {
         state.distributionsByAgeTotal = action.payload;
@@ -641,7 +630,6 @@ export const {
   clearForfeituresByAgeQueryParams,
   clearMilitaryAndRehireForfeituresDetails,
   clearMilitaryAndRehireForfeituresQueryParams,
-  clearMilitaryAndRehireProfitSummaryDetails,
   clearMilitaryAndRehireProfitSummaryQueryParams,
   clearMissingCommaInPYName,
   clearNegativeEtvaForSSNsOnPayprofit,
@@ -685,7 +673,6 @@ export const {
   setForfeituresByAgeQueryParams,
   setMilitaryAndRehireForfeituresDetails,
   setMilitaryAndRehireForfeituresQueryParams,
-  setMilitaryAndRehireProfitSummaryDetails,
   setMilitaryAndRehireProfitSummaryQueryParams,
   setMissingCommaInPYName,
   setNegativeEtvaForSSNsOnPayprofit,
