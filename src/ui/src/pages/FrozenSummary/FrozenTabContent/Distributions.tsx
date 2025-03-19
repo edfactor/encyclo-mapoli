@@ -1,5 +1,5 @@
 import Grid2 from "@mui/material/Grid2";
-import DistributionByAgeGrid from "pages/DistributionByAge/DistributionByAgeGrid";
+import DistributionByAgeGrid from "pages/PROF130/DistributionByAge/DistributionByAgeGrid";
 
 export const Distributions = () => {
   return (

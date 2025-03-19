@@ -1,5 +1,5 @@
 import Grid2 from '@mui/material/Grid2';
-import ForfeituresByAgeGrid from "pages/ForfeituresByAge/ForfeituresByAgeGrid";
+import ForfeituresByAgeGrid from "pages/PROF130/ForfeituresByAge/ForfeituresByAgeGrid";
 
 export const Forfeitures = () => {
   return (

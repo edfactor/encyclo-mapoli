@@ -1,20 +1,21 @@
+
 import { agGridNumberToCurrency } from "smart-ui-library";
-import { FrozenReportsByAgeRequestType } from "../../reduxstore/types";
+import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 import { ColDef } from "ag-grid-community";
 
-export interface IForfeitureByAgeGridColumns {
+export interface IContributionByAgeGridColumns {
   headerName: string;
   children?: ColDef[];
 }
 
-export const GetBalanceByYearsColumns = (  reportType: FrozenReportsByAgeRequestType): IForfeitureByAgeGridColumns => {
+export const GetContributionsByAgeColumns = (  reportType: FrozenReportsByAgeRequestType): IContributionByAgeGridColumns => {
   return {
     headerName: reportType,
     children: [
       {
-        headerName: "Years",
-        field: "years",
-        colId: "years",
+        headerName: "Age",
+        field: "age",
+        colId: "age",
         minWidth: 80,
         headerClass: "right-align",
         cellClass: "right-align",
@@ -23,7 +24,7 @@ export const GetBalanceByYearsColumns = (  reportType: FrozenReportsByAgeRequest
         cellDataType: "text"
       },
       {
-        headerName: "Count",
+        headerName: "EMPS",
         field: "employeeCount",
         colId: "employeeCount",
         minWidth: 100,
@@ -32,19 +33,9 @@ export const GetBalanceByYearsColumns = (  reportType: FrozenReportsByAgeRequest
         resizable: true
       },
       {
-        headerName: "Balance",
-        field: "currentBalance",
-        colId: "currentBalance",
-        minWidth: 150,
-        headerClass: "left-align",
-        cellClass: "left-align",
-        resizable: true,
-        valueFormatter: agGridNumberToCurrency
-      },
-      {
-        headerName: "Vested",
-        field: "vestedBalance",
-        colId: "vestedBalance",
+        headerName: "Amount",
+        field: "amount",
+        colId: "amount",
         minWidth: 150,
         headerClass: "left-align",
         cellClass: "left-align",

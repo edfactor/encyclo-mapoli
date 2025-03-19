@@ -1,21 +1,24 @@
-import { FormHelperText, FormLabel, TextField, Button } from "@mui/material";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import { Controller, useForm } from "react-hook-form";
-import { useLazyGetVestingAmountByAgeQuery } from "reduxstore/api/YearsEndApi";
-import { SearchAndReset } from "smart-ui-library";
-import { downloadFileFromResponse } from "utils/fileDownload"; // Import utility function
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
+import { useLazyGetContributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import {
- clearVestedAmountsByAgeQueryParams, setVestedAmountsByAgeQueryParams
+  clearContributionsByAge,
+  clearContributionsByAgeQueryParams,
+  setContributionsByAgeQueryParams
 } from "reduxstore/slices/yearsEndSlice";
-import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
+import { RootState } from "reduxstore/store";
+import { FrozenReportsByAgeRequestType } from "reduxstore/types";
+import { SearchAndReset } from "smart-ui-library";
+import * as yup from "yup";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 
-interface VestingAmountByAgeSearch {
+interface ContributionsByAgeSearch {
   profitYear: number;
+  reportType?: FrozenReportsByAgeRequestType;
 }
 
 const schema = yup.object().shape({
@@ -28,9 +31,9 @@ const schema = yup.object().shape({
     .required("Year is required")
 });
 
-const VestedAmountsByAgeSearchFilter = () => {
-  const [triggerSearch, { isFetching }] = useLazyGetVestingAmountByAgeQuery();
-  const { vestedAmountsByAgeQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+const ContributionsByAgeSearchFilter = () => {
+  const [triggerSearch, { isFetching }] = useLazyGetContributionsByAgeQuery();
+  const { contributionsByAgeQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
   const {
@@ -38,10 +41,11 @@ const VestedAmountsByAgeSearchFilter = () => {
     handleSubmit,
     formState: { errors, isValid },
     reset
-  } = useForm<VestingAmountByAgeSearch>({
+  } = useForm<ContributionsByAgeSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: fiscalCloseProfitYear || vestedAmountsByAgeQueryParams?.profitYear || undefined
+      profitYear: fiscalCloseProfitYear || contributionsByAgeQueryParams?.profitYear || undefined,
+      reportType: undefined
     }
   });
 
@@ -50,35 +54,39 @@ const VestedAmountsByAgeSearchFilter = () => {
       triggerSearch(
         {
           profitYear: fiscalCloseProfitYear,
-          acceptHeader: "application/json"
+          reportType: FrozenReportsByAgeRequestType.Total,
+          pagination: { skip: 0, take: 255 }
         },
         false
       ).unwrap();
-      dispatch(setVestedAmountsByAgeQueryParams(fiscalCloseProfitYear));
+      triggerSearch(
+        {
+          profitYear: fiscalCloseProfitYear,
+          reportType: FrozenReportsByAgeRequestType.FullTime,
+          pagination: { skip: 0, take: 255 }
+        },
+        false
+      ).unwrap();
+      triggerSearch(
+        {
+          profitYear: fiscalCloseProfitYear,
+          reportType: FrozenReportsByAgeRequestType.PartTime,
+          pagination: { skip: 0, take: 255 }
+        },
+        false
+      ).unwrap();
+      dispatch(setContributionsByAgeQueryParams(fiscalCloseProfitYear));
     }
   });
 
   const handleReset = () => {
-    dispatch(clearVestedAmountsByAgeQueryParams());
+    dispatch(clearContributionsByAgeQueryParams());
+    dispatch(clearContributionsByAge());
     reset({
-      profitYear: fiscalCloseProfitYear
+      profitYear: fiscalCloseProfitYear,
+      reportType: undefined
     });
   };
-
-  const handleDownloadCSV = handleSubmit(async (data) => {
-    if (isValid) {
-      try {
-        const fetchPromise = triggerSearch({
-          profitYear: fiscalCloseProfitYear,
-          acceptHeader: "text/csv"
-        });
-        await downloadFileFromResponse(fetchPromise, `vesting-amounts-${data.profitYear}.csv`);
-      } catch (error) {
-        console.error("Download failed:", error);
-        // Do we want to throw a formal Error for the react-error-boundary to catch?
-      }
-    }
-  });
 
   return (
     <form onSubmit={validateAndSearch}>
@@ -86,7 +94,7 @@ const VestedAmountsByAgeSearchFilter = () => {
         container
         paddingX="24px"
         gap="24px">
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }} >
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
           <Controller
             name="profitYear"
             control={control}
@@ -109,25 +117,16 @@ const VestedAmountsByAgeSearchFilter = () => {
       </Grid2>
       <Grid2
         width="100%"
-        paddingX="24px"
-        display="flex"
-        gap="16px">
+        paddingX="24px">
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={validateAndSearch}
           isFetching={isFetching}
           disabled={!isValid}
         />
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleDownloadCSV}
-          disabled={!isValid}>
-          Download CSV
-        </Button>
       </Grid2>
     </form>
   );
 };
 
-export default VestedAmountsByAgeSearchFilter;
+export default ContributionsByAgeSearchFilter;

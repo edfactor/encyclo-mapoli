@@ -5,7 +5,7 @@ import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, TotalsGrid } from "smart-ui-library";
 import { GetBalanceByYearsColumns } from "./BalanceByYearsGridColumns";
 import Grid2 from '@mui/material/Grid2';
-import { FrozenReportsByAgeRequestType } from "../../reduxstore/types";
+import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 import { numberToCurrency } from "smart-ui-library";
 
 const BalanceByYearsGrid = () => {
