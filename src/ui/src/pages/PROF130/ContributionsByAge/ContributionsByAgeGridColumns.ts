@@ -1,6 +1,6 @@
 
 import { agGridNumberToCurrency } from "smart-ui-library";
-import { FrozenReportsByAgeRequestType } from "../../reduxstore/types";
+import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 import { ColDef } from "ag-grid-community";
 
 export interface IContributionByAgeGridColumns {

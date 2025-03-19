@@ -1,5 +1,5 @@
 import Grid2 from '@mui/material/Grid2';
-import ContributionsByAgeGrid from "pages/ContributionsByAge/ContributionsByAgeGrid";
+import ContributionsByAgeGrid from "pages/PROF130/ContributionsByAge/ContributionsByAgeGrid";
 
 export const Contributions = () => {
   return (

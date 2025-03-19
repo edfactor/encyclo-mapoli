@@ -13,7 +13,7 @@ import { RootState } from "reduxstore/store";
 import { FrozenReportsByAgeRequestType } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import DsmDatePicker from "../../components/DsmDatePicker/DsmDatePicker";
+import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 
 interface DistributionByAgeSearch {
   profitYear: number;
