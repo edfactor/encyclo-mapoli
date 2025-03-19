@@ -1,55 +1,49 @@
-import { Button, Divider, Stack, Typography } from "@mui/material";
+import { Button, Divider, MenuItem, Select, SelectChangeEvent, Stack, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import DSMCollapsedAccordion from "components/DSMCollapsedAccordion";
 import DuplicateNamesAndBirthdaysGrid from "pages/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdaysGrid";
 import DuplicateSSNsOnDemographicsGrid from "pages/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographicsGrid";
-import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router";
-import {
-  useLazyGetDemographicBadgesNotInPayprofitQuery,
-  useLazyGetDuplicateNamesAndBirthdaysQuery,
-  useLazyGetDuplicateSSNsQuery,
-  useLazyGetNegativeEVTASSNQuery
-} from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { Page } from "smart-ui-library";
 import { MENU_LABELS } from "../../constants";
 import NegativeETVA from "./NegativeETVA";
+import { setSelectedProfitYearForDecemberActivities } from "reduxstore/slices/yearsEndSlice";
 
 const DecemberProcessAccordion = () => {
-  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
-  const [triggerETVASearch, { isFetching: isFetchingETVA }] = useLazyGetNegativeEVTASSNQuery();
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
-  const [triggerPayrollDupeSsnsOnDemographics, { isFetching: isFetchingPayRollDupeSsns }] =
-    useLazyGetDuplicateSSNsQuery();
-  const [triggerDemographicBadgesNotInPayprofit, { isFetching: isfetchingDemographicBadges }] =
-    useLazyGetDemographicBadgesNotInPayprofitQuery();
-  const [triggerDuplicateNamesAndBirthdays, { isFetching: isFetchingDuplicateNames }] =
-    useLazyGetDuplicateNamesAndBirthdaysQuery();
-
-  const { negativeEtvaForSSNsOnPayprofit, duplicateSSNsData, demographicBadges, duplicateNamesAndBirthdays } =
-    useSelector((state: RootState) => state.yearsEnd);
-
-  const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.yearsEnd);
-
-  useEffect(() => {
-    if (hasToken) {
-      triggerPayrollDupeSsnsOnDemographics({ profitYear: 2023, pagination: { take: 25, skip: 0 } });
-      triggerDemographicBadgesNotInPayprofit({ pagination: { take: 25, skip: 0 } });
-      triggerDuplicateNamesAndBirthdays({ profitYear: 2023, pagination: { take: 25, skip: 0 } });
-    }
-  }, [
-    hasToken,
-    triggerDemographicBadgesNotInPayprofit,
-    triggerDuplicateNamesAndBirthdays,
-    triggerPayrollDupeSsnsOnDemographics
-  ]);
-
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { selectedProfitYearForDecemberActivities } = useSelector((state: RootState) => state.yearsEnd);
+
+  const ProfitYearSelector = () => {
+    const handleChange = (event: SelectChangeEvent) => {
+      dispatch(setSelectedProfitYearForDecemberActivities(Number(event.target.value)));
+    };
+
+    return (
+      <div className="flex items-center gap-2 h-10 min-w-[174px]">
+        <Select
+          labelId="demo-simple-select-label"
+          id="demo-simple-select"
+          defaultValue="2024"
+          value={selectedProfitYearForDecemberActivities.toString()}
+          size="small"
+          fullWidth
+          onChange={handleChange}
+        >
+          <MenuItem value={2024}>2024</MenuItem>
+          <MenuItem value={2025}>2025</MenuItem>
+          <MenuItem value={2026}>2026</MenuItem>
+        </Select>
+        </div>
+    );
+  }
 
   return (
-    <Page label={MENU_LABELS.DECEMBER_ACTIVITIES}>
+    <Page label={MENU_LABELS.DECEMBER_ACTIVITIES} actionNode={<ProfitYearSelector />}>
       <Grid2 container>
         <Grid2
           size={{ xs: 12 }}
@@ -120,7 +114,7 @@ const DecemberProcessAccordion = () => {
               label: "Not Started",
               color: "secondary"
             }}
-            onActionClick={() => navigate("/military-and-rehire")}
+            onActionClick={() => navigate("/military-and-rehire-forfeitures")}
             actionButtonText="START">
             <></>
           </DSMCollapsedAccordion>

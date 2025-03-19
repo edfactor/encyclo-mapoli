@@ -11,6 +11,8 @@ import {
 } from "reduxstore/slices/yearsEndSlice";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import { RootState } from "reduxstore/store";
+import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 
 interface NegativeEtvaForSSNsOnPayprofitSearch {
   profitYear: number;
@@ -35,6 +37,7 @@ const NegativeEtvaForSSNsOnPayprofitSearchFilter: React.FC<NegativeEtvaForSSNsOn
 }) => {
   const [triggerSearch, { isFetching }] = useLazyGetNegativeEVTASSNQuery();
   const { negativeEtvaForSSNsOnPayprofitParams } = useSelector((state: RootState) => state.yearsEnd);
+  const profitYear = useDecemberFlowProfitYear();
   const dispatch = useDispatch();
   const {
     control,
@@ -45,7 +48,7 @@ const NegativeEtvaForSSNsOnPayprofitSearchFilter: React.FC<NegativeEtvaForSSNsOn
   } = useForm<NegativeEtvaForSSNsOnPayprofitSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: negativeEtvaForSSNsOnPayprofitParams?.profitYear || undefined
+      profitYear: profitYear || negativeEtvaForSSNsOnPayprofitParams?.profitYear || undefined
     }
   });
 
@@ -92,6 +95,7 @@ const NegativeEtvaForSSNsOnPayprofitSearchFilter: React.FC<NegativeEtvaForSSNsOn
                   field.onChange(e);
                 }}
                 type="number"
+                disabled={true}
               />
             )}
           />
