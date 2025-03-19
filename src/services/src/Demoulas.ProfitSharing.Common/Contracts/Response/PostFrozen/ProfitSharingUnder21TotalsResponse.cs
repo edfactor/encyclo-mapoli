@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen
 {
-    public sealed class ProfitSharingUnder21TotalsResponse
+    public sealed record ProfitSharingUnder21TotalsResponse
     {
         public int NumberOfEmployees { get; set; }
         public int NumberOfActiveUnder21With1to2Years { get; set; }
