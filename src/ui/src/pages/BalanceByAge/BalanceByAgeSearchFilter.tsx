@@ -13,6 +13,7 @@ import { FrozenReportsByAgeRequestType } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { RootState } from "reduxstore/store";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 
 interface BalanceByAgeSearch {
   profitYear: number;
@@ -32,7 +33,7 @@ const schema = yup.object().shape({
 const BalanceByAgeSearchFilter = () => {
   const [triggerSearch, { isFetching }] = useLazyGetBalanceByAgeQuery();
   const { balanceByAgeQueryParams } = useSelector((state: RootState) => state.yearsEnd);
-
+  const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
 
   const {
@@ -43,7 +44,7 @@ const BalanceByAgeSearchFilter = () => {
   } = useForm<BalanceByAgeSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: balanceByAgeQueryParams?.profitYear || undefined,
+      profitYear: fiscalCloseProfitYear || balanceByAgeQueryParams?.profitYear || undefined,
       reportType: undefined
     }
   });
@@ -52,7 +53,7 @@ const BalanceByAgeSearchFilter = () => {
     if (isValid) {
       triggerSearch(
         {
-          profitYear: data.profitYear,
+          profitYear: fiscalCloseProfitYear,
           reportType: FrozenReportsByAgeRequestType.Total,
           pagination: { skip: 0, take: 255 }
         },
@@ -60,7 +61,7 @@ const BalanceByAgeSearchFilter = () => {
       ).unwrap();
       triggerSearch(
         {
-          profitYear: data.profitYear,
+          profitYear: fiscalCloseProfitYear,
           reportType: FrozenReportsByAgeRequestType.FullTime,
           pagination: { skip: 0, take: 255 }
         },
@@ -68,13 +69,13 @@ const BalanceByAgeSearchFilter = () => {
       ).unwrap();
       triggerSearch(
         {
-          profitYear: data.profitYear,
+          profitYear: fiscalCloseProfitYear,
           reportType: FrozenReportsByAgeRequestType.PartTime,
           pagination: { skip: 0, take: 255 }
         },
         false
       ).unwrap();
-      dispatch(setBalanceByAgeQueryParams(data.profitYear));
+      dispatch(setBalanceByAgeQueryParams(fiscalCloseProfitYear));
     }
   });
 
@@ -82,7 +83,7 @@ const BalanceByAgeSearchFilter = () => {
     dispatch(clearBalanceByAgeQueryParams());
     dispatch(clearBalanceByAge());
     reset({
-      profitYear: undefined,
+      profitYear: fiscalCloseProfitYear,
       reportType: undefined
     });
   };
@@ -108,6 +109,7 @@ const BalanceByAgeSearchFilter = () => {
                   field.onChange(e);
                 }}
                 type="number"
+                disabled={true}
               />
             )}
           />

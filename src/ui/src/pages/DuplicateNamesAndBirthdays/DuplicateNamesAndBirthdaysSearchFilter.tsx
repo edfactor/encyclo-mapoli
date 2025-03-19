@@ -12,6 +12,7 @@ import {
 import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 
 interface DuplicateNamesAndBirthdaysSearch {
   profitYear: number;
@@ -36,6 +37,7 @@ const DuplicateNamesAndBirthdaysSearchFilter: React.FC<DuplicateNamesAndBirthday
 }) => {
   const [triggerSearch, { isFetching }] = useLazyGetDuplicateNamesAndBirthdaysQuery();
   const { duplicateNamesAndBirthdaysQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const profitYear = useDecemberFlowProfitYear();
   const dispatch = useDispatch();
   const {
     control,
@@ -46,7 +48,7 @@ const DuplicateNamesAndBirthdaysSearchFilter: React.FC<DuplicateNamesAndBirthday
   } = useForm<DuplicateNamesAndBirthdaysSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: duplicateNamesAndBirthdaysQueryParams?.profitYear || undefined
+      profitYear: profitYear || duplicateNamesAndBirthdaysQueryParams?.profitYear || undefined
     }
   });
 
@@ -93,6 +95,7 @@ const DuplicateNamesAndBirthdaysSearchFilter: React.FC<DuplicateNamesAndBirthday
                   field.onChange(e);
                 }}
                 type="number"
+                disabled={true}
               />
             )}
           />

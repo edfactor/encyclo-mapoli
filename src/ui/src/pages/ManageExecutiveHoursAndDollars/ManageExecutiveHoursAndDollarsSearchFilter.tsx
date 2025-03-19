@@ -17,6 +17,7 @@ import {
   setExecutiveHoursAndDollarsGridYear,
   setExecutiveHoursAndDollarsQueryParams
 } from "reduxstore/slices/yearsEndSlice";
+import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 
 interface ExecutiveHoursAndDollarsSearch {
   profitYear: number;
@@ -66,6 +67,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
   setInitialSearchLoaded
 }) => {
   const { executiveHoursAndDollarsQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const profitYear = useDecemberFlowProfitYear();
 
   const [triggerSearch, { isFetching }] = useLazyGetExecutiveHoursAndDollarsQuery();
   const [triggerModalSearch, { isFetching: isModalFetching }] = useLazyGetAdditionalExecutivesQuery();
@@ -82,7 +84,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
   } = useForm<ExecutiveHoursAndDollarsSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: executiveHoursAndDollarsQueryParams?.profitYear ?? undefined,
+      profitYear: profitYear || (executiveHoursAndDollarsQueryParams?.profitYear ?? undefined),
       badgeNumber:
         executiveHoursAndDollarsQueryParams?.badgeNumber && executiveHoursAndDollarsQueryParams.badgeNumber !== 0
           ? executiveHoursAndDollarsQueryParams.badgeNumber
@@ -190,6 +192,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
                       field.onChange(e);
                     }}
                     type="number"
+                    disabled={true}
                   />
                 )}
               />
