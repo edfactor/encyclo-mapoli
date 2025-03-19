@@ -13,6 +13,7 @@ import { RootState } from "reduxstore/store";
 import { YearEndProfitSharingReportRequest } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 
 interface ProfitShareReportSearch {
   profitYear: number;
@@ -35,6 +36,7 @@ interface ProfitShareReportSearchFilterProps {
 const ProfitShareReportSearchFilter: React.FC<ProfitShareReportSearchFilterProps> = ({ setInitialSearchLoaded }) => {
   const [triggerSearch, { isFetching }] = useLazyGetYearEndProfitSharingReportQuery();
   const { yearEndProfitSharingReportQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const profitYear = useDecemberFlowProfitYear();
   const dispatch = useDispatch();
   const {
     control,
@@ -45,7 +47,7 @@ const ProfitShareReportSearchFilter: React.FC<ProfitShareReportSearchFilterProps
   } = useForm<ProfitShareReportSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: yearEndProfitSharingReportQueryParams?.profitYear || undefined
+      profitYear: profitYear || yearEndProfitSharingReportQueryParams?.profitYear || undefined
     }
   });
 
@@ -102,6 +104,7 @@ const ProfitShareReportSearchFilter: React.FC<ProfitShareReportSearchFilterProps
                   field.onChange(e);
                 }}
                 slotProps={{ htmlInput: { min: 1975, max: 2075 } }}
+                disabled={true}
               />
             )}
           />

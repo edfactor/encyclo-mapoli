@@ -12,6 +12,7 @@ import {
 import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 
 const digitsOnly: (value: string | undefined) => boolean = (value) => (value ? /^\d+$/.test(value) : false);
 
@@ -43,6 +44,7 @@ const MilitaryAndRehireProfitSummarySearchFilter: React.FC<MilitaryAndRehireProf
 }) => {
   const [triggerSearch, { isFetching }] = useLazyGetMilitaryAndRehireProfitSummaryQuery();
   const { militaryAndRehireProfitSummaryQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const decemberProfitYear = useDecemberFlowProfitYear();
   const dispatch = useDispatch();
   const {
     control,
@@ -53,7 +55,7 @@ const MilitaryAndRehireProfitSummarySearchFilter: React.FC<MilitaryAndRehireProf
   } = useForm<MilitaryAndRehireProfitSummarySearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: militaryAndRehireProfitSummaryQueryParams?.profitYear || undefined,
+      profitYear: decemberProfitYear || militaryAndRehireProfitSummaryQueryParams?.profitYear || undefined,
       reportingYear: militaryAndRehireProfitSummaryQueryParams?.reportingYear || undefined
     }
   });
@@ -63,12 +65,15 @@ const MilitaryAndRehireProfitSummarySearchFilter: React.FC<MilitaryAndRehireProf
       triggerSearch(
         {
           reportingYear: data.reportingYear,
-          profitYear: data.profitYear,
+          profitYear: decemberProfitYear,
           pagination: { skip: 0, take: 25 }
         },
         false
       ).unwrap();
-      dispatch(setMilitaryAndRehireProfitSummaryQueryParams(data));
+      dispatch(setMilitaryAndRehireProfitSummaryQueryParams({
+        profitYear: decemberProfitYear,
+        reportingYear: data.reportingYear
+      }));
     }
   });
 
@@ -77,7 +82,7 @@ const MilitaryAndRehireProfitSummarySearchFilter: React.FC<MilitaryAndRehireProf
     dispatch(clearMilitaryAndRehireProfitSummaryDetails());
 
     reset({
-      profitYear: undefined,
+      profitYear: decemberProfitYear,
       reportingYear: undefined
     });
     dispatch(clearMilitaryAndRehireProfitSummaryQueryParams());
@@ -104,6 +109,7 @@ const MilitaryAndRehireProfitSummarySearchFilter: React.FC<MilitaryAndRehireProf
                   field.onChange(e);
                 }}
                 type="number"
+                disabled={true}
               />
             )}
           />

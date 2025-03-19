@@ -14,6 +14,7 @@ import { FrozenReportsByAgeRequestType } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 
 interface DistributionByAgeSearch {
   profitYear: number;
@@ -34,6 +35,7 @@ const DistributionByAgeSearchFilter = () => {
   const [triggerSearch, { isFetching }] = useLazyGetDistributionsByAgeQuery();
   const dispatch = useDispatch();
   const { distributionsByAgeQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const fiscalCloseProfitYear = useFiscalCloseProfitYear();
 
   const {
     control,
@@ -43,7 +45,7 @@ const DistributionByAgeSearchFilter = () => {
   } = useForm<DistributionByAgeSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: distributionsByAgeQueryParams?.profitYear || undefined,
+      profitYear: fiscalCloseProfitYear || distributionsByAgeQueryParams?.profitYear || undefined,
       reportType: undefined
     }
   });
@@ -52,7 +54,7 @@ const DistributionByAgeSearchFilter = () => {
     if (isValid) {
       triggerSearch(
         {
-          profitYear: data.profitYear,
+          profitYear: fiscalCloseProfitYear,
           reportType: FrozenReportsByAgeRequestType.Total,
           pagination: { skip: 0, take: 255 }
         },
@@ -60,7 +62,7 @@ const DistributionByAgeSearchFilter = () => {
       ).unwrap();
       triggerSearch(
         {
-          profitYear: data.profitYear,
+          profitYear: fiscalCloseProfitYear,
           reportType: FrozenReportsByAgeRequestType.FullTime,
           pagination: { skip: 0, take: 255 }
         },
@@ -68,13 +70,13 @@ const DistributionByAgeSearchFilter = () => {
       ).unwrap();
       triggerSearch(
         {
-          profitYear: data.profitYear,
+          profitYear: fiscalCloseProfitYear,
           reportType: FrozenReportsByAgeRequestType.PartTime,
           pagination: { skip: 0, take: 255 }
         },
         false
       ).unwrap();
-      dispatch(setDistributionsByAgeQueryParams(data.profitYear));
+      dispatch(setDistributionsByAgeQueryParams(fiscalCloseProfitYear));
     }
   });
 
@@ -82,7 +84,7 @@ const DistributionByAgeSearchFilter = () => {
     dispatch(clearDistributionsByAge());
     dispatch(clearDistributionsByAgeQueryParams());
     reset({
-      profitYear: undefined,
+      profitYear: fiscalCloseProfitYear,
       reportType: undefined
     });
   };
@@ -107,6 +109,7 @@ const DistributionByAgeSearchFilter = () => {
                 disableFuture
                 views={["year"]}
                 error={errors.profitYear?.message}
+                disabled={true}
               />
             )}
           />

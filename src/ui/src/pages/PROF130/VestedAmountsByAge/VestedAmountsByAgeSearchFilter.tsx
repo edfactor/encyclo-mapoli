@@ -7,6 +7,10 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
+import {
+ clearVestedAmountsByAgeQueryParams, setVestedAmountsByAgeQueryParams
+} from "reduxstore/slices/yearsEndSlice";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { clearVestedAmountsByAgeQueryParams, setVestedAmountsByAgeQueryParams } from "reduxstore/slices/yearsEndSlice";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 
@@ -27,6 +31,7 @@ const schema = yup.object().shape({
 const VestedAmountsByAgeSearchFilter = () => {
   const [triggerSearch, { isFetching }] = useLazyGetVestingAmountByAgeQuery();
   const { vestedAmountsByAgeQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
   const {
     control,
@@ -36,7 +41,7 @@ const VestedAmountsByAgeSearchFilter = () => {
   } = useForm<VestingAmountByAgeSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: vestedAmountsByAgeQueryParams?.profitYear || undefined
+      profitYear: fiscalCloseProfitYear || vestedAmountsByAgeQueryParams?.profitYear || undefined
     }
   });
 
@@ -44,19 +49,19 @@ const VestedAmountsByAgeSearchFilter = () => {
     if (isValid) {
       triggerSearch(
         {
-          profitYear: data.profitYear,
+          profitYear: fiscalCloseProfitYear,
           acceptHeader: "application/json"
         },
         false
       ).unwrap();
-      dispatch(setVestedAmountsByAgeQueryParams(data.profitYear));
+      dispatch(setVestedAmountsByAgeQueryParams(fiscalCloseProfitYear));
     }
   });
 
   const handleReset = () => {
     dispatch(clearVestedAmountsByAgeQueryParams());
     reset({
-      profitYear: undefined
+      profitYear: fiscalCloseProfitYear
     });
   };
 
@@ -66,13 +71,13 @@ const VestedAmountsByAgeSearchFilter = () => {
         container
         paddingX="24px"
         gap="24px">
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }} >
           <Controller
             name="profitYear"
             control={control}
             render={({ field }) => (
               <DsmDatePicker
-                id="Beginning Year"
+                id="profitYear"
                 onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
                 value={field.value ? new Date(field.value, 0) : null}
                 required={true}
@@ -80,6 +85,7 @@ const VestedAmountsByAgeSearchFilter = () => {
                 disableFuture
                 views={["year"]}
                 error={errors.profitYear?.message}
+                disabled={true}
               />
             )}
           />

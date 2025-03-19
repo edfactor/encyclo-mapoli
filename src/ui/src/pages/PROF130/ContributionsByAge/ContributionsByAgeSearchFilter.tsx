@@ -13,6 +13,7 @@ import { RootState } from "reduxstore/store";
 import { FrozenReportsByAgeRequestType } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 
 interface ContributionsByAgeSearch {
   profitYear: number;
@@ -32,6 +33,7 @@ const schema = yup.object().shape({
 const ContributionsByAgeSearchFilter = () => {
   const [triggerSearch, { isFetching }] = useLazyGetContributionsByAgeQuery();
   const { contributionsByAgeQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
   const {
     control,
@@ -41,7 +43,7 @@ const ContributionsByAgeSearchFilter = () => {
   } = useForm<ContributionsByAgeSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: contributionsByAgeQueryParams?.profitYear || undefined,
+      profitYear: fiscalCloseProfitYear || contributionsByAgeQueryParams?.profitYear || undefined,
       reportType: undefined
     }
   });
@@ -50,7 +52,7 @@ const ContributionsByAgeSearchFilter = () => {
     if (isValid) {
       triggerSearch(
         {
-          profitYear: data.profitYear,
+          profitYear: fiscalCloseProfitYear,
           reportType: FrozenReportsByAgeRequestType.Total,
           pagination: { skip: 0, take: 255 }
         },
@@ -58,7 +60,7 @@ const ContributionsByAgeSearchFilter = () => {
       ).unwrap();
       triggerSearch(
         {
-          profitYear: data.profitYear,
+          profitYear: fiscalCloseProfitYear,
           reportType: FrozenReportsByAgeRequestType.FullTime,
           pagination: { skip: 0, take: 255 }
         },
@@ -66,13 +68,13 @@ const ContributionsByAgeSearchFilter = () => {
       ).unwrap();
       triggerSearch(
         {
-          profitYear: data.profitYear,
+          profitYear: fiscalCloseProfitYear,
           reportType: FrozenReportsByAgeRequestType.PartTime,
           pagination: { skip: 0, take: 255 }
         },
         false
       ).unwrap();
-      dispatch(setContributionsByAgeQueryParams(data.profitYear));
+      dispatch(setContributionsByAgeQueryParams(fiscalCloseProfitYear));
     }
   });
 
@@ -80,7 +82,7 @@ const ContributionsByAgeSearchFilter = () => {
     dispatch(clearContributionsByAgeQueryParams());
     dispatch(clearContributionsByAge());
     reset({
-      profitYear: undefined,
+      profitYear: fiscalCloseProfitYear,
       reportType: undefined
     });
   };
@@ -106,6 +108,7 @@ const ContributionsByAgeSearchFilter = () => {
                   field.onChange(e);
                 }}
                 type="number"
+                disabled={true}
               />
             )}
           />

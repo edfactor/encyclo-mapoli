@@ -12,6 +12,7 @@ import {
 import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 
 interface EligibleEmployeesSearch {
   profitYear: number;
@@ -34,6 +35,7 @@ interface EligibleEmployeesSearchFilterProps {
 const EligibleEmployeesSearchFilter: React.FC<EligibleEmployeesSearchFilterProps> = ({ setInitialSearchLoaded }) => {
   // Need to see if we have saved query params
   const { eligibleEmployeesQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const fiscalCloseProfitYear = useFiscalCloseProfitYear();
 
   const [triggerSearch, { isFetching }] = useLazyGetEligibleEmployeesQuery();
   const dispatch = useDispatch();
@@ -46,7 +48,7 @@ const EligibleEmployeesSearchFilter: React.FC<EligibleEmployeesSearchFilterProps
   } = useForm<EligibleEmployeesSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: eligibleEmployeesQueryParams?.profitYear || undefined
+      profitYear: fiscalCloseProfitYear || eligibleEmployeesQueryParams?.profitYear || undefined
     }
   });
 
@@ -54,12 +56,12 @@ const EligibleEmployeesSearchFilter: React.FC<EligibleEmployeesSearchFilterProps
     if (isValid) {
       triggerSearch(
         {
-          profitYear: data.profitYear,
-          pagination: { skip: 0, take: 10 }
+          profitYear: fiscalCloseProfitYear,
+          pagination: { skip: 0, take: 25 }
         },
         false
       ).unwrap();
-      dispatch(setEligibleEmployeesQueryParams(data.profitYear));
+      dispatch(setEligibleEmployeesQueryParams(fiscalCloseProfitYear));
     }
   });
 
@@ -68,7 +70,7 @@ const EligibleEmployeesSearchFilter: React.FC<EligibleEmployeesSearchFilterProps
     dispatch(clearEligibleEmployees());
     dispatch(clearEligibleEmployeesQueryParams());
     reset({
-      profitYear: undefined
+      profitYear: fiscalCloseProfitYear
     });
   };
 
@@ -93,6 +95,7 @@ const EligibleEmployeesSearchFilter: React.FC<EligibleEmployeesSearchFilterProps
                   field.onChange(e);
                 }}
                 type="number"
+                disabled={true}
               />
             )}
           />
