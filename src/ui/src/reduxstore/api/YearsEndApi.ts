@@ -20,7 +20,6 @@ import {
   setForfeituresAndPoints,
   setForfeituresByAge,
   setMilitaryAndRehireForfeituresDetails,
-  setMilitaryAndRehireProfitSummaryDetails,
   setMissingCommaInPYName,
   setNegativeEtvaForSSNsOnPayprofit,
   setProfitEdit,
@@ -58,8 +57,6 @@ import {
   FrozenReportsForfeituresAndPointsRequest,
   MilitaryAndRehireForfeiture,
   MilitaryAndRehireForfeituresRequestDto,
-  MilitaryAndRehireProfitSummary,
-  MilitaryAndRehireProfitSummaryRequestDto,
   MissingCommasInPYName,
   MissingCommasInPYNameRequestDto,
   NegativeEtvaForSSNsOnPayProfit,
@@ -233,28 +230,6 @@ export const YearsEndApi = createApi({
         try {
           const { data } = await queryFulfilled;
           dispatch(setMilitaryAndRehireForfeituresDetails(data));
-        } catch (err) {
-          console.log("Err: " + err);
-        }
-      }
-    }),
-    getMilitaryAndRehireProfitSummary: builder.query<
-      PagedReportResponse<MilitaryAndRehireProfitSummary>,
-      MilitaryAndRehireProfitSummaryRequestDto
-    >({
-      query: (params) => ({
-        url: `yearend/military-and-rehire-profit-summary/${params.reportingYear}`,
-        method: "GET",
-        params: {
-          profitYear: params.profitYear,
-          take: params.pagination.take,
-          skip: params.pagination.skip
-        }
-      }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-          dispatch(setMilitaryAndRehireProfitSummaryDetails(data));
         } catch (err) {
           console.log("Err: " + err);
         }
@@ -701,7 +676,6 @@ export const {
   useLazyGetMasterApplyQuery,
   useLazyGetMasterRevertQuery,
   useLazyGetMilitaryAndRehireForfeituresQuery,
-  useLazyGetMilitaryAndRehireProfitSummaryQuery,
   useLazyGetNamesMissingCommasQuery,
   useLazyGetNegativeEVTASSNQuery,
   useLazyGetProfitShareEditQuery,
