@@ -7,8 +7,8 @@ export const GetVestedAmountsByAgeColumns = (countColName: string, amountColName
       headerName: "Age",
       field: "age",
       minWidth: 80,
-      headerClass: "left-align",
-      cellClass: "left-align",
+      headerClass: "right-align",
+      cellClass: "right-align",
       resizable: true,
       sort: "asc",
       cellDataType: "text"
@@ -18,8 +18,8 @@ export const GetVestedAmountsByAgeColumns = (countColName: string, amountColName
       field: countColName,
       colId: countColName,
       minWidth: 120,
-      headerClass: "left-align",
-      cellClass: "left-align",
+      headerClass: "right-align",
+      cellClass: "right-align",
       resizable: true
     },
     {
