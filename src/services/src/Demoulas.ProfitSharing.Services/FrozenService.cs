@@ -129,7 +129,8 @@ public class FrozenService: IFrozenService
                 ProfitYear = f.ProfitYear,
                 FrozenBy = f.FrozenBy,
                 AsOfDateTime = f.AsOfDateTime,
-                IsActive = f.IsActive
+                IsActive = f.IsActive,
+                CreatedDateTime = f.CreatedDateTime
             }).ToPaginationResultsAsync(request, cancellationToken);
         });
     }
@@ -145,7 +146,8 @@ public class FrozenService: IFrozenService
                 ProfitYear = f.ProfitYear,
                 FrozenBy = f.FrozenBy,
                 AsOfDateTime = f.AsOfDateTime,
-                IsActive = f.IsActive
+                IsActive = f.IsActive,
+                CreatedDateTime = f.CreatedDateTime
             }).FirstOrDefaultAsync(cancellationToken);
             
             return frozen ?? new FrozenStateResponse { ProfitYear = (short)DateTime.Today.Year, AsOfDateTime = DateTime.Now, IsActive = false};

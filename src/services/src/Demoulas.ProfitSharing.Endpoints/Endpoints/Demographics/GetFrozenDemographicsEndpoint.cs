@@ -36,7 +36,7 @@ public class GetFrozenDemographicsEndpoint : Endpoint<SortedPaginationRequestDto
                                 ProfitYear = Convert.ToInt16(DateTime.Now.Year),
                                 FrozenBy = "Somebody",
                                 AsOfDateTime = DateTime.Today,
-                                IsActive = false
+                                IsActive = false,
                             }
                         }
                     }

@@ -26,7 +26,13 @@ internal sealed class FrozenStateMap : IEntityTypeConfiguration<FrozenState>
 
         _ = builder.Property(x => x.AsOfDateTime)
             .HasColumnName("AS_OF_DATETIME")
+            .HasColumnType("DATE")
             .IsRequired();
+
+        _ = builder.Property(x => x.CreatedDateTime)
+            .HasColumnName("CREATED_DATETIME")
+            .HasColumnType("DATE")
+            .HasDefaultValueSql("SYSDATE");
 
         _ = builder.Property(x => x.IsActive)
             .HasColumnName("IS_ACTIVE");

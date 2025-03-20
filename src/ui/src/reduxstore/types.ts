@@ -666,6 +666,7 @@ export interface FrozenStateResponse {
   profitYear: number;
   frozenBy: string;
   asOfDateTime: string;
+  createdDateTime: string;
   isActive: boolean;
 }
 

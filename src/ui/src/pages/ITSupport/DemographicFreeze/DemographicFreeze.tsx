@@ -8,7 +8,7 @@ import { useState } from "react";
 const DemographicFreeze = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   return (
-    <Page label="Demographic Freeze">
+    <Page label="IT Commands - Demographic Freeze">
       <Grid2
         container
         rowSpacing="24px">

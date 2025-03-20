@@ -51,7 +51,7 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
       triggerSearch({
         skip: 0,
         take: 25,
-        sortBy: undefined,
+        sortBy: "createdDateTime",
         isSortDescending: false
       });
     }

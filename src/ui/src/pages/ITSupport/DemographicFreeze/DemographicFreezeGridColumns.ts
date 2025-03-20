@@ -25,6 +25,15 @@ export const GetFreezeColumns = (): ColDef[] => {
       valueFormatter: (params) => (params.value ? yyyyMMDDToMMDDYYYY(params.value) : "")
     },
     {
+      headerName: "IsActive Freeze",
+      field: "isActive",
+      colId: "isActive",
+      minWidth: 100,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true      
+    },
+    {
       headerName: "Frozen By",
       field: "frozenBy",
       colId: "frozenBy",
@@ -34,13 +43,13 @@ export const GetFreezeColumns = (): ColDef[] => {
       resizable: true
     },
     {
-      headerName: "IsActive Freeze",
-      field: "isActive",
-      colId: "isActive",
-      minWidth: 100,
+      headerName: "Created Date/Time",
+      field: "createdDateTime",
+      colId: "createdDateTime",
+      minWidth: 150,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true      
+      resizable: true
     }
   ];
 };
