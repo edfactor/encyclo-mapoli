@@ -110,7 +110,7 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
           display: 'flex',
           flexDirection: 'row',
           flexWrap: 'wrap',
-          alignItems: 'flex-start',
+          alignItems: 'flex-end', // Align items at the bottom for consistent baseline
           paddingX: '24px',
           gap: '24px',
         }}
@@ -166,6 +166,15 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
                 id="asOfTime"
                 label="As Of Time"
                 type="time"
+                size="medium"
+                margin="normal"
+                sx={{
+                  mt: 0,  // Remove top margin
+                  mb: 0,  // Remove bottom margin
+                  '& .MuiInputBase-root': {
+                    height: '56px',  // Match the height of DsmDatePicker
+                  }
+                }}
                 InputLabelProps={{
                   shrink: true,
                 }}
