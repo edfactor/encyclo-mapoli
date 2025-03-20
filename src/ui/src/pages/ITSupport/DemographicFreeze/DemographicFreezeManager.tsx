@@ -1,5 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormHelperText, TextField } from "@mui/material";
+import { FormHelperText, TextField, Box } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
@@ -97,17 +97,26 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
     });
   };
 
+  // Style for making input fields smaller
+  const fieldStyle = {
+    width: '250px',  // Fixed width for all fields to make them smaller
+    mr: 2,           // Add some right margin between fields
+  };
+
   return (
     <form onSubmit={validateAndSearch}>
-      <Grid2
-        container
-        paddingX="24px"
-        gap="24px"
-        direction="row" // Ensure horizontal layout
-        alignItems="center">
-
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          alignItems: 'flex-start',
+          paddingX: '24px',
+          gap: '24px',
+        }}
+      >
         {/* Profit Year */}
-        <Grid2 size={{ xs: 12, sm: 4, md: 4 }}>
+        <Box sx={fieldStyle}>
           <Controller
             name="profitYear"
             control={control}
@@ -125,10 +134,10 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
             )}
           />
           {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
-        </Grid2>
+        </Box>
 
         {/* As Of Date */}
-        <Grid2 size={{ xs: 12, sm: 4, md: 4 }}>
+        <Box sx={fieldStyle}>
           <Controller
             name="asOfDate"
             control={control}
@@ -145,10 +154,10 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
             )}
           />
           {errors.asOfDate && <FormHelperText error>{errors.asOfDate.message}</FormHelperText>}
-        </Grid2>
+        </Box>
 
         {/* As Of Time */}
-        <Grid2 size={{ xs: 12, sm: 4, md: 4 }}>
+        <Box sx={fieldStyle}>
           <Controller
             name="asOfTime"
             control={control}
@@ -172,16 +181,16 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
               />
             )}
           />
-        </Grid2>
+        </Box>
 
         {/* Search and Reset Buttons */}
-        <Grid2 size={12}>
+        <Box sx={{ mt: 1 }}>
           <SearchAndReset
             onReset={handleReset}
             isSearching={isFetching}
           />
-        </Grid2>
-      </Grid2>
+        </Box>
+      </Box>
     </form>
   );
 };
