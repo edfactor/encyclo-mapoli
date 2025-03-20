@@ -6,7 +6,6 @@ import { useFreezeDemographicsMutation } from "reduxstore/api/FrozenApi";
 import * as yup from "yup";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
-import { format } from "date-fns";
 import Grid2 from "@mui/material/Grid2";
 
 // Update the interface to include new fields
@@ -194,7 +193,7 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
             color="primary"
             disabled={isLoading || !isValid}
           >
-            {isLoading ? "Submitting..." : "Freeze Demographics"}
+            {isLoading ? "Submitting..." : "Create Freeze Point"}
           </Button>
         </Box>
       </Box>

@@ -22,8 +22,12 @@ const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({initialSearchLoaded
   const [triggerSearch] = useLazyGetHistoricalFrozenStateResponseQuery();
 
   const onSearch = useCallback(async () => {
-    await triggerSearch();
-  }, [triggerSearch]);
+    const request = {
+      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: "createdDateTime", isSortDescending: true }
+    };
+
+    await triggerSearch(request, false);
+  }, [pageNumber, pageSize, triggerSearch]);
 
   // First useEffect to trigger the search on initial render
   useEffect(() => {

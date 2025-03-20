@@ -90,7 +90,7 @@ const Router = () => {
                 ImpersonationRoles.DistributionsClerk,
                 ImpersonationRoles.HardshipAdministrator,
                 ImpersonationRoles.ProfitSharingAdministrator,
-                ImpersonationRoles.ItSupport
+                ImpersonationRoles.ItOperations
               ]}
               currentRoles={impersonating ? [impersonating] : []}
               setCurrentRoles={(value: string[]) => {
@@ -108,8 +108,8 @@ const Router = () => {
                   case ImpersonationRoles.ProfitSharingAdministrator:
                     dispatch(setImpersonating(ImpersonationRoles.ProfitSharingAdministrator));
                     break;
-                  case ImpersonationRoles.ItSupport:
-                    dispatch(setImpersonating(ImpersonationRoles.ItSupport));
+                  case ImpersonationRoles.ItOperations:
+                    dispatch(setImpersonating(ImpersonationRoles.ItOperations));
                     break;
                   default:
                     localStorage.removeItem("impersonatingRole");
