@@ -1,12 +1,13 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 import { RootState } from "reduxstore/store";
-import { FrozenStateResponse } from "reduxstore/types";
+import { FrozenStateResponse, SortedPaginationRequestDto } from "reduxstore/types";
 import {
     setFrozenStateResponse,
     setFrozenStateCollectionResponse
 } from "reduxstore/slices/frozenSlice";
 import { url } from "./api";
+import { Paged } from "smart-ui-library";
 
 export const FrozenApi = createApi({
     baseQuery: fetchBaseQuery({
@@ -44,10 +45,16 @@ export const FrozenApi = createApi({
                 }
             }
         }),
-        getHistoricalFrozenStateResponse: builder.query<FrozenStateResponse[], void>({
-            query: () => ({
+        getHistoricalFrozenStateResponse: builder.query<Paged<FrozenStateResponse>, SortedPaginationRequestDto>({
+            query: (params) => ({
                 url: `demographics/frozen`,
                 method: "GET",
+                params: {
+                    take: params.take,
+                    skip: params.skip,
+                    sortBy: params.sortBy,
+                    isSortDescending: params.isSortDescending
+                }
             }),
             async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {

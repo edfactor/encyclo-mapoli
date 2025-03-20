@@ -1,9 +1,10 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { FrozenStateResponse } from "reduxstore/types";
+import { Paged } from "smart-ui-library";
 
 export interface FrozenState {
   frozenStateResponseData: FrozenStateResponse | null;
-  frozenStateCollectionData: FrozenStateResponse[] | null;
+  frozenStateCollectionData: Paged<FrozenStateResponse> | null;
   error: string | null;
 }
 
@@ -25,7 +26,7 @@ export const frozenSlice = createSlice({
         state.error = "Failed to fetch frozen state";
       }
     },
-    setFrozenStateCollectionResponse: (state, action: PayloadAction<FrozenStateResponse[] | null>) => {
+    setFrozenStateCollectionResponse: (state, action: PayloadAction<Paged<FrozenStateResponse> | null>) => {
       if (action.payload) {
         state.frozenStateCollectionData = action.payload;
         state.error = null;

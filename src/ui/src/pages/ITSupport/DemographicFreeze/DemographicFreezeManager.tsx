@@ -1,21 +1,16 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormHelperText, FormLabel, TextField } from "@mui/material";
+import { FormHelperText } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { useLazyGetDuplicateNamesAndBirthdaysQuery } from "reduxstore/api/YearsEndApi";
-import {
-  clearDuplicateNamesAndBirthdays,
-  clearDuplicateNamesAndBirthdaysQueryParams,
-  setDuplicateNamesAndBirthdaysQueryParams
-} from "reduxstore/slices/yearsEndSlice";
+import { useLazyGetHistoricalFrozenStateResponseQuery } from "reduxstore/api/FrozenApi";
 import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 
-interface DuplicateNamesAndBirthdaysSearch {
+interface DemographicFreezeSearch {
   profitYear: number;
 }
 
@@ -29,47 +24,41 @@ const schema = yup.object().shape({
     .required("Year is required")
 });
 
-interface DuplicateNamesAndBirthdaysSearchFilterProps {
+interface DemographicFreezeSearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
 }
 
-const DemographicFreezeManager: React.FC<DuplicateNamesAndBirthdaysSearchFilterProps> = ({
-  setInitialSearchLoaded
-}) => {
-  const [triggerSearch, { isFetching }] = useLazyGetDuplicateNamesAndBirthdaysQuery();
-  const { duplicateNamesAndBirthdaysQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = ({
+                                                                                  setInitialSearchLoaded
+                                                                                }) => {
+  const [triggerSearch, { isFetching }] = useLazyGetHistoricalFrozenStateResponseQuery();
   const profitYear = useDecemberFlowProfitYear();
   const dispatch = useDispatch();
   const {
     control,
     handleSubmit,
     formState: { errors, isValid },
-    reset,
-    trigger
-  } = useForm<DuplicateNamesAndBirthdaysSearch>({
+    reset
+  } = useForm<DemographicFreezeSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: profitYear || duplicateNamesAndBirthdaysQueryParams?.profitYear || undefined
+      profitYear: profitYear || undefined
     }
   });
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
-      triggerSearch(
-        {
-          profitYear: data.profitYear,
-          pagination: { skip: 0, take: 25 }
-        },
-        false
-      ).unwrap();
-      dispatch(setDuplicateNamesAndBirthdaysQueryParams(data.profitYear));
+      triggerSearch({
+        skip: 0,
+        take: 25,
+        sortBy: undefined,
+        isSortDescending: false
+      });
     }
   });
 
   const handleReset = () => {
     setInitialSearchLoaded(false);
-    dispatch(clearDuplicateNamesAndBirthdaysQueryParams());
-    dispatch(clearDuplicateNamesAndBirthdays());
     reset({
       profitYear: undefined
     });

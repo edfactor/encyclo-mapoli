@@ -1,11 +1,13 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Demographics;
 
-public class GetFrozenDemographicsEndpoint : EndpointWithoutRequest<List<FrozenStateResponse>>
+public class GetFrozenDemographicsEndpoint : Endpoint<SortedPaginationRequestDto, PaginatedResponseDto<FrozenStateResponse>>
 {
     private readonly IFrozenService _frozenService;
 
@@ -24,9 +26,19 @@ public class GetFrozenDemographicsEndpoint : EndpointWithoutRequest<List<FrozenS
             {
                 {
                     200,
-                    new List<FrozenStateResponse>
+                    new PaginatedResponseDto<FrozenStateResponse>
                     {
-                        new () { Id = 2, ProfitYear = Convert.ToInt16(DateTime.Now.Year), FrozenBy = "Somebody", AsOfDateTime = DateTime.Today, IsActive = false}
+                        Results = new List<FrozenStateResponse>
+                        {
+                            new FrozenStateResponse
+                            {
+                                Id = 2,
+                                ProfitYear = Convert.ToInt16(DateTime.Now.Year),
+                                FrozenBy = "Somebody",
+                                AsOfDateTime = DateTime.Today,
+                                IsActive = false
+                            }
+                        }
                     }
                 }
             };
@@ -34,8 +46,8 @@ public class GetFrozenDemographicsEndpoint : EndpointWithoutRequest<List<FrozenS
         Group<DemographicsGroup>();
     }
 
-    public override Task<List<FrozenStateResponse>> ExecuteAsync(CancellationToken ct)
+    public override Task<PaginatedResponseDto<FrozenStateResponse>> ExecuteAsync(SortedPaginationRequestDto req, CancellationToken ct)
     {
-        return _frozenService.GetFrozenDemographics(ct);
+        return _frozenService.GetFrozenDemographics(req, ct);
     }
 }
