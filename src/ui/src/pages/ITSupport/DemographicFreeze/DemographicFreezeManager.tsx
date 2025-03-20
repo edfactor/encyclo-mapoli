@@ -1,12 +1,13 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormHelperText, TextField, Box } from "@mui/material";
+import { FormHelperText, TextField, Box, Button } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
-import { useLazyGetHistoricalFrozenStateResponseQuery } from "reduxstore/api/FrozenApi";
-import { SearchAndReset } from "smart-ui-library";
+import { useFreezeDemographicsMutation } from "reduxstore/api/FrozenApi";
 import * as yup from "yup";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
+import { format } from "date-fns";
+import Grid2 from "@mui/material/Grid2";
 
 // Update the interface to include new fields
 interface DemographicFreezeSearch {
@@ -55,7 +56,7 @@ interface DemographicFreezeSearchFilterProps {
 const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = ({
                                                                                   setInitialSearchLoaded
                                                                                 }) => {
-  const [triggerSearch, { isFetching }] = useLazyGetHistoricalFrozenStateResponseQuery();
+  const [freezeDemographics, { isLoading }] = useFreezeDemographicsMutation();
   const profitYear = useDecemberFlowProfitYear();
   const dispatch = useDispatch();
 
@@ -73,28 +74,37 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
     }
   });
 
-  const validateAndSearch = handleSubmit((data) => {
+  const onSubmit = handleSubmit(async (data) => {
     if (isValid) {
-      triggerSearch({
-        skip: 0,
-        take: 25,
-        sortBy: "createdDateTime",
-        isSortDescending: false,
-        profitYear: data.profitYear,
-        asOfDate: data.asOfDate,
-        asOfTime: data.asOfTime
-      });
+      try {
+        // Format date and time together into a single ISO string
+        const dateObj = data.asOfDate;
+        const timeStr = data.asOfTime;
+
+        // Create a date with combined date and time components
+        if (dateObj && timeStr) {
+          const [hours, minutes] = timeStr.split(':').map(Number);
+          const combinedDate = new Date(dateObj);
+          combinedDate.setHours(hours, minutes, 0, 0);
+
+          // Format as ISO string with timezone offset
+          // The format should match: "2025-03-19T00:00:00-04:00"
+          const asOfDateTime = combinedDate.toISOString().replace('Z', '-04:00');
+
+          await freezeDemographics({
+            asOfDateTime,
+            profitYear: data.profitYear
+          });
+
+          setInitialSearchLoaded(true);
+          // Could add a success notification here
+        }
+      } catch (error) {
+        console.error("Error freezing demographics:", error);
+        // Could add an error notification here
+      }
     }
   });
-
-  const handleReset = () => {
-    setInitialSearchLoaded(false);
-    reset({
-      profitYear: undefined,
-      asOfDate: null,
-      asOfTime: null
-    });
-  };
 
   // Style for making input fields smaller
   const fieldStyle = {
@@ -103,7 +113,7 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
   };
 
   return (
-    <form onSubmit={validateAndSearch}>
+    <form onSubmit={onSubmit}>
       <Box
         sx={{
           display: 'flex',
@@ -115,7 +125,7 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
         }}
       >
         {/* Profit Year */}
-        <Box sx={fieldStyle}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
           <Controller
             name="profitYear"
             control={control}
@@ -128,14 +138,14 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
                 label="Profit Year"
                 disableFuture
                 views={["year"]}
-                error={errors.profitYear?.message}
+                error={errors.profitYear?.message}                
               />
             )}
           />
           {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
-        </Box>
+        </Grid2>
 
-        {/* As Of Date */}
+        {/* As of Date */}
         <Box sx={fieldStyle}>
           <Controller
             name="asOfDate"
@@ -143,19 +153,18 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
             render={({ field }) => (
               <DsmDatePicker
                 id="asOfDate"
-                onChange={(value: Date | null) => field.onChange(value)}
+                onChange={(date) => field.onChange(date)}
                 value={field.value}
                 required={true}
-                label="As Of Date"
-                disableFuture
-                error={errors.asOfDate?.message}
+                label="As of Date"
+                error={!!errors.asOfDate}
+                helperText={errors.asOfDate?.message}
               />
             )}
           />
-          {errors.asOfDate && <FormHelperText error>{errors.asOfDate.message}</FormHelperText>}
         </Box>
 
-        {/* As Of Time */}
+        {/* As of Time */}
         <Box sx={fieldStyle}>
           <Controller
             name="asOfTime"
@@ -163,42 +172,30 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
             render={({ field }) => (
               <TextField
                 id="asOfTime"
-                label="As Of Time"
+                label="As of Time (HH:MM)"
                 type="time"
-                size="medium"
-                sx={{
-                  mt: 0,
-                  mb: 0,
-                  '& .MuiInputBase-root': {
-                    height: '56px',  // Match the height of DsmDatePicker
-                  },
-                  '& .MuiInputLabel-root': {
-                    transform: 'translate(14px, 16px) scale(1)',
-                  },
-                  '& .MuiInputLabel-shrink': {
-                    transform: 'translate(14px, -6px) scale(0.75)',
-                  },
-                  '& input': {
-                    step: '300', // 5-minute steps
-                  }
-                }}
                 required
-                fullWidth
                 onChange={field.onChange}
                 value={field.value || ""}
                 error={!!errors.asOfTime}
-                helperText={errors.asOfTime?.message}
               />
             )}
           />
+          {errors.asOfTime && (
+            <FormHelperText error>{errors.asOfTime.message}</FormHelperText>
+          )}
         </Box>
 
-        {/* Search and Reset Buttons */}
-        <Box sx={{ mt: 1 }}>
-          <SearchAndReset
-            onReset={handleReset}
-            isSearching={isFetching}
-          />
+        {/* Submit Button */}
+        <Box sx={{ mt: 2, mb: 2 }}>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            disabled={isLoading || !isValid}
+          >
+            {isLoading ? "Submitting..." : "Freeze Demographics"}
+          </Button>
         </Box>
       </Box>
     </form>
