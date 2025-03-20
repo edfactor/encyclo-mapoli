@@ -22,12 +22,12 @@ public class GetFrozenDemographicsEndpointTests : ApiTestBase<Program>
         List<FrozenState> frozenDemographics = await MockDbContextFactory.UseReadOnlyContext(c => c.FrozenStates.ToListAsync());
 
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
-        TestResult<List<FrozenStateResponse>> response = await ApiClient.GETAsync<GetFrozenDemographicsEndpoint, List<FrozenStateResponse>>();
+        TestResult<PaginatedResponseDto<FrozenStateResponse>> response = await ApiClient.GETAsync<GetFrozenDemographicsEndpoint, PaginatedResponseDto<FrozenStateResponse>>();
         response.Should().NotBeNull();
 
         // Convert expected/actual values to UTC
         frozenDemographics.ForEach(d => d.AsOfDateTime = d.AsOfDateTime.ToUniversalTime());
-        response.Result.ForEach(r => r.AsOfDateTime = r.AsOfDateTime.ToUniversalTime());
+        ((List<FrozenStateResponse>)response.Result.Results).ForEach(r => r.AsOfDateTime = r.AsOfDateTime.ToUniversalTime());
 
         // Assert
         Assert.Equivalent(frozenDemographics, response.Result);

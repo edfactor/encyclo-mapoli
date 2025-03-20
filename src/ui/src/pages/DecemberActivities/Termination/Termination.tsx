@@ -1,17 +1,19 @@
-import { Button, Divider } from "@mui/material";
-import Grid2 from '@mui/material/Grid2';
-import { DSMAccordion, Page } from "smart-ui-library";
-import DistributionsAndForfeituresSearchFilter from "./DistributionAndForfeituresSearchFilter";
-import DistributionsAndForfeituresGrid from "./DistributionAndForfeituresGrid";
 import StatusDropdown, { ProcessStatus } from "components/StatusDropdown";
-import { useNavigate } from "react-router";
-import { MENU_LABELS } from "../../constants";
 import { useState } from "react";
+import { useNavigate } from "react-router";
+import { DSMAccordion, Page } from "smart-ui-library";
 
-const DistributionsAndForfeitures = () => {
-  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+import { Button, Divider } from "@mui/material";
+import Grid2 from "@mui/material/Grid2";
 
+import { CAPTIONS, MENU_LABELS } from "../../../constants";
+import TerminationGrid from "./TerminationGrid";
+import TerminationSearchFilter from "./TerminationSearchFilter";
+
+const Termination = () => {
   const navigate = useNavigate();
+
+  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
 
   const handleStatusChange = async (newStatus: ProcessStatus) => {
     console.info("Logging new status: ", newStatus);
@@ -33,7 +35,7 @@ const DistributionsAndForfeitures = () => {
 
   return (
     <Page
-      label="Distributions And Forfeitures (QPAY129)"
+      label={CAPTIONS.TERMINATIONS}
       actionNode={renderActionNode()}>
       <Grid2
         container
@@ -43,12 +45,12 @@ const DistributionsAndForfeitures = () => {
         </Grid2>
         <Grid2 width={"100%"}>
           <DSMAccordion title="Filter">
-            <DistributionsAndForfeituresSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
+            <TerminationSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
           </DSMAccordion>
         </Grid2>
 
         <Grid2 width="100%">
-          <DistributionsAndForfeituresGrid
+          <TerminationGrid
             setInitialSearchLoaded={setInitialSearchLoaded}
             initialSearchLoaded={initialSearchLoaded}
           />
@@ -58,4 +60,4 @@ const DistributionsAndForfeitures = () => {
   );
 };
 
-export default DistributionsAndForfeitures;
+export default Termination;

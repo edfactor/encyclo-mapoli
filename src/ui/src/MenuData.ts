@@ -1,7 +1,7 @@
 import { RouteCategory } from "smart-ui-library/dist/components/MenuBar/MenuBar";
 import { MENU_LABELS, ROUTES, CAPTIONS } from "./constants";
 
-const yearEndReports: RouteCategory = {
+const fiscalClose: RouteCategory = {
   menuLabel: MENU_LABELS.FISCAL_CLOSE,
   parentRoute: ROUTES.FISCAL_CLOSE,
   items: [
@@ -39,7 +39,7 @@ const yearEndReports: RouteCategory = {
 
 const decemberFlow: RouteCategory = {
   menuLabel: MENU_LABELS.DECEMBER_ACTIVITIES,
-  parentRoute: "",
+  parentRoute: MENU_LABELS.DECEMBER_ACTIVITIES,
   items: [
     { caption: CAPTIONS.SUMMARY, route: ROUTES.DECEMBER_PROCESS_ACCORDION },
     { caption: CAPTIONS.DEMOGRAPHIC_BADGES, route: ROUTES.DEMOGRAPHIC_BADGES },
@@ -59,35 +59,42 @@ const decemberFlow: RouteCategory = {
 
 const beneficiaries: RouteCategory = {
   menuLabel: MENU_LABELS.BENEFICIARIES,
-  parentRoute: "",
+  parentRoute: MENU_LABELS.BENEFICIARIES,
   items: [{ caption: CAPTIONS.SUMMARY, route: ROUTES.FROZEN_SUMMARY }]
 };
 
 const distributions: RouteCategory = {
   menuLabel: MENU_LABELS.DISTRIBUTIONS,
-  parentRoute: "",
+  parentRoute: MENU_LABELS.DISTRIBUTIONS,
   items: [{ caption: CAPTIONS.SUMMARY, route: ROUTES.FROZEN_SUMMARY }]
 };
 
 const reconciliation: RouteCategory = {
   menuLabel: MENU_LABELS.RECONCILIATION,
-  parentRoute: "",
+  parentRoute: MENU_LABELS.RECONCILIATION,
   items: [{ caption: CAPTIONS.SUMMARY, route: ROUTES.FROZEN_SUMMARY }]
 };
 
-const miscellaneous: RouteCategory = {
+const inquiries: RouteCategory = {
   menuLabel: MENU_LABELS.INQUIRIES,
-  parentRoute: "",
+  parentRoute: MENU_LABELS.INQUIRIES,
   items: [{ caption: CAPTIONS.MASTER_INQUIRY, route: ROUTES.MASTER_INQUIRY }]
 };
 
+const it_support: RouteCategory = {
+  menuLabel: MENU_LABELS.IT_SUPPORT,
+  parentRoute: MENU_LABELS.IT_SUPPORT,
+  items: [{ caption: CAPTIONS.DEMOGRAOHIC_FREEZE, route: ROUTES.DEMO_FREEZE }]
+};
+
 const MenuData: RouteCategory[] = [
-  miscellaneous,
+  inquiries,
   beneficiaries,
   distributions,
   reconciliation,
   decemberFlow,
-  yearEndReports
+  fiscalClose,
+  it_support
 ];
 
 export default MenuData;

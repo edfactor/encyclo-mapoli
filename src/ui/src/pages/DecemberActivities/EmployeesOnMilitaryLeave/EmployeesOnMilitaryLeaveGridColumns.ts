@@ -1,7 +1,7 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
+import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 
-export const GetNegativeEtvaForSSNsOnPayProfitColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
+export const GetMilitaryAndRehireColumns = (): ColDef[] => {
   return [
     {
       headerName: "Badge",
@@ -12,22 +12,22 @@ export const GetNegativeEtvaForSSNsOnPayProfitColumns = (navFunction: (badgeNumb
       cellClass: "right-align",
       resizable: true,
       sortable: true,
-      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, navFunction)
+      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber)
+    },
+    {
+      headerName: "Full Name",
+      field: "fullName",
+      colId: "fullName",
+      minWidth: 150,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true
     },
     {
       headerName: "SSN",
       field: "ssn",
       colId: "ssn",
       minWidth: 120,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
-    {
-      headerName: "ETVA",
-      field: "etvaValue",
-      colId: "etvaValue",
-      minWidth: 150,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true

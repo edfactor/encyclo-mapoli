@@ -1,19 +1,17 @@
-import StatusDropdown, { ProcessStatus } from "components/StatusDropdown";
-import { useState } from "react";
-import { useNavigate } from "react-router";
-import { DSMAccordion, Page } from "smart-ui-library";
-
 import { Button, Divider } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import Grid2 from '@mui/material/Grid2';
+import { DSMAccordion, Page } from "smart-ui-library";
+import DistributionsAndForfeituresSearchFilter from "./DistributionAndForfeituresSearchFilter";
+import DistributionsAndForfeituresGrid from "./DistributionAndForfeituresGrid";
+import StatusDropdown, { ProcessStatus } from "components/StatusDropdown";
+import { useNavigate } from "react-router";
+import { MENU_LABELS } from "../../../constants";
+import { useState } from "react";
 
-import { CAPTIONS, MENU_LABELS } from "../../constants";
-import TerminationGrid from "./TerminationGrid";
-import TerminationSearchFilter from "./TerminationSearchFilter";
-
-const Termination = () => {
-  const navigate = useNavigate();
-
+const DistributionsAndForfeitures = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+
+  const navigate = useNavigate();
 
   const handleStatusChange = async (newStatus: ProcessStatus) => {
     console.info("Logging new status: ", newStatus);
@@ -35,7 +33,7 @@ const Termination = () => {
 
   return (
     <Page
-      label={CAPTIONS.TERMINATIONS}
+      label="Distributions And Forfeitures (QPAY129)"
       actionNode={renderActionNode()}>
       <Grid2
         container
@@ -45,12 +43,12 @@ const Termination = () => {
         </Grid2>
         <Grid2 width={"100%"}>
           <DSMAccordion title="Filter">
-            <TerminationSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
+            <DistributionsAndForfeituresSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
           </DSMAccordion>
         </Grid2>
 
         <Grid2 width="100%">
-          <TerminationGrid
+          <DistributionsAndForfeituresGrid
             setInitialSearchLoaded={setInitialSearchLoaded}
             initialSearchLoaded={initialSearchLoaded}
           />
@@ -60,4 +58,4 @@ const Termination = () => {
   );
 };
 
-export default Termination;
+export default DistributionsAndForfeitures;

@@ -18,7 +18,7 @@ const EmployeesOnMilitaryLeaveSearchFilter: React.FC<EmployeesOnMilitaryLeaveSea
   const search = () => {
     triggerSearch(
       {
-        pagination: { skip: 0, take: 100 }
+        pagination: { skip: 0, take: 25 }
       },
       false
     );

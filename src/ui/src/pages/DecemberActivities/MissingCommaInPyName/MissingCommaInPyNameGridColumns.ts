@@ -1,7 +1,7 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
+import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 
-export const GetMilitaryAndRehireColumns = (): ColDef[] => {
+export const GetMissingCommaInPyNameColumns = (): ColDef[] => {
   return [
     {
       headerName: "Badge",
@@ -11,23 +11,22 @@ export const GetMilitaryAndRehireColumns = (): ColDef[] => {
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
-      sortable: true,
       cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber)
-    },
-    {
-      headerName: "Full Name",
-      field: "fullName",
-      colId: "fullName",
-      minWidth: 150,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
     },
     {
       headerName: "SSN",
       field: "ssn",
       colId: "ssn",
-      minWidth: 120,
+      minWidth: 100,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true
+    },
+    {
+      headerName: "Name",
+      field: "employeeName",
+      colId: "employeeName",
+      minWidth: 150,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true

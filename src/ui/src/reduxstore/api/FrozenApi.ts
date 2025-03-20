@@ -1,18 +1,21 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 import { RootState } from "reduxstore/store";
-import { FrozenStateResponse } from "reduxstore/types";
+import { FrozenStateResponse, SortedPaginationRequestDto, FreezeDemographicsRequest } from "reduxstore/types";
 import {
-    setFrozenStateResponse,   
+    setFrozenStateResponse,
+    setFrozenStateCollectionResponse
 } from "reduxstore/slices/frozenSlice";
 import { url } from "./api";
+import { Paged } from "smart-ui-library";
 
 export const FrozenApi = createApi({
     baseQuery: fetchBaseQuery({
         baseUrl: `${url}/api/`,
         prepareHeaders: (headers, { getState }) => {
-            const token = (getState() as RootState).security.token;
-            const impersonating = (getState() as RootState).security.impersonating;
+            const root = (getState() as RootState);
+            const token = root.security.token;
+            const impersonating = root.security.impersonating;
             if (token) {
                 headers.set("authorization", `Bearer ${token}`);
             }
@@ -41,12 +44,41 @@ export const FrozenApi = createApi({
                     dispatch(setFrozenStateResponse(null)); // Handle API errors
                 }
             }
+        }),
+        getHistoricalFrozenStateResponse: builder.query<Paged<FrozenStateResponse>, SortedPaginationRequestDto>({
+            query: (params) => ({
+                url: `demographics/frozen`,
+                method: "GET",
+                params: {
+                    take: params.take,
+                    skip: params.skip,
+                    sortBy: params.sortBy,
+                    isSortDescending: params.isSortDescending
+                }
+            }),
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+                try {
+                    const { data } = await queryFulfilled;
+                    dispatch(setFrozenStateCollectionResponse(data));
+                } catch (err) {
+                    console.error("Failed to fetch frozen state collection:", err);
+                    dispatch(setFrozenStateCollectionResponse(null)); // Handle API errors
+                }
+            }
+        }),
+        // New POST endpoint for freezing demographics
+        freezeDemographics: builder.mutation<void, FreezeDemographicsRequest>({
+            query: (request) => ({
+                url: 'demographics/freeze',
+                method: 'POST',
+                body: request
+            })
         })
-
     })
 });
 
 export const {
-    useLazyGetFrozenStateResponseQuery, // Fix casing
+    useLazyGetFrozenStateResponseQuery,
+    useLazyGetHistoricalFrozenStateResponseQuery,
+    useFreezeDemographicsMutation // Export the new mutation hook
 } = FrozenApi;
-

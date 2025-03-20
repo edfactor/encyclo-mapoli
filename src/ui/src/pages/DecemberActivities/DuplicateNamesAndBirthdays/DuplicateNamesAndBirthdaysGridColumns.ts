@@ -1,6 +1,6 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { agGridNumberToCurrency, yyyyMMDDToMMDDYYYY } from "smart-ui-library";
-import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
+import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 
 export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
   return [

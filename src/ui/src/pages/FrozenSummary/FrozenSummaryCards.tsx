@@ -191,9 +191,9 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
       (contributionsByAgeTotal.totalEmployees || 0);
 
     const amountsMatch =
-      (contributionsByAgePartTime.distributionTotalAmount || 0) +
-        (contributionsByAgeFullTime.distributionTotalAmount || 0) ===
-      (contributionsByAgeTotal.distributionTotalAmount || 0);
+      (contributionsByAgePartTime.totalAmount || 0) +
+        (contributionsByAgeFullTime.totalAmount || 0) ===
+      (contributionsByAgeTotal.totalAmount || 0);
 
     return employeesMatch && amountsMatch;
   }, [contributionsByAgeTotal, contributionsByAgeFullTime, contributionsByAgePartTime]);
@@ -206,9 +206,9 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
       (forfeituresByAgeTotal.totalEmployees || 0);
 
     const amountsMatch =
-      (forfeituresByAgeFullTime.distributionTotalAmount || 0) +
-        (forfeituresByAgePartTime.distributionTotalAmount || 0) ===
-      (forfeituresByAgeTotal.distributionTotalAmount || 0);
+      (forfeituresByAgeFullTime.totalAmount || 0) +
+        (forfeituresByAgePartTime.totalAmount || 0) ===
+      (forfeituresByAgeTotal.totalAmount || 0);
 
     return employeesMatch && amountsMatch;
   }, [forfeituresByAgeTotal, forfeituresByAgeFullTime, forfeituresByAgePartTime]);
@@ -345,15 +345,15 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
               data={{
                 "CONT TTL Total": {
                   value1: (contributionsByAgeTotal?.totalEmployees || 0).toString(),
-                  value2: numberToCurrency(contributionsByAgeTotal?.distributionTotalAmount || 0)
+                  value2: numberToCurrency(contributionsByAgeTotal?.totalAmount || 0)
                 },
                 "CONT TTL FT": {
                   value1: (contributionsByAgeFullTime?.totalEmployees || 0).toString(),
-                  value2: numberToCurrency(contributionsByAgeFullTime?.distributionTotalAmount || 0)
+                  value2: numberToCurrency(contributionsByAgeFullTime?.totalAmount || 0)
                 },
                 "CONT TTL PT": {
                   value1: (contributionsByAgePartTime?.totalEmployees || 0).toString(),
-                  value2: numberToCurrency(contributionsByAgePartTime?.distributionTotalAmount || 0)
+                  value2: numberToCurrency(contributionsByAgePartTime?.totalAmount || 0)
                 }
               }}
             />
@@ -369,15 +369,15 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
               data={{
                 "FORF TTL Total": {
                   value1: (forfeituresByAgeTotal?.totalEmployees || 0).toString(),
-                  value2: numberToCurrency(forfeituresByAgeTotal?.distributionTotalAmount || 0)
+                  value2: numberToCurrency(forfeituresByAgeTotal?.totalAmount || 0)
                 },
                 "FORF TTL FT": {
                   value1: (forfeituresByAgeFullTime?.totalEmployees || 0).toString(),
-                  value2: numberToCurrency(forfeituresByAgeFullTime?.distributionTotalAmount || 0)
+                  value2: numberToCurrency(forfeituresByAgeFullTime?.totalAmount || 0)
                 },
                 "FORF TTL PT": {
                   value1: (forfeituresByAgePartTime?.totalEmployees || 0).toString(),
-                  value2: numberToCurrency(forfeituresByAgePartTime?.distributionTotalAmount || 0)
+                  value2: numberToCurrency(forfeituresByAgePartTime?.totalAmount || 0)
                 }
               }}
             />

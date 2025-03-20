@@ -1,7 +1,7 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
+import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 
-export const GetMissingCommaInPyNameColumns = (): ColDef[] => {
+export const GetNegativeEtvaForSSNsOnPayProfitColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
     {
       headerName: "Badge",
@@ -11,21 +11,22 @@ export const GetMissingCommaInPyNameColumns = (): ColDef[] => {
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
-      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber)
+      sortable: true,
+      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, navFunction)
     },
     {
       headerName: "SSN",
       field: "ssn",
       colId: "ssn",
-      minWidth: 100,
+      minWidth: 120,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true
     },
     {
-      headerName: "Name",
-      field: "employeeName",
-      colId: "employeeName",
+      headerName: "ETVA",
+      field: "etvaValue",
+      colId: "etvaValue",
       minWidth: 150,
       headerClass: "left-align",
       cellClass: "left-align",

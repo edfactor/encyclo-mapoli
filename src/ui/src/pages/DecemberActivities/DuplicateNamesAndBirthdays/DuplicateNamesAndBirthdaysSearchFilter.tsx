@@ -3,19 +3,19 @@ import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { useLazyGetNegativeEVTASSNQuery } from "reduxstore/api/YearsEndApi";
+import { useLazyGetDuplicateNamesAndBirthdaysQuery } from "reduxstore/api/YearsEndApi";
 import {
-  clearNegativeEtvaForSSNsOnPayprofit,
-  clearNegativeEtvaForSSNsOnPayprofitQueryParams,
-  setNegativeEtvaForSSNsOnPayprofitQueryParams
+  clearDuplicateNamesAndBirthdays,
+  clearDuplicateNamesAndBirthdaysQueryParams,
+  setDuplicateNamesAndBirthdaysQueryParams
 } from "reduxstore/slices/yearsEndSlice";
+import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import { RootState } from "reduxstore/store";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
-import DsmDatePicker from "../../components/DsmDatePicker/DsmDatePicker";
+import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 
-interface NegativeEtvaForSSNsOnPayprofitSearch {
+interface DuplicateNamesAndBirthdaysSearch {
   profitYear: number;
 }
 
@@ -29,15 +29,15 @@ const schema = yup.object().shape({
     .required("Year is required")
 });
 
-interface NegativeEtvaForSSNsOnPayprofitSearchFilterProps {
+interface DuplicateNamesAndBirthdaysSearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
 }
 
-const NegativeEtvaForSSNsOnPayprofitSearchFilter: React.FC<NegativeEtvaForSSNsOnPayprofitSearchFilterProps> = ({
+const DuplicateNamesAndBirthdaysSearchFilter: React.FC<DuplicateNamesAndBirthdaysSearchFilterProps> = ({
   setInitialSearchLoaded
 }) => {
-  const [triggerSearch, { isFetching }] = useLazyGetNegativeEVTASSNQuery();
-  const { negativeEtvaForSSNsOnPayprofitParams } = useSelector((state: RootState) => state.yearsEnd);
+  const [triggerSearch, { isFetching }] = useLazyGetDuplicateNamesAndBirthdaysQuery();
+  const { duplicateNamesAndBirthdaysQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const profitYear = useDecemberFlowProfitYear();
   const dispatch = useDispatch();
   const {
@@ -46,10 +46,10 @@ const NegativeEtvaForSSNsOnPayprofitSearchFilter: React.FC<NegativeEtvaForSSNsOn
     formState: { errors, isValid },
     reset,
     trigger
-  } = useForm<NegativeEtvaForSSNsOnPayprofitSearch>({
+  } = useForm<DuplicateNamesAndBirthdaysSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: profitYear || negativeEtvaForSSNsOnPayprofitParams?.profitYear || undefined
+      profitYear: profitYear || duplicateNamesAndBirthdaysQueryParams?.profitYear || undefined
     }
   });
 
@@ -62,14 +62,14 @@ const NegativeEtvaForSSNsOnPayprofitSearchFilter: React.FC<NegativeEtvaForSSNsOn
         },
         false
       ).unwrap();
-      dispatch(setNegativeEtvaForSSNsOnPayprofitQueryParams(data.profitYear));
+      dispatch(setDuplicateNamesAndBirthdaysQueryParams(data.profitYear));
     }
   });
 
   const handleReset = () => {
     setInitialSearchLoaded(false);
-    dispatch(clearNegativeEtvaForSSNsOnPayprofitQueryParams());
-    dispatch(clearNegativeEtvaForSSNsOnPayprofit());
+    dispatch(clearDuplicateNamesAndBirthdaysQueryParams());
+    dispatch(clearDuplicateNamesAndBirthdays());
     reset({
       profitYear: undefined
     });
@@ -116,4 +116,4 @@ const NegativeEtvaForSSNsOnPayprofitSearchFilter: React.FC<NegativeEtvaForSSNsOn
   );
 };
 
-export default NegativeEtvaForSSNsOnPayprofitSearchFilter;
+export default DuplicateNamesAndBirthdaysSearchFilter;

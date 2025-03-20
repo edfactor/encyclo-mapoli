@@ -1,4 +1,7 @@
-﻿using Demoulas.Common.Contracts.Interfaces;
+﻿using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -107,6 +110,7 @@ public class FrozenService: IFrozenService
     /// <summary>
     /// Retrieves a list of frozen demographic states.
     /// </summary>
+    /// <param name="request"></param>
     /// <param name="cancellationToken">
     /// A <see cref="CancellationToken"/> to observe while waiting for the task to complete.
     /// </param>
@@ -114,7 +118,7 @@ public class FrozenService: IFrozenService
     /// A task that represents the asynchronous operation. The task result contains a list of 
     /// <see cref="FrozenStateResponse"/> objects representing the frozen demographic states.
     /// </returns>
-    public Task<List<FrozenStateResponse>> GetFrozenDemographics(CancellationToken cancellationToken = default)
+    public Task<PaginatedResponseDto<FrozenStateResponse>> GetFrozenDemographics(SortedPaginationRequestDto request, CancellationToken cancellationToken = default)
     {
         return _dataContextFactory.UseReadOnlyContext(ctx =>
         {
@@ -125,8 +129,9 @@ public class FrozenService: IFrozenService
                 ProfitYear = f.ProfitYear,
                 FrozenBy = f.FrozenBy,
                 AsOfDateTime = f.AsOfDateTime,
-                IsActive = f.IsActive
-            }).ToListAsync(cancellationToken);
+                IsActive = f.IsActive,
+                CreatedDateTime = f.CreatedDateTime
+            }).ToPaginationResultsAsync(request, cancellationToken);
         });
     }
 
@@ -141,7 +146,8 @@ public class FrozenService: IFrozenService
                 ProfitYear = f.ProfitYear,
                 FrozenBy = f.FrozenBy,
                 AsOfDateTime = f.AsOfDateTime,
-                IsActive = f.IsActive
+                IsActive = f.IsActive,
+                CreatedDateTime = f.CreatedDateTime
             }).FirstOrDefaultAsync(cancellationToken);
             
             return frozen ?? new FrozenStateResponse { ProfitYear = (short)DateTime.Today.Year, AsOfDateTime = DateTime.Now, IsActive = false};
