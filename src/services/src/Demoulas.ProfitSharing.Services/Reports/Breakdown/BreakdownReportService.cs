@@ -44,7 +44,7 @@ public class BreakdownReportService : IBreakdownService
             // .Where(pp => pp.Demographic!.StoreNumber < 3)
 
             // This branching based on report requested is going to get more complex as more report types are added,
-            // it will likely graduate to a switch statment, or some other more sophistiacated form of dispatch.
+            // it will likely graduate to a switch statement, or some other more sophisticated form of dispatch.
             if (breakdownByStoreRequest.StoreNumber == null)
             {
                 employeesBase = employeesBase.Where(pp => pp.Demographic!.EmploymentStatusId == EmploymentStatus.Constants.Active

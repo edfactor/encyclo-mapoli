@@ -17,7 +17,7 @@ public record ProfitShareEditMemberRecord
     internal bool IsEmployee { get; init; }
     internal int Ssn { get; set; }
     internal int BadgeNumber { get; set; }
-    internal long Psn { get; set; }
+    internal string? Psn { get; set; }
     internal string? Name { get; set; }
     internal byte Code { get; set; }
     internal decimal ContributionAmount { get; set; }
