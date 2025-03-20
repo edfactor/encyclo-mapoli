@@ -670,6 +670,11 @@ export interface FrozenStateResponse {
   isActive: boolean;
 }
 
+interface FreezeDemographicsRequest {
+  asOfDateTime: string;
+  profitYear: number;
+}
+
 export interface ProfallData {
   badge: number;
   employeeName: string;

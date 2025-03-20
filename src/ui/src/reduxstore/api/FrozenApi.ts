@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 import { RootState } from "reduxstore/store";
-import { FrozenStateResponse, SortedPaginationRequestDto } from "reduxstore/types";
+import { FrozenStateResponse, SortedPaginationRequestDto, FreezeDemographicsRequest } from "reduxstore/types";
 import {
     setFrozenStateResponse,
     setFrozenStateCollectionResponse
@@ -65,11 +65,20 @@ export const FrozenApi = createApi({
                     dispatch(setFrozenStateCollectionResponse(null)); // Handle API errors
                 }
             }
+        }),
+        // New POST endpoint for freezing demographics
+        freezeDemographics: builder.mutation<void, FreezeDemographicsRequest>({
+            query: (request) => ({
+                url: 'demographics/freeze',
+                method: 'POST',
+                body: request
+            })
         })
     })
 });
 
 export const {
     useLazyGetFrozenStateResponseQuery,
-    useLazyGetHistoricalFrozenStateResponseQuery    
+    useLazyGetHistoricalFrozenStateResponseQuery,
+    useFreezeDemographicsMutation // Export the new mutation hook
 } = FrozenApi;
