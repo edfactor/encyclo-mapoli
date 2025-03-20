@@ -1,4 +1,5 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate.Formatters;
 using Demoulas.ProfitSharing.Services;
@@ -52,24 +53,6 @@ internal sealed class ProfitShareUpdateReport
         header_1.HDR1_HR = TodaysDateTime.Hour;
         header_1.HDR1_MN = TodaysDateTime.Minute;
 
-
-        members.Sort((a, b) =>
-        {
-            int nameComparison = StringComparer.Ordinal.Compare(a.Name, b.Name);
-            if (nameComparison != 0)
-            {
-                return nameComparison;
-            }
-
-            // This is so we converge on a stable sort.  This effectively matches Ready's order.
-            long aBadge = Convert.ToInt64(a.BadgeNumber);
-            long bBadge = Convert.ToInt64(b.BadgeNumber);
-            aBadge = aBadge == 0 ? a.Psn : aBadge;
-            bBadge = bBadge == 0 ? b.Psn : bBadge;
-            return aBadge < bBadge ? -1 : 1;
-        });
-
-
         ReportCounters reportCounters = new();
         CollectTotals collectTotals = new();
 
@@ -97,7 +80,7 @@ internal sealed class ProfitShareUpdateReport
 
         ReportLine report_line = new();
         ReportLine2 report_line_2 = new();
-        if (memberFinancials.BadgeNumber > 0)
+        if (memberFinancials.Psn == memberFinancials.BadgeNumber.ToString())
         {
             report_line.BADGE_NBR = memberFinancials.BadgeNumber;
             report_line.EMP_NAME = memberFinancials.Name?.Length > 24
@@ -107,15 +90,18 @@ internal sealed class ProfitShareUpdateReport
             report_line.BEG_BAL = memberFinancials.CurrentAmount;
             report_line.PR_DIST1 = memberFinancials.Distributions;
 
-            if (memberFinancials.EmployeeTypeId == 1)
+            if (memberFinancials.EmployeeTypeId == /*1*/ EmployeeType.Constants.NewLastYear)
             {
                 report_line.PR_NEWEMP = "NEW";
+            }
+            else if (memberFinancials.TreatAsBeneficiary)
+            {
+                report_line.PR_NEWEMP = "BEN";
             }
             else
             {
                 report_line.PR_NEWEMP = " ";
             }
-
 
             report_line.PR_CONT = memberFinancials.Contributions + memberFinancials.Xfer;
             report_line.PR_MIL = memberFinancials.Military - memberFinancials.Pxfer;
@@ -127,12 +113,11 @@ internal sealed class ProfitShareUpdateReport
             report_line.END_BAL = memberFinancials.EndingBalance;
         }
 
-
-        if (memberFinancials.BadgeNumber == 0)
+        if (memberFinancials.Psn != memberFinancials.BadgeNumber.ToString())
         {
             report_line_2.PR2_EMP_NAME =
                 memberFinancials.Name?.Length > 24 ? memberFinancials.Name.Substring(0, 24) : memberFinancials.Name;
-            report_line_2.PR2_PSN = memberFinancials.Psn;
+            report_line_2.PR2_PSN = long.Parse(memberFinancials.Psn ?? "0");
             report_line_2.PR2_BEG_BAL = memberFinancials.CurrentAmount;
             report_line_2.PR2_DIST1 = memberFinancials.Distributions;
             report_line_2.PR2_NEWEMP = "BEN";
