@@ -1,6 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, TextField, Box } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { useLazyGetHistoricalFrozenStateResponseQuery } from "reduxstore/api/FrozenApi";
@@ -167,22 +166,24 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
                 label="As Of Time"
                 type="time"
                 size="medium"
-                margin="normal"
                 sx={{
-                  mt: 0,  // Remove top margin
-                  mb: 0,  // Remove bottom margin
+                  mt: 0,
+                  mb: 0,
                   '& .MuiInputBase-root': {
                     height: '56px',  // Match the height of DsmDatePicker
+                  },
+                  '& .MuiInputLabel-root': {
+                    transform: 'translate(14px, 16px) scale(1)',
+                  },
+                  '& .MuiInputLabel-shrink': {
+                    transform: 'translate(14px, -6px) scale(0.75)',
+                  },
+                  '& input': {
+                    step: '300', // 5-minute steps
                   }
                 }}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                inputProps={{
-                  step: 300, // 5-minute steps
-                }}
-                fullWidth
                 required
+                fullWidth
                 onChange={field.onChange}
                 value={field.value || ""}
                 error={!!errors.asOfTime}
