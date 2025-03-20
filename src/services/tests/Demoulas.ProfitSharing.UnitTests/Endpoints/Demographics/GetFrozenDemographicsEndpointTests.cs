@@ -30,6 +30,6 @@ public class GetFrozenDemographicsEndpointTests : ApiTestBase<Program>
         ((List<FrozenStateResponse>)response.Result.Results).ForEach(r => r.AsOfDateTime = r.AsOfDateTime.ToUniversalTime());
 
         // Assert
-        Assert.Equivalent(frozenDemographics, response.Result);
+        Assert.Equivalent(frozenDemographics, response.Result.Results);
     }
 }
