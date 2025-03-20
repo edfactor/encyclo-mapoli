@@ -16,9 +16,7 @@ const DemographicFreeze = () => {
           <Divider />
         </Grid2>
         <Grid2 width={"100%"}>
-          <DSMAccordion title="Filter">
-            <DemographicFreezeManager setInitialSearchLoaded={setInitialSearchLoaded} />
-          </DSMAccordion>
+            <DemographicFreezeManager setInitialSearchLoaded={setInitialSearchLoaded} />          
         </Grid2>
 
         <Grid2 width="100%">

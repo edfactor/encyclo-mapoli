@@ -86,10 +86,11 @@ const Router = () => {
           showImpersonation ? (
             <ImpersonationMultiSelect
               impersonationRoles={[
-                "Finance-Manager",
-                "Distributions-Clerk",
-                "Hardship-Administrator",
-                "Profit-Sharing-Administrator"
+                ImpersonationRoles.FinanceManager,
+                ImpersonationRoles.DistributionsClerk,
+                ImpersonationRoles.HardshipAdministrator,
+                ImpersonationRoles.ProfitSharingAdministrator,
+                ImpersonationRoles.ItSupport
               ]}
               currentRoles={impersonating ? [impersonating] : []}
               setCurrentRoles={(value: string[]) => {
