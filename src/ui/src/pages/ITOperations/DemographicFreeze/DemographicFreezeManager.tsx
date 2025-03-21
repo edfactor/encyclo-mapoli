@@ -57,13 +57,11 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
                                                                                 }) => {
   const [freezeDemographics, { isLoading }] = useFreezeDemographicsMutation();
   const profitYear = useDecemberFlowProfitYear();
-  const dispatch = useDispatch();
 
   const {
     control,
     handleSubmit,
-    formState: { errors, isValid },
-    reset
+    formState: { errors, isValid }
   } = useForm<DemographicFreezeSearch>({
     resolver: yupResolver(schema),
     defaultValues: {

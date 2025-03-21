@@ -1,5 +1,6 @@
 import { RouteCategory } from "smart-ui-library/dist/components/MenuBar/MenuBar";
 import { MENU_LABELS, ROUTES, CAPTIONS } from "./constants";
+import { ImpersonationRoles } from "./reduxstore/types";
 
 const fiscalClose: RouteCategory = {
   menuLabel: MENU_LABELS.FISCAL_CLOSE,
@@ -84,6 +85,7 @@ const inquiries: RouteCategory = {
 const it_operations: RouteCategory = {
   menuLabel: MENU_LABELS.IT_OPERATIONS,
   parentRoute: MENU_LABELS.IT_OPERATIONS,
+  roles: [ImpersonationRoles.ItOperations],  // Only users with this role can see this menu item
   items: [{ caption: CAPTIONS.DEMOGRAOHIC_FREEZE, route: ROUTES.DEMO_FREEZE }]
 };
 
