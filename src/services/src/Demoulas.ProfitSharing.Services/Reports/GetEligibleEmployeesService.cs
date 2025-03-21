@@ -6,7 +6,6 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace Demoulas.ProfitSharing.Services.Reports;
 
 public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
@@ -31,31 +30,22 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
 
         return await _dataContextFactory.UseReadOnlyContext(async c =>
         {
+            // Currently using non-frozen data. Will be corrected in PS-896.
             int numberReadOnFrozen = await c.PayProfits.Where(p => p.ProfitYear == request.ProfitYear)
                 .CountAsync(cancellationToken);
 
-            int numberNotSelected = await c.PayProfits
-                .Include(p => p.Demographic)
-                .Where(p => p.ProfitYear == request.ProfitYear)
+            var baseQuery = c.PayProfits
+                .Where(p => p.ProfitYear == request.ProfitYear);
+
+            int numberNotSelected = await baseQuery
                 .Where(p => p.Demographic!.DateOfBirth > birthDateOfExactly21YearsOld /*too young*/ ||
-                            p.CurrentHoursYear < hoursWorkedRequirement || p.Demographic!.EmploymentStatusId ==
+                            (p.CurrentHoursYear + p.HoursExecutive) < hoursWorkedRequirement || p.Demographic!.EmploymentStatusId ==
                             EmploymentStatus.Constants.Terminated)
                 .CountAsync(cancellationToken: cancellationToken);
 
-            var totalEligible = await c.PayProfits
-                .Include(p => p.Demographic)
-                .Where(p => p.ProfitYear == request.ProfitYear)
+            var result = await baseQuery
                 .Where(p => p.Demographic!.DateOfBirth <= birthDateOfExactly21YearsOld /*over 21*/ &&
-                            p.CurrentHoursYear >= hoursWorkedRequirement &&
-                            p.Demographic!.EmploymentStatusId != EmploymentStatus.Constants.Terminated)
-                .CountAsync(cancellationToken);
-
-            var result = await c.PayProfits
-                .Include(p => p.Demographic)
-                .ThenInclude(d => d!.Department)
-                .Where(p => p.ProfitYear == request.ProfitYear)
-                .Where(p => p.Demographic!.DateOfBirth <= birthDateOfExactly21YearsOld /*over 21*/ &&
-                            p.CurrentHoursYear >= hoursWorkedRequirement && p.Demographic!.EmploymentStatusId !=
+                            (p.CurrentHoursYear + p.HoursExecutive) >= hoursWorkedRequirement && p.Demographic!.EmploymentStatusId !=
                             EmploymentStatus.Constants.Terminated)
                 .Select(p => new EligibleEmployee
                 {
@@ -75,9 +65,8 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
                 Response = result,
                 NumberReadOnFrozen = numberReadOnFrozen,
                 NumberNotSelected = numberNotSelected,
-                NumberWritten = totalEligible
+                NumberWritten = result.Results.Count()
             };
-
         });
     }
 }
